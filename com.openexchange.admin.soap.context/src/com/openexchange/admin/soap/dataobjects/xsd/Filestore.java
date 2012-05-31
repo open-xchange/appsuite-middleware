@@ -1,10 +1,9 @@
 
 package com.openexchange.admin.soap.dataobjects.xsd;
 
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElementRef;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 
@@ -45,30 +44,30 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class Filestore {
 
-    @XmlElementRef(name = "currentContexts", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Integer> currentContexts;
-    @XmlElementRef(name = "id", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Integer> id;
-    @XmlElementRef(name = "maxContexts", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Integer> maxContexts;
-    @XmlElementRef(name = "reserved", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Long> reserved;
-    @XmlElementRef(name = "size", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Long> size;
-    @XmlElementRef(name = "url", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> url;
-    @XmlElementRef(name = "used", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Long> used;
+    @XmlElement(nillable = true)
+    protected Integer currentContexts;
+    @XmlElement(nillable = true)
+    protected Integer id;
+    @XmlElement(nillable = true)
+    protected Integer maxContexts;
+    @XmlElement(nillable = true)
+    protected Long reserved;
+    @XmlElement(nillable = true)
+    protected Long size;
+    @XmlElement(nillable = true)
+    protected String url;
+    @XmlElement(nillable = true)
+    protected Long used;
 
     /**
      * Ruft den Wert der currentContexts-Eigenschaft ab.
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Integer }{@code >}
+     *     {@link Integer }
      *     
      */
-    public JAXBElement<Integer> getCurrentContexts() {
+    public Integer getCurrentContexts() {
         return currentContexts;
     }
 
@@ -77,10 +76,10 @@ public class Filestore {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Integer }{@code >}
+     *     {@link Integer }
      *     
      */
-    public void setCurrentContexts(JAXBElement<Integer> value) {
+    public void setCurrentContexts(Integer value) {
         this.currentContexts = value;
     }
 
@@ -89,10 +88,10 @@ public class Filestore {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Integer }{@code >}
+     *     {@link Integer }
      *     
      */
-    public JAXBElement<Integer> getId() {
+    public Integer getId() {
         return id;
     }
 
@@ -101,10 +100,10 @@ public class Filestore {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Integer }{@code >}
+     *     {@link Integer }
      *     
      */
-    public void setId(JAXBElement<Integer> value) {
+    public void setId(Integer value) {
         this.id = value;
     }
 
@@ -113,10 +112,10 @@ public class Filestore {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Integer }{@code >}
+     *     {@link Integer }
      *     
      */
-    public JAXBElement<Integer> getMaxContexts() {
+    public Integer getMaxContexts() {
         return maxContexts;
     }
 
@@ -125,10 +124,10 @@ public class Filestore {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Integer }{@code >}
+     *     {@link Integer }
      *     
      */
-    public void setMaxContexts(JAXBElement<Integer> value) {
+    public void setMaxContexts(Integer value) {
         this.maxContexts = value;
     }
 
@@ -137,10 +136,10 @@ public class Filestore {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Long }{@code >}
+     *     {@link Long }
      *     
      */
-    public JAXBElement<Long> getReserved() {
+    public Long getReserved() {
         return reserved;
     }
 
@@ -149,10 +148,10 @@ public class Filestore {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Long }{@code >}
+     *     {@link Long }
      *     
      */
-    public void setReserved(JAXBElement<Long> value) {
+    public void setReserved(Long value) {
         this.reserved = value;
     }
 
@@ -161,10 +160,10 @@ public class Filestore {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Long }{@code >}
+     *     {@link Long }
      *     
      */
-    public JAXBElement<Long> getSize() {
+    public Long getSize() {
         return size;
     }
 
@@ -173,10 +172,10 @@ public class Filestore {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Long }{@code >}
+     *     {@link Long }
      *     
      */
-    public void setSize(JAXBElement<Long> value) {
+    public void setSize(Long value) {
         this.size = value;
     }
 
@@ -185,10 +184,10 @@ public class Filestore {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getUrl() {
+    public String getUrl() {
         return url;
     }
 
@@ -197,10 +196,10 @@ public class Filestore {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setUrl(JAXBElement<String> value) {
+    public void setUrl(String value) {
         this.url = value;
     }
 
@@ -209,10 +208,10 @@ public class Filestore {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Long }{@code >}
+     *     {@link Long }
      *     
      */
-    public JAXBElement<Long> getUsed() {
+    public Long getUsed() {
         return used;
     }
 
@@ -221,10 +220,10 @@ public class Filestore {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Long }{@code >}
+     *     {@link Long }
      *     
      */
-    public void setUsed(JAXBElement<Long> value) {
+    public void setUsed(Long value) {
         this.used = value;
     }
 

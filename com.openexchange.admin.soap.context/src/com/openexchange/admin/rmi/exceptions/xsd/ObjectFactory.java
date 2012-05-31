@@ -1,10 +1,7 @@
 
 package com.openexchange.admin.rmi.exceptions.xsd;
 
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.annotation.XmlElementDecl;
 import javax.xml.bind.annotation.XmlRegistry;
-import javax.xml.namespace.QName;
 
 
 /**
@@ -24,7 +21,6 @@ import javax.xml.namespace.QName;
 @XmlRegistry
 public class ObjectFactory {
 
-    private final static QName _InvalidDataExceptionObjectname_QNAME = new QName("http://exceptions.rmi.admin.openexchange.com/xsd", "objectname");
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: com.openexchange.admin.rmi.exceptions.xsd
@@ -42,19 +38,19 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link NoSuchContextException }
+     * 
+     */
+    public NoSuchContextException createNoSuchContextException() {
+        return new NoSuchContextException();
+    }
+
+    /**
      * Create an instance of {@link StorageException }
      * 
      */
     public StorageException createStorageException() {
         return new StorageException();
-    }
-
-    /**
-     * Create an instance of {@link ContextExistsException }
-     * 
-     */
-    public ContextExistsException createContextExistsException() {
-        return new ContextExistsException();
     }
 
     /**
@@ -66,19 +62,35 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link InvalidCredentialsException }
-     * 
-     */
-    public InvalidCredentialsException createInvalidCredentialsException() {
-        return new InvalidCredentialsException();
-    }
-
-    /**
      * Create an instance of {@link NoSuchReasonException }
      * 
      */
     public NoSuchReasonException createNoSuchReasonException() {
         return new NoSuchReasonException();
+    }
+
+    /**
+     * Create an instance of {@link OXContextException }
+     * 
+     */
+    public OXContextException createOXContextException() {
+        return new OXContextException();
+    }
+
+    /**
+     * Create an instance of {@link ContextExistsException }
+     * 
+     */
+    public ContextExistsException createContextExistsException() {
+        return new ContextExistsException();
+    }
+
+    /**
+     * Create an instance of {@link InvalidCredentialsException }
+     * 
+     */
+    public InvalidCredentialsException createInvalidCredentialsException() {
+        return new InvalidCredentialsException();
     }
 
     /**
@@ -95,31 +107,6 @@ public class ObjectFactory {
      */
     public DatabaseUpdateException createDatabaseUpdateException() {
         return new DatabaseUpdateException();
-    }
-
-    /**
-     * Create an instance of {@link NoSuchContextException }
-     * 
-     */
-    public NoSuchContextException createNoSuchContextException() {
-        return new NoSuchContextException();
-    }
-
-    /**
-     * Create an instance of {@link OXContextException }
-     * 
-     */
-    public OXContextException createOXContextException() {
-        return new OXContextException();
-    }
-
-    /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link String }{@code >}}
-     * 
-     */
-    @XmlElementDecl(namespace = "http://exceptions.rmi.admin.openexchange.com/xsd", name = "objectname", scope = InvalidDataException.class)
-    public JAXBElement<String> createInvalidDataExceptionObjectname(String value) {
-        return new JAXBElement<String>(_InvalidDataExceptionObjectname_QNAME, String.class, InvalidDataException.class, value);
     }
 
 }

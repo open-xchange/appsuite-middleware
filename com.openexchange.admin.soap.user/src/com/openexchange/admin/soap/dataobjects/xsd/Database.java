@@ -1,10 +1,9 @@
 
 package com.openexchange.admin.soap.dataobjects.xsd;
 
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElementRef;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 
@@ -63,48 +62,48 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class Database {
 
-    @XmlElementRef(name = "clusterWeight", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Integer> clusterWeight;
-    @XmlElementRef(name = "currentUnits", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Integer> currentUnits;
-    @XmlElementRef(name = "driver", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> driver;
-    @XmlElementRef(name = "id", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Integer> id;
-    @XmlElementRef(name = "login", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> login;
-    @XmlElementRef(name = "master", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Boolean> master;
-    @XmlElementRef(name = "masterId", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Integer> masterId;
-    @XmlElementRef(name = "maxUnits", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Integer> maxUnits;
-    @XmlElementRef(name = "name", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> name;
-    @XmlElementRef(name = "password", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> password;
-    @XmlElementRef(name = "poolHardLimit", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Integer> poolHardLimit;
-    @XmlElementRef(name = "poolInitial", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Integer> poolInitial;
-    @XmlElementRef(name = "poolMax", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Integer> poolMax;
-    @XmlElementRef(name = "read_id", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Integer> readId;
-    @XmlElementRef(name = "scheme", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> scheme;
-    @XmlElementRef(name = "url", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> url;
+    @XmlElement(nillable = true)
+    protected Integer clusterWeight;
+    @XmlElement(nillable = true)
+    protected Integer currentUnits;
+    @XmlElement(nillable = true)
+    protected String driver;
+    @XmlElement(nillable = true)
+    protected Integer id;
+    @XmlElement(nillable = true)
+    protected String login;
+    @XmlElement(nillable = true)
+    protected Boolean master;
+    @XmlElement(nillable = true)
+    protected Integer masterId;
+    @XmlElement(nillable = true)
+    protected Integer maxUnits;
+    @XmlElement(nillable = true)
+    protected String name;
+    @XmlElement(nillable = true)
+    protected String password;
+    @XmlElement(nillable = true)
+    protected Integer poolHardLimit;
+    @XmlElement(nillable = true)
+    protected Integer poolInitial;
+    @XmlElement(nillable = true)
+    protected Integer poolMax;
+    @XmlElement(name = "read_id", nillable = true)
+    protected Integer readId;
+    @XmlElement(nillable = true)
+    protected String scheme;
+    @XmlElement(nillable = true)
+    protected String url;
 
     /**
      * Ruft den Wert der clusterWeight-Eigenschaft ab.
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Integer }{@code >}
+     *     {@link Integer }
      *     
      */
-    public JAXBElement<Integer> getClusterWeight() {
+    public Integer getClusterWeight() {
         return clusterWeight;
     }
 
@@ -113,10 +112,10 @@ public class Database {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Integer }{@code >}
+     *     {@link Integer }
      *     
      */
-    public void setClusterWeight(JAXBElement<Integer> value) {
+    public void setClusterWeight(Integer value) {
         this.clusterWeight = value;
     }
 
@@ -125,10 +124,10 @@ public class Database {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Integer }{@code >}
+     *     {@link Integer }
      *     
      */
-    public JAXBElement<Integer> getCurrentUnits() {
+    public Integer getCurrentUnits() {
         return currentUnits;
     }
 
@@ -137,10 +136,10 @@ public class Database {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Integer }{@code >}
+     *     {@link Integer }
      *     
      */
-    public void setCurrentUnits(JAXBElement<Integer> value) {
+    public void setCurrentUnits(Integer value) {
         this.currentUnits = value;
     }
 
@@ -149,10 +148,10 @@ public class Database {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getDriver() {
+    public String getDriver() {
         return driver;
     }
 
@@ -161,10 +160,10 @@ public class Database {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setDriver(JAXBElement<String> value) {
+    public void setDriver(String value) {
         this.driver = value;
     }
 
@@ -173,10 +172,10 @@ public class Database {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Integer }{@code >}
+     *     {@link Integer }
      *     
      */
-    public JAXBElement<Integer> getId() {
+    public Integer getId() {
         return id;
     }
 
@@ -185,10 +184,10 @@ public class Database {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Integer }{@code >}
+     *     {@link Integer }
      *     
      */
-    public void setId(JAXBElement<Integer> value) {
+    public void setId(Integer value) {
         this.id = value;
     }
 
@@ -197,10 +196,10 @@ public class Database {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getLogin() {
+    public String getLogin() {
         return login;
     }
 
@@ -209,10 +208,10 @@ public class Database {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setLogin(JAXBElement<String> value) {
+    public void setLogin(String value) {
         this.login = value;
     }
 
@@ -221,10 +220,10 @@ public class Database {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public JAXBElement<Boolean> getMaster() {
+    public Boolean isMaster() {
         return master;
     }
 
@@ -233,10 +232,10 @@ public class Database {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public void setMaster(JAXBElement<Boolean> value) {
+    public void setMaster(Boolean value) {
         this.master = value;
     }
 
@@ -245,10 +244,10 @@ public class Database {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Integer }{@code >}
+     *     {@link Integer }
      *     
      */
-    public JAXBElement<Integer> getMasterId() {
+    public Integer getMasterId() {
         return masterId;
     }
 
@@ -257,10 +256,10 @@ public class Database {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Integer }{@code >}
+     *     {@link Integer }
      *     
      */
-    public void setMasterId(JAXBElement<Integer> value) {
+    public void setMasterId(Integer value) {
         this.masterId = value;
     }
 
@@ -269,10 +268,10 @@ public class Database {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Integer }{@code >}
+     *     {@link Integer }
      *     
      */
-    public JAXBElement<Integer> getMaxUnits() {
+    public Integer getMaxUnits() {
         return maxUnits;
     }
 
@@ -281,10 +280,10 @@ public class Database {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Integer }{@code >}
+     *     {@link Integer }
      *     
      */
-    public void setMaxUnits(JAXBElement<Integer> value) {
+    public void setMaxUnits(Integer value) {
         this.maxUnits = value;
     }
 
@@ -293,10 +292,10 @@ public class Database {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getName() {
+    public String getName() {
         return name;
     }
 
@@ -305,10 +304,10 @@ public class Database {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setName(JAXBElement<String> value) {
+    public void setName(String value) {
         this.name = value;
     }
 
@@ -317,10 +316,10 @@ public class Database {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getPassword() {
+    public String getPassword() {
         return password;
     }
 
@@ -329,10 +328,10 @@ public class Database {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setPassword(JAXBElement<String> value) {
+    public void setPassword(String value) {
         this.password = value;
     }
 
@@ -341,10 +340,10 @@ public class Database {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Integer }{@code >}
+     *     {@link Integer }
      *     
      */
-    public JAXBElement<Integer> getPoolHardLimit() {
+    public Integer getPoolHardLimit() {
         return poolHardLimit;
     }
 
@@ -353,10 +352,10 @@ public class Database {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Integer }{@code >}
+     *     {@link Integer }
      *     
      */
-    public void setPoolHardLimit(JAXBElement<Integer> value) {
+    public void setPoolHardLimit(Integer value) {
         this.poolHardLimit = value;
     }
 
@@ -365,10 +364,10 @@ public class Database {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Integer }{@code >}
+     *     {@link Integer }
      *     
      */
-    public JAXBElement<Integer> getPoolInitial() {
+    public Integer getPoolInitial() {
         return poolInitial;
     }
 
@@ -377,10 +376,10 @@ public class Database {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Integer }{@code >}
+     *     {@link Integer }
      *     
      */
-    public void setPoolInitial(JAXBElement<Integer> value) {
+    public void setPoolInitial(Integer value) {
         this.poolInitial = value;
     }
 
@@ -389,10 +388,10 @@ public class Database {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Integer }{@code >}
+     *     {@link Integer }
      *     
      */
-    public JAXBElement<Integer> getPoolMax() {
+    public Integer getPoolMax() {
         return poolMax;
     }
 
@@ -401,10 +400,10 @@ public class Database {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Integer }{@code >}
+     *     {@link Integer }
      *     
      */
-    public void setPoolMax(JAXBElement<Integer> value) {
+    public void setPoolMax(Integer value) {
         this.poolMax = value;
     }
 
@@ -413,10 +412,10 @@ public class Database {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Integer }{@code >}
+     *     {@link Integer }
      *     
      */
-    public JAXBElement<Integer> getReadId() {
+    public Integer getReadId() {
         return readId;
     }
 
@@ -425,10 +424,10 @@ public class Database {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Integer }{@code >}
+     *     {@link Integer }
      *     
      */
-    public void setReadId(JAXBElement<Integer> value) {
+    public void setReadId(Integer value) {
         this.readId = value;
     }
 
@@ -437,10 +436,10 @@ public class Database {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getScheme() {
+    public String getScheme() {
         return scheme;
     }
 
@@ -449,10 +448,10 @@ public class Database {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setScheme(JAXBElement<String> value) {
+    public void setScheme(String value) {
         this.scheme = value;
     }
 
@@ -461,10 +460,10 @@ public class Database {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getUrl() {
+    public String getUrl() {
         return url;
     }
 
@@ -473,10 +472,10 @@ public class Database {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setUrl(JAXBElement<String> value) {
+    public void setUrl(String value) {
         this.url = value;
     }
 

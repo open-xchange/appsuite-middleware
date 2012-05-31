@@ -1,10 +1,9 @@
 
 package com.openexchange.admin.soap.dataobjects.xsd;
 
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElementRef;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 
@@ -93,78 +92,78 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class UserModuleAccess {
 
-    @XmlElementRef(name = "OLOX20", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Boolean> olox20;
-    @XmlElementRef(name = "USM", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Boolean> usm;
-    @XmlElementRef(name = "activeSync", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Boolean> activeSync;
-    @XmlElementRef(name = "calendar", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Boolean> calendar;
-    @XmlElementRef(name = "collectEmailAddresses", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Boolean> collectEmailAddresses;
-    @XmlElementRef(name = "contacts", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Boolean> contacts;
-    @XmlElementRef(name = "delegateTask", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Boolean> delegateTask;
-    @XmlElementRef(name = "deniedPortal", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Boolean> deniedPortal;
-    @XmlElementRef(name = "editGroup", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Boolean> editGroup;
-    @XmlElementRef(name = "editPassword", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Boolean> editPassword;
-    @XmlElementRef(name = "editPublicFolders", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Boolean> editPublicFolders;
-    @XmlElementRef(name = "editResource", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Boolean> editResource;
-    @XmlElementRef(name = "forum", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Boolean> forum;
-    @XmlElementRef(name = "globalAddressBookDisabled", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Boolean> globalAddressBookDisabled;
-    @XmlElementRef(name = "ical", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Boolean> ical;
-    @XmlElementRef(name = "infostore", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Boolean> infostore;
-    @XmlElementRef(name = "multipleMailAccounts", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Boolean> multipleMailAccounts;
-    @XmlElementRef(name = "pinboardWrite", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Boolean> pinboardWrite;
-    @XmlElementRef(name = "projects", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Boolean> projects;
-    @XmlElementRef(name = "publicFolderEditable", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Boolean> publicFolderEditable;
-    @XmlElementRef(name = "publication", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Boolean> publication;
-    @XmlElementRef(name = "readCreateSharedFolders", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Boolean> readCreateSharedFolders;
-    @XmlElementRef(name = "rssBookmarks", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Boolean> rssBookmarks;
-    @XmlElementRef(name = "rssPortal", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Boolean> rssPortal;
-    @XmlElementRef(name = "subscription", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Boolean> subscription;
-    @XmlElementRef(name = "syncml", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Boolean> syncml;
-    @XmlElementRef(name = "tasks", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Boolean> tasks;
-    @XmlElementRef(name = "vcard", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Boolean> vcard;
-    @XmlElementRef(name = "webdav", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Boolean> webdav;
-    @XmlElementRef(name = "webdavXml", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Boolean> webdavXml;
-    @XmlElementRef(name = "webmail", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Boolean> webmail;
+    @XmlElement(name = "OLOX20", nillable = true)
+    protected Boolean olox20;
+    @XmlElement(name = "USM", nillable = true)
+    protected Boolean usm;
+    @XmlElement(nillable = true)
+    protected Boolean activeSync;
+    @XmlElement(nillable = true)
+    protected Boolean calendar;
+    @XmlElement(nillable = true)
+    protected Boolean collectEmailAddresses;
+    @XmlElement(nillable = true)
+    protected Boolean contacts;
+    @XmlElement(nillable = true)
+    protected Boolean delegateTask;
+    @XmlElement(nillable = true)
+    protected Boolean deniedPortal;
+    @XmlElement(nillable = true)
+    protected Boolean editGroup;
+    @XmlElement(nillable = true)
+    protected Boolean editPassword;
+    @XmlElement(nillable = true)
+    protected Boolean editPublicFolders;
+    @XmlElement(nillable = true)
+    protected Boolean editResource;
+    @XmlElement(nillable = true)
+    protected Boolean forum;
+    @XmlElement(nillable = true)
+    protected Boolean globalAddressBookDisabled;
+    @XmlElement(nillable = true)
+    protected Boolean ical;
+    @XmlElement(nillable = true)
+    protected Boolean infostore;
+    @XmlElement(nillable = true)
+    protected Boolean multipleMailAccounts;
+    @XmlElement(nillable = true)
+    protected Boolean pinboardWrite;
+    @XmlElement(nillable = true)
+    protected Boolean projects;
+    @XmlElement(nillable = true)
+    protected Boolean publicFolderEditable;
+    @XmlElement(nillable = true)
+    protected Boolean publication;
+    @XmlElement(nillable = true)
+    protected Boolean readCreateSharedFolders;
+    @XmlElement(nillable = true)
+    protected Boolean rssBookmarks;
+    @XmlElement(nillable = true)
+    protected Boolean rssPortal;
+    @XmlElement(nillable = true)
+    protected Boolean subscription;
+    @XmlElement(nillable = true)
+    protected Boolean syncml;
+    @XmlElement(nillable = true)
+    protected Boolean tasks;
+    @XmlElement(nillable = true)
+    protected Boolean vcard;
+    @XmlElement(nillable = true)
+    protected Boolean webdav;
+    @XmlElement(nillable = true)
+    protected Boolean webdavXml;
+    @XmlElement(nillable = true)
+    protected Boolean webmail;
 
     /**
      * Ruft den Wert der olox20-Eigenschaft ab.
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public JAXBElement<Boolean> getOLOX20() {
+    public Boolean isOLOX20() {
         return olox20;
     }
 
@@ -173,10 +172,10 @@ public class UserModuleAccess {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public void setOLOX20(JAXBElement<Boolean> value) {
+    public void setOLOX20(Boolean value) {
         this.olox20 = value;
     }
 
@@ -185,10 +184,10 @@ public class UserModuleAccess {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public JAXBElement<Boolean> getUSM() {
+    public Boolean isUSM() {
         return usm;
     }
 
@@ -197,10 +196,10 @@ public class UserModuleAccess {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public void setUSM(JAXBElement<Boolean> value) {
+    public void setUSM(Boolean value) {
         this.usm = value;
     }
 
@@ -209,10 +208,10 @@ public class UserModuleAccess {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public JAXBElement<Boolean> getActiveSync() {
+    public Boolean isActiveSync() {
         return activeSync;
     }
 
@@ -221,10 +220,10 @@ public class UserModuleAccess {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public void setActiveSync(JAXBElement<Boolean> value) {
+    public void setActiveSync(Boolean value) {
         this.activeSync = value;
     }
 
@@ -233,10 +232,10 @@ public class UserModuleAccess {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public JAXBElement<Boolean> getCalendar() {
+    public Boolean isCalendar() {
         return calendar;
     }
 
@@ -245,10 +244,10 @@ public class UserModuleAccess {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public void setCalendar(JAXBElement<Boolean> value) {
+    public void setCalendar(Boolean value) {
         this.calendar = value;
     }
 
@@ -257,10 +256,10 @@ public class UserModuleAccess {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public JAXBElement<Boolean> getCollectEmailAddresses() {
+    public Boolean isCollectEmailAddresses() {
         return collectEmailAddresses;
     }
 
@@ -269,10 +268,10 @@ public class UserModuleAccess {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public void setCollectEmailAddresses(JAXBElement<Boolean> value) {
+    public void setCollectEmailAddresses(Boolean value) {
         this.collectEmailAddresses = value;
     }
 
@@ -281,10 +280,10 @@ public class UserModuleAccess {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public JAXBElement<Boolean> getContacts() {
+    public Boolean isContacts() {
         return contacts;
     }
 
@@ -293,10 +292,10 @@ public class UserModuleAccess {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public void setContacts(JAXBElement<Boolean> value) {
+    public void setContacts(Boolean value) {
         this.contacts = value;
     }
 
@@ -305,10 +304,10 @@ public class UserModuleAccess {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public JAXBElement<Boolean> getDelegateTask() {
+    public Boolean isDelegateTask() {
         return delegateTask;
     }
 
@@ -317,10 +316,10 @@ public class UserModuleAccess {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public void setDelegateTask(JAXBElement<Boolean> value) {
+    public void setDelegateTask(Boolean value) {
         this.delegateTask = value;
     }
 
@@ -329,10 +328,10 @@ public class UserModuleAccess {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public JAXBElement<Boolean> getDeniedPortal() {
+    public Boolean isDeniedPortal() {
         return deniedPortal;
     }
 
@@ -341,10 +340,10 @@ public class UserModuleAccess {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public void setDeniedPortal(JAXBElement<Boolean> value) {
+    public void setDeniedPortal(Boolean value) {
         this.deniedPortal = value;
     }
 
@@ -353,10 +352,10 @@ public class UserModuleAccess {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public JAXBElement<Boolean> getEditGroup() {
+    public Boolean isEditGroup() {
         return editGroup;
     }
 
@@ -365,10 +364,10 @@ public class UserModuleAccess {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public void setEditGroup(JAXBElement<Boolean> value) {
+    public void setEditGroup(Boolean value) {
         this.editGroup = value;
     }
 
@@ -377,10 +376,10 @@ public class UserModuleAccess {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public JAXBElement<Boolean> getEditPassword() {
+    public Boolean isEditPassword() {
         return editPassword;
     }
 
@@ -389,10 +388,10 @@ public class UserModuleAccess {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public void setEditPassword(JAXBElement<Boolean> value) {
+    public void setEditPassword(Boolean value) {
         this.editPassword = value;
     }
 
@@ -401,10 +400,10 @@ public class UserModuleAccess {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public JAXBElement<Boolean> getEditPublicFolders() {
+    public Boolean isEditPublicFolders() {
         return editPublicFolders;
     }
 
@@ -413,10 +412,10 @@ public class UserModuleAccess {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public void setEditPublicFolders(JAXBElement<Boolean> value) {
+    public void setEditPublicFolders(Boolean value) {
         this.editPublicFolders = value;
     }
 
@@ -425,10 +424,10 @@ public class UserModuleAccess {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public JAXBElement<Boolean> getEditResource() {
+    public Boolean isEditResource() {
         return editResource;
     }
 
@@ -437,10 +436,10 @@ public class UserModuleAccess {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public void setEditResource(JAXBElement<Boolean> value) {
+    public void setEditResource(Boolean value) {
         this.editResource = value;
     }
 
@@ -449,10 +448,10 @@ public class UserModuleAccess {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public JAXBElement<Boolean> getForum() {
+    public Boolean isForum() {
         return forum;
     }
 
@@ -461,10 +460,10 @@ public class UserModuleAccess {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public void setForum(JAXBElement<Boolean> value) {
+    public void setForum(Boolean value) {
         this.forum = value;
     }
 
@@ -473,10 +472,10 @@ public class UserModuleAccess {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public JAXBElement<Boolean> getGlobalAddressBookDisabled() {
+    public Boolean isGlobalAddressBookDisabled() {
         return globalAddressBookDisabled;
     }
 
@@ -485,10 +484,10 @@ public class UserModuleAccess {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public void setGlobalAddressBookDisabled(JAXBElement<Boolean> value) {
+    public void setGlobalAddressBookDisabled(Boolean value) {
         this.globalAddressBookDisabled = value;
     }
 
@@ -497,10 +496,10 @@ public class UserModuleAccess {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public JAXBElement<Boolean> getIcal() {
+    public Boolean isIcal() {
         return ical;
     }
 
@@ -509,10 +508,10 @@ public class UserModuleAccess {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public void setIcal(JAXBElement<Boolean> value) {
+    public void setIcal(Boolean value) {
         this.ical = value;
     }
 
@@ -521,10 +520,10 @@ public class UserModuleAccess {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public JAXBElement<Boolean> getInfostore() {
+    public Boolean isInfostore() {
         return infostore;
     }
 
@@ -533,10 +532,10 @@ public class UserModuleAccess {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public void setInfostore(JAXBElement<Boolean> value) {
+    public void setInfostore(Boolean value) {
         this.infostore = value;
     }
 
@@ -545,10 +544,10 @@ public class UserModuleAccess {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public JAXBElement<Boolean> getMultipleMailAccounts() {
+    public Boolean isMultipleMailAccounts() {
         return multipleMailAccounts;
     }
 
@@ -557,10 +556,10 @@ public class UserModuleAccess {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public void setMultipleMailAccounts(JAXBElement<Boolean> value) {
+    public void setMultipleMailAccounts(Boolean value) {
         this.multipleMailAccounts = value;
     }
 
@@ -569,10 +568,10 @@ public class UserModuleAccess {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public JAXBElement<Boolean> getPinboardWrite() {
+    public Boolean isPinboardWrite() {
         return pinboardWrite;
     }
 
@@ -581,10 +580,10 @@ public class UserModuleAccess {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public void setPinboardWrite(JAXBElement<Boolean> value) {
+    public void setPinboardWrite(Boolean value) {
         this.pinboardWrite = value;
     }
 
@@ -593,10 +592,10 @@ public class UserModuleAccess {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public JAXBElement<Boolean> getProjects() {
+    public Boolean isProjects() {
         return projects;
     }
 
@@ -605,10 +604,10 @@ public class UserModuleAccess {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public void setProjects(JAXBElement<Boolean> value) {
+    public void setProjects(Boolean value) {
         this.projects = value;
     }
 
@@ -617,10 +616,10 @@ public class UserModuleAccess {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public JAXBElement<Boolean> getPublicFolderEditable() {
+    public Boolean isPublicFolderEditable() {
         return publicFolderEditable;
     }
 
@@ -629,10 +628,10 @@ public class UserModuleAccess {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public void setPublicFolderEditable(JAXBElement<Boolean> value) {
+    public void setPublicFolderEditable(Boolean value) {
         this.publicFolderEditable = value;
     }
 
@@ -641,10 +640,10 @@ public class UserModuleAccess {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public JAXBElement<Boolean> getPublication() {
+    public Boolean isPublication() {
         return publication;
     }
 
@@ -653,10 +652,10 @@ public class UserModuleAccess {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public void setPublication(JAXBElement<Boolean> value) {
+    public void setPublication(Boolean value) {
         this.publication = value;
     }
 
@@ -665,10 +664,10 @@ public class UserModuleAccess {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public JAXBElement<Boolean> getReadCreateSharedFolders() {
+    public Boolean isReadCreateSharedFolders() {
         return readCreateSharedFolders;
     }
 
@@ -677,10 +676,10 @@ public class UserModuleAccess {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public void setReadCreateSharedFolders(JAXBElement<Boolean> value) {
+    public void setReadCreateSharedFolders(Boolean value) {
         this.readCreateSharedFolders = value;
     }
 
@@ -689,10 +688,10 @@ public class UserModuleAccess {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public JAXBElement<Boolean> getRssBookmarks() {
+    public Boolean isRssBookmarks() {
         return rssBookmarks;
     }
 
@@ -701,10 +700,10 @@ public class UserModuleAccess {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public void setRssBookmarks(JAXBElement<Boolean> value) {
+    public void setRssBookmarks(Boolean value) {
         this.rssBookmarks = value;
     }
 
@@ -713,10 +712,10 @@ public class UserModuleAccess {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public JAXBElement<Boolean> getRssPortal() {
+    public Boolean isRssPortal() {
         return rssPortal;
     }
 
@@ -725,10 +724,10 @@ public class UserModuleAccess {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public void setRssPortal(JAXBElement<Boolean> value) {
+    public void setRssPortal(Boolean value) {
         this.rssPortal = value;
     }
 
@@ -737,10 +736,10 @@ public class UserModuleAccess {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public JAXBElement<Boolean> getSubscription() {
+    public Boolean isSubscription() {
         return subscription;
     }
 
@@ -749,10 +748,10 @@ public class UserModuleAccess {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public void setSubscription(JAXBElement<Boolean> value) {
+    public void setSubscription(Boolean value) {
         this.subscription = value;
     }
 
@@ -761,10 +760,10 @@ public class UserModuleAccess {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public JAXBElement<Boolean> getSyncml() {
+    public Boolean isSyncml() {
         return syncml;
     }
 
@@ -773,10 +772,10 @@ public class UserModuleAccess {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public void setSyncml(JAXBElement<Boolean> value) {
+    public void setSyncml(Boolean value) {
         this.syncml = value;
     }
 
@@ -785,10 +784,10 @@ public class UserModuleAccess {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public JAXBElement<Boolean> getTasks() {
+    public Boolean isTasks() {
         return tasks;
     }
 
@@ -797,10 +796,10 @@ public class UserModuleAccess {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public void setTasks(JAXBElement<Boolean> value) {
+    public void setTasks(Boolean value) {
         this.tasks = value;
     }
 
@@ -809,10 +808,10 @@ public class UserModuleAccess {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public JAXBElement<Boolean> getVcard() {
+    public Boolean isVcard() {
         return vcard;
     }
 
@@ -821,10 +820,10 @@ public class UserModuleAccess {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public void setVcard(JAXBElement<Boolean> value) {
+    public void setVcard(Boolean value) {
         this.vcard = value;
     }
 
@@ -833,10 +832,10 @@ public class UserModuleAccess {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public JAXBElement<Boolean> getWebdav() {
+    public Boolean isWebdav() {
         return webdav;
     }
 
@@ -845,10 +844,10 @@ public class UserModuleAccess {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public void setWebdav(JAXBElement<Boolean> value) {
+    public void setWebdav(Boolean value) {
         this.webdav = value;
     }
 
@@ -857,10 +856,10 @@ public class UserModuleAccess {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public JAXBElement<Boolean> getWebdavXml() {
+    public Boolean isWebdavXml() {
         return webdavXml;
     }
 
@@ -869,10 +868,10 @@ public class UserModuleAccess {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public void setWebdavXml(JAXBElement<Boolean> value) {
+    public void setWebdavXml(Boolean value) {
         this.webdavXml = value;
     }
 
@@ -881,10 +880,10 @@ public class UserModuleAccess {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public JAXBElement<Boolean> getWebmail() {
+    public Boolean isWebmail() {
         return webmail;
     }
 
@@ -893,10 +892,10 @@ public class UserModuleAccess {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public void setWebmail(JAXBElement<Boolean> value) {
+    public void setWebmail(Boolean value) {
         this.webmail = value;
     }
 

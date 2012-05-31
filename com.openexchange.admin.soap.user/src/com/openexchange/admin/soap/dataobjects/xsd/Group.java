@@ -3,11 +3,9 @@ package com.openexchange.admin.soap.dataobjects.xsd;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlType;
 
 
@@ -42,24 +40,24 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class Group {
 
-    @XmlElementRef(name = "displayname", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> displayname;
-    @XmlElementRef(name = "id", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Integer> id;
+    @XmlElement(nillable = true)
+    protected String displayname;
+    @XmlElement(nillable = true)
+    protected Integer id;
     @XmlElement(nillable = true)
     protected List<Integer> members;
-    @XmlElementRef(name = "name", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> name;
+    @XmlElement(nillable = true)
+    protected String name;
 
     /**
      * Ruft den Wert der displayname-Eigenschaft ab.
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getDisplayname() {
+    public String getDisplayname() {
         return displayname;
     }
 
@@ -68,10 +66,10 @@ public class Group {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setDisplayname(JAXBElement<String> value) {
+    public void setDisplayname(String value) {
         this.displayname = value;
     }
 
@@ -80,10 +78,10 @@ public class Group {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Integer }{@code >}
+     *     {@link Integer }
      *     
      */
-    public JAXBElement<Integer> getId() {
+    public Integer getId() {
         return id;
     }
 
@@ -92,10 +90,10 @@ public class Group {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Integer }{@code >}
+     *     {@link Integer }
      *     
      */
-    public void setId(JAXBElement<Integer> value) {
+    public void setId(Integer value) {
         this.id = value;
     }
 
@@ -133,10 +131,10 @@ public class Group {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getName() {
+    public String getName() {
         return name;
     }
 
@@ -145,10 +143,10 @@ public class Group {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setName(JAXBElement<String> value) {
+    public void setName(String value) {
         this.name = value;
     }
 

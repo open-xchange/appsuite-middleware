@@ -66,4 +66,13 @@ public class SOAPStringMap {
         return this.entries;
     }
 
+    /**
+     * Sets the entries
+     *
+     * @param entries The entries to set
+     */
+    public void setEntries(final List<Entry> entries) {
+        this.entries = entries;
+    }
+
 }

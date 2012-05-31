@@ -14,4 +14,4 @@ Import-Package: com.openexchange.exception,
  org.osgi.util.tracker
 Require-Bundle: com.openexchange.admin.plugin.hosting,
  com.openexchange.admin
-Bundle-Activator: com.openexchange.admin.soap.osgi.SoapContextActivator
+Bundle-Activator: com.openexchange.admin.soap.context.osgi.SoapContextActivator

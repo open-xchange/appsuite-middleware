@@ -1,12 +1,11 @@
 
 package com.openexchange.admin.rmi.exceptions.xsd;
 
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElementRef;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
-import com.openexchange.admin.soap.Exception;
+import com.openexchange.admin.soap.user.Exception;
 
 
 /**
@@ -36,18 +35,18 @@ public class InvalidDataException
     extends Exception
 {
 
-    @XmlElementRef(name = "objectname", namespace = "http://exceptions.rmi.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> objectname;
+    @XmlElement(nillable = true)
+    protected String objectname;
 
     /**
      * Ruft den Wert der objectname-Eigenschaft ab.
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getObjectname() {
+    public String getObjectname() {
         return objectname;
     }
 
@@ -56,10 +55,10 @@ public class InvalidDataException
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setObjectname(JAXBElement<String> value) {
+    public void setObjectname(String value) {
         this.objectname = value;
     }
 

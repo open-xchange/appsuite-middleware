@@ -1,10 +1,9 @@
 
 package com.openexchange.admin.soap.dataobjects.xsd;
 
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElementRef;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 
@@ -35,20 +34,20 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class Entry {
 
-    @XmlElementRef(name = "key", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> key;
-    @XmlElementRef(name = "value", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> value;
+    @XmlElement(nillable = true)
+    protected String key;
+    @XmlElement(nillable = true)
+    protected String value;
 
     /**
      * Ruft den Wert der key-Eigenschaft ab.
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getKey() {
+    public String getKey() {
         return key;
     }
 
@@ -57,10 +56,10 @@ public class Entry {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setKey(JAXBElement<String> value) {
+    public void setKey(String value) {
         this.key = value;
     }
 
@@ -69,10 +68,10 @@ public class Entry {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getValue() {
+    public String getValue() {
         return value;
     }
 
@@ -81,10 +80,10 @@ public class Entry {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setValue(JAXBElement<String> value) {
+    public void setValue(String value) {
         this.value = value;
     }
 

@@ -3,11 +3,9 @@ package com.openexchange.admin.soap.dataobjects.xsd;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlType;
 
 
@@ -58,40 +56,40 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class Context {
 
-    @XmlElementRef(name = "average_size", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Long> averageSize;
-    @XmlElementRef(name = "enabled", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Boolean> enabled;
-    @XmlElementRef(name = "filestoreId", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Integer> filestoreId;
-    @XmlElementRef(name = "filestore_name", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> filestoreName;
-    @XmlElementRef(name = "id", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Integer> id;
+    @XmlElement(name = "average_size", nillable = true)
+    protected Long averageSize;
+    @XmlElement(nillable = true)
+    protected Boolean enabled;
+    @XmlElement(nillable = true)
+    protected Integer filestoreId;
+    @XmlElement(name = "filestore_name", nillable = true)
+    protected String filestoreName;
+    @XmlElement(nillable = true)
+    protected Integer id;
     @XmlElement(nillable = true)
     protected List<String> loginMappings;
-    @XmlElementRef(name = "maxQuota", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Long> maxQuota;
-    @XmlElementRef(name = "name", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> name;
-    @XmlElementRef(name = "readDatabase", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Database> readDatabase;
-    @XmlElementRef(name = "usedQuota", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Long> usedQuota;
-    @XmlElementRef(name = "userAttributes", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<SOAPStringMapMap> userAttributes;
-    @XmlElementRef(name = "writeDatabase", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Database> writeDatabase;
+    @XmlElement(nillable = true)
+    protected Long maxQuota;
+    @XmlElement(nillable = true)
+    protected String name;
+    @XmlElement(nillable = true)
+    protected Database readDatabase;
+    @XmlElement(nillable = true)
+    protected Long usedQuota;
+    @XmlElement(nillable = true)
+    protected SOAPStringMapMap userAttributes;
+    @XmlElement(nillable = true)
+    protected Database writeDatabase;
 
     /**
      * Ruft den Wert der averageSize-Eigenschaft ab.
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Long }{@code >}
+     *     {@link Long }
      *     
      */
-    public JAXBElement<Long> getAverageSize() {
+    public Long getAverageSize() {
         return averageSize;
     }
 
@@ -100,10 +98,10 @@ public class Context {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Long }{@code >}
+     *     {@link Long }
      *     
      */
-    public void setAverageSize(JAXBElement<Long> value) {
+    public void setAverageSize(Long value) {
         this.averageSize = value;
     }
 
@@ -112,10 +110,10 @@ public class Context {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public JAXBElement<Boolean> getEnabled() {
+    public Boolean isEnabled() {
         return enabled;
     }
 
@@ -124,10 +122,10 @@ public class Context {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public void setEnabled(JAXBElement<Boolean> value) {
+    public void setEnabled(Boolean value) {
         this.enabled = value;
     }
 
@@ -136,10 +134,10 @@ public class Context {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Integer }{@code >}
+     *     {@link Integer }
      *     
      */
-    public JAXBElement<Integer> getFilestoreId() {
+    public Integer getFilestoreId() {
         return filestoreId;
     }
 
@@ -148,10 +146,10 @@ public class Context {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Integer }{@code >}
+     *     {@link Integer }
      *     
      */
-    public void setFilestoreId(JAXBElement<Integer> value) {
+    public void setFilestoreId(Integer value) {
         this.filestoreId = value;
     }
 
@@ -160,10 +158,10 @@ public class Context {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getFilestoreName() {
+    public String getFilestoreName() {
         return filestoreName;
     }
 
@@ -172,10 +170,10 @@ public class Context {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setFilestoreName(JAXBElement<String> value) {
+    public void setFilestoreName(String value) {
         this.filestoreName = value;
     }
 
@@ -184,10 +182,10 @@ public class Context {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Integer }{@code >}
+     *     {@link Integer }
      *     
      */
-    public JAXBElement<Integer> getId() {
+    public Integer getId() {
         return id;
     }
 
@@ -196,10 +194,10 @@ public class Context {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Integer }{@code >}
+     *     {@link Integer }
      *     
      */
-    public void setId(JAXBElement<Integer> value) {
+    public void setId(Integer value) {
         this.id = value;
     }
 
@@ -237,10 +235,10 @@ public class Context {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Long }{@code >}
+     *     {@link Long }
      *     
      */
-    public JAXBElement<Long> getMaxQuota() {
+    public Long getMaxQuota() {
         return maxQuota;
     }
 
@@ -249,10 +247,10 @@ public class Context {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Long }{@code >}
+     *     {@link Long }
      *     
      */
-    public void setMaxQuota(JAXBElement<Long> value) {
+    public void setMaxQuota(Long value) {
         this.maxQuota = value;
     }
 
@@ -261,10 +259,10 @@ public class Context {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getName() {
+    public String getName() {
         return name;
     }
 
@@ -273,10 +271,10 @@ public class Context {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setName(JAXBElement<String> value) {
+    public void setName(String value) {
         this.name = value;
     }
 
@@ -285,10 +283,10 @@ public class Context {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Database }{@code >}
+     *     {@link Database }
      *     
      */
-    public JAXBElement<Database> getReadDatabase() {
+    public Database getReadDatabase() {
         return readDatabase;
     }
 
@@ -297,10 +295,10 @@ public class Context {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Database }{@code >}
+     *     {@link Database }
      *     
      */
-    public void setReadDatabase(JAXBElement<Database> value) {
+    public void setReadDatabase(Database value) {
         this.readDatabase = value;
     }
 
@@ -309,10 +307,10 @@ public class Context {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Long }{@code >}
+     *     {@link Long }
      *     
      */
-    public JAXBElement<Long> getUsedQuota() {
+    public Long getUsedQuota() {
         return usedQuota;
     }
 
@@ -321,10 +319,10 @@ public class Context {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Long }{@code >}
+     *     {@link Long }
      *     
      */
-    public void setUsedQuota(JAXBElement<Long> value) {
+    public void setUsedQuota(Long value) {
         this.usedQuota = value;
     }
 
@@ -333,10 +331,10 @@ public class Context {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link SOAPStringMapMap }{@code >}
+     *     {@link SOAPStringMapMap }
      *     
      */
-    public JAXBElement<SOAPStringMapMap> getUserAttributes() {
+    public SOAPStringMapMap getUserAttributes() {
         return userAttributes;
     }
 
@@ -345,10 +343,10 @@ public class Context {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link SOAPStringMapMap }{@code >}
+     *     {@link SOAPStringMapMap }
      *     
      */
-    public void setUserAttributes(JAXBElement<SOAPStringMapMap> value) {
+    public void setUserAttributes(SOAPStringMapMap value) {
         this.userAttributes = value;
     }
 
@@ -357,10 +355,10 @@ public class Context {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Database }{@code >}
+     *     {@link Database }
      *     
      */
-    public JAXBElement<Database> getWriteDatabase() {
+    public Database getWriteDatabase() {
         return writeDatabase;
     }
 
@@ -369,10 +367,10 @@ public class Context {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Database }{@code >}
+     *     {@link Database }
      *     
      */
-    public void setWriteDatabase(JAXBElement<Database> value) {
+    public void setWriteDatabase(Database value) {
         this.writeDatabase = value;
     }
 

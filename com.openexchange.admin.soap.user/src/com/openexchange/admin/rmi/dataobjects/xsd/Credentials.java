@@ -1,10 +1,9 @@
 
 package com.openexchange.admin.rmi.dataobjects.xsd;
 
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElementRef;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 
@@ -35,20 +34,20 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class Credentials {
 
-    @XmlElementRef(name = "login", namespace = "http://dataobjects.rmi.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> login;
-    @XmlElementRef(name = "password", namespace = "http://dataobjects.rmi.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> password;
+    @XmlElement(nillable = true)
+    protected String login;
+    @XmlElement(nillable = true)
+    protected String password;
 
     /**
      * Ruft den Wert der login-Eigenschaft ab.
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getLogin() {
+    public String getLogin() {
         return login;
     }
 
@@ -57,10 +56,10 @@ public class Credentials {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setLogin(JAXBElement<String> value) {
+    public void setLogin(String value) {
         this.login = value;
     }
 
@@ -69,10 +68,10 @@ public class Credentials {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getPassword() {
+    public String getPassword() {
         return password;
     }
 
@@ -81,10 +80,10 @@ public class Credentials {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setPassword(JAXBElement<String> value) {
+    public void setPassword(String value) {
         this.password = value;
     }
 

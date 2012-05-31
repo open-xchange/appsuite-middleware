@@ -1,10 +1,9 @@
 
 package com.openexchange.admin.soap.dataobjects.xsd;
 
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElementRef;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 
@@ -35,20 +34,20 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class SOAPMapEntry {
 
-    @XmlElementRef(name = "key", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> key;
-    @XmlElementRef(name = "value", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<SOAPStringMap> value;
+    @XmlElement(nillable = true)
+    protected String key;
+    @XmlElement(nillable = true)
+    protected SOAPStringMap value;
 
     /**
      * Ruft den Wert der key-Eigenschaft ab.
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getKey() {
+    public String getKey() {
         return key;
     }
 
@@ -57,10 +56,10 @@ public class SOAPMapEntry {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setKey(JAXBElement<String> value) {
+    public void setKey(String value) {
         this.key = value;
     }
 
@@ -69,10 +68,10 @@ public class SOAPMapEntry {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link SOAPStringMap }{@code >}
+     *     {@link SOAPStringMap }
      *     
      */
-    public JAXBElement<SOAPStringMap> getValue() {
+    public SOAPStringMap getValue() {
         return value;
     }
 
@@ -81,10 +80,10 @@ public class SOAPMapEntry {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link SOAPStringMap }{@code >}
+     *     {@link SOAPStringMap }
      *     
      */
-    public void setValue(JAXBElement<SOAPStringMap> value) {
+    public void setValue(SOAPStringMap value) {
         this.value = value;
     }
 

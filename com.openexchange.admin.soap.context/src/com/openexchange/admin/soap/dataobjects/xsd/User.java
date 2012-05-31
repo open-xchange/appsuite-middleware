@@ -3,11 +3,10 @@ package com.openexchange.admin.soap.dataobjects.xsd;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementRef;
+import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.datatype.XMLGregorianCalendar;
 
@@ -287,251 +286,253 @@ public class User {
 
     @XmlElement(nillable = true)
     protected List<String> aliases;
-    @XmlElementRef(name = "anniversary", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<XMLGregorianCalendar> anniversary;
-    @XmlElementRef(name = "assistant_name", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> assistantName;
-    @XmlElementRef(name = "birthday", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<XMLGregorianCalendar> birthday;
-    @XmlElementRef(name = "branches", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> branches;
-    @XmlElementRef(name = "business_category", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> businessCategory;
-    @XmlElementRef(name = "categories", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> categories;
-    @XmlElementRef(name = "cellular_telephone1", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> cellularTelephone1;
-    @XmlElementRef(name = "cellular_telephone2", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> cellularTelephone2;
-    @XmlElementRef(name = "city_business", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> cityBusiness;
-    @XmlElementRef(name = "city_home", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> cityHome;
-    @XmlElementRef(name = "city_other", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> cityOther;
-    @XmlElementRef(name = "commercial_register", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> commercialRegister;
-    @XmlElementRef(name = "company", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> company;
+    @XmlElement(nillable = true)
+    @XmlSchemaType(name = "date")
+    protected XMLGregorianCalendar anniversary;
+    @XmlElement(name = "assistant_name", nillable = true)
+    protected String assistantName;
+    @XmlElement(nillable = true)
+    @XmlSchemaType(name = "date")
+    protected XMLGregorianCalendar birthday;
+    @XmlElement(nillable = true)
+    protected String branches;
+    @XmlElement(name = "business_category", nillable = true)
+    protected String businessCategory;
+    @XmlElement(nillable = true)
+    protected String categories;
+    @XmlElement(name = "cellular_telephone1", nillable = true)
+    protected String cellularTelephone1;
+    @XmlElement(name = "cellular_telephone2", nillable = true)
+    protected String cellularTelephone2;
+    @XmlElement(name = "city_business", nillable = true)
+    protected String cityBusiness;
+    @XmlElement(name = "city_home", nillable = true)
+    protected String cityHome;
+    @XmlElement(name = "city_other", nillable = true)
+    protected String cityOther;
+    @XmlElement(name = "commercial_register", nillable = true)
+    protected String commercialRegister;
+    @XmlElement(nillable = true)
+    protected String company;
     protected Boolean contextadmin;
-    @XmlElementRef(name = "country_business", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> countryBusiness;
-    @XmlElementRef(name = "country_home", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> countryHome;
-    @XmlElementRef(name = "country_other", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> countryOther;
-    @XmlElementRef(name = "defaultSenderAddress", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> defaultSenderAddress;
-    @XmlElementRef(name = "default_group", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Group> defaultGroup;
-    @XmlElementRef(name = "department", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> department;
-    @XmlElementRef(name = "display_name", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> displayName;
-    @XmlElementRef(name = "email1", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> email1;
-    @XmlElementRef(name = "email2", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> email2;
-    @XmlElementRef(name = "email3", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> email3;
-    @XmlElementRef(name = "employeeType", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> employeeType;
-    @XmlElementRef(name = "fax_business", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> faxBusiness;
-    @XmlElementRef(name = "fax_home", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> faxHome;
-    @XmlElementRef(name = "fax_other", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> faxOther;
-    @XmlElementRef(name = "folderTree", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Integer> folderTree;
-    @XmlElementRef(name = "given_name", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> givenName;
-    @XmlElementRef(name = "guiPreferencesForSoap", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<SOAPStringMap> guiPreferencesForSoap;
-    @XmlElementRef(name = "gui_spam_filter_enabled", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Boolean> guiSpamFilterEnabled;
-    @XmlElementRef(name = "id", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Integer> id;
-    @XmlElementRef(name = "imapLogin", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> imapLogin;
+    @XmlElement(name = "country_business", nillable = true)
+    protected String countryBusiness;
+    @XmlElement(name = "country_home", nillable = true)
+    protected String countryHome;
+    @XmlElement(name = "country_other", nillable = true)
+    protected String countryOther;
+    @XmlElement(nillable = true)
+    protected String defaultSenderAddress;
+    @XmlElement(name = "default_group", nillable = true)
+    protected Group defaultGroup;
+    @XmlElement(nillable = true)
+    protected String department;
+    @XmlElement(name = "display_name", nillable = true)
+    protected String displayName;
+    @XmlElement(nillable = true)
+    protected String email1;
+    @XmlElement(nillable = true)
+    protected String email2;
+    @XmlElement(nillable = true)
+    protected String email3;
+    @XmlElement(nillable = true)
+    protected String employeeType;
+    @XmlElement(name = "fax_business", nillable = true)
+    protected String faxBusiness;
+    @XmlElement(name = "fax_home", nillable = true)
+    protected String faxHome;
+    @XmlElement(name = "fax_other", nillable = true)
+    protected String faxOther;
+    @XmlElement(nillable = true)
+    protected Integer folderTree;
+    @XmlElement(name = "given_name", nillable = true)
+    protected String givenName;
+    @XmlElement(nillable = true)
+    protected SOAPStringMap guiPreferencesForSoap;
+    @XmlElement(name = "gui_spam_filter_enabled", nillable = true)
+    protected Boolean guiSpamFilterEnabled;
+    @XmlElement(nillable = true)
+    protected Integer id;
+    @XmlElement(nillable = true)
+    protected String imapLogin;
     protected Integer imapPort;
-    @XmlElementRef(name = "imapSchema", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> imapSchema;
-    @XmlElementRef(name = "imapServer", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> imapServer;
-    @XmlElementRef(name = "imapServerString", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> imapServerString;
-    @XmlElementRef(name = "info", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> info;
-    @XmlElementRef(name = "instant_messenger1", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> instantMessenger1;
-    @XmlElementRef(name = "instant_messenger2", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> instantMessenger2;
-    @XmlElementRef(name = "language", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> language;
-    @XmlElementRef(name = "mail_folder_confirmed_ham_name", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> mailFolderConfirmedHamName;
-    @XmlElementRef(name = "mail_folder_confirmed_spam_name", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> mailFolderConfirmedSpamName;
-    @XmlElementRef(name = "mail_folder_drafts_name", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> mailFolderDraftsName;
-    @XmlElementRef(name = "mail_folder_sent_name", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> mailFolderSentName;
-    @XmlElementRef(name = "mail_folder_spam_name", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> mailFolderSpamName;
-    @XmlElementRef(name = "mail_folder_trash_name", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> mailFolderTrashName;
-    @XmlElementRef(name = "mailenabled", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Boolean> mailenabled;
-    @XmlElementRef(name = "manager_name", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> managerName;
-    @XmlElementRef(name = "marital_status", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> maritalStatus;
-    @XmlElementRef(name = "middle_name", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> middleName;
-    @XmlElementRef(name = "name", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> name;
-    @XmlElementRef(name = "nickname", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> nickname;
-    @XmlElementRef(name = "note", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> note;
-    @XmlElementRef(name = "number_of_children", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> numberOfChildren;
-    @XmlElementRef(name = "number_of_employee", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> numberOfEmployee;
-    @XmlElementRef(name = "password", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> password;
-    @XmlElementRef(name = "passwordMech", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> passwordMech;
-    @XmlElementRef(name = "password_expired", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Boolean> passwordExpired;
-    @XmlElementRef(name = "position", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> position;
-    @XmlElementRef(name = "postal_code_business", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> postalCodeBusiness;
-    @XmlElementRef(name = "postal_code_home", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> postalCodeHome;
-    @XmlElementRef(name = "postal_code_other", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> postalCodeOther;
-    @XmlElementRef(name = "primaryEmail", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> primaryEmail;
-    @XmlElementRef(name = "profession", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> profession;
-    @XmlElementRef(name = "room_number", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> roomNumber;
-    @XmlElementRef(name = "sales_volume", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> salesVolume;
+    @XmlElement(nillable = true)
+    protected String imapSchema;
+    @XmlElement(nillable = true)
+    protected String imapServer;
+    @XmlElement(nillable = true)
+    protected String imapServerString;
+    @XmlElement(nillable = true)
+    protected String info;
+    @XmlElement(name = "instant_messenger1", nillable = true)
+    protected String instantMessenger1;
+    @XmlElement(name = "instant_messenger2", nillable = true)
+    protected String instantMessenger2;
+    @XmlElement(nillable = true)
+    protected String language;
+    @XmlElement(name = "mail_folder_confirmed_ham_name", nillable = true)
+    protected String mailFolderConfirmedHamName;
+    @XmlElement(name = "mail_folder_confirmed_spam_name", nillable = true)
+    protected String mailFolderConfirmedSpamName;
+    @XmlElement(name = "mail_folder_drafts_name", nillable = true)
+    protected String mailFolderDraftsName;
+    @XmlElement(name = "mail_folder_sent_name", nillable = true)
+    protected String mailFolderSentName;
+    @XmlElement(name = "mail_folder_spam_name", nillable = true)
+    protected String mailFolderSpamName;
+    @XmlElement(name = "mail_folder_trash_name", nillable = true)
+    protected String mailFolderTrashName;
+    @XmlElement(nillable = true)
+    protected Boolean mailenabled;
+    @XmlElement(name = "manager_name", nillable = true)
+    protected String managerName;
+    @XmlElement(name = "marital_status", nillable = true)
+    protected String maritalStatus;
+    @XmlElement(name = "middle_name", nillable = true)
+    protected String middleName;
+    @XmlElement(nillable = true)
+    protected String name;
+    @XmlElement(nillable = true)
+    protected String nickname;
+    @XmlElement(nillable = true)
+    protected String note;
+    @XmlElement(name = "number_of_children", nillable = true)
+    protected String numberOfChildren;
+    @XmlElement(name = "number_of_employee", nillable = true)
+    protected String numberOfEmployee;
+    @XmlElement(nillable = true)
+    protected String password;
+    @XmlElement(nillable = true)
+    protected String passwordMech;
+    @XmlElement(name = "password_expired", nillable = true)
+    protected Boolean passwordExpired;
+    @XmlElement(nillable = true)
+    protected String position;
+    @XmlElement(name = "postal_code_business", nillable = true)
+    protected String postalCodeBusiness;
+    @XmlElement(name = "postal_code_home", nillable = true)
+    protected String postalCodeHome;
+    @XmlElement(name = "postal_code_other", nillable = true)
+    protected String postalCodeOther;
+    @XmlElement(nillable = true)
+    protected String primaryEmail;
+    @XmlElement(nillable = true)
+    protected String profession;
+    @XmlElement(name = "room_number", nillable = true)
+    protected String roomNumber;
+    @XmlElement(name = "sales_volume", nillable = true)
+    protected String salesVolume;
     protected Integer smtpPort;
-    @XmlElementRef(name = "smtpSchema", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> smtpSchema;
-    @XmlElementRef(name = "smtpServer", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> smtpServer;
-    @XmlElementRef(name = "smtpServerString", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> smtpServerString;
-    @XmlElementRef(name = "spouse_name", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> spouseName;
-    @XmlElementRef(name = "state_business", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> stateBusiness;
-    @XmlElementRef(name = "state_home", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> stateHome;
-    @XmlElementRef(name = "state_other", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> stateOther;
-    @XmlElementRef(name = "street_business", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> streetBusiness;
-    @XmlElementRef(name = "street_home", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> streetHome;
-    @XmlElementRef(name = "street_other", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> streetOther;
-    @XmlElementRef(name = "suffix", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> suffix;
-    @XmlElementRef(name = "sur_name", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> surName;
-    @XmlElementRef(name = "tax_id", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> taxId;
-    @XmlElementRef(name = "telephone_assistant", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> telephoneAssistant;
-    @XmlElementRef(name = "telephone_business1", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> telephoneBusiness1;
-    @XmlElementRef(name = "telephone_business2", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> telephoneBusiness2;
-    @XmlElementRef(name = "telephone_callback", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> telephoneCallback;
-    @XmlElementRef(name = "telephone_car", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> telephoneCar;
-    @XmlElementRef(name = "telephone_company", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> telephoneCompany;
-    @XmlElementRef(name = "telephone_home1", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> telephoneHome1;
-    @XmlElementRef(name = "telephone_home2", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> telephoneHome2;
-    @XmlElementRef(name = "telephone_ip", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> telephoneIp;
-    @XmlElementRef(name = "telephone_isdn", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> telephoneIsdn;
-    @XmlElementRef(name = "telephone_other", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> telephoneOther;
-    @XmlElementRef(name = "telephone_pager", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> telephonePager;
-    @XmlElementRef(name = "telephone_primary", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> telephonePrimary;
-    @XmlElementRef(name = "telephone_radio", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> telephoneRadio;
-    @XmlElementRef(name = "telephone_telex", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> telephoneTelex;
-    @XmlElementRef(name = "telephone_ttytdd", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> telephoneTtytdd;
-    @XmlElementRef(name = "timezone", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> timezone;
-    @XmlElementRef(name = "title", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> title;
-    @XmlElementRef(name = "uploadFileSizeLimit", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Integer> uploadFileSizeLimit;
-    @XmlElementRef(name = "uploadFileSizeLimitPerFile", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Integer> uploadFileSizeLimitPerFile;
-    @XmlElementRef(name = "url", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> url;
-    @XmlElementRef(name = "userAttributes", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<SOAPStringMapMap> userAttributes;
-    @XmlElementRef(name = "userfield01", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> userfield01;
-    @XmlElementRef(name = "userfield02", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> userfield02;
-    @XmlElementRef(name = "userfield03", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> userfield03;
-    @XmlElementRef(name = "userfield04", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> userfield04;
-    @XmlElementRef(name = "userfield05", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> userfield05;
-    @XmlElementRef(name = "userfield06", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> userfield06;
-    @XmlElementRef(name = "userfield07", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> userfield07;
-    @XmlElementRef(name = "userfield08", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> userfield08;
-    @XmlElementRef(name = "userfield09", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> userfield09;
-    @XmlElementRef(name = "userfield10", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> userfield10;
-    @XmlElementRef(name = "userfield11", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> userfield11;
-    @XmlElementRef(name = "userfield12", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> userfield12;
-    @XmlElementRef(name = "userfield13", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> userfield13;
-    @XmlElementRef(name = "userfield14", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> userfield14;
-    @XmlElementRef(name = "userfield15", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> userfield15;
-    @XmlElementRef(name = "userfield16", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> userfield16;
-    @XmlElementRef(name = "userfield17", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> userfield17;
-    @XmlElementRef(name = "userfield18", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> userfield18;
-    @XmlElementRef(name = "userfield19", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> userfield19;
-    @XmlElementRef(name = "userfield20", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> userfield20;
+    @XmlElement(nillable = true)
+    protected String smtpSchema;
+    @XmlElement(nillable = true)
+    protected String smtpServer;
+    @XmlElement(nillable = true)
+    protected String smtpServerString;
+    @XmlElement(name = "spouse_name", nillable = true)
+    protected String spouseName;
+    @XmlElement(name = "state_business", nillable = true)
+    protected String stateBusiness;
+    @XmlElement(name = "state_home", nillable = true)
+    protected String stateHome;
+    @XmlElement(name = "state_other", nillable = true)
+    protected String stateOther;
+    @XmlElement(name = "street_business", nillable = true)
+    protected String streetBusiness;
+    @XmlElement(name = "street_home", nillable = true)
+    protected String streetHome;
+    @XmlElement(name = "street_other", nillable = true)
+    protected String streetOther;
+    @XmlElement(nillable = true)
+    protected String suffix;
+    @XmlElement(name = "sur_name", nillable = true)
+    protected String surName;
+    @XmlElement(name = "tax_id", nillable = true)
+    protected String taxId;
+    @XmlElement(name = "telephone_assistant", nillable = true)
+    protected String telephoneAssistant;
+    @XmlElement(name = "telephone_business1", nillable = true)
+    protected String telephoneBusiness1;
+    @XmlElement(name = "telephone_business2", nillable = true)
+    protected String telephoneBusiness2;
+    @XmlElement(name = "telephone_callback", nillable = true)
+    protected String telephoneCallback;
+    @XmlElement(name = "telephone_car", nillable = true)
+    protected String telephoneCar;
+    @XmlElement(name = "telephone_company", nillable = true)
+    protected String telephoneCompany;
+    @XmlElement(name = "telephone_home1", nillable = true)
+    protected String telephoneHome1;
+    @XmlElement(name = "telephone_home2", nillable = true)
+    protected String telephoneHome2;
+    @XmlElement(name = "telephone_ip", nillable = true)
+    protected String telephoneIp;
+    @XmlElement(name = "telephone_isdn", nillable = true)
+    protected String telephoneIsdn;
+    @XmlElement(name = "telephone_other", nillable = true)
+    protected String telephoneOther;
+    @XmlElement(name = "telephone_pager", nillable = true)
+    protected String telephonePager;
+    @XmlElement(name = "telephone_primary", nillable = true)
+    protected String telephonePrimary;
+    @XmlElement(name = "telephone_radio", nillable = true)
+    protected String telephoneRadio;
+    @XmlElement(name = "telephone_telex", nillable = true)
+    protected String telephoneTelex;
+    @XmlElement(name = "telephone_ttytdd", nillable = true)
+    protected String telephoneTtytdd;
+    @XmlElement(nillable = true)
+    protected String timezone;
+    @XmlElement(nillable = true)
+    protected String title;
+    @XmlElement(nillable = true)
+    protected Integer uploadFileSizeLimit;
+    @XmlElement(nillable = true)
+    protected Integer uploadFileSizeLimitPerFile;
+    @XmlElement(nillable = true)
+    protected String url;
+    @XmlElement(nillable = true)
+    protected SOAPStringMapMap userAttributes;
+    @XmlElement(nillable = true)
+    protected String userfield01;
+    @XmlElement(nillable = true)
+    protected String userfield02;
+    @XmlElement(nillable = true)
+    protected String userfield03;
+    @XmlElement(nillable = true)
+    protected String userfield04;
+    @XmlElement(nillable = true)
+    protected String userfield05;
+    @XmlElement(nillable = true)
+    protected String userfield06;
+    @XmlElement(nillable = true)
+    protected String userfield07;
+    @XmlElement(nillable = true)
+    protected String userfield08;
+    @XmlElement(nillable = true)
+    protected String userfield09;
+    @XmlElement(nillable = true)
+    protected String userfield10;
+    @XmlElement(nillable = true)
+    protected String userfield11;
+    @XmlElement(nillable = true)
+    protected String userfield12;
+    @XmlElement(nillable = true)
+    protected String userfield13;
+    @XmlElement(nillable = true)
+    protected String userfield14;
+    @XmlElement(nillable = true)
+    protected String userfield15;
+    @XmlElement(nillable = true)
+    protected String userfield16;
+    @XmlElement(nillable = true)
+    protected String userfield17;
+    @XmlElement(nillable = true)
+    protected String userfield18;
+    @XmlElement(nillable = true)
+    protected String userfield19;
+    @XmlElement(nillable = true)
+    protected String userfield20;
 
     /**
      * Gets the value of the aliases property.
@@ -567,10 +568,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link XMLGregorianCalendar }{@code >}
+     *     {@link XMLGregorianCalendar }
      *     
      */
-    public JAXBElement<XMLGregorianCalendar> getAnniversary() {
+    public XMLGregorianCalendar getAnniversary() {
         return anniversary;
     }
 
@@ -579,10 +580,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link XMLGregorianCalendar }{@code >}
+     *     {@link XMLGregorianCalendar }
      *     
      */
-    public void setAnniversary(JAXBElement<XMLGregorianCalendar> value) {
+    public void setAnniversary(XMLGregorianCalendar value) {
         this.anniversary = value;
     }
 
@@ -591,10 +592,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getAssistantName() {
+    public String getAssistantName() {
         return assistantName;
     }
 
@@ -603,10 +604,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setAssistantName(JAXBElement<String> value) {
+    public void setAssistantName(String value) {
         this.assistantName = value;
     }
 
@@ -615,10 +616,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link XMLGregorianCalendar }{@code >}
+     *     {@link XMLGregorianCalendar }
      *     
      */
-    public JAXBElement<XMLGregorianCalendar> getBirthday() {
+    public XMLGregorianCalendar getBirthday() {
         return birthday;
     }
 
@@ -627,10 +628,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link XMLGregorianCalendar }{@code >}
+     *     {@link XMLGregorianCalendar }
      *     
      */
-    public void setBirthday(JAXBElement<XMLGregorianCalendar> value) {
+    public void setBirthday(XMLGregorianCalendar value) {
         this.birthday = value;
     }
 
@@ -639,10 +640,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getBranches() {
+    public String getBranches() {
         return branches;
     }
 
@@ -651,10 +652,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setBranches(JAXBElement<String> value) {
+    public void setBranches(String value) {
         this.branches = value;
     }
 
@@ -663,10 +664,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getBusinessCategory() {
+    public String getBusinessCategory() {
         return businessCategory;
     }
 
@@ -675,10 +676,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setBusinessCategory(JAXBElement<String> value) {
+    public void setBusinessCategory(String value) {
         this.businessCategory = value;
     }
 
@@ -687,10 +688,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getCategories() {
+    public String getCategories() {
         return categories;
     }
 
@@ -699,10 +700,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setCategories(JAXBElement<String> value) {
+    public void setCategories(String value) {
         this.categories = value;
     }
 
@@ -711,10 +712,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getCellularTelephone1() {
+    public String getCellularTelephone1() {
         return cellularTelephone1;
     }
 
@@ -723,10 +724,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setCellularTelephone1(JAXBElement<String> value) {
+    public void setCellularTelephone1(String value) {
         this.cellularTelephone1 = value;
     }
 
@@ -735,10 +736,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getCellularTelephone2() {
+    public String getCellularTelephone2() {
         return cellularTelephone2;
     }
 
@@ -747,10 +748,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setCellularTelephone2(JAXBElement<String> value) {
+    public void setCellularTelephone2(String value) {
         this.cellularTelephone2 = value;
     }
 
@@ -759,10 +760,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getCityBusiness() {
+    public String getCityBusiness() {
         return cityBusiness;
     }
 
@@ -771,10 +772,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setCityBusiness(JAXBElement<String> value) {
+    public void setCityBusiness(String value) {
         this.cityBusiness = value;
     }
 
@@ -783,10 +784,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getCityHome() {
+    public String getCityHome() {
         return cityHome;
     }
 
@@ -795,10 +796,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setCityHome(JAXBElement<String> value) {
+    public void setCityHome(String value) {
         this.cityHome = value;
     }
 
@@ -807,10 +808,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getCityOther() {
+    public String getCityOther() {
         return cityOther;
     }
 
@@ -819,10 +820,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setCityOther(JAXBElement<String> value) {
+    public void setCityOther(String value) {
         this.cityOther = value;
     }
 
@@ -831,10 +832,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getCommercialRegister() {
+    public String getCommercialRegister() {
         return commercialRegister;
     }
 
@@ -843,10 +844,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setCommercialRegister(JAXBElement<String> value) {
+    public void setCommercialRegister(String value) {
         this.commercialRegister = value;
     }
 
@@ -855,10 +856,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getCompany() {
+    public String getCompany() {
         return company;
     }
 
@@ -867,10 +868,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setCompany(JAXBElement<String> value) {
+    public void setCompany(String value) {
         this.company = value;
     }
 
@@ -903,10 +904,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getCountryBusiness() {
+    public String getCountryBusiness() {
         return countryBusiness;
     }
 
@@ -915,10 +916,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setCountryBusiness(JAXBElement<String> value) {
+    public void setCountryBusiness(String value) {
         this.countryBusiness = value;
     }
 
@@ -927,10 +928,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getCountryHome() {
+    public String getCountryHome() {
         return countryHome;
     }
 
@@ -939,10 +940,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setCountryHome(JAXBElement<String> value) {
+    public void setCountryHome(String value) {
         this.countryHome = value;
     }
 
@@ -951,10 +952,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getCountryOther() {
+    public String getCountryOther() {
         return countryOther;
     }
 
@@ -963,10 +964,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setCountryOther(JAXBElement<String> value) {
+    public void setCountryOther(String value) {
         this.countryOther = value;
     }
 
@@ -975,10 +976,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getDefaultSenderAddress() {
+    public String getDefaultSenderAddress() {
         return defaultSenderAddress;
     }
 
@@ -987,10 +988,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setDefaultSenderAddress(JAXBElement<String> value) {
+    public void setDefaultSenderAddress(String value) {
         this.defaultSenderAddress = value;
     }
 
@@ -999,10 +1000,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Group }{@code >}
+     *     {@link Group }
      *     
      */
-    public JAXBElement<Group> getDefaultGroup() {
+    public Group getDefaultGroup() {
         return defaultGroup;
     }
 
@@ -1011,10 +1012,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Group }{@code >}
+     *     {@link Group }
      *     
      */
-    public void setDefaultGroup(JAXBElement<Group> value) {
+    public void setDefaultGroup(Group value) {
         this.defaultGroup = value;
     }
 
@@ -1023,10 +1024,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getDepartment() {
+    public String getDepartment() {
         return department;
     }
 
@@ -1035,10 +1036,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setDepartment(JAXBElement<String> value) {
+    public void setDepartment(String value) {
         this.department = value;
     }
 
@@ -1047,10 +1048,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getDisplayName() {
+    public String getDisplayName() {
         return displayName;
     }
 
@@ -1059,10 +1060,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setDisplayName(JAXBElement<String> value) {
+    public void setDisplayName(String value) {
         this.displayName = value;
     }
 
@@ -1071,10 +1072,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getEmail1() {
+    public String getEmail1() {
         return email1;
     }
 
@@ -1083,10 +1084,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setEmail1(JAXBElement<String> value) {
+    public void setEmail1(String value) {
         this.email1 = value;
     }
 
@@ -1095,10 +1096,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getEmail2() {
+    public String getEmail2() {
         return email2;
     }
 
@@ -1107,10 +1108,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setEmail2(JAXBElement<String> value) {
+    public void setEmail2(String value) {
         this.email2 = value;
     }
 
@@ -1119,10 +1120,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getEmail3() {
+    public String getEmail3() {
         return email3;
     }
 
@@ -1131,10 +1132,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setEmail3(JAXBElement<String> value) {
+    public void setEmail3(String value) {
         this.email3 = value;
     }
 
@@ -1143,10 +1144,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getEmployeeType() {
+    public String getEmployeeType() {
         return employeeType;
     }
 
@@ -1155,10 +1156,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setEmployeeType(JAXBElement<String> value) {
+    public void setEmployeeType(String value) {
         this.employeeType = value;
     }
 
@@ -1167,10 +1168,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getFaxBusiness() {
+    public String getFaxBusiness() {
         return faxBusiness;
     }
 
@@ -1179,10 +1180,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setFaxBusiness(JAXBElement<String> value) {
+    public void setFaxBusiness(String value) {
         this.faxBusiness = value;
     }
 
@@ -1191,10 +1192,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getFaxHome() {
+    public String getFaxHome() {
         return faxHome;
     }
 
@@ -1203,10 +1204,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setFaxHome(JAXBElement<String> value) {
+    public void setFaxHome(String value) {
         this.faxHome = value;
     }
 
@@ -1215,10 +1216,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getFaxOther() {
+    public String getFaxOther() {
         return faxOther;
     }
 
@@ -1227,10 +1228,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setFaxOther(JAXBElement<String> value) {
+    public void setFaxOther(String value) {
         this.faxOther = value;
     }
 
@@ -1239,10 +1240,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Integer }{@code >}
+     *     {@link Integer }
      *     
      */
-    public JAXBElement<Integer> getFolderTree() {
+    public Integer getFolderTree() {
         return folderTree;
     }
 
@@ -1251,10 +1252,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Integer }{@code >}
+     *     {@link Integer }
      *     
      */
-    public void setFolderTree(JAXBElement<Integer> value) {
+    public void setFolderTree(Integer value) {
         this.folderTree = value;
     }
 
@@ -1263,10 +1264,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getGivenName() {
+    public String getGivenName() {
         return givenName;
     }
 
@@ -1275,10 +1276,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setGivenName(JAXBElement<String> value) {
+    public void setGivenName(String value) {
         this.givenName = value;
     }
 
@@ -1287,10 +1288,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link SOAPStringMap }{@code >}
+     *     {@link SOAPStringMap }
      *     
      */
-    public JAXBElement<SOAPStringMap> getGuiPreferencesForSoap() {
+    public SOAPStringMap getGuiPreferencesForSoap() {
         return guiPreferencesForSoap;
     }
 
@@ -1299,10 +1300,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link SOAPStringMap }{@code >}
+     *     {@link SOAPStringMap }
      *     
      */
-    public void setGuiPreferencesForSoap(JAXBElement<SOAPStringMap> value) {
+    public void setGuiPreferencesForSoap(SOAPStringMap value) {
         this.guiPreferencesForSoap = value;
     }
 
@@ -1311,10 +1312,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public JAXBElement<Boolean> getGuiSpamFilterEnabled() {
+    public Boolean isGuiSpamFilterEnabled() {
         return guiSpamFilterEnabled;
     }
 
@@ -1323,10 +1324,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public void setGuiSpamFilterEnabled(JAXBElement<Boolean> value) {
+    public void setGuiSpamFilterEnabled(Boolean value) {
         this.guiSpamFilterEnabled = value;
     }
 
@@ -1335,10 +1336,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Integer }{@code >}
+     *     {@link Integer }
      *     
      */
-    public JAXBElement<Integer> getId() {
+    public Integer getId() {
         return id;
     }
 
@@ -1347,10 +1348,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Integer }{@code >}
+     *     {@link Integer }
      *     
      */
-    public void setId(JAXBElement<Integer> value) {
+    public void setId(Integer value) {
         this.id = value;
     }
 
@@ -1359,10 +1360,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getImapLogin() {
+    public String getImapLogin() {
         return imapLogin;
     }
 
@@ -1371,10 +1372,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setImapLogin(JAXBElement<String> value) {
+    public void setImapLogin(String value) {
         this.imapLogin = value;
     }
 
@@ -1407,10 +1408,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getImapSchema() {
+    public String getImapSchema() {
         return imapSchema;
     }
 
@@ -1419,10 +1420,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setImapSchema(JAXBElement<String> value) {
+    public void setImapSchema(String value) {
         this.imapSchema = value;
     }
 
@@ -1431,10 +1432,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getImapServer() {
+    public String getImapServer() {
         return imapServer;
     }
 
@@ -1443,10 +1444,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setImapServer(JAXBElement<String> value) {
+    public void setImapServer(String value) {
         this.imapServer = value;
     }
 
@@ -1455,10 +1456,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getImapServerString() {
+    public String getImapServerString() {
         return imapServerString;
     }
 
@@ -1467,10 +1468,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setImapServerString(JAXBElement<String> value) {
+    public void setImapServerString(String value) {
         this.imapServerString = value;
     }
 
@@ -1479,10 +1480,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getInfo() {
+    public String getInfo() {
         return info;
     }
 
@@ -1491,10 +1492,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setInfo(JAXBElement<String> value) {
+    public void setInfo(String value) {
         this.info = value;
     }
 
@@ -1503,10 +1504,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getInstantMessenger1() {
+    public String getInstantMessenger1() {
         return instantMessenger1;
     }
 
@@ -1515,10 +1516,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setInstantMessenger1(JAXBElement<String> value) {
+    public void setInstantMessenger1(String value) {
         this.instantMessenger1 = value;
     }
 
@@ -1527,10 +1528,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getInstantMessenger2() {
+    public String getInstantMessenger2() {
         return instantMessenger2;
     }
 
@@ -1539,10 +1540,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setInstantMessenger2(JAXBElement<String> value) {
+    public void setInstantMessenger2(String value) {
         this.instantMessenger2 = value;
     }
 
@@ -1551,10 +1552,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getLanguage() {
+    public String getLanguage() {
         return language;
     }
 
@@ -1563,10 +1564,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setLanguage(JAXBElement<String> value) {
+    public void setLanguage(String value) {
         this.language = value;
     }
 
@@ -1575,10 +1576,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getMailFolderConfirmedHamName() {
+    public String getMailFolderConfirmedHamName() {
         return mailFolderConfirmedHamName;
     }
 
@@ -1587,10 +1588,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setMailFolderConfirmedHamName(JAXBElement<String> value) {
+    public void setMailFolderConfirmedHamName(String value) {
         this.mailFolderConfirmedHamName = value;
     }
 
@@ -1599,10 +1600,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getMailFolderConfirmedSpamName() {
+    public String getMailFolderConfirmedSpamName() {
         return mailFolderConfirmedSpamName;
     }
 
@@ -1611,10 +1612,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setMailFolderConfirmedSpamName(JAXBElement<String> value) {
+    public void setMailFolderConfirmedSpamName(String value) {
         this.mailFolderConfirmedSpamName = value;
     }
 
@@ -1623,10 +1624,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getMailFolderDraftsName() {
+    public String getMailFolderDraftsName() {
         return mailFolderDraftsName;
     }
 
@@ -1635,10 +1636,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setMailFolderDraftsName(JAXBElement<String> value) {
+    public void setMailFolderDraftsName(String value) {
         this.mailFolderDraftsName = value;
     }
 
@@ -1647,10 +1648,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getMailFolderSentName() {
+    public String getMailFolderSentName() {
         return mailFolderSentName;
     }
 
@@ -1659,10 +1660,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setMailFolderSentName(JAXBElement<String> value) {
+    public void setMailFolderSentName(String value) {
         this.mailFolderSentName = value;
     }
 
@@ -1671,10 +1672,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getMailFolderSpamName() {
+    public String getMailFolderSpamName() {
         return mailFolderSpamName;
     }
 
@@ -1683,10 +1684,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setMailFolderSpamName(JAXBElement<String> value) {
+    public void setMailFolderSpamName(String value) {
         this.mailFolderSpamName = value;
     }
 
@@ -1695,10 +1696,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getMailFolderTrashName() {
+    public String getMailFolderTrashName() {
         return mailFolderTrashName;
     }
 
@@ -1707,10 +1708,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setMailFolderTrashName(JAXBElement<String> value) {
+    public void setMailFolderTrashName(String value) {
         this.mailFolderTrashName = value;
     }
 
@@ -1719,10 +1720,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public JAXBElement<Boolean> getMailenabled() {
+    public Boolean isMailenabled() {
         return mailenabled;
     }
 
@@ -1731,10 +1732,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public void setMailenabled(JAXBElement<Boolean> value) {
+    public void setMailenabled(Boolean value) {
         this.mailenabled = value;
     }
 
@@ -1743,10 +1744,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getManagerName() {
+    public String getManagerName() {
         return managerName;
     }
 
@@ -1755,10 +1756,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setManagerName(JAXBElement<String> value) {
+    public void setManagerName(String value) {
         this.managerName = value;
     }
 
@@ -1767,10 +1768,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getMaritalStatus() {
+    public String getMaritalStatus() {
         return maritalStatus;
     }
 
@@ -1779,10 +1780,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setMaritalStatus(JAXBElement<String> value) {
+    public void setMaritalStatus(String value) {
         this.maritalStatus = value;
     }
 
@@ -1791,10 +1792,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getMiddleName() {
+    public String getMiddleName() {
         return middleName;
     }
 
@@ -1803,10 +1804,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setMiddleName(JAXBElement<String> value) {
+    public void setMiddleName(String value) {
         this.middleName = value;
     }
 
@@ -1815,10 +1816,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getName() {
+    public String getName() {
         return name;
     }
 
@@ -1827,10 +1828,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setName(JAXBElement<String> value) {
+    public void setName(String value) {
         this.name = value;
     }
 
@@ -1839,10 +1840,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getNickname() {
+    public String getNickname() {
         return nickname;
     }
 
@@ -1851,10 +1852,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setNickname(JAXBElement<String> value) {
+    public void setNickname(String value) {
         this.nickname = value;
     }
 
@@ -1863,10 +1864,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getNote() {
+    public String getNote() {
         return note;
     }
 
@@ -1875,10 +1876,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setNote(JAXBElement<String> value) {
+    public void setNote(String value) {
         this.note = value;
     }
 
@@ -1887,10 +1888,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getNumberOfChildren() {
+    public String getNumberOfChildren() {
         return numberOfChildren;
     }
 
@@ -1899,10 +1900,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setNumberOfChildren(JAXBElement<String> value) {
+    public void setNumberOfChildren(String value) {
         this.numberOfChildren = value;
     }
 
@@ -1911,10 +1912,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getNumberOfEmployee() {
+    public String getNumberOfEmployee() {
         return numberOfEmployee;
     }
 
@@ -1923,10 +1924,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setNumberOfEmployee(JAXBElement<String> value) {
+    public void setNumberOfEmployee(String value) {
         this.numberOfEmployee = value;
     }
 
@@ -1935,10 +1936,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getPassword() {
+    public String getPassword() {
         return password;
     }
 
@@ -1947,10 +1948,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setPassword(JAXBElement<String> value) {
+    public void setPassword(String value) {
         this.password = value;
     }
 
@@ -1959,10 +1960,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getPasswordMech() {
+    public String getPasswordMech() {
         return passwordMech;
     }
 
@@ -1971,10 +1972,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setPasswordMech(JAXBElement<String> value) {
+    public void setPasswordMech(String value) {
         this.passwordMech = value;
     }
 
@@ -1983,10 +1984,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public JAXBElement<Boolean> getPasswordExpired() {
+    public Boolean isPasswordExpired() {
         return passwordExpired;
     }
 
@@ -1995,10 +1996,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public void setPasswordExpired(JAXBElement<Boolean> value) {
+    public void setPasswordExpired(Boolean value) {
         this.passwordExpired = value;
     }
 
@@ -2007,10 +2008,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getPosition() {
+    public String getPosition() {
         return position;
     }
 
@@ -2019,10 +2020,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setPosition(JAXBElement<String> value) {
+    public void setPosition(String value) {
         this.position = value;
     }
 
@@ -2031,10 +2032,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getPostalCodeBusiness() {
+    public String getPostalCodeBusiness() {
         return postalCodeBusiness;
     }
 
@@ -2043,10 +2044,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setPostalCodeBusiness(JAXBElement<String> value) {
+    public void setPostalCodeBusiness(String value) {
         this.postalCodeBusiness = value;
     }
 
@@ -2055,10 +2056,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getPostalCodeHome() {
+    public String getPostalCodeHome() {
         return postalCodeHome;
     }
 
@@ -2067,10 +2068,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setPostalCodeHome(JAXBElement<String> value) {
+    public void setPostalCodeHome(String value) {
         this.postalCodeHome = value;
     }
 
@@ -2079,10 +2080,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getPostalCodeOther() {
+    public String getPostalCodeOther() {
         return postalCodeOther;
     }
 
@@ -2091,10 +2092,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setPostalCodeOther(JAXBElement<String> value) {
+    public void setPostalCodeOther(String value) {
         this.postalCodeOther = value;
     }
 
@@ -2103,10 +2104,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getPrimaryEmail() {
+    public String getPrimaryEmail() {
         return primaryEmail;
     }
 
@@ -2115,10 +2116,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setPrimaryEmail(JAXBElement<String> value) {
+    public void setPrimaryEmail(String value) {
         this.primaryEmail = value;
     }
 
@@ -2127,10 +2128,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getProfession() {
+    public String getProfession() {
         return profession;
     }
 
@@ -2139,10 +2140,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setProfession(JAXBElement<String> value) {
+    public void setProfession(String value) {
         this.profession = value;
     }
 
@@ -2151,10 +2152,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getRoomNumber() {
+    public String getRoomNumber() {
         return roomNumber;
     }
 
@@ -2163,10 +2164,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setRoomNumber(JAXBElement<String> value) {
+    public void setRoomNumber(String value) {
         this.roomNumber = value;
     }
 
@@ -2175,10 +2176,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getSalesVolume() {
+    public String getSalesVolume() {
         return salesVolume;
     }
 
@@ -2187,10 +2188,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setSalesVolume(JAXBElement<String> value) {
+    public void setSalesVolume(String value) {
         this.salesVolume = value;
     }
 
@@ -2223,10 +2224,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getSmtpSchema() {
+    public String getSmtpSchema() {
         return smtpSchema;
     }
 
@@ -2235,10 +2236,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setSmtpSchema(JAXBElement<String> value) {
+    public void setSmtpSchema(String value) {
         this.smtpSchema = value;
     }
 
@@ -2247,10 +2248,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getSmtpServer() {
+    public String getSmtpServer() {
         return smtpServer;
     }
 
@@ -2259,10 +2260,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setSmtpServer(JAXBElement<String> value) {
+    public void setSmtpServer(String value) {
         this.smtpServer = value;
     }
 
@@ -2271,10 +2272,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getSmtpServerString() {
+    public String getSmtpServerString() {
         return smtpServerString;
     }
 
@@ -2283,10 +2284,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setSmtpServerString(JAXBElement<String> value) {
+    public void setSmtpServerString(String value) {
         this.smtpServerString = value;
     }
 
@@ -2295,10 +2296,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getSpouseName() {
+    public String getSpouseName() {
         return spouseName;
     }
 
@@ -2307,10 +2308,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setSpouseName(JAXBElement<String> value) {
+    public void setSpouseName(String value) {
         this.spouseName = value;
     }
 
@@ -2319,10 +2320,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getStateBusiness() {
+    public String getStateBusiness() {
         return stateBusiness;
     }
 
@@ -2331,10 +2332,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setStateBusiness(JAXBElement<String> value) {
+    public void setStateBusiness(String value) {
         this.stateBusiness = value;
     }
 
@@ -2343,10 +2344,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getStateHome() {
+    public String getStateHome() {
         return stateHome;
     }
 
@@ -2355,10 +2356,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setStateHome(JAXBElement<String> value) {
+    public void setStateHome(String value) {
         this.stateHome = value;
     }
 
@@ -2367,10 +2368,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getStateOther() {
+    public String getStateOther() {
         return stateOther;
     }
 
@@ -2379,10 +2380,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setStateOther(JAXBElement<String> value) {
+    public void setStateOther(String value) {
         this.stateOther = value;
     }
 
@@ -2391,10 +2392,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getStreetBusiness() {
+    public String getStreetBusiness() {
         return streetBusiness;
     }
 
@@ -2403,10 +2404,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setStreetBusiness(JAXBElement<String> value) {
+    public void setStreetBusiness(String value) {
         this.streetBusiness = value;
     }
 
@@ -2415,10 +2416,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getStreetHome() {
+    public String getStreetHome() {
         return streetHome;
     }
 
@@ -2427,10 +2428,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setStreetHome(JAXBElement<String> value) {
+    public void setStreetHome(String value) {
         this.streetHome = value;
     }
 
@@ -2439,10 +2440,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getStreetOther() {
+    public String getStreetOther() {
         return streetOther;
     }
 
@@ -2451,10 +2452,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setStreetOther(JAXBElement<String> value) {
+    public void setStreetOther(String value) {
         this.streetOther = value;
     }
 
@@ -2463,10 +2464,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getSuffix() {
+    public String getSuffix() {
         return suffix;
     }
 
@@ -2475,10 +2476,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setSuffix(JAXBElement<String> value) {
+    public void setSuffix(String value) {
         this.suffix = value;
     }
 
@@ -2487,10 +2488,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getSurName() {
+    public String getSurName() {
         return surName;
     }
 
@@ -2499,10 +2500,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setSurName(JAXBElement<String> value) {
+    public void setSurName(String value) {
         this.surName = value;
     }
 
@@ -2511,10 +2512,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getTaxId() {
+    public String getTaxId() {
         return taxId;
     }
 
@@ -2523,10 +2524,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setTaxId(JAXBElement<String> value) {
+    public void setTaxId(String value) {
         this.taxId = value;
     }
 
@@ -2535,10 +2536,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getTelephoneAssistant() {
+    public String getTelephoneAssistant() {
         return telephoneAssistant;
     }
 
@@ -2547,10 +2548,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setTelephoneAssistant(JAXBElement<String> value) {
+    public void setTelephoneAssistant(String value) {
         this.telephoneAssistant = value;
     }
 
@@ -2559,10 +2560,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getTelephoneBusiness1() {
+    public String getTelephoneBusiness1() {
         return telephoneBusiness1;
     }
 
@@ -2571,10 +2572,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setTelephoneBusiness1(JAXBElement<String> value) {
+    public void setTelephoneBusiness1(String value) {
         this.telephoneBusiness1 = value;
     }
 
@@ -2583,10 +2584,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getTelephoneBusiness2() {
+    public String getTelephoneBusiness2() {
         return telephoneBusiness2;
     }
 
@@ -2595,10 +2596,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setTelephoneBusiness2(JAXBElement<String> value) {
+    public void setTelephoneBusiness2(String value) {
         this.telephoneBusiness2 = value;
     }
 
@@ -2607,10 +2608,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getTelephoneCallback() {
+    public String getTelephoneCallback() {
         return telephoneCallback;
     }
 
@@ -2619,10 +2620,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setTelephoneCallback(JAXBElement<String> value) {
+    public void setTelephoneCallback(String value) {
         this.telephoneCallback = value;
     }
 
@@ -2631,10 +2632,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getTelephoneCar() {
+    public String getTelephoneCar() {
         return telephoneCar;
     }
 
@@ -2643,10 +2644,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setTelephoneCar(JAXBElement<String> value) {
+    public void setTelephoneCar(String value) {
         this.telephoneCar = value;
     }
 
@@ -2655,10 +2656,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getTelephoneCompany() {
+    public String getTelephoneCompany() {
         return telephoneCompany;
     }
 
@@ -2667,10 +2668,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setTelephoneCompany(JAXBElement<String> value) {
+    public void setTelephoneCompany(String value) {
         this.telephoneCompany = value;
     }
 
@@ -2679,10 +2680,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getTelephoneHome1() {
+    public String getTelephoneHome1() {
         return telephoneHome1;
     }
 
@@ -2691,10 +2692,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setTelephoneHome1(JAXBElement<String> value) {
+    public void setTelephoneHome1(String value) {
         this.telephoneHome1 = value;
     }
 
@@ -2703,10 +2704,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getTelephoneHome2() {
+    public String getTelephoneHome2() {
         return telephoneHome2;
     }
 
@@ -2715,10 +2716,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setTelephoneHome2(JAXBElement<String> value) {
+    public void setTelephoneHome2(String value) {
         this.telephoneHome2 = value;
     }
 
@@ -2727,10 +2728,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getTelephoneIp() {
+    public String getTelephoneIp() {
         return telephoneIp;
     }
 
@@ -2739,10 +2740,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setTelephoneIp(JAXBElement<String> value) {
+    public void setTelephoneIp(String value) {
         this.telephoneIp = value;
     }
 
@@ -2751,10 +2752,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getTelephoneIsdn() {
+    public String getTelephoneIsdn() {
         return telephoneIsdn;
     }
 
@@ -2763,10 +2764,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setTelephoneIsdn(JAXBElement<String> value) {
+    public void setTelephoneIsdn(String value) {
         this.telephoneIsdn = value;
     }
 
@@ -2775,10 +2776,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getTelephoneOther() {
+    public String getTelephoneOther() {
         return telephoneOther;
     }
 
@@ -2787,10 +2788,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setTelephoneOther(JAXBElement<String> value) {
+    public void setTelephoneOther(String value) {
         this.telephoneOther = value;
     }
 
@@ -2799,10 +2800,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getTelephonePager() {
+    public String getTelephonePager() {
         return telephonePager;
     }
 
@@ -2811,10 +2812,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setTelephonePager(JAXBElement<String> value) {
+    public void setTelephonePager(String value) {
         this.telephonePager = value;
     }
 
@@ -2823,10 +2824,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getTelephonePrimary() {
+    public String getTelephonePrimary() {
         return telephonePrimary;
     }
 
@@ -2835,10 +2836,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setTelephonePrimary(JAXBElement<String> value) {
+    public void setTelephonePrimary(String value) {
         this.telephonePrimary = value;
     }
 
@@ -2847,10 +2848,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getTelephoneRadio() {
+    public String getTelephoneRadio() {
         return telephoneRadio;
     }
 
@@ -2859,10 +2860,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setTelephoneRadio(JAXBElement<String> value) {
+    public void setTelephoneRadio(String value) {
         this.telephoneRadio = value;
     }
 
@@ -2871,10 +2872,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getTelephoneTelex() {
+    public String getTelephoneTelex() {
         return telephoneTelex;
     }
 
@@ -2883,10 +2884,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setTelephoneTelex(JAXBElement<String> value) {
+    public void setTelephoneTelex(String value) {
         this.telephoneTelex = value;
     }
 
@@ -2895,10 +2896,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getTelephoneTtytdd() {
+    public String getTelephoneTtytdd() {
         return telephoneTtytdd;
     }
 
@@ -2907,10 +2908,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setTelephoneTtytdd(JAXBElement<String> value) {
+    public void setTelephoneTtytdd(String value) {
         this.telephoneTtytdd = value;
     }
 
@@ -2919,10 +2920,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getTimezone() {
+    public String getTimezone() {
         return timezone;
     }
 
@@ -2931,10 +2932,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setTimezone(JAXBElement<String> value) {
+    public void setTimezone(String value) {
         this.timezone = value;
     }
 
@@ -2943,10 +2944,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getTitle() {
+    public String getTitle() {
         return title;
     }
 
@@ -2955,10 +2956,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setTitle(JAXBElement<String> value) {
+    public void setTitle(String value) {
         this.title = value;
     }
 
@@ -2967,10 +2968,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Integer }{@code >}
+     *     {@link Integer }
      *     
      */
-    public JAXBElement<Integer> getUploadFileSizeLimit() {
+    public Integer getUploadFileSizeLimit() {
         return uploadFileSizeLimit;
     }
 
@@ -2979,10 +2980,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Integer }{@code >}
+     *     {@link Integer }
      *     
      */
-    public void setUploadFileSizeLimit(JAXBElement<Integer> value) {
+    public void setUploadFileSizeLimit(Integer value) {
         this.uploadFileSizeLimit = value;
     }
 
@@ -2991,10 +2992,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Integer }{@code >}
+     *     {@link Integer }
      *     
      */
-    public JAXBElement<Integer> getUploadFileSizeLimitPerFile() {
+    public Integer getUploadFileSizeLimitPerFile() {
         return uploadFileSizeLimitPerFile;
     }
 
@@ -3003,10 +3004,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Integer }{@code >}
+     *     {@link Integer }
      *     
      */
-    public void setUploadFileSizeLimitPerFile(JAXBElement<Integer> value) {
+    public void setUploadFileSizeLimitPerFile(Integer value) {
         this.uploadFileSizeLimitPerFile = value;
     }
 
@@ -3015,10 +3016,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getUrl() {
+    public String getUrl() {
         return url;
     }
 
@@ -3027,10 +3028,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setUrl(JAXBElement<String> value) {
+    public void setUrl(String value) {
         this.url = value;
     }
 
@@ -3039,10 +3040,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link SOAPStringMapMap }{@code >}
+     *     {@link SOAPStringMapMap }
      *     
      */
-    public JAXBElement<SOAPStringMapMap> getUserAttributes() {
+    public SOAPStringMapMap getUserAttributes() {
         return userAttributes;
     }
 
@@ -3051,10 +3052,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link SOAPStringMapMap }{@code >}
+     *     {@link SOAPStringMapMap }
      *     
      */
-    public void setUserAttributes(JAXBElement<SOAPStringMapMap> value) {
+    public void setUserAttributes(SOAPStringMapMap value) {
         this.userAttributes = value;
     }
 
@@ -3063,10 +3064,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getUserfield01() {
+    public String getUserfield01() {
         return userfield01;
     }
 
@@ -3075,10 +3076,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setUserfield01(JAXBElement<String> value) {
+    public void setUserfield01(String value) {
         this.userfield01 = value;
     }
 
@@ -3087,10 +3088,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getUserfield02() {
+    public String getUserfield02() {
         return userfield02;
     }
 
@@ -3099,10 +3100,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setUserfield02(JAXBElement<String> value) {
+    public void setUserfield02(String value) {
         this.userfield02 = value;
     }
 
@@ -3111,10 +3112,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getUserfield03() {
+    public String getUserfield03() {
         return userfield03;
     }
 
@@ -3123,10 +3124,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setUserfield03(JAXBElement<String> value) {
+    public void setUserfield03(String value) {
         this.userfield03 = value;
     }
 
@@ -3135,10 +3136,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getUserfield04() {
+    public String getUserfield04() {
         return userfield04;
     }
 
@@ -3147,10 +3148,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setUserfield04(JAXBElement<String> value) {
+    public void setUserfield04(String value) {
         this.userfield04 = value;
     }
 
@@ -3159,10 +3160,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getUserfield05() {
+    public String getUserfield05() {
         return userfield05;
     }
 
@@ -3171,10 +3172,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setUserfield05(JAXBElement<String> value) {
+    public void setUserfield05(String value) {
         this.userfield05 = value;
     }
 
@@ -3183,10 +3184,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getUserfield06() {
+    public String getUserfield06() {
         return userfield06;
     }
 
@@ -3195,10 +3196,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setUserfield06(JAXBElement<String> value) {
+    public void setUserfield06(String value) {
         this.userfield06 = value;
     }
 
@@ -3207,10 +3208,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getUserfield07() {
+    public String getUserfield07() {
         return userfield07;
     }
 
@@ -3219,10 +3220,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setUserfield07(JAXBElement<String> value) {
+    public void setUserfield07(String value) {
         this.userfield07 = value;
     }
 
@@ -3231,10 +3232,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getUserfield08() {
+    public String getUserfield08() {
         return userfield08;
     }
 
@@ -3243,10 +3244,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setUserfield08(JAXBElement<String> value) {
+    public void setUserfield08(String value) {
         this.userfield08 = value;
     }
 
@@ -3255,10 +3256,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getUserfield09() {
+    public String getUserfield09() {
         return userfield09;
     }
 
@@ -3267,10 +3268,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setUserfield09(JAXBElement<String> value) {
+    public void setUserfield09(String value) {
         this.userfield09 = value;
     }
 
@@ -3279,10 +3280,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getUserfield10() {
+    public String getUserfield10() {
         return userfield10;
     }
 
@@ -3291,10 +3292,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setUserfield10(JAXBElement<String> value) {
+    public void setUserfield10(String value) {
         this.userfield10 = value;
     }
 
@@ -3303,10 +3304,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getUserfield11() {
+    public String getUserfield11() {
         return userfield11;
     }
 
@@ -3315,10 +3316,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setUserfield11(JAXBElement<String> value) {
+    public void setUserfield11(String value) {
         this.userfield11 = value;
     }
 
@@ -3327,10 +3328,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getUserfield12() {
+    public String getUserfield12() {
         return userfield12;
     }
 
@@ -3339,10 +3340,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setUserfield12(JAXBElement<String> value) {
+    public void setUserfield12(String value) {
         this.userfield12 = value;
     }
 
@@ -3351,10 +3352,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getUserfield13() {
+    public String getUserfield13() {
         return userfield13;
     }
 
@@ -3363,10 +3364,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setUserfield13(JAXBElement<String> value) {
+    public void setUserfield13(String value) {
         this.userfield13 = value;
     }
 
@@ -3375,10 +3376,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getUserfield14() {
+    public String getUserfield14() {
         return userfield14;
     }
 
@@ -3387,10 +3388,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setUserfield14(JAXBElement<String> value) {
+    public void setUserfield14(String value) {
         this.userfield14 = value;
     }
 
@@ -3399,10 +3400,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getUserfield15() {
+    public String getUserfield15() {
         return userfield15;
     }
 
@@ -3411,10 +3412,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setUserfield15(JAXBElement<String> value) {
+    public void setUserfield15(String value) {
         this.userfield15 = value;
     }
 
@@ -3423,10 +3424,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getUserfield16() {
+    public String getUserfield16() {
         return userfield16;
     }
 
@@ -3435,10 +3436,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setUserfield16(JAXBElement<String> value) {
+    public void setUserfield16(String value) {
         this.userfield16 = value;
     }
 
@@ -3447,10 +3448,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getUserfield17() {
+    public String getUserfield17() {
         return userfield17;
     }
 
@@ -3459,10 +3460,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setUserfield17(JAXBElement<String> value) {
+    public void setUserfield17(String value) {
         this.userfield17 = value;
     }
 
@@ -3471,10 +3472,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getUserfield18() {
+    public String getUserfield18() {
         return userfield18;
     }
 
@@ -3483,10 +3484,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setUserfield18(JAXBElement<String> value) {
+    public void setUserfield18(String value) {
         this.userfield18 = value;
     }
 
@@ -3495,10 +3496,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getUserfield19() {
+    public String getUserfield19() {
         return userfield19;
     }
 
@@ -3507,10 +3508,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setUserfield19(JAXBElement<String> value) {
+    public void setUserfield19(String value) {
         this.userfield19 = value;
     }
 
@@ -3519,10 +3520,10 @@ public class User {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getUserfield20() {
+    public String getUserfield20() {
         return userfield20;
     }
 
@@ -3531,10 +3532,10 @@ public class User {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setUserfield20(JAXBElement<String> value) {
+    public void setUserfield20(String value) {
         this.userfield20 = value;
     }
 
