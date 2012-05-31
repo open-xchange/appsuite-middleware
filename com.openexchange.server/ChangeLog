@@ -1,3 +1,7 @@
+* 2012-05-31 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22228: Guess Content-Type by file name if broken within client request
+
 * 2012-05-31 - martin.herfurth@open-xchange.com
 
  - Fix for bug 22109: Use default sender address for IMip Mails.

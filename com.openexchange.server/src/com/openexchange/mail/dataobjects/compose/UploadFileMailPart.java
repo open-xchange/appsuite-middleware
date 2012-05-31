@@ -100,7 +100,12 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
         super();
         this.uploadFile = uploadFile.getTmpFile();
         final String preparedFileName = uploadFile.getPreparedFileName();
-        setContentType(prepareContentType(uploadFile.getContentType(), preparedFileName));
+        try {
+            setContentType(prepareContentType(uploadFile.getContentType(), preparedFileName));
+        } catch (final OXException e) {
+            // Retry with guess by file name
+            setContentType(MimeType2ExtMap.getContentType(preparedFileName));
+        }
         {
             final ContentType contentType = getContentType();
             if (contentType.startsWith("text/") && "GB18030".equalsIgnoreCase(contentType.getCharsetParameter())) {
