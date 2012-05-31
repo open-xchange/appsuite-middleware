@@ -190,7 +190,7 @@ public final class FacebookOAuthAccess {
     private void checkForErrors(final JSONObject object) throws OXException, JSONException{
         if (object.has("error")) {
             final JSONObject error = object.getJSONObject("error");
-            if ("OXException".equals(error.opt("type"))) {
+            if ("OAuthException".equals(error.opt("type"))) {
                 final OXException e = new OXException(OAuthExceptionCodes.TOKEN_EXPIRED.create(oauthAccount.getDisplayName()));
                 LOG.error(e.getErrorCode() + " exceptionId=" + e.getExceptionId() + " JSON error object:\n" + error.toString(2));
                 throw e;
