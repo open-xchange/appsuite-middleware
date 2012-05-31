@@ -16,3 +16,4 @@ Import-Package: com.openexchange.exception,
  org.osgi.framework,
  org.osgi.util.tracker
 Require-Bundle: com.openexchange.admin
+Bundle-Activator: com.openexchange.admin.soap.user.osgi.SoapUserActivator
