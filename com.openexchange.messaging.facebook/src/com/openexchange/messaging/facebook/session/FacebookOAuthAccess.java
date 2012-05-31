@@ -50,6 +50,8 @@
 package com.openexchange.messaging.facebook.session;
 
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -159,7 +161,7 @@ public final class FacebookOAuthAccess {
         final OAuthService oAuthService = FacebookMessagingServiceRegistry.getServiceRegistry().getService(OAuthService.class);
         try {
             oauthAccount = oAuthService.getAccount(oauthAccountId, session, user, contextId);
-            facebookAccessToken = new Token(oauthAccount.getToken(), oauthAccount.getSecret());
+            facebookAccessToken = new Token(checkToken(oauthAccount.getToken()), oauthAccount.getSecret());
             /*
              * Generate FB service
              */
@@ -185,6 +187,21 @@ public final class FacebookOAuthAccess {
         } catch (final JSONException e) {
             throw FacebookMessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private static final Pattern P_EXPIRES = Pattern.compile("&expires(=[0-9]+)?$");
+
+    private static String checkToken(final String accessToken) {
+        if (accessToken.indexOf("&expires") < 0) {
+            return accessToken;
+        }
+        final Matcher m = P_EXPIRES.matcher(accessToken);
+        final StringBuffer sb = new StringBuffer(accessToken.length());
+        if (m.find()) {
+            m.appendReplacement(sb, "");
+        }
+        m.appendTail(sb);
+        return sb.toString();
     }
 
     private void checkForErrors(final JSONObject object) throws OXException, JSONException{
