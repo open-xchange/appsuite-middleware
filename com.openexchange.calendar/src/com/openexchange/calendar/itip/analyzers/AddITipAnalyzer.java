@@ -99,9 +99,14 @@ public class AddITipAnalyzer extends AbstractITipAnalyzer {
         List<Appointment> exceptions = null;
         boolean findActions = true;
         for (CalendarDataObject exception : message.exceptions()) {
-        	exception = exception.clone();
-        	ensureParticipant(exception, session);
-        	ITipChange change = new ITipChange();
+            exception = exception.clone();
+            int owner = session.getUserId();
+            if (message.getOwner() > 0 && message.getOwner() != session.getUserId()) {
+                owner = message.getOwner();
+            }
+
+            ensureParticipant(exception, session, owner);
+            ITipChange change = new ITipChange();
             change.setType(Type.CREATE);
             change.setException(true);
             if (master == null) {

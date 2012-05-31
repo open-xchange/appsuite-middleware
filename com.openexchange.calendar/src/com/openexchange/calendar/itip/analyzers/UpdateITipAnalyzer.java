@@ -68,10 +68,14 @@ import com.openexchange.data.conversion.ical.itip.ITipMethod;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 /**
  * {@link UpdateITipAnalyzer}
@@ -139,11 +143,30 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
             }
             change.setType(ITipChange.Type.CREATE);
         }
+        int owner = session.getUserId();
+        if (message.getOwner() > 0 && message.getOwner() != session.getUserId()) {
+            owner = message.getOwner();
+        }
 
         if (differ && message.getDataObject() != null) {
-        	final CalendarDataObject dao = message.getDataObject().clone();
-        	ensureParticipant(dao, session);
-        	change.setNewAppointment(dao);
+            CalendarDataObject dataObject = message.getDataObject().clone();
+            ensureParticipant(dataObject, session, owner);
+
+            if (owner != session.getUserId()) {
+                OXFolderAccess oxfs = new OXFolderAccess(ctx);
+                FolderObject defaultFolder = oxfs.getDefaultFolder(owner, FolderObject.CALENDAR);
+                EffectivePermission permission = oxfs.getFolderPermission(
+                    defaultFolder.getObjectID(),
+                    session.getUserId(),
+                    UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx));
+                if (permission.canCreateObjects()) {
+                    dataObject.setParentFolderID(defaultFolder.getObjectID());
+                } else {
+                    analysis.addAnnotation(new ITipAnnotation(Messages.SHARED_FOLDER, locale));
+                    return analysis;
+                }
+            }
+        	change.setNewAppointment(dataObject);
 
             change.setConflicts(util.getConflicts(message.getDataObject(), session));
 
@@ -156,7 +179,7 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
 
         for (CalendarDataObject exception : message.exceptions()) {
         	exception = exception.clone();
-        	ensureParticipant(exception, session);
+        	ensureParticipant(exception, session, owner);
 
             final Appointment matchingException = findAndRemoveMatchingException(exception, exceptions);
             change = new ITipChange();

@@ -107,6 +107,9 @@ public abstract class AbstrakterDingeMacher implements ITipDingeMacher {
     }
     
     protected void ensureFolderId(final Appointment appointment, final Session session) throws OXException {
+        if (appointment.containsParentFolderID()) {
+            return;
+        }
         final int privateCalendarFolderId = util.getPrivateCalendarFolderId(session);
         appointment.setParentFolderID(privateCalendarFolderId);
         

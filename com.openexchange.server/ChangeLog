@@ -2,6 +2,7 @@
 
  - Fix for bug 22109: Use default sender address for IMip Mails.
  - Fix for bug 22098: Added resource tag to mails for resource invitations.
+ - Fix for bug 22124: Invitations in shared IMAP folders.
 
 * 2012-05-25 - thorben.betten@open-xchange.com
 

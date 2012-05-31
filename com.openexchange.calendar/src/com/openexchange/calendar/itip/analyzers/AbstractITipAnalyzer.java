@@ -532,7 +532,7 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 		return false;
 	}
 	
-	protected void ensureParticipant(final CalendarDataObject appointment, final Session session) {
+	protected void ensureParticipant(final CalendarDataObject appointment, final Session session, int owner) {
         final int confirm = CalendarDataObject.NONE;
         final Participant[] participants = appointment.getParticipants();
         boolean found = false;
@@ -540,7 +540,7 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
             for (final Participant participant : participants) {
                 if (participant instanceof UserParticipant) {
                     final UserParticipant up = (UserParticipant) participant;
-                    if (up.getIdentifier() == session.getUserId()) {
+                    if (up.getIdentifier() == owner) {
                         found = true;
                     }
                 }
@@ -548,7 +548,7 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
         }
 
         if (!found) {
-            final UserParticipant up = new UserParticipant(session.getUserId());
+            final UserParticipant up = new UserParticipant(owner);
             if (confirm != -1) {
                 up.setConfirm(confirm);
             }
@@ -562,14 +562,14 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
         final UserParticipant[] users = appointment.getUsers();
         if (users != null) {
             for (final UserParticipant userParticipant : users) {
-                if (userParticipant.getIdentifier() == session.getUserId()) {
+                if (userParticipant.getIdentifier() == owner) {
                     found = true;
                 }
             }
         }
         
         if (!found) {
-            final UserParticipant up = new UserParticipant(session.getUserId());
+            final UserParticipant up = new UserParticipant(owner);
             if (confirm != -1) {
                 up.setConfirm(confirm);
             }

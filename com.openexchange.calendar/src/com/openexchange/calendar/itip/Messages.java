@@ -77,6 +77,7 @@ public class Messages implements LocalizableStrings {
     public static final String REFRESH_FOR_UNKNOWN = "An attendee wants to be brought up to date about an appointment that does not seem to exist. It was probably deleted at some point. It is best to just ignore this message.";
     public static final String ALREADY_UPDATED = "This message contains appointment updates that were already accepted by another user. You do not need to do anything with this message.";
     public static final String INTERNAL_MAIL = "This message comes from an internal user. You do not need to do anything with this message.";
+    public static final String SHARED_FOLDER = "This invitation was sent to someone else, not you. This appointment would have to be created in a user's private folder to which you do not have write permissions.";
     
     public static final String ATTACHMENTS_CHANGED = "The attachments to the appointment have changed";
     
