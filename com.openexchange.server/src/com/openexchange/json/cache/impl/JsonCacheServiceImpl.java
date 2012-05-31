@@ -211,7 +211,7 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
     }
 
     @Override
-    public boolean setIfDiffers(final String id, final JSONValue jsonValue, final int userId, final int contextId) throws OXException {
+    public boolean setIfDifferent(final String id, final JSONValue jsonValue, final int userId, final int contextId) throws OXException {
         if (null == jsonValue) {
             return false;
         }
