@@ -51,6 +51,7 @@ package com.openexchange.calendar.itip.sender;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.sql.SQLException;
 import java.util.Locale;
 import java.util.regex.Pattern;
 import javax.activation.DataHandler;
@@ -81,7 +82,11 @@ import com.openexchange.groupware.container.mail.MailObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.notify.NotificationConfig;
+import com.openexchange.groupware.notify.NotificationConfig.NotificationProperty;
 import com.openexchange.groupware.notify.State;
+import com.openexchange.groupware.userconfiguration.RdbUserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.html.HtmlService;
@@ -91,7 +96,11 @@ import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
+import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.UserService;
 
 /**
@@ -138,7 +147,7 @@ public class DefaultMailSenderService implements MailSenderService {
         MailObject message = new MailObject(session, app.getObjectID(), mail.getRecipient().getFolderId(), Types.APPOINTMENT, type.toString());
         message.setInternalRecipient(!mail.getRecipient().isExternal() && !mail.getRecipient().isResource());
 
-        message.setFromAddr(getAddress(mail.getSender()));
+        message.setFromAddr(getSenderAddress(mail.getSender(), session));
         message.addToAddr(getAddress(mail.getRecipient()));
         message.setSubject(mail.getSubject());
         message.setUid(app.getUid());
@@ -157,6 +166,46 @@ public class DefaultMailSenderService implements MailSenderService {
         }
 
     }
+    
+    /**
+     * @param message
+     * @param sender
+     */
+    private String getSenderAddress(NotificationParticipant sender, Session session) {
+        ServerSession serverSession = null;
+        try {
+            serverSession = ServerSessionAdapter.valueOf(session);
+        } catch (OXException e) {
+            LOG.error("Unable to retrieve ServerSession for UserSettings", e);
+            return getAddress(sender);
+        }
+
+        String fromAddr;
+        final String senderSource = NotificationConfig.getProperty(NotificationProperty.FROM_SOURCE, "primaryMail");
+        if (senderSource.equals("defaultSenderAddress")) {
+            try {
+                fromAddr = getUserSettingMail(session.getUserId(), serverSession.getContext()).getSendAddr();
+            } catch (final OXException e) {
+                LOG.error(e.getMessage(), e);
+                fromAddr = UserStorage.getStorageUser(session.getUserId(), serverSession.getContext()).getMail();
+            }
+        } else {
+            fromAddr = UserStorage.getStorageUser(session.getUserId(), serverSession.getContext()).getMail();
+        }
+
+        sender.setEmail(fromAddr);
+
+        return getAddress(sender);
+    }
+
+    private UserConfiguration getUserConfiguration(final int id, final int[] groups, final Context context) throws SQLException, OXException {
+        return RdbUserConfigurationStorage.loadUserConfiguration(id, groups, context);
+    }
+
+    private UserSettingMail getUserSettingMail(final int id, final Context context) throws OXException {
+        return UserSettingMailStorage.getInstance().loadUserSettingMail(id, context);
+    }
+    
 
     private void addBody(NotificationMail mail, MailObject message, Session session) throws MessagingException, OXException, UnsupportedEncodingException {
         NotificationConfiguration recipientConfig = mail.getRecipient().getConfiguration();

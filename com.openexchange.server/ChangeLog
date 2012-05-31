@@ -1,3 +1,7 @@
+* 2012-05-31 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 22109: Use default sender address for IMip Mails.
+
 * 2012-05-25 - thorben.betten@open-xchange.com
 
  - Fix for bug 22192: Proper decoding of MIME encoded Content-Disposition header
