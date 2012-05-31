@@ -2,10 +2,9 @@
 package java.rmi.xsd;
 
 import java.io.xsd.IOException;
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElementRef;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 
@@ -36,18 +35,18 @@ public class RemoteException
     extends IOException
 {
 
-    @XmlElementRef(name = "message", namespace = "http://rmi.java/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> message;
+    @XmlElement(nillable = true)
+    protected String message;
 
     /**
      * Ruft den Wert der message-Eigenschaft ab.
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getMessage() {
+    public String getMessage() {
         return message;
     }
 
@@ -56,10 +55,10 @@ public class RemoteException
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setMessage(JAXBElement<String> value) {
+    public void setMessage(String value) {
         this.message = value;
     }
 

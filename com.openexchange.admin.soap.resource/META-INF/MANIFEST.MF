@@ -5,3 +5,15 @@ Bundle-SymbolicName: com.openexchange.admin.soap.resource
 Bundle-Version: 6.21.0.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.exception,
+ com.openexchange.log,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ org.apache.commons.logging,
+ org.apache.xerces.jaxp,
+ org.apache.xerces.jaxp.datatype,
+ org.apache.xerces.jaxp.validation,
+ org.osgi.framework,
+ org.osgi.util.tracker
+Require-Bundle: com.openexchange.admin
+Bundle-Activator: com.openexchange.admin.soap.resource.osgi.SoapResourceActivator

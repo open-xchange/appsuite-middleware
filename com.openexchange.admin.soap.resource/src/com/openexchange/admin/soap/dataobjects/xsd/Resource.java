@@ -1,10 +1,9 @@
 
 package com.openexchange.admin.soap.dataobjects.xsd;
 
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElementRef;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 
@@ -43,28 +42,28 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class Resource {
 
-    @XmlElementRef(name = "available", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Boolean> available;
-    @XmlElementRef(name = "description", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> description;
-    @XmlElementRef(name = "displayname", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> displayname;
-    @XmlElementRef(name = "email", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> email;
-    @XmlElementRef(name = "id", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<Integer> id;
-    @XmlElementRef(name = "name", namespace = "http://dataobjects.soap.admin.openexchange.com/xsd", type = JAXBElement.class)
-    protected JAXBElement<String> name;
+    @XmlElement(nillable = true)
+    protected Boolean available;
+    @XmlElement(nillable = true)
+    protected String description;
+    @XmlElement(nillable = true)
+    protected String displayname;
+    @XmlElement(nillable = true)
+    protected String email;
+    @XmlElement(nillable = true)
+    protected Integer id;
+    @XmlElement(nillable = true)
+    protected String name;
 
     /**
      * Ruft den Wert der available-Eigenschaft ab.
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public JAXBElement<Boolean> getAvailable() {
+    public Boolean isAvailable() {
         return available;
     }
 
@@ -73,10 +72,10 @@ public class Resource {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Boolean }{@code >}
+     *     {@link Boolean }
      *     
      */
-    public void setAvailable(JAXBElement<Boolean> value) {
+    public void setAvailable(Boolean value) {
         this.available = value;
     }
 
@@ -85,10 +84,10 @@ public class Resource {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getDescription() {
+    public String getDescription() {
         return description;
     }
 
@@ -97,10 +96,10 @@ public class Resource {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setDescription(JAXBElement<String> value) {
+    public void setDescription(String value) {
         this.description = value;
     }
 
@@ -109,10 +108,10 @@ public class Resource {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getDisplayname() {
+    public String getDisplayname() {
         return displayname;
     }
 
@@ -121,10 +120,10 @@ public class Resource {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setDisplayname(JAXBElement<String> value) {
+    public void setDisplayname(String value) {
         this.displayname = value;
     }
 
@@ -133,10 +132,10 @@ public class Resource {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getEmail() {
+    public String getEmail() {
         return email;
     }
 
@@ -145,10 +144,10 @@ public class Resource {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setEmail(JAXBElement<String> value) {
+    public void setEmail(String value) {
         this.email = value;
     }
 
@@ -157,10 +156,10 @@ public class Resource {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link Integer }{@code >}
+     *     {@link Integer }
      *     
      */
-    public JAXBElement<Integer> getId() {
+    public Integer getId() {
         return id;
     }
 
@@ -169,10 +168,10 @@ public class Resource {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link Integer }{@code >}
+     *     {@link Integer }
      *     
      */
-    public void setId(JAXBElement<Integer> value) {
+    public void setId(Integer value) {
         this.id = value;
     }
 
@@ -181,10 +180,10 @@ public class Resource {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getName() {
+    public String getName() {
         return name;
     }
 
@@ -193,10 +192,10 @@ public class Resource {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setName(JAXBElement<String> value) {
+    public void setName(String value) {
         this.name = value;
     }
 

@@ -1,10 +1,7 @@
 
 package com.openexchange.admin.rmi.dataobjects.xsd;
 
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.annotation.XmlElementDecl;
 import javax.xml.bind.annotation.XmlRegistry;
-import javax.xml.namespace.QName;
 
 
 /**
@@ -24,8 +21,6 @@ import javax.xml.namespace.QName;
 @XmlRegistry
 public class ObjectFactory {
 
-    private final static QName _CredentialsLogin_QNAME = new QName("http://dataobjects.rmi.admin.openexchange.com/xsd", "login");
-    private final static QName _CredentialsPassword_QNAME = new QName("http://dataobjects.rmi.admin.openexchange.com/xsd", "password");
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: com.openexchange.admin.rmi.dataobjects.xsd
@@ -40,24 +35,6 @@ public class ObjectFactory {
      */
     public Credentials createCredentials() {
         return new Credentials();
-    }
-
-    /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link String }{@code >}}
-     * 
-     */
-    @XmlElementDecl(namespace = "http://dataobjects.rmi.admin.openexchange.com/xsd", name = "login", scope = Credentials.class)
-    public JAXBElement<String> createCredentialsLogin(String value) {
-        return new JAXBElement<String>(_CredentialsLogin_QNAME, String.class, Credentials.class, value);
-    }
-
-    /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link String }{@code >}}
-     * 
-     */
-    @XmlElementDecl(namespace = "http://dataobjects.rmi.admin.openexchange.com/xsd", name = "password", scope = Credentials.class)
-    public JAXBElement<String> createCredentialsPassword(String value) {
-        return new JAXBElement<String>(_CredentialsPassword_QNAME, String.class, Credentials.class, value);
     }
 
 }

@@ -1,10 +1,7 @@
 
 package java.rmi.xsd;
 
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.annotation.XmlElementDecl;
 import javax.xml.bind.annotation.XmlRegistry;
-import javax.xml.namespace.QName;
 
 
 /**
@@ -24,7 +21,6 @@ import javax.xml.namespace.QName;
 @XmlRegistry
 public class ObjectFactory {
 
-    private final static QName _RemoteExceptionMessage_QNAME = new QName("http://rmi.java/xsd", "message");
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: java.rmi.xsd
@@ -39,15 +35,6 @@ public class ObjectFactory {
      */
     public RemoteException createRemoteException() {
         return new RemoteException();
-    }
-
-    /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link String }{@code >}}
-     * 
-     */
-    @XmlElementDecl(namespace = "http://rmi.java/xsd", name = "message", scope = RemoteException.class)
-    public JAXBElement<String> createRemoteExceptionMessage(String value) {
-        return new JAXBElement<String>(_RemoteExceptionMessage_QNAME, String.class, RemoteException.class, value);
     }
 
 }
