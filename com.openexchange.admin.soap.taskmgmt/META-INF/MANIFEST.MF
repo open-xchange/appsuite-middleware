@@ -5,7 +5,6 @@ Bundle-SymbolicName: com.openexchange.admin.soap.taskmgmt
 Bundle-Version: 6.21.0.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Eclipse-RegisterBuddy: com.openexchange.soap.cxf
 Import-Package: com.openexchange.exception,
  com.openexchange.log,
  com.openexchange.osgi,
