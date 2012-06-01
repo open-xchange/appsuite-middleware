@@ -86,6 +86,7 @@ public final class SoapResourceActivator extends HousekeepingActivator {
             @Override
             public void removedService(final ServiceReference<Remote> reference, final Remote service) {
                 if (null != service) {
+                    OXResourceServicePortTypeImpl.RMI_REFERENCE.set(null);
                     context.ungetService(reference);
                 }
             }
