@@ -53,7 +53,9 @@ import static com.openexchange.ajax.requesthandler.Dispatcher.PREFIX;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.ServletException;
@@ -67,10 +69,15 @@ import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.impl.ContextImpl;
+import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.log.LogFactory;
+import com.openexchange.session.Session;
+import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link DispatcherServlet} - The main dispatcher servlet which delegates request to dispatcher framework.
@@ -84,6 +91,8 @@ public class DispatcherServlet extends SessionServlet {
     private static final long serialVersionUID = -8060034833311074781L;
 
     private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(DispatcherServlet.class));
+    
+    private static final Session NO_SESSION = new SessionObject("");
 
     /*-
      * /!\ These must be static for our servlet container to work properly. /!\
@@ -215,7 +224,12 @@ public class DispatcherServlet extends SessionServlet {
         final Dispatcher dispatcher = DISPATCHER.get();
         try {
             final AJAXRequestDataTools requestDataTools = getAjaxRequestDataTools();
-            final ServerSession session = getSessionObject(httpRequest, dispatcher.mayUseFallbackSession(requestDataTools.getModule(PREFIX.get(), httpRequest), requestDataTools.getAction(httpRequest)));
+            String module = requestDataTools.getModule(PREFIX.get(), httpRequest);
+			String action2 = requestDataTools.getAction(httpRequest);
+			ServerSession session = getSessionObject(httpRequest, dispatcher.mayUseFallbackSession(module, action2));
+            if (session == null && dispatcher.mayOmitSession(module, action2)) {
+            	session = fakeSession();
+            }
             if (null == session) {
                 throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_SESSION);
             }
@@ -260,6 +274,12 @@ public class DispatcherServlet extends SessionServlet {
     }
 
   
+
+	private ServerSession fakeSession() {
+		UserImpl user = new UserImpl();
+		user.setAttributes(new HashMap<String, Set<String>>());
+		return new ServerSessionAdapter(NO_SESSION, new ContextImpl(-1), user);
+	}
 
 	/**
      * Sends a proper response to requesting client after request has been orderly dispatched.
