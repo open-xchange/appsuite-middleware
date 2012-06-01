@@ -6,6 +6,7 @@ import com.openexchange.log.LogFactory;
 import com.openexchange.calendar.itip.AppointmentNotificationPoolService;
 import com.openexchange.calendar.itip.generators.NotificationMail;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.notify.State.Type;
 import com.openexchange.session.Session;
 
@@ -47,7 +48,11 @@ public class PoolingMailSenderService implements MailSenderService {
 			
 			// Fasttrack messages prior to creating a change or delete exception
 			if (needsFastTrack(mail)) {
-				pool.fasttrack(mail.getOriginal(), session);
+                Appointment app = mail.getOriginal();
+                if (app == null) {
+                    app = mail.getAppointment();
+                }
+                pool.fasttrack(app, session);
 				delegate.sendMail(mail, session);
 				return;
 			}
