@@ -398,7 +398,7 @@ public class ConsistencyCheck {
                     result = consistency.listUnassignedFilesInFilestore(sourceId);
                 } else if ("context".equals(source)) {
                     result = new HashMap<Integer, List<String>>();
-                    result.put(sourceId, consistency.listUnassignedFilesInContext(sourceId));
+                    result.put(Integer.valueOf(sourceId), consistency.listUnassignedFilesInContext(sourceId));
                 } else if ("all".equals(source)) {
                     result = consistency.listAllUnassignedFiles();
                 }

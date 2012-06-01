@@ -6,7 +6,6 @@ Bundle-Version: 6.21.0
 Bundle-Activator: com.openexchange.soap.cxf.osgi.CXFActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Eclipse-BuddyPolicy: registered
 Import-Package: com.openexchange.admin.soap.context.dataobjects,
  com.openexchange.admin.soap.context.exceptions,
  com.openexchange.admin.soap.context.io,
