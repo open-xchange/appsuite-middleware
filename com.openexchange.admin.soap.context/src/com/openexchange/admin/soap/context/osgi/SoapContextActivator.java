@@ -54,8 +54,8 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.admin.rmi.OXContextInterface;
-import com.openexchange.admin.soap.context.OXContextServicePortType;
-import com.openexchange.admin.soap.context.OXContextServicePortTypeImpl;
+import com.openexchange.admin.soap.context.soap.OXContextServicePortType;
+import com.openexchange.admin.soap.context.soap.OXContextServicePortTypeImpl;
 import com.openexchange.osgi.HousekeepingActivator;
 
 
@@ -110,7 +110,7 @@ public final class SoapContextActivator extends HousekeepingActivator {
         track(Remote.class, trackerCustomizer);
         openTrackers();
 
-        final OXContextServicePortType soapService = new OXContextServicePortTypeImpl();
+        final OXContextServicePortTypeImpl soapService = new OXContextServicePortTypeImpl();
         registerService(OXContextServicePortType.class, soapService);
     }
 

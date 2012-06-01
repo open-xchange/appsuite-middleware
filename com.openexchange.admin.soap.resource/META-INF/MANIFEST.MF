@@ -5,6 +5,7 @@ Bundle-SymbolicName: com.openexchange.admin.soap.resource
 Bundle-Version: 6.21.0.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Eclipse-RegisterBuddy: com.openexchange.soap.cxf
 Import-Package: com.openexchange.exception,
  com.openexchange.log,
  com.openexchange.osgi,
@@ -39,3 +40,8 @@ Import-Package: com.openexchange.exception,
  org.osgi.util.tracker
 Require-Bundle: com.openexchange.admin
 Bundle-Activator: com.openexchange.admin.soap.resource.osgi.SoapResourceActivator
+Export-Package: com.openexchange.admin.soap.resource.dataobjects,
+ com.openexchange.admin.soap.resource.exceptions,
+ com.openexchange.admin.soap.resource.io,
+ com.openexchange.admin.soap.resource.rmi,
+ com.openexchange.admin.soap.resource.soap

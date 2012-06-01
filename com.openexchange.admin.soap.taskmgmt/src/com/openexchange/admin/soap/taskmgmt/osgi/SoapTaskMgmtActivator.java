@@ -54,8 +54,8 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.admin.rmi.OXTaskMgmtInterface;
-import com.openexchange.admin.soap.taskmgmt.OXTaskMgmtServicePortType;
-import com.openexchange.admin.soap.taskmgmt.OXTaskMgmtServicePortTypeImpl;
+import com.openexchange.admin.soap.taskmgmt.soap.OXTaskMgmtServicePortType;
+import com.openexchange.admin.soap.taskmgmt.soap.OXTaskMgmtServicePortTypeImpl;
 import com.openexchange.osgi.HousekeepingActivator;
 
 

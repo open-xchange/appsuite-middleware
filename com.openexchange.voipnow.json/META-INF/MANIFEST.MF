@@ -5,6 +5,7 @@ Bundle-SymbolicName: com.openexchange.voipnow.json
 Bundle-Version: 6.21.0
 Bundle-Vendor: Open-Xchange Inc
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Eclipse-RegisterBuddy: com.openexchange.soap.cxf
 Import-Package: com.openexchange.ajax,
  com.openexchange.ajax.requesthandler,
  com.openexchange.ajax.requesthandler.osgiservice,

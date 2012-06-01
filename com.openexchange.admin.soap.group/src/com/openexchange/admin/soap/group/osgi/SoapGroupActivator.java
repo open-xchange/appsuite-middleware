@@ -54,8 +54,8 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.admin.rmi.OXGroupInterface;
-import com.openexchange.admin.soap.group.OXGroupServicePortType;
-import com.openexchange.admin.soap.group.OXGroupServicePortTypeImpl;
+import com.openexchange.admin.soap.group.soap.OXGroupServicePortType;
+import com.openexchange.admin.soap.group.soap.OXGroupServicePortTypeImpl;
 import com.openexchange.osgi.HousekeepingActivator;
 
 
@@ -112,7 +112,6 @@ public final class SoapGroupActivator extends HousekeepingActivator {
 
         final OXGroupServicePortTypeImpl soapService = new OXGroupServicePortTypeImpl();
         registerService(OXGroupServicePortType.class, soapService);
-
     }
 
 }

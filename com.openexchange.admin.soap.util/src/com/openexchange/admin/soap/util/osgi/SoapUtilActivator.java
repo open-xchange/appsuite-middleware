@@ -54,8 +54,8 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.admin.rmi.OXUtilInterface;
-import com.openexchange.admin.soap.util.OXUtilServicePortType;
-import com.openexchange.admin.soap.util.OXUtilServicePortTypeImpl;
+import com.openexchange.admin.soap.util.soap.OXUtilServicePortType;
+import com.openexchange.admin.soap.util.soap.OXUtilServicePortTypeImpl;
 import com.openexchange.osgi.HousekeepingActivator;
 
 

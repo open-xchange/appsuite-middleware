@@ -5,6 +5,7 @@ Bundle-SymbolicName: com.openexchange.admin.soap.context
 Bundle-Version: 6.21.0.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Eclipse-RegisterBuddy: com.openexchange.soap.cxf
 Import-Package: com.openexchange.exception,
  com.openexchange.log,
  com.openexchange.osgi,
@@ -40,3 +41,8 @@ Import-Package: com.openexchange.exception,
 Require-Bundle: com.openexchange.admin.plugin.hosting,
  com.openexchange.admin
 Bundle-Activator: com.openexchange.admin.soap.context.osgi.SoapContextActivator
+Export-Package: com.openexchange.admin.soap.context.dataobjects,
+ com.openexchange.admin.soap.context.exceptions,
+ com.openexchange.admin.soap.context.io,
+ com.openexchange.admin.soap.context.rmi,
+ com.openexchange.admin.soap.context.soap

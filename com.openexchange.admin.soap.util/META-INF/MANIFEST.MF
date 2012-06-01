@@ -5,6 +5,7 @@ Bundle-SymbolicName: com.openexchange.admin.soap.util
 Bundle-Version: 6.21.0.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Eclipse-RegisterBuddy: com.openexchange.soap.cxf
 Import-Package: com.openexchange.exception,
  com.openexchange.log,
  com.openexchange.osgi,
@@ -40,3 +41,8 @@ Import-Package: com.openexchange.exception,
 Require-Bundle: com.openexchange.admin,
  com.openexchange.admin.plugin.hosting
 Bundle-Activator: com.openexchange.admin.soap.util.osgi.SoapUtilActivator
+Export-Package: com.openexchange.admin.soap.util.dataobjects,
+ com.openexchange.admin.soap.util.exceptions,
+ com.openexchange.admin.soap.util.io,
+ com.openexchange.admin.soap.util.rmi,
+ com.openexchange.admin.soap.util.soap
