@@ -71,13 +71,20 @@ public class WebserviceCollector implements ServiceListener {
 
     private static final String WEBSERVICE_NAME = "WebserviceName";
 
-    private final ConcurrentMap<String, Endpoint> endpoints = new ConcurrentHashMap<String, Endpoint>();
+    private final ConcurrentMap<String, Endpoint> endpoints;
 
     private final BundleContext context;
 
     private volatile boolean open;
 
+    /**
+     * Initializes a new {@link WebserviceCollector}.
+     * 
+     * @param context The bundle context
+     */
     public WebserviceCollector(final BundleContext context) {
+        super();
+        endpoints = new ConcurrentHashMap<String, Endpoint>();
         this.context = context;
     }
 
@@ -86,15 +93,19 @@ public class WebserviceCollector implements ServiceListener {
         if (!open) {
             return;
         }
-        if (event.getType() == ServiceEvent.REGISTERED) {
+        final int type = event.getType();
+        if (ServiceEvent.REGISTERED == type) {
             final ServiceReference<?> ref = event.getServiceReference();
             add(ref);
-        } else if (event.getType() == ServiceEvent.UNREGISTERING) {
+        } else if (ServiceEvent.UNREGISTERING == type) {
             final ServiceReference<?> ref = event.getServiceReference();
             remove(ref);
         }
     }
 
+    /**
+     * Opens this collector.
+     */
     public void open() {
         try {
             final ServiceReference<?>[] allServiceReferences = context.getAllServiceReferences(null, null);
@@ -109,6 +120,9 @@ public class WebserviceCollector implements ServiceListener {
         open = true;
     }
 
+    /**
+     * Closes this collector.
+     */
     public void close() {
         open = false;
         for (final Entry<String, Endpoint> entry : endpoints.entrySet()) {
@@ -180,8 +194,7 @@ public class WebserviceCollector implements ServiceListener {
     }
 
     private boolean isWebservice(final Object service) {
-        final WebService annotation = service.getClass().getAnnotation(WebService.class);
-        return annotation != null;
+        return (null != service.getClass().getAnnotation(WebService.class));
     }
 
 }
