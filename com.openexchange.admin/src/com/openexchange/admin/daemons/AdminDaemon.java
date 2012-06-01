@@ -187,7 +187,6 @@ public class AdminDaemon {
 
         } catch (final RemoteException e) {
             LOG.fatal("Error creating RMI registry!", e);
-            System.exit(1);
         } catch (final StorageException e) {
             LOG.fatal("Error while creating one instance for RMI interface", e);
         }
