@@ -51,6 +51,7 @@ package com.openexchange.consistency;
 
 import java.util.List;
 import java.util.Map;
+import javax.management.MBeanException;
 import com.openexchange.exception.OXException;
 
 /**
@@ -64,32 +65,32 @@ public interface ConsistencyMBean {
     // List
 
     // Missing
-    List<String> listMissingFilesInContext(int contextId) throws OXException;
+    List<String> listMissingFilesInContext(int contextId) throws MBeanException;
 
-    Map<Integer, List<String>> listMissingFilesInFilestore(int filestoreId) throws OXException;
+    Map<Integer, List<String>> listMissingFilesInFilestore(int filestoreId) throws MBeanException;
 
-    Map<Integer, List<String>> listMissingFilesInDatabase(int databaseId) throws OXException;
+    Map<Integer, List<String>> listMissingFilesInDatabase(int databaseId) throws MBeanException;
 
-    Map<Integer, List<String>> listAllMissingFiles() throws OXException;
+    Map<Integer, List<String>> listAllMissingFiles() throws MBeanException;
 
     // Unassigned
 
-    List<String> listUnassignedFilesInContext(int contextId) throws OXException;
+    List<String> listUnassignedFilesInContext(int contextId) throws MBeanException;
 
-    Map<Integer, List<String>> listUnassignedFilesInFilestore(int filestoreId) throws OXException;
+    Map<Integer, List<String>> listUnassignedFilesInFilestore(int filestoreId) throws MBeanException;
 
-    Map<Integer, List<String>> listUnassignedFilesInDatabase(int databaseId) throws OXException;
+    Map<Integer, List<String>> listUnassignedFilesInDatabase(int databaseId) throws MBeanException;
 
-    Map<Integer, List<String>> listAllUnassignedFiles() throws OXException;
+    Map<Integer, List<String>> listAllUnassignedFiles() throws MBeanException;
 
     // Repair
 
-    void repairFilesInContext(int contextId, String resolverPolicy) throws OXException;
+    void repairFilesInContext(int contextId, String resolverPolicy) throws MBeanException;
 
-    void repairFilesInFilestore(int filestoreId, String resolverPolicy) throws OXException;
+    void repairFilesInFilestore(int filestoreId, String resolverPolicy) throws MBeanException;
 
-    void repairFilesInDatabase(int databaseId, String resolverPolicy) throws OXException;
+    void repairFilesInDatabase(int databaseId, String resolverPolicy) throws MBeanException;
 
-    void repairAllFiles(String resolverPolicy) throws OXException;
+    void repairAllFiles(String resolverPolicy) throws MBeanException;
 
 }

@@ -75,13 +75,13 @@ final class MBeanConsistency implements ConsistencyMBean {
     }
 
     @Override
-    public List<String> listMissingFilesInContext(final int contextId) throws OXException {
+    public List<String> listMissingFilesInContext(final int contextId) throws MBeanException {
         try {
             return (List<String>) mbsc.invoke(name, "listMissingFilesInContext", new Object[]{contextId}, new String[]{"int"});
         } catch (final InstanceNotFoundException e) {
             exception(e);
         } catch (final MBeanException e) {
-            exception(e);
+            throw e;
         } catch (final ReflectionException e) {
             exception(e);
         } catch (final IOException e) {
@@ -93,13 +93,13 @@ final class MBeanConsistency implements ConsistencyMBean {
 
 
     @Override
-    public Map<Integer, List<String>> listMissingFilesInFilestore(final int filestoreId) throws OXException {
+    public Map<Integer, List<String>> listMissingFilesInFilestore(final int filestoreId) throws MBeanException {
         try {
             return (Map<Integer, List<String>>) mbsc.invoke(name, "listMissingFilesInFilestore", new Object[]{filestoreId}, new String[]{"int"});
         } catch (final InstanceNotFoundException e) {
             exception(e);
         } catch (final MBeanException e) {
-            exception(e);
+            throw e;
         } catch (final ReflectionException e) {
             exception(e);
         } catch (final IOException e) {
@@ -109,13 +109,13 @@ final class MBeanConsistency implements ConsistencyMBean {
     }
 
     @Override
-    public Map<Integer, List<String>> listMissingFilesInDatabase(final int databaseId) throws OXException {
+    public Map<Integer, List<String>> listMissingFilesInDatabase(final int databaseId) throws MBeanException {
         try {
             return (Map<Integer, List<String>>) mbsc.invoke(name, "listMissingFilesInDatabase", new Object[]{databaseId}, new String[]{"int"});
         } catch (final InstanceNotFoundException e) {
             exception(e);
         } catch (final MBeanException e) {
-            exception(e);
+            throw e;
         } catch (final ReflectionException e) {
             exception(e);
         } catch (final IOException e) {
@@ -125,13 +125,13 @@ final class MBeanConsistency implements ConsistencyMBean {
     }
 
     @Override
-    public Map<Integer, List<String>> listAllMissingFiles() throws OXException {
+    public Map<Integer, List<String>> listAllMissingFiles() throws MBeanException {
         try {
             return (Map<Integer, List<String>>) mbsc.invoke(name, "listAllMissingFiles", new Object[]{}, new String[]{});
         } catch (final InstanceNotFoundException e) {
             exception(e);
         } catch (final MBeanException e) {
-            exception(e);
+            throw e;
         } catch (final ReflectionException e) {
             exception(e);
         } catch (final IOException e) {
@@ -141,13 +141,13 @@ final class MBeanConsistency implements ConsistencyMBean {
     }
 
     @Override
-    public List<String> listUnassignedFilesInContext(final int contextId) throws OXException {
+    public List<String> listUnassignedFilesInContext(final int contextId) throws MBeanException {
         try {
             return (List<String>) mbsc.invoke(name, "listUnassignedFilesInContext", new Object[]{contextId}, new String[]{"int"});
         } catch (final InstanceNotFoundException e) {
             exception(e);
         } catch (final MBeanException e) {
-            exception(e);
+            throw e;
         } catch (final ReflectionException e) {
             exception(e);
         } catch (final IOException e) {
@@ -157,13 +157,13 @@ final class MBeanConsistency implements ConsistencyMBean {
     }
 
     @Override
-    public Map<Integer, List<String>> listUnassignedFilesInFilestore(final int filestoreId) throws OXException {
+    public Map<Integer, List<String>> listUnassignedFilesInFilestore(final int filestoreId) throws MBeanException {
         try {
             return (Map<Integer, List<String>>) mbsc.invoke(name, "listUnassignedFilesInFilestore", new Object[]{filestoreId}, new String[]{"int"});
         } catch (final InstanceNotFoundException e) {
             exception(e);
         } catch (final MBeanException e) {
-            exception(e);
+            throw e;
         } catch (final ReflectionException e) {
             exception(e);
         } catch (final IOException e) {
@@ -173,13 +173,13 @@ final class MBeanConsistency implements ConsistencyMBean {
     }
 
     @Override
-    public Map<Integer, List<String>> listUnassignedFilesInDatabase(final int databaseId) throws OXException {
+    public Map<Integer, List<String>> listUnassignedFilesInDatabase(final int databaseId) throws MBeanException {
         try {
             return (Map<Integer, List<String>>) mbsc.invoke(name, "listUnassignedFilesInDatabase", new Object[]{databaseId}, new String[]{"int"});
         } catch (final InstanceNotFoundException e) {
             exception(e);
         } catch (final MBeanException e) {
-            exception(e);
+            throw e;
         } catch (final ReflectionException e) {
             exception(e);
         } catch (final IOException e) {
@@ -189,13 +189,13 @@ final class MBeanConsistency implements ConsistencyMBean {
     }
 
     @Override
-    public Map<Integer, List<String>> listAllUnassignedFiles() throws OXException {
+    public Map<Integer, List<String>> listAllUnassignedFiles() throws MBeanException {
         try {
             return (Map<Integer, List<String>>) mbsc.invoke(name, "listAllUnassignedFiles", new Object[]{}, new String[]{});
         } catch (final InstanceNotFoundException e) {
             exception(e);
         } catch (final MBeanException e) {
-            exception(e);
+            throw e;
         } catch (final ReflectionException e) {
             exception(e);
         } catch (final IOException e) {
@@ -205,7 +205,7 @@ final class MBeanConsistency implements ConsistencyMBean {
     }
 
     @Override
-    public void repairFilesInContext(final int contextId, final String resolverPolicy) throws OXException {
+    public void repairFilesInContext(final int contextId, final String resolverPolicy) throws MBeanException {
         try {
             mbsc.invoke(name, "repairFilesInContext", new Object[]{contextId, resolverPolicy}, new String[]{"int", "java.lang.String"});
         } catch (final InstanceNotFoundException e) {
@@ -220,13 +220,13 @@ final class MBeanConsistency implements ConsistencyMBean {
     }
 
     @Override
-    public void repairFilesInFilestore(final int filestoreId, final String resolverPolicy) throws OXException {
+    public void repairFilesInFilestore(final int filestoreId, final String resolverPolicy) throws MBeanException {
         try {
             mbsc.invoke(name, "repairFilesInFilestore", new Object[]{filestoreId, resolverPolicy}, new String[]{"int", "java.lang.String"});
         } catch (final InstanceNotFoundException e) {
             exception(e);
         } catch (final MBeanException e) {
-            exception(e);
+            throw e;
         } catch (final ReflectionException e) {
             exception(e);
         } catch (final IOException e) {
@@ -235,13 +235,13 @@ final class MBeanConsistency implements ConsistencyMBean {
     }
 
     @Override
-    public void repairFilesInDatabase(final int databaseId, final String resolverPolicy) throws OXException {
+    public void repairFilesInDatabase(final int databaseId, final String resolverPolicy) throws MBeanException {
         try {
             mbsc.invoke(name, "repairFilesInDatabase", new Object[]{databaseId, resolverPolicy}, new String[]{"int", "java.lang.String"});
         } catch (final InstanceNotFoundException e) {
             exception(e);
         } catch (final MBeanException e) {
-            exception(e);
+            throw e;
         } catch (final ReflectionException e) {
             exception(e);
         } catch (final IOException e) {
@@ -250,13 +250,13 @@ final class MBeanConsistency implements ConsistencyMBean {
     }
 
     @Override
-    public void repairAllFiles(final String resolverPolicy) throws OXException {
+    public void repairAllFiles(final String resolverPolicy) throws MBeanException {
         try {
             mbsc.invoke(name, "repairAllFiles", new Object[]{resolverPolicy}, new String[]{"java.lang.String"});
         } catch (final InstanceNotFoundException e) {
             exception(e);
         } catch (final MBeanException e) {
-            exception(e);
+            throw e;
         } catch (final ReflectionException e) {
             exception(e);
         } catch (final IOException e) {
@@ -264,7 +264,14 @@ final class MBeanConsistency implements ConsistencyMBean {
         }
     }
 
-    private void exception(final Exception e) throws OXException {
-        throw ConsistencyExceptionCodes.COMMUNICATION_PROBLEM.create(e, e.getMessage());
+    private void exception(final OXException e) throws MBeanException {
+        final Exception wrapMe = new Exception(e.getMessage());
+        throw new MBeanException(wrapMe, e.getMessage());
+    }
+
+    private void exception(final Exception e) throws MBeanException {
+        final OXException oxe = ConsistencyExceptionCodes.COMMUNICATION_PROBLEM.create(e, e.getMessage());
+        final Exception wrapMe = new Exception(oxe.getMessage());
+        throw new MBeanException(wrapMe, e.getMessage());
     }
 }
