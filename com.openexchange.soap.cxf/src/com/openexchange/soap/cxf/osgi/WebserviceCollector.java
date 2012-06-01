@@ -49,12 +49,12 @@
 
 package com.openexchange.soap.cxf.osgi;
 
-import java.text.MessageFormat;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import javax.jws.WebService;
 import javax.xml.ws.Endpoint;
+import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
@@ -68,6 +68,8 @@ import com.openexchange.soap.cxf.WebserviceName;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class WebserviceCollector implements ServiceListener {
+
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(WebserviceCollector.class);
 
     private static final String WEBSERVICE_NAME = "WebserviceName";
 
@@ -187,7 +189,15 @@ public class WebserviceCollector implements ServiceListener {
     }
 
     private void replace(final String name, final Object service) {
-        final Endpoint oldEndpoint = endpoints.replace(name, Endpoint.publish(MessageFormat.format("/{0}", name), service));
+        final String address = '/' + name; // MessageFormat.format("/{0}", name);
+        Endpoint oldEndpoint;
+        try {
+            oldEndpoint = endpoints.replace(name, Endpoint.publish(address, service));
+            LOG.error("Publishing endpoint succeeded. Published \"" + name + "\" under address \"" + address + "\".");
+        } catch (final Exception e) {
+            LOG.error("Publishing endpoint failed. Couldn't publish \"" + name + "\" under address \"" + address + "\".", e);
+            oldEndpoint = null;
+        }
         if (oldEndpoint != null) {
             oldEndpoint.stop();
         }

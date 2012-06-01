@@ -77,7 +77,12 @@ public class CXFActivator extends HousekeepingActivator {
     /**
      * The CXF Servlet's alias.
      */
-    static final String ALIAS = "/webservices"; // /servlet/axis2/services
+    static final String ALIAS = "/webservices";
+
+    /**
+     * The Axis2 Servlet's alias.
+     */
+    static final String ALIAS2 = "/servlet/axis2/services";
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -98,13 +103,23 @@ public class CXFActivator extends HousekeepingActivator {
                     public void removedService(final ServiceReference<HttpService> reference, final HttpService service) {
                         final HttpService httpService = getService(HttpService.class);
                         if (httpService != null) {
-                            httpService.unregister(ALIAS);
+                            try {
+                                httpService.unregister(ALIAS);
+                                httpService.unregister(ALIAS2);
+                            } catch (final Exception e) {
+                                // Ignore
+                            }
                         }
                         final WebserviceCollector collector = this.collector;
                         if (null != collector) {
-                            collector.close();
+                            try {
+                                collector.close();
+                            } catch (final Exception e) {
+                                // Ignore
+                            }
                             this.collector = null;
                         }
+                        context.ungetService(reference);
                     }
 
                     @Override
@@ -115,6 +130,8 @@ public class CXFActivator extends HousekeepingActivator {
                     @Override
                     public HttpService addingService(final ServiceReference<HttpService> reference) {
                         final HttpService httpService = context.getService(reference);
+                        boolean servletRegistered = false;
+                        boolean collectorOpened = false;
                         try {
                             /*
                              * Register CXF Servlet
@@ -123,7 +140,10 @@ public class CXFActivator extends HousekeepingActivator {
                             final Bus bus = cxf.getBus();
                             BusFactory.setDefaultBus(bus);
                             httpService.registerServlet(ALIAS, cxf, null, null);
-                            LOG.info("Registered CXF Servlet with: " + ALIAS);
+                            LOG.info("Registered CXF Servlet under: " + ALIAS);
+                            httpService.registerServlet(ALIAS2, cxf, null, null);
+                            LOG.info("Registered CXF Servlet under: " + ALIAS2);
+                            servletRegistered = true;
                             /*
                              * Initialize Webservice collector
                              */
@@ -131,6 +151,7 @@ public class CXFActivator extends HousekeepingActivator {
                             context.addServiceListener(collector);
                             collector.open();
                             this.collector = collector;
+                            collectorOpened = true;
                             LOG.info("CXF SOAP service is up and running");
                             /*
                              * Return tracked HTTP service
@@ -141,6 +162,25 @@ public class CXFActivator extends HousekeepingActivator {
                         } catch (final NamespaceException e) {
                             LOG.error("Couldn't register CXF Servlet: " + e.getMessage(), e);
                         } catch (final RuntimeException e) {
+                            if (servletRegistered) {
+                                try {
+                                    httpService.unregister(ALIAS);
+                                    httpService.unregister(ALIAS2);
+                                } catch (final Exception e1) {
+                                    // Ignore
+                                }
+                            }
+                            if (collectorOpened) {
+                                final WebserviceCollector collector = this.collector;
+                                if (null != collector) {
+                                    try {
+                                        collector.close();
+                                    } catch (final Exception e1) {
+                                        // Ignore
+                                    }
+                                    this.collector = null;
+                                }
+                            }
                             LOG.error("Couldn't register CXF Servlet: " + e.getMessage(), e);
                         }
                         context.ungetService(reference);

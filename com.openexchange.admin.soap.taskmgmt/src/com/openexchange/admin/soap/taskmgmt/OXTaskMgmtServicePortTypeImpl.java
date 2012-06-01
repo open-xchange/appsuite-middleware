@@ -55,7 +55,7 @@ public class OXTaskMgmtServicePortTypeImpl implements OXTaskMgmtServicePortType 
     public java.lang.Object getTaskResults(final com.openexchange.admin.soap.dataobjects.xsd.Context ctx,final com.openexchange.admin.rmi.dataobjects.xsd.Credentials cred,final java.lang.Integer id) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , RemoteException_Exception , ExecutionException_Exception , InterruptedException_Exception    { 
         final OXTaskMgmtInterface taskMgmtInterface = getTaskMgmtInterface();
         try {
-            return taskMgmtInterface.getTaskResults(soap2Context(ctx), soap2Credentials(cred), id);
+            return taskMgmtInterface.getTaskResults(soap2Context(ctx), soap2Credentials(cred), id.intValue());
         } catch (final RemoteException e) {
             throw new RemoteException_Exception(e.getMessage(), e);
         } catch (final InvalidCredentialsException e) {
