@@ -287,7 +287,7 @@ public abstract class SessionServlet extends AJAXServlet {
                 }
             }
             ThreadLocalSessionHolder.getInstance().setSession(session);
-            if (null != threadCounter) {
+            if (null != threadCounter && null != session) {
                 sessionId = session.getSessionID();
                 threadCounter.increment(sessionId);
             }
@@ -361,6 +361,9 @@ public abstract class SessionServlet extends AJAXServlet {
     }
 
     private static int getMaxConcurrentRequests0(final ServerSession session) {
+    	if (session == null) {
+    		return 0;
+    	}
         final Set<String> set = session.getUser().getAttributes().get("ajax.maxCount");
         if (null == set || set.isEmpty()) {
             try {

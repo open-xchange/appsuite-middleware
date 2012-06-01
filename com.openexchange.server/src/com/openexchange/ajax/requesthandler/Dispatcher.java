@@ -108,4 +108,9 @@ public interface Dispatcher {
      * @throws OXException
      */
     boolean mayUseFallbackSession(String module, String action) throws OXException;
+    
+    /**
+     * Indicates that this action can be used without a session
+     */
+    boolean mayOmitSession(String module, String action) throws OXException;
 }
