@@ -2,6 +2,7 @@
 
  - Fix for bug 22236: Check determined sequence number prior to issuing an IMAP FETCH command
  - Fix for bug 22237: Checking for possible empty path when writing response cookies
+ - Fix for bug 22165: Dealing with TNEF-encoded nested messages
 
 * 2012-05-31 - thorben.betten@open-xchange.com
 
