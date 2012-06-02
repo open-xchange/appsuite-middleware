@@ -1,3 +1,7 @@
+* 2012-06-02 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22236: Check determined sequence number prior to issuing an IMAP FETCH command
+
 * 2012-05-31 - thorben.betten@open-xchange.com
 
  - Fix for bug 22228: Guess Content-Type by file name if broken within client request

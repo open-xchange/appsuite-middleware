@@ -51,8 +51,8 @@ package com.openexchange.imap;
 
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
-import static com.openexchange.mail.mime.utils.MimeStorageUtility.getFetchProfile;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.fold;
+import static com.openexchange.mail.mime.utils.MimeStorageUtility.getFetchProfile;
 import gnu.trove.TLongCollection;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
@@ -727,11 +727,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 }
                 // Hm... Something weird with executed "UID FETCH" command; retry manually...
                 final int[] seqNums = IMAPCommandsCollection.uids2SeqNums(imapFolder, new long[] { msgUID });
-                if (null == seqNums || 0 == seqNums.length) {
+                if ((null == seqNums) || (0 == seqNums.length) || (1 > seqNums[0])) {
+                    LOG.warn("No message with UID '" + msgUID + "' found in folder '" + fullName + '\'', cause);
                     return null;
                 }
-                final int seqNum = seqNums[0];
-                msg = (IMAPMessage) imapFolder.getMessage(seqNum);
+                msg = (IMAPMessage) imapFolder.getMessage(seqNums[0]);
             }
             if (msg == null) {
                 // throw new OXException(OXException.Code.MAIL_NOT_FOUND,
