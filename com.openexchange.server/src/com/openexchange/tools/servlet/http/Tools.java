@@ -186,7 +186,7 @@ public final class Tools {
     }
     
 
-	public static void setExpires(Date expires, HttpServletResponse resp) {
+	public static void setExpires(final Date expires, final HttpServletResponse resp) {
        if (null != expires) {
             synchronized (HEADER_DATEFORMAT) {
                 resp.setHeader(NAME_EXPIRES, HEADER_DATEFORMAT.format(expires));
@@ -195,7 +195,7 @@ public final class Tools {
         }
 	}
 	
-	public static void setExpiresInOneYear(HttpServletResponse resp) {
+	public static void setExpiresInOneYear(final HttpServletResponse resp) {
 		synchronized (HEADER_DATEFORMAT) {
             resp.setHeader(NAME_EXPIRES, HEADER_DATEFORMAT.format(new Date(System.currentTimeMillis() + MILLIS_YEAR)));
         }
@@ -339,6 +339,7 @@ public final class Tools {
                 if (matcher.matches(cookieName)) {
                     final Cookie respCookie = new Cookie(cookieName, cookie.getValue());
                     respCookie.setPath("/");
+                    // A zero value causes the cookie to be deleted.
                     respCookie.setMaxAge(0);
                     resp.addCookie(respCookie);
                 }
@@ -448,7 +449,7 @@ public final class Tools {
         if (null == cookies) {
             return new com.openexchange.authentication.Cookie[0];
         }
-        com.openexchange.authentication.Cookie[] retval = new com.openexchange.authentication.Cookie[cookies.length];
+        final com.openexchange.authentication.Cookie[] retval = new com.openexchange.authentication.Cookie[cookies.length];
         for (int i = 0; i < cookies.length; i++) {
             retval[i] = getCookie(cookies[i]);
         }
