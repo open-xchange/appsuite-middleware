@@ -50,7 +50,6 @@
 package com.openexchange.groupware.update.internal;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.UpdateTaskV2;
@@ -63,6 +62,7 @@ import com.openexchange.groupware.update.tasks.CreateIndexOnContextAttributesTas
 import com.openexchange.groupware.update.tasks.CreateIndexOnUserAttributesForAliasLookupTask;
 import com.openexchange.groupware.update.tasks.MailAccountAddReplyToTask;
 import com.openexchange.groupware.update.tasks.VirtualFolderAddSortNumTask;
+import com.openexchange.log.LogFactory;
 
 /**
  * Lists all update tasks of the com.openexchange.server bundle.
@@ -448,6 +448,9 @@ public final class InternalList {
         
         // Extends dn fields in calendar tables to 320 chars.
         new com.openexchange.groupware.update.tasks.CalendarExtendDNColumnTaskV2(),
+
+        // Creates indexes on tables "prg_dlist" and "del_dlist" to improve look-up.
+        new com.openexchange.groupware.update.tasks.DListAddIndexForLookup(),
 
     };
 }

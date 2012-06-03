@@ -2,6 +2,7 @@
 
  - Fix for bug 22217: Resolved possible deadlock on session lock
  - Fix for bug 22226: Perform a delete-if-present operation
+ - Fix for bug 22225: Introduced update task to add missing index to distribution list tables for fast look-up
 
 * 2012-06-02 - thorben.betten@open-xchange.com
 
