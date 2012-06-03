@@ -78,6 +78,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.locks.Lock;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.internet.IDNA;
@@ -179,18 +181,27 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
 
     private static final String PARAM_POP3_STORAGE_FOLDERS = "com.openexchange.mailaccount.pop3Folders";
 
-    private static Object getSessionLock(final Session session) {
-        final Object lock = session.getParameter(Session.PARAM_LOCK);
-        return null == lock ? session : lock;
+    private static <V> V performSynchronized(final Callable<V> task, final Session session) throws Exception {
+        final Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
+        if (null == lock) {
+            synchronized (session) {
+                return task.call();
+            }
+        }
+        // Use Lock instance
+        lock.lock();
+        try {
+            return task.call();
+        } finally {
+            lock.unlock();
+        }
     }
 
     private static void dropPOP3StorageFolders(final int userId, final int contextId) {
         final SessiondService service = ServerServiceRegistry.getInstance().getService(SessiondService.class);
         if (null != service) {
             for (final Session session : service.getSessions(userId, contextId)) {
-                synchronized (getSessionLock(session)) {
-                    session.setParameter(PARAM_POP3_STORAGE_FOLDERS, null);
-                }
+                session.setParameter(PARAM_POP3_STORAGE_FOLDERS, null);
             }
         }
     }
@@ -211,18 +222,30 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     public static Set<String> getPOP3StorageFolders(final Session session) throws OXException {
         Set<String> set = (Set<String>) session.getParameter(PARAM_POP3_STORAGE_FOLDERS);
         if (null == set) {
-            synchronized (getSessionLock(session)) {
-                set = (Set<String>) session.getParameter(PARAM_POP3_STORAGE_FOLDERS);
-                if (null == set) {
-                    set = getPOP3StorageFolders0(session);
-                    session.setParameter(PARAM_POP3_STORAGE_FOLDERS, set);
-                }
+            try {
+                final Callable<Set<String>> task = new Callable<Set<String>>() {
+                    
+                    @Override
+                    public Set<String> call() throws OXException {
+                        Set<String> set = (Set<String>) session.getParameter(PARAM_POP3_STORAGE_FOLDERS);
+                        if (null == set) {
+                            set = getPOP3StorageFolders0(session);
+                            session.setParameter(PARAM_POP3_STORAGE_FOLDERS, set);
+                        }
+                        return set;
+                    }
+                };
+                set = performSynchronized(task, session);
+            } catch (final OXException e) {
+                throw e;
+            } catch (final Exception e) {
+                throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
         }
         return set;
     }
 
-    private static Set<String> getPOP3StorageFolders0(final Session session) throws OXException {
+    static Set<String> getPOP3StorageFolders0(final Session session) throws OXException {
         final int contextId = session.getContextId();
         final Connection con = Database.get(contextId, false);
         PreparedStatement stmt = null;

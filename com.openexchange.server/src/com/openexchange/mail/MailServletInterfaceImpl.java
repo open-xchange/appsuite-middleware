@@ -75,6 +75,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.locks.Lock;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.IDNA;
@@ -204,7 +206,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
     private int accountId;
 
-    private final Session session;
+    /**
+     * The session instance.
+     */
+    final Session session;
 
     private final UserSettingMail usm;
 
@@ -2733,41 +2738,50 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
     }
 
-    private Object getLockObject() {
-        final Object lock = session.getParameter(Session.PARAM_LOCK);
-        return null == lock ? session : lock;
+    private <V> V performSynchronized(final Callable<V> task, final Session session) throws Exception {
+        final Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
+        if (null == lock) {
+            synchronized (session) {
+                return task.call();
+            }
+        }
+        // Use Lock instance
+        lock.lock();
+        try {
+            return task.call();
+        } finally {
+            lock.unlock();
+        }
     }
 
     private void setRateLimitTime(final int rateLimit) {
         if (rateLimit > 0) {
-            synchronized (getLockObject()) {
-                session.setParameter(LAST_SEND_TIME, Long.valueOf(System.currentTimeMillis()));
-            }
+            session.setParameter(LAST_SEND_TIME, Long.valueOf(System.currentTimeMillis()));
         }
     }
 
     private void rateLimitChecks(final MailMessage composedMail, final int rateLimit, final int maxToCcBcc) throws OXException {
         if (rateLimit > 0) {
-            synchronized (getLockObject()) {
-                final Long parameter = (Long) session.getParameter(LAST_SEND_TIME);
-                if (null != parameter && (parameter.longValue() + rateLimit) >= System.currentTimeMillis()) {
-                    final NumberFormat numberInstance = DecimalFormat.getNumberInstance(UserStorage.getStorageUser(session.getUserId(), session.getContextId()).getLocale());
-                    throw MailExceptionCode.SENT_QUOTA_EXCEEDED.create(numberInstance.format(((double) rateLimit) / 1000));
-                }
+            final Long parameter = (Long) session.getParameter(LAST_SEND_TIME);
+            if (null != parameter && (parameter.longValue() + rateLimit) >= System.currentTimeMillis()) {
+                final NumberFormat numberInstance = DecimalFormat.getNumberInstance(UserStorage.getStorageUser(session.getUserId(), session.getContextId()).getLocale());
+                throw MailExceptionCode.SENT_QUOTA_EXCEEDED.create(numberInstance.format(((double) rateLimit) / 1000));
             }
         }
         if (maxToCcBcc > 0) {
-            synchronized (getLockObject()) {
-                int count = (composedMail.getTo() == null ? 0 : composedMail.getTo().length);
-                count += (composedMail.getCc() == null ? 0 : composedMail.getCc().length);
-                count += (composedMail.getBcc() == null ? 0 : composedMail.getBcc().length);
+            InternetAddress[] addrs = composedMail.getTo();
+            int count = (addrs == null ? 0 : addrs.length);
 
-                if (count > maxToCcBcc) {
-                    throw MailExceptionCode.RECIPIENTS_EXCEEDED.create(Integer.valueOf(maxToCcBcc));
-                }
+            addrs = composedMail.getCc();
+            count += (addrs == null ? 0 : addrs.length);
+
+            addrs = composedMail.getBcc();
+            count += (addrs == null ? 0 : addrs.length);
+
+            if (count > maxToCcBcc) {
+                throw MailExceptionCode.RECIPIENTS_EXCEEDED.create(Integer.valueOf(maxToCcBcc));
             }
         }
-
     }
 
     @Override
