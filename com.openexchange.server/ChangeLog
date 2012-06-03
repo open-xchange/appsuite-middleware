@@ -1,6 +1,7 @@
 * 2012-06-03 - thorben.betten@open-xchange.com
 
  - Fix for bug 22217: Resolved possible deadlock on session lock
+ - Fix for bug 22226: Perform a delete-if-present operation
 
 * 2012-06-02 - thorben.betten@open-xchange.com
 
