@@ -2,6 +2,7 @@
 
  - Fix for bug 22242: Changed error message
  - Fix for bug 22241: Don't retry to load mail account data with a connection to DB master
+ - Fix for bug 22246: Allowing '+' character inside a token
 
 * 2012-06-03 - thorben.betten@open-xchange.com
 

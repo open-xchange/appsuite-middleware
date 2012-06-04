@@ -247,7 +247,7 @@ public class ContentType extends ParameterizedHeader {
     // private static final Pattern PATTERN_CONTENT_TYPE = Pattern.compile("(?:\"?([[\\p{L}\\p{ASCII}]&&[^/;\\s\"]]+)(?:/([[\\p{L}\\p{ASCII}]&&[^;\\s\"]]+))?\"?)|(?:/([[\\p{L}\\p{ASCII}]&&[^;\\s\"]]+))");
     private static final Pattern PATTERN_CONTENT_TYPE = Pattern.compile("(?:\"?([\\p{L}_0-9-]+)(?:/([\\p{L}_0-9-]+))?\"?)|(?:/([\\p{L}_0-9-]+))");
 
-    private static final Pattern PATTERN_TOKEN = Pattern.compile("[\\p{L}_0-9-.]+");
+    private static final Pattern PATTERN_TOKEN = Pattern.compile("[\\p{L}_0-9-.+]+");
 
     private static boolean isInvalidToken(final String token) {
         if (null == token) {
