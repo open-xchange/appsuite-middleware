@@ -29,7 +29,7 @@ import javax.xml.ws.ResponseWrapper;
                       serviceName = "OXContextService",
                       portName = "OXContextServiceHttpEndpoint",
                       targetNamespace = "http://soap.admin.openexchange.com",
-                      wsdlLocation = "null",
+                      // wsdlLocation = "null",
                       endpointInterface = "com.openexchange.admin.soap.context.soap.OXContextServicePortType")
                       
 public class OXContextServicePortTypeImpl3 implements OXContextServicePortType {

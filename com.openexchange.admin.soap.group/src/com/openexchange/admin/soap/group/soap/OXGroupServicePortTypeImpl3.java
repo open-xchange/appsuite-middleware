@@ -29,7 +29,7 @@ import javax.xml.ws.ResponseWrapper;
                       serviceName = "OXGroupService",
                       portName = "OXGroupServiceHttpsSoap12Endpoint",
                       targetNamespace = "http://soap.admin.openexchange.com",
-                      wsdlLocation = "null",
+                      // wsdlLocation = "null",
                       endpointInterface = "com.openexchange.admin.soap.group.soap.OXGroupServicePortType")
                       
 public class OXGroupServicePortTypeImpl3 implements OXGroupServicePortType {

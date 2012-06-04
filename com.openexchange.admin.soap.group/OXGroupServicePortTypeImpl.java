@@ -47,7 +47,7 @@ import com.openexchange.admin.soap.dataobjects.xsd.User;
                       serviceName = "OXGroupService",
                       portName = "OXGroupServiceHttpSoap11Endpoint",
                       targetNamespace = "http://soap.admin.openexchange.com",
-                      wsdlLocation = "null",
+                      // wsdlLocation = "null",
                       endpointInterface = "com.openexchange.admin.soap.group.OXGroupServicePortType")
                       
 public class OXGroupServicePortTypeImpl implements OXGroupServicePortType {

@@ -42,7 +42,7 @@ import com.openexchange.admin.soap.resource.dataobjects.SOAPStringMapMap;
                       serviceName = "OXResourceService",
                       portName = "OXResourceServiceHttpSoap12Endpoint",
                       targetNamespace = "http://soap.admin.openexchange.com",
-                      wsdlLocation = "null",
+                      // wsdlLocation = "null",
                       endpointInterface = "com.openexchange.admin.soap.resource.soap.OXResourceServicePortType")
                       
 public class OXResourceServicePortTypeImpl implements OXResourceServicePortType {

@@ -36,7 +36,7 @@ import com.openexchange.admin.soap.taskmgmt.dataobjects.SOAPStringMapMap;
                       serviceName = "OXTaskMgmtService",
                       portName = "OXTaskMgmtServiceHttpsEndpoint",
                       targetNamespace = "http://soap.admin.openexchange.com",
-                      wsdlLocation = "null",
+                      // wsdlLocation = "null",
                       endpointInterface = "com.openexchange.admin.soap.taskmgmt.soap.OXTaskMgmtServicePortType")
                       
 public class OXTaskMgmtServicePortTypeImpl implements OXTaskMgmtServicePortType {

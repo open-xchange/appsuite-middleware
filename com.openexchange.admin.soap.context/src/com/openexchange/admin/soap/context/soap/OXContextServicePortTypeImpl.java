@@ -47,7 +47,7 @@ import com.openexchange.admin.soap.context.dataobjects.UserModuleAccess;
                       serviceName = "OXContextService",
                       portName = "OXContextServiceHttpsEndpoint",
                       targetNamespace = "http://soap.admin.openexchange.com",
-                      wsdlLocation = "null",
+                      // wsdlLocation = "null",
                       endpointInterface = "com.openexchange.admin.soap.context.soap.OXContextServicePortType")
                       
 public class OXContextServicePortTypeImpl implements OXContextServicePortType {

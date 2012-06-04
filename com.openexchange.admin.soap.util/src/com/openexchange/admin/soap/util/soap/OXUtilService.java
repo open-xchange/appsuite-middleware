@@ -15,7 +15,7 @@ import javax.xml.ws.Service;
  * 
  */
 @WebServiceClient(name = "OXUtilService", 
-                  wsdlLocation = "null",
+                  // wsdlLocation = "null",
                   targetNamespace = "http://soap.admin.openexchange.com") 
 public class OXUtilService extends Service {
 
