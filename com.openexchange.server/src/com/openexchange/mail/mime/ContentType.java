@@ -419,7 +419,11 @@ public class ContentType extends ParameterizedHeader {
                 }
                 baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
                 if (paramList) {
-                    parameterList = pos < cts.length() ? new ParameterList(cts.substring(pos + 1)) : new ParameterList();
+                    try {
+                        parameterList = pos < cts.length() ? new ParameterList(cts.substring(pos + 1)) : new ParameterList();
+                    } catch (final RuntimeException e) {
+                        throw MailExceptionCode.INVALID_CONTENT_TYPE.create(e, contentType);
+                    }
                 }
                 return;
             } catch (final OXException e) {
