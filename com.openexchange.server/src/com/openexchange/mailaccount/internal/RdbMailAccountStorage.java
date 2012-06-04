@@ -695,26 +695,11 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
 
     @Override
     public MailAccount getMailAccount(final int id, final int user, final int cid) throws OXException {
+        final Connection rcon = Database.get(cid, false);
         try {
-            final Connection rcon = Database.get(cid, false);
-            try {
-                return getMailAccount(id, user, cid, rcon);
-            } finally {
-                Database.back(cid, false, rcon);
-            }
-        } catch (final OXException mae) {
-            if (MailAccountExceptionCodes.NOT_FOUND.getPrefix().equals(mae.getPrefix()) && MailAccountExceptionCodes.NOT_FOUND.getNumber() != mae.getCode()) {
-                throw mae;
-            }
-            /*
-             * Read-only failed, retry with read-write connection
-             */
-            final Connection wcon = Database.get(cid, true);
-            try {
-                return getMailAccount(id, user, cid, wcon);
-            } finally {
-                Database.back(cid, true, wcon);
-            }
+            return getMailAccount(id, user, cid, rcon);
+        } finally {
+            Database.back(cid, false, rcon);
         }
     }
 
