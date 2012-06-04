@@ -89,7 +89,11 @@ public class TrackingConfiguration implements TrackingConfigurationMBean {
 	
 	public void setLogLevel(String className, String sessionId, String lvl) {
 		LogLevel level = LogLevel.valueOf(lvl.toUpperCase());
-		ConcurrentMap<String, LogLevel> clazzMap = sessionLevels.putIfAbsent(sessionId, new ConcurrentHashMap<String, LogLevel>());
+		ConcurrentMap<String, LogLevel> clazzMap = new ConcurrentHashMap<String, LogLevel>();
+		ConcurrentMap<String, LogLevel> otherMap = sessionLevels.putIfAbsent(sessionId, clazzMap);
+		if (otherMap != null) {
+			clazzMap = otherMap;
+		}
 		if (level == null) {
 			clazzMap.remove(className);
 		} else {
@@ -101,7 +105,11 @@ public class TrackingConfiguration implements TrackingConfigurationMBean {
 		LogLevel level = LogLevel.valueOf(lvl.toUpperCase());
 
 		ConcurrentMap<Integer, ConcurrentMap<String, LogLevel>> userMap = userLevels.putIfAbsent(Integer.valueOf(cid), new ConcurrentHashMap<Integer, ConcurrentMap<String, LogLevel>>());
-		ConcurrentMap<String, LogLevel> clazzMap = userMap.putIfAbsent(Integer.valueOf(uid), new ConcurrentHashMap<String, LogLevel>());
+		ConcurrentMap<String, LogLevel> clazzMap = new ConcurrentHashMap<String, LogLevel>();
+		ConcurrentMap<String, LogLevel> otherMap = userMap.putIfAbsent(Integer.valueOf(uid), clazzMap);
+		if (otherMap != null) {
+			clazzMap = otherMap;
+		}
 		if (level == null) {
 			clazzMap.remove(className);
 		} else {
@@ -112,7 +120,12 @@ public class TrackingConfiguration implements TrackingConfigurationMBean {
 	public void setLogLevel(String className, int cid, String lvl) {
 		LogLevel level = LogLevel.valueOf(lvl.toUpperCase());
 
-		ConcurrentMap<String, LogLevel> clazzMap = cidLevels.putIfAbsent(Integer.valueOf(cid), new ConcurrentHashMap<String, LogLevel>());
+		ConcurrentMap<String, LogLevel> clazzMap = new ConcurrentHashMap<String, LogLevel>();
+		ConcurrentMap<String, LogLevel> otherMap = cidLevels.putIfAbsent(Integer.valueOf(cid), clazzMap);
+		if (otherMap != null) {
+			clazzMap = otherMap;
+		}
+
 		if (level == null) {
 			clazzMap.remove(className);
 		} else {

@@ -50,16 +50,14 @@
 package com.openexchange.admin.reseller.rmi.dataobjects;
 
 import java.lang.reflect.Field;
-import java.util.HashSet;
-
-import com.openexchange.admin.rmi.dataobjects.ExtendableDataObject;
+import com.openexchange.admin.rmi.dataobjects.EnforceableDataObject;
 import com.openexchange.admin.rmi.dataobjects.PasswordMechObject;
 
 /**
  * @author choeger
  *
  */
-public class ResellerAdmin extends ExtendableDataObject implements PasswordMechObject,Cloneable {
+public class ResellerAdmin extends EnforceableDataObject implements PasswordMechObject,Cloneable {
 
     /**
      * 
@@ -90,7 +88,7 @@ public class ResellerAdmin extends ExtendableDataObject implements PasswordMechO
 
     private boolean displaynameset = false;
 
-    private HashSet<Restriction> restrictions;
+    private Restriction[] restrictions;
     
     private boolean restrictionsset = false;
     
@@ -288,14 +286,14 @@ public class ResellerAdmin extends ExtendableDataObject implements PasswordMechO
     /**
      * @return the restrictions
      */
-    public final HashSet<Restriction> getRestrictions() {
+    public final Restriction[] getRestrictions() {
         return restrictions;
     }
 
     /**
      * @param restrictions the restrictions to set
      */
-    public final void setRestrictions(final HashSet<Restriction> restrictions) {
+    public final void setRestrictions(final Restriction[] restrictions) {
         this.restrictionsset = true;
         this.restrictions = restrictions;
     }

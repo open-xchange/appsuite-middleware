@@ -51,9 +51,9 @@ package com.openexchange.mail.mime.utils;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.image.ImageActionFactory;
-import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link ImageMatcher}
@@ -104,7 +104,7 @@ public final class ImageMatcher {
             REGEX_FILE_URL = null;
             PATTERN_REF_IMG = null;
         } else {
-            String prefix = ServerServiceRegistry.getInstance().getService(DispatcherPrefixService.class).getPrefix();
+            String prefix = DefaultDispatcherPrefixService.getInstance().getPrefix();
             if (prefix.charAt(0) == '/') {
                 prefix = prefix.substring(1);
             }

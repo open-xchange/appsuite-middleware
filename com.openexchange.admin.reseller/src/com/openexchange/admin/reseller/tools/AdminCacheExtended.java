@@ -49,9 +49,7 @@
 
 package com.openexchange.admin.reseller.tools;
 
-import java.sql.SQLException;
 import com.openexchange.admin.tools.AdminCache;
-import com.openexchange.groupware.impl.IDGenerator.Implementations;
 
 public class AdminCacheExtended extends AdminCache {
 

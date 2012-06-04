@@ -162,11 +162,16 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
         CalendarDataObject appointment = appointment("123-123-123-123");
         appointment.setRecurrenceType(CalendarDataObject.WEEKLY);
         appointment.setInterval(1);
+        appointment.setObjectID(1);
 
         CalendarDataObject ex1 = appointment("123-123-123-123");
+        ex1.setObjectID(101);
         CalendarDataObject ex2 = appointment("123-123-123-123");
+        ex2.setObjectID(102);
         CalendarDataObject ex3 = appointment("123-123-123-123");
+        ex3.setObjectID(103);
         CalendarDataObject ex4 = appointment("123-123-123-123");
+        ex4.setObjectID(104);
 
         SimBuilder integrationBuilder = new SimBuilder();
         integrationBuilder.expectCall("resolveUid", "123-123-123-123", session).andReturn(null);
@@ -208,15 +213,15 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
         assertTrue(changes.get(3).isException());
         assertTrue(changes.get(4).isException());
         
-        assertSame(appointment, changes.get(1).getMasterAppointment());
-        assertSame(appointment, changes.get(2).getMasterAppointment());
-        assertSame(appointment, changes.get(3).getMasterAppointment());
-        assertSame(appointment, changes.get(4).getMasterAppointment());
+        assertEquals(appointment, changes.get(1).getMasterAppointment());
+        assertEquals(appointment, changes.get(2).getMasterAppointment());
+        assertEquals(appointment, changes.get(3).getMasterAppointment());
+        assertEquals(appointment, changes.get(4).getMasterAppointment());
 
-        assertSame(ex1, changes.get(1).getNewAppointment());
-        assertSame(ex2, changes.get(2).getNewAppointment());
-        assertSame(ex3, changes.get(3).getNewAppointment());
-        assertSame(ex4, changes.get(4).getNewAppointment());
+        assertEquals(ex1, changes.get(1).getNewAppointment());
+        assertEquals(ex2, changes.get(2).getNewAppointment());
+        assertEquals(ex3, changes.get(3).getNewAppointment());
+        assertEquals(ex4, changes.get(4).getNewAppointment());
         
         assertActions(analysis, ITipAction.ACCEPT, ITipAction.DECLINE,  ITipAction.TENTATIVE, ITipAction.DELEGATE, ITipAction.COUNTER);
 

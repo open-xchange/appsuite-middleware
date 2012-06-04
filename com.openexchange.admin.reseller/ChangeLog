@@ -1,3 +1,23 @@
+* 2011-10-19 - choeger@open-xchange.com
+
+ - Use the new stabilized SOAP API from SoftwareChange_Request-860
+   This change does NOT introduce any changes to users using the API with perl or php.
+   However, users using the WSDL to generate code must regenerate the code!
+
+* 2011-09-07 - thorben.betten@open-xchange.com
+
+ - Fix for bug #20044: Fixed regular expression to look-up database name
+
+* 2011-09-07 - choeger@open-xchange.com
+
+ - RMI API Change: Restrictions will now be exchanged as Java array and no longer as HashSet
+ - New Feature: Subadmin can create further subadmins (extra permission required, maxdepth: 1) 
+ - add new restrictions using new updaterestrictions commandline
+ 
+* 2011-08-08 - choeger@open-xchange.com
+
+ - Bugfix #20032 - SOAP api breaks when userAttributesForSOAP are set within user object
+
 * 2011-05-16 - dennis.sieben@open-xchange.com
 
  - Bugfix #19253 - com.openexchange.admin.reseller.console.extensionimpl.ContextConsoleChangeImpl

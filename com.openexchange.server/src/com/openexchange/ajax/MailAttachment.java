@@ -129,14 +129,14 @@ public class MailAttachment extends AJAXServlet {
              *
              * IP-Check appropriate for roaming mobile devices?
              */
-            if (false && null != token.getClientIp() && !req.getRemoteAddr().equals(token.getClientIp())) {
+            if (token.isCheckIp() && null != token.getClientIp() && !req.getRemoteAddr().equals(token.getClientIp())) {
                 AttachmentTokenRegistry.getInstance().removeToken(id);
                 throw MailExceptionCode.ATTACHMENT_EXPIRED.create();
             }
             /*
              * At least expect the same user agent as the one which created the attachment token
              */
-            if (!token.isOneTime() && null != token.getUserAgent()) {
+            if (token.isOneTime() && null != token.getUserAgent()) {
                 final String requestUserAgent = req.getHeader("user-agent");
                 if (null == requestUserAgent) {
                     AttachmentTokenRegistry.getInstance().removeToken(id);

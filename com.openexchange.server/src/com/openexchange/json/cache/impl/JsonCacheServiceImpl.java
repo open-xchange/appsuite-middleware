@@ -54,7 +54,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import org.apache.commons.codec.binary.Base64;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -68,10 +67,9 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.sql.DBUtils;
 
-
 /**
  * {@link JsonCacheServiceImpl}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JsonCacheServiceImpl implements JsonCacheService {
@@ -113,11 +111,10 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
             if (!rs.next()) {
                 return null;
             }
-            final String string = rs.getString(1);
-            if ("null".equals(string)) {
+            final String sJson = rs.getString(1);
+            if ("null".equals(sJson)) {
                 return null;
             }
-            final String sJson = new String(Base64.decodeBase64(string), UTF8);
             if ('{' == sJson.charAt(0)) {
                 return new JSONObject(sJson);
             }
@@ -188,10 +185,10 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
             /*
              * Update or insert
              */
-            final String text = new String(Base64.encodeBase64(jsonValue.toString().getBytes(UTF8)), US_ASCII);
+            final String asciiOnly = toJavaNotation(jsonValue.toString());
             if (update) {
                 stmt = con.prepareStatement("UPDATE jsonCache SET json=? WHERE cid=? AND user=? AND id=?");
-                stmt.setString(1, text);
+                stmt.setString(1, asciiOnly);
                 stmt.setInt(2, contextId);
                 stmt.setInt(3, userId);
                 stmt.setString(4, id);
@@ -200,7 +197,7 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
                 stmt.setInt(1, contextId);
                 stmt.setInt(2, userId);
                 stmt.setString(3, id);
-                stmt.setString(4, text);
+                stmt.setString(4, asciiOnly);
             }
             stmt.executeUpdate();
         } catch (final SQLException e) {
@@ -214,7 +211,7 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
     }
 
     @Override
-    public boolean setIfDiffers(final String id, final JSONValue jsonValue, final int userId, final int contextId) throws OXException {
+    public boolean setIfDifferent(final String id, final JSONValue jsonValue, final int userId, final int contextId) throws OXException {
         if (null == jsonValue) {
             return false;
         }
@@ -238,11 +235,10 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
                     update = false;
                 } else {
                     update = true;
-                    final String string = rs.getString(1);
-                    if ("null".equals(string)) {
+                    final String sJson = rs.getString(1);
+                    if ("null".equals(sJson)) {
                         prev = null;
                     } else {
-                        final String sJson = new String(Base64.decodeBase64(string), UTF8);
                         if ('{' == sJson.charAt(0)) {
                             prev = new JSONObject(sJson);
                         } else if ('[' == sJson.charAt(0)) {
@@ -265,10 +261,10 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
             /*
              * Update or insert
              */
-            final String text = new String(Base64.encodeBase64(jsonValue.toString().getBytes(UTF8)), US_ASCII);
+            final String asciiOnly = toJavaNotation(jsonValue.toString());
             if (update) {
                 stmt = con.prepareStatement("UPDATE jsonCache SET json=? WHERE cid=? AND user=? AND id=?");
-                stmt.setString(1, text);
+                stmt.setString(1, asciiOnly);
                 stmt.setInt(2, contextId);
                 stmt.setInt(3, userId);
                 stmt.setString(4, id);
@@ -277,7 +273,7 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
                 stmt.setInt(1, contextId);
                 stmt.setInt(2, userId);
                 stmt.setString(3, id);
-                stmt.setString(4, text);
+                stmt.setString(4, asciiOnly);
             }
             stmt.executeUpdate();
             return true;
@@ -387,6 +383,25 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
             }
             Database.back(contextId, true, con);
         }
+    }
+
+    private static String toJavaNotation(final String unicode) {
+        final int length = unicode.length();
+        final StringBuilder sb = new StringBuilder(length << 1);
+        for (int i = 0; i < length; ++i) {
+            final char a = unicode.charAt(i);
+            if (a > 127) {
+                final String hexString = Integer.toHexString(a);
+                sb.append("\\u");
+                if (2 == hexString.length()) {
+                    sb.append(2 == hexString.length() ? "00" : "");
+                }
+                sb.append(hexString);
+            } else {
+                sb.append(a);
+            }
+        }
+        return sb.toString();
     }
 
 }

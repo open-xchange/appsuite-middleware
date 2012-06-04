@@ -52,6 +52,8 @@ package com.openexchange.ajax.framework;
 import org.apache.http.client.params.ClientPNames;
 import org.apache.http.client.params.CookiePolicy;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 import com.meterware.httpunit.HttpUnitOptions;
 import com.meterware.httpunit.WebConversation;
 
@@ -133,6 +135,12 @@ public class AJAXSession {
 
     public static DefaultHttpClient newHttpClient() {
         DefaultHttpClient retval = new DefaultHttpClient();
+        
+        HttpParams params = retval.getParams();
+        int minute = 1 * 60 * 1000;
+        HttpConnectionParams.setConnectionTimeout(params, minute);
+        HttpConnectionParams.setSoTimeout(params, minute);
+
         retval.getParams().setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.BROWSER_COMPATIBILITY); //OX cookies work with all browsers, meaning they are a mix of the Netscape draft and the RFC
         retval.getParams().setParameter("User-Agent", USER_AGENT); //needs to be consistent
         retval.getParams().setParameter("http.useragent", USER_AGENT); //needs to be consistent

@@ -51,13 +51,13 @@ package com.openexchange.admin.reseller.soap;
 
 import java.rmi.ConnectException;
 import java.rmi.RemoteException;
-import java.util.HashSet;
 import com.openexchange.admin.reseller.rmi.OXResellerInterface;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;
-import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.reseller.soap.dataobjects.ResellerContext;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
@@ -70,7 +70,7 @@ import com.openexchange.admin.soap.OXSOAPRMIMapper;
  * @author choeger
  *
  */
-public class OXReseller extends OXSOAPRMIMapper implements OXResellerInterface {
+public class OXReseller extends OXSOAPRMIMapper {
 
     /**
      * @throws RemoteException
@@ -125,7 +125,7 @@ public class OXReseller extends OXSOAPRMIMapper implements OXResellerInterface {
     /* (non-Javadoc)
      * @see com.openexchange.admin.reseller.rmi.OXResellerInterface#getAvailableRestrictions(com.openexchange.admin.rmi.dataobjects.Credentials)
      */
-    public HashSet<Restriction> getAvailableRestrictions(Credentials creds) throws RemoteException, InvalidCredentialsException, StorageException, OXResellerException {
+    public Restriction[] getAvailableRestrictions(Credentials creds) throws RemoteException, InvalidCredentialsException, StorageException, OXResellerException {
         reconnect();
         try {
             return ((OXResellerInterface)rmistub).getAvailableRestrictions(creds);
@@ -164,10 +164,10 @@ public class OXReseller extends OXSOAPRMIMapper implements OXResellerInterface {
     /* (non-Javadoc)
      * @see com.openexchange.admin.reseller.rmi.OXResellerInterface#getRestrictionsFromContext(com.openexchange.admin.rmi.dataobjects.Context, com.openexchange.admin.rmi.dataobjects.Credentials)
      */
-    public HashSet<Restriction> getRestrictionsFromContext(Context ctx, Credentials creds) throws RemoteException, InvalidDataException, OXResellerException, StorageException, InvalidCredentialsException {
+    public Restriction[] getRestrictionsFromContext(ResellerContext ctx, Credentials creds) throws RemoteException, InvalidDataException, OXResellerException, StorageException, InvalidCredentialsException, DuplicateExtensionException {
         reconnect();
         try {
-            return ((OXResellerInterface)rmistub).getRestrictionsFromContext(ctx, creds);
+            return ((OXResellerInterface)rmistub).getRestrictionsFromContext(ResellerContextUtil.resellerContext2Context(ctx), creds);
         } catch (ConnectException e) {
             reconnect(true);
         }
@@ -222,6 +222,17 @@ public class OXReseller extends OXSOAPRMIMapper implements OXResellerInterface {
         reconnect();
         try {
             ((OXResellerInterface)rmistub).updateDatabaseModuleAccessRestrictions(creds);
+            return;
+        } catch (ConnectException e) {
+            reconnect(true);
+        }
+        throw new RemoteException(RMI_CONNECT_ERROR);
+    }
+
+    public void updateDatabaseRestrictions(Credentials creds) throws RemoteException, StorageException, InvalidCredentialsException, OXResellerException {
+        reconnect();
+        try {
+            ((OXResellerInterface)rmistub).updateDatabaseRestrictions(creds);
             return;
         } catch (ConnectException e) {
             reconnect(true);

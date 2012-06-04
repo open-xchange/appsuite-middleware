@@ -80,7 +80,7 @@ import javax.mail.internet.ParseException;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.net.QuotedPrintableCodec;
-import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.ldap.User;
@@ -355,7 +355,7 @@ public final class MimeMessageUtility {
         if (fromIndex < 0) {
             fromIndex = 0;
         }
-        String prefix = ServerServiceRegistry.getInstance().getService(DispatcherPrefixService.class).getPrefix();
+        String prefix = DefaultDispatcherPrefixService.getInstance().getPrefix();
         if (prefix.charAt(0) == '/') {
             prefix = prefix.substring(1);
         }
@@ -916,7 +916,7 @@ public final class MimeMessageUtility {
     public static String getFileName(final MailPart mailPart) {
         // First look-up content-disposition
         String fileName = mailPart.getContentDisposition().getFilenameParameter();
-        if (null == fileName) {
+        if (isEmpty(fileName)) {
             // Then look-up content-type
             fileName = mailPart.getContentType().getNameParameter();
         }

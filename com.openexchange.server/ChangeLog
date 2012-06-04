@@ -1,3 +1,36 @@
+* 2012-06-04 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22242: Changed error message
+ - Fix for bug 22241: Don't retry to load mail account data with a connection to DB master
+
+* 2012-06-03 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22217: Resolved possible deadlock on session lock
+ - Fix for bug 22226: Perform a delete-if-present operation
+ - Fix for bug 22225: Introduced update task to add missing index to distribution list tables for fast look-up
+
+* 2012-06-02 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22236: Check determined sequence number prior to issuing an IMAP FETCH command
+ - Fix for bug 22237: Checking for possible empty path when writing response cookies
+ - Fix for bug 22165: Dealing with TNEF-encoded nested messages
+
+* 2012-05-31 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22228: Guess Content-Type by file name if broken within client request
+ - Fix for bug 22231: Proper check for possibly empty file name
+
+* 2012-05-31 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 22109: Use default sender address for IMip Mails.
+ - Fix for bug 22098: Added resource tag to mails for resource invitations.
+ - Fix for bug 22124: Invitations in shared IMAP folders.
+
+* 2012-05-25 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22192: Proper decoding of MIME encoded Content-Disposition header
+ - Fix for bug 22191: Discard empty mail in JSON response
+
 * 2012-05-24 - martin.herfurth@open-xchange.com
 
  - Fix for bug 22158: Ignore ITip requests for exceptions on non existing series.

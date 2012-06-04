@@ -54,9 +54,6 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.rmi.server.RMIServerSocketFactory;
 import org.apache.commons.logging.Log;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.log.LogFactory;
-import com.openexchange.rmi.osgi.RMIActivator;
 
 /**
  * {@link LocalServerFactory}
@@ -64,21 +61,25 @@ import com.openexchange.rmi.osgi.RMIActivator;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class LocalServerFactory implements RMIServerSocketFactory {
-    
-    public Log LOG = LogFactory.getLog(LocalServerFactory.class);
+
+    private final Log Log = com.openexchange.log.Log.loggerFor(LocalServerFactory.class);
+
+    private final String hostname;
+
+    public LocalServerFactory(final String hostname) {
+        this.hostname = hostname;
+    }
 
     @Override
     public ServerSocket createServerSocket(final int port) throws IOException {
-        ConfigurationService configService = RMIActivator.getServiceRegistry().getService(ConfigurationService.class);
-        final String hostname = configService.getProperty("com.openexchange.rmi.host", "localhost");
         if (hostname.equalsIgnoreCase("0")) {
-            if (LOG.isInfoEnabled()) {
-                LOG.info("Admindaemon will listen on all network devices!");
+            if (Log.isInfoEnabled()) {
+                Log.info("Admindaemon will listen on all network devices!");
             }
             return new ServerSocket(port, 0, null);
         }
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Admindaemon will listen on " + hostname + "!");
+        if (Log.isInfoEnabled()) {
+            Log.info("Admindaemon will listen on " + hostname + "!");
         }
         return new ServerSocket(port, 0, InetAddress.getByName(hostname));
     }

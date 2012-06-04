@@ -3,90 +3,107 @@ package com.openexchange.oauth.json.proxy;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.exception.OXException;
+import com.openexchange.http.client.HTTPClient;
+import com.openexchange.http.client.builder.HTTPDeleteRequestBuilder;
+import com.openexchange.http.client.builder.HTTPGenericRequestBuilder;
+import com.openexchange.http.client.builder.HTTPGetRequestBuilder;
+import com.openexchange.http.client.builder.HTTPPostRequestBuilder;
+import com.openexchange.http.client.builder.HTTPPutRequestBuilder;
+import com.openexchange.http.client.builder.HTTPRequest;
+import com.openexchange.http.client.builder.HTTPResponse;
+import com.openexchange.oauth.OAuthHTTPClientFactory;
+import com.openexchange.oauth.OAuthService;
+import com.openexchange.oauth.json.proxy.OAuthProxyRequest.HTTPMethod;
 import com.openexchange.tools.session.ServerSession;
 
 public class OAuthProxyAction implements AJAXActionService {
 
+	private OAuthService oauthService;
+	private OAuthHTTPClientFactory clients;
+	
+	public OAuthProxyAction(OAuthService service, OAuthHTTPClientFactory clients){
+		oauthService = service;
+		this.clients = clients;
+	}
+	
 	@Override
 	public AJAXRequestResult perform(AJAXRequestData requestData,
 			ServerSession session) throws OXException {
-		// Builder builder
-		String action = requestData.getAction();
-		if (action.equals("GET")) {
-			return get(/*builder,*/ requestData);
-		} else if (action.equals("PUT")) {
-			return put(/*builder,*/ requestData);
-		} else if (action.equals("POST")) {
-			return post(/*builder,*/ requestData);
-		} else if (action.equals("DELETE")) {
-			return delete(/*builder,*/ requestData);
+		
+		OAuthProxyRequest proxyRequest = new OAuthProxyRequest(requestData, session, oauthService);
+
+		HTTPClient client = clients.create(proxyRequest.getAccount());
+		
+		HTTPMethod method = proxyRequest.getMethod();
+		HTTPRequest httpRequest = null;
+		
+		switch (method) {
+		case GET:
+			httpRequest = buildGet(proxyRequest, client);
+			break;
+		case DELETE:
+			httpRequest = buildDelete(proxyRequest, client);
+			break;
+		case PUT:
+			httpRequest = buildPut(proxyRequest, client);
+			break;
+		case POST:
+			httpRequest = buildPost(proxyRequest, client);
+			break;
+
+		default:
+			break;
 		}
-		return null;
+		HTTPResponse httpResponse = httpRequest.execute();
+		String payload = httpResponse.getPayload(String.class);
+		return new AJAXRequestResult(payload, "string");
 	}
-	
-	public AJAXRequestResult get(/* Builder builder, */ AJAXRequestData req) {
-		/*
-		 * ReqBuilder r = builder.get();
-		 * initURL(r, req);
-		 * initHeader(r, req);
-		 * initParameters(r, req);
-		 * 
-		 */
+
+	private HTTPRequest buildPost(OAuthProxyRequest proxyRequest, HTTPClient client) throws OXException {
 		
-		return null;
-	}
-	
-	public AJAXRequestResult put(/* Builder req, */ AJAXRequestData req) {
-		/*
-		 * ReqBuilder r = builder.put();
-		 * initURL(r, req);
-		 * initHeader(r, req);
-		 * initParameters(r, req);
-		 * initBody(r, req);
-		 */
+		HTTPPostRequestBuilder builder = client.getBuilder().post();
 		
-		return null;
+		buildCommon(proxyRequest, builder);
+
+		return builder.build();
 	}
-	
-	public AJAXRequestResult post(/* Builder req, */ AJAXRequestData req) {
-		/*
-		 * ReqBuilder r = builder.post(); // What about multipart POST ?
-		 * initURL(r, req);
-		 * initHeader(r, req);
-		 * initParameters(r, req);
-		 * initBody(r, req);
-		 */
+
+	private HTTPRequest buildPut(OAuthProxyRequest proxyRequest, HTTPClient client) throws OXException {
 		
-		return null;
-	}
-	
-	public AJAXRequestResult delete(/* Builder req, */ AJAXRequestData req) {
-		/*
-		 * ReqBuilder r = builder.delete();
-		 * initURL(r, req);
-		 * initHeader(r, req);
-		 * initParameters(r, req);
-		 * 
-		 */
+		HTTPPutRequestBuilder builder = client.getBuilder().put();
 		
-		return null;
+		buildCommon(proxyRequest, builder);
+		builder.body(proxyRequest.getBody());
+		return builder.build();
 	}
-	
-	public void initURL(/* r ,*/ AJAXRequestData req) {
+
+	private HTTPRequest buildGet(OAuthProxyRequest proxyRequest,
+			HTTPClient client) throws OXException {
+		
+		HTTPGetRequestBuilder builder = client.getBuilder().get();
+		
+		buildCommon(proxyRequest, builder);
+		
+		return builder.build();
 		
 	}
 	
-	public void initHeader(/* r ,*/ AJAXRequestData req) {
+	private HTTPRequest buildDelete(OAuthProxyRequest proxyRequest,
+			HTTPClient client) throws OXException {
 		
-	}
-	
-	public void initParameters(/* r ,*/ AJAXRequestData req) {
+		HTTPDeleteRequestBuilder builder = client.getBuilder().delete();
 		
-	}
-	
-	public void initBody(/* r ,*/ AJAXRequestData req) {
+		buildCommon(proxyRequest, builder);
+		
+		return builder.build();
 		
 	}
 
+	private void buildCommon(OAuthProxyRequest proxyRequest,
+			HTTPGenericRequestBuilder<?> builder) throws OXException {
+		builder.url(proxyRequest.getUrl()).headers(proxyRequest.getHeaders()).parameters(proxyRequest.getParameters());
+	}
+	
 }

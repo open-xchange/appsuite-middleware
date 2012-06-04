@@ -305,5 +305,17 @@ public class DefaultDispatcher implements Dispatcher {
         }
 		return actionMetadata.allowPublicSession();
 	}
+	
+	public boolean mayOmitSession(String module, String action) throws OXException {
+		final AJAXActionServiceFactory factory = lookupFactory(module);
+        if (factory == null) {
+            return false;
+        }
+        final DispatcherNotes actionMetadata = getActionMetadata(factory.createActionService(action));
+        if (actionMetadata == null) {
+        	return false;
+        }
+		return actionMetadata.noSession();
+	}
 
 }

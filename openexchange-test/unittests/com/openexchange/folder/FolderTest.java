@@ -60,7 +60,6 @@ public class FolderTest extends TestCase {
             return uStorage.getUserId(user, ctx);
         } catch (final Throwable t) {
             t.printStackTrace();
-            System.exit(1);
             return -1;
         }
     }

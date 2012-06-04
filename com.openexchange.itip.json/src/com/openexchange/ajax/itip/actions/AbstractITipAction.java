@@ -88,7 +88,9 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public abstract class AbstractITipAction implements AJAXActionService{
-    
+
+    private static final String OWNER = "com.openexchange.conversion.owner";
+
     protected static final Log LOG = LogFactory.getLog(AbstractITipAction.class);
 
     protected ServiceLookup services;
@@ -110,7 +112,12 @@ public abstract class AbstractITipAction implements AJAXActionService{
         String optTimezone = request.getParameter("timezone");
 		TimeZone tz = TimeZone.getTimeZone(optTimezone != null ? optTimezone : session.getUser().getTimeZone());
         Map<String, String> mailHeader = new HashMap<String, String>();
-        List<ITipMessage> messages = itipParser.parseMessage(getInputStreamAndFillMailHeader(request, session, mailHeader), tz, session.getContext(), errors, warnings);
+        InputStream stream = getInputStreamAndFillMailHeader(request, session, mailHeader);
+        int owner = 0;
+        if (mailHeader.containsKey(OWNER)) {
+            owner = Integer.parseInt(mailHeader.get(OWNER));
+        }
+        List<ITipMessage> messages = itipParser.parseMessage(stream, tz, session.getContext(), owner, errors, warnings);
 
         List<ITipAnalysis> analysis = analyzer.analyze(messages, request.getParameter("descriptionFormat"), session, mailHeader);
         Object result;
@@ -173,6 +180,10 @@ public abstract class AbstractITipAction implements AJAXActionService{
         for (String key : properties.keySet()) {
             if (key.startsWith(DataProperties.PROPERTY_EMAIL_HEADER_PREFIX)) {
                 mailHeader.put(key.substring(DataProperties.PROPERTY_EMAIL_HEADER_PREFIX.length() + 1, key.length()), properties.get(key));
+            }
+            
+            if (key.equals(OWNER)) {
+                mailHeader.put(OWNER, properties.get(OWNER));
             }
         }
     }

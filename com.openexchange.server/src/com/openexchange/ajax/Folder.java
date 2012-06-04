@@ -87,6 +87,7 @@ import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.helper.ParamContainer;
 import com.openexchange.ajax.parser.FolderParser;
 import com.openexchange.ajax.parser.MessagingFolderParser;
+import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.ajax.writer.FolderWriter;
 import com.openexchange.ajax.writer.FolderWriter.FolderFieldWriter;
 import com.openexchange.ajax.writer.MessagingFolderWriter;
@@ -95,7 +96,6 @@ import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.api2.FolderSQLInterface;
 import com.openexchange.api2.RdbFolderSQLInterface;
 import com.openexchange.cache.impl.FolderCacheManager;
-import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Generic;
@@ -263,7 +263,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
         } else if (actionStr.equalsIgnoreCase(ACTION_GET)) {
             actionGetFolder(req, resp);
         } else {
-            throw getWrappingOXException(new Exception("Action \"" + actionStr + "\" NOT supported via GET on "+ServerServiceRegistry.getInstance().getService(DispatcherPrefixService.class).getPrefix() + "folders"));
+            throw getWrappingOXException(new Exception("Action \"" + actionStr + "\" NOT supported via GET on "+DefaultDispatcherPrefixService.getInstance().getPrefix() + "folders"));
         }
     }
 
@@ -283,7 +283,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
         } else if (actionStr.equalsIgnoreCase("removetestfolders")) {
             actionPutRemoveTestFolder(req, resp);
         } else {
-            throw getWrappingOXException(new Exception("Action \"" + actionStr + "\" NOT supported via PUT on "+ServerServiceRegistry.getInstance().getService(DispatcherPrefixService.class).getPrefix() + "folders"));
+            throw getWrappingOXException(new Exception("Action \"" + actionStr + "\" NOT supported via PUT on "+DefaultDispatcherPrefixService.getInstance().getPrefix() + "folders"));
         }
     }
 

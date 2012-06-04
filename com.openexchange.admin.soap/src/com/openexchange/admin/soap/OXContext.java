@@ -96,11 +96,11 @@ public class OXContext extends OXSOAPRMIMapper {
      * @throws StorageException
      * @throws InvalidDataException
      */
-    public void change(Context ctx, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
+    public void change(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
         reconnect();
         try {
             ((OXContextInterface)rmistub).change(SOAPUtils.soapContext2Context(ctx), auth);
-        } catch( ConnectException e) {
+        } catch( final ConnectException e) {
             reconnect(true);
             ((OXContextInterface)rmistub).change(SOAPUtils.soapContext2Context(ctx), auth);
         }
@@ -118,11 +118,11 @@ public class OXContext extends OXSOAPRMIMapper {
      * @throws StorageException
      * @throws InvalidDataException
      */
-    public void changeModuleAccess(Context ctx, UserModuleAccess access, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
+    public void changeModuleAccess(final Context ctx, final UserModuleAccess access, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
         reconnect();
         try {
             ((OXContextInterface)rmistub).changeModuleAccess(SOAPUtils.soapContext2Context(ctx), SOAPUtils.soapModuleAccess2ModuleAccess(access), auth);
-        } catch( ConnectException e) {
+        } catch( final ConnectException e) {
             reconnect(true);
             ((OXContextInterface)rmistub).changeModuleAccess(SOAPUtils.soapContext2Context(ctx), SOAPUtils.soapModuleAccess2ModuleAccess(access), auth);
         }
@@ -140,11 +140,11 @@ public class OXContext extends OXSOAPRMIMapper {
      * @throws StorageException
      * @throws InvalidDataException
      */
-    public void changeModuleAccessByName(Context ctx, String access_combination_name, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
+    public void changeModuleAccessByName(final Context ctx, final String access_combination_name, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
         reconnect();
         try {
             ((OXContextInterface)rmistub).changeModuleAccess(SOAPUtils.soapContext2Context(ctx), access_combination_name, auth);
-        } catch( ConnectException e) {
+        } catch( final ConnectException e) {
             reconnect(true);
             ((OXContextInterface)rmistub).changeModuleAccess(SOAPUtils.soapContext2Context(ctx), access_combination_name, auth);
         }
@@ -163,11 +163,11 @@ public class OXContext extends OXSOAPRMIMapper {
      * @throws InvalidDataException
      * @throws ContextExistsException
      */
-    public Context create(Context ctx, User admin_user, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
+    public Context create(final Context ctx, final User admin_user, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
         reconnect();
         try {
             return new Context(((OXContextInterface)rmistub).create(SOAPUtils.soapContext2Context(ctx), SOAPUtils.soapUser2User(admin_user), auth));
-        } catch( ConnectException e) {
+        } catch( final ConnectException e) {
             reconnect(true);
             return new Context(((OXContextInterface)rmistub).create(SOAPUtils.soapContext2Context(ctx), SOAPUtils.soapUser2User(admin_user), auth));
         }
@@ -187,11 +187,11 @@ public class OXContext extends OXSOAPRMIMapper {
      * @throws InvalidDataException
      * @throws ContextExistsException
      */
-    public Context createModuleAccessByName(Context ctx, User admin_user, String access_combination_name, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
+    public Context createModuleAccessByName(final Context ctx, final User admin_user, final String access_combination_name, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
         reconnect();
         try {
             return new Context(((OXContextInterface)rmistub).create(SOAPUtils.soapContext2Context(ctx), SOAPUtils.soapUser2User(admin_user), access_combination_name, auth));
-        } catch( ConnectException e) {
+        } catch( final ConnectException e) {
             reconnect(true);
             return new Context(((OXContextInterface)rmistub).create(SOAPUtils.soapContext2Context(ctx), SOAPUtils.soapUser2User(admin_user), access_combination_name, auth));
         }
@@ -211,11 +211,11 @@ public class OXContext extends OXSOAPRMIMapper {
      * @throws InvalidDataException
      * @throws ContextExistsException
      */
-    public Context createModuleAccess(Context ctx, User admin_user, UserModuleAccess access, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
+    public Context createModuleAccess(final Context ctx, final User admin_user, final UserModuleAccess access, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
         reconnect();
         try {
             return new Context(((OXContextInterface)rmistub).create(SOAPUtils.soapContext2Context(ctx), SOAPUtils.soapUser2User(admin_user), SOAPUtils.soapModuleAccess2ModuleAccess(access), auth));
-        } catch( ConnectException e) {
+        } catch( final ConnectException e) {
             reconnect(true);
             return new Context(((OXContextInterface)rmistub).create(SOAPUtils.soapContext2Context(ctx), SOAPUtils.soapUser2User(admin_user), SOAPUtils.soapModuleAccess2ModuleAccess(access), auth));
         }
@@ -233,11 +233,11 @@ public class OXContext extends OXSOAPRMIMapper {
      * @throws DatabaseUpdateException
      * @throws InvalidDataException
      */
-    public void delete(Context ctx, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, DatabaseUpdateException, InvalidDataException {
+    public void delete(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, DatabaseUpdateException, InvalidDataException {
         reconnect();
         try {
             ((OXContextInterface)rmistub).delete(SOAPUtils.soapContext2Context(ctx), auth);
-        } catch( ConnectException e) {
+        } catch( final ConnectException e) {
             reconnect(true);
             ((OXContextInterface)rmistub).delete(SOAPUtils.soapContext2Context(ctx), auth);
         }
@@ -256,11 +256,11 @@ public class OXContext extends OXSOAPRMIMapper {
      * @throws NoSuchReasonException
      * @throws OXContextException
      */
-    public void disable(Context ctx, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, NoSuchReasonException, OXContextException {
+    public void disable(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, NoSuchReasonException, OXContextException {
         reconnect();
         try {
             ((OXContextInterface)rmistub).disable(SOAPUtils.soapContext2Context(ctx), auth);
-        } catch( ConnectException e) {
+        } catch( final ConnectException e) {
             reconnect(true);
             ((OXContextInterface)rmistub).disable(SOAPUtils.soapContext2Context(ctx), auth);
         }
@@ -276,11 +276,11 @@ public class OXContext extends OXSOAPRMIMapper {
      * @throws InvalidDataException
      * @throws NoSuchReasonException
      */
-    public void disableAll(Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchReasonException {
+    public void disableAll(final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchReasonException {
         reconnect();
         try {
             ((OXContextInterface)rmistub).disableAll(auth);
-        } catch( ConnectException e) {
+        } catch( final ConnectException e) {
             reconnect(true);
             ((OXContextInterface)rmistub).disableAll(auth);
         }
@@ -298,11 +298,11 @@ public class OXContext extends OXSOAPRMIMapper {
      * @throws DatabaseUpdateException
      * @throws InvalidDataException
      */
-    public void downgrade(Context ctx, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, DatabaseUpdateException, InvalidDataException {
+    public void downgrade(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, DatabaseUpdateException, InvalidDataException {
         reconnect();
         try {
             ((OXContextInterface)rmistub).downgrade(SOAPUtils.soapContext2Context(ctx), auth);
-        } catch( ConnectException e) {
+        } catch( final ConnectException e) {
             reconnect(true);
             ((OXContextInterface)rmistub).downgrade(SOAPUtils.soapContext2Context(ctx), auth);
         }
@@ -319,11 +319,11 @@ public class OXContext extends OXSOAPRMIMapper {
      * @throws StorageException
      * @throws InvalidDataException
      */
-    public void enable(Context ctx, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
+    public void enable(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
         reconnect();
         try {
             ((OXContextInterface)rmistub).enable(SOAPUtils.soapContext2Context(ctx), auth);
-        } catch( ConnectException e) {
+        } catch( final ConnectException e) {
             reconnect(true);
             ((OXContextInterface)rmistub).enable(SOAPUtils.soapContext2Context(ctx), auth);
         }
@@ -337,11 +337,11 @@ public class OXContext extends OXSOAPRMIMapper {
      * @throws StorageException
      * @throws InvalidCredentialsException
      */
-    public void enableAll(Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException {
+    public void enableAll(final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException {
         reconnect();
         try {
             ((OXContextInterface)rmistub).enableAll(auth);
-        } catch( ConnectException e) {
+        } catch( final ConnectException e) {
             reconnect(true);
             ((OXContextInterface)rmistub).enableAll(auth);
         }
@@ -359,11 +359,11 @@ public class OXContext extends OXSOAPRMIMapper {
      * @throws StorageException
      * @throws InvalidDataException
      */
-    public String getAccessCombinationName(Context ctx, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
+    public String getAccessCombinationName(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
         reconnect();
         try {
             return ((OXContextInterface)rmistub).getAccessCombinationName(SOAPUtils.soapContext2Context(ctx), auth);
-        } catch( ConnectException e) {
+        } catch( final ConnectException e) {
             reconnect(true);
             return ((OXContextInterface)rmistub).getAccessCombinationName(SOAPUtils.soapContext2Context(ctx), auth);
         }
@@ -381,11 +381,11 @@ public class OXContext extends OXSOAPRMIMapper {
      * @throws StorageException
      * @throws InvalidDataException
      */
-    public Context getData(Context ctx, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
+    public Context getData(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
         reconnect();
         try {
             return new Context(((OXContextInterface)rmistub).getData(SOAPUtils.soapContext2Context(ctx), auth));
-        } catch( ConnectException e) {
+        } catch( final ConnectException e) {
             reconnect(true);
             return new Context(((OXContextInterface)rmistub).getData(SOAPUtils.soapContext2Context(ctx), auth));
         }
@@ -403,11 +403,11 @@ public class OXContext extends OXSOAPRMIMapper {
      * @throws StorageException
      * @throws InvalidDataException
      */
-    public UserModuleAccess getModuleAccess(Context ctx, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
+    public UserModuleAccess getModuleAccess(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
         reconnect();
         try {
             return new UserModuleAccess(((OXContextInterface)rmistub).getModuleAccess(SOAPUtils.soapContext2Context(ctx), auth));
-        } catch( ConnectException e) {
+        } catch( final ConnectException e) {
             reconnect(true);
             return new UserModuleAccess(((OXContextInterface)rmistub).getModuleAccess(SOAPUtils.soapContext2Context(ctx), auth));
         }
@@ -424,11 +424,11 @@ public class OXContext extends OXSOAPRMIMapper {
      * @throws InvalidCredentialsException
      * @throws InvalidDataException
      */
-    public Context[] list(String search_pattern, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+    public Context[] list(final String search_pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         reconnect();
         try {
             return SOAPUtils.contexts2SoapContexts(((OXContextInterface)rmistub).list(search_pattern, auth));
-        } catch( ConnectException e) {
+        } catch( final ConnectException e) {
             reconnect(true);
             return SOAPUtils.contexts2SoapContexts(((OXContextInterface)rmistub).list(search_pattern, auth));
         }
@@ -444,11 +444,11 @@ public class OXContext extends OXSOAPRMIMapper {
      * @throws InvalidCredentialsException
      * @throws InvalidDataException
      */
-    public Context[] listAll(Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+    public Context[] listAll(final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         reconnect();
         try {
             return SOAPUtils.contexts2SoapContexts(((OXContextInterface)rmistub).listAll(auth));
-        } catch( ConnectException e) {
+        } catch( final ConnectException e) {
             reconnect(true);
             return SOAPUtils.contexts2SoapContexts(((OXContextInterface)rmistub).listAll(auth));
         }
@@ -466,11 +466,11 @@ public class OXContext extends OXSOAPRMIMapper {
      * @throws InvalidDataException
      * @throws NoSuchDatabaseException
      */
-    public Context[] listByDatabase(Database db, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchDatabaseException {
+    public Context[] listByDatabase(final Database db, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchDatabaseException {
         reconnect();
         try {
             return SOAPUtils.contexts2SoapContexts(((OXContextInterface)rmistub).listByDatabase(SOAPUtils.soapDatabase2Database(db), auth));
-        } catch( ConnectException e) {
+        } catch( final ConnectException e) {
             reconnect(true);
             return SOAPUtils.contexts2SoapContexts(((OXContextInterface)rmistub).listByDatabase(SOAPUtils.soapDatabase2Database(db), auth));
         }
@@ -488,11 +488,11 @@ public class OXContext extends OXSOAPRMIMapper {
      * @throws InvalidDataException
      * @throws NoSuchFilestoreException
      */
-    public Context[] listByFilestore(Filestore fs, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchFilestoreException {
+    public Context[] listByFilestore(final Filestore fs, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchFilestoreException {
         reconnect();
         try {
             return SOAPUtils.contexts2SoapContexts(((OXContextInterface)rmistub).listByFilestore(SOAPUtils.soapFilestore2Filestore(fs), auth));
-        } catch( ConnectException e) {
+        } catch( final ConnectException e) {
             reconnect(true);
             return SOAPUtils.contexts2SoapContexts(((OXContextInterface)rmistub).listByFilestore(SOAPUtils.soapFilestore2Filestore(fs), auth));
         }
@@ -513,11 +513,11 @@ public class OXContext extends OXSOAPRMIMapper {
      * @throws DatabaseUpdateException
      * @throws OXContextException
      */
-    public int moveContextDatabase(Context ctx, Database dst_database_id, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, OXContextException {
+    public int moveContextDatabase(final Context ctx, final Database dst_database_id, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, OXContextException {
         reconnect();
         try {
             return ((OXContextInterface)rmistub).moveContextDatabase(SOAPUtils.soapContext2Context(ctx), SOAPUtils.soapDatabase2Database(dst_database_id), auth);
-        } catch( ConnectException e) {
+        } catch( final ConnectException e) {
             reconnect(true);
             return ((OXContextInterface)rmistub).moveContextDatabase(SOAPUtils.soapContext2Context(ctx), SOAPUtils.soapDatabase2Database(dst_database_id), auth);
         }
@@ -539,11 +539,11 @@ public class OXContext extends OXSOAPRMIMapper {
      * @throws NoSuchReasonException
      * @throws OXContextException
      */
-    public int moveContextFilestore(Context ctx, Filestore dst_filestore_id, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, NoSuchFilestoreException, NoSuchReasonException, OXContextException {
+    public int moveContextFilestore(final Context ctx, final Filestore dst_filestore_id, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, NoSuchFilestoreException, NoSuchReasonException, OXContextException {
         reconnect();
         try {
             return ((OXContextInterface)rmistub).moveContextFilestore(SOAPUtils.soapContext2Context(ctx), SOAPUtils.soapFilestore2Filestore(dst_filestore_id), auth);
-        } catch( ConnectException e) {
+        } catch( final ConnectException e) {
             reconnect(true);
             return ((OXContextInterface)rmistub).moveContextFilestore(SOAPUtils.soapContext2Context(ctx), SOAPUtils.soapFilestore2Filestore(dst_filestore_id), auth);
         }
@@ -558,12 +558,13 @@ public class OXContext extends OXSOAPRMIMapper {
      * @throws RemoteException
      * @throws InvalidCredentialsException
      * @throws StorageException
+     * @throws NoSuchContextException 
      */
-    public int getAdminId(Context ctx, Credentials auth) throws RemoteException, InvalidCredentialsException, StorageException {
+    public int getAdminId(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, StorageException, NoSuchContextException {
         reconnect();
         try {
             return ((OXContextInterface)rmistub).getAdminId(SOAPUtils.soapContext2Context(ctx), auth);
-        } catch( ConnectException e) {
+        } catch( final ConnectException e) {
             reconnect(true);
             return ((OXContextInterface)rmistub).getAdminId(SOAPUtils.soapContext2Context(ctx), auth);
         }

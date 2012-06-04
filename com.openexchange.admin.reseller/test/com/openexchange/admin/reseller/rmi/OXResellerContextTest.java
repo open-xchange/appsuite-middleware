@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.reseller.rmi;
 
 import static org.junit.Assert.assertEquals;
@@ -54,7 +55,6 @@ import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.util.HashSet;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -91,11 +91,6 @@ public class OXResellerContextTest extends OXResellerAbstractTest {
     public static void cleanup() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchContextException, DatabaseUpdateException, OXResellerException {
         final Credentials creds = DummyMasterCredentials();
 
-        final Context[] ctxs = oxctx.list("*", creds);
-        for(final Context ctx : ctxs) {
-            oxctx.delete(ctx, creds);
-        }
-        
         final ResellerAdmin[] adms = oxresell.list("*", creds);
         for(final ResellerAdmin adm : adms) {
             oxresell.delete(adm, creds);
@@ -131,9 +126,7 @@ public class OXResellerContextTest extends OXResellerAbstractTest {
         final Credentials creds = DummyMasterCredentials();
 
         ResellerAdmin adm = FooAdminUser();
-        HashSet<Restriction> res = new HashSet<Restriction>();
-        res.add(MaxContextRestriction());
-        adm.setRestrictions(res);
+        adm.setRestrictions(new Restriction[]{ MaxContextRestriction() });
         oxresell.create(adm, creds);
 
         Context ctx1 = createContext(ResellerFooCredentials());
@@ -161,9 +154,7 @@ public class OXResellerContextTest extends OXResellerAbstractTest {
         final Credentials creds = DummyMasterCredentials();
 
         ResellerAdmin adm = FooAdminUser();
-        HashSet<Restriction> res = new HashSet<Restriction>();
-        res.add(MaxOverallUserRestriction(2));
-        adm.setRestrictions(res);
+        adm.setRestrictions(new Restriction[]{MaxOverallUserRestriction(2)});
         oxresell.create(adm, creds);
 
         Context ctx1 = null;
@@ -187,9 +178,7 @@ public class OXResellerContextTest extends OXResellerAbstractTest {
         final Credentials creds = DummyMasterCredentials();
 
         ResellerAdmin adm = FooAdminUser();
-        HashSet<Restriction> res = new HashSet<Restriction>();
-        res.add(MaxOverallUserRestriction(2));
-        adm.setRestrictions(res);
+        adm.setRestrictions(new Restriction[]{MaxOverallUserRestriction(2)});
         oxresell.create(adm, creds);
 
         Context ctx1 = createContext(ResellerFooCredentials());

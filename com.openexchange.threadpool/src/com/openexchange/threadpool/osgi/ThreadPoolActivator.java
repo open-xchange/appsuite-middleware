@@ -102,7 +102,7 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ThreadPoolActivator.class));
+        final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(ThreadPoolActivator.class);
         try {
             if (LOG.isInfoEnabled()) {
                 LOG.info("starting bundle: com.openexchange.threadpool");
@@ -122,7 +122,6 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
              * Service trackers
              */
             track(ManagementService.class, new ManagementServiceTrackerCustomizer(context, threadPool));
-            openTrackers();
             /*
              * Register
              */            
@@ -130,11 +129,27 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
             registerService(ThreadPoolService.class, threadPool);            
             registerService(TimerService.class, new CustomThreadPoolExecutorTimerService(threadPool.getThreadPoolExecutor()));
             registerService(LogService.class, logService);
-            // Register SessionThreadCounter service
+            /*
+             * Register SessionThreadCounter service
+             */
             final int notifyThreashold = getService(ConfigurationService.class).getIntProperty("com.openexchange.session.maxThreadNotifyThreshold", -1);
             final SessionThreadCounterImpl counterImpl = new SessionThreadCounterImpl(notifyThreashold, this);
             registerService(SessionThreadCounter.class, counterImpl);
             SessionThreadCounter.REFERENCE.set(counterImpl);
+            /*
+             * Event handler for session count events
+             */
+            {
+                final SessionThreadCountEventHandler handler = new SessionThreadCountEventHandler(context, notifyThreashold, counterImpl);
+                rememberTracker(handler);
+                final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
+                dict.put(EventConstants.EVENT_TOPIC, SessionThreadCounter.EVENT_TOPIC);
+                registerService(EventHandler.class, handler, dict);
+                track(ManagementService.class, new ManagementServiceTrackerCustomizer2(context, counterImpl, handler));
+            }
+            /*
+             * Event handler for session events
+             */
             {
                 final EventHandler sessionEventHandler = new EventHandler() {
 
@@ -168,6 +183,10 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
                 dict.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
                 registerService(EventHandler.class, sessionEventHandler, dict);
             }
+            /*
+             * Open service trackers
+             */
+            openTrackers();
         } catch (final Exception e) {
             LOG.error("Failed start-up of bundle com.openexchange.threadpool: " + e.getMessage(), e);
             throw e;
@@ -220,7 +239,7 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ThreadPoolActivator.class));
+        final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(ThreadPoolActivator.class);
         try {
             if (LOG.isInfoEnabled()) {
                 LOG.info("stopping bundle: com.openexchange.threadpool");

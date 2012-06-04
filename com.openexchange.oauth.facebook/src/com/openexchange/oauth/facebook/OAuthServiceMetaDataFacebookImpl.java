@@ -61,6 +61,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.http.deferrer.DeferringURLService;
+import com.openexchange.oauth.API;
 import com.openexchange.oauth.AbstractOAuthServiceMetaData;
 import com.openexchange.oauth.DefaultOAuthToken;
 import com.openexchange.oauth.OAuthConstants;
@@ -202,5 +203,10 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
         }
         return new DefaultOAuthToken(token, "");
     }
+
+	@Override
+	public API getAPI() {
+		return API.FACEBOOK;
+	}
 
 }

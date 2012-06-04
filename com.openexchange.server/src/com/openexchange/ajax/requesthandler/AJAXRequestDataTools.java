@@ -310,7 +310,11 @@ public class AJAXRequestDataTools {
         if (lastIndex > 0) {
             pathInfo = pathInfo.substring(0, lastIndex);
         }
-        return pathInfo.substring(prefix.length());
+        String module = pathInfo.substring(prefix.length());
+        if (module.endsWith("/")) {
+        	module = module.substring(0, module.length()-1);
+        }
+        return module;
     }
 
     /**

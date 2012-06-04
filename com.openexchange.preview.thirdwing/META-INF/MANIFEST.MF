@@ -25,7 +25,6 @@ DynamicImport-Package: *
 Bundle-ClassPath: .,
  lib/thirdwing.jar,
  lib/ecs-1.4.2.jar,
- lib/xml-apis.jar,
  lib/dom4j-1.6.1.jar,
  lib/jsr173_1.0_api.jar,
  lib/xmlbeans-2.3.0.jar,
@@ -40,4 +39,5 @@ Bundle-ClassPath: .,
  lib/2007core.jar,
  lib/common.jar,
  lib/PDFRenderer-0.9.1.jar,
- lib/visitors.jar
+ lib/visitors.jar,
+ lib/pdfbox-app-1.6.0.jar

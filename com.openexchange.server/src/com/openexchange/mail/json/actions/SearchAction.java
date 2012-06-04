@@ -172,11 +172,13 @@ public final class SearchAction extends AbstractMailAction {
                             final int size = it.size();
                             for (int i = 0; i < size; i++) {
                                 final MailMessage mail = it.next();
-                                final JSONArray arr = new JSONArray();
-                                for (final MailFieldWriter writer : writers) {
-                                    writer.writeField(arr, mail, 0, false, mailInterface.getAccountID(), userId, contextId);
+                                if (mail != null && !mail.isDeleted()) {
+                                    final JSONArray arr = new JSONArray();
+                                    for (final MailFieldWriter writer : writers) {
+                                        writer.writeField(arr, mail, 0, false, mailInterface.getAccountID(), userId, contextId);
+                                    }
+                                    jsonWriter.value(arr);
                                 }
-                                jsonWriter.value(arr);
                             }
                         } else {
                             final int sortCol = sort == null ? MailListField.RECEIVED_DATE.getField() : Integer.parseInt(sort);
@@ -184,11 +186,13 @@ public final class SearchAction extends AbstractMailAction {
                             final int size = it.size();
                             for (int i = 0; i < size; i++) {
                                 final MailMessage mail = it.next();
-                                final JSONArray arr = new JSONArray();
-                                for (final MailFieldWriter writer : writers) {
-                                    writer.writeField(arr, mail, 0, false, mailInterface.getAccountID(), userId, contextId);
+                                if (mail != null && !mail.isDeleted()) {
+                                    final JSONArray arr = new JSONArray();
+                                    for (final MailFieldWriter writer : writers) {
+                                        writer.writeField(arr, mail, 0, false, mailInterface.getAccountID(), userId, contextId);
+                                    }
+                                    jsonWriter.value(arr);
                                 }
-                                jsonWriter.value(arr);
                             }
                         }
                     } finally {
@@ -230,11 +234,13 @@ public final class SearchAction extends AbstractMailAction {
                 jsonWriter.array();
                 for (int i = 0; i < size; i++) {
                     final MailMessage mail = it.next();
-                    final JSONArray arr = new JSONArray();
-                    for (final MailFieldWriter writer : writers) {
-                        writer.writeField(arr, mail, 0, false, mailInterface.getAccountID(), userId, contextId);
+                    if (mail != null && !mail.isDeleted()) {
+                        final JSONArray arr = new JSONArray();
+                        for (final MailFieldWriter writer : writers) {
+                            writer.writeField(arr, mail, 0, false, mailInterface.getAccountID(), userId, contextId);
+                        }
+                        jsonWriter.value(arr);
                     }
-                    jsonWriter.value(arr);
                 }
                 jsonWriter.endArray();
                 result = new AJAXRequestResult(jsonWriter.getObject(), "json");

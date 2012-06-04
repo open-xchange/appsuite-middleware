@@ -66,6 +66,9 @@ import com.openexchange.java.Charsets;
  */
 public final class JsonCaches {
 
+    private static final String ALGORITHM_MD5 = "MD5";
+    private static final String ALGORITHM_SHA1 = "SHA1";
+
     /**
      * The cache reference for fast look-up.
      */
@@ -97,8 +100,25 @@ public final class JsonCaches {
         if (null == args || 0 == args.length) {
             return "";
         }
+        return getCheckSum(ALGORITHM_MD5, args);
+    }
+
+    /**
+     * Gets the SHA1 sum of passed arguments.
+     * 
+     * @param args The arguments
+     * @return The SHA1 sum's hex representation
+     */
+    public static String getSHA1Sum(final String... args) {
+        if (null == args || 0 == args.length) {
+            return "";
+        }
+        return getCheckSum(ALGORITHM_SHA1, args);
+    }
+
+    private static String getCheckSum(final String algorithm, final String[] args) {
         try {
-            final MessageDigest md = MessageDigest.getInstance("MD5");
+            final MessageDigest md = MessageDigest.getInstance(algorithm);
             for (final String arg : args) {
                 if (null != arg) {
                     md.update(arg.getBytes(Charsets.UTF_8));

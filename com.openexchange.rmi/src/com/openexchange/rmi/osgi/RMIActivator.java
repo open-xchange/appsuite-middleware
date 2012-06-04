@@ -52,11 +52,8 @@ package com.openexchange.rmi.osgi;
 import java.rmi.Remote;
 import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceRegistry;
-import com.openexchange.rmi.RMITracker;
 
 /**
  * {@link RMIService}
@@ -65,15 +62,15 @@ import com.openexchange.rmi.RMITracker;
  */
 public class RMIActivator extends HousekeepingActivator {
 
-    private static Log log = LogFactory.getLog(RMIActivator.class);
+    private static final Log log = com.openexchange.log.Log.loggerFor(RMIActivator.class);
 
     private static ServiceRegistry serviceRegistry;
 
-    private RMITracker rmiTracker;
+    private RMITrackerCustomizer rmiTrackerCustomizer;
 
     @Override
     protected Class<?>[] getNeededServices() {
-        Class<?>[] needed = new Class<?>[] { ConfigurationService.class };
+        final Class<?>[] needed = new Class<?>[] { ConfigurationService.class };
         return needed;
     }
 
@@ -82,15 +79,15 @@ public class RMIActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void startBundle() throws OXException {
+    protected void startBundle() {
         log.info("Starting bundle com.openexchange.rmi");
         serviceRegistry = new ServiceRegistry();
-        for (Class<?> clazz : getNeededServices()) {
-            Object service = getService(clazz);
+        for (final Class<?> clazz : getNeededServices()) {
+            final Object service = getService(clazz);
             serviceRegistry.addService(clazz, service);
         }
-        rmiTracker = new RMITracker(context);
-        track(Remote.class, rmiTracker);
+        rmiTrackerCustomizer = new RMITrackerCustomizer(context);
+        track(Remote.class, rmiTrackerCustomizer);
         openTrackers();
     }
 
@@ -101,12 +98,10 @@ public class RMIActivator extends HousekeepingActivator {
             serviceRegistry.clearRegistry();
             serviceRegistry = null;
         }
-        if (rmiTracker != null) {
-            rmiTracker.close();
-            rmiTracker = null;
+        if (rmiTrackerCustomizer != null) {
+            rmiTrackerCustomizer = null;
         }
         closeTrackers();
         cleanUp();
     }
-
 }

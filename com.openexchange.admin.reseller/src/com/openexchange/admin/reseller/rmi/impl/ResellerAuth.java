@@ -53,7 +53,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
+import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.admin.plugins.BasicAuthenticatorPluginInterface;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;

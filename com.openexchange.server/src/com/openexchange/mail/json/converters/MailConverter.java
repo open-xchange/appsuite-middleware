@@ -77,9 +77,8 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.ThreadedStructure;
 import com.openexchange.mail.json.MailActionConstants;
 import com.openexchange.mail.json.MailRequest;
+import com.openexchange.mail.json.MailRequestSha1Calculator;
 import com.openexchange.mail.json.actions.AbstractMailAction;
-import com.openexchange.mail.json.actions.AllAction;
-import com.openexchange.mail.json.actions.SimpleThreadStructureAction;
 import com.openexchange.mail.json.writer.MessageWriter;
 import com.openexchange.mail.json.writer.MessageWriter.MailFieldWriter;
 import com.openexchange.mail.mime.MimeFilter;
@@ -239,14 +238,15 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         final boolean cache = req.optBool("cache", false);
         if (cache) {
             final JsonCacheService jsonCache = JsonCaches.getCache();
-            if (null != jsonCache) {
-                final String md5Sum = SimpleThreadStructureAction.getMD5For(req);
-                final String id = "com.openexchange.mail." + md5Sum;
+            final MailRequestSha1Calculator sha1Calculator = req.getRequest().getProperty("mail.sha1calc");
+            if (null != jsonCache && null != sha1Calculator) {
+                final String sha1Sum = sha1Calculator.getSha1For(req);
+                final String id = "com.openexchange.mail." + sha1Sum;
                 final JSONValue jsonValue = requestData.getProperty(id);
                 if (!JsonCaches.areEqual(jsonValue, newJsonValue)) {
                     final ServerSession ses = req.getSession();
                     if (null == jsonValue) {
-                        jsonCache.setIfDiffers(id, newJsonValue, ses.getUserId(), ses.getContextId());
+                        jsonCache.setIfDifferent(id, newJsonValue, ses.getUserId(), ses.getContextId());
                     } else {
                         jsonCache.set(id, newJsonValue, ses.getUserId(), ses.getContextId());
                     }
@@ -431,14 +431,15 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         final boolean cache = req.optBool("cache", false);
         if (cache) {
             final JsonCacheService jsonCache = JsonCaches.getCache();
-            if (null != jsonCache) {
-                final String md5Sum = AllAction.getMD5For(req);
-                final String id = "com.openexchange.mail." + md5Sum;
+            final MailRequestSha1Calculator sha1Calculator = req.getRequest().getProperty("mail.sha1calc");
+            if (null != jsonCache && null != sha1Calculator) {
+                final String sha1Sum = sha1Calculator.getSha1For(req);
+                final String id = "com.openexchange.mail." + sha1Sum;
                 final JSONValue jsonValue = requestData.getProperty(id);
                 if (!JsonCaches.areEqual(jsonValue, newJsonValue)) {
                     final ServerSession ses = req.getSession();
                     if (null == jsonValue) {
-                        jsonCache.setIfDiffers(id, newJsonValue, ses.getUserId(), ses.getContextId());
+                        jsonCache.setIfDifferent(id, newJsonValue, ses.getUserId(), ses.getContextId());
                     } else {
                         jsonCache.set(id, newJsonValue, ses.getUserId(), ses.getContextId());
                     }

@@ -59,6 +59,7 @@ import javax.mail.internet.IDNA;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeUtility;
 import com.openexchange.mail.config.MailProperties;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 
 /**
  * {@link QuotedInternetAddress} - A quoted version of {@link InternetAddress} originally written by <b>Bill Shannon</b> and <b>John
@@ -978,9 +979,36 @@ public final class QuotedInternetAddress extends InternetAddress {
     }
 
     /**
+     * Get the personal name. If the name is encoded as per RFC 2047, it is decoded and converted into Unicode. If the decoding or
+     * conversion fails, the raw data is returned as is.
+     * 
+     * @return personal name
+     */
+    @Override
+    public String getPersonal() {
+        if (personal != null) {
+            return personal;
+        }
+
+        if (encodedPersonal != null) {
+            try {
+                personal = MimeMessageUtility.decodeMultiEncodedHeader(encodedPersonal);
+                return personal;
+            } catch (final Exception ex) {
+                // 1. ParseException: either its an unencoded string or
+                // it can't be parsed
+                // 2. UnsupportedEncodingException: can't decode it.
+                return encodedPersonal;
+            }
+        }
+        // No personal or encodedPersonal, return null
+        return null;
+    }
+
+    /**
      * Convert this address into a RFC 822 / RFC 2047 encoded address. The resulting string contains only US-ASCII characters, and hence is
      * mail-safe.
-     *
+     * 
      * @return possibly encoded address string
      */
     @Override

@@ -98,6 +98,7 @@ public class StreamProvider implements IStreamProvider {
 
     @Override
     public Stream createFile(final String fileName) throws XHTMLConversionException {
+        System.out.println("Create File: " + fileName);
         Stream stream = createInternal(fileName);
         return stream;
     }
@@ -111,6 +112,7 @@ public class StreamProvider implements IStreamProvider {
 
     @Override
     public Stream createDocumentFile(String fileName) throws XHTMLConversionException {
+        //System.out.println("Create document file: " + fileName);
         Stream stream = createInternal(fileName);
         this.document = fileName;
         return stream;
@@ -170,10 +172,11 @@ public class StreamProvider implements IStreamProvider {
     }
 
     public String getDocumentContent() throws OXException {
+        //System.out.println("Get document content: " + document);
         final ManagedFile managedFile = createdFiles.get(document);
         if (managedFile == null) {
             // TODO: throw proper exception
-            throw PreviewExceptionCodes.ERROR.create();
+            throw PreviewExceptionCodes.ERROR.create("Missing File");
         }
 
         BufferedReader reader = null;

@@ -6,20 +6,25 @@ import java.util.Collection;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.oauth.OAuthHTTPClientFactory;
+import com.openexchange.oauth.OAuthService;
 
 public class OAuthProxyActionFactory implements AJAXActionServiceFactory {
+	
+	private AJAXActionService proxyAction;
 
-	private static final AJAXActionService PROXY_ACTION = new OAuthProxyAction();
+	public OAuthProxyActionFactory(OAuthService service, OAuthHTTPClientFactory clients){
+		proxyAction = new OAuthProxyAction(service, clients);
+	}
 	
 	@Override
 	public Collection<?> getSupportedServices() {
-		return Arrays.asList("GET", "PUT", "POST", "DELETE");
+		return Arrays.asList("PUT", "POST");
 	}
 
 	@Override
-	public AJAXActionService createActionService(String action)
-			throws OXException {
-		return PROXY_ACTION;
+	public AJAXActionService createActionService(String action) throws OXException {
+		return proxyAction;
 	}
 
 }

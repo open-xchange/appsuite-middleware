@@ -68,6 +68,7 @@ import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.ThreadedStructure;
 import com.openexchange.mail.json.MailRequest;
+import com.openexchange.mail.json.MailRequestSha1Calculator;
 import com.openexchange.mail.json.converters.MailConverter;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.threadpool.ThreadPools;
@@ -79,7 +80,7 @@ import com.openexchange.tools.session.ServerSession;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SimpleThreadStructureAction extends AbstractMailAction {
+public final class SimpleThreadStructureAction extends AbstractMailAction implements MailRequestSha1Calculator {
 
     protected static final org.apache.commons.logging.Log LOG = Log.loggerFor(SimpleThreadStructureAction.class);
 
@@ -105,8 +106,8 @@ public final class SimpleThreadStructureAction extends AbstractMailAction {
             final JsonCacheService jsonCache = JsonCaches.getCache();
             if (null != jsonCache) {
                 final long st = DEBUG ? System.currentTimeMillis() : 0L;
-                final String md5Sum = getMD5For(req);
-                final String id = "com.openexchange.mail." + md5Sum;
+                final String sha1Sum = getSha1For(req);
+                final String id = "com.openexchange.mail." + sha1Sum;
                 final ServerSession session = req.getSession();
                 final JSONValue jsonValue = jsonCache.opt(id, session.getUserId(), session.getContextId());
                 final AJAXRequestResult result;
@@ -128,7 +129,8 @@ public final class SimpleThreadStructureAction extends AbstractMailAction {
                  * Update cache with separate thread
                  */
                 final AJAXRequestData requestData = req.getRequest().copyOf();
-                requestData.setProperty("mail.md5", id);
+                requestData.setProperty("mail.sha1", sha1Sum);
+                requestData.setProperty("mail.sha1calc", this);
                 requestData.setProperty(id, jsonValue);
                 final MailRequest mailRequest = new MailRequest(requestData, session);
                 final Runnable r = new Runnable() {
@@ -342,20 +344,14 @@ public final class SimpleThreadStructureAction extends AbstractMailAction {
         }
     }
 
-    /**
-     * Gets the MD5 sum for given mail request.
-     * 
-     * @param req The mail request
-     * @return The MD5 sum
-     * @throws OXException If MD5 sum cannot be calculated.
-     */
-    public static String getMD5For(final MailRequest req) throws OXException {
-        final String id = req.getRequest().getProperty("mail.md5");
+    @Override
+    public String getSha1For(final MailRequest req) throws OXException {
+        final String id = req.getRequest().getProperty("mail.sha1");
         if (null != id) {
             return id;
         }
-        final String md5Sum =
-            JsonCaches.getMD5Sum(
+        final String sha1Sum =
+            JsonCaches.getSHA1Sum(
                 "threadedAll",
                 req.checkParameter(Mail.PARAMETER_MAILFOLDER),
                 req.checkParameter(Mail.PARAMETER_COLUMNS),
@@ -367,7 +363,7 @@ public final class SimpleThreadStructureAction extends AbstractMailAction {
                 req.getParameter("includeSent"),
                 req.getParameter("unseen"),
                 req.getParameter("deleted"));
-        return md5Sum;
+        return sha1Sum;
     }
 
 }

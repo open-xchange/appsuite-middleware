@@ -106,7 +106,11 @@ public class UpdatePerformer extends AbstrakterDingeMacher {
             	continue;
             }
             appointment.setNotification(true);
-            ensureParticipant(appointment, action, session);
+            int owner = session.getUserId();
+            if (analysis.getMessage().getOwner() > 0) {
+                owner = analysis.getMessage().getOwner();
+            }
+            ensureParticipant(appointment, action, owner);
             Appointment original = determineOriginalAppointment(change, processed, session);
             
             if (original != null) {
@@ -190,7 +194,7 @@ public class UpdatePerformer extends AbstrakterDingeMacher {
     }
 
     
-    private void ensureParticipant(CalendarDataObject appointment, ITipAction action, Session session) {
+    private void ensureParticipant(CalendarDataObject appointment, ITipAction action, int owner) {
         int confirm = CalendarDataObject.NONE;
         switch (action) {
         case ACCEPT: case ACCEPT_AND_IGNORE_CONFLICTS: case CREATE: case UPDATE: confirm = CalendarDataObject.ACCEPT; break;
@@ -204,7 +208,7 @@ public class UpdatePerformer extends AbstrakterDingeMacher {
             for (Participant participant : participants) {
                 if (participant instanceof UserParticipant) {
                     UserParticipant up = (UserParticipant) participant;
-                    if (up.getIdentifier() == session.getUserId()) {
+                    if (up.getIdentifier() == owner) {
                         found = true;
                         if (confirm != -1) {
                             up.setConfirm(confirm);
@@ -215,7 +219,7 @@ public class UpdatePerformer extends AbstrakterDingeMacher {
         }
 
         if (!found) {
-            UserParticipant up = new UserParticipant(session.getUserId());
+            UserParticipant up = new UserParticipant(owner);
             if (confirm != -1) {
                 up.setConfirm(confirm);
             }
@@ -229,7 +233,7 @@ public class UpdatePerformer extends AbstrakterDingeMacher {
         UserParticipant[] users = appointment.getUsers();
         if (users != null) {
             for (UserParticipant userParticipant : users) {
-                if (userParticipant.getIdentifier() == session.getUserId()) {
+                if (userParticipant.getIdentifier() == owner) {
                     found = true;
                     if (confirm != -1) {
                         userParticipant.setConfirm(confirm);
@@ -239,7 +243,7 @@ public class UpdatePerformer extends AbstrakterDingeMacher {
         }
         
         if (!found) {
-            UserParticipant up = new UserParticipant(session.getUserId());
+            UserParticipant up = new UserParticipant(owner);
             if (confirm != -1) {
                 up.setConfirm(confirm);
             }

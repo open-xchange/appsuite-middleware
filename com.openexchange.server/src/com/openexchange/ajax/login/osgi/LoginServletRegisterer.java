@@ -61,12 +61,12 @@ import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.ajax.Login;
+import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.log.LogFactory;
 import com.openexchange.login.ConfigurationProperty;
-import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link LoginServletRegisterer}
@@ -186,7 +186,7 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
         }
         if (null != unregister) {
             LOG.info("Unregistering login servlet.");
-            unregister.unregister(ServerServiceRegistry.getInstance().getService(DispatcherPrefixService.class).getPrefix() + SERVLET_PATH_APPENDIX);
+            unregister.unregister(DefaultDispatcherPrefixService.getInstance().getPrefix() + SERVLET_PATH_APPENDIX);
         }
         context.ungetService(reference);
     }

@@ -134,6 +134,10 @@ public final class OAuthExceptionMessages implements LocalizableStrings {
     // An OAuth error occurred: %1$s
     public static final String OAUTH_ERROR_MSG = "An OAuth error occurred: %1$s";
 
+	public static final String NOT_A_WHITELISTED_URL_MSG = "The address %1$s is not white-listed as for the %2$s OAuth API";
+
+	public static final String MISSING_BODY_MSG = "The request sent was missing its body";
+
     /**
      * Initializes a new {@link OAuthExceptionMessages}.
      */

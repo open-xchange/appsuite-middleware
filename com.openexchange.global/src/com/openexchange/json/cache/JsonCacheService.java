@@ -127,7 +127,7 @@ public interface JsonCacheService {
      * @return <code>true</code> if put into cache; otherwise <code>false</code>
      * @throws OXException If JSON value cannot be put into cache for any reason
      */
-    boolean setIfDiffers(String id, JSONValue jsonValue, int userId, int contextId) throws OXException;
+    boolean setIfDifferent(String id, JSONValue jsonValue, int userId, int contextId) throws OXException;
 
     /**
      * Deletes denoted JSON value from cache.

@@ -56,6 +56,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
@@ -141,7 +142,7 @@ final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry {
         /*
          * Compose URL parameters
          */
-        sb.append(prefix).append(ServerServiceRegistry.getInstance().getService(DispatcherPrefixService.class).getPrefix()).append("file");
+        sb.append(prefix).append(DefaultDispatcherPrefixService.getInstance().getPrefix()).append("file");
         if (null != route) {
             sb.append(";jsessionid=").append(route);
         }

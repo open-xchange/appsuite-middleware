@@ -50,6 +50,7 @@
 package com.openexchange.oauth.twitter;
 
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.oauth.API;
 import com.openexchange.oauth.AbstractOAuthServiceMetaData;
 
 /**
@@ -115,5 +116,10 @@ public class OAuthServiceMetaDataTwitterImpl extends AbstractOAuthServiceMetaDat
     public String processAuthorizationURL(final String authUrl) {
         return authUrl;
     }
+
+	@Override
+	public API getAPI() {
+		return API.TWITTER;
+	}
 
 }

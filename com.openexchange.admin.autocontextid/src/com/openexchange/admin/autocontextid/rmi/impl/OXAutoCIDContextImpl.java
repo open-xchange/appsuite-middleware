@@ -91,12 +91,10 @@ public class OXAutoCIDContextImpl implements OXContextPluginInterface {
 
     public Context preCreate(final Context ctx, final User admin_user, final Credentials auth) throws PluginException {
         try {
-            if (!ctx.isIdset()) {
-                int id = oxautocid.generateContextId();
-                ctx.setId(Integer.valueOf(id));
-            }
+            final int id = oxautocid.generateContextId();
+            ctx.setId(Integer.valueOf(id));
             return ctx;
-        } catch (StorageException e) {
+        } catch (final StorageException e) {
             throw new PluginException(e);
         }
     }
@@ -145,7 +143,15 @@ public class OXAutoCIDContextImpl implements OXContextPluginInterface {
         return null;
     }
 
-    public Boolean checkMandatoryMembersContextCreate(Context ctx) {
+    public Boolean checkMandatoryMembersContextCreate(final Context ctx) {
         return new Boolean(true);
+    }
+
+    public void exists(final Context ctx, final Credentials auth) throws PluginException {
+        // Nothing to do.
+    }
+
+    public void getAdminId(final Context ctx, final Credentials auth) throws PluginException {
+        // Nothing to do.
     }
 }

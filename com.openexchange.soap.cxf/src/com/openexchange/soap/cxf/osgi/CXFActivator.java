@@ -49,24 +49,40 @@
 
 package com.openexchange.soap.cxf.osgi;
 
+import javax.servlet.ServletException;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.apache.cxf.Bus;
 import org.apache.cxf.BusFactory;
 import org.apache.cxf.transport.servlet.CXFNonSpringServlet;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
-import com.openexchange.osgi.DeferredActivator;
+import org.osgi.service.http.NamespaceException;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
+ * {@link CXFActivator} - The activator for CXF bundle.
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class CXFActivator extends DeferredActivator {
+public class CXFActivator extends HousekeepingActivator {
 
-    private static final String PATH = "/webservices";
+    /**
+     * The logger.
+     */
+    static final Log LOG = com.openexchange.log.Log.loggerFor(CXFActivator.class);
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CXFActivator.class));
+    /**
+     * The CXF Servlet's alias.
+     */
+    static final String ALIAS = "/webservices";
 
-    private WebserviceCollector collector;
+    /**
+     * The Axis2 Servlet's alias.
+     */
+    static final String ALIAS2 = "/servlet/axis2/services";
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -74,46 +90,108 @@ public class CXFActivator extends DeferredActivator {
     }
 
     @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        // Nope
-    }
-
-    @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        // Nope
-    }
-
-    @Override
     protected void startBundle() throws Exception {
         try {
-            LOG.info("Starting Bundle :com.openexchange.soap.cxf");
-            final HttpService httpService = getService(HttpService.class);
-            final CXFNonSpringServlet cxf = new CXFNonSpringServlet();
-            final Bus bus = cxf.getBus();
-            BusFactory.setDefaultBus(bus);
+            LOG.info("Starting Bundle: com.openexchange.soap.cxf");
+            final BundleContext context = this.context;
+            final ServiceTrackerCustomizer<HttpService, HttpService> trackerCustomizer =
+                new ServiceTrackerCustomizer<HttpService, HttpService>() {
 
-            LOG.info("Registering CXF servlet under " + PATH);
-            httpService.registerServlet(PATH, cxf, null, null);
+                    private volatile WebserviceCollector collector;
 
-            collector = new WebserviceCollector(context);
-            context.addServiceListener(collector);
-            collector.open();
-            LOG.info("com.openexchange.soap.cxf is up and running");
-        } catch (final Throwable t) {
-            LOG.error(t.getMessage(), t);
-        }
+                    @Override
+                    public void removedService(final ServiceReference<HttpService> reference, final HttpService service) {
+                        final HttpService httpService = getService(HttpService.class);
+                        if (httpService != null) {
+                            try {
+                                httpService.unregister(ALIAS);
+                                httpService.unregister(ALIAS2);
+                            } catch (final Exception e) {
+                                // Ignore
+                            }
+                        }
+                        final WebserviceCollector collector = this.collector;
+                        if (null != collector) {
+                            try {
+                                collector.close();
+                            } catch (final Exception e) {
+                                // Ignore
+                            }
+                            this.collector = null;
+                        }
+                        context.ungetService(reference);
+                    }
 
-    }
+                    @Override
+                    public void modifiedService(final ServiceReference<HttpService> reference, final HttpService service) {
+                        // Ignore
+                    }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        final HttpService httpService = getService(HttpService.class);
-        if (httpService != null) {
-            httpService.unregister(PATH);
-        }
-        if (null != collector) {
-            collector.close();
-            collector = null;
+                    @Override
+                    public HttpService addingService(final ServiceReference<HttpService> reference) {
+                        final HttpService httpService = context.getService(reference);
+                        boolean servletRegistered = false;
+                        boolean collectorOpened = false;
+                        try {
+                            /*
+                             * Register CXF Servlet
+                             */
+                            final CXFNonSpringServlet cxf = new CXFNonSpringServlet();
+                            final Bus bus = cxf.getBus();
+                            BusFactory.setDefaultBus(bus);
+                            httpService.registerServlet(ALIAS, cxf, null, null);
+                            LOG.info("Registered CXF Servlet under: " + ALIAS);
+                            httpService.registerServlet(ALIAS2, cxf, null, null);
+                            LOG.info("Registered CXF Servlet under: " + ALIAS2);
+                            servletRegistered = true;
+                            /*
+                             * Initialize Webservice collector
+                             */
+                            final WebserviceCollector collector = new WebserviceCollector(context);
+                            context.addServiceListener(collector);
+                            collector.open();
+                            this.collector = collector;
+                            collectorOpened = true;
+                            LOG.info("CXF SOAP service is up and running");
+                            /*
+                             * Return tracked HTTP service
+                             */
+                            return httpService;
+                        } catch (final ServletException e) {
+                            LOG.error("Couldn't register CXF Servlet: " + e.getMessage(), e);
+                        } catch (final NamespaceException e) {
+                            LOG.error("Couldn't register CXF Servlet: " + e.getMessage(), e);
+                        } catch (final RuntimeException e) {
+                            if (servletRegistered) {
+                                try {
+                                    httpService.unregister(ALIAS);
+                                    httpService.unregister(ALIAS2);
+                                } catch (final Exception e1) {
+                                    // Ignore
+                                }
+                            }
+                            if (collectorOpened) {
+                                final WebserviceCollector collector = this.collector;
+                                if (null != collector) {
+                                    try {
+                                        collector.close();
+                                    } catch (final Exception e1) {
+                                        // Ignore
+                                    }
+                                    this.collector = null;
+                                }
+                            }
+                            LOG.error("Couldn't register CXF Servlet: " + e.getMessage(), e);
+                        }
+                        context.ungetService(reference);
+                        return null;
+                    }
+                };
+                track(HttpService.class, trackerCustomizer);
+                openTrackers();
+        } catch (final Exception e) {
+            LOG.error(e.getMessage(), e);
+            throw e;
         }
     }
 

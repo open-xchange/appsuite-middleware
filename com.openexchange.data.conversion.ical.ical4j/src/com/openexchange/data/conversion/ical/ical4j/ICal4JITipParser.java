@@ -91,9 +91,9 @@ public class ICal4JITipParser extends ICal4JParser implements ITipParser {
     private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ICal4JITipParser.class));
 
     @Override
-    public List<ITipMessage> parseMessage(String icalText, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
+    public List<ITipMessage> parseMessage(String icalText, TimeZone defaultTZ, Context ctx, int owner, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
         try {
-            return parseMessage(new ByteArrayInputStream(icalText.getBytes("UTF-8")), defaultTZ, ctx, errors, warnings);
+            return parseMessage(new ByteArrayInputStream(icalText.getBytes("UTF-8")), defaultTZ, ctx, owner, errors, warnings);
         } catch (UnsupportedEncodingException e) {
             LOG.error(e.getMessage(), e);
         }
@@ -101,7 +101,7 @@ public class ICal4JITipParser extends ICal4JParser implements ITipParser {
     }
 
     @Override
-    public List<ITipMessage> parseMessage(InputStream ical, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
+    public List<ITipMessage> parseMessage(InputStream ical, TimeZone defaultTZ, Context ctx, int owner, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
         List<ITipMessage> messages = new ArrayList<ITipMessage>();
         Map<String, ITipMessage> messagesPerUID = new HashMap<String, ITipMessage>();
         BufferedReader reader = null;
@@ -131,6 +131,9 @@ public class ICal4JITipParser extends ICal4JParser implements ITipParser {
                         message.setMethod(methodValue);
                         messagesPerUID.put(appointment.getUid(), message);
                         messages.add(message);
+                    }
+                    if (owner > 0) {
+                        message.setOwner(owner);
                     }
                     if (appointment.containsRecurrenceDatePosition()) {
                         message.addException(appointment);

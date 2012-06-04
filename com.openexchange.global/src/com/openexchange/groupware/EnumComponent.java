@@ -278,7 +278,12 @@ public enum EnumComponent implements Component {
     /**
      * WebDAV/XML related errors
      */
-    WEBDAV("WEBDAV");
+    WEBDAV("WEBDAV"),
+    /**
+     * HTTP CLIENT
+     */
+    HTTP_CLIENT("HC"),
+    ;
 
     /**
      * The abbreviation for components.

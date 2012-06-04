@@ -78,7 +78,7 @@ import com.openexchange.threadpool.AbstractTask;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class TransformationObservationTask extends AbstractTask<List<String>> implements Observer {
+public class TransformationObservationTask implements Observer {
 
     /*
      * TODO:
@@ -128,13 +128,12 @@ public class TransformationObservationTask extends AbstractTask<List<String>> im
         hasMore = new AtomicBoolean(true);
         pageRendered = new AtomicBoolean(true);
         
-        content = new ArrayList<String>(pages);
+        content = new ArrayList<String>();
         this.pages = pages;
         this.transformer = transformer;
         this.file = file;
     }
 
-    @Override
     public List<String> call() {
     	
     	FileInputStream fis = null;
@@ -143,21 +142,10 @@ public class TransformationObservationTask extends AbstractTask<List<String>> im
         	IOUnit unit = new IOUnit((fis = new FileInputStream(file)));
         	unit.setStreamProvider(streamProvider);
         	contentIterator = transformer.transformDocument(unit, 80, true); 
-        	while (!done.get()) {
+        	while (contentIterator.hasNext() && !done.get()) {
         		try {
-        			lock.lock();
-        			pageRendered.set(false);
-            		if (!done.get()) {
-                		contentIterator.writeNextContent();
-                		if (!pageRendered.get()) {
-                			signal.await();
-                		}
-            		}
-            		
-        		} catch (InterruptedException e) {
-        			
+        			contentIterator.writeNextContent();
         		} finally {
-        			lock.unlock();
         		}
 				// Wait for Event
 				
@@ -168,10 +156,13 @@ public class TransformationObservationTask extends AbstractTask<List<String>> im
 		} catch (XHTMLConversionException e) {
 			exception = PreviewExceptionCodes.ERROR.create();
 		} finally {
-			contentIterator.releaseData();
+		    if (contentIterator != null) {
+		        contentIterator.releaseData();
+		    }
     		Streams.close(fis);
     	}
 
+    	System.out.println(content);
         return content;
     }
 
@@ -183,31 +174,29 @@ public class TransformationObservationTask extends AbstractTask<List<String>> im
     public void update(final Observable o, final Object obj) {
         final UpdateMessages message = (UpdateMessages) obj;
         final String key = message.getKey();
+        //System.out.println("UpdateMessage.getKey(): " + key);
         boolean htmlFinished = key.equals(UpdateMessages.HTML_TRANSFORMATION_FINISHED);
 		boolean pageFinished = key.equals(UpdateMessages.PAGE_TRANSFORMATION_FINISHED);
 		if (htmlFinished || pageFinished) {
             try {
+                //Thread.sleep(2000);
             	String page = streamProvider.getDocumentContent();
+            	//System.out.println(page);
             	if (htmlFinished) {
-    				this.content.set(this.content.size() - 1, page); // *shrugs* Recovery. For some reason the page before the last is reported twice
+    				//this.content.set(this.content.size() - 1, page); // *shrugs* Recovery. For some reason the page before the last is reported twice
+                    //this.content.add(page);
             	} else {
     				this.content.add(page);
             	}
             } catch (final OXException e) {
                 exception = e;
+
             } finally {
-            	if (this.content.size() >= pages || htmlFinished) {
+            	if ((pages != -1 && this.content.size() >= pages) || htmlFinished) {
                     done.compareAndSet(false, true);
             	}
             	if (htmlFinished) {
             		hasMore.set(false);
-            	}
-            	try {
-            		lock.lock();
-            		pageRendered.set(true);
-            		signal.signalAll();
-            	} finally {
-            		lock.unlock();
             	}
             }
         } else if (key.equals(UpdateMessages.HTML_TRANSFORMATION_FAILED)) {

@@ -63,7 +63,7 @@ import com.openexchange.exception.OXExceptionFactory;
 public enum OXRMIExceptionCodes implements OXExceptionCode {
     RMI_START_FAILED(OXRMIExceptionMessage.RMI_START_FAILED_MSG, 1, Category.CATEGORY_ERROR),
     
-    RMI_ADDING_SERVICE_FAILED(OXRMIExceptionMessage.RMI_ADDING_SERVICE_FAILED_MSG, 2, Category.CATEGORY_ERROR)
+    RMI_CREATE_REGISTRY_FAILED(OXRMIExceptionMessage.RMI_CREATE_REGISTRY_FAILED_MSG, 2, Category.CATEGORY_ERROR)
     ;
     
     /**

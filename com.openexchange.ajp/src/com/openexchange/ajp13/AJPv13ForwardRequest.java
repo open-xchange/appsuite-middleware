@@ -676,6 +676,7 @@ public final class AJPv13ForwardRequest extends AbstractAJPv13Request {
                             if (DEBUG) {
                                 LOG.debug(new StringBuilder("\n\tDifferent JVM route detected. Removing JSESSIONID cookie: ").append(id));
                             }
+                            current.setPath("/");
                             current.setMaxAge(0); // delete
                             current.setSecure(forceHttps || servletRequest.isSecure());
                             resp.addCookie(current);
@@ -691,6 +692,7 @@ public final class AJPv13ForwardRequest extends AbstractAJPv13Request {
                             if (DEBUG) {
                                 LOG.debug(new StringBuilder("\n\tExpired or invalid cookie -> Removing JSESSIONID cookie: ").append(current.getValue()));
                             }
+                            current.setPath("/");
                             current.setMaxAge(0); // delete
                             current.setSecure(forceHttps || servletRequest.isSecure());
                             resp.addCookie(current);
@@ -711,6 +713,7 @@ public final class AJPv13ForwardRequest extends AbstractAJPv13Request {
                             if (DEBUG) {
                                 LOG.debug(new StringBuilder("\n\tMissing JVM route in JESSIONID cookie").append(current.getValue()));
                             }
+                            current.setPath("/");
                             current.setMaxAge(0); // delete
                             current.setSecure(forceHttps || servletRequest.isSecure());
                             resp.addCookie(current);
@@ -726,6 +729,7 @@ public final class AJPv13ForwardRequest extends AbstractAJPv13Request {
                             if (DEBUG) {
                                 LOG.debug(new StringBuilder("\n\tExpired or invalid cookie -> Removing JSESSIONID cookie: ").append(current.getValue()));
                             }
+                            current.setPath("/");
                             current.setMaxAge(0); // delete
                             current.setSecure(forceHttps || servletRequest.isSecure());
                             resp.addCookie(current);

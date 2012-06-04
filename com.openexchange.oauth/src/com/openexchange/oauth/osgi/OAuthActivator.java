@@ -49,22 +49,27 @@
 
 package com.openexchange.oauth.osgi;
 
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.provider.DBProvider;
+import com.openexchange.http.client.builder.HTTPResponseProcessor;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.OAuthAccountInvalidationListener;
+import com.openexchange.oauth.OAuthHTTPClientFactory;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
+import com.openexchange.oauth.httpclient.impl.scribe.ScribeHTTPClientFactoryImpl;
 import com.openexchange.oauth.internal.DeleteListenerRegistry;
 import com.openexchange.oauth.internal.InvalidationListenerRegistry;
 import com.openexchange.oauth.internal.OAuthServiceImpl;
 import com.openexchange.oauth.services.ServiceRegistry;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.recovery.EncryptedItemDetectorService;
 import com.openexchange.secret.recovery.SecretMigrator;
@@ -165,6 +170,25 @@ public final class OAuthActivator extends HousekeepingActivator {
             registerService(OAuthServiceMetaDataRegistry.class, registry, null);
             registerService(EncryptedItemDetectorService.class, oauthService, null);
             registerService(SecretMigrator.class, oauthService, null);
+            
+            final ScribeHTTPClientFactoryImpl oauthFactory = new ScribeHTTPClientFactoryImpl();
+			registerService(OAuthHTTPClientFactory.class, oauthFactory);
+			
+			SimpleRegistryListener<HTTPResponseProcessor> listener = new SimpleRegistryListener<HTTPResponseProcessor>() {
+
+				public void added(ServiceReference<HTTPResponseProcessor> ref,
+						HTTPResponseProcessor service) {
+					oauthFactory.registerProcessor(service);
+				}
+
+				public void removed(ServiceReference<HTTPResponseProcessor> ref,
+						HTTPResponseProcessor service) {
+					oauthFactory.forgetProcessor(service);
+				}
+
+
+			};
+			track(HTTPResponseProcessor.class, listener );
 
         } catch (final Exception e) {
             log.error("Starting bundle \"com.openexchange.oauth\" failed.", e);

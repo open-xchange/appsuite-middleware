@@ -54,7 +54,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.event.impl.AppointmentEventInterface;
 import com.openexchange.event.impl.ContactEventInterface;
 import com.openexchange.event.impl.InfostoreEventInterface;
@@ -68,6 +67,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
 import com.openexchange.tools.sql.DBUtils;
@@ -154,51 +154,58 @@ public class LinksEventHandler implements NoDelayEventInterface, AppointmentEven
             + " OR (secondid = ? AND secondmodule = ? AND secondfolder = ?) AND cid = ?";
 
     public void deleteLink(final int id, final int type, final int fid, final Session so) {
-        Connection writecon = null;
-        PreparedStatement del = null;
-
-        Context ct = null;
+        final int contextId = so.getContextId();
+        final Context ct;
         try {
-            ct = ContextStorage.getStorageContext(so.getContextId());
+            ct = ContextStorage.getStorageContext(contextId);
         } catch (final OXException e) {
-            LOG.error("ERROR: Unable to Delete Links from Object! cid=" + so.getContextId() + " oid=" + id + " fid="
-                    + fid, e);
+            LOG.error("ERROR: Unable to Delete Links from Object! cid=" + contextId + " oid=" + id + " fid=" + fid, e);
             return;
         }
-
+        // Check if any present
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
         try {
-            writecon = DBPool.pickupWriteable(ct);
-            writecon.setAutoCommit(false);
-
-            del = writecon.prepareStatement(SQL_DEL);
-            int pos = 1;
-            del.setInt(pos++, id);
-            del.setInt(pos++, type);
-            del.setInt(pos++, fid);
-            del.setInt(pos++, id);
-            del.setInt(pos++, type);
-            del.setInt(pos++, fid);
-            del.setInt(pos++, so.getContextId());
-            del.executeUpdate();
-
-            writecon.commit();
+            con = DBPool.pickup(ct);
+            stmt = con.prepareStatement("SELECT DISTINCT 1 FROM prg_links WHERE cid = ?");
+            stmt.setInt(1, contextId);
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                return;
+            }
         } catch (final Exception se) {
-            try {
-                writecon.rollback();
-            } catch (final SQLException see) {
-                LOG.error("Uable to rollback Link Delete", see);
-            }
-            LOG.error("ERROR: Unable to Delete Links from Object! cid=" + so.getContextId() + " oid=" + id + " fid="
-                    + fid, se);
+            LOG.debug("DEBUG: Error occurred during look-up attempt. cid=" + contextId + " oid=" + id + " fid=" + fid, se);
         } finally {
-            try {
-                writecon.setAutoCommit(true);
-            } catch (final SQLException see) {
-                LOG.error("Unable to restore auto-commit", see);
+            DBUtils.closeSQLStuff(rs, stmt);
+            if (null != con) {
+                DBPool.closeReaderSilent(ct, con);
             }
-            DBUtils.closeResources(null, del, writecon, false, ct);
         }
-
+        // Delete them
+        con = null;
+        stmt = null;
+        rs = null;
+        try {
+            con = DBPool.pickupWriteable(ct);
+            stmt = con.prepareStatement(SQL_DEL);
+            int pos = 1;
+            stmt.setInt(pos++, id);
+            stmt.setInt(pos++, type);
+            stmt.setInt(pos++, fid);
+            stmt.setInt(pos++, id);
+            stmt.setInt(pos++, type);
+            stmt.setInt(pos++, fid);
+            stmt.setInt(pos++, contextId);
+            stmt.executeUpdate();
+        } catch (final Exception se) {
+            LOG.error("ERROR: Unable to Delete Links from Object! cid=" + contextId + " oid=" + id + " fid=" + fid, se);
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+            if (null != con) {
+                DBPool.closeWriterSilent(ct, con);
+            }
+        }
     }
 
     private static final String SQL_LOAD = "SELECT firstid, firstfolder, secondid, secondfolder FROM prg_links"

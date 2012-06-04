@@ -100,8 +100,8 @@ public final class ThreadCountEntry implements Comparable<ThreadCountEntry> {
 
     @Override
     public int compareTo(final ThreadCountEntry o) {
-        final int thisVal = this.count;
-        final int anotherVal = o.count;
+        final int thisVal = this.get();
+        final int anotherVal = o.get();
         return (thisVal < anotherVal ? -1 : (thisVal == anotherVal ? 0 : 1));
     }
 

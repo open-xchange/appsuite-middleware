@@ -58,18 +58,23 @@ import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.FullnameArgument;
+import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.config.MailProperties;
+import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeTypes;
+import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.session.Session;
 
 /**
  * {@link ICalMailPartDataSource} - The {@link MailPartDataSource} for VCard parts.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ICalMailPartDataSource extends MailPartDataSource {
+
+    public static final String PROPERTY_OWNER = "com.openexchange.conversion.owner";
 
     /**
      * Initializes a new {@link ICalMailPartDataSource}
@@ -89,7 +94,8 @@ public final class ICalMailPartDataSource extends MailPartDataSource {
             final String fullname = arg.getFullname();
             final String mailId = dataArguments.get(ARGS[1]);
             final String sequenceId = dataArguments.get(ARGS[2]);
-            mailPart = getMailPart(arg.getAccountId(), fullname, mailId, sequenceId, session);
+            final DataProperties properties = new DataProperties();
+            mailPart = getMailPart(arg.getAccountId(), fullname, mailId, sequenceId, session, properties);
             final ContentType contentType = mailPart.getContentType();
             if (contentType == null) {
                 throw DataExceptionCodes.ERROR.create("Missing header 'Content-Type' in requested mail part");
@@ -97,7 +103,6 @@ public final class ICalMailPartDataSource extends MailPartDataSource {
             if (!contentType.isMimeType(MimeTypes.MIME_TEXT_ALL_CALENDAR)) {
                 throw DataExceptionCodes.ERROR.create("Requested mail part is not an ICal: " + contentType.getBaseType());
             }
-            final DataProperties properties = new DataProperties();
             properties.put(DataProperties.PROPERTY_CONTENT_TYPE, contentType.getBaseType());
             final String charset = contentType.getCharsetParameter();
             if (charset == null) {
@@ -112,6 +117,44 @@ public final class ICalMailPartDataSource extends MailPartDataSource {
             } catch (final OXException e) {
                 throw new OXException(e);
             }
+        }
+    }
+
+    private MailPart getMailPart(final int accountId, final String fullname, final String mailId, final String sequenceId, final Session session, DataProperties properties) throws OXException {
+        final MailAccess<?, ?> mailAccess;
+        try {
+            mailAccess = MailAccess.getInstance(session, accountId);
+            mailAccess.connect();
+        } catch (final OXException e) {
+            throw new OXException(e);
+        }
+        try {
+            MailFolder folder = mailAccess.getFolderStorage().getFolder(fullname);
+            if (folder.isShared()) {
+                MailPermission[] permissions = folder.getPermissions();
+                boolean found = false;
+                boolean foundMoreThanOne = false;
+                int ownerId = 0;
+                for (MailPermission perm : permissions) {
+                    if (perm.isFolderAdmin() && !perm.isGroupPermission()) {
+                        if (found) {
+                            foundMoreThanOne = true;
+                        }
+                        ownerId = perm.getEntity();
+                        found = true;
+                    }
+                }
+                if (found && !foundMoreThanOne && ownerId > 0) {
+                    properties.put(PROPERTY_OWNER, Integer.toString(ownerId));
+                }
+            }
+            final MailPart mailPart = mailAccess.getMessageStorage().getAttachment(fullname, mailId, sequenceId);
+            mailPart.loadContent();
+            return mailPart;
+        } catch (final OXException e) {
+            throw new OXException(e);
+        } finally {
+            mailAccess.close(true);
         }
     }
 

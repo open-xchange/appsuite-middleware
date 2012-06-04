@@ -65,6 +65,7 @@ import com.openexchange.oauth.AbstractOAuthServiceMetaData;
 import com.openexchange.oauth.DefaultOAuthToken;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.exception.OXException;
+import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthInteraction;
 import com.openexchange.oauth.OAuthInteractionType;
@@ -202,5 +203,10 @@ public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData {
         return super.getOAuthToken(arguments);
         // throw OAuthExceptionCodes.IO_ERROR.create(" ***** Something went terribly wrong!");
     }
+
+	@Override
+	public API getAPI() {
+		return API.MSN;
+	}
 
 }

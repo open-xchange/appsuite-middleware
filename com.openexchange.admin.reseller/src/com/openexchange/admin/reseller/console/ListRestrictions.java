@@ -54,6 +54,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.reseller.rmi.OXResellerInterface;
+import com.openexchange.admin.reseller.rmi.OXResellerTools;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
@@ -99,7 +100,7 @@ public class ListRestrictions extends ResellerAbstraction {
 
             final OXResellerInterface rsi = getResellerInterface();
 
-            res = rsi.getAvailableRestrictions(auth);
+            res = OXResellerTools.array2HashSet(rsi.getAvailableRestrictions(auth));
         } catch (final Exception e) {
             printErrors(null, null, e, parser);
             sysexit(1);
@@ -123,7 +124,6 @@ public class ListRestrictions extends ResellerAbstraction {
     private void sysoutOutput(final HashSet<Restriction> restrictions) throws InvalidDataException {
         final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
         for (final Restriction res : restrictions) {
-            printExtensionsError(res);
             data.add(makeStandardData(res));
         }
 
@@ -141,7 +141,6 @@ public class ListRestrictions extends ResellerAbstraction {
 
         for (final Restriction admin : adminlist) {
             data.add(makeDataForCsv(admin));
-            printExtensionsError(admin);
         }
         doCSVOutput(columns, data);
     }

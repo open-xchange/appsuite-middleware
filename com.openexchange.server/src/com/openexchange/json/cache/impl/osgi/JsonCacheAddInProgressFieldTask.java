@@ -61,6 +61,7 @@ import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
@@ -96,7 +97,7 @@ public final class JsonCacheAddInProgressFieldTask extends UpdateTaskAdapter {
         final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
         final Connection con = dbService.getForUpdateTask(cid);
         try {
-            con.setAutoCommit(false);
+            DBUtils.startTransaction(con);
             Tools.checkAndAddColumns(con, "jsonCache", getColumns());
             con.commit();
         } catch (final SQLException e) {

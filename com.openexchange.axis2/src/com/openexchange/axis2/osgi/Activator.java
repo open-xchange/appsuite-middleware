@@ -48,42 +48,32 @@
  */
 package com.openexchange.axis2.osgi;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.osgi.service.http.HttpService;
-
 import com.openexchange.axis2.internal.Axis2ServletInit;
 import com.openexchange.axis2.services.Axis2ServletServiceRegistry;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.server.osgiservice.DeferredActivator;
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.ServiceRegistry;
 
-public class Activator extends DeferredActivator {
+public class Activator extends HousekeepingActivator {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory.getLog(Activator.class);
-
-    private final AtomicBoolean started;
-
-    //private ServiceRegistration serviceRegistration;
 
     /**
      * Initializes a new {@link Axis2ServletActivator}
      */
     public Activator() {
         super();
-        started = new AtomicBoolean();
     }
-
-    private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class, HttpService.class };
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED_SERVICES;
+        return new Class<?>[] { ConfigurationService.class, HttpService.class };
     }
 
 
     @Override
-    protected void handleAvailability(Class<?> clazz) {
+    protected void handleAvailability(final Class<?> clazz) {
         if (LOG.isInfoEnabled()) {
             LOG.info("Re-available service: " + clazz.getName());
         }
@@ -118,17 +108,6 @@ public class Activator extends DeferredActivator {
                     }
                 }
             }
-            if (!started.compareAndSet(false, true)) {
-                /*
-                 * Don't start the server again. A duplicate call to
-                 * startBundle() is probably caused by temporary absent
-                 * service(s) whose re-availability causes to trigger this
-                 * method again.
-                 */
-                LOG.info("A temporary absent service is available again");
-                return;
-            }
-
             Axis2ServletInit.getInstance().start();
 
             // TODO: ConfigTree may be needed or not...
@@ -143,10 +122,6 @@ public class Activator extends DeferredActivator {
     @Override
     public void stopBundle() throws Exception {
         try {
-//          if (null != serviceRegistration) {
-//          serviceRegistration.unregister();
-//          serviceRegistration = null;
-//          }
             Axis2ServletInit.getInstance().stop();
 
             /*

@@ -85,6 +85,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.log.LogFactory;
+import com.openexchange.oauth.API;
 import com.openexchange.oauth.DefaultOAuthAccount;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
@@ -372,9 +373,9 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
                 throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_TOKEN);
             }
             account.setToken(encrypt(account.getToken(), session));
-            if (isEmpty(account.getSecret())) {
+            /*if (isEmpty(account.getSecret())) {
                 throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_SECRET);
-            }
+            }*/
             account.setSecret(encrypt(account.getSecret(), session));
             /*
              * Create INSERT command
@@ -569,6 +570,26 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             provider.releaseReadConnection(context, con);
         }
     }
+    
+    @Override
+	public OAuthAccount getDefaultAccount(final API api, final Session session) throws OXException {
+    	final List<OAuthServiceMetaData> allServices = registry.getAllServices(session.getUserId(), session.getContextId());
+    	for (final OAuthServiceMetaData metaData : allServices) {
+			if (metaData.getAPI() == api) {
+				final List<OAuthAccount> accounts = getAccounts(metaData.getId(), session, session.getUserId(), session.getContextId());
+				OAuthAccount likely = null;
+				for(final OAuthAccount acc: accounts){
+					if(likely == null || acc.getId() < likely.getId()){
+						likely = acc;
+					}
+				}
+				if(likely != null){
+					return likely;
+				}
+			}
+		}
+    	throw OAuthExceptionCodes.ACCOUNT_NOT_FOUND.create("default:"+api.toString(), session.getUserId(), session.getContextId());
+	}
 
     @Override
     public OAuthAccount updateAccount(final int accountId, final String serviceMetaData, final OAuthInteractionType type, final Map<String, Object> arguments, final int user, final int contextId) throws OXException {
@@ -859,14 +880,14 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             }
             final List<OAuthAccount> accounts = new ArrayList<OAuthAccount>(8);
             do {
-                final DefaultOAuthAccount account = new DefaultOAuthAccount();
-                account.setId(rs.getInt(1));
                 try {
                     // Try using the new secret. Maybe this account doesn't need the migration
                     cryptoService.decrypt(rs.getString(2), newSecret);
                     cryptoService.decrypt(rs.getString(3), newSecret);
                 } catch (final OXException e) {
                     // Needs migration
+                    final DefaultOAuthAccount account = new DefaultOAuthAccount();
+                    account.setId(rs.getInt(1));
                     account.setToken(cryptoService.decrypt(rs.getString(2), oldSecret));
                     account.setSecret(cryptoService.decrypt(rs.getString(3), oldSecret));
                     accounts.add(account);
@@ -896,5 +917,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             provider.releaseWriteConnection(context, con);
         }
     }
+
+	
 
 }

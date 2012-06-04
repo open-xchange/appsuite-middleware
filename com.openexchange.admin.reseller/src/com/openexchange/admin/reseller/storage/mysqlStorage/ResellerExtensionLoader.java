@@ -61,7 +61,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
+import org.apache.commons.logging.LogFactory;
+import com.openexchange.admin.reseller.rmi.OXResellerTools;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.reseller.rmi.extensions.OXContextExtensionImpl;
@@ -133,7 +134,7 @@ public class ResellerExtensionLoader implements Filter<Context, Context> {
                 Context context = contexts.get(I(cid));
                 OXContextExtensionImpl ctxext = (OXContextExtensionImpl)context.getFirstExtensionByName(OXContextExtensionImpl.class.getName());
                 HashSet<Restriction> restrictions;
-                restrictions = ctxext.getRestriction();
+                restrictions = OXResellerTools.array2HashSet(ctxext.getRestriction());
                 if( null == restrictions ) {
                     restrictions = new HashSet<Restriction>();
                 }
@@ -146,7 +147,7 @@ public class ResellerExtensionLoader implements Filter<Context, Context> {
                     res.setValue(rs.getString(4));
                     res.setName(rs.getString(5));
                     restrictions.add(res);
-                    ctxext.setRestriction(restrictions);
+                    ctxext.setRestriction(restrictions.toArray(new Restriction[restrictions.size()]));
                 }
                 ResellerAdmin ra = new ResellerAdmin(rs.getString(6));
                 ctxext.setOwner(ra);

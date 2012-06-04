@@ -52,6 +52,7 @@ package com.openexchange.oauth.json.osgi;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
+import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthInteraction;
 import com.openexchange.oauth.OAuthInteractionType;
@@ -134,5 +135,10 @@ public final class OSGiOAuthService extends AbstractOSGiDelegateService<OAuthSer
     public OAuthAccount updateAccount(final int accountId, final String serviceMetaData, final OAuthInteractionType type, final Map<String, Object> arguments, final int user, final int contextId) throws OXException {
         return getService0().updateAccount(accountId, serviceMetaData, type, arguments, user, contextId);
     }
+
+	@Override
+	public OAuthAccount getDefaultAccount(API api, Session session) throws OXException {
+		return getService0().getDefaultAccount(api, null);
+	}
 
 }

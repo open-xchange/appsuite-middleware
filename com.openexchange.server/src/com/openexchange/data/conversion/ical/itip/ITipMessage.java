@@ -65,6 +65,8 @@ public class ITipMessage extends AppointmentWithExceptions {
     private String comment;
     
     private final Set<Object> features = new HashSet<Object>();
+    
+    private int owner;
 
     public ITipMethod getMethod() {
         return method;
@@ -99,5 +101,23 @@ public class ITipMessage extends AppointmentWithExceptions {
 	public boolean hasFeature(Object feature) {
 		return features.contains(feature);
 	}
+
+    /**
+     * Gets the owner
+     *
+     * @return The owner
+     */
+    public int getOwner() {
+        return owner;
+    }
+
+    /**
+     * Sets the owner
+     *
+     * @param owner The owner to set
+     */
+    public void setOwner(int owner) {
+        this.owner = owner;
+    }
 
 }
