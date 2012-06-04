@@ -38,8 +38,3 @@ Import-Package: com.openexchange.exception,
  org.osgi.util.tracker
 Require-Bundle: com.openexchange.admin
 Bundle-Activator: com.openexchange.admin.soap.group.osgi.SoapGroupActivator
-Export-Package: com.openexchange.admin.soap.group.dataobjects,
- com.openexchange.admin.soap.group.exceptions,
- com.openexchange.admin.soap.group.io,
- com.openexchange.admin.soap.group.rmi,
- com.openexchange.admin.soap.group.soap

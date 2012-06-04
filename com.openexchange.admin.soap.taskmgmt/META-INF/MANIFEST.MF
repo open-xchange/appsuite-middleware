@@ -39,9 +39,3 @@ Import-Package: com.openexchange.exception,
  org.osgi.util.tracker
 Require-Bundle: com.openexchange.admin
 Bundle-Activator: com.openexchange.admin.soap.taskmgmt.osgi.SoapTaskMgmtActivator
-Export-Package: com.openexchange.admin.soap.taskmgmt.concurrent,
- com.openexchange.admin.soap.taskmgmt.dataobjects,
- com.openexchange.admin.soap.taskmgmt.exceptions,
- com.openexchange.admin.soap.taskmgmt.io,
- com.openexchange.admin.soap.taskmgmt.rmi,
- com.openexchange.admin.soap.taskmgmt.soap
