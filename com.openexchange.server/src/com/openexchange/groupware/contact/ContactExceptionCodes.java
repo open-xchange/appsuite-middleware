@@ -66,7 +66,7 @@ public enum ContactExceptionCodes implements OXExceptionCode {
     USER_OUTSIDE_GLOBAL(USER_OUTSIDE_GLOBAL_MSG, Category.CATEGORY_ERROR, 1),
     /** Invalid E-Mail address: '%s'. Please correct the E-Mail address. */
     INVALID_EMAIL(INVALID_EMAIL_MSG, Category.CATEGORY_USER_INPUT, 100),
-    /** Unable to scale this contact image. Either the file type is not supported or the image is too large. Your mime type is %1$s and your image size is %2$d. The max. allowed image size is %3$d. */
+    /** Unable to import this contact picture. Either the type is not part of the supported type (JPG, GIF, BMP or PNG) or the size exceed %3$d. Your mime type is %1$s and your image size is %2$d. */
     IMAGE_SCALE_PROBLEM(IMAGE_SCALE_PROBLEM_MSG, Category.CATEGORY_USER_INPUT, 101),
     /** You are not allowed to store this contact in a non-contact folder: folder id %1$d in context %2$d with user %3$d */
     NON_CONTACT_FOLDER(NON_CONTACT_FOLDER_MSG, Category.CATEGORY_PERMISSION_DENIED, 103),
