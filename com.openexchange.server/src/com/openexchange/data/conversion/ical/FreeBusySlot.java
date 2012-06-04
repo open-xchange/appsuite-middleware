@@ -49,68 +49,71 @@
 
 package com.openexchange.data.conversion.ical;
 
-import java.io.InputStream;
-import java.util.List;
-import java.util.TimeZone;
+import java.util.Date;
 
-import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.tasks.Task;
-
+import com.openexchange.groupware.container.Appointment;
 
 /**
- * {@link SimICalParser}
+ * {@link FreeBusySlot} - Represents a free/busy-timeslot.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class SimICalParser implements ICalParser{
-
-    private List<CalendarDataObject> appointments;
-    private List<Task> tasks;
-
-
-    @Override
-    public List<CalendarDataObject> parseAppointments(final String icalText, final TimeZone defaultTZ, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
-        return appointments;
-    }
-
-    @Override
-    public List<CalendarDataObject> parseAppointments(final InputStream ical, final TimeZone defaultTZ, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
-        return appointments;
-    }
-
-    @Override
-    public List<Task> parseTasks(final String icalText, final TimeZone defaultTZ, final Context context, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
-        return tasks;
-    }
-
-    @Override
-    public List<Task> parseTasks(final InputStream ical, final TimeZone defaultTZ, final Context context, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
-        return tasks;
-    }
-
-    public void setAppointments(final List<CalendarDataObject> appointments) {
-        this.appointments = appointments;
-    }
-
-    public void setTasks(final List<Task> tasks) {
-        this.tasks = tasks;
-    }
-
-    @Override
-    public String parseProperty(final String propertyName, final InputStream ical) {
-        return null;
-    }
-
-	@Override
-	public List<CalendarDataObject> parseFreeBusy(String icalText, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
-		return appointments;
+public class FreeBusySlot {
+	
+	private Date start;
+	private Date end;
+	private int shownAs;
+	
+	public FreeBusySlot() {
+		super();
 	}
-
-	@Override
-	public List<CalendarDataObject> parseFreeBusy(InputStream ical, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
-		return appointments;
+	
+	public FreeBusySlot(Date start, Date end, int shownAs) {
+		super();
+		this.start = start;
+		this.end = end;
+		this.shownAs = shownAs;
 	}
-
+	
+	public static FreeBusySlot create(Appointment appointment) {
+		return new FreeBusySlot(appointment.getStartDate(), appointment.getEndDate(), appointment.getShownAs());				
+	}
+	
+	/**
+	 * @return the start
+	 */
+	public Date getStart() {
+		return start;
+	}
+	/**
+	 * @param start the start to set
+	 */
+	public void setStart(Date start) {
+		this.start = start;
+	}
+	/**
+	 * @return the end
+	 */
+	public Date getEnd() {
+		return end;
+	}
+	/**
+	 * @param end the shown as to set
+	 */
+	public void setEnd(Date end) {
+		this.end = end;
+	}
+	/**
+	 * @return the type
+	 */
+	public int getShownAs() {
+		return shownAs;
+	}
+	/**
+	 * @param shownAs the shown as to set
+	 */
+	public void setShownAs(int shownAs) {
+		this.shownAs = shownAs;
+	}	
+	
 }

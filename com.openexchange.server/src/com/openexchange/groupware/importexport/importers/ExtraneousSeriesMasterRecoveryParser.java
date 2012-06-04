@@ -53,8 +53,10 @@ import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
+
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.FreeBusyInformation;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
@@ -124,5 +126,15 @@ public class ExtraneousSeriesMasterRecoveryParser implements ICalParser {
     public String parseProperty(final String propertyName, final InputStream ical) {
         return delegate.parseProperty(propertyName, ical);
     }
+
+	@Override
+	public List<FreeBusyInformation> parseFreeBusy(String icalText, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
+		return delegate.parseFreeBusy(icalText, defaultTZ, ctx, errors, warnings);
+	}
+
+	@Override
+	public List<FreeBusyInformation> parseFreeBusy(InputStream ical, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
+		return delegate.parseFreeBusy(ical, defaultTZ, ctx, errors, warnings);
+	}
 
 }

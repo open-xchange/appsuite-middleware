@@ -59,6 +59,8 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ScheduleOutboxURL extends SingleXMLPropertyMixin {
+	
+	public static final String SCHEDULE_OUTBOX = "schedule-outbox"; 
 
     public ScheduleOutboxURL() {
         super(CaldavProtocol.CAL_NS.getURI(), "schedule-outbox-URL");
@@ -66,7 +68,7 @@ public class ScheduleOutboxURL extends SingleXMLPropertyMixin {
 
     @Override
     protected String getValue() {
-        return "<D:href>/dev/null</D:href>";
+        return "<D:href>/caldav/" + SCHEDULE_OUTBOX + "</D:href>";
     }
 
 }
