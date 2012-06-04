@@ -136,7 +136,7 @@ public class MailAttachment extends AJAXServlet {
             /*
              * At least expect the same user agent as the one which created the attachment token
              */
-            if (!token.isOneTime() && null != token.getUserAgent()) {
+            if (token.isOneTime() && null != token.getUserAgent()) {
                 final String requestUserAgent = req.getHeader("user-agent");
                 if (null == requestUserAgent) {
                     AttachmentTokenRegistry.getInstance().removeToken(id);
