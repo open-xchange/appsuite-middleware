@@ -50,14 +50,17 @@
 package com.openexchange.caldav.servlet;
 
 import java.io.IOException;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
+
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 import com.openexchange.login.Interface;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.server.ServiceLookup;
@@ -149,6 +152,11 @@ public class CalDAV extends OXServlet {
     @Override
     protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         doIt(req, resp, CaldavPerformer.Action.PUT);
+    }
+
+    @Override
+    protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        doIt(req, resp, CaldavPerformer.Action.POST);
     }
 
     @Override

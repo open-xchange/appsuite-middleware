@@ -64,14 +64,17 @@ import net.fortuna.ical4j.model.PropertyList;
 import net.fortuna.ical4j.model.TimeZone;
 import net.fortuna.ical4j.model.ValidationException;
 import net.fortuna.ical4j.model.component.VEvent;
+import net.fortuna.ical4j.model.component.VFreeBusy;
 import net.fortuna.ical4j.model.component.VTimeZone;
 import net.fortuna.ical4j.model.component.VToDo;
 import net.fortuna.ical4j.model.property.CalScale;
 import net.fortuna.ical4j.model.property.Method;
 import net.fortuna.ical4j.model.property.ProdId;
+
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ConversionWarning.Code;
+import com.openexchange.data.conversion.ical.FreeBusyInformation;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalItem;
 import com.openexchange.data.conversion.ical.ICalSession;
@@ -81,6 +84,7 @@ import com.openexchange.data.conversion.ical.ZoneInfo;
 import com.openexchange.data.conversion.ical.ical4j.internal.AppointmentConverters;
 import com.openexchange.data.conversion.ical.ical4j.internal.AttributeConverter;
 import com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools;
+import com.openexchange.data.conversion.ical.ical4j.internal.FreeBusyConverters;
 import com.openexchange.data.conversion.ical.ical4j.internal.TaskConverters;
 import com.openexchange.data.conversion.ical.itip.ITipContainer;
 import com.openexchange.groupware.container.Appointment;
@@ -114,6 +118,27 @@ public class ICal4JEmitter implements ICalEmitter {
         final VEvent event = createEvent(mode, 0, appointment, ctx, errors, warnings);
         calendar.getComponents().add(event);
         addVTimeZone(mode.getZoneInfo(), calendar, appointment);
+        return calendar.toString();
+    }
+
+    @Override
+    public String writeFreeBusyReply(FreeBusyInformation freeBusyInfo, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
+        Calendar calendar = new Calendar();
+        calendar.getProperties().add(new ProdId(com.openexchange.server.impl.Version.NAME));
+        calendar.getProperties().add(net.fortuna.ical4j.model.property.Version.VERSION_2_0);
+        calendar.getProperties().add(Method.REPLY);
+        VFreeBusy vFreeBusy = new VFreeBusy();
+        Mode mode = new SimpleMode(ZoneInfo.OUTLOOK);
+        for (AttributeConverter<VFreeBusy, FreeBusyInformation> converter : FreeBusyConverters.REPLY) {
+            if (converter.isSet(freeBusyInfo)) {
+                try {
+                    converter.emit(mode, 0, freeBusyInfo, vFreeBusy, warnings, ctx);
+                } catch (ConversionError conversionError) {
+                    errors.add(conversionError);
+                }
+            }
+        }
+        calendar.getComponents().add(vFreeBusy);
         return calendar.toString();
     }
 

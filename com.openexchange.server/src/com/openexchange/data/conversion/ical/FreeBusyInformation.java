@@ -49,69 +49,51 @@
 
 package com.openexchange.data.conversion.ical;
 
-import java.io.InputStream;
-import java.util.Collections;
 import java.util.List;
-import java.util.TimeZone;
 
-import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.tasks.Task;
-
+import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.Participant;
 
 /**
- * {@link SimICalParser}
+ * {@link FreeBusyInformation}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class SimICalParser implements ICalParser{
-
-    private List<CalendarDataObject> appointments;
-    private List<Task> tasks;
-
-
-    @Override
-    public List<CalendarDataObject> parseAppointments(final String icalText, final TimeZone defaultTZ, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
-        return appointments;
-    }
-
-    @Override
-    public List<CalendarDataObject> parseAppointments(final InputStream ical, final TimeZone defaultTZ, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
-        return appointments;
-    }
-
-    @Override
-    public List<Task> parseTasks(final String icalText, final TimeZone defaultTZ, final Context context, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
-        return tasks;
-    }
-
-    @Override
-    public List<Task> parseTasks(final InputStream ical, final TimeZone defaultTZ, final Context context, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
-        return tasks;
-    }
-
-    public void setAppointments(final List<CalendarDataObject> appointments) {
-        this.appointments = appointments;
-    }
-
-    public void setTasks(final List<Task> tasks) {
-        this.tasks = tasks;
-    }
-
-    @Override
-    public String parseProperty(final String propertyName, final InputStream ical) {
-        return null;
-    }
-
-	@Override
-	public List<FreeBusyInformation> parseFreeBusy(String icalText, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
-		return Collections.emptyList();
+public class FreeBusyInformation extends Appointment {
+	
+	private Participant attendee;
+	private List<FreeBusySlot> freeBusySlots;
+	
+	public FreeBusyInformation() {
+		super();
 	}
 
-	@Override
-	public List<FreeBusyInformation> parseFreeBusy(InputStream ical, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
-		return Collections.emptyList();
+	/**
+	 * @return the attendee
+	 */
+	public Participant getAttendee() {
+		return attendee;
+	}
+
+	/**
+	 * @param attendee the attendee to set
+	 */
+	public void setAttendee(Participant attendee) {
+		this.attendee = attendee;
+	}
+
+	/**
+	 * @return the freeBusySlots
+	 */
+	public List<FreeBusySlot> getFreeBusySlots() {
+		return freeBusySlots;
+	}
+
+	/**
+	 * @param freeBusySlots the freeBusySlots to set
+	 */
+	public void setFreeBusySlots(List<FreeBusySlot> freeBusySlots) {
+		this.freeBusySlots = freeBusySlots;
 	}
 
 }

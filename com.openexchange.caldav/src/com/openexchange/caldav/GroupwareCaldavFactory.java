@@ -72,9 +72,9 @@ import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 
 import com.openexchange.api2.AppointmentSQLInterface;
+import com.openexchange.caldav.mixins.ScheduleOutboxURL;
 import com.openexchange.caldav.reports.Syncstatus;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
@@ -104,6 +104,7 @@ import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.SessionHolder;
@@ -192,6 +193,8 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
         }
         if (isRoot(url)) {
             return mixin(new RootCollection(this));
+        } else if (ScheduleOutboxURL.SCHEDULE_OUTBOX.equals(url.name())) {
+        	return mixin(new ScheduleOutboxCollection(this));
         }
         return resolveChild(url);
     }
