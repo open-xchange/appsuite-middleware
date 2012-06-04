@@ -5223,9 +5223,9 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:65
 msgid ""
-"Unable to scale this contact image. Either the file type is not supported or "
-"the image is too large. Your mime type is %1$s and your image size is %2$d. "
-"The max. allowed image size is %3$d."
+"Unable to import this contact picture. Either the type is not part of the "
+"supported type (JPG, GIF, BMP or PNG) or the size exceed %3$d. Your mime "
+"type is %1$s and your image size is %2$d."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:67
@@ -5275,7 +5275,7 @@ msgid "An error occurred: Object id is -1"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:87
-msgid "No changes found. No update requiered. Context %1$d Object %2$d"
+msgid "No changes found. No update required. Context %1$d Object %2$d"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:89
