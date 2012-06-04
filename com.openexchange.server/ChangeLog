@@ -1,3 +1,7 @@
+* 2012-06-04 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22242: Changed error message
+
 * 2012-06-03 - thorben.betten@open-xchange.com
 
  - Fix for bug 22217: Resolved possible deadlock on session lock
