@@ -90,7 +90,7 @@ public enum ContactExceptionCodes implements OXExceptionCode {
     OBJECT_HAS_CHANGED(OBJECT_HAS_CHANGED_MSG, Category.CATEGORY_CONFLICT, 119),
     /** An error occurred: Object id is -1 */
     NEGATIVE_OBJECT_ID(NEGATIVE_OBJECT_ID_MSG, Category.CATEGORY_ERROR, 121),
-    /** No changes found. No update requiered. Context %1$d Object %2$d */
+    /** No changes found. No update required. Context %1$d Object %2$d */
     NO_CHANGES(NO_CHANGES_MSG, Category.CATEGORY_USER_INPUT, 122),
     /** Contact %1$d not found in context %2$d. */
     CONTACT_NOT_FOUND(CONTACT_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 125),

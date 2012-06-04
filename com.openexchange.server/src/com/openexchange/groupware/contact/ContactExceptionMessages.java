@@ -84,7 +84,7 @@ public class ContactExceptionMessages implements LocalizableStrings {
 
     public static final String NEGATIVE_OBJECT_ID_MSG = "An error occurred: Object id is -1";
 
-    public static final String NO_CHANGES_MSG = "No changes found. No update requiered. Context %1$d Object %2$d";
+    public static final String NO_CHANGES_MSG = "No changes found. No update required. Context %1$d Object %2$d";
 
     public static final String CONTACT_NOT_FOUND_MSG = "Contact %1$d not found in context %2$d.";
 
