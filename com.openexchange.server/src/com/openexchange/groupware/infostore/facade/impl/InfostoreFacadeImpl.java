@@ -329,9 +329,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             updateVersion.setTimestamp(oldDocument.getSequenceNumber());
 
             perform(updateVersion, true);
-
-            final EventClient ec = new EventClient(sessionObj);
-            ec.modify(document);
         } catch (final OXException x) {
             throw x;
         } catch (final Exception e) {
@@ -593,12 +590,13 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 }
             }
 
-            final EventClient ec = new EventClient(sessionObj);
-            try {
-                ec.create(document);
-            } catch (final Exception e) {
-                LOG.error("", e);
-            }
+            //FIXME
+//            final EventClient ec = new EventClient(sessionObj);
+//            try {
+//                ec.create(document);
+//            } catch (final Exception e) {
+//                LOG.error("", e);
+//            }
 
         } else {
             saveDocument(document, data, sequenceNumber, nonNull(document), sessionObj);
@@ -893,8 +891,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                     infostoreFilenameReservation.destroySilently();
                 }
             }
-
-            final EventClient ec = new EventClient(sessionObj);
+          //FIXME
+//            final EventClient ec = new EventClient(sessionObj);
             final DocumentMetadataImpl docForEvent = new DocumentMetadataImpl(oldDocument);
             final SetSwitch set = new SetSwitch(docForEvent);
             final GetSwitch get = new GetSwitch(document);
@@ -907,7 +905,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             if (updatedCols.contains(Metadata.FOLDER_ID_LITERAL)) {
                 folderId = (int) docForEvent.getFolderId();
             }
-            ec.modify(oldDocument, docForEvent, ofa.getFolderObject(folderId));
+//            ec.modify(oldDocument, docForEvent, ofa.getFolderObject(folderId));
         } catch (final OXException x) {
             throw x;
         } catch (final Exception e) {
@@ -996,16 +994,16 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         {
             perform(deleteDocument, true);
         }
-
-        final EventClient ec = new EventClient(sessionObj);
-
-        for (final DocumentMetadata m : allDocuments) {
-            try {
-                ec.delete(m);
-            } catch (final Exception e) {
-                LOG.error("", e);
-            }
-        }
+      //FIXME
+//        final EventClient ec = new EventClient(sessionObj);
+//
+//        for (final DocumentMetadata m : allDocuments) {
+//            try {
+//                ec.delete(m);
+//            } catch (final Exception e) {
+//                LOG.error("", e);
+//            }
+//        }
     }
 
     private void removeFile(final Context context, final String filestoreLocation) throws OXException {
@@ -1251,13 +1249,13 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         } catch (final OXException x) {
             throw x;
         }
-
-        final EventClient ec = new EventClient(sessionObj);
-        try {
-            ec.modify(metadata);
-        } catch (final Exception e) {
-            LOG.error("", e); // FIXME
-        }
+      //FIXME
+//        final EventClient ec = new EventClient(sessionObj);
+//        try {
+//            ec.modify(metadata);
+//        } catch (final Exception e) {
+//            LOG.error("", e); // FIXME
+//        }
 
         final int[] retval = new int[versionSet.size()];
         int i = 0;

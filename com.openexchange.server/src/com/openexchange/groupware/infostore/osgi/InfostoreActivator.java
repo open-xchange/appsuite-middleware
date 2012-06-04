@@ -51,12 +51,23 @@ package com.openexchange.groupware.infostore.osgi;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.Stack;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import com.openexchange.database.CreateTableService;
+import com.openexchange.database.provider.DBPoolProvider;
+import com.openexchange.file.storage.FileStorageEventConstants;
+import com.openexchange.groupware.impl.FolderLockManagerImpl;
 import com.openexchange.groupware.infostore.database.impl.InfostoreFilenameReservationsCreateTableTask;
+import com.openexchange.groupware.infostore.webdav.EntityLockManagerImpl;
+import com.openexchange.groupware.infostore.webdav.LockCleaner;
+import com.openexchange.groupware.infostore.webdav.PropertyCleaner;
+import com.openexchange.groupware.infostore.webdav.PropertyStoreImpl;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskV2;
 
@@ -72,6 +83,10 @@ public class InfostoreActivator implements BundleActivator {
     @Override
     public void start(final BundleContext context) throws Exception {
         final InfostoreFilenameReservationsCreateTableTask task = new InfostoreFilenameReservationsCreateTableTask();
+        LockCleaner lockCleaner = new LockCleaner(new FolderLockManagerImpl(new DBPoolProvider()), new EntityLockManagerImpl(new DBPoolProvider(), "infostore_lock"));
+        PropertyCleaner propertyCleaner = new PropertyCleaner(new PropertyStoreImpl(new DBPoolProvider(), "oxfolder_property"), new PropertyStoreImpl(new DBPoolProvider(), "infostore_property"));
+        Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+        serviceProperties.put(EventConstants.EVENT_TOPIC, FileStorageEventConstants.ALL_TOPICS);
         registrations.push(context.registerService(CreateTableService.class.getName(), task, null));
         registrations.push(context.registerService(UpdateTaskProviderService.class.getName(), new UpdateTaskProviderService() {
             @Override
@@ -79,6 +94,8 @@ public class InfostoreActivator implements BundleActivator {
                 return Arrays.asList(((UpdateTaskV2) task));
             }
         }, null));
+        registrations.push(context.registerService(EventHandler.class, lockCleaner, serviceProperties));
+        registrations.push(context.registerService(EventHandler.class, propertyCleaner, serviceProperties));
     }
 
     @Override

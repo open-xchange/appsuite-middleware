@@ -50,17 +50,18 @@
 package com.openexchange.groupware.infostore.webdav;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventHandler;
 import com.openexchange.event.impl.FolderEventInterface;
-import com.openexchange.event.impl.InfostoreEventInterface;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageEventHelper;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
-public class PropertyCleaner implements FolderEventInterface, InfostoreEventInterface {
+public class PropertyCleaner implements FolderEventInterface, EventHandler {
 
 	private final PropertyStore infoProperties;
 	private final PropertyStore folderProperties;
@@ -101,35 +102,30 @@ public class PropertyCleaner implements FolderEventInterface, InfostoreEventInte
 
 	}
 
-	@Override
-    public void infoitemCreated(final DocumentMetadata metadata,
-			final Session sessionObject) {
-
-	}
-
-	@Override
-    public void infoitemDeleted(final DocumentMetadata metadata,
-			final Session session) {
-		try {
-            final ServerSession sessionObject = ServerSessionAdapter.valueOf(session);
-            infoProperties.startTransaction();
-			infoProperties.removeAll(metadata.getId(), sessionObject.getContext());
-			infoProperties.commit();
-		} catch (final OXException e) {
-		    LOG.error(e.getMessage(), e); // What shall we do with the drunken Exception? what shall we do with the drunken Exception? What shall we do with the drunken Exception early in the morning?
-		} finally {
-			try {
-				infoProperties.finish();
-			} catch (final OXException e) {
-			    LOG.error(e.getMessage(), e);
-			}
-		}
-	}
-
-	@Override
-    public void infoitemModified(final DocumentMetadata metadata,
-			final Session sessionObj) {
-
-	}
-
+    @Override
+    public void handleEvent(Event event) {
+        if (FileStorageEventHelper.isInfostoreEvent(event)) {
+            if (FileStorageEventHelper.isUpdateEvent(event)) {
+                ServerSession session = null;
+                int id = 0;
+                try {
+                    session = ServerSessionAdapter.valueOf(FileStorageEventHelper.extractSession(event));
+                    id = Integer.parseInt(FileStorageEventHelper.extractObjectId(event));
+                    infoProperties.startTransaction();
+                    infoProperties.removeAll(id, session.getContext());
+                    infoProperties.commit();
+                } catch (OXException e) {
+                    LOG.error(e.getMessage(), e);
+                } catch (NumberFormatException e) {
+                    LOG.error(e.getMessage(), e);
+                } finally {
+                    try {
+                        infoProperties.finish();
+                    } catch (final OXException e) {
+                        LOG.error(e.getMessage(), e);
+                    }
+                }
+            }
+        }        
+    }
 }

@@ -49,20 +49,21 @@
 package com.openexchange.groupware.infostore.webdav;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventHandler;
 import com.openexchange.event.impl.FolderEventInterface;
-import com.openexchange.event.impl.InfostoreEventInterface;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageEventHelper;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.impl.FolderLockManager;
-import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
-public class LockCleaner implements FolderEventInterface, InfostoreEventInterface {
+public class LockCleaner implements FolderEventInterface, EventHandler {
 
 	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LockCleaner.class));
 
@@ -85,17 +86,6 @@ public class LockCleaner implements FolderEventInterface, InfostoreEventInterfac
 		}
     }
 
-
-	@Override
-    public void infoitemDeleted(final DocumentMetadata metadata, final Session session) {
-		try {
-            final ServerSession sessionObj = ServerSessionAdapter.valueOf(session);
-            infoLockManager.removeAll(metadata.getId(), sessionObj.getContext(), UserStorage.getStorageUser(sessionObj.getUserId(), sessionObj.getContext()), UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext()));
-		} catch (final OXException e) {
-			LOG.fatal("Couldn't remove locks from infoitem "+metadata.getId()+" in context "+session.getContextId()+". Run the consistency tool.");
-		}
-    }
-
 	@Override
     public void folderCreated(final FolderObject folderObj, final Session sessionObj) {
 
@@ -106,14 +96,26 @@ public class LockCleaner implements FolderEventInterface, InfostoreEventInterfac
 
 	}
 
-	@Override
-    public void infoitemCreated(final DocumentMetadata metadata, final Session sessionObject) {
-
-	}
-
-	@Override
-    public void infoitemModified(final DocumentMetadata metadata, final Session sessionObject) {
-
-	}
-
+    @Override
+    public void handleEvent(Event event) {
+        if (FileStorageEventHelper.isInfostoreEvent(event)) {
+            if (FileStorageEventHelper.isUpdateEvent(event)) {
+                ServerSession session = null;
+                int id = 0;
+                try {
+                    session = ServerSessionAdapter.valueOf(FileStorageEventHelper.extractSession(event));
+                    id = Integer.parseInt(FileStorageEventHelper.extractObjectId(event));
+                    infoLockManager.removeAll(
+                        id,
+                        session.getContext(),
+                        UserStorage.getStorageUser(session.getUserId(), session.getContext()),
+                        UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()));
+                } catch (OXException e) {
+                    LOG.fatal("Couldn't remove locks from infoitem. Run the consistency tool.", e);
+                } catch (NumberFormatException e) {
+                    LOG.fatal("Couldn't remove locks from infoitem. Run the consistency tool.", e);
+                }
+            }
+        }            
+    }
 }

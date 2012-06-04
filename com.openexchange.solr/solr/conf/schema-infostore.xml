@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<schema name="OX Schema Infostore" version="1.1">
+    <types>
+        <fieldType name="boolean" class="solr.BoolField" omitNorms="true" />
+        <fieldType name="string" class="solr.StrField" sortMissingLast="true" omitNorms="true" />
+        <fieldType name="long" class="solr.LongField" omitNorms="true" />
+        <fieldType name="int" class="solr.IntField" omitNorms="true" />
+
+        <fieldType name="text" class="solr.TextField" positionIncrementGap="100" omitNorms="false">
+            <analyzer type="index">
+                <tokenizer class="solr.WhitespaceTokenizerFactory" />
+                <filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="0" catenateNumbers="1"
+                    catenateAll="0" splitOnCaseChange="1" />
+                <filter class="solr.LowerCaseFilterFactory" />
+                <filter class="solr.RemoveDuplicatesTokenFilterFactory" />
+            </analyzer>
+            <analyzer type="query">
+                <tokenizer class="solr.WhitespaceTokenizerFactory" />
+                <filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="0" catenateNumbers="1"
+                    catenateAll="0" splitOnCaseChange="1" />
+                <filter class="solr.LowerCaseFilterFactory" />
+                <filter class="solr.SynonymFilterFactory" synonyms="${confDir:/opt/open-xchange/solr/conf}/synonyms.txt" ignoreCase="true" expand="true" />
+                <filter class="solr.RemoveDuplicatesTokenFilterFactory" />
+            </analyzer>
+        </fieldType>
+    </types>
+
+    <fields>
+        <field name="uuid" type="string" stored="true" indexed="true" />
+        <field name="account" type="string" stored="true" indexed="true" />
+        <!-- infostore.id -->
+        <field name="id" type="int" stored="true" indexed="true" />
+        <!-- infostore.folder_id -->
+        <field name="folder_id" type="int" stored="true" indexed="true" />
+        <!-- infostore.version -->
+        <field name="version" type="int" stored="true" indexed="true" />
+        <!-- infostore.created_by -->
+        <field name="created_by" type="int" stored="true" indexed="true" />
+        <!-- infostore.changed_by -->
+        <field name="modified_by" type="int" stored="true" indexed="true" />
+        <!-- infostore.creating_date -->
+        <field name="creation_date" type="long" stored="true" indexed="true" />
+        <!-- infostore.last_modified -->
+        <field name="last_modified" type="long" stored="true" indexed="true" />
+        <!-- infostore_document.title -->
+        <field name="title" type="text" stored="true" indexed="true" />   
+        <!-- infostore_document.url -->
+        <field name="url" type="text" stored="true" indexed="true" />     
+        <!-- infostore_document.description -->
+        <field name="description" type="text" stored="false" indexed="true" />
+        <!-- infostore_document.file_version_comment -->
+        <field name="version_comment" type="text" stored="false" indexed="true" />
+        <!-- infostore_document.categories -->
+        <field name="categories" type="text" stored="true" indexed="true" />
+        <!-- infostore.color_label -->
+        <field name="color_label" type="int" stored="true" indexed="true" />
+        <!-- infostore.locked_until -->
+        <field name="locked_until" type="long" stored="true" indexed="true" />
+        <!-- infostore_document.filename -->
+        <field name="file_name" type="text" stored="true" indexed="true" />
+        <!-- infostore_document.file_size -->
+        <field name="file_size" type="long" stored="true" indexed="true" />
+        <!-- infostore_document.file_mimetype -->
+        <field name="mime_type" type="string" stored="true" indexed="true" />
+        <!-- infostore_document.file_md5sum -->
+        <field name="md5_sum" type="string" stored="true" indexed="false" />
+        <field name="attachment" type="text" stored="false" indexed="true" />
+    </fields>
+
+    <uniqueKey>uuid</uniqueKey>
+    <solrQueryParser defaultOperator="AND" />
+    <defaultSearchField>title</defaultSearchField>
+</schema>

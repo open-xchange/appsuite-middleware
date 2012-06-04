@@ -70,7 +70,7 @@
 	<classpathentry kind="lib" path="lib/ical4j-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/backport-util-concurrent-3.1.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.folder.json"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.eclipse.osgi.services_3.3.0.v20110513.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.eclipse.osgi.services_3.3.0.v20110513.jar" sourcepath="/com.openexchange.bundles/source/org.eclipse.osgi.services.source_3.3.0.v20110513.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.commons.logging_1.0.4.v200706111724.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/javax.servlet_2.5.0.v201103041518.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/geronimo-annotation_1.0_spec-1.1.1.jar"/>

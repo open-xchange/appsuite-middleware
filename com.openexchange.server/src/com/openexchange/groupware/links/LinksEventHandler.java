@@ -54,22 +54,25 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventHandler;
 import com.openexchange.event.impl.AppointmentEventInterface;
 import com.openexchange.event.impl.ContactEventInterface;
-import com.openexchange.event.impl.InfostoreEventInterface;
 import com.openexchange.event.impl.NoDelayEventInterface;
 import com.openexchange.event.impl.TaskEventInterface;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageEventHelper;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -77,8 +80,7 @@ import com.openexchange.tools.sql.DBUtils;
  *
  * @author <a href="mailto:ben.pahne@open-xchange.com">Benjamin Frederic Pahne</a>
  */
-public class LinksEventHandler implements NoDelayEventInterface, AppointmentEventInterface, TaskEventInterface, ContactEventInterface,
-        InfostoreEventInterface {
+public class LinksEventHandler implements NoDelayEventInterface, AppointmentEventInterface, TaskEventInterface, ContactEventInterface, EventHandler {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LinksEventHandler.class));
 
@@ -130,24 +132,40 @@ public class LinksEventHandler implements NoDelayEventInterface, AppointmentEven
     public void contactDeleted(final Contact contactObj, final Session sessionObj) {
         deleteLink(contactObj.getObjectID(), Types.CONTACT, contactObj.getParentFolderID(), sessionObj);
     }
-
+    
     @Override
-    public void infoitemCreated(final DocumentMetadata metadata, final Session sessionObject) {
-        // nix
-    }
-
-    @Override
-    public void infoitemModified(final DocumentMetadata metadata, final Session sessionObject) {
-        // BOESE TODO
-        final int x = (int) metadata.getFolderId();
-        updateLink(metadata.getId(), Types.INFOSTORE, x, sessionObject);
-    }
-
-    @Override
-    public void infoitemDeleted(final DocumentMetadata metadata, final Session sessionObject) {
-        // BOESE TODO
-        final int x = (int) metadata.getFolderId();
-        deleteLink(metadata.getId(), Types.INFOSTORE, x, sessionObject);
+    public void handleEvent(Event event) {
+        if (FileStorageEventHelper.isInfostoreEvent(event)) {
+            if (FileStorageEventHelper.isUpdateEvent(event)) {
+                ServerSession session;
+                int id;
+                int folderId;
+                try {
+                    session = ServerSessionAdapter.valueOf(FileStorageEventHelper.extractSession(event));
+                    id = Integer.parseInt(FileStorageEventHelper.extractObjectId(event));
+                    folderId = Integer.parseInt(FileStorageEventHelper.extractFolderId(event));
+                    updateLink(id, Types.INFOSTORE, folderId, session);
+                } catch (OXException e) {
+                    LOG.error(e.getMessage(), e);
+                } catch (NumberFormatException e) {
+                    LOG.error(e.getMessage(), e);
+                }
+            } else if (FileStorageEventHelper.isDeleteEvent(event)) {
+                ServerSession session;
+                int id;
+                int folderId;
+                try {
+                    session = ServerSessionAdapter.valueOf(FileStorageEventHelper.extractSession(event));
+                    id = Integer.parseInt(FileStorageEventHelper.extractObjectId(event));
+                    folderId = Integer.parseInt(FileStorageEventHelper.extractFolderId(event));
+                    deleteLink(id, Types.INFOSTORE, folderId, session);
+                } catch (OXException e) {
+                    LOG.error(e.getMessage(), e);
+                } catch (NumberFormatException e) {
+                    LOG.error(e.getMessage(), e);
+                }
+            }
+        }
     }
 
     private static final String SQL_DEL = "DELETE from prg_links WHERE (firstid = ? AND firstmodule = ? AND firstfolder = ?)"
