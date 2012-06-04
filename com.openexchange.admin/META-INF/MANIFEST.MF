@@ -4,7 +4,7 @@ Bundle-Name: Open-Xchange Administration
 Bundle-SymbolicName: com.openexchange.admin
 Bundle-Version: 6.21.0
 OXVersion: 6.21.0
-OXRevision: 4
+OXRevision: 5
 Bundle-Activator: com.openexchange.admin.osgi.Activator
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-Vendor: Open-Xchange Inc.
