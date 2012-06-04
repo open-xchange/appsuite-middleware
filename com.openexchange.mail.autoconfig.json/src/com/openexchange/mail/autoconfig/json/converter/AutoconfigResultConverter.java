@@ -97,13 +97,13 @@ public class AutoconfigResultConverter implements ResultConverter {
         }
 
         try {
-            json.put("username", autoconfig.getUsername());
-            json.put("mailserver", autoconfig.getMailServer());
-            json.put("transportserver", autoconfig.getTransportServer());
-            json.put("mailport", autoconfig.getMailPort());
-            json.put("transportport", autoconfig.getTransportPort());
-            json.put("mailProtocol", autoconfig.getMailProtocol());
-            json.put("transportProtocol", autoconfig.getTransportProtocol());
+            json.put("login", autoconfig.getUsername());
+            json.put("mail_server", autoconfig.getMailServer());
+            json.put("transport_server", autoconfig.getTransportServer());
+            json.put("mail_port", autoconfig.getMailPort());
+            json.put("transport_port", autoconfig.getTransportPort());
+            json.put("mail_protocol", autoconfig.getMailProtocol());
+            json.put("transport_protocol", autoconfig.getTransportProtocol());
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
         }
