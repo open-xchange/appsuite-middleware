@@ -381,6 +381,25 @@ public final class Tools {
         resp.setHeader("Content-Disposition", cd);
     }
 
+    private static final class AuthCookie implements com.openexchange.authentication.Cookie {
+
+        private final Cookie cookie;
+
+        protected AuthCookie(final Cookie cookie) {
+            this.cookie = cookie;
+        }
+
+        @Override
+        public String getValue() {
+            return cookie.getValue();
+        }
+
+        @Override
+        public String getName() {
+            return cookie.getName();
+        }
+    }
+
     public static interface CookieNameMatcher {
 
         /**
@@ -495,17 +514,6 @@ public final class Tools {
     }
 
     private static com.openexchange.authentication.Cookie getCookie(final Cookie cookie) {
-        return new com.openexchange.authentication.Cookie() {
-
-            @Override
-            public String getValue() {
-                return cookie.getValue();
-            }
-
-            @Override
-            public String getName() {
-                return cookie.getName();
-            }
-        };
+        return new AuthCookie(cookie);
     }
 }
