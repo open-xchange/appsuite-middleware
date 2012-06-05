@@ -50,6 +50,7 @@
 package com.openexchange.ajax.requesthandler;
 
 import static com.openexchange.ajax.requesthandler.Dispatcher.PREFIX;
+import static com.openexchange.tools.servlet.http.Tools.isMultipartContent;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
@@ -61,8 +62,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.fileupload.FileUploadBase;
-import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import org.apache.commons.logging.Log;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.SessionServlet;
@@ -271,10 +270,6 @@ public class DispatcherServlet extends SessionServlet {
                 dispatcher.end(state);
             }
         }
-    }
-
-    private boolean isMultipartContent(final HttpServletRequest httpRequest) {
-        return FileUploadBase.isMultipartContent(new ServletRequestContext(httpRequest));
     }
 
 	private ServerSession fakeSession() {

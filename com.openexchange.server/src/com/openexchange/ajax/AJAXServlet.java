@@ -72,11 +72,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileUploadBase;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -101,6 +99,7 @@ import com.openexchange.log.LogFactory;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.CountingHttpServletRequest;
+import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
@@ -783,7 +782,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * @throws OXException Id processing the upload fails
      */
     public static final UploadEvent processUploadStatic(final HttpServletRequest req) throws OXException {
-        if (!FileUploadBase.isMultipartContent(new ServletRequestContext(req))) {
+        if (!Tools.isMultipartContent(req)) {
             // No multipart content
             throw UploadException.UploadCode.NO_MULTIPART_CONTENT.create();
         }

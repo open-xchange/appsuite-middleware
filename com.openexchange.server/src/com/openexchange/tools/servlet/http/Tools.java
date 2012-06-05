@@ -457,6 +457,9 @@ public final class Tools {
      * @return <code>true</code> if the request is multipart; <code>false</code> otherwise.
      */
     public static final boolean isMultipartContent(final HttpServletRequest request) {
+        if (null == request) {
+            return false;
+        }
         final String contentType = request.getContentType();
         if (contentType == null) {
             return false;

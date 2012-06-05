@@ -58,8 +58,6 @@ import java.util.Set;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.fileupload.FileUploadBase;
-import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -151,7 +149,7 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
         Tools.disableCaching(resp);
 
         final String action = req.getParameter(PARAMETER_ACTION);
-        final boolean isFileUpload = FileUploadBase.isMultipartContent(new ServletRequestContext(req));
+        final boolean isFileUpload = Tools.isMultipartContent(req);
 
         final ServerSession session = getSessionObject(req);
 
