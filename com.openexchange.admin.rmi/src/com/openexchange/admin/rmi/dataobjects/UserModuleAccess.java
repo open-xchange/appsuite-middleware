@@ -51,7 +51,6 @@ package com.openexchange.admin.rmi.dataobjects;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
 
 /**
  * Object for setting/getting access informations to the different ox modules
@@ -691,97 +690,6 @@ public class UserModuleAccess implements Serializable {
             return false;
         }
         return true;
-    }
-    
-    public int getPermissionBits() {
-        int retval = 0;
-        
-        if (isActiveSync()) {
-            retval |= UserConfiguration.ACTIVE_SYNC;
-        }
-        if (getCalendar()) {
-            retval |= UserConfiguration.CALENDAR;
-        }
-        if (isCollectEmailAddresses()) {
-            retval |= UserConfiguration.COLLECT_EMAIL_ADDRESSES;
-        }
-        if (getContacts()) {
-            retval |= UserConfiguration.CONTACTS;
-        }
-        if (getDelegateTask()) {
-            retval |= UserConfiguration.DELEGATE_TASKS;
-        }
-        if (getEditGroup()) {
-            retval |= UserConfiguration.EDIT_GROUP;
-        }
-        if (getEditPassword()) {
-            retval |= UserConfiguration.EDIT_PASSWORD;
-        }
-        if (getEditPublicFolders()) {
-            retval |= UserConfiguration.EDIT_PUBLIC_FOLDERS;
-        }
-        if (getEditResource()) {
-            retval |= UserConfiguration.EDIT_RESOURCE;
-        }
-        if (getForum()) {
-            retval |= UserConfiguration.FORUM;
-        }
-        if (getIcal()) {
-            retval |= UserConfiguration.ICAL;
-        }
-        if (getInfostore()) {
-            retval |= UserConfiguration.INFOSTORE;
-        }
-        if (getSyncml()) {
-            retval |= UserConfiguration.MOBILITY;
-        }
-        if (isMultipleMailAccounts()) {
-            retval |= UserConfiguration.MULTIPLE_MAIL_ACCOUNTS;
-        }
-        if (isOLOX20()) {
-            retval |= UserConfiguration.OLOX20;
-        }
-        if (getPinboardWrite()) {
-            retval |= UserConfiguration.PINBOARD_WRITE_ACCESS;
-        }
-        if (getProjects()) {
-            retval |= UserConfiguration.PROJECTS;
-        }
-        if (isPublication()) {
-            retval |= UserConfiguration.PUBLICATION;
-        }
-        if (getReadCreateSharedFolders()) {
-            retval |= UserConfiguration.READ_CREATE_SHARED_FOLDERS;
-        }
-        if (getRssBookmarks()) {
-            retval |= UserConfiguration.RSS_BOOKMARKS;
-        }
-        if (getRssPortal()) {
-            retval |= UserConfiguration.RSS_PORTAL;
-        }
-        if (isSubscription()) {
-            retval |= UserConfiguration.SUBSCRIPTION;
-        }
-        if (getTasks()) {
-            retval |= UserConfiguration.TASKS;
-        }
-        if (isUSM()) {
-            retval |= UserConfiguration.USM;
-        }
-        if (getVcard()) {
-            retval |= UserConfiguration.VCARD;
-        }
-        if (getWebdav()) {
-            retval |= UserConfiguration.WEBDAV;
-        }
-        if (getWebdavXml()) {
-            retval |= UserConfiguration.WEBDAV_XML;
-        }
-        if (getWebmail()) {
-            retval |= UserConfiguration.WEBMAIL;
-        }
-        
-        return retval;
     }
 
 }

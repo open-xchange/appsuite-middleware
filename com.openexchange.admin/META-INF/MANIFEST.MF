@@ -57,7 +57,6 @@ Import-Package: com.mysql.jdbc,
  org.osgi.util.tracker
 Export-Package: com.openexchange.admin.daemons,
  com.openexchange.admin.exceptions,
- com.openexchange.admin.plugins,
  com.openexchange.admin.properties,
  com.openexchange.admin.rmi.impl,
  com.openexchange.admin.storage.interfaces,
@@ -65,7 +64,4 @@ Export-Package: com.openexchange.admin.daemons,
  com.openexchange.admin.storage.sqlStorage,
  com.openexchange.admin.taskmanagement,
  com.openexchange.admin.tools
-Bundle-ActivationPolicy: lazy
-Eclipse-BuddyPolicy: registered
-Bundle-ClassPath: lib/opencsv-2.0.jar,
- .
+Bundle-ClassPath: .

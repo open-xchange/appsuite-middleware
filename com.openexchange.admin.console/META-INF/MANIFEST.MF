@@ -12,7 +12,7 @@ Import-Package: com.openexchange.admin.rmi,
  com.openexchange.admin.rmi.exceptions,
  com.openexchange.admin.rmi.extensions,
  com.openexchange.tools.pipesnfilters,
- org.apache.commons.cli;version="1.2.0"
+ org.apache.commons.cli
 Export-Package: com.openexchange.admin.console,
  com.openexchange.admin.console.admincore,
  com.openexchange.admin.console.context,

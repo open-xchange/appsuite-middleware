@@ -54,7 +54,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-
 import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
@@ -325,18 +324,23 @@ public abstract class EnforceableDataObject implements Serializable, Cloneable {
      */
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (!(obj instanceof EnforceableDataObject))
+        }
+        if (!(obj instanceof EnforceableDataObject)) {
             return false;
+        }
         final EnforceableDataObject other = (EnforceableDataObject) obj;
         if (unset_members == null) {
-            if (other.unset_members != null)
+            if (other.unset_members != null) {
                 return false;
-        } else if (!unset_members.equals(other.unset_members))
+            }
+        } else if (!unset_members.equals(other.unset_members)) {
             return false;
+        }
         return true;
     }
 

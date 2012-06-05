@@ -260,7 +260,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
 
     private String mail_folder_confirmed_spam_name;
 
-    private boolean mail_folder_confirmed_spam_nameset = false;
+    private final boolean mail_folder_confirmed_spam_nameset = false;
 
     private String mail_folder_confirmed_ham_name;
 
@@ -578,6 +578,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return Returns the id of the user as a long.
      */
+    @Override
     final public Integer getId() {
         return id;
     }
@@ -1596,6 +1597,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param userid An {@link Integer} containing the user id
      */
+    @Override
     final public void setId(final Integer userid) {
         if (null == userid) {
             this.idset = true;
@@ -1603,6 +1605,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         this.id = userid;
     }
 
+    @Override
     final public String getName() {
         return name;
     }
@@ -1612,6 +1615,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param username A {@link String} containing the user name
      */
+    @Override
     final public void setName(final String username) {
         if (null == username) {
             this.nameset = true;
@@ -1622,6 +1626,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     /* (non-Javadoc)
      * @see com.openexchange.admin.rmi.dataobjects.PasswordMechObject#getPassword()
      */
+    @Override
     final public String getPassword() {
         return password;
     }
@@ -4339,6 +4344,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     /* (non-Javadoc)
      * @see com.openexchange.admin.rmi.dataobjects.PasswordMechObject#getPasswordMech()
      */
+    @Override
     final public String getPasswordMech() {
         return passwordMech;
     }
@@ -4346,6 +4352,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     /* (non-Javadoc)
      * @see com.openexchange.admin.rmi.dataobjects.PasswordMechObject#setPasswordMech(java.lang.String)
      */
+    @Override
     final public void setPasswordMech(final String passwordMech) {
         if (null == passwordMech) {
             this.passwordMechset = true;
@@ -4902,820 +4909,1169 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      */
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (!super.equals(obj))
+        }
+        if (!super.equals(obj)) {
             return false;
-        if (!(obj instanceof User))
+        }
+        if (!(obj instanceof User)) {
             return false;
+        }
         final User other = (User) obj;
         if (aliases == null) {
-            if (other.aliases != null)
+            if (other.aliases != null) {
                 return false;
-        } else if (!aliases.equals(other.aliases))
+            }
+        } else if (!aliases.equals(other.aliases)) {
             return false;
-        if (aliasesset != other.aliasesset)
+        }
+        if (aliasesset != other.aliasesset) {
             return false;
+        }
         if (anniversary == null) {
-            if (other.anniversary != null)
+            if (other.anniversary != null) {
                 return false;
-        } else if (!anniversary.equals(other.anniversary))
+            }
+        } else if (!anniversary.equals(other.anniversary)) {
             return false;
-        if (anniversaryset != other.anniversaryset)
+        }
+        if (anniversaryset != other.anniversaryset) {
             return false;
+        }
         if (assistant_name == null) {
-            if (other.assistant_name != null)
+            if (other.assistant_name != null) {
                 return false;
-        } else if (!assistant_name.equals(other.assistant_name))
+            }
+        } else if (!assistant_name.equals(other.assistant_name)) {
             return false;
-        if (assistant_nameset != other.assistant_nameset)
+        }
+        if (assistant_nameset != other.assistant_nameset) {
             return false;
+        }
         if (birthday == null) {
-            if (other.birthday != null)
+            if (other.birthday != null) {
                 return false;
-        } else if (!birthday.equals(other.birthday))
+            }
+        } else if (!birthday.equals(other.birthday)) {
             return false;
-        if (birthdayset != other.birthdayset)
+        }
+        if (birthdayset != other.birthdayset) {
             return false;
+        }
         if (branches == null) {
-            if (other.branches != null)
+            if (other.branches != null) {
                 return false;
-        } else if (!branches.equals(other.branches))
+            }
+        } else if (!branches.equals(other.branches)) {
             return false;
-        if (branchesset != other.branchesset)
+        }
+        if (branchesset != other.branchesset) {
             return false;
+        }
         if (business_category == null) {
-            if (other.business_category != null)
+            if (other.business_category != null) {
                 return false;
-        } else if (!business_category.equals(other.business_category))
+            }
+        } else if (!business_category.equals(other.business_category)) {
             return false;
-        if (business_categoryset != other.business_categoryset)
+        }
+        if (business_categoryset != other.business_categoryset) {
             return false;
+        }
         if (categories == null) {
-            if (other.categories != null)
+            if (other.categories != null) {
                 return false;
-        } else if (!categories.equals(other.categories))
+            }
+        } else if (!categories.equals(other.categories)) {
             return false;
-        if (categoriesset != other.categoriesset)
+        }
+        if (categoriesset != other.categoriesset) {
             return false;
+        }
         if (cellular_telephone1 == null) {
-            if (other.cellular_telephone1 != null)
+            if (other.cellular_telephone1 != null) {
                 return false;
-        } else if (!cellular_telephone1.equals(other.cellular_telephone1))
+            }
+        } else if (!cellular_telephone1.equals(other.cellular_telephone1)) {
             return false;
-        if (cellular_telephone1set != other.cellular_telephone1set)
+        }
+        if (cellular_telephone1set != other.cellular_telephone1set) {
             return false;
+        }
         if (cellular_telephone2 == null) {
-            if (other.cellular_telephone2 != null)
+            if (other.cellular_telephone2 != null) {
                 return false;
-        } else if (!cellular_telephone2.equals(other.cellular_telephone2))
+            }
+        } else if (!cellular_telephone2.equals(other.cellular_telephone2)) {
             return false;
-        if (cellular_telephone2set != other.cellular_telephone2set)
+        }
+        if (cellular_telephone2set != other.cellular_telephone2set) {
             return false;
+        }
         if (city_business == null) {
-            if (other.city_business != null)
+            if (other.city_business != null) {
                 return false;
-        } else if (!city_business.equals(other.city_business))
+            }
+        } else if (!city_business.equals(other.city_business)) {
             return false;
-        if (city_businessset != other.city_businessset)
+        }
+        if (city_businessset != other.city_businessset) {
             return false;
+        }
         if (city_home == null) {
-            if (other.city_home != null)
+            if (other.city_home != null) {
                 return false;
-        } else if (!city_home.equals(other.city_home))
+            }
+        } else if (!city_home.equals(other.city_home)) {
             return false;
-        if (city_homeset != other.city_homeset)
+        }
+        if (city_homeset != other.city_homeset) {
             return false;
+        }
         if (city_other == null) {
-            if (other.city_other != null)
+            if (other.city_other != null) {
                 return false;
-        } else if (!city_other.equals(other.city_other))
+            }
+        } else if (!city_other.equals(other.city_other)) {
             return false;
-        if (city_otherset != other.city_otherset)
+        }
+        if (city_otherset != other.city_otherset) {
             return false;
+        }
         if (commercial_register == null) {
-            if (other.commercial_register != null)
+            if (other.commercial_register != null) {
                 return false;
-        } else if (!commercial_register.equals(other.commercial_register))
+            }
+        } else if (!commercial_register.equals(other.commercial_register)) {
             return false;
-        if (commercial_registerset != other.commercial_registerset)
+        }
+        if (commercial_registerset != other.commercial_registerset) {
             return false;
+        }
         if (company == null) {
-            if (other.company != null)
+            if (other.company != null) {
                 return false;
-        } else if (!company.equals(other.company))
+            }
+        } else if (!company.equals(other.company)) {
             return false;
-        if (companyset != other.companyset)
+        }
+        if (companyset != other.companyset) {
             return false;
-        if (contextadmin != other.contextadmin)
+        }
+        if (contextadmin != other.contextadmin) {
             return false;
+        }
         if (country_business == null) {
-            if (other.country_business != null)
+            if (other.country_business != null) {
                 return false;
-        } else if (!country_business.equals(other.country_business))
+            }
+        } else if (!country_business.equals(other.country_business)) {
             return false;
-        if (country_businessset != other.country_businessset)
+        }
+        if (country_businessset != other.country_businessset) {
             return false;
+        }
         if (country_home == null) {
-            if (other.country_home != null)
+            if (other.country_home != null) {
                 return false;
-        } else if (!country_home.equals(other.country_home))
+            }
+        } else if (!country_home.equals(other.country_home)) {
             return false;
-        if (country_homeset != other.country_homeset)
+        }
+        if (country_homeset != other.country_homeset) {
             return false;
+        }
         if (country_other == null) {
-            if (other.country_other != null)
+            if (other.country_other != null) {
                 return false;
-        } else if (!country_other.equals(other.country_other))
+            }
+        } else if (!country_other.equals(other.country_other)) {
             return false;
-        if (country_otherset != other.country_otherset)
+        }
+        if (country_otherset != other.country_otherset) {
             return false;
+        }
         if (defaultSenderAddress == null) {
-            if (other.defaultSenderAddress != null)
+            if (other.defaultSenderAddress != null) {
                 return false;
-        } else if (!defaultSenderAddress.equals(other.defaultSenderAddress))
+            }
+        } else if (!defaultSenderAddress.equals(other.defaultSenderAddress)) {
             return false;
-        if (defaultSenderAddressset != other.defaultSenderAddressset)
+        }
+        if (defaultSenderAddressset != other.defaultSenderAddressset) {
             return false;
+        }
         if (folderTree == null) {
-            if (other.folderTree != null)
+            if (other.folderTree != null) {
                 return false;
-        } else if (!folderTree.equals(other.folderTree))
+            }
+        } else if (!folderTree.equals(other.folderTree)) {
             return false;
-        if (folderTreeSet != other.folderTreeSet)
+        }
+        if (folderTreeSet != other.folderTreeSet) {
             return false;
+        }
         if (default_group == null) {
-            if (other.default_group != null)
+            if (other.default_group != null) {
                 return false;
-        } else if (!default_group.equals(other.default_group))
+            }
+        } else if (!default_group.equals(other.default_group)) {
             return false;
-        if (default_groupset != other.default_groupset)
+        }
+        if (default_groupset != other.default_groupset) {
             return false;
+        }
         if (department == null) {
-            if (other.department != null)
+            if (other.department != null) {
                 return false;
-        } else if (!department.equals(other.department))
+            }
+        } else if (!department.equals(other.department)) {
             return false;
-        if (departmentset != other.departmentset)
+        }
+        if (departmentset != other.departmentset) {
             return false;
+        }
         if (display_name == null) {
-            if (other.display_name != null)
+            if (other.display_name != null) {
                 return false;
-        } else if (!display_name.equals(other.display_name))
+            }
+        } else if (!display_name.equals(other.display_name)) {
             return false;
-        if (display_nameset != other.display_nameset)
+        }
+        if (display_nameset != other.display_nameset) {
             return false;
+        }
         if (email1 == null) {
-            if (other.email1 != null)
+            if (other.email1 != null) {
                 return false;
-        } else if (!email1.equals(other.email1))
+            }
+        } else if (!email1.equals(other.email1)) {
             return false;
-        if (email1set != other.email1set)
+        }
+        if (email1set != other.email1set) {
             return false;
+        }
         if (email2 == null) {
-            if (other.email2 != null)
+            if (other.email2 != null) {
                 return false;
-        } else if (!email2.equals(other.email2))
+            }
+        } else if (!email2.equals(other.email2)) {
             return false;
-        if (email2set != other.email2set)
+        }
+        if (email2set != other.email2set) {
             return false;
+        }
         if (email3 == null) {
-            if (other.email3 != null)
+            if (other.email3 != null) {
                 return false;
-        } else if (!email3.equals(other.email3))
+            }
+        } else if (!email3.equals(other.email3)) {
             return false;
-        if (email3set != other.email3set)
+        }
+        if (email3set != other.email3set) {
             return false;
+        }
         if (employeeType == null) {
-            if (other.employeeType != null)
+            if (other.employeeType != null) {
                 return false;
-        } else if (!employeeType.equals(other.employeeType))
+            }
+        } else if (!employeeType.equals(other.employeeType)) {
             return false;
-        if (employeeTypeset != other.employeeTypeset)
+        }
+        if (employeeTypeset != other.employeeTypeset) {
             return false;
+        }
         if (fax_business == null) {
-            if (other.fax_business != null)
+            if (other.fax_business != null) {
                 return false;
-        } else if (!fax_business.equals(other.fax_business))
+            }
+        } else if (!fax_business.equals(other.fax_business)) {
             return false;
-        if (fax_businessset != other.fax_businessset)
+        }
+        if (fax_businessset != other.fax_businessset) {
             return false;
+        }
         if (fax_home == null) {
-            if (other.fax_home != null)
+            if (other.fax_home != null) {
                 return false;
-        } else if (!fax_home.equals(other.fax_home))
+            }
+        } else if (!fax_home.equals(other.fax_home)) {
             return false;
-        if (fax_homeset != other.fax_homeset)
+        }
+        if (fax_homeset != other.fax_homeset) {
             return false;
+        }
         if (fax_other == null) {
-            if (other.fax_other != null)
+            if (other.fax_other != null) {
                 return false;
-        } else if (!fax_other.equals(other.fax_other))
+            }
+        } else if (!fax_other.equals(other.fax_other)) {
             return false;
-        if (fax_otherset != other.fax_otherset)
+        }
+        if (fax_otherset != other.fax_otherset) {
             return false;
+        }
         if (given_name == null) {
-            if (other.given_name != null)
+            if (other.given_name != null) {
                 return false;
-        } else if (!given_name.equals(other.given_name))
+            }
+        } else if (!given_name.equals(other.given_name)) {
             return false;
-        if (given_nameset != other.given_nameset)
+        }
+        if (given_nameset != other.given_nameset) {
             return false;
+        }
         if (guiPreferences == null) {
-            if (other.guiPreferences != null)
+            if (other.guiPreferences != null) {
                 return false;
-        } else if (!guiPreferences.equals(other.guiPreferences))
+            }
+        } else if (!guiPreferences.equals(other.guiPreferences)) {
             return false;
-        if (guiPreferencesset != other.guiPreferencesset)
+        }
+        if (guiPreferencesset != other.guiPreferencesset) {
             return false;
+        }
         if (gui_spam_filter_enabled == null) {
-            if (other.gui_spam_filter_enabled != null)
+            if (other.gui_spam_filter_enabled != null) {
                 return false;
-        } else if (!gui_spam_filter_enabled.equals(other.gui_spam_filter_enabled))
+            }
+        } else if (!gui_spam_filter_enabled.equals(other.gui_spam_filter_enabled)) {
             return false;
-        if (gui_spam_filter_enabledset != other.gui_spam_filter_enabledset)
+        }
+        if (gui_spam_filter_enabledset != other.gui_spam_filter_enabledset) {
             return false;
+        }
         if (id == null) {
-            if (other.id != null)
+            if (other.id != null) {
                 return false;
-        } else if (!id.equals(other.id))
+            }
+        } else if (!id.equals(other.id)) {
             return false;
-        if (idset != other.idset)
+        }
+        if (idset != other.idset) {
             return false;
+        }
         if (imapLogin == null) {
-            if (other.imapLogin != null)
+            if (other.imapLogin != null) {
                 return false;
-        } else if (!imapLogin.equals(other.imapLogin))
+            }
+        } else if (!imapLogin.equals(other.imapLogin)) {
             return false;
-        if (imapLoginset != other.imapLoginset)
+        }
+        if (imapLoginset != other.imapLoginset) {
             return false;
+        }
         if (imapServer == null) {
-            if (other.imapServer != null)
+            if (other.imapServer != null) {
                 return false;
-        } else if (!imapServer.equals(other.imapServer))
+            }
+        } else if (!imapServer.equals(other.imapServer)) {
             return false;
-        if (imapServerset != other.imapServerset)
+        }
+        if (imapServerset != other.imapServerset) {
             return false;
+        }
         if (info == null) {
-            if (other.info != null)
+            if (other.info != null) {
                 return false;
-        } else if (!info.equals(other.info))
+            }
+        } else if (!info.equals(other.info)) {
             return false;
-        if (infoset != other.infoset)
+        }
+        if (infoset != other.infoset) {
             return false;
+        }
         if (instant_messenger1 == null) {
-            if (other.instant_messenger1 != null)
+            if (other.instant_messenger1 != null) {
                 return false;
-        } else if (!instant_messenger1.equals(other.instant_messenger1))
+            }
+        } else if (!instant_messenger1.equals(other.instant_messenger1)) {
             return false;
-        if (instant_messenger1set != other.instant_messenger1set)
+        }
+        if (instant_messenger1set != other.instant_messenger1set) {
             return false;
+        }
         if (instant_messenger2 == null) {
-            if (other.instant_messenger2 != null)
+            if (other.instant_messenger2 != null) {
                 return false;
-        } else if (!instant_messenger2.equals(other.instant_messenger2))
+            }
+        } else if (!instant_messenger2.equals(other.instant_messenger2)) {
             return false;
-        if (instant_messenger2set != other.instant_messenger2set)
+        }
+        if (instant_messenger2set != other.instant_messenger2set) {
             return false;
+        }
         if (language == null) {
-            if (other.language != null)
+            if (other.language != null) {
                 return false;
-        } else if (!language.equals(other.language))
+            }
+        } else if (!language.equals(other.language)) {
             return false;
-        if (languageset != other.languageset)
+        }
+        if (languageset != other.languageset) {
             return false;
+        }
         if (mail_folder_confirmed_ham_name == null) {
-            if (other.mail_folder_confirmed_ham_name != null)
+            if (other.mail_folder_confirmed_ham_name != null) {
                 return false;
-        } else if (!mail_folder_confirmed_ham_name.equals(other.mail_folder_confirmed_ham_name))
+            }
+        } else if (!mail_folder_confirmed_ham_name.equals(other.mail_folder_confirmed_ham_name)) {
             return false;
-        if (mail_folder_confirmed_ham_nameset != other.mail_folder_confirmed_ham_nameset)
+        }
+        if (mail_folder_confirmed_ham_nameset != other.mail_folder_confirmed_ham_nameset) {
             return false;
+        }
         if (mail_folder_confirmed_spam_name == null) {
-            if (other.mail_folder_confirmed_spam_name != null)
+            if (other.mail_folder_confirmed_spam_name != null) {
                 return false;
-        } else if (!mail_folder_confirmed_spam_name.equals(other.mail_folder_confirmed_spam_name))
+            }
+        } else if (!mail_folder_confirmed_spam_name.equals(other.mail_folder_confirmed_spam_name)) {
             return false;
-        if (mail_folder_confirmed_spam_nameset != other.mail_folder_confirmed_spam_nameset)
+        }
+        if (mail_folder_confirmed_spam_nameset != other.mail_folder_confirmed_spam_nameset) {
             return false;
+        }
         if (mail_folder_drafts_name == null) {
-            if (other.mail_folder_drafts_name != null)
+            if (other.mail_folder_drafts_name != null) {
                 return false;
-        } else if (!mail_folder_drafts_name.equals(other.mail_folder_drafts_name))
+            }
+        } else if (!mail_folder_drafts_name.equals(other.mail_folder_drafts_name)) {
             return false;
-        if (mail_folder_drafts_nameset != other.mail_folder_drafts_nameset)
+        }
+        if (mail_folder_drafts_nameset != other.mail_folder_drafts_nameset) {
             return false;
+        }
         if (mail_folder_sent_name == null) {
-            if (other.mail_folder_sent_name != null)
+            if (other.mail_folder_sent_name != null) {
                 return false;
-        } else if (!mail_folder_sent_name.equals(other.mail_folder_sent_name))
+            }
+        } else if (!mail_folder_sent_name.equals(other.mail_folder_sent_name)) {
             return false;
-        if (mail_folder_sent_nameset != other.mail_folder_sent_nameset)
+        }
+        if (mail_folder_sent_nameset != other.mail_folder_sent_nameset) {
             return false;
+        }
         if (mail_folder_spam_name == null) {
-            if (other.mail_folder_spam_name != null)
+            if (other.mail_folder_spam_name != null) {
                 return false;
-        } else if (!mail_folder_spam_name.equals(other.mail_folder_spam_name))
+            }
+        } else if (!mail_folder_spam_name.equals(other.mail_folder_spam_name)) {
             return false;
-        if (mail_folder_spam_nameset != other.mail_folder_spam_nameset)
+        }
+        if (mail_folder_spam_nameset != other.mail_folder_spam_nameset) {
             return false;
+        }
         if (mail_folder_trash_name == null) {
-            if (other.mail_folder_trash_name != null)
+            if (other.mail_folder_trash_name != null) {
                 return false;
-        } else if (!mail_folder_trash_name.equals(other.mail_folder_trash_name))
+            }
+        } else if (!mail_folder_trash_name.equals(other.mail_folder_trash_name)) {
             return false;
-        if (mail_folder_trash_nameset != other.mail_folder_trash_nameset)
+        }
+        if (mail_folder_trash_nameset != other.mail_folder_trash_nameset) {
             return false;
+        }
         if (mailenabled == null) {
-            if (other.mailenabled != null)
+            if (other.mailenabled != null) {
                 return false;
-        } else if (!mailenabled.equals(other.mailenabled))
+            }
+        } else if (!mailenabled.equals(other.mailenabled)) {
             return false;
-        if (mailenabledset != other.mailenabledset)
+        }
+        if (mailenabledset != other.mailenabledset) {
             return false;
+        }
         if (manager_name == null) {
-            if (other.manager_name != null)
+            if (other.manager_name != null) {
                 return false;
-        } else if (!manager_name.equals(other.manager_name))
+            }
+        } else if (!manager_name.equals(other.manager_name)) {
             return false;
-        if (manager_nameset != other.manager_nameset)
+        }
+        if (manager_nameset != other.manager_nameset) {
             return false;
+        }
         if (marital_status == null) {
-            if (other.marital_status != null)
+            if (other.marital_status != null) {
                 return false;
-        } else if (!marital_status.equals(other.marital_status))
+            }
+        } else if (!marital_status.equals(other.marital_status)) {
             return false;
-        if (marital_statusset != other.marital_statusset)
+        }
+        if (marital_statusset != other.marital_statusset) {
             return false;
+        }
         if (middle_name == null) {
-            if (other.middle_name != null)
+            if (other.middle_name != null) {
                 return false;
-        } else if (!middle_name.equals(other.middle_name))
+            }
+        } else if (!middle_name.equals(other.middle_name)) {
             return false;
-        if (middle_nameset != other.middle_nameset)
+        }
+        if (middle_nameset != other.middle_nameset) {
             return false;
+        }
         if (name == null) {
-            if (other.name != null)
+            if (other.name != null) {
                 return false;
-        } else if (!name.equals(other.name))
+            }
+        } else if (!name.equals(other.name)) {
             return false;
-        if (nameset != other.nameset)
+        }
+        if (nameset != other.nameset) {
             return false;
+        }
         if (nickname == null) {
-            if (other.nickname != null)
+            if (other.nickname != null) {
                 return false;
-        } else if (!nickname.equals(other.nickname))
+            }
+        } else if (!nickname.equals(other.nickname)) {
             return false;
-        if (nicknameset != other.nicknameset)
+        }
+        if (nicknameset != other.nicknameset) {
             return false;
+        }
         if (note == null) {
-            if (other.note != null)
+            if (other.note != null) {
                 return false;
-        } else if (!note.equals(other.note))
+            }
+        } else if (!note.equals(other.note)) {
             return false;
-        if (noteset != other.noteset)
+        }
+        if (noteset != other.noteset) {
             return false;
+        }
         if (number_of_children == null) {
-            if (other.number_of_children != null)
+            if (other.number_of_children != null) {
                 return false;
-        } else if (!number_of_children.equals(other.number_of_children))
+            }
+        } else if (!number_of_children.equals(other.number_of_children)) {
             return false;
-        if (number_of_childrenset != other.number_of_childrenset)
+        }
+        if (number_of_childrenset != other.number_of_childrenset) {
             return false;
+        }
         if (number_of_employee == null) {
-            if (other.number_of_employee != null)
+            if (other.number_of_employee != null) {
                 return false;
-        } else if (!number_of_employee.equals(other.number_of_employee))
+            }
+        } else if (!number_of_employee.equals(other.number_of_employee)) {
             return false;
-        if (number_of_employeeset != other.number_of_employeeset)
+        }
+        if (number_of_employeeset != other.number_of_employeeset) {
             return false;
+        }
         if (password == null) {
-            if (other.password != null)
+            if (other.password != null) {
                 return false;
-        } else if (!password.equals(other.password))
+            }
+        } else if (!password.equals(other.password)) {
             return false;
+        }
         if (passwordMech == null) {
-            if (other.passwordMech != null)
+            if (other.passwordMech != null) {
                 return false;
-        } else if (!passwordMech.equals(other.passwordMech))
+            }
+        } else if (!passwordMech.equals(other.passwordMech)) {
             return false;
-        if (passwordMechset != other.passwordMechset)
+        }
+        if (passwordMechset != other.passwordMechset) {
             return false;
+        }
         if (password_expired == null) {
-            if (other.password_expired != null)
+            if (other.password_expired != null) {
                 return false;
-        } else if (!password_expired.equals(other.password_expired))
+            }
+        } else if (!password_expired.equals(other.password_expired)) {
             return false;
-        if (password_expiredset != other.password_expiredset)
+        }
+        if (password_expiredset != other.password_expiredset) {
             return false;
-        if (passwordset != other.passwordset)
+        }
+        if (passwordset != other.passwordset) {
             return false;
+        }
         if (position == null) {
-            if (other.position != null)
+            if (other.position != null) {
                 return false;
-        } else if (!position.equals(other.position))
+            }
+        } else if (!position.equals(other.position)) {
             return false;
-        if (positionset != other.positionset)
+        }
+        if (positionset != other.positionset) {
             return false;
+        }
         if (postal_code_business == null) {
-            if (other.postal_code_business != null)
+            if (other.postal_code_business != null) {
                 return false;
-        } else if (!postal_code_business.equals(other.postal_code_business))
+            }
+        } else if (!postal_code_business.equals(other.postal_code_business)) {
             return false;
-        if (postal_code_businessset != other.postal_code_businessset)
+        }
+        if (postal_code_businessset != other.postal_code_businessset) {
             return false;
+        }
         if (postal_code_home == null) {
-            if (other.postal_code_home != null)
+            if (other.postal_code_home != null) {
                 return false;
-        } else if (!postal_code_home.equals(other.postal_code_home))
+            }
+        } else if (!postal_code_home.equals(other.postal_code_home)) {
             return false;
-        if (postal_code_homeset != other.postal_code_homeset)
+        }
+        if (postal_code_homeset != other.postal_code_homeset) {
             return false;
+        }
         if (postal_code_other == null) {
-            if (other.postal_code_other != null)
+            if (other.postal_code_other != null) {
                 return false;
-        } else if (!postal_code_other.equals(other.postal_code_other))
+            }
+        } else if (!postal_code_other.equals(other.postal_code_other)) {
             return false;
-        if (postal_code_otherset != other.postal_code_otherset)
+        }
+        if (postal_code_otherset != other.postal_code_otherset) {
             return false;
+        }
         if (primaryEmail == null) {
-            if (other.primaryEmail != null)
+            if (other.primaryEmail != null) {
                 return false;
-        } else if (!primaryEmail.equals(other.primaryEmail))
+            }
+        } else if (!primaryEmail.equals(other.primaryEmail)) {
             return false;
-        if (primaryEmailset != other.primaryEmailset)
+        }
+        if (primaryEmailset != other.primaryEmailset) {
             return false;
+        }
         if (profession == null) {
-            if (other.profession != null)
+            if (other.profession != null) {
                 return false;
-        } else if (!profession.equals(other.profession))
+            }
+        } else if (!profession.equals(other.profession)) {
             return false;
-        if (professionset != other.professionset)
+        }
+        if (professionset != other.professionset) {
             return false;
+        }
         if (room_number == null) {
-            if (other.room_number != null)
+            if (other.room_number != null) {
                 return false;
-        } else if (!room_number.equals(other.room_number))
+            }
+        } else if (!room_number.equals(other.room_number)) {
             return false;
-        if (room_numberset != other.room_numberset)
+        }
+        if (room_numberset != other.room_numberset) {
             return false;
+        }
         if (sales_volume == null) {
-            if (other.sales_volume != null)
+            if (other.sales_volume != null) {
                 return false;
-        } else if (!sales_volume.equals(other.sales_volume))
+            }
+        } else if (!sales_volume.equals(other.sales_volume)) {
             return false;
-        if (sales_volumeset != other.sales_volumeset)
+        }
+        if (sales_volumeset != other.sales_volumeset) {
             return false;
+        }
         if (smtpServer == null) {
-            if (other.smtpServer != null)
+            if (other.smtpServer != null) {
                 return false;
-        } else if (!smtpServer.equals(other.smtpServer))
+            }
+        } else if (!smtpServer.equals(other.smtpServer)) {
             return false;
-        if (smtpServerset != other.smtpServerset)
+        }
+        if (smtpServerset != other.smtpServerset) {
             return false;
+        }
         if (spouse_name == null) {
-            if (other.spouse_name != null)
+            if (other.spouse_name != null) {
                 return false;
-        } else if (!spouse_name.equals(other.spouse_name))
+            }
+        } else if (!spouse_name.equals(other.spouse_name)) {
             return false;
-        if (spouse_nameset != other.spouse_nameset)
+        }
+        if (spouse_nameset != other.spouse_nameset) {
             return false;
+        }
         if (state_business == null) {
-            if (other.state_business != null)
+            if (other.state_business != null) {
                 return false;
-        } else if (!state_business.equals(other.state_business))
+            }
+        } else if (!state_business.equals(other.state_business)) {
             return false;
-        if (state_businessset != other.state_businessset)
+        }
+        if (state_businessset != other.state_businessset) {
             return false;
+        }
         if (state_home == null) {
-            if (other.state_home != null)
+            if (other.state_home != null) {
                 return false;
-        } else if (!state_home.equals(other.state_home))
+            }
+        } else if (!state_home.equals(other.state_home)) {
             return false;
-        if (state_homeset != other.state_homeset)
+        }
+        if (state_homeset != other.state_homeset) {
             return false;
+        }
         if (state_other == null) {
-            if (other.state_other != null)
+            if (other.state_other != null) {
                 return false;
-        } else if (!state_other.equals(other.state_other))
+            }
+        } else if (!state_other.equals(other.state_other)) {
             return false;
-        if (state_otherset != other.state_otherset)
+        }
+        if (state_otherset != other.state_otherset) {
             return false;
+        }
         if (street_business == null) {
-            if (other.street_business != null)
+            if (other.street_business != null) {
                 return false;
-        } else if (!street_business.equals(other.street_business))
+            }
+        } else if (!street_business.equals(other.street_business)) {
             return false;
-        if (street_businessset != other.street_businessset)
+        }
+        if (street_businessset != other.street_businessset) {
             return false;
+        }
         if (street_home == null) {
-            if (other.street_home != null)
+            if (other.street_home != null) {
                 return false;
-        } else if (!street_home.equals(other.street_home))
+            }
+        } else if (!street_home.equals(other.street_home)) {
             return false;
-        if (street_homeset != other.street_homeset)
+        }
+        if (street_homeset != other.street_homeset) {
             return false;
+        }
         if (street_other == null) {
-            if (other.street_other != null)
+            if (other.street_other != null) {
                 return false;
-        } else if (!street_other.equals(other.street_other))
+            }
+        } else if (!street_other.equals(other.street_other)) {
             return false;
-        if (street_otherset != other.street_otherset)
+        }
+        if (street_otherset != other.street_otherset) {
             return false;
+        }
         if (suffix == null) {
-            if (other.suffix != null)
+            if (other.suffix != null) {
                 return false;
-        } else if (!suffix.equals(other.suffix))
+            }
+        } else if (!suffix.equals(other.suffix)) {
             return false;
-        if (suffixset != other.suffixset)
+        }
+        if (suffixset != other.suffixset) {
             return false;
+        }
         if (sur_name == null) {
-            if (other.sur_name != null)
+            if (other.sur_name != null) {
                 return false;
-        } else if (!sur_name.equals(other.sur_name))
+            }
+        } else if (!sur_name.equals(other.sur_name)) {
             return false;
-        if (sur_nameset != other.sur_nameset)
+        }
+        if (sur_nameset != other.sur_nameset) {
             return false;
+        }
         if (tax_id == null) {
-            if (other.tax_id != null)
+            if (other.tax_id != null) {
                 return false;
-        } else if (!tax_id.equals(other.tax_id))
+            }
+        } else if (!tax_id.equals(other.tax_id)) {
             return false;
-        if (tax_idset != other.tax_idset)
+        }
+        if (tax_idset != other.tax_idset) {
             return false;
+        }
         if (telephone_assistant == null) {
-            if (other.telephone_assistant != null)
+            if (other.telephone_assistant != null) {
                 return false;
-        } else if (!telephone_assistant.equals(other.telephone_assistant))
+            }
+        } else if (!telephone_assistant.equals(other.telephone_assistant)) {
             return false;
-        if (telephone_assistantset != other.telephone_assistantset)
+        }
+        if (telephone_assistantset != other.telephone_assistantset) {
             return false;
+        }
         if (telephone_business1 == null) {
-            if (other.telephone_business1 != null)
+            if (other.telephone_business1 != null) {
                 return false;
-        } else if (!telephone_business1.equals(other.telephone_business1))
+            }
+        } else if (!telephone_business1.equals(other.telephone_business1)) {
             return false;
-        if (telephone_business1set != other.telephone_business1set)
+        }
+        if (telephone_business1set != other.telephone_business1set) {
             return false;
+        }
         if (telephone_business2 == null) {
-            if (other.telephone_business2 != null)
+            if (other.telephone_business2 != null) {
                 return false;
-        } else if (!telephone_business2.equals(other.telephone_business2))
+            }
+        } else if (!telephone_business2.equals(other.telephone_business2)) {
             return false;
-        if (telephone_business2set != other.telephone_business2set)
+        }
+        if (telephone_business2set != other.telephone_business2set) {
             return false;
+        }
         if (telephone_callback == null) {
-            if (other.telephone_callback != null)
+            if (other.telephone_callback != null) {
                 return false;
-        } else if (!telephone_callback.equals(other.telephone_callback))
+            }
+        } else if (!telephone_callback.equals(other.telephone_callback)) {
             return false;
-        if (telephone_callbackset != other.telephone_callbackset)
+        }
+        if (telephone_callbackset != other.telephone_callbackset) {
             return false;
+        }
         if (telephone_car == null) {
-            if (other.telephone_car != null)
+            if (other.telephone_car != null) {
                 return false;
-        } else if (!telephone_car.equals(other.telephone_car))
+            }
+        } else if (!telephone_car.equals(other.telephone_car)) {
             return false;
-        if (telephone_carset != other.telephone_carset)
+        }
+        if (telephone_carset != other.telephone_carset) {
             return false;
+        }
         if (telephone_company == null) {
-            if (other.telephone_company != null)
+            if (other.telephone_company != null) {
                 return false;
-        } else if (!telephone_company.equals(other.telephone_company))
+            }
+        } else if (!telephone_company.equals(other.telephone_company)) {
             return false;
-        if (telephone_companyset != other.telephone_companyset)
+        }
+        if (telephone_companyset != other.telephone_companyset) {
             return false;
+        }
         if (telephone_home1 == null) {
-            if (other.telephone_home1 != null)
+            if (other.telephone_home1 != null) {
                 return false;
-        } else if (!telephone_home1.equals(other.telephone_home1))
+            }
+        } else if (!telephone_home1.equals(other.telephone_home1)) {
             return false;
-        if (telephone_home1set != other.telephone_home1set)
+        }
+        if (telephone_home1set != other.telephone_home1set) {
             return false;
+        }
         if (telephone_home2 == null) {
-            if (other.telephone_home2 != null)
+            if (other.telephone_home2 != null) {
                 return false;
-        } else if (!telephone_home2.equals(other.telephone_home2))
+            }
+        } else if (!telephone_home2.equals(other.telephone_home2)) {
             return false;
-        if (telephone_home2set != other.telephone_home2set)
+        }
+        if (telephone_home2set != other.telephone_home2set) {
             return false;
+        }
         if (telephone_ip == null) {
-            if (other.telephone_ip != null)
+            if (other.telephone_ip != null) {
                 return false;
-        } else if (!telephone_ip.equals(other.telephone_ip))
+            }
+        } else if (!telephone_ip.equals(other.telephone_ip)) {
             return false;
-        if (telephone_ipset != other.telephone_ipset)
+        }
+        if (telephone_ipset != other.telephone_ipset) {
             return false;
+        }
         if (telephone_isdn == null) {
-            if (other.telephone_isdn != null)
+            if (other.telephone_isdn != null) {
                 return false;
-        } else if (!telephone_isdn.equals(other.telephone_isdn))
+            }
+        } else if (!telephone_isdn.equals(other.telephone_isdn)) {
             return false;
-        if (telephone_isdnset != other.telephone_isdnset)
+        }
+        if (telephone_isdnset != other.telephone_isdnset) {
             return false;
+        }
         if (telephone_other == null) {
-            if (other.telephone_other != null)
+            if (other.telephone_other != null) {
                 return false;
-        } else if (!telephone_other.equals(other.telephone_other))
+            }
+        } else if (!telephone_other.equals(other.telephone_other)) {
             return false;
-        if (telephone_otherset != other.telephone_otherset)
+        }
+        if (telephone_otherset != other.telephone_otherset) {
             return false;
+        }
         if (telephone_pager == null) {
-            if (other.telephone_pager != null)
+            if (other.telephone_pager != null) {
                 return false;
-        } else if (!telephone_pager.equals(other.telephone_pager))
+            }
+        } else if (!telephone_pager.equals(other.telephone_pager)) {
             return false;
-        if (telephone_pagerset != other.telephone_pagerset)
+        }
+        if (telephone_pagerset != other.telephone_pagerset) {
             return false;
+        }
         if (telephone_primary == null) {
-            if (other.telephone_primary != null)
+            if (other.telephone_primary != null) {
                 return false;
-        } else if (!telephone_primary.equals(other.telephone_primary))
+            }
+        } else if (!telephone_primary.equals(other.telephone_primary)) {
             return false;
-        if (telephone_primaryset != other.telephone_primaryset)
+        }
+        if (telephone_primaryset != other.telephone_primaryset) {
             return false;
+        }
         if (telephone_radio == null) {
-            if (other.telephone_radio != null)
+            if (other.telephone_radio != null) {
                 return false;
-        } else if (!telephone_radio.equals(other.telephone_radio))
+            }
+        } else if (!telephone_radio.equals(other.telephone_radio)) {
             return false;
-        if (telephone_radioset != other.telephone_radioset)
+        }
+        if (telephone_radioset != other.telephone_radioset) {
             return false;
+        }
         if (telephone_telex == null) {
-            if (other.telephone_telex != null)
+            if (other.telephone_telex != null) {
                 return false;
-        } else if (!telephone_telex.equals(other.telephone_telex))
+            }
+        } else if (!telephone_telex.equals(other.telephone_telex)) {
             return false;
-        if (telephone_telexset != other.telephone_telexset)
+        }
+        if (telephone_telexset != other.telephone_telexset) {
             return false;
+        }
         if (telephone_ttytdd == null) {
-            if (other.telephone_ttytdd != null)
+            if (other.telephone_ttytdd != null) {
                 return false;
-        } else if (!telephone_ttytdd.equals(other.telephone_ttytdd))
+            }
+        } else if (!telephone_ttytdd.equals(other.telephone_ttytdd)) {
             return false;
-        if (telephone_ttytddset != other.telephone_ttytddset)
+        }
+        if (telephone_ttytddset != other.telephone_ttytddset) {
             return false;
+        }
         if (timezone == null) {
-            if (other.timezone != null)
+            if (other.timezone != null) {
                 return false;
-        } else if (!timezone.equals(other.timezone))
+            }
+        } else if (!timezone.equals(other.timezone)) {
             return false;
-        if (timezoneset != other.timezoneset)
+        }
+        if (timezoneset != other.timezoneset) {
             return false;
+        }
         if (title == null) {
-            if (other.title != null)
+            if (other.title != null) {
                 return false;
-        } else if (!title.equals(other.title))
+            }
+        } else if (!title.equals(other.title)) {
             return false;
-        if (titleset != other.titleset)
+        }
+        if (titleset != other.titleset) {
             return false;
+        }
         if (url == null) {
-            if (other.url != null)
+            if (other.url != null) {
                 return false;
-        } else if (!url.equals(other.url))
+            }
+        } else if (!url.equals(other.url)) {
             return false;
-        if (urlset != other.urlset)
+        }
+        if (urlset != other.urlset) {
             return false;
+        }
         if (userfield01 == null) {
-            if (other.userfield01 != null)
+            if (other.userfield01 != null) {
                 return false;
-        } else if (!userfield01.equals(other.userfield01))
+            }
+        } else if (!userfield01.equals(other.userfield01)) {
             return false;
-        if (userfield01set != other.userfield01set)
+        }
+        if (userfield01set != other.userfield01set) {
             return false;
+        }
         if (userfield02 == null) {
-            if (other.userfield02 != null)
+            if (other.userfield02 != null) {
                 return false;
-        } else if (!userfield02.equals(other.userfield02))
+            }
+        } else if (!userfield02.equals(other.userfield02)) {
             return false;
-        if (userfield02set != other.userfield02set)
+        }
+        if (userfield02set != other.userfield02set) {
             return false;
+        }
         if (userfield03 == null) {
-            if (other.userfield03 != null)
+            if (other.userfield03 != null) {
                 return false;
-        } else if (!userfield03.equals(other.userfield03))
+            }
+        } else if (!userfield03.equals(other.userfield03)) {
             return false;
-        if (userfield03set != other.userfield03set)
+        }
+        if (userfield03set != other.userfield03set) {
             return false;
+        }
         if (userfield04 == null) {
-            if (other.userfield04 != null)
+            if (other.userfield04 != null) {
                 return false;
-        } else if (!userfield04.equals(other.userfield04))
+            }
+        } else if (!userfield04.equals(other.userfield04)) {
             return false;
-        if (userfield04set != other.userfield04set)
+        }
+        if (userfield04set != other.userfield04set) {
             return false;
+        }
         if (userfield05 == null) {
-            if (other.userfield05 != null)
+            if (other.userfield05 != null) {
                 return false;
-        } else if (!userfield05.equals(other.userfield05))
+            }
+        } else if (!userfield05.equals(other.userfield05)) {
             return false;
-        if (userfield05set != other.userfield05set)
+        }
+        if (userfield05set != other.userfield05set) {
             return false;
+        }
         if (userfield06 == null) {
-            if (other.userfield06 != null)
+            if (other.userfield06 != null) {
                 return false;
-        } else if (!userfield06.equals(other.userfield06))
+            }
+        } else if (!userfield06.equals(other.userfield06)) {
             return false;
-        if (userfield06set != other.userfield06set)
+        }
+        if (userfield06set != other.userfield06set) {
             return false;
+        }
         if (userfield07 == null) {
-            if (other.userfield07 != null)
+            if (other.userfield07 != null) {
                 return false;
-        } else if (!userfield07.equals(other.userfield07))
+            }
+        } else if (!userfield07.equals(other.userfield07)) {
             return false;
-        if (userfield07set != other.userfield07set)
+        }
+        if (userfield07set != other.userfield07set) {
             return false;
+        }
         if (userfield08 == null) {
-            if (other.userfield08 != null)
+            if (other.userfield08 != null) {
                 return false;
-        } else if (!userfield08.equals(other.userfield08))
+            }
+        } else if (!userfield08.equals(other.userfield08)) {
             return false;
-        if (userfield08set != other.userfield08set)
+        }
+        if (userfield08set != other.userfield08set) {
             return false;
+        }
         if (userfield09 == null) {
-            if (other.userfield09 != null)
+            if (other.userfield09 != null) {
                 return false;
-        } else if (!userfield09.equals(other.userfield09))
+            }
+        } else if (!userfield09.equals(other.userfield09)) {
             return false;
-        if (userfield09set != other.userfield09set)
+        }
+        if (userfield09set != other.userfield09set) {
             return false;
+        }
         if (userfield10 == null) {
-            if (other.userfield10 != null)
+            if (other.userfield10 != null) {
                 return false;
-        } else if (!userfield10.equals(other.userfield10))
+            }
+        } else if (!userfield10.equals(other.userfield10)) {
             return false;
-        if (userfield10set != other.userfield10set)
+        }
+        if (userfield10set != other.userfield10set) {
             return false;
+        }
         if (userfield11 == null) {
-            if (other.userfield11 != null)
+            if (other.userfield11 != null) {
                 return false;
-        } else if (!userfield11.equals(other.userfield11))
+            }
+        } else if (!userfield11.equals(other.userfield11)) {
             return false;
-        if (userfield11set != other.userfield11set)
+        }
+        if (userfield11set != other.userfield11set) {
             return false;
+        }
         if (userfield12 == null) {
-            if (other.userfield12 != null)
+            if (other.userfield12 != null) {
                 return false;
-        } else if (!userfield12.equals(other.userfield12))
+            }
+        } else if (!userfield12.equals(other.userfield12)) {
             return false;
-        if (userfield12set != other.userfield12set)
+        }
+        if (userfield12set != other.userfield12set) {
             return false;
+        }
         if (userfield13 == null) {
-            if (other.userfield13 != null)
+            if (other.userfield13 != null) {
                 return false;
-        } else if (!userfield13.equals(other.userfield13))
+            }
+        } else if (!userfield13.equals(other.userfield13)) {
             return false;
-        if (userfield13set != other.userfield13set)
+        }
+        if (userfield13set != other.userfield13set) {
             return false;
+        }
         if (userfield14 == null) {
-            if (other.userfield14 != null)
+            if (other.userfield14 != null) {
                 return false;
-        } else if (!userfield14.equals(other.userfield14))
+            }
+        } else if (!userfield14.equals(other.userfield14)) {
             return false;
-        if (userfield14set != other.userfield14set)
+        }
+        if (userfield14set != other.userfield14set) {
             return false;
+        }
         if (userfield15 == null) {
-            if (other.userfield15 != null)
+            if (other.userfield15 != null) {
                 return false;
-        } else if (!userfield15.equals(other.userfield15))
+            }
+        } else if (!userfield15.equals(other.userfield15)) {
             return false;
-        if (userfield15set != other.userfield15set)
+        }
+        if (userfield15set != other.userfield15set) {
             return false;
+        }
         if (userfield16 == null) {
-            if (other.userfield16 != null)
+            if (other.userfield16 != null) {
                 return false;
-        } else if (!userfield16.equals(other.userfield16))
+            }
+        } else if (!userfield16.equals(other.userfield16)) {
             return false;
-        if (userfield16set != other.userfield16set)
+        }
+        if (userfield16set != other.userfield16set) {
             return false;
+        }
         if (userfield17 == null) {
-            if (other.userfield17 != null)
+            if (other.userfield17 != null) {
                 return false;
-        } else if (!userfield17.equals(other.userfield17))
+            }
+        } else if (!userfield17.equals(other.userfield17)) {
             return false;
-        if (userfield17set != other.userfield17set)
+        }
+        if (userfield17set != other.userfield17set) {
             return false;
+        }
         if (userfield18 == null) {
-            if (other.userfield18 != null)
+            if (other.userfield18 != null) {
                 return false;
-        } else if (!userfield18.equals(other.userfield18))
+            }
+        } else if (!userfield18.equals(other.userfield18)) {
             return false;
-        if (userfield18set != other.userfield18set)
+        }
+        if (userfield18set != other.userfield18set) {
             return false;
+        }
         if (userfield19 == null) {
-            if (other.userfield19 != null)
+            if (other.userfield19 != null) {
                 return false;
-        } else if (!userfield19.equals(other.userfield19))
+            }
+        } else if (!userfield19.equals(other.userfield19)) {
             return false;
-        if (userfield19set != other.userfield19set)
+        }
+        if (userfield19set != other.userfield19set) {
             return false;
+        }
         if (userfield20 == null) {
-            if (other.userfield20 != null)
+            if (other.userfield20 != null) {
                 return false;
-        } else if (!userfield20.equals(other.userfield20))
+            }
+        } else if (!userfield20.equals(other.userfield20)) {
             return false;
-        if (userfield20set != other.userfield20set)
+        }
+        if (userfield20set != other.userfield20set) {
             return false;
+        }
         return true;
     }
 
