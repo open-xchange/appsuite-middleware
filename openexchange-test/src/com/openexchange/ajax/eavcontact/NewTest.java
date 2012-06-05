@@ -49,12 +49,10 @@
 package com.openexchange.ajax.eavcontact;
 
 import java.util.UUID;
-
 import com.openexchange.ajax.eavcontact.action.NewActionRequest;
 import com.openexchange.ajax.eavcontact.action.NewActionResponse;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.loxandra.dto.EAVContact;
-import com.openexchange.loxandra.test.NameGenerator;
 
 /**
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
@@ -62,7 +60,7 @@ import com.openexchange.loxandra.test.NameGenerator;
  */
 public class NewTest extends AbstractAJAXSession {
 
-	private static NameGenerator nameGen = new NameGenerator();
+	//private static NameGenerator nameGen = new NameGenerator();
 	
 	/**
 	 * 
@@ -73,15 +71,15 @@ public class NewTest extends AbstractAJAXSession {
 
 	public void testNew() throws Exception {
 		
-		EAVContact c = new EAVContact();
-		UUID folderUUID = new UUID(1,1);
+		final EAVContact c = new EAVContact();
+		final UUID folderUUID = new UUID(1,1);
 		c.addFolderUUID(folderUUID);
-		c.setGivenName(nameGen.getName());
-		c.setSurName(nameGen.getName());
+		//c.setGivenName(nameGen.getName());
+		//c.setSurName(nameGen.getName());
 		c.setDisplayName(c.getSurName() + ", " + c.getGivenName());
 		
-		NewActionRequest request = new NewActionRequest(c);
-		NewActionResponse response = getClient().execute(request);
+		final NewActionRequest request = new NewActionRequest(c);
+		final NewActionResponse response = getClient().execute(request);
 		System.out.println(response.getResponse().getData());
 	}
 }
