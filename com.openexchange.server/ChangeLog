@@ -1,3 +1,7 @@
+* 2012-06-05 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22245: Properly use ACE address for SMTP's envelope-from header
+
 * 2012-06-04 - thorben.betten@open-xchange.com
 
  - Fix for bug 22242: Changed error message
