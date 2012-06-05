@@ -8,5 +8,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/open-xchange-test"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.plugin.hosting"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.soap"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
