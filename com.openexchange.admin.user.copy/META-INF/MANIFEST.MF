@@ -38,3 +38,4 @@ Import-Package: com.openexchange.admin.console,
  org.json,
  org.osgi.framework,
  org.osgi.util.tracker
+Require-Bundle: com.openexchange.admin
