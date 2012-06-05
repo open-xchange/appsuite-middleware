@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="com.openexchange.admin.rmi overrides">
+
+    <description>
+        Symlinks administration RMI client JAR to lib directory.
+    </description>
+
+    <import file="build-project.xml"/>    
+
+    <target name="postInstall">
+    	<symlink resource="${bundlesDir}/${Bundle-SymbolicName}.jar" link="${destDir}/${prefix}/${libDir}/${Bundle-SymbolicName}.jar" overwrite="true"/>
+    </target>
+
+</project>

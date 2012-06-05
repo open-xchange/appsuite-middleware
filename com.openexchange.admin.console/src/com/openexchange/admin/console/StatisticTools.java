@@ -65,7 +65,6 @@ import javax.management.ObjectName;
 import javax.management.ReflectionException;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.threadpool.ThreadPoolInformationMBean;
 
 public class StatisticTools extends AbstractJMXTools {
 
@@ -257,7 +256,7 @@ public class StatisticTools extends AbstractJMXTools {
     }
     
     private void showThreadPoolData(MBeanServerConnection mbc) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException {
-        System.out.print(getStats(mbc, ThreadPoolInformationMBean.THREAD_POOL_DOMAIN + ".internal.ThreadPoolInformation"));
+        System.out.print(getStats(mbc, "com.openexchange.threadpool.internal.ThreadPoolInformation"));
     }
     
     @SuppressWarnings("unchecked")
