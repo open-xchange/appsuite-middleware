@@ -84,6 +84,8 @@ public class APIResponseRenderer implements ResponseRenderer {
 
 	private static final String CALLBACK = "callback";
 
+	private static final String PLAIN_JSON = "plainJson";
+
     /**
      * Initializes a new {@link APIResponseRenderer}.
      */
@@ -103,7 +105,8 @@ public class APIResponseRenderer implements ResponseRenderer {
 
     @Override
     public void write(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest req, final HttpServletResponse resp) {
-        writeResponse((Response) result.getResultObject(), request.getAction(), req, resp);
+        final Boolean plainJson = (Boolean) result.getParameter(PLAIN_JSON);
+        writeResponse((Response) result.getResultObject(), request.getAction(), req, resp, null == plainJson ? false : plainJson.booleanValue());
     }
 
     /**
@@ -122,8 +125,14 @@ public class APIResponseRenderer implements ResponseRenderer {
      * @param resp The HTTP Servlet response
      */
     public static void writeResponse(final Response response, final String action, final HttpServletRequest req, final HttpServletResponse resp) {
+        writeResponse(response, action, req, resp, false);
+    }
+
+    private static void writeResponse(final Response response, final String action, final HttpServletRequest req, final HttpServletResponse resp, final boolean plainJson) {
         try {
-            if (FileUploadBase.isMultipartContent(new ServletRequestContext(req)) || isRespondWithHTML(req) || req.getParameter(CALLBACK) != null) {
+            if (plainJson) {
+                ResponseWriter.write(response, resp.getWriter());
+            } else if (FileUploadBase.isMultipartContent(new ServletRequestContext(req)) || isRespondWithHTML(req) || req.getParameter(CALLBACK) != null) {
                 resp.setContentType(AJAXServlet.CONTENTTYPE_HTML);
                 String callback = req.getParameter(CALLBACK);
                 if (callback == null) {
@@ -139,9 +148,7 @@ public class APIResponseRenderer implements ResponseRenderer {
                 ResponseWriter.write(response, w);
 
                 final StringBuilder sb = new StringBuilder(call);
-                sb.append('(');
-                sb.append(w.toString());
-                sb.append(");");
+                sb.append('(').append(w.toString()).append(");");
                 resp.setContentType("text/javascript");
                 resp.getWriter().write(sb.toString());
             } else {

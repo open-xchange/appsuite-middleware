@@ -51,6 +51,7 @@ package com.openexchange.ajax.requesthandler.converters;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -59,7 +60,6 @@ import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
-import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  * {@link BasicTypeAPIResultConverter}
@@ -71,7 +71,8 @@ public class BasicTypeAPIResultConverter implements ResultConverter {
 	/**
 	 * The basic converters.
 	 */
-	public static final List<ResultConverter> CONVERTERS = Collections.unmodifiableList(new ArrayList<ResultConverter>() {{
+	public static final List<ResultConverter> CONVERTERS = Collections.<ResultConverter> unmodifiableList(new ArrayList<ResultConverter>() {
+    {
 		add(new BasicTypeAPIResultConverter("string"));
 		add(new BasicTypeAPIResultConverter("int"));
 		add(new BasicTypeAPIResultConverter("float"));
@@ -82,7 +83,7 @@ public class BasicTypeAPIResultConverter implements ResultConverter {
 
 	private final String inputFormat;
 
-	private BasicTypeAPIResultConverter(final String inputFormat) {
+	protected BasicTypeAPIResultConverter(final String inputFormat) {
 		this.inputFormat = inputFormat;
 	}
 

@@ -771,7 +771,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     }
 
     private static final Set<String> UPLOAD_ACTIONS =
-        new HashSet<String>(Arrays.asList(ACTION_NEW, ACTION_UPLOAD, ACTION_APPEND, ACTION_UPDATE, ACTION_ATTACH, ACTION_COPY));
+        new HashSet<String>(Arrays.asList(ACTION_NEW, ACTION_UPLOAD, ACTION_APPEND, ACTION_UPDATE, ACTION_ATTACH, ACTION_COPY, "import"));
 
 
 

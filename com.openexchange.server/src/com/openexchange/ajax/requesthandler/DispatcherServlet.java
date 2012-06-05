@@ -224,8 +224,8 @@ public class DispatcherServlet extends SessionServlet {
         final Dispatcher dispatcher = DISPATCHER.get();
         try {
             final AJAXRequestDataTools requestDataTools = getAjaxRequestDataTools();
-            String module = requestDataTools.getModule(PREFIX.get(), httpRequest);
-			String action2 = requestDataTools.getAction(httpRequest);
+            final String module = requestDataTools.getModule(PREFIX.get(), httpRequest);
+			final String action2 = requestDataTools.getAction(httpRequest);
 			ServerSession session = getSessionObject(httpRequest, dispatcher.mayUseFallbackSession(module, action2));
             if (session == null && dispatcher.mayOmitSession(module, action2)) {
             	session = fakeSession();
@@ -236,7 +236,7 @@ public class DispatcherServlet extends SessionServlet {
             /*
              * Parse AJAXRequestData
              */
-            final AJAXRequestData requestData = requestDataTools.parseRequest(httpRequest, preferStream, FileUploadBase.isMultipartContent(new ServletRequestContext(httpRequest)), session, PREFIX.get());
+            final AJAXRequestData requestData = requestDataTools.parseRequest(httpRequest, preferStream, isMultipartContent(httpRequest), session, PREFIX.get());
             requestData.setSession(session);
             /*
              * Start dispatcher processing
@@ -273,10 +273,12 @@ public class DispatcherServlet extends SessionServlet {
         }
     }
 
-  
+    private boolean isMultipartContent(final HttpServletRequest httpRequest) {
+        return FileUploadBase.isMultipartContent(new ServletRequestContext(httpRequest));
+    }
 
 	private ServerSession fakeSession() {
-		UserImpl user = new UserImpl();
+		final UserImpl user = new UserImpl();
 		user.setAttributes(new HashMap<String, Set<String>>());
 		return new ServerSessionAdapter(NO_SESSION, new ContextImpl(-1), user);
 	}
@@ -303,9 +305,5 @@ public class DispatcherServlet extends SessionServlet {
         }
         candidate.write(requestData, result, httpRequest, httpResponse);
     }
-
-    
-
-   
 
 }
