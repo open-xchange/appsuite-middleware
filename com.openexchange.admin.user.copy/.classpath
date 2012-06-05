@@ -9,5 +9,7 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.plugin.hosting"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.soap"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.console"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.rmi"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
