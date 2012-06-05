@@ -105,9 +105,9 @@ public class Executor {
      * @throws SQLException
      * @throws OXException
      */
-    public Contact selectSingle(final Connection connection, final Table table, final int contextID, final int objectID, 
-    		final ContactField[] fields) throws SQLException, OXException {
-        final StringBuilder stringBuilder = new StringBuilder();
+    public Contact selectSingle(Connection connection, Table table, int contextID, int objectID, ContactField[] fields) 
+    		throws SQLException, OXException {
+        StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("SELECT ").append(Mappers.CONTACT.getColumns(fields)).append(" FROM ").append(table).append(" WHERE ")
             .append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=? AND ")
             .append(Mappers.CONTACT.get(ContactField.OBJECT_ID).getColumnLabel()).append("=?;");
@@ -194,15 +194,15 @@ public class Executor {
      * @throws SQLException
      * @throws OXException
      */
-    public <O> List<Contact> select(final Connection connection, final Table table, final int contextID, final int folderID, 
-    		final int[] objectIDs,  final long minLastModified, final ContactField[] fields, final SearchTerm<O> term, 
-    		final SortOptions sortOptions) throws SQLException, OXException {
+    public <O> List<Contact> select(Connection connection, Table table, int contextID, int folderID, int[] objectIDs, long minLastModified, 
+    		ContactField[] fields, SearchTerm<O> term, SortOptions sortOptions) throws SQLException, OXException {
         /*
          * construct query string
          */
-        final SearchTermAdapter adapter = null != term ? new SearchTermAdapter(term, getCharset(sortOptions)) : null;
-        final StringBuilder stringBuilder = new StringBuilder();
-//        stringBuilder.append("SELECT ").append(Mappers.CONTACT.getColumns(fields)).append(" FROM ").append(table).append(" USE INDEX (cid) WHERE ")
+        SearchTermAdapter adapter = null != term ? new SearchTermAdapter(term, getCharset(sortOptions)) : null;
+        StringBuilder stringBuilder = new StringBuilder();
+//      stringBuilder.append("SELECT ").append(Mappers.CONTACT.getColumns(fields)).append(" FROM ").append(table).append(" USE INDEX (cid) WHERE ")
+//      stringBuilder.append("SELECT SQL_NO_CACHE ").append(Mappers.CONTACT.getColumns(fields)).append(" FROM ").append(table).append(" WHERE ")
         stringBuilder.append("SELECT ").append(Mappers.CONTACT.getColumns(fields)).append(" FROM ").append(table).append(" WHERE ")
             .append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=?");
         if (Integer.MIN_VALUE != folderID) {
@@ -212,8 +212,12 @@ public class Executor {
             stringBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.LAST_MODIFIED).getColumnLabel()).append(">?");
         }
         if (null != objectIDs && 0 < objectIDs.length) {
-        	stringBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.OBJECT_ID).getColumnLabel()).append(" IN (")
-        		.append(Tools.toCSV(objectIDs)).append(')');
+        	stringBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.OBJECT_ID).getColumnLabel());
+        	if (1 == objectIDs.length) {
+        		stringBuilder.append('=').append(objectIDs[0]);
+        	} else {
+	        	stringBuilder.append(" IN (").append(Tools.toCSV(objectIDs)).append(')');
+        	}
         }
         if (null != adapter) {
         	stringBuilder.append(" AND ").append(adapter.getClause());	
@@ -231,7 +235,7 @@ public class Executor {
         PreparedStatement stmt = null;
         int parameterIndex = 1;
         ResultSet resultSet = null;
-        final List<Contact> contacts = new ArrayList<Contact>();
+        List<Contact> contacts = new ArrayList<Contact>();
         try {
             stmt = connection.prepareStatement(stringBuilder.toString());
             stmt.setInt(parameterIndex++, contextID);
