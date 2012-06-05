@@ -5,12 +5,13 @@ Bundle-SymbolicName: com.openexchange.admin.contextrestore
 Bundle-Version: 6.20.0.0
 Bundle-Activator: com.openexchange.admin.contextrestore.osgi.Activator
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.mysql.jdbc,
  com.openexchange.admin.console,
  com.openexchange.admin.rmi,
  com.openexchange.admin.rmi.dataobjects,
  com.openexchange.admin.rmi.exceptions,
+ com.openexchange.admin.rmi.impl,
  com.openexchange.admin.storage.interfaces,
  com.openexchange.admin.tools,
  com.openexchange.database,
