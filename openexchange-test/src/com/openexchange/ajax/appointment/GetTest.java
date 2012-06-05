@@ -59,6 +59,7 @@ import com.openexchange.ajax.ResourceTest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.group.GroupTest;
@@ -82,6 +83,7 @@ public class GetTest extends AppointmentTest {
 
     public void testGet() throws Exception {
         final Appointment appointmentObj = createAppointmentObject("testGet");
+        appointmentObj.setOrganizer(User.User1.name());
         final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 
         final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());

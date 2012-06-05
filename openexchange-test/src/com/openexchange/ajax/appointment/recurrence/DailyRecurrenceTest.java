@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.groupware.container.Appointment;
 
 public class DailyRecurrenceTest extends AbstractRecurrenceTest {
@@ -37,6 +38,7 @@ public class DailyRecurrenceTest extends AbstractRecurrenceTest {
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		appointmentObj.setRecurrenceType(Appointment.DAILY);
 		appointmentObj.setInterval(1);
+		appointmentObj.setOrganizer(User.User1.name());
 		appointmentObj.setUntil(until);
 		appointmentObj.setIgnoreConflicts(true);
 		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
@@ -95,6 +97,7 @@ public class DailyRecurrenceTest extends AbstractRecurrenceTest {
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		appointmentObj.setRecurrenceType(Appointment.DAILY);
 		appointmentObj.setInterval(1);
+		appointmentObj.setOrganizer(User.User1.name());
 		appointmentObj.setUntil(until);
 		appointmentObj.setIgnoreConflicts(true);
 		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
@@ -152,6 +155,7 @@ public class DailyRecurrenceTest extends AbstractRecurrenceTest {
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		appointmentObj.setRecurrenceType(Appointment.DAILY);
 		appointmentObj.setInterval(1);
+		appointmentObj.setOrganizer(User.User1.name());
 		appointmentObj.setUntil(until);
 		appointmentObj.setIgnoreConflicts(true);
 		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
@@ -209,6 +213,7 @@ public class DailyRecurrenceTest extends AbstractRecurrenceTest {
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		appointmentObj.setRecurrenceType(Appointment.DAILY);
 		appointmentObj.setInterval(1);
+		appointmentObj.setOrganizer(User.User1.name());
 		appointmentObj.setUntil(until);
                 appointmentObj.setFullTime(true);
 		appointmentObj.setIgnoreConflicts(true);

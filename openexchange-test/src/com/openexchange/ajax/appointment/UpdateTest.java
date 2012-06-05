@@ -57,6 +57,7 @@ import java.util.TimeZone;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.ResourceTest;
+import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.group.GroupTest;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
@@ -169,6 +170,7 @@ public class UpdateTest extends AppointmentTest {
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setRecurrenceType(Appointment.DAILY);
         appointmentObj.setInterval(1);
+        appointmentObj.setOrganizer(User.User1.name());
         appointmentObj.setUntil(until);
         appointmentObj.setIgnoreConflicts(true);
         final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
@@ -187,6 +189,7 @@ public class UpdateTest extends AppointmentTest {
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setRecurrencePosition(changeExceptionPosition);
         appointmentObj.setIgnoreConflicts(true);
+        appointmentObj.setOrganizer(User.User1.name());
 
         final int newObjectId = updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
         assertFalse("object id of the update is equals with the old object id", newObjectId == objectId);
@@ -229,6 +232,7 @@ public class UpdateTest extends AppointmentTest {
 
         appointmentObj.setStartDate(calendarStart.getTime());
         appointmentObj.setEndDate(calendarEnd.getTime());
+        appointmentObj.setOrganizer(User.User1.name());
 
         final Calendar recurrenceStart = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         final int startDay = calendarStart.get(Calendar.DAY_OF_MONTH);
