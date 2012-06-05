@@ -247,10 +247,10 @@ public final class SMTPTransport extends MailTransport {
                         smtpProps.put("mail.smtp.localhost", smtpLocalhost);
                     }
                     if (smtpProperties.getSmtpTimeout() > 0) {
-                        smtpProps.put("mail.smtp.timeout", String.valueOf(smtpProperties.getSmtpTimeout()));
+                        smtpProps.put("mail.smtp.timeout", Integer.toString(smtpProperties.getSmtpTimeout()));
                     }
                     if (smtpProperties.getSmtpConnectionTimeout() > 0) {
-                        smtpProps.put("mail.smtp.connectiontimeout", String.valueOf(smtpProperties.getSmtpConnectionTimeout()));
+                        smtpProps.put("mail.smtp.connectiontimeout", Integer.toString(smtpProperties.getSmtpConnectionTimeout()));
                     }
                     smtpProps.put("mail.smtp.auth", smtpProperties.isSmtpAuth() ? "true" : "false");
                     /*
