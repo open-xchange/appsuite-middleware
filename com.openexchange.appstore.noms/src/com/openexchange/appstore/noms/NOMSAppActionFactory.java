@@ -26,6 +26,7 @@ public class NOMSAppActionFactory implements AJAXActionServiceFactory {
 		JSONArray database = new JSONArray();
 		
 		ACTIONS.put("GET", new RegisterAction(database));
+		ACTIONS.put("POST", new RegisterAction(database));
 		ACTIONS.put("list", new ListAction(database));
 		ACTIONS.put("clear", new ClearAction(database));
 	}
@@ -38,7 +39,7 @@ public class NOMSAppActionFactory implements AJAXActionServiceFactory {
 
 	@Override
 	public Collection<?> getSupportedServices() {
-		return Arrays.asList("GET", "list", "clear");
+		return Arrays.asList("GET", "POST", "list", "clear");
 	}
 
 }
