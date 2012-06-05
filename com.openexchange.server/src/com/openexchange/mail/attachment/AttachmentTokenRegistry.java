@@ -55,6 +55,7 @@ import java.util.concurrent.ConcurrentMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
@@ -121,7 +122,7 @@ public final class AttachmentTokenRegistry implements AttachmentTokenConstants {
         super();
         map = new ConcurrentHashMap<Key, ConcurrentMap<String, AttachmentToken>>();
         tokens = new ConcurrentHashMap<String, AttachmentToken>();
-        final TimerService timerService = ServerServiceRegistry.getInstance().getService(TimerService.class, true);
+        final TimerService timerService = ThreadPools.getTimerService();
         final Runnable task = new CleanExpiredTokensRunnable(map, tokens);
         timerTask = timerService.scheduleWithFixedDelay(task, CLEANER_FREQUENCY, CLEANER_FREQUENCY);
     }
