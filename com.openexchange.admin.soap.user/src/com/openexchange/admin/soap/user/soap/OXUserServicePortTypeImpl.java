@@ -504,7 +504,7 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
         user.setCity_other(soapUser.getCityOther());
         user.setCommercial_register(soapUser.getCommercialRegister());
         user.setCompany(soapUser.getCompany());
-        user.setContextadmin(soapUser.isContextadmin().booleanValue());
+        user.setContextadmin(null == soapUser.isContextadmin() ? false : soapUser.isContextadmin().booleanValue());
         user.setCountry_business(soapUser.getCountryBusiness());
         user.setCountry_home(soapUser.getCountryHome());
         user.setCountry_other(soapUser.getCountryOther());
@@ -823,38 +823,42 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
             return null;
         }
         final com.openexchange.admin.rmi.dataobjects.UserModuleAccess moduleAccess = new com.openexchange.admin.rmi.dataobjects.UserModuleAccess();
-        moduleAccess.setActiveSync(soapModuleAccess.isActiveSync().booleanValue());
-        moduleAccess.setCalendar(soapModuleAccess.isCalendar().booleanValue());
-        moduleAccess.setCollectEmailAddresses(soapModuleAccess.isCollectEmailAddresses().booleanValue());
-        moduleAccess.setContacts(soapModuleAccess.isContacts().booleanValue());
-        moduleAccess.setDelegateTask(soapModuleAccess.isDelegateTask().booleanValue());
-        moduleAccess.setDeniedPortal(soapModuleAccess.isDeniedPortal().booleanValue());
-        moduleAccess.setEditGroup(soapModuleAccess.isEditGroup().booleanValue());
-        moduleAccess.setEditPassword(soapModuleAccess.isEditPassword().booleanValue());
-        moduleAccess.setEditPublicFolders(soapModuleAccess.isEditPublicFolders().booleanValue());
-        moduleAccess.setEditResource(soapModuleAccess.isEditResource().booleanValue());
-        moduleAccess.setForum(soapModuleAccess.isForum().booleanValue());
-        moduleAccess.setGlobalAddressBookDisabled(soapModuleAccess.isGlobalAddressBookDisabled().booleanValue());
-        moduleAccess.setIcal(soapModuleAccess.isIcal().booleanValue());
-        moduleAccess.setInfostore(soapModuleAccess.isInfostore().booleanValue());
-        moduleAccess.setMultipleMailAccounts(soapModuleAccess.isMultipleMailAccounts().booleanValue());
-        moduleAccess.setOLOX20(soapModuleAccess.isOLOX20().booleanValue());
-        moduleAccess.setPinboardWrite(soapModuleAccess.isPinboardWrite().booleanValue());
-        moduleAccess.setProjects(soapModuleAccess.isProjects().booleanValue());
-        moduleAccess.setPublication(soapModuleAccess.isPublication().booleanValue());
-        moduleAccess.setPublicFolderEditable(soapModuleAccess.isPublicFolderEditable().booleanValue());
-        moduleAccess.setReadCreateSharedFolders(soapModuleAccess.isReadCreateSharedFolders().booleanValue());
-        moduleAccess.setRssBookmarks(soapModuleAccess.isRssBookmarks().booleanValue());
-        moduleAccess.setRssPortal(soapModuleAccess.isRssPortal().booleanValue());
-        moduleAccess.setSubscription(soapModuleAccess.isSubscription().booleanValue());
-        moduleAccess.setSyncml(soapModuleAccess.isSyncml().booleanValue());
-        moduleAccess.setTasks(soapModuleAccess.isTasks().booleanValue());
-        moduleAccess.setUSM(soapModuleAccess.isUSM().booleanValue());
-        moduleAccess.setVcard(soapModuleAccess.isVcard().booleanValue());
-        moduleAccess.setWebdav(soapModuleAccess.isWebdav().booleanValue());
-        moduleAccess.setWebdavXml(soapModuleAccess.isWebdavXml().booleanValue());
-        moduleAccess.setWebmail(soapModuleAccess.isWebmail().booleanValue());
+        moduleAccess.setActiveSync(booleanValue(soapModuleAccess.isActiveSync()));
+        moduleAccess.setCalendar(booleanValue(soapModuleAccess.isCalendar()));
+        moduleAccess.setCollectEmailAddresses(booleanValue(soapModuleAccess.isCollectEmailAddresses()));
+        moduleAccess.setContacts(booleanValue(soapModuleAccess.isContacts()));
+        moduleAccess.setDelegateTask(booleanValue(soapModuleAccess.isDelegateTask()));
+        moduleAccess.setDeniedPortal(booleanValue(soapModuleAccess.isDeniedPortal()));
+        moduleAccess.setEditGroup(booleanValue(soapModuleAccess.isEditGroup()));
+        moduleAccess.setEditPassword(booleanValue(soapModuleAccess.isEditPassword()));
+        moduleAccess.setEditPublicFolders(booleanValue(soapModuleAccess.isEditPublicFolders()));
+        moduleAccess.setEditResource(booleanValue(soapModuleAccess.isEditResource()));
+        moduleAccess.setForum(booleanValue(soapModuleAccess.isForum()));
+        moduleAccess.setGlobalAddressBookDisabled(booleanValue(soapModuleAccess.isGlobalAddressBookDisabled()));
+        moduleAccess.setIcal(booleanValue(soapModuleAccess.isIcal()));
+        moduleAccess.setInfostore(booleanValue(soapModuleAccess.isInfostore()));
+        moduleAccess.setMultipleMailAccounts(booleanValue(soapModuleAccess.isMultipleMailAccounts()));
+        moduleAccess.setOLOX20(booleanValue(soapModuleAccess.isOLOX20()));
+        moduleAccess.setPinboardWrite(booleanValue(soapModuleAccess.isPinboardWrite()));
+        moduleAccess.setProjects(booleanValue(soapModuleAccess.isProjects()));
+        moduleAccess.setPublication(booleanValue(soapModuleAccess.isPublication()));
+        moduleAccess.setPublicFolderEditable(booleanValue(soapModuleAccess.isPublicFolderEditable()));
+        moduleAccess.setReadCreateSharedFolders(booleanValue(soapModuleAccess.isReadCreateSharedFolders()));
+        moduleAccess.setRssBookmarks(booleanValue(soapModuleAccess.isRssBookmarks()));
+        moduleAccess.setRssPortal(booleanValue(soapModuleAccess.isRssPortal()));
+        moduleAccess.setSubscription(booleanValue(soapModuleAccess.isSubscription()));
+        moduleAccess.setSyncml(booleanValue(soapModuleAccess.isSyncml()));
+        moduleAccess.setTasks(booleanValue(soapModuleAccess.isTasks()));
+        moduleAccess.setUSM(booleanValue(soapModuleAccess.isUSM()));
+        moduleAccess.setVcard(booleanValue(soapModuleAccess.isVcard()));
+        moduleAccess.setWebdav(booleanValue(soapModuleAccess.isWebdav()));
+        moduleAccess.setWebdavXml(booleanValue(soapModuleAccess.isWebdavXml()));
+        moduleAccess.setWebmail(booleanValue(soapModuleAccess.isWebmail()));
         return moduleAccess;
+    }
+
+    private static boolean booleanValue(final Boolean b) {
+        return null == b ? false : b.booleanValue();
     }
 
     private static UserModuleAccess moduleAccess2Soap(final com.openexchange.admin.rmi.dataobjects.UserModuleAccess moduleAccess) {

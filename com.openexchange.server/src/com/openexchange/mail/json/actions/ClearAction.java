@@ -51,6 +51,7 @@ package com.openexchange.mail.json.actions;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -90,6 +91,7 @@ public final class ClearAction extends AbstractMailAction {
              * Read in parameters
              */
             final JSONArray ja = (JSONArray) req.getRequest().getData();
+            final boolean hardDelete = req.optBool(AJAXServlet.PARAMETER_HARDDELETE, false);
             /*
              * Clear folder sequentially
              */
@@ -98,7 +100,7 @@ public final class ClearAction extends AbstractMailAction {
             final JSONArray ret = new JSONArray();
             for (int i = 0; i < length; i++) {
                 final String folderId = ja.getString(i);
-                if (!mailInterface.clearFolder(folderId)) {
+                if (!mailInterface.clearFolder(folderId, hardDelete)) {
                     /*
                      * Something went wrong
                      */

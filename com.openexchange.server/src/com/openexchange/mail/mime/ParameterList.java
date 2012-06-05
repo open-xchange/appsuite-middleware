@@ -224,10 +224,17 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
             int pos = parameterList.indexOf(';');
             while (pos >= 0) {
                 final int delim = parameterList.indexOf('=', pos);
-                final String name = parameterList.substring(pos + 1, delim).trim();
-                pos = parameterList.indexOf(';', pos + 1);
-                final String value = pos < 0 ? parameterList.substring(delim + 1) : parameterList.substring(delim + 1, pos);
-                parseParameter(name.toLowerCase(Locale.ENGLISH), value);
+                if (delim < 0) {
+                    final int pos2 = parameterList.indexOf(';', pos + 1);
+                    final String name = pos2 < 0 ? parameterList.substring(pos + 1).trim() : parameterList.substring(pos + 1, pos2).trim();
+                    parseParameter(name.toLowerCase(Locale.ENGLISH), "");
+                    pos = pos2;
+                } else {
+                    final String name = parameterList.substring(pos + 1, delim).trim();
+                    pos = parameterList.indexOf(';', pos + 1);
+                    final String value = pos < 0 ? parameterList.substring(delim + 1) : parameterList.substring(delim + 1, pos);
+                    parseParameter(name.toLowerCase(Locale.ENGLISH), value);
+                }
             }
         }
     }

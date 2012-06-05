@@ -87,7 +87,9 @@ import com.openexchange.timer.internal.CustomThreadPoolExecutorTimerService;
  */
 public final class ThreadPoolActivator extends HousekeepingActivator {
 
-    public static final AtomicReference<ThreadPoolService> REF = new AtomicReference<ThreadPoolService>();
+    public static final AtomicReference<ThreadPoolService> REF_THREAD_POOL = new AtomicReference<ThreadPoolService>();
+
+    public static final AtomicReference<TimerService> REF_TIMER = new AtomicReference<TimerService>();
 
     private ThreadPoolServiceImpl threadPool;
 
@@ -125,9 +127,11 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
             /*
              * Register
              */            
-            REF.set(threadPool);
+            REF_THREAD_POOL.set(threadPool);
             registerService(ThreadPoolService.class, threadPool);            
-            registerService(TimerService.class, new CustomThreadPoolExecutorTimerService(threadPool.getThreadPoolExecutor()));
+            final TimerService timerService = new CustomThreadPoolExecutorTimerService(threadPool.getThreadPoolExecutor());
+            REF_TIMER.set(timerService);
+            registerService(TimerService.class, timerService);
             registerService(LogService.class, logService);
             /*
              * Register SessionThreadCounter service
@@ -244,8 +248,9 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
             if (LOG.isInfoEnabled()) {
                 LOG.info("stopping bundle: com.openexchange.threadpool");
             }
+            REF_THREAD_POOL.set(null);
+            REF_TIMER.set(null);
             cleanUp();
-            REF.set(null);
             SessionThreadCounter.REFERENCE.set(null);
             /*
              * Stop thread pool

@@ -51,6 +51,7 @@ package com.openexchange.smtp.filler;
 
 import java.io.IOException;
 import javax.mail.MessagingException;
+import javax.mail.internet.IDNA;
 import javax.mail.internet.MimeMessage;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -162,7 +163,7 @@ public final class SMTPMessageFiller extends MimeMessageFiller {
             /*
              * Set ENVELOPE-FROM in SMTP message to user's primary email address
              */
-            ((SMTPMessage) mimeMessage).setEnvelopeFrom(UserStorage.getStorageUser(session.getUserId(), ctx).getMail());
+            ((SMTPMessage) mimeMessage).setEnvelopeFrom(IDNA.toACE(UserStorage.getStorageUser(session.getUserId(), ctx).getMail()));
         }
     }
 

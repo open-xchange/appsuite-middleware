@@ -445,7 +445,7 @@ public class OXGroupServicePortTypeImpl implements OXGroupServicePortType {
         user.setCity_other(soapUser.getCityOther());
         user.setCommercial_register(soapUser.getCommercialRegister());
         user.setCompany(soapUser.getCompany());
-        user.setContextadmin(soapUser.isContextadmin().booleanValue());
+        user.setContextadmin(null == soapUser.isContextadmin() ? false : soapUser.isContextadmin().booleanValue());
         user.setCountry_business(soapUser.getCountryBusiness());
         user.setCountry_home(soapUser.getCountryHome());
         user.setCountry_other(soapUser.getCountryOther());

@@ -324,6 +324,49 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
+    public boolean clearFolder(final String folder, final boolean hardDelete) throws OXException {
+        final FullnameArgument fullnameArgument = prepareMailFolderParam(folder);
+        final int accountId = fullnameArgument.getAccountId();
+        initConnection(fullnameArgument.getAccountId());
+        final String fullname = fullnameArgument.getFullname();
+        /*
+         * Only backup if no hard-delete is set in user's mail configuration and fullname does not denote trash (sub)folder
+         */
+        final boolean backup;
+        if (hardDelete) {
+            backup = false;
+        } else {
+            backup =
+                (!UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx).isHardDeleteMsgs() && !(fullname.startsWith(mailAccess.getFolderStorage().getTrashFolder())));
+        }
+        mailAccess.getFolderStorage().clearFolder(fullname, !backup);
+        postEvent(accountId, fullname, true);
+        final String trashFullname = prepareMailFolderParam(getTrashFolder(accountId)).getFullname();
+        if (backup) {
+            postEvent(accountId, trashFullname, true);
+        }
+        try {
+            /*
+             * Update message cache
+             */
+            MailMessageCache.getInstance().removeFolderMessages(fullnameArgument.getAccountId(), fullname, session.getUserId(), contextId);
+        } catch (final OXException e) {
+            LOG.error(e.getMessage(), e);
+        }
+        if (fullname.startsWith(trashFullname)) {
+            // Special handling
+            final MailFolder[] subf = mailAccess.getFolderStorage().getSubfolders(fullname, true);
+            for (int i = 0; i < subf.length; i++) {
+                final String subFullname = subf[i].getFullname();
+                mailAccess.getFolderStorage().deleteFolder(subFullname, true);
+                postEvent(accountId, subFullname, false);
+            }
+            postEvent(accountId, trashFullname, false);
+        }
+        return true;
+    }
+
+    @Override
     public void close(final boolean putIntoCache) throws OXException {
         try {
             if (mailAccess != null) {
