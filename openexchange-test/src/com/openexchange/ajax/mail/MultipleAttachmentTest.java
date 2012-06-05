@@ -138,7 +138,7 @@ public final class MultipleAttachmentTest extends AbstractMailTest {
 			 * Some assertions
 			 */
 			assertFalse("Web response does indicate HTML content", webResponse.isHTML());
-			assertEquals("No ZIP content", "application/octet-stream", webResponse.getContentType());
+			assertEquals("No ZIP content", "application/zip", webResponse.getContentType());
 			final String disp = webResponse.getHeaderField("Content-disposition");
 			assertNotNull("No Content-disposition header", disp);
 			assertTrue("Disposition is not set to 'attachment'", disp.startsWith("attachment"));
