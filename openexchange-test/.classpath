@@ -98,6 +98,5 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.unifiedinbox"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.jcharset"/>
 	<classpathentry kind="src" path="/com.openexchange.loxandra.dto"/>
-	<classpathentry kind="src" path="/com.openexchange.loxandra.test"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
