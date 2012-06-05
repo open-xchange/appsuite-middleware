@@ -57,6 +57,7 @@ import java.util.ArrayList;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.ServiceLoader;
 import com.openexchange.admin.console.context.extensioninterfaces.ContextConsoleListInterface;
+import com.openexchange.admin.console.context.extensioninterfaces.PluginException;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
@@ -69,7 +70,7 @@ public abstract class ListCore extends ContextAbstraction {
     private ServiceLoader<ContextConsoleListInterface> listsubclasses = null;
     
     private interface GetterClosureInterface {
-        public ArrayList<String> getData(final ContextConsoleListInterface commonex);
+        public ArrayList<String> getData(final ContextConsoleListInterface commonex) throws PluginException;
     }
     
     protected void setOptions(final AdminParser parser) {
@@ -134,7 +135,7 @@ public abstract class ListCore extends ContextAbstraction {
     protected ArrayList<String> getCSVDataOfAllExtensions(final Context ctx, final AdminParser parser) {
         return abstractGetter(parser, new GetterClosureInterface() {
             @Override
-            public ArrayList<String> getData(final ContextConsoleListInterface commonex) {
+            public ArrayList<String> getData(final ContextConsoleListInterface commonex) throws PluginException {
                 return commonex.getCSVData(ctx);
             }
         });
@@ -144,7 +145,7 @@ public abstract class ListCore extends ContextAbstraction {
     protected ArrayList<String> getHumanReableDataOfAllExtensions(final Context ctx, final AdminParser parser) {
         return abstractGetter(parser, new GetterClosureInterface() {
             @Override
-            public ArrayList<String> getData(final ContextConsoleListInterface commonex) {
+            public ArrayList<String> getData(final ContextConsoleListInterface commonex) throws PluginException {
                 return commonex.getHumanReadableData(ctx);
             }
         });
@@ -190,12 +191,12 @@ public abstract class ListCore extends ContextAbstraction {
             }
         }
         for (final ContextConsoleListInterface commoniface : this.listsubclasses) {
-//            try {
+            try {
                 retval.addAll(iface.getData(commoniface));
-//            } catch (PluginException e) {
-//                printError(null, null, "Error during initializing extensions: " + e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
-//                sysexit(1);
-//            }
+            } catch (PluginException e) {
+                printError(null, null, "Error during initializing extensions: " + e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
+                sysexit(1);
+            }
         }
         return retval;
     }

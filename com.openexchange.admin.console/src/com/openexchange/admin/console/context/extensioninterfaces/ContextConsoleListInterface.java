@@ -38,7 +38,7 @@ public interface ContextConsoleListInterface extends ContextConsoleCommonInterfa
      * @return
      * @throws PluginException 
      */
-    public ArrayList<String> getHumanReadableData(final Context ctx);
+    public ArrayList<String> getHumanReadableData(final Context ctx) throws PluginException;
 
     /**
      * This method can be implemented to set the data in the CSV output.
@@ -47,6 +47,6 @@ public interface ContextConsoleListInterface extends ContextConsoleCommonInterfa
      * @return
      * @throws PluginException 
      */
-    public ArrayList<String> getCSVData(final Context ctx);
+    public ArrayList<String> getCSVData(final Context ctx) throws PluginException;
 
 }
