@@ -51,7 +51,6 @@ package com.openexchange.admin.rmi;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
-
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
@@ -510,5 +509,6 @@ public interface OXContextInterface extends Remote {
      * @return Whether the given context exists or not
      * @deprecated
      */
+    @Deprecated
     public boolean checkExists(Context ctx, Credentials auth) throws RemoteException, InvalidDataException, StorageException, InvalidCredentialsException;
 }

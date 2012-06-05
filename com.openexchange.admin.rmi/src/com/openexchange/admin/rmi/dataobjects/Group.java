@@ -52,7 +52,6 @@ package com.openexchange.admin.rmi.dataobjects;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
-
 import com.openexchange.admin.rmi.extensions.OXCommonExtension;
 import com.openexchange.admin.rmi.extensions.OXGroupExtensionInterface;
 
@@ -160,6 +159,7 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
     /* (non-Javadoc)
      * @see com.openexchange.admin.rmi.dataobjects.NameAndIdObject#getId()
      */
+    @Override
     public final Integer getId() {
         return id;
     }
@@ -167,6 +167,7 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
     /* (non-Javadoc)
      * @see com.openexchange.admin.rmi.dataobjects.NameAndIdObject#setId(java.lang.Integer)
      */
+    @Override
     public final void setId(final Integer val) {
         this.id = val;
     }
@@ -174,6 +175,7 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
     /* (non-Javadoc)
      * @see com.openexchange.admin.rmi.dataobjects.NameAndIdObject#getName()
      */
+    @Override
     public final String getName() {
         return name;
     }
@@ -181,6 +183,7 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
     /* (non-Javadoc)
      * @see com.openexchange.admin.rmi.dataobjects.NameAndIdObject#setName(java.lang.String)
      */
+    @Override
     public final void setName(final String val) {
         nameset = true;
         this.name = val;
@@ -225,6 +228,7 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
     }
 
 
+    @Override
     public final String toString() {
         StringBuilder ret = new StringBuilder();
         ret.append("[ \n");
@@ -253,6 +257,7 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
      * @param extension
      * @deprecated 
      */
+    @Deprecated
     public final void addExtension(final OXGroupExtensionInterface extension) {
         getAllExtensionsAsHash().put(extension.getClass().getName(), (OXCommonExtension) extension);
     }
@@ -261,6 +266,7 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
      * @return
      * @deprecated 
      */
+    @Deprecated
     public final ArrayList<OXGroupExtensionInterface> getExtensions() {
         final ArrayList<OXGroupExtensionInterface> retval = new ArrayList<OXGroupExtensionInterface>();
         for (final OXCommonExtension commoninterface : getAllExtensionsAsHash().values()) {
@@ -274,6 +280,7 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
      * @return
      * @deprecated 
      */
+    @Deprecated
     public final boolean removeExtension(final OXGroupExtensionInterface o) {
         if (null == getAllExtensionsAsHash().remove(o)) {
             return false;
@@ -291,6 +298,7 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
      * @return the {@link OXGroupExtensionInterface} with extname
      * @deprecated 
      */
+    @Deprecated
     public final OXGroupExtensionInterface getExtensionbyName(final String extname) {
         for (final OXCommonExtension ext : getAllExtensionsAsHash().values()) {
             if (extname.equals(ext.getClass().getName())) {
@@ -358,36 +366,49 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
      */
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (!super.equals(obj))
+        }
+        if (!super.equals(obj)) {
             return false;
-        if (!(obj instanceof Group))
+        }
+        if (!(obj instanceof Group)) {
             return false;
+        }
         final Group other = (Group) obj;
         if (displayname == null) {
-            if (other.displayname != null)
+            if (other.displayname != null) {
                 return false;
-        } else if (!displayname.equals(other.displayname))
+            }
+        } else if (!displayname.equals(other.displayname)) {
             return false;
-        if (displaynameset != other.displaynameset)
+        }
+        if (displaynameset != other.displaynameset) {
             return false;
+        }
         if (id == null) {
-            if (other.id != null)
+            if (other.id != null) {
                 return false;
-        } else if (!id.equals(other.id))
+            }
+        } else if (!id.equals(other.id)) {
             return false;
-        if (!Arrays.equals(members, other.members))
+        }
+        if (!Arrays.equals(members, other.members)) {
             return false;
-        if (membersset != other.membersset)
+        }
+        if (membersset != other.membersset) {
             return false;
+        }
         if (name == null) {
-            if (other.name != null)
+            if (other.name != null) {
                 return false;
-        } else if (!name.equals(other.name))
+            }
+        } else if (!name.equals(other.name)) {
             return false;
-        if (nameset != other.nameset)
+        }
+        if (nameset != other.nameset) {
             return false;
+        }
         return true;
     }
 }

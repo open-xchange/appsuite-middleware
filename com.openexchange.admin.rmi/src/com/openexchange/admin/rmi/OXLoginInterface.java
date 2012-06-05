@@ -50,81 +50,88 @@ package com.openexchange.admin.rmi;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
-import java.util.concurrent.ExecutionException;
-
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.admin.rmi.exceptions.TaskManagerException;
 
 /**
- * This interface defines the methods of the task management which are accessibly through RMI.
+ * This interface defines methods for doing a "login" for an user or admin.<br>
+ * Can be usefull in UI`s which provide login masks for checking login informations.<br><br>
+ * 
+ * <b>Example:</b>
+ * <pre>
+ * final OXLoginInterface iface = (OXLoginInterface)Naming.lookup("rmi:///oxhost/"+OXLoginInterface.RMI_NAME);
+ * 
+ * final Context ctx = new Context(1);
+ * 
+ * final Credentials auth = new Credentials();
+ * auth.setLogin("myuser");
+ * auth.setPassword("secret");
+ * 
+ * try{
+ * User account_data = iface.login2User(ctx,auth);
+ *  // Do something after user logged in successfully.
+ * }catch(InvalidCredentialsException ice){
+ *  // show error in UI.  
+ * }
+ * </pre>
  * 
  * @author <a href="mailto:manuel.kraft@open-xchange.com">Manuel Kraft</a>
  * @author <a href="mailto:carsten.hoeger@open-xchange.com">Carsten Hoeger</a>
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
- *
+ * 
  */
-public interface OXTaskMgmtInterface extends Remote {
+public interface OXLoginInterface extends Remote {
 
     /**
      * RMI name to be used in the naming lookup.
      */
-    public static final String RMI_NAME = "OXTaskManagement";
+    public static final String RMI_NAME = "OXLogin_V2";
 
     /**
-     * Gets the result from the task with the specified id
+     * Login method to check if given credentials are correct. 
      * 
      * @param ctx
-     * @param cred
-     * @param id
-     * @return an object which has to be casted to the return value specified in the method which
-     * adds the job
+     * @param auth
      * @throws RemoteException
-     * @throws InvalidCredentialsException
      * @throws StorageException
-     * @throws InterruptedException
-     * @throws ExecutionException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
      * @throws InvalidDataException
      */
-    public Object getTaskResults(final Context ctx, final Credentials cred, final int id)
-        throws RemoteException, InvalidCredentialsException, StorageException, InterruptedException, ExecutionException, InvalidDataException;
+    public void login(Context ctx,Credentials auth) 
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException,DatabaseUpdateException;
     
     /**
-     * @return
-     * @throws RemoteException
-     * @throws InvalidDataException 
-     * @throws StorageException 
-     * @throws InvalidCredentialsException 
-     */
-    public String getJobList(final Context ctx, final Credentials cred) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException;
-
-    /**
-     * This method is used to delete finished jobs (jobs != running) from the list
+     * Login method for a context admin or a normal user.
      * 
      * @param ctx
      * @param auth
-     * @param i
+     * @return An user object with all data of the user who just logged in.
      * @throws RemoteException
-     * @throws InvalidDataException
-     * @throws InvalidCredentialsException
-     * @throws StorageException 
-     * @throws TaskManagerException 
-     */
-    public void deleteJob(final Context ctx, final Credentials auth, final int i) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, TaskManagerException;
-
-    /**
-     * Flushes all jobs from the queue which are finished ( != running)
-     * 
-     * @param ctx
-     * @param auth
-     * @throws RemoteException
-     * @throws InvalidDataException
-     * @throws InvalidCredentialsException
      * @throws StorageException
-     * @throws TaskManagerException 
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws InvalidDataException
      */
-    public void flush(final Context ctx, final Credentials auth) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, TaskManagerException;
+    public User login2User(Context ctx,Credentials auth) 
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException,DatabaseUpdateException;
+    
+    /**
+     * Login method for the master admin account.
+     * 
+     * @param auth
+     * @throws RemoteException
+     * @throws StorageException
+     * @throws InvalidCredentialsException
+     * @throws InvalidDataException
+     */
+    public void login(Credentials auth) 
+    throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException;
+
 }

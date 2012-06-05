@@ -197,22 +197,29 @@ public abstract class ExtendableDataObject extends EnforceableDataObject impleme
      */
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (!super.equals(obj))
+        }
+        if (!super.equals(obj)) {
             return false;
-        if (!(obj instanceof ExtendableDataObject))
+        }
+        if (!(obj instanceof ExtendableDataObject)) {
             return false;
+        }
         final ExtendableDataObject other = (ExtendableDataObject) obj;
         if (extensions == null) {
-            if (other.extensions != null)
+            if (other.extensions != null) {
                 return false;
-        } else if (!extensions.equals(other.extensions))
+            }
+        } else if (!extensions.equals(other.extensions)) {
             return false;
-        if (extensionsok != other.extensionsok)
+        }
+        if (extensionsok != other.extensionsok) {
             return false;
-        if (extensionsset != other.extensionsset)
+        }
+        if (extensionsset != other.extensionsset) {
             return false;
+        }
         return true;
     }
 }

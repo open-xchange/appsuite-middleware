@@ -51,7 +51,6 @@ package com.openexchange.admin.rmi.dataobjects;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-
 import com.openexchange.admin.rmi.extensions.OXCommonExtension;
 import com.openexchange.admin.rmi.extensions.OXResourceExtensionInterface;
 
@@ -123,6 +122,7 @@ public class Resource extends ExtendableDataObject implements NameAndIdObject {
     /* (non-Javadoc)
      * @see com.openexchange.admin.rmi.dataobjects.NameAndIdObject#getId()
      */
+    @Override
     public Integer getId() {
         return id;
     }
@@ -130,6 +130,7 @@ public class Resource extends ExtendableDataObject implements NameAndIdObject {
     /* (non-Javadoc)
      * @see com.openexchange.admin.rmi.dataobjects.NameAndIdObject#setId(java.lang.Integer)
      */
+    @Override
     public void setId(final Integer id) {
         this.id = id;
     }
@@ -137,6 +138,7 @@ public class Resource extends ExtendableDataObject implements NameAndIdObject {
     /* (non-Javadoc)
      * @see com.openexchange.admin.rmi.dataobjects.NameAndIdObject#getName()
      */
+    @Override
     public String getName() {
         return name;
     }
@@ -144,6 +146,7 @@ public class Resource extends ExtendableDataObject implements NameAndIdObject {
     /* (non-Javadoc)
      * @see com.openexchange.admin.rmi.dataobjects.NameAndIdObject#setName(java.lang.String)
      */
+    @Override
     public void setName(final String name) {
         nameset = true;
         this.name = name;
@@ -253,6 +256,7 @@ public class Resource extends ExtendableDataObject implements NameAndIdObject {
      * @param extension
      * @deprecated 
      */
+    @Deprecated
     public void addExtension(final OXResourceExtensionInterface extension) {
         getAllExtensionsAsHash().put(extension.getClass().getName(), (OXCommonExtension) extension);
     }
@@ -261,6 +265,7 @@ public class Resource extends ExtendableDataObject implements NameAndIdObject {
      * @return
      * @deprecated 
      */
+    @Deprecated
     public ArrayList<OXResourceExtensionInterface> getExtensions() {
         final ArrayList<OXResourceExtensionInterface> retval = new ArrayList<OXResourceExtensionInterface>();
         for (final OXCommonExtension commoninterface : getAllExtensionsAsHash().values()) {
@@ -274,6 +279,7 @@ public class Resource extends ExtendableDataObject implements NameAndIdObject {
      * @return
      * @deprecated 
      */
+    @Deprecated
     public boolean removeExtension(final OXResourceExtensionInterface o) {
         if (null == getAllExtensionsAsHash().remove(o)) {
             return false;
@@ -291,6 +297,7 @@ public class Resource extends ExtendableDataObject implements NameAndIdObject {
      * @return the {@link OXResourceExtensionInterface} with extname
      * @deprecated 
      */
+    @Deprecated
     public OXResourceExtensionInterface getExtensionbyName(final String extname) {
         for (final OXCommonExtension ext : getAllExtensionsAsHash().values()) {
             if (extname.equals(ext.getClass().getName())) {
@@ -409,53 +416,73 @@ public class Resource extends ExtendableDataObject implements NameAndIdObject {
      */
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (!super.equals(obj))
+        }
+        if (!super.equals(obj)) {
             return false;
-        if (!(obj instanceof Resource))
+        }
+        if (!(obj instanceof Resource)) {
             return false;
+        }
         final Resource other = (Resource) obj;
         if (available == null) {
-            if (other.available != null)
+            if (other.available != null) {
                 return false;
-        } else if (!available.equals(other.available))
+            }
+        } else if (!available.equals(other.available)) {
             return false;
-        if (availableset != other.availableset)
+        }
+        if (availableset != other.availableset) {
             return false;
+        }
         if (description == null) {
-            if (other.description != null)
+            if (other.description != null) {
                 return false;
-        } else if (!description.equals(other.description))
+            }
+        } else if (!description.equals(other.description)) {
             return false;
-        if (descriptionset != other.descriptionset)
+        }
+        if (descriptionset != other.descriptionset) {
             return false;
+        }
         if (displayname == null) {
-            if (other.displayname != null)
+            if (other.displayname != null) {
                 return false;
-        } else if (!displayname.equals(other.displayname))
+            }
+        } else if (!displayname.equals(other.displayname)) {
             return false;
-        if (displaynameset != other.displaynameset)
+        }
+        if (displaynameset != other.displaynameset) {
             return false;
+        }
         if (email == null) {
-            if (other.email != null)
+            if (other.email != null) {
                 return false;
-        } else if (!email.equals(other.email))
+            }
+        } else if (!email.equals(other.email)) {
             return false;
-        if (emailset != other.emailset)
+        }
+        if (emailset != other.emailset) {
             return false;
+        }
         if (id == null) {
-            if (other.id != null)
+            if (other.id != null) {
                 return false;
-        } else if (!id.equals(other.id))
+            }
+        } else if (!id.equals(other.id)) {
             return false;
+        }
         if (name == null) {
-            if (other.name != null)
+            if (other.name != null) {
                 return false;
-        } else if (!name.equals(other.name))
+            }
+        } else if (!name.equals(other.name)) {
             return false;
-        if (nameset != other.nameset)
+        }
+        if (nameset != other.nameset) {
             return false;
+        }
         return true;
     }
 }
