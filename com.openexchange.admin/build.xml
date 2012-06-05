@@ -8,11 +8,7 @@
     <import file="build-project.xml"/>
 
     <!-- Constants -->
-    <property name="sbinDir" value="sbin"/>
     <property name="patchConfDir" value="${tmpDir}/${confDir}"/>
-
-    <!-- Install Constants -->
-    <property name="client.jar" value="adminRMIClient.jar"/>
 
     <target name="installConf" depends="patchConfig">
         <copy todir="${destDir}/${confInstallDir}">
@@ -52,57 +48,6 @@
             <replacefilter token="@oxconfdir@" value="${confSubstPatch}"/>
         </replace>
     </target>    
-
-    <target name="postInstall">
-        <antcall target="createAndInstallLibs"/>
-        <antcall target="patchAndInstallScripts"/>
-    </target>
-
-    <target name="createAndInstallLibs" depends="rmiClientJar">
-        <copy todir="${destDir}/${prefix}/${libDir}">
-            <fileset dir="${tmpDir}" includes="${client.jar}"/>
-            <fileset dir="${libDir}" includes="opencsv-2.0.jar"/>
-        </copy>
-        <symlink resource="${bundlesDir}/org.apache.commons.cli_1.0.0.v20080604-1500.jar" link="${destDir}/${prefix}/${libDir}/org.apache.commons.cli_1.0.0.v20080604-1500.jar" overwrite="true"/>
-    </target>
-
-    <target name="rmiClientJar">
-        <mkdir dir="${tmpDir}/${libDir}"/>
-        <jar jarfile="${tmpDir}/${client.jar}">
-            <fileset dir="${mainBinDir}">
-                <include name="com/openexchange/admin/rmi/**"/>
-                <include name="com/openexchange/admin/console/**"/>
-                <include name="com/openexchange/admin/plugins/**"/>
-                <exclude name="com/openexchange/admin/rmi/impl/**"/>
-            </fileset>
-		</jar>
-    </target>
-
-    <target name="patchAndInstallScripts" depends="moveAndPatchScripts">
-        <property name="sbinInstallDir" value="${destDir}/${prefix}/${sbinDir}"/>
-        <copy todir="${sbinInstallDir}" overwrite="true">
-            <fileset dir="${patchSbinDir}"/>
-        </copy>
-        <chmod perm="755" file="${sbinInstallDir}/allpluginsloaded"/>
-        <chmod perm="755" file="${sbinInstallDir}/jobcontrol"/>
-    </target>
-
-    <target name="moveAndPatchScripts">
-        <property name="patchSbinDir" value="${tmpDir}/${sbinDir}"/>
-        <mkdir dir="${patchSbinDir}"/>
-        <copy todir="${patchSbinDir}" overwrite="true">
-            <fileset dir="${sbinDir}"/>
-            <mapper type="glob" from="*.in" to="*"/>
-        </copy>
-        <antcall target="patchScripts"/>
-    </target>
-
-    <target name="patchScripts">
-        <replace dir="${patchSbinDir}" includes="allpluginsloaded jobcontrol">
-            <replacefilter token="@oxfunctions@" value="${prefix}/${libDir}/oxfunctions.sh"/>
-            <replacefilter token="@oxscriptconf@" value="${confInstallDir}/ox-scriptconf.sh"/>
-        </replace>
-    </target>
 
     <target name="setVersion">
         <replaceregexp file="META-INF/MANIFEST.MF" match="OXVersion: .*" replace="OXVersion: ${version}" byline="true"/>
