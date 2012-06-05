@@ -388,7 +388,7 @@ public final class Init {
                     props.getRefusedExecutionBehavior());
             services.put(ThreadPoolService.class, threadPool);
             TestServiceRegistry.getInstance().addService(ThreadPoolService.class, threadPool);
-            ThreadPoolActivator.REF.set(threadPool);
+            ThreadPoolActivator.REF_THREAD_POOL.set(threadPool);
             final TimerService timer = new CustomThreadPoolExecutorTimerService(threadPool.getThreadPoolExecutor());
             services.put(TimerService.class, timer);
             TestServiceRegistry.getInstance().addService(TimerService.class, timer);
