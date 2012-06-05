@@ -244,7 +244,7 @@ public class AJAXRequestResult {
     public AJAXRequestResult(final Object resultObject, final Date timestamp, final String format) {
         super();
         headers = new LinkedHashMap<String, String>(8);
-        parameters = new HashMap<String, Object>(4);
+        parameters = new HashMap<String, Object>(8);
         responseProperties = new HashMap<String, Object>(4);
         this.resultObject = resultObject;
         this.timestamp = null == timestamp ? null : new Date(timestamp.getTime());
