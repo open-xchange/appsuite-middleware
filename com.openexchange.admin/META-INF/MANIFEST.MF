@@ -57,6 +57,7 @@ Import-Package: com.mysql.jdbc,
  org.osgi.util.tracker
 Export-Package: com.openexchange.admin.daemons,
  com.openexchange.admin.exceptions,
+ com.openexchange.admin.plugins,
  com.openexchange.admin.properties,
  com.openexchange.admin.rmi.impl,
  com.openexchange.admin.storage.interfaces,
