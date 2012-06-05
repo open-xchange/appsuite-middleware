@@ -119,7 +119,7 @@ public final class AttachmentTokenRegistry implements AttachmentTokenConstants {
      */
     private AttachmentTokenRegistry() throws OXException {
         super();
-        map = new ConcurrentHashMap<AttachmentTokenRegistry.Key, ConcurrentMap<String, AttachmentToken>>();
+        map = new ConcurrentHashMap<Key, ConcurrentMap<String, AttachmentToken>>();
         tokens = new ConcurrentHashMap<String, AttachmentToken>();
         final TimerService timerService = ServerServiceRegistry.getInstance().getService(TimerService.class, true);
         final Runnable task = new CleanExpiredTokensRunnable(map, tokens);
