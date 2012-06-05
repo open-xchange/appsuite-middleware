@@ -248,11 +248,7 @@ public class AJAXRequestResult {
         responseProperties = new HashMap<String, Object>(4);
         this.resultObject = resultObject;
         this.timestamp = null == timestamp ? null : new Date(timestamp.getTime());
-        if (format == null) {
-            this.format = JSON;
-        } else {
-            this.format = format;
-        }
+        this.format = null == format ? JSON : format;
         resultType = ResultType.COMMON;
         expires = -1;
     }
