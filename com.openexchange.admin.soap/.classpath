@@ -2,8 +2,7 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.plugin.hosting"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.commons.logging_1.0.4.v200706111724.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.rmi"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>
