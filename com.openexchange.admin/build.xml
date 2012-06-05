@@ -53,7 +53,7 @@
         </replace>
     </target>    
 
-    <target name="postInstall">
+    <target name="postqInstall">
         <antcall target="createAndInstallLibs"/>
         <antcall target="patchAndInstallScripts"/>
     </target>

@@ -13,7 +13,7 @@
     <!-- Install Constants -->
     <property name="client.jar" value="adminHostingRMIClient.jar"/>
 
-    <target name="postInstall">
+    <target name="postqInstall">
         <antcall target="createAndInstallLibs"/>
         <antcall target="patchAndInstallScripts"/>
     </target>
