@@ -336,9 +336,14 @@ public abstract class MailServletInterface {
     public abstract boolean deleteMessages(String folder, String[] msgUIDs, boolean hardDelete) throws OXException;
 
     /**
-     * Clears all messages out of given folder. <b>NOTE</b> this is a hard delete, thus no copies are created
+     * Clears all messages out of given folder.
      */
     public abstract boolean clearFolder(final String folderArg) throws OXException;
+
+    /**
+     * Clears all messages out of given folder.
+     */
+    public abstract boolean clearFolder(final String folderArg, boolean hardDelete) throws OXException;
 
     /**
      * Copies or moves (if <code>move</code> is set) the defined message from source folder to destination folder.

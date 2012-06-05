@@ -69,7 +69,7 @@ public class MailSearchTest extends AbstractMailTest {
 
     private String folder;
 
-    public MailSearchTest(String name) {
+    public MailSearchTest(final String name) {
         super(name);
     }
 
@@ -87,33 +87,36 @@ public class MailSearchTest extends AbstractMailTest {
     }
 
     public void testSearch() throws Exception {
-        String searchText = MAIL_SUBJECT;
+        final String searchText = MAIL_SUBJECT;
         JSONArray search;
 
         search = searchBySubject(searchText);
         assertEquals("Should not yield results in empty folder.", 0, search.length());
 
         sendMail(generateMail());
+        Thread.sleep(1000);
         search = searchBySubject(searchText);
         assertEquals("Should yield one result.", 1, search.length());
 
         sendMail(generateMail());
+        Thread.sleep(1000);
         search = searchBySubject(searchText);
         assertEquals("Should yield two results when facing two identical mails.", 2, search.length());
 
         sendMail(generateMail("Different subject than original one." ));
+        Thread.sleep(1000);
         search = searchBySubject(searchText);
         assertEquals("Should still yield two results after being sent a different one", 2, search.length());
     }
 
-    public JSONArray searchBySubject(String pattern) throws OXException, IOException, SAXException, JSONException {
-        JSONArray body = new JSONArray();
-        JSONObject obj = new JSONObject();
+    public JSONArray searchBySubject(final String pattern) throws OXException, IOException, SAXException, JSONException {
+        final JSONArray body = new JSONArray();
+        final JSONObject obj = new JSONObject();
         obj.put(Mail.PARAMETER_COL, MailListField.SUBJECT.getField());
         obj.put(Mail.PARAMETER_SEARCHPATTERN, pattern);
         body.put(obj);
-        MailSearchRequest request = new MailSearchRequest(body, folder, COLUMNS_DEFAULT_LIST, -1, "asc", true);
-        MailSearchResponse response = getClient().execute(request);
+        final MailSearchRequest request = new MailSearchRequest(body, folder, COLUMNS_DEFAULT_LIST, -1, "asc", true);
+        final MailSearchResponse response = getClient().execute(request);
         return response.getDataAsJSONArray();
     }
 }
