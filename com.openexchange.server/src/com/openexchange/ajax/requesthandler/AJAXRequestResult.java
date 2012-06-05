@@ -354,9 +354,9 @@ public class AJAXRequestResult {
     }
 
     /**
-     * Sets the resultObject
+     * Sets the result object
      * 
-     * @param resultObject The resultObject to set
+     * @param resultObject The result object to set
      */
     public void setResultObject(final Object resultObject) {
         this.resultObject = resultObject;
@@ -390,7 +390,7 @@ public class AJAXRequestResult {
     }
 
     /**
-     * sets the time stamp.
+     * Sets the time stamp.
      * 
      * @param timestamp The time stamp.
      */
