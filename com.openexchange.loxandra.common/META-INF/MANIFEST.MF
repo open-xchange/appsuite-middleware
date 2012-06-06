@@ -5,7 +5,8 @@ Bundle-SymbolicName: com.openexchange.loxandra.common
 Bundle-Version: 6.21.0.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Bundle-ClassPath: lib/antlr-3.2.jar,
+Bundle-ClassPath: .,
+ lib/antlr-3.2.jar,
  lib/apache-cassandra-1.1.0.jar,
  lib/apache-cassandra-clientutil-1.1.0.jar,
  lib/apache-cassandra-thrift-1.1.0.jar,
@@ -27,10 +28,10 @@ Bundle-ClassPath: lib/antlr-3.2.jar,
  lib/snappy-java-1.0.4.1.jar,
  lib/snaptree-0.1.jar,
  lib/uuid-3.3.jar,
- .,
  lib/slf4j-api-1.6.1.jar,
  lib/speed4j-0.13.jar,
- lib/slf4j-nop-1.6.4.jar
+ lib/slf4j-nop-1.6.4.jar,
+ lib/commons-pool-1.6.jar
 Export-Package: antlr,
  antlr.ASdebug,
  antlr.actions.cpp,
@@ -185,6 +186,8 @@ Export-Package: antlr,
  org.apache.cassandra.utils.IntervalTree,
  org.apache.cassandra.utils.avro,
  org.apache.cassandra.utils.obs,
+ org.apache.commons.pool,
+ org.apache.commons.pool.impl,
  org.apache.thrift,
  org.apache.thrift.async,
  org.apache.thrift.meta_data,

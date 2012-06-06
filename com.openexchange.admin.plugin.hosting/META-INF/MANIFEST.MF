@@ -51,9 +51,7 @@ Import-Package: com.openexchange.admin.console,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.util.tracker
-Require-Bundle: com.openexchange.admin
 Export-Package: com.openexchange.admin.rmi.impl,
  com.openexchange.admin.storage.interfaces
-Eclipse-BuddyPolicy: registered
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: .

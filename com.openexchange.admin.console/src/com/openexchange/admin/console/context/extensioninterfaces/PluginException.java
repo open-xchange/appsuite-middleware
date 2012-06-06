@@ -46,40 +46,32 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.ajax.eavcontact;
 
-import java.util.UUID;
-import com.openexchange.ajax.eavcontact.action.NewActionRequest;
-import com.openexchange.ajax.eavcontact.action.NewActionResponse;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.loxandra.dto.EAVContact;
+package com.openexchange.admin.console.context.extensioninterfaces;
 
 /**
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * The exception which is thrown by any plugin. So that the exception is known in the core console tools.
  *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class NewTest extends AbstractAJAXSession {
+public class PluginException extends Exception {
 
-	//private static NameGenerator nameGen = new NameGenerator();
-	
-	/**
-	 * 
-	 */
-	public NewTest() {
-		super("NewTest");
-	}
+    private static final long serialVersionUID = -1327700290913950494L;
 
-	public void testNew() throws Exception {
-		
-		final EAVContact c = new EAVContact();
-		final UUID folderUUID = new UUID(1,1);
-		c.addFolderUUID(folderUUID);
-		//c.setGivenName(nameGen.getName());
-		//c.setSurName(nameGen.getName());
-		c.setDisplayName(c.getSurName() + ", " + c.getGivenName());
-		
-		final NewActionRequest request = new NewActionRequest(c);
-		final NewActionResponse response = getClient().execute(request);
-		System.out.println(response.getResponse().getData());
-	}
+    public PluginException() {
+        super();
+    }
+
+    public PluginException(String message) {
+        super(message);
+    }
+
+    public PluginException(Throwable cause) {
+        super(cause);
+
+    }
+
+    public PluginException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

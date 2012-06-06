@@ -26,5 +26,4 @@ Export-Package: com.openexchange.admin.console,
  com.openexchange.admin.console.util.database,
  com.openexchange.admin.console.util.filestore,
  com.openexchange.admin.console.util.reason,
- com.openexchange.admin.console.util.server,
- com.openexchange.admin.plugins
+ com.openexchange.admin.console.util.server

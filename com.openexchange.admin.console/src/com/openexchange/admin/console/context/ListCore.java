@@ -57,7 +57,7 @@ import java.util.ArrayList;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.ServiceLoader;
 import com.openexchange.admin.console.context.extensioninterfaces.ContextConsoleListInterface;
-import com.openexchange.admin.plugins.PluginException;
+import com.openexchange.admin.console.context.extensioninterfaces.PluginException;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
