@@ -67,3 +67,4 @@ Export-Package: com.openexchange.admin.daemons,
  com.openexchange.admin.taskmanagement,
  com.openexchange.admin.tools
 Bundle-ClassPath: .
+Require-Bundle: com.openexchange.admin.rmi;bundle-version="6.21.0"

@@ -55,3 +55,4 @@ Export-Package: com.openexchange.admin.rmi.impl,
  com.openexchange.admin.storage.interfaces
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: .
+Require-Bundle: com.openexchange.admin;bundle-version="6.21.0"
