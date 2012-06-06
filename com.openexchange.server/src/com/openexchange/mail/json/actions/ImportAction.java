@@ -157,7 +157,7 @@ public final class ImportAction extends AbstractMailAction {
              */
             final ServerSession session = mailRequest.getSession();
             final QuotedInternetAddress defaultSendAddr = new QuotedInternetAddress(getDefaultSendAddress(session), true);
-            MailServletInterface mailInterface = MailServletInterface.getInstance(session);
+            MailServletInterface mailInterface = getMailInterface(mailRequest);
             final BlockingQueue<MimeMessage> queue = new ArrayBlockingQueue<MimeMessage>(100);
             Future<Object> future = null;
             {

@@ -51,7 +51,6 @@ package com.openexchange.mail.json.actions;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
@@ -123,7 +122,7 @@ public final class NewAction extends AbstractMailAction {
     @Override
     protected AJAXRequestResult perform(final MailRequest req) throws OXException {
         final AJAXRequestData request = req.getRequest();
-        List<OXException> warnings = new ArrayList<OXException>();
+        final List<OXException> warnings = new ArrayList<OXException>();
         try {
             if (request.hasUploads() || request.getParameter(Mail.UPLOAD_FORMFIELD_MAIL) != null) {
                 final ServerSession session = req.getSession();
@@ -161,7 +160,7 @@ public final class NewAction extends AbstractMailAction {
                         // Send with default account's transport provider
                         accountId = MailAccount.DEFAULT_ID;
                     }
-                    final MailServletInterface mailInterface = MailServletInterface.getInstance(session);
+                    final MailServletInterface mailInterface = getMailInterface(req);
                     if (jsonMailObj.hasAndNotNull(MailJSONField.FLAGS.getKey()) && (jsonMailObj.getInt(MailJSONField.FLAGS.getKey()) & MailMessage.FLAG_DRAFT) > 0) {
                         /*
                          * ... and save draft
@@ -204,7 +203,7 @@ public final class NewAction extends AbstractMailAction {
                 /*
                  * Create JSON response object
                  */
-                AJAXRequestResult result = new AJAXRequestResult(msgIdentifier, "string");
+                final AJAXRequestResult result = new AJAXRequestResult(msgIdentifier, "string");
                 result.addWarnings(warnings);
                 return result;
             }
@@ -281,7 +280,7 @@ public final class NewAction extends AbstractMailAction {
                 responseObj.put(DataFields.ID, ids[0]);
                 responseData = responseObj;
             }
-            AJAXRequestResult result = new AJAXRequestResult(responseData, "json");
+            final AJAXRequestResult result = new AJAXRequestResult(responseData, "json");
             result.addWarnings(warnings);
             return result;
         } catch (final JSONException e) {
@@ -334,9 +333,10 @@ public final class NewAction extends AbstractMailAction {
                 /*
                  * Copy in sent folder allowed
                  */
-                final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, accountId);
-                mailAccess.connect();
+                MailAccess<?, ?> mailAccess = null;
                 try {
+                    mailAccess = MailAccess.getInstance(session, accountId);
+                    mailAccess.connect();
                     final String sentFullname =
                         MailFolderUtility.prepareMailFolderParam(mailAccess.getFolderStorage().getSentFolder()).getFullname();
                     final String[] uidArr;
@@ -379,7 +379,9 @@ public final class NewAction extends AbstractMailAction {
                     responseData.put(FolderChildFields.FOLDER_ID, MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, sentFullname));
                     responseData.put(DataFields.ID, uidArr[0]);
                 } finally {
-                    mailAccess.close(true);
+                    if (null != mailAccess) {
+                        mailAccess.close(true);
+                    }
                 }
             }
             return responseData;

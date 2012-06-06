@@ -50,11 +50,11 @@
 package com.openexchange.ajax.requesthandler;
 
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
@@ -71,7 +71,7 @@ public final class AJAXState {
 
     private final Set<String> initializers;
 
-    private final List<AJAXStateHandler> handlers;
+    private final Queue<AJAXStateHandler> handlers;
 
     /**
      * Initializes a new {@link AJAXState}.
@@ -80,7 +80,7 @@ public final class AJAXState {
         super();
         properties = new ConcurrentHashMap<String, Object>();
         initializers = new HashSet<String>();
-        handlers = new LinkedList<AJAXStateHandler>();
+        handlers = new ConcurrentLinkedQueue<AJAXStateHandler>();
     }
 
     /**
@@ -175,7 +175,7 @@ public final class AJAXState {
      */
     public void close() {
         while (!handlers.isEmpty()) {
-            final AJAXStateHandler handler = handlers.remove(0);
+            final AJAXStateHandler handler = handlers.poll();
             try {
                 handler.cleanUp(this);
             } catch (final OXException e) {
