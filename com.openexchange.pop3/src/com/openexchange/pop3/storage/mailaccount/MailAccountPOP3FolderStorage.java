@@ -347,10 +347,9 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
         try {
             fn = delegatee.createFolder(description);
         } catch (final OXException e) {
-            if (!MailExceptionCode.DUPLICATE_FOLDER.equals(e)) {
-                throw e;
-            }
-            /*
+            /*-
+             * Expect creation failed because already existent
+             * 
              * Ensure folder is unsubscribed in primary account
              */
             unsubscribe(realFullname);

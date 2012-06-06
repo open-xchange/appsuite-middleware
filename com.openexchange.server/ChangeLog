@@ -1,3 +1,7 @@
+* 2012-06-06 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22257: Don't stick to specific error code MSG-0063 to assume folder creation failed because of already existent folder
+
 * 2012-06-05 - thorben.betten@open-xchange.com
 
  - Fix for bug 22245: Properly use ACE address for SMTP's envelope-from header
