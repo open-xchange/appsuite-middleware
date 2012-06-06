@@ -53,6 +53,7 @@ import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import static com.openexchange.http.grizzly.GrizzlyExceptionMessage.*;
 
 
 /**
@@ -62,8 +63,12 @@ import com.openexchange.exception.OXExceptionFactory;
  */
 public enum GrizzlyExceptionCode implements OXExceptionCode {
     
-    // Server could notbe started.
-    SERVER_NOT_STARTED(GrizzlyExceptionMessage.NOT_STARTED_MSG, CATEGORY_ERROR, 1)
+    /** The grizzly server could not be started. */
+    GRIZZLY_SERVER_NOT_STARTED(GRIZZLY_SERVER_NOT_STARTED_MSG, CATEGORY_ERROR, 1),
+    /** The following needed service is missing: "%1$s" */
+    NEEDED_SERVICE_MISSING(NEEDED_SERVICE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 2),
+    /** The maximum number of HTTP sessions (%1$n) is exceeded */
+    MAX_NUMBER_OF_SESSIONS_REACHED(MAX_NUMBER_OF_SESSIONS_REACHED_MSG, CATEGORY_ERROR, 3)
     ;
 
     private final String message;

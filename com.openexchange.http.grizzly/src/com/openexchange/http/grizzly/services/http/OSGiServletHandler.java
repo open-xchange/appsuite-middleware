@@ -319,6 +319,7 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
 
             try {
                 if (servlet != null) {
+                    //TODO: wrap request! check cookies
                     servlet.service(request, response);
                 }
 

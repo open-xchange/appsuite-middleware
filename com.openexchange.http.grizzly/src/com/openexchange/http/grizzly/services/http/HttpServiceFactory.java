@@ -92,4 +92,5 @@ public class HttpServiceFactory implements ServiceFactory<HttpService> {
         LOG.info("Stoping main handler");
         mainHttpHandler.unregisterAll();
     }
+    
 }

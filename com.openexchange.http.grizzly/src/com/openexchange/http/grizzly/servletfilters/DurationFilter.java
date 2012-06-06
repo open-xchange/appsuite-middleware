@@ -47,21 +47,56 @@
  *
  */
 
-package com.openexchange.http.grizzly;
+package com.openexchange.http.grizzly.servletfilters;
 
-import com.openexchange.i18n.LocalizableStrings;
+import java.io.IOException;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 
 /**
- * {@link GrizzlyExceptionMessage}
+ * {@link DurationFilter}
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class GrizzlyExceptionMessage implements LocalizableStrings{
-    /** The grizzly server could not be started */
-    public static final String GRIZZLY_SERVER_NOT_STARTED_MSG = "The grizzly server could not be started";
-    /** The following needed service is missing: \"%1$s\" */
-    public static final String NEEDED_SERVICE_MISSING_MSG = "The following needed service is missing: \"%1$s\"";
-    /** "Maximum number of HTTP sessions (%1$n) exceeded */
-    public static final String MAX_NUMBER_OF_SESSIONS_REACHED_MSG = "The maximum number of HTTP sessions (%1$n) is exceeded.";
+public class DurationFilter implements Filter {
+    
+    private static final Log LOG = LogFactory.getLog(DurationFilter.class); 
+
+    @Override
+    public void init(FilterConfig filterConfig) throws ServletException {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+        String url = null;
+        if (request instanceof HttpServletRequest) {
+            url = ((HttpServletRequest) request).getRequestURL().toString();
+        }
+        long duration, starttime = System.currentTimeMillis();
+
+        // proceed along the chain
+        chain.doFilter(request, response);
+
+        // after response returns, calculate duration and log it
+        duration = System.currentTimeMillis() - starttime;
+        if (LOG.isInfoEnabled()) {
+            LOG.info(">>> Filter recorded duration: " + duration + "ms - " + url);
+        }
+    }
+
+    @Override
+    public void destroy() {
+        // TODO Auto-generated method stub
+
+    }
 }

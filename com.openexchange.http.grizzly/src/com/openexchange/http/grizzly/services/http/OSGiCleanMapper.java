@@ -50,12 +50,15 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 import org.osgi.service.http.HttpContext;
 
 import javax.servlet.Servlet;
 import java.util.concurrent.locks.ReentrantLock;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.glassfish.grizzly.http.server.HttpHandler;
 
 /**
@@ -67,6 +70,7 @@ import org.glassfish.grizzly.http.server.HttpHandler;
  */
 class OSGiCleanMapper {
 
+    private static final Log LOG = LogFactory.getLog(OSGiCleanMapper.class);
     private static final ReentrantLock lock = new ReentrantLock();
     private static final TreeSet<String> aliasTree = new TreeSet<String>();
     private static final Map<String, HttpHandler> registrations = new HashMap<String, HttpHandler>(16);
@@ -188,7 +192,9 @@ class OSGiCleanMapper {
     public void addHttpHandler(String alias, HttpHandler handler) {
         if (containsAlias(alias)) {
             // should not happend, alias should be checked before.
-            // TODO: signal it some how
+            if(LOG.isWarnEnabled()){
+                LOG.warn("Alias already in use, this shouldn't happen");
+            }
         } else {
             registerAliasHandler(alias, handler);
             if (handler instanceof OSGiServletHandler) {
@@ -266,6 +272,10 @@ class OSGiCleanMapper {
 
     public void addContext(HttpContext httpContext, ArrayList<OSGiServletHandler> servletHandlers) {
         contextServletHandlerMap.put(httpContext, servletHandlers);
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Adding another ServletHandler to the map. Now using "+contextServletHandlerMap.size()+" handlers");
+            LOG.debug(prettyPrintServletHandlerMap());
+        }
     }
 
     private static boolean registerAliasHandler(String alias, HttpHandler httpHandler) {
@@ -277,4 +287,20 @@ class OSGiCleanMapper {
         }
         return wasNew;
     }
+    
+    /**
+     * Prettyprint the currently used ServletHandlerMap
+     * @return the formatted ServletHandlerMap
+     */
+    private String prettyPrintServletHandlerMap() {
+        StringBuilder sb = new StringBuilder();
+        for (Entry<HttpContext, ArrayList<OSGiServletHandler>> entry : contextServletHandlerMap.entrySet()) {
+            sb.append("HttpContext: ").append(entry.getKey().toString()).append('\n');
+            for (OSGiServletHandler handler : entry.getValue()) {
+                sb.append('\t').append(handler.toString()).append("\t servletPath: ").append(handler.getServletPath()) .append('\n');
+            }
+        }
+        return sb.toString();
+    }
+    
 }
