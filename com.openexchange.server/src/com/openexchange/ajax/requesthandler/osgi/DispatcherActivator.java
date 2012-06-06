@@ -197,15 +197,17 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
 
         });
 
+//        registerSessionServlet("/ajax", servlet);
+        
         track(AJAXActionServiceFactory.class, new SimpleRegistryListener<AJAXActionServiceFactory>() {
 
             @Override
             public void added(final ServiceReference<AJAXActionServiceFactory> ref, final AJAXActionServiceFactory service) {
-                final String module = (String) ref.getProperty("module");
+                String module = (String) ref.getProperty("module");
                 dispatcher.register(module, service);
                 if (!servlets.contains(module)) {
-                    servlets.add(module);
                     registerSessionServlet(prefix + module, servlet);
+                    servlets.add(module);
                 }
             }
 

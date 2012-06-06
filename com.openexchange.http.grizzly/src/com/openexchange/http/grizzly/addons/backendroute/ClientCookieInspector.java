@@ -47,21 +47,62 @@
  *
  */
 
-package com.openexchange.http.grizzly;
+package com.openexchange.http.grizzly.addons.backendroute;
 
-import com.openexchange.i18n.LocalizableStrings;
+import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import org.glassfish.grizzly.http.Cookie;
+import org.glassfish.grizzly.http.util.CookieParserUtils;
+import org.glassfish.grizzly.http.util.CookieSerializerUtils;
+import org.glassfish.grizzly.memory.ByteBufferWrapper;
 
 
 /**
- * {@link GrizzlyExceptionMessage}
+ * {@link ClientCookieInspector} to inspect and fix client cookies.
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class GrizzlyExceptionMessage implements LocalizableStrings{
-    /** The grizzly server could not be started */
-    public static final String GRIZZLY_SERVER_NOT_STARTED_MSG = "The grizzly server could not be started";
-    /** The following needed service is missing: \"%1$s\" */
-    public static final String NEEDED_SERVICE_MISSING_MSG = "The following needed service is missing: \"%1$s\"";
-    /** "Maximum number of HTTP sessions (%1$n) exceeded */
-    public static final String MAX_NUMBER_OF_SESSIONS_REACHED_MSG = "The maximum number of HTTP sessions (%1$n) is exceeded.";
+public class ClientCookieInspector extends AbstractCookieInspector {
+
+    /**
+     * Initializes a new {@link ClientCookieInspector}.
+     * @param headerLine the client Cookie: header line, must not be null
+     * @param backendRoute the currently configured backendRoute, must not be null
+     * @throws IllegalArgumentException for null parameters
+     */
+    public ClientCookieInspector(String headerLine, String backendRoute) {
+        if(headerLine == null || backendRoute == null) {
+            throw new IllegalArgumentException();
+        }
+        this.cookieMap=getCookieMapFromHeaderLine(headerLine);
+        this.backendRoute=backendRoute;
+    }
+    
+    /**
+     * Convert the client header line into a map<name, cookie> of cookies.
+     * @param headerLine the header line from the client http request
+     */
+    private Map<String, Cookie> getCookieMapFromHeaderLine(String headerLine) {
+        HashMap<String, Cookie> cookieMap = new HashMap<String, Cookie>(); 
+        List<Cookie> cookieList = new LinkedList<Cookie>();
+        CookieParserUtils.parseClientCookies(cookieList, headerLine, true);
+        for (Cookie cookie : cookieList) {
+            cookieMap.put(cookie.getName(), cookie);
+        }
+        return cookieMap;
+    }
+
+    /**
+     * Construct a http <code>Cookie:</code> header line from the cookies currently stored in the inspector.
+     * @return a Cookie: header line 
+     */
+    public ByteBufferWrapper getCookieHeaderLine() {
+        StringBuilder sb = new StringBuilder();
+        CookieSerializerUtils.serializeClientCookies(sb, false, cookieMap.values().toArray(new Cookie[0]));
+        return new ByteBufferWrapper(ByteBuffer.wrap(sb.toString().getBytes()));
+    }
+    
 }
