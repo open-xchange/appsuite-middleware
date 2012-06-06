@@ -126,6 +126,9 @@ public class GetResponse extends AbstractAJAXResponse {
      */
     public boolean getBoolean() {
         fetchValue();
+        if (value instanceof String) {
+            return Boolean.parseBoolean((String) value);
+        }
         return null == value ? false : ((Boolean) value).booleanValue();
     }
 
