@@ -72,15 +72,8 @@ public class Activator implements BundleActivator {
     private static OXContextInterface ox_ctx = null;
     
     private ServiceRegistration<Remote> registration = null;
-    
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext
-     * )
-     */
-    public void start(BundleContext context) throws Exception {
+
+    public void start(final BundleContext context) throws Exception {
         try {
             ox_ctx = new OXContext(context);
             contextRestore = new OXContextRestore();
@@ -98,13 +91,7 @@ public class Activator implements BundleActivator {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
-     */
-    public void stop(BundleContext context) throws Exception {
+    public void stop(final BundleContext context) throws Exception {
         context.ungetService(registration.getReference());
     }
 
