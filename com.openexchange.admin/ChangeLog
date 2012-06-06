@@ -1,3 +1,7 @@
+* 2012-06-06 - marcus.klein@open-xchange.com
+
+ - Fix for bug 22263: RequireBundle is still necessary for com.openexchange.admin & com.openexchange.admin.plugin.hosting bundles.
+
 * 2012-05-24 - marcus.klein@open-xchange.com
 
  - Fix for bug 22189: Removed stale reference to RMI.properties configuration file.

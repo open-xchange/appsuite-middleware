@@ -1,3 +1,7 @@
+* 2012-06-06 - marcus.klein@open-xchange.com
+
+ - Fix for bug 22263: RequireBundle is still necessary for com.openexchange.admin & com.openexchange.admin.plugin.hosting bundles.
+
 * 2012-05-23 - marcus.klein@open-xchange.com
 
  - Fix for bug 22163: Using cache write through for context to database assignment to prevent missing information while reading from slave.
