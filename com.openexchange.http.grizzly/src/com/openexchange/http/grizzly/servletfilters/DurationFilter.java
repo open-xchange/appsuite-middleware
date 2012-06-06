@@ -47,66 +47,56 @@
  *
  */
 
-package com.openexchange.http.grizzly.grizzlyfilters;
+package com.openexchange.http.grizzly.servletfilters;
 
 import java.io.IOException;
-import javax.servlet.Servlet;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 
 /**
- * {@link RouteFilterInstaller}
+ * {@link DurationFilter}
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class RouteFilterInstaller implements Servlet {
+public class DurationFilter implements Filter {
+    
+    private static final Log LOG = LogFactory.getLog(DurationFilter.class); 
 
-    /* (non-Javadoc)
-     * @see javax.servlet.Servlet#init(javax.servlet.ServletConfig)
-     */
     @Override
-    public void init(ServletConfig config) throws ServletException {
-        ServletContext servletContext = config.getServletContext();
-    }
-
-    /* (non-Javadoc)
-     * @see javax.servlet.Servlet#getServletConfig()
-     */
-    @Override
-    public ServletConfig getServletConfig() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    /* (non-Javadoc)
-     * @see javax.servlet.Servlet#service(javax.servlet.ServletRequest, javax.servlet.ServletResponse)
-     */
-    @Override
-    public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
+    public void init(FilterConfig filterConfig) throws ServletException {
         // TODO Auto-generated method stub
 
     }
 
-    /* (non-Javadoc)
-     * @see javax.servlet.Servlet#getServletInfo()
-     */
     @Override
-    public String getServletInfo() {
-        // TODO Auto-generated method stub
-        return null;
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+        String url = null;
+        if (request instanceof HttpServletRequest) {
+            url = ((HttpServletRequest) request).getRequestURL().toString();
+        }
+        long duration, starttime = System.currentTimeMillis();
+
+        // proceed along the chain
+        chain.doFilter(request, response);
+
+        // after response returns, calculate duration and log it
+        duration = System.currentTimeMillis() - starttime;
+        if (LOG.isInfoEnabled()) {
+            LOG.info(">>> Filter recorded duration: " + duration + "ms - " + url);
+        }
     }
 
-    /* (non-Javadoc)
-     * @see javax.servlet.Servlet#destroy()
-     */
     @Override
     public void destroy() {
-        //Delete Filter
+        // TODO Auto-generated method stub
 
     }
-
 }

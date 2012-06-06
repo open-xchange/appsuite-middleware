@@ -272,8 +272,10 @@ class OSGiCleanMapper {
 
     public void addContext(HttpContext httpContext, ArrayList<OSGiServletHandler> servletHandlers) {
         contextServletHandlerMap.put(httpContext, servletHandlers);
-        LOG.info("Adding another ServletHandler to the map. Now using "+contextServletHandlerMap.size()+" handlers");
-        prettyPrintServletHandlerMap();
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Adding another ServletHandler to the map. Now using "+contextServletHandlerMap.size()+" handlers");
+            LOG.debug(prettyPrintServletHandlerMap());
+        }
     }
 
     private static boolean registerAliasHandler(String alias, HttpHandler httpHandler) {
@@ -286,7 +288,11 @@ class OSGiCleanMapper {
         return wasNew;
     }
     
-    private void prettyPrintServletHandlerMap() {
+    /**
+     * Prettyprint the currently used ServletHandlerMap
+     * @return the formatted ServletHandlerMap
+     */
+    private String prettyPrintServletHandlerMap() {
         StringBuilder sb = new StringBuilder();
         for (Entry<HttpContext, ArrayList<OSGiServletHandler>> entry : contextServletHandlerMap.entrySet()) {
             sb.append("HttpContext: ").append(entry.getKey().toString()).append('\n');
@@ -294,7 +300,7 @@ class OSGiCleanMapper {
                 sb.append('\t').append(handler.toString()).append("\t servletPath: ").append(handler.getServletPath()) .append('\n');
             }
         }
-        LOG.info(sb.toString());
+        return sb.toString();
     }
     
 }

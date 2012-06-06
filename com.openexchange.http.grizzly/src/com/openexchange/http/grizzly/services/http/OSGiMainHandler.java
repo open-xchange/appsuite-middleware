@@ -45,10 +45,17 @@
 
 package com.openexchange.http.grizzly.services.http;
 
-import org.osgi.framework.Bundle;
-import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.HttpService;
-import org.osgi.service.http.NamespaceException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -57,16 +64,20 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.apache.commons.logging.Log;
 import org.glassfish.grizzly.http.server.HttpHandler;
 import org.glassfish.grizzly.http.server.Request;
 import org.glassfish.grizzly.http.server.Response;
 import org.glassfish.grizzly.http.util.HttpStatus;
-import com.openexchange.http.grizzly.Configuration;
+import org.osgi.framework.Bundle;
+import org.osgi.service.http.HttpContext;
+import org.osgi.service.http.HttpService;
+import org.osgi.service.http.NamespaceException;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.configuration.ServerConfig;
+import com.openexchange.exception.OXException;
+import com.openexchange.http.grizzly.GrizzlyExceptionMessage;
+import com.openexchange.http.grizzly.osgi.GrizzlyServiceRegistry;
 import com.openexchange.http.grizzly.servletfilters.BackendRouteFilter;
 import com.openexchange.log.LogFactory;
 
@@ -127,7 +138,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
                     break;
                 } else {
                     // switching to reducing mapping mode (removing after last '/' and searching)
-                    LOG.debug("Swithcing to reducing mapping mode.");
+                    LOG.debug("Switching to reducing mapping mode.");
                     cutOff = true;
                     alias = originalAlias;
                 }
@@ -175,13 +186,14 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
      * @param httpService Used to {@link HttpService#createDefaultHttpContext()} if needed.
      * @throws org.osgi.service.http.NamespaceException If alias was invalid or already registered.
      * @throws javax.servlet.ServletException If {@link javax.servlet.Servlet#init(javax.servlet.ServletConfig)} fails.
+     * @throws OXException
      */
     public void registerServletHandler(final String alias, Servlet servlet, Dictionary initparams, HttpContext context, HttpService httpService) throws NamespaceException, ServletException {
 
         ReentrantLock lock = OSGiCleanMapper.getLock();
         lock.lock();
         try {
-//            validateAlias4RegOk(alias);
+            // validateAlias4RegOk(alias);
             /*
              * Currently only checks if servlet is already registered. This prevents the same servlet with different aliases. Disabled until
              * we don't have to register the DispatcherServlet multiple times under different aliases.
@@ -198,47 +210,27 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
             }
             OSGiServletHandler servletHandler = findOrCreateOSGiServletHandler(servlet, context, initparams);
             servletHandler.setServletPath(alias);
-            servletHandler.addFilter(new Filter() {
-                
-                @Override
-                public void init(FilterConfig filterConfig) throws ServletException {
-                    // TODO Auto-generated method stub
-                    
-                }
-                
-                @Override
-                public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-                    String url = null;
-                    if (request instanceof HttpServletRequest) {
-                       url = ((HttpServletRequest)request).getRequestURL().toString();
-                    }
-                    long duration, starttime = System.currentTimeMillis();
 
-                    // proceed along the chain
-                    chain.doFilter(request, response);
+//            /*
+//             * Get backendRoute from configService and add BackendRouteFilter to ServletHandler.
+//             */
+//            ConfigurationService configService = GrizzlyServiceRegistry.getInstance().getService(ConfigurationService.class);
+//            if (configService == null) {
+//                throw new IllegalStateException(String.format(
+//                    GrizzlyExceptionMessage.NEEDED_SERVICE_MISSING_MSG,
+//                    ConfigurationService.class.getName()));
+//            }
+//            final String backendRoute = configService.getProperty("com.openexchange.http.grizzly.backendRoute", "");
+//            servletHandler.addFilter(
+//                new BackendRouteFilter(),
+//                BackendRouteFilter.class.getName(),
+//                new HashMap<String, String>() {
+//
+//                    {
+//                        this.put("backendRoute", backendRoute);
+//                    }
+//                });
 
-                    // after response returns, calculate duration and log it
-                    duration = System.currentTimeMillis() - starttime;
-                    if (LOG.isInfoEnabled()) {
-                       LOG.info("\n\n Filter recorded duration: " + duration + "ms - " + url +"\n\n");
-                    }
-                    
-                }
-                
-                @Override
-                public void destroy() {
-                    // TODO Auto-generated method stub
-                    
-                }
-            }, "HelloFilter", null);
-            
-            servletHandler.addFilter(new BackendRouteFilter(), "BackendRouteFilter",
-                new HashMap<String, String>() {{
-                    this.put("backendRoute", Configuration.backendRoute);
-                    this.put("alias", alias);
-                }}
-            );
-            
             /*
              * Servlet would be started several times if registered with multiple aliases. Starting means: 1. Set ContextPath 2. Instantiate
              * Servlet if null 3. Call init(config) on the Servlet.
@@ -428,13 +420,17 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
         OSGiServletHandler osgiServletHandler;
 
         if (mapper.containsContext(httpContext)) {
-            LOG.debug("Reusing ServletHandler");
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("Reusing ServletHandler");
+            }
             // new servlet handler for same configuration, different servlet and alias
             List<OSGiServletHandler> servletHandlers = mapper.getContext(httpContext);
             osgiServletHandler = servletHandlers.get(0).newServletHandler(servlet);
             servletHandlers.add(osgiServletHandler);
         } else {
-            LOG.debug("Creating new ServletHandler");
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("Creating new ServletHandler");
+            }
             HashMap<String, String> params;
             if (initparams != null) {
                 params = new HashMap<String, String>(initparams.size());

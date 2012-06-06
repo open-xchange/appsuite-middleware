@@ -58,8 +58,10 @@ import com.openexchange.i18n.LocalizableStrings;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class GrizzlyExceptionMessage implements LocalizableStrings{
-    
-    // Server could not be started.
-    public static final String NOT_STARTED_MSG = "Server could not be started";
-
+    /** The grizzly server could not be started */
+    public static final String GRIZZLY_SERVER_NOT_STARTED_MSG = "The grizzly server could not be started";
+    /** The following needed service is missing: \"%1$s\" */
+    public static final String NEEDED_SERVICE_MISSING_MSG = "The following needed service is missing: \"%1$s\"";
+    /** "Maximum number of HTTP sessions (%1$n) exceeded */
+    public static final String MAX_NUMBER_OF_SESSIONS_REACHED_MSG = "The maximum number of HTTP sessions (%1$n) is exceeded.";
 }

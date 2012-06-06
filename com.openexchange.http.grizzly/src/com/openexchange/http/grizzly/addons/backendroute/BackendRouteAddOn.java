@@ -47,14 +47,43 @@
  *
  */
 
-package com.openexchange.http.grizzly;
+package com.openexchange.http.grizzly.addons.backendroute;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.glassfish.grizzly.filterchain.Filter;
+import org.glassfish.grizzly.filterchain.FilterChainBuilder;
+import org.glassfish.grizzly.http.server.AddOn;
+import org.glassfish.grizzly.http.server.HttpServerFilter;
+import org.glassfish.grizzly.http.server.NetworkListener;
+import com.openexchange.http.grizzly.util.FilterChainUtils;
 
 /**
- * {@link Configuration} A bundle wide 
- *
+ * {@link BackendRouteAddOn}
+ * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class Configuration {
-    public static String backendRoute;
+public class BackendRouteAddOn implements AddOn {
+
+    private static final Log LOG = LogFactory.getLog(BackendRouteAddOn.class);
+
+    private Filter filter;
+
+    public BackendRouteAddOn(AppendBackendRouteFilter filter) {
+        this.filter = filter;
+    }
+
+    @Override
+    public void setup(NetworkListener networkListener, FilterChainBuilder builder) {
+        AddOn[] addOns = networkListener.getAddOns();
+        for (AddOn addOn : addOns) {
+            LOG.info("Current Addon is: " + addOn.getClass());
+        }
+        int httpServerFilterIdx = builder.indexOfType(HttpServerFilter.class);
+        if (httpServerFilterIdx > 0) {
+            builder.add(httpServerFilterIdx - 1, filter);
+        }
+        LOG.info("FilterChain after adding Watchers:\n" + FilterChainUtils.formatFilterChainString(builder.build()));
+    }
+
 }

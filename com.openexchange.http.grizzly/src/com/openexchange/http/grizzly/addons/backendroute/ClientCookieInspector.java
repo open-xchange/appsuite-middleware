@@ -47,49 +47,62 @@
  *
  */
 
-package com.openexchange.http.grizzly.grizzlyfilters;
+package com.openexchange.http.grizzly.addons.backendroute;
 
-import java.io.IOException;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import org.glassfish.grizzly.http.Cookie;
+import org.glassfish.grizzly.http.util.CookieParserUtils;
+import org.glassfish.grizzly.http.util.CookieSerializerUtils;
+import org.glassfish.grizzly.memory.ByteBufferWrapper;
 
 
 /**
- * {@link RouteFilter}
+ * {@link ClientCookieInspector} to inspect and fix client cookies.
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class RouteFilter implements Filter {
+public class ClientCookieInspector extends AbstractCookieInspector {
 
-    /* (non-Javadoc)
-     * @see javax.servlet.Filter#init(javax.servlet.FilterConfig)
+    /**
+     * Initializes a new {@link ClientCookieInspector}.
+     * @param headerLine the client Cookie: header line, must not be null
+     * @param backendRoute the currently configured backendRoute, must not be null
+     * @throws IllegalArgumentException for null parameters
      */
-    @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
-        // TODO Auto-generated method stub
-
+    public ClientCookieInspector(String headerLine, String backendRoute) {
+        if(headerLine == null || backendRoute == null) {
+            throw new IllegalArgumentException();
+        }
+        this.cookieMap=getCookieMapFromHeaderLine(headerLine);
+        this.backendRoute=backendRoute;
+    }
+    
+    /**
+     * Convert the client header line into a map<name, cookie> of cookies.
+     * @param headerLine the header line from the client http request
+     */
+    private Map<String, Cookie> getCookieMapFromHeaderLine(String headerLine) {
+        HashMap<String, Cookie> cookieMap = new HashMap<String, Cookie>(); 
+        List<Cookie> cookieList = new LinkedList<Cookie>();
+        CookieParserUtils.parseClientCookies(cookieList, headerLine, true);
+        for (Cookie cookie : cookieList) {
+            cookieMap.put(cookie.getName(), cookie);
+        }
+        return cookieMap;
     }
 
-    /* (non-Javadoc)
-     * @see javax.servlet.Filter#doFilter(javax.servlet.ServletRequest, javax.servlet.ServletResponse, javax.servlet.FilterChain)
+    /**
+     * Construct a http <code>Cookie:</code> header line from the cookies currently stored in the inspector.
+     * @return a Cookie: header line 
      */
-    @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        // TODO Auto-generated method stub
-
+    public ByteBufferWrapper getCookieHeaderLine() {
+        StringBuilder sb = new StringBuilder();
+        CookieSerializerUtils.serializeClientCookies(sb, false, cookieMap.values().toArray(new Cookie[0]));
+        return new ByteBufferWrapper(ByteBuffer.wrap(sb.toString().getBytes()));
     }
-
-    /* (non-Javadoc)
-     * @see javax.servlet.Filter#destroy()
-     */
-    @Override
-    public void destroy() {
-        // TODO Auto-generated method stub
-
-    }
-
+    
 }

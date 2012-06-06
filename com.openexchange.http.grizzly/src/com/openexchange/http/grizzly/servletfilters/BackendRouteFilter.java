@@ -61,107 +61,94 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import org.apache.commons.logging.Log;
-import com.openexchange.http.grizzly.Configuration;
 import com.openexchange.log.LogFactory;
-//import com.google.common.base.Optional;
 
 /**
+ * Checks the Request/Response for JSessionId Cookies/Headers.
+ * Invalid Cookies in the Requests are discarded in the Response. New JSessionIds are modified so they end with ".backendRoute" if a 
+ * backend route is configured.  
  * {@link BackendRouteFilter}
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class BackendRouteFilter implements Filter {
 
-    private static final Log LOG = LogFactory.getLog(BackendRouteFilter.class);
     private static final String JSESSIONID_COOKIE="JSESSIONID";
-    private static final String JSESSIONID_URL_PARAMETER="JSESSIONID";
+    private static final String JSESSIONID_URL_PARAMETER="jsessionid";
+    private static final Log LOG = LogFactory.getLog(BackendRouteFilter.class);
     private String backendRoute="";
-    private String alias="";
+    
+    /**
+     * Get the backend route.
+     * @return the backend route
+     */
+    private String getBackendRoute() {
+        return backendRoute;
+    }
+    
+    /**
+     * Sets the backendRoute. Silently converts null to the empty string.
+     *
+     * @param backendRoute The backendRoute to set
+     */
+    private void setBackendRoute(String backendRoute) {
+        this.backendRoute = backendRoute == null ? "" : backendRoute;
+    }
 
+    //--------------------------------------------------------------------------------------------------------------------------------------
+    
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-        backendRoute = filterConfig.getInitParameter("backendRoute");
-        alias = filterConfig.getInitParameter("alias");
+        setBackendRoute(filterConfig.getInitParameter("backendRoute"));
     }
 
     /*
      * JSessionID can be passed as param or as cookie. Cookie may appear multiple times!
      * We have to look at three different conditions:
-     * 
-     * 1: If the request contains a jsessionid as url parameter:
-     *      - if no route OR a matching route is appended to the jsessionid:
-     *          - check if session is still valid
-     *              - if still valid
-     *                  - joined to false
-     *                  - decide if cookie should only be set for https connections
-     *                  - Set cookie with joined!
-     *              - if invalid
-     *                  - joined to true
-     *                  - create new unique id in sessionmanagement
-     *                  - append route to new id if route is specified
-     *                  - decide if cookie should only be set for https connections
-     *                  - Set cookie with joined!
-     *      - if a route is appended to the id but doesn't fit:
-     *          - create new unique id in sessionmanagement
-     *          - append route to new id if route is specified
-     *          - joined to true
-     *          - decide if cookie should only be set for https connections
-     *          - Set cookie with joined!
-     *          
-     * 2: If the request contains one or more JSsessionIds as cookies:
-     *      - check Cookies
-     *          - no route:
-     *              - backend defines route:
-     *                  - discard cookie
-     *              - backend doesn't define route:
-     *                  - check if session is still valid
-     *                      - invalid: discard cookie
-     *                      - valid:
-     *                          - decide if cookie should only be set for https connections
-     *                          - set cookie with joined!
-     *          - route doesn't match:
-     *              - discard cookie
-     *          - route matches:
-     *              - check if session is still valid
-     *                  - invalid: discard cookie
-     *                  - valid:
-     *                      - decide if cookie should only be set for https connections
-     *                      - set cookie with joined!
-     *      
-     *      
-     * 3: If the request doesn't contain a jsessionid cookie:
-     *      - create new unique id in sessionmanagement
-     *      - append route to new id if route is specified
-     *      - joined to true
-     *      - decide if cookie should only be set for https connections
-     *      - Set cookie with joined!
-     * 
-     *      
-     *      
-     * - decide if cookie should only be set for https connections
-     * - Set cookie with joined!
-     *      
+     *
+     * 1: JSessionId as url param
+     *  - no route
+     *   - backendroute defined -> discard cookie in response
+     *   - no backendroute defined -> continue
+     *  - route doesn't match
+     *   - discard cookie in response
+     *  - route matches
+     *   - continue
+     *  
+     * 2: JSessionID as cookie
+     *  - no route appended to JSessionId 
+     *   - but backendroute is defined -> discard cookie in response
+     *   - no backendroute defined -> continue
+     *  - route doesn't match
+     *   - discard cookie in response
+     *  - route matches
+     *   - continue
+     *  
+     * 3: No JSessionId, recheck JSessionId in response
+     *     
      * @see javax.servlet.Filter#doFilter(javax.servlet.ServletRequest, javax.servlet.ServletResponse, javax.servlet.FilterChain)
      */
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        if (request instanceof HttpServletRequest) {
+        if (request instanceof HttpServletRequest && response instanceof HttpServletResponse) {
             HttpServletRequest httpServletRequest = (HttpServletRequest) request;
-            //does the request contain a jSessonId as parameter, as cookie, or not at all?
-            if(hasJSessionIdAsUrlParam(httpServletRequest)) { //1:
-                String route = getRouteFromSession(getJsessionIdParameterValue(httpServletRequest));
-                
-            } else if (hasJSessionIdAsCookie(httpServletRequest)) { //2:
-                
-            } else { //3:
-                
+            HttpServletResponse httpServletResponse = (HttpServletResponse) response;
+            
+            if(hasJSessionIdAsUrlParam(httpServletRequest)) { //1: JSessionId as url param
+                checkUrlParam(httpServletRequest, httpServletResponse);
+                chain.doFilter(httpServletRequest, httpServletResponse);
+            } else if (hasJSessionIdAsCookie(httpServletRequest)) { //2: JSessionID as cookie
+                checkRequestCookies(httpServletRequest, httpServletResponse);
+                chain.doFilter(httpServletRequest, httpServletResponse);
+            } else { //3: No JSessionId
+                chain.doFilter(httpServletRequest, httpServletResponse);
+                updateJSessionIdRoute(httpServletResponse);
             }
         }
     }
-
     
-
     /*
      * (non-Javadoc)
      * @see javax.servlet.Filter#destroy()
@@ -169,7 +156,137 @@ public class BackendRouteFilter implements Filter {
     @Override
     public void destroy() {
         // TODO Auto-generated method stub
+        
+    }
+    
+    //--------------------------------------------------------------------------------------------------------------------------------------
+    
+    /**
+     * Inspect the Url parameter for JSessionId cookies.
+     * This gets the route from the jsessionid param contained in the request url and checks it.
+     * @param httpServletRequest the request to inspect
+     * @param httpServletResponse the response belonging to the request
+     */
+    private void checkUrlParam(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
+        String jSessionId = getJsessionIdParameterValue(httpServletRequest);
+        writeToDebugLog(new StringBuilder("Request has JSessionId set as url param: ").append(jSessionId).toString());
+        checkTheRoute(jSessionId, httpServletRequest, httpServletResponse);
+    }
 
+    /**
+     * Inspect the request for JSessionId cookies.
+     * This gets the route from the cookies contained in the requests and checks them.
+     * @param httpServletRequest the request to inspect
+     * @param httpServletResponse the response belonging to the request
+     */
+    private void checkRequestCookies(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
+        writeToDebugLog("Request has JSessionId set as cookie.");
+        List<Cookie> jsessionIdCookies = getJsessionIdCookies(httpServletRequest);
+        for (Cookie jSessionIdCookie : jsessionIdCookies) {
+            String jSessionId = getJsessionIdFromCookie(jSessionIdCookie);
+            writeToDebugLog(new StringBuilder("Current JSessionId: ").append(jSessionId).toString());
+            checkTheRoute(jSessionId, httpServletRequest, httpServletResponse);
+        }
+    }
+    
+    /**
+     * Check the JSessionId route against the currently configured backend route.
+     * Implemented behaviour:
+     *  - no route appended to JSessionId
+     *   - but backendroute is defined -> discard cookie in response
+     *   - no backendroute defined -> continue
+     *  - route doesn't match
+     *   - discard cookie in response
+     *  - route matches
+     *   - continue
+     * @param jSessionId the JSessionId
+     * @param httpServletRequest the incoming request
+     * @param httpServletResponse the response belonging to the request
+     */
+    private void checkTheRoute(String jSessionId, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
+        if(jSessionId == null) {
+            throw new IllegalArgumentException();
+        }
+        String route = getRouteFromJSessionId(jSessionId);
+        if(route.isEmpty()) { //no route found in JSessionId
+            if(isBackendRouteDefined()){ //but backendRoute is defined -> discard cookie
+                writeToInfoLog(new StringBuilder("Route is null but backend defines one: ").append(jSessionId).toString());
+                HttpSession session = httpServletRequest.getSession(false);
+                session.invalidate();
+                discardCookie(jSessionId,httpServletRequest, httpServletResponse);
+            } //else, no backenRoute defined -> continue
+        } else { //route exists
+            if(isRouteInvalid(route)) { //but is invalid
+                writeToInfoLog(new StringBuilder("Route exists but is invalid: ")
+                    .append(jSessionId).append(" vs. ")
+                    .append(backendRoute)
+                    .toString());
+                HttpSession httpSession = httpServletRequest.getSession(false);
+                if(httpSession != null) {
+                    httpSession.invalidate();
+                    writeToDebugLog(new StringBuilder("Invalidated Session: ").append(httpSession.getId()).toString());
+                    httpServletRequest.isRequestedSessionIdValid();
+                    writeToDebugLog(new StringBuilder("Is Session ")
+                    .append(httpSession.getId())
+                    .append(" still valid? ")
+                    .append(httpServletRequest.isRequestedSessionIdValid())
+                    .toString());
+                }
+                discardCookie(jSessionId, httpServletRequest, httpServletResponse);
+            } // else route matches -> continue
+        }
+    }
+    
+    /**
+     * Update the newly set JSessionId Set-Cookie header that was set in the Response.
+     * <p>
+     *   Like shown below the new JSessionId currently gets generated further up the processing chain in the callhierarchy
+     *   so we have to recheck the response when it comes back down the filter chain.
+     * </p>
+     * <pre>
+     *  Response.addCookie(Cookie)
+     *  Request.doGetSession(boolean)
+     *  Request.getSession(boolean)
+     *  HttpServletRequestImpl.getSession(boolean)
+     *  HttpServletRequestImpl.getSession()
+     *  CountingHttpServletRequest.getSession()
+     *  SessionServlet.rememberSession(HttpServletRequest, ServerSession)
+     * </pre>
+     * <p>
+     *   
+     * </p>
+     * This can only be implemented when the ServletContainer supports Servlet 3.*. In the meantime rewrite the JSessionId in a container
+     * specific way
+     * @param httpServletResponse the response to check for JSessionId Headers
+     */
+    private void updateJSessionIdRoute(HttpServletResponse httpServletResponse) {        
+        /*
+         * if(!backendRoute.isEmpty()) {
+         *   if(containsHeader) {
+         *     getHeaders
+         *     BasicHeaderElement.getParameterByName(); appendRoute to JSessionId
+         *     setHeader() //overwrite existing
+         *     addHeader() //add others if multiple Set-Cookie headers existed
+         *   }
+         * }
+         */
+    }
+
+    /**
+     * Checks if the given route is invalid by comparing it to the currently configured backend route
+     * @param route the route to compare
+     * @return false if the routes don't match, true otherwise
+     */
+    private boolean isRouteInvalid(String route) {
+        return !route.equals(getBackendRoute());
+    }
+
+    /**
+     * Checks if a backendRoute is defined for this backend.
+     * @return false if no backendRoute is defined, true otherwise
+     */
+    private boolean isBackendRouteDefined() {
+        return !getBackendRoute().isEmpty();
     }
     
     /**
@@ -187,7 +304,7 @@ public class BackendRouteFilter implements Filter {
      * @return false if the request doesn't contain a JSessionId as url parameter, otherwise true
      */
     private boolean hasJSessionIdAsUrlParam(HttpServletRequest httpServletRequest) {
-        return getJsessionIdParameterValue(httpServletRequest) != null;
+        return !getJsessionIdParameterValue(httpServletRequest).isEmpty();
     }
     
     /**
@@ -205,32 +322,36 @@ public class BackendRouteFilter implements Filter {
         }
         return ids;
     }
+    
+    /**
+     * Get the value of a JSessionId cookie
+     * @param jSessionIdCookie the cookie
+     * @return the value of the cookie
+     */
+    private String getJsessionIdFromCookie(Cookie jSessionIdCookie) {
+        return jSessionIdCookie.getValue();
+    }
 
     /**
-     * Test if the request contains the backendRoute as url parameter in the form of ;jsessionid=.
+     * Get the backendRoute as url parameter in the form of ;jsessionid=.
      * @param request the HttpServletRequest
-     * @return null if the request doesn't contain a route parameter, the value of the parameter otherwise 
+     * @return Empty String if the request doesn't contain a route parameter, the value of the parameter otherwise 
      */
     private String getJsessionIdParameterValue(final HttpServletRequest request) {
-        return request.getParameter(JSESSIONID_URL_PARAMETER);
+        String parameter = request.getParameter(JSESSIONID_URL_PARAMETER);
+        return parameter == null ? "" : parameter;
     }
 
-    /**
-     * Compare a given route against the current route configuration of this server.
-     * @param route The route to validate
-     * @return false if the routes don't match, true otherwise
-     */
-    private boolean isBackendRouteValid(String route) {
-        return route.equals(backendRoute);
-    }
-    
     /**
      * Takes a JSessionId and returns the trailing backend route
      * @param session the JSessionId 
-     * @return null if no route can be found, the route otherwise
+     * @return Empty String if no route can be found, the route otherwise
      */
-    private String getRouteFromSession(String session) {
-        String route = null;
+    private String getRouteFromJSessionId(String session) {
+        if(session == null) {
+            throw new IllegalArgumentException();
+        }
+        String route = "";
         String[] tokens = session.split("\\.");
         if(tokens.length>=2) {
             route = tokens[1];
@@ -238,17 +359,39 @@ public class BackendRouteFilter implements Filter {
         return route;
     }
     
-    private void discardCookie(Cookie cookie, HttpServletResponse response) {
-//        if (DEBUG) {
-//            LOG.debug(new StringBuilder("\n\tDifferent JVM route detected. Removing JSESSIONID cookie: ").append(id));
-//        }
-//        current.setMaxAge(0); // delete
-//        current.setSecure(forceHttps || servletRequest.isSecure());
-//        resp.addCookie(current);
+    /**
+     * Discard a cookie by setting its max age to 0.
+     * A cookie can only be overwritten (or deleted) by a subsequent cookie exactly matching the name, path and domain of the original
+     * cookie.
+     * @param jSessionId the JSessionId value
+     * @param httpServletResponse the response the cookie is added to
+     */
+    private void discardCookie(String jSessionId, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
+        writeToInfoLog(new StringBuilder("Removing JSessionId cookie: ").append(jSessionId).toString());
+        Cookie cookie = new Cookie(JSESSIONID_COOKIE, jSessionId);
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
+        httpServletResponse.addCookie(cookie);
     }
     
-    private boolean isJSessionIdValid(String id) {
-        throw new UnsupportedOperationException("Not yet implemented");
+    /**
+     * Write a String to the info log.
+     * @param logValue the String that should be logged
+     */
+    private static void writeToInfoLog(String logValue) {
+        if(LOG.isInfoEnabled()) {
+            LOG.info(logValue);
+        }
     }
-
+    
+    /**
+     * Write a String to the debug log.
+     * @param logValue the String that should be logged
+     */
+    private static void writeToDebugLog(String logValue) {
+        if(LOG.isDebugEnabled()) {
+            LOG.debug(logValue);
+        }
+    }
+    
 }

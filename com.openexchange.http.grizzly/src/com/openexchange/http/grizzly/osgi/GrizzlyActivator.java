@@ -50,12 +50,8 @@
 package com.openexchange.http.grizzly.osgi;
 
 import java.io.IOException;
-import java.util.Iterator;
 import javax.servlet.ServletException;
 import org.glassfish.grizzly.comet.CometAddOn;
-import org.glassfish.grizzly.filterchain.Filter;
-import org.glassfish.grizzly.filterchain.FilterChain;
-import org.glassfish.grizzly.http.server.HttpHandler;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.grizzly.http.server.NetworkListener;
 import org.glassfish.grizzly.websockets.WebSocketAddOn;
@@ -63,12 +59,10 @@ import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.http.grizzly.Configuration;
 import com.openexchange.http.grizzly.GrizzlyExceptionCode;
-import com.openexchange.http.grizzly.addons.BackendRouteAddOn;
-import com.openexchange.http.grizzly.grizzlyfilters.BackendRouteFilter;
+import com.openexchange.http.grizzly.addons.backendroute.BackendRouteAddOn;
+import com.openexchange.http.grizzly.addons.backendroute.AppendBackendRouteFilter;
 import com.openexchange.http.grizzly.services.http.HttpServiceFactory;
-import com.openexchange.http.grizzly.services.http.OSGiMainHandler;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -92,57 +86,102 @@ public class GrizzlyActivator extends HousekeepingActivator {
         return new Class[] { ConfigurationService.class };
     }
 
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.osgi.HousekeepingActivator#handleAvailability(java.lang.Class)
+     */
+    @Override
+    protected void handleAvailability(Class<?> clazz) {
+        if (LOG.isInfoEnabled()) {
+            LOG.info("Service " + clazz.getName() + " is available again");
+        }
+        Object service = getService(clazz);
+        GrizzlyServiceRegistry.getInstance().addService(clazz, service);
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.osgi.HousekeepingActivator#handleUnavailability(java.lang.Class)
+     */
+    @Override
+    protected void handleUnavailability(Class<?> clazz) {
+        if (LOG.isInfoEnabled()) {
+            LOG.info("Service " + clazz.getName() + " is available again");
+        }
+        GrizzlyServiceRegistry.getInstance().removeService(clazz);
+    }
+
     @Override
     protected void startBundle() throws OXException, ServletException, NamespaceException {
         try {
             if (LOG.isInfoEnabled()) {
                 LOG.info("Starting Grizzly server.");
             }
-            trackService(ConfigurationService.class);
-            openTrackers();
+            
+            GrizzlyServiceRegistry grizzlyServiceRegistry = GrizzlyServiceRegistry.getInstance();
+            
+            /*
+             * initialize the registry, handleUn/Availability keeps track of services.
+             * Otherwise use trackService(ConfigurationService.class) and openTrackers() to let the superclass handle the services.
+             */
+            initializeServiceRegistry(grizzlyServiceRegistry);
 
             // create addons based on given configuration
-            final ConfigurationService configService = getService(ConfigurationService.class);
+            final ConfigurationService configService = grizzlyServiceRegistry.getService(ConfigurationService.class);
             if (configService == null) {
                 throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigurationService.class.getName());
             }
 
-            //read config properties
+            /*
+             *  read config properties
+             */
             final String httpHost = configService.getProperty("com.openexchange.http.grizzly.httpNetworkListenerHost", "0.0.0.0");
             final int httpPort = configService.getIntProperty("com.openexchange.http.grizzly.httpNetworkListenerPort", 8080);
             final boolean hasJMXEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasJMXEnabled", true);
             final boolean hasWebsocketsEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasWebsocketsEnabled", true);
             final boolean hasCometEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasCometEnabled", false);
-            final String backendRoute = configService.getProperty("com.openexchange.http.grizzly.backendRoute", "OX-0");
-            Configuration.backendRoute=backendRoute;
+            final String backendRoute = configService.getProperty("com.openexchange.http.grizzly.backendRoute", "");
+            
 
-
-            // create, configure and start server
+            /*
+             *  create, configure and start server
+             */
             grizzly = new HttpServer();
             final NetworkListener networkListener = new NetworkListener("http-listener", httpHost, 8080);
             
-            if(hasJMXEnabled) {
+            if (hasJMXEnabled) {
                 if (LOG.isInfoEnabled()) {
                     LOG.info("Enabling JMX for Grizzly server.");
                 }
                 grizzly.getServerConfiguration().setJmxEnabled(true);
             }
+            
             if (hasWebsocketsEnabled) {
                 if (LOG.isInfoEnabled()) {
                     LOG.info("Enabling WebSockets for Grizzly server.");
                 }
                 networkListener.registerAddOn(new WebSocketAddOn());
             }
+            
             if (hasCometEnabled) {
                 if (LOG.isInfoEnabled()) {
                     LOG.info("Enabling Comet for Grizzly server.");
                 }
                 networkListener.registerAddOn(new CometAddOn());
             }
+
             if (LOG.isInfoEnabled()) {
-                LOG.info(String.format("Registering Grizzly HttpNetworkListener on host: %s and port: %d", httpHost, Integer.valueOf(httpPort)));
+                LOG.info("Enabling BackendRouteAddon for Grizzly server.");
             }
-            networkListener.registerAddOn(new BackendRouteAddOn(new BackendRouteFilter(backendRoute)));
+            networkListener.registerAddOn(new BackendRouteAddOn(new AppendBackendRouteFilter(backendRoute)));
+            
+            if (LOG.isInfoEnabled()) {
+                LOG.info(String.format(
+                    "Registering Grizzly HttpNetworkListener on host: %s and port: %d",
+                    httpHost,
+                    Integer.valueOf(httpPort)));
+            }
+            
             grizzly.addListener(networkListener);
 
             /*
@@ -150,20 +189,24 @@ public class GrizzlyActivator extends HousekeepingActivator {
              * getService() will get its own instance of HttpServiceImpl
              */
             serviceFactory = new HttpServiceFactory(grizzly, context.getBundle());
-            
-            //TODO: add Filters to context
+
             registerService(HttpService.class.getName(), serviceFactory);
-            
+
             grizzly.start();
         } catch (final IOException e) {
-            throw GrizzlyExceptionCode.SERVER_NOT_STARTED.create(e, new Object[] {});
+            throw GrizzlyExceptionCode.GRIZZLY_SERVER_NOT_STARTED.create(e, new Object[] {});
         }
 
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        super.stopBundle();
+        /*
+         * Clear the registry from the services we are tracking.
+         * Otherwise use super.stopBundle(); if we let the superclass handle the services.
+         */
+        GrizzlyServiceRegistry.getInstance().clearRegistry();
+        
         if (LOG.isInfoEnabled()) {
             LOG.info("Unregistering HttpService");
         }
@@ -173,13 +216,19 @@ public class GrizzlyActivator extends HousekeepingActivator {
         }
         grizzly.stop();
     }
-    
-    private void addRouteFilter(NetworkListener networkListener, BackendRouteFilter routeFilter) {
-        FilterChain filterChain = networkListener.getFilterChain();
-        filterChain.add(routeFilter);
-        Iterator<Filter> filterIterator = filterChain.iterator();
-        while(filterIterator.hasNext()) {
-            LOG.info(filterIterator.next());
+
+    /**
+     * Initialize the package wide service registry with the services we declared as needed.
+     * @param serviceRegistry the registry to fill
+     */
+    private void initializeServiceRegistry(final GrizzlyServiceRegistry serviceRegistry) {
+        serviceRegistry.clearRegistry();
+        Class<?>[] serviceClasses = getNeededServices();
+        for (Class<?> serviceClass : serviceClasses) {
+            Object service = getService(serviceClass);
+            if (service != null) {
+                serviceRegistry.addService(serviceClass, service);
+            }
         }
     }
 
