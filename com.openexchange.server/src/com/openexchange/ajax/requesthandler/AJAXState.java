@@ -49,12 +49,12 @@
 
 package com.openexchange.ajax.requesthandler;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
@@ -78,7 +78,7 @@ public final class AJAXState {
      */
     public AJAXState() {
         super();
-        properties = new HashMap<String, Object>();
+        properties = new ConcurrentHashMap<String, Object>();
         initializers = new HashSet<String>();
         handlers = new LinkedList<AJAXStateHandler>();
     }
