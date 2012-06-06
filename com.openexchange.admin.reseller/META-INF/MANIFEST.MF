@@ -32,3 +32,7 @@ Import-Package: com.openexchange.admin.console,
  org.osgi.framework
 Require-Bundle: com.openexchange.admin.plugin.hosting,
  com.openexchange.admin;bundle-version="6.21.0"
+Export-Package: com.openexchange.admin.reseller.rmi,
+ com.openexchange.admin.reseller.rmi.dataobjects,
+ com.openexchange.admin.reseller.rmi.exceptions,
+ com.openexchange.admin.reseller.rmi.extensions
