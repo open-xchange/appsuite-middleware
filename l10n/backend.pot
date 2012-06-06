@@ -2307,9 +2307,19 @@ msgstr ""
 msgid "An IO error occurred: %1"
 msgstr ""
 
-#. Server could not be started.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.grizzly/src/com/openexchange/http/grizzly/GrizzlyExceptionMessage.java:63
-msgid "Server could not be started"
+#. * The grizzly server could not be started
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.grizzly/src/com/openexchange/http/grizzly/GrizzlyExceptionMessage.java:62
+msgid "The grizzly server could not be started"
+msgstr ""
+
+#. * The following needed service is missing: \"%1$s\"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.grizzly/src/com/openexchange/http/grizzly/GrizzlyExceptionMessage.java:64
+msgid "The following needed service is missing: \"%1$s\""
+msgstr ""
+
+#. * "Maximum number of HTTP sessions (%1$n) exceeded
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.grizzly/src/com/openexchange/http/grizzly/GrizzlyExceptionMessage.java:66
+msgid "The maximum number of HTTP sessions (%1$n) is exceeded."
 msgstr ""
 
 #. Messages //
