@@ -1,6 +1,7 @@
 * 2012-06-06 - martin.herfurth@open-xchange.com
 
- - Fix for bug 22258: Fiexed missing folder-id on invitation accepts.
+ - Fix for bug 22258: Fixed missing folder-id on invitation accepts.
+ - Fix for bug 21691: Initial Alarm on new Appointments.
 
 * 2012-06-06 - thorben.betten@open-xchange.com
 
