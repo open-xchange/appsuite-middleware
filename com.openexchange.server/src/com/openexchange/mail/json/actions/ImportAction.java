@@ -157,7 +157,7 @@ public final class ImportAction extends AbstractMailAction {
              */
             final ServerSession session = mailRequest.getSession();
             final QuotedInternetAddress defaultSendAddr = new QuotedInternetAddress(getDefaultSendAddress(session), true);
-            MailServletInterface mailInterface = getMailInterface(mailRequest);
+            MailServletInterface mailInterface = MailServletInterface.getInstance(session);
             final BlockingQueue<MimeMessage> queue = new ArrayBlockingQueue<MimeMessage>(100);
             Future<Object> future = null;
             {
@@ -239,15 +239,13 @@ public final class ImportAction extends AbstractMailAction {
                         mails.add(mm);
                     }
                     messages.clear();
-                    mailInterface = MailServletInterface.getInstance(session);
-                    try {
+                    mailInterface = getMailInterface(mailRequest);
+                    {
                         final String[] ids = mailInterface.importMessages(folder, mails.toArray(new MailMessage[mails.size()]), force);
                         mails.clear();
                         if (flags > 0) {
                             mailInterface.updateMessageFlags(folder, ids, flags, true);
                         }
-                    } finally {
-                        mailInterface.close(true);
                     }
                     final MailImportResult[] byCaller = mailInterface.getMailImportResults();
                     warnings.addAll(mailInterface.getWarnings());
