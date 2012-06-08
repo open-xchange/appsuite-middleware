@@ -157,7 +157,7 @@ public enum FileStorageExceptionCodes implements OXExceptionCode {
     /**
      * File %1$s not found in folder %2$s.
      */
-    FILE_NOT_FOUND(FileStorageExceptionMessages.FILE_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 26),
+    FILE_NOT_FOUND(FileStorageExceptionMessages.FILE_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 26),
     /**
      * No account manager could be found for service: %1$s.
      */
