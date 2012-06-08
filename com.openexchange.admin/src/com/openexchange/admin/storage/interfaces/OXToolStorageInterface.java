@@ -52,8 +52,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
-import com.openexchange.admin.daemons.ClientAdminThread;
+import com.openexchange.admin.daemons.AdminDaemon;
+import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Group;
@@ -65,6 +65,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
+import com.openexchange.log.LogFactory;
 
 public abstract class OXToolStorageInterface {
 
@@ -80,8 +81,12 @@ public abstract class OXToolStorageInterface {
     protected static PropertyHandler prop = null;
 
     static {
-        cache = ClientAdminThread.cache;
-        prop = cache.getProperties();
+        try {
+            cache = AdminDaemon.getCache();
+            prop = cache.getProperties();
+        } catch (OXGenericException e) {
+            log.warn(e.getMessage(), e);
+        }
     }
 
     /**

@@ -82,7 +82,7 @@ public class AdminDaemon {
 
     private static PropertyHandler prop = null;
 
-    private AdminCache cache = null;
+    private static AdminCache cache = null;
 
     private final List<ServiceRegistration<Remote>> services = new ArrayList<ServiceRegistration<Remote>>();
 
@@ -142,13 +142,21 @@ public class AdminDaemon {
         context.addBundleListener(bl);
     }
 
-    public void initCache() throws OXGenericException {
-        this.cache = new AdminCache();
-
-        this.cache.initCache();
-        ClientAdminThread.cache = this.cache;
-        prop = this.cache.getProperties();
-        LOG.info("Cache and Pools initialized!");
+    public static void initCache() throws OXGenericException {
+        if (cache == null) {
+            cache = new AdminCache();
+            cache.initCache();
+            ClientAdminThread.cache = cache;
+            prop = cache.getProperties();
+            LOG.info("Cache and Pools initialized!");
+        }
+    }
+    
+    public static AdminCache getCache() throws OXGenericException {
+        if (cache == null) {
+            initCache();
+        }
+        return cache;
     }
 
     public void initAccessCombinationsInCache() throws ClassNotFoundException, OXGenericException {

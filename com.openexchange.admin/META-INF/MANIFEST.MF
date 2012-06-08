@@ -9,13 +9,10 @@ Bundle-Activator: com.openexchange.admin.osgi.Activator
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-Vendor: Open-Xchange Inc.
 Import-Package: com.mysql.jdbc,
- com.openexchange.admin.exceptions,
- com.openexchange.admin.plugins,
  com.openexchange.admin.rmi,
  com.openexchange.admin.rmi.dataobjects,
  com.openexchange.admin.rmi.exceptions,
  com.openexchange.admin.rmi.extensions,
- com.openexchange.admin.tools,
  com.openexchange.caching,
  com.openexchange.config.cascade,
  com.openexchange.context,
@@ -67,4 +64,4 @@ Export-Package: com.openexchange.admin.daemons,
  com.openexchange.admin.taskmanagement,
  com.openexchange.admin.tools
 Bundle-ClassPath: .
-Require-Bundle: com.openexchange.admin.rmi;bundle-version="6.21.0"
+Require-Bundle: com.openexchange.admin.rmi

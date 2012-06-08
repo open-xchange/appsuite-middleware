@@ -13,11 +13,6 @@ Import-Package: com.openexchange.admin.console,
  com.openexchange.admin.console.util.filestore,
  com.openexchange.admin.console.util.reason,
  com.openexchange.admin.console.util.server,
- com.openexchange.admin.plugins,
- com.openexchange.admin.rmi,
- com.openexchange.admin.rmi.dataobjects,
- com.openexchange.admin.rmi.exceptions,
- com.openexchange.admin.rmi.extensions,
  com.openexchange.caching,
  com.openexchange.context,
  com.openexchange.database,
@@ -55,4 +50,5 @@ Export-Package: com.openexchange.admin.rmi.impl,
  com.openexchange.admin.storage.interfaces
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: .
-Require-Bundle: com.openexchange.admin;bundle-version="6.21.0"
+Require-Bundle: com.openexchange.admin.rmi,
+ com.openexchange.admin
