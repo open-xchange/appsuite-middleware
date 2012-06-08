@@ -165,7 +165,7 @@ public final class HtmlProcessing {
                 if (DisplayMode.MODIFYABLE.isIncluded(mode) && usm.isDisplayHtmlInlineContent()) {
                     final boolean externalImagesAllowed = usm.isAllowHTMLImages();
                     retval = htmlService.checkBaseTag(retval, externalImagesAllowed);
-                    final String cssPrefix = embedded ? "ox-" + getHash(mailPath.toString()) : null;
+                    final String cssPrefix = null == mailPath ? null : (embedded ? "ox-" + getHash(mailPath.toString()) : null);
                     if (useSanitize()) {
                         // No need to generate well-formed HTML
                         if (externalImagesAllowed) {

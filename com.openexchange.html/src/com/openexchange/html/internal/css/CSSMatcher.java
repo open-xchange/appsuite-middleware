@@ -500,6 +500,9 @@ public final class CSSMatcher {
      * @return <code>true</code> if modified; otherwise <code>false</code>
      */
     private static boolean checkCSSElements(final StringBuilder cssBuilder, final Map<String, Set<String>> styleMap, final boolean removeIfAbsent) {
+        if (null == styleMap) {
+            return false;
+        }
         boolean modified = false;
         correctRGBFunc(cssBuilder);
         /*
@@ -516,48 +519,50 @@ public final class CSSMatcher {
         final StringBuilder elemBuilder = new StringBuilder(128);
         while (m.find()) {
             final String elementName = m.group(1);
-            if (styleMap.containsKey(elementName.toLowerCase(Locale.ENGLISH))) {
-                elemBuilder.append(elementName).append(':').append(' ');
-                final Set<String> allowedValuesSet = styleMap.get(elementName.toLowerCase(Locale.ENGLISH));
-                final String elementValues = m.group(2);
-                boolean hasValues = false;
-                if (matches(elementValues, allowedValuesSet)) {
-                    /*
-                     * Direct match
-                     */
-                    elemBuilder.append(elementValues);
-                    hasValues = true;
-                } else {
-                    final String[] tokens = elementValues.split("\\s+");
-                    for (int j = 0; j < tokens.length; j++) {
-                        if (matches(tokens[j], allowedValuesSet)) {
-                            if (j > 0) {
-                                elemBuilder.append(' ');
+            if (null != elementName) {
+                if (styleMap.containsKey(elementName.toLowerCase(Locale.ENGLISH))) {
+                    elemBuilder.append(elementName).append(':').append(' ');
+                    final Set<String> allowedValuesSet = styleMap.get(elementName.toLowerCase(Locale.ENGLISH));
+                    final String elementValues = m.group(2);
+                    boolean hasValues = false;
+                    if (matches(elementValues, allowedValuesSet)) {
+                        /*
+                         * Direct match
+                         */
+                        elemBuilder.append(elementValues);
+                        hasValues = true;
+                    } else {
+                        final String[] tokens = elementValues.split("\\s+");
+                        for (int j = 0; j < tokens.length; j++) {
+                            if (matches(tokens[j], allowedValuesSet)) {
+                                if (j > 0) {
+                                    elemBuilder.append(' ');
+                                }
+                                elemBuilder.append(tokens[j]);
+                                hasValues = true;
+                            } else {
+                                modified = true;
                             }
-                            elemBuilder.append(tokens[j]);
-                            hasValues = true;
-                        } else {
-                            modified = true;
                         }
                     }
-                }
-                if (hasValues) {
-                    elemBuilder.append(';');
-                    mr.appendLiteralReplacement(cssBuilder, elemBuilder.toString());
-                } else {
+                    if (hasValues) {
+                        elemBuilder.append(';');
+                        mr.appendLiteralReplacement(cssBuilder, elemBuilder.toString());
+                    } else {
+                        /*
+                         * Remove element since none of its values is allowed
+                         */
+                        modified = true;
+                        mr.appendReplacement(cssBuilder, "");
+                    }
+                    elemBuilder.setLength(0);
+                } else if (removeIfAbsent) {
                     /*
-                     * Remove element since none of its values is allowed
+                     * Remove forbidden element
                      */
                     modified = true;
                     mr.appendReplacement(cssBuilder, "");
                 }
-                elemBuilder.setLength(0);
-            } else if (removeIfAbsent) {
-                /*
-                 * Remove forbidden element
-                 */
-                modified = true;
-                mr.appendReplacement(cssBuilder, "");
             }
         }
         mr.appendTail(cssBuilder);
