@@ -85,6 +85,7 @@ public class Activator implements BundleActivator {
         services = new LinkedList<ServiceRegistration<Remote>>();
     }
 
+    @Override
     public void start(final BundleContext context) throws Exception {
         try {
             initCache();
@@ -96,7 +97,7 @@ public class Activator implements BundleActivator {
             final Hashtable<String, String> props = new Hashtable<String, String>();
             props.put("name", "BasicAuthenticator");
             LOG.info(BasicAuthenticatorPluginInterface.class.getName());
-            ServiceRegistration reg = context.registerService(BasicAuthenticatorPluginInterface.class.getName(), new ResellerAuth(), props);
+            ServiceRegistration<?> reg = context.registerService(BasicAuthenticatorPluginInterface.class, new ResellerAuth(), props);
             if (LOG.isDebugEnabled()) {
                 LOG.debug(reg.toString());
                 LOG.debug("Service registered");
@@ -105,7 +106,7 @@ public class Activator implements BundleActivator {
             props.clear();
             props.put("name", "OXContext");
             LOG.info(OXContextPluginInterface.class.getName());
-            reg = context.registerService(OXContextPluginInterface.class.getName(), new OXResellerContextImpl(), props);
+            reg = context.registerService(OXContextPluginInterface.class, new OXResellerContextImpl(), props);
             if (LOG.isDebugEnabled()) {
                 LOG.debug(reg.toString());
                 LOG.debug("Service registered");
@@ -114,7 +115,7 @@ public class Activator implements BundleActivator {
             props.clear();
             props.put("name", "OXUser");
             LOG.info(OXUserPluginInterface.class.getName());
-            reg = context.registerService(OXUserPluginInterface.class.getName(), new OXResellerUserImpl(), props);
+            reg = context.registerService(OXUserPluginInterface.class, new OXResellerUserImpl(), props);
             if (LOG.isDebugEnabled()) {
                 LOG.debug(reg.toString());
                 LOG.debug("Service registered");
@@ -135,6 +136,7 @@ public class Activator implements BundleActivator {
         }
     }
 
+    @Override
     public void stop(final BundleContext context) throws Exception {
         try {
             while (!services.isEmpty()) {
