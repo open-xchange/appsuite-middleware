@@ -49,15 +49,19 @@
 package com.openexchange.loxandra.impl.core;
 
 import java.io.IOException;
-
 import org.apache.cassandra.thrift.CassandraDaemon;
+import org.apache.commons.logging.Log;
+
+import com.openexchange.log.LogFactory;
 
 /**
  * An embedded Cassandra instance for OX.
  * 
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class EmbeddedCassandraService implements Runnable {
+public class EmbeddedCassandraService /*implements Runnable*/ {
+	
+	private static Log log = LogFactory.getLog(EmbeddedCassandraService.class);
 
 	private CassandraDaemon cassandraDaemon;
 	
@@ -65,16 +69,32 @@ public class EmbeddedCassandraService implements Runnable {
 		cassandraDaemon = new CassandraDaemon();
 		try {
 			cassandraDaemon.init(null);
+			System.setProperty("cassandra-foreground", "1");
 		} catch (IOException e) {
 			e.printStackTrace();
+		} catch (Throwable t) {
+			t.printStackTrace();
 		}
 	}
 	
 	/* (non-Javadoc)
 	 * @see java.lang.Runnable#run()
 	 */
-	@Override
+	//@Override
 	public void run() {
 		cassandraDaemon.start();
+	}
+	
+	public void start() {
+		cassandraDaemon.start();
+	}
+	
+	/**
+	 * stop the daemon
+	 */
+	public void stop() {
+		log.info("Deactivating Cassandra Daemon");
+		cassandraDaemon.deactivate();
+		cassandraDaemon = null;
 	}
 }

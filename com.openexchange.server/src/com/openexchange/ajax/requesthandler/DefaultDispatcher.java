@@ -247,19 +247,21 @@ public class DefaultDispatcher implements Dispatcher {
         synchronized (actionFactories) {
             AJAXActionServiceFactory current = actionFactories.putIfAbsent(module, factory);
             if (null != current) {
-                try {
-                    current = actionFactories.get(module);
-                    final CombinedActionFactory combinedFactory;
-                    if (current instanceof CombinedActionFactory) {
-                        combinedFactory = (CombinedActionFactory) current;
-                    } else {
-                        combinedFactory = new CombinedActionFactory();
-                        combinedFactory.add(current);
-                        actionFactories.put(module, combinedFactory);
+                synchronized (actionFactories) {
+                    try {
+                        current = actionFactories.get(module);
+                        final CombinedActionFactory combinedFactory;
+                        if (current instanceof CombinedActionFactory) {
+                            combinedFactory = (CombinedActionFactory) current;
+                        } else {
+                            combinedFactory = new CombinedActionFactory();
+                            combinedFactory.add(current);
+                            actionFactories.put(module, combinedFactory);
+                        }
+                        combinedFactory.add(factory);
+                    } catch (final IllegalArgumentException e) {
+                        LOG.error(e.getMessage());
                     }
-                    combinedFactory.add(factory);
-                } catch (final IllegalArgumentException e) {
-                    LOG.error(e.getMessage());
                 }
             }
         }
@@ -306,7 +308,8 @@ public class DefaultDispatcher implements Dispatcher {
 		return actionMetadata.allowPublicSession();
 	}
 	
-	public boolean mayOmitSession(String module, String action) throws OXException {
+	@Override
+    public boolean mayOmitSession(final String module, final String action) throws OXException {
 		final AJAXActionServiceFactory factory = lookupFactory(module);
         if (factory == null) {
             return false;

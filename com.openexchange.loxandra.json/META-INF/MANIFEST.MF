@@ -2,13 +2,14 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Loxandra Json Bundle
 Bundle-SymbolicName: com.openexchange.loxandra.json
-Bundle-Version: 6.21.0.0
+Bundle-Version: 6.21.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.ajax,
  com.openexchange.ajax.fields,
  com.openexchange.ajax.requesthandler,
  com.openexchange.ajax.requesthandler.osgiservice,
+ com.openexchange.ajax.writer,
  com.openexchange.documentation,
  com.openexchange.documentation.annotations,
  com.openexchange.exception,
@@ -18,6 +19,7 @@ Import-Package: com.openexchange.ajax,
  com.openexchange.osgi,
  com.openexchange.server,
  com.openexchange.session,
+ com.openexchange.tools,
  com.openexchange.tools.session,
  org.json,
  org.osgi.framework

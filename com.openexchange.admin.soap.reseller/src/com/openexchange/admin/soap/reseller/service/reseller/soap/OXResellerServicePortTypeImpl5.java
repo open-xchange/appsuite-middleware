@@ -30,7 +30,7 @@ import javax.xml.ws.ResponseWrapper;
                       serviceName = "OXResellerService",
                       portName = "OXResellerServiceHttpsSoap12Endpoint",
                       targetNamespace = "http://soap.reseller.admin.openexchange.com",
-                      wsdlLocation = "null",
+                      
                       endpointInterface = "com.openexchange.admin.soap.reseller.service.reseller.soap.OXResellerServicePortType")
                       
 public class OXResellerServicePortTypeImpl5 implements OXResellerServicePortType {

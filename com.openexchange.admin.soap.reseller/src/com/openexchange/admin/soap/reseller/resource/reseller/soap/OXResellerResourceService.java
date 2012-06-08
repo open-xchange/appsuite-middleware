@@ -15,7 +15,7 @@ import javax.xml.ws.Service;
  * 
  */
 @WebServiceClient(name = "OXResellerResourceService", 
-                  wsdlLocation = "null",
+                  
                   targetNamespace = "http://soap.reseller.admin.openexchange.com") 
 public class OXResellerResourceService extends Service {
 

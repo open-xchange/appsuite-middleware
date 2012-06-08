@@ -74,8 +74,8 @@ public class NewTest extends AbstractAJAXSession {
 		final EAVContact c = new EAVContact();
 		final UUID folderUUID = new UUID(1,1);
 		c.addFolderUUID(folderUUID);
-		//c.setGivenName(nameGen.getName());
-		//c.setSurName(nameGen.getName());
+		c.setGivenName("foo");
+		c.setSurName("bar");
 		c.setDisplayName(c.getSurName() + ", " + c.getGivenName());
 		
 		final NewActionRequest request = new NewActionRequest(c);

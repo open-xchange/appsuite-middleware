@@ -98,5 +98,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.jcharset"/>
 	<classpathentry kind="src" path="/com.openexchange.loxandra.dto"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.commons.logging_1.1.1.v201101211721.jar"/>
+	<classpathentry kind="src" path="/com.openexchange.loxandra.json"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

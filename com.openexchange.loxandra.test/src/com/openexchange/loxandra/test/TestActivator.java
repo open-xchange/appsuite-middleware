@@ -46,39 +46,31 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.ajax.eavcontact;
+package com.openexchange.loxandra.test;
 
-import java.util.TimeZone;
+import org.apache.commons.logging.Log;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import com.openexchange.ajax.fields.ContactFields;
-import com.openexchange.ajax.writer.CommonWriter;
-import com.openexchange.loxandra.dto.EAVContact;
-import com.openexchange.tools.TimeZoneUtils;
+import com.openexchange.log.LogFactory;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  *
  */
-public class EAVContactWriter extends CommonWriter {
+public class TestActivator extends HousekeepingActivator {
 	
-	private TimeZone utc;
+	private static Log log = LogFactory.getLog(TestActivator.class);
 	
-	/**
-	 * Default Constructor
-	 * @param tz
-	 */
-	public EAVContactWriter(TimeZone tz) {
-		super(tz, null);
-        utc = TimeZoneUtils.getTimeZone("utc");
-	}
-	
-	public void writeContact(final EAVContact c, final JSONObject j) throws JSONException {
-		writeParameter("named:" + ContactFields.FIRST_NAME, c.getGivenName(), j);
-		writeParameter("named:" + ContactFields.LAST_NAME, c.getSurName(), j);
-		writeParameter("named:" + ContactFields.DISPLAY_NAME, c.getDisplayName(), j);
+	public TestActivator() {}
+
+	@Override
+	protected Class<?>[] getNeededServices() {
+		return EMPTY_CLASSES;
 	}
 
+	@Override
+	protected void startBundle() throws Exception {
+		log.info("starting bundle: testactivator");
+		registerService(TestHelloService.class, new TestHelloImpl());
+	}
 }

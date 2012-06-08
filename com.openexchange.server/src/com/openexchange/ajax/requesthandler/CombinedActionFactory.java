@@ -113,7 +113,7 @@ public final class CombinedActionFactory implements AJAXActionServiceFactory {
     private static Set<String> getActionsFrom(final AJAXActionServiceFactory factory) {
         final Module moduleAnnotation = factory.getClass().getAnnotation(Module.class);
         if (null == moduleAnnotation) {
-            throw new IllegalArgumentException("Specified factory has no Module annotation: " + factory.getClass());
+            throw new IllegalArgumentException("Specified factory has no \""+Module.class.getName()+"\" annotation: " + factory.getClass());
         }
         return new HashSet<String>(Arrays.asList(moduleAnnotation.actions()));
     }
