@@ -13,6 +13,7 @@
  - Fix for bug 22274: Fixed possible NPEs
  - Fix for bug 22276: Proper handling of possible NumberFormatException
  - Fix for bug 22281: Setting proper account identifier in MailMessage instance
+ - Fix for bug 22256: Try to resolve request's data to a JSON array
 
 * 2012-06-07 - thorben.betten@open-xchange.com
 
