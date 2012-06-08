@@ -48,8 +48,9 @@ public enum SnappyErrorCode {
 
     public static SnappyErrorCode getErrorCode(int id) {
         for (SnappyErrorCode code : SnappyErrorCode.values()) {
-            if (code.id == id)
+            if (code.id == id) {
                 return code;
+            }
         }
         return UNKNOWN;
     }

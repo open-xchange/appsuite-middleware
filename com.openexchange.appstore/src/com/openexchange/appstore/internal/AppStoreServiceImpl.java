@@ -550,12 +550,13 @@ public class AppStoreServiceImpl implements AppStoreService {
                 Integer contextId = resultSet.getInt("cid");
                 Integer userId = resultSet.getInt("userId");
 
-                if (contextId == 0 && userId == 0)
+                if (contextId == 0 && userId == 0) {
                     target = "all";
-                else if (userId == 0)
+                } else if (userId == 0) {
                     target = "context";
-                else
+                } else {
                     target = "user";
+                }
 
                 ReleaseStatus status = new ReleaseStatus();
                 status.setTarget(target);

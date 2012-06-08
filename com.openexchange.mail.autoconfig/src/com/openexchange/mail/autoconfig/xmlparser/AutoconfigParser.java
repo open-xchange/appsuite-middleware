@@ -246,7 +246,9 @@ public class AutoconfigParser {
      * @throws IOException
      */
     private void ignoreTag(XmlPullParser parser, String name) throws XmlPullParserException, IOException {
-        while (parser.next() != END_TAG || !parser.getName().equalsIgnoreCase(name));
+        while (parser.next() != END_TAG || !parser.getName().equalsIgnoreCase(name)) {
+            ;
+        }
         parser.require(END_TAG, null, name);
     }
 

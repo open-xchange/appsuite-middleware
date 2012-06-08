@@ -123,10 +123,12 @@ public class Snappy
      */
     public static int compress(ByteBuffer uncompressed, ByteBuffer compressed) throws IOException {
 
-        if (!uncompressed.isDirect())
+        if (!uncompressed.isDirect()) {
             throw new SnappyError(SnappyErrorCode.NOT_A_DIRECT_BUFFER, "input is not a direct buffer");
-        if (!compressed.isDirect())
+        }
+        if (!compressed.isDirect()) {
             throw new SnappyError(SnappyErrorCode.NOT_A_DIRECT_BUFFER, "destination is not a direct buffer");
+        }
 
         // input: uncompressed[pos(), limit())
         // output: compressed
@@ -261,8 +263,9 @@ public class Snappy
                 Properties versionData = new Properties();
                 versionData.load(versionFile.openStream());
                 version = versionData.getProperty("version", version);
-                if (version.equals("unknown"))
+                if (version.equals("unknown")) {
                     version = versionData.getProperty("VERSION", version);
+                }
                 version = version.trim().replaceAll("[^0-9\\.]", "");
             }
         }
@@ -279,8 +282,9 @@ public class Snappy
      * usually at least a factor of four faster than actual decompression.
      */
     public static boolean isValidCompressedBuffer(byte[] input, int offset, int length) throws IOException {
-        if (input == null)
+        if (input == null) {
             throw new NullPointerException("input is null");
+        }
         return impl.isValidCompressedBuffer(input, offset, length);
     }
 
@@ -353,8 +357,9 @@ public class Snappy
      */
     public static int rawCompress(Object input, int inputOffset, int inputLength, byte[] output, int outputOffset)
             throws IOException {
-        if (input == null || output == null)
+        if (input == null || output == null) {
             throw new NullPointerException("input or output is null");
+        }
 
         int compressedSize = impl
                 .rawCompress(input, inputOffset, inputLength, output, outputOffset);
@@ -387,8 +392,9 @@ public class Snappy
      */
     public static int rawUncompress(byte[] input, int inputOffset, int inputLength, Object output, int outputOffset)
             throws IOException {
-        if (input == null || output == null)
+        if (input == null || output == null) {
             throw new NullPointerException("input or output is null");
+        }
         return impl.rawUncompress(input, inputOffset, inputLength, output, outputOffset);
     }
 
@@ -451,10 +457,12 @@ public class Snappy
      */
     public static int uncompress(ByteBuffer compressed, ByteBuffer uncompressed) throws IOException {
 
-        if (!compressed.isDirect())
+        if (!compressed.isDirect()) {
             throw new SnappyError(SnappyErrorCode.NOT_A_DIRECT_BUFFER, "input is not a direct buffer");
-        if (!uncompressed.isDirect())
+        }
+        if (!uncompressed.isDirect()) {
             throw new SnappyError(SnappyErrorCode.NOT_A_DIRECT_BUFFER, "destination is not a direct buffer");
+        }
 
         int cPos = compressed.position();
         int cLen = compressed.remaining();
@@ -536,8 +544,9 @@ public class Snappy
      *             {@link SnappyErrorCode#PARSING_ERROR}
      */
     public static int uncompressedLength(byte[] input, int offset, int length) throws IOException {
-        if (input == null)
+        if (input == null) {
             throw new NullPointerException("input is null");
+        }
 
         return impl.uncompressedLength(input, offset, length);
     }
@@ -556,8 +565,9 @@ public class Snappy
      *             when the input is not a direct buffer
      */
     public static int uncompressedLength(ByteBuffer compressed) throws IOException {
-        if (!compressed.isDirect())
+        if (!compressed.isDirect()) {
             throw new SnappyError(SnappyErrorCode.NOT_A_DIRECT_BUFFER, "input is not a direct buffer");
+        }
 
         return impl.uncompressedLength(compressed, compressed.position(), compressed.remaining());
     }

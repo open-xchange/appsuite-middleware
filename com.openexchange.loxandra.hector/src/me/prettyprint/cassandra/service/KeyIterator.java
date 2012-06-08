@@ -104,8 +104,9 @@ public class KeyIterator<K> implements Iterable<K> {
     rowsIterator = (rows != null) ? rows.iterator() : null;
 
     // we'll skip this first one, since it is the same as the last one from previous time we executed
-    if (!firstRun  && rowsIterator != null) 
-      rowsIterator.next();
+    if (!firstRun  && rowsIterator != null) {
+        rowsIterator.next();
+    }
 
     firstRun = false;
 

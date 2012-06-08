@@ -68,8 +68,9 @@ public class SnappyInputStream extends InputStream
     public void close() throws IOException {
         compressed = null;
         uncompressed = null;
-        if (in != null)
+        if (in != null) {
             in.close();
+        }
     }
 
     protected void readHeader() throws IOException {
@@ -77,8 +78,9 @@ public class SnappyInputStream extends InputStream
         int readBytes = 0;
         while (readBytes < header.length) {
             int ret = in.read(header, readBytes, header.length - readBytes);
-            if (ret == -1)
+            if (ret == -1) {
                 break;
+            }
             readBytes += ret;
         }
 
@@ -155,9 +157,9 @@ public class SnappyInputStream extends InputStream
         int writtenBytes = 0;
         for (; writtenBytes < byteLength;) {
             if (uncompressedCursor >= uncompressedLimit) {
-                if (hasNextChunk())
+                if (hasNextChunk()) {
                     continue;
-                else {
+                } else {
                     return writtenBytes == 0 ? -1 : writtenBytes;
                 }
             }
@@ -316,8 +318,9 @@ public class SnappyInputStream extends InputStream
     }
 
     protected boolean hasNextChunk() throws IOException {
-        if (finishedReading)
+        if (finishedReading) {
             return false;
+        }
 
         uncompressedCursor = 0;
         uncompressedLimit = 0;
@@ -339,8 +342,9 @@ public class SnappyInputStream extends InputStream
         readBytes = 0;
         while (readBytes < chunkSize) {
             int ret = in.read(compressed, readBytes, chunkSize - readBytes);
-            if (ret == -1)
+            if (ret == -1) {
                 break;
+            }
             readBytes += ret;
         }
         if (readBytes < chunkSize) {
@@ -380,10 +384,11 @@ public class SnappyInputStream extends InputStream
             return uncompressed[uncompressedCursor++] & 0xFF;
         }
         else {
-            if (hasNextChunk())
+            if (hasNextChunk()) {
                 return read();
-            else
+            } else {
                 return -1;
+            }
         }
     }
 

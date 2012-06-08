@@ -289,7 +289,9 @@ public class SnappyOutputStream extends OutputStream
 
     protected void dump() throws IOException {
         if (cursor <= 0)
+         {
             return; // no need to dump
+        }
 
         // Compress and dump the buffer content
         int compressedSize = Snappy.compress(uncompressed, 0, cursor, compressed, 0);

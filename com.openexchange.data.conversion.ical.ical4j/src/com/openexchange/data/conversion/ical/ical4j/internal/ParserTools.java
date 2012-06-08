@@ -202,8 +202,9 @@ public final class ParserTools {
     	List<String> candidates1 = new LinkedList<String>();
     	if(tzidName.contains(",")){
     		String[] split = tzidName.split(",");
-    		for(String tmp: split)
-    			candidates1.add(tmp.trim());
+    		for(String tmp: split) {
+                candidates1.add(tmp.trim());
+            }
     	} else {
     		candidates1.add(tzidName);
     	}
@@ -231,8 +232,9 @@ public final class ParserTools {
     	int highestNumberOccurrences = 0;
     	for(TimeZone cand: candidates2){
     		int offset = cand.getRawOffset();
-    		if(!occurrences.containsKey(offset))
-    			occurrences.put(offset, 0);
+    		if(!occurrences.containsKey(offset)) {
+                occurrences.put(offset, 0);
+            }
     		int numOccurrences = ((Integer)occurrences.get(offset))+1;
     		occurrences.put(offset, numOccurrences);
     		highestNumberOccurrences = highestNumberOccurrences < numOccurrences ? numOccurrences : highestNumberOccurrences; 

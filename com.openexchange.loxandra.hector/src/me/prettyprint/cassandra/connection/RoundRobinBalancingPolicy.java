@@ -32,8 +32,9 @@ public class RoundRobinBalancingPolicy implements LoadBalancingPolicy {
     if ( excludeHosts != null && excludeHosts.size() > 0 ) {
       while ( excludeHosts.contains(pool.getCassandraHost()) ) {
         pool = getPoolSafely(pools);
-        if ( excludeHosts.size() >= pools.size() )
-          break;
+        if ( excludeHosts.size() >= pools.size() ) {
+            break;
+        }
       }
     }    
     return pool;

@@ -92,8 +92,9 @@ public class OSGiServletContext extends WebappContext {
         }
 
         path = normalize(path);
-        if (path == null)
+        if (path == null) {
             return (null);
+        }
 
         return httpContext.getResource(path);
     }
@@ -105,8 +106,9 @@ public class OSGiServletContext extends WebappContext {
      */
     @Override public InputStream getResourceAsStream(String path) {
         path = normalize(path);
-        if (path == null)
+        if (path == null) {
             return (null);
+        }
 
         try {
             return httpContext.getResource(path).openStream();

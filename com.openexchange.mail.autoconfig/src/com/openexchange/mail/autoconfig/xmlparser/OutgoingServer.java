@@ -68,8 +68,9 @@ public class OutgoingServer extends Server {
         }
 
         public static OutgoingType getOutgoingType(String keyword) {
-            if (keyword.equalsIgnoreCase(Server.SMTP))
+            if (keyword.equalsIgnoreCase(Server.SMTP)) {
                 return SMTP;
+            }
             return null;
         }
 

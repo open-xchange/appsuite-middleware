@@ -85,20 +85,25 @@ public class HKerberosSecuredThriftClientFactoryImpl implements HClientFactory {
     String krbClientPassword = System.getProperty("kerberos.client.password");
     krbServicePrincipalName = System.getProperty("kerberos.service.principal.name");
 
-    if (krbDebug == null)
-      System.setProperty("sun.security.krb5.debug", "false");
+    if (krbDebug == null) {
+        System.setProperty("sun.security.krb5.debug", "false");
+    }
 
-    if (jaasConf == null)
-      System.setProperty("java.security.auth.login.config", JAAS_CONFIG);
+    if (jaasConf == null) {
+        System.setProperty("java.security.auth.login.config", JAAS_CONFIG);
+    }
 
-    if (krb5Conf == null)
-      System.setProperty("java.security.krb5.conf", KRB5_CONFIG);
+    if (krb5Conf == null) {
+        System.setProperty("java.security.krb5.conf", KRB5_CONFIG);
+    }
 
-    if (krbClientReferenceName == null)
-      krbClientReferenceName = "Client";
+    if (krbClientReferenceName == null) {
+        krbClientReferenceName = "Client";
+    }
     
-    if (krbServicePrincipalName == null)
-      krbServicePrincipalName = "cassandra";
+    if (krbServicePrincipalName == null) {
+        krbServicePrincipalName = "cassandra";
+    }
 
     System.setProperty("javax.security.auth.useSubjectCredsOnly", "true");
 
@@ -117,10 +122,11 @@ public class HKerberosSecuredThriftClientFactoryImpl implements HClientFactory {
 
     try {
       // Ticket Granting Ticket (TGT) from the Authentication Server (AS)
-      if (krbClientUsername != null && krbClientPassword != null)
+      if (krbClientUsername != null && krbClientPassword != null) {
         kerberosTicket = KerberosHelper.loginService(krbClientReferenceName, krbClientUsername, krbClientPassword);
-      else
+    } else {
         kerberosTicket = KerberosHelper.loginService(krbClientReferenceName);
+    }
     } catch (LoginException e) {
       throw new RuntimeException(e);
     }

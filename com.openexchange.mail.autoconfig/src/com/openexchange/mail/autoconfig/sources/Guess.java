@@ -118,14 +118,17 @@ public class Guess extends AbstractConfigSource {
 
         for (String login : logins) {
             if (protocol == URIDefaults.IMAP) {
-                if (MailValidator.validateImap(host, secure ? protocol.getSSLPort() : protocol.getPort() , login, password))
+                if (MailValidator.validateImap(host, secure ? protocol.getSSLPort() : protocol.getPort() , login, password)) {
                     return login;
+                }
             } else if (protocol == URIDefaults.POP3) {
-                if (MailValidator.validatePop3(host, secure ? protocol.getSSLPort() : protocol.getPort() , login, password))
+                if (MailValidator.validatePop3(host, secure ? protocol.getSSLPort() : protocol.getPort() , login, password)) {
                     return login;
+                }
             } else if (protocol == URIDefaults.SMTP) {
-                if (MailValidator.validateSmtp(host, secure ? protocol.getSSLPort() : protocol.getPort() , login, password))
+                if (MailValidator.validateSmtp(host, secure ? protocol.getSSLPort() : protocol.getPort() , login, password)) {
                     return login;
+                }
             }
         }
         return null;

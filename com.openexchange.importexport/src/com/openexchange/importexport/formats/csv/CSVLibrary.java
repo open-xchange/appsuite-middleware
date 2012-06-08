@@ -192,21 +192,30 @@ public final class CSVLibrary {
 	private static int lengthOfBOM(char[] buf) {
 		int length = buf.length;
 
-		if(length > 3)
-			if(Character.getNumericValue(buf[0]) < 0 && Character.getNumericValue(buf[1]) < 0 && Character.getNumericValue(buf[2]) < 0 && Character.getNumericValue(buf[3]) < 0){
-				if(Character.getType(buf[0]) == 15 && Character.getType(buf[1]) == 15 && Character.getType(buf[2]) == 28 && Character.getType(buf[3]) == 28)
-					return 4;
-				if(Character.getType(buf[0]) == 28 && Character.getType(buf[1]) == 28 && Character.getType(buf[2]) == 15 && Character.getType(buf[3]) == 15)
-					return 4;
+		if(length > 3) {
+            if(Character.getNumericValue(buf[0]) < 0 && Character.getNumericValue(buf[1]) < 0 && Character.getNumericValue(buf[2]) < 0 && Character.getNumericValue(buf[3]) < 0){
+				if(Character.getType(buf[0]) == 15 && Character.getType(buf[1]) == 15 && Character.getType(buf[2]) == 28 && Character.getType(buf[3]) == 28) {
+                    return 4;
+                }
+				if(Character.getType(buf[0]) == 28 && Character.getType(buf[1]) == 28 && Character.getType(buf[2]) == 15 && Character.getType(buf[3]) == 15) {
+                    return 4;
+                }
 			}
-		if(length > 1)
-			if(Character.getNumericValue(buf[0]) < 0 && Character.getNumericValue(buf[1]) < 0)
-				if(Character.getType(buf[0]) == 28 && Character.getType(buf[1]) == 28)
-					return 2;
-		if(length > 0)
-			if(Character.getNumericValue(buf[0]) < 0)
-				if(Character.getType(buf[0]) == 16)
-					return 1;
+        }
+		if(length > 1) {
+            if(Character.getNumericValue(buf[0]) < 0 && Character.getNumericValue(buf[1]) < 0) {
+                if(Character.getType(buf[0]) == 28 && Character.getType(buf[1]) == 28) {
+                    return 2;
+                }
+            }
+        }
+		if(length > 0) {
+            if(Character.getNumericValue(buf[0]) < 0) {
+                if(Character.getType(buf[0]) == 16) {
+                    return 1;
+                }
+            }
+        }
 
 		return 0;
 	}

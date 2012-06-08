@@ -106,23 +106,28 @@ public Object getObjectInstance(Object object, Name jndiName, Context context,
     cassandraHostConfigurator = new CassandraHostConfigurator((String)hostsRefAddr.getContent());
     if ( autoDiscoverHosts != null ) {
       cassandraHostConfigurator.setAutoDiscoverHosts(Boolean.parseBoolean((String)autoDiscoverHosts.getContent()));
-      if ( runAutoDiscoverAtStartup  != null )
+      if ( runAutoDiscoverAtStartup  != null ) {
         cassandraHostConfigurator.setRunAutoDiscoveryAtStartup(Boolean.parseBoolean((String)autoDiscoverHosts.getContent()));
+    }
     }    
     if ( retryDownedHostDelayInSeconds != null ) {
       int retryDelay = Integer.parseInt((String)retryDownedHostDelayInSeconds.getContent());
       // disable retry if less than 1
-      if ( retryDelay < 1 )
-        cassandraHostConfigurator.setRetryDownedHosts(false);      
+      if ( retryDelay < 1 ) {
+        cassandraHostConfigurator.setRetryDownedHosts(false);
+    }      
       cassandraHostConfigurator.setRetryDownedHostsDelayInSeconds(retryDelay);
     }
-    if ( maxActiveRefAddr != null ) 
-      cassandraHostConfigurator.setMaxActive(Integer.parseInt((String)maxActiveRefAddr.getContent()));
-    if ( maxWaitTimeWhenExhausted != null ) 
-      cassandraHostConfigurator.setMaxWaitTimeWhenExhausted(Integer.parseInt((String)maxWaitTimeWhenExhausted.getContent()));
+    if ( maxActiveRefAddr != null ) {
+        cassandraHostConfigurator.setMaxActive(Integer.parseInt((String)maxActiveRefAddr.getContent()));
+    }
+    if ( maxWaitTimeWhenExhausted != null ) {
+        cassandraHostConfigurator.setMaxWaitTimeWhenExhausted(Integer.parseInt((String)maxWaitTimeWhenExhausted.getContent()));
+    }
     
-    if ( log.isDebugEnabled() )
-      log.debug("JNDI resource created with CassandraHostConfiguration: {}", cassandraHostConfigurator.getAutoDiscoverHosts());
+    if ( log.isDebugEnabled() ) {
+        log.debug("JNDI resource created with CassandraHostConfiguration: {}", cassandraHostConfigurator.getAutoDiscoverHosts());
+    }
     
     cluster = HFactory.getOrCreateCluster((String)clusterNameRef.getContent(), cassandraHostConfigurator);
     keyspace = HFactory.createKeyspace((String)keyspaceNameRef.getContent(), cluster);

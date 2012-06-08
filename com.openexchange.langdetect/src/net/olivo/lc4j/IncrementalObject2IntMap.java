@@ -147,9 +147,13 @@ public class IncrementalObject2IntMap {
 		 */
 		@Override
         public int compare( Object o1, Object o2 ) {
-			if ( IncrementalObject2IntMap.this.m.getInt( o2 ) < IncrementalObject2IntMap.this.m.getInt( o1 ) ) return -1;
-			else if ( IncrementalObject2IntMap.this.m.getInt( o2 ) > IncrementalObject2IntMap.this.m.getInt( o1 ) ) return 1;
-			else return 0;
+			if ( IncrementalObject2IntMap.this.m.getInt( o2 ) < IncrementalObject2IntMap.this.m.getInt( o1 ) ) {
+                return -1;
+            } else if ( IncrementalObject2IntMap.this.m.getInt( o2 ) > IncrementalObject2IntMap.this.m.getInt( o1 ) ) {
+                return 1;
+            } else {
+                return 0;
+            }
 		}
 	}
 }

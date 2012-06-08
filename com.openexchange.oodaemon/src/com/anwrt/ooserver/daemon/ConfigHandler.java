@@ -55,8 +55,9 @@ public class ConfigHandler extends org.xml.sax.helpers.DefaultHandler implements
     public Config readConfiguration(final String filePath) throws FileNotFoundException, SAXException, java.io.IOException {
         Logger.info(Config.CONFIG_TAG + "reading configuration file ... : " + filePath);
         final File in = new File(filePath);
-        if (!in.canRead())
+        if (!in.canRead()) {
             throw new FileNotFoundException(Config.CONFIG_TAG + "cannot get configuration file : " + filePath);
+        }
         _parser.parse(in, this);
 
         Logger.info(Config.CONFIG_TAG + "configuration file OK");
@@ -66,16 +67,16 @@ public class ConfigHandler extends org.xml.sax.helpers.DefaultHandler implements
 
     @Override
     public void startElement(final String uri, final String localName, final String qName, final Attributes attlist) {
-        if (qName.equals("acceptor"))
+        if (qName.equals("acceptor")) {
             _config.acceptor = attlist.getValue((short) 0);
-        else if (qName.equals("admin-acceptor"))
+        } else if (qName.equals("admin-acceptor")) {
             _config.adminAcceptor = attlist.getValue((short) 0);
-        else if (qName.equals("open-office-install-path")) {
+        } else if (qName.equals("open-office-install-path")) {
             final String path = attlist.getValue("path");
             _config.officeProgramDirectoryPath = OSAbstractLayer.concatPaths(path, "program");
-        } else if (qName.equals("user-installation"))
+        } else if (qName.equals("user-installation")) {
             _config.userInstallation.add(attlist.getValue("url"));
-        else if (qName.equals("tolerated-startuptime-per-instance")) {
+        } else if (qName.equals("tolerated-startuptime-per-instance")) {
             final int timeInSeconds = Integer.parseInt(attlist.getValue("value"));
             _config.toleratedStartupTimePerInstance = convertSecondsToMillis(timeInSeconds);
         } else if (qName.equals("usage-count-per-instance")) {

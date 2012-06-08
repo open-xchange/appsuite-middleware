@@ -140,11 +140,13 @@ public class HColumnFamilyImpl<K,N> implements HColumnFamily<K, N> {
 
   @Override
   public Collection<HColumn<N, ByteBuffer>> getColumns() {
-    if ( columns == null )
-      columns = new HashMap<N, HColumn<N,ByteBuffer>>();      
+    if ( columns == null ) {
+        columns = new HashMap<N, HColumn<N,ByteBuffer>>();
+    }      
     
-    if ( !hasValues )
-      doExecuteSlice();
+    if ( !hasValues ) {
+        doExecuteSlice();
+    }
     
     return columns.values();
   }

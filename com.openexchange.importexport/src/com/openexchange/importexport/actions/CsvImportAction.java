@@ -15,8 +15,9 @@ public class CsvImportAction extends AbstractImportAction {
 
 	@Override
 	public Importer getImporter() {
-		if(this.importer == null)
-			this.importer = new CSVContactImporter();
+		if(this.importer == null) {
+            this.importer = new CSVContactImporter();
+        }
 
 		return this.importer;
 	}

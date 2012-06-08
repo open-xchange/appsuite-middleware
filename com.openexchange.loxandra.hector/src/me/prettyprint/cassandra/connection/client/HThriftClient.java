@@ -74,8 +74,9 @@ public Cassandra.Client getCassandra() {
 public Cassandra.Client getCassandra(String keyspaceNameArg) {
     getCassandra();
     if ( keyspaceNameArg != null && !StringUtils.equals(keyspaceName, keyspaceNameArg)) {
-      if ( log.isDebugEnabled() )
+      if ( log.isDebugEnabled() ) {
         log.debug("keyspace reseting from {} to {}", keyspaceName, keyspaceNameArg);
+    }
       try {
         cassandraClient.set_keyspace(keyspaceNameArg);
       } catch (InvalidRequestException ire) {

@@ -106,7 +106,9 @@ public class SnappyLoader
                     .getResourceAsStream(SNAPPY_SYSTEM_PROPERTIES_FILE);
 
             if (is == null)
+             {
                 return; // no configuration file is found 
+            }
 
             // Load property file
             Properties props = new Properties();
@@ -143,8 +145,9 @@ public class SnappyLoader
     private static byte[] getByteCode(String resourcePath) throws IOException {
 
         InputStream in = SnappyLoader.class.getResourceAsStream(resourcePath);
-        if (in == null)
+        if (in == null) {
             throw new IOException(resourcePath + " is not found");
+        }
         byte[] buf = new byte[1024];
         ByteArrayOutputStream byteCodeBuf = new ByteArrayOutputStream();
         for (int readLength; (readLength = in.read(buf)) != -1;) {
@@ -208,8 +211,9 @@ public class SnappyLoader
      */
     static synchronized Object load() {
 
-        if (api != null)
+        if (api != null) {
             return api;
+        }
 
         try {
             if (!hasInjectedNativeLoader()) {
@@ -302,8 +306,9 @@ public class SnappyLoader
      */
     private static void loadNativeLibrary(Class< ? > loaderClass) throws SecurityException, NoSuchMethodException,
             IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-        if (loaderClass == null)
+        if (loaderClass == null) {
             throw new SnappyError(SnappyErrorCode.FAILED_TO_LOAD_NATIVE_LIBRARY, "missing snappy native loader class");
+        }
 
         File nativeLib = findNativeLibrary();
         if (nativeLib != null) {
@@ -411,26 +416,30 @@ public class SnappyLoader
     static File findNativeLibrary() {
 
         boolean useSystemLib = Boolean.parseBoolean(System.getProperty(KEY_SNAPPY_USE_SYSTEMLIB, "false"));
-        if (useSystemLib)
+        if (useSystemLib) {
             return null;
+        }
 
         boolean disabledBundledLibs = Boolean
                 .parseBoolean(System.getProperty(KEY_SNAPPY_DISABLE_BUNDLED_LIBS, "false"));
-        if (disabledBundledLibs)
+        if (disabledBundledLibs) {
             return null;
+        }
 
         // Try to load the library in org.xerial.snappy.lib.path  */
         String snappyNativeLibraryPath = System.getProperty(KEY_SNAPPY_LIB_PATH);
         String snappyNativeLibraryName = System.getProperty(KEY_SNAPPY_LIB_NAME);
 
         // Resolve the library file name with a suffix (e.g., dll, .so, etc.) 
-        if (snappyNativeLibraryName == null)
+        if (snappyNativeLibraryName == null) {
             snappyNativeLibraryName = System.mapLibraryName("snappyjava");
+        }
 
         if (snappyNativeLibraryPath != null) {
             File nativeLib = new File(snappyNativeLibraryPath, snappyNativeLibraryName);
-            if (nativeLib.exists())
+            if (nativeLib.exists()) {
                 return nativeLib;
+            }
         }
 
         {
@@ -461,8 +470,9 @@ public class SnappyLoader
 
         URL versionFile = SnappyLoader.class
                 .getResource("/META-INF/maven/org.xerial.snappy/snappy-java/pom.properties");
-        if (versionFile == null)
+        if (versionFile == null) {
             versionFile = SnappyLoader.class.getResource("/org/xerial/snappy/VERSION");
+        }
 
         String version = "unknown";
         try {
@@ -470,8 +480,9 @@ public class SnappyLoader
                 Properties versionData = new Properties();
                 versionData.load(versionFile.openStream());
                 version = versionData.getProperty("version", version);
-                if (version.equals("unknown"))
+                if (version.equals("unknown")) {
                     version = versionData.getProperty("VERSION", version);
+                }
                 version = version.trim().replaceAll("[^0-9\\.]", "");
             }
         }

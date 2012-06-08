@@ -145,8 +145,9 @@ public class EmbeddedServerHelper {
       for (String dirName : directoryNames)
       {
           File dir = new File(dirName);
-          if (!dir.exists())
-              throw new RuntimeException("No such directory: " + dir.getAbsolutePath());
+          if (!dir.exists()) {
+            throw new RuntimeException("No such directory: " + dir.getAbsolutePath());
+        }
           FileUtils.deleteRecursive(dir);
       }
 
@@ -154,8 +155,9 @@ public class EmbeddedServerHelper {
       for (String dirName : DatabaseDescriptor.getAllDataFileLocations())
       {
           File dir = new File(dirName);
-          if (!dir.exists())
-              throw new RuntimeException("No such directory: " + dir.getAbsolutePath());
+          if (!dir.exists()) {
+            throw new RuntimeException("No such directory: " + dir.getAbsolutePath());
+        }
           FileUtils.deleteRecursive(dir);
       }
   }

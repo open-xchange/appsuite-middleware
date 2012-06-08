@@ -62,8 +62,9 @@ public final class HCounterSuperColumnImpl<SN,N> implements HCounterSuperColumn<
 
   @Override
 public HCounterSuperColumn<SN, N> addSubCounterColumn(HCounterColumn<N> counterColumn) {
-    if ( counterColumns == null )
-      counterColumns = new ArrayList<HCounterColumn<N>>();
+    if ( counterColumns == null ) {
+        counterColumns = new ArrayList<HCounterColumn<N>>();
+    }
     counterColumns.add(counterColumn);
     return this;
   }

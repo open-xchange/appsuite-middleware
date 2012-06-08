@@ -92,10 +92,12 @@ public class HostTimeoutTracker extends BackgroundCassandraHostService {
   @Override
   void shutdown() {
     log.info("Shutting down HostTimeoutTracker");
-    if ( sf != null )
-      sf.cancel(true);
-    if ( executor != null ) 
-      executor.shutdownNow();
+    if ( sf != null ) {
+        sf.cancel(true);
+    }
+    if ( executor != null ) {
+        executor.shutdownNow();
+    }
     log.info("HostTimeTracker shutdown complete.");
   }
 

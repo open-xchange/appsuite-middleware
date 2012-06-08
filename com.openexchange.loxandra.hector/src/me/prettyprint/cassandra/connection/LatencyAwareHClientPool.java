@@ -41,8 +41,9 @@ public class LatencyAwareHClientPool extends ConcurrentHClientPool {
   }
 
   void add(double i) {
-    if (intervalupdates.intValue() >= UPDATES_PER_INTERVAL)
-      return;
+    if (intervalupdates.intValue() >= UPDATES_PER_INTERVAL) {
+        return;
+    }
     if (!latencies.offer(i)) {
       latencies.remove();
       latencies.offer(i);

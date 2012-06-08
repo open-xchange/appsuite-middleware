@@ -134,14 +134,16 @@ public class NodeAutoDiscoverService extends BackgroundCassandraHostService {
     Set<String> dataCenters;
 
     public DataCenterValidator(List<String> dataCenters) {
-      if (dataCenters != null)
+      if (dataCenters != null) {
         this.dataCenters = new HashSet<String>(dataCenters);
+    }
     }
 
     public boolean validate(String dcName) {
       // If the DC is not defined (i.e: single cluster) always returns TRUE.
-      if (dataCenters == null || dcName == null)
+      if (dataCenters == null || dcName == null) {
         return true;
+    }
 
       return dataCenters.contains(dcName);
     }

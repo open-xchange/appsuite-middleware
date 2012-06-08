@@ -24,12 +24,15 @@ public class ContactEMailCompletor {
 		final ContactField[] mailFields = new ContactField[] { ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3 };
 		final Contact fullContact = contactService.getContact(session, Integer.toString(contact.getParentFolderID()), 
 				Integer.toString(contact.getObjectID()), mailFields);
-		if(fullContact.containsEmail1())
-			contact.setEmail1(fullContact.getEmail1());
-		if(fullContact.containsEmail2())
-			contact.setEmail2(fullContact.getEmail2());
-		if(fullContact.containsEmail3())
-			contact.setEmail3(fullContact.getEmail3());
+		if(fullContact.containsEmail1()) {
+            contact.setEmail1(fullContact.getEmail1());
+        }
+		if(fullContact.containsEmail2()) {
+            contact.setEmail2(fullContact.getEmail2());
+        }
+		if(fullContact.containsEmail3()) {
+            contact.setEmail3(fullContact.getEmail3());
+        }
 	}
 
 	protected void completeFromUserData(Contact contact) throws OXException {

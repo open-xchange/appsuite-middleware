@@ -1443,10 +1443,11 @@ public abstract class CalendarObject extends CommonObject {
 		case MONTH:
 			return getMonth();
 		case RECURRENCE_COUNT:
-			if (containsRecurrenceCount())
-				return getRecurrenceCount();
-			else
-				return getOccurrence();
+			if (containsRecurrenceCount()) {
+                return getRecurrenceCount();
+            } else {
+                return getOccurrence();
+            }
 		case DAY_IN_MONTH:
 			return getDayInMonth();
 		case RECURRENCE_TYPE:

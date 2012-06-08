@@ -51,8 +51,9 @@ public final class HSlicePredicate<N> {
   }
   
   public HSlicePredicate<N> addColumnName(N columnName) {
-    if ( columnNames == null )
-      columnNames = new ArrayList<N>();
+    if ( columnNames == null ) {
+        columnNames = new ArrayList<N>();
+    }
     columnNames.add(columnName);
     predicateType = PredicateType.ColumnNames;
     return this;

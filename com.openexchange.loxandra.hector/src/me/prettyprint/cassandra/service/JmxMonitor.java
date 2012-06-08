@@ -95,8 +95,9 @@ public class JmxMonitor {
    */
   private String getContextPath() {
     ClassLoader loader = getClass().getClassLoader();
-    if(loader == null)
-     return null;
+    if(loader == null) {
+        return null;
+    }
     URL url = loader.getResource("/");
     if (url != null) {
       String[] elements = url.toString().split("/");

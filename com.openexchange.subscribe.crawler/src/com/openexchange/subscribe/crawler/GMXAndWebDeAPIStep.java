@@ -220,32 +220,42 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
                 try {
                     JSONObject contactJSON = allContactsJSON.getJSONObject(i);
                     Contact contact = new Contact();
-                    if (contactJSON.has("name"))
+                    if (contactJSON.has("name")) {
                         contact.setSurName(contactJSON.getString("name"));
-                    if (contactJSON.has("firstName"))
+                    }
+                    if (contactJSON.has("firstName")) {
                         contact.setGivenName(contactJSON.getString("firstName"));
-                    if (contactJSON.has("comment"))
+                    }
+                    if (contactJSON.has("comment")) {
                         contact.setNote(contactJSON.getString("comment"));
-                    if (contactJSON.has("position"))
+                    }
+                    if (contactJSON.has("position")) {
                         contact.setPosition(contactJSON.getString("position"));
-                    if (contactJSON.has("shortName"))
+                    }
+                    if (contactJSON.has("shortName")) {
                         contact.setNickname(contactJSON.getString("shortName"));
-                    if (contactJSON.has("title"))
+                    }
+                    if (contactJSON.has("title")) {
                         contact.setTitle(contactJSON.getString("title"));
-                    if (contactJSON.has("company"))
+                    }
+                    if (contactJSON.has("company")) {
                         contact.setCompany(contactJSON.getString("company"));
+                    }
 
                     if (contactJSON.has("birthday")) {
                         JSONObject birthdayJSON = contactJSON.getJSONObject("birthday");
                         String day = "";
                         String month = "";
                         String year = "";
-                        if (birthdayJSON.has("day"))
+                        if (birthdayJSON.has("day")) {
                             day = birthdayJSON.getString("day");
-                        if (birthdayJSON.has("month"))
+                        }
+                        if (birthdayJSON.has("month")) {
                             month = birthdayJSON.getString("month");
-                        if (birthdayJSON.has("day"))
+                        }
+                        if (birthdayJSON.has("day")) {
                             year = birthdayJSON.getString("year");
+                        }
                         Calendar calendar = Calendar.getInstance();
                         if (!day.equals("") && !month.equals("") && !year.equals("")) {
                             calendar.set(Integer.parseInt(year), Integer.parseInt(month) - 1, Integer.parseInt(day));
@@ -264,23 +274,31 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
                                     if (classifier.has("name")) {
                                         String type = classifier.getString("name");
                                         if (type.equals("BUSINESS")) {
-                                            if (addressJSON.has("address"))
+                                            if (addressJSON.has("address")) {
                                                 contact.setStreetBusiness(addressJSON.getString("address"));
-                                            if (addressJSON.has("postcode"))
+                                            }
+                                            if (addressJSON.has("postcode")) {
                                                 contact.setPostalCodeBusiness(addressJSON.getString("postcode"));
-                                            if (addressJSON.has("town"))
+                                            }
+                                            if (addressJSON.has("town")) {
                                                 contact.setCityBusiness(addressJSON.getString("town"));
-                                            if (addressJSON.has("country"))
+                                            }
+                                            if (addressJSON.has("country")) {
                                                 contact.setCountryBusiness(addressJSON.getString("country"));
+                                            }
                                         } else if (type.equals("PRIVATE")) {
-                                            if (addressJSON.has("address"))
+                                            if (addressJSON.has("address")) {
                                                 contact.setStreetHome(addressJSON.getString("address"));
-                                            if (addressJSON.has("postcode"))
+                                            }
+                                            if (addressJSON.has("postcode")) {
                                                 contact.setPostalCodeHome(addressJSON.getString("postcode"));
-                                            if (addressJSON.has("town"))
+                                            }
+                                            if (addressJSON.has("town")) {
                                                 contact.setCityHome(addressJSON.getString("town"));
-                                            if (addressJSON.has("country"))
+                                            }
+                                            if (addressJSON.has("country")) {
                                                 contact.setCountryHome(addressJSON.getString("country"));
+                                            }
                                         }
                                     }
                                 }
@@ -296,11 +314,13 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
                                     if (classifier.has("name")) {
                                         String type = classifier.getString("name");
                                         if (type.equals("BUSINESS")) {
-                                            if (faxJSON.has("number"))
+                                            if (faxJSON.has("number")) {
                                                 contact.setFaxBusiness(faxJSON.getString("number"));
+                                            }
                                         } else if (type.equals("PRIVATE")) {
-                                            if (faxJSON.has("number"))
+                                            if (faxJSON.has("number")) {
                                                 contact.setFaxHome(faxJSON.getString("number"));
+                                            }
                                         }
                                     }
                                 }
@@ -316,11 +336,13 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
                                     if (classifier.has("name")) {
                                         String type = classifier.getString("name");
                                         if (type.equals("BUSINESS")) {
-                                            if (instantMessengerJSON.has("messenger") && instantMessengerJSON.has("messengerAccount"))
+                                            if (instantMessengerJSON.has("messenger") && instantMessengerJSON.has("messengerAccount")) {
                                                 contact.setInstantMessenger1(instantMessengerJSON.getString("messengerAccount") + " (" + instantMessengerJSON.getString("messenger") + ")");
+                                            }
                                         } else if (type.equals("PRIVATE")) {
-                                            if (instantMessengerJSON.has("messenger") && instantMessengerJSON.has("messengerAccount"))
+                                            if (instantMessengerJSON.has("messenger") && instantMessengerJSON.has("messengerAccount")) {
                                                 contact.setInstantMessenger2(instantMessengerJSON.getString("messengerAccount") + " (" + instantMessengerJSON.getString("messenger") + ")");
+                                            }
                                         }
                                     }
                                 }
@@ -336,11 +358,13 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
                                     if (classifier.has("name")) {
                                         String type = classifier.getString("name");
                                         if (type.equals("BUSINESS")) {
-                                            if (mobilePhoneJSON.has("number"))
+                                            if (mobilePhoneJSON.has("number")) {
                                                 contact.setCellularTelephone1(mobilePhoneJSON.getString("number"));
+                                            }
                                         } else if (type.equals("PRIVATE")) {
-                                            if (mobilePhoneJSON.has("number"))
+                                            if (mobilePhoneJSON.has("number")) {
                                                 contact.setCellularTelephone2(mobilePhoneJSON.getString("number"));
+                                            }
                                         }
                                     }
                                 }
@@ -356,11 +380,13 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
                                     if (classifier.has("name")) {
                                         String type = classifier.getString("name");
                                         if (type.equals("BUSINESS")) {
-                                            if (phoneJSON.has("number"))
+                                            if (phoneJSON.has("number")) {
                                                 contact.setTelephoneBusiness1(phoneJSON.getString("number"));
+                                            }
                                         } else if (type.equals("PRIVATE")) {
-                                            if (phoneJSON.has("number"))
+                                            if (phoneJSON.has("number")) {
                                                 contact.setTelephoneHome1(phoneJSON.getString("number"));
+                                            }
                                         }
                                     }
                                 }
@@ -376,11 +402,13 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
                                     if (classifier.has("name")) {
                                         String type = classifier.getString("name");
                                         if (type.equals("BUSINESS")) {
-                                            if (emailJSON.has("address"))
+                                            if (emailJSON.has("address")) {
                                                 contact.setEmail1(emailJSON.getString("address"));
+                                            }
                                         } else if (type.equals("PRIVATE")) {
-                                            if (emailJSON.has("address"))
+                                            if (emailJSON.has("address")) {
                                                 contact.setEmail2(emailJSON.getString("address"));
+                                            }
                                         }
                                     }
                                 }
@@ -396,8 +424,9 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
                                     if (classifier.has("name")) {
                                         String type = classifier.getString("name");
                                         if (type.equals("BUSINESS")) {
-                                            if (urlJSON.has("uri"))
+                                            if (urlJSON.has("uri")) {
                                                 contact.setURL(urlJSON.getString("uri"));
+                                            }
                                         }
                                     }
                                 }

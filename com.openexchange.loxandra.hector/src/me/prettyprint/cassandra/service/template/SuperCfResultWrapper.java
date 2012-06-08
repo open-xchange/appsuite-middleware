@@ -136,8 +136,9 @@ public List<SN> getSuperColumns() {
 
   private <V> V extractType(SN sColumnName, N columnName, Serializer<V> valueSerializer) {
     Map<N, HColumn<N, ByteBuffer>> map = columns.get(sColumnName);
-    if ( map != null && map.get(columnName) != null )
-      return valueSerializer.fromByteBuffer(map.get(columnName).getValue());
+    if ( map != null && map.get(columnName) != null ) {
+        return valueSerializer.fromByteBuffer(map.get(columnName).getValue());
+    }
     return null;
   }
   

@@ -90,8 +90,9 @@ public final class CassandraEAVContactFactoryServiceImpl implements EAVContactFa
 		Properties prop = new Properties();
 		String configUrl = System.getProperty("loxandra.config");
         
-		if (configUrl == null)
+		if (configUrl == null) {
             configUrl = DEFAULT_CONFIGURATION;
+        }
 		
         try {
 			prop.load(new FileInputStream(configUrl));
@@ -111,8 +112,9 @@ public final class CassandraEAVContactFactoryServiceImpl implements EAVContactFa
 	 * KeyspaceNotDefinedException will be thrown if the keyspace does not exist
 	 */
 	public final static Keyspace getKeyspace() {
-		if (cluster == null)
-			cluster = HFactory.getOrCreateCluster("Local Cluster", node);
+		if (cluster == null) {
+            cluster = HFactory.getOrCreateCluster("Local Cluster", node);
+        }
 		
 		KeyspaceDefinition kDef = cluster.describeKeyspace(keyspaceName);
 		

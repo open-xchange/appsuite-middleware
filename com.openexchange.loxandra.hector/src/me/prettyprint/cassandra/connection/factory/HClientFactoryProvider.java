@@ -17,10 +17,11 @@ public class HClientFactoryProvider {
    * @return an implementation of {@link HClientFactory}
    */
   public static HClientFactory createFactory(CassandraHostConfigurator chc) {
-    if (chc.isUseKerberosAuthentication())
-      return new HKerberosSecuredThriftClientFactoryImpl();
-    else 
-      return new HThriftClientFactoryImpl();
+    if (chc.isUseKerberosAuthentication()) {
+        return new HKerberosSecuredThriftClientFactoryImpl();
+    } else {
+        return new HThriftClientFactoryImpl();
+    }
   }
 
 }

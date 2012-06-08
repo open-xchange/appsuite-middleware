@@ -167,10 +167,12 @@ public class EmailContactHalo extends AbstractContactHalo implements HaloContact
 		for (String addr : addresses) {
 			queries.add(new FromTerm(addr));
 		}
-		if (queries.size() == 3)
-			return new ORTerm(new ORTerm(queries.get(0), queries.get(1)), queries.get(2));
-		if (queries.size() == 2)
-			return new ORTerm(queries.get(0), queries.get(1));
+		if (queries.size() == 3) {
+            return new ORTerm(new ORTerm(queries.get(0), queries.get(1)), queries.get(2));
+        }
+		if (queries.size() == 2) {
+            return new ORTerm(queries.get(0), queries.get(1));
+        }
 		return queries.get(0);
 	}
 
@@ -179,10 +181,12 @@ public class EmailContactHalo extends AbstractContactHalo implements HaloContact
 		for (String addr : addresses) {
 			queries.add(new ORTerm(new CcTerm(addr), new ToTerm(addr)));
 		}
-		if (queries.size() == 3)
-			return new ORTerm(new ORTerm(queries.get(0), queries.get(1)), queries.get(2));
-		if (queries.size() == 2)
-			return new ORTerm(queries.get(0), queries.get(1));
+		if (queries.size() == 3) {
+            return new ORTerm(new ORTerm(queries.get(0), queries.get(1)), queries.get(2));
+        }
+		if (queries.size() == 2) {
+            return new ORTerm(queries.get(0), queries.get(1));
+        }
 		return queries.get(0);
 	}
 	

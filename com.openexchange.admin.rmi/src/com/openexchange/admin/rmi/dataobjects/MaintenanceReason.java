@@ -186,27 +186,36 @@ public class MaintenanceReason implements Serializable{
      */
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (!(obj instanceof MaintenanceReason))
+        }
+        if (!(obj instanceof MaintenanceReason)) {
             return false;
+        }
         final MaintenanceReason other = (MaintenanceReason) obj;
         if (id == null) {
-            if (other.id != null)
+            if (other.id != null) {
                 return false;
-        } else if (!id.equals(other.id))
+            }
+        } else if (!id.equals(other.id)) {
             return false;
-        if (idset != other.idset)
+        }
+        if (idset != other.idset) {
             return false;
+        }
         if (text == null) {
-            if (other.text != null)
+            if (other.text != null) {
                 return false;
-        } else if (!text.equals(other.text))
+            }
+        } else if (!text.equals(other.text)) {
             return false;
-        if (textset != other.textset)
+        }
+        if (textset != other.textset) {
             return false;
+        }
         return true;
     }
 }
