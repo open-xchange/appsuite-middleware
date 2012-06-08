@@ -40,7 +40,7 @@ import com.openexchange.admin.soap.reseller.service.soap.dataobjects.SOAPStringM
                       serviceName = "OXResellerService",
                       portName = "OXResellerServiceHttpSoap12Endpoint",
                       targetNamespace = "http://soap.reseller.admin.openexchange.com",
-                      wsdlLocation = "null",
+                      
                       endpointInterface = "com.openexchange.admin.soap.reseller.service.reseller.soap.OXResellerServicePortType")
                       
 public class OXResellerServicePortTypeImpl implements OXResellerServicePortType {
