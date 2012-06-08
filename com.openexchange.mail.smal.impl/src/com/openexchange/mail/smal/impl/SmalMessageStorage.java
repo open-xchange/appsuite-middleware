@@ -99,9 +99,15 @@ import com.openexchange.threadpool.ThreadPools;
  */
 public final class SmalMessageStorage extends AbstractSMALStorage implements IMailMessageStorage, IMailMessageStorageExt, IMailMessageStorageBatch {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SmalMessageStorage.class));
+    /**
+     * The logger constant.
+     */
+    static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SmalMessageStorage.class));
     
-    private static final boolean DEBUG = LOG.isDebugEnabled();
+    /**
+     * Whether DEBUG log level is enabled for this class.
+     */
+    static final boolean DEBUG = LOG.isDebugEnabled();
 
     private static enum MailResultType {
         STORAGE, INDEX;
