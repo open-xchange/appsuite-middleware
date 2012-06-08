@@ -236,14 +236,16 @@ public abstract class AbstractSubscribeService implements SubscribeService {
 
     @Override
     public void migrateSecret(final Session session, final String oldSecret, final String newSecret) throws OXException {
-        final Set<String> passwordFields = getSubscriptionSource().getPasswordFields();
+        final SubscriptionSource subscriptionSource = getSubscriptionSource();
+        final Set<String> passwordFields = subscriptionSource.getPasswordFields();
         if (passwordFields.isEmpty()) {
             return;
         }
         final ServerSession serverSession = ServerSessionAdapter.valueOf(session);
         final List<Subscription> allSubscriptions = STORAGE.getSubscriptionsOfUser(serverSession.getContext(), session.getUserId());
+        final String id = subscriptionSource.getId();
         for (final Subscription subscription : allSubscriptions) {
-            if (subscription.getSource().getId().equals(getSubscriptionSource().getId())) {
+            if (id.equals(getSubscriptionSourceId(subscription))) {
                 final Map<String, Object> configuration = subscription.getConfiguration();
                 final Map<String, Object> update = new HashMap<String, Object>();
                 boolean save = false;
@@ -273,6 +275,14 @@ public abstract class AbstractSubscribeService implements SubscribeService {
         }
     }
 
+    private static String getSubscriptionSourceId(final Subscription subscription) {
+        if (null == subscription) {
+            return null;
+        }
+        final SubscriptionSource source = subscription.getSource();
+        return null == source ? null : source.getId();
+    }
+
     protected void removeWhereConfigMatches(final Context context, final Map<String, Object> query) throws OXException {
         STORAGE.deleteAllSubscriptionsWhereConfigMatches(query, getSubscriptionSource().getId(), context);
     }
@@ -280,41 +290,41 @@ public abstract class AbstractSubscribeService implements SubscribeService {
     
     // Permission Checks
     
-    public void checkCreate(Subscription subscription) throws OXException {
+    public void checkCreate(final Subscription subscription) throws OXException {
     	if (canWrite(subscription)) {
     		return;
     	}
     	throw SubscriptionErrorMessage.PERMISSION_DENIED.create();
     }
-    public void checkUpdate(Subscription subscription) throws OXException {
+    public void checkUpdate(final Subscription subscription) throws OXException {
     	if (subscription.getSession().getUserId() == subscription.getUserId() || isFolderAdmin(subscription)) {
     		return;
     	}
     	throw SubscriptionErrorMessage.PERMISSION_DENIED.create();
     }
     
-    public void checkDelete(Subscription subscription) throws OXException {
+    public void checkDelete(final Subscription subscription) throws OXException {
     	if (subscription.getSession().getUserId() == subscription.getUserId() || isFolderAdmin(subscription)) {
     		return;
     	}
     	throw SubscriptionErrorMessage.PERMISSION_DENIED.create();
     }
     
-    private boolean canWrite(Subscription subscription) throws OXException {
-    	OCLPermission permission = loadFolderPermission(subscription);
+    private boolean canWrite(final Subscription subscription) throws OXException {
+    	final OCLPermission permission = loadFolderPermission(subscription);
     	return permission.isFolderAdmin() || permission.getFolderPermission() >= OCLPermission.ADMIN_PERMISSION ||  ( permission.getFolderPermission() >= OCLPermission.CREATE_OBJECTS_IN_FOLDER && permission.getWritePermission() >= OCLPermission.WRITE_ALL_OBJECTS);
     }
     
-    private boolean isFolderAdmin(Subscription subscription) throws OXException {
-    	OCLPermission permission = loadFolderPermission(subscription);
+    private boolean isFolderAdmin(final Subscription subscription) throws OXException {
+    	final OCLPermission permission = loadFolderPermission(subscription);
     	return  permission.isFolderAdmin() || permission.getFolderPermission() >= OCLPermission.ADMIN_PERMISSION;
     }
     
-    private OCLPermission loadFolderPermission(Subscription subscription) throws OXException {
-        int folderId = Integer.valueOf(subscription.getFolderId());
-        int userId = subscription.getSession().getUserId();
-        Context ctx = subscription.getContext();
-        UserConfiguration userConfig = USER_CONFIGS.getUserConfiguration(userId, ctx);
+    private OCLPermission loadFolderPermission(final Subscription subscription) throws OXException {
+        final int folderId = Integer.valueOf(subscription.getFolderId());
+        final int userId = subscription.getSession().getUserId();
+        final Context ctx = subscription.getContext();
+        final UserConfiguration userConfig = USER_CONFIGS.getUserConfiguration(userId, ctx);
         
         
         return new OXFolderAccess(ctx).getFolderPermission(folderId, userId, userConfig);
