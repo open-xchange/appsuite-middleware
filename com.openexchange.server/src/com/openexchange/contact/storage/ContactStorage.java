@@ -55,6 +55,7 @@ import com.openexchange.contact.SortOptions;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.tools.iterator.SearchIterator;
 
@@ -207,6 +208,29 @@ public interface ContactStorage {
      * @throws OXException
      */
     <O> SearchIterator<Contact> search(int contextID, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException;
+    
+    /**
+     * Searches for contacts.
+     * 
+     * @param contextID the context ID
+     * @param contactSearch the contact search object
+     * @param fields the contact fields that should be retrieved
+     * @return the contacts found with the search
+     * @throws OXException
+     */
+    <O> SearchIterator<Contact> search(int contextID, ContactSearchObject contactSearch, ContactField[] fields) throws OXException;
+
+    /**
+     * Searches for contacts.
+     * 
+     * @param contextID the context ID
+     * @param contactSearch the contact search object
+     * @param fields the contact fields that should be retrieved
+     * @param sortOptions the options to sort the results 
+     * @return the contacts found with the search
+     * @throws OXException
+     */
+    <O> SearchIterator<Contact> search(int contextID, ContactSearchObject contactSearch, ContactField[] fields, SortOptions sortOptions) throws OXException;
     
     /**
      * Creates a new contact in a folder.

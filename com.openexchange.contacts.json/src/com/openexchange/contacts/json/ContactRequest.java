@@ -202,14 +202,13 @@ public class ContactRequest {
      * Gets a search term from the json array named 'filter in the request. 
      * @return the search term
      * @throws OXException
-     * @throws JSONException
      */
-    public SearchTerm<?> getSearchFilter() throws OXException, JSONException {
-		final JSONArray filterContent = getJSONData().getJSONArray("filter");
-		if (null == filterContent) {
+    public SearchTerm<?> getSearchFilter() throws OXException {
+    	JSONArray jsonArray = this.getJSONData().optJSONArray("filter");
+		if (null == jsonArray) {
 			throw OXJSONExceptionCodes.MISSING_FIELD.create("filter");
-		}		
-	    return SearchTermParser.parse(filterContent);
+		}
+	    return SearchTermParser.parse(jsonArray);
     }
 
     /**
@@ -243,16 +242,17 @@ public class ContactRequest {
     /**
      * Gets the request's data as JSON object.
      * 
-     * @return the json object
+     * @return the JSON object
      * @throws OXException
-     * @throws JSONException
      */
-    public JSONObject getJSONData() throws OXException, JSONException {
-    	final JSONObject jsonData = (JSONObject)request.getData();
-    	if (null == jsonData) {
+    public JSONObject getJSONData() throws OXException {
+    	Object data = request.getData();
+    	if (null == data) {
             throw OXJSONExceptionCodes.MISSING_FIELD.create("data");
-    	}
-    	return jsonData;
+    	} else if (false == JSONObject.class.isInstance(data)) {
+    		throw OXJSONExceptionCodes.INVALID_VALUE.create("data", data.toString());
+    	} 
+    	return (JSONObject)data;
     }
 
     /**
@@ -260,10 +260,9 @@ public class ContactRequest {
      * 
      * @return the folder ID
      * @throws OXException
-     * @throws JSONException
      */
-    public String getFolderIDFromData() throws OXException, JSONException {
-    	final String folderID = getJSONData().getString("folder_id");
+    public String getFolderIDFromData() throws OXException {
+    	String folderID = this.getJSONData().optString("folder_id");
     	if (null == folderID || 0 == folderID.length()) {
     		throw OXJSONExceptionCodes.MISSING_FIELD.create("folder_id");
     	}

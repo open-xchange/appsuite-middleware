@@ -54,15 +54,16 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.fields.SearchFields;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contacts.json.ContactRequest;
-import com.openexchange.contacts.json.search.SearchTermParser;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
@@ -71,7 +72,6 @@ import com.openexchange.groupware.contact.ContactSearchMultiplexer;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.search.Order;
-import com.openexchange.search.SearchTerm;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
@@ -143,30 +143,33 @@ public class SearchAction extends ContactAction {
     }
 
     @Override
-    protected AJAXRequestResult perform2(final ContactRequest request) throws OXException, JSONException {
-    	final JSONObject jsonObject = request.getJSONData();
-        final SearchTerm<?> searchTerm = new SearchTermParser(jsonObject).getSearchTerm(); 
-        final List<Contact> contacts = new ArrayList<Contact>();
+    protected AJAXRequestResult perform2(final ContactRequest request) throws OXException {
+    	JSONObject jsonObject = request.getJSONData();
+    	    	
+        ContactSearchObject contactSearch = createContactSearchObject(jsonObject);
+//        SearchTerm<?> searchTerm = new SearchTermParser(jsonObject).getSearchTerm();
+        
+        List<Contact> contacts = new ArrayList<Contact>();
         Date lastModified = new Date(0);
         SearchIterator<Contact> searchIterator = null;
         try {
-            searchIterator = getContactService().searchContacts(request.getSession(), searchTerm, request.getFields(), 
+            searchIterator = getContactService().searchContacts(request.getSession(), contactSearch, request.getFields(), 
             		request.getSortOptions());
+//            searchIterator = getContactService().searchContacts(request.getSession(), searchTerm, request.getFields(), 
+//            		request.getSortOptions());
             while (searchIterator.hasNext()) {
-                final Contact contact = searchIterator.next();
+                Contact contact = searchIterator.next();
                 lastModified = getLatestModified(lastModified, contact);
                 contacts.add(contact);
             }
         } finally {
-        	if (null != searchIterator) {
-        		searchIterator.close();
-        	}
+        	close(searchIterator);
         }
         request.sortInternalIfNeeded(contacts);
         return new AJAXRequestResult(contacts, lastModified, "contact");
     }
 
-    private ContactSearchObject createContactSearchObject(final JSONObject json) throws OXException {
+    private static ContactSearchObject createContactSearchObject(JSONObject json) throws OXException {
         ContactSearchObject searchObject = null;
         try {
             searchObject = new ContactSearchObject();

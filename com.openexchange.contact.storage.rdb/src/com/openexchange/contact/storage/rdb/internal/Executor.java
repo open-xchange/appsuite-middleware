@@ -67,10 +67,14 @@ import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.SortOrder;
 import com.openexchange.contact.storage.rdb.fields.DistListMemberField;
 import com.openexchange.contact.storage.rdb.mapping.Mappers;
+import com.openexchange.contact.storage.rdb.search.ContactSearchAdapter;
+import com.openexchange.contact.storage.rdb.search.SearchAdapter;
+import com.openexchange.contact.storage.rdb.search.SearchTermAdapter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.l10n.SuperCollator;
 import com.openexchange.log.LogFactory;
@@ -199,7 +203,7 @@ public class Executor {
         /*
          * construct query string
          */
-        SearchTermAdapter adapter = null != term ? new SearchTermAdapter(term, getCharset(sortOptions)) : null;
+    	SearchTermAdapter adapter = null != term ? new SearchTermAdapter(term, getCharset(sortOptions)) : null;
         StringBuilder stringBuilder = new StringBuilder();
 //      stringBuilder.append("SELECT ").append(Mappers.CONTACT.getColumns(fields)).append(" FROM ").append(table).append(" USE INDEX (cid) WHERE ")
 //      stringBuilder.append("SELECT SQL_NO_CACHE ").append(Mappers.CONTACT.getColumns(fields)).append(" FROM ").append(table).append(" WHERE ")
@@ -248,6 +252,44 @@ public class Executor {
             if (null != adapter) {
             	adapter.setParameters(stmt, parameterIndex);            	
             }
+            /*
+             * execute and read out results
+             */
+            resultSet = logExecuteQuery(stmt);
+            while (resultSet.next()) {
+                contacts.add(Mappers.CONTACT.fromResultSet(resultSet, fields));
+            }
+            return contacts; 
+        } finally {
+            closeSQLStuff(resultSet, stmt);
+        }
+    }
+
+    public List<Contact> select(Connection connection, Table table, int contextID, ContactSearchObject contactSearch, 
+    		ContactField[] fields, SortOptions sortOptions) throws SQLException, OXException {
+        /*
+         * construct query string
+         */
+        SearchAdapter adapter = new ContactSearchAdapter(contactSearch, contextID, fields, getCharset(sortOptions));
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(adapter.getClause());
+        if (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions)) {
+        	stringBuilder.append(' ').append(getOrderClause(sortOptions));
+        	if (0 < sortOptions.getLimit()) {
+            	stringBuilder.append(' ').append(getLimitClause(sortOptions));
+        	}
+        }
+        stringBuilder.append(';');
+        /*
+         * prepare statement
+         */
+        PreparedStatement stmt = null;
+        int parameterIndex = 1;
+        ResultSet resultSet = null;
+        List<Contact> contacts = new ArrayList<Contact>();
+        try {
+            stmt = connection.prepareStatement(stringBuilder.toString());
+           	adapter.setParameters(stmt, parameterIndex);            	
             /*
              * execute and read out results
              */

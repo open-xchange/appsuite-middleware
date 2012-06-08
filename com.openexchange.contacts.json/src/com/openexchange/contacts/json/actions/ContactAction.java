@@ -54,8 +54,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
-import org.json.JSONException;
-
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -66,7 +64,7 @@ import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.server.ServiceExceptionCodes;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.OXJSONExceptionCodes;
+import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -93,18 +91,13 @@ public abstract class ContactAction implements AJAXActionService {
     @Override
     public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
         final ContactRequest contactRequest = new ContactRequest(requestData, session);
-
-		//return perform(contactRequest);
-        try {
-			return perform2(contactRequest);
-		} catch (final JSONException e) {
-			throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e);
-		}
+//		AJAXRequestResult perform = perform(contactRequest);
+		return perform2(contactRequest);
     }
 
     protected abstract AJAXRequestResult perform(ContactRequest req) throws OXException;
 
-    protected abstract AJAXRequestResult perform2(ContactRequest req) throws OXException, JSONException;
+    protected abstract AJAXRequestResult perform2(ContactRequest req) throws OXException;
 
     protected ContactInterfaceDiscoveryService getContactInterfaceDiscoveryService() throws OXException {
         try {
@@ -151,5 +144,11 @@ public abstract class ContactAction implements AJAXActionService {
         calendar.add(Calendar.MILLISECOND, offset);
 
         return calendar.getTime();
+    }
+    
+    protected static <T> void close(SearchIterator<T> searchIterator) throws OXException {
+    	if (null != searchIterator) {
+			searchIterator.close();
+    	}
     }
 }

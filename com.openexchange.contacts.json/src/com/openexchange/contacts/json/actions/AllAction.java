@@ -54,8 +54,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
-import org.json.JSONException;
-
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.documentation.RequestMethod;
@@ -142,8 +140,8 @@ public class AllAction extends ContactAction {
     }
     
     @Override
-    protected AJAXRequestResult perform2(final ContactRequest request) throws OXException, JSONException {
-        final List<Contact> contacts = new ArrayList<Contact>();
+    protected AJAXRequestResult perform2(final ContactRequest request) throws OXException {
+        List<Contact> contacts = new ArrayList<Contact>();
         Date lastModified = new Date(0);
         SearchIterator<Contact> searchIterator = null;
         boolean excludeAdmin = request.isExcludeAdmin();
@@ -152,7 +150,7 @@ public class AllAction extends ContactAction {
             searchIterator = getContactService().getAllContacts(request.getSession(), request.getFolderID(), 
             		excludeAdmin ? request.getFields(ContactField.INTERNAL_USERID) : request.getFields(), request.getSortOptions());
             while (searchIterator.hasNext()) {
-                final Contact contact = searchIterator.next();
+                Contact contact = searchIterator.next();
                 if (excludeAdmin && contact.getInternalUserId() == adminID) {
                 	continue;
                 }
@@ -160,9 +158,7 @@ public class AllAction extends ContactAction {
                 contacts.add(contact);
             }
         } finally {
-        	if (null != searchIterator) {
-        		searchIterator.close();
-        	}
+        	close(searchIterator);
         }
         request.sortInternalIfNeeded(contacts);
         return new AJAXRequestResult(contacts, lastModified, "contact");

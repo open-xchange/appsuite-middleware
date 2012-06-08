@@ -56,5 +56,4 @@ Import-Package: com.openexchange.ajax.fields,
  org.apache.commons.logging,
  org.json,
  org.osgi.framework
-Export-Package: com.openexchange.contacts.json.mapping,
- com.openexchange.contacts.json.search
+Export-Package: com.openexchange.contacts.json.mapping

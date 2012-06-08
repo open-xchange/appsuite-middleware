@@ -47,15 +47,13 @@
  *
  */
 
-package com.openexchange.contact.storage.rdb.internal;
+package com.openexchange.contact.storage.rdb.search;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 
+import com.openexchange.contact.storage.rdb.internal.Tools;
 import com.openexchange.contact.storage.rdb.mapping.Mappers;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -73,56 +71,38 @@ import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.tools.StringCollection;
 
 /**
- * {@link SearchTermAdapter} - Helps constructing the database statement for a search term.
+ * {@link SearchAdapter} - Helps constructing the database statement for a 
+ * search term.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class SearchTermAdapter {
+public class SearchTermAdapter extends DefaultSearchAdapter {
+	
+	private StringBuilder stringBuilder;
 	
 	/**
-	 * Pattern to check whether a string contains SQL wildcards or not
-	 */
-	private static final Pattern WILDCARD_PATTERN = Pattern.compile("((^|[^\\\\])%)|((^|[^\\\\])_)");
-	
-	private final StringBuilder stringBuilder;
-	private final List<Object> parameters;
-	private final String charset;
-	
-	/**
-	 * Initializes a new {@link SearchTermAdapter}.
+	 * Initializes a new {@link SearchAdapter}.
 	 * 
 	 * @param term
 	 * @param charset
 	 * @throws OXException
 	 */
-	public SearchTermAdapter(final SearchTerm<?> term, final String charset) throws OXException {
-		super();
+	public SearchTermAdapter(SearchTerm<?> term, String charset) throws OXException {
+		super(charset);
 		this.stringBuilder = new StringBuilder();
-		this.parameters = new ArrayList<Object>();
-		this.charset = charset;
 		this.append(term);
 	}
     
 	/**
-	 * Initializes a new {@link SearchTermAdapter}.
+	 * Initializes a new {@link SearchAdapter}.
 	 * 
 	 * @param term
 	 * @throws OXException
 	 */
-	public SearchTermAdapter(final SearchTerm<?> term) throws OXException {
+	public SearchTermAdapter(SearchTerm<?> term) throws OXException {
 		this(term, null);
 	}
     
-	/**
-	 * Gets the parameter values that were detected in the search term during 
-	 * parsing to be included in the database statement in the correct order.
-	 *  
-	 * @return the parameters
-	 */
-	public Object[] getParameters() {
-		return this.parameters.toArray(new Object[parameters.size()]);
-	}
-	
 	/**
 	 * Gets the constructed <code>WHERE</code>-clause for the search term to be
 	 * used in the database statement, without the leading <code>WHERE</code>.  
@@ -136,20 +116,6 @@ public class SearchTermAdapter {
 		} else {
 			return "TRUE";
 		}
-	}
-	
-	/**
-	 * Sets the detected database parameters in the supplied prepared statement,
-	 * beginning at the specified parameter index.
-	 * 
-	 * @param stmt the statement to set the parameters for
-	 * @param parameterIndex the start index to set the parameters
-	 * @throws SQLException
-	 */
-	public void setParameters(final PreparedStatement stmt, int parameterIndex) throws SQLException {
-		for (final Object parameter : parameters) {
-			stmt.setObject(parameterIndex++, parameter);
-		}		
 	}
 	
 	private void append(final SearchTerm<?> term) throws OXException {
@@ -256,11 +222,11 @@ public class SearchTermAdapter {
 			}
 			if (String.class.isInstance(constantValue)) {
 				String preparedPattern = StringCollection.prepareForSearch((String)constantValue, false, true);
-				if (WILDCARD_PATTERN.matcher(preparedPattern).find()) {
+				if (containsWildcards(preparedPattern)) {
 					return false; // no wildcards
 				}
 			}
-			constantValues.add(constantValue);						
+			constantValues.add(constantValue);
 		}
 		if (null == commonColumnValue || 2 > constantValues.size()) {
 			return false;
@@ -268,12 +234,13 @@ public class SearchTermAdapter {
 		/*
 		 * all checks passed, build IN clause
 		 */
-		int sqlType = this.appendColumnOperand(commonColumnValue);
+		DbMapping<? extends Object, Contact> dbMapping = getMapping(commonColumnValue);
+		this.appendColumnOperand(dbMapping);
 		this.stringBuilder.append(" IN (");
-		this.appendConstantOperand(constantValues.get(0), sqlType);
+		this.appendConstantOperand(constantValues.get(0), dbMapping.getSqlType());
 		for (int i = 1; i < constantValues.size(); i++) {
 			this.stringBuilder.append(',');
-			this.appendConstantOperand(constantValues.get(i), sqlType);
+			this.appendConstantOperand(constantValues.get(i), dbMapping.getSqlType());
 		}
 		this.stringBuilder.append(") ");
 		return true; 
@@ -303,7 +270,7 @@ public class SearchTermAdapter {
 				parameters.add(Tools.parse((String)value));
 			} else {
 				String preparedPattern = StringCollection.prepareForSearch((String)value, false, true);
-				if (WILDCARD_PATTERN.matcher(preparedPattern).find()) {
+				if (containsWildcards(preparedPattern)) {
 					// use "LIKE" search 
 					final int index = stringBuilder.lastIndexOf("=");
 					stringBuilder.replace(index, index + 1, "LIKE");		
@@ -323,20 +290,31 @@ public class SearchTermAdapter {
 	 * @return the sql type of the column
 	 * @throws OXException
 	 */
-	private int appendColumnOperand(Object value) throws OXException {
+	private void appendColumnOperand(Object value) throws OXException {
 		DbMapping<? extends Object, Contact> dbMapping = getMapping(value);
 		if (null == dbMapping) {
 			throw new IllegalArgumentException("unable to determine database mapping for column operand value: " + value);
 		}
+		if (null != this.charset && isTextColumn(dbMapping)) {
+			stringBuilder.append("CONVERT(").append(dbMapping.getColumnLabel()).append(" USING ").append(this.charset).append(')');
+		} else {
+			stringBuilder.append(dbMapping.getColumnLabel());
+		}
+	}
+	
+	private void appendColumnOperand(DbMapping<? extends Object, Contact> dbMapping) throws OXException {
 		if (null != this.charset && Types.VARCHAR == dbMapping.getSqlType()) {
 			stringBuilder.append("CONVERT(").append(dbMapping.getColumnLabel()).append(" USING ").append(this.charset).append(')');
 		} else {
 			stringBuilder.append(dbMapping.getColumnLabel());
 		}
-		return dbMapping.getSqlType();
 	}
 	
 	private static DbMapping<? extends Object, Contact> getMapping(Object value) throws OXException {
+		return Mappers.CONTACT.get(getField(value));
+	}
+
+	private static ContactField getField(Object value) throws OXException {
 		ContactField field = null;
 		if (ContactField.class.isInstance(value)) {
 			field = (ContactField)value;
@@ -351,7 +329,7 @@ public class SearchTermAdapter {
 		if (null == field) {
 			throw new IllegalArgumentException("unable to determine contact field for column operand value: " + value);
 		}
-		return Mappers.CONTACT.get(field);
+		return field;
 	}
 
 }

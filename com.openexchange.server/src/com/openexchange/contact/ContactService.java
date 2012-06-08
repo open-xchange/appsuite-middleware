@@ -54,6 +54,7 @@ import java.util.Date;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -306,6 +307,50 @@ public interface ContactService {
     <O> SearchIterator<Contact> searchContacts(Session session, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException;
     
     /**
+     * Searches for contacts.
+     * 
+     * @param session the session
+     * @param contactSearch the contact search object
+     * @return the contacts found with the search
+     * @throws OXException
+     */
+    SearchIterator<Contact> searchContacts(Session session, ContactSearchObject contactSearch) throws OXException;
+
+    /**
+     * Searches for contacts.
+     * 
+     * @param session the session
+     * @param contactSearch the contact search object
+     * @param sortOptions the options to sort the results 
+     * @return the contacts found with the search
+     * @throws OXException
+     */
+    SearchIterator<Contact> searchContacts(Session session, ContactSearchObject contactSearch, SortOptions sortOptions) throws OXException;
+
+    /**
+     * Searches for contacts.
+     * 
+     * @param session the session
+     * @param contactSearch the contact search object
+     * @param fields the contact fields that should be retrieved
+     * @return the contacts found with the search
+     * @throws OXException
+     */
+    SearchIterator<Contact> searchContacts(Session session, ContactSearchObject contactSearch, ContactField[] fields) throws OXException;
+
+    /**
+     * Searches for contacts.
+     * 
+     * @param session the session
+     * @param contactSearch the contact search object
+     * @param fields the contact fields that should be retrieved
+     * @param sortOptions the options to sort the results 
+     * @return the contacts found with the search
+     * @throws OXException
+     */
+    SearchIterator<Contact> searchContacts(Session session, ContactSearchObject contactSearch, ContactField[] fields, SortOptions sortOptions) throws OXException;
+    
+    /**
      * Creates a new contact in a folder.
      * 
      * @param session the session
@@ -431,4 +476,18 @@ public interface ContactService {
      * @throws OXException
      */
 	<O> SearchIterator<Contact> searchUsers(Session session, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException;
+	
+	
+    /**
+     * Searches for users.
+     * 
+     * @param session the session
+     * @param contactSearch the contact search object
+     * @param fields the contact fields that should be retrieved
+     * @param sortOptions the options to sort the results 
+     * @return the user contacts found with the search
+     * @throws OXException
+     */
+    SearchIterator<Contact> searchUsers(Session session, ContactSearchObject contactSearch, ContactField[] fields, SortOptions sortOptions) throws OXException;
+
 }

@@ -74,7 +74,6 @@ import com.openexchange.contact.ContactService;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.SortOrder;
 import com.openexchange.contacts.json.mapping.ContactMapper;
-import com.openexchange.contacts.json.search.SearchTermParser;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.Type;
 import com.openexchange.documentation.annotations.Action;
@@ -87,7 +86,6 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.search.Order;
-import com.openexchange.search.SearchTerm;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
@@ -147,15 +145,52 @@ public final class SearchAction extends AbstractUserAction {
         final int orderBy = parseIntParameter(AJAXServlet.PARAMETER_SORT, request);
         final Order order = OrderFields.parse(request.getParameter(AJAXServlet.PARAMETER_ORDER));
         final String collation = request.getParameter(AJAXServlet.PARAMETER_COLLATION);
+        final JSONObject jData = (JSONObject) request.getData();
         /*
-         * Parse search term 
+         * Contact search object
          */
-        SearchTerm<?> term;
-		try {
-			term = new SearchTermParser((JSONObject)request.getData()).getSearchTerm();
-		} catch (JSONException e) {
-			throw AjaxExceptionCodes.JSON_ERROR.create( e, e.getMessage());
-		}
+        ContactSearchObject contactSearch = new ContactSearchObject();
+        contactSearch.addFolder(Constants.USER_ADDRESS_BOOK_FOLDER_ID);
+        try {
+	        if (jData.has(SearchFields.PATTERN)) {
+	            contactSearch.setPattern(parseString(jData, SearchFields.PATTERN));
+	        }
+	        if (jData.has("startletter")) {
+	            contactSearch.setStartLetter(parseBoolean(jData, "startletter"));
+	        }
+	        if (jData.has("emailAutoComplete") && jData.getBoolean("emailAutoComplete")) {
+	            contactSearch.setEmailAutoComplete(true);
+	        }
+	        if (jData.has("orSearch") && jData.getBoolean("orSearch")) {
+	            contactSearch.setOrSearch(true);
+	        }
+	        contactSearch.setSurname(parseString(jData, ContactFields.LAST_NAME));
+	        contactSearch.setDisplayName(parseString(jData, ContactFields.DISPLAY_NAME));
+	        contactSearch.setGivenName(parseString(jData, ContactFields.FIRST_NAME));
+	        contactSearch.setCompany(parseString(jData, ContactFields.COMPANY));
+	        contactSearch.setEmail1(parseString(jData, ContactFields.EMAIL1));
+	        contactSearch.setEmail2(parseString(jData, ContactFields.EMAIL2));
+	        contactSearch.setEmail3(parseString(jData, ContactFields.EMAIL3));
+	        contactSearch.setDynamicSearchField(parseJSONIntArray(jData, "dynamicsearchfield"));
+	        contactSearch.setDynamicSearchFieldValue(parseJSONStringArray(jData, "dynamicsearchfieldvalue"));
+	        contactSearch.setPrivatePostalCodeRange(parseJSONStringArray(jData, "privatepostalcoderange"));
+	        contactSearch.setBusinessPostalCodeRange(parseJSONStringArray(jData, "businesspostalcoderange"));
+	        contactSearch.setPrivatePostalCodeRange(parseJSONStringArray(jData, "privatepostalcoderange"));
+	        contactSearch.setOtherPostalCodeRange(parseJSONStringArray(jData, "otherpostalcoderange"));
+	        contactSearch.setBirthdayRange(parseJSONDateArray(jData, "birthdayrange"));
+	        contactSearch.setAnniversaryRange(parseJSONDateArray(jData, "anniversaryrange"));
+	        contactSearch.setNumberOfEmployeesRange(parseJSONStringArray(jData, "numberofemployee"));
+	        contactSearch.setSalesVolumeRange(parseJSONStringArray(jData, "salesvolumerange"));
+	        contactSearch.setCreationDateRange(parseJSONDateArray(jData, "creationdaterange"));
+	        contactSearch.setLastModifiedRange(parseJSONDateArray(jData, "lastmodifiedrange"));
+	        contactSearch.setCatgories(parseString(jData, "categories"));
+	        contactSearch.setSubfolderSearch(parseBoolean(jData, "subfoldersearch"));
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        }
+        /*
+         * Sort options 
+         */
     	UserField orderField = UserMapper.getInstance().getMappedField(orderBy);
     	SortOptions sortOptions = new SortOptions(collation); 
     	if (null == orderField) {
@@ -176,7 +211,7 @@ public final class SearchAction extends AbstractUserAction {
         final UserService userService = ServiceRegistry.getInstance().getService(UserService.class, true);
         SearchIterator<Contact> searchIterator = null;
         try {
-        	searchIterator = contactService.searchUsers(session, term, contactFields, sortOptions);
+        	searchIterator = contactService.searchUsers(session, contactSearch, contactFields, sortOptions);
         	/*
         	 * Process results
         	 */

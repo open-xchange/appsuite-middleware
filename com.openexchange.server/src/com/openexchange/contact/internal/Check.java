@@ -58,10 +58,12 @@ import com.openexchange.contact.internal.mapping.ContactMapper;
 import com.openexchange.contact.storage.ContactStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
+import com.openexchange.groupware.contact.Search;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SingleSearchTerm;
@@ -164,6 +166,19 @@ public final class Check {
         }
     }
     
+	public static void validateSearch(ContactSearchObject contactSearch) throws OXException {
+		Search.checkPatternLength(contactSearch);
+		if (0 != contactSearch.getIgnoreOwn() || null != contactSearch.getAnniversaryRange() || 
+				null != contactSearch.getBirthdayRange() || null != contactSearch.getBusinessPostalCodeRange() ||
+				null != contactSearch.getCreationDateRange() || null != contactSearch.getDynamicSearchField() ||
+				null != contactSearch.getDynamicSearchFieldValue() || null != contactSearch.getFrom() ||
+				null != contactSearch.getLastModifiedRange() || null != contactSearch.getNumberOfEmployeesRange() ||
+				null != contactSearch.getSalesVolumeRange() ||
+				null != contactSearch.getOtherPostalCodeRange() || null != contactSearch.getPrivatePostalCodeRange()) {
+			throw new UnsupportedOperationException("not implemented");
+		}	
+	}	
+
 	/**
 	 * Performs validation checks prior performing write operations on the 
 	 * global address book, throwing appropriate exceptions if checks fail.

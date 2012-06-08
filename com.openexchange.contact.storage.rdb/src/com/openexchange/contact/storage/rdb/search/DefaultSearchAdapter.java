@@ -47,64 +47,68 @@
  *
  */
 
-package com.openexchange.contact.storage;
+package com.openexchange.contact.storage.rdb.search;
 
-import java.util.Collection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Pattern;
 
-import com.openexchange.contact.SortOptions;
+import com.openexchange.contact.storage.rdb.mapping.Mappers;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.search.ContactSearchObject;
-import com.openexchange.search.SearchTerm;
-import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorAdapter;
+import com.openexchange.groupware.tools.mappings.database.DbMapping;
 
 /**
- * {@link DefaultContactStorage} - Abstract {@link ContactStorage} implementation.
+ * {@link DefaultSearchAdapter} 
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class DefaultContactStorage implements ContactStorage {
-    
-    /**
-     * Initializes a new {@link DefaultContactStorage}.
-     */
-    public DefaultContactStorage() {
-        super();
-    }
-    
-    @Override
-    public SearchIterator<Contact> all(final int contextID, final String folderId, final ContactField[] fields) throws OXException {
-		return this.all(contextID, folderId, fields, SortOptions.EMPTY);
-    }
+public abstract class DefaultSearchAdapter implements SearchAdapter {
 
-    @Override
-    public SearchIterator<Contact> list(final int contextID, final String folderId, final String[] ids, final ContactField[] fields) throws OXException {
-    	return this.list(contextID, folderId, ids, fields, SortOptions.EMPTY);    	
-    }
-    
+	/**
+	 * Pattern to check whether a string contains SQL wildcards or not
+	 */
+	private static final Pattern WILDCARD_PATTERN = Pattern.compile("((^|[^\\\\])%)|((^|[^\\\\])_)");
+
+	protected List<Object> parameters;
+	protected String charset;
+
+	/**
+	 * 
+	 * @param charset
+	 */
+	public DefaultSearchAdapter(String charset) {
+		super();
+		this.charset = charset;
+		this.parameters = new ArrayList<Object>();
+
+	}
+	
 	@Override
-	public <O> SearchIterator<Contact> search(int contextID, SearchTerm<O> term, ContactField[] fields) throws OXException {
-        return this.search(contextID, term, fields, SortOptions.EMPTY);
+	public Object[] getParameters() {
+		return this.parameters.toArray(new Object[parameters.size()]);
+	}
+	
+	@Override
+	public void setParameters(PreparedStatement stmt, int parameterIndex) throws SQLException {
+		for (Object parameter : parameters) {
+			stmt.setObject(parameterIndex++, parameter);
+		}		
+	}
+	
+	protected boolean containsWildcards(String pattern) {
+		return WILDCARD_PATTERN.matcher(pattern).find();
+	}
+	
+	protected boolean isTextColumn(ContactField field) throws OXException {
+		return isTextColumn(Mappers.CONTACT.get(field));
 	}
 
-	@Override
-	public <O> SearchIterator<Contact> search(int contextID, ContactSearchObject contactSearch, ContactField[] fields) throws OXException {
-        return this.search(contextID, contactSearch, fields, SortOptions.EMPTY);
+	protected boolean isTextColumn(DbMapping<? extends Object, Contact> mapping) {
+		return Types.VARCHAR == mapping.getSqlType();
 	}
-
-    /**
-     * Gets all contact fields.
-     * 
-     * @return the fields
-     */
-    protected static ContactField[] allFields() {
-        return ContactField.values();
-    }
-    
-    protected static SearchIterator<Contact> getSearchIterator(final Collection<Contact> contacts) {
-    	return new SearchIteratorAdapter<Contact>(contacts.iterator(), contacts.size());
-    }
-    
 }

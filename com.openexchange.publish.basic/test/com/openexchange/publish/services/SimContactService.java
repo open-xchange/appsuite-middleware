@@ -60,6 +60,7 @@ import com.openexchange.contact.SortOptions;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -319,5 +320,44 @@ public class SimContactService implements ContactService {
     public <O> SearchIterator<Contact> searchUsers(Session session, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException {
         return null;
     }
+
+	@Override
+	public SearchIterator<Contact> searchContacts(Session session,
+			ContactSearchObject contactSearch) throws OXException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public SearchIterator<Contact> searchContacts(Session session,
+			ContactSearchObject contactSearch, SortOptions sortOptions)
+			throws OXException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public SearchIterator<Contact> searchContacts(Session session,
+			ContactSearchObject contactSearch, ContactField[] fields)
+			throws OXException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public SearchIterator<Contact> searchContacts(Session session,
+			ContactSearchObject contactSearch, ContactField[] fields,
+			SortOptions sortOptions) throws OXException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public SearchIterator<Contact> searchUsers(Session session,
+			ContactSearchObject contactSearch, ContactField[] fields,
+			SortOptions sortOptions) throws OXException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }

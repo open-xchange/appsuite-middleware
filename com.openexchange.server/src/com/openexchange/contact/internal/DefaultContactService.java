@@ -60,6 +60,7 @@ import com.openexchange.contact.SortOptions;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.log.LogFactory;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.session.Session;
@@ -154,6 +155,21 @@ public abstract class DefaultContactService implements ContactService {
 	}
 	
 	@Override
+	public SearchIterator<Contact> searchContacts(Session session, ContactSearchObject contactSearch) throws OXException {
+		return this.searchContacts(session, contactSearch, null, null);
+	}
+
+	@Override
+	public SearchIterator<Contact> searchContacts(Session session, ContactSearchObject contactSearch, SortOptions sortOptions) throws OXException {
+		return this.searchContacts(session, contactSearch, null, sortOptions);
+	}
+
+	@Override
+	public SearchIterator<Contact> searchContacts(Session session, ContactSearchObject contactSearch, ContactField[] fields) throws OXException {
+		return this.searchContacts(session, contactSearch, fields, null);
+	}
+	
+	@Override
 	public Contact getUser(Session session, int userID) throws OXException {
 		return getUser(session, userID, null);
 	}
@@ -172,6 +188,13 @@ public abstract class DefaultContactService implements ContactService {
 		Check.argNotNull(session, "session");
 		Check.argNotNull(term, "term");
 		return this.doSearchContacts(session, term, fields, sortOptions);
+	}
+
+	@Override
+	public SearchIterator<Contact> searchContacts(Session session, ContactSearchObject contactSearch, ContactField[] fields, SortOptions sortOptions) throws OXException {
+		Check.argNotNull(session, "session");
+		Check.argNotNull(contactSearch, "contactSearch");
+		return this.doSearchContacts(session, contactSearch, fields, sortOptions);
 	}
 
 	@Override
@@ -262,7 +285,7 @@ public abstract class DefaultContactService implements ContactService {
 		Contact contact = null;
 		SearchIterator<Contact> searchIterator = null;
 		try {
-			searchIterator = this.doGetUsers(session, new int[] { userID }, null, fields, null); 
+			searchIterator = this.doGetUsers(session, new int[] { userID }, (SearchTerm<?>)null, fields, null); 
 			contact = searchIterator.next();
 		} finally {
 			if (null != searchIterator) {
@@ -277,13 +300,13 @@ public abstract class DefaultContactService implements ContactService {
     public SearchIterator<Contact> getUsers(Session session, int[] userIDs, ContactField[] fields) throws OXException {
 		Check.argNotNull(session, "session");
 		Check.argNotNull(userIDs, "userIDs");
-		return this.doGetUsers(session, userIDs, null, fields, null);
+		return this.doGetUsers(session, userIDs, (SearchTerm<?>)null, fields, null);
     }
     
 	@Override
     public SearchIterator<Contact> getAllUsers(Session session, ContactField[] fields, final SortOptions sortOptions) throws OXException {
 		Check.argNotNull(session, "session");
-		return this.doGetUsers(session, null, null, fields, sortOptions);
+		return this.doGetUsers(session, null, (SearchTerm<?>)null, fields, sortOptions);
     }
 
 	@Override
@@ -291,6 +314,13 @@ public abstract class DefaultContactService implements ContactService {
 		Check.argNotNull(session, "session");
 		Check.argNotNull(term, "term");
 		return this.doGetUsers(session, null, term, fields, sortOptions);
+	}
+
+	@Override
+	public SearchIterator<Contact> searchUsers(Session session, ContactSearchObject contactSearch, ContactField[] fields, SortOptions sortOptions) throws OXException {
+		Check.argNotNull(session, "session");
+		Check.argNotNull(contactSearch, "contactSearch");
+		return this.doGetUsers(session, null, contactSearch, fields, sortOptions);
 	}
 
 	@Override
@@ -320,9 +350,15 @@ public abstract class DefaultContactService implements ContactService {
 	protected abstract <O> SearchIterator<Contact> doSearchContacts(Session session, SearchTerm<O> term, ContactField[] fields, 
 			SortOptions sortOptions) throws OXException;
 	
+	protected abstract <O> SearchIterator<Contact> doSearchContacts(Session session, ContactSearchObject contactSearch, 
+			ContactField[] fields, SortOptions sortOptions) throws OXException;
+	
 	protected abstract String doGetOrganization(int contextID) throws OXException;
 	
 	protected abstract <O> SearchIterator<Contact> doGetUsers(Session session, int[] userIDs, SearchTerm<O> term,
+			ContactField[] fields, SortOptions sortOptions) throws OXException;
+	
+	protected abstract SearchIterator<Contact> doGetUsers(Session session, int[] userIDs, ContactSearchObject contactSearch,
 			ContactField[] fields, SortOptions sortOptions) throws OXException;
 	
 }

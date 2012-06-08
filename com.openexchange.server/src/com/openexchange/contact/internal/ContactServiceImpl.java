@@ -70,6 +70,7 @@ import com.openexchange.groupware.contact.ContactMergerator;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SearchTerm;
@@ -485,6 +486,50 @@ public class ContactServiceImpl extends DefaultContactService {
 	}
 	
 	@Override
+    protected <O> SearchIterator<Contact> doSearchContacts(Session session, ContactSearchObject contactSearch, ContactField[] fields, 
+			SortOptions sortOptions) throws OXException {
+		int userID = session.getUserId();
+		int contextID = session.getContextId();
+		/*
+		 * check supplied search
+		 */
+		Check.validateSearch(contactSearch);
+		/*
+		 * determine queried storages according to searched folders
+		 */
+		Map<ContactStorage, List<String>> queriedStorages = Tools.getStorages(contextID,
+				contactSearch.hasFolders() ? Tools.toStringList(contactSearch.getFolders()) : Tools.getSearchFolders(contextID, userID));
+		if (null == queriedStorages || 0 == queriedStorages.size()) {
+			throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create("No contact storage found for queried folder IDs");
+		}
+		/*
+		 * prepare fields
+		 */
+		QueryFields queryFields = new QueryFields(fields);
+		/*
+		 * perform searches
+		 */
+		List<SearchIterator<Contact>> searchIterators = new ArrayList<SearchIterator<Contact>>();		
+		for (Entry<ContactStorage, List<String>> queriedStorage : queriedStorages.entrySet()) {
+			/*
+			 * apply folders specific to this storage to contact search
+			 */
+			contactSearch.setFolders(Tools.parse(queriedStorage.getValue()));
+			/*
+			 * get results, filtered respecting object permission restrictions, adding attachment info as needed
+			 */
+			SearchIterator<Contact> searchIterator = queriedStorage.getKey().search(
+					contextID, contactSearch, queryFields.getFields(), sortOptions);
+			searchIterators.add(new ResultIterator(searchIterator, queryFields.needsAttachmentInfo(), session));
+		}
+		/*
+		 * deliver sorted results
+		 */
+		return 2 > searchIterators.size() ? searchIterators.get(0) : 
+			new ContactMergerator(Tools.getComparator(sortOptions), searchIterators);				
+	}
+	
+	@Override
     protected String doGetOrganization(int contextID) throws OXException {
 		final String folderID = Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID);
 		final int userID = Tools.getContext(contextID).getMailadmin();
@@ -555,5 +600,30 @@ public class ContactServiceImpl extends DefaultContactService {
 		return new ResultIterator(storage.search(contextID, searchTerm, queryFields.getFields(), sortOptions), 
 				queryFields.needsAttachmentInfo(), session, true);
 	}
-	
+
+	protected SearchIterator<Contact> doGetUsers(Session session, int[] userIDs, ContactSearchObject contactSearch,
+			ContactField[] fields, SortOptions sortOptions) throws OXException {
+		int currentUserID = session.getUserId();
+		int contextID = session.getContextId();
+		String folderID = Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID);
+		ContactStorage storage = Tools.getStorage(contextID, folderID);
+		/*
+		 * limit queried fields when necessary due to permissions
+		 */
+		EffectivePermission permission = Tools.getPermission(contextID, folderID, currentUserID);
+		QueryFields queryFields;		
+		if (permission.canReadAllObjects() || permission.canReadOwnObjects() && 1 == userIDs.length && currentUserID == userIDs[0]) {
+			// no limitation
+			queryFields = new QueryFields(fields);		
+		} else {
+			// restrict queried fields
+			queryFields = new QueryFields(fields, LIMITED_USER_FIELDS);
+		}
+		/*
+		 * get user contacts from storage
+		 */
+		return new ResultIterator(storage.search(contextID, contactSearch, queryFields.getFields(), sortOptions), 
+				queryFields.needsAttachmentInfo(), session, true);
+	}
+
 }

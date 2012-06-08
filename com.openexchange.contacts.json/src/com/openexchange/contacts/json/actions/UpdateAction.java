@@ -74,6 +74,7 @@ import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -185,10 +186,15 @@ public class UpdateAction extends ContactAction {
     }
 
     @Override
-    protected AJAXRequestResult perform2(final ContactRequest request) throws OXException, JSONException {
-        final boolean containsImage = request.containsImage();
-        final JSONObject json = request.getContactJSON(containsImage);
-        final Contact contact = ContactMapper.getInstance().deserialize(json, ContactMapper.getInstance().getAllFields());
+    protected AJAXRequestResult perform2(final ContactRequest request) throws OXException {
+        boolean containsImage = request.containsImage();
+        JSONObject json = request.getContactJSON(containsImage);
+        Contact contact = null;
+		try {
+			contact = ContactMapper.getInstance().deserialize(json, ContactMapper.getInstance().getAllFields());
+		} catch (JSONException e) {
+			throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, json);
+		}
         if (containsImage) {
         	RequestTools.setImageData(request, contact);
         }

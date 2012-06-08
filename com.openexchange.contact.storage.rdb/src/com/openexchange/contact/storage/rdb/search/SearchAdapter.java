@@ -47,64 +47,43 @@
  *
  */
 
-package com.openexchange.contact.storage;
+package com.openexchange.contact.storage.rdb.search;
 
-import java.util.Collection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
-import com.openexchange.contact.SortOptions;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.helpers.ContactField;
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.search.ContactSearchObject;
-import com.openexchange.search.SearchTerm;
-import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorAdapter;
 
 /**
- * {@link DefaultContactStorage} - Abstract {@link ContactStorage} implementation.
+ * {@link SearchAdapter} - Helps constructing the database statement for a search term.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class DefaultContactStorage implements ContactStorage {
-    
-    /**
-     * Initializes a new {@link DefaultContactStorage}.
-     */
-    public DefaultContactStorage() {
-        super();
-    }
-    
-    @Override
-    public SearchIterator<Contact> all(final int contextID, final String folderId, final ContactField[] fields) throws OXException {
-		return this.all(contextID, folderId, fields, SortOptions.EMPTY);
-    }
+public interface SearchAdapter {
 
-    @Override
-    public SearchIterator<Contact> list(final int contextID, final String folderId, final String[] ids, final ContactField[] fields) throws OXException {
-    	return this.list(contextID, folderId, ids, fields, SortOptions.EMPTY);    	
-    }
-    
-	@Override
-	public <O> SearchIterator<Contact> search(int contextID, SearchTerm<O> term, ContactField[] fields) throws OXException {
-        return this.search(contextID, term, fields, SortOptions.EMPTY);
-	}
-
-	@Override
-	public <O> SearchIterator<Contact> search(int contextID, ContactSearchObject contactSearch, ContactField[] fields) throws OXException {
-        return this.search(contextID, contactSearch, fields, SortOptions.EMPTY);
-	}
-
-    /**
-     * Gets all contact fields.
-     * 
-     * @return the fields
-     */
-    protected static ContactField[] allFields() {
-        return ContactField.values();
-    }
-    
-    protected static SearchIterator<Contact> getSearchIterator(final Collection<Contact> contacts) {
-    	return new SearchIteratorAdapter<Contact>(contacts.iterator(), contacts.size());
-    }
-    
+	/**
+	 * Gets the parameter values that were detected in the search term during 
+	 * parsing to be included in the database statement in the correct order.
+	 *  
+	 * @return the parameters
+	 */
+	public Object[] getParameters();
+	
+	/**
+	 * Gets the constructed <code>WHERE</code>-clause for the search term to be
+	 * used in the database statement, without the leading <code>WHERE</code>.  
+	 * 
+	 * @return the search clause
+	 */
+	public String getClause();
+	
+	/**
+	 * Sets the detected database parameters in the supplied prepared statement,
+	 * beginning at the specified parameter index.
+	 * 
+	 * @param stmt the statement to set the parameters for
+	 * @param parameterIndex the start index to set the parameters
+	 * @throws SQLException
+	 */
+	public void setParameters(PreparedStatement stmt, int parameterIndex) throws SQLException;
+	
 }

@@ -388,6 +388,36 @@ public final class Tools {
 	}
 	
 	/**
+	 * Parses a list of numerical identifiers from strings, wrapping possible 
+	 * NumberFormatExceptions into an OXException.
+	 * 
+	 * @param ids the list of string IDs
+	 * @return a list of numerical IDs
+	 * @throws OXException
+	 */
+	public static List<Integer> parse(List<String> ids) throws OXException {
+		List<Integer> intIDs = new ArrayList<Integer>();
+		for (String id : ids) {
+			intIDs.add(parse(id));
+		}
+		return intIDs;
+	}
+	
+	/**
+	 * Converts an array of numeric IDs to a list of String identifiers.
+	 * 
+	 * @param ids the numeric identifiers
+	 * @return the string identifiers
+	 */
+	public static List<String> toStringList(int[] ids) {
+		List<String> stringList = new ArrayList<String>();
+		for (int id : ids) {
+			stringList.add(Integer.toString(id));
+		}
+		return stringList;
+	}
+	
+	/**
 	 * Invalidates the address properties of the given contact if one of the 
 	 * corresponding parts of the address is set, e.g. sets the "Business
 	 * Address" to <code>null</code>, when the "Postal Code Business" is set.

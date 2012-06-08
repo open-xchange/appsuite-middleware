@@ -53,7 +53,6 @@ import java.sql.Connection;
 import java.util.Date;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -78,6 +77,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.links.Links;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -158,7 +158,7 @@ public class CopyAction extends ContactAction {
     }
     
     @Override
-    protected AJAXRequestResult perform2(final ContactRequest request) throws OXException, JSONException {
+    protected AJAXRequestResult perform2(final ContactRequest request) throws OXException {
         /*
          * prepare original contact
          */
@@ -173,13 +173,14 @@ public class CopyAction extends ContactAction {
         /*
          * create copy
          */
+        String folderID = request.getFolderIDFromData();
         if (false == hasAttachments) {
             contact.removeNumberOfAttachments();
-	        contactService.createContact(request.getSession(), request.getFolderIDFromData(), contact);
-	        copyAttachments(Integer.parseInt(request.getFolderIDFromData()), request.getSession(), request.getSession().getContext(), 
+	        contactService.createContact(request.getSession(), folderID, contact);
+	        copyAttachments(Integer.parseInt(folderID), request.getSession(), request.getSession().getContext(), 
 	        		contact, originalObjectID, originalFolderID, request.getSession().getUser(), request.getSession().getUserConfiguration());
         } else {
-	        contactService.createContact(request.getSession(), request.getFolderIDFromData(), contact);
+	        contactService.createContact(request.getSession(), folderID, contact);
         }
         /*
          * respond with new object ID
@@ -187,7 +188,7 @@ public class CopyAction extends ContactAction {
         final JSONObject response = new JSONObject();
         try {
             response.put("id", contact.getObjectID());
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
         }
 
