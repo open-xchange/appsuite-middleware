@@ -39,6 +39,7 @@ public class OXTaskMgmtServicePortTypeImpl3 implements OXTaskMgmtServicePortType
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.taskmgmt.soap.OXTaskMgmtServicePortType#getTaskResults(com.openexchange.admin.soap.taskmgmt.dataobjects.Context  ctx ,)com.openexchange.admin.soap.taskmgmt.dataobjects.Credentials  cred ,)java.lang.Integer  id )*
      */
+    @Override
     public java.lang.Object getTaskResults(com.openexchange.admin.soap.taskmgmt.dataobjects.Context ctx,com.openexchange.admin.soap.taskmgmt.dataobjects.Credentials cred,java.lang.Integer id) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , RemoteException_Exception , ExecutionException_Exception , InterruptedException_Exception    { 
         LOG.info("Executing operation getTaskResults");
         System.out.println(ctx);
@@ -62,6 +63,7 @@ public class OXTaskMgmtServicePortTypeImpl3 implements OXTaskMgmtServicePortType
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.taskmgmt.soap.OXTaskMgmtServicePortType#flush(com.openexchange.admin.soap.taskmgmt.soap.Flush  parameters )*
      */
+    @Override
     public void flush(Flush parameters) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , TaskManagerException_Exception , RemoteException_Exception    { 
         LOG.info("Executing operation flush");
         System.out.println(parameters);
@@ -80,6 +82,7 @@ public class OXTaskMgmtServicePortTypeImpl3 implements OXTaskMgmtServicePortType
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.taskmgmt.soap.OXTaskMgmtServicePortType#getJobList(com.openexchange.admin.soap.taskmgmt.dataobjects.Context  ctx ,)com.openexchange.admin.soap.taskmgmt.dataobjects.Credentials  cred )*
      */
+    @Override
     public java.lang.String getJobList(com.openexchange.admin.soap.taskmgmt.dataobjects.Context ctx,com.openexchange.admin.soap.taskmgmt.dataobjects.Credentials cred) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , RemoteException_Exception    { 
         LOG.info("Executing operation getJobList");
         System.out.println(ctx);
@@ -100,6 +103,7 @@ public class OXTaskMgmtServicePortTypeImpl3 implements OXTaskMgmtServicePortType
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.taskmgmt.soap.OXTaskMgmtServicePortType#deleteJob(com.openexchange.admin.soap.taskmgmt.soap.DeleteJob  parameters )*
      */
+    @Override
     public void deleteJob(DeleteJob parameters) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , TaskManagerException_Exception , RemoteException_Exception    { 
         LOG.info("Executing operation deleteJob");
         System.out.println(parameters);

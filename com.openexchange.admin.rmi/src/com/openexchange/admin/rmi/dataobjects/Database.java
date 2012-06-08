@@ -178,10 +178,12 @@ public class Database extends EnforceableDataObject implements NameAndIdObject {
     // //////////////////////////////////////////////
     // Getter and Setter
     //
+    @Override
     public Integer getId() {
         return this.id;
     }
 
+    @Override
     public void setId(final Integer val) {
         this.id = val;
         this.idset = true;
@@ -214,10 +216,12 @@ public class Database extends EnforceableDataObject implements NameAndIdObject {
         this.passwordset = true;
     }
 
+    @Override
     public String getName() {
         return this.name;
     }
 
+    @Override
     public void setName(final String val) {
         this.name = val;
         this.nameset = true;

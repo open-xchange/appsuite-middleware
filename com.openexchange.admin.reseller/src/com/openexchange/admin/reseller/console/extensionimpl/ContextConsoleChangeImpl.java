@@ -81,6 +81,7 @@ public class ContextConsoleChangeImpl extends BasicCommandlineOptions implements
     protected CLIOption removeRestrictionsOption = null;
     protected CLIOption customidOption = null;
 
+    @Override
     public void addExtensionOptions(final AdminParser parser) throws OXConsolePluginException {
         addRestrictionsOption = parser.addOption(ResellerAbstraction.OPT_ADD_RESTRICTION_SHORT, ResellerAbstraction.OPT_ADD_RESTRICTION_LONG, ResellerAbstraction.OPT_ADD_RESTRICTION_LONG, "Restriction to add (can be specified multiple times)", NeededQuadState.notneeded, true);
         editRestrictionsOption = parser.addOption(ResellerAbstraction.OPT_EDIT_RESTRICTION_SHORT, ResellerAbstraction.OPT_EDIT_RESTRICTION_LONG, ResellerAbstraction.OPT_EDIT_RESTRICTION_LONG, "Restriction to edit (can be specified multiple times)", NeededQuadState.notneeded, true);
@@ -88,6 +89,7 @@ public class ContextConsoleChangeImpl extends BasicCommandlineOptions implements
         customidOption = parser.addOption(ResellerAbstraction.OPT_CUSTOMID_SHORT, ResellerAbstraction.OPT_CUSTOMID_LONG, ResellerAbstraction.OPT_CUSTOMID_LONG, "Custom Context ID", NeededQuadState.notneeded, true); 
     }
 
+    @Override
     public void setAndFillExtension(final AdminParser parser, final Context ctx, final Credentials auth) throws OXConsolePluginException {
         final OXContextExtensionImpl firstExtensionByName = (OXContextExtensionImpl) ctx.getFirstExtensionByName(OXContextExtensionImpl.class.getName());
         try {

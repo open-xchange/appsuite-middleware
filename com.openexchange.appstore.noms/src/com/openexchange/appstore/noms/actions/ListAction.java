@@ -10,7 +10,7 @@ import com.openexchange.tools.session.ServerSession;
 
 public class ListAction implements AJAXActionService {
 
-	private JSONArray database;
+	private final JSONArray database;
 
 	public ListAction(JSONArray database) {
 		this.database = database;

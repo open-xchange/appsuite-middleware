@@ -100,6 +100,7 @@ public abstract class AbstractTest extends TestCase {
     
     
     
+    @Override
     @After
     public void tearDown() {
         if(errConsole == null) {

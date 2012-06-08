@@ -90,6 +90,7 @@ public class ResellerExtensionLoader implements Filter<Context, Context> {
         this.cache = cache;
     }
 
+    @Override
     public Context[] filter(Collection<Context> input) throws PipesAndFiltersException {
         Map<Integer, Context> contexts = new HashMap<Integer, Context>(input.size());
         for (Context context : input) {

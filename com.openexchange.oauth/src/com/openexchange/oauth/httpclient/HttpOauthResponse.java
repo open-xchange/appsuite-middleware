@@ -9,7 +9,7 @@ import com.openexchange.http.client.builder.HTTPResponse;
 
 public class HttpOauthResponse implements HTTPResponse {
 
-	private Response delegate;
+	private final Response delegate;
 
 	HttpOauthResponse(Response oauthResponse){
 		delegate = oauthResponse;

@@ -83,6 +83,7 @@ public class OXResellerUserImpl implements OXUserPluginInterface {
     /* (non-Javadoc)
      * @see com.openexchange.admin.plugins.OXUserPluginInterface#canHandleContextAdmin()
      */
+    @Override
     public boolean canHandleContextAdmin() {
         return true;
     }
@@ -90,12 +91,14 @@ public class OXResellerUserImpl implements OXUserPluginInterface {
     /* (non-Javadoc)
      * @see com.openexchange.admin.plugins.OXUserPluginInterface#change(com.openexchange.admin.rmi.dataobjects.Context, com.openexchange.admin.rmi.dataobjects.User, com.openexchange.admin.rmi.dataobjects.Credentials)
      */
+    @Override
     public void change(Context ctx, User usrdata, Credentials auth) throws PluginException {
     }
 
     /* (non-Javadoc)
      * @see com.openexchange.admin.plugins.OXUserPluginInterface#create(com.openexchange.admin.rmi.dataobjects.Context, com.openexchange.admin.rmi.dataobjects.User, com.openexchange.admin.rmi.dataobjects.UserModuleAccess, com.openexchange.admin.rmi.dataobjects.Credentials)
      */
+    @Override
     public void create(Context ctx, User usr, UserModuleAccess access, Credentials cred) throws PluginException {
         try {
             final ResellerAdmin owner = oxresell.getContextOwner(ctx);
@@ -121,12 +124,14 @@ public class OXResellerUserImpl implements OXUserPluginInterface {
     /* (non-Javadoc)
      * @see com.openexchange.admin.plugins.OXUserPluginInterface#delete(com.openexchange.admin.rmi.dataobjects.Context, com.openexchange.admin.rmi.dataobjects.User[], com.openexchange.admin.rmi.dataobjects.Credentials)
      */
+    @Override
     public void delete(Context ctx, User[] user, Credentials cred) throws PluginException {
     }
 
     /* (non-Javadoc)
      * @see com.openexchange.admin.plugins.OXUserPluginInterface#getData(com.openexchange.admin.rmi.dataobjects.Context, com.openexchange.admin.rmi.dataobjects.User[], com.openexchange.admin.rmi.dataobjects.Credentials)
      */
+    @Override
     public User[] getData(Context ctx, User[] users, Credentials cred) {
         // pass-through
         return users;

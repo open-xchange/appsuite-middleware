@@ -119,7 +119,8 @@ public class ScheduleOutboxCollection extends AbstractCollection {
 		return super.getResourceType() + "<CAL:schedule-outbox />";
 	}
 
-	public void putBody(InputStream body, boolean guessSize) throws WebdavProtocolException {
+	@Override
+    public void putBody(InputStream body, boolean guessSize) throws WebdavProtocolException {
 		this.freeBusyRequest = this.parseFreeBusyRequest(body); 
 	}	
 	

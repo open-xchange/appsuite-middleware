@@ -39,6 +39,7 @@ public class OXResourceServicePortTypeImpl5 implements OXResourceServicePortType
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.resource.soap.OXResourceServicePortType#change(com.openexchange.admin.soap.resource.soap.Change  parameters )*
      */
+    @Override
     public void change(Change parameters) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , NoSuchContextException_Exception , RemoteException_Exception , NoSuchResourceException_Exception , DatabaseUpdateException_Exception    { 
         LOG.info("Executing operation change");
         System.out.println(parameters);
@@ -59,6 +60,7 @@ public class OXResourceServicePortTypeImpl5 implements OXResourceServicePortType
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.resource.soap.OXResourceServicePortType#listAll(com.openexchange.admin.soap.resource.dataobjects.Context  ctx ,)com.openexchange.admin.soap.resource.dataobjects.Credentials  auth )*
      */
+    @Override
     public java.util.List<com.openexchange.admin.soap.resource.dataobjects.Resource> listAll(com.openexchange.admin.soap.resource.dataobjects.Context ctx,com.openexchange.admin.soap.resource.dataobjects.Credentials auth) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , NoSuchContextException_Exception , RemoteException_Exception , DatabaseUpdateException_Exception    { 
         LOG.info("Executing operation listAll");
         System.out.println(ctx);
@@ -81,6 +83,7 @@ public class OXResourceServicePortTypeImpl5 implements OXResourceServicePortType
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.resource.soap.OXResourceServicePortType#delete(com.openexchange.admin.soap.resource.soap.Delete  parameters )*
      */
+    @Override
     public void delete(Delete parameters) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , NoSuchContextException_Exception , RemoteException_Exception , NoSuchResourceException_Exception , DatabaseUpdateException_Exception    { 
         LOG.info("Executing operation delete");
         System.out.println(parameters);
@@ -101,6 +104,7 @@ public class OXResourceServicePortTypeImpl5 implements OXResourceServicePortType
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.resource.soap.OXResourceServicePortType#getMultipleData(com.openexchange.admin.soap.resource.dataobjects.Context  ctx ,)java.util.List<com.openexchange.admin.soap.resource.dataobjects.Resource>  resources ,)com.openexchange.admin.soap.resource.dataobjects.Credentials  auth )*
      */
+    @Override
     public java.util.List<com.openexchange.admin.soap.resource.dataobjects.Resource> getMultipleData(com.openexchange.admin.soap.resource.dataobjects.Context ctx,java.util.List<com.openexchange.admin.soap.resource.dataobjects.Resource> resources,com.openexchange.admin.soap.resource.dataobjects.Credentials auth) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , NoSuchContextException_Exception , RemoteException_Exception , NoSuchResourceException_Exception , DatabaseUpdateException_Exception    { 
         LOG.info("Executing operation getMultipleData");
         System.out.println(ctx);
@@ -125,6 +129,7 @@ public class OXResourceServicePortTypeImpl5 implements OXResourceServicePortType
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.resource.soap.OXResourceServicePortType#create(com.openexchange.admin.soap.resource.dataobjects.Context  ctx ,)com.openexchange.admin.soap.resource.dataobjects.Resource  res ,)com.openexchange.admin.soap.resource.dataobjects.Credentials  auth )*
      */
+    @Override
     public com.openexchange.admin.soap.resource.dataobjects.Resource create(com.openexchange.admin.soap.resource.dataobjects.Context ctx,com.openexchange.admin.soap.resource.dataobjects.Resource res,com.openexchange.admin.soap.resource.dataobjects.Credentials auth) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , NoSuchContextException_Exception , RemoteException_Exception , DatabaseUpdateException_Exception    { 
         LOG.info("Executing operation create");
         System.out.println(ctx);
@@ -148,6 +153,7 @@ public class OXResourceServicePortTypeImpl5 implements OXResourceServicePortType
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.resource.soap.OXResourceServicePortType#list(com.openexchange.admin.soap.resource.dataobjects.Context  ctx ,)java.lang.String  pattern ,)com.openexchange.admin.soap.resource.dataobjects.Credentials  auth )*
      */
+    @Override
     public java.util.List<com.openexchange.admin.soap.resource.dataobjects.Resource> list(com.openexchange.admin.soap.resource.dataobjects.Context ctx,java.lang.String pattern,com.openexchange.admin.soap.resource.dataobjects.Credentials auth) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , NoSuchContextException_Exception , RemoteException_Exception , DatabaseUpdateException_Exception    { 
         LOG.info("Executing operation list");
         System.out.println(ctx);
@@ -171,6 +177,7 @@ public class OXResourceServicePortTypeImpl5 implements OXResourceServicePortType
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.resource.soap.OXResourceServicePortType#getData(com.openexchange.admin.soap.resource.dataobjects.Context  ctx ,)com.openexchange.admin.soap.resource.dataobjects.Resource  res ,)com.openexchange.admin.soap.resource.dataobjects.Credentials  auth )*
      */
+    @Override
     public com.openexchange.admin.soap.resource.dataobjects.Resource getData(com.openexchange.admin.soap.resource.dataobjects.Context ctx,com.openexchange.admin.soap.resource.dataobjects.Resource res,com.openexchange.admin.soap.resource.dataobjects.Credentials auth) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , NoSuchContextException_Exception , RemoteException_Exception , NoSuchResourceException_Exception , DatabaseUpdateException_Exception    { 
         LOG.info("Executing operation getData");
         System.out.println(ctx);

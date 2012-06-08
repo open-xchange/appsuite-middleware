@@ -63,6 +63,7 @@ public class OXAdminPoolDBPoolExtension extends OXAdminPoolDBPool implements OXA
         super();
     }
 
+    @Override
     public int getDBPoolIdForContextId(int contextId) throws PoolException {
         try {
             return getService().getWritablePool(contextId);
@@ -71,6 +72,7 @@ public class OXAdminPoolDBPoolExtension extends OXAdminPoolDBPool implements OXA
         }
     }
 
+    @Override
     public Connection getWRITEConnectionForPoolId(int poolId, String schema) throws PoolException {
         try {
             return getService().get(poolId, schema);
@@ -79,6 +81,7 @@ public class OXAdminPoolDBPoolExtension extends OXAdminPoolDBPool implements OXA
         }
     }
 
+    @Override
     public void pushWRITEConnectionForPoolId(int poolId, Connection con) {
         try {
             getService().back(poolId, con);
@@ -87,6 +90,7 @@ public class OXAdminPoolDBPoolExtension extends OXAdminPoolDBPool implements OXA
         }
     }
 
+    @Override
     public Connection getWRITENoTimeoutConnectionForPoolId(final int poolId, final String schema) throws PoolException {
         try {
             return getService().getNoTimeout(poolId, schema);
@@ -95,6 +99,7 @@ public class OXAdminPoolDBPoolExtension extends OXAdminPoolDBPool implements OXA
         }
     }
 
+    @Override
     public void pushWRITENoTimeoutConnectionForPoolId(int poolId, Connection con) {
         try {
             getService().backNoTimeoout(poolId, con);
@@ -103,6 +108,7 @@ public class OXAdminPoolDBPoolExtension extends OXAdminPoolDBPool implements OXA
         }
     }
 
+    @Override
     public void resetPoolMappingForContext(int contextId) throws PoolException {
         try {
             getService().invalidate(contextId);
@@ -111,6 +117,7 @@ public class OXAdminPoolDBPoolExtension extends OXAdminPoolDBPool implements OXA
         }
     }
 
+    @Override
     public String getSchemeForContextId(final int contextId) throws PoolException {
         try {
             return getService().getSchemaName(contextId);

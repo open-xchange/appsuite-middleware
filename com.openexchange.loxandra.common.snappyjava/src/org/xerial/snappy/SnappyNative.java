@@ -43,37 +43,49 @@ import java.nio.ByteBuffer;
 public class SnappyNative implements SnappyNativeAPI
 {
 
+    @Override
     public native String nativeLibraryVersion();
 
     // ------------------------------------------------------------------------
     // Generic compression/decompression routines.
     // ------------------------------------------------------------------------
+    @Override
     public native int rawCompress(ByteBuffer input, int inputOffset, int inputLength, ByteBuffer compressed,
             int outputOffset) throws IOException;
 
+    @Override
     public native int rawCompress(Object input, int inputOffset, int inputByteLength, Object output, int outputOffset);
 
+    @Override
     public native int rawUncompress(ByteBuffer compressed, int inputOffset, int inputLength, ByteBuffer uncompressed,
             int outputOffset) throws IOException;
 
+    @Override
     public native int rawUncompress(Object input, int inputOffset, int inputLength, Object output, int outputOffset)
             throws IOException;
 
     // Returns the maximal size of the compressed representation of
     // input data that is "source_bytes" bytes in length;
+    @Override
     public native int maxCompressedLength(int source_bytes);
 
     // This operation takes O(1) time.
+    @Override
     public native int uncompressedLength(ByteBuffer compressed, int offset, int len) throws IOException;
 
+    @Override
     public native int uncompressedLength(Object input, int offset, int len) throws IOException;
 
+    @Override
     public native boolean isValidCompressedBuffer(ByteBuffer compressed, int offset, int len) throws IOException;
 
+    @Override
     public native boolean isValidCompressedBuffer(Object input, int offset, int len) throws IOException;
 
+    @Override
     public native void arrayCopy(Object src, int offset, int byteLength, Object dest, int dOffset) throws IOException;
 
+    @Override
     public void throw_error(int errorCode) throws IOException {
         throw new IOException(String.format("%s(%d)", SnappyErrorCode.getErrorMessage(errorCode), errorCode));
     }

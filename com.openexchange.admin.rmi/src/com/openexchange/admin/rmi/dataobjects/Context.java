@@ -145,6 +145,7 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
         this.name = name;
     }
 
+    @Override
     public final Integer getId() {
         return this.id;
     }
@@ -153,15 +154,18 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
         return String.valueOf(this.id);
     }
 
+    @Override
     public final void setId(final Integer id) {
         this.id = id;
         this.idset = true;
     }
     
+    @Override
     public final String getName() {
         return name;
     }
 
+    @Override
     public final void setName(final String name) {
         this.name = name;
         this.nameset = true;
@@ -320,6 +324,7 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
      * (non-Javadoc)
      * @see com.openexchange.admin.rmi.dataobjects.ExtendableDataObject#toString()
      */
+    @Override
     public String toString() {
         StringBuilder ret = new StringBuilder();
         ret.append("[ \n");

@@ -12,7 +12,8 @@ public class ScribeHTTPGetRequestBuilder extends ScribeGenericHTTPRequestBuilder
 		super(coreBuilder);
 	}
 	
-	public Verb getVerb(){
+	@Override
+    public Verb getVerb(){
 		return Verb.GET;
 	}
 }

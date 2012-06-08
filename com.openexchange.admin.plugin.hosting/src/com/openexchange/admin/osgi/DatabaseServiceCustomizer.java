@@ -71,16 +71,19 @@ public class DatabaseServiceCustomizer implements ServiceTrackerCustomizer<Datab
         this.pool = pool;
     }
 
+    @Override
     public DatabaseService addingService(ServiceReference<DatabaseService> reference) {
         DatabaseService service = context.getService(reference);
         pool.setService(service);
         return service;
     }
 
+    @Override
     public void modifiedService(ServiceReference<DatabaseService> reference, DatabaseService service) {
         // Nothing to do
     }
 
+    @Override
     public void removedService(ServiceReference<DatabaseService> reference, DatabaseService service) {
         pool.removeService();
         context.ungetService(reference);

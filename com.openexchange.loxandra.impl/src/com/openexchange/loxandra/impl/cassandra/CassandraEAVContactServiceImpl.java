@@ -110,8 +110,8 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 	//private static final LongSerializer ls = LongSerializer.get();
 	
 	/* Templates to access the column families */
-	private ColumnFamilyTemplate<UUID, Composite> personTemplate;
-	private ColumnFamilyTemplate<UUID, Composite> personFolderTemplate;
+	private final ColumnFamilyTemplate<UUID, Composite> personTemplate;
+	private final ColumnFamilyTemplate<UUID, Composite> personFolderTemplate;
 	
 	//private EAVContactList<EAVContact> sortedContactList;
 	
@@ -119,7 +119,7 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 	private int totalRows;
 	private Composite startRange, lastEndRange;
 	
-	private Keyspace keyspace;
+	private final Keyspace keyspace;
 	
 	/**
 	 * Default Constructor. Initializes the CF templates.
@@ -190,7 +190,7 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 		
 		Iterator<String> iterator  = c.getKeysIterator();
 		while (iterator.hasNext()) {
-			String key = (String) iterator.next();
+			String key = iterator.next();
 			updater.setValue(new Composite("unnamed", key), c.getUnnamedProperty(key), ss);
 		}
 	}

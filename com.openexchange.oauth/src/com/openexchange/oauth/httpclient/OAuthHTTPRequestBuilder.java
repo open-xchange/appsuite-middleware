@@ -16,7 +16,7 @@ import com.openexchange.oauth.httpclient.impl.scribe.ScribeHTTPPutRequestBuilder
 public class OAuthHTTPRequestBuilder implements HTTPRequestBuilder {
 
 
-	private OAuthHTTPClient client;
+	private final OAuthHTTPClient client;
 
 	public OAuthHTTPRequestBuilder(OAuthHTTPClient client) {
 		this.client = client;

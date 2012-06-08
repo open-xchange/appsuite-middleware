@@ -86,6 +86,7 @@ public class Server implements Serializable, NameAndIdObject {
      * 
      * @return An {@link Integer} containing the id
      */
+    @Override
     public Integer getId() {
         return id;
     }
@@ -95,6 +96,7 @@ public class Server implements Serializable, NameAndIdObject {
      * 
      * @param id An {@link Integer} containing the id
      */
+    @Override
     public void setId(final Integer id) {
         this.id = id;
         this.idset = true;
@@ -105,6 +107,7 @@ public class Server implements Serializable, NameAndIdObject {
      * 
      * @return A {@link String} containing the name
      */
+    @Override
     public String getName() {
         return name;
     }
@@ -114,6 +117,7 @@ public class Server implements Serializable, NameAndIdObject {
      * 
      * @param name A {@link String} containing the name
      */
+    @Override
     public void setName(final String name) {
         this.name = name;
         this.nameset = true;

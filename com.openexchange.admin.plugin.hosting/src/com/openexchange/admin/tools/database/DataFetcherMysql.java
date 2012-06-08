@@ -64,7 +64,7 @@ import com.openexchange.log.LogFactory;
  */
 public class DataFetcherMysql implements DataFetcher{
     
-    private Log log = LogFactory.getLog(DataFetcherMysql.class);
+    private final Log log = LogFactory.getLog(DataFetcherMysql.class);
     
     private Connection dbConnection = null;
     
@@ -75,6 +75,7 @@ public class DataFetcherMysql implements DataFetcher{
     private Vector<TableObject> tableObjects = null;
     private DatabaseMetaData dbmetadata = null;
     
+    @Override
     public String getCatalogName(){
         return this.catalogname;
     }
@@ -82,37 +83,45 @@ public class DataFetcherMysql implements DataFetcher{
     public DataFetcherMysql() {
     }
     
+    @Override
     public Connection getDbConnection() {
         return dbConnection;
     }
     
+    @Override
     public void setDbConnection(Connection dbConnection,String catalog_name) throws SQLException {
         this.dbConnection = dbConnection;
         this.dbConnection.setCatalog(catalog_name);
         this.catalogname = catalog_name;
     }
     
+    @Override
     public String getMatchingColumn() {
         return selectionCriteria;
     }
     
+    @Override
     public void setMatchingColumn(String column_name) {
         this.selectionCriteria = column_name;
     }
     
+    @Override
     public int getColumnMatchType(){
         return this.criteriaType;
     }
     
+    @Override
     public Object getColumnMatchObject(){
         return this.criteriaMatch;
     }
     
+    @Override
     public void setColumnMatchObject(Object match_obj,int match_type){
         this.criteriaType = match_type;
         this.criteriaMatch = match_obj;
     }
     
+    @Override
     public TableObject getDataForTable(TableObject to) throws SQLException{
         
         Vector<TableColumnObject> column_objects = to.getColumns();
@@ -120,7 +129,7 @@ public class DataFetcherMysql implements DataFetcher{
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT ");
         for(int a = 0;a<column_objects.size();a++){
-            TableColumnObject tco = (TableColumnObject)column_objects.get(a);
+            TableColumnObject tco = column_objects.get(a);
             sb.append(""+tco.getName()+",");
         }
         sb.delete(sb.length()-1,sb.length());
@@ -137,7 +146,7 @@ public class DataFetcherMysql implements DataFetcher{
             while(rs.next()){
                 TableRowObject tro = new TableRowObject();
                 for(int b = 0;b<column_objects.size();b++){
-                    TableColumnObject tco = (TableColumnObject)column_objects.get(b);
+                    TableColumnObject tco = column_objects.get(b);
                     Object o = rs.getObject(tco.getName());
                     
                     TableColumnObject tc2 = new TableColumnObject();
@@ -173,6 +182,7 @@ public class DataFetcherMysql implements DataFetcher{
         
     }
     
+    @Override
     public Vector<TableObject> fetchTableObjects() throws SQLException{
         tableObjects = new Vector<TableObject>();
         
@@ -238,6 +248,7 @@ public class DataFetcherMysql implements DataFetcher{
 //        log.error(sb.toString());
 //    }
     
+    @Override
     public Vector<TableObject> sortTableObjects() throws SQLException {
         
         findReferences();
@@ -252,7 +263,7 @@ public class DataFetcherMysql implements DataFetcher{
      */
     private void findReferences() throws SQLException{
         for(int v = 0;v<tableObjects.size();v++){
-            TableObject to = (TableObject)tableObjects.get(v);
+            TableObject to = tableObjects.get(v);
             // get references from this table to another
             String table_name = to.getName();
             //ResultSet table_references = dbmetadata.getCrossReference("%",null,table_name,getCatalogName(),null,getCatalogName());
@@ -266,7 +277,7 @@ public class DataFetcherMysql implements DataFetcher{
                 int pos_in_list = tableListContainsObject(pk);
                 if(pos_in_list!=-1){
                     log.debug("Found referenced by "+table_name+"<->"+pk+"->"+pkc);
-                    TableObject edit_me = (TableObject)tableObjects.get(pos_in_list);
+                    TableObject edit_me = tableObjects.get(pos_in_list);
                     edit_me.addReferencedBy(table_name);
                 }
             }
@@ -281,7 +292,7 @@ public class DataFetcherMysql implements DataFetcher{
     private int tableListContainsObject(String table_name){
         int found_at_position = -1;
         for(int v = 0;v<tableObjects.size();v++){
-            TableObject to = (TableObject)tableObjects.get(v);
+            TableObject to = tableObjects.get(v);
             if(to.getName().equals(table_name)){
                 found_at_position = v;
             }
@@ -299,7 +310,7 @@ public class DataFetcherMysql implements DataFetcher{
         // work with the unsorted vector
         while(unsorted.size()>0){
             for(int a = 0;a<unsorted.size();a++){
-                TableObject to = (TableObject)unsorted.get(a);
+                TableObject to = unsorted.get(a);
                 if(!to.hasCrossReferences()){
                     //log.error("removing "+to.getName());
                     nasty_order.add(to);
@@ -322,7 +333,7 @@ public class DataFetcherMysql implements DataFetcher{
     private void removeAndSortNew(Vector<TableObject> v,TableObject to){
         v.remove(to);
         for(int i = 0;i<v.size();i++){
-            TableObject tob = (TableObject)v.get(i);
+            TableObject tob = v.get(i);
             tob.removeCrossReferenceTable(to.getName());
         }
     }

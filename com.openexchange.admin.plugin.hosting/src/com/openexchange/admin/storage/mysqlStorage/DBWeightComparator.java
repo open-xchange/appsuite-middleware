@@ -69,6 +69,7 @@ public class DBWeightComparator implements Comparator<DatabaseHandle> {
         this.totalWeight = totalWeight;
     }
 
+    @Override
     public int compare(DatabaseHandle db1, DatabaseHandle db2) {
         int missingUnits1 = getMissingUnits(db1);
         if (isFull(db1)) {

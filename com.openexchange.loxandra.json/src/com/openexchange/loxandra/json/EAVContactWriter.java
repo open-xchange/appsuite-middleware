@@ -64,7 +64,7 @@ import com.openexchange.tools.TimeZoneUtils;
  */
 public class EAVContactWriter extends CommonWriter {
 	
-	private TimeZone utc;
+	private final TimeZone utc;
 	
 	/**
 	 * Default Constructor

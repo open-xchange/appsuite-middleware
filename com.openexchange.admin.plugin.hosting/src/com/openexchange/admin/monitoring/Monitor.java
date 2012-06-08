@@ -58,13 +58,13 @@ public final class Monitor implements MonitorMBean {
 
     private static final Monitor SINGLETON = new Monitor();
 
-    private AtomicLong createResourceCalls = new AtomicLong(0);
+    private final AtomicLong createResourceCalls = new AtomicLong(0);
 
-    private AtomicLong createContextCalls = new AtomicLong(0);
+    private final AtomicLong createContextCalls = new AtomicLong(0);
 
-    private AtomicLong createUserCalls = new AtomicLong(0);
+    private final AtomicLong createUserCalls = new AtomicLong(0);
 
-    private AtomicLong createGroupCalls = new AtomicLong(0);
+    private final AtomicLong createGroupCalls = new AtomicLong(0);
 
     public Monitor() {
         super();
@@ -90,18 +90,22 @@ public final class Monitor implements MonitorMBean {
         createGroupCalls.incrementAndGet();
     }
 
+    @Override
     public long getNumberOfCreateResourceCalled() {
         return createResourceCalls.get();
     }
 
+    @Override
     public long getNumberOfCreateContextCalled() {
         return createContextCalls.get();
     }
 
+    @Override
     public long getNumberOfCreateUserCalled() {
         return createUserCalls.get();
     }
 
+    @Override
     public long getNumberOfCreateGroupCalled() {
         return createGroupCalls.get();
     }

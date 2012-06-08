@@ -45,7 +45,7 @@ public class SnappyInputStream extends InputStream
     private int                 uncompressedCursor = 0;
     private int                 uncompressedLimit  = 0;
 
-    private byte[]              chunkSizeBuf       = new byte[4];
+    private final byte[]              chunkSizeBuf       = new byte[4];
 
     /**
      * Create a filter for reading compressed data as a uncompressed stream

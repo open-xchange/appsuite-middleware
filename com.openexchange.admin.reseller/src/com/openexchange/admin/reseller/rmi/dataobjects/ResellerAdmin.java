@@ -163,6 +163,7 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
     /* (non-Javadoc)
      * @see com.openexchange.admin.rmi.dataobjects.PasswordMechObject#getPassword()
      */
+    @Override
     public String getPassword() {
         return password;
     }
@@ -170,6 +171,7 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
     /* (non-Javadoc)
      * @see com.openexchange.admin.rmi.dataobjects.PasswordMechObject#getPasswordMech()
      */
+    @Override
     public String getPasswordMech() {
         return passwordMech;
     }
@@ -268,6 +270,7 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
     /* (non-Javadoc)
      * @see com.openexchange.admin.rmi.dataobjects.PasswordMechObject#setPasswordMech(java.lang.String)
      */
+    @Override
     public void setPasswordMech(final String passwordMech) {
         this.passwordMechset = true;
         this.passwordMech = passwordMech;
@@ -302,6 +305,7 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
         return restrictionsset;
     }
 
+    @Override
     public final String toString() {
         StringBuilder ret = new StringBuilder();
         ret.append("[ \n");

@@ -176,12 +176,14 @@ public final class OAuthActivator extends HousekeepingActivator {
 			
 			SimpleRegistryListener<HTTPResponseProcessor> listener = new SimpleRegistryListener<HTTPResponseProcessor>() {
 
-				public void added(ServiceReference<HTTPResponseProcessor> ref,
+				@Override
+                public void added(ServiceReference<HTTPResponseProcessor> ref,
 						HTTPResponseProcessor service) {
 					oauthFactory.registerProcessor(service);
 				}
 
-				public void removed(ServiceReference<HTTPResponseProcessor> ref,
+				@Override
+                public void removed(ServiceReference<HTTPResponseProcessor> ref,
 						HTTPResponseProcessor service) {
 					oauthFactory.forgetProcessor(service);
 				}

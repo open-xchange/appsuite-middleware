@@ -64,7 +64,8 @@ public class SnappyBundleActivator implements BundleActivator {
 	
 	private static Log log = LogFactory.getLog(SnappyBundleActivator.class);
 
-	public void start(BundleContext context) throws Exception {
+	@Override
+    public void start(BundleContext context) throws Exception {
     	log.info("starting snappy bundle");
     	//System.loadLibrary("libsnappyjava");
     	

@@ -63,6 +63,7 @@ public class StatisticToolsTest extends AbstractTest {
     public void testgetServerStats() {
         resetBuffers();
         final StatisticTools statisticTools = new StatisticTools(){
+            @Override
             protected void sysexit(int exitCode) {
                 StatisticToolsTest.this.returnCode = exitCode;
             }
@@ -75,6 +76,7 @@ public class StatisticToolsTest extends AbstractTest {
     public void testgetAdminStats() {
         resetBuffers();
         final StatisticTools statisticTools = new StatisticTools(){
+            @Override
             protected void sysexit(int exitCode) {
                 StatisticToolsTest.this.returnCode = exitCode;
             }

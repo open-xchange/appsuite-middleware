@@ -63,6 +63,7 @@ public abstract class OXCommonExtension implements OXCommonExtensionInterface {
      * This method is used to get the errors which appear while processing an extension. This is especially used
      * for getData methods
      */
+    @Override
     public String getExtensionError() {
         return this.errortext;
     }
@@ -71,16 +72,19 @@ public abstract class OXCommonExtension implements OXCommonExtensionInterface {
      * This method is used to set the errors which appear while processing an extension. This is especially used
      * for getData methods
      */
+    @Override
     public void setExtensionError(final String errortext) {
         this.errortext = errortext;
     }
     
+    @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder(super.toString());
         sb.append(this.errortext);
         return sb.toString();
     }
 
+    @Override
     public boolean equals(final Object obj) {
         return false;
     }

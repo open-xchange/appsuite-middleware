@@ -66,7 +66,7 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 public class RMITracker extends ServiceTracker {
 
-    private Registry registry;
+    private final Registry registry;
 
     private static final Log LOG = LogFactory.getLog(RMITracker.class);
 

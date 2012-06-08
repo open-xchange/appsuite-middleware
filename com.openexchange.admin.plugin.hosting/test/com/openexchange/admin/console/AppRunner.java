@@ -95,9 +95,9 @@ public class AppRunner {
     
     private static final class MethodCall implements Callable<Object> {
 
-        private Method method;
-        private Object object;
-        private Object[] arguments;
+        private final Method method;
+        private final Object object;
+        private final Object[] arguments;
         
         public MethodCall(Method method, Object object, Object...arguments) {
             this.method = method;
@@ -105,6 +105,7 @@ public class AppRunner {
             this.arguments = arguments;
         }
         
+        @Override
         public Object call() throws Exception {
             return method.invoke(object, arguments);
         }

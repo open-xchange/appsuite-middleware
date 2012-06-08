@@ -39,6 +39,7 @@ public class OXResellerUserServicePortTypeImpl3 implements OXResellerUserService
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.reseller.user.reseller.soap.OXResellerUserServicePortType#change(com.openexchange.admin.soap.reseller.user.reseller.soap.Change  parameters )*
      */
+    @Override
     public void change(Change parameters) throws DatabaseUpdateException_Exception , NoSuchUserException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    { 
         LOG.info("Executing operation change");
         System.out.println(parameters);
@@ -60,6 +61,7 @@ public class OXResellerUserServicePortTypeImpl3 implements OXResellerUserService
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.reseller.user.reseller.soap.OXResellerUserServicePortType#delete(com.openexchange.admin.soap.reseller.user.reseller.soap.Delete  parameters )*
      */
+    @Override
     public void delete(Delete parameters) throws DatabaseUpdateException_Exception , NoSuchUserException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    { 
         LOG.info("Executing operation delete");
         System.out.println(parameters);
@@ -81,6 +83,7 @@ public class OXResellerUserServicePortTypeImpl3 implements OXResellerUserService
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.reseller.user.reseller.soap.OXResellerUserServicePortType#getContextAdmin(com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext  ctx ,)com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials  auth )*
      */
+    @Override
     public com.openexchange.admin.soap.reseller.user.soap.dataobjects.User getContextAdmin(com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext ctx,com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth) throws InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    { 
         LOG.info("Executing operation getContextAdmin");
         System.out.println(ctx);
@@ -102,6 +105,7 @@ public class OXResellerUserServicePortTypeImpl3 implements OXResellerUserService
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.reseller.user.reseller.soap.OXResellerUserServicePortType#list(com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext  ctx ,)java.lang.String  searchPattern ,)com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials  auth )*
      */
+    @Override
     public java.util.List<com.openexchange.admin.soap.reseller.user.soap.dataobjects.User> list(com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext ctx,java.lang.String searchPattern,com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth) throws DatabaseUpdateException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    { 
         LOG.info("Executing operation list");
         System.out.println(ctx);
@@ -126,6 +130,7 @@ public class OXResellerUserServicePortTypeImpl3 implements OXResellerUserService
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.reseller.user.reseller.soap.OXResellerUserServicePortType#changeByModuleAccessName(com.openexchange.admin.soap.reseller.user.reseller.soap.ChangeByModuleAccessName  parameters )*
      */
+    @Override
     public void changeByModuleAccessName(ChangeByModuleAccessName parameters) throws DatabaseUpdateException_Exception , NoSuchUserException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    { 
         LOG.info("Executing operation changeByModuleAccessName");
         System.out.println(parameters);
@@ -147,6 +152,7 @@ public class OXResellerUserServicePortTypeImpl3 implements OXResellerUserService
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.reseller.user.reseller.soap.OXResellerUserServicePortType#createByModuleAccess(com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext  ctx ,)com.openexchange.admin.soap.reseller.user.soap.dataobjects.User  usrdata ,)com.openexchange.admin.soap.reseller.user.soap.dataobjects.UserModuleAccess  access ,)com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials  auth )*
      */
+    @Override
     public com.openexchange.admin.soap.reseller.user.soap.dataobjects.User createByModuleAccess(com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext ctx,com.openexchange.admin.soap.reseller.user.soap.dataobjects.User usrdata,com.openexchange.admin.soap.reseller.user.soap.dataobjects.UserModuleAccess access,com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth) throws DatabaseUpdateException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    { 
         LOG.info("Executing operation createByModuleAccess");
         System.out.println(ctx);
@@ -172,6 +178,7 @@ public class OXResellerUserServicePortTypeImpl3 implements OXResellerUserService
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.reseller.user.reseller.soap.OXResellerUserServicePortType#getModuleAccess(com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext  ctx ,)com.openexchange.admin.soap.reseller.user.soap.dataobjects.User  user ,)com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials  auth )*
      */
+    @Override
     public com.openexchange.admin.soap.reseller.user.soap.dataobjects.UserModuleAccess getModuleAccess(com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext ctx,com.openexchange.admin.soap.reseller.user.soap.dataobjects.User user,com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth) throws DatabaseUpdateException_Exception , NoSuchUserException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    { 
         LOG.info("Executing operation getModuleAccess");
         System.out.println(ctx);
@@ -197,6 +204,7 @@ public class OXResellerUserServicePortTypeImpl3 implements OXResellerUserService
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.reseller.user.reseller.soap.OXResellerUserServicePortType#create(com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext  ctx ,)com.openexchange.admin.soap.reseller.user.soap.dataobjects.User  usrdata ,)com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials  auth )*
      */
+    @Override
     public com.openexchange.admin.soap.reseller.user.soap.dataobjects.User create(com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext ctx,com.openexchange.admin.soap.reseller.user.soap.dataobjects.User usrdata,com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth) throws DatabaseUpdateException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    { 
         LOG.info("Executing operation create");
         System.out.println(ctx);
@@ -221,6 +229,7 @@ public class OXResellerUserServicePortTypeImpl3 implements OXResellerUserService
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.reseller.user.reseller.soap.OXResellerUserServicePortType#listAll(com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext  ctx ,)com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials  auth )*
      */
+    @Override
     public java.util.List<com.openexchange.admin.soap.reseller.user.soap.dataobjects.User> listAll(com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext ctx,com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth) throws DatabaseUpdateException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    { 
         LOG.info("Executing operation listAll");
         System.out.println(ctx);
@@ -244,6 +253,7 @@ public class OXResellerUserServicePortTypeImpl3 implements OXResellerUserService
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.reseller.user.reseller.soap.OXResellerUserServicePortType#getMultipleData(com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext  ctx ,)java.util.List<com.openexchange.admin.soap.reseller.user.soap.dataobjects.User>  users ,)com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials  auth )*
      */
+    @Override
     public java.util.List<com.openexchange.admin.soap.reseller.user.soap.dataobjects.User> getMultipleData(com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext ctx,java.util.List<com.openexchange.admin.soap.reseller.user.soap.dataobjects.User> users,com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth) throws DatabaseUpdateException_Exception , NoSuchUserException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    { 
         LOG.info("Executing operation getMultipleData");
         System.out.println(ctx);
@@ -269,6 +279,7 @@ public class OXResellerUserServicePortTypeImpl3 implements OXResellerUserService
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.reseller.user.reseller.soap.OXResellerUserServicePortType#getData(com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext  ctx ,)com.openexchange.admin.soap.reseller.user.soap.dataobjects.User  user ,)com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials  auth )*
      */
+    @Override
     public com.openexchange.admin.soap.reseller.user.soap.dataobjects.User getData(com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext ctx,com.openexchange.admin.soap.reseller.user.soap.dataobjects.User user,com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth) throws DatabaseUpdateException_Exception , NoSuchUserException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    { 
         LOG.info("Executing operation getData");
         System.out.println(ctx);
@@ -294,6 +305,7 @@ public class OXResellerUserServicePortTypeImpl3 implements OXResellerUserService
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.reseller.user.reseller.soap.OXResellerUserServicePortType#deleteMultiple(com.openexchange.admin.soap.reseller.user.reseller.soap.DeleteMultiple  parameters )*
      */
+    @Override
     public void deleteMultiple(DeleteMultiple parameters) throws DatabaseUpdateException_Exception , NoSuchUserException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    { 
         LOG.info("Executing operation deleteMultiple");
         System.out.println(parameters);
@@ -315,6 +327,7 @@ public class OXResellerUserServicePortTypeImpl3 implements OXResellerUserService
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.reseller.user.reseller.soap.OXResellerUserServicePortType#exists(com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext  ctx ,)com.openexchange.admin.soap.reseller.user.soap.dataobjects.User  user ,)com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials  auth )*
      */
+    @Override
     public java.lang.Boolean exists(com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext ctx,com.openexchange.admin.soap.reseller.user.soap.dataobjects.User user,com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth) throws DatabaseUpdateException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    { 
         LOG.info("Executing operation exists");
         System.out.println(ctx);
@@ -339,6 +352,7 @@ public class OXResellerUserServicePortTypeImpl3 implements OXResellerUserService
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.reseller.user.reseller.soap.OXResellerUserServicePortType#listCaseInsensitive(com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext  ctx ,)java.lang.String  searchPattern ,)com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials  auth )*
      */
+    @Override
     public java.util.List<com.openexchange.admin.soap.reseller.user.soap.dataobjects.User> listCaseInsensitive(com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext ctx,java.lang.String searchPattern,com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth) throws DatabaseUpdateException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    { 
         LOG.info("Executing operation listCaseInsensitive");
         System.out.println(ctx);
@@ -363,6 +377,7 @@ public class OXResellerUserServicePortTypeImpl3 implements OXResellerUserService
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.reseller.user.reseller.soap.OXResellerUserServicePortType#getAccessCombinationName(com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext  ctx ,)com.openexchange.admin.soap.reseller.user.soap.dataobjects.User  user ,)com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials  auth )*
      */
+    @Override
     public java.lang.String getAccessCombinationName(com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext ctx,com.openexchange.admin.soap.reseller.user.soap.dataobjects.User user,com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth) throws DatabaseUpdateException_Exception , NoSuchUserException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    { 
         LOG.info("Executing operation getAccessCombinationName");
         System.out.println(ctx);
@@ -388,6 +403,7 @@ public class OXResellerUserServicePortTypeImpl3 implements OXResellerUserService
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.reseller.user.reseller.soap.OXResellerUserServicePortType#changeByModuleAccess(com.openexchange.admin.soap.reseller.user.reseller.soap.ChangeByModuleAccess  parameters )*
      */
+    @Override
     public void changeByModuleAccess(ChangeByModuleAccess parameters) throws DatabaseUpdateException_Exception , NoSuchUserException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    { 
         LOG.info("Executing operation changeByModuleAccess");
         System.out.println(parameters);
@@ -409,6 +425,7 @@ public class OXResellerUserServicePortTypeImpl3 implements OXResellerUserService
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.reseller.user.reseller.soap.OXResellerUserServicePortType#createByModuleAccessName(com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext  ctx ,)com.openexchange.admin.soap.reseller.user.soap.dataobjects.User  usrdata ,)java.lang.String  accessCombinationName ,)com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials  auth )*
      */
+    @Override
     public com.openexchange.admin.soap.reseller.user.soap.dataobjects.User createByModuleAccessName(com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext ctx,com.openexchange.admin.soap.reseller.user.soap.dataobjects.User usrdata,java.lang.String accessCombinationName,com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth) throws DatabaseUpdateException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    { 
         LOG.info("Executing operation createByModuleAccessName");
         System.out.println(ctx);

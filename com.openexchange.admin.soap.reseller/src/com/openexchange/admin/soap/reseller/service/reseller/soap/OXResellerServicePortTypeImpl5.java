@@ -40,6 +40,7 @@ public class OXResellerServicePortTypeImpl5 implements OXResellerServicePortType
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.reseller.service.reseller.soap.OXResellerServicePortType#updateDatabaseRestrictions(com.openexchange.admin.soap.reseller.service.rmi.dataobjects.Credentials  creds )*
      */
+    @Override
     public void updateDatabaseRestrictions(com.openexchange.admin.soap.reseller.service.rmi.dataobjects.Credentials creds) throws InvalidCredentialsException_Exception , StorageException_Exception , RemoteException_Exception , OXResellerException_Exception    { 
         LOG.info("Executing operation updateDatabaseRestrictions");
         System.out.println(creds);
@@ -57,6 +58,7 @@ public class OXResellerServicePortTypeImpl5 implements OXResellerServicePortType
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.reseller.service.reseller.soap.OXResellerServicePortType#change(com.openexchange.admin.soap.reseller.service.reseller.soap.Change  parameters )*
      */
+    @Override
     public void change(Change parameters) throws InvalidCredentialsException_Exception , StorageException_Exception , RemoteException_Exception , OXResellerException_Exception , InvalidDataException_Exception    { 
         LOG.info("Executing operation change");
         System.out.println(parameters);
@@ -75,6 +77,7 @@ public class OXResellerServicePortTypeImpl5 implements OXResellerServicePortType
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.reseller.service.reseller.soap.OXResellerServicePortType#getAvailableRestrictions(com.openexchange.admin.soap.reseller.service.rmi.dataobjects.Credentials  creds )*
      */
+    @Override
     public java.util.List<com.openexchange.admin.soap.reseller.service.reseller.rmi.dataobjects.Restriction> getAvailableRestrictions(com.openexchange.admin.soap.reseller.service.rmi.dataobjects.Credentials creds) throws InvalidCredentialsException_Exception , StorageException_Exception , RemoteException_Exception , OXResellerException_Exception    { 
         LOG.info("Executing operation getAvailableRestrictions");
         System.out.println(creds);
@@ -94,6 +97,7 @@ public class OXResellerServicePortTypeImpl5 implements OXResellerServicePortType
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.reseller.service.reseller.soap.OXResellerServicePortType#removeDatabaseRestrictions(com.openexchange.admin.soap.reseller.service.reseller.soap.RemoveDatabaseRestrictions  parameters )*
      */
+    @Override
     public void removeDatabaseRestrictions(RemoveDatabaseRestrictions parameters) throws InvalidCredentialsException_Exception , StorageException_Exception , RemoteException_Exception , OXResellerException_Exception    { 
         LOG.info("Executing operation removeDatabaseRestrictions");
         System.out.println(parameters);
@@ -111,6 +115,7 @@ public class OXResellerServicePortTypeImpl5 implements OXResellerServicePortType
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.reseller.service.reseller.soap.OXResellerServicePortType#delete(com.openexchange.admin.soap.reseller.service.reseller.soap.Delete  parameters )*
      */
+    @Override
     public void delete(Delete parameters) throws InvalidCredentialsException_Exception , StorageException_Exception , RemoteException_Exception , OXResellerException_Exception    { 
         LOG.info("Executing operation delete");
         System.out.println(parameters);
@@ -128,6 +133,7 @@ public class OXResellerServicePortTypeImpl5 implements OXResellerServicePortType
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.reseller.service.reseller.soap.OXResellerServicePortType#list(java.lang.String  searchPattern ,)com.openexchange.admin.soap.reseller.service.rmi.dataobjects.Credentials  creds )*
      */
+    @Override
     public java.util.List<com.openexchange.admin.soap.reseller.service.reseller.rmi.dataobjects.ResellerAdmin> list(java.lang.String searchPattern,com.openexchange.admin.soap.reseller.service.rmi.dataobjects.Credentials creds) throws InvalidCredentialsException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    { 
         LOG.info("Executing operation list");
         System.out.println(searchPattern);
@@ -148,6 +154,7 @@ public class OXResellerServicePortTypeImpl5 implements OXResellerServicePortType
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.reseller.service.reseller.soap.OXResellerServicePortType#getRestrictionsFromContext(com.openexchange.admin.soap.reseller.service.reseller.soap.dataobjects.ResellerContext  ctx ,)com.openexchange.admin.soap.reseller.service.rmi.dataobjects.Credentials  creds )*
      */
+    @Override
     public java.util.List<com.openexchange.admin.soap.reseller.service.reseller.rmi.dataobjects.Restriction> getRestrictionsFromContext(com.openexchange.admin.soap.reseller.service.reseller.soap.dataobjects.ResellerContext ctx,com.openexchange.admin.soap.reseller.service.rmi.dataobjects.Credentials creds) throws InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , StorageException_Exception , RemoteException_Exception , OXResellerException_Exception , InvalidDataException_Exception    { 
         LOG.info("Executing operation getRestrictionsFromContext");
         System.out.println(ctx);
@@ -170,6 +177,7 @@ public class OXResellerServicePortTypeImpl5 implements OXResellerServicePortType
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.reseller.service.reseller.soap.OXResellerServicePortType#create(com.openexchange.admin.soap.reseller.service.reseller.rmi.dataobjects.ResellerAdmin  adm ,)com.openexchange.admin.soap.reseller.service.rmi.dataobjects.Credentials  creds )*
      */
+    @Override
     public com.openexchange.admin.soap.reseller.service.reseller.rmi.dataobjects.ResellerAdmin create(com.openexchange.admin.soap.reseller.service.reseller.rmi.dataobjects.ResellerAdmin adm,com.openexchange.admin.soap.reseller.service.rmi.dataobjects.Credentials creds) throws InvalidCredentialsException_Exception , StorageException_Exception , RemoteException_Exception , OXResellerException_Exception , InvalidDataException_Exception    { 
         LOG.info("Executing operation create");
         System.out.println(adm);
@@ -191,6 +199,7 @@ public class OXResellerServicePortTypeImpl5 implements OXResellerServicePortType
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.reseller.service.reseller.soap.OXResellerServicePortType#getMultipleData(java.util.List<com.openexchange.admin.soap.reseller.service.reseller.rmi.dataobjects.ResellerAdmin>  admins ,)com.openexchange.admin.soap.reseller.service.rmi.dataobjects.Credentials  creds )*
      */
+    @Override
     public java.util.List<com.openexchange.admin.soap.reseller.service.reseller.rmi.dataobjects.ResellerAdmin> getMultipleData(java.util.List<com.openexchange.admin.soap.reseller.service.reseller.rmi.dataobjects.ResellerAdmin> admins,com.openexchange.admin.soap.reseller.service.rmi.dataobjects.Credentials creds) throws InvalidCredentialsException_Exception , StorageException_Exception , RemoteException_Exception , OXResellerException_Exception , InvalidDataException_Exception    { 
         LOG.info("Executing operation getMultipleData");
         System.out.println(admins);
@@ -212,6 +221,7 @@ public class OXResellerServicePortTypeImpl5 implements OXResellerServicePortType
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.reseller.service.reseller.soap.OXResellerServicePortType#getData(com.openexchange.admin.soap.reseller.service.reseller.rmi.dataobjects.ResellerAdmin  adm ,)com.openexchange.admin.soap.reseller.service.rmi.dataobjects.Credentials  creds )*
      */
+    @Override
     public com.openexchange.admin.soap.reseller.service.reseller.rmi.dataobjects.ResellerAdmin getData(com.openexchange.admin.soap.reseller.service.reseller.rmi.dataobjects.ResellerAdmin adm,com.openexchange.admin.soap.reseller.service.rmi.dataobjects.Credentials creds) throws InvalidCredentialsException_Exception , StorageException_Exception , RemoteException_Exception , OXResellerException_Exception , InvalidDataException_Exception    { 
         LOG.info("Executing operation getData");
         System.out.println(adm);
@@ -233,6 +243,7 @@ public class OXResellerServicePortTypeImpl5 implements OXResellerServicePortType
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.reseller.service.reseller.soap.OXResellerServicePortType#updateDatabaseModuleAccessRestrictions(com.openexchange.admin.soap.reseller.service.reseller.soap.UpdateDatabaseModuleAccessRestrictions  parameters )*
      */
+    @Override
     public void updateDatabaseModuleAccessRestrictions(UpdateDatabaseModuleAccessRestrictions parameters) throws InvalidCredentialsException_Exception , StorageException_Exception , RemoteException_Exception , OXResellerException_Exception    { 
         LOG.info("Executing operation updateDatabaseModuleAccessRestrictions");
         System.out.println(parameters);
@@ -250,6 +261,7 @@ public class OXResellerServicePortTypeImpl5 implements OXResellerServicePortType
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.reseller.service.reseller.soap.OXResellerServicePortType#initDatabaseRestrictions(com.openexchange.admin.soap.reseller.service.reseller.soap.InitDatabaseRestrictions  parameters )*
      */
+    @Override
     public void initDatabaseRestrictions(InitDatabaseRestrictions parameters) throws InvalidCredentialsException_Exception , StorageException_Exception , RemoteException_Exception , OXResellerException_Exception    { 
         LOG.info("Executing operation initDatabaseRestrictions");
         System.out.println(parameters);

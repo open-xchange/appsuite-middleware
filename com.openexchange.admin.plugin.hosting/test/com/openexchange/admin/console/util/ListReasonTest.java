@@ -69,6 +69,7 @@ public class ListReasonTest extends AbstractTest {
         resetBuffers();
         
         new ListReason(getMasterCredentialsOptionData()){
+            @Override
             protected void sysexit(int exitCode) {
                 ListReasonTest.this.returnCode = exitCode;
             }
@@ -83,6 +84,7 @@ public class ListReasonTest extends AbstractTest {
         resetBuffers();
         
         new ListReason(getCSVMasterOptionData()){
+            @Override
             protected void sysexit(int exitCode) {
                 ListReasonTest.this.returnCode = exitCode;
             }
@@ -97,6 +99,7 @@ public class ListReasonTest extends AbstractTest {
         resetBuffers();
         
         new ListReason(getWrongMasterCredentialsOptionData()){
+            @Override
             protected void sysexit(int exitCode) {
                 ListReasonTest.this.returnCode = exitCode;
             }
@@ -111,6 +114,7 @@ public class ListReasonTest extends AbstractTest {
         resetBuffers();
         
         new ListReason(getUnknownOptionData()){
+            @Override
             protected void sysexit(int exitCode) {
                 ListReasonTest.this.returnCode = exitCode;
             }

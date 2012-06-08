@@ -85,9 +85,9 @@ public class ChangeModuleAccessGlobal extends UserAbstraction {
 
     private OXUserInterface oxusr;
 
-    private UserModuleAccess addAccess;
+    private final UserModuleAccess addAccess;
 
-    private UserModuleAccess removeAccess;
+    private final UserModuleAccess removeAccess;
 
     private int filter;
 

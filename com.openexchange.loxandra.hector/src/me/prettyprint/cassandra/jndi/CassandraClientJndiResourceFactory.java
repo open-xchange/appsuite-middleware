@@ -45,7 +45,7 @@ import me.prettyprint.hector.api.factory.HFactory;
  */
 
 public class CassandraClientJndiResourceFactory implements ObjectFactory {
-  private Logger log = LoggerFactory.getLogger(CassandraClientJndiResourceFactory.class);
+  private final Logger log = LoggerFactory.getLogger(CassandraClientJndiResourceFactory.class);
   
   private CassandraHostConfigurator cassandraHostConfigurator;
   private Cluster cluster;
@@ -67,7 +67,8 @@ public class CassandraClientJndiResourceFactory implements ObjectFactory {
    * @exception Exception - if this object factory encountered an exception while attempting 
    *                        to create an object, and no other object factories are to be tried.
    */
-  public Object getObjectInstance(Object object, Name jndiName, Context context,
+  @Override
+public Object getObjectInstance(Object object, Name jndiName, Context context,
       Hashtable<?, ?> environment) throws Exception {  
     Reference resourceRef = null;
     

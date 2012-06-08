@@ -601,7 +601,8 @@ public class ContactServiceImpl extends DefaultContactService {
 				queryFields.needsAttachmentInfo(), session, true);
 	}
 
-	protected SearchIterator<Contact> doGetUsers(Session session, int[] userIDs, ContactSearchObject contactSearch,
+	@Override
+    protected SearchIterator<Contact> doGetUsers(Session session, int[] userIDs, ContactSearchObject contactSearch,
 			ContactField[] fields, SortOptions sortOptions) throws OXException {
 		int currentUserID = session.getUserId();
 		int contextID = session.getContextId();
