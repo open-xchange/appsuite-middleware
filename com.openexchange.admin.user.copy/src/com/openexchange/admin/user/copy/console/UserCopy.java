@@ -57,10 +57,10 @@ import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.ObjectNamingAbstraction;
+import com.openexchange.admin.rmi.OXUserCopyInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
-import com.openexchange.admin.user.copy.rmi.OXUserCopyInterface;
 
 public class UserCopy extends ObjectNamingAbstraction {
 
@@ -96,7 +96,7 @@ public class UserCopy extends ObjectNamingAbstraction {
     /**
      * @param args
      */
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         final UserCopy usercopy = new UserCopy();
         usercopy.start(args);
     }
@@ -181,7 +181,7 @@ public class UserCopy extends ObjectNamingAbstraction {
     }
 
 
-    private void setOptions(AdminParser parser) {
+    private void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptionsWithoutContextID(parser);
         this.fromContextOption = setShortLongOpt(parser,OPT_NAME_FROM_CONTEXT_SHORT, OPT_NAME_FROM_CONTEXT_LONG, OPT_NAME_FROM_CONTEXT_DESCRIPTION, true, NeededQuadState.needed);
         this.toContextOption = setShortLongOpt(parser,OPT_NAME_TO_CONTEXT_SHORT, OPT_NAME_TO_CONTEXT_LONG, OPT_NAME_TO_CONTEXT_DESCRIPTION, true, NeededQuadState.needed);
