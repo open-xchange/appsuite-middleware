@@ -47,29 +47,31 @@
  *
  */
 
-package com.openexchange.index;
+package com.openexchange.mail.smal.impl;
 
-import com.openexchange.i18n.LocalizableStrings;
+import com.openexchange.mail.search.ANDTerm;
+import com.openexchange.mail.search.AbstractSearchTermVisitor;
+import com.openexchange.mail.search.ORTerm;
 
+public class SimpleSearchTermVisitor extends AbstractSearchTermVisitor {
 
-/**
- * {@link IndexExceptionMessages}
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- */
-public final class IndexExceptionMessages implements LocalizableStrings {
+    public boolean simple = true;
 
     /**
-     * Initializes a new {@link IndexExceptionMessages}.
+     * Initializes a new {@link SimpleSearchTermVisitor}.
      */
-    public IndexExceptionMessages() {
+    public SimpleSearchTermVisitor() {
         super();
     }
 
-    // An unexpected error occurred: %1$s
-    public static final String UNEXPECTED_ERROR_MSG = "An unexpected error occurred: %1$s";
-    
-    // An index entry does not exist for folder %1$s in account %2$s.
-    public static final String MISSING_FOLDER_ENTRY_MSG = "An index entry does not exist for folder %1$s in account %2$s.";
-    
+    @Override
+    public void visit(final ANDTerm term) {
+        simple = false;
+    }
+
+    @Override
+    public void visit(final ORTerm term) {
+        simple = false;
+    }
+
 }

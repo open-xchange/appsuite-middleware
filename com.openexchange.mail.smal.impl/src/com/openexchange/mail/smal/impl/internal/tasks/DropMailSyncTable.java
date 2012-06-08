@@ -47,29 +47,62 @@
  *
  */
 
-package com.openexchange.index;
+package com.openexchange.mail.smal.impl.internal.tasks;
 
-import com.openexchange.i18n.LocalizableStrings;
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.tools.sql.DBUtils.tableExists;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.mail.smal.impl.SmalServiceLookup;
+import com.openexchange.server.ServiceExceptionCodes;
 
 
 /**
- * {@link IndexExceptionMessages}
+ * {@link DropMailSyncTable}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public final class IndexExceptionMessages implements LocalizableStrings {
+public class DropMailSyncTable extends UpdateTaskAdapter {
 
-    /**
-     * Initializes a new {@link IndexExceptionMessages}.
-     */
-    public IndexExceptionMessages() {
-        super();
+    @Override
+    public void perform(PerformParameters params) throws OXException {
+        final DatabaseService dbService = SmalServiceLookup.getInstance().getService(DatabaseService.class);
+        if (dbService == null) {
+            throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
+        }
+        final int contextId = params.getContextId();
+        final Connection writeCon;
+        try {
+            writeCon = dbService.getForUpdateTask(contextId);
+        } catch (final OXException e) {
+            throw e;
+        }
+        PreparedStatement stmt = null;
+        try {
+            try {
+                if (tableExists(writeCon, "mailSync")) {
+                    stmt = writeCon.prepareStatement("DROP TABLE mailSync");
+                    stmt.executeUpdate();
+                    stmt.close();
+                }
+            } catch (final SQLException e) {
+                throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+            }
+        } finally {
+            closeSQLStuff(null, stmt);
+            dbService.backForUpdateTask(contextId, writeCon);
+        }
     }
 
-    // An unexpected error occurred: %1$s
-    public static final String UNEXPECTED_ERROR_MSG = "An unexpected error occurred: %1$s";
-    
-    // An index entry does not exist for folder %1$s in account %2$s.
-    public static final String MISSING_FOLDER_ENTRY_MSG = "An index entry does not exist for folder %1$s in account %2$s.";
-    
+    @Override
+    public String[] getDependencies() {
+        return new String[] {};
+    }
+
 }

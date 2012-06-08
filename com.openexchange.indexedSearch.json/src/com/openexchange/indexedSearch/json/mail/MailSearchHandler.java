@@ -155,10 +155,8 @@ public class MailSearchHandler implements SearchHandler {
                         mails.add(indexDocument.getObject());
                     }
                     retval.add(new FieldResults(name, "mail", results, more[0]));
-                } catch (InterruptedException e) {
-                    // Thread interrupted
-                    Thread.currentThread().interrupt();
-                    return Collections.emptyList();
+                } finally {
+                    
                 }
             }
             // Prepare AJAX request data for mail ResultConverter
