@@ -7,6 +7,7 @@
  - Fix for bug 22261: Only check secret for not null rather than possible empty string
  - Fix for bug 22277: Fixed possible NPE
  - Fix for bug 22274: Fixed possible NPEs
+ - Fix for bug 22276: Proper handling of possible NumberFormatException
 
 * 2012-06-07 - thorben.betten@open-xchange.com
 
