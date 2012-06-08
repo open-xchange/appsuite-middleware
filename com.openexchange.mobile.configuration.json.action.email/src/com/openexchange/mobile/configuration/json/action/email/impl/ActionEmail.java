@@ -56,6 +56,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
 import com.openexchange.mail.transport.MailTransport;
+import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mobile.configuration.json.action.ActionService;
 import com.openexchange.mobile.configuration.json.container.ProvisioningInformation;
 import com.openexchange.mobile.configuration.json.container.ProvisioningResponse;
@@ -97,6 +98,7 @@ public class ActionEmail implements ActionService {
 			}
 
 			msg.setContentType("text/plain");
+			msg.setAccountId(MailAccount.DEFAULT_ID);
 
 			final MailTransport transport = MailTransport.getInstance(provisioningInformation.getSession());
 			try {
