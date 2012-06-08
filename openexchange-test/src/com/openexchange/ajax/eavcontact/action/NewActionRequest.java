@@ -55,9 +55,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.eavcontact.EAVContactWriter;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.loxandra.dto.EAVContact;
+import com.openexchange.loxandra.json.EAVContactWriter;
 
 /**
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
