@@ -69,6 +69,7 @@ import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
+import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.tools.TimeZoneUtils;
 
 /**
@@ -441,7 +442,7 @@ public abstract class MailMessage extends MailPart {
         super();
         priority = PRIORITY_NORMAL;
         colorLabel = COLOR_LABEL_NONE;
-        accountId = -1;
+        accountId = MailAccount.DEFAULT_ID;
     }
 
     /**
