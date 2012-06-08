@@ -1,20 +1,19 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Open-Xchange Loxandra Impl Bundle
-Bundle-SymbolicName: com.openexchange.loxandra.impl
-Bundle-Version: 6.21.0
+Bundle-Name: Open-Xchange Loxandra Test Bundle
+Bundle-SymbolicName: com.openexchange.loxandra.test
+Bundle-Version: 6.21.0.0
+Bundle-Activator: com.openexchange.loxandra.test.Activator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.config,
- com.openexchange.groupware.container,
+Import-Package: com.openexchange.groupware.contact,
+ com.openexchange.log,
  com.openexchange.loxandra,
  com.openexchange.loxandra.dto,
  com.openexchange.osgi,
+ com.openexchange.server,
  me.prettyprint.cassandra.serializers,
  me.prettyprint.cassandra.service,
- me.prettyprint.cassandra.service.clock,
- me.prettyprint.cassandra.service.template,
- me.prettyprint.cassandra.utils,
  me.prettyprint.hector.api,
  me.prettyprint.hector.api.beans,
  me.prettyprint.hector.api.ddl,
@@ -23,12 +22,6 @@ Import-Package: com.openexchange.config,
  me.prettyprint.hector.api.mutation,
  me.prettyprint.hector.api.query,
  me.prettyprint.hector.testutils,
- org.apache.cassandra.db,
- org.apache.cassandra.service,
- org.apache.cassandra.thrift,
- org.apache.cassandra.utils,
  org.apache.commons.logging,
- org.apache.log4j,
  org.osgi.framework
-Require-Bundle: com.openexchange.global
-Bundle-Activator: com.openexchange.loxandra.impl.osgi.LoxandraActivator
+Bundle-ActivationPolicy: lazy

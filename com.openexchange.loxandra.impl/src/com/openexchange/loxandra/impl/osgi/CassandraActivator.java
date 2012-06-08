@@ -46,58 +46,91 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.loxandra.impl.core;
+package com.openexchange.loxandra.impl.osgi;
 
-import java.util.concurrent.atomic.AtomicReference;
+import java.io.File;
 
-import com.openexchange.server.ServiceLookup;
+import org.apache.commons.logging.Log;
+
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.log.LogFactory;
+import com.openexchange.loxandra.impl.core.CassandraServiceLookUp;
+import com.openexchange.loxandra.impl.core.EmbeddedCassandraService;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ *
  */
-public final class LoxandraServiceLookUp {
+public final class CassandraActivator extends HousekeepingActivator {
+	
+	private static Log log = LogFactory.getLog(CassandraActivator.class);
+	
+	private EmbeddedCassandraService cassandra;
+	private Thread cassandraThread;
 
 	/**
-	 * Initializes a new {@link LoxandraServiceLookUp}.
+	 * Default Constructor 
 	 */
-	private LoxandraServiceLookUp() {
+	public CassandraActivator() {
 		super();
 	}
 
-	private static final AtomicReference<ServiceLookup> ref = new AtomicReference<ServiceLookup>();
-
-	/**
-	 * Gets the service look-up
-	 * 
-	 * @return The service look-up or <code>null</code>
+	/*
+	 * (non-Javadoc)
+	 * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
 	 */
-	public static ServiceLookup get() {
-		return ref.get();
+	@Override
+	protected Class<?>[] getNeededServices() {
+		
+		return new Class[]{ConfigurationService.class};
 	}
 
-	/**
-	 * Gets the service of specified type
-	 * 
-	 * @param clazz
-	 *            The service's class
-	 * @return The service or <code>null</code> is absent
-	 * @throws IllegalStateException
-	 *             If an error occurs while returning the demanded service
+	/*
+	 * (non-Javadoc)
+	 * @see com.openexchange.osgi.DeferredActivator#startBundle()
 	 */
-	public static <S extends Object> S getService(final Class<? extends S> clazz) {
-		final ServiceLookup serviceLookup = ref.get();
-		return null == serviceLookup ? null : serviceLookup.getService(clazz);
+	@Override
+	protected void startBundle() throws Exception {
+		log.info("starting bundle: com.openexchange.loxandra.common");
+		
+		CassandraServiceLookUp.set(this);
+		
+		ConfigurationService config = CassandraServiceLookUp.getService(ConfigurationService.class);
+		
+		System.setProperty("cassandra.config", new File(config.getProperty("CONFIGPATH") + "/cassandra.yaml").toURI().toString());
+		
+		//start embedded cassandra node
+		cassandra = new EmbeddedCassandraService();
+		cassandra.init();
+		cassandra.run();
+		//cassandraThread = new Thread(cassandra);
+		//cassandraThread.setDaemon(true);
+		System.out.println("Waiting for server to become alive...");
+		try {
+			Thread.sleep(137);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		//cassandraThread.start();
+		
+        
+        log.info("started bundle: com.openexchange.loxandra.common");
 	}
-
-	/**
-	 * Sets the service look-up
-	 * 
-	 * @param serviceLookup
-	 *            The service look-up or <code>null</code>
+	
+	/*
+	 * (non-Javadoc)
+	 * @see com.openexchange.osgi.HousekeepingActivator#stopBundle()
 	 */
-	public static void set(final ServiceLookup serviceLookup) {
-		ref.set(serviceLookup);
+	@Override
+	protected void stopBundle() throws Exception {
+		// ISSUE: no clean stop
+		log.info("stopping bundle: com.openexchange.loxandra.common");
+		cassandra.stop();
+		cassandraThread = null;
+		cassandra = null;
+		CassandraServiceLookUp.set(null);
+		cleanUp();
+		log.info("stopped bundle: com.openexchange.loxandra.common");
 	}
 }

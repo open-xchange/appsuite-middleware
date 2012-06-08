@@ -46,58 +46,39 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.loxandra.impl.core;
+package com.openexchange.loxandra.json;
 
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.TimeZone;
 
-import com.openexchange.server.ServiceLookup;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.openexchange.ajax.fields.ContactFields;
+import com.openexchange.ajax.writer.CommonWriter;
+import com.openexchange.loxandra.dto.EAVContact;
+import com.openexchange.tools.TimeZoneUtils;
 
 /**
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ *
  */
-public final class LoxandraServiceLookUp {
-
+public class EAVContactWriter extends CommonWriter {
+	
+	private TimeZone utc;
+	
 	/**
-	 * Initializes a new {@link LoxandraServiceLookUp}.
+	 * Default Constructor
+	 * @param tz
 	 */
-	private LoxandraServiceLookUp() {
-		super();
+	public EAVContactWriter(TimeZone tz) {
+		super(tz, null);
+        utc = TimeZoneUtils.getTimeZone("utc");
+	}
+	
+	public void writeContact(final EAVContact c, final JSONObject j) throws JSONException {
+		writeParameter("named:" + ContactFields.FIRST_NAME, c.getGivenName(), j);
+		writeParameter("named:" + ContactFields.LAST_NAME, c.getSurName(), j);
+		writeParameter("named:" + ContactFields.DISPLAY_NAME, c.getDisplayName(), j);
 	}
 
-	private static final AtomicReference<ServiceLookup> ref = new AtomicReference<ServiceLookup>();
-
-	/**
-	 * Gets the service look-up
-	 * 
-	 * @return The service look-up or <code>null</code>
-	 */
-	public static ServiceLookup get() {
-		return ref.get();
-	}
-
-	/**
-	 * Gets the service of specified type
-	 * 
-	 * @param clazz
-	 *            The service's class
-	 * @return The service or <code>null</code> is absent
-	 * @throws IllegalStateException
-	 *             If an error occurs while returning the demanded service
-	 */
-	public static <S extends Object> S getService(final Class<? extends S> clazz) {
-		final ServiceLookup serviceLookup = ref.get();
-		return null == serviceLookup ? null : serviceLookup.getService(clazz);
-	}
-
-	/**
-	 * Sets the service look-up
-	 * 
-	 * @param serviceLookup
-	 *            The service look-up or <code>null</code>
-	 */
-	public static void set(final ServiceLookup serviceLookup) {
-		ref.set(serviceLookup);
-	}
 }
