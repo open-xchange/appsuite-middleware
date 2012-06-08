@@ -53,16 +53,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.Set;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.fileupload.FileUploadBase;
-import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -74,8 +70,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
-import com.openexchange.groupware.upload.UploadFile;
-import com.openexchange.groupware.upload.impl.UploadEvent;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
@@ -154,7 +149,7 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
         Tools.disableCaching(resp);
 
         final String action = req.getParameter(PARAMETER_ACTION);
-        final boolean isFileUpload = FileUploadBase.isMultipartContent(new ServletRequestContext(req));
+        final boolean isFileUpload = Tools.isMultipartContent(req);
 
         final ServerSession session = getSessionObject(req);
 
@@ -245,6 +240,11 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
 
     protected AJAXRequestData parseRequest(final HttpServletRequest req, final boolean preferStream, final boolean isFileUpload, final ServerSession session) throws IOException, OXException {
         final AJAXRequestData retval = new AJAXRequestData();
+        retval.setMultipart(isFileUpload);
+        /*
+         * Set HTTP Servlet request instance
+         */
+        retval.setHttpServletRequest(req);
         retval.setSecure(Tools.considerSecure(req));
         {
             final HostnameService hostnameService = ServerServiceRegistry.getInstance().getService(HostnameService.class);
@@ -266,19 +266,7 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
                 retval.putParameter(entry.getKey(), entry.getValue()[0]);
             }
         }
-        if (isFileUpload) {
-            final UploadEvent upload = processUpload(req);
-            final Iterator<UploadFile> iterator = upload.getUploadFilesIterator();
-            while(iterator.hasNext()) {
-                retval.addFile(iterator.next());
-            }
-            final Iterator<String> names = upload.getFormFieldNames();
-            while(names.hasNext()) {
-                final String name = names.next();
-                retval.putParameter(name, upload.getFormField(name));
-            }
-            retval.setUploadEvent(upload);
-        } else if (preferStream) {
+        if (preferStream) {
             /*
              * Pass request's stream
              */

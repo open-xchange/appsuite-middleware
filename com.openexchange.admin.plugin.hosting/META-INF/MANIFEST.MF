@@ -4,7 +4,21 @@ Bundle-Name: Hosting Plugin for Administration Daemon
 Bundle-SymbolicName: com.openexchange.admin.plugin.hosting
 Bundle-Version: 6.21.0
 Bundle-Activator: com.openexchange.admin.osgi.Activator
-Import-Package: com.openexchange.caching,
+Import-Package: com.openexchange.admin.console,
+ com.openexchange.admin.console.context,
+ com.openexchange.admin.console.group,
+ com.openexchange.admin.console.resource,
+ com.openexchange.admin.console.user,
+ com.openexchange.admin.console.util.database,
+ com.openexchange.admin.console.util.filestore,
+ com.openexchange.admin.console.util.reason,
+ com.openexchange.admin.console.util.server,
+ com.openexchange.admin.plugins,
+ com.openexchange.admin.rmi,
+ com.openexchange.admin.rmi.dataobjects,
+ com.openexchange.admin.rmi.exceptions,
+ com.openexchange.admin.rmi.extensions,
+ com.openexchange.caching,
  com.openexchange.context,
  com.openexchange.database,
  com.openexchange.databaseold,
@@ -37,11 +51,8 @@ Import-Package: com.openexchange.caching,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.util.tracker
-Require-Bundle: com.openexchange.admin
-Export-Package: com.openexchange.admin.rmi,
- com.openexchange.admin.rmi.impl,
- com.openexchange.admin.rmi.exceptions,
+Export-Package: com.openexchange.admin.rmi.impl,
  com.openexchange.admin.storage.interfaces
-Eclipse-BuddyPolicy: registered
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: .
+Require-Bundle: com.openexchange.admin;bundle-version="6.21.0"

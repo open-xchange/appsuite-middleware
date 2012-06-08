@@ -29,8 +29,11 @@ public class RegisterAction implements AJAXActionService {
 			ServerSession session) throws OXException {
 		JSONObject app = new JSONObject();
 		
+		System.out.println("######## "+requestData.getParameters());
+		
+		
 		try {
-			app.put("img", requestData.getParameter("img"));
+			app.put("img", requestData.getParameter("image"));
 			app.put("url", requestData.getParameter("url"));
 			database.put(app);
 		} catch (JSONException e) {

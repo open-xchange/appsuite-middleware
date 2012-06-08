@@ -350,7 +350,7 @@ public abstract class DefaultContactService implements ContactService {
 	protected abstract <O> SearchIterator<Contact> doSearchContacts(Session session, SearchTerm<O> term, ContactField[] fields, 
 			SortOptions sortOptions) throws OXException;
 	
-	protected abstract <O> SearchIterator<Contact> doSearchContacts(Session session, ContactSearchObject contactSearch, 
+	protected abstract SearchIterator<Contact> doSearchContacts(Session session, ContactSearchObject contactSearch, 
 			ContactField[] fields, SortOptions sortOptions) throws OXException;
 	
 	protected abstract String doGetOrganization(int contextID) throws OXException;

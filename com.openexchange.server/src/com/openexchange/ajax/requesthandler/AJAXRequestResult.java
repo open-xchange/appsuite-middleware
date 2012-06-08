@@ -244,15 +244,11 @@ public class AJAXRequestResult {
     public AJAXRequestResult(final Object resultObject, final Date timestamp, final String format) {
         super();
         headers = new LinkedHashMap<String, String>(8);
-        parameters = new HashMap<String, Object>(4);
+        parameters = new HashMap<String, Object>(8);
         responseProperties = new HashMap<String, Object>(4);
         this.resultObject = resultObject;
         this.timestamp = null == timestamp ? null : new Date(timestamp.getTime());
-        if (format == null) {
-            this.format = JSON;
-        } else {
-            this.format = format;
-        }
+        this.format = null == format ? JSON : format;
         resultType = ResultType.COMMON;
         expires = -1;
     }
@@ -358,9 +354,9 @@ public class AJAXRequestResult {
     }
 
     /**
-     * Sets the resultObject
+     * Sets the result object
      * 
-     * @param resultObject The resultObject to set
+     * @param resultObject The result object to set
      */
     public void setResultObject(final Object resultObject) {
         this.resultObject = resultObject;
@@ -394,7 +390,7 @@ public class AJAXRequestResult {
     }
 
     /**
-     * sets the time stamp.
+     * Sets the time stamp.
      * 
      * @param timestamp The time stamp.
      */

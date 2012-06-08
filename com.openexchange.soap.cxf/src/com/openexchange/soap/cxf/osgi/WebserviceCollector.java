@@ -160,8 +160,9 @@ public class WebserviceCollector implements ServiceListener {
         // If a service property for WebserviceName is present, use that
         {
             final Object name = ref.getProperty(WEBSERVICE_NAME);
-            if (name != null && !"".equals(name)) {
-                return name.toString();
+            final String sName = null == name ? null : name.toString();
+            if (!isEmpty(sName)) {
+                return sName;
             }
         }
         // Next try the WebService annotation
@@ -169,16 +170,28 @@ public class WebserviceCollector implements ServiceListener {
         {
             final WebService webService = service.getClass().getAnnotation(WebService.class);
             String serviceName = webService.serviceName();
-            if (serviceName != null && !("".equals(serviceName))) {
+            if (!isEmpty(serviceName)) {
                 return serviceName;
             }
             serviceName = webService.name();
-            if (serviceName != null && !("".equals(serviceName))) {
+            if (!isEmpty(serviceName)) {
                 return serviceName;
             }
         }
         // Else use the class name
         return service.getClass().getSimpleName();
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
     private void remove(final String name, final Object service) {

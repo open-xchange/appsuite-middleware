@@ -1,3 +1,20 @@
+* 2012-06-08 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22261: Only check secret for not null rather than possible empty string
+
+* 2012-06-07 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22162: Checking if uploaded file's Content-Type starts with "application/force" to let its MIME type be resolved by file name
+
+* 2012-06-06 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 22258: Fixed missing folder-id on invitation accepts.
+ - Fix for bug 21691: Initial Alarm on new Appointments.
+
+* 2012-06-06 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22257: Don't stick to specific error code MSG-0063 to assume folder creation failed because of already existent folder
+
 * 2012-06-05 - thorben.betten@open-xchange.com
 
  - Fix for bug 22245: Properly use ACE address for SMTP's envelope-from header

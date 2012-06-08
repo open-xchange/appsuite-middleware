@@ -53,7 +53,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -65,8 +64,6 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
-import com.openexchange.groupware.upload.UploadFile;
-import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
@@ -120,6 +117,11 @@ public class AJAXRequestDataTools {
     public AJAXRequestData parseRequest(final HttpServletRequest req, final boolean preferStream, final boolean isFileUpload, final ServerSession session, final String prefix) throws IOException, OXException {
         final AJAXRequestData retval = new AJAXRequestData();
         parseHostName(retval, req, session);
+        retval.setMultipart(isFileUpload);
+        /*
+         * Set HTTP Servlet request instance
+         */
+        retval.setHttpServletRequest(req);
         /*
          * Set the module
          */
@@ -167,19 +169,7 @@ public class AJAXRequestDataTools {
         /*
          * Set request body
          */
-        if (isFileUpload) {
-            final UploadEvent upload = AJAXServlet.processUploadStatic(req);
-            final Iterator<UploadFile> iterator = upload.getUploadFilesIterator();
-            while (iterator.hasNext()) {
-                retval.addFile(iterator.next());
-            }
-            final Iterator<String> names = upload.getFormFieldNames();
-            while (names.hasNext()) {
-                final String name = names.next();
-                retval.putParameter(name, upload.getFormField(name));
-            }
-            retval.setUploadEvent(upload);
-        } else if (preferStream || parseBoolParameter("binary", req)) {
+        if (preferStream || parseBoolParameter("binary", req)) {
             /*
              * Pass request's stream
              */

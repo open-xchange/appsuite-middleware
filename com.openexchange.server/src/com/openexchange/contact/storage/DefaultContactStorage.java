@@ -90,7 +90,7 @@ public abstract class DefaultContactStorage implements ContactStorage {
 	}
 
 	@Override
-	public <O> SearchIterator<Contact> search(int contextID, ContactSearchObject contactSearch, ContactField[] fields) throws OXException {
+	public SearchIterator<Contact> search(int contextID, ContactSearchObject contactSearch, ContactField[] fields) throws OXException {
         return this.search(contextID, contactSearch, fields, SortOptions.EMPTY);
 	}
 

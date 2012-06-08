@@ -373,9 +373,9 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
                 throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_TOKEN);
             }
             account.setToken(encrypt(account.getToken(), session));
-            /*if (isEmpty(account.getSecret())) {
+            if (null == account.getSecret()) {
                 throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_SECRET);
-            }*/
+            }
             account.setSecret(encrypt(account.getSecret(), session));
             /*
              * Create INSERT command

@@ -486,7 +486,7 @@ public class ContactServiceImpl extends DefaultContactService {
 	}
 	
 	@Override
-    protected <O> SearchIterator<Contact> doSearchContacts(Session session, ContactSearchObject contactSearch, ContactField[] fields, 
+    protected SearchIterator<Contact> doSearchContacts(Session session, ContactSearchObject contactSearch, ContactField[] fields, 
 			SortOptions sortOptions) throws OXException {
 		int userID = session.getUserId();
 		int contextID = session.getContextId();

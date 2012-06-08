@@ -55,8 +55,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.fileupload.FileUploadBase;
-import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
@@ -70,7 +68,7 @@ import com.openexchange.tools.UnsynchronizedStringWriter;
 
 /**
  * {@link APIResponseRenderer}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class APIResponseRenderer implements ResponseRenderer {
@@ -80,9 +78,11 @@ public class APIResponseRenderer implements ResponseRenderer {
      */
     private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(APIResponseRenderer.class));
 
-	private static final String JSONP = "jsonp";
+    private static final String JSONP = "jsonp";
 
-	private static final String CALLBACK = "callback";
+    private static final String CALLBACK = "callback";
+
+    private static final String PLAIN_JSON = "plainJson";
 
     /**
      * Initializes a new {@link APIResponseRenderer}.
@@ -103,7 +103,13 @@ public class APIResponseRenderer implements ResponseRenderer {
 
     @Override
     public void write(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest req, final HttpServletResponse resp) {
-        writeResponse((Response) result.getResultObject(), request.getAction(), req, resp);
+        final Boolean plainJson = (Boolean) result.getParameter(PLAIN_JSON);
+        writeResponse(
+            (Response) result.getResultObject(),
+            request.getAction(),
+            req,
+            resp,
+            null == plainJson ? false : plainJson.booleanValue());
     }
 
     /**
@@ -115,15 +121,21 @@ public class APIResponseRenderer implements ResponseRenderer {
      * <li>The HTTP Servlet request has the <code>"respondWithHTML"</code> parameter set to <code>"true"</code></li>
      * <li>The HTTP Servlet request contains non-<code>null</code> <code>"callback"</code> parameter</li>
      * </ul>
-     *
+     * 
      * @param response The response to write
      * @param action The request's action
      * @param req The HTTP Servlet request
      * @param resp The HTTP Servlet response
      */
     public static void writeResponse(final Response response, final String action, final HttpServletRequest req, final HttpServletResponse resp) {
+        writeResponse(response, action, req, resp, false);
+    }
+
+    private static void writeResponse(final Response response, final String action, final HttpServletRequest req, final HttpServletResponse resp, final boolean plainJson) {
         try {
-            if (FileUploadBase.isMultipartContent(new ServletRequestContext(req)) || isRespondWithHTML(req) || req.getParameter(CALLBACK) != null) {
+            if (plainJson) {
+                ResponseWriter.write(response, resp.getWriter());
+            } else if (isMultipartContent(req) || isRespondWithHTML(req) || req.getParameter(CALLBACK) != null) {
                 resp.setContentType(AJAXServlet.CONTENTTYPE_HTML);
                 String callback = req.getParameter(CALLBACK);
                 if (callback == null) {
@@ -139,9 +151,7 @@ public class APIResponseRenderer implements ResponseRenderer {
                 ResponseWriter.write(response, w);
 
                 final StringBuilder sb = new StringBuilder(call);
-                sb.append('(');
-                sb.append(w.toString());
-                sb.append(");");
+                sb.append('(').append(w.toString()).append(");");
                 resp.setContentType("text/javascript");
                 resp.getWriter().write(sb.toString());
             } else {
@@ -157,6 +167,28 @@ public class APIResponseRenderer implements ResponseRenderer {
         } catch (final IOException e) {
             LOG.error(e.getMessage(), e);
         }
+    }
+
+    /**
+     * Part of HTTP content type header.
+     */
+    private static final String MULTIPART = "multipart/";
+
+    /**
+     * Utility method that determines whether the request contains multipart content
+     * 
+     * @param request The request to be evaluated.
+     * @return <code>true</code> if the request is multipart; <code>false</code> otherwise.
+     */
+    private static final boolean isMultipartContent(final HttpServletRequest request) {
+        final String contentType = request.getContentType();
+        if (contentType == null) {
+            return false;
+        }
+        if (contentType.toLowerCase().startsWith(MULTIPART)) {
+            return true;
+        }
+        return false;
     }
 
     private static boolean isRespondWithHTML(final HttpServletRequest req) {

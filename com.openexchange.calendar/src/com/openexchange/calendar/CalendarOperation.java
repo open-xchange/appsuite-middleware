@@ -1364,7 +1364,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                                     p[1] = new Participants(); // modified
                                 }
                                 np[a].setIsModified(false);
-                                if (cdao.containsAlarm() && recColl.existsReminder(cdao.getContext(), cdao.getObjectID(), uid)) {
+                                if (cdao.containsAlarm()) {
                                     np[a].setIsModified(true);
                                     np[a].setAlarmMinutes(cdao.getAlarm());
                                 } else if (sharedFolderOwner != 0 && uid != sharedFolderOwner && sharedFolderOwner == np[a].getIdentifier() && !userIsParticipant(

@@ -7,6 +7,7 @@ Bundle-Activator: com.openexchange.http.grizzly.osgi.GrizzlyActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.config,
+ com.openexchange.configuration,
  com.openexchange.exception,
  com.openexchange.i18n,
  com.openexchange.log,
@@ -31,3 +32,4 @@ Bundle-ClassPath: .,
  lib/management-api-3.0.0-b012.jar,
  lib/servlet-api-2.5.jar,
  lib/grizzly-http-servlet-2.2.5.jar
+Require-Bundle: com.openexchange.common

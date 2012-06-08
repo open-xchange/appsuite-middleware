@@ -63,6 +63,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
+import javax.servlet.http.HttpServletRequest;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.RequestConstants;
@@ -129,7 +130,7 @@ public class AJAXRequestData {
      */
     private String route;
 
-    private UploadEvent uploadEvent;
+    private volatile UploadEvent uploadEvent;
 
     private String format;
 
@@ -141,7 +142,11 @@ public class AJAXRequestData {
 
     private String pathInfo;
 
+    private HttpServletRequest httpServletRequest;
+
     private final List<String> decoratorIds;
+
+    private boolean multipart;
 
     /**
      * Initializes a new {@link AJAXRequestData}.
@@ -267,6 +272,25 @@ public class AJAXRequestData {
      */
     public void setSession(final ServerSession session) {
         this.session = session;
+    }
+
+    
+    /**
+     * Gets the HTTP Servlet request.
+     *
+     * @return The HTTP Servlet request or <code>null</code> if absent
+     */
+    public HttpServletRequest getHttpServletRequest() {
+        return httpServletRequest;
+    }
+    
+    /**
+     * Sets the HTTP Servlet request.
+     *
+     * @param httpServletRequest The HTTP Servlet request to set
+     */
+    public void setHttpServletRequest(final HttpServletRequest httpServletRequest) {
+        this.httpServletRequest = httpServletRequest;
     }
 
     /**
@@ -615,6 +639,24 @@ public class AJAXRequestData {
     }
 
     /**
+     * Utility method that determines whether the request contains multipart content.
+     *
+     * @return <code>true</code> if the request is multipart; <code>false</code> otherwise.
+     */
+    public boolean isMultipartContent() {
+        return multipart;
+    }
+    
+    /**
+     * Sets the whether the request contains multipart content
+     *
+     * @param multipart <code>true</code> if the request is multipart; <code>false</code> otherwise.
+     */
+    public void setMultipart(final boolean multipart) {
+        this.multipart = multipart;
+    }
+
+    /**
      * Sets whether this request has a secure connection.
      * 
      * @param secure <code>true</code> if this request has a secure connection; otherwise <code>false</code>
@@ -710,9 +752,11 @@ public class AJAXRequestData {
      * Find out whether this request contains an uploaded file. Note that this is only possible via a servlet interface and not via the
      * multiple module.
      * 
-     * @return true if one or more files were uploaded, false otherwise.
+     * @return <code>true</code> if one or more files were uploaded, <code>false</code> otherwise.
+     * @throws OXException If upload files cannot be processed
      */
-    public boolean hasUploads() {
+    public boolean hasUploads() throws OXException {
+        processUpload();
         return !files.isEmpty();
     }
 
@@ -720,8 +764,10 @@ public class AJAXRequestData {
      * Retrieve file uploads.
      * 
      * @return A list of file uploads.
+     * @throws OXException If upload files cannot be processed
      */
-    public List<UploadFile> getFiles() {
+    public List<UploadFile> getFiles() throws OXException {
+        processUpload();
         return Collections.unmodifiableList(files);
     }
 
@@ -730,8 +776,10 @@ public class AJAXRequestData {
      * 
      * @param name The name of the form field that include the file
      * @return The file, or null if no file field of this name was found
+     * @throws OXException If upload files cannot be processed
      */
-    public UploadFile getFile(final String name) {
+    public UploadFile getFile(final String name) throws OXException {
+        processUpload();
         for (final UploadFile file : files) {
             if (file.getFieldName().equals(name)) {
                 return file;
@@ -740,8 +788,27 @@ public class AJAXRequestData {
         return null;
     }
 
-    public void addFile(final UploadFile file) {
-        files.add(file);
+    private void processUpload() throws OXException {
+        if (!multipart || null == httpServletRequest) {
+            return;
+        }
+        final List<UploadFile> thisFiles = this.files;
+        synchronized (thisFiles) {
+            UploadEvent uploadEvent = this.uploadEvent;
+            if (null == uploadEvent) {
+                uploadEvent = AJAXServlet.processUploadStatic(httpServletRequest);
+                final Iterator<UploadFile> iterator = uploadEvent.getUploadFilesIterator();
+                while(iterator.hasNext()) {
+                    thisFiles.add(iterator.next());
+                }
+                final Iterator<String> names = uploadEvent.getFormFieldNames();
+                while(names.hasNext()) {
+                    final String name = names.next();
+                    putParameter(name, uploadEvent.getFormField(name));
+                }
+                this.uploadEvent = uploadEvent;
+            }
+        }
     }
 
     /**
@@ -838,20 +905,13 @@ public class AJAXRequestData {
     }
 
     /**
-     * Sets the associated upload event.
-     * 
-     * @param upload The upload event
-     */
-    public void setUploadEvent(final UploadEvent upload) {
-        this.uploadEvent = upload;
-    }
-
-    /**
      * Gets the associated upload event.
      * 
      * @return The upload event
+     * @throws OXException If upload files cannot be processed
      */
-    public UploadEvent getUploadEvent() {
+    public UploadEvent getUploadEvent() throws OXException {
+        processUpload();
         return uploadEvent;
     }
 

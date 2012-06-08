@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange Loxandra DTO Bundle
+Bundle-SymbolicName: com.openexchange.loxandra.dto
+Bundle-Version: 6.21.0.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Export-Package: com.openexchange.loxandra.dto
+Import-Package: com.openexchange.groupware.contact,
+ com.openexchange.groupware.container

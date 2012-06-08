@@ -218,7 +218,7 @@ public interface ContactStorage {
      * @return the contacts found with the search
      * @throws OXException
      */
-    <O> SearchIterator<Contact> search(int contextID, ContactSearchObject contactSearch, ContactField[] fields) throws OXException;
+    SearchIterator<Contact> search(int contextID, ContactSearchObject contactSearch, ContactField[] fields) throws OXException;
 
     /**
      * Searches for contacts.
@@ -230,7 +230,7 @@ public interface ContactStorage {
      * @return the contacts found with the search
      * @throws OXException
      */
-    <O> SearchIterator<Contact> search(int contextID, ContactSearchObject contactSearch, ContactField[] fields, SortOptions sortOptions) throws OXException;
+    SearchIterator<Contact> search(int contextID, ContactSearchObject contactSearch, ContactField[] fields, SortOptions sortOptions) throws OXException;
     
     /**
      * Creates a new contact in a folder.
