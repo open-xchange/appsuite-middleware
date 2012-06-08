@@ -1,3 +1,7 @@
+* 2012-06-08 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 22273: Removing appointments where i am not the organizer.
+
 * 2012-06-08 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 21287: Implemented free/busy for iCal

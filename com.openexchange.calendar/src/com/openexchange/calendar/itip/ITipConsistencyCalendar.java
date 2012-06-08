@@ -173,6 +173,7 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
 				} else {
 					removeCurrentUserFromParticipants(original);
 					original.setExternalOrganizer(true);
+					original.setIgnoreConflicts(true);
 					delegate.updateAppointmentObject(original, inFolder,
 							clientLastModified, checkPermissions);
 				}
