@@ -49,7 +49,9 @@
 
 package com.openexchange.user.copy.osgi;
 
+import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
 import com.openexchange.osgi.CompositeBundleActivator;
 import com.openexchange.user.copy.internal.additional.osgi.AdditionalCopyActivator;
 import com.openexchange.user.copy.internal.attachment.osgi.AttachmentCopyActivator;
@@ -98,5 +100,12 @@ public class Activator extends CompositeBundleActivator {
             new ReminderCopyActivator(),
             new UWAActivator()
         };
+    }
+
+    @Override
+    public void start(final BundleContext context) throws Exception {
+        final Log log = com.openexchange.log.Log.loggerFor(Activator.class);
+        super.start(context);
+        log.info("Bundle started: com.openexchange.user.copy");
     }
 }

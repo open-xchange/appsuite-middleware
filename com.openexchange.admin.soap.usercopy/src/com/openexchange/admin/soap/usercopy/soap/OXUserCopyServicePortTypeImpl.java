@@ -46,7 +46,7 @@ import com.openexchange.admin.soap.usercopy.dataobjects.User;
                       serviceName = "OXUserCopyService",
                       portName = "OXUserCopyServiceHttpSoap11Endpoint",
                       targetNamespace = "http://soap.copy.user.admin.openexchange.com",
-                      wsdlLocation = "null",
+                      
                       endpointInterface = "com.openexchange.admin.soap.usercopy.soap.OXUserCopyServicePortType")
                       
 public class OXUserCopyServicePortTypeImpl implements OXUserCopyServicePortType {

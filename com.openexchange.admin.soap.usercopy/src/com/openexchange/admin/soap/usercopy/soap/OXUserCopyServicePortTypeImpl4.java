@@ -28,7 +28,7 @@ import javax.xml.ws.ResponseWrapper;
                       serviceName = "OXUserCopyService",
                       portName = "OXUserCopyServiceHttpsSoap11Endpoint",
                       targetNamespace = "http://soap.copy.user.admin.openexchange.com",
-                      wsdlLocation = "null",
+                      
                       endpointInterface = "com.openexchange.admin.soap.usercopy.soap.OXUserCopyServicePortType")
                       
 public class OXUserCopyServicePortTypeImpl4 implements OXUserCopyServicePortType {

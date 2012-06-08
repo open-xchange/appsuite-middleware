@@ -78,6 +78,7 @@ public class RMIUserCopyRegisterer implements ServiceTrackerCustomizer<UserCopyS
         this.context = context;
     }
 
+    @Override
     public UserCopyService addingService(final ServiceReference<UserCopyService> reference) {
         final UserCopyService service = context.getService(reference);
         try {
@@ -90,10 +91,12 @@ public class RMIUserCopyRegisterer implements ServiceTrackerCustomizer<UserCopyS
         return service;
     }
 
+    @Override
     public void modifiedService(final ServiceReference<UserCopyService> reference, final UserCopyService service) {
         // Nothing to do.
     }
 
+    @Override
     public void removedService(final ServiceReference<UserCopyService> reference, final UserCopyService service) {
         try {
             if (null != registration) {

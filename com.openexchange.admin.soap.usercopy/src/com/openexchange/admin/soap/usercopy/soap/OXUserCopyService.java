@@ -15,7 +15,7 @@ import javax.xml.ws.Service;
  * 
  */
 @WebServiceClient(name = "OXUserCopyService", 
-                  wsdlLocation = "null",
+                  
                   targetNamespace = "http://soap.copy.user.admin.openexchange.com") 
 public class OXUserCopyService extends Service {
 
