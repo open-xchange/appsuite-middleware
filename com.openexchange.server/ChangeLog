@@ -1,3 +1,7 @@
+* 2012-06-08 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 21287: Implemented free/busy for iCal
+
 * 2012-06-08 - thorben.betten@open-xchange.com
 
  - Fix for bug 22261: Only check secret for not null rather than possible empty string
