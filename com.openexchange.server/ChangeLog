@@ -1,3 +1,7 @@
+* 2012-06-08 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22261: Only check secret for not null rather than possible empty string
+
 * 2012-06-07 - thorben.betten@open-xchange.com
 
  - Fix for bug 22162: Checking if uploaded file's Content-Type starts with "application/force" to let its MIME type be resolved by file name
