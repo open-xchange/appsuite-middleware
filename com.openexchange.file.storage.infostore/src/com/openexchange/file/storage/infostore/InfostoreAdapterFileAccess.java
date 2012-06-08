@@ -60,6 +60,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.infostore.internal.VirtualFolderInfostoreFacade;
 import com.openexchange.groupware.container.FolderObject;
@@ -120,26 +121,42 @@ public class InfostoreAdapterFileAccess implements FileStorageFileAccess {
 
     @Override
     public boolean exists(final String folderId, final String id, final int version) throws OXException {
-        return getInfostore(folderId).exists( ID(id), version, ctx, user, userConfig);
+        try {
+            return getInfostore(folderId).exists( ID(id), version, ctx, user, userConfig);
+        } catch (final NumberFormatException e) {
+            throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(e, id, folderId);
+        }
     }
 
 
     @Override
     public InputStream getDocument(final String folderId, final String id, final int version) throws OXException {
-        return getInfostore(folderId).getDocument(ID( id ), version, ctx, user, userConfig);
+        try {
+            return getInfostore(folderId).getDocument(ID( id ), version, ctx, user, userConfig);
+        } catch (final NumberFormatException e) {
+            throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(e, id, folderId);
+        }
     }
 
 
     @Override
     public File getFileMetadata(final String folderId, final String id, final int version) throws OXException {
-        final DocumentMetadata documentMetadata = getInfostore(folderId).getDocumentMetadata(ID( id ), version, ctx, user, userConfig);
-        return new InfostoreFile( documentMetadata );
+        try {
+            final DocumentMetadata documentMetadata = getInfostore(folderId).getDocumentMetadata(ID( id ), version, ctx, user, userConfig);
+            return new InfostoreFile( documentMetadata );
+        } catch (final NumberFormatException e) {
+            throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(e, id, folderId);
+        }
     }
 
 
     @Override
     public void lock(final String folderId, final String id, final long diff) throws OXException {
-        getInfostore(folderId).lock(ID( id ), diff, sessionObj);
+        try {
+            getInfostore(folderId).lock(ID( id ), diff, sessionObj);
+        } catch (final NumberFormatException e) {
+            throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(e, id, folderId);
+        }
     }
 
 
