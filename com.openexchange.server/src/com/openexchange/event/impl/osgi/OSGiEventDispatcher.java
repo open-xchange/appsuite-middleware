@@ -85,7 +85,7 @@ public class OSGiEventDispatcher implements EventHandlerRegistration, EventDispa
 
     private final Queue<TaskEventInterface> taskListeners;
 
-    private ServiceRegistration<EventHandler> serviceRegistration;
+    private volatile ServiceRegistration<EventHandler> serviceRegistration;
 
     /**
      * Initializes a new {@link OSGiEventDispatcher}.
@@ -256,9 +256,10 @@ public class OSGiEventDispatcher implements EventHandlerRegistration, EventDispa
 
     @Override
     public void unregisterService() {
+        final ServiceRegistration<EventHandler> serviceRegistration = this.serviceRegistration;
         if (null != serviceRegistration) {
             serviceRegistration.unregister();
-            serviceRegistration = null;
+            this.serviceRegistration = null;
         }
     }
 }
