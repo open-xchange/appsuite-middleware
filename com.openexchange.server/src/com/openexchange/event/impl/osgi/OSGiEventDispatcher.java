@@ -49,12 +49,11 @@
 
 package com.openexchange.event.impl.osgi;
 
-import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.Event;
@@ -69,6 +68,7 @@ import com.openexchange.event.impl.TaskEventInterface2;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 
 /**
@@ -81,19 +81,19 @@ public class OSGiEventDispatcher implements EventHandlerRegistration, EventDispa
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(OSGiEventDispatcher.class));
 
-    private final List<AppointmentEventInterface> appointmentListeners;
+    private final Queue<AppointmentEventInterface> appointmentListeners;
 
-    private final List<TaskEventInterface> taskListeners;
+    private final Queue<TaskEventInterface> taskListeners;
 
-    private ServiceRegistration serviceRegistration;
+    private ServiceRegistration<EventHandler> serviceRegistration;
 
     /**
      * Initializes a new {@link OSGiEventDispatcher}.
      */
     public OSGiEventDispatcher() {
         super();
-        appointmentListeners = new ArrayList<AppointmentEventInterface>();
-        taskListeners = new ArrayList<TaskEventInterface>();
+        appointmentListeners = new ConcurrentLinkedQueue<AppointmentEventInterface>();
+        taskListeners = new ConcurrentLinkedQueue<TaskEventInterface>();
     }
 
     @Override
@@ -251,7 +251,7 @@ public class OSGiEventDispatcher implements EventHandlerRegistration, EventDispa
     public void registerService(final BundleContext context) {
         final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
         serviceProperties.put(EventConstants.EVENT_TOPIC, new String[] { "com/openexchange/groupware/*" });
-        serviceRegistration = context.registerService(EventHandler.class.getName(), this, serviceProperties);
+        serviceRegistration = context.registerService(EventHandler.class, this, serviceProperties);
     }
 
     @Override
