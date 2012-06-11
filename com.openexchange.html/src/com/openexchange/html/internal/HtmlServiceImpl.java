@@ -496,10 +496,12 @@ public final class HtmlServiceImpl implements HtmlService {
 
     private static final Pattern PATTERN_TAG = Pattern.compile("<\\w+?[^>]*>");
 
-    private static final Pattern PATTERN_ACCENTS = Pattern.compile(Pattern.quote("``")+"|"+Pattern.quote("лл"));
+    private static final Pattern PATTERN_ACCENTS1 = Pattern.compile(Pattern.quote("\u0060"));
+
+    private static final Pattern PATTERN_ACCENTS2 = Pattern.compile(Pattern.quote("\u00b4"));
 
     private static String dropDoubleAccents(final String html) {
-        if (null == html || (html.indexOf("``") < 0 && html.indexOf("лл") < 0)) {
+        if (null == html || (html.indexOf('\u0060') < 0 && html.indexOf('\u00b4') < 0)) {
             return html;
         }
         final Matcher m = PATTERN_TAG.matcher(html);
@@ -510,12 +512,14 @@ public final class HtmlServiceImpl implements HtmlService {
         final StringBuilder sb = new StringBuilder(html.length());
         do {
             sb.append(html.substring(lastMatch, m.start()));
-            final String match = m.group();
+            String match = m.group();
             if (!isEmpty(match)) {
-                if (match.indexOf("``") < 0 && match.indexOf("лл") < 0) {
+                if (match.indexOf('\u0060') < 0 && match.indexOf('\u00b4') < 0) {
                     sb.append(match);
                 } else {
-                    sb.append(PATTERN_ACCENTS.matcher(match).replaceAll(""));
+                    match = PATTERN_ACCENTS1.matcher(match).replaceAll("&#96;");
+                    match = PATTERN_ACCENTS2.matcher(match).replaceAll("&#180;");
+                    sb.append(match);
                 }
             }
             lastMatch = m.end();
