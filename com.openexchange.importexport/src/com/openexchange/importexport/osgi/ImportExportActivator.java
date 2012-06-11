@@ -87,9 +87,15 @@ public class ImportExportActivator extends AJAXModuleActivator{
 
 	@Override
 	protected void startBundle() throws Exception {
-		ImportExportServices.LOOKUP = this;
+		ImportExportServices.LOOKUP.set(this);
 		registerModule(new ImportActionFactory(), "import");
 		registerModule(new ExportActionFactory(), "export");
+	}
+
+	@Override
+	protected void stopBundle() throws Exception {
+	    ImportExportServices.LOOKUP.set(null);
+	    super.stopBundle();
 	}
 
 }
