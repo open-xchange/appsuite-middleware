@@ -532,6 +532,12 @@ public abstract class MailConfig {
         return true;
     }
 
+    /**
+     * Gets the sane (puny-code) representation of passed login in case it appears to be an Internet address. 
+     * 
+     * @param login The login
+     * @return The sane login
+     */
     private static final String saneLogin(final String login) {
         final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
         if (!(null == service ? true : service.getBoolProperty("com.openexchange.mail.saneLogin", true))) {
