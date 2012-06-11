@@ -60,6 +60,7 @@ import java.util.Locale;
 import java.util.Set;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.IDNA;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -520,6 +521,18 @@ public abstract class MailConfig {
         return true;
     }
 
+    private static final String saneLogin(final String login) {
+        final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+        if (!(null == service ? true : service.getBoolProperty("com.openexchange.mail.saneLogin", true))) {
+            return login;
+        }
+        try {
+            return IDNA.toACE(login);
+        } catch (final Exception e) {
+            return login;
+        }
+    }
+
     /**
      * Fills login and password in specified instance of {@link MailConfig}.
      *
@@ -533,9 +546,9 @@ public abstract class MailConfig {
         // Assign login
         final String slogin = session.getLoginName();
         if (proxyDelimiter != null && slogin.contains(proxyDelimiter)) {
-            mailConfig.login = slogin;
+            mailConfig.login = saneLogin(slogin);
         } else {
-            mailConfig.login = getMailLogin(mailAccount, userLoginInfo);
+            mailConfig.login = saneLogin(getMailLogin(mailAccount, userLoginInfo));
         }
         // Assign password
         if (mailAccount.isDefaultAccount()) {
@@ -735,7 +748,7 @@ public abstract class MailConfig {
      * @param login The login
      */
     public void setLogin(final String login) {
-        this.login = login;
+        this.login = saneLogin(login);
     }
 
     /**
