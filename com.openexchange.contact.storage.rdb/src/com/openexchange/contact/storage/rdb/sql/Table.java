@@ -47,61 +47,77 @@
  *
  */
 
-package com.openexchange.contact.storage.rdb.osgi;
-
-import org.apache.commons.logging.Log;
-
-import com.openexchange.contact.storage.ContactStorage;
-import com.openexchange.contact.storage.rdb.internal.RdbContactStorage;
-import com.openexchange.contact.storage.rdb.internal.RdbServiceLookup;
-import com.openexchange.contact.storage.rdb.sql.AddFilenameColumnTask;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.log.LogFactory;
-import com.openexchange.osgi.HousekeepingActivator;
-
+package com.openexchange.contact.storage.rdb.sql;
 
 /**
- * {@link RdbContactStorageActivator}
+ * {@link Table} - Encapsulates the relevant database table names.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class RdbContactStorageActivator extends HousekeepingActivator {
-
-    private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(RdbContactStorageActivator.class));
-
+public enum Table {
     /**
-     * Initializes a new {@link RdbContactStorageActivator}.
+     * The 'prg_contacts' table
      */
-    public RdbContactStorageActivator() {
-        super();
+    CONTACTS("prg_contacts"),
+    /**
+     * The 'del_contacts' table
+     */
+    DELETED_CONTACTS("del_contacts"),
+    /**
+     * The 'prg_contacts_image' table
+     */
+    IMAGES("prg_contacts_image"),
+    /**
+     * The 'del_contacts_image' table
+     */
+    DELETED_IMAGES("del_contacts_image"),
+    /**
+     * The 'prg_dlist' table
+     */
+    DISTLIST("prg_dlist"),
+    /**
+     * The 'del_dlist' table
+     */
+    DELETED_DISTLIST("del_dlist"),
+    /**
+     * The 'prg_contacts_linkage' table
+     */
+    LINKS("prg_contacts_linkage"),
+    /**
+     * The 'del_contacts_linkage' table
+     */
+    DELETED_LINKS("del_contacts_linkage"),
+    ;
+    
+    private final String name;
+    
+    private Table(final String name) {
+        this.name = name;
     }
-
+    
+    /**
+     * Gets the name of the table.
+     * 
+     * @return the name
+     */
+    public String getName() {
+        return this.name;
+    }
+    
+    public boolean isImageTable() {
+        return Table.IMAGES.equals(this) || Table.DELETED_IMAGES.equals(this);
+    }
+    
+    public boolean isDistListTable() {
+        return Table.DISTLIST.equals(this) || Table.DELETED_DISTLIST.equals(this);
+    }
+    
+    public boolean isContactTable() {
+        return Table.CONTACTS.equals(this) || Table.DELETED_CONTACTS.equals(this);
+    }
+    
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class };
+    public String toString() {
+        return this.getName();
     }
-
-    @Override
-    protected void startBundle() throws Exception {
-        try {
-            LOG.info("starting bundle: com.openexchange.contact.storage.rdb");
-            RdbServiceLookup.set(this);
-            registerService(ContactStorage.class, new RdbContactStorage());
-            DatabaseService dbService = getService(DatabaseService.class);
-            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new AddFilenameColumnTask(dbService)));
-        } catch (Exception e) {
-            LOG.error("error starting \"com.openexchange.contact.storage.rdb\"", e);
-            throw e;            
-        }
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: com.openexchange.contact.storage.rdb");
-        RdbServiceLookup.set(null);            
-        super.stopBundle();
-    }
-
 }

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.contact.storage.rdb.internal;
+package com.openexchange.contact.storage.rdb.sql;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 
@@ -66,6 +66,8 @@ import org.apache.commons.logging.Log;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.SortOrder;
 import com.openexchange.contact.storage.rdb.fields.DistListMemberField;
+import com.openexchange.contact.storage.rdb.internal.DistListMember;
+import com.openexchange.contact.storage.rdb.internal.Tools;
 import com.openexchange.contact.storage.rdb.mapping.Mappers;
 import com.openexchange.contact.storage.rdb.search.ContactSearchAdapter;
 import com.openexchange.contact.storage.rdb.search.SearchAdapter;

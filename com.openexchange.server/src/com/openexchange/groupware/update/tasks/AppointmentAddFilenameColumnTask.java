@@ -47,61 +47,57 @@
  *
  */
 
-package com.openexchange.contact.storage.rdb.osgi;
+package com.openexchange.groupware.update.tasks;
 
-import org.apache.commons.logging.Log;
+import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.tools.sql.DBUtils.rollback;
 
-import com.openexchange.contact.storage.ContactStorage;
-import com.openexchange.contact.storage.rdb.internal.RdbContactStorage;
-import com.openexchange.contact.storage.rdb.internal.RdbServiceLookup;
-import com.openexchange.contact.storage.rdb.sql.AddFilenameColumnTask;
+import java.sql.Connection;
+import java.sql.SQLException;
+
 import com.openexchange.database.DatabaseService;
-import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.log.LogFactory;
-import com.openexchange.osgi.HousekeepingActivator;
-
+import com.openexchange.databaseold.Database;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.update.Column;
+import com.openexchange.tools.update.Tools;
 
 /**
- * {@link RdbContactStorageActivator}
- *
+ * {@link AppointmentAddFilenameColumnTask}
+ * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class RdbContactStorageActivator extends HousekeepingActivator {
+public class AppointmentAddFilenameColumnTask extends UpdateTaskAdapter {
 
-    private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(RdbContactStorageActivator.class));
-
-    /**
-     * Initializes a new {@link RdbContactStorageActivator}.
-     */
-    public RdbContactStorageActivator() {
-        super();
+    @Override
+    public String[] getDependencies() {
+        return new String[0];
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
+    public void perform(PerformParameters params) throws OXException {
+        int contextID = params.getContextId();
+        DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+        Connection connnection = dbService.getForUpdateTask(contextID);
+        Column filenameColumn = new Column("filename", "VARCHAR(255) COLLATE utf8_unicode_ci DEFAULT NULL");
         try {
-            LOG.info("starting bundle: com.openexchange.contact.storage.rdb");
-            RdbServiceLookup.set(this);
-            registerService(ContactStorage.class, new RdbContactStorage());
-            DatabaseService dbService = getService(DatabaseService.class);
-            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new AddFilenameColumnTask(dbService)));
-        } catch (Exception e) {
-            LOG.error("error starting \"com.openexchange.contact.storage.rdb\"", e);
-            throw e;            
+            connnection.setAutoCommit(false);
+            Tools.checkAndAddColumns(connnection, "prg_dates", filenameColumn);
+            Tools.checkAndAddColumns(connnection, "del_dates", filenameColumn);
+            connnection.commit();
+        } catch (SQLException e) {
+            rollback(connnection);
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            rollback(connnection);
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
+        } finally {
+            autocommit(connnection);
+            Database.backNoTimeout(contextID, true, connnection);
         }
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: com.openexchange.contact.storage.rdb");
-        RdbServiceLookup.set(null);            
-        super.stopBundle();
     }
 
 }

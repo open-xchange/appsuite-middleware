@@ -47,77 +47,62 @@
  *
  */
 
-package com.openexchange.contact.storage.rdb.internal;
+package com.openexchange.contact.storage.rdb.sql;
+
+import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.tools.sql.DBUtils.rollback;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+
+import com.openexchange.database.DatabaseService;
+import com.openexchange.databaseold.Database;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.tools.update.Column;
+import com.openexchange.tools.update.Tools;
 
 /**
- * {@link Table} - Encapsulates the relevant database table names.
- *
+ * {@link AddFilenameColumnTask}
+ * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public enum Table {
-    /**
-     * The 'prg_contacts' table
-     */
-    CONTACTS("prg_contacts"),
-    /**
-     * The 'del_contacts' table
-     */
-    DELETED_CONTACTS("del_contacts"),
-    /**
-     * The 'prg_contacts_image' table
-     */
-    IMAGES("prg_contacts_image"),
-    /**
-     * The 'del_contacts_image' table
-     */
-    DELETED_IMAGES("del_contacts_image"),
-    /**
-     * The 'prg_dlist' table
-     */
-    DISTLIST("prg_dlist"),
-    /**
-     * The 'del_dlist' table
-     */
-    DELETED_DISTLIST("del_dlist"),
-    /**
-     * The 'prg_contacts_linkage' table
-     */
-    LINKS("prg_contacts_linkage"),
-    /**
-     * The 'del_contacts_linkage' table
-     */
-    DELETED_LINKS("del_contacts_linkage"),
-    ;
-    
-    private final String name;
-    
-    private Table(final String name) {
-        this.name = name;
-    }
-    
-    /**
-     * Gets the name of the table.
-     * 
-     * @return the name
-     */
-    public String getName() {
-        return this.name;
-    }
-    
-    public boolean isImageTable() {
-        return Table.IMAGES.equals(this) || Table.DELETED_IMAGES.equals(this);
-    }
-    
-    public boolean isDistListTable() {
-        return Table.DISTLIST.equals(this) || Table.DELETED_DISTLIST.equals(this);
-    }
-    
-    public boolean isContactTable() {
-        return Table.CONTACTS.equals(this) || Table.DELETED_CONTACTS.equals(this);
-    }
-    
+public class AddFilenameColumnTask extends UpdateTaskAdapter {
+	
+	private final DatabaseService dbService;
+	
+	public AddFilenameColumnTask(DatabaseService dbService) {
+		super();
+		this.dbService = dbService;
+	}
+
     @Override
-    public String toString() {
-        return this.getName();
+    public String[] getDependencies() {
+        return new String[0];
     }
+
+    @Override
+    public void perform(PerformParameters params) throws OXException {
+        int contextID = params.getContextId();
+        Connection connnection = dbService.getForUpdateTask(contextID);
+        Column filenameColumn = new Column("filename", "VARCHAR(255) COLLATE utf8_unicode_ci DEFAULT NULL");
+        try {
+            connnection.setAutoCommit(false);
+            Tools.checkAndAddColumns(connnection, Table.CONTACTS.getName(), filenameColumn);
+            Tools.checkAndAddColumns(connnection, Table.DELETED_CONTACTS.getName(), filenameColumn);
+            connnection.commit();
+        } catch (SQLException e) {
+            rollback(connnection);
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            rollback(connnection);
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
+        } finally {
+            autocommit(connnection);
+            Database.backNoTimeout(contextID, true, connnection);
+        }
+    }
+    
 }

@@ -451,7 +451,10 @@ public final class InternalList {
         new com.openexchange.groupware.update.tasks.CalendarExtendDNColumnTaskV2(),
 
         // Creates indexes on tables "prg_dlist" and "del_dlist" to improve look-up.
-        new com.openexchange.groupware.update.tasks.DListAddIndexForLookup()
+        new com.openexchange.groupware.update.tasks.DListAddIndexForLookup(),
+
+        // Add 'filename' column to appointment tables.
+        new com.openexchange.groupware.update.tasks.AppointmentAddFilenameColumnTask()
 
     };
 }
