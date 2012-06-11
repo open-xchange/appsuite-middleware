@@ -499,6 +499,9 @@ public final class HtmlServiceImpl implements HtmlService {
     private static final Pattern PATTERN_ACCENTS = Pattern.compile(Pattern.quote("``")+"|"+Pattern.quote("лл"));
 
     private static String dropDoubleAccents(final String html) {
+        if (null == html || (html.indexOf("``") < 0 && html.indexOf("лл") < 0)) {
+            return html;
+        }
         final Matcher m = PATTERN_TAG.matcher(html);
         if (!m.find()) {
             /*
@@ -512,7 +515,11 @@ public final class HtmlServiceImpl implements HtmlService {
             sb.append(html.substring(lastMatch, m.start()));
             final String match = m.group();
             if (!isEmpty(match)) {
-                sb.append(PATTERN_ACCENTS.matcher(match).replaceAll(""));
+                if (match.indexOf("``") < 0 && match.indexOf("лл") < 0) {
+                    sb.append(match);
+                } else {
+                    sb.append(PATTERN_ACCENTS.matcher(match).replaceAll(""));
+                }
             }
             lastMatch = m.end();
         } while (m.find());
