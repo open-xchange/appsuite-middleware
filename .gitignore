@@ -3,6 +3,7 @@
 bin
 bin/
 openexchange-test/conf/test.properties
+openexchange-test/conf/ajax.properties
 open-xchange-development/tmp
 open-xchange-development/adminTmp
 open-xchange-development/commonTmp

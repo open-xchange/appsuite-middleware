@@ -55,9 +55,9 @@ import java.lang.annotation.RetentionPolicy;
 /**
  * {@link Module} - The module annotation specifies supported actions via {@link #actions()}.
  * <p>
- * It is an optional annotation for those {@link AJAXActionServiceFactory AJAX action factories} which share the same module identifier.
- * Thus different actions can be specified per factory and are collected in an instance of {@link CombinedActionFactory}.
- *
+ * It is a <b>mandatory</b> annotation for those {@link AJAXActionServiceFactory AJAX action factories} which share the same module
+ * identifier. Thus different actions can be specified per factory and are collected in an instance of {@link CombinedActionFactory}.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @Retention(RetentionPolicy.RUNTIME)
@@ -65,7 +65,7 @@ public @interface Module {
 
     /**
      * Gets the supported action strings
-     *
+     * 
      * @return The action strings or <code>null</code>
      */
     String[] actions();
