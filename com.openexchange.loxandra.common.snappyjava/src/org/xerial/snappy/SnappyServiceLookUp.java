@@ -46,49 +46,58 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package org.xerial.snappy;
 
-package com.openexchange.mail.smal.impl.json;
+import java.util.concurrent.atomic.AtomicReference;
 
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.exception.OXException;
-import com.openexchange.mail.smal.impl.SmalServiceLookup;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link AbstractJSONMethod} - An abstract JSON method.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public abstract class AbstractJSONMethod {
+public final class SnappyServiceLookUp {
 
-    /**
-     * The HTTPS identifier constant.
-     */
-    protected static final String HTTPS = "https";
+	/**
+	 * Initializes a new {@link SnappyServiceLookUp}.
+	 */
+	private SnappyServiceLookUp() {
+		super();
+	}
 
-    /**
-     * Initializes a new {@link AbstractJSONMethod}.
-     */
-    protected AbstractJSONMethod() {
-        super();
-    }
+	private static final AtomicReference<ServiceLookup> ref = new AtomicReference<ServiceLookup>();
 
-    /**
-     * Gets the VoipNow setting for specified session.
-     *
-     * @param session The session
-     * @param httpApi <code>true</code> to authenticate against HTTP-API interface; otherwise <code>false</code>
-     * @return The VoipNow setting
-     * @throws OXException If returning VoipNow setting fails
-     */
-    protected static JSONServerSetting getVoipNowServerSetting() {
-        final JSONServerSetting retval = new JSONServerSetting();
-        final ConfigurationService service = SmalServiceLookup.getInstance().getService(ConfigurationService.class);
-        retval.setPort(service.getIntProperty("com.4psa.voipnow.port", 443));
-        retval.setHost(service.getProperty("com.4psa.voipnow.host", "localhost").trim());
-        retval.setSecure(Boolean.parseBoolean(service.getProperty("com.4psa.voipnow.secure", "true").trim()));
-        retval.setLogin(service.getProperty("com.4psa.voipnow.adminLogin", "").trim());
-        retval.setPassword(service.getProperty("com.4psa.voipnow.adminPassword", "").trim());
-        return retval;
-    }
+	/**
+	 * Gets the service look-up
+	 * 
+	 * @return The service look-up or <code>null</code>
+	 */
+	public static ServiceLookup get() {
+		return ref.get();
+	}
 
+	/**
+	 * Gets the service of specified type
+	 * 
+	 * @param clazz
+	 *            The service's class
+	 * @return The service or <code>null</code> is absent
+	 * @throws IllegalStateException
+	 *             If an error occurs while returning the demanded service
+	 */
+	public static <S extends Object> S getService(final Class<? extends S> clazz) {
+		final ServiceLookup serviceLookup = ref.get();
+		return null == serviceLookup ? null : serviceLookup.getService(clazz);
+	}
+
+	/**
+	 * Sets the service look-up
+	 * 
+	 * @param serviceLookup
+	 *            The service look-up or <code>null</code>
+	 */
+	public static void set(final ServiceLookup serviceLookup) {
+		ref.set(serviceLookup);
+	}
 }

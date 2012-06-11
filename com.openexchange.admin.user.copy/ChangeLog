@@ -1,3 +1,8 @@
+* 2012-06-11 - jan.bauerdick@open-xchange.com
+
+ - Refactored to run in groupware VM
+ - Register RMI as OSGi-service
+ 
 * 2012-01-24 - steffen.templin@open-xchange.com
 
  - Fix for bug 21347: missing userid in logfile

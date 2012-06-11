@@ -4,7 +4,7 @@ Bundle-Name: Autocontextid
 Bundle-SymbolicName: com.openexchange.admin.autocontextid
 Bundle-Version: 6.21.0
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-Activator: com.openexchange.admin.autocontextid.Activator
+Bundle-Activator: com.openexchange.admin.autocontextid.osgi.Activator
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Import-Package: com.openexchange.admin.console,
  com.openexchange.admin.console.context.extensioninterfaces,
@@ -22,6 +22,7 @@ Import-Package: com.openexchange.admin.console,
  com.openexchange.groupware.impl,
  com.openexchange.groupware.userconfiguration,
  com.openexchange.log,
+ com.openexchange.osgi,
  com.openexchange.tools.pipesnfilters,
  org.apache.commons.logging;version="1.0.4",
  org.osgi.framework;version="1.3.0"

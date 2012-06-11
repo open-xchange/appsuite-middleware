@@ -1,3 +1,8 @@
+* 2012-06-11 - jan.bauerdick@open-xchange.com
+
+ - Refactored to run in groupware VM
+ - Register RMI as OSGi-service
+
 * 2012-06-06 - marcus.klein@open-xchange.com
 
  - Fix for bug 22263: RequireBundle is still necessary for com.openexchange.admin & com.openexchange.admin.plugin.hosting bundles.

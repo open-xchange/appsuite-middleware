@@ -46,58 +46,67 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package org.xerial.snappy;
 
-package com.openexchange.admin.autocontextid;
+import java.io.File;
+import java.io.FileInputStream;
+import java.util.Iterator;
+import java.util.Properties;
 
-import java.sql.SQLException;
-import java.util.Hashtable;
 import org.apache.commons.logging.Log;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
-import com.openexchange.admin.autocontextid.daemons.ClientAdminThreadExtended;
-import com.openexchange.admin.autocontextid.rmi.impl.OXAutoCIDContextImpl;
-import com.openexchange.admin.autocontextid.tools.AdminCacheExtended;
-import com.openexchange.admin.exceptions.OXGenericException;
-import com.openexchange.admin.plugins.OXContextPluginInterface;
+
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.log.LogFactory;
+import com.openexchange.osgi.HousekeepingActivator;
 
-public class Activator implements BundleActivator {
+/**
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ *
+ */
+public class SnappyActivator extends HousekeepingActivator {
+	private static Log log = LogFactory.getLog(SnappyActivator.class);
+	private static String snappyPathProp = "com.openexchange.loxandra.common.snappyjava.nativelibs";
 
-    private static final Log LOG = LogFactory.getLog(Activator.class);
+	@Override
+	protected Class<?>[] getNeededServices() {
+		// TODO Auto-generated method stub
+		return new Class[]{ConfigurationService.class};
+	}
 
-    public void start(final BundleContext context) throws Exception {
-        try {
-            initCache();
+	@Override
+	protected void startBundle() throws Exception {
+		log.info("starting snappy bundle");
+		SnappyServiceLookUp.set(this);
+		
+		ConfigurationService config = SnappyServiceLookUp.getService(ConfigurationService.class);
+		System.setProperty("snappy.config", new File(config.getProperty("CONFIGPATH") + "/snappy.properties").getAbsolutePath().toString());
+		
+		Properties prop = new Properties();
+		String configUrl = System.getProperty("snappy.config");
+		prop.load(new FileInputStream(configUrl));
+		
+		String snappyNativePath = prop.getProperty(snappyPathProp);
+		
+    	String osName = System.getProperty("os.name");
+    	String osArch = System.getProperty("os.arch");
+    	String fileSeparator = System.getProperty("file.separator");
+    	log.info(osName + " " + osArch);
+    	
+    	String postfix = null;
+    	if (osName.equals("Linux")) {
+    		postfix = ".so";
+    	} else if (osName.equals("Windows")) {
+    		postfix = ".dll";
+    	} else if (osName.equals("Mac")) {
+    		postfix = ".jnilib";
+    	} else {
+    		log.error("Unsupported system");
+    	}
 
-            final Hashtable<String, String> props = new Hashtable<String, String>();
-            props.put("name", "OXContext");
-            LOG.info(OXContextPluginInterface.class.getName());
-            final ServiceRegistration<OXContextPluginInterface> reg = context.registerService(OXContextPluginInterface.class, new OXAutoCIDContextImpl(), props);
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(reg.toString());
-                LOG.debug("Service registered");
-            }
+		String path = snappyNativePath + "/native/" + osName + "/" + osArch + "/libsnappyjava" + postfix;
+    	System.load(path);
+    	//System.load("/home/isole/git/backend/com.openexchange.loxandra.common.snappyjava/lib/" + "native"  + fileSeparator + osName + fileSeparator + osArch + fileSeparator + "libsnappyjava.so");		
+	}
 
-        } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
-            throw e;
-        } catch (final OXGenericException e) {
-            LOG.fatal(e.getMessage(), e);
-            throw e;
-        }
-    }
-
-    public void stop(final BundleContext context) throws Exception {
-        // Nope
-    }
-
-    private void initCache() throws SQLException, OXGenericException {
-        final AdminCacheExtended cache = new AdminCacheExtended();
-        cache.initCache();
-        cache.initCacheExtended();
-        cache.initIDGenerator();
-        ClientAdminThreadExtended.cache = cache;
-        LOG.info("AutocontextID Bundle: Cache and Pools initialized!");
-    }
 }
+
