@@ -108,7 +108,6 @@ public class EventInit implements Initialization {
 		EventQueue.addAppointmentEvent(linkHandler);
 		EventQueue.addContactEvent(linkHandler);
 		EventQueue.addTaskEvent(linkHandler);
-		EventQueue.addInfostoreEvent(linkHandler);
 
 		if (LOG.isInfoEnabled()) {
 			LOG.info("Adding AttachmentCleaner");
@@ -123,14 +122,12 @@ public class EventInit implements Initialization {
 		}
         final PropertyCleaner propertyCleaner = new PropertyCleaner(new PropertyStoreImpl(new DBPoolProvider(), "oxfolder_property"), new PropertyStoreImpl(new DBPoolProvider(), "infostore_property"));
 		EventQueue.addFolderEvent(propertyCleaner);
-		EventQueue.addInfostoreEvent(propertyCleaner);
 
 		if (LOG.isInfoEnabled()) {
 			LOG.info("Adding LockCleaner");
 		}
         final LockCleaner lockCleaner = new LockCleaner(new FolderLockManagerImpl(new DBPoolProvider()), new EntityLockManagerImpl(new DBPoolProvider(), "infostore_lock"));
 		EventQueue.addFolderEvent(lockCleaner);
-		EventQueue.addInfostoreEvent(lockCleaner);
     }
 
     @Override

@@ -318,11 +318,6 @@ public class Contact extends CommonObject implements Serializable {
     public static final int ADDRESS_OTHER = 615;
 
     /**
-     * UID field.
-     */
-    public static final int UID = 223;
-
-    /**
      * Sorted array of fields belonging to business address.
      */
     public static final int[] ADDRESS_FIELDS_BUSINESS;
@@ -602,10 +597,6 @@ public class Contact extends CommonObject implements Serializable {
     protected String addressBusiness;
 
     protected String addressOther;
-
-    protected String uid;
-
-    protected boolean b_uid;
 
     protected boolean b_display_name;
 
@@ -1312,16 +1303,7 @@ public class Contact extends CommonObject implements Serializable {
         return addressOther;
     }
 
-    public String getUid() {
-        return uid;
-    }
-    
     // SET METHODS
-
-    public void setUid(final String uid) {
-        this.uid = uid;
-        b_uid = true;
-    }
 
     public void setDisplayName(final String display_name) {
         this.display_name = display_name;
@@ -1891,10 +1873,6 @@ public class Contact extends CommonObject implements Serializable {
     }
 
     // REMOVE METHODS
-    public void removeUid() {
-        uid = null;
-        b_uid = false;
-    }
 
     public void removeDisplayName() {
         display_name = null;
@@ -2449,9 +2427,6 @@ public class Contact extends CommonObject implements Serializable {
     }
 
     // CONTAINS METHODS
-    public boolean containsUid() {
-        return b_uid;
-    }
 
     public boolean containsDisplayName() {
         return b_display_name;
@@ -3443,11 +3418,6 @@ public class Contact extends CommonObject implements Serializable {
             differingFields.add(I(ADDRESS_OTHER));
         }
 
-        if ((!containsUid() && other.containsUid()) || (containsUid() && other.containsUid() && getUid() != other.getUid() && (getUid() == null || !getUid().equals(
-            other.getUid())))) {
-            differingFields.add(I(UID));
-        }
-
         return differingFields;
     }
 
@@ -3788,9 +3758,6 @@ public class Contact extends CommonObject implements Serializable {
         case ADDRESS_OTHER:
             setAddressOther((String) value);
             break;
-        case UID:
-            setUid((String) value);
-            break;
         default:
             super.set(field, value);
 
@@ -4020,8 +3987,6 @@ public class Contact extends CommonObject implements Serializable {
             return getAddressHome();
         case ADDRESS_OTHER:
             return getAddressOther();
-        case UID:
-            return getUid();
         default:
             return super.get(field);
 
@@ -4251,8 +4216,6 @@ public class Contact extends CommonObject implements Serializable {
             return containsAddressHome();
         case ADDRESS_OTHER:
             return containsAddressOther();
-        case UID:
-            return containsUid();
         default:
             return super.contains(field);
 
@@ -4588,9 +4551,6 @@ public class Contact extends CommonObject implements Serializable {
             break;
         case ADDRESS_OTHER:
             removeAddressOther();
-            break;
-        case UID:
-            removeUid();
             break;
         default:
             super.remove(field);

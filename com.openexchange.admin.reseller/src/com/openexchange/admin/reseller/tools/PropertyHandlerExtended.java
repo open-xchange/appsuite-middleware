@@ -70,7 +70,7 @@ public class PropertyHandlerExtended extends PropertyHandler {
     public PropertyHandlerExtended(final Properties sysprops) {
         super(sysprops);
         final StringBuilder configfile = new StringBuilder(); 
-        configfile.append(sysprops.getProperty("configdir"));
+        configfile.append(sysprops.getProperty("openexchange.propdir"));
         configfile.append(File.separatorChar);
         configfile.append("plugin");
         configfile.append(File.separatorChar);

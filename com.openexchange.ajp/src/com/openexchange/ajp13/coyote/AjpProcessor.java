@@ -77,6 +77,7 @@ import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13RequestHandler;
 import com.openexchange.ajp13.AJPv13Response;
 import com.openexchange.ajp13.AJPv13ServiceRegistry;
+import com.openexchange.ajp13.AJPv13Utility;
 import com.openexchange.ajp13.AjpLongRunningRegistry;
 import com.openexchange.ajp13.coyote.util.ByteChunk;
 import com.openexchange.ajp13.coyote.util.CookieParser;
@@ -1582,7 +1583,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         }
         HttpServlet servlet = HttpServletManager.getServlet(path, servletId);
         if (servlet == null) {
-            servlet = new HttpErrorServlet("No servlet bound to path/alias: " + requestURI);
+            servlet = new HttpErrorServlet("No servlet bound to path/alias: " + AJPv13Utility.urlEncode(requestURI));
         }
         this.servlet = servlet;
         // servletId = pathStorage.length() > 0 ? pathStorage.toString() : null;

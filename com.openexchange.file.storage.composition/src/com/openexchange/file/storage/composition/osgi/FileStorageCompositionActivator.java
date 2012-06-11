@@ -58,6 +58,7 @@ import com.openexchange.file.storage.composition.internal.CompositingIDBasedFile
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.Session;
+import org.osgi.service.event.EventAdmin;
 
 
 /**
@@ -69,7 +70,7 @@ public class FileStorageCompositionActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[]{FileStorageServiceRegistry.class};
+        return new Class<?>[]{FileStorageServiceRegistry.class, EventAdmin.class};
     }
 
     @Override
@@ -98,6 +99,11 @@ public class FileStorageCompositionActivator extends HousekeepingActivator {
                     @Override
                     protected FileStorageService getFileStorageService(final String serviceId) throws OXException {
                         return getService(FileStorageServiceRegistry.class).getFileStorageService(serviceId);
+                    }
+                    
+                    @Override
+                    protected EventAdmin getEventAdmin() {
+                        return getService(EventAdmin.class);
                     }
 
                 };

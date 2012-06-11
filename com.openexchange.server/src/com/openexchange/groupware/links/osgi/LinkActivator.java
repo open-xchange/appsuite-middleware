@@ -49,8 +49,15 @@
 
 package com.openexchange.groupware.links.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
+import com.openexchange.file.storage.FileStorageEventConstants;
+import com.openexchange.groupware.links.LinksEventHandler;
 
 /**
  * {@link LinkActivator}
@@ -59,17 +66,24 @@ import org.osgi.framework.BundleContext;
  */
 public class LinkActivator implements BundleActivator {
 
+    private ServiceRegistration<EventHandler> linksHandlerRegistration;
+    
+
     public LinkActivator() {
         super();
     }
 
     @Override
     public void start(final BundleContext context) throws Exception {
-        // Nope
+        Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+        serviceProperties.put(EventConstants.EVENT_TOPIC, FileStorageEventConstants.ALL_TOPICS);
+        linksHandlerRegistration = context.registerService(EventHandler.class, new LinksEventHandler(), serviceProperties);
     }
 
     @Override
     public void stop(final BundleContext context) throws Exception {
-        // Nope
+        if (linksHandlerRegistration != null) {
+            linksHandlerRegistration.unregister();
+        }
     }
 }

@@ -26,12 +26,14 @@ Import-Package: com.openexchange.admin.console,
  com.openexchange.groupware.impl,
  com.openexchange.groupware.userconfiguration,
  com.openexchange.java,
+ com.openexchange.osgi,
  com.openexchange.tools.pipesnfilters,
  com.openexchange.tools.sql,
  org.apache.commons.logging,
  org.osgi.framework
-Require-Bundle: com.openexchange.admin.plugin.hosting,
- com.openexchange.admin;bundle-version="6.21.0"
+Require-Bundle: com.openexchange.admin,
+ com.openexchange.admin.plugin.hosting,
+ com.openexchange.admin.rmi
 Export-Package: com.openexchange.admin.reseller.rmi,
  com.openexchange.admin.reseller.rmi.dataobjects,
  com.openexchange.admin.reseller.rmi.exceptions,

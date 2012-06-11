@@ -70,11 +70,9 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.ReuseReadConProvider;
 import com.openexchange.database.tx.DBService;
-import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
@@ -122,6 +120,7 @@ import com.openexchange.groupware.results.DeltaImpl;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.collections.Injector;
 import com.openexchange.tools.file.FileStorage;
@@ -329,9 +328,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             updateVersion.setTimestamp(oldDocument.getSequenceNumber());
 
             perform(updateVersion, true);
-
-            final EventClient ec = new EventClient(sessionObj);
-            ec.modify(document);
         } catch (final OXException x) {
             throw x;
         } catch (final Exception e) {
@@ -592,14 +588,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                     reservation.destroySilently();
                 }
             }
-
-            final EventClient ec = new EventClient(sessionObj);
-            try {
-                ec.create(document);
-            } catch (final Exception e) {
-                LOG.error("", e);
-            }
-
         } else {
             saveDocument(document, data, sequenceNumber, nonNull(document), sessionObj);
         }
@@ -893,26 +881,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                     infostoreFilenameReservation.destroySilently();
                 }
             }
-
-            final EventClient ec = new EventClient(sessionObj);
-            final DocumentMetadataImpl docForEvent = new DocumentMetadataImpl(oldDocument);
-            final SetSwitch set = new SetSwitch(docForEvent);
-            final GetSwitch get = new GetSwitch(document);
-            for (final Metadata metadata : modifiedColumns) {
-                set.setValue(metadata.doSwitch(get));
-                metadata.doSwitch(set);
-            }
-            final OXFolderAccess ofa = new OXFolderAccess(sessionObj.getContext());
-            int folderId = (int) oldDocument.getFolderId();
-            if (updatedCols.contains(Metadata.FOLDER_ID_LITERAL)) {
-                folderId = (int) docForEvent.getFolderId();
-            }
-            ec.modify(oldDocument, docForEvent, ofa.getFolderObject(folderId));
         } catch (final OXException x) {
             throw x;
-        } catch (final Exception e) {
-            // FIXME Client
-            LOG.error("", e);
         }
     }
 
@@ -995,16 +965,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
         {
             perform(deleteDocument, true);
-        }
-
-        final EventClient ec = new EventClient(sessionObj);
-
-        for (final DocumentMetadata m : allDocuments) {
-            try {
-                ec.delete(m);
-            } catch (final Exception e) {
-                LOG.error("", e);
-            }
         }
     }
 
@@ -1250,13 +1210,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             perform(deleteVersion, true);
         } catch (final OXException x) {
             throw x;
-        }
-
-        final EventClient ec = new EventClient(sessionObj);
-        try {
-            ec.modify(metadata);
-        } catch (final Exception e) {
-            LOG.error("", e); // FIXME
         }
 
         final int[] retval = new int[versionSet.size()];

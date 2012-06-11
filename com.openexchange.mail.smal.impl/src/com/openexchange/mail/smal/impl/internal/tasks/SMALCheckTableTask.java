@@ -99,10 +99,6 @@ public class SMALCheckTableTask extends UpdateTaskAdapter {
                     stmt = writeCon.prepareStatement("DROP TABLE jobQueue");
                     stmt.executeUpdate();
                     stmt.close();
-                    if (!tableExists(writeCon, CreateMailSyncTable.MAIL_SYNC_TABLE)) {
-                        stmt = writeCon.prepareStatement(CreateMailSyncTable.CREATE_MAIL_SYNC_TABLE_STATEMENT);
-                        stmt.executeUpdate();
-                    }
                 }
             } catch (final SQLException e) {
                 throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());

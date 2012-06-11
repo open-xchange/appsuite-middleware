@@ -287,6 +287,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                 headerWriters[j].writeField(jMail, mail, 0, true, accountID, userId, contextId);
             }
         }
+        int unreadCount = 0;
         // Add child nodes
         final JSONArray jChildMessages = new JSONArray();
         if (writeThreadAsObjects()) {
@@ -309,6 +310,12 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                     w.writeField(jChild, child, 0, true, accountID, userId, contextId);
                 }
                 jChildMessages.put(jChild);
+                /*
+                 * Count unread messages in this thread structure
+                 */
+                if (!child.isSeen()) {
+                    unreadCount++;
+                }
             }
         } else {
             if (containsMultipleFolders) {
@@ -317,14 +324,27 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                 for (final MailMessage child : mails) {
                     sb.setLength(0);
                     jChildMessages.put(sb.append(child.getFolder()).append(defaultSeparator).append(child.getMailId()).toString());
+                    /*
+                     * Count unread messages in this thread structure
+                     */
+                    if (!child.isSeen()) {
+                        unreadCount++;
+                    }
                 }
             } else {
                 for (final MailMessage child : mails) {
                     jChildMessages.put(child.getMailId());
+                    /*
+                     * Count unread messages in this thread structure
+                     */
+                    if (!child.isSeen()) {
+                        unreadCount++;
+                    }
                 }
             }
         }
         jMail.put("thread", jChildMessages);
+        jMail.put("unreadCount", unreadCount);
     }
 
     private void convertMultiple4List(final Collection<MailMessage> mails, final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session) throws OXException, JSONException {
