@@ -315,6 +315,17 @@ public abstract class MailConfig {
      * @return The mail login of specified user
      */
     public static final String getMailLogin(final MailAccount mailAccount, final String userLoginInfo) {
+        return saneLogin(getMailLogin0(mailAccount, userLoginInfo));
+    }
+
+    /**
+     * Gets the mail login with respect to configured login source.
+     *
+     * @param mailAccount The mail account used to determine the login
+     * @param userLoginInfo The login information of the user
+     * @return The mail login of specified user
+     */
+    private static final String getMailLogin0(final MailAccount mailAccount, final String userLoginInfo) {
         if (!mailAccount.isDefaultAccount()) {
             return mailAccount.getLogin();
         }
@@ -548,7 +559,7 @@ public abstract class MailConfig {
         if (proxyDelimiter != null && slogin.contains(proxyDelimiter)) {
             mailConfig.login = saneLogin(slogin);
         } else {
-            mailConfig.login = saneLogin(getMailLogin(mailAccount, userLoginInfo));
+            mailConfig.login = getMailLogin(mailAccount, userLoginInfo);
         }
         // Assign password
         if (mailAccount.isDefaultAccount()) {
