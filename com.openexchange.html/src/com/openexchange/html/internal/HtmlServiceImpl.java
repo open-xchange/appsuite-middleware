@@ -494,8 +494,6 @@ public final class HtmlServiceImpl implements HtmlService {
         return retval;
     }
 
-    private static final Pattern PATTERN_TAG = Pattern.compile("<\\w+?[^>]*>");
-
     private static final Pattern PATTERN_ACCENTS1 = Pattern.compile(Pattern.quote("\u0060"));
 
     private static final Pattern PATTERN_ACCENTS2 = Pattern.compile(Pattern.quote("\u00b4"));
@@ -504,28 +502,9 @@ public final class HtmlServiceImpl implements HtmlService {
         if (null == html || (html.indexOf('\u0060') < 0 && html.indexOf('\u00b4') < 0)) {
             return html;
         }
-        final Matcher m = PATTERN_TAG.matcher(html);
-        if (!m.find()) {
-            return html;
-        }
-        int lastMatch = 0;
-        final StringBuilder sb = new StringBuilder(html.length());
-        do {
-            sb.append(html.substring(lastMatch, m.start()));
-            String match = m.group();
-            if (!isEmpty(match)) {
-                if (match.indexOf('\u0060') < 0 && match.indexOf('\u00b4') < 0) {
-                    sb.append(match);
-                } else {
-                    match = PATTERN_ACCENTS1.matcher(match).replaceAll("&#96;");
-                    match = PATTERN_ACCENTS2.matcher(match).replaceAll("&#180;");
-                    sb.append(match);
-                }
-            }
-            lastMatch = m.end();
-        } while (m.find());
-        sb.append(html.substring(lastMatch));
-        return sb.toString();
+        String ret = PATTERN_ACCENTS1.matcher(html).replaceAll("&#96;");
+        ret = PATTERN_ACCENTS2.matcher(ret).replaceAll("&#180;");
+        return ret;
     }
 
     private static final Pattern PATTERN_HEADING_WS = Pattern.compile("(\r?\n|^) +");
