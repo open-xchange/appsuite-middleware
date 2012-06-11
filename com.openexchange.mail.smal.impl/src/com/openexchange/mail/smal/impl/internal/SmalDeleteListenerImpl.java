@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.smal.impl.internal;
 
-import static com.openexchange.mail.smal.impl.internal.tasks.CreateMailSyncTable.MAIL_SYNC_TABLE;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -81,7 +80,7 @@ public class SmalDeleteListenerImpl implements DeleteListener {
         final int contextId = event.getContext().getContextId();
         PreparedStatement stmt = null;
         try {
-            stmt = writeCon.prepareStatement("DELETE FROM " + MAIL_SYNC_TABLE + " WHERE cid = ?");
+            stmt = writeCon.prepareStatement("DELETE FROM indexedFolders WHERE cid = ?");
             stmt.setInt(1, contextId);
             stmt.executeUpdate();
         } catch (final SQLException e) {
@@ -98,7 +97,7 @@ public class SmalDeleteListenerImpl implements DeleteListener {
         PreparedStatement stmt = null;
         try {
             final int userId = event.getId();
-            stmt = writeCon.prepareStatement("DELETE FROM " + MAIL_SYNC_TABLE + " WHERE cid = ? AND user = ?");
+            stmt = writeCon.prepareStatement("DELETE FROM indexedFolders WHERE cid = ? AND uid = ?");
             int pos = 1;
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);

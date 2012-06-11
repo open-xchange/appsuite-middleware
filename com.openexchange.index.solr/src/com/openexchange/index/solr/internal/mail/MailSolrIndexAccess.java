@@ -68,6 +68,7 @@ import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.Types;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexDocument.Type;
 import com.openexchange.index.IndexField;
@@ -119,7 +120,12 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
         super(identifier);
         helper = SolrInputDocumentHelper.getInstance();
     }
-
+    
+    @Override
+    public boolean isIndexed(String accountId, String folderId) throws OXException {
+        return isIndexed(Types.EMAIL, accountId, folderId);
+    }
+    
     @Override
     public Set<? extends IndexField> getIndexedFields() {
         return SolrMailField.getIndexedFields();
@@ -132,7 +138,7 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
     }
 
     @Override
-    public void addEnvelopeData(Collection<IndexDocument<MailMessage>> col) throws OXException, InterruptedException {
+    public void addEnvelopeData(Collection<IndexDocument<MailMessage>> col) throws OXException {
         if (col == null || col.isEmpty()) {
             return;
         }
@@ -147,9 +153,6 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
         int size = documents.size();
         int off = 0;
         while (off < size) {
-            if (Thread.interrupted()) {
-                throw new InterruptedException("Thread interrupted while adding Solr input documents.");
-            }
             int endIndex = off + chunkSize;
             if (endIndex >= size) {
                 endIndex = size;
@@ -250,7 +253,7 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
     }
         
     @Override
-    public void addContent(Collection<IndexDocument<MailMessage>> documents, boolean full) throws OXException, InterruptedException {
+    public void addContent(Collection<IndexDocument<MailMessage>> documents, boolean full) throws OXException {
         Collection<SolrInputDocument> inputDocuments = new ArrayList<SolrInputDocument>();
         for (IndexDocument<MailMessage> document : documents) {
             MailMessage message = document.getObject();
@@ -323,7 +326,7 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
     }
 
     @Override
-    public void addAttachments(Collection<IndexDocument<MailMessage>> documents, boolean full) throws OXException, InterruptedException {
+    public void addAttachments(Collection<IndexDocument<MailMessage>> documents, boolean full) throws OXException {
         addContent(documents, full);
     }
     
@@ -335,7 +338,7 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
     }
 
     @Override
-    public void change(Collection<IndexDocument<MailMessage>> documents, Set<? extends IndexField> fields) throws OXException, InterruptedException {     
+    public void change(Collection<IndexDocument<MailMessage>> documents, Set<? extends IndexField> fields) throws OXException {     
         Set<SolrMailField> solrFields = convertAndCheckFields(null, fields);        
         List<SolrInputDocument> inputDocuments = new ArrayList<SolrInputDocument>();
         for (IndexDocument<MailMessage> document : documents) {
@@ -397,7 +400,7 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
     }
 
     @Override
-    public IndexResult<MailMessage> query(QueryParameters parameters, Set<? extends IndexField> fields) throws OXException, InterruptedException {
+    public IndexResult<MailMessage> query(QueryParameters parameters, Set<? extends IndexField> fields) throws OXException {
         Set<SolrMailField> solrFields = convertAndCheckFields(parameters, fields);
         List<IndexDocument<MailMessage>> mails = new ArrayList<IndexDocument<MailMessage>>();
         SolrQuery solrQuery = buildSolrQuery(parameters);

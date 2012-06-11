@@ -49,22 +49,16 @@
 
 package com.openexchange.service.indexing.mail.job;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.LinkedList;
 import java.util.List;
 import org.apache.commons.logging.Log;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.Types;
+import com.openexchange.index.solr.IndexFolderManager;
 import com.openexchange.log.LogFactory;
-import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.service.indexing.IndexingService;
 import com.openexchange.service.indexing.impl.Services;
 import com.openexchange.service.indexing.mail.Constants;
 import com.openexchange.service.indexing.mail.MailJobInfo;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link ElapsedFolderJob}
@@ -134,7 +128,7 @@ public final class ElapsedFolderJob extends AbstractMailJob {
     protected void performMailJob() throws OXException, InterruptedException {
         runner = Thread.currentThread();
         try {
-            final List<String> exceededFolders = getElapsedFolders(System.currentTimeMillis());
+            final List<String> exceededFolders = IndexFolderManager.getElapsedFolders(contextId, userId, Types.EMAIL, String.valueOf(accountId), System.currentTimeMillis() - Constants.HOUR_MILLIS);
             if (exceededFolders.isEmpty()) {
                 return;
             }
@@ -149,37 +143,4 @@ public final class ElapsedFolderJob extends AbstractMailJob {
             runner = null;
         }
     }
-
-    private List<String> getElapsedFolders(final long now) throws OXException {
-        final DatabaseService databaseService = Services.optService(DatabaseService.class);
-        if (null == databaseService) {
-            return java.util.Collections.emptyList();
-        }
-        final Connection con = databaseService.getWritable(contextId);
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = con.prepareStatement("SELECT fullName FROM mailSync WHERE cid = ? AND user = ? AND accountId = ? AND timestamp < ?");
-            int pos = 1;
-            stmt.setLong(pos++, contextId);
-            stmt.setLong(pos++, userId);
-            stmt.setLong(pos++, accountId);
-            stmt.setLong(pos, now - Constants.HOUR_MILLIS); // Grab all entries since that time stamp
-            rs = stmt.executeQuery();
-            if (!rs.next()) {
-                return java.util.Collections.emptyList();
-            }
-            final List<String> list = new LinkedList<String>();
-            do {
-                list.add(rs.getString(1));
-            } while (rs.next());
-            return list;
-        } catch (final SQLException e) {
-            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
-            databaseService.backWritable(contextId, con);
-        }
-    }
-
 }

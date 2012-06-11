@@ -66,21 +66,15 @@ import com.openexchange.index.IndexDocument.Type;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
-import com.openexchange.index.QueryParameters.Order;
 import com.openexchange.index.SearchHandler;
 import com.openexchange.index.StandardIndexDocument;
 import com.openexchange.index.mail.MailIndexField;
 import com.openexchange.index.solr.mail.MailUUID;
-import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.search.ANDTerm;
-import com.openexchange.mail.search.AbstractSearchTermVisitor;
-import com.openexchange.mail.search.ORTerm;
-import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.smal.impl.SmalServiceLookup;
 import com.openexchange.service.indexing.IndexingService;
 import com.openexchange.session.Session;
@@ -138,36 +132,6 @@ public final class IndexAccessAdapter {
         }
     }
 
-    /**
-     * Checks for presence of denoted folder in index.
-     * 
-     * @param accountId The account identifier
-     * @param fullName The folder's full name
-     * @param session The session
-     * @return <code>true</code> if present; otherwise <code>false</code>
-     * @throws OXException If check fails
-     * @throws InterruptedException If check is interrupted
-     */
-    public boolean containsFolder(final int accountId, final String fullName, final Session session) throws OXException, InterruptedException {
-        if (null == fullName || accountId < 0) {
-            return false;
-        }
-        final IndexFacadeService facade = SmalServiceLookup.getServiceStatic(IndexFacadeService.class);
-        if (null == facade) {
-            // Index service missing
-            return false;
-        }
-        IndexAccess<MailMessage> indexAccess = null;
-        try {
-            final int contextId = session.getContextId();
-            final int userId = session.getUserId();
-            indexAccess = facade.acquireIndexAccess(Types.EMAIL, userId, contextId);
-            return exists(userId, contextId, accountId, fullName, indexAccess);
-        } finally {
-            releaseAccess(facade, indexAccess);
-        }
-    }
-
     public void delete(final int accountId, final String fullName, final String[] optMailIds, final Session session) throws OXException, InterruptedException {
         final IndexFacadeService facade = SmalServiceLookup.getServiceStatic(IndexFacadeService.class);
         if (null == facade) {
@@ -200,86 +164,6 @@ public final class IndexAccessAdapter {
                 final MailUUID indexId = new MailUUID(contextId, userId, accountId, fullName, id);
                 indexAccess.deleteById(indexId.getUUID());
             }
-        } finally {
-            releaseAccess(facade, indexAccess);
-        }
-    }
-
-    public List<MailMessage> search(final int accountId, final String fullName, final SearchTerm<?> searchTerm, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final IndexRange indexRange, final Session session) throws OXException, InterruptedException {
-        final IndexFacadeService facade = SmalServiceLookup.getServiceStatic(IndexFacadeService.class);
-        if (null == facade) {
-            // Index service missing
-            return Collections.emptyList();
-        }
-        IndexAccess<MailMessage> indexAccess = null;
-        try {
-            indexAccess = facade.acquireIndexAccess(Types.EMAIL, session);
-            /*
-             * Check folder existence in index
-             */
-            final int contextId = session.getContextId();
-            final int userId = session.getUserId();
-            if ((accountId >= 0) && (null != fullName) && !exists(userId, contextId, accountId, fullName, indexAccess)) {
-                throw MailExceptionCode.FOLDER_NOT_FOUND.create(fullName);
-            }
-
-            /*
-             * search
-             */            
-            final Map<String, Object> params = new HashMap<String, Object>(1);
-            params.put("accountId", accountId);
-            final QueryParameters.Builder builder = new QueryParameters.Builder(params)
-                                                        .setOffset(0)
-                                                        .setLength(Integer.MAX_VALUE)
-                                                        .setType(IndexDocument.Type.MAIL)
-                                                        .setFolder(fullName);
-            
-            
-            if (null != sortField) {
-                final MailField field = MailField.getField(sortField.getField());
-                final MailIndexField indexSortField = MailIndexField.getFor(field);
-                if (indexSortField != null) {
-                    builder.setSortField(indexSortField);
-                    builder.setOrder(OrderDirection.DESC.equals(order) ? Order.DESC : Order.ASC);
-                }
-            }
-            
-            final QueryParameters parameters;
-            if (searchTerm == null) {
-                parameters = builder.setHandler(SearchHandler.ALL_REQUEST).build();
-            } else {
-                final SimpleSearchTermVisitor visitor = new SimpleSearchTermVisitor();
-                searchTerm.accept(visitor);
-                if (visitor.simple) {
-                    parameters = builder.setHandler(SearchHandler.SIMPLE).setPattern(searchTerm.getPattern().toString()).build();
-                } else {
-                    parameters = builder.setHandler(SearchHandler.CUSTOM).setSearchTerm(searchTerm).build();
-                }
-            }
-
-            final IndexResult<MailMessage> result = indexAccess.query(parameters, MailIndexField.getFor(fields));
-            List<IndexDocument<MailMessage>> documents = result.getResults();
-            if (indexRange != null) {
-                final int fromIndex = indexRange.start;
-                int toIndex = indexRange.end;
-                if ((documents == null) || documents.isEmpty()) {
-                    return Collections.emptyList();
-                }
-                if ((fromIndex) > documents.size()) {
-                    /*
-                     * Return empty iterator if start is out of range
-                     */
-                    return Collections.emptyList();
-                }
-                /*
-                 * Reset end index if out of range
-                 */
-                if (toIndex >= documents.size()) {
-                    toIndex = documents.size();
-                }
-                documents = documents.subList(fromIndex, toIndex);
-            }
-            return IndexDocumentHelper.messagesFrom(documents);
         } finally {
             releaseAccess(facade, indexAccess);
         }
@@ -364,29 +248,6 @@ public final class IndexAccessAdapter {
         } finally {
             releaseAccess(facade, indexAccess);
         }
-    }
-
-    private static final class SimpleSearchTermVisitor extends AbstractSearchTermVisitor {
-
-        boolean simple = true;
-
-        /**
-         * Initializes a new {@link IndexAccessAdapter.SimpleSearchTermVisitor}.
-         */
-        SimpleSearchTermVisitor() {
-            super();
-        }
-
-        @Override
-        public void visit(final ANDTerm term) {
-            simple = false;
-        }
-
-        @Override
-        public void visit(final ORTerm term) {
-            simple = false;
-        }
-
     }
 
 }

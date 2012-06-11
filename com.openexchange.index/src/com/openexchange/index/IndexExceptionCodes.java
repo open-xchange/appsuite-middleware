@@ -66,7 +66,11 @@ public enum IndexExceptionCodes implements OXExceptionCode {
     /**
      * An unexpected error occurred: %1$s
      */
-    UNEXPECTED_ERROR(IndexExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CATEGORY_ERROR, 1),
+    UNEXPECTED_ERROR(IndexExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CATEGORY_ERROR, 1),    
+    /**
+     * An index entry does not exist for folder %1$s in account %2$s.
+     */
+    MISSING_FOLDER_ENTRY(IndexExceptionMessages.MISSING_FOLDER_ENTRY_MSG, Category.CATEGORY_ERROR, 2),
     
     ;
 

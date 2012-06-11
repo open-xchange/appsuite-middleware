@@ -51,8 +51,13 @@ package com.openexchange.index.solr.osgi;
 
 import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
+import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.index.IndexFacadeService;
+import com.openexchange.index.solr.groupware.IndexedFoldersCreateTableService;
+import com.openexchange.index.solr.groupware.IndexedFoldersCreateTableTask;
 import com.openexchange.index.solr.internal.Services;
 import com.openexchange.index.solr.internal.SolrIndexFacadeService;
 import com.openexchange.log.LogFactory;
@@ -71,6 +76,8 @@ import com.openexchange.user.UserService;
 public class SolrIndexActivator extends HousekeepingActivator {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SolrIndexActivator.class));
+    
+    private SolrIndexFacadeService solrFacadeService;
         
 
     @Override
@@ -85,22 +92,26 @@ public class SolrIndexActivator extends HousekeepingActivator {
         LOG.info("Starting Bundle com.openexchange.index.solr");
         Services.setServiceLookup(this);
 
-        final SolrIndexFacadeService solrFacadeService = new SolrIndexFacadeService();
+        solrFacadeService = new SolrIndexFacadeService();
         solrFacadeService.init();
         registerService(IndexFacadeService.class, solrFacadeService);
         addService(IndexFacadeService.class, solrFacadeService);
+        IndexedFoldersCreateTableService createTableService = new IndexedFoldersCreateTableService();
+        registerService(CreateTableService.class, createTableService);
+        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new IndexedFoldersCreateTableTask(createTableService)));
 //        	registerService(CommandProvider.class, new UtilCommandProvider());        
         
 //        final SolrCoreConfigService indexService = new SolrCoreConfigServiceImpl();
 //        registerService(SolrCoreConfigService.class, indexService);
-
-        /*
-         * Register UpdateTasks and DeleteListener. Uncomment for production. final DatabaseService dbService =
-         * getService(DatabaseService.class); final CreateTableService createTableService = new IndexCreateTableService();
-         * registerService(CreateTableService.class, createTableService); registerService(UpdateTaskProviderService.class, new
-         * IndexUpdateTaskProviderService( new CreateTableUpdateTask(createTableService, new String[0], Schema.NO_VERSION, dbService), new
-         * IndexCreateServerTableTask(dbService) )); registerService(DeleteListener.class, new IndexDeleteListener(indexService));
-         */
+    }
+    
+    @Override
+    protected void stopBundle() throws Exception {
+        if (solrFacadeService != null) {
+            solrFacadeService.shutDown();
+        }
+        
+        super.stopBundle();
     }
     
 //    public class UtilCommandProvider implements CommandProvider {
