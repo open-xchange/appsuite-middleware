@@ -1,3 +1,7 @@
+* 2012-06-11 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22286: Discard unsafe conditional comments
+
 * 2012-06-08 - martin.herfurth@open-xchange.com
 
  - Fix for bug 22273: Removing appointments where i am not the organizer.

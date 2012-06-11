@@ -1144,7 +1144,7 @@ public final class HtmlServiceImpl implements HtmlService {
         return htmlContent;
     }
 
-    private static final Pattern PATTERN_CC = Pattern.compile("(<!(?:--)?\\[if)([^\\]]+\\]>)(.*?)(<!\\[endif\\](?:--)?>)", Pattern.DOTALL);
+    private static final Pattern PATTERN_CC = Pattern.compile("(<!(?:--)?\\[if)([^\\]]+\\](?:--!?)?>)(.*?)((?:<!\\[endif\\])?(?:--)?>)", Pattern.DOTALL);
 
     private static final String CC_START_IF = "<!-- [if";
 
@@ -1156,21 +1156,21 @@ public final class HtmlServiceImpl implements HtmlService {
      * Processes detected downlevel-revealed <a href="http://en.wikipedia.org/wiki/Conditional_comment">conditional comments</a> through
      * adding dashes before and after each <code>if</code> statement tag to complete them as a valid HTML comment and leaves center code
      * open to rendering on non-IE browsers:
-     * 
+     *
      * <pre>
      * &lt;![if !IE]&gt;
      * &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;non-ie.css&quot;&gt;
      * &lt;![endif]&gt;
      * </pre>
-     * 
+     *
      * is turned to
-     * 
+     *
      * <pre>
      * &lt;!--[if !IE]&gt;--&gt;
      * &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;non-ie.css&quot;&gt;
      * &lt;!--&lt;![endif]--&gt;
      * </pre>
-     * 
+     *
      * @param htmlContent The HTML content possibly containing downlevel-revealed conditional comments
      * @return The HTML content whose downlevel-revealed conditional comments contain valid HTML for non-IE browsers
      */
@@ -1186,21 +1186,32 @@ public final class HtmlServiceImpl implements HtmlService {
         final StringBuilder sb = new StringBuilder(htmlContent.length() + 128);
         do {
             sb.append(htmlContent.substring(lastMatch, m.start()));
-            sb.append(CC_START_IF).append(m.group(2));
-            final String wrappedContent = m.group(3);
-            if (!wrappedContent.startsWith("-->", 0)) {
-                sb.append(CC_END_IF);
-            }
-            sb.append(wrappedContent);
-            if (wrappedContent.endsWith("<!--")) {
-                sb.append(m.group(4));
-            } else {
-                sb.append(CC_ENDIF);
+            final String condition = m.group(2);
+            if (isValidCondition(condition)) {
+                sb.append(CC_START_IF).append(condition);
+                final String wrappedContent = m.group(3);
+                if (!wrappedContent.startsWith("-->", 0)) {
+                    sb.append(CC_END_IF);
+                }
+                sb.append(wrappedContent);
+                if (wrappedContent.endsWith("<!--")) {
+                    sb.append(m.group(4));
+                } else {
+                    sb.append(CC_ENDIF);
+                }
             }
             lastMatch = m.end();
         } while (m.find());
         sb.append(htmlContent.substring(lastMatch));
         return sb.toString();
+    }
+
+    private static boolean isValidCondition(final String condition) {
+        if (isEmpty(condition)) {
+            return false;
+        }
+        final String cond = condition.toUpperCase(Locale.US);
+        return (cond.indexOf("IE") >= 0) && (cond.indexOf('<') < 0) && (cond.indexOf('>') < 0);
     }
 
     /**
