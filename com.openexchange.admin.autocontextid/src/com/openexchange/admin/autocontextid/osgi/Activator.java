@@ -47,37 +47,32 @@
  *
  */
 
-package com.openexchange.admin.autocontextid;
+package com.openexchange.admin.autocontextid.osgi;
 
 import java.sql.SQLException;
 import java.util.Hashtable;
 import org.apache.commons.logging.Log;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
 import com.openexchange.admin.autocontextid.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.autocontextid.rmi.impl.OXAutoCIDContextImpl;
 import com.openexchange.admin.autocontextid.tools.AdminCacheExtended;
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.plugins.OXContextPluginInterface;
 import com.openexchange.log.LogFactory;
+import com.openexchange.osgi.HousekeepingActivator;
 
-public class Activator implements BundleActivator {
+public class Activator extends HousekeepingActivator {
 
     private static final Log LOG = LogFactory.getLog(Activator.class);
 
-    public void start(final BundleContext context) throws Exception {
+    @Override
+    public void startBundle() throws Exception {
         try {
             initCache();
 
             final Hashtable<String, String> props = new Hashtable<String, String>();
             props.put("name", "OXContext");
             LOG.info(OXContextPluginInterface.class.getName());
-            final ServiceRegistration<OXContextPluginInterface> reg = context.registerService(OXContextPluginInterface.class, new OXAutoCIDContextImpl(), props);
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(reg.toString());
-                LOG.debug("Service registered");
-            }
+            registerService(OXContextPluginInterface.class, new OXAutoCIDContextImpl(), props);
 
         } catch (final SQLException e) {
             LOG.error(e.getMessage(), e);
@@ -88,8 +83,9 @@ public class Activator implements BundleActivator {
         }
     }
 
-    public void stop(final BundleContext context) throws Exception {
-        // Nope
+    @Override
+    public void stopBundle() throws Exception {
+        unregisterServices();
     }
 
     private void initCache() throws SQLException, OXGenericException {
@@ -99,5 +95,10 @@ public class Activator implements BundleActivator {
         cache.initIDGenerator();
         ClientAdminThreadExtended.cache = cache;
         LOG.info("AutocontextID Bundle: Cache and Pools initialized!");
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return null;
     }
 }
