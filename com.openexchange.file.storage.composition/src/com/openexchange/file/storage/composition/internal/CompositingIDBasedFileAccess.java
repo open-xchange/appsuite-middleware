@@ -242,19 +242,26 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
     @Override
     public List<String> removeDocument(final List<String> ids, final long sequenceNumber) throws OXException {
         final Map<FileStorageFileAccess, List<IDTuple>> deleteOperations = new HashMap<FileStorageFileAccess, List<IDTuple>>();
-        for (final String id : ids) {
+        final List<File> reloaded = new ArrayList<File>();
+        for (final String id : ids) {            
             final FileID fileID = new FileID(id);
             final FileStorageFileAccess fileAccess = getFileAccess(fileID.getService(), fileID.getAccountId());
-
             List<IDTuple> deletes = deleteOperations.get(fileAccess);
             if (deletes == null) {
                 deletes = new ArrayList<IDTuple>();
                 deleteOperations.put(fileAccess, deletes);
             }
 
-            deletes.add(new FileStorageFileAccess.IDTuple(fileID.getFolderId(), fileID.getFileId()));            
+            deletes.add(new FileStorageFileAccess.IDTuple(fileID.getFolderId(), fileID.getFileId()));     
+            TimedResult<File> documents = fileAccess.getDocuments(deletes, Arrays.asList(new Field[] { Field.ID, Field.FOLDER_ID }));
+            SearchIterator<File> it = documents.results();
+            while (it.hasNext()) {
+                File file = it.next();
+                reloaded.add(file);
+            }
         }
 
+        
         final List<String> notDeleted = new ArrayList<String>(ids.size());
 
         for (final Map.Entry<FileStorageFileAccess, List<IDTuple>> deleteOp : deleteOperations.entrySet()) {
@@ -283,8 +290,11 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
                     /*
                      * Reload the document to get it's folder id.
                      */
-                    File fileMetadata = access.getFileMetadata(folderId, objectId, FileStorageFileAccess.CURRENT_VERSION);
-                    folderId = fileMetadata.getFolderId();
+                    for (File file : reloaded) {
+                        if (file.getId().equals(objectId)) {
+                            folderId = file.getFolderId();
+                        }
+                    }
                 }
                 postEvent(FileStorageEventHelper.buildDeleteEvent(session, serviceId, accountId, folderId, objectId, null));
             }
