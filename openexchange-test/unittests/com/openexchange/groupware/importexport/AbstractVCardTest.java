@@ -57,8 +57,10 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.importexport.importers.VCardImporter;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.importexport.formats.Format;
+import com.openexchange.importexport.importers.Importer;
+import com.openexchange.importexport.importers.VCardImporter;
 import com.openexchange.test.AjaxInit;
 import com.openexchange.tools.session.ServerSessionFactory;
 

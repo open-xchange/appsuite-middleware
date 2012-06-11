@@ -559,7 +559,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		xo.output(doc, baos);
 		baos.flush();
 		final HttpClient httpclient = new HttpClient();
-		httpclient.getState().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login+"@"+context, password));
+		httpclient.getState().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(context.equals("") ? login : login+"@"+context, password));
 		final PropFindMethod propFindMethod = new PropFindMethod(host + CONTACT_URL);
 		propFindMethod.setDoAuthentication(true);
 		propFindMethod.setRequestEntity(new ByteArrayRequestEntity(baos.toByteArray(), "text/xml"));

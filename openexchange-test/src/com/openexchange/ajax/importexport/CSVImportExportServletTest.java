@@ -59,8 +59,8 @@ import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.importexport.Format;
 import com.openexchange.groupware.importexport.csv.CSVParser;
+import com.openexchange.importexport.formats.Format;
 import com.openexchange.test.OXTestToolkit;
 
 /**
@@ -126,7 +126,7 @@ public class CSVImportExportServletTest extends AbstractImportExportServletTest 
 			req.selectFile("file", "contacts.csv", is, format.getMimeType());
 			final WebResponse webRes = webconv.getResource(req);
 			final JSONObject response = extractFromCallback( webRes.getText() );
-			assertEquals("Must contain error.", "I_E-1000", response.optString("code"));
+			assertEquals("Must contain error.", "CSV-1000", response.optString("code"));
 		} finally {
 			removeFolder(folderId);
 		}
@@ -166,7 +166,7 @@ public class CSVImportExportServletTest extends AbstractImportExportServletTest 
 			req.selectFile("file", "empty.vcs", is, format.getMimeType());
 			final WebResponse webRes = webconv.getResource(req);
 			final JSONObject response = extractFromCallback( webRes.getText() );
-			assertEquals("Must contain error ", "I_E-1303", response.optString("code"));
+			assertEquals("Must contain error ", "I_E-0804", response.optString("code"));
 		} finally {
 			removeFolder(folderId);
 		}

@@ -70,8 +70,11 @@ import com.openexchange.api2.RdbContactSQLImpl;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.importexport.csv.CSVParser;
-import com.openexchange.groupware.importexport.exporters.CSVContactExporter;
-import com.openexchange.groupware.importexport.importers.CSVContactImporter;
+import com.openexchange.importexport.exporters.CSVContactExporter;
+import com.openexchange.importexport.exporters.Exporter;
+import com.openexchange.importexport.formats.Format;
+import com.openexchange.importexport.importers.CSVContactImporter;
+import com.openexchange.importexport.importers.Importer;
 import com.openexchange.test.OXTestToolkit;
 
 

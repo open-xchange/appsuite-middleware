@@ -53,7 +53,7 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
-import com.openexchange.importexport.ImportResult;
+import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.tools.session.ServerSession;
 

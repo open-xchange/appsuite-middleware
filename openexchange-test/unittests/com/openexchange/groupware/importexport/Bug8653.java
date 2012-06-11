@@ -64,6 +64,7 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.importexport.formats.Format;
 
 public class Bug8653 extends AbstractICalImportTest {
 

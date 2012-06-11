@@ -69,7 +69,7 @@ import com.openexchange.groupware.contact.helpers.ContactSwitcherForSimpleDateFo
 import com.openexchange.groupware.contact.helpers.ContactSwitcherForTimestamp;
 import com.openexchange.groupware.contact.helpers.SplitBirthdayFieldsSetter;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.importexport.importers.OutlookCSVContactImporter;
+import com.openexchange.importexport.importers.OutlookCSVContactImporter;
 
 /**
  * This tests setting and getting options of the Switchers used in ...contact.helpers.

@@ -64,6 +64,7 @@ import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.CalendarSql;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.importexport.formats.Format;
 
 public class Bug7732Test extends AbstractICalImportTest {
 	//workaround for JUnit 3 runner

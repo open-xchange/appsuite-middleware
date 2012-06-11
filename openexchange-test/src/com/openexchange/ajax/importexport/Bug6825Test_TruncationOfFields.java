@@ -106,7 +106,7 @@ public class Bug6825Test_TruncationOfFields extends ManagedAppointmentTest {
         final String stringTooLong = "zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... ";
         final String ical = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:OPEN-XCHANGE\nBEGIN:VEVENT\nCLASS:PUBLIC\nCREATED:20060519T120300Z\nDTSTART:20060519T110000Z\nDTSTAMP:20070423T063205Z\nSUMMARY:" + stringTooLong + "\nDTEND:20060519T120000Z\nATTENDEE:mailto:" + testMailAddress + "\nEND:VEVENT\nEND:VCALENDAR";
 
-        final ICalImportResponse importresponse = getClient().execute(new ICalImportRequest(folder.getObjectID(), ical));
+        final ICalImportResponse importresponse = getClient().execute(new ICalImportRequest(folder.getObjectID(), ical, false));
         assertTrue(importresponse.hasError());
         final JSONObject data = ((JSONArray) importresponse.getData()).getJSONObject(0);
         assertTrue(data.has("truncated"));

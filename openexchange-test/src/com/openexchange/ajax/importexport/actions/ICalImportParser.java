@@ -87,11 +87,11 @@ public final class ICalImportParser extends AbstractUploadParser<ICalImportRespo
                 results[i] = ImportExportParser.parse(array.getString(i));
             }
             retval.setImports(results);
-            if (failOnError) {
-                for (final ImportResult result : results) {
-                    final OXException e = result.getException();
-                    final String msg = e == null ? null : e.getMessage();
-                    assertFalse(msg, result.hasError());
+            for (final ImportResult result : results) {
+                final OXException e = result.getException();
+                final String msg = e == null ? null : e.getMessage();
+                if (failOnError) {
+                	assertFalse(msg, result.hasError());
                 }
             }
         } else if (failOnError) {

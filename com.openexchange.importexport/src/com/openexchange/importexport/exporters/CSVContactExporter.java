@@ -49,10 +49,7 @@
 
 package com.openexchange.importexport.exporters;
 
-import static com.openexchange.importexport.formats.csv.CSVLibrary.getFolderId;
-import static com.openexchange.importexport.formats.csv.CSVLibrary.getFolderObject;
-import static com.openexchange.importexport.formats.csv.CSVLibrary.transformIntArrayToSet;
-import static com.openexchange.importexport.formats.csv.CSVLibrary.transformSetToIntArray;
+import static com.openexchange.importexport.formats.csv.CSVLibrary.*;
 import java.io.ByteArrayInputStream;
 import java.sql.SQLException;
 import java.util.LinkedList;
@@ -284,9 +281,9 @@ public class CSVContactExporter implements Exporter {
             bob.append('"');
             bob.append(str.replace("\"", "\"\""));
             bob.append('"');
-            bob.append(com.openexchange.importexport.formats.csv.CSVLibrary.CELL_DELIMITER);
+            bob.append(CELL_DELIMITER);
         }
-        bob.setCharAt(bob.length() - 1, com.openexchange.importexport.formats.csv.CSVLibrary.ROW_DELIMITER);
+        bob.setCharAt(bob.length() - 1, ROW_DELIMITER);
         return bob.toString();
     }
 

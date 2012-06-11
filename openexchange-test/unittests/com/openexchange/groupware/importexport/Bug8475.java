@@ -67,6 +67,7 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
+import com.openexchange.importexport.formats.Format;
 
 public class Bug8475 extends AbstractICalImportTest{
 

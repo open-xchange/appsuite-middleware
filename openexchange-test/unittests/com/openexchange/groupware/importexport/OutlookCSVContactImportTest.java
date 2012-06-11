@@ -63,12 +63,12 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import junit.framework.JUnit4TestAdapter;
 import org.junit.Test;
-import com.openexchange.ajax.ImportExport;
 import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.RdbContactSQLImpl;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.importexport.importers.OutlookCSVContactImporter;
+import com.openexchange.importexport.formats.Format;
+import com.openexchange.importexport.importers.OutlookCSVContactImporter;
 
 public class OutlookCSVContactImportTest extends AbstractContactTest{
 	public String IMPORT_HEADERS = ContactField.GIVEN_NAME.getEnglishOutlookName()+","+ContactField.EMAIL1.getEnglishOutlookName()+","+ContactField.BIRTHDAY.getEnglishOutlookName()+"\n";
@@ -78,7 +78,7 @@ public class OutlookCSVContactImportTest extends AbstractContactTest{
 	public OutlookCSVContactImportTest(){
 		super();
 		defaultFormat = Format.OUTLOOK_CSV;
-		imp = ImportExport.getOutlookImporter();
+		imp = new OutlookCSVContactImporter();
 		assertFalse("Should read from property file", ( (OutlookCSVContactImporter) imp).isUsingFallback());
 	}
 

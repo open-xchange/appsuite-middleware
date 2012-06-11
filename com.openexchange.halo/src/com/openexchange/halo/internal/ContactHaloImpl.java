@@ -55,13 +55,16 @@ public class ContactHaloImpl implements ContactHalo {
 			throw new OXException(1).setPrefix("HALO").setLogMessage(
 					"Unknown halo provider '" + provider + "'");
 		}
+		if(! (contact.getInternalUserId() > 0) && ! contact.containsEmail1() & ! contact.containsEmail2() & ! contact.containsEmail3()){
+			throw new OXException(2).setPrefix("HALO").setLogMessage("Cannot search a contact that is neither an internal user nor has an e-mail address!");
+		}
 		return dataSource.investigate(buildQuery(contact, session), req,
 				session);
 	}
 
 	private HaloContactQuery buildQuery(Contact contact, final ServerSession session)
 			throws OXException {
-		final HaloContactQuery contactQuery = new HaloContactQuery();
+		HaloContactQuery contactQuery = new HaloContactQuery();
 
 		// Try to find a user with a given eMail address
 
@@ -105,7 +108,7 @@ public class ContactHaloImpl implements ContactHalo {
 			contactsToMerge.add(contact);
 		} else {
 			// Try to find a contact
-			final ContactField[] searchFields = { ContactField.EMAIL1, ContactField.EMAIL1, ContactField.EMAIL3 };
+			final ContactField[] searchFields = { ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3 };
 			final CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
         	for (final ContactField field : searchFields) {        		
         		final SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);

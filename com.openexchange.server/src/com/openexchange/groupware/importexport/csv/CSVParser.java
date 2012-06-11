@@ -53,7 +53,6 @@ import static com.openexchange.java.Autoboxing.I;
 import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.importexport.ImportExportExceptionCodes;
 
 /**
  * This class represents a combined parser and lexer for CSV files. It is designed rather simple with speed in mind. Note: Proper CSV files
@@ -150,7 +149,7 @@ public class CSVParser {
         }
 
         if (!(currentCell.length() == 0 && currentLine.isEmpty())) {
-            throw ImportExportExceptionCodes.DATA_AFTER_LAST_LINE.create();
+            throw CsvExceptionCodes.DATA_AFTER_LAST_LINE.create();
         }
 
         return structure;
@@ -169,7 +168,7 @@ public class CSVParser {
                 currentCell = new StringBuilder();
             } else {
                 if (!isTolerant()) {
-                    throw ImportExportExceptionCodes.BROKEN_CSV.create(I(numberOfCells), I(currentLineNumber), I(currentLine.size()));
+                    throw CsvExceptionCodes.BROKEN_CSV.create(I(numberOfCells), I(currentLineNumber), I(currentLine.size()));
                 }
             }
         }
@@ -197,7 +196,7 @@ public class CSVParser {
                 currentLine.add(currentCell.toString().trim());
             } else {
                 if (!isTolerant()) {
-                    throw ImportExportExceptionCodes.BROKEN_CSV.create(I(numberOfCells), I(currentLineNumber), I(currentLine.size()));
+                    throw CsvExceptionCodes.BROKEN_CSV.create(I(numberOfCells), I(currentLineNumber), I(currentLine.size()));
                 }
             }
             currentCell = new StringBuilder();
@@ -210,7 +209,7 @@ public class CSVParser {
                 }
                 structure.add(currentLine);
             } else {
-                throw ImportExportExceptionCodes.BROKEN_CSV.create(I(numberOfCells), I(currentLineNumber), I(currentLine.size()));
+                throw CsvExceptionCodes.BROKEN_CSV.create(I(numberOfCells), I(currentLineNumber), I(currentLine.size()));
                 // unparsableLines.add(currentLineNumber-1);
             }
             currentLine = new LinkedList<String>();

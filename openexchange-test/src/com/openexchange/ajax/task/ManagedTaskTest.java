@@ -2,7 +2,9 @@ package com.openexchange.ajax.task;
 
 import java.util.Date;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.test.FolderTestManager;
 import com.openexchange.test.TaskTestManager;
 
 public abstract class ManagedTaskTest extends AbstractAJAXSession {
@@ -10,6 +12,7 @@ public abstract class ManagedTaskTest extends AbstractAJAXSession {
 	protected TaskTestManager manager;
 	protected int folderID;
 	protected Task actual;
+	private FolderTestManager fManager;
 
 	public ManagedTaskTest(String name) {
 		super(name);
@@ -19,13 +22,21 @@ public abstract class ManagedTaskTest extends AbstractAJAXSession {
 	public void setUp() throws Exception {
 	    super.setUp();
 	    manager = new TaskTestManager(getClient());
-	    folderID = getClient().getValues().getPrivateTaskFolder();
+	    fManager = new FolderTestManager(getClient());
+	    folderID = fManager.insertFolderOnServer(
+	    	fManager.generateFolder(
+	    			"Managed task test folder #"+System.currentTimeMillis(), 
+	    			Module.TASK.getFolderConstant(), 
+	    			getClient().getValues().getPrivateTaskFolder(), 
+	    			getClient().getValues().getUserId())
+	    	).getObjectID();
 	    actual = null;
 	}
 
 	@Override
 	public void tearDown() throws Exception {
 	    manager.cleanUp();
+	    fManager.cleanUp();
 	    super.tearDown();
 	}
 
