@@ -471,6 +471,7 @@ public final class HtmlServiceImpl implements HtmlService {
         }
         String html = replaceHexEntities(htmlContent);
         html = processDownlevelRevealedConditionalComments(html);
+        html = dropDoubleAccents(html);
         // html = replaceHexNbsp(html);
         final FilterJerichoHandler handler;
         {
@@ -491,6 +492,36 @@ public final class HtmlServiceImpl implements HtmlService {
             LOG.debug("\tHTMLServiceImpl.sanitize() took " + dur + "msec.");
         }
         return retval;
+    }
+
+    private static final Pattern PATTERN_TAG = Pattern.compile("<\\w+?[^>]*>");
+
+    private static final Pattern PATTERN_ACCENTS = Pattern.compile(Pattern.quote("``")+"|"+Pattern.quote("лл"));
+
+    private static String dropDoubleAccents(final String html) {
+        if (null == html || (html.indexOf("``") < 0 && html.indexOf("лл") < 0)) {
+            return html;
+        }
+        final Matcher m = PATTERN_TAG.matcher(html);
+        if (!m.find()) {
+            return html;
+        }
+        int lastMatch = 0;
+        final StringBuilder sb = new StringBuilder(html.length());
+        do {
+            sb.append(html.substring(lastMatch, m.start()));
+            final String match = m.group();
+            if (!isEmpty(match)) {
+                if (match.indexOf("``") < 0 && match.indexOf("лл") < 0) {
+                    sb.append(match);
+                } else {
+                    sb.append(PATTERN_ACCENTS.matcher(match).replaceAll(""));
+                }
+            }
+            lastMatch = m.end();
+        } while (m.find());
+        sb.append(html.substring(lastMatch));
+        return sb.toString();
     }
 
     private static final Pattern PATTERN_HEADING_WS = Pattern.compile("(\r?\n|^) +");
