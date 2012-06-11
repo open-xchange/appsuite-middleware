@@ -1,6 +1,7 @@
 * 2012-06-11 - thorben.betten@open-xchange.com
 
  - Fix for bug 22286: Discard unsafe conditional comments
+ - Fix for bug 22284: Remove possible double accents in start of a HTML tag
 
 * 2012-06-08 - martin.herfurth@open-xchange.com
 
