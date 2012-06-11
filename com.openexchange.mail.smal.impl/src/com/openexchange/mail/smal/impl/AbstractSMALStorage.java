@@ -66,7 +66,6 @@ import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.smal.impl.processor.DefaultProcessorStrategy;
 import com.openexchange.mail.smal.impl.processor.MailFolderInfo;
-import com.openexchange.mail.smal.impl.processor.ProcessingProgress;
 import com.openexchange.mail.smal.impl.processor.Processor;
 import com.openexchange.mail.smal.impl.processor.ProcessorStrategy;
 import com.openexchange.server.ServiceExceptionCodes;
@@ -239,17 +238,19 @@ public abstract class AbstractSMALStorage {
      * @throws OXException If folder retrieval fails
      * @throws InterruptedException If interrupted
      */
-    protected ProcessingProgress processFolder(final String fullName) throws OXException, InterruptedException {
+    protected void processFolder(final String fullName) throws OXException, InterruptedException {
         final IMailFolderStorage folderStorage = delegateMailAccess.getFolderStorage();
         if (folderStorage instanceof IMailFolderStorageEnhanced) {
             final IMailFolderStorageEnhanced storageEnhanced = (IMailFolderStorageEnhanced) folderStorage;
-            return processor.processFolder(
-                new MailFolderInfo(fullName, storageEnhanced.getTotalCounter(fullName)),
-                accountId,
-                session,
-                Collections.<String, Object> emptyMap());
+            processor.processFolderAsync(
+              new MailFolderInfo(fullName, storageEnhanced.getTotalCounter(fullName)),
+              accountId,
+              session,
+              Collections.<String, Object> emptyMap());
+            
         }
-        return processFolder(folderStorage.getFolder(fullName));
+
+        processFolder(folderStorage.getFolder(fullName));
     }
 
     /**
@@ -260,8 +261,8 @@ public abstract class AbstractSMALStorage {
      * @throws OXException If processing fails
      * @throws InterruptedException If interrupted
      */
-    protected ProcessingProgress processFolder(final MailFolder mailFolder) throws OXException, InterruptedException {
-        return processor.processFolder(mailFolder, delegateMailAccess, Collections.<String, Object> emptyMap());
+    protected void processFolder(final MailFolder mailFolder) throws OXException, InterruptedException {
+        processor.processFolderAsync(mailFolder, delegateMailAccess, Collections.<String, Object> emptyMap());
     }
 
     /**
@@ -272,8 +273,8 @@ public abstract class AbstractSMALStorage {
      * @throws OXException If processing fails
      * @throws InterruptedException If interrupted
      */
-    protected ProcessingProgress processFolder(final MailFolderInfo mailFolderInfo) throws OXException, InterruptedException {
-        return processor.processFolder(mailFolderInfo, accountId, session, Collections.<String, Object> emptyMap());
+    protected void processFolder(final MailFolderInfo mailFolderInfo) throws OXException, InterruptedException {
+        processor.processFolderAsync(mailFolderInfo, accountId, session, Collections.<String, Object> emptyMap());
     }
 
     /**

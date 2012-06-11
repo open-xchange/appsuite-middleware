@@ -47,29 +47,69 @@
  *
  */
 
-package com.openexchange.index;
+package com.openexchange.index.solr.groupware;
 
-import com.openexchange.i18n.LocalizableStrings;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import com.openexchange.database.DBPoolingExceptionCodes;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.index.solr.internal.Services;
+import com.openexchange.tools.sql.DBUtils;
 
 
 /**
- * {@link IndexExceptionMessages}
+ * {@link IndexedFoldersCreateTableTask}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public final class IndexExceptionMessages implements LocalizableStrings {
+public class IndexedFoldersCreateTableTask extends UpdateTaskAdapter {
+    
+    private IndexedFoldersCreateTableService service;
 
-    /**
-     * Initializes a new {@link IndexExceptionMessages}.
-     */
-    public IndexExceptionMessages() {
+    public IndexedFoldersCreateTableTask(IndexedFoldersCreateTableService service) {
         super();
+        this.service = service;
     }
 
-    // An unexpected error occurred: %1$s
-    public static final String UNEXPECTED_ERROR_MSG = "An unexpected error occurred: %1$s";
-    
-    // An index entry does not exist for folder %1$s in account %2$s.
-    public static final String MISSING_FOLDER_ENTRY_MSG = "An index entry does not exist for folder %1$s in account %2$s.";
-    
+    @Override
+    public void perform(PerformParameters params) throws OXException {
+        DatabaseService dbService = Services.getService(DatabaseService.class);
+        int contextId = params.getContextId();
+        Connection con = dbService.getForUpdateTask(contextId);
+        try {
+            String[] tables = service.tablesToCreate();
+            String[] statements = service.getCreateStatements();
+            DBUtils.startTransaction(con);
+            for (int i = 0; i < service.tablesToCreate().length; i++) {
+                String table = tables[i];
+                if (!DBUtils.tableExists(con, table)) {
+                    PreparedStatement stmt = null;
+                    try {
+                        String statement = statements[i];
+                        stmt = con.prepareStatement(statement);
+                        stmt.executeUpdate();
+                    } finally {
+                        DBUtils.closeSQLStuff(stmt);
+                    }
+                }
+            }
+            con.commit();
+        } catch (SQLException e) {
+            DBUtils.rollback(con);
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.autocommit(con);
+            dbService.backForUpdateTask(contextId, con);
+        }
+    }
+
+    @Override
+    public String[] getDependencies() {
+        return new String[] {};
+    }
+
 }

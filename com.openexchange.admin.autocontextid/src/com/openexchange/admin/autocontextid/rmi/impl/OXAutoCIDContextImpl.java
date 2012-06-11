@@ -147,11 +147,11 @@ public class OXAutoCIDContextImpl implements OXContextPluginInterface {
         return new Boolean(true);
     }
 
-    public void exists(final Context ctx, final Credentials auth) throws PluginException {
+    public void exists(final Context ctx, final Credentials auth) {
         // Nothing to do.
     }
 
-    public void getAdminId(final Context ctx, final Credentials auth) throws PluginException {
+    public void getAdminId(final Context ctx, final Credentials auth) {
         // Nothing to do.
     }
 }

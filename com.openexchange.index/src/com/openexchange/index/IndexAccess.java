@@ -62,6 +62,16 @@ import com.openexchange.exception.OXException;
 public interface IndexAccess<V> {
     
     /**
+     * Returns if a folder within an account is already indexed.
+     * If folder is <code>null</code>, the whole account is checked.
+     * 
+     * @param accountId The account id.
+     * @param folderId The folder id or <code>null</code>.
+     * @return If a folder or account is indexed.
+     */
+    boolean isIndexed(String accountId, String folderId) throws OXException;
+    
+    /**
      * Gets the fields indexed by this access.
      * 
      * @return The indexed fields
@@ -83,7 +93,7 @@ public interface IndexAccess<V> {
      * @throws OXException If add operation fails
      * @throws InterruptedException If interrupted while adding
      */
-    void addEnvelopeData(Collection<IndexDocument<V>> documents) throws OXException, InterruptedException;
+    void addEnvelopeData(Collection<IndexDocument<V>> documents) throws OXException;
 
     /**
      * Adds specified document's content to associated index.
@@ -103,7 +113,7 @@ public interface IndexAccess<V> {
      * Otherwise it will be loaded from the index and only the content will be added to the existing document.
      * @throws OXException If parameter full is false but one of the documents could not be found in the index or if an index error occurs.
      */
-    void addContent(Collection<IndexDocument<V>> documents, boolean full) throws OXException, InterruptedException;
+    void addContent(Collection<IndexDocument<V>> documents, boolean full) throws OXException;
 
     /**
      * Adds specified document's attachments to associated index.
@@ -123,7 +133,7 @@ public interface IndexAccess<V> {
      * Otherwise it will be loaded from the index and only the attachment will be added to the existing document.
      * @throws OXException If parameter full is false but one of the documents could not be found in the index or if an index error occurs.
      */
-    void addAttachments(Collection<IndexDocument<V>> documents, boolean full) throws OXException, InterruptedException;
+    void addAttachments(Collection<IndexDocument<V>> documents, boolean full) throws OXException;
 
     /**
      * Changes the denoted fields of already existing document according to specified input document.
@@ -133,7 +143,7 @@ public interface IndexAccess<V> {
      * @throws OXException If change operation fails
      * @throws InterruptedException If operation has been interrupted
      */
-    void change(IndexDocument<V> document, Set<? extends IndexField> fields) throws OXException, InterruptedException;
+    void change(IndexDocument<V> document, Set<? extends IndexField> fields) throws OXException;
 
     /**
      * Changes the denoted fields of already existing documents according to specified input documents.
@@ -143,7 +153,7 @@ public interface IndexAccess<V> {
      * @throws OXException If change operation fails
      * @throws InterruptedException If operation has been interrupted
      */
-    void change(Collection<IndexDocument<V>> documents, Set<? extends IndexField> fields) throws OXException, InterruptedException;
+    void change(Collection<IndexDocument<V>> documents, Set<? extends IndexField> fields) throws OXException;
 
     /**
      * Deletes a document by identifier.
@@ -170,6 +180,6 @@ public interface IndexAccess<V> {
      * @throws OXException If query fails
      * @throws InterruptedException If interrupted while retrieving results
      */
-    IndexResult<V> query(QueryParameters parameters, Set<? extends IndexField> fields) throws OXException, InterruptedException;
+    IndexResult<V> query(QueryParameters parameters, Set<? extends IndexField> fields) throws OXException;
 
 }

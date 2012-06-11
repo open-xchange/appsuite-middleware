@@ -47,48 +47,31 @@
  *
  */
 
-package com.openexchange.mail.smal.impl.json;
+package com.openexchange.mail.smal.impl;
 
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.exception.OXException;
-import com.openexchange.mail.smal.impl.SmalServiceLookup;
+import com.openexchange.mail.search.ANDTerm;
+import com.openexchange.mail.search.AbstractSearchTermVisitor;
+import com.openexchange.mail.search.ORTerm;
 
-/**
- * {@link AbstractJSONMethod} - An abstract JSON method.
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- */
-public abstract class AbstractJSONMethod {
+public class SimpleSearchTermVisitor extends AbstractSearchTermVisitor {
+
+    public boolean simple = true;
 
     /**
-     * The HTTPS identifier constant.
+     * Initializes a new {@link SimpleSearchTermVisitor}.
      */
-    protected static final String HTTPS = "https";
-
-    /**
-     * Initializes a new {@link AbstractJSONMethod}.
-     */
-    protected AbstractJSONMethod() {
+    public SimpleSearchTermVisitor() {
         super();
     }
 
-    /**
-     * Gets the VoipNow setting for specified session.
-     *
-     * @param session The session
-     * @param httpApi <code>true</code> to authenticate against HTTP-API interface; otherwise <code>false</code>
-     * @return The VoipNow setting
-     * @throws OXException If returning VoipNow setting fails
-     */
-    protected static JSONServerSetting getVoipNowServerSetting() {
-        final JSONServerSetting retval = new JSONServerSetting();
-        final ConfigurationService service = SmalServiceLookup.getInstance().getService(ConfigurationService.class);
-        retval.setPort(service.getIntProperty("com.4psa.voipnow.port", 443));
-        retval.setHost(service.getProperty("com.4psa.voipnow.host", "localhost").trim());
-        retval.setSecure(Boolean.parseBoolean(service.getProperty("com.4psa.voipnow.secure", "true").trim()));
-        retval.setLogin(service.getProperty("com.4psa.voipnow.adminLogin", "").trim());
-        retval.setPassword(service.getProperty("com.4psa.voipnow.adminPassword", "").trim());
-        return retval;
+    @Override
+    public void visit(final ANDTerm term) {
+        simple = false;
+    }
+
+    @Override
+    public void visit(final ORTerm term) {
+        simple = false;
     }
 
 }

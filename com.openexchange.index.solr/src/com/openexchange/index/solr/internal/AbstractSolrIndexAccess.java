@@ -50,7 +50,13 @@
 package com.openexchange.index.solr.internal;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import org.apache.solr.client.solrj.SolrResponse;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.UpdateResponse;
@@ -58,6 +64,7 @@ import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.SolrParams;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexAccess;
+import com.openexchange.index.solr.IndexFolderManager;
 import com.openexchange.solr.SolrAccessService;
 import com.openexchange.solr.SolrCoreIdentifier;
 
@@ -67,6 +74,8 @@ import com.openexchange.solr.SolrCoreIdentifier;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
+    
+    private final Lock folderCacheLock = new ReentrantLock();
 
     protected final int contextId;
 
@@ -79,6 +88,8 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
     private final AtomicInteger retainCount;
 
     private long lastAccess;
+    
+    private Map<Integer, Map<String, Set<String>>> indexedFolders;
         
 
     /**
@@ -94,12 +105,51 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
         this.module = identifier.getModule();
         lastAccess = System.currentTimeMillis();
         retainCount = new AtomicInteger(0);
+        indexedFolders = new HashMap<Integer, Map<String, Set<String>>>();
+    }
+    
+    /*
+     * Implemented methods
+     */
+    protected boolean isIndexed(int module, String accountId, String folderId) throws OXException {
+        Map<String, Set<String>> accounts = indexedFolders.get(module);
+        folderCacheLock.lock();        
+        try {
+            Set<String> folders;
+            if (accounts == null) {
+                accounts = new HashMap<String, Set<String>>();
+                folders = new HashSet<String>();
+                accounts.put(accountId, folders);
+                indexedFolders.put(module, accounts);
+            } else {
+                folders = accounts.get(accountId);
+                if (folders == null) {
+                    folders = new HashSet<String>();
+                    accounts.put(accountId, folders);                    
+                }              
+            }
+            
+            if (folders.contains(folderId)) {
+                return true;
+            }
+            
+            if (IndexFolderManager.isIndexed(contextId, userId, module, accountId, folderId)) {
+                folders.add(folderId);
+                return true;
+            }
+
+            return false;
+        } finally {
+            folderCacheLock.unlock();
+        }
     }
     
     /*
      * Public methods
      */
     public void releaseCore() {        
+        indexedFolders = null;
+        indexedFolders = new HashMap<Integer, Map<String, Set<String>>>();
         final SolrAccessService accessService = Services.getService(SolrAccessService.class);
         accessService.freeResources(identifier);
     }

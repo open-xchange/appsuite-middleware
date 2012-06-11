@@ -47,57 +47,62 @@
  *
  */
 
-package com.openexchange.admin.autocontextid;
+package com.openexchange.mail.smal.impl.internal.tasks;
 
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.tools.sql.DBUtils.tableExists;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.Hashtable;
-import org.apache.commons.logging.Log;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
-import com.openexchange.admin.autocontextid.daemons.ClientAdminThreadExtended;
-import com.openexchange.admin.autocontextid.rmi.impl.OXAutoCIDContextImpl;
-import com.openexchange.admin.autocontextid.tools.AdminCacheExtended;
-import com.openexchange.admin.exceptions.OXGenericException;
-import com.openexchange.admin.plugins.OXContextPluginInterface;
-import com.openexchange.log.LogFactory;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.mail.smal.impl.SmalServiceLookup;
+import com.openexchange.server.ServiceExceptionCodes;
 
-public class Activator implements BundleActivator {
 
-    private static final Log LOG = LogFactory.getLog(Activator.class);
+/**
+ * {@link DropMailSyncTable}
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ */
+public class DropMailSyncTable extends UpdateTaskAdapter {
 
-    public void start(final BundleContext context) throws Exception {
+    @Override
+    public void perform(PerformParameters params) throws OXException {
+        final DatabaseService dbService = SmalServiceLookup.getInstance().getService(DatabaseService.class);
+        if (dbService == null) {
+            throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
+        }
+        final int contextId = params.getContextId();
+        final Connection writeCon;
         try {
-            initCache();
-
-            final Hashtable<String, String> props = new Hashtable<String, String>();
-            props.put("name", "OXContext");
-            LOG.info(OXContextPluginInterface.class.getName());
-            final ServiceRegistration<OXContextPluginInterface> reg = context.registerService(OXContextPluginInterface.class, new OXAutoCIDContextImpl(), props);
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(reg.toString());
-                LOG.debug("Service registered");
+            writeCon = dbService.getForUpdateTask(contextId);
+        } catch (final OXException e) {
+            throw e;
+        }
+        PreparedStatement stmt = null;
+        try {
+            try {
+                if (tableExists(writeCon, "mailSync")) {
+                    stmt = writeCon.prepareStatement("DROP TABLE mailSync");
+                    stmt.executeUpdate();
+                    stmt.close();
+                }
+            } catch (final SQLException e) {
+                throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
             }
-
-        } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
-            throw e;
-        } catch (final OXGenericException e) {
-            LOG.fatal(e.getMessage(), e);
-            throw e;
+        } finally {
+            closeSQLStuff(null, stmt);
+            dbService.backForUpdateTask(contextId, writeCon);
         }
     }
 
-    public void stop(final BundleContext context) throws Exception {
-        // Nope
+    @Override
+    public String[] getDependencies() {
+        return new String[] {};
     }
 
-    private void initCache() throws SQLException, OXGenericException {
-        final AdminCacheExtended cache = new AdminCacheExtended();
-        cache.initCache();
-        cache.initCacheExtended();
-        cache.initIDGenerator();
-        ClientAdminThreadExtended.cache = cache;
-        LOG.info("AutocontextID Bundle: Cache and Pools initialized!");
-    }
 }

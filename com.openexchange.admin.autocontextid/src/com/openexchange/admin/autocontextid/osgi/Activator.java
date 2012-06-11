@@ -47,119 +47,58 @@
  *
  */
 
-package com.openexchange.mail.smal.impl.json;
+package com.openexchange.admin.autocontextid.osgi;
 
-/**
- * {@link JSONServerSetting}
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- */
-public final class JSONServerSetting {
+import java.sql.SQLException;
+import java.util.Hashtable;
+import org.apache.commons.logging.Log;
+import com.openexchange.admin.autocontextid.daemons.ClientAdminThreadExtended;
+import com.openexchange.admin.autocontextid.rmi.impl.OXAutoCIDContextImpl;
+import com.openexchange.admin.autocontextid.tools.AdminCacheExtended;
+import com.openexchange.admin.exceptions.OXGenericException;
+import com.openexchange.admin.plugins.OXContextPluginInterface;
+import com.openexchange.log.LogFactory;
+import com.openexchange.osgi.HousekeepingActivator;
 
-    private String host;
+public class Activator extends HousekeepingActivator {
 
-    private boolean secure;
+    private static final Log LOG = LogFactory.getLog(Activator.class);
 
-    private int port;
+    @Override
+    public void startBundle() throws Exception {
+        try {
+            initCache();
 
-    private String login;
+            final Hashtable<String, String> props = new Hashtable<String, String>();
+            props.put("name", "OXContext");
+            LOG.info(OXContextPluginInterface.class.getName());
+            registerService(OXContextPluginInterface.class, new OXAutoCIDContextImpl(), props);
 
-    private String password;
-
-    /**
-     * Initializes a new {@link JSONServerSetting}.
-     */
-    public JSONServerSetting() {
-        super();
+        } catch (final SQLException e) {
+            LOG.error(e.getMessage(), e);
+            throw e;
+        } catch (final OXGenericException e) {
+            LOG.fatal(e.getMessage(), e);
+            throw e;
+        }
     }
 
-    /**
-     * Sets the host
-     *
-     * @param host The host to set
-     */
-    public void setHost(final String host) {
-        this.host = host;
+    @Override
+    public void stopBundle() throws Exception {
+        unregisterServices();
     }
 
-    /**
-     * Gets the host
-     *
-     * @return The host
-     */
-    public String getHost() {
-        return host;
+    private void initCache() throws SQLException, OXGenericException {
+        final AdminCacheExtended cache = new AdminCacheExtended();
+        cache.initCache();
+        cache.initCacheExtended();
+        cache.initIDGenerator();
+        ClientAdminThreadExtended.cache = cache;
+        LOG.info("AutocontextID Bundle: Cache and Pools initialized!");
     }
 
-    /**
-     * Sets the secure
-     *
-     * @param secure The secure to set
-     */
-    public void setSecure(final boolean secure) {
-        this.secure = secure;
-    }
-
-    /**
-     * Gets the secure
-     *
-     * @return The secure
-     */
-    public boolean isSecure() {
-        return secure;
-    }
-
-    /**
-     * Sets the port
-     *
-     * @param port The port to set
-     */
-    public void setPort(final int port) {
-        this.port = port;
-    }
-
-    /**
-     * Gets the port
-     *
-     * @return The port
-     */
-    public int getPort() {
-        return port;
-    }
-
-    /**
-     * Sets the login
-     *
-     * @param login The login to set
-     */
-    public void setLogin(final String login) {
-        this.login = login;
-    }
-
-    /**
-     * Gets the login
-     *
-     * @return The login
-     */
-    public String getLogin() {
-        return login;
-    }
-
-    /**
-     * Sets the password
-     *
-     * @param password The password to set
-     */
-    public void setPassword(final String password) {
-        this.password = password;
-    }
-
-    /**
-     * Gets the password
-     *
-     * @return The password
-     */
-    public String getPassword() {
-        return password;
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return null;
     }
 }

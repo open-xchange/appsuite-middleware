@@ -47,77 +47,44 @@
  *
  */
 
-package com.openexchange.admin.daemons.osgi;
+package com.openexchange.index.solr.groupware;
 
-import java.lang.reflect.Field;
-import java.rmi.Remote;
-import java.rmi.registry.Registry;
-import java.rmi.server.UnicastRemoteObject;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.database.AbstractCreateTableImpl;
 
 /**
- * {@link RMITracker}
+ * {@link IndexedFoldersCreateTableService}
  * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class RMITracker extends ServiceTracker {
+public class IndexedFoldersCreateTableService extends AbstractCreateTableImpl {
 
-    private final Registry registry;
-
-    private static final Log LOG = LogFactory.getLog(RMITracker.class);
-
-    public RMITracker(BundleContext context, Registry registry) {
-        super(context, Remote.class.getName(), null);
-        this.registry = registry;
+    @Override
+    public String[] requiredTables() {
+        return NO_TABLES;
     }
 
     @Override
-    public Object addingService(ServiceReference reference) {
-        Remote r = (Remote) super.addingService(reference);
-        String name = findRMIName(reference, r);
-        try {
-            registry.bind(name, UnicastRemoteObject.exportObject(r, 0));
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-        }
-
-        return r;
+    public String[] tablesToCreate() {
+        // These table names must(!) be returned in the same order as their create statements.
+        return new String[] { "indexedFolders" };
     }
 
     @Override
-    public void removedService(ServiceReference reference, Object service) {
-        Remote r = (Remote) service;
-        String name = findRMIName(reference, r);
-        try {
-            registry.unbind(name);
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-        }
-        super.removedService(reference, service);
+    protected String[] getCreateStatements() {
+        return new String[] {
+              "CREATE TABLE indexedFolders (" +
+                  "cid int(10) unsigned NOT NULL," +
+                  "uid int(10) unsigned NOT NULL," +
+                  "module int(10) unsigned NOT NULL," +
+                  "account varchar(128) COLLATE utf8_unicode_ci NOT NULL," +
+                  "folder varchar(128) COLLATE utf8_unicode_ci NOT NULL," +
+                  "timestamp bigint(64) NOT NULL," +
+                  "locked`tinyint(1) unsigned NOT NULL," +
+                  "indexed tinyint(1) unsigned NOT NULL," +
+                  "PRIMARY KEY (cid,uid,module,account,folder)," +
+                  "KEY module (cid,uid,module)," +
+                  "KEY account (cid,uid,module,account)" +
+              ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci"
+        };
     }
-
-    private String findRMIName(ServiceReference reference, Remote r) {
-        Object name = reference.getProperty("RMIName");
-        if (name != null) {
-            return (String) name;
-        }
-
-        try {
-            Field field = r.getClass().getField("RMI_NAME");
-            return (String) field.get(r);
-        } catch (SecurityException e) {
-            return r.getClass().getSimpleName();
-        } catch (NoSuchFieldException e) {
-            return r.getClass().getSimpleName();
-        } catch (IllegalArgumentException e) {
-            return r.getClass().getSimpleName();
-        } catch (IllegalAccessException e) {
-            return r.getClass().getSimpleName();
-        }
-    }
-
 }
