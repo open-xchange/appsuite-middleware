@@ -48,8 +48,7 @@
  */
 package com.openexchange.importexport.actions;
 
-import java.util.Collections;
-import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.importexport.actions.importer.CsvImportAction;

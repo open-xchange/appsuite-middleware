@@ -56,6 +56,7 @@ import com.openexchange.ajax.importexport.actions.ICalImportRequest;
 import com.openexchange.ajax.importexport.actions.ICalImportResponse;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ConversionWarning.Code;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.importexport.ImportResult;
 
 /**
@@ -80,7 +81,7 @@ public final class Bug9840Test extends AbstractAJAXSession {
         final ImportResult result = iResponse.getImports()[0];
         assertTrue("BYMONTH recurrence pattern not detected as error.",
             result.hasError());
-        final ConversionWarning exception = (ConversionWarning) result.getException();
+        final OXException exception = result.getException();
         final Code code = Code.BYMONTH_NOT_SUPPORTED;
         assertEquals(code.getNumber(), exception.getCode());
         assertEquals(code.getCategory(), exception.getCategory());

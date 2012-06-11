@@ -49,13 +49,7 @@
 
 package com.openexchange.importexport.exporters;
 
-import static com.openexchange.groupware.importexport.csv.CSVLibrary.getFolderId;
-import static com.openexchange.groupware.importexport.csv.CSVLibrary.getFolderObject;
-import static com.openexchange.groupware.importexport.csv.CSVLibrary.transformIntArrayToSet;
-import static com.openexchange.groupware.importexport.csv.CSVLibrary.transformSetToIntArray;
-import static com.openexchange.groupware.importexport.csv.CSVLibrary.convertToList;
-import static com.openexchange.groupware.importexport.csv.CSVLibrary.ROW_DELIMITER;
-import static com.openexchange.groupware.importexport.csv.CSVLibrary.CELL_DELIMITER;
+import static com.openexchange.importexport.formats.csv.CSVLibrary.*;
 import java.io.ByteArrayInputStream;
 import java.sql.SQLException;
 import java.util.LinkedList;
@@ -212,7 +206,7 @@ public class CSVContactExporter implements Exporter {
             throw ImportExportExceptionCodes.LOADING_CONTACTS_FAILED.create(e);
         }
         final StringBuilder ret = new StringBuilder();
-        ret.append(convertToLine(com.openexchange.groupware.importexport.csv.CSVLibrary.convertToList(cols)));
+        ret.append(convertToLine(com.openexchange.importexport.formats.csv.CSVLibrary.convertToList(cols)));
 
         try {
             while (conIter.hasNext()) {
@@ -258,7 +252,7 @@ public class CSVContactExporter implements Exporter {
         }
 
         final StringBuilder ret = new StringBuilder();
-        ret.append(convertToLine(com.openexchange.groupware.importexport.csv.CSVLibrary.convertToList(cols)));
+        ret.append(convertToLine(com.openexchange.importexport.formats.csv.CSVLibrary.convertToList(cols)));
         ret.append(convertToLine(convertToList(conObj, cols)));
 
         final byte[] bytes = Charsets.getBytes(ret.toString(), Charsets.UTF_8);

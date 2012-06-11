@@ -1,0 +1,38 @@
+====[       ${mail.appointment.title!""}       ]====
+
+${labels.timezoneInfo!""}
+
+${labels.whenLabel} ${formatters.dateSpec} ${formatters.interval}
+<#if mail.appointment.location??>
+${labels.whereLabel} ${mail.appointment.location!""}
+</#if>
+
+
+<#if mail.appointment.note??>
+====================================
+${mail.appointment.note!""}
+====================================
+</#if>
+
+== ${labels.participantsLabel} ==
+
+<#list mail.participants as participant>
+${participantHelper.participantLine(participant)}
+</#list>
+
+== ${labels.resourcesLabel} ==
+
+<#list mail.resources as participant>
+${participantHelper.participantLine(participant)}
+</#list>
+
+== ${labels.detailsLabel} ==
+
+${labels.showAsLabel} ${labels.showAs}
+${labels.createdLabel} ${formatters.created} - ${labels.creator}
+
+${labels.directLink!""}
+
+${labels.attachmentNote!""}
+
+${labels.justification!""}

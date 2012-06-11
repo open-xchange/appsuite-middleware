@@ -102,7 +102,7 @@ public final class Bug11868Test extends AbstractAJAXSession {
         final Resource resource = new Resource();
         {
             final long different = System.currentTimeMillis();
-            resource.setDisplayName("Bug 11868 test resource");
+            resource.setDisplayName("Bug 11868 test resource" + different);
             resource.setSimpleName("Bug 11868 test resource " + different);
             resource.setMail("bug11868testresource" + different + "@example.org");
             final ResourceNewResponse response = Executor.execute(client,
@@ -145,7 +145,6 @@ public final class Bug11868Test extends AbstractAJAXSession {
         "ATTENDEE:MAILTO:@email3@\n" +
         "RESOURCES:@resource1@\n" +
         "RRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=MO\n" +
-        "UID:20080807T103849Z-49@fe80:0:0:0:20c:29ff:fe29:9f2e%2\n" +
         "END:VEVENT\n" +
         "END:VCALENDAR\n";
 }

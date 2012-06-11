@@ -110,7 +110,7 @@ public class ImportWriter extends DataWriter {
                     jsonwriter.object();
                     final JSONObject jsonWarning = new JSONObject();
                     ResponseWriter.addWarning(jsonWarning, warning,  session.getUser().getLocale());
-                    writeDepth1(jsonWarning);
+                    writeDepth1(jsonWarning.getJSONObject("warnings"));
                     jsonwriter.endObject();
                 }
                 jsonwriter.endArray();

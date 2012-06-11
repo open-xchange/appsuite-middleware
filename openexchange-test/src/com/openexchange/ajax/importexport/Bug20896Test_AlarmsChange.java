@@ -43,9 +43,9 @@ public class Bug20896Test_AlarmsChange extends ManagedAppointmentTest {
 		"SUMMARY:2 Tage vorher\n" + 
 		"CLASS:PRIVATE\n" + 
 		"LAST-MODIFIED:20111130T124235Z\n" + 
-		"DTEND;TZID=Europe/Berlin:20120328T180000\n" + 
+		"DTEND;TZID=Europe/Berlin:20300328T180000\n" + 
 		"CREATED:20111130T124235Z\n" + 
-		"DTSTART;TZID=Europe/Berlin:20120328T170000\n" + 
+		"DTSTART;TZID=Europe/Berlin:20300328T170000\n" + 
 		"BEGIN:VALARM\n" + 
 		"ACTION:DISPLAY\n" + 
 		"TRIGGER:-P2D\n" + 
@@ -59,9 +59,9 @@ public class Bug20896Test_AlarmsChange extends ManagedAppointmentTest {
 		"SUMMARY:4 Wochen vorher\n" + 
 		"CLASS:PRIVATE\n" + 
 		"LAST-MODIFIED:20111130T124311Z\n" + 
-		"DTEND;TZID=Europe/Berlin:20120328T230000\n" + 
+		"DTEND;TZID=Europe/Berlin:20300328T230000\n" + 
 		"CREATED:20111130T124311Z\n" + 
-		"DTSTART;TZID=Europe/Berlin:20120328T220000\n" + 
+		"DTSTART;TZID=Europe/Berlin:20300328T220000\n" + 
 		"BEGIN:VALARM\n" + 
 		"ACTION:DISPLAY\n" + 
 		"TRIGGER:-P4W\n" + 
@@ -75,9 +75,9 @@ public class Bug20896Test_AlarmsChange extends ManagedAppointmentTest {
 		"SUMMARY:15 Minuten vorher\n" + 
 		"CLASS:PRIVATE\n" + 
 		"LAST-MODIFIED:20111130T124258Z\n" + 
-		"DTEND;TZID=Europe/Berlin:20120328T160000\n" + 
+		"DTEND;TZID=Europe/Berlin:20300328T160000\n" + 
 		"CREATED:20111130T124258Z\n" + 
-		"DTSTART;TZID=Europe/Berlin:20120328T150000\n" + 
+		"DTSTART;TZID=Europe/Berlin:20300328T150000\n" + 
 		"BEGIN:VALARM\n" + 
 		"ACTION:DISPLAY\n" + 
 		"TRIGGER:-PT15M\n" + 
@@ -91,9 +91,9 @@ public class Bug20896Test_AlarmsChange extends ManagedAppointmentTest {
 		"SUMMARY:2 Stunden vorher\n" + 
 		"CLASS:PRIVATE\n" + 
 		"LAST-MODIFIED:20111130T124245Z\n" + 
-		"DTEND;TZID=Europe/Berlin:20120328T170000\n" + 
+		"DTEND;TZID=Europe/Berlin:20300328T170000\n" + 
 		"CREATED:20111130T124245Z\n" + 
-		"DTSTART;TZID=Europe/Berlin:20120328T160000\n" + 
+		"DTSTART;TZID=Europe/Berlin:20300328T160000\n" + 
 		"BEGIN:VALARM\n" + 
 		"ACTION:DISPLAY\n" + 
 		"TRIGGER:-PT2H\n" + 
@@ -107,9 +107,9 @@ public class Bug20896Test_AlarmsChange extends ManagedAppointmentTest {
 		"SUMMARY:3 Monate vorher erinnern (Erwartet 4 Wochen im OX)\n" + 
 		"CLASS:PRIVATE\n" + 
 		"LAST-MODIFIED:20111130T124151Z\n" + 
-		"DTEND;TZID=Europe/Berlin:20120328T200000\n" + 
+		"DTEND;TZID=Europe/Berlin:20300328T200000\n" + 
 		"CREATED:20111130T124110Z\n" + 
-		"DTSTART;TZID=Europe/Berlin:20120328T190000\n" + 
+		"DTSTART;TZID=Europe/Berlin:20300328T190000\n" + 
 		"BEGIN:VALARM\n" + 
 		"ACTION:DISPLAY\n" + 
 		"TRIGGER:-P4W\n" + 
@@ -123,9 +123,9 @@ public class Bug20896Test_AlarmsChange extends ManagedAppointmentTest {
 		"SUMMARY:2 Wochen vorher\n" + 
 		"CLASS:PRIVATE\n" + 
 		"LAST-MODIFIED:20111130T124220Z\n" + 
-		"DTEND;TZID=Europe/Berlin:20120328T190000\n" + 
+		"DTEND;TZID=Europe/Berlin:20300328T190000\n" + 
 		"CREATED:20111130T124220Z\n" + 
-		"DTSTART;TZID=Europe/Berlin:20120328T180000\n" + 
+		"DTSTART;TZID=Europe/Berlin:20300328T180000\n" + 
 		"BEGIN:VALARM\n" + 
 		"ACTION:DISPLAY\n" + 
 		"TRIGGER:-P2W\n" + 

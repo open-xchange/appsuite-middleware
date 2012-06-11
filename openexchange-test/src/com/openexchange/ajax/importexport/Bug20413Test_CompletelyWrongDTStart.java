@@ -55,14 +55,15 @@ public class Bug20413Test_CompletelyWrongDTStart extends ManagedAppointmentTest 
 		JSONArray arr = (JSONArray)response.getData();
 		
 		
-		assertEquals(2, arr.length()); // interesting: you get an appointment and a series for the same date. ICal4J weirdness. But hey, it works!
+		assertEquals(1, arr.length());
 		
 		JSONObject jsonObject = arr.getJSONObject(0);
 		Appointment actual = calendarManager.get(jsonObject.getInt("folder_id"), jsonObject.getInt("id"));
 		Calendar startDate = Calendar.getInstance();
 		startDate.setTime(actual.getStartDate());
+		//NOTE: Completely irrelevant. Date format not allowed. 
 		assertEquals(Calendar.NOVEMBER, startDate.get(Calendar.MONTH));
-		assertEquals(10, startDate.get(Calendar.DAY_OF_MONTH));
+		assertEquals(8, startDate.get(Calendar.DAY_OF_MONTH));
 		
 	}
 

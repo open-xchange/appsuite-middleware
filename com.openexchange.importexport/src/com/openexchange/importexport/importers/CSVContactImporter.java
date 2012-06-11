@@ -49,8 +49,8 @@
 
 package com.openexchange.importexport.importers;
 
-import static com.openexchange.groupware.importexport.csv.CSVLibrary.getFolderObject;
-import static com.openexchange.groupware.importexport.csv.CSVLibrary.transformInputStreamToString;
+import static com.openexchange.importexport.formats.csv.CSVLibrary.getFolderObject;
+import static com.openexchange.importexport.formats.csv.CSVLibrary.transformInputStreamToString;
 import static com.openexchange.java.Autoboxing.I;
 import java.io.InputStream;
 import java.sql.SQLException;

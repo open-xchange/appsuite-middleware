@@ -12,6 +12,9 @@ public class Bug19046Test_SeriesWithExtraneousStartDate extends
 		super(name);
 	}
 
+	/*
+	 * Behaviour: Only shows series, not exception
+	 */
 	public void testExtraneousStartDate() throws Exception{
 		String ical =
 		"BEGIN:VCALENDAR\n"+
@@ -31,7 +34,7 @@ public class Bug19046Test_SeriesWithExtraneousStartDate extends
 		ICalImportRequest request = new ICalImportRequest(folder.getObjectID(), ical);
 		ICalImportResponse response = getClient().execute(request);
 		ImportResult[] imports = response.getImports();
-		assertEquals(2, imports.length);
+		assertEquals(1, imports.length);
 		assertFalse(response.hasConflicts() || response.hasError());
 	}
 

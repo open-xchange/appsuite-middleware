@@ -57,6 +57,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.importexport.ImportResult;
+import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.importers.Importer;
 import com.openexchange.importexport.json.ImportRequest;
@@ -91,6 +92,15 @@ public abstract class AbstractImportAction implements AJAXActionService {
 			e1.printStackTrace();
 		}
 		AJAXRequestResult result = new AJAXRequestResult(jsonWriter.getObject());
+		boolean hasWarnings = false;
+		for(ImportResult res: importResult){
+			if(res.getWarnings() != null && res.getWarnings().size() > 0){
+				hasWarnings = true;		
+			}
+		}
+		if(hasWarnings){
+			result.setException(ImportExportExceptionCodes.WARNINGS.create());
+		}
 		return result;
 
 	}
