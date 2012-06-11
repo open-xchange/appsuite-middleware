@@ -504,9 +504,6 @@ public final class HtmlServiceImpl implements HtmlService {
         }
         final Matcher m = PATTERN_TAG.matcher(html);
         if (!m.find()) {
-            /*
-             * No conditional comments found
-             */
             return html;
         }
         int lastMatch = 0;
