@@ -55,6 +55,7 @@ import static com.openexchange.user.copy.internal.CopyTools.getIntOrNegative;
 import static com.openexchange.user.copy.internal.CopyTools.replaceIdsInQuery;
 import static com.openexchange.user.copy.internal.CopyTools.setIntOrNull;
 import static com.openexchange.user.copy.internal.CopyTools.setStringOrNull;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -68,6 +69,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.ExternalUserParticipant;
@@ -120,7 +122,7 @@ public class CalendarCopyTask implements CopyUserTaskService {
             "creating_date, changing_date, fid, pflag, timestampfield01, timestampfield02, " +
             "timezone, intfield01, intfield02, intfield03, intfield04, intfield05, intfield06, " +
             "intfield07, intfield08, field01, field02, field04, field06, field07, field08, " +
-            "field09, uid, organizer, sequence, organizerId, principal, principalId " +
+            "field09, uid, organizer, sequence, organizerId, principal, principalId, filename " +
         "FROM " +
             "prg_dates " +
         "WHERE " +
@@ -155,9 +157,9 @@ public class CalendarCopyTask implements CopyUserTaskService {
             "fid, pflag, cid, timestampfield01, timestampfield02, " +
             "timezone, intfield01, intfield02, intfield03, intfield04, intfield05, intfield06, " +
             "intfield07, intfield08, field01, field02, field04, field06, field07, field08, " +
-            "field09, uid, organizer, sequence, organizerId, principal, principalId) " +
+            "field09, uid, organizer, sequence, organizerId, principal, principalId, filename) " +
         "VALUES " +
-            "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     
     private static final String INSERT_MEMBER = 
         "INSERT INTO " +
@@ -393,6 +395,7 @@ public class CalendarCopyTask implements CopyUserTaskService {
                 stmt.setInt(i++, appointment.getOrganizerId());
                 setStringOrNull(i++, stmt, appointment.getPrincipal());
                 stmt.setInt(i++, appointment.getPrincipalId());
+                setStringOrNull(i++, stmt, appointment.getFilename());
                 
                 stmt.addBatch();
             }
@@ -586,6 +589,7 @@ public class CalendarCopyTask implements CopyUserTaskService {
                     appointment.setOrganizerId(getIntOrNegative(i++, rs));
                     appointment.setPrincipal(rs.getString(i++));
                     appointment.setPrincipalId(getIntOrNegative(i++, rs));
+                    appointment.setFilename(rs.getString(i++));
 
                     appointments.put(appointment.getObjectID(), appointment);
                 }
