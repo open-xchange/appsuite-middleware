@@ -3,6 +3,7 @@
  - Fix for bug 22286: Discard unsafe conditional comments
  - Fix for bug 22284: Remove possible double accents in start of a HTML tag
  - Fix for bug 22287: URL-encode Servlet path on error response
+ - Fix for bug 21430: Convert login string to puny-code representation if appears to be an Email address
 
 * 2012-06-08 - martin.herfurth@open-xchange.com
 
