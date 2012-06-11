@@ -120,12 +120,15 @@ public abstract class Server {
         }
 
         public static SocketType getSocketType(String keyword) {
-            if (keyword.equalsIgnoreCase(Server.PLAIN))
+            if (keyword.equalsIgnoreCase(Server.PLAIN)) {
                 return PLAIN;
-            if (keyword.equalsIgnoreCase(Server.STARTTLS))
+            }
+            if (keyword.equalsIgnoreCase(Server.STARTTLS)) {
                 return STARTTLS;
-            if (keyword.equalsIgnoreCase(Server.SSL))
+            }
+            if (keyword.equalsIgnoreCase(Server.SSL)) {
                 return SSL;
+            }
             return null;
         }
 

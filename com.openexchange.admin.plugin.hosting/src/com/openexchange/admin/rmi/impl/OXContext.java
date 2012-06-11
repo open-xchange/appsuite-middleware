@@ -113,7 +113,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
     private final Log log = LogFactory.getLog(this.getClass());
 
-    private OXAdminPoolDBPoolExtension pool;
+    private final OXAdminPoolDBPoolExtension pool;
 
     public OXContext(final BundleContext context) throws StorageException {
         super();
@@ -124,6 +124,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         }
     }
 
+    @Override
     public void change(final Context ctx, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
         auth = auth == null ? new Credentials("","") : auth;
         try {
@@ -187,10 +188,12 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         }
     }
 
+    @Override
     public Context create(final Context ctx, final User admin_user, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
         return createcommon(ctx, admin_user, null, null, auth);
     }
 
+    @Override
     public Context create(final Context ctx, final User admin_user,final String access_combination_name, Credentials auth)
         throws RemoteException, StorageException,InvalidCredentialsException, InvalidDataException,    ContextExistsException {
 
@@ -221,6 +224,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         return createcommon(ctx, admin_user, null, access, auth);
     }
 
+    @Override
     public Context create(final Context ctx, final User admin_user,final UserModuleAccess access, Credentials auth)
         throws RemoteException,StorageException, InvalidCredentialsException,InvalidDataException, ContextExistsException {
         auth = auth == null ? new Credentials("","") : auth;
@@ -236,6 +240,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
     }
 
+    @Override
     public void delete(final Context ctx, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, DatabaseUpdateException, InvalidDataException {
         auth = auth == null ? new Credentials("","") : auth;
         try {
@@ -303,6 +308,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         }
     }
 
+    @Override
     public void disable(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, NoSuchReasonException, OXContextException {
         final MaintenanceReason reason = new MaintenanceReason(42);
         disable(ctx, reason, auth);
@@ -360,6 +366,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         }
     }
 
+    @Override
     public void disableAll(final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchReasonException {
         final MaintenanceReason reason = new MaintenanceReason(42);
         disableAll(reason, auth);
@@ -413,6 +420,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         // END OF CACHE
     }
 
+    @Override
     public void enable(final Context ctx, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
         auth = auth == null ? new Credentials("","") : auth;
         try {
@@ -449,6 +457,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         }
     }
 
+    @Override
     public void enableAll(Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException {
         new BasicAuthenticator(context).doAuthentication(auth);
         auth = auth == null ? new Credentials("","") : auth;
@@ -482,6 +491,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         // END OF CACHE
     }
 
+    @Override
     public Context[] getData(final Context[] ctxs, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
         auth = auth == null ? new Credentials("","") : auth;
         try {
@@ -541,10 +551,12 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         }
     }
 
+    @Override
     public Context getData(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
         return getData(new Context[]{ctx}, auth)[0];
     }
 
+    @Override
     public Context[] list(final String search_pattern, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         auth = auth == null ? new Credentials("","") : auth;
         try {
@@ -609,10 +621,12 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         return list("*", auth);
     }
 
+    @Override
     public Context[] listAll(final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         return list("*", auth);
     }
 
+    @Override
     public Context[] listByDatabase(final Database db, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchDatabaseException {
         auth = auth == null ? new Credentials("","") : auth;
         try {
@@ -647,6 +661,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         }
     }
 
+    @Override
     public Context[] listByFilestore(final Filestore filestore, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchFilestoreException {
         auth = auth == null ? new Credentials("","") : auth;
         try {
@@ -683,6 +698,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
     /**
      * @see com.openexchange.admin.rmi.OXContextInterface#moveContextDatabase(com.openexchange.admin.rmi.dataobjects.Context, com.openexchange.admin.rmi.dataobjects.Database, com.openexchange.admin.rmi.dataobjects.Credentials)
      */
+    @Override
     public int moveContextDatabase(final Context ctx, final Database db, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, OXContextException {
         final MaintenanceReason reason = new MaintenanceReason(42);
         return moveContextDatabase(ctx, db, reason, auth);
@@ -749,6 +765,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         }
     }
 
+    @Override
     public int moveContextFilestore(final Context ctx, final Filestore dst_filestore, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, NoSuchFilestoreException, NoSuchReasonException, OXContextException {
         final MaintenanceReason reason = new MaintenanceReason(I(42));
         return moveContextFilestore(ctx, dst_filestore, reason, auth);
@@ -906,6 +923,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         return src;
     }
 
+    @Override
     public void changeModuleAccess(final Context ctx, final UserModuleAccess access,Credentials auth)
         throws RemoteException,InvalidCredentialsException, NoSuchContextException,    StorageException, InvalidDataException {
         auth = auth == null ? new Credentials("","") : auth;
@@ -951,6 +969,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
     }
 
+    @Override
     public void changeModuleAccess(final Context ctx, final String access_combination_name,Credentials auth)
         throws RemoteException,InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
 
@@ -1010,6 +1029,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
     /**
      * {@inheritDoc}
      */
+    @Override
     public void downgrade(final Context ctx, Credentials auth) throws
         RemoteException, InvalidCredentialsException,NoSuchContextException,
         StorageException, DatabaseUpdateException,InvalidDataException {
@@ -1048,6 +1068,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         }
     }
 
+    @Override
     public String getAccessCombinationName(final Context ctx, Credentials auth)
         throws RemoteException, InvalidCredentialsException,NoSuchContextException, StorageException, InvalidDataException {
         auth = auth == null ? new Credentials("","") : auth;
@@ -1083,6 +1104,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         }
     }
 
+    @Override
     public UserModuleAccess getModuleAccess(final Context ctx, Credentials auth)
         throws RemoteException, InvalidCredentialsException,NoSuchContextException, StorageException, InvalidDataException {
         auth = auth == null ? new Credentials("","") : auth;
@@ -1170,6 +1192,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         }
     }
     
+    @Override
     public int getAdminId(final Context ctx, Credentials auth) throws RemoteException, InvalidCredentialsException, StorageException, NoSuchContextException {
         auth = auth == null ? new Credentials("","") : auth;
         
@@ -1189,6 +1212,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         return tool.getAdminForContext(ctx);
     }
 
+    @Override
     public boolean exists(final Context ctx, Credentials auth) throws RemoteException, InvalidDataException, StorageException, InvalidCredentialsException {
         auth = auth == null ? new Credentials("","") : auth;
         new BasicAuthenticator(context).doAuthentication(auth);
@@ -1213,6 +1237,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         }
     }
     
+    @Override
     public boolean checkExists(final Context ctx, Credentials auth) throws RemoteException, InvalidDataException, StorageException, InvalidCredentialsException {
         return exists(ctx, auth);
     }

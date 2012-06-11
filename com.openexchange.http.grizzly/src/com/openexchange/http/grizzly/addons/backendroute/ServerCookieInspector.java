@@ -73,7 +73,7 @@ import com.openexchange.http.grizzly.osgi.GrizzlyServiceRegistry;
  */
 public class ServerCookieInspector extends AbstractCookieInspector {
 
-    private HttpResponsePacket httpResponsePacket;
+    private final HttpResponsePacket httpResponsePacket;
     
     /**
      * Initializes a new {@link ServerCookieInspector}.

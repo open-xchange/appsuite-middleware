@@ -40,4 +40,5 @@ Bundle-ClassPath: .,
  lib/common.jar,
  lib/PDFRenderer-0.9.1.jar,
  lib/visitors.jar,
- lib/pdfbox-app-1.6.0.jar
+ lib/pdfbox-app-1.6.0.jar,
+ lib/xml-apis.jar

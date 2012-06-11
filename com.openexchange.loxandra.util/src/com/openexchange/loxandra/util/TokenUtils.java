@@ -159,7 +159,7 @@ public class TokenUtils {
 	private static ArrayList<String> pending(ArrayList<String> pending) {
 		Iterator<String> iter = pending.iterator(); 
 		while (iter.hasNext()) {
-			String type = (String) iter.next();
+			String type = iter.next();
 			log.debug(type);
 		}
 		pending.clear();

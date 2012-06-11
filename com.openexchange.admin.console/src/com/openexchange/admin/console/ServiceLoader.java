@@ -72,6 +72,7 @@ public class ServiceLoader<S> implements Iterable<S> {
         return new ServiceLoader<S>(retval);
     }
     
+    @Override
     public Iterator<S> iterator() {
         return this.list.iterator();
     }

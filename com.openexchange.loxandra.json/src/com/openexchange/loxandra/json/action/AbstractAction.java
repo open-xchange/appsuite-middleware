@@ -59,7 +59,7 @@ import com.openexchange.server.ServiceLookup;
  */
 public abstract class AbstractAction implements AJAXActionService {
 	
-	private ServiceLookup serviceLookup;
+	private final ServiceLookup serviceLookup;
 
 	/**
 	 * Default constructor

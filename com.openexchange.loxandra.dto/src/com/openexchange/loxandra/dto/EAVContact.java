@@ -82,16 +82,16 @@ public class EAVContact extends Contact implements Comparable<EAVContact> {
 	private UUID folderUUID;*/
 	
 	/** The folder UUID list aka FID **/
-	private List<UUID> folderUUIDs;
+	private final List<UUID> folderUUIDs;
 	
 	/** The time UUID for this contact aka time of creation **/
 	private UUID timeUUID;
 	
 	/** a hash map to hold the unnamed properties **/
-	private HashMap<String, String> unnamedProperties;
+	private final HashMap<String, String> unnamedProperties;
 	
 	/** Holds all the named properties for an object. Used only by the {@link #CassandraContactDAO.populateDTO */
-	private HashMap<String, ByteBuffer> namedProperties = new HashMap<String, ByteBuffer>();
+	private final HashMap<String, ByteBuffer> namedProperties = new HashMap<String, ByteBuffer>();
 	
 	/**
 	 * Default constructor
@@ -168,7 +168,7 @@ public class EAVContact extends Contact implements Comparable<EAVContact> {
 		Iterator<String> iteratorKeys = unnamedProperties.keySet().iterator();
 		
 		while (iteratorKeys.hasNext()) {
-			keys.add((String) iteratorKeys.next());
+			keys.add(iteratorKeys.next());
 		}
 		
 		return keys;
@@ -185,7 +185,7 @@ public class EAVContact extends Contact implements Comparable<EAVContact> {
 		Iterator<String> iteratorKeys = unnamedProperties.keySet().iterator();
 		
 		while (iteratorKeys.hasNext()) {
-			values.add(unnamedProperties.get((String) iteratorKeys.next()));
+			values.add(unnamedProperties.get(iteratorKeys.next()));
 		}
 		
 		return values;

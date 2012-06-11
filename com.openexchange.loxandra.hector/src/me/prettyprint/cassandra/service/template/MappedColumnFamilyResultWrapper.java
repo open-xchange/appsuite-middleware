@@ -11,7 +11,7 @@ import org.apache.cassandra.thrift.ColumnOrSuperColumn;
 
 public class MappedColumnFamilyResultWrapper<K, N, V> extends ColumnFamilyResultWrapper<K, N> implements MappedColumnFamilyResult<K, N, V>{
 
-  private ColumnFamilyRowMapper<K, N, V> rowMapper;
+  private final ColumnFamilyRowMapper<K, N, V> rowMapper;
   
   public MappedColumnFamilyResultWrapper(Serializer<K> keySerializer,
       Serializer<N> columnNameSerializer,

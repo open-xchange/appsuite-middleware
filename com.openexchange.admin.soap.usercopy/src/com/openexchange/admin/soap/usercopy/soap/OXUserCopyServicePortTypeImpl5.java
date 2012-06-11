@@ -38,6 +38,7 @@ public class OXUserCopyServicePortTypeImpl5 implements OXUserCopyServicePortType
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.usercopy.soap.OXUserCopyServicePortType#copyUser(com.openexchange.admin.soap.usercopy.dataobjects.User  user ,)com.openexchange.admin.soap.usercopy.dataobjects.Context  src ,)com.openexchange.admin.soap.usercopy.dataobjects.Context  dest ,)com.openexchange.admin.soap.usercopy.dataobjects.Credentials  auth )*
      */
+    @Override
     public com.openexchange.admin.soap.usercopy.dataobjects.User copyUser(com.openexchange.admin.soap.usercopy.dataobjects.User user,com.openexchange.admin.soap.usercopy.dataobjects.Context src,com.openexchange.admin.soap.usercopy.dataobjects.Context dest,com.openexchange.admin.soap.usercopy.dataobjects.Credentials auth) throws InvalidCredentialsException_Exception , NoSuchContextException_Exception , DatabaseUpdateException_Exception , UserExistsException_Exception , NoSuchUserException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    { 
         LOG.info("Executing operation copyUser");
         System.out.println(user);

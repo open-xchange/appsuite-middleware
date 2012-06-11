@@ -72,7 +72,7 @@ public class TableRowObject {
     }
     
     public TableColumnObject getColumn(String name){
-        return (TableColumnObject)columns.get(name);
+        return columns.get(name);
     }
     
     public Enumeration<String> getColumnNames(){

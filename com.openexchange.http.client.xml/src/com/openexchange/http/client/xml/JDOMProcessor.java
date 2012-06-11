@@ -13,7 +13,7 @@ import com.openexchange.xml.jdom.JDOMParser;
 
 public class JDOMProcessor implements HTTPResponseProcessor {
 
-	private JDOMParser parser;
+	private final JDOMParser parser;
 
 	public JDOMProcessor(JDOMParser parser) {
 		this.parser = parser;

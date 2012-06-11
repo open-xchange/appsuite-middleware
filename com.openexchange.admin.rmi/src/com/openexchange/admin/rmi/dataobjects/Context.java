@@ -145,6 +145,7 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
         this.name = name;
     }
 
+    @Override
     public final Integer getId() {
         return this.id;
     }
@@ -153,15 +154,18 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
         return String.valueOf(this.id);
     }
 
+    @Override
     public final void setId(final Integer id) {
         this.id = id;
         this.idset = true;
     }
     
+    @Override
     public final String getName() {
         return name;
     }
 
+    @Override
     public final void setName(final String name) {
         this.name = name;
         this.nameset = true;
@@ -320,6 +324,7 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
      * (non-Javadoc)
      * @see com.openexchange.admin.rmi.dataobjects.ExtendableDataObject#toString()
      */
+    @Override
     public String toString() {
         StringBuilder ret = new StringBuilder();
         ret.append("[ \n");
@@ -553,95 +558,133 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
      */
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (!super.equals(obj))
+        }
+        if (!super.equals(obj)) {
             return false;
-        if (!(obj instanceof Context))
+        }
+        if (!(obj instanceof Context)) {
             return false;
+        }
         final Context other = (Context) obj;
         if (average_size == null) {
-            if (other.average_size != null)
+            if (other.average_size != null) {
                 return false;
-        } else if (!average_size.equals(other.average_size))
+            }
+        } else if (!average_size.equals(other.average_size)) {
             return false;
-        if (average_sizeset != other.average_sizeset)
+        }
+        if (average_sizeset != other.average_sizeset) {
             return false;
+        }
         if (enabled == null) {
-            if (other.enabled != null)
+            if (other.enabled != null) {
                 return false;
-        } else if (!enabled.equals(other.enabled))
+            }
+        } else if (!enabled.equals(other.enabled)) {
             return false;
-        if (enabledset != other.enabledset)
+        }
+        if (enabledset != other.enabledset) {
             return false;
+        }
         if (filestore_id == null) {
-            if (other.filestore_id != null)
+            if (other.filestore_id != null) {
                 return false;
-        } else if (!filestore_id.equals(other.filestore_id))
+            }
+        } else if (!filestore_id.equals(other.filestore_id)) {
             return false;
-        if (filestore_idset != other.filestore_idset)
+        }
+        if (filestore_idset != other.filestore_idset) {
             return false;
+        }
         if (filestore_name == null) {
-            if (other.filestore_name != null)
+            if (other.filestore_name != null) {
                 return false;
-        } else if (!filestore_name.equals(other.filestore_name))
+            }
+        } else if (!filestore_name.equals(other.filestore_name)) {
             return false;
-        if (filestore_nameset != other.filestore_nameset)
+        }
+        if (filestore_nameset != other.filestore_nameset) {
             return false;
+        }
         if (id == null) {
-            if (other.id != null)
+            if (other.id != null) {
                 return false;
-        } else if (!id.equals(other.id))
+            }
+        } else if (!id.equals(other.id)) {
             return false;
-        if (idset != other.idset)
+        }
+        if (idset != other.idset) {
             return false;
+        }
         if (login_mappings == null) {
-            if (other.login_mappings != null)
+            if (other.login_mappings != null) {
                 return false;
-        } else if (!login_mappings.equals(other.login_mappings))
+            }
+        } else if (!login_mappings.equals(other.login_mappings)) {
             return false;
+        }
         if (maintenanceReason == null) {
-            if (other.maintenanceReason != null)
+            if (other.maintenanceReason != null) {
                 return false;
-        } else if (!maintenanceReason.equals(other.maintenanceReason))
+            }
+        } else if (!maintenanceReason.equals(other.maintenanceReason)) {
             return false;
-        if (maintenanceReasonset != other.maintenanceReasonset)
+        }
+        if (maintenanceReasonset != other.maintenanceReasonset) {
             return false;
+        }
         if (maxQuota == null) {
-            if (other.maxQuota != null)
+            if (other.maxQuota != null) {
                 return false;
-        } else if (!maxQuota.equals(other.maxQuota))
+            }
+        } else if (!maxQuota.equals(other.maxQuota)) {
             return false;
-        if (maxQuotaset != other.maxQuotaset)
+        }
+        if (maxQuotaset != other.maxQuotaset) {
             return false;
+        }
         if (name == null) {
-            if (other.name != null)
+            if (other.name != null) {
                 return false;
-        } else if (!name.equals(other.name))
+            }
+        } else if (!name.equals(other.name)) {
             return false;
-        if (nameset != other.nameset)
+        }
+        if (nameset != other.nameset) {
             return false;
+        }
         if (readDatabase == null) {
-            if (other.readDatabase != null)
+            if (other.readDatabase != null) {
                 return false;
-        } else if (!readDatabase.equals(other.readDatabase))
+            }
+        } else if (!readDatabase.equals(other.readDatabase)) {
             return false;
-        if (readDatabaseset != other.readDatabaseset)
+        }
+        if (readDatabaseset != other.readDatabaseset) {
             return false;
+        }
         if (usedQuota == null) {
-            if (other.usedQuota != null)
+            if (other.usedQuota != null) {
                 return false;
-        } else if (!usedQuota.equals(other.usedQuota))
+            }
+        } else if (!usedQuota.equals(other.usedQuota)) {
             return false;
-        if (usedQuotaset != other.usedQuotaset)
+        }
+        if (usedQuotaset != other.usedQuotaset) {
             return false;
+        }
         if (writeDatabase == null) {
-            if (other.writeDatabase != null)
+            if (other.writeDatabase != null) {
                 return false;
-        } else if (!writeDatabase.equals(other.writeDatabase))
+            }
+        } else if (!writeDatabase.equals(other.writeDatabase)) {
             return false;
-        if (writeDatabaseset != other.writeDatabaseset)
+        }
+        if (writeDatabaseset != other.writeDatabaseset) {
             return false;
+        }
         return true;
     }
 

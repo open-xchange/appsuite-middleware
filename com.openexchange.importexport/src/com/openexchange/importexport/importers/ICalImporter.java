@@ -407,10 +407,11 @@ public class ICalImporter extends AbstractImporter {
 					if(isChange){
 						appointmentObj.setRecurrenceID(masterID);
 						appointmentObj.removeUid();
-						if(appointmentObj.containsRecurrenceDatePosition())
-							appointmentObj.setRecurrenceDatePosition(calculateRecurrenceDatePosition(appointmentObj.getRecurrenceDatePosition()));
-						else
-							appointmentObj.setRecurrenceDatePosition(calculateRecurrenceDatePosition(appointmentObj.getStartDate()));
+						if(appointmentObj.containsRecurrenceDatePosition()) {
+                            appointmentObj.setRecurrenceDatePosition(calculateRecurrenceDatePosition(appointmentObj.getRecurrenceDatePosition()));
+                        } else {
+                            appointmentObj.setRecurrenceDatePosition(calculateRecurrenceDatePosition(appointmentObj.getStartDate()));
+                        }
 					}
 					final Appointment[] conflicts;
 					if(isChange){

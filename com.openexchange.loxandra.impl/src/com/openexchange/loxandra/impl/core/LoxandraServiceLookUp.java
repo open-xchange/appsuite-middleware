@@ -59,43 +59,45 @@ import com.openexchange.server.ServiceLookup;
  */
 public final class LoxandraServiceLookUp {
 
-	    /**
-	     * Initializes a new {@link LoxandraServiceLookUp}.
-	     */
-	    private LoxandraServiceLookUp() {
-	        super();
-	    }
-
-	    private static final AtomicReference<ServiceLookup> ref = new AtomicReference<ServiceLookup>();
-
-	    /**
-	     * Gets the service look-up
-	     *
-	     * @return The service look-up or <code>null</code>
-	     */
-	    public static ServiceLookup get() {
-	        return ref.get();
-	    }
-
-	    /**
-	     * Gets the service of specified type
-	     *
-	     * @param clazz The service's class
-	     * @return The service or <code>null</code> is absent
-	     * @throws IllegalStateException If an error occurs while returning the demanded service
-	     */
-	    public static <S extends Object> S getService(final Class<? extends S> clazz) {
-	        final ServiceLookup serviceLookup = ref.get();
-	        return null == serviceLookup ? null : serviceLookup.getService(clazz);
-	    }
-
-	    /**
-	     * Sets the service look-up
-	     *
-	     * @param serviceLookup The service look-up or <code>null</code>
-	     */
-	    public static void set(final ServiceLookup serviceLookup) {
-	        ref.set(serviceLookup);
-	    }
-
+	/**
+	 * Initializes a new {@link LoxandraServiceLookUp}.
+	 */
+	private LoxandraServiceLookUp() {
+		super();
 	}
+
+	private static final AtomicReference<ServiceLookup> ref = new AtomicReference<ServiceLookup>();
+
+	/**
+	 * Gets the service look-up
+	 * 
+	 * @return The service look-up or <code>null</code>
+	 */
+	public static ServiceLookup get() {
+		return ref.get();
+	}
+
+	/**
+	 * Gets the service of specified type
+	 * 
+	 * @param clazz
+	 *            The service's class
+	 * @return The service or <code>null</code> is absent
+	 * @throws IllegalStateException
+	 *             If an error occurs while returning the demanded service
+	 */
+	public static <S extends Object> S getService(final Class<? extends S> clazz) {
+		final ServiceLookup serviceLookup = ref.get();
+		return null == serviceLookup ? null : serviceLookup.getService(clazz);
+	}
+
+	/**
+	 * Sets the service look-up
+	 * 
+	 * @param serviceLookup
+	 *            The service look-up or <code>null</code>
+	 */
+	public static void set(final ServiceLookup serviceLookup) {
+		ref.set(serviceLookup);
+	}
+}

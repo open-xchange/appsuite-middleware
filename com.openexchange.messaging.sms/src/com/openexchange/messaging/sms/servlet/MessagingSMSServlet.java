@@ -209,8 +209,9 @@ public final class MessagingSMSServlet extends PermissionServlet {
     }
 
     private void parseCaptchaParameter(HttpServletRequest req, JSONObject body, SMSMessagingMessage message) throws JSONException {
-        if (!body.has("captcha"))
+        if (!body.has("captcha")) {
             return;
+        }
         
         JSONObject captcha = body.getJSONObject("captcha");
         

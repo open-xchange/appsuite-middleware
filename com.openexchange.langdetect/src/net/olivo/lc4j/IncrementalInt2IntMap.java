@@ -103,7 +103,9 @@ public class IncrementalInt2IntMap {
 		l.addAll( m.keySet() );
 		Collections.sort( l, new KeyComparator() );
 		int[] a = new int[l.size()];
-		for ( int i = 0; i < a.length; i++ ) a[i] = ( (Integer)l.get(i) ).intValue();
+		for ( int i = 0; i < a.length; i++ ) {
+            a[i] = ( (Integer)l.get(i) ).intValue();
+        }
 		return a;
 	}
 
@@ -150,9 +152,13 @@ public class IncrementalInt2IntMap {
 		 */
 		@Override
         public int compare( Object o1, Object o2 ) {
-			if ( IncrementalInt2IntMap.this.m.get( ( (Integer)o2 ).intValue() ) < IncrementalInt2IntMap.this.m.get( ( (Integer)o1 ).intValue() ) ) return -1;
-			else if ( IncrementalInt2IntMap.this.m.get( ( (Integer)o2 ).intValue() ) > IncrementalInt2IntMap.this.m.get( ( (Integer)o1 ).intValue() ) ) return 1;
-			else return 0;
+			if ( IncrementalInt2IntMap.this.m.get( ( (Integer)o2 ).intValue() ) < IncrementalInt2IntMap.this.m.get( ( (Integer)o1 ).intValue() ) ) {
+                return -1;
+            } else if ( IncrementalInt2IntMap.this.m.get( ( (Integer)o2 ).intValue() ) > IncrementalInt2IntMap.this.m.get( ( (Integer)o1 ).intValue() ) ) {
+                return 1;
+            } else {
+                return 0;
+            }
 		}
 	}
 }

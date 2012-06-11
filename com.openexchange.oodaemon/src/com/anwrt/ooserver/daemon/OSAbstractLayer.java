@@ -25,12 +25,9 @@ public class OSAbstractLayer {
 
     public OSAbstractLayer() throws Exception {
         final String osName = System.getProperty("os.name").toLowerCase();
-        if (osName.startsWith("windows"))
+        if (osName.startsWith("windows")) {
             _os = OS_WINDOWS;
-        /*
-         * else if (osName.startsWith("SunOS") || osName.startsWith("Linux")) os = OS_UNIXCOMPATIBLE;
-         */
-        else {
+        } else {
             _os = OS_UNIXCOMPATIBLE;
             // throw new Exception("Unknown OS, killing impossible");
         }

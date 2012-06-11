@@ -150,12 +150,13 @@ public class ContactSearchtermSqlConverter  implements ContactSearchTermConverte
 	}
 
 	protected <T> void traverseViaInOrder(SearchTerm<T> term) {
-		if(term instanceof SingleSearchTerm)
-			traverseViaInorder((SingleSearchTerm) term);
-		else if(term instanceof CompositeSearchTerm)
-			traverseViaInorder((CompositeSearchTerm) term);
-		else
-			System.err.println("Got a search term that was neither Composite nor Single. How?");
+		if(term instanceof SingleSearchTerm) {
+            traverseViaInorder((SingleSearchTerm) term);
+        } else if(term instanceof CompositeSearchTerm) {
+            traverseViaInorder((CompositeSearchTerm) term);
+        } else {
+            System.err.println("Got a search term that was neither Composite nor Single. How?");
+        }
 	}
 
 	protected void traverseViaInorder(SingleSearchTerm term) {
@@ -167,8 +168,9 @@ public class ContactSearchtermSqlConverter  implements ContactSearchTermConverte
 		for(int i = 0; i < operands.length; i++){
 			Operand<?> o = operands[i];
 
-			if(operation.getSqlPosition() == OperationPosition.BEFORE)
-				bob.append(operation.getSqlRepresentation());
+			if(operation.getSqlPosition() == OperationPosition.BEFORE) {
+                bob.append(operation.getSqlRepresentation());
+            }
 
 			if(o.getType() == Operand.Type.COLUMN){
 				String value = (String) o.getValue();
@@ -188,12 +190,15 @@ public class ContactSearchtermSqlConverter  implements ContactSearchTermConverte
 				bob.append(handleCharset("?"));
 			}
 
-			if(operation.getSqlPosition() == OperationPosition.AFTER)
-				bob.append(' ').append(operation.getSqlRepresentation());
+			if(operation.getSqlPosition() == OperationPosition.AFTER) {
+                bob.append(' ').append(operation.getSqlRepresentation());
+            }
 
-			if(operation.getSqlPosition() == OperationPosition.BETWEEN)
-				if((i+1) < operands.length) //don't place an operator after the last operand here
-					bob.append(' ').append(operation.getSqlRepresentation()).append(' ');
+			if(operation.getSqlPosition() == OperationPosition.BETWEEN) {
+                if((i+1) < operands.length) {
+                    bob.append(' ').append(operation.getSqlRepresentation()).append(' ');
+                }
+            }
 
 		}
 		bob.append(" ) ");
@@ -205,17 +210,21 @@ public class ContactSearchtermSqlConverter  implements ContactSearchTermConverte
 
 		bob.append(" ( ");
 
-		if(operation.getSqlPosition() == OperationPosition.BEFORE)
-			bob.append(operation.getSqlRepresentation());
+		if(operation.getSqlPosition() == OperationPosition.BEFORE) {
+            bob.append(operation.getSqlRepresentation());
+        }
 
 		for(int i = 0; i < operands.length; i++){
 			traverseViaInOrder(operands[i]);
 
-			if(operation.getSqlPosition() == OperationPosition.AFTER)
-				bob.append(' ').append(operation.getSqlRepresentation());
-			if(operation.getSqlPosition() == OperationPosition.BETWEEN)
-				if((i+1) < operands.length) //don't place an operator after the last operand
-					bob.append(' ').append(operation.getSqlRepresentation()).append("    ");
+			if(operation.getSqlPosition() == OperationPosition.AFTER) {
+                bob.append(' ').append(operation.getSqlRepresentation());
+            }
+			if(operation.getSqlPosition() == OperationPosition.BETWEEN) {
+                if((i+1) < operands.length) {
+                    bob.append(' ').append(operation.getSqlRepresentation()).append("    ");
+                }
+            }
 		}
 		bob.append(" ) ");
 
@@ -226,8 +235,9 @@ public class ContactSearchtermSqlConverter  implements ContactSearchTermConverte
  * extract these separately because our access system works folder-based.
 	 */
 	protected void handleFolder(Operand<?> o) {
-		if(o.getType() == Operand.Type.COLUMN && o.getValue().equals(FOLDER_AJAXNAME))
-				nextIsFolder = true;
+		if(o.getType() == Operand.Type.COLUMN && o.getValue().equals(FOLDER_AJAXNAME)) {
+            nextIsFolder = true;
+        }
 
 	if(o.getType() == Operand.Type.CONSTANT && nextIsFolder){
 				folders.add((String) o.getValue());
@@ -244,8 +254,9 @@ public class ContactSearchtermSqlConverter  implements ContactSearchTermConverte
 	 * @return the value reformatted for SQL use (means: with some % in most cases)
 	 */
 	protected String handlePatternMatching(String value) {
-		if(!value.contains("*"))
-			return value;
+		if(!value.contains("*")) {
+            return value;
+        }
 
 		value = value.replaceAll("\\*", "%");
 
@@ -259,8 +270,9 @@ public class ContactSearchtermSqlConverter  implements ContactSearchTermConverte
 	 * Writes a CONVERT statement around the field in case there was a charset given
 	 */
 	protected String handleCharset(String field) {
-		if(charset == null)
-			return field;
+		if(charset == null) {
+            return field;
+        }
 		return new StringBuilder("CONVERT(").append(field).append(" USING ").append(getCharset()).append(')').toString();
 	}
 
@@ -268,8 +280,9 @@ public class ContactSearchtermSqlConverter  implements ContactSearchTermConverte
 	 * Adds a prefix to the field - if set.
 	 */
 	protected String handlePrefix(String field) {
-		if(getPrefix() == null)
-			return field;
+		if(getPrefix() == null) {
+            return field;
+        }
 		return new StringBuilder(getPrefix()).append('.').append(field).toString();
 	}
 
@@ -282,10 +295,11 @@ public class ContactSearchtermSqlConverter  implements ContactSearchTermConverte
 
 	public String translateFromJSONtoDB(String fieldname) {
  		ContactField field = ContactField.getByAjaxName(fieldname);
- 		if((field != null) && (field.getDbName() != null))
- 			return field.getDbName();
- 		else
- 			return fieldname;
+ 		if((field != null) && (field.getDbName() != null)) {
+            return field.getDbName();
+        } else {
+            return fieldname;
+        }
  	}
 
  	/**

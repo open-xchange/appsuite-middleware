@@ -583,17 +583,22 @@ public class AppointmentNotificationPool implements
 
 		@Override
 		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
+			if (this == obj) {
+                return true;
+            }
+			if (obj == null) {
+                return false;
+            }
+			if (getClass() != obj.getClass()) {
+                return false;
+            }
 			PartitionIndex other = (PartitionIndex) obj;
-			if (sharedFolderOwner != other.sharedFolderOwner)
-				return false;
-			if (uid != other.uid)
-				return false;
+			if (sharedFolderOwner != other.sharedFolderOwner) {
+                return false;
+            }
+			if (uid != other.uid) {
+                return false;
+            }
 			return true;
 		}
 

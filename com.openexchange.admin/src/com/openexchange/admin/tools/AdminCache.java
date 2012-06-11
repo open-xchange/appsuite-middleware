@@ -136,7 +136,7 @@ public class AdminCache {
 
     public static final String PATTERN_REGEX_FUNCTION = "CREATE\\s+(FUNCTION|PROCEDURE) (.*?)END\\s*//";
 
-    private Properties fallback_access_combinations = new Properties();
+    private final Properties fallback_access_combinations = new Properties();
 
     private HashMap<String, UserModuleAccess> named_access_combinations = null;
 

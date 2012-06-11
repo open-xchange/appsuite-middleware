@@ -90,7 +90,7 @@ public class RdbContactStorage extends DefaultContactStorage {
     private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(RdbContactStorage.class));
     private static boolean PREFETCH_ATTACHMENT_INFO = true;
 
-    private Executor executor;
+    private final Executor executor;
     
     /**
      * Initializes a new {@link RdbContactStorage}.

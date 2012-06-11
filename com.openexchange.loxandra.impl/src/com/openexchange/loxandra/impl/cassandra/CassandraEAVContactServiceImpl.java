@@ -110,8 +110,8 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 	//private static final LongSerializer ls = LongSerializer.get();
 	
 	/* Templates to access the column families */
-	private ColumnFamilyTemplate<UUID, Composite> personTemplate;
-	private ColumnFamilyTemplate<UUID, Composite> personFolderTemplate;
+	private final ColumnFamilyTemplate<UUID, Composite> personTemplate;
+	private final ColumnFamilyTemplate<UUID, Composite> personFolderTemplate;
 	
 	//private EAVContactList<EAVContact> sortedContactList;
 	
@@ -119,7 +119,7 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 	private int totalRows;
 	private Composite startRange, lastEndRange;
 	
-	private Keyspace keyspace;
+	private final Keyspace keyspace;
 	
 	/**
 	 * Default Constructor. Initializes the CF templates.
@@ -174,15 +174,20 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 	 * @param updater
 	 */
 	private void populateUpdater(EAVContact c, ColumnFamilyUpdater<UUID, Composite> updater) {
-		if (c.containsNickname())
-			updater.setString(new Composite("named", "nickname"), c.getNickname());
-		if (c.containsDisplayName())
-			updater.setString(new Composite("named", "displayname"), c.getDisplayName());
-		if (c.containsGivenName())
-			updater.setString(new Composite("named", "givenname"), c.getGivenName());
+		if (c.containsNickname()) {
+            updater.setString(new Composite("named", "nickname"), c.getNickname());
+        }
+		if (c.containsDisplayName()) {
+            updater.setString(new Composite("named", "displayname"), c.getDisplayName());
+        }
+		if (c.containsGivenName()) {
+            updater.setString(new Composite("named", "givenname"), c.getGivenName());
+        }
 		if (c.containsSurName())
-			updater.setString(new Composite("named", "surname"), c.getSurName());
+         {
+            updater.setString(new Composite("named", "surname"), c.getSurName());
 		//TODO: complete...
+        }
 		
 		updater.setUUID(new Composite("named", "timeuuid"), c.getTimeUUID());
 		
@@ -190,7 +195,7 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 		
 		Iterator<String> iterator  = c.getKeysIterator();
 		while (iterator.hasNext()) {
-			String key = (String) iterator.next();
+			String key = iterator.next();
 			updater.setValue(new Composite("unnamed", key), c.getUnnamedProperty(key), ss);
 		}
 	}
@@ -210,10 +215,11 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 			if (null == res || !res.hasResults()) {
 				log.error("No result");
 			} else {
-				if (limited)
-					populateDTOLimited(c);
-				else
-					populateDTO(c);
+				if (limited) {
+                    populateDTOLimited(c);
+                } else {
+                    populateDTO(c);
+                }
 			}
 
 		} catch (HectorException e) {
@@ -248,14 +254,18 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 		}
 		
 		// setters
-		if (contact.containsNamedProperty("displayname"))
-			contact.setDisplayName(ByteBufferUtil.string(contact.getNamedProperty("displayname")));
-		if (contact.containsNamedProperty("givenname"))
-			contact.setGivenName(ByteBufferUtil.string(contact.getNamedProperty("givenname")));
-		if (contact.containsNamedProperty("surname"))
-			contact.setSurName(ByteBufferUtil.string(contact.getNamedProperty("surname")));
-		if (contact.containsNamedProperty("email"))
-			contact.setEmail1(ByteBufferUtil.string(contact.getNamedProperty("email")));
+		if (contact.containsNamedProperty("displayname")) {
+            contact.setDisplayName(ByteBufferUtil.string(contact.getNamedProperty("displayname")));
+        }
+		if (contact.containsNamedProperty("givenname")) {
+            contact.setGivenName(ByteBufferUtil.string(contact.getNamedProperty("givenname")));
+        }
+		if (contact.containsNamedProperty("surname")) {
+            contact.setSurName(ByteBufferUtil.string(contact.getNamedProperty("surname")));
+        }
+		if (contact.containsNamedProperty("email")) {
+            contact.setEmail1(ByteBufferUtil.string(contact.getNamedProperty("email")));
+        }
 		
 		contact.setTimeUUID(TimeUUIDUtils.uuid(contact.getNamedProperty("timeuuid")));
 		
@@ -290,15 +300,20 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 		}
 		
 		// setters
-		if (contact.containsNamedProperty("nickname"))
-			contact.setNickname(ByteBufferUtil.string(contact.getNamedProperty("nickname")));
-		if (contact.containsNamedProperty("displayname"))
-			contact.setDisplayName(ByteBufferUtil.string(contact.getNamedProperty("displayname")));
-		if (contact.containsNamedProperty("givenname"))
-			contact.setGivenName(ByteBufferUtil.string(contact.getNamedProperty("givenname")));
+		if (contact.containsNamedProperty("nickname")) {
+            contact.setNickname(ByteBufferUtil.string(contact.getNamedProperty("nickname")));
+        }
+		if (contact.containsNamedProperty("displayname")) {
+            contact.setDisplayName(ByteBufferUtil.string(contact.getNamedProperty("displayname")));
+        }
+		if (contact.containsNamedProperty("givenname")) {
+            contact.setGivenName(ByteBufferUtil.string(contact.getNamedProperty("givenname")));
+        }
 		if (contact.containsNamedProperty("surname"))
-			contact.setSurName(ByteBufferUtil.string(contact.getNamedProperty("surname")));
+         {
+            contact.setSurName(ByteBufferUtil.string(contact.getNamedProperty("surname")));
 		//TODO: complete...
+        }
 		
 		contact.setTimeUUID(TimeUUIDUtils.uuid(contact.getNamedProperty("timeuuid")));
 		
@@ -426,8 +441,9 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 		if (from == 0) {
 			startRange = null;
 			totalRows = getNumberOfContactsInFolder(folderUUID);
-		} else
-			startRange = lastEndRange;
+		} else {
+            startRange = lastEndRange;
+        }
 		
 		int numOfCols = (to - from) + 1;
 		
@@ -456,8 +472,9 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 		
 		System.out.println("from: " + from + ", to: " + to + ", totalRows: " + totalRows + ", collistsize: " + colList.size() + ", numOfCols: " + numOfCols);
 		
-		if (from <= totalRows && to > totalRows)
-			contactList.add(getContact(colList.get(colList.size() - 1).getValue(), true));
+		if (from <= totalRows && to > totalRows) {
+            contactList.add(getContact(colList.get(colList.size() - 1).getValue(), true));
+        }
 		
 		return contactList;
 	}

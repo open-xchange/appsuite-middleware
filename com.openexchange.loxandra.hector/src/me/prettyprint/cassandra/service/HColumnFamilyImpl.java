@@ -46,15 +46,15 @@ public class HColumnFamilyImpl<K,N> implements HColumnFamily<K, N> {
   
   private final ExecutingKeyspace keyspace;
   private final String columnFamilyName;
-  private List<K> _keys;
-  private HSlicePredicate<N> activeSlicePredicate;
+  private final List<K> _keys;
+  private final HSlicePredicate<N> activeSlicePredicate;
   private HSlicePredicate<N> lastAppliedPredicate;
-  private Serializer<K> keySerializer;
-  private Serializer<N> columnNameSerializer;
-  private ConfigurableConsistencyLevel consistencyLevelPolicy;
+  private final Serializer<K> keySerializer;
+  private final Serializer<N> columnNameSerializer;
+  private final ConfigurableConsistencyLevel consistencyLevelPolicy;
   private Map<N, HColumn<N,ByteBuffer>> columns;
-  private ColumnParent columnParent;
-  private ExceptionsTranslator exceptionsTranslator;
+  private final ColumnParent columnParent;
+  private final ExceptionsTranslator exceptionsTranslator;
   private boolean hasValues;
   // TODO consider a bounds on this
   private Set<N> columnNames;
@@ -140,11 +140,13 @@ public class HColumnFamilyImpl<K,N> implements HColumnFamily<K, N> {
 
   @Override
   public Collection<HColumn<N, ByteBuffer>> getColumns() {
-    if ( columns == null )
-      columns = new HashMap<N, HColumn<N,ByteBuffer>>();      
+    if ( columns == null ) {
+        columns = new HashMap<N, HColumn<N,ByteBuffer>>();
+    }      
     
-    if ( !hasValues )
-      doExecuteSlice();
+    if ( !hasValues ) {
+        doExecuteSlice();
+    }
     
     return columns.values();
   }

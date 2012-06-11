@@ -56,7 +56,8 @@ public class HThriftClient implements HClient {
   /**
    * {@inheritDoc}
    */
-  public Cassandra.Client getCassandra() {
+  @Override
+public Cassandra.Client getCassandra() {
     if ( !isOpen() ) {
       throw new IllegalStateException("getCassandra called on client that was not open. You should not have gotten here.");
     }
@@ -69,11 +70,13 @@ public class HThriftClient implements HClient {
   /**
    * {@inheritDoc}
    */
-  public Cassandra.Client getCassandra(String keyspaceNameArg) {
+  @Override
+public Cassandra.Client getCassandra(String keyspaceNameArg) {
     getCassandra();
     if ( keyspaceNameArg != null && !StringUtils.equals(keyspaceName, keyspaceNameArg)) {
-      if ( log.isDebugEnabled() )
+      if ( log.isDebugEnabled() ) {
         log.debug("keyspace reseting from {} to {}", keyspaceName, keyspaceNameArg);
+    }
       try {
         cassandraClient.set_keyspace(keyspaceNameArg);
       } catch (InvalidRequestException ire) {
@@ -89,7 +92,8 @@ public class HThriftClient implements HClient {
   /**
    * {@inheritDoc}
    */
-  public HThriftClient close() {
+  @Override
+public HThriftClient close() {
     if ( log.isDebugEnabled() ) {
       log.debug("Closing client {}", this);
     }
@@ -112,7 +116,8 @@ public class HThriftClient implements HClient {
   /**
    * {@inheritDoc}
    */
-  public HThriftClient open() {
+  @Override
+public HThriftClient open() {
     if ( isOpen() ) {
       throw new IllegalStateException("Open called on already open connection. You should not have gotten here.");
     }
@@ -150,7 +155,8 @@ public class HThriftClient implements HClient {
   /**
    * {@inheritDoc}
    */
-  public boolean isOpen() {
+  @Override
+public boolean isOpen() {
     boolean open = false;
     if (transport != null) {
       open = transport.isOpen();
@@ -189,14 +195,16 @@ public class HThriftClient implements HClient {
   /**
    * {@inheritDoc}
    */
-  public void startToUse() {
+  @Override
+public void startToUse() {
       useageStartTime = System.currentTimeMillis();
   }
 
   /**
    * {@inheritDoc}
    */
-  public long getSinceLastUsed() {
+  @Override
+public long getSinceLastUsed() {
 	  return System.currentTimeMillis() - useageStartTime;
   }
 

@@ -83,10 +83,12 @@ public abstract class AbstractOutlookMapper implements ContactFieldMapper {
     }
 
     public void store(ContactField oxField, String outlookField){
-        if(outlookField != null && ! "".equals(outlookField))
+        if(outlookField != null && ! "".equals(outlookField)) {
             outlook2ox.put(outlookField, oxField);
-        if(oxField != null)
+        }
+        if(oxField != null) {
             ox2outlook.put(oxField, outlookField);
+        }
     }
 
 }

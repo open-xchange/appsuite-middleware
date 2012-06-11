@@ -18,7 +18,7 @@ import com.openexchange.server.ServiceLookup;
 public class NOMSAppActionFactory implements AJAXActionServiceFactory {
 
 	private final Map<String, AJAXActionService> ACTIONS = new HashMap<String, AJAXActionService>();
-	private ServiceLookup services;
+	private final ServiceLookup services;
 	
 	public NOMSAppActionFactory(ServiceLookup services) {
 		this.services = services;

@@ -20,8 +20,8 @@ import com.openexchange.tools.session.ServerSession;
 
 public class OAuthProxyAction implements AJAXActionService {
 
-	private OAuthService oauthService;
-	private OAuthHTTPClientFactory clients;
+	private final OAuthService oauthService;
+	private final OAuthHTTPClientFactory clients;
 	
 	public OAuthProxyAction(OAuthService service, OAuthHTTPClientFactory clients){
 		oauthService = service;

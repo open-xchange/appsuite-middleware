@@ -105,10 +105,11 @@ class OSGiCleanMapper {
                     result = null;
                     break;
                 } else {
-                    if (i == 0)
+                    if (i == 0) {
                         match = "/";
-                    else
+                    } else {
                         match = resource.substring(0, i);
+                    }
                 }
             }
             if (containsAlias(match)) {

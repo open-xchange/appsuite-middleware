@@ -77,6 +77,7 @@ public final class ManagementCustomizer implements ServiceTrackerCustomizer<Mana
         this.context = context;
     }
 
+    @Override
     public ManagementService addingService(final ServiceReference<ManagementService> reference) {
         final ManagementService management = context.getService(reference);
         try {
@@ -92,10 +93,12 @@ public final class ManagementCustomizer implements ServiceTrackerCustomizer<Mana
         return management;
     }
 
+    @Override
     public void modifiedService(final ServiceReference<ManagementService> reference, final ManagementService service) {
         // Nothing to do.
     }
 
+    @Override
     public void removedService(final ServiceReference<ManagementService> reference, final ManagementService service) {
         final ManagementService management = service;
         if (null != objName) {

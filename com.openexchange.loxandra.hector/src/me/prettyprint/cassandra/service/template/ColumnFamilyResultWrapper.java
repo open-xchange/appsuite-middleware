@@ -20,7 +20,7 @@ import org.apache.cassandra.thrift.ColumnOrSuperColumn;
 public class ColumnFamilyResultWrapper<K,N> extends AbstractResultWrapper<K,N> {
   
   private Map<N,HColumn<N,ByteBuffer>> columns;
-  private Iterator<Map.Entry<ByteBuffer, List<ColumnOrSuperColumn>>> rows;
+  private final Iterator<Map.Entry<ByteBuffer, List<ColumnOrSuperColumn>>> rows;
   private Map.Entry<ByteBuffer, List<ColumnOrSuperColumn>> entry;
   private boolean hasEntries;
   
@@ -40,16 +40,19 @@ public class ColumnFamilyResultWrapper<K,N> extends AbstractResultWrapper<K,N> {
    * All the column names we know about in the current iterator position
    * @return
    */
-  public Collection<N> getColumnNames() {
+  @Override
+public Collection<N> getColumnNames() {
     return columns == null ? null : columns.keySet();
   }
   
-  public ByteBuffer getColumnValue( N columnName) {
+  @Override
+public ByteBuffer getColumnValue( N columnName) {
     HColumn<N,ByteBuffer> col = getColumn( columnName );
     return col != null ? col.getValue().duplicate() : null;
   }
 
-  public HColumn<N,ByteBuffer> getColumn( N columnName ) {
+  @Override
+public HColumn<N,ByteBuffer> getColumn( N columnName ) {
     return columns.get( columnName );
   }
   

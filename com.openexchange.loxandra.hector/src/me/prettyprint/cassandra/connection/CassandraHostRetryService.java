@@ -30,7 +30,7 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
 
   private final HClientFactory clientFactory;
   private final LinkedBlockingQueue<CassandraHost> downedHostQueue;
-  private ConnectionManagerListenersHandler listenerHandler;
+  private final ConnectionManagerListenersHandler listenerHandler;
 
   public CassandraHostRetryService(HConnectionManager connectionManager, HClientFactory clientFactory,
       CassandraHostConfigurator cassandraHostConfigurator, ConnectionManagerListenersHandler listenerHandler) {

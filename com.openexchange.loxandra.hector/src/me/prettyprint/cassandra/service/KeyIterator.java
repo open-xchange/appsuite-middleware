@@ -25,7 +25,7 @@ public class KeyIterator<K> implements Iterable<K> {
   private static StringSerializer stringSerializer = new StringSerializer();
 
   private static int MAX_ROW_COUNT_DEFAULT = 500;
-  private int maxColumnCount = 2;	// we only need this to tell if there are any columns in the row (to test for tombstones)
+  private final int maxColumnCount = 2;	// we only need this to tell if there are any columns in the row (to test for tombstones)
 
   private Iterator<Row<K, String, String>> rowsIterator = null;
 
@@ -36,7 +36,7 @@ public class KeyIterator<K> implements Iterable<K> {
   private K endKey;
   private boolean firstRun = true;
 
-  private Iterator<K> keyIterator = new Iterator<K>() {
+  private final Iterator<K> keyIterator = new Iterator<K>() {
     @Override
     public boolean hasNext() {
       return nextValue != null;
@@ -104,8 +104,9 @@ public class KeyIterator<K> implements Iterable<K> {
     rowsIterator = (rows != null) ? rows.iterator() : null;
 
     // we'll skip this first one, since it is the same as the last one from previous time we executed
-    if (!firstRun  && rowsIterator != null) 
-      rowsIterator.next();
+    if (!firstRun  && rowsIterator != null) {
+        rowsIterator.next();
+    }
 
     firstRun = false;
 

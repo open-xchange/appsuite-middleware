@@ -69,6 +69,7 @@ public class ListServertest extends AbstractTest {
         resetBuffers();
         
         new ListServer(getMasterCredentialsOptionData()){
+            @Override
             protected void sysexit(int exitCode) {
                 ListServertest.this.returnCode = exitCode;
             }
@@ -83,6 +84,7 @@ public class ListServertest extends AbstractTest {
         resetBuffers();
         
         new ListServer(getCSVMasterOptionData()){
+            @Override
             protected void sysexit(int exitCode) {
                 ListServertest.this.returnCode = exitCode;
             }
@@ -97,6 +99,7 @@ public class ListServertest extends AbstractTest {
         resetBuffers();
         
         new ListServer(getWrongMasterCredentialsOptionData()){
+            @Override
             protected void sysexit(int exitCode) {
                 ListServertest.this.returnCode = exitCode;
             }
@@ -111,6 +114,7 @@ public class ListServertest extends AbstractTest {
         resetBuffers();
         
         new ListServer(getUnknownOptionData()){
+            @Override
             protected void sysexit(int exitCode) {
                 ListServertest.this.returnCode = exitCode;
             }

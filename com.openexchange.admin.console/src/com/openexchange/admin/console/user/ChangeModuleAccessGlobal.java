@@ -85,9 +85,9 @@ public class ChangeModuleAccessGlobal extends UserAbstraction {
 
     private OXUserInterface oxusr;
 
-    private UserModuleAccess addAccess;
+    private final UserModuleAccess addAccess;
 
-    private UserModuleAccess removeAccess;
+    private final UserModuleAccess removeAccess;
 
     private int filter;
 
@@ -143,178 +143,207 @@ public class ChangeModuleAccessGlobal extends UserAbstraction {
             throw new InvalidDataException("Unable to set Global Address Book Permission.");
         }
         if (parser.getOptionValue(accessCalendarOption) != null) {
-            if (accessOption2Boolean(parser, accessCalendarOption))
+            if (accessOption2Boolean(parser, accessCalendarOption)) {
                 addAccess.setCalendar(true);
-            else
+            } else {
                 removeAccess.setCalendar(true);
+            }
         }
         if (parser.getOptionValue(accessContactOption) != null) {
-            if (accessOption2Boolean(parser, accessContactOption))
+            if (accessOption2Boolean(parser, accessContactOption)) {
                 addAccess.setContacts(true);
-            else
+            } else {
                 removeAccess.setContacts(true);
+            }
         }
         if (parser.getOptionValue(accessDelegateTasksOption) != null) {
-            if (accessOption2Boolean(parser, accessDelegateTasksOption))
+            if (accessOption2Boolean(parser, accessDelegateTasksOption)) {
                 addAccess.setDelegateTask(true);
-            else
+            } else {
                 removeAccess.setDelegateTask(true);
+            }
         }
         if (parser.getOptionValue(accessEditPublicFolderOption) != null) {
-            if (accessOption2Boolean(parser, accessEditPublicFolderOption))
+            if (accessOption2Boolean(parser, accessEditPublicFolderOption)) {
                 addAccess.setEditPublicFolders(true);
-            else
+            } else {
                 removeAccess.setEditPublicFolders(true);
+            }
         }
         if (parser.getOptionValue(accessForumOption) != null) {
-            if (accessOption2Boolean(parser, accessForumOption))
+            if (accessOption2Boolean(parser, accessForumOption)) {
                 addAccess.setForum(true);
-            else
+            } else {
                 removeAccess.setForum(true);
+            }
         }
         if (parser.getOptionValue(accessIcalOption) != null) {
-            if (accessOption2Boolean(parser, accessIcalOption))
+            if (accessOption2Boolean(parser, accessIcalOption)) {
                 addAccess.setIcal(true);
-            else
+            } else {
                 removeAccess.setIcal(true);
+            }
         }
         if (parser.getOptionValue(accessInfostoreOption) != null) {
-            if (accessOption2Boolean(parser, accessInfostoreOption))
+            if (accessOption2Boolean(parser, accessInfostoreOption)) {
                 addAccess.setInfostore(true);
-            else
+            } else {
                 removeAccess.setInfostore(true);
+            }
         }
         if (parser.getOptionValue(accessPinboardWriteOption) != null) {
-            if (accessOption2Boolean(parser, accessPinboardWriteOption))
+            if (accessOption2Boolean(parser, accessPinboardWriteOption)) {
                 addAccess.setPinboardWrite(true);
-            else
+            } else {
                 removeAccess.setPinboardWrite(true);
+            }
         }
         if (parser.getOptionValue(accessProjectsOption) != null) {
-            if (accessOption2Boolean(parser, accessProjectsOption))
+            if (accessOption2Boolean(parser, accessProjectsOption)) {
                 addAccess.setProjects(true);
-            else
+            } else {
                 removeAccess.setProjects(true);
+            }
         }
         if (parser.getOptionValue(accessReadCreateSharedFolderOption) != null) {
-            if (accessOption2Boolean(parser, accessReadCreateSharedFolderOption))
+            if (accessOption2Boolean(parser, accessReadCreateSharedFolderOption)) {
                 addAccess.setReadCreateSharedFolders(true);
-            else
+            } else {
                 removeAccess.setReadCreateSharedFolders(true);
+            }
         }
         if (parser.getOptionValue(accessRssBookmarkOption) != null) {
-            if (accessOption2Boolean(parser, accessRssBookmarkOption))
+            if (accessOption2Boolean(parser, accessRssBookmarkOption)) {
                 addAccess.setRssBookmarks(true);
-            else
+            } else {
                 removeAccess.setRssBookmarks(true);
+            }
         }
         if (parser.getOptionValue(accessRssPortalOption) != null) {
-            if (accessOption2Boolean(parser, accessRssPortalOption))
+            if (accessOption2Boolean(parser, accessRssPortalOption)) {
                 addAccess.setRssPortal(true);
-            else
+            } else {
                 removeAccess.setRssPortal(true);
+            }
         }
         if (parser.getOptionValue(accessSyncmlOption) != null) {
-            if (accessOption2Boolean(parser, accessSyncmlOption))
+            if (accessOption2Boolean(parser, accessSyncmlOption)) {
                 addAccess.setSyncml(true);
-            else
+            } else {
                 removeAccess.setSyncml(true);
+            }
         }
         if (parser.getOptionValue(accessTasksOption) != null) {
-            if (accessOption2Boolean(parser, accessTasksOption))
+            if (accessOption2Boolean(parser, accessTasksOption)) {
                 addAccess.setTasks(true);
-            else
+            } else {
                 removeAccess.setTasks(true);
+            }
         }
         if (parser.getOptionValue(accessVcardOption) != null) {
-            if (accessOption2Boolean(parser, accessVcardOption))
+            if (accessOption2Boolean(parser, accessVcardOption)) {
                 addAccess.setVcard(true);
-            else
+            } else {
                 removeAccess.setVcard(true);
+            }
         }
         if (parser.getOptionValue(accessWebdavOption) != null) {
-            if (accessOption2Boolean(parser, accessWebdavOption))
+            if (accessOption2Boolean(parser, accessWebdavOption)) {
                 addAccess.setWebdav(true);
-            else
+            } else {
                 removeAccess.setWebdav(true);
+            }
         }
         if (parser.getOptionValue(accessWebdavXmlOption) != null) {
-            if (accessOption2Boolean(parser, accessWebdavXmlOption))
+            if (accessOption2Boolean(parser, accessWebdavXmlOption)) {
                 addAccess.setWebdavXml(true);
-            else
+            } else {
                 removeAccess.setWebdavXml(true);
+            }
         }
         if (parser.getOptionValue(accessWebmailOption) != null) {
-            if (accessOption2Boolean(parser, accessWebmailOption))
+            if (accessOption2Boolean(parser, accessWebmailOption)) {
                 addAccess.setWebmail(true);
-            else
+            } else {
                 removeAccess.setWebmail(true);
+            }
         }
         if (parser.getOptionValue(accessEditGroupOption) != null) {
-            if (accessOption2Boolean(parser, accessEditGroupOption))
+            if (accessOption2Boolean(parser, accessEditGroupOption)) {
                 addAccess.setEditGroup(true);
-            else
+            } else {
                 removeAccess.setEditGroup(true);
+            }
         }
         if (parser.getOptionValue(accessEditResourceOption) != null) {
-            if (accessOption2Boolean(parser, accessEditResourceOption))
+            if (accessOption2Boolean(parser, accessEditResourceOption)) {
                 addAccess.setEditResource(true);
-            else
+            } else {
                 removeAccess.setEditResource(true);
+            }
         }
         if (parser.getOptionValue(accessEditPasswordOption) != null) {
-            if (accessOption2Boolean(parser, accessEditPasswordOption))
+            if (accessOption2Boolean(parser, accessEditPasswordOption)) {
                 addAccess.setEditPassword(true);
-            else
+            } else {
                 removeAccess.setEditPassword(true);
+            }
         }
         if (parser.getOptionValue(accessCollectEmailAddresses) != null) {
-            if (accessOption2Boolean(parser, accessCollectEmailAddresses))
+            if (accessOption2Boolean(parser, accessCollectEmailAddresses)) {
                 addAccess.setCollectEmailAddresses(true);
-            else
+            } else {
                 removeAccess.setCollectEmailAddresses(true);
+            }
         }
         if (parser.getOptionValue(accessMultipleMailAccounts) != null) {
-            if (accessOption2Boolean(parser, accessMultipleMailAccounts))
+            if (accessOption2Boolean(parser, accessMultipleMailAccounts)) {
                 addAccess.setMultipleMailAccounts(true);
-            else
+            } else {
                 removeAccess.setMultipleMailAccounts(true);
+            }
         }
         if (parser.getOptionValue(accessSubscription) != null) {
-            if (accessOption2Boolean(parser, accessSubscription))
+            if (accessOption2Boolean(parser, accessSubscription)) {
                 addAccess.setSubscription(true);
-            else
+            } else {
                 removeAccess.setSubscription(true);
+            }
         }
         if (parser.getOptionValue(accessPublication) != null) {
-            if (accessOption2Boolean(parser, accessPublication))
+            if (accessOption2Boolean(parser, accessPublication)) {
                 addAccess.setPublication(true);
-            else
+            } else {
                 removeAccess.setPublication(true);
+            }
         }
         if (parser.getOptionValue(accessActiveSync) != null) {
-            if (accessOption2Boolean(parser, accessActiveSync))
+            if (accessOption2Boolean(parser, accessActiveSync)) {
                 addAccess.setActiveSync(true);
-            else
+            } else {
                 removeAccess.setActiveSync(true);
+            }
         }
         if (parser.getOptionValue(accessUSM) != null) {
-            if (accessOption2Boolean(parser, accessUSM))
+            if (accessOption2Boolean(parser, accessUSM)) {
                 addAccess.setUSM(true);
-            else
+            } else {
                 removeAccess.setUSM(true);
+            }
         }
         if (parser.getOptionValue(accessOLOX20) != null) {
-            if (accessOption2Boolean(parser, accessOLOX20))
+            if (accessOption2Boolean(parser, accessOLOX20)) {
                 addAccess.setOLOX20(true);
-            else
+            } else {
                 removeAccess.setOLOX20(true);
+            }
         }
         if (parser.getOptionValue(accessPublicFolderEditable) != null) {
-            if (accessOption2Boolean(parser, accessPublicFolderEditable))
+            if (accessOption2Boolean(parser, accessPublicFolderEditable)) {
                 addAccess.setPublicFolderEditable(true);
-            else
+            } else {
                 removeAccess.setPublicFolderEditable(true);
+            }
         }
 
         if (parser.getOptionValue(filterOption) == null) {

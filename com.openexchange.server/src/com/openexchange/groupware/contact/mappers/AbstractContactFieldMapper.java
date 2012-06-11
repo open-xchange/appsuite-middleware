@@ -83,10 +83,12 @@ public abstract class AbstractContactFieldMapper implements ContactFieldMapper {
     }
 
     public void store(ContactField oxField, String otherField){
-        if(otherField != null && ! "".equals(otherField))
+        if(otherField != null && ! "".equals(otherField)) {
             something2ox.put(otherField, oxField);
-        if(oxField != null)
+        }
+        if(oxField != null) {
             ox2something.put(oxField, otherField);
+        }
     }
 
 }

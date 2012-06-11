@@ -70,6 +70,7 @@ public class ChangeFilestoreTest extends AbstractTest {
         resetBuffers();
         String store = "file:/tmp/"+System.currentTimeMillis();
         new RegisterFilestore(RegisterFilestoreTest.getAllOptionData(store)){
+            @Override
             protected void sysexit(int exitCode) {
                 ChangeFilestoreTest.this.returnCode = exitCode;
             }
@@ -81,6 +82,7 @@ public class ChangeFilestoreTest extends AbstractTest {
         //edit fstore via store id        
         int store_id = Integer.parseInt(outBytes.toString().trim());
         new ChangeFilestore(getAllChangeOptionData(store,store_id)){
+            @Override
             protected void sysexit(int exitCode) {
                 ChangeFilestoreTest.this.returnCode = exitCode;
             }
@@ -96,6 +98,7 @@ public class ChangeFilestoreTest extends AbstractTest {
         resetBuffers();
         String store = "file:/tmp/"+System.currentTimeMillis();
         new RegisterFilestore(RegisterFilestoreTest.getAllOptionData(store)){
+            @Override
             protected void sysexit(int exitCode) {
                 ChangeFilestoreTest.this.returnCode = exitCode;
             }
@@ -107,6 +110,7 @@ public class ChangeFilestoreTest extends AbstractTest {
         //edit fstore via store id        
         int store_id = Integer.parseInt(outBytes.toString().trim());
         new ChangeFilestore(getAllChangeOptionDataWithInvalidCredentials(store,store_id)){
+            @Override
             protected void sysexit(int exitCode) {
                 ChangeFilestoreTest.this.returnCode = exitCode;
             }
@@ -123,6 +127,7 @@ public class ChangeFilestoreTest extends AbstractTest {
       
         
         new ChangeFilestore(getUnknownOptionData()){
+            @Override
             protected void sysexit(int exitCode) {
                 ChangeFilestoreTest.this.returnCode = exitCode;
             }
@@ -139,6 +144,7 @@ public class ChangeFilestoreTest extends AbstractTest {
       
         
         new ChangeFilestore(getMissingOptionData()){
+            @Override
             protected void sysexit(int exitCode) {
                 ChangeFilestoreTest.this.returnCode = exitCode;
             }

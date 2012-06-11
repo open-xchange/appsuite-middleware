@@ -23,15 +23,15 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 public class OAuthProxyRequest {
-	private AJAXRequestData req;
-	private OAuthService oauthService;
+	private final AJAXRequestData req;
+	private final OAuthService oauthService;
 	private boolean analyzed;
 	private HTTPMethod method;
 	private Map<String, String> parameters;
 	private Map<String, String> headers;
 	private String url;
 	private String body;
-	private ServerSession session;
+	private final ServerSession session;
 	
 	protected Map<API, List<Pattern>> whitelist = new HashMap<API,List<Pattern>>(){{
 		put(API.FACEBOOK, 	Arrays.asList(Pattern.compile("^https:\\/\\/graph\\.facebook\\.com")));

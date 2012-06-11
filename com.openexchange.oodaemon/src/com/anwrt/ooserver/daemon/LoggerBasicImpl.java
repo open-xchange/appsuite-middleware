@@ -31,8 +31,9 @@ public class LoggerBasicImpl extends Logger {
 
     @Override
     protected void warningImpl(final String msg) {
-        if (level >= WARNING)
+        if (level >= WARNING) {
             System.out.println(getMessageString(TAG_WARNING, msg));
+        }
     }
 
     @Override

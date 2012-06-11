@@ -233,7 +233,7 @@ public final class ListAction extends AbstractUserAction {
              */
             final int[] userIdArray;
             {
-                final JSONArray jsonArray = (JSONArray) request.getData();
+                final JSONArray jsonArray = getJsonArrayFromData(request.getData());
                 if (null == jsonArray) {
                     throw AjaxExceptionCodes.MISSING_PARAMETER.create( "data");
                 }
@@ -328,6 +328,41 @@ public final class ListAction extends AbstractUserAction {
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create( e, e.getMessage());
         }
+    }
+
+    private JSONArray getJsonArrayFromData(final Object data) {
+        if (null == data) {
+            return new JSONArray();
+        }
+        if (data instanceof JSONArray) {
+            return (JSONArray) data;
+        }
+        final String sData = data.toString().trim();
+        if (isEmpty(sData)) {
+            return new JSONArray();
+        }
+        if ('[' == sData.charAt(0)) {
+            try {
+                return new JSONArray(sData);
+            } catch (final JSONException e) {
+                // Ignore
+            }
+        }
+        final JSONArray ret = new JSONArray();
+        ret.put(sData);
+        return ret;
+    }
+
+    private boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
 }

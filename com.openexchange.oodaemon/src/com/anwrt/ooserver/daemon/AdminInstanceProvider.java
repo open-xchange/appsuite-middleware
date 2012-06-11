@@ -51,10 +51,11 @@ public class AdminInstanceProvider extends ComponentBase implements XInstancePro
         if (name.equals("daemon.stop")) {
             _shutdownTask = new Timer();
             _shutdownTask.schedule(new ShutdownTask(), _daemon.getConfig().shutdownDelay);
-        } else if (name.equals("daemon.status"))
+        } else if (name.equals("daemon.status")) {
             object = new Status(_daemon.getPool().getAll());
-        else
+        } else {
             Logger.error("AdminInstanceProvider: unknown command : " + name);
+        }
 
         return object;
     }

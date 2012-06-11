@@ -352,62 +352,86 @@ public class Filestore implements Serializable {
      */
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (!(obj instanceof Filestore))
+        }
+        if (!(obj instanceof Filestore)) {
             return false;
+        }
         final Filestore other = (Filestore) obj;
         if (currentContexts == null) {
-            if (other.currentContexts != null)
+            if (other.currentContexts != null) {
                 return false;
-        } else if (!currentContexts.equals(other.currentContexts))
+            }
+        } else if (!currentContexts.equals(other.currentContexts)) {
             return false;
-        if (currentContextsset != other.currentContextsset)
+        }
+        if (currentContextsset != other.currentContextsset) {
             return false;
+        }
         if (id == null) {
-            if (other.id != null)
+            if (other.id != null) {
                 return false;
-        } else if (!id.equals(other.id))
+            }
+        } else if (!id.equals(other.id)) {
             return false;
-        if (idset != other.idset)
+        }
+        if (idset != other.idset) {
             return false;
+        }
         if (maxContexts == null) {
-            if (other.maxContexts != null)
+            if (other.maxContexts != null) {
                 return false;
-        } else if (!maxContexts.equals(other.maxContexts))
+            }
+        } else if (!maxContexts.equals(other.maxContexts)) {
             return false;
-        if (maxContextsset != other.maxContextsset)
+        }
+        if (maxContextsset != other.maxContextsset) {
             return false;
+        }
         if (reserved == null) {
-            if (other.reserved != null)
+            if (other.reserved != null) {
                 return false;
-        } else if (!reserved.equals(other.reserved))
+            }
+        } else if (!reserved.equals(other.reserved)) {
             return false;
-        if (reservedset != other.reservedset)
+        }
+        if (reservedset != other.reservedset) {
             return false;
+        }
         if (size == null) {
-            if (other.size != null)
+            if (other.size != null) {
                 return false;
-        } else if (!size.equals(other.size))
+            }
+        } else if (!size.equals(other.size)) {
             return false;
-        if (sizeset != other.sizeset)
+        }
+        if (sizeset != other.sizeset) {
             return false;
+        }
         if (url == null) {
-            if (other.url != null)
+            if (other.url != null) {
                 return false;
-        } else if (!url.equals(other.url))
+            }
+        } else if (!url.equals(other.url)) {
             return false;
-        if (urlset != other.urlset)
+        }
+        if (urlset != other.urlset) {
             return false;
+        }
         if (used == null) {
-            if (other.used != null)
+            if (other.used != null) {
                 return false;
-        } else if (!used.equals(other.used))
+            }
+        } else if (!used.equals(other.used)) {
             return false;
-        if (usedset != other.usedset)
+        }
+        if (usedset != other.usedset) {
             return false;
+        }
         return true;
     }
 }

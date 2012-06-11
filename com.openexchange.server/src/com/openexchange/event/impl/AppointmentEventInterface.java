@@ -61,8 +61,20 @@ import com.openexchange.session.Session;
  */
 public interface AppointmentEventInterface {
 
+    /**
+     * Invoked when a new appointment is created.
+     * 
+     * @param appointmentObj The appointment
+     * @param sessionObj The user session
+     */
     public void appointmentCreated(Appointment appointmentObj, Session sessionObj);
 
+    /**
+     * Invoked when a new appointment is modified.
+     * 
+     * @param appointmentObj The appointment
+     * @param sessionObj The user session
+     */
     public void appointmentModified(Appointment appointmentObj, Session sessionObj);
 
     /**

@@ -76,7 +76,7 @@ public class ContactSearchAdapter extends DefaultSearchAdapter {
 	private static String eMailAutomCompleteClause = null;
 	private static ContactField startLetterField = null;
 	
-	private StringBuilder stringBuilder;
+	private final StringBuilder stringBuilder;
 
 	public ContactSearchAdapter(ContactSearchObject contactSearch, int contextID, ContactField[] fields, String charset) throws OXException {
 		super(charset);

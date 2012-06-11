@@ -78,7 +78,7 @@ import com.openexchange.tools.StringCollection;
  */
 public class SearchTermAdapter extends DefaultSearchAdapter {
 	
-	private StringBuilder stringBuilder;
+	private final StringBuilder stringBuilder;
 	
 	/**
 	 * Initializes a new {@link SearchAdapter}.
@@ -109,7 +109,8 @@ public class SearchTermAdapter extends DefaultSearchAdapter {
 	 * 
 	 * @return the search clause
 	 */
-	public String getClause() {
+	@Override
+    public String getClause() {
 		final String clause = this.stringBuilder.toString().trim();
 		if (0 < clause.length()) {
 			return clause;

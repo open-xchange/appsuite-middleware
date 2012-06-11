@@ -60,7 +60,7 @@ import com.openexchange.log.LogFactory;
 
 public class OXAdminPoolDBPool implements OXAdminPoolInterface {
 
-    private Log log = LogFactory.getLog(this.getClass());
+    private final Log log = LogFactory.getLog(this.getClass());
     private DatabaseService service;
 
     public OXAdminPoolDBPool() {

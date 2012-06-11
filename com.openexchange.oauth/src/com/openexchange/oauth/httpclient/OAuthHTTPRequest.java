@@ -12,7 +12,7 @@ import com.openexchange.http.client.builder.HTTPResponse;
 
 public class OAuthHTTPRequest implements HTTPRequest {
 
-	private OAuthRequest delegate;
+	private final OAuthRequest delegate;
 
 	public OAuthHTTPRequest(OAuthRequest req) {
 		delegate = req;

@@ -101,7 +101,7 @@ public class TableObject {
     }
     
     public TableRowObject getDataRow(int position){
-        return (TableRowObject)table_rows.get(position);
+        return table_rows.get(position);
     }
     
     public int getDataRowCount(){

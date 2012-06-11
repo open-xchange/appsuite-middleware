@@ -68,10 +68,12 @@ public class IncomingServer extends Server {
         }
 
         public static IncomingType getIncomingType(String keyword) {
-            if (keyword.equalsIgnoreCase(Server.POP3))
+            if (keyword.equalsIgnoreCase(Server.POP3)) {
                 return POP3;
-            if (keyword.equalsIgnoreCase(Server.IMAP))
+            }
+            if (keyword.equalsIgnoreCase(Server.IMAP)) {
                 return IMAP;
+            }
             return null;
         }
 

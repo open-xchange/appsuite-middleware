@@ -145,10 +145,12 @@ public class OXContextExtensionImpl extends OXCommonExtension {
         return sid;
     }
 
+    @Override
     public void setExtensionError(final String errortext) {
         this.errortext = errortext;
     }
 
+    @Override
     public String getExtensionError() {
         return this.errortext;
     }

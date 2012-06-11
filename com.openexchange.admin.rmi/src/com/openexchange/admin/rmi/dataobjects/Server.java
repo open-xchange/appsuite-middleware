@@ -86,6 +86,7 @@ public class Server implements Serializable, NameAndIdObject {
      * 
      * @return An {@link Integer} containing the id
      */
+    @Override
     public Integer getId() {
         return id;
     }
@@ -95,6 +96,7 @@ public class Server implements Serializable, NameAndIdObject {
      * 
      * @param id An {@link Integer} containing the id
      */
+    @Override
     public void setId(final Integer id) {
         this.id = id;
         this.idset = true;
@@ -105,6 +107,7 @@ public class Server implements Serializable, NameAndIdObject {
      * 
      * @return A {@link String} containing the name
      */
+    @Override
     public String getName() {
         return name;
     }
@@ -114,6 +117,7 @@ public class Server implements Serializable, NameAndIdObject {
      * 
      * @param name A {@link String} containing the name
      */
+    @Override
     public void setName(final String name) {
         this.name = name;
         this.nameset = true;
@@ -181,27 +185,36 @@ public class Server implements Serializable, NameAndIdObject {
      */
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (!(obj instanceof Server))
+        }
+        if (!(obj instanceof Server)) {
             return false;
+        }
         final Server other = (Server) obj;
         if (id == null) {
-            if (other.id != null)
+            if (other.id != null) {
                 return false;
-        } else if (!id.equals(other.id))
+            }
+        } else if (!id.equals(other.id)) {
             return false;
-        if (idset != other.idset)
+        }
+        if (idset != other.idset) {
             return false;
+        }
         if (name == null) {
-            if (other.name != null)
+            if (other.name != null) {
                 return false;
-        } else if (!name.equals(other.name))
+            }
+        } else if (!name.equals(other.name)) {
             return false;
-        if (nameset != other.nameset)
+        }
+        if (nameset != other.nameset) {
             return false;
+        }
         return true;
     }
 }

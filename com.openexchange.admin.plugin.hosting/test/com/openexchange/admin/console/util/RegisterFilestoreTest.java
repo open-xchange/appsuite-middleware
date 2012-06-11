@@ -70,6 +70,7 @@ public class RegisterFilestoreTest extends AbstractTest {
         resetBuffers();
         String store = "file:/tmp/"+System.currentTimeMillis();
         new RegisterFilestore(getAllOptionData(store)){
+            @Override
             protected void sysexit(int exitCode) {
                 RegisterFilestoreTest.this.returnCode = exitCode;
             }
@@ -84,6 +85,7 @@ public class RegisterFilestoreTest extends AbstractTest {
         resetBuffers();
         String store = "tmp/"+System.currentTimeMillis();
         new RegisterFilestore(getAllOptionData(store)){
+            @Override
             protected void sysexit(int exitCode) {
                 RegisterFilestoreTest.this.returnCode = exitCode;
             }
@@ -98,6 +100,7 @@ public class RegisterFilestoreTest extends AbstractTest {
         resetBuffers();
         
         new RegisterFilestore(getMissingOptionData()){
+            @Override
             protected void sysexit(int exitCode) {
                 RegisterFilestoreTest.this.returnCode = exitCode;
             }
@@ -112,6 +115,7 @@ public class RegisterFilestoreTest extends AbstractTest {
         resetBuffers();
         
         new RegisterFilestore(getUnknownOptionData()){
+            @Override
             protected void sysexit(int exitCode) {
                 RegisterFilestoreTest.this.returnCode = exitCode;
             }
@@ -126,6 +130,7 @@ public class RegisterFilestoreTest extends AbstractTest {
         resetBuffers();
         String store = "file:/tmp/"+System.currentTimeMillis();
         new RegisterFilestore(getAllOptionDataWithInvalidCredentials(store)){
+            @Override
             protected void sysexit(int exitCode) {
                 RegisterFilestoreTest.this.returnCode = exitCode;
             }

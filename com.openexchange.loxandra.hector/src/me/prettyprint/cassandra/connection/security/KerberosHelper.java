@@ -34,7 +34,8 @@ public class KerberosHelper {
   public static Subject loginService(String serviceName) throws LoginException {
     LoginContext loginCtx = new LoginContext(serviceName, new CallbackHandler() {
           // as we use .keytab file there is no need to specify any options in callback
-          public void handle(Callback[] callbacks) throws IOException,
+          @Override
+        public void handle(Callback[] callbacks) throws IOException,
               UnsupportedCallbackException {
           }
         });
@@ -71,7 +72,8 @@ public class KerberosHelper {
    */
   public static GSSContext authenticateClient(final Socket socket, Subject subject, final String servicePrincipalName) {
     return Subject.doAs(subject, new PrivilegedAction<GSSContext>() {
-      public GSSContext run() {
+      @Override
+    public GSSContext run() {
         try {
           GSSManager manager = GSSManager.getInstance();
           GSSName peerName = manager.createName(servicePrincipalName, GSSName.NT_HOSTBASED_SERVICE);
@@ -129,6 +131,7 @@ public class KerberosHelper {
      * @param callbacks the callbacks to handle
      * @throws IOException if an input or output error occurs.
      */
+    @Override
     public void handle( Callback[] callbacks) throws IOException, UnsupportedCallbackException {
 
       for ( int i=0; i<callbacks.length; i++) {

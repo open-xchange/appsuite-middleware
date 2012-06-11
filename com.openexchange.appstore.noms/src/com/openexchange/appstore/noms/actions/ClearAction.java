@@ -12,7 +12,7 @@ import com.openexchange.tools.session.ServerSession;
 @DispatcherNotes(noSession=true)
 public class ClearAction implements AJAXActionService {
 
-	private JSONArray database;
+	private final JSONArray database;
 
 	public ClearAction(JSONArray database) {
 		this.database = database;

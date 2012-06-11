@@ -39,6 +39,7 @@ public class OXUtilServicePortTypeImpl5 implements OXUtilServicePortType {
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.util.soap.OXUtilServicePortType#registerServer(com.openexchange.admin.soap.util.dataobjects.Server  srv ,)com.openexchange.admin.soap.util.dataobjects.Credentials  auth )*
      */
+    @Override
     public com.openexchange.admin.soap.util.dataobjects.Server registerServer(com.openexchange.admin.soap.util.dataobjects.Server srv,com.openexchange.admin.soap.util.dataobjects.Credentials auth) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , RemoteException_Exception    { 
         LOG.info("Executing operation registerServer");
         System.out.println(srv);
@@ -59,6 +60,7 @@ public class OXUtilServicePortTypeImpl5 implements OXUtilServicePortType {
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.util.soap.OXUtilServicePortType#changeDatabase(com.openexchange.admin.soap.util.soap.ChangeDatabase  parameters )*
      */
+    @Override
     public void changeDatabase(ChangeDatabase parameters) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , RemoteException_Exception    { 
         LOG.info("Executing operation changeDatabase");
         System.out.println(parameters);
@@ -76,6 +78,7 @@ public class OXUtilServicePortTypeImpl5 implements OXUtilServicePortType {
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.util.soap.OXUtilServicePortType#listAllDatabase(com.openexchange.admin.soap.util.dataobjects.Credentials  auth )*
      */
+    @Override
     public java.util.List<com.openexchange.admin.soap.util.dataobjects.Database> listAllDatabase(com.openexchange.admin.soap.util.dataobjects.Credentials auth) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , RemoteException_Exception    { 
         LOG.info("Executing operation listAllDatabase");
         System.out.println(auth);
@@ -95,6 +98,7 @@ public class OXUtilServicePortTypeImpl5 implements OXUtilServicePortType {
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.util.soap.OXUtilServicePortType#deleteMaintenanceReason(com.openexchange.admin.soap.util.soap.DeleteMaintenanceReason  parameters )*
      */
+    @Override
     public void deleteMaintenanceReason(DeleteMaintenanceReason parameters) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , RemoteException_Exception    { 
         LOG.info("Executing operation deleteMaintenanceReason");
         System.out.println(parameters);
@@ -112,6 +116,7 @@ public class OXUtilServicePortTypeImpl5 implements OXUtilServicePortType {
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.util.soap.OXUtilServicePortType#listAllServer(com.openexchange.admin.soap.util.dataobjects.Credentials  auth )*
      */
+    @Override
     public java.util.List<com.openexchange.admin.soap.util.dataobjects.Server> listAllServer(com.openexchange.admin.soap.util.dataobjects.Credentials auth) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , RemoteException_Exception    { 
         LOG.info("Executing operation listAllServer");
         System.out.println(auth);
@@ -131,6 +136,7 @@ public class OXUtilServicePortTypeImpl5 implements OXUtilServicePortType {
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.util.soap.OXUtilServicePortType#listMaintenanceReason(java.lang.String  searchPattern ,)com.openexchange.admin.soap.util.dataobjects.Credentials  auth )*
      */
+    @Override
     public java.util.List<com.openexchange.admin.soap.util.dataobjects.MaintenanceReason> listMaintenanceReason(java.lang.String searchPattern,com.openexchange.admin.soap.util.dataobjects.Credentials auth) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , RemoteException_Exception    { 
         LOG.info("Executing operation listMaintenanceReason");
         System.out.println(searchPattern);
@@ -151,6 +157,7 @@ public class OXUtilServicePortTypeImpl5 implements OXUtilServicePortType {
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.util.soap.OXUtilServicePortType#unregisterServer(com.openexchange.admin.soap.util.soap.UnregisterServer  parameters )*
      */
+    @Override
     public void unregisterServer(UnregisterServer parameters) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , RemoteException_Exception    { 
         LOG.info("Executing operation unregisterServer");
         System.out.println(parameters);
@@ -168,6 +175,7 @@ public class OXUtilServicePortTypeImpl5 implements OXUtilServicePortType {
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.util.soap.OXUtilServicePortType#listServer(java.lang.String  searchPattern ,)com.openexchange.admin.soap.util.dataobjects.Credentials  auth )*
      */
+    @Override
     public java.util.List<com.openexchange.admin.soap.util.dataobjects.Server> listServer(java.lang.String searchPattern,com.openexchange.admin.soap.util.dataobjects.Credentials auth) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , RemoteException_Exception    { 
         LOG.info("Executing operation listServer");
         System.out.println(searchPattern);
@@ -188,6 +196,7 @@ public class OXUtilServicePortTypeImpl5 implements OXUtilServicePortType {
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.util.soap.OXUtilServicePortType#listDatabase(java.lang.String  searchPattern ,)com.openexchange.admin.soap.util.dataobjects.Credentials  auth )*
      */
+    @Override
     public java.util.List<com.openexchange.admin.soap.util.dataobjects.Database> listDatabase(java.lang.String searchPattern,com.openexchange.admin.soap.util.dataobjects.Credentials auth) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , RemoteException_Exception    { 
         LOG.info("Executing operation listDatabase");
         System.out.println(searchPattern);
@@ -208,6 +217,7 @@ public class OXUtilServicePortTypeImpl5 implements OXUtilServicePortType {
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.util.soap.OXUtilServicePortType#createMaintenanceReason(com.openexchange.admin.soap.util.dataobjects.MaintenanceReason  reason ,)com.openexchange.admin.soap.util.dataobjects.Credentials  auth )*
      */
+    @Override
     public com.openexchange.admin.soap.util.dataobjects.MaintenanceReason createMaintenanceReason(com.openexchange.admin.soap.util.dataobjects.MaintenanceReason reason,com.openexchange.admin.soap.util.dataobjects.Credentials auth) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , RemoteException_Exception    { 
         LOG.info("Executing operation createMaintenanceReason");
         System.out.println(reason);
@@ -228,6 +238,7 @@ public class OXUtilServicePortTypeImpl5 implements OXUtilServicePortType {
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.util.soap.OXUtilServicePortType#registerDatabase(com.openexchange.admin.soap.util.dataobjects.Database  db ,)com.openexchange.admin.soap.util.dataobjects.Credentials  auth )*
      */
+    @Override
     public com.openexchange.admin.soap.util.dataobjects.Database registerDatabase(com.openexchange.admin.soap.util.dataobjects.Database db,com.openexchange.admin.soap.util.dataobjects.Credentials auth) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , RemoteException_Exception    { 
         LOG.info("Executing operation registerDatabase");
         System.out.println(db);
@@ -248,6 +259,7 @@ public class OXUtilServicePortTypeImpl5 implements OXUtilServicePortType {
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.util.soap.OXUtilServicePortType#listAllMaintenanceReason(com.openexchange.admin.soap.util.dataobjects.Credentials  auth )*
      */
+    @Override
     public java.util.List<com.openexchange.admin.soap.util.dataobjects.MaintenanceReason> listAllMaintenanceReason(com.openexchange.admin.soap.util.dataobjects.Credentials auth) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , RemoteException_Exception    { 
         LOG.info("Executing operation listAllMaintenanceReason");
         System.out.println(auth);
@@ -267,6 +279,7 @@ public class OXUtilServicePortTypeImpl5 implements OXUtilServicePortType {
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.util.soap.OXUtilServicePortType#registerFilestore(com.openexchange.admin.soap.util.dataobjects.Filestore  fstore ,)com.openexchange.admin.soap.util.dataobjects.Credentials  auth )*
      */
+    @Override
     public com.openexchange.admin.soap.util.dataobjects.Filestore registerFilestore(com.openexchange.admin.soap.util.dataobjects.Filestore fstore,com.openexchange.admin.soap.util.dataobjects.Credentials auth) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , RemoteException_Exception    { 
         LOG.info("Executing operation registerFilestore");
         System.out.println(fstore);
@@ -287,6 +300,7 @@ public class OXUtilServicePortTypeImpl5 implements OXUtilServicePortType {
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.util.soap.OXUtilServicePortType#unregisterFilestore(com.openexchange.admin.soap.util.soap.UnregisterFilestore  parameters )*
      */
+    @Override
     public void unregisterFilestore(UnregisterFilestore parameters) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , RemoteException_Exception    { 
         LOG.info("Executing operation unregisterFilestore");
         System.out.println(parameters);
@@ -304,6 +318,7 @@ public class OXUtilServicePortTypeImpl5 implements OXUtilServicePortType {
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.util.soap.OXUtilServicePortType#listFilestore(java.lang.String  searchPattern ,)com.openexchange.admin.soap.util.dataobjects.Credentials  auth )*
      */
+    @Override
     public java.util.List<com.openexchange.admin.soap.util.dataobjects.Filestore> listFilestore(java.lang.String searchPattern,com.openexchange.admin.soap.util.dataobjects.Credentials auth) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , RemoteException_Exception    { 
         LOG.info("Executing operation listFilestore");
         System.out.println(searchPattern);
@@ -324,6 +339,7 @@ public class OXUtilServicePortTypeImpl5 implements OXUtilServicePortType {
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.util.soap.OXUtilServicePortType#changeFilestore(com.openexchange.admin.soap.util.soap.ChangeFilestore  parameters )*
      */
+    @Override
     public void changeFilestore(ChangeFilestore parameters) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , RemoteException_Exception    { 
         LOG.info("Executing operation changeFilestore");
         System.out.println(parameters);
@@ -341,6 +357,7 @@ public class OXUtilServicePortTypeImpl5 implements OXUtilServicePortType {
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.util.soap.OXUtilServicePortType#listAllFilestore(com.openexchange.admin.soap.util.dataobjects.Credentials  auth )*
      */
+    @Override
     public java.util.List<com.openexchange.admin.soap.util.dataobjects.Filestore> listAllFilestore(com.openexchange.admin.soap.util.dataobjects.Credentials auth) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , RemoteException_Exception    { 
         LOG.info("Executing operation listAllFilestore");
         System.out.println(auth);
@@ -360,6 +377,7 @@ public class OXUtilServicePortTypeImpl5 implements OXUtilServicePortType {
     /* (non-Javadoc)
      * @see com.openexchange.admin.soap.util.soap.OXUtilServicePortType#unregisterDatabase(com.openexchange.admin.soap.util.soap.UnregisterDatabase  parameters )*
      */
+    @Override
     public void unregisterDatabase(UnregisterDatabase parameters) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , RemoteException_Exception    { 
         LOG.info("Executing operation unregisterDatabase");
         System.out.println(parameters);

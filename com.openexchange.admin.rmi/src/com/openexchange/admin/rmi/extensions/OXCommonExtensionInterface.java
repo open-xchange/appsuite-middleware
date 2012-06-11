@@ -56,6 +56,7 @@ import java.io.Serializable;
  * @author d7
  * @deprecated 
  */
+@Deprecated
 public interface OXCommonExtensionInterface extends Serializable {
     /**
      * If an error has occured you get the error text of the extension
@@ -74,8 +75,10 @@ public interface OXCommonExtensionInterface extends Serializable {
      * Used to return a string representation of the underlying object
      * @return
      */
+    @Override
     public String toString();
 
+    @Override
     public boolean equals(final Object obj);
 
 }

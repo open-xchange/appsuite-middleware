@@ -98,6 +98,7 @@ public class AdditionalRMITests extends AbstractRMITest {
 
         assertFalse(any(myArray, notInThereInteger, new Verifier<Integer, Integer>() {
 
+            @Override
             public boolean verify(Integer obj1, Integer obj2) {
                 return obj1.equals(obj2);
             }
@@ -105,6 +106,7 @@ public class AdditionalRMITests extends AbstractRMITest {
 
         assertTrue(any(myArray, inThere, new Verifier<Integer, Integer>() {
 
+            @Override
             public boolean verify(Integer obj1, Integer obj2) {
                 return obj1.equals(obj2);
             }
@@ -164,6 +166,7 @@ public class AdditionalRMITests extends AbstractRMITest {
 
         assertTrue("User's ID group should be found in a group", any(allGroups, myUpdatedUser.getId(), new Verifier<Group, Integer>() {
 
+            @Override
             public boolean verify(Group group, Integer userid) {
                 return (Arrays.asList(group.getMembers())).contains(userid);
             }
@@ -182,6 +185,7 @@ public class AdditionalRMITests extends AbstractRMITest {
             List<Resource> allResources = Arrays.asList(resInterface.listAll(adminContext, adminCredentials));
             assertTrue("Should contain our trusty test resource", any(allResources, res, new Verifier<Resource, Resource>() {
 
+                @Override
                 public boolean verify(Resource fromCollection, Resource myResource) {
                     return myResource.getDisplayname().equals(fromCollection.getDisplayname()) && myResource.getEmail().equals(
                         fromCollection.getEmail()) && myResource.getName().equals(fromCollection.getName());

@@ -42,15 +42,15 @@ import org.slf4j.LoggerFactory;
 public class SuperCfResultWrapper<K,SN,N> extends AbstractResultWrapper<K,N> implements SuperCfResult<K,SN,N> {
   private static final Logger log = LoggerFactory.getLogger(SuperCfResultWrapper.class);
   
-  private Map<SN,Map<N,HColumn<N,ByteBuffer>>> columns = new LinkedHashMap<SN,Map<N,HColumn<N,ByteBuffer>>>();
-  private Iterator<Map.Entry<ByteBuffer, List<ColumnOrSuperColumn>>> rows;
+  private final Map<SN,Map<N,HColumn<N,ByteBuffer>>> columns = new LinkedHashMap<SN,Map<N,HColumn<N,ByteBuffer>>>();
+  private final Iterator<Map.Entry<ByteBuffer, List<ColumnOrSuperColumn>>> rows;
   private Map.Entry<ByteBuffer, List<ColumnOrSuperColumn>> entry;
   private List<SN> superColumns;
   private Map<N,HColumn<N,ByteBuffer>> subColumns = new LinkedHashMap<N,HColumn<N,ByteBuffer>>();
   private SN currentSuperColumn;
-  private boolean hasEntries;
+  private final boolean hasEntries;
 
-  private Serializer<SN> sNameSerializer;
+  private final Serializer<SN> sNameSerializer;
   
   public SuperCfResultWrapper(Serializer<K> keySerializer,
       Serializer<SN> sNameSerializer,
@@ -93,7 +93,8 @@ public class SuperCfResultWrapper<K,SN,N> extends AbstractResultWrapper<K,N> imp
   }
   
   
-  public List<SN> getSuperColumns() {
+  @Override
+public List<SN> getSuperColumns() {
     return superColumns;
   }
   
@@ -135,8 +136,9 @@ public class SuperCfResultWrapper<K,SN,N> extends AbstractResultWrapper<K,N> imp
 
   private <V> V extractType(SN sColumnName, N columnName, Serializer<V> valueSerializer) {
     Map<N, HColumn<N, ByteBuffer>> map = columns.get(sColumnName);
-    if ( map != null && map.get(columnName) != null )
-      return valueSerializer.fromByteBuffer(map.get(columnName).getValue());
+    if ( map != null && map.get(columnName) != null ) {
+        return valueSerializer.fromByteBuffer(map.get(columnName).getValue());
+    }
     return null;
   }
   

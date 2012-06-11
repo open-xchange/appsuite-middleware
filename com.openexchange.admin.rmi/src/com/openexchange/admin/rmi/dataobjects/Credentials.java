@@ -161,23 +161,30 @@ public class Credentials implements Serializable{
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         final Credentials other = (Credentials) obj;
         if (login == null) {
-            if (other.login != null)
+            if (other.login != null) {
                 return false;
-        } else if (!login.equals(other.login))
+            }
+        } else if (!login.equals(other.login)) {
             return false;
+        }
         if (password == null) {
-            if (other.password != null)
+            if (other.password != null) {
                 return false;
-        } else if (!password.equals(other.password))
+            }
+        } else if (!password.equals(other.password)) {
             return false;
+        }
         return true;
     }
 }

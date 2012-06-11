@@ -67,7 +67,7 @@ public class BackendRouteAddOn implements AddOn {
 
     private static final Log LOG = LogFactory.getLog(BackendRouteAddOn.class);
 
-    private Filter filter;
+    private final Filter filter;
 
     public BackendRouteAddOn(AppendBackendRouteFilter filter) {
         this.filter = filter;

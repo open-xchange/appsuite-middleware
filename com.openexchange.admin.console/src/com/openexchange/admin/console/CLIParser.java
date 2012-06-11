@@ -301,10 +301,12 @@ public class CLIParser {
             this.c = c;
         }
 
+        @Override
         public String getValue() {
             return cliCommandLine.getOptionValue(c);
         }
 
+        @Override
         public boolean hasOption() {
             return cliCommandLine.hasOption(c);
         }
@@ -327,10 +329,12 @@ public class CLIParser {
             this.s = s;
         }
 
+        @Override
         public String getValue() {
             return cliCommandLine.getOptionValue(s);
         }
 
+        @Override
         public boolean hasOption() {
             return cliCommandLine.hasOption(s);
         }

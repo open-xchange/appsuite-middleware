@@ -98,22 +98,30 @@ public enum ITipMethod {
     	}
         keyword = keyword.trim().toLowerCase(Locale.US);
 
-        if (keyword.equals(REQUEST.getKeyword()))
+        if (keyword.equals(REQUEST.getKeyword())) {
             return REQUEST;
-        if (keyword.equals(REPLY.getKeyword()))
+        }
+        if (keyword.equals(REPLY.getKeyword())) {
             return REPLY;
-        if (keyword.equals(CANCEL.getKeyword()))
+        }
+        if (keyword.equals(CANCEL.getKeyword())) {
             return CANCEL;
-        if (keyword.equals(COUNTER.getKeyword()))
+        }
+        if (keyword.equals(COUNTER.getKeyword())) {
             return COUNTER;
-        if (keyword.equals(DECLINECOUNTER.getKeyword()))
+        }
+        if (keyword.equals(DECLINECOUNTER.getKeyword())) {
             return DECLINECOUNTER;
-        if (keyword.equals(REFRESH.getKeyword()))
+        }
+        if (keyword.equals(REFRESH.getKeyword())) {
             return REFRESH;
-        if (keyword.equals(ADD.getKeyword()))
+        }
+        if (keyword.equals(ADD.getKeyword())) {
             return ADD;
-        if (keyword.equals(PUBLISH.getKeyword()))
+        }
+        if (keyword.equals(PUBLISH.getKeyword())) {
             return PUBLISH;
+        }
 
         return NO_METHOD;
     }

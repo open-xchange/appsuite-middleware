@@ -79,7 +79,7 @@ public class TaskManager {
     
     private int runningjobs = 0;
     
-    private ArrayList<Integer> finishedJobs = new ArrayList<Integer>();
+    private final ArrayList<Integer> finishedJobs = new ArrayList<Integer>();
 
     private static class JobManagerSingletonHolder {
         private static final TaskManager instance = new TaskManager();

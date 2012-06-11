@@ -59,8 +59,20 @@ import com.openexchange.session.Session;
  */
 public interface TaskEventInterface {
 
+    /**
+     * Invoked if a new task is created.
+     * 
+     * @param taskObj The task
+     * @param sessionObj The user session
+     */
     public void taskCreated(Task taskObj, Session sessionObj);
 
+    /**
+     * Invoked if a new task is modified.
+     * 
+     * @param taskObj The task
+     * @param sessionObj The user session
+     */
     public void taskModified(Task taskObj, Session sessionObj);
 
     /**

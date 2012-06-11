@@ -18,7 +18,7 @@ public class RegisterAction implements AJAXActionService {
 
 	private static final Log LOG = LogFactory.getLog(RegisterAction.class);
 	
-	private JSONArray database;
+	private final JSONArray database;
 
 	public RegisterAction(JSONArray database) {
 		this.database = database;

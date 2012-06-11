@@ -75,16 +75,19 @@ final class AdminServiceRegisterer implements ServiceTrackerCustomizer {
         this.context = context;
     }
 
+    @Override
     public Object addingService(ServiceReference reference) {
         Object service = context.getService(reference);
         AdminServiceRegistry.getInstance().addService(clazz, service);
         return service;
     }
 
+    @Override
     public void modifiedService(ServiceReference reference, Object service) {
         // Nothing to do.
     }
 
+    @Override
     public void removedService(ServiceReference reference, Object service) {
         AdminServiceRegistry.getInstance().removeService(clazz);
         context.ungetService(reference);

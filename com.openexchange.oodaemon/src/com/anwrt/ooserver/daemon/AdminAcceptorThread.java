@@ -64,8 +64,9 @@ public class AdminAcceptorThread extends Thread {
         while (true) {
             try {
                 final XConnection connexion = _acceptor.accept(_acceptString);
-                if (connexion == null)
+                if (connexion == null) {
                     break;
+                }
                 Logger.debug(ADMIN_LOGGER_TAG + "Accepted admin connection from " + Daemon.extractContactInfo(connexion.getDescription()));
                 _daemon.getBridgeFactory().createBridge("", "urp", connexion, new AdminInstanceProvider(_daemon, _shutdownThread));
             } catch (final AlreadyAcceptingException ex) // TODO this must be taken into account for the admin acceptor to work the best manner
@@ -73,9 +74,9 @@ public class AdminAcceptorThread extends Thread {
                 Logger.error(ADMIN_LOGGER_TAG + "Already accepting connection");
                 Logger.debug(ex);
             } catch (final ConnectionSetupException ex) {
-                if (_daemon.isShutdowned())
+                if (_daemon.isShutdowned()) {
                     break;
-                else {
+                } else {
                     Logger.error(ADMIN_LOGGER_TAG + ex);
                     Logger.debug(ex);
                 }

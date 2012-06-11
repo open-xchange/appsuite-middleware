@@ -83,6 +83,7 @@ public class ResellerContextFilter implements Filter<Integer, Integer> {
         this.admin = admin;
     }
 
+    @Override
     public Integer[] filter(Collection<Integer> input) throws PipesAndFiltersException {
         List<Integer> cids;
         if( null == admin ) {

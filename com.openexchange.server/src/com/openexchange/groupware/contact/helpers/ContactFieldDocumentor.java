@@ -40,8 +40,9 @@ public class ContactFieldDocumentor {
 			sb.append(matcher.group(2).toUpperCase());
 			sb.append(matcher.group(3));
 		}
-		if(!found)
-			return ajaxName;
+		if(!found) {
+            return ajaxName;
+        }
 		return sb.toString();
 	}
 

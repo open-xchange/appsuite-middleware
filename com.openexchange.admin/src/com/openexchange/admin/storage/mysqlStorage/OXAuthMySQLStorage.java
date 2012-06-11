@@ -81,6 +81,7 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
     public OXAuthMySQLStorage() {
     }
 
+    @Override
     public boolean authenticate(final Credentials authdata) {
         return false;
     }
@@ -90,6 +91,7 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
      * Authenticates the admin user of the system within context.
      * 
      */
+    @Override
     public boolean authenticate(final Credentials authdata, final Context ctx) throws StorageException {
 
         if (authdata != null && authdata.getLogin() != null && authdata.getPassword() != null) {
@@ -196,6 +198,7 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
         }
     }
 
+    @Override
     public boolean authenticateUser(final Credentials authdata, final Context ctx) throws StorageException {
 
         if (authdata != null && authdata.getLogin() != null && authdata.getPassword() != null) {

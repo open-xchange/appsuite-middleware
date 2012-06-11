@@ -230,19 +230,23 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             this.required = required;
         }
 
+        @Override
         public String getString() {
             return string;
         }
 
         
+        @Override
         public int getIndex() {
             return index;
         }
 
+        @Override
         public boolean isRequired() {
             return required;
         }
 
+        @Override
         public void setRequired(final boolean required) {
             this.required = required;
         }
@@ -381,19 +385,23 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             this.required = required;
         }
 
+        @Override
         public String getString() {
             return string;
         }
 
         
+        @Override
         public int getIndex() {
             return index;
         }
         
+        @Override
         public boolean isRequired() {
             return required;
         }
 
+        @Override
         public void setRequired(final boolean required) {
             this.required = required;
         }
@@ -998,6 +1006,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected Context getContext(final String[] nextLine, final int[] idarray) throws InvalidDataException, ParseException {
         final Context context = new Context();
         setValue(nextLine, idarray, Constants.CONTEXTID, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) throws InvalidDataException {
                 try {
                     context.setId(Integer.valueOf(value));
@@ -1013,42 +1022,50 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected User getUser(final String[] nextLine, final int[] idarray) throws InvalidDataException, ParseException {
         final User user = new User();
         setValue(nextLine, idarray, Constants.USERNAME, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setName(value);
             }
         });
         setValue(nextLine, idarray, Constants.PASSWORD, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setPassword(value);
             }
         });
         setValue(nextLine, idarray, Constants.EMAIL, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setPrimaryEmail(value);
                 user.setEmail1(value);
             }
         });
         setValue(nextLine, idarray, Constants.DISPLAYNAME, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setDisplay_name(value);
             }
         });
         setValue(nextLine, idarray, Constants.SURNAME, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setSur_name(value);
             }
         });
         setValue(nextLine, idarray, Constants.GIVENNAME, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setGiven_name(value);
             }
         });
         setValue(nextLine, idarray, Constants.LANGUAGE, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setLanguage(value);
             }
         });
         setValue(nextLine, idarray, Constants.timezone, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setTimezone(value);
             }
@@ -1077,361 +1094,433 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             }
         }
         setValue(nextLine, idarray, Constants.department, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setDepartment(value);
             }
         });
         setValue(nextLine, idarray, Constants.company, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setCompany(value);
             }
         });
         setValue(nextLine, idarray, Constants.EMAIL1, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setEmail1(value);
             }
         });
         setValue(nextLine, idarray, Constants.mailenabled, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setMailenabled(Boolean.valueOf(stringToBool(value)));
             }
         });
         setValue(nextLine, idarray, Constants.birthday, new MethodDateClosure() {
+            @Override
             public void callMethod(final Date value) {
                 user.setBirthday(value);
             }
         });
         setValue(nextLine, idarray, Constants.anniversary, new MethodDateClosure() {
+            @Override
             public void callMethod(final Date value) {
                 user.setAnniversary(value);
             }
         });
         setValue(nextLine, idarray, Constants.branches, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setBranches(value);
             }
         });
         setValue(nextLine, idarray, Constants.business_category, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setBusiness_category(value);
             }
         });
         setValue(nextLine, idarray, Constants.postal_code_business, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setPostal_code_business(value);
             }
         });
         setValue(nextLine, idarray, Constants.state_business, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setState_business(value);
             }
         });
         setValue(nextLine, idarray, Constants.street_business, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setStreet_business(value);
             }
         });
         setValue(nextLine, idarray, Constants.telephone_callback, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setTelephone_callback(value);
             }
         });
         setValue(nextLine, idarray, Constants.city_home, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setCity_home(value);
             }
         });
         setValue(nextLine, idarray, Constants.commercial_register, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setCommercial_register(value);
             }
         });
         setValue(nextLine, idarray, Constants.country_home, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setCountry_home(value);
             }
         });
         setValue(nextLine, idarray, Constants.email2, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setEmail2(value);
             }
         });
         setValue(nextLine, idarray, Constants.email3, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setEmail3(value);
             }
         });
         setValue(nextLine, idarray, Constants.employeetype, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setEmployeeType(value);
             }
         });
         setValue(nextLine, idarray, Constants.fax_business, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setFax_business(value);
             }
         });
         setValue(nextLine, idarray, Constants.fax_home, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setFax_home(value);
             }
         });
         setValue(nextLine, idarray, Constants.fax_other, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setFax_other(value);
             }
         });
         setValue(nextLine, idarray, Constants.imapserver, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setImapServer(value);
             }
         });
         setValue(nextLine, idarray, Constants.imaplogin, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setImapLogin(value);
             }
         });
         setValue(nextLine, idarray, Constants.smtpserver, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setSmtpServer(value);
             }
         });
         setValue(nextLine, idarray, Constants.instant_messenger1, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setInstant_messenger1(value);
             }
         });
         setValue(nextLine, idarray, Constants.instant_messenger2, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setInstant_messenger2(value);
             }
         });
         setValue(nextLine, idarray, Constants.telephone_ip, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setTelephone_ip(value);
             }
         });
         setValue(nextLine, idarray, Constants.telephone_isdn, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setTelephone_isdn(value);
             }
         });
         setValue(nextLine, idarray, Constants.mail_folder_drafts_name, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setMail_folder_drafts_name(value);
             }
         });
         setValue(nextLine, idarray, Constants.mail_folder_sent_name, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setMail_folder_sent_name(value);
             }
         });
         setValue(nextLine, idarray, Constants.mail_folder_spam_name, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setMail_folder_spam_name(value);
             }
         });
         setValue(nextLine, idarray, Constants.mail_folder_trash_name, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setMail_folder_trash_name(value);
             }
         });
         setValue(nextLine, idarray, Constants.manager_name, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setManager_name(value);
             }
         });
         setValue(nextLine, idarray, Constants.marital_status, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setMarital_status(value);
             }
         });
         setValue(nextLine, idarray, Constants.cellular_telephone1, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setCellular_telephone1(value);
             }
         });
         setValue(nextLine, idarray, Constants.cellular_telephone2, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setCellular_telephone2(value);
             }
         });
         setValue(nextLine, idarray, Constants.info, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setInfo(value);
             }
         });
         setValue(nextLine, idarray, Constants.nickname, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setNickname(value);
             }
         });
         setValue(nextLine, idarray, Constants.number_of_children, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setNumber_of_children(value);
             }
         });
         setValue(nextLine, idarray, Constants.note, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setNote(value);
             }
         });
         setValue(nextLine, idarray, Constants.number_of_employee, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setNumber_of_employee(value);
             }
         });
         setValue(nextLine, idarray, Constants.telephone_pager, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setTelephone_pager(value);
             }
         });
         setValue(nextLine, idarray, Constants.password_expired, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setPassword_expired(Boolean.valueOf(stringToBool(value)));
             }
         });
         setValue(nextLine, idarray, Constants.telephone_assistant, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setTelephone_assistant(value);
             }
         });
         setValue(nextLine, idarray, Constants.telephone_business1, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setTelephone_business1(value);
             }
         });
         setValue(nextLine, idarray, Constants.telephone_business2, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setTelephone_business2(value);
             }
         });
         setValue(nextLine, idarray, Constants.telephone_car, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setTelephone_car(value);
             }
         });
         setValue(nextLine, idarray, Constants.telephone_company, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setTelephone_company(value);
             }
         });
         setValue(nextLine, idarray, Constants.telephone_home1, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setTelephone_home1(value);
             }
         });
         setValue(nextLine, idarray, Constants.telephone_home2, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setTelephone_home2(value);
             }
         });
         setValue(nextLine, idarray, Constants.telephone_other, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setTelephone_other(value);
             }
         });
         setValue(nextLine, idarray, Constants.position, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setPosition(value);
             }
         });
         setValue(nextLine, idarray, Constants.postal_code_home, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setPostal_code_home(value);
             }
         });
         setValue(nextLine, idarray, Constants.profession, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setProfession(value);
             }
         });
         setValue(nextLine, idarray, Constants.telephone_radio, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setTelephone_radio(value);
             }
         });
         setValue(nextLine, idarray, Constants.room_number, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setRoom_number(value);
             }
         });
         setValue(nextLine, idarray, Constants.sales_volume, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setSales_volume(value);
             }
         });
         setValue(nextLine, idarray, Constants.city_other, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setCity_other(value);
             }
         });
         setValue(nextLine, idarray, Constants.country_other, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setCountry_other(value);
             }
         });
         setValue(nextLine, idarray, Constants.middle_name, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setMiddle_name(value);
             }
         });
         setValue(nextLine, idarray, Constants.postal_code_other, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setPostal_code_other(value);
             }
         });
         setValue(nextLine, idarray, Constants.state_other, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setState_other(value);
             }
         });
         setValue(nextLine, idarray, Constants.street_other, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setStreet_other(value);
             }
         });
         setValue(nextLine, idarray, Constants.spouse_name, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setSpouse_name(value);
             }
         });
         setValue(nextLine, idarray, Constants.state_home, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setState_home(value);
             }
         });
         setValue(nextLine, idarray, Constants.street_home, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setStreet_home(value);
             }
         });
         setValue(nextLine, idarray, Constants.suffix, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setSuffix(value);
             }
         });
         setValue(nextLine, idarray, Constants.tax_id, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setTax_id(value);
             }
         });
         setValue(nextLine, idarray, Constants.telephone_telex, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setTelephone_telex(value);
             }
         });
         setValue(nextLine, idarray, Constants.title, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setTitle(value);
             }
         });
         setValue(nextLine, idarray, Constants.telephone_ttytdd, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setTelephone_ttytdd(value);
             }
         });
         setValue(nextLine, idarray, Constants.UPLOADFILESIZELIMIT, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) throws InvalidDataException {
                 try {
                     user.setUploadFileSizeLimit(Integer.valueOf(value));
@@ -1441,6 +1530,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             }
         });
         setValue(nextLine, idarray, Constants.uploadfilesizelimitperfile, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) throws InvalidDataException {
                 try {
                     user.setUploadFileSizeLimitPerFile(Integer.valueOf(value));
@@ -1450,156 +1540,187 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             }
         });
         setValue(nextLine, idarray, Constants.url, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setUrl(value);
             }
         });
         setValue(nextLine, idarray, Constants.userfield01, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setUserfield01(value);
             }
         });
         setValue(nextLine, idarray, Constants.userfield02, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setUserfield02(value);
             }
         });
         setValue(nextLine, idarray, Constants.userfield03, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setUserfield03(value);
             }
         });
         setValue(nextLine, idarray, Constants.userfield04, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setUserfield04(value);
             }
         });
         setValue(nextLine, idarray, Constants.userfield05, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setUserfield05(value);
             }
         });
         setValue(nextLine, idarray, Constants.userfield06, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setUserfield06(value);
             }
         });
         setValue(nextLine, idarray, Constants.userfield07, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setUserfield07(value);
             }
         });
         setValue(nextLine, idarray, Constants.userfield08, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setUserfield08(value);
             }
         });
         setValue(nextLine, idarray, Constants.userfield09, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setUserfield09(value);
             }
         });
         setValue(nextLine, idarray, Constants.userfield10, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setUserfield10(value);
             }
         });
         setValue(nextLine, idarray, Constants.userfield11, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setUserfield11(value);
             }
         });
         setValue(nextLine, idarray, Constants.userfield12, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setUserfield12(value);
             }
         });
         setValue(nextLine, idarray, Constants.userfield13, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setUserfield13(value);
             }
         });
         setValue(nextLine, idarray, Constants.userfield14, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setUserfield14(value);
             }
         });
         setValue(nextLine, idarray, Constants.userfield15, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setUserfield15(value);
             }
         });
         setValue(nextLine, idarray, Constants.userfield16, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setUserfield16(value);
             }
         });
         setValue(nextLine, idarray, Constants.userfield17, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setUserfield17(value);
             }
         });
         setValue(nextLine, idarray, Constants.userfield18, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setUserfield18(value);
             }
         });
         setValue(nextLine, idarray, Constants.userfield19, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setUserfield19(value);
             }
         });
         setValue(nextLine, idarray, Constants.userfield20, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setUserfield20(value);
             }
         });
         setValue(nextLine, idarray, Constants.city_business, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setCity_business(value);
             }
         });
         setValue(nextLine, idarray, Constants.country_business, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setCountry_business(value);
             }
         });
         setValue(nextLine, idarray, Constants.assistant_name, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setAssistant_name(value);
             }
         });
         setValue(nextLine, idarray, Constants.telephone_primary, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setTelephone_primary(value);
             }
         });
         setValue(nextLine, idarray, Constants.categories, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setCategories(value);
             }
         });
         setValue(nextLine, idarray, Constants.PASSWORDMECH, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setPasswordMech(value);
             }
         });
         setValue(nextLine, idarray, Constants.mail_folder_confirmed_ham_name, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setMail_folder_confirmed_ham_name(value);
             }
         });
         setValue(nextLine, idarray, Constants.mail_folder_confirmed_spam_name, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setMail_folder_confirmed_spam_name(value);
             }
         });
         setValue(nextLine, idarray, Constants.DEFAULTSENDERADDRESS, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setDefaultSenderAddress(value);
             }
         });
         setValue(nextLine, idarray, Constants.gui_spam_filter_capabilities_enabled, new MethodStringClosure() {
+            @Override
             public void callMethod(final String value) {
                 user.setGui_spam_filter_enabled(Boolean.valueOf(stringToBool(value)));
             }

@@ -80,6 +80,7 @@ public class OXAuthFileStorage extends OXAuthStorageInterface {
      * Authenticates against a textfile
      * 
      */
+    @Override
     public boolean authenticate(final Credentials authdata) {
         final Credentials master = ClientAdminThread.cache.getMasterCredentials();
         if(master != null && authdata != null &&
@@ -97,11 +98,13 @@ public class OXAuthFileStorage extends OXAuthStorageInterface {
         }
     }
 
+    @Override
     public boolean authenticate(final Credentials authdata, final Context ctx)
             throws StorageException {
         return false;
     }
 
+    @Override
     public boolean authenticateUser(final Credentials authdata, final Context ctx) throws StorageException {        
         return false;
     }

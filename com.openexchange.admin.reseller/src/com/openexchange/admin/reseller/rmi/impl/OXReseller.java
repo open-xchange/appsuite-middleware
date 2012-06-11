@@ -107,6 +107,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
      * @see com.openexchange.admin.reseller.rmi.OXResellerInterface#change(com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin,
      * com.openexchange.admin.rmi.dataobjects.Credentials)
      */
+    @Override
     public void change(final ResellerAdmin adm, final Credentials creds) throws RemoteException, InvalidDataException, StorageException, OXResellerException, InvalidCredentialsException {
         try {
             doNullCheck(adm);
@@ -185,6 +186,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
      * @see com.openexchange.admin.reseller.rmi.OXResellerInterface#create(com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin,
      * com.openexchange.admin.rmi.dataobjects.Credentials)
      */
+    @Override
     public ResellerAdmin create(final ResellerAdmin adm, final Credentials creds) throws RemoteException, InvalidDataException, StorageException, InvalidCredentialsException, OXResellerException {
         try {
             doNullCheck(adm);
@@ -256,6 +258,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
      * @see com.openexchange.admin.reseller.rmi.OXResellerInterface#delete(com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin,
      * com.openexchange.admin.rmi.dataobjects.Credentials)
      */
+    @Override
     public void delete(final ResellerAdmin adm, final Credentials creds) throws RemoteException, InvalidDataException, StorageException, OXResellerException, InvalidCredentialsException {
         try {
             doNullCheck(adm);
@@ -318,6 +321,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
      * @see
      * com.openexchange.admin.reseller.rmi.OXResellerInterface#getAvailableRestrictions(com.openexchange.admin.rmi.dataobjects.Credentials)
      */
+    @Override
     public Restriction[] getAvailableRestrictions(final Credentials creds) throws RemoteException, InvalidCredentialsException, StorageException, OXResellerException {
         try {
             if( ClientAdminThread.cache.getMasterCredentials().getLogin().equals(creds.getLogin()) ) {
@@ -350,6 +354,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
      * @see com.openexchange.admin.reseller.rmi.OXResellerInterface#getData(com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin,
      * com.openexchange.admin.rmi.dataobjects.Credentials)
      */
+    @Override
     public ResellerAdmin getData(final ResellerAdmin adm, final Credentials creds) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, OXResellerException {
         return getMultipleData(new ResellerAdmin[] { adm }, creds)[0];
     }
@@ -358,6 +363,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
      * (non-Javadoc)
      * @see com.openexchange.admin.reseller.rmi.OXResellerInterface#getData(com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin[])
      */
+    @Override
     public ResellerAdmin[] getMultipleData(final ResellerAdmin[] admins, final Credentials creds) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, OXResellerException {
         try {
             doNullCheck((Object[]) admins);
@@ -411,6 +417,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
      * com.openexchange.admin.reseller.rmi.OXResellerInterface#getRestrictionsFromContext(com.openexchange.admin.rmi.dataobjects.Context,
      * com.openexchange.admin.rmi.dataobjects.Credentials)
      */
+    @Override
     public Restriction[] getRestrictionsFromContext(final Context ctx, final Credentials creds) throws RemoteException, InvalidDataException, OXResellerException, StorageException, InvalidCredentialsException {
         try {
             doNullCheck(ctx);
@@ -450,6 +457,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
      * @see
      * com.openexchange.admin.reseller.rmi.OXResellerInterface#initDatabaseRestrictions(com.openexchange.admin.rmi.dataobjects.Credentials)
      */
+    @Override
     public void initDatabaseRestrictions(final Credentials creds) throws StorageException, InvalidCredentialsException, OXResellerException {
         try {
             basicauth.doAuthentication(creds);
@@ -478,6 +486,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
      * @see com.openexchange.admin.reseller.rmi.OXResellerInterface#list(java.lang.String,
      * com.openexchange.admin.rmi.dataobjects.Credentials)
      */
+    @Override
     public ResellerAdmin[] list(final String search_pattern, final Credentials creds) throws RemoteException, InvalidDataException, StorageException, InvalidCredentialsException {
         try {
             doNullCheck(search_pattern);
@@ -513,6 +522,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
      * com.openexchange.admin.reseller.rmi.OXResellerInterface#removeDatabaseRestrictions(com.openexchange.admin.rmi.dataobjects.Credentials
      * )
      */
+    @Override
     public void removeDatabaseRestrictions(final Credentials creds) throws RemoteException, InvalidCredentialsException, StorageException, OXResellerException {
         try {
             basicauth.doAuthentication(creds);
@@ -541,6 +551,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
      * (non-Javadoc)
      * @see com.openexchange.admin.reseller.rmi.OXResellerInterface#updateModuleAccessRestrictions(java.lang.String)
      */
+    @Override
     public void updateDatabaseModuleAccessRestrictions(final Credentials creds) throws RemoteException, StorageException, InvalidCredentialsException, OXResellerException {
         try {
             basicauth.doAuthentication(creds);
@@ -616,6 +627,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
         final HashSet<Restriction> res = OXResellerTools.array2HashSet(adm.getRestrictions());
         if (null != res) {
             OXResellerTools.checkRestrictions(res, validRestrictions, "subadmin", new ClosureInterface() {
+                @Override
                 public boolean checkAgainstCorrespondingRestrictions(final String rname) {
                     return !(rname.equals(Restriction.MAX_CONTEXT_PER_SUBADMIN) || rname.equals(Restriction.MAX_OVERALL_CONTEXT_QUOTA_PER_SUBADMIN) || rname.equals(Restriction.MAX_OVERALL_USER_PER_SUBADMIN) || rname.equals(Restriction.SUBADMIN_CAN_CREATE_SUBADMINS) || rname.equals(Restriction.MAX_SUBADMIN_PER_SUBADMIN) || rname.startsWith(Restriction.MAX_OVERALL_USER_PER_SUBADMIN_BY_MODULEACCESS_PREFIX));
                 }
@@ -623,6 +635,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
         }
     }
 
+    @Override
     public void updateDatabaseRestrictions(Credentials creds) throws RemoteException, StorageException, InvalidCredentialsException, OXResellerException {
         try {
             basicauth.doAuthentication(creds);

@@ -178,10 +178,12 @@ public class Database extends EnforceableDataObject implements NameAndIdObject {
     // //////////////////////////////////////////////
     // Getter and Setter
     //
+    @Override
     public Integer getId() {
         return this.id;
     }
 
+    @Override
     public void setId(final Integer val) {
         this.id = val;
         this.idset = true;
@@ -214,10 +216,12 @@ public class Database extends EnforceableDataObject implements NameAndIdObject {
         this.passwordset = true;
     }
 
+    @Override
     public String getName() {
         return this.name;
     }
 
+    @Override
     public void setName(final String val) {
         this.name = val;
         this.nameset = true;
@@ -581,125 +585,176 @@ public class Database extends EnforceableDataObject implements NameAndIdObject {
      */
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (!super.equals(obj))
+        }
+        if (!super.equals(obj)) {
             return false;
-        if (!(obj instanceof Database))
+        }
+        if (!(obj instanceof Database)) {
             return false;
+        }
         final Database other = (Database) obj;
         if (clusterWeight == null) {
-            if (other.clusterWeight != null)
+            if (other.clusterWeight != null) {
                 return false;
-        } else if (!clusterWeight.equals(other.clusterWeight))
+            }
+        } else if (!clusterWeight.equals(other.clusterWeight)) {
             return false;
-        if (clusterWeightset != other.clusterWeightset)
+        }
+        if (clusterWeightset != other.clusterWeightset) {
             return false;
+        }
         if (currentUnits == null) {
-            if (other.currentUnits != null)
+            if (other.currentUnits != null) {
                 return false;
-        } else if (!currentUnits.equals(other.currentUnits))
+            }
+        } else if (!currentUnits.equals(other.currentUnits)) {
             return false;
-        if (currentUnitsset != other.currentUnitsset)
+        }
+        if (currentUnitsset != other.currentUnitsset) {
             return false;
+        }
         if (driver == null) {
-            if (other.driver != null)
+            if (other.driver != null) {
                 return false;
-        } else if (!driver.equals(other.driver))
+            }
+        } else if (!driver.equals(other.driver)) {
             return false;
-        if (driverset != other.driverset)
+        }
+        if (driverset != other.driverset) {
             return false;
+        }
         if (id == null) {
-            if (other.id != null)
+            if (other.id != null) {
                 return false;
-        } else if (!id.equals(other.id))
+            }
+        } else if (!id.equals(other.id)) {
             return false;
-        if (idset != other.idset)
+        }
+        if (idset != other.idset) {
             return false;
+        }
         if (login == null) {
-            if (other.login != null)
+            if (other.login != null) {
                 return false;
-        } else if (!login.equals(other.login))
+            }
+        } else if (!login.equals(other.login)) {
             return false;
-        if (loginset != other.loginset)
+        }
+        if (loginset != other.loginset) {
             return false;
+        }
         if (master == null) {
-            if (other.master != null)
+            if (other.master != null) {
                 return false;
-        } else if (!master.equals(other.master))
+            }
+        } else if (!master.equals(other.master)) {
             return false;
+        }
         if (masterId == null) {
-            if (other.masterId != null)
+            if (other.masterId != null) {
                 return false;
-        } else if (!masterId.equals(other.masterId))
+            }
+        } else if (!masterId.equals(other.masterId)) {
             return false;
-        if (masterIdset != other.masterIdset)
+        }
+        if (masterIdset != other.masterIdset) {
             return false;
-        if (masterset != other.masterset)
+        }
+        if (masterset != other.masterset) {
             return false;
+        }
         if (maxUnits == null) {
-            if (other.maxUnits != null)
+            if (other.maxUnits != null) {
                 return false;
-        } else if (!maxUnits.equals(other.maxUnits))
+            }
+        } else if (!maxUnits.equals(other.maxUnits)) {
             return false;
-        if (maxUnitsset != other.maxUnitsset)
+        }
+        if (maxUnitsset != other.maxUnitsset) {
             return false;
+        }
         if (name == null) {
-            if (other.name != null)
+            if (other.name != null) {
                 return false;
-        } else if (!name.equals(other.name))
+            }
+        } else if (!name.equals(other.name)) {
             return false;
-        if (nameset != other.nameset)
+        }
+        if (nameset != other.nameset) {
             return false;
+        }
         if (password == null) {
-            if (other.password != null)
+            if (other.password != null) {
                 return false;
-        } else if (!password.equals(other.password))
+            }
+        } else if (!password.equals(other.password)) {
             return false;
-        if (passwordset != other.passwordset)
+        }
+        if (passwordset != other.passwordset) {
             return false;
+        }
         if (poolHardLimit == null) {
-            if (other.poolHardLimit != null)
+            if (other.poolHardLimit != null) {
                 return false;
-        } else if (!poolHardLimit.equals(other.poolHardLimit))
+            }
+        } else if (!poolHardLimit.equals(other.poolHardLimit)) {
             return false;
-        if (poolHardLimitset != other.poolHardLimitset)
+        }
+        if (poolHardLimitset != other.poolHardLimitset) {
             return false;
+        }
         if (poolInitial == null) {
-            if (other.poolInitial != null)
+            if (other.poolInitial != null) {
                 return false;
-        } else if (!poolInitial.equals(other.poolInitial))
+            }
+        } else if (!poolInitial.equals(other.poolInitial)) {
             return false;
-        if (poolInitialset != other.poolInitialset)
+        }
+        if (poolInitialset != other.poolInitialset) {
             return false;
+        }
         if (poolMax == null) {
-            if (other.poolMax != null)
+            if (other.poolMax != null) {
                 return false;
-        } else if (!poolMax.equals(other.poolMax))
+            }
+        } else if (!poolMax.equals(other.poolMax)) {
             return false;
-        if (poolMaxset != other.poolMaxset)
+        }
+        if (poolMaxset != other.poolMaxset) {
             return false;
+        }
         if (read_id == null) {
-            if (other.read_id != null)
+            if (other.read_id != null) {
                 return false;
-        } else if (!read_id.equals(other.read_id))
+            }
+        } else if (!read_id.equals(other.read_id)) {
             return false;
-        if (read_idset != other.read_idset)
+        }
+        if (read_idset != other.read_idset) {
             return false;
+        }
         if (scheme == null) {
-            if (other.scheme != null)
+            if (other.scheme != null) {
                 return false;
-        } else if (!scheme.equals(other.scheme))
+            }
+        } else if (!scheme.equals(other.scheme)) {
             return false;
-        if (schemeset != other.schemeset)
+        }
+        if (schemeset != other.schemeset) {
             return false;
+        }
         if (url == null) {
-            if (other.url != null)
+            if (other.url != null) {
                 return false;
-        } else if (!url.equals(other.url))
+            }
+        } else if (!url.equals(other.url)) {
             return false;
-        if (urlset != other.urlset)
+        }
+        if (urlset != other.urlset) {
             return false;
+        }
         return true;
     }
 

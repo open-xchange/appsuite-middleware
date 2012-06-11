@@ -91,6 +91,7 @@ public class ContextSearcher extends AbstractTask<Collection<Integer>> {
         threadRenamer.renamePrefix("listContext searcher");
     }
 
+    @Override
     public Collection<Integer> call() throws StorageException {
         final Connection con;
         try {
