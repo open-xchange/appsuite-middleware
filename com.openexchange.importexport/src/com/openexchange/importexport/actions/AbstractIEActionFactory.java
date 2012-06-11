@@ -58,21 +58,19 @@ import com.openexchange.importexport.formats.Format;
 
 public abstract class AbstractIEActionFactory implements AJAXActionServiceFactory {
 
+    /**
+     * Initializes a new {@link AbstractIEActionFactory}.
+     */
+    protected AbstractIEActionFactory() {
+        super();
+    }
+
     protected abstract Map<Format, AJAXActionService> getActions();
 
     @Override
     public AJAXActionService createActionService(final String action) throws OXException {
         final Format format = Format.getFormatByConstantName(action);
-        if (format == null) {
-            return null;
-        }
-
-        final AJAXActionService handler = getActions().get(format);
-        if (handler == null) {
-            return null;
-        }
-
-        return handler;
+        return format == null ? null : getActions().get(format);
     }
 
     @Override
