@@ -49,12 +49,18 @@
 
 package com.openexchange.index.solr.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import org.apache.commons.logging.Log;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.solr.internal.Services;
 import com.openexchange.index.solr.internal.SolrIndexFacadeService;
+import com.openexchange.index.solr.internal.filestore.SolrFilestoreEventHandler;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.solr.SolrAccessService;
@@ -89,6 +95,9 @@ public class SolrIndexActivator extends HousekeepingActivator {
         solrFacadeService.init();
         registerService(IndexFacadeService.class, solrFacadeService);
         addService(IndexFacadeService.class, solrFacadeService);
+        Dictionary<String, Object> ht = new Hashtable<String, Object>();
+        ht.put(EventConstants.EVENT_TOPIC, FileStorageEventConstants.ALL_TOPICS);
+        registerService(EventHandler.class, new SolrFilestoreEventHandler(), ht);
 //        	registerService(CommandProvider.class, new UtilCommandProvider());        
         
 //        final SolrCoreConfigService indexService = new SolrCoreConfigServiceImpl();

@@ -51,6 +51,7 @@ package com.openexchange.file.storage;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.Set;
 import org.osgi.service.event.Event;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
@@ -62,7 +63,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class FileStorageEventHelper {
-    
+
     public static Event buildUpdateEvent(Session session, String service, String accountId, String folderId, String objectId) {
         Event event = new Event(FileStorageEventConstants.UPDATE_TOPIC, buildProperties(session, service, accountId, folderId, objectId));        
         return event;
@@ -73,8 +74,16 @@ public class FileStorageEventHelper {
         return event;
     }   
     
-    public static Event buildDeleteEvent(Session session, String service, String accountId, String folderId, String objectId) {
-        Event event = new Event(FileStorageEventConstants.DELETE_TOPIC, buildProperties(session, service, accountId, folderId, objectId));        
+    public static Event buildDeleteEvent(Session session, String service, String accountId, String folderId, String objectId, Set<Integer> versions) {
+        Dictionary<String,Object> properties = buildProperties(session, service, accountId, folderId, objectId);
+        /*
+         * version may be null to indicate a complete deletion of a document.
+         */
+        if (versions != null) {
+            properties.put(FileStorageEventConstants.VERSIONS, versions);
+        }
+        
+        Event event = new Event(FileStorageEventConstants.DELETE_TOPIC, properties);        
         return event;
     }
     
@@ -82,9 +91,11 @@ public class FileStorageEventHelper {
         Dictionary<String, Object> ht = new Hashtable<String, Object>();
         ht.put(FileStorageEventConstants.SESSION, session);
         ht.put(FileStorageEventConstants.SERVICE, service);
-        ht.put(FileStorageEventConstants.ACCOUNT_ID, accountId);
-        ht.put(FileStorageEventConstants.FOLDER_ID, folderId);        
+        ht.put(FileStorageEventConstants.ACCOUNT_ID, accountId);           
         ht.put(FileStorageEventConstants.OBJECT_ID, objectId); 
+        if (folderId != null) {
+            ht.put(FileStorageEventConstants.FOLDER_ID, folderId);
+        }
         
         return ht;
     }
@@ -134,7 +145,7 @@ public class FileStorageEventHelper {
     public static String extractFolderId(Event event) throws OXException {
         Object idObj = event.getProperty(FileStorageEventConstants.FOLDER_ID);
         if (idObj == null) {
-            throw FileStorageExceptionCodes.MISSING_PARAMETER.create(FileStorageEventConstants.FOLDER_ID);
+            return null;
         }
         
         if (idObj instanceof String) {
@@ -142,6 +153,22 @@ public class FileStorageEventHelper {
         } else {
             throw FileStorageExceptionCodes.INVALID_PARAMETER.create(FileStorageEventConstants.FOLDER_ID, idObj.getClass().getName());
         }
+    }
+    
+    public static String createDebugMessage(String eventName, Event event) {
+        StringBuilder sb = new StringBuilder("Received ");
+        sb.append(eventName);
+        sb.append(": ");
+        sb.append(event.toString());
+        for (String key : event.getPropertyNames()) {
+            Object value = event.getProperty(key);            
+            sb.append("\n    ");
+            sb.append(key);
+            sb.append(": ");
+            sb.append(value.toString());            
+        }
+        
+        return sb.toString();
     }
         
 

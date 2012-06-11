@@ -125,6 +125,10 @@ public class PropertyCleaner implements FolderEventInterface, EventHandler {
                         LOG.error(e.getMessage(), e);
                     }
                 }
+                
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(FileStorageEventHelper.createDebugMessage("UpdateEvent", event));
+                }
             }
         }        
     }

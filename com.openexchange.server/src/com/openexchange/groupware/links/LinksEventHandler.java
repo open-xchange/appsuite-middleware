@@ -150,6 +150,10 @@ public class LinksEventHandler implements NoDelayEventInterface, AppointmentEven
                 } catch (NumberFormatException e) {
                     LOG.error(e.getMessage(), e);
                 }
+                
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(FileStorageEventHelper.createDebugMessage("UpdateEvent", event));
+                }
             } else if (FileStorageEventHelper.isDeleteEvent(event)) {
                 ServerSession session;
                 int id;
@@ -163,6 +167,10 @@ public class LinksEventHandler implements NoDelayEventInterface, AppointmentEven
                     LOG.error(e.getMessage(), e);
                 } catch (NumberFormatException e) {
                     LOG.error(e.getMessage(), e);
+                }
+                
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(FileStorageEventHelper.createDebugMessage("DebugEvent", event));
                 }
             }
         }

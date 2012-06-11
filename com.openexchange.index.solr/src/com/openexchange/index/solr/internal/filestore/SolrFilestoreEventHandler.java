@@ -47,34 +47,35 @@
  *
  */
 
-package com.openexchange.file.storage;
+package com.openexchange.index.solr.internal.filestore;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventHandler;
+import com.openexchange.file.storage.FileStorageEventHelper;
 
 
 /**
- * {@link FileStorageEventConstants}
+ * {@link SolrFilestoreEventHandler}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class FileStorageEventConstants {
+public class SolrFilestoreEventHandler implements EventHandler {
     
-    public static final String UPDATE_TOPIC = "com/openexchange/groupware/infostore/update";
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SolrFilestoreEventHandler.class));
 
-    public static final String CREATE_TOPIC = "com/openexchange/groupware/infostore/insert";
+    @Override
+    public void handleEvent(Event event) {
+        if (FileStorageEventHelper.isInfostoreEvent(event)) {
+            if (FileStorageEventHelper.isCreateEvent(event)) {
+                LOG.info(FileStorageEventHelper.createDebugMessage("CreateEvent", event));
+            } else if (FileStorageEventHelper.isUpdateEvent(event)) {
+                LOG.info(FileStorageEventHelper.createDebugMessage("UpdateEvent", event));
+            } else if (FileStorageEventHelper.isDeleteEvent(event)) {
+                LOG.info(FileStorageEventHelper.createDebugMessage("DeleteEvent", event));
+            }
+        }        
+    }
 
-    public static final String DELETE_TOPIC = "com/openexchange/groupware/infostore/delete";
-    
-    public static final String ALL_TOPICS = "com/openexchange/groupware/infostore/*";
-    
-    public static final String SESSION = "session";
-    
-    public static final String SERVICE = "service";
-    
-    public static final String ACCOUNT_ID = "accountId";
-    
-    public static final String FOLDER_ID = "folderId";
-    
-    public static final String OBJECT_ID = "objectId";
-    
-    public static final String VERSIONS = "versions";
-    
 }
