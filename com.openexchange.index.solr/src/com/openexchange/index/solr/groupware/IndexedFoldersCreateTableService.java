@@ -79,7 +79,7 @@ public class IndexedFoldersCreateTableService extends AbstractCreateTableImpl {
                   "account varchar(128) COLLATE utf8_unicode_ci NOT NULL," +
                   "folder varchar(128) COLLATE utf8_unicode_ci NOT NULL," +
                   "timestamp bigint(64) NOT NULL," +
-                  "locked`tinyint(1) unsigned NOT NULL," +
+                  "locked tinyint(1) unsigned NOT NULL," +
                   "indexed tinyint(1) unsigned NOT NULL," +
                   "PRIMARY KEY (cid,uid,module,account,folder)," +
                   "KEY module (cid,uid,module)," +
