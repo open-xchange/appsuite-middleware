@@ -64,6 +64,7 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.SingleThreadModel;
 import javax.servlet.http.HttpServlet;
+import com.openexchange.ajp13.AJPv13Utility;
 import com.openexchange.ajp13.servlet.ServletConfigLoader;
 import com.openexchange.ajp13.servlet.http.FiFoServletQueue;
 import com.openexchange.ajp13.servlet.http.HttpErrorServlet;
@@ -193,7 +194,7 @@ public final class ConcurrentHttpServletManager extends AbstractHttpServletManag
                     }
                     if (null == implier) {
                         final ServletQueue errServletQueue =
-                            new SingletonServletQueue(new HttpErrorServlet("No servlet bound to path/alias: " + path), path);
+                            new SingletonServletQueue(new HttpErrorServlet("No servlet bound to path/alias: " + AJPv13Utility.urlEncode(path)), path);
                         implierCache.put(path, errServletQueue);
                     } else {
                         pathStorage.append(implier.implier);
