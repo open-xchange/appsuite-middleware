@@ -672,14 +672,14 @@ public class CaldavResource extends AbstractResource {
             if (UserParticipant.class.isInstance(participant)) {
                 final UserParticipant userParticipant = (UserParticipant) participant;
                 final int identifier = userParticipant.getIdentifier();
-                if (createdBy == identifier && userParticipant.getConfirm() == 0) {
+                final UserParticipant up = userMap.get(identifier);
+                if (up != null && CalendarObject.NONE != up.getConfirm()) {
+                    // prefer confirmation status from users when set
+                    userParticipant.setConfirm(up.getConfirm());
+                    userParticipant.setConfirmMessage(up.getConfirmMessage());
+                } else if (createdBy == identifier && CalendarObject.NONE == userParticipant.getConfirm()) {
+                    // assume 'accepted' when no confirmation set
                     userParticipant.setConfirm(CalendarObject.ACCEPT);
-                } else {
-                    final UserParticipant up = userMap.get(identifier);
-                    if (up != null) {
-                        userParticipant.setConfirm(up.getConfirm());
-                        userParticipant.setConfirmMessage(up.getConfirmMessage());
-                    }
                 }
             }
         }
