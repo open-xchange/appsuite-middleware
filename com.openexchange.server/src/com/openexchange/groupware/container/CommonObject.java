@@ -51,6 +51,7 @@ package com.openexchange.groupware.container;
 
 import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
+
 import java.util.Date;
 import java.util.Set;
 
@@ -110,6 +111,8 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
     public static final int NUMBER_OF_ATTACHMENTS = 104;
 
     public static final int LAST_MODIFIED_OF_NEWEST_ATTACHMENT = 105;
+    
+    public static final int UID = 223;
 
     protected Marker marker;
 
@@ -127,6 +130,8 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
 
     protected int label;
 
+	protected String uid;
+
     protected boolean b_personal_folder_id;
 
     protected boolean b_number_of_attachments;
@@ -140,6 +145,8 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
     protected boolean b_private_flag;
 
     protected boolean bLabel;
+
+	protected boolean b_uid;
 
     /**
      * Initializes a new {@link CommonObject}.
@@ -187,6 +194,10 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
         return label;
     }
 
+    public String getUid() {
+        return uid;
+    }
+
     // SET METHODS
     public void setCategories(final String categories) {
         this.categories = categories;
@@ -232,6 +243,11 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
         bLabel = true;
     }
 
+	public void setUid(String uid) {
+		this.uid = uid;
+		b_uid = true;
+	}
+
     // REMOVE METHODS
     public void removeCategories() {
         categories = null;
@@ -268,6 +284,11 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
         bLabel = false;
     }
 
+    public void removeUid() {
+        uid = null;
+        b_uid = false;
+    }
+
     // CONTAINS METHODS
     public boolean containsCategories() {
         return b_categories;
@@ -297,6 +318,10 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
         return bLabel;
     }
 
+    public boolean containsUid() {
+        return b_uid;
+    }
+
     @Override
     public void reset() {
         super.reset();
@@ -307,6 +332,7 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
         number_of_links = 0;
         categories = null;
         label = 0;
+        uid = null;
 
         b_personal_folder_id = false;
         b_number_of_attachments = false;
@@ -314,6 +340,7 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
         b_number_of_links = false;
         b_categories = false;
         bLabel = false;
+        b_uid = false;
     }
 
     @Override
@@ -352,6 +379,10 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
             differingFields.add(I(PRIVATE_FLAG));
         }
 
+        if ((!containsUid() && other.containsUid()) || (containsUid() && other.containsUid() && getUid() != other.getUid())) {
+            differingFields.add(I(UID));
+        }
+
         return differingFields;
     }
 
@@ -376,6 +407,9 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
         case PRIVATE_FLAG:
             setPrivateFlag(((Boolean) value).booleanValue());
             break;
+        case UID:
+            setUid((String) value);
+            break;
         default:
             super.set(field, value);
 
@@ -397,6 +431,8 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
             return getLastModifiedOfNewestAttachment();
         case PRIVATE_FLAG:
             return B(getPrivateFlag());
+        case UID:
+            return getUid();
         default:
             return super.get(field);
 
@@ -418,6 +454,8 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
             return containsLastModifiedOfNewestAttachment;
         case PRIVATE_FLAG:
             return containsPrivateFlag();
+        case UID:
+            return containsUid();
         default:
             return super.contains(field);
 
@@ -444,6 +482,9 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
             break;
         case PRIVATE_FLAG:
             removePrivateFlag();
+            break;
+        case UID:
+            removeUid();
             break;
         default:
             super.remove(field);
