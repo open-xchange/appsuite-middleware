@@ -47,52 +47,26 @@
  *
  */
 
-package com.openexchange.ajax.importexport;
+package com.openexchange.groupware.importexport.csv;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import com.openexchange.i18n.LocalizableStrings;
 
-/**
- * Test suite for iCal tests.
- */
-public final class ICalTestSuite {
 
-	/**
-	 * @return the suite.
-	 */
-	public static Test suite() {
-		final TestSuite tests = new TestSuite();
-		tests.addTestSuite(ICalImportTest.class);
-		tests.addTestSuite(ICalTaskExportTest.class);
-		tests.addTestSuite(ICalAppointmentExportTest.class);
-		tests.addTestSuite(ICalSeriesTests.class);
-		tests.addTestSuite(Bug6825Test_TruncationOfFields.class);
-		tests.addTestSuite(Bug9840Test.class);
-		tests.addTestSuite(Bug10382Test.class);
-		tests.addTestSuite(Bug11724Test.class);
-		tests.addTestSuite(Bug11868Test.class);
-		tests.addTestSuite(Bug11871Test.class);
-		tests.addTestSuite(Bug11920Test.class);
-		tests.addTestSuite(Bug11996Test.class);
-		tests.addTestSuite(Bug12414Test.class);
-		tests.addTestSuite(Bug12470Test.class);
-		tests.addTestSuite(Bug17393Test.class);
-		tests.addTestSuite(Bug17963Test_DateWithoutTime.class);
-		tests.addTestSuite(Bug19046Test_SeriesWithExtraneousStartDate.class);
-		tests.addTestSuite(Bug19089Test.class);
-		tests.addTestSuite(Bug19463Test_TimezoneOffsetsWith4Digits.class);
-		tests.addTestSuite(Bug19681_TimezoneForUtcProperties.class);
-		tests.addTestSuite(Bug19915Test.class);
-		tests.addTestSuite(Bug20132Test_WrongRecurrenceDatePosition.class);
-		tests.addTestSuite(Bug20405Test_TaskWithoutDueDate.class);
-		tests.addTestSuite(Bug20413Test_CompletelyWrongDTStart.class);
-		tests.addTestSuite(Bug20453Test_emptyDTEND.class);
-		tests.addTestSuite(Bug20498Test_ReminderJumpsAnHour.class);
-		tests.addTestSuite(Bug20715Test_UidIsNotcaseSensitive.class);
-		tests.addTestSuite(Bug20718Test_JumpDuringDstCrossing.class);
-		tests.addTestSuite(Bug20896Test_AlarmsChange.class);
-		tests.addTestSuite(Bug20945Test_UnexpectedError26.class);
-		tests.addTestSuite(Bug22059Test.class);
-		return tests;
-	}
+public class CsvExceptionMessages implements LocalizableStrings {
+
+    public static final String BROKEN_CSV_MSG = "Broken CSV file: Lines have different number of cells, line #1 has %d, line #%d has %d. Is this really a CSV file?";
+
+    public static final String DATA_AFTER_LAST_LINE_MSG = "Illegal state: Found data after presumed last line.";
+
+    public static final String LOADING_FOLDER_FAILED_MSG = "Could not load folder %s";
+    
+    public static final String UTF8_ENCODE_FAILED_MSG = "Could not encode as UTF-8";
+
+    public static final String IOEXCEPTION_WHILE_CONVERTING_MSG = "Encountered IO error while trying to read stream";
+    
+    public static final String NUMBER_FAILED_MSG = "Parsing %1$s to a number failed.";
+
+    private CsvExceptionMessages() {
+        super();
+    }
 }

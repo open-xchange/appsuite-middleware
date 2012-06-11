@@ -46,89 +46,28 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package com.openexchange.importexport.actions.exporter;
 
-package com.openexchange.groupware.importexport;
+import com.openexchange.ajax.requesthandler.DispatcherNotes;
+import com.openexchange.importexport.exporters.Exporter;
+import com.openexchange.importexport.exporters.VCardExporter;
+import com.openexchange.importexport.formats.Format;
 
-import java.io.IOException;
-import java.io.InputStream;
+@DispatcherNotes(defaultFormat="file")
+public class VCardExportAction extends AbstractExportAction {
 
-/**
- * Defines a wrapper for an InputStream that also contains the size of this
- * InputStream. This is necessary to be able to set the correct size when
- * returning a HTTP-response - else the whole connection might be cancelled
- * either too early (resulting in corrupt data) or to late (resulting in
- * a lot of waiting).
- *
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
- *
- */
-public class SizedInputStream extends InputStream{
+	private Exporter exporter;
 
-	private final InputStream in;
-	private final long size;
-	private final Format format;
-
-	public SizedInputStream(final InputStream in, final long size, final Format format){
-		this.size = size;
-		this.in = in;
-		this.format = format;
-	}
-
-	public long getSize() {
-		return this.size;
-	}
-
-	public Format getFormat(){
-		return this.format;
+	@Override
+	public Format getFormat() {
+		return Format.VCARD;
 	}
 
 	@Override
-	public int read() throws IOException {
-		return in.read();
-	}
-
-	@Override
-	public int available() throws IOException {
-		return in.available();
-	}
-
-	@Override
-	public void close() throws IOException {
-		in.close();
-	}
-
-	@Override
-	public void mark(final int readlimit) {
-		synchronized (this) {
-			in.mark(readlimit);
-		}
-	}
-
-	@Override
-	public boolean markSupported() {
-		return in.markSupported();
-	}
-
-	@Override
-	public int read(final byte[] b, final int off, final int len) throws IOException {
-		return in.read(b, off, len);
-	}
-
-	@Override
-	public int read(final byte[] b) throws IOException {
-		return in.read(b);
-	}
-
-	@Override
-	public void reset() throws IOException {
-		synchronized (this) {
-			in.reset();
-		}
-	}
-
-	@Override
-	public long skip(final long n) throws IOException {
-		return in.skip(n);
+	public Exporter getExporter() {
+		if(this.exporter == null)
+			exporter = new VCardExporter();
+		return exporter;
 	}
 
 }

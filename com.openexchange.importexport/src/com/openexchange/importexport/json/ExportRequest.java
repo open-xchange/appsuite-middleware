@@ -47,52 +47,76 @@
  *
  */
 
-package com.openexchange.ajax.importexport;
+package com.openexchange.importexport.json;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.util.LinkedList;
+import java.util.List;
 
-/**
- * Test suite for iCal tests.
- */
-public final class ICalTestSuite {
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.exception.OXException;
+import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
-	/**
-	 * @return the suite.
-	 */
-	public static Test suite() {
-		final TestSuite tests = new TestSuite();
-		tests.addTestSuite(ICalImportTest.class);
-		tests.addTestSuite(ICalTaskExportTest.class);
-		tests.addTestSuite(ICalAppointmentExportTest.class);
-		tests.addTestSuite(ICalSeriesTests.class);
-		tests.addTestSuite(Bug6825Test_TruncationOfFields.class);
-		tests.addTestSuite(Bug9840Test.class);
-		tests.addTestSuite(Bug10382Test.class);
-		tests.addTestSuite(Bug11724Test.class);
-		tests.addTestSuite(Bug11868Test.class);
-		tests.addTestSuite(Bug11871Test.class);
-		tests.addTestSuite(Bug11920Test.class);
-		tests.addTestSuite(Bug11996Test.class);
-		tests.addTestSuite(Bug12414Test.class);
-		tests.addTestSuite(Bug12470Test.class);
-		tests.addTestSuite(Bug17393Test.class);
-		tests.addTestSuite(Bug17963Test_DateWithoutTime.class);
-		tests.addTestSuite(Bug19046Test_SeriesWithExtraneousStartDate.class);
-		tests.addTestSuite(Bug19089Test.class);
-		tests.addTestSuite(Bug19463Test_TimezoneOffsetsWith4Digits.class);
-		tests.addTestSuite(Bug19681_TimezoneForUtcProperties.class);
-		tests.addTestSuite(Bug19915Test.class);
-		tests.addTestSuite(Bug20132Test_WrongRecurrenceDatePosition.class);
-		tests.addTestSuite(Bug20405Test_TaskWithoutDueDate.class);
-		tests.addTestSuite(Bug20413Test_CompletelyWrongDTStart.class);
-		tests.addTestSuite(Bug20453Test_emptyDTEND.class);
-		tests.addTestSuite(Bug20498Test_ReminderJumpsAnHour.class);
-		tests.addTestSuite(Bug20715Test_UidIsNotcaseSensitive.class);
-		tests.addTestSuite(Bug20718Test_JumpDuringDstCrossing.class);
-		tests.addTestSuite(Bug20896Test_AlarmsChange.class);
-		tests.addTestSuite(Bug20945Test_UnexpectedError26.class);
-		tests.addTestSuite(Bug22059Test.class);
-		return tests;
+public class ExportRequest {
+	
+	private ServerSession session;
+	private AJAXRequestData request;
+	private String folder;
+	private List<Integer> columns;
+
+	public ExportRequest(AJAXRequestData request, ServerSession session) throws OXException {
+		this.setSession(session);
+		this.setRequest(request);
+
+		if(request.getParameter(AJAXServlet.PARAMETER_FOLDERID) == null){
+			throw ImportExportExceptionCodes.NEED_FOLDER.create();
+		}
+		String colStr = request.getParameter(AJAXServlet.PARAMETER_COLUMNS);
+		if(colStr != null){
+			String[] split = colStr.split(",");
+			setColumns(new LinkedList<Integer>());
+			for(String s: split){
+				try {
+					getColumns().add(Integer.parseInt(s));
+				} catch (NumberFormatException e) {
+					throw ImportExportExceptionCodes.IRREGULAR_COLUMN_ID.create(s);
+				}
+			}
+		}
+		this.setFolder(request.getParameter(AJAXServlet.PARAMETER_FOLDERID));
+
+	}
+
+	public String getFolder() {
+		return folder;
+	}
+
+	public void setFolder(String folder) {
+		this.folder = folder;
+	}
+
+	public AJAXRequestData getRequest() {
+		return request;
+	}
+
+	public void setRequest(AJAXRequestData request) {
+		this.request = request;
+	}
+
+	public ServerSession getSession() {
+		return session;
+	}
+
+	public void setSession(ServerSession session) {
+		this.session = session;
+	}
+
+	public List<Integer> getColumns() {
+		return columns;
+	}
+
+	public void setColumns(List<Integer> columns) {
+		this.columns = columns;
 	}
 }

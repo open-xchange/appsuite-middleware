@@ -67,7 +67,7 @@ public class Bug20498Test_ReminderJumpsAnHour extends ManagedAppointmentTest{
 
 		Appointment actual = getClient().execute(new GetRequest(folder.getObjectID(), id)).getAppointment(tz);
 
-		assertEquals(14 * 24 * 60, actual.getAlarm());
+		assertEquals(2 * 7 * 24 * 60, actual.getAlarm());
 	}
 
 	public void testReminderFourDaysBefore() throws Exception{
@@ -81,7 +81,7 @@ public class Bug20498Test_ReminderJumpsAnHour extends ManagedAppointmentTest{
 
 		Appointment actual = getClient().execute(new GetRequest(folder.getObjectID(), id)).getAppointment(tz);
 
-		assertEquals(4 * 60, actual.getAlarm());
+		assertEquals(4 * 24 * 60, actual.getAlarm());
 	}
 
 	public void testReminderEightMinutesBefore() throws Exception{

@@ -61,7 +61,7 @@ import com.openexchange.groupware.contact.helpers.ContactSwitcherForBooleans;
 import com.openexchange.groupware.contact.helpers.ContactSwitcherForSimpleDateFormat;
 import com.openexchange.groupware.contact.helpers.SplitBirthdayFieldsSetter;
 import com.openexchange.importexport.formats.Format;
-import com.openexchange.importexport.formats.csv.CSVParser;
+import com.openexchange.groupware.importexport.csv.CSVParser;
 import com.openexchange.importexport.formats.csv.ContactFieldMapper;
 import com.openexchange.importexport.formats.csv.DutchOutlookMapper;
 import com.openexchange.importexport.formats.csv.EnglishOutlookMapper;
@@ -149,7 +149,7 @@ public class OutlookCSVContactImporter extends CSVContactImporter {
      * class.
      */
     @Override
-    protected boolean checkFields(final List<String> fields) {
+	public boolean checkFields(final List<String> fields) {
         int highestAmountOfMappedFields = 0;
 
         for (ContactFieldMapper mapper : getFieldMappers()) {
@@ -169,7 +169,7 @@ public class OutlookCSVContactImporter extends CSVContactImporter {
     }
 
     @Override
-    protected ContactSwitcher getContactSwitcher() {
+	public ContactSwitcher getContactSwitcher() {
         final ContactSwitcherForSimpleDateFormat dateSwitcher = new ContactSwitcherForSimpleDateFormat();
         dateSwitcher.addDateFormat(getGermanDateNotation());
         dateSwitcher.addDateFormat(getAmericanDateNotation());

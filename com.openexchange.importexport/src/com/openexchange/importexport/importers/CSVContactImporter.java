@@ -49,8 +49,8 @@
 
 package com.openexchange.importexport.importers;
 
-import static com.openexchange.importexport.formats.csv.CSVLibrary.getFolderObject;
-import static com.openexchange.importexport.formats.csv.CSVLibrary.transformInputStreamToString;
+import static com.openexchange.groupware.importexport.csv.CSVLibrary.getFolderObject;
+import static com.openexchange.groupware.importexport.csv.CSVLibrary.transformInputStreamToString;
 import static com.openexchange.java.Autoboxing.I;
 import java.io.InputStream;
 import java.sql.SQLException;
@@ -80,10 +80,10 @@ import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.groupware.generic.FolderUpdaterService;
 import com.openexchange.groupware.generic.TargetFolderDefinition;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.importexport.ImportResult;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
-import com.openexchange.importexport.formats.csv.CSVParser;
+import com.openexchange.groupware.importexport.ImportResult;
+import com.openexchange.groupware.importexport.csv.CSVParser;
 import com.openexchange.importexport.osgi.ImportExportServices;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.Collections;
@@ -93,7 +93,7 @@ import com.openexchange.tools.session.ServerSession;
 /**
  * Importer for OX own CSV file format - this format is able to represent a contact with all fields that appear in the OX.
  *
- * @see com.openexchange.importexport.importers.OutlookCSVContactImporter - imports files prduced by Outlook
+ * @see com.openexchange.importexport.importers.OutlookCSVContactImporter - imports files produced by Outlook
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  */
 public class CSVContactImporter extends AbstractImporter {
@@ -213,7 +213,7 @@ public class CSVContactImporter extends AbstractImporter {
         final List<ImportResult> results = new LinkedList<ImportResult>();
 
         for(final ImportIntention intention : intentions) {
-            if (intention.contact != null) {
+        	if (intention.contact != null && intention.contact.getObjectID() != 0) {
                 final ImportResult result = new ImportResult();
                 result.setFolder(folder);
                 result.setObjectId(Integer.toString(intention.contact.getObjectID()));
@@ -222,6 +222,10 @@ public class CSVContactImporter extends AbstractImporter {
                     result.setException(intention.result.getException());
                 }
                 results.add(result);
+            } else if (intention.contact != null && intention.contact.getObjectID() == 0) {
+            	ImportResult notCreated = new ImportResult();
+            	notCreated.setException(ImportExportExceptionCodes.COULD_NOT_CREATE.create(intention.contact));
+            	results.add(notCreated);
             } else if (intention.result != null) {
                 results.add(intention.result);
             }
@@ -234,7 +238,7 @@ public class CSVContactImporter extends AbstractImporter {
         return new CSVParser();
     }
 
-    protected boolean checkFields(final List<String> fields) {
+    public boolean checkFields(final List<String> fields) {
         for (final String fieldname : fields) {
             if (getRelevantField(fieldname) != null) {
                 return true;
@@ -371,7 +375,7 @@ public class CSVContactImporter extends AbstractImporter {
         return ContactField.getByDisplayName(name);
     }
 
-    protected ContactSwitcher getContactSwitcher() {
+    public ContactSwitcher getContactSwitcher() {
         final ContactSwitcherForSimpleDateFormat dateSwitch = new ContactSwitcherForSimpleDateFormat();
         dateSwitch.addDateFormat(DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM));
 

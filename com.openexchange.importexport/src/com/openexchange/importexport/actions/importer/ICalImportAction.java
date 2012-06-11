@@ -47,50 +47,26 @@
  *
  */
 
-package com.openexchange.groupware.importexport;
+package com.openexchange.importexport.actions.importer;
 
-import java.io.InputStream;
-import java.util.List;
-import java.util.Map;
-import com.openexchange.exception.OXException;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.importexport.formats.Format;
+import com.openexchange.importexport.importers.ICalImporter;
+import com.openexchange.importexport.importers.Importer;
 
-/**
- * This interface defines an importer, meaning a class able to
- * import one or more data formats into the OX.
- *
- * @author Tobias Prinz, mailto:tobias.prinz@open-xchange.com
- *
- */
-public interface Importer {
+public class ICalImportAction extends AbstractImportAction {
 
-	/**
-	 *
-	 * @param sessObj: Session object enabling us to check write access.
-	 * @param format: Format of the data that is meant to be imported
-	 * @param folders: Those folders the data is meant to be imported int
-	 * @param optionalParams: Params that might be needed by a specific implementor of this interface. Note: The format was chosen to be congruent with HTTP-GET
-	 * @return true, if this importer can import this format for this module; false otherwise
-	 * @see com.openexchange.groupware.Types
-	 */
-	public abstract boolean canImport(ServerSession sessObj, Format format, List<String> folders, Map<String, String[]> optionalParams) throws OXException;
+	private Importer importer;
 
-	/**
-	 *
-	 * @param sessObj: session object enabling us to check access rights (write rights needed)
-	 * @param format: Format of the data to be imported
-	 * @param is: InputStream containing data to be imported
-	 * @param folders: Identifiers for folders (plus their type as int) - usually only one, but iCal may need two and future extensions might need even more (remember: Folders can have only one type, so type is not a necessary argument)
-	 * @param optionalParams: Params that might be needed by a specific implementor of this interface. Note: The format was chosen to be congruent with HTTP-GET
-	 * @return
-	 * @throws OXException
-	 * @see com.openexchange.groupware.Types
-	 */
-	public abstract List<ImportResult> importData(
-			ServerSession sessObj,
-			Format format,
-			InputStream is,
-			List<String> folders,
-			Map<String, String[]> optionalParams ) throws OXException;
+	@Override
+	public Format getFormat() {
+		return Format.ICAL;
+	}
+
+	@Override
+	public Importer getImporter() {
+		if(importer == null)
+			importer = new ICalImporter();
+		return importer;
+	}
 
 }

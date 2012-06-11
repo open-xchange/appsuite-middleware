@@ -47,62 +47,41 @@
  *
  */
 
-package com.openexchange.groupware.importexport;
+package com.openexchange.importexport.actions.exporter;
 
-import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.I2i;
+
+import java.util.List;
+
+import com.openexchange.ajax.container.FileHolder;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.Types;
-import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.importexport.exporters.Exporter;
+import com.openexchange.importexport.formats.Format;
+import com.openexchange.importexport.helpers.SizedInputStream;
+import com.openexchange.importexport.json.ExportRequest;
+import com.openexchange.tools.session.ServerSession;
 
-/**
- * This sad little class translates has the sad little task to translate between different constants that are used to identify types of
- * modules. So, in case yo
- *
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
- */
-public final class ModuleTypeTranslator {
+public abstract class AbstractExportAction implements AJAXActionService {
 
-    private ModuleTypeTranslator() {
-        super();
-    }
+	@Override
+	public AJAXRequestResult perform(AJAXRequestData requestData,
+			ServerSession session) throws OXException {
+		return perform(new ExportRequest(requestData, session));
+	}
 
-    /**
-     * Translates a FolderObject value to a Types value.
-     */
-    public static int getTypesConstant(final int folderObjectConstant) throws OXException {
-        switch (folderObjectConstant) {
-        case FolderObject.CONTACT:
-            return Types.CONTACT;
-        case FolderObject.INFOSTORE:
-            return Types.INFOSTORE;
-        case FolderObject.MAIL:
-            return Types.EMAIL;
-        case FolderObject.TASK:
-            return Types.TASK;
-        case FolderObject.CALENDAR:
-            return Types.APPOINTMENT;
-        default:
-            throw ImportExportExceptionCodes.NO_TYPES_CONSTANT.create(I(folderObjectConstant));
-        }
-    }
+	public abstract Format getFormat();
 
-    /**
-     * Translates a Types value to a FolderObject value
-     */
-    public static int getFolderObjectConstant(final int typeConstant) throws OXException {
-        switch (typeConstant) {
-        case Types.CONTACT:
-            return FolderObject.CONTACT;
-        case Types.INFOSTORE:
-            return FolderObject.INFOSTORE;
-        case Types.EMAIL:
-            return FolderObject.MAIL;
-        case Types.TASK:
-            return FolderObject.TASK;
-        case Types.APPOINTMENT:
-            return FolderObject.CALENDAR;
-        default:
-            throw ImportExportExceptionCodes.NO_FOLDEROBJECT_CONSTANT.create(I(typeConstant));
-        }
-    }
+	public abstract Exporter getExporter();
+
+	private AJAXRequestResult perform(ExportRequest req) throws OXException {
+		List<Integer> cols = req.getColumns();
+		SizedInputStream sis = getExporter().exportData(req.getSession(), getFormat(), req.getFolder(), cols != null ? I2i(cols) : null, null);
+				
+		AJAXRequestResult result = new AJAXRequestResult();
+		result.setResultObject(new FileHolder(sis, sis.getSize(), sis.getFormat().getMimeType(), "export."+sis.getFormat().getExtension()), "file");
+		return result;
+	}
 }

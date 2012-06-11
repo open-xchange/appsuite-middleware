@@ -46,21 +46,28 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package com.openexchange.importexport.actions.exporter;
 
-package com.openexchange.groupware.importexport;
+import com.openexchange.ajax.requesthandler.DispatcherNotes;
+import com.openexchange.importexport.exporters.Exporter;
+import com.openexchange.importexport.exporters.ICalExporter;
+import com.openexchange.importexport.formats.Format;
 
-import com.openexchange.exception.OXException;
+@DispatcherNotes(defaultFormat="file")
+public class ICalExportAction extends AbstractExportAction {
 
+	private Exporter exporter;
 
-/**
- * This class contains basic helper methods needed by all importers.
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
- */
-public abstract class AbstractImporter implements Importer {
+	@Override
+	public Format getFormat() {
+		return Format.ICAL;
+	}
 
-    protected AbstractImporter() {
-        super();
-    }
+	@Override
+	public Exporter getExporter() {
+		if(this.exporter == null)
+			this.exporter = new ICalExporter();
+		return this.exporter;
+	}
 
-    protected abstract String getNameForFieldInTruncationError(int id, OXException dataTruncation);
 }

@@ -46,53 +46,28 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package com.openexchange.importexport.actions.importer;
 
-package com.openexchange.ajax.importexport;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.importexport.formats.Format;
+import com.openexchange.importexport.importers.FacebookArchiveImporter;
+import com.openexchange.importexport.importers.Importer;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+public class FacebookArchiveImportAction extends AbstractImportAction implements
+		AJAXActionService {
 
-/**
- * Test suite for iCal tests.
- */
-public final class ICalTestSuite {
+	private Importer importer;
 
-	/**
-	 * @return the suite.
-	 */
-	public static Test suite() {
-		final TestSuite tests = new TestSuite();
-		tests.addTestSuite(ICalImportTest.class);
-		tests.addTestSuite(ICalTaskExportTest.class);
-		tests.addTestSuite(ICalAppointmentExportTest.class);
-		tests.addTestSuite(ICalSeriesTests.class);
-		tests.addTestSuite(Bug6825Test_TruncationOfFields.class);
-		tests.addTestSuite(Bug9840Test.class);
-		tests.addTestSuite(Bug10382Test.class);
-		tests.addTestSuite(Bug11724Test.class);
-		tests.addTestSuite(Bug11868Test.class);
-		tests.addTestSuite(Bug11871Test.class);
-		tests.addTestSuite(Bug11920Test.class);
-		tests.addTestSuite(Bug11996Test.class);
-		tests.addTestSuite(Bug12414Test.class);
-		tests.addTestSuite(Bug12470Test.class);
-		tests.addTestSuite(Bug17393Test.class);
-		tests.addTestSuite(Bug17963Test_DateWithoutTime.class);
-		tests.addTestSuite(Bug19046Test_SeriesWithExtraneousStartDate.class);
-		tests.addTestSuite(Bug19089Test.class);
-		tests.addTestSuite(Bug19463Test_TimezoneOffsetsWith4Digits.class);
-		tests.addTestSuite(Bug19681_TimezoneForUtcProperties.class);
-		tests.addTestSuite(Bug19915Test.class);
-		tests.addTestSuite(Bug20132Test_WrongRecurrenceDatePosition.class);
-		tests.addTestSuite(Bug20405Test_TaskWithoutDueDate.class);
-		tests.addTestSuite(Bug20413Test_CompletelyWrongDTStart.class);
-		tests.addTestSuite(Bug20453Test_emptyDTEND.class);
-		tests.addTestSuite(Bug20498Test_ReminderJumpsAnHour.class);
-		tests.addTestSuite(Bug20715Test_UidIsNotcaseSensitive.class);
-		tests.addTestSuite(Bug20718Test_JumpDuringDstCrossing.class);
-		tests.addTestSuite(Bug20896Test_AlarmsChange.class);
-		tests.addTestSuite(Bug20945Test_UnexpectedError26.class);
-		tests.addTestSuite(Bug22059Test.class);
-		return tests;
+	@Override
+	public Format getFormat() {
+		return Format.FacebookArchive;
 	}
+
+	@Override
+	public Importer getImporter() {
+		if(importer == null)
+			importer = new FacebookArchiveImporter();
+		return importer;
+	}
+
 }

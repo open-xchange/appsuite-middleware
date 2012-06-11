@@ -46,53 +46,53 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package com.openexchange.importexport.actions.importer;
 
-package com.openexchange.ajax.importexport;
+import java.util.List;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.json.JSONException;
 
-/**
- * Test suite for iCal tests.
- */
-public final class ICalTestSuite {
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.importexport.ImportResult;
+import com.openexchange.importexport.formats.Format;
+import com.openexchange.importexport.importers.Importer;
+import com.openexchange.importexport.json.ImportRequest;
+import com.openexchange.importexport.json.ImportWriter;
+import com.openexchange.json.OXJSONWriter;
+import com.openexchange.tools.session.ServerSession;
 
-	/**
-	 * @return the suite.
-	 */
-	public static Test suite() {
-		final TestSuite tests = new TestSuite();
-		tests.addTestSuite(ICalImportTest.class);
-		tests.addTestSuite(ICalTaskExportTest.class);
-		tests.addTestSuite(ICalAppointmentExportTest.class);
-		tests.addTestSuite(ICalSeriesTests.class);
-		tests.addTestSuite(Bug6825Test_TruncationOfFields.class);
-		tests.addTestSuite(Bug9840Test.class);
-		tests.addTestSuite(Bug10382Test.class);
-		tests.addTestSuite(Bug11724Test.class);
-		tests.addTestSuite(Bug11868Test.class);
-		tests.addTestSuite(Bug11871Test.class);
-		tests.addTestSuite(Bug11920Test.class);
-		tests.addTestSuite(Bug11996Test.class);
-		tests.addTestSuite(Bug12414Test.class);
-		tests.addTestSuite(Bug12470Test.class);
-		tests.addTestSuite(Bug17393Test.class);
-		tests.addTestSuite(Bug17963Test_DateWithoutTime.class);
-		tests.addTestSuite(Bug19046Test_SeriesWithExtraneousStartDate.class);
-		tests.addTestSuite(Bug19089Test.class);
-		tests.addTestSuite(Bug19463Test_TimezoneOffsetsWith4Digits.class);
-		tests.addTestSuite(Bug19681_TimezoneForUtcProperties.class);
-		tests.addTestSuite(Bug19915Test.class);
-		tests.addTestSuite(Bug20132Test_WrongRecurrenceDatePosition.class);
-		tests.addTestSuite(Bug20405Test_TaskWithoutDueDate.class);
-		tests.addTestSuite(Bug20413Test_CompletelyWrongDTStart.class);
-		tests.addTestSuite(Bug20453Test_emptyDTEND.class);
-		tests.addTestSuite(Bug20498Test_ReminderJumpsAnHour.class);
-		tests.addTestSuite(Bug20715Test_UidIsNotcaseSensitive.class);
-		tests.addTestSuite(Bug20718Test_JumpDuringDstCrossing.class);
-		tests.addTestSuite(Bug20896Test_AlarmsChange.class);
-		tests.addTestSuite(Bug20945Test_UnexpectedError26.class);
-		tests.addTestSuite(Bug22059Test.class);
-		return tests;
+public abstract class AbstractImportAction implements AJAXActionService {
+
+	@Override
+	public AJAXRequestResult perform(AJAXRequestData requestData,
+			ServerSession session) throws OXException {
+		return perform(new ImportRequest(requestData, session));
 	}
+
+	public abstract Format getFormat();
+
+	public abstract Importer getImporter();
+
+	private AJAXRequestResult perform(ImportRequest req) throws OXException {
+		final List<ImportResult> importResult;
+
+		importResult = getImporter().importData(req.getSession(), getFormat(),
+				req.getImportFileAsStream(), req.getFolders(), null);
+
+		ImportWriter writer;
+		OXJSONWriter jsonWriter = new OXJSONWriter();
+		try {
+			writer = new ImportWriter(jsonWriter, req.getSession());
+			writer.writeObjects(importResult);
+		} catch (JSONException e1) {
+			e1.printStackTrace();
+		}
+		AJAXRequestResult result = new AJAXRequestResult(jsonWriter.getObject());
+		return result;
+
+	}
+
 }
