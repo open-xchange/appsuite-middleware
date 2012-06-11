@@ -281,9 +281,7 @@ public final class StorageAccess implements Serializable {
     public List<MailMessage> allMailsFromIndex(final String fullName) throws OXException, InterruptedException {
         final Map<String, Object> params = new HashMap<String, Object>();
         params.put("accountId", Integer.valueOf(info.accountId));
-        final Builder queryBuilder =
-            new Builder(params).setType(MAIL).setFolder(fullName).setSortField(MailIndexField.RECEIVED_DATE).setOrder(Order.DESC).setHandler(
-                SearchHandler.ALL_REQUEST);
+        final Builder queryBuilder = new Builder(params).setType(MAIL).setFolder(fullName).setHandler(SearchHandler.ALL_REQUEST);
         final IndexResult<MailMessage> indexResult = getIndexAccess().query(queryBuilder.build(), null);
         if (0 >= indexResult.getNumFound()) {
             return Collections.emptyList();

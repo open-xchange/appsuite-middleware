@@ -47,29 +47,44 @@
  *
  */
 
-package com.openexchange.index;
+package com.openexchange.index.solr.groupware;
 
-import com.openexchange.i18n.LocalizableStrings;
-
+import com.openexchange.database.AbstractCreateTableImpl;
 
 /**
- * {@link IndexExceptionMessages}
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link IndexedFoldersCreateTableService}
+ * 
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public final class IndexExceptionMessages implements LocalizableStrings {
+public class IndexedFoldersCreateTableService extends AbstractCreateTableImpl {
 
-    /**
-     * Initializes a new {@link IndexExceptionMessages}.
-     */
-    public IndexExceptionMessages() {
-        super();
+    @Override
+    public String[] requiredTables() {
+        return NO_TABLES;
     }
 
-    // An unexpected error occurred: %1$s
-    public static final String UNEXPECTED_ERROR_MSG = "An unexpected error occurred: %1$s";
-    
-    // An index entry does not exist for folder %1$s in account %2$s.
-    public static final String MISSING_FOLDER_ENTRY_MSG = "An index entry does not exist for folder %1$s in account %2$s.";
-    
+    @Override
+    public String[] tablesToCreate() {
+        // These table names must(!) be returned in the same order as their create statements.
+        return new String[] { "indexedFolders" };
+    }
+
+    @Override
+    protected String[] getCreateStatements() {
+        return new String[] {
+              "CREATE TABLE indexedFolders (" +
+                  "cid int(10) unsigned NOT NULL," +
+                  "uid int(10) unsigned NOT NULL," +
+                  "module int(10) unsigned NOT NULL," +
+                  "account varchar(128) COLLATE utf8_unicode_ci NOT NULL," +
+                  "folder varchar(128) COLLATE utf8_unicode_ci NOT NULL," +
+                  "timestamp bigint(64) NOT NULL," +
+                  "locked`tinyint(1) unsigned NOT NULL," +
+                  "indexed tinyint(1) unsigned NOT NULL," +
+                  "PRIMARY KEY (cid,uid,module,account,folder)," +
+                  "KEY module (cid,uid,module)," +
+                  "KEY account (cid,uid,module,account)" +
+              ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci"
+        };
+    }
 }

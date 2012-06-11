@@ -49,6 +49,9 @@
 
 package com.openexchange.ajp13;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
 /**
  * {@link AJPv13Utility} - Provides some utility methods for AJP processing
  *
@@ -61,6 +64,20 @@ public final class AJPv13Utility {
      */
     private AJPv13Utility() {
         super();
+    }
+
+    /**
+     * Generates URL-encoding of specified text.
+     * 
+     * @param text The text
+     * @return The URL-encoded text
+     */
+    public static String urlEncode(final String text) {
+        try {
+            return URLEncoder.encode(text, "iso-8859-1");
+        } catch (final UnsupportedEncodingException e) {
+            return text;
+        }
     }
 
     /**

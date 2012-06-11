@@ -51,9 +51,9 @@ package com.openexchange.index.solr.internal;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
@@ -64,13 +64,15 @@ import com.openexchange.index.solr.internal.mail.MailSolrIndexAccess;
 import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.solr.SolrCoreIdentifier;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link SolrIndexFacadeService} - The Solr {@link IndexFacadeService} implementation.
  * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class SolrIndexFacadeService implements IndexFacadeService {	
+public class SolrIndexFacadeService implements IndexFacadeService {
     
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SolrIndexFacadeService.class));
 	
@@ -87,6 +89,8 @@ public class SolrIndexFacadeService implements IndexFacadeService {
      * An index access will be released after being unused for this time whether it's still referenced or not.
      */
     private static final long HARD_TIMEOUT = 60;
+
+    private ScheduledTimerTask timerTask;
 	
 
     /**
@@ -98,8 +102,8 @@ public class SolrIndexFacadeService implements IndexFacadeService {
     }
     
     public void init() {
-        final Timer timer = new Timer();
-        timer.scheduleAtFixedRate(new TimerTask() {
+        TimerService timerService = Services.getService(TimerService.class);
+        timerTask = timerService.scheduleAtFixedRate(new TimerTask() { 
             
             @Override
             public void run() {
@@ -107,8 +111,8 @@ public class SolrIndexFacadeService implements IndexFacadeService {
                     final List<AbstractSolrIndexAccess<?>> accessList = getCachedAccesses();
                     final List<SolrCoreIdentifier> identifiers = new ArrayList<SolrCoreIdentifier>();
                     final long now = System.currentTimeMillis();
-                    final long softBarrier = now - (SOFT_TIMEOUT * 60000);
-                    final long hardBarrier = now - (HARD_TIMEOUT * 60000);
+                    final long softBarrier = now - (TimeUnit.MINUTES.toMillis(SOFT_TIMEOUT));
+                    final long hardBarrier = now - (TimeUnit.MINUTES.toMillis(HARD_TIMEOUT));
                     for (final AbstractSolrIndexAccess<?> access : accessList) {
                         final long lastAccess = access.getLastAccess();
                         if ((lastAccess < softBarrier && !access.isRetained()) || lastAccess < hardBarrier) {
@@ -127,12 +131,22 @@ public class SolrIndexFacadeService implements IndexFacadeService {
                         }
                         LOG.debug(sb.toString());
                     }
-                } catch (final Exception e) {
+                } catch (final Throwable e) {
                     LOG.error("Exception during timer task execution: " + e.getMessage(), e);
                 }
                 
             }
-        }, SOFT_TIMEOUT * 60000, SOFT_TIMEOUT * 60000);
+        }, SOFT_TIMEOUT, SOFT_TIMEOUT, TimeUnit.MINUTES);
+    }
+    
+    public void shutDown() {
+        if (timerTask != null) {
+            timerTask.cancel();
+        }
+        
+        for (AbstractSolrIndexAccess<?> access : accessMap.values()) {
+            access.releaseCore();
+        }
     }
 	
     @SuppressWarnings("unchecked")
