@@ -60,6 +60,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.junit.Test;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
@@ -979,6 +981,24 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     public FileStorageAccountManagerProvider getProvider() {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override
+    protected EventAdmin getEventAdmin() {
+        return new EventAdmin() {
+            
+            @Override
+            public void sendEvent(Event arg0) {
+                // TODO Auto-generated method stub
+                
+            }
+            
+            @Override
+            public void postEvent(Event arg0) {
+                // TODO Auto-generated method stub
+                
+            }
+        };
     }
 
 }

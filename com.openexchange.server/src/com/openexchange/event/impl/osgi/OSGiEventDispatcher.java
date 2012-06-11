@@ -74,7 +74,7 @@ import com.openexchange.session.Session;
 /**
  * Grabs events from the OSGi Event Admin and disseminates them to server listeners. Only handles appointments, and has to be extended once
  * needed.
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class OSGiEventDispatcher implements EventHandlerRegistration, EventDispatcher {
@@ -202,42 +202,43 @@ public class OSGiEventDispatcher implements EventHandlerRegistration, EventDispa
     public void handleEvent(final Event event) {
         try {
             final CommonEvent commonEvent = (CommonEvent) event.getProperty(CommonEvent.EVENT_KEY);
+            if (commonEvent != null) {
+                final Object actionObj = commonEvent.getActionObj();
+                final Object oldObj = commonEvent.getOldObj();
+                final Session session = commonEvent.getSession();
 
-            final Object actionObj = commonEvent.getActionObj();
-            final Object oldObj = commonEvent.getOldObj();
-            final Session session = commonEvent.getSession();
-
-            final int module = commonEvent.getModule();
-            final int action = commonEvent.getAction();
-            if (Types.APPOINTMENT == module) {
-                if (CommonEvent.INSERT == action) {
-                    created((Appointment) actionObj, session);
-                } else if (CommonEvent.UPDATE == action || CommonEvent.MOVE == action) {
-                    modified((Appointment) oldObj, (Appointment) actionObj, session);
-                } else if (CommonEvent.DELETE == action) {
-                    deleted((Appointment) actionObj, session);
-                } else if (CommonEvent.CONFIRM_ACCEPTED == action) {
-                    accepted((Appointment) actionObj, session);
-                } else if (CommonEvent.CONFIRM_DECLINED == action) {
-                    declined((Appointment) actionObj, session);
-                } else if (CommonEvent.CONFIRM_TENTATIVE == action) {
-                    tentativelyAccepted((Appointment) actionObj, session);
-                } else if (CommonEvent.CONFIRM_WAITING == action) {
-                    waiting((Appointment) actionObj, session);
-                }
-            } else if (Types.TASK == module) {
-                if (CommonEvent.INSERT == action) {
-                    created((Task) actionObj, session);
-                } else if (CommonEvent.UPDATE == action || CommonEvent.MOVE == action) {
-                    modified((Task) oldObj, (Task) actionObj, session);
-                } else if (CommonEvent.DELETE == action) {
-                    deleted((Task) actionObj, session);
-                } else if (CommonEvent.CONFIRM_ACCEPTED == action) {
-                    accepted((Task) oldObj, (Task) actionObj, session);
-                } else if (CommonEvent.CONFIRM_DECLINED == action) {
-                    declined((Task) oldObj, (Task) actionObj, session);
-                } else if (CommonEvent.CONFIRM_TENTATIVE == action) {
-                    tentativelyAccepted((Task) oldObj, (Task) actionObj, session);
+                final int module = commonEvent.getModule();
+                final int action = commonEvent.getAction();
+                if (Types.APPOINTMENT == module) {
+                    if (CommonEvent.INSERT == action) {
+                        created((Appointment) actionObj, session);
+                    } else if (CommonEvent.UPDATE == action || CommonEvent.MOVE == action) {
+                        modified((Appointment) oldObj, (Appointment) actionObj, session);
+                    } else if (CommonEvent.DELETE == action) {
+                        deleted((Appointment) actionObj, session);
+                    } else if (CommonEvent.CONFIRM_ACCEPTED == action) {
+                        accepted((Appointment) actionObj, session);
+                    } else if (CommonEvent.CONFIRM_DECLINED == action) {
+                        declined((Appointment) actionObj, session);
+                    } else if (CommonEvent.CONFIRM_TENTATIVE == action) {
+                        tentativelyAccepted((Appointment) actionObj, session);
+                    } else if (CommonEvent.CONFIRM_WAITING == action) {
+                        waiting((Appointment) actionObj, session);
+                    }
+                } else if (Types.TASK == module) {
+                    if (CommonEvent.INSERT == action) {
+                        created((Task) actionObj, session);
+                    } else if (CommonEvent.UPDATE == action || CommonEvent.MOVE == action) {
+                        modified((Task) oldObj, (Task) actionObj, session);
+                    } else if (CommonEvent.DELETE == action) {
+                        deleted((Task) actionObj, session);
+                    } else if (CommonEvent.CONFIRM_ACCEPTED == action) {
+                        accepted((Task) oldObj, (Task) actionObj, session);
+                    } else if (CommonEvent.CONFIRM_DECLINED == action) {
+                        declined((Task) oldObj, (Task) actionObj, session);
+                    } else if (CommonEvent.CONFIRM_TENTATIVE == action) {
+                        tentativelyAccepted((Task) oldObj, (Task) actionObj, session);
+                    }
                 }
             }
         } catch (final Exception e) {

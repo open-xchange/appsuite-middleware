@@ -47,17 +47,34 @@
  *
  */
 
-package com.openexchange.event.impl;
+package com.openexchange.file.storage;
 
-import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.session.Session;
 
-public interface InfostoreEventInterface {
+/**
+ * {@link FileStorageEventConstants}
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ */
+public class FileStorageEventConstants {
+    
+    public static final String UPDATE_TOPIC = "com/openexchange/groupware/infostore/update";
 
-	public void infoitemCreated(DocumentMetadata metadata, Session sessionObject);
+    public static final String CREATE_TOPIC = "com/openexchange/groupware/infostore/insert";
 
-	public void infoitemModified(DocumentMetadata metadata, Session sessionObject);
-
-	public void infoitemDeleted(DocumentMetadata metadata, Session sessionObject);
-
+    public static final String DELETE_TOPIC = "com/openexchange/groupware/infostore/delete";
+    
+    public static final String ALL_TOPICS = "com/openexchange/groupware/infostore/*";
+    
+    public static final String SESSION = "session";
+    
+    public static final String SERVICE = "service";
+    
+    public static final String ACCOUNT_ID = "accountId";
+    
+    public static final String FOLDER_ID = "folderId";
+    
+    public static final String OBJECT_ID = "objectId";
+    
+    public static final String VERSIONS = "versions";
+    
 }

@@ -47,43 +47,35 @@
  *
  */
 
-package com.openexchange.groupware.links.osgi;
+package com.openexchange.index.solr.internal.filestore;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.event.EventConstants;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
-import com.openexchange.file.storage.FileStorageEventConstants;
-import com.openexchange.groupware.links.LinksEventHandler;
+import com.openexchange.file.storage.FileStorageEventHelper;
+
 
 /**
- * {@link LinkActivator}
+ * {@link SolrFilestoreEventHandler}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class LinkActivator implements BundleActivator {
-
-    private ServiceRegistration<EventHandler> linksHandlerRegistration;
+public class SolrFilestoreEventHandler implements EventHandler {
     
-
-    public LinkActivator() {
-        super();
-    }
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SolrFilestoreEventHandler.class));
 
     @Override
-    public void start(final BundleContext context) throws Exception {
-        Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
-        serviceProperties.put(EventConstants.EVENT_TOPIC, FileStorageEventConstants.ALL_TOPICS);
-        linksHandlerRegistration = context.registerService(EventHandler.class, new LinksEventHandler(), serviceProperties);
+    public void handleEvent(Event event) {
+        if (FileStorageEventHelper.isInfostoreEvent(event)) {
+            if (FileStorageEventHelper.isCreateEvent(event)) {
+                LOG.info(FileStorageEventHelper.createDebugMessage("CreateEvent", event));
+            } else if (FileStorageEventHelper.isUpdateEvent(event)) {
+                LOG.info(FileStorageEventHelper.createDebugMessage("UpdateEvent", event));
+            } else if (FileStorageEventHelper.isDeleteEvent(event)) {
+                LOG.info(FileStorageEventHelper.createDebugMessage("DeleteEvent", event));
+            }
+        }        
     }
 
-    @Override
-    public void stop(final BundleContext context) throws Exception {
-        if (linksHandlerRegistration != null) {
-            linksHandlerRegistration.unregister();
-        }
-    }
 }

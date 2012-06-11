@@ -10,6 +10,7 @@ Import-Package: com.openexchange.config,
  com.openexchange.database,
  com.openexchange.database.provider,
  com.openexchange.exception,
+ com.openexchange.file.storage,
  com.openexchange.groupware,
  com.openexchange.groupware.contexts,
  com.openexchange.groupware.delete,
@@ -68,6 +69,7 @@ Import-Package: com.openexchange.config,
  org.apache.solr.common,
  org.apache.solr.common.params,
  org.eclipse.osgi.framework.console;version="1.1.0",
- org.osgi.framework
+ org.osgi.framework,
+ org.osgi.service.event;version="1.3.0"
 Export-Package: com.openexchange.index.solr,
  com.openexchange.index.solr.mail
