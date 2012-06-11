@@ -1,6 +1,7 @@
 * 2012-06-11 - jan.bauerdick@open-xchange.com
 
- - Refactoring, register RMI as OSGi-service
+ - Refactored to run in groupware VM
+ - Register RMI as OSGi-service
 
 * 2011-03-01 - marcus.klein@open-xchange.com
 

@@ -96,8 +96,8 @@ public abstract class OXResellerStorageInterface {
     public static OXResellerStorageInterface getInstance() throws StorageException {
         synchronized (OXResellerStorageInterface.class) {
             if (null == implementingClass) {
-                cache = ClientAdminThreadExtended.cache;
-                prop = cache.getProperties();
+//                cache = ClientAdminThreadExtended.cache;
+//                prop = cache.getProperties();
                 final String className = prop.getProp(PropertyHandlerExtended.RESELLER_STORAGE, null);
                 if (null != className) {
                     try {
