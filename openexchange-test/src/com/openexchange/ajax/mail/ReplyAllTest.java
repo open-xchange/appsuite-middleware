@@ -59,8 +59,10 @@ import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.mail.contenttypes.MailContentType;
+import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.search.ContactSearchObject;
 
 
 /**
@@ -94,7 +96,13 @@ public class ReplyAllTest extends AbstractReplyTest {
         final String mail1 = client1.getValues().getSendAddress(); // note: doesn't work the other way around on the dev system, because only the
         final String mail2 = client2.getValues().getSendAddress(); // first account is set up correctly.
 
-        final List<Contact> otherContacts = extract(2, contactManager.searchAction("*", 6), Arrays.asList(mail1,mail2));
+        final List<Contact> otherContacts;
+        {
+            final ContactSearchObject searchObject = new ContactSearchObject();
+            searchObject.setEmail1("*" + AJAXConfig.getProperty(AJAXConfig.Property.CONTEXTNAME)+"*");
+            searchObject.addFolder(6);
+            otherContacts = extract(2, contactManager.searchAction(searchObject), Arrays.asList(mail1,mail2));
+        }
         assertTrue("Precondition: This test needs at least two other contacts in the global address book to work, but has "+otherContacts.size(), otherContacts.size() > 1);
 
         this.client = client2;

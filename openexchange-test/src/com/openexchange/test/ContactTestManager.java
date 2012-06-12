@@ -51,7 +51,6 @@ package com.openexchange.test;
 
 import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.fail;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -61,9 +60,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.Vector;
-
 import junit.framework.TestCase;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
@@ -71,7 +68,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
-
 import com.openexchange.ajax.contact.action.AdvancedSearchRequest;
 import com.openexchange.ajax.contact.action.AllRequest;
 import com.openexchange.ajax.contact.action.ContactUpdatesResponse;
@@ -271,7 +267,7 @@ public class ContactTestManager implements TestManager {
     /**
      * Updates a contact via HTTP-API and returns the same contact for convenience
      */
-    public Contact updateAction(int inFolder, final Contact contact) {
+    public Contact updateAction(final int inFolder, final Contact contact) {
         final UpdateRequest request = new UpdateRequest(inFolder, contact, true);
         try {
             lastResponse = getClient().execute(request, getSleep());
@@ -586,11 +582,15 @@ public class ContactTestManager implements TestManager {
             getContactParser().parse(contactObject, jsonObject);
             
             if (null != contactObject.getImage1()) {
-            	String image1 = new String(contactObject.getImage1());
+            	final String image1 = new String(contactObject.getImage1());
             	if (0 < image1.length() && image1.contains("image")) {
             		// interpret as image url, download real image            		
-        			contactObject.setImage1(loadImage(image1));
-        			contactObject.setNumberOfImages(1);
+            		try {
+                        contactObject.setImage1(loadImage(image1));
+                        contactObject.setNumberOfImages(1);
+                    } catch (final Exception e) {
+                        // Ignore possible error during download attempt
+                    }
             	}            	
             }            
             contacts.add(contactObject);
@@ -598,23 +598,23 @@ public class ContactTestManager implements TestManager {
         return contacts;
     }
 
-    private byte[] loadImage(String imageURL) throws OXException {
+    private byte[] loadImage(final String imageURL) throws OXException {
         InputStream inputStream = null;
         try {
-            AJAXSession ajaxSession = getClient().getSession();
-            HttpGet httpRequest = new HttpGet(getClient().getProtocol() + "://" + getClient().getHostname() + imageURL);
-            HttpResponse httpResponse = ajaxSession.getHttpClient().execute(httpRequest);
+            final AJAXSession ajaxSession = getClient().getSession();
+            final HttpGet httpRequest = new HttpGet(getClient().getProtocol() + "://" + getClient().getHostname() + imageURL);
+            final HttpResponse httpResponse = ajaxSession.getHttpClient().execute(httpRequest);
             inputStream = httpResponse.getEntity().getContent();
-            int len = 8192;
-            byte[] buf = new byte[len];
-            ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(len << 2);
+            final int len = 8192;
+            final byte[] buf = new byte[len];
+            final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(len << 2);
             for (int read; (read = inputStream.read(buf, 0, len)) > 0;) {
                 out.write(buf, 0, read);
             }
             return out.toByteArray();
-        } catch (ClientProtocolException e) {
+        } catch (final ClientProtocolException e) {
         	throw new OXException(e);
-		} catch (IOException e) {
+		} catch (final IOException e) {
         	throw new OXException(e);
 		} finally {
             if (null != inputStream) {
