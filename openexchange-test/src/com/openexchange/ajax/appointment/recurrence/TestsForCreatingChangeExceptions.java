@@ -53,6 +53,7 @@ import com.openexchange.ajax.user.UserResolver;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.Changes;
 import com.openexchange.groupware.container.Expectations;
 import com.openexchange.groupware.container.Participant;
@@ -310,6 +311,25 @@ public class TestsForCreatingChangeExceptions extends ManagedAppointmentTest {
         changes.put(Appointment.END_DATE, D("3/1/2008 24:00", utc));
 
         negativeAssertionOnChangeException.check(app, changes, OXCalendarExceptionCodes.UNABLE_TO_CALCULATE_POSITION.create());
+    }
+
+    public void testShouldSilentlyIgnoreNumberOfAttachmentsOnExceptionCreation() throws OXException {
+        Appointment app = generateDailyAppointment();
+        app.setOccurrence(3);
+        
+        calendarManager.insert(app);
+        
+        Appointment changeEx = calendarManager.createIdentifyingCopy(app);
+        changeEx.setNumberOfAttachments(23);
+        changeEx.setRecurrencePosition(2);
+        changeEx.setTitle("Bla");
+        changeEx.setRecurrenceType(CalendarObject.NO_RECURRENCE);
+        calendarManager.update(changeEx);
+        
+        
+        Appointment loaded = calendarManager.get(changeEx);
+        
+        assertEquals(0, loaded.getNumberOfAttachments());
     }
 
 }
