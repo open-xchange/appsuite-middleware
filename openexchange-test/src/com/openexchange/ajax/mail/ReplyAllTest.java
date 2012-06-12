@@ -58,6 +58,7 @@ import org.json.JSONObject;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
+import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.contenttypes.MailContentType;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
@@ -91,6 +92,12 @@ public class ReplyAllTest extends AbstractReplyTest {
     public void testShouldReplyToSenderAndAllRecipients() throws OXException, IOException, SAXException, JSONException, OXException {
         final AJAXClient client1 = new AJAXClient(User.User1);
         final AJAXClient client2 = new AJAXClient(User.User2);
+        {
+            String folder = client2.getValues().getInboxFolder();
+            Executor.execute(client2.getSession(), new com.openexchange.ajax.mail.actions.ClearRequest(folder).setHardDelete(true));
+            folder = client2.getValues().getSentFolder();
+            Executor.execute(client2.getSession(), new com.openexchange.ajax.mail.actions.ClearRequest(folder).setHardDelete(true));
+        }
 
 
         final String mail1 = client1.getValues().getSendAddress(); // note: doesn't work the other way around on the dev system, because only the
