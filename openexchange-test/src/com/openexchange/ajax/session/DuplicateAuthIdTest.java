@@ -57,6 +57,7 @@ import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.session.actions.LoginRequest;
 import com.openexchange.ajax.session.actions.LoginResponse;
 import com.openexchange.configuration.AJAXConfig;
+import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.sessiond.SessionExceptionCodes;
 
@@ -87,14 +88,14 @@ public class DuplicateAuthIdTest extends TestCase {
         sameAuthId = LoginTools.generateAuthId();
         final AJAXSession session1 = new AJAXSession();
         client1 = new AJAXClient(session1);
-        login1 = AJAXConfig.getProperty(User1.getLogin());
+        login1 = AJAXConfig.getProperty(User1.getLogin()) + "@" + AJAXConfig.getProperty(Property.CONTEXTNAME);
         password1 = AJAXConfig.getProperty(User1.getPassword());
         LoginResponse response = client1.execute(new LoginRequest(login1, password1, sameAuthId, LoginTest.class.getName(), "6.15.0"));
         session1.setId(response.getSessionId());
         session2 = new AJAXSession();
         session2.getConversation().putCookie("JSESSIONID", session1.getConversation().getCookieValue("JSESSIONID"));
         client2 = new AJAXClient(session2);
-        login2 = AJAXConfig.getProperty(User2.getLogin());
+        login2 = AJAXConfig.getProperty(User2.getLogin()) + "@" + AJAXConfig.getProperty(Property.CONTEXTNAME);;
         password2 = AJAXConfig.getProperty(User2.getPassword());
     }
 
