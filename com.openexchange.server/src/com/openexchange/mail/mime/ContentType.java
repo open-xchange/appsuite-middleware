@@ -415,7 +415,7 @@ public class ContentType extends ParameterizedHeader {
                     if (isInvalidToken(st)) {
                         throw MailExceptionCode.INVALID_CONTENT_TYPE.create(contentType);
                     }
-                    if (st.length() <= 0) {
+                    if (st.trim().length() <= 0) {
                         if ("multipart".equals(primaryType)) {
                             subType = "mixed";
                         } else if ("text".equals(primaryType)) {
