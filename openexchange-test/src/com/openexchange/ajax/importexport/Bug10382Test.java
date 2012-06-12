@@ -101,6 +101,7 @@ public class Bug10382Test extends AbstractAJAXSession {
             false));
         assertTrue("ICal imported without permissions.", response.hasError());
         final OXException exception = response.getException();
+        assertNotNull("Expected exception but got nothing.", exception);
         assertTrue(exception.similarTo(ImportExportExceptionCodes.NO_IMPORTER));
     }
 }
