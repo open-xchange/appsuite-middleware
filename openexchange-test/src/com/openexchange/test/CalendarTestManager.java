@@ -53,6 +53,7 @@ import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
 import static com.openexchange.java.Autoboxing.i2I;
 import static junit.framework.Assert.fail;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -60,8 +61,10 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
+
 import org.json.JSONException;
 import org.xml.sax.SAXException;
+
 import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.ConfirmRequest;
@@ -501,6 +504,10 @@ public class CalendarTestManager implements TestManager {
         }
     }
 
+    public List<Appointment> getCreatedEntities() {
+    	return this.createdEntities;
+    }
+    
     /*
      * Helper methods
      */
