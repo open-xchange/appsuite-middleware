@@ -49,26 +49,40 @@
 
 package com.openexchange.index.solr;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.client.solrj.response.UpdateResponse;
+import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.params.SolrParams;
+import com.openexchange.exception.OXException;
+import com.openexchange.index.solr.internal.filestore.SolrFilestoreIndexAccess;
+import com.openexchange.solr.SolrCoreIdentifier;
 
 
 /**
- * {@link UnitTests}
+ * {@link MockSolrFilestoreIndexAccess}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class UnitTests {
+public class MockSolrFilestoreIndexAccess extends SolrFilestoreIndexAccess {
     
-    public UnitTests() {
-        super();
+    private final InMemoryIndex executor;
+
+    /**
+     * Initializes a new {@link MockSolrFilestoreIndexAccess}.
+     */
+    public MockSolrFilestoreIndexAccess() {
+        super(new SolrCoreIdentifier(1, 1, 1));
+        executor = new InMemoryIndex(0);
     }
     
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(MailSolrIndexAccessTest.class);
-        tests.addTestSuite(AddressComparatorTest.class);
-        return tests;
+    @Override
+    protected QueryResponse query(SolrParams query) throws OXException {
+        return executor.query(query);
+    }
+    
+    @Override
+    protected UpdateResponse addDocument(SolrInputDocument document) throws OXException {
+        return executor.addDocument(document);
     }
 
 }

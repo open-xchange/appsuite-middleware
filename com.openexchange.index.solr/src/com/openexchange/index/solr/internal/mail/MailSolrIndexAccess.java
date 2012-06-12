@@ -402,35 +402,9 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
     @Override
     public IndexResult<MailMessage> query(QueryParameters parameters, Set<? extends IndexField> fields) throws OXException {
         Set<SolrMailField> solrFields = convertAndCheckFields(parameters, fields);
-        List<IndexDocument<MailMessage>> mails = new ArrayList<IndexDocument<MailMessage>>();
         SolrQuery solrQuery = buildSolrQuery(parameters);
         setFieldList(solrQuery, solrFields);
-        int off = parameters.getOff();
-        int len = parameters.getLen();
-        int fetched = 0;
-        int maxRows = len;
-        if (maxRows > QUERY_ROWS) {
-            maxRows = QUERY_ROWS;
-        }
-        do {
-            solrQuery.setStart(off);
-            if ((fetched + maxRows) > len) {
-                maxRows = (len - fetched);
-            }
-            solrQuery.setRows(maxRows);
-            QueryResponse queryResponse = query(solrQuery);
-            SolrDocumentList results = queryResponse.getResults();
-            for (SolrDocument document : results) {
-                mails.add(helper.readDocument(document, MailFillers.allFillers()));
-            }
-
-            if (results.size() < maxRows) {
-                break;
-            }
-            
-            fetched += maxRows;
-            off += maxRows;
-        } while (fetched < len);
+        List<IndexDocument<MailMessage>> mails = queryChunkWise(new SolrMailMessageConverter(), solrQuery, parameters.getOff(), parameters.getLen(), QUERY_ROWS);
         
         if (mails.isEmpty()) {
             return Indexes.emptyResult();

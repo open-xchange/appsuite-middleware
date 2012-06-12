@@ -8,6 +8,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.config,
  com.openexchange.database,
  com.openexchange.exception,
+ com.openexchange.file.storage,
  com.openexchange.i18n,
  com.openexchange.mail,
  com.openexchange.osgi,
@@ -16,4 +17,5 @@ Import-Package: com.openexchange.config,
  org.apache.commons.logging,
  org.osgi.framework
 Export-Package: com.openexchange.index,
+ com.openexchange.index.filestore,
  com.openexchange.index.mail

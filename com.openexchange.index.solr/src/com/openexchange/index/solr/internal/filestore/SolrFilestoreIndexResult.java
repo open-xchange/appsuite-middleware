@@ -47,28 +47,43 @@
  *
  */
 
-package com.openexchange.index.solr;
+package com.openexchange.index.solr.internal.filestore;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.util.List;
+import com.openexchange.file.storage.File;
+import com.openexchange.index.IndexDocument;
+import com.openexchange.index.IndexResult;
 
 
 /**
- * {@link UnitTests}
+ * {@link SolrFilestoreIndexResult}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class UnitTests {
+public class SolrFilestoreIndexResult implements IndexResult<File> {
+
+    private final int numFound;
     
-    public UnitTests() {
+    private final List<IndexDocument<File>> results;
+
+    
+    /**
+     * Initializes a new {@link SolrFilestoreIndexResult}.
+     */
+    public SolrFilestoreIndexResult(int numFound, List<IndexDocument<File>> results) {
         super();
+        this.numFound = numFound;
+        this.results = results;
     }
-    
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(MailSolrIndexAccessTest.class);
-        tests.addTestSuite(AddressComparatorTest.class);
-        return tests;
+
+    @Override
+    public int getNumFound() {
+        return numFound;
+    }
+
+    @Override
+    public List<IndexDocument<File>> getResults() {
+        return results;
     }
 
 }

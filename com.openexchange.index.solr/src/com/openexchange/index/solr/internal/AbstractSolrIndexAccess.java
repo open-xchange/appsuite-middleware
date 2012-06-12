@@ -49,21 +49,27 @@
 
 package com.openexchange.index.solr.internal;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrResponse;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.UpdateResponse;
+import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.SolrParams;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexAccess;
+import com.openexchange.index.IndexDocument;
 import com.openexchange.index.solr.IndexFolderManager;
 import com.openexchange.solr.SolrAccessService;
 import com.openexchange.solr.SolrCoreIdentifier;
@@ -232,6 +238,36 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
         final SolrAccessService accessService = Services.getService(SolrAccessService.class);        
         final QueryResponse response = accessService.query(identifier, query);
         return response;
+    }
+    
+    protected List<IndexDocument<V>> queryChunkWise(SolrResultConverter<V> converter, SolrQuery solrQuery, int off, int len, int chunkSize) throws OXException {
+        List<IndexDocument<V>> indexDocuments = new ArrayList<IndexDocument<V>>();
+        int fetched = 0;
+        int maxRows = len;
+        if (maxRows > chunkSize) {
+            maxRows = chunkSize;
+        }
+        do {
+            solrQuery.setStart(off);
+            if ((fetched + maxRows) > len) {
+                maxRows = (len - fetched);
+            }
+            solrQuery.setRows(maxRows);
+            QueryResponse queryResponse = query(solrQuery);
+            SolrDocumentList results = queryResponse.getResults();
+            for (SolrDocument document : results) {
+                indexDocuments.add(converter.convert(document));
+            }
+
+            if (results.size() < maxRows) {
+                break;
+            }
+            
+            fetched += maxRows;
+            off += maxRows;
+        } while (fetched < len);
+        
+        return indexDocuments;
     }
 
 }

@@ -47,28 +47,26 @@
  *
  */
 
-package com.openexchange.index.solr;
+package com.openexchange.index.solr.internal.mail;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.apache.solr.common.SolrDocument;
+import com.openexchange.exception.OXException;
+import com.openexchange.index.IndexDocument;
+import com.openexchange.index.solr.internal.SolrResultConverter;
+import com.openexchange.mail.dataobjects.MailMessage;
 
 
 /**
- * {@link UnitTests}
+ * {@link SolrMailMessageConverter}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class UnitTests {
-    
-    public UnitTests() {
-        super();
-    }
-    
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(MailSolrIndexAccessTest.class);
-        tests.addTestSuite(AddressComparatorTest.class);
-        return tests;
+public class SolrMailMessageConverter implements SolrResultConverter<MailMessage> {
+
+    @Override
+    public IndexDocument<MailMessage> convert(SolrDocument document) throws OXException {
+        IndexDocument<MailMessage> converted = SolrInputDocumentHelper.getInstance().readDocument(document, MailFillers.allFillers());
+        return converted;
     }
 
 }

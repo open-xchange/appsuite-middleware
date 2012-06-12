@@ -49,26 +49,33 @@
 
 package com.openexchange.index.solr;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.common.params.SolrParams;
+import com.openexchange.exception.OXException;
+import com.openexchange.index.solr.internal.mail.MailSolrIndexAccess;
+import com.openexchange.solr.SolrCoreIdentifier;
 
-
-/**
- * {@link UnitTests}
- *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- */
-public class UnitTests {
+public class MockMailSolrIndexAccess extends MailSolrIndexAccess {
     
-    public UnitTests() {
-        super();
+    private final InMemoryIndex executor;
+    
+    /**
+     * Initializes a new {@link MockMailSolrIndexAccess}.
+     * @param identifier
+     * @param triggerType
+     */
+    public MockMailSolrIndexAccess(int docs) {
+        super(new SolrCoreIdentifier(1, 1, 1));
+        executor = new InMemoryIndex(docs);
     }
     
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(MailSolrIndexAccessTest.class);
-        tests.addTestSuite(AddressComparatorTest.class);
-        return tests;
+    public static int getQueryRows() {
+        return QUERY_ROWS;
     }
-
+    
+    @Override
+    protected QueryResponse query(SolrParams query) throws OXException {
+        return executor.query(query);
+    }
+    
 }

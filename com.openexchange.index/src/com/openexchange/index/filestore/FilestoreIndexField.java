@@ -47,28 +47,50 @@
  *
  */
 
-package com.openexchange.index.solr;
+package com.openexchange.index.filestore;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import com.openexchange.index.IndexField;
+import com.openexchange.file.storage.File.Field;
 
 
 /**
- * {@link UnitTests}
+ * {@link FilestoreIndexField}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class UnitTests {
+public enum FilestoreIndexField implements IndexField {
     
-    public UnitTests() {
-        super();
+    UUID(null),
+    ACCOUNT(null),
+    FOLDER(Field.FOLDER_ID),
+    ID(Field.ID),
+    CREATED_BY(Field.CREATED_BY),
+    MODIFIED_BY(Field.MODIFIED_BY),
+    CREATED(Field.CREATED),
+    LAST_MODIFIED(Field.LAST_MODIFIED),
+    TITLE(Field.TITLE),
+    VERSION(Field.VERSION),
+    FILE_SIZE(Field.FILE_SIZE),
+    MIME_TYPE(Field.FILE_MIMETYPE),
+    FILE_NAME(Field.FILENAME),
+    DESCRIPTION(Field.DESCRIPTION),
+    URL(Field.URL),
+    SEQUENCE_NUMBER(Field.SEQUENCE_NUMBER),
+    CATEGORIES(Field.CATEGORIES),
+    COLOR_LABEL(Field.COLOR_LABEL),
+    VERSION_COMMENT(Field.VERSION_COMMENT),
+    CONTENT(Field.CONTENT),
+    MD5_SUM(Field.FILE_MD5SUM);
+    
+    
+    private Field field;
+    
+    private FilestoreIndexField(Field field) {
+        this.field = field;
     }
     
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(MailSolrIndexAccessTest.class);
-        tests.addTestSuite(AddressComparatorTest.class);
-        return tests;
+    public Field getFileField() {
+        return field;
     }
 
 }
