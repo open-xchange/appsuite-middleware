@@ -101,10 +101,9 @@ public class FunctionTests extends AbstractAJAXSession {
         GetResponse response = client.execute(new UnknownActionRequest(EnumAPI.OX_OLD, FolderObject.SYSTEM_PUBLIC_FOLDER_ID, false));
         assertTrue("JSON response should contain an error message.", response.hasError());
         OXException exception = response.getException();
-        String error = exception.getMessage(); //was: getOrigMessage, maybe it should be .getCause().getMessage()?
+        String error = exception.getErrorCode(); //was: getOrigMessage, maybe it should be .getCause().getMessage()?
         assertTrue(
-            "Error is not the expected one: \"" + error + "\"",
-            error.equals("Action \"unknown\" NOT supported via GET on /ajax/folders") || error.equals("Unknown AJAX action: %s."));
+            "Error is not the expected one: \"" + error + "\"", error.equals("SVL-0001"));
     }
 
     private class UnknownActionRequest extends GetRequest {
