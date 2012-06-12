@@ -11,7 +11,7 @@ public class Bug19915Test extends ManagedAppointmentTest {
 	}
 
 	public void testParsing() throws Exception {
-		ICalImportRequest request = new ICalImportRequest(folder.getObjectID(), getIcal());
+		ICalImportRequest request = new ICalImportRequest(folder.getObjectID(), getIcal(), false);
 		ICalImportResponse response = getClient().execute(request);
 		assertFalse(response.hasError());
 		assertFalse(response.hasConflicts());
@@ -34,7 +34,6 @@ public class Bug19915Test extends ManagedAppointmentTest {
 		bob.append("SUMMARY:Geburtstag von Hermann\\, Silke\n");
 		bob.append("DTSTART;VALUE=DATE:20101210\n");
 		bob.append("DTEND;VALUE=DATE:20101211\n");
-		bob.append("CLASS:PRIVATE\n");
 		bob.append("TRANSP:TRANSPARENT\n");
 		bob.append("RRULE:FREQ=YEARLY;INTERVAL=1;BYMONTH=12;BYMONTHDAY=10\n");
 		bob.append("EXDATE:20101210T000000Z\n");

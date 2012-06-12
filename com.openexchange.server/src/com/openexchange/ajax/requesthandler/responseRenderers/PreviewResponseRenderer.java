@@ -112,7 +112,6 @@ public class PreviewResponseRenderer implements ResponseRenderer {
                     response.addWarning(warning);
                 }
             }
-
             APIResponseRenderer.writeResponse(response, request.getAction(), httpReq, httpResp);
         } catch (final JSONException e) {
             LOG.error("JSON Error", e);

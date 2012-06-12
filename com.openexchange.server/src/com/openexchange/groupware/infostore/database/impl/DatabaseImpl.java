@@ -1171,16 +1171,16 @@ public class DatabaseImpl extends DBService {
                 }
             }
             fs.deleteFiles(files.toArray(new String[files.size()]));
-
-            final EventClient ec = new EventClient(session);
-
-            for (final DocumentMetadata m : documents) {
-                try {
-                    ec.delete(m);
-                } catch (final Exception e) {
-                    LOG.error("", e);
-                }
-            }
+          //FIXME
+//            final EventClient ec = new EventClient(session);
+//
+//            for (final DocumentMetadata m : documents) {
+//                try {
+//                    ec.delete(m);
+//                } catch (final Exception e) {
+//                    LOG.error("", e);
+//                }
+//            }
 
         } catch (final OXException x) {
             throw x;
@@ -1248,15 +1248,15 @@ public class DatabaseImpl extends DBService {
         }
 
 
-
-        final EventClient ec = new EventClient(session);
-        for (final DocumentMetadata documentMetadata : parents) {
-            try {
-                ec.delete(documentMetadata);
-            } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
-            }
-        }
+      //FIXME
+//        final EventClient ec = new EventClient(session);
+//        for (final DocumentMetadata documentMetadata : parents) {
+//            try {
+//                ec.delete(documentMetadata);
+//            } catch (final OXException e) {
+//                LOG.error(e.getMessage(), e);
+//            }
+//        }
     }
 
     private void discoverAllFiles(final DocumentMetadata documentMetadata, final ServerSession session, final List<String> files) throws OXException {

@@ -53,34 +53,31 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import org.apache.commons.logging.Log;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
 import com.openexchange.admin.contextrestore.rmi.OXContextRestoreInterface;
 import com.openexchange.admin.contextrestore.rmi.impl.OXContextRestore;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.impl.OXContext;
 import com.openexchange.log.LogFactory;
+import com.openexchange.osgi.HousekeepingActivator;
 
-public class Activator implements BundleActivator {
+public class Activator extends HousekeepingActivator {
     
     private static Log log = LogFactory.getLog(Activator.class);
     
     private static OXContextRestore contextRestore = null;
     
     private static OXContextInterface ox_ctx = null;
-    
-    private ServiceRegistration<Remote> registration = null;
 
-    public void start(final BundleContext context) throws Exception {
+    @Override
+    public void startBundle() throws Exception {
         try {
             ox_ctx = new OXContext(context);
             contextRestore = new OXContextRestore();
             final OXContextRestoreInterface oxctxrest_stub = (OXContextRestoreInterface) UnicastRemoteObject.exportObject(contextRestore, 0);
 
             // bind all NEW Objects to registry
-            registration = context.registerService(Remote.class, oxctxrest_stub, null);
+            registerService(Remote.class, oxctxrest_stub, null);
             log.info("RMI Interface for context restore bound to RMI registry");
         } catch (final RemoteException e) {
             log.error(e.getMessage(), e);
@@ -91,12 +88,18 @@ public class Activator implements BundleActivator {
         }
     }
 
-    public void stop(final BundleContext context) throws Exception {
-        context.ungetService(registration.getReference());
+    @Override
+    public void stopBundle() throws Exception {
+        unregisterServices();
     }
 
     public static final OXContextInterface getContextInterface() {
         return ox_ctx;
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return null;
     }
     
 }

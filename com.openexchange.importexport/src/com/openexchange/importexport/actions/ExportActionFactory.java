@@ -48,29 +48,24 @@
  */
 package com.openexchange.importexport.actions;
 
-import java.util.Collections;
-import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Map;
+
 import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.importexport.actions.exporter.CsvExportAction;
+import com.openexchange.importexport.actions.exporter.ICalExportAction;
+import com.openexchange.importexport.actions.exporter.VCardExportAction;
 import com.openexchange.importexport.formats.Format;
 
 public class ExportActionFactory  extends AbstractIEActionFactory{
 
-    private final Map<Format, AJAXActionService> map;
-
-    /**
-     * Initializes a new {@link ExportActionFactory}.
-     */
-    public ExportActionFactory() {
-        super();
-        final EnumMap<Format, AJAXActionService> map = new EnumMap<Format, AJAXActionService>(Format.class);
-        map.put(Format.CSV, new CsvImportAction());
-        this.map = Collections.unmodifiableMap(map);
-    }
-
     @Override
     protected Map<Format, AJAXActionService> getActions(){
-        return map;
+    	return new HashMap<Format, AJAXActionService>(){{
+    		put(Format.CSV, new CsvExportAction());
+    		put(Format.VCARD, new VCardExportAction());
+    		put(Format.ICAL, new ICalExportAction());
+    	}};
     }
 
 }

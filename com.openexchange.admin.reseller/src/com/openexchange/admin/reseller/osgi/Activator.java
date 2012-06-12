@@ -50,14 +50,9 @@
 package com.openexchange.admin.reseller.osgi;
 
 import java.rmi.Remote;
-import java.sql.SQLException;
 import java.util.Hashtable;
-import java.util.LinkedList;
-import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.plugins.BasicAuthenticatorPluginInterface;
@@ -70,28 +65,26 @@ import com.openexchange.admin.reseller.rmi.impl.OXResellerUserImpl;
 import com.openexchange.admin.reseller.rmi.impl.ResellerAuth;
 import com.openexchange.admin.reseller.tools.AdminCacheExtended;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.osgi.HousekeepingActivator;
 
-public class Activator implements BundleActivator {
+public class Activator extends HousekeepingActivator {
 
     private static final Log LOG = LogFactory.getLog(Activator.class);
-
-    private final List<ServiceRegistration<Remote>> services;
     
     /**
      * Initializes a new {@link Activator}.
      */
     public Activator() {
         super();
-        services = new LinkedList<ServiceRegistration<Remote>>();
     }
 
     @Override
-    public void start(final BundleContext context) throws Exception {
+    public void startBundle() throws Exception {
         try {
             initCache();
 
             final OXReseller reseller = new OXReseller();
-            services.add(context.registerService(Remote.class, reseller, null));
+            registerService(Remote.class, reseller, null);
             LOG.info("RMI Interface for reseller bundle bound to RMI registry");
 
             final Hashtable<String, String> props = new Hashtable<String, String>();
@@ -124,9 +117,6 @@ public class Activator implements BundleActivator {
         } catch (final StorageException e) {
             LOG.fatal("Error while creating one instance for RMI interface", e);
             throw e;
-        } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
-            throw e;
         } catch (final OXGenericException e) {
             LOG.fatal(e.getMessage(), e);
             throw e;
@@ -137,22 +127,20 @@ public class Activator implements BundleActivator {
     }
 
     @Override
-    public void stop(final BundleContext context) throws Exception {
-        try {
-            while (!services.isEmpty()) {
-                context.ungetService(services.remove(0).getReference());
-            }
-        } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
-            throw e;
-        }
+    public void stopBundle() throws Exception {
+        unregisterServices();
     }
 
-    private void initCache() throws SQLException, OXGenericException {
+    private void initCache() throws OXGenericException {
         final AdminCacheExtended cache = new AdminCacheExtended();
         cache.initCache();
         cache.initCacheExtended();
         ClientAdminThreadExtended.cache = cache;
         LOG.info("ResellerBundle: Cache and Pools initialized!");
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return null;
     }
 }

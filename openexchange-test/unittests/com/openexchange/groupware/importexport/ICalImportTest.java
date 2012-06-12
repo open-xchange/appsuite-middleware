@@ -77,6 +77,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
+import com.openexchange.importexport.formats.Format;
 
 public class ICalImportTest extends AbstractICalImportTest {
 

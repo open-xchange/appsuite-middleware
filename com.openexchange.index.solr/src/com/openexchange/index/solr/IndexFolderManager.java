@@ -73,12 +73,12 @@ public class IndexFolderManager {
 
     public static boolean isIndexed(int contextId, int userId, int module, String account, String folder) throws OXException {
         DatabaseService dbService = getDbService();
-        Connection con = dbService.getReadOnly(contextId);
+        Connection con = dbService.getWritable(contextId);
         try {
             return isIndexed(con, contextId, userId, module, account, folder);
         } finally {
             if (con != null) {
-                dbService.backReadOnly(contextId, con);
+                dbService.backWritable(contextId, con);
             }
         }
     }
@@ -149,12 +149,12 @@ public class IndexFolderManager {
     
     public static boolean isLocked(int contextId, int userId, int module, String account, String folder) throws OXException {
         DatabaseService dbService = getDbService();
-        Connection con = dbService.getReadOnly(contextId);
+        Connection con = dbService.getWritable(contextId);
         try {
             return isLocked(con, contextId, userId, module, account, folder);
         } finally {
             if (con != null) {
-                dbService.backReadOnly(contextId, con);
+                dbService.backWritable(contextId, con);
             }
         }
         
@@ -335,12 +335,12 @@ public class IndexFolderManager {
     
     public static long getTimestamp(int contextId, int userId, int module, String account, String folder) throws OXException {
         DatabaseService dbService = getDbService();
-        Connection con = dbService.getReadOnly(contextId);
+        Connection con = dbService.getWritable(contextId);
         try {
             return getTimestamp(con, contextId, userId, module, account, folder);
         } finally {
             if (con != null) {
-                dbService.backReadOnly(contextId, con);
+                dbService.backWritable(contextId, con);
             }
         }
     }

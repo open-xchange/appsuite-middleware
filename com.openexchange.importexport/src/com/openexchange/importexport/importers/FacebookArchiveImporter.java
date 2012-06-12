@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import com.openexchange.exception.OXException;
-import com.openexchange.importexport.ImportResult;
+import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.tools.session.ServerSession;
 

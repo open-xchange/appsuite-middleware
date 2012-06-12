@@ -196,6 +196,8 @@ public class AJAXRequestResult {
 
     private long expires;
 
+	private OXException exception;
+
     /**
      * Initializes a new {@link AJAXRequestResult} with data and time stamp set to <code>null</code>.
      * 
@@ -559,5 +561,13 @@ public class AJAXRequestResult {
         setResultObject(object);
         setFormat(format);
     }
+
+	public void setException(OXException exception) {
+		this.exception = exception;
+	}
+	
+	public OXException getException() {
+		return exception;
+	}
 
 }

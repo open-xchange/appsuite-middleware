@@ -581,97 +581,97 @@ public class EventClient {
         EventQueue.add(eventObject);
     }
 
-    public void create(final DocumentMetadata document) throws OXException, OXException {
-        final Context ctx = ContextStorage.getInstance().getContext(contextId);
-
-        final long folderId = document.getFolderId();
-        if (folderId > 0) {
-            final FolderObject folder = getFolder((int)folderId, ctx);
-            create(document, folder);
-        }
-    }
-
-    public void create(final DocumentMetadata document, final FolderObject folder) throws OXException {
-        final Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new FolderObject[] { folder }, (int) document.getFolderId());
-        final CommonEvent genericEvent = new CommonEventImpl(contextId, userId, unmodifyable(affectedUsers), CommonEvent.INSERT, Types.INFOSTORE, document, null, folder, null, session);
-
-        final Dictionary<String, CommonEvent> ht = new Hashtable<String, CommonEvent>(1);
-        ht.put(CommonEvent.EVENT_KEY, genericEvent);
-
-        final Event event = new Event("com/openexchange/groupware/infostore/insert", ht);
-        triggerEvent(event);
-
-        final EventObject eventObject = new EventObject(document, CREATED, session);
-        EventQueue.add(eventObject);
-    }
-
-    public void modify(final DocumentMetadata document) throws OXException, OXException {
-        final Context ctx = ContextStorage.getInstance().getContext(contextId);
-
-        final long folderId = document.getFolderId();
-        if (folderId > 0) {
-            final FolderObject folder = getFolder((int)folderId, ctx);
-            modify(null, document, folder);
-        }
-    }
-
-    public void modify(final DocumentMetadata oldDocument, final DocumentMetadata newDocument, final FolderObject folder) throws OXException {
-        final Map<Integer, Set<Integer>> affectedUsers;
-        if (null == oldDocument) {
-            affectedUsers = getAffectedUsers(new FolderObject[] { folder }, (int) newDocument.getFolderId());
-        } else {
-            affectedUsers = getAffectedUsers(new FolderObject[] { folder }, (int) oldDocument.getFolderId(), (int) newDocument.getFolderId());
-        }
-        final CommonEvent genericEvent = new CommonEventImpl(contextId, userId, unmodifyable(affectedUsers), CommonEvent.UPDATE, Types.INFOSTORE, newDocument, oldDocument, folder, null, session);
-
-        final Dictionary<String, CommonEvent> ht = new Hashtable<String, CommonEvent>(1);
-        ht.put(CommonEvent.EVENT_KEY, genericEvent);
-
-        final Event event = new Event("com/openexchange/groupware/infostore/update", ht);
-        triggerEvent(event);
-
-        final EventObject eventObject = new EventObject(newDocument, CHANGED, session);
-        EventQueue.add(eventObject);
-    }
-
-    public void delete(final DocumentMetadata document) throws OXException, OXException {
-        final Context ctx = ContextStorage.getInstance().getContext(contextId);
-        //FolderSQLInterface folderSql = new RdbFolderSQLInterface(session, ctx);
-
-        final long folderId = document.getFolderId();
-        if (folderId > 0) {
-            final FolderObject folder = getFolder((int)folderId, ctx);
-            delete(document, folder);
-        }
-    }
-
-    public void delete(final DocumentMetadata document, final FolderObject folder) throws OXException {
-        final Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new FolderObject[] { folder }, (int) document.getFolderId());
-        final CommonEvent genericEvent = new CommonEventImpl(contextId, userId, unmodifyable(affectedUsers), CommonEvent.DELETE, Types.INFOSTORE, document, null, folder, null, session);
-
-        final Dictionary<String, CommonEvent> ht = new Hashtable<String, CommonEvent>(1);
-        ht.put(CommonEvent.EVENT_KEY, genericEvent);
-
-        final Event event = new Event("com/openexchange/groupware/infostore/delete", ht);
-        triggerEvent(event);
-
-        final EventObject eventObject = new EventObject(document, DELETED, session);
-        EventQueue.add(eventObject);
-    }
-
-    public void move(final DocumentMetadata document, final FolderObject sourceFolder, final FolderObject destinationFolder) throws OXException {
-        final Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new FolderObject[] { sourceFolder, destinationFolder }, (int) document.getFolderId());
-        final CommonEvent genericEvent = new CommonEventImpl(contextId, userId, unmodifyable(affectedUsers), CommonEvent.MOVE, Types.INFOSTORE, document, null, sourceFolder, destinationFolder, session);
-
-        final Dictionary<String, CommonEvent> ht = new Hashtable<String, CommonEvent>(1);
-        ht.put(CommonEvent.EVENT_KEY, genericEvent);
-
-        final Event event = new Event("com/openexchange/groupware/infostore/move", ht);
-        triggerEvent(event);
-
-        final EventObject eventObject = new EventObject(document, MOVED, session);
-        EventQueue.add(eventObject);
-    }
+//    public void create(final DocumentMetadata document) throws OXException, OXException {
+//        final Context ctx = ContextStorage.getInstance().getContext(contextId);
+//
+//        final long folderId = document.getFolderId();
+//        if (folderId > 0) {
+//            final FolderObject folder = getFolder((int)folderId, ctx);
+//            create(document, folder);
+//        }
+//    }
+//
+//    public void create(final DocumentMetadata document, final FolderObject folder) throws OXException {
+//        final Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new FolderObject[] { folder }, (int) document.getFolderId());
+//        final CommonEvent genericEvent = new CommonEventImpl(contextId, userId, unmodifyable(affectedUsers), CommonEvent.INSERT, Types.INFOSTORE, document, null, folder, null, session);
+//
+//        final Dictionary<String, CommonEvent> ht = new Hashtable<String, CommonEvent>(1);
+//        ht.put(CommonEvent.EVENT_KEY, genericEvent);
+//
+//        final Event event = new Event("com/openexchange/groupware/infostore/insert", ht);
+//        triggerEvent(event);
+//
+//        final EventObject eventObject = new EventObject(document, CREATED, session);
+//        EventQueue.add(eventObject);
+//    }
+//
+//    public void modify(final DocumentMetadata document) throws OXException, OXException {
+//        final Context ctx = ContextStorage.getInstance().getContext(contextId);
+//
+//        final long folderId = document.getFolderId();
+//        if (folderId > 0) {
+//            final FolderObject folder = getFolder((int)folderId, ctx);
+//            modify(null, document, folder);
+//        }
+//    }
+//
+//    public void modify(final DocumentMetadata oldDocument, final DocumentMetadata newDocument, final FolderObject folder) throws OXException {
+//        final Map<Integer, Set<Integer>> affectedUsers;
+//        if (null == oldDocument) {
+//            affectedUsers = getAffectedUsers(new FolderObject[] { folder }, (int) newDocument.getFolderId());
+//        } else {
+//            affectedUsers = getAffectedUsers(new FolderObject[] { folder }, (int) oldDocument.getFolderId(), (int) newDocument.getFolderId());
+//        }
+//        final CommonEvent genericEvent = new CommonEventImpl(contextId, userId, unmodifyable(affectedUsers), CommonEvent.UPDATE, Types.INFOSTORE, newDocument, oldDocument, folder, null, session);
+//
+//        final Dictionary<String, CommonEvent> ht = new Hashtable<String, CommonEvent>(1);
+//        ht.put(CommonEvent.EVENT_KEY, genericEvent);
+//
+//        final Event event = new Event("com/openexchange/groupware/infostore/update", ht);
+//        triggerEvent(event);
+//
+//        final EventObject eventObject = new EventObject(newDocument, CHANGED, session);
+//        EventQueue.add(eventObject);
+//    }
+//
+//    public void delete(final DocumentMetadata document) throws OXException, OXException {
+//        final Context ctx = ContextStorage.getInstance().getContext(contextId);
+//        //FolderSQLInterface folderSql = new RdbFolderSQLInterface(session, ctx);
+//
+//        final long folderId = document.getFolderId();
+//        if (folderId > 0) {
+//            final FolderObject folder = getFolder((int)folderId, ctx);
+//            delete(document, folder);
+//        }
+//    }
+//
+//    public void delete(final DocumentMetadata document, final FolderObject folder) throws OXException {
+//        final Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new FolderObject[] { folder }, (int) document.getFolderId());
+//        final CommonEvent genericEvent = new CommonEventImpl(contextId, userId, unmodifyable(affectedUsers), CommonEvent.DELETE, Types.INFOSTORE, document, null, folder, null, session);
+//
+//        final Dictionary<String, CommonEvent> ht = new Hashtable<String, CommonEvent>(1);
+//        ht.put(CommonEvent.EVENT_KEY, genericEvent);
+//
+//        final Event event = new Event("com/openexchange/groupware/infostore/delete", ht);
+//        triggerEvent(event);
+//
+//        final EventObject eventObject = new EventObject(document, DELETED, session);
+//        EventQueue.add(eventObject);
+//    }
+//
+//    public void move(final DocumentMetadata document, final FolderObject sourceFolder, final FolderObject destinationFolder) throws OXException {
+//        final Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new FolderObject[] { sourceFolder, destinationFolder }, (int) document.getFolderId());
+//        final CommonEvent genericEvent = new CommonEventImpl(contextId, userId, unmodifyable(affectedUsers), CommonEvent.MOVE, Types.INFOSTORE, document, null, sourceFolder, destinationFolder, session);
+//
+//        final Dictionary<String, CommonEvent> ht = new Hashtable<String, CommonEvent>(1);
+//        ht.put(CommonEvent.EVENT_KEY, genericEvent);
+//
+//        final Event event = new Event("com/openexchange/groupware/infostore/move", ht);
+//        triggerEvent(event);
+//
+//        final EventObject eventObject = new EventObject(document, MOVED, session);
+//        EventQueue.add(eventObject);
+//    }
 
     protected void triggerEvent(final Event event) throws OXException {
         final EventAdmin eventAdmin = ServerServiceRegistry.getInstance().getService(EventAdmin.class);

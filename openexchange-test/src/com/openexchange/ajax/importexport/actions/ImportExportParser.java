@@ -81,8 +81,11 @@ public final class ImportExportParser {
         final String folderId = json.optString(CommonFields.FOLDER_ID);
         final long lastModified = json.optLong(CommonFields.LAST_MODIFIED);
         retval = new ImportResult(id, folderId, lastModified);
-        if (response.hasError()) {
-            retval.setException(response.getException());
+        if (response.getWarnings() != null && response.getWarnings().size() > 0) {
+        	retval.setException(response.getWarnings().get(0));
+        }
+        if(response.hasError()){
+        	retval.setException(response.getException());
         }
 
         JSONArray warnings = json.optJSONArray("warnings");

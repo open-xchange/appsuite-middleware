@@ -20,6 +20,7 @@ Import-Package: com.openexchange.datatypes.genericonf,
  gnu.trove,
  org.apache.commons.logging,
  org.osgi.framework,
+ org.osgi.service.event;version="1.3.0",
  org.osgi.util.tracker
 Export-Package: com.openexchange.file.storage.composition
 Bundle-Activator: com.openexchange.file.storage.composition.osgi.FileStorageCompositionActivator

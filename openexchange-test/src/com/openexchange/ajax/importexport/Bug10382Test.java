@@ -57,7 +57,7 @@ import com.openexchange.ajax.importexport.actions.ICalImportRequest;
 import com.openexchange.ajax.importexport.actions.ICalImportResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.importexport.ImportExportExceptionCodes;
+import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 
 /**
  * Test class for bug 10382.
