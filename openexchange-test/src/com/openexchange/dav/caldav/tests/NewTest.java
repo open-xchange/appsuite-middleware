@@ -47,70 +47,60 @@
  *
  */
 
-package com.openexchange.dav.carddav.reports;
+package com.openexchange.dav.caldav.tests;
 
-import java.io.IOException;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
-import org.apache.commons.httpclient.HttpConnection;
-import org.apache.commons.httpclient.HttpState;
-import org.apache.jackrabbit.webdav.DavException;
-import org.apache.jackrabbit.webdav.client.methods.ReportMethod;
-import org.apache.jackrabbit.webdav.version.report.ReportInfo;
-import org.apache.jackrabbit.webdav.xml.DomUtil;
-import org.apache.jackrabbit.webdav.xml.ElementIterator;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
-import com.openexchange.dav.PropertyNames;
+import com.openexchange.dav.StatusCodes;
+import com.openexchange.dav.SyncToken;
+import com.openexchange.dav.caldav.CalDAVTest;
+import com.openexchange.dav.caldav.ICalResource;
+import com.openexchange.groupware.calendar.TimeTools;
+import com.openexchange.groupware.container.Appointment;
 
 /**
- * {@link SyncCollectionReportMethod} - Report method for the 
- * "sync-collection" request.
+ * {@link NewTest} - Tests appointment creation via the CalDAV interface 
  * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class SyncCollectionReportMethod extends ReportMethod {
-	
-	private String syncToken;
-	private Document responseDocument = null;
+public class NewTest extends CalDAVTest {
 
-	public SyncCollectionReportMethod(String uri, ReportInfo reportInfo) throws IOException {
-		super(uri, reportInfo);
-		this.syncToken = null;
+	public NewTest(String name) {
+		super(name);
+	}	
+	
+	public void testCreateSimpleOnClient() throws Exception {
+		/*
+		 * fetch sync token for later synchronization
+		 */
+		SyncToken syncToken = new SyncToken(super.fetchSyncToken());
+		/*
+		 * create appointment
+		 */
+    	String uid = randomUID();
+    	String summary = "test";
+    	String location = "testcity";
+    	Date start = TimeTools.D("tomorrow at 3pm");
+    	Date end = TimeTools.D("tomorrow at 4pm");
+    	String iCal = generateICal(start, end, uid, summary, location);
+        assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putICal(super.getDefaultFolderID(), uid, iCal));
+        /*
+         * verify appointment on server
+         */
+        Appointment appointment = super.getAppointment(uid);
+        super.rememberForCleanUp(appointment);
+        assertEquals(appointment, start, end, uid, summary, location);
+        /*
+         * verify appointment on client
+         */
+        Map<String, String> eTags = super.syncCollection(syncToken).getETagsStatusOK();
+        assertTrue("no resource changes reported on sync collection", 0 < eTags.size());
+        List<ICalResource> calendarData = super.calendarMultiget(eTags.keySet());
+        ICalResource iCalResource = assertContains(uid, calendarData);
+        assertEquals("SUMMARY wrong", summary, iCalResource.getSummary());
+        assertEquals("LOCATION wrong", location, iCalResource.getLocation());
 	}
 	
-	public String getSyncTokenFromResponse() {
-		return syncToken;
-	}
-	
-	public SyncCollectionResponse getResponseBodyAsSyncCollection() throws IOException, DavException {
-        checkUsed();
-		return new SyncCollectionResponse(this.getResponseBodyAsMultiStatus(), this.syncToken);  
-	}
-	
-    @Override
-    public Document getResponseBodyAsDocument() throws IOException {
-    	if (null == this.responseDocument) {
-    		this.responseDocument = super.getResponseBodyAsDocument();
-    	}
-        return responseDocument;
-    }
-	
-    @Override
-    protected void processResponseBody(HttpState httpState, HttpConnection httpConnection) {
-    	super.processResponseBody(httpState, httpConnection);
-    	Document document = null;
-    	try {
-			document = getResponseBodyAsDocument();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-        ElementIterator it = DomUtil.getChildren(document.getDocumentElement(), PropertyNames.SYNC_TOKEN.getName(), 
-        		PropertyNames.SYNC_TOKEN.getNamespace());
-        if (it.hasNext()) {
-            Element respElem = it.nextElement();
-            this.syncToken = respElem.getTextContent();
-        }
-    }	
-
 }

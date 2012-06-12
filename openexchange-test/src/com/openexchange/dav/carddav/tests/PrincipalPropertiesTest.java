@@ -53,6 +53,7 @@ import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.MultiStatusResponse;
 import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
 import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
+
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.user.actions.GetRequest;
 import com.openexchange.ajax.user.actions.GetResponse;
@@ -90,9 +91,9 @@ public class PrincipalPropertiesTest extends CardDAVTest {
         props.add(PropertyNames.RESOURCE_ID);
         props.add(PropertyNames.SUPPORTED_REPORT_SET);
         final PropFindMethod propFind = new PropFindMethod(
-        		super.getCardDAVClient().getBaseURI() + "/principals/users/" + Config.getUsername() + "/", 
+        		super.getWebDAVClient().getBaseURI() + "/principals/users/" + Config.getUsername() + "/", 
         		DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
-        final MultiStatusResponse response = assertSingleResponse(super.getCardDAVClient().doPropFind(propFind));
+        final MultiStatusResponse response = assertSingleResponse(super.getWebDAVClient().doPropFind(propFind));
         final GetRequest getRequest = new GetRequest(super.getAJAXClient().getValues().getUserId(), 
         		super.getAJAXClient().getValues().getTimeZone());
         final GetResponse getResponse = Executor.execute(client, getRequest);

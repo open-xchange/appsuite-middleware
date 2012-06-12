@@ -47,75 +47,66 @@
  *
  */
 
-package com.openexchange.dav.carddav.reports;
+package com.openexchange.dav.caldav.reports;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import junit.framework.Assert;
-
-import org.apache.jackrabbit.webdav.MultiStatus;
-import org.apache.jackrabbit.webdav.MultiStatusResponse;
-
-import com.openexchange.dav.PropertyNames;
-import com.openexchange.dav.StatusCodes;
+import org.apache.jackrabbit.webdav.DavConstants;
+import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
+import org.apache.jackrabbit.webdav.version.report.ReportInfo;
+import org.apache.jackrabbit.webdav.xml.DomUtil;
+import org.apache.jackrabbit.webdav.xml.Namespace;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 /**
- * {@link SyncCollectionResponse} - Custom response to an "sync-collection" report 
+ * {@link CalendarMultiGetReportInfo} - Encapsulates the BODY of a 
+ * {@link CalendarMultiGetReport} request ("calendar-multiget").
  * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class SyncCollectionResponse {
-	
-	private final MultiStatusResponse[] responses;
-	private final String syncToken;
-	
-	public SyncCollectionResponse(MultiStatus multiStatus, String syncToken) {
-		super();
-		this.responses = multiStatus.getResponses();
-		this.syncToken = syncToken;
-	}
-	
-	/**
-	 * @return the syncToken
-	 */
-	public String getSyncToken() {
-		return syncToken;
-	}
+public class CalendarMultiGetReportInfo extends ReportInfo {
 
-	/**
-	 * @return the responses
-	 */
-	public MultiStatusResponse[] getResponses() {
-		return responses;
-	}
+    private final String[] hrefs;
 
-	public Map<String, String> getETagsStatusOK() {
-		Map<String, String> eTags = new HashMap<String, String>();
-        for (MultiStatusResponse response : responses) {
-        	if (response.getProperties(StatusCodes.SC_OK).contains(PropertyNames.GETETAG)) {
-	        	String href = response.getHref();
-	        	Assert.assertNotNull("got no href from response", href);
-	        	Object value = response.getProperties(StatusCodes.SC_OK).get(PropertyNames.GETETAG).getValue();
-	        	Assert.assertNotNull("got no ETag from response", value);
-	        	String eTag = (String)value;
-	        	eTags.put(href, eTag);
-        	}
-		}
-		return eTags;
-	}
-	
-	public List<String> getHrefsStatusNotFound() {
-		List<String> hrefs = new ArrayList<String>();
-        for (MultiStatusResponse response : responses) {
-        	if (null != response.getStatus() && 0 < response.getStatus().length && null != response.getStatus()[0] && 
-        			StatusCodes.SC_NOT_FOUND == response.getStatus()[0].getStatusCode()) {
-            	hrefs.add(response.getHref());
-        	}
-        }
-		return hrefs;
-	}
-	
+    /**
+     * Creates a new {@link CalendarMultiGetReportInfo}.
+     * 
+     * @param hrefs The resource data references to include in the request 
+     */
+    public CalendarMultiGetReportInfo(String[] hrefs) {
+    	this(hrefs, null);
+    }
+
+    /**
+     * Creates a new {@link CalendarMultiGetReportInfo}.
+     * 
+     * @param hrefs The resource data references to include in the request
+     *  
+     * @param propertyNames the properties to include in the request
+     */
+    public CalendarMultiGetReportInfo(String[] hrefs, DavPropertyNameSet propertyNames) {
+        super(CalendarMultiGetReport.CALENDAR_MULTIGET, DavConstants.DEPTH_0, propertyNames);
+        this.hrefs = hrefs;
+    }
+
+    @Override
+    public Element toXml(final Document document) {
+    	/*
+    	 * create calendar-multiget element
+    	 */
+    	Element multiGetElement = DomUtil.createElement(document, CalendarMultiGetReport.CALENDAR_MULTIGET.getLocalName(), 
+    			CalendarMultiGetReport.CALENDAR_MULTIGET.getNamespace());
+    	multiGetElement.setAttributeNS(Namespace.XMLNS_NAMESPACE.getURI(), 
+    			Namespace.XMLNS_NAMESPACE.getPrefix() + ":" + DavConstants.NAMESPACE.getPrefix(), DavConstants.NAMESPACE.getURI());
+    	/*
+    	 * append properties element
+    	 */
+    	multiGetElement.appendChild(super.getPropertyNameSet().toXml(document));
+    	/*
+    	 * append hrefs
+    	 */
+    	for (String href : hrefs) {
+            multiGetElement.appendChild(DomUtil.createElement(document, DavConstants.XML_HREF, DavConstants.NAMESPACE, href));
+    	}
+        return multiGetElement;
+    }
 }

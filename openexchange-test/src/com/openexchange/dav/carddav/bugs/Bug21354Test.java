@@ -74,7 +74,7 @@ public class Bug21354Test extends CardDAVTest {
 	}
 	
 	public void testDeleteFromGAB_10_6() throws Exception {
-		super.getCardDAVClient().setUserAgent(UserAgents.MACOS_10_6_8);
+		super.getWebDAVClient().setUserAgent(UserAgents.MACOS_10_6_8);
 		/*
 		 * store current sync state via all ETags and CTag properties
 		 */
@@ -113,7 +113,7 @@ public class Bug21354Test extends CardDAVTest {
 	}
 	
 	public void testDeleteFromGAB_10_7() throws Exception {
-		super.getCardDAVClient().setUserAgent(UserAgents.MACOS_10_7_2);
+		super.getWebDAVClient().setUserAgent(UserAgents.MACOS_10_7_2);
 		/*
 		 * store current sync state via all ETags and sync-token properties
 		 */

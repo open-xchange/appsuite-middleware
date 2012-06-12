@@ -47,61 +47,70 @@
  *
  */
 
-package com.openexchange.dav.carddav.tests;
+package com.openexchange.dav.reports;
 
-import org.apache.jackrabbit.webdav.client.methods.OptionsMethod;
+import java.io.IOException;
 
-import com.openexchange.dav.StatusCodes;
-import com.openexchange.dav.carddav.CardDAVTest;
+import org.apache.commons.httpclient.HttpConnection;
+import org.apache.commons.httpclient.HttpState;
+import org.apache.jackrabbit.webdav.DavException;
+import org.apache.jackrabbit.webdav.client.methods.ReportMethod;
+import org.apache.jackrabbit.webdav.version.report.ReportInfo;
+import org.apache.jackrabbit.webdav.xml.DomUtil;
+import org.apache.jackrabbit.webdav.xml.ElementIterator;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
+import com.openexchange.dav.PropertyNames;
 
 /**
- * {@link OptionsTest}
- * 
- * Tests the "OPTIONS" method for the discovery of support for CardDAV 
+ * {@link SyncCollectionReportMethod} - Report method for the 
+ * "sync-collection" request.
  * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class OptionsTest extends CardDAVTest {
+public class SyncCollectionReportMethod extends ReportMethod {
+	
+	private String syncToken;
+	private Document responseDocument = null;
 
-	private static final String[] EXPECTED_ALLOW_HEADERS = {
-		"PROPFIND", "OPTIONS", "REPORT", "PUT", "DELETE", "ACL"
-	};
-	
-	private static final String[] EXPECTED_DAV_HEADERS = {
-		"1", "2", "3", "addressbook", "access-control", "extended-mkcol"				
-	};
-	
-	public OptionsTest(String name) {
-		super(name);
+	public SyncCollectionReportMethod(String uri, ReportInfo reportInfo) throws IOException {
+		super(uri, reportInfo);
+		this.syncToken = null;
 	}
+	
+	public String getSyncTokenFromResponse() {
+		return syncToken;
+	}
+	
+	public SyncCollectionResponse getResponseBodyAsSyncCollection() throws IOException, DavException {
+        checkUsed();
+		return new SyncCollectionResponse(this.getResponseBodyAsMultiStatus(), this.syncToken);  
+	}
+	
+    @Override
+    public Document getResponseBodyAsDocument() throws IOException {
+    	if (null == this.responseDocument) {
+    		this.responseDocument = super.getResponseBodyAsDocument();
+    	}
+        return responseDocument;
+    }
+	
+    @Override
+    protected void processResponseBody(HttpState httpState, HttpConnection httpConnection) {
+    	super.processResponseBody(httpState, httpConnection);
+    	Document document = null;
+    	try {
+			document = getResponseBodyAsDocument();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+        ElementIterator it = DomUtil.getChildren(document.getDocumentElement(), PropertyNames.SYNC_TOKEN.getName(), 
+        		PropertyNames.SYNC_TOKEN.getNamespace());
+        if (it.hasNext()) {
+            Element respElem = it.nextElement();
+            this.syncToken = respElem.getTextContent();
+        }
+    }	
 
-	/**
-	 * Tests if the necessary 'Allow' header elements are present in the OPTIONS response. 
-	 * @throws Exception
-	 */
-	public void testAllowHeaders() throws Exception {
-		OptionsMethod options = null;
-		try {
-			options = new OptionsMethod(getBaseUri());
-	    	assertEquals("unexpected http status", StatusCodes.SC_OK, super.getWebDAVClient().executeMethod(options));
-	    	assertResponseHeaders(EXPECTED_ALLOW_HEADERS, "Allow", options);
-		} finally {
-			release(options);
-		}
-	}
-	
-	/**
-	 * Tests if the necessary 'DAV' header elements are present in the OPTIONS response. 
-	 * @throws Exception
-	 */
-	public void testDAVHeaders() throws Exception {
-		OptionsMethod options = null;
-		try {
-			options = new OptionsMethod(getBaseUri());
-	    	assertEquals("unexpected http status", StatusCodes.SC_OK, super.getWebDAVClient().executeMethod(options));
-	    	assertResponseHeaders(EXPECTED_DAV_HEADERS, "DAV", options);
-		} finally {
-			release(options);
-		}
-	}
 }

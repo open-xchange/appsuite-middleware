@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -63,9 +64,14 @@ import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HeaderElement;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpMethodBase;
+import org.apache.jackrabbit.webdav.DavConstants;
+import org.apache.jackrabbit.webdav.DavException;
 import org.apache.jackrabbit.webdav.MultiStatusResponse;
+import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
 import org.apache.jackrabbit.webdav.property.DavProperty;
 import org.apache.jackrabbit.webdav.property.DavPropertyName;
+import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
+import org.apache.jackrabbit.webdav.version.report.ReportInfo;
 import org.json.JSONException;
 import org.w3c.dom.Node;
 
@@ -78,6 +84,8 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
+import com.openexchange.dav.reports.SyncCollectionReportInfo;
+import com.openexchange.dav.reports.SyncCollectionResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 
@@ -91,7 +99,8 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
 	protected static final int TIMEOUT = 10000;
 	
 	private List<FolderObject> foldersToCleanUp;
-	
+	private Map<Long, WebDAVClient> webDAVClients;
+
 	public WebDAVTest(String name) {
 		super(name);
 	}
@@ -99,6 +108,7 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+        this.webDAVClients = new HashMap<Long, WebDAVClient>();
         getAJAXClient().setHostname(getHostname());
         getAJAXClient().setProtocol(getProtocol());
         /*
@@ -111,6 +121,19 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
     protected void tearDown() throws Exception {
     	this.cleanupFolders();
         super.tearDown();
+    }
+    
+    protected abstract String getDefaultUserAgent();
+    
+    protected WebDAVClient getWebDAVClient() throws OXException {
+    	Long threadID = Long.valueOf(Thread.currentThread().getId());
+    	if (false == this.webDAVClients.containsKey(threadID)) {
+    		WebDAVClient webDAVClient = new WebDAVClient(getDefaultUserAgent());
+    		this.webDAVClients.put(threadID, webDAVClient);
+    		return webDAVClient;
+    	} else {
+    		return this.webDAVClients.get(threadID);
+    	}
     }
     
     private void cleanupFolders() {
@@ -309,6 +332,58 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
     protected AJAXClient getAJAXClient() {
     	return super.getClient();
     }
+    
+	protected String fetchSyncToken(String relativeUrl) throws OXException, IOException, DavException {
+		PropFindMethod propFind = null;
+		try {
+			DavPropertyNameSet props = new DavPropertyNameSet();
+	        props.add(PropertyNames.SYNC_TOKEN);
+	        propFind = new PropFindMethod(getBaseUri() + relativeUrl, DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
+	        MultiStatusResponse response = assertSingleResponse(
+	        		this.getWebDAVClient().doPropFind(propFind, StatusCodes.SC_MULTISTATUS));
+	        return this.extractTextContent(PropertyNames.SYNC_TOKEN, response);
+		} finally {
+			release(propFind);
+		}
+	}
+	
+	/**
+	 * Performs a REPORT method at the specified URL with a Depth of 1, 
+	 * requesting the ETag property of all resources that were changed since 
+	 * the supplied sync token. 
+	 * 
+	 * @param syncToken
+	 * @return
+	 * @throws IOException 
+	 * @throws ConfigurationException 
+	 * @throws DavException 
+	 */
+	protected Map<String, String> syncCollection(String syncToken, String relativeUrl) throws OXException, IOException, DavException {
+		Map<String, String> eTags = new HashMap<String, String>();
+    	DavPropertyNameSet props = new DavPropertyNameSet();
+    	props.add(PropertyNames.GETETAG);
+    	ReportInfo reportInfo = new SyncCollectionReportInfo(syncToken, props);
+    	MultiStatusResponse[] responses = this.getWebDAVClient().doReport(reportInfo, getBaseUri() + relativeUrl);
+        for (final MultiStatusResponse response : responses) {
+        	if (response.getProperties(StatusCodes.SC_OK).contains(PropertyNames.GETETAG)) {
+	        	String href = response.getHref();
+	        	assertNotNull("got no href from response", href);
+	        	String eTag = this.extractTextContent(PropertyNames.GETETAG, response);
+	        	assertNotNull("got no ETag from response", eTag);
+	        	eTags.put(href, eTag);
+        	}
+		}
+    	return eTags;
+	}
+	
+	protected SyncCollectionResponse syncCollection(SyncToken syncToken, String relativeUrl) throws OXException, IOException, DavException {
+    	DavPropertyNameSet props = new DavPropertyNameSet();
+    	props.add(PropertyNames.GETETAG);
+    	SyncCollectionReportInfo reportInfo = new SyncCollectionReportInfo(syncToken.getToken(), props);
+    	SyncCollectionResponse syncCollectionResponse = this.getWebDAVClient().doReport(reportInfo, getBaseUri() + relativeUrl);
+        syncToken.setToken(syncCollectionResponse.getSyncToken());
+        return syncCollectionResponse;
+	}
     
     protected String extractHref(DavPropertyName propertyName, MultiStatusResponse response) {
     	Node node = this.extractNodeValue(propertyName, response);

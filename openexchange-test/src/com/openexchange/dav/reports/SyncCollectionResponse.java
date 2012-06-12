@@ -47,26 +47,75 @@
  *
  */
 
-package com.openexchange.dav.carddav;
+package com.openexchange.dav.reports;
 
-import com.openexchange.dav.WebDAVClient;
-import com.openexchange.exception.OXException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import junit.framework.Assert;
+
+import org.apache.jackrabbit.webdav.MultiStatus;
+import org.apache.jackrabbit.webdav.MultiStatusResponse;
+
+import com.openexchange.dav.PropertyNames;
+import com.openexchange.dav.StatusCodes;
 
 /**
- * {@link CardDAVClient}
+ * {@link SyncCollectionResponse} - Custom response to an "sync-collection" report 
  * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class CardDAVClient extends WebDAVClient {
+public class SyncCollectionResponse {
+	
+	private final MultiStatusResponse[] responses;
+	private final String syncToken;
+	
+	public SyncCollectionResponse(MultiStatus multiStatus, String syncToken) {
+		super();
+		this.responses = multiStatus.getResponses();
+		this.syncToken = syncToken;
+	}
+	
+	/**
+	 * @return the syncToken
+	 */
+	public String getSyncToken() {
+		return syncToken;
+	}
 
 	/**
-	 * Initializes a new {@link CardDAVClient}.
-	 * 
-	 * @throws OXException
+	 * @return the responses
 	 */
-	public CardDAVClient() throws OXException {
-		super();
-		super.setUserAgent(UserAgents.MACOS_10_7_3);
+	public MultiStatusResponse[] getResponses() {
+		return responses;
+	}
+
+	public Map<String, String> getETagsStatusOK() {
+		Map<String, String> eTags = new HashMap<String, String>();
+        for (MultiStatusResponse response : responses) {
+        	if (response.getProperties(StatusCodes.SC_OK).contains(PropertyNames.GETETAG)) {
+	        	String href = response.getHref();
+	        	Assert.assertNotNull("got no href from response", href);
+	        	Object value = response.getProperties(StatusCodes.SC_OK).get(PropertyNames.GETETAG).getValue();
+	        	Assert.assertNotNull("got no ETag from response", value);
+	        	String eTag = (String)value;
+	        	eTags.put(href, eTag);
+        	}
+		}
+		return eTags;
+	}
+	
+	public List<String> getHrefsStatusNotFound() {
+		List<String> hrefs = new ArrayList<String>();
+        for (MultiStatusResponse response : responses) {
+        	if (null != response.getStatus() && 0 < response.getStatus().length && null != response.getStatus()[0] && 
+        			StatusCodes.SC_NOT_FOUND == response.getStatus()[0].getStatusCode()) {
+            	hrefs.add(response.getHref());
+        	}
+        }
+		return hrefs;
 	}
 	
 }

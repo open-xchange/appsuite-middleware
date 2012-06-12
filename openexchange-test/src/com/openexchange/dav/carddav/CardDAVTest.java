@@ -87,8 +87,7 @@ import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.SyncToken;
 import com.openexchange.dav.WebDAVTest;
 import com.openexchange.dav.carddav.reports.AddressbookMultiGetReportInfo;
-import com.openexchange.dav.carddav.reports.SyncCollectionReportInfo;
-import com.openexchange.dav.carddav.reports.SyncCollectionResponse;
+import com.openexchange.dav.reports.SyncCollectionResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
@@ -107,8 +106,6 @@ public abstract class CardDAVTest extends WebDAVTest {
 	private ContactTestManager testManager = null;
 	private int folderId;
 	private VCardEngine vCardEngine;
-	private Map<Long, CardDAVClient> cardDAVClients;
-	
 	
 	public CardDAVTest(final String name) {
 		super(name);
@@ -124,7 +121,6 @@ public abstract class CardDAVTest extends WebDAVTest {
     	this.getManager().setFailOnError(true);
         this.folderId = this.getAJAXClient().getValues().getPrivateContactFolder();
         this.vCardEngine = new VCardEngine(CompatibilityMode.MAC_ADDRESS_BOOK);
-        this.cardDAVClients = new HashMap<Long, CardDAVClient>();
     }
     
     @Override
@@ -133,6 +129,10 @@ public abstract class CardDAVTest extends WebDAVTest {
     		this.getManager().cleanUp();
     	}
         super.tearDown();
+    }
+    
+    protected String getDefaultUserAgent() {
+    	return UserAgents.MACOS_10_7_3;
     }
     
     /**
@@ -176,7 +176,7 @@ public abstract class CardDAVTest extends WebDAVTest {
         try {
             final String href = "/carddav/Contacts/" + uid + ".vcf";
             delete = new DeleteMethod(getBaseUri() + href);
-            return this.getCardDAVClient().executeMethod(delete);
+            return getWebDAVClient().executeMethod(delete);
         } finally {
             release(delete);
         }
@@ -189,12 +189,12 @@ public abstract class CardDAVTest extends WebDAVTest {
     protected String getCTag() throws OXException, IOException, DavException {
 		PropFindMethod propFind = null;
 		try {
-			final DavPropertyNameSet props = new DavPropertyNameSet();
+			DavPropertyNameSet props = new DavPropertyNameSet();
 	        props.add(PropertyNames.GETCTAG);
 	        propFind = new PropFindMethod(getBaseUri() + "/carddav/Contacts/", 
 	        		DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
-	        final MultiStatusResponse response = assertSingleResponse(
-	        		this.getCardDAVClient().doPropFind(propFind, StatusCodes.SC_MULTISTATUS));
+	        MultiStatusResponse response = assertSingleResponse(
+	        		getWebDAVClient().doPropFind(propFind, StatusCodes.SC_MULTISTATUS));
 	        return this.extractTextContent(PropertyNames.GETCTAG, response);
 		} finally {
 			release(propFind);
@@ -208,7 +208,7 @@ public abstract class CardDAVTest extends WebDAVTest {
             put = new PutMethod(getBaseUri() + href);
             put.addRequestHeader(Headers.IF_NONE_MATCH, "*");
             put.setRequestEntity(new StringRequestEntity(vCard, "text/vcard", "UTF-8"));
-            return getCardDAVClient().executeMethod(put);
+            return getWebDAVClient().executeMethod(put);
         } finally {
             release(put);
         }
@@ -227,25 +227,14 @@ public abstract class CardDAVTest extends WebDAVTest {
                 put.addRequestHeader(Headers.IF_MATCH, ifMatchEtag);
             }
             put.setRequestEntity(new StringRequestEntity(vCard, "text/vcard", "UTF-8"));
-            return getCardDAVClient().executeMethod(put);
+            return getWebDAVClient().executeMethod(put);
         } finally {
             release(put);
         }
 	}
 	
 	protected String fetchSyncToken() throws OXException, IOException, DavException {
-		PropFindMethod propFind = null;
-		try {
-			final DavPropertyNameSet props = new DavPropertyNameSet();
-	        props.add(PropertyNames.SYNC_TOKEN);
-	        propFind = new PropFindMethod(getBaseUri() + "/carddav/Contacts", 
-	        		DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
-	        final MultiStatusResponse response = assertSingleResponse(
-	        		this.getCardDAVClient().doPropFind(propFind, StatusCodes.SC_MULTISTATUS));
-	        return this.extractTextContent(PropertyNames.SYNC_TOKEN, response);
-		} finally {
-			release(propFind);
-		}
+		return super.fetchSyncToken("/carddav/Contacts");
 	}
 	
 	/**
@@ -259,30 +248,11 @@ public abstract class CardDAVTest extends WebDAVTest {
 	 * @throws DavException 
 	 */
 	protected Map<String, String> syncCollection(final String syncToken) throws OXException, IOException, DavException {
-		final Map<String, String> eTags = new HashMap<String, String>();
-    	final DavPropertyNameSet props = new DavPropertyNameSet();
-    	props.add(PropertyNames.GETETAG);
-    	final ReportInfo reportInfo = new SyncCollectionReportInfo(syncToken, props);
-    	final MultiStatusResponse[] responses = this.getCardDAVClient().doReport(reportInfo, getBaseUri() + "/carddav/Contacts/");
-        for (final MultiStatusResponse response : responses) {
-        	if (response.getProperties(StatusCodes.SC_OK).contains(PropertyNames.GETETAG)) {
-	        	final String href = response.getHref();
-	        	assertNotNull("got no href from response", href);
-	        	final String eTag = this.extractTextContent(PropertyNames.GETETAG, response);
-	        	assertNotNull("got no ETag from response", eTag);
-	        	eTags.put(href, eTag);
-        	}
-		}
-    	return eTags;
+		return super.syncCollection(syncToken, "/carddav/Contacts");
 	}
 	
 	protected SyncCollectionResponse syncCollection(SyncToken syncToken) throws OXException, IOException, DavException {
-    	DavPropertyNameSet props = new DavPropertyNameSet();
-    	props.add(PropertyNames.GETETAG);
-    	SyncCollectionReportInfo reportInfo = new SyncCollectionReportInfo(syncToken.getToken(), props);
-    	SyncCollectionResponse syncCollectionResponse = this.getCardDAVClient().doReport(reportInfo, getBaseUri() + "/carddav/Contacts/");
-        syncToken.setToken(syncCollectionResponse.getSyncToken());
-        return syncCollectionResponse;
+		return super.syncCollection(syncToken, "/carddav/Contacts");
 	}
 	
 	/**
@@ -362,7 +332,7 @@ public abstract class CardDAVTest extends WebDAVTest {
     	final DavPropertyNameSet propertyNames = new DavPropertyNameSet();
     	propertyNames.add(PropertyNames.GETETAG);
 		final PropFindMethod propFind = new PropFindMethod(getBaseUri() + "/carddav/Contacts", propertyNames, DavConstants.DEPTH_1);
-    	final MultiStatusResponse[] responses = this.getCardDAVClient().doPropFind(propFind, StatusCodes.SC_MULTISTATUS);
+    	final MultiStatusResponse[] responses = this.getWebDAVClient().doPropFind(propFind, StatusCodes.SC_MULTISTATUS);
         for (final MultiStatusResponse response : responses) {
         	if (response.getProperties(StatusCodes.SC_OK).contains(PropertyNames.GETETAG)) {
             	final String href = response.getHref();
@@ -391,7 +361,7 @@ public abstract class CardDAVTest extends WebDAVTest {
     	props.add(PropertyNames.GETETAG);
     	props.add(PropertyNames.ADDRESS_DATA);
     	final ReportInfo reportInfo = new AddressbookMultiGetReportInfo(hrefs.toArray(new String[hrefs.size()]), props);
-    	final MultiStatusResponse[] responses = this.getCardDAVClient().doReport(reportInfo, getBaseUri() + "/carddav/Contacts/");
+    	final MultiStatusResponse[] responses = this.getWebDAVClient().doReport(reportInfo, getBaseUri() + "/carddav/Contacts/");
         for (final MultiStatusResponse response : responses) {
         	if (response.getProperties(StatusCodes.SC_OK).contains(PropertyNames.GETETAG)) {
 	        	final String href = response.getHref();
@@ -561,14 +531,6 @@ public abstract class CardDAVTest extends WebDAVTest {
 
     protected FolderObject createFolder(String folderName) throws OXException, IOException, JSONException {
     	return super.createFolder(this.getDefaultFolder(), folderName);
-    }
-    
-    protected CardDAVClient getCardDAVClient() throws OXException {
-    	Long threadID = Long.valueOf(Thread.currentThread().getId());
-    	if (false == this.cardDAVClients.containsKey(threadID)) {
-    		this.cardDAVClients.put(threadID, new CardDAVClient());	
-    	}
-    	return this.cardDAVClients.get(threadID);
     }
     
     protected static String formatAsUTC(final Date date) {

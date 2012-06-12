@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.dav.carddav.reports;
+package com.openexchange.dav.reports;
 
 import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;

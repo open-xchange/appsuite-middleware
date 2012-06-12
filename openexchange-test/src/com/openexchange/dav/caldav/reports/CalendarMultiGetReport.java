@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.dav.carddav.reports;
+package com.openexchange.dav.caldav.reports;
 
 import org.apache.jackrabbit.webdav.DavException;
 import org.apache.jackrabbit.webdav.DavResource;
@@ -61,18 +61,18 @@ import org.w3c.dom.Element;
 import com.openexchange.dav.PropertyNames;
 
 /**
- * {@link SyncCollectionReport}
+ * {@link CalendarMultiGetReport}
  * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class SyncCollectionReport implements Report, DeltaVConstants {
+public class CalendarMultiGetReport implements Report, DeltaVConstants {
 
-    public static final ReportType SYNC_COLLECTION = ReportType.register(PropertyNames.SYNC_COLLECTION.getName(), 
-    		PropertyNames.SYNC_COLLECTION.getNamespace(), SyncCollectionReport.class); 
+    public static final ReportType CALENDAR_MULTIGET = ReportType.register(PropertyNames.CALENDAR_MULTIGET.getName(), 
+    		PropertyNames.CALENDAR_MULTIGET.getNamespace(), CalendarMultiGetReport.class); 
 
     @Override
     public ReportType getType() {
-        return SYNC_COLLECTION;
+        return CALENDAR_MULTIGET;
     }
 
     @Override
@@ -82,12 +82,10 @@ public class SyncCollectionReport implements Report, DeltaVConstants {
 
     @Override
     public void init(DavResource dr, ReportInfo ri) throws DavException {
-    	System.out.println("init");
     }
 
-    @Override
-    public Element toXml(Document dcmnt) {
-    	System.out.println("toxml");
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+	@Override
+    public Element toXml(Document arg0) {
+        throw new UnsupportedOperationException();
+	}
 }

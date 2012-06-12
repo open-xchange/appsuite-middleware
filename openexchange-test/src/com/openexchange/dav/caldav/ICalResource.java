@@ -47,61 +47,66 @@
  *
  */
 
-package com.openexchange.dav.carddav.tests;
+package com.openexchange.dav.caldav;
 
-import org.apache.jackrabbit.webdav.client.methods.OptionsMethod;
+import java.io.IOException;
+import java.io.StringReader;
 
-import com.openexchange.dav.StatusCodes;
-import com.openexchange.dav.carddav.CardDAVTest;
+import com.openexchange.data.conversion.ical.ICalFile;
 
 /**
- * {@link OptionsTest}
- * 
- * Tests the "OPTIONS" method for the discovery of support for CardDAV 
+ * {@link ICalResource}
  * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class OptionsTest extends CardDAVTest {
-
-	private static final String[] EXPECTED_ALLOW_HEADERS = {
-		"PROPFIND", "OPTIONS", "REPORT", "PUT", "DELETE", "ACL"
-	};
+public class ICalResource {
 	
-	private static final String[] EXPECTED_DAV_HEADERS = {
-		"1", "2", "3", "addressbook", "access-control", "extended-mkcol"				
-	};
+	private final String eTag;
+	private final String href;
+	private final ICalFile iCalFile;
 	
-	public OptionsTest(String name) {
-		super(name);
+	public ICalResource(String iCalString, String href, String eTag) throws IOException {
+		this.iCalFile = new ICalFile(new StringReader(iCalString));
+		this.href = href;
+		this.eTag = eTag;
 	}
+	
+	public String getUID() {
+		return this.iCalFile.getValue("UID");
+	}	
 
-	/**
-	 * Tests if the necessary 'Allow' header elements are present in the OPTIONS response. 
-	 * @throws Exception
-	 */
-	public void testAllowHeaders() throws Exception {
-		OptionsMethod options = null;
-		try {
-			options = new OptionsMethod(getBaseUri());
-	    	assertEquals("unexpected http status", StatusCodes.SC_OK, super.getWebDAVClient().executeMethod(options));
-	    	assertResponseHeaders(EXPECTED_ALLOW_HEADERS, "Allow", options);
-		} finally {
-			release(options);
-		}
+	public String getSummary() {
+		return this.iCalFile.getValue("SUMMARY");
+	}	
+
+	public String getLocation() {
+		return this.iCalFile.getValue("LOCATION");
 	}
 	
 	/**
-	 * Tests if the necessary 'DAV' header elements are present in the OPTIONS response. 
-	 * @throws Exception
+	 * @return the eTag
 	 */
-	public void testDAVHeaders() throws Exception {
-		OptionsMethod options = null;
-		try {
-			options = new OptionsMethod(getBaseUri());
-	    	assertEquals("unexpected http status", StatusCodes.SC_OK, super.getWebDAVClient().executeMethod(options));
-	    	assertResponseHeaders(EXPECTED_DAV_HEADERS, "DAV", options);
-		} finally {
-			release(options);
-		}
+	public String getETag() {
+		return eTag;
 	}
+
+	/**
+	 * @return the href
+	 */
+	public String getHref() {
+		return href;
+	}
+
+	/**
+	 * @return the iCal file
+	 */
+	public ICalFile getICalFile() {
+		return iCalFile;
+	}
+
+	@Override
+    public String toString() {
+		return this.iCalFile.toString();		
+	}
+
 }
