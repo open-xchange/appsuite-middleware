@@ -206,7 +206,7 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
                 updates++;
             }
         }
-		assertEquals(arrayOfArrays.toString(), clean.size(), updates);
+		assertTrue(arrayOfArrays.toString(), clean.size() <= updates);
 		for(int i = 0; i < arrayOfArrays.length(); i++) {
             final Object tmp = arrayOfArrays.get(i);
             if (tmp instanceof JSONArray) {
@@ -382,7 +382,7 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
 	    // Action attach in a regular PUT may contain a datasource field
 	    // Note that POST must always contain a file upload field and may never contain a datasource field. Maybe, anyway. Whatever.
 
-	    Map<String, Object> datasourceDefinition = new HashMap<String, Object>();
+	    final Map<String, Object> datasourceDefinition = new HashMap<String, Object>();
 
 	    datasourceDefinition.put("identifier", "com.openexchange.url.mail.attachment");
 	    datasourceDefinition.put("url", "http://one-finger-salute.org/middle_finger.png");
