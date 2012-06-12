@@ -117,12 +117,7 @@ public abstract class AbstractFileAction implements AJAXActionService {
     }
 
     protected AJAXRequestResult results(final SearchIterator<File> results, final long timestamp, final InfostoreRequest request) throws OXException {
-        try {
-            return new AJAXRequestResult(results, new Date(timestamp), "infostore");
-        } finally {
-            results.close();
-        }
-
+        return new AJAXRequestResult(results, new Date(timestamp), "infostore");
     }
 
     public AJAXRequestResult result(final Delta<File> delta, final InfostoreRequest request) throws OXException {
