@@ -1,6 +1,8 @@
 * 2012-06-12 - thorben.betten@open-xchange.com
 
  - Fix for bug 22294: Dealing with possible empty sub-type
+ - Fix for bug 22298: Showing proper error message for failed authentication against primary mail account & introduced property to specify
+                      how long such a failed authentication is remembered to avoid possible DoS attack
 
 * 2012-06-11 - thorben.betten@open-xchange.com
 
