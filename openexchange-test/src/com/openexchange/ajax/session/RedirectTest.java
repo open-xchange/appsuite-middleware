@@ -86,7 +86,7 @@ public class RedirectTest extends AbstractAJAXSession {
     @Override
     protected void setUp() throws Exception {
         AJAXConfig.init();
-        login = AJAXConfig.getProperty(Property.LOGIN);
+        login = AJAXConfig.getProperty(Property.LOGIN) + "@" + AJAXConfig.getProperty(Property.CONTEXTNAME);
         password = AJAXConfig.getProperty(Property.PASSWORD);
         Init.injectProperty();
         ConfigurationService configService = new ConfigurationImpl();

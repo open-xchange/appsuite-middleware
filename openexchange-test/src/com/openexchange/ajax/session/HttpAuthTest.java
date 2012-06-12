@@ -84,7 +84,7 @@ public class HttpAuthTest extends TestCase {
         AJAXConfig.init();
         protocol = AJAXConfig.getProperty(Property.PROTOCOL);
         hostname = AJAXConfig.getProperty(Property.HOSTNAME);
-        login = AJAXConfig.getProperty(Property.LOGIN);
+        login = AJAXConfig.getProperty(Property.LOGIN) + "@" + AJAXConfig.getProperty(Property.CONTEXTNAME);;
         password = AJAXConfig.getProperty(Property.PASSWORD);
     }
 
