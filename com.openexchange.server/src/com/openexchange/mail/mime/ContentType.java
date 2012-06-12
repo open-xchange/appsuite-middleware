@@ -247,7 +247,7 @@ public class ContentType extends ParameterizedHeader {
     // private static final Pattern PATTERN_CONTENT_TYPE = Pattern.compile("(?:\"?([[\\p{L}\\p{ASCII}]&&[^/;\\s\"]]+)(?:/([[\\p{L}\\p{ASCII}]&&[^;\\s\"]]+))?\"?)|(?:/([[\\p{L}\\p{ASCII}]&&[^;\\s\"]]+))");
     private static final Pattern PATTERN_CONTENT_TYPE = Pattern.compile("(?:\"?([\\p{L}_0-9-]+)(?:/([\\p{L}_0-9-]+))?\"?)|(?:/([\\p{L}_0-9-]+))");
 
-    private static final Pattern PATTERN_TOKEN = Pattern.compile("[\\p{L}_0-9-.+]+");
+    private static final Pattern PATTERN_TOKEN = Pattern.compile("[\\p{L}_0-9-.+]*");
 
     private static boolean isInvalidToken(final String token) {
         if (null == token) {
@@ -403,19 +403,29 @@ public class ContentType extends ParameterizedHeader {
                     if (isInvalidToken(pt)) {
                         throw MailExceptionCode.INVALID_CONTENT_TYPE.create(contentType);
                     }
-                    primaryType = pt;
+                    primaryType = pt.length() <= 0 ? DEFAULT_PRIMTYPE : pt;
                 }
                 // Subtype
                 {
                     String st = slashPos < type.length() ? type.substring(slashPos + 1).trim() : DEFAULT_SUBTYPE;
                     final int mlen = st.length() - 1;
-                    if (st.charAt(mlen) == '"') {
+                    if (mlen > 0 && st.charAt(mlen) == '"') {
                         st = st.substring(0, mlen);
                     }
                     if (isInvalidToken(st)) {
                         throw MailExceptionCode.INVALID_CONTENT_TYPE.create(contentType);
                     }
-                    subType = st;
+                    if (st.length() <= 0) {
+                        if ("multipart".equals(primaryType)) {
+                            subType = "mixed";
+                        } else if ("text".equals(primaryType)) {
+                            subType = "plain";
+                        } else {
+                            subType = DEFAULT_SUBTYPE;
+                        }
+                    } else {
+                        subType = st;
+                    }
                 }
                 baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
                 if (paramList) {
