@@ -1,3 +1,7 @@
+* 2012-06-12 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22294: Dealing with possible empty sub-type
+
 * 2012-06-11 - thorben.betten@open-xchange.com
 
  - Fix for bug 22286: Discard unsafe conditional comments

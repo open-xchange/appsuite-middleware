@@ -61,13 +61,13 @@ import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
@@ -220,7 +220,7 @@ public class CachingUserStorage extends UserStorage {
         if (null == cacheService) {
             return delegate.getUserId(uid, context);
         }
-        try {
+//        try {
             final Cache cache = cacheService.getCache(REGION_NAME);
             final CacheKey key = cache.newCacheKey(context.getContextId(), uid);
             int identifier = -1;
@@ -247,9 +247,10 @@ public class CachingUserStorage extends UserStorage {
                 identifier = tmp.intValue();
             }
             return identifier;
-        } catch (final OXException e) {
-            throw LdapExceptionCode.CACHE_PROBLEM.create(e).setPrefix("USR");
-        }
+//        }
+//        catch (final OXException e) {
+//            throw LdapExceptionCode.CACHE_PROBLEM.create(e).setPrefix("USR");
+//        }
     }
 
     @Override

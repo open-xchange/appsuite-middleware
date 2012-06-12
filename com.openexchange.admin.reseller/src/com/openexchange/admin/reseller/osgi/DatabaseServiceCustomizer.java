@@ -47,61 +47,46 @@
  *
  */
 
-package com.openexchange.templating.impl;
+package com.openexchange.admin.reseller.osgi;
 
-import com.openexchange.groupware.infostore.DocumentMetadata;
-
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterface;
+import com.openexchange.database.DatabaseService;
 
 /**
- * {@link DocumentMetadataMatcher}
+ * {@link DatabaseServiceCustomizer}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class DocumentMetadataMatcher {
-    private DocumentMetadata bestMatch;
-    private final String name;
-    private int score;
+public final class DatabaseServiceCustomizer implements ServiceTrackerCustomizer<DatabaseService, DatabaseService> {
 
-    public DocumentMetadataMatcher(final String name) {
-        this.name = name;
-        this.score = 0;
+    private final BundleContext context;
+    private final OXAdminPoolInterface pool;
 
+    public DatabaseServiceCustomizer(BundleContext context, OXAdminPoolInterface pool) {
+        super();
+        this.context = context;
+        this.pool = pool;
     }
 
-    public boolean hasPerfectMatch() {
-        return score > 10;
+    @Override
+    public DatabaseService addingService(ServiceReference<DatabaseService> reference) {
+        DatabaseService service = context.getService(reference);
+        pool.setService(service);
+        return service;
     }
 
-    public DocumentMetadata getBestMatch() {
-        return bestMatch;
+    @Override
+    public void modifiedService(ServiceReference<DatabaseService> reference, DatabaseService service) {
+        // Nothing to do.
     }
 
-    public void propose(final DocumentMetadata document) {
-        int newScore = 0;
-        final String fileName = document.getFileName();
-        if (fileName == null) {
-            return;
-        }
-        if(fileName.equals(name)) {
-            newScore = 100;
-        }
-        if(fileName.contains(".")) {
-            final String filenameWithoutExtension = fileName.substring(0, fileName.lastIndexOf('.'));
-            if(filenameWithoutExtension.equals(name)) {
-                newScore = 5;
-            }
-        }
-
-        if(document.getTitle().equals(name)) {
-            newScore = 7;
-        }
-
-
-        if(newScore > score) {
-            score = newScore;
-            bestMatch = document;
-        }
+    @Override
+    public void removedService(ServiceReference<DatabaseService> reference, DatabaseService service) {
+        pool.removeService();
+        context.ungetService(reference);
     }
+
 }
-

@@ -1,5 +1,7 @@
 package com.openexchange.appstore.noms.actions;
 
+import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -35,6 +37,10 @@ public class RegisterAction implements AJAXActionService {
 		try {
 			app.put("img", requestData.getParameter("image"));
 			app.put("url", requestData.getParameter("url"));
+			Map<String, String> parameters = requestData.getParameters();
+			for(Map.Entry<String, String> entry: parameters.entrySet()) {
+				app.put(entry.getKey(), entry.getValue());
+			}
 			database.put(app);
 		} catch (JSONException e) {
 			LOG.error(e.getMessage(), e);

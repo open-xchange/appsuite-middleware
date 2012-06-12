@@ -315,7 +315,7 @@ final class ListLsubCollection {
 
         });
         /*
-         * Perform LIST "" "*"
+         * Perform LSUB "" "*"
          */
         imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
@@ -327,7 +327,7 @@ final class ListLsubCollection {
 
         });
         /*
-         * Perform LSUB "" "*"
+         * Perform LIST "" "*"
          */
         imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
@@ -789,7 +789,8 @@ final class ListLsubCollection {
             }
             final IMAPResponse ir = (IMAPResponse) r[i];
             if (ir.keyEquals(command)) {
-                list.add(parseListResponse(ir, lsub ? null : lsubMap));
+                final ListLsubEntryImpl entryImpl = parseListResponse(ir, lsub ? null : lsubMap);
+                list.add(entryImpl);
                 r[i] = null;
             }
         }
