@@ -63,7 +63,7 @@ public class DocumentMetadataMatcher {
     private final String name;
     private int score;
 
-    public DocumentMetadataMatcher(String name) {
+    public DocumentMetadataMatcher(final String name) {
         this.name = name;
         this.score = 0;
 
@@ -77,14 +77,17 @@ public class DocumentMetadataMatcher {
         return bestMatch;
     }
 
-    public void propose(DocumentMetadata document) {
+    public void propose(final DocumentMetadata document) {
         int newScore = 0;
-        String fileName = document.getFileName();
+        final String fileName = document.getFileName();
+        if (fileName == null) {
+            return;
+        }
         if(fileName.equals(name)) {
             newScore = 100;
         }
         if(fileName.contains(".")) {
-            String filenameWithoutExtension = fileName.substring(0, fileName.lastIndexOf('.'));
+            final String filenameWithoutExtension = fileName.substring(0, fileName.lastIndexOf('.'));
             if(filenameWithoutExtension.equals(name)) {
                 newScore = 5;
             }
