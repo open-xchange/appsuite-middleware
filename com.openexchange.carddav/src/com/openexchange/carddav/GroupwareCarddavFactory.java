@@ -258,12 +258,12 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 
 		private static final ContactField[] BASIC_FIELDS = { 
 			ContactField.OBJECT_ID, ContactField.LAST_MODIFIED, ContactField.CREATION_DATE, ContactField.MARK_AS_DISTRIBUTIONLIST, 
-			ContactField.DISTRIBUTIONLIST, ContactField.UID, ContactField.USERFIELD19
+			ContactField.DISTRIBUTIONLIST, ContactField.UID, ContactField.FILENAME
 		};
 		
 		private final GroupwareCarddavFactory factory;
 		private Map<String, Contact> uidCache = null;
-		private Map<String, Contact> userfield19Cache = null;
+		private Map<String, Contact> filenameCache = null;
 		private List<UserizedFolder> allFolders = null;		
 		private HashSet<String> folderBlacklist = null;		
 		private UserizedFolder defaultFolder = null;
@@ -287,8 +287,8 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 			 */
 			if (null != uidCache && uidCache.containsKey(uid)) {
 				return load(uidCache.get(uid), fields);
-			} else if (null != userfield19Cache && userfield19Cache.containsKey(uid)) {
-				return load(userfield19Cache.get(uid), fields);
+			} else if (null != filenameCache && filenameCache.containsKey(uid)) {
+				return load(filenameCache.get(uid), fields);
 			}
 			/*
 			 * perform repeated search 
@@ -640,8 +640,8 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 		public Contact get(String uid) throws OXException {
 			Contact contact = this.getUidCache().get(uid);
 			if (null == contact) {
-				LOG.debug("Contact with UID '" + uid + "' not found, trying to get contact by userfield 19...");
-				contact = getUserfield19Cache().get(uid);
+				LOG.debug("Contact with UID '" + uid + "' not found, trying to get contact by filename...");
+				contact = getFilenameCache().get(uid);
 			}
 			if (null == contact) {
 				LOG.debug("Contact with UID '" + uid + "' not found.");
@@ -677,11 +677,11 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 			return this.uidCache;
 		}		
 		
-		private Map<String, Contact> getUserfield19Cache() throws OXException {
-			if (null == this.userfield19Cache) {
-				this.userfield19Cache = generateUserfield19Cache();
+		private Map<String, Contact> getFilenameCache() throws OXException {
+			if (null == this.filenameCache) {
+				this.filenameCache = generateFilenameCache();
 			}
-			return this.userfield19Cache;
+			return this.filenameCache;
 		}		
 		
 		private Map<String, Contact> generateUidCache() throws OXException {
@@ -707,11 +707,11 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 			return cache;
 		}
 		
-		private Map<String, Contact> generateUserfield19Cache() throws OXException {
+		private Map<String, Contact> generateFilenameCache() throws OXException {
 			HashMap<String, Contact> cache = new HashMap<String, Contact>();
 			for (Contact contact : getUidCache().values()) {
-				if (null != contact.getUserField19()) {
-					cache.put(contact.getUserField19(), contact);
+				if (null != contact.getFilename()) {
+					cache.put(contact.getFilename(), contact);
 				}
 			}
 			return cache;

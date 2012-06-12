@@ -53,6 +53,7 @@ import java.sql.Types;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
+
 import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.fields.DataFields;
@@ -208,6 +209,7 @@ public enum ContactField{
     BUSINESS_ADDRESS(Contact.ADDRESS_BUSINESS, "businessAddress", "BUSINESS_ADDRESS", "businessAddress", ContactFields.ADDRESS_BUSINESS, Types.VARCHAR),
     OTHER_ADDRESS(Contact.ADDRESS_OTHER, "otherAddress", "OTHER_ADDRESS", "otherAddress", ContactFields.ADDRESS_OTHER, Types.VARCHAR),
     UID(Contact.UID, "uid", "UID", "uid", ContactFields.UID, Types.VARCHAR),
+    FILENAME(Contact.FILENAME, "filename", "FILENAME", "filename", "", Types.VARCHAR)
     ;
 
     private int columnNumber, sqlType;

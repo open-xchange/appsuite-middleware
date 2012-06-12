@@ -51,6 +51,7 @@
 package com.openexchange.calendar.api;
 
 import static com.openexchange.java.Autoboxing.I;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -69,8 +70,9 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 import java.util.TimeZone;
+
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
+
 import com.openexchange.api2.ReminderService;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.calendar.CachedCalendarIterator;
@@ -113,6 +115,7 @@ import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.log.LogFactory;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
@@ -213,7 +216,7 @@ public final class CalendarCollection implements CalendarCollectionService {
         fieldMap.put(Integer.valueOf(CalendarDataObject.ORGANIZER_ID), "organizerId");
         fieldMap.put(Integer.valueOf(CalendarDataObject.PRINCIPAL), "principal");
         fieldMap.put(Integer.valueOf(CalendarDataObject.PRINCIPAL_ID), "principalId");
-        
+        fieldMap.put(Integer.valueOf(Appointment.FILENAME), "filename");
     }
 
     /**

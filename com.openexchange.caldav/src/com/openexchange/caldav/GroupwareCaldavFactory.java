@@ -58,7 +58,6 @@ import gnu.trove.set.hash.TIntHashSet;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -291,16 +290,16 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
         return stateHolder.get();
     }
 
-    public boolean isInRange(final Appointment appointment) throws WebdavProtocolException {
-        final Date start = start();
-        final Date end = end();
-        for (final Date d : Arrays.asList(appointment.getStartDate(), appointment.getEndDate())) {
-            if (!d.after(start) || !d.before(end)) {
-                return false;
-            }
-        }
-        return true;
-    }
+//    public boolean isInRange(final Appointment appointment) throws WebdavProtocolException {
+//        final Date start = start();
+//        final Date end = end();
+//        for (final Date d : Arrays.asList(appointment.getStartDate(), appointment.getEndDate())) {
+//            if (!d.after(start) || !d.before(end)) {
+//                return false;
+//            }
+//        }
+//        return true;
+//    }
 
     public Date end() throws WebdavProtocolException {
         final String value = getConfigValue("com.openexchange.caldav.interval.end", "one_year");
@@ -451,7 +450,9 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
 
     public static final class State {
 
-        private final static int[] FIELDS_FOR_ALL_REQUEST = { DataObject.OBJECT_ID, FolderChildObject.FOLDER_ID, DataObject.LAST_MODIFIED, Appointment.RECURRENCE_ID, Appointment.UID };
+        private final static int[] BASIC_FIELDS = { 
+        	DataObject.OBJECT_ID, FolderChildObject.FOLDER_ID, DataObject.LAST_MODIFIED, Appointment.RECURRENCE_ID, 
+        	CommonObject.FILENAME, Appointment.UID };
 
         private final static int[] APPOINTMENT_FIELDS = {
             DataObject.OBJECT_ID, DataObject.CREATED_BY, DataObject.CREATION_DATE, DataObject.LAST_MODIFIED, DataObject.MODIFIED_BY,
@@ -459,7 +460,8 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
             CalendarObject.START_DATE, CalendarObject.END_DATE, CalendarObject.NOTE, CalendarObject.RECURRENCE_TYPE,
             CalendarObject.RECURRENCE_CALCULATOR, CalendarObject.RECURRENCE_ID, CalendarObject.PARTICIPANTS, CalendarObject.USERS,
             Appointment.SHOWN_AS, Appointment.FULL_TIME, Appointment.COLOR_LABEL, Appointment.TIMEZONE, Appointment.UID,
-            Appointment.SEQUENCE, Appointment.ORGANIZER, Appointment.CONFIRMATIONS, Appointment.ORGANIZER_ID, Appointment.PRINCIPAL, Appointment.PRINCIPAL_ID };
+            Appointment.SEQUENCE, Appointment.ORGANIZER, Appointment.CONFIRMATIONS, Appointment.ORGANIZER_ID, Appointment.PRINCIPAL, 
+            CommonObject.FILENAME, Appointment.PRINCIPAL_ID };
 
         private final GroupwareCaldavFactory factory;
 
@@ -473,7 +475,7 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
 
         private final TIntObjectMap<List<Appointment>> folderCache = new TIntObjectHashMap<List<Appointment>>();
 
-        private final Map<String, Integer> uuidMap = new HashMap<String, Integer>();
+        private final Map<String, Integer> resourceMapping = new HashMap<String, Integer>();
 
 //        private final Set<Integer> loadedAllFolderGuardian = new HashSet<Integer>();
 
@@ -493,7 +495,7 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
             try {
                 final SearchIterator<Appointment> iterator = calendar.getAppointmentsBetweenInFolder(
                     folderId,
-                    FIELDS_FOR_ALL_REQUEST,
+                    BASIC_FIELDS,
                     factory.start(),
                     factory.end(),
                     -1,
@@ -643,12 +645,13 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
                 final CalendarDataObject appointment = appointmentInterface.getObjectById(id, folderId);
                 appointmentCache.put(key, appointment);
                 loadedAllAppointmentGuardian.add(key);
-                uuidMap.put(appointment.getUid(), I(appointment.getObjectID()));
+                resourceMapping.put(CaldavResource.getResourceName(appointment), I(id));
+//                uuidMap.put(appointment.getUid(), I(appointment.getObjectID()));
             } catch (final Exception e) {
                 throw WebdavProtocolException.generalError(e, new WebdavPath(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             }
         }
-
+        
         public Appointment get(final int id, final int folderId) {
             cacheFolderSlim(folderId);
             final Appointment appointment = appointmentCache.get(new UIDMatch(id, folderId));
@@ -721,18 +724,18 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
             patchGuard.add(appointment.getObjectID() + ":" + appointment.getParentFolderID());
         }
 
-        public int resolveUUID(final String uuid, final int folderId) {
-
-            final Integer id = uuidMap.get(uuid);
+        public Integer resolveResource(final String name, final int folderId) {
+            final Integer id = resourceMapping.get(name);
             if (id != null) {
-                return i(id);
+                return id;
             }
 
             final AppointmentSQLInterface calendar = factory.getAppointmentInterface();
             try {
                 final SearchIterator<Appointment> iterator = calendar.getAppointmentsBetweenInFolder(
                     folderId,
-                    new int[]{Appointment.OBJECT_ID, Appointment.UID, Appointment.RECURRENCE_ID},
+                    BASIC_FIELDS,
+//                    new int[]{Appointment.OBJECT_ID, Appointment.UID, Appointment.RECURRENCE_ID},
                     factory.start(),
                     factory.end(),
                     -1,
@@ -743,17 +746,18 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
                         // Exception, so ignore
                     } else {
                         if (appointment.getUid() != null) {
-                            uuidMap.put(appointment.getUid(), I(appointment.getObjectID()));
+                            resourceMapping.put(CaldavResource.getResourceName(appointment), I(appointment.getObjectID()));
+//                            uuidMap.put(appointment.getUid(), I(appointment.getObjectID()));
                         }
                     }
                 }
-                if (uuidMap.containsKey(uuid)) {
-                    return i(uuidMap.get(uuid));
+                if (resourceMapping.containsKey(name)) {
+                    return resourceMapping.get(name);
                 }
             } catch (final Exception e) {
                 LOG.error(e.getMessage(), e);
             }
-            return -1;
+            return null;
         }
 
         public List<Appointment> getAppointmentsInFolderAndRange(final int folderId, Date start, Date end) throws WebdavProtocolException {
@@ -764,7 +768,7 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
             try {
                 final SearchIterator<Appointment> iterator = calendar.getAppointmentsBetweenInFolder(
                     folderId,
-                    FIELDS_FOR_ALL_REQUEST,
+                    BASIC_FIELDS,
                     start,
                     end,
                     -1,
@@ -903,7 +907,8 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
 
     }
     
-    private final int[] SYNC_STATUS_FIELDS = { Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.LAST_MODIFIED, Appointment.CREATION_DATE };
+    private final int[] SYNC_STATUS_FIELDS = { Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.LAST_MODIFIED, 
+    		Appointment.CREATION_DATE, Appointment.UID, Appointment.FILENAME };
 
     public Syncstatus<WebdavResource> getSyncStatusSince(final WebdavCollection webdavCollection, String token) throws WebdavProtocolException {
         if (token.length() == 0) {

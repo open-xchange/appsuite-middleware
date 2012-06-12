@@ -160,32 +160,23 @@ public class CaldavResource extends AbstractResource {
 
     private final List<CalendarDataObject> deleteExceptionsToSave = new ArrayList<CalendarDataObject>();
 
-    public CaldavResource(final CaldavCollection parent, final Appointment appointment, final GroupwareCaldavFactory factory) throws WebdavProtocolException {
-        super();
-        if (appointment == null) {
-            throw new NullPointerException();
-        }
-        this.exists = true;
-        this.parent = parent;
-        this.appointment = appointment;
-        this.factory = factory;
-        final String uid = appointment.getUid();
-        if (null != uid && 0 < uid.length()) {
-            this.url = parent.getUrl().dup().append(uid + ".ics");
-        } else {
-        	//TODO: generate and save missing UUID on demand 
-        	this.url = parent.getUrl().dup().append(appointment.getObjectID() + ".ics");
-        }
+    public CaldavResource(CaldavCollection parent, Appointment appointment, GroupwareCaldavFactory factory) throws WebdavProtocolException {
+    	this(parent, appointment, parent.getUrl().dup().append(getResourceName(appointment) + ".ics"), factory);
     }
 
-    public CaldavResource(final CaldavCollection parent, final WebdavPath url, final GroupwareCaldavFactory factory) {
+    public CaldavResource(CaldavCollection parent, WebdavPath url, GroupwareCaldavFactory factory) {
+    	this(parent, null, url, factory);
+    }
+
+    private CaldavResource(CaldavCollection parent, Appointment appointment, WebdavPath url, GroupwareCaldavFactory factory) {
         super();
-        this.exists = false;
         this.parent = parent;
+        this.appointment = appointment;
+        this.exists = null != appointment;
         this.factory = factory;
         this.url = url;
     }
-
+    
     @Override
     protected WebdavFactory getFactory() {
         return factory;
@@ -375,6 +366,11 @@ public class CaldavResource extends AbstractResource {
             toSave.setIgnoreConflicts(true);
             final AppointmentSQLInterface appointmentSQLInterface = factory.getAppointmentInterface();
             if (create) {
+                String resourceName = getResourceName(this.url);
+                if (null != resourceName && false == resourceName.equals(toSave.getUid())) {
+            		LOG.debug(getUrl() + ": Storing WebDAV resource name in filename upon creation.");
+            		toSave.setFilename(resourceName);
+                }
                 appointmentSQLInterface.insertAppointmentObject(toSave);
             } else {
                 Appointment oldAppointment = factory.getState().get(appointment.getObjectID(), parent.getId());
@@ -843,4 +839,38 @@ public class CaldavResource extends AbstractResource {
         		patchedICal, UTC, factory.getContext(), new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>());
     }
     
+
+    /**
+     * Gets the resource name for an appointment, preferring the 
+     * 'filename' property if set.
+     * 
+     * @param appointment the appointment
+     * @return the resource name
+     */
+    public static String getResourceName(Appointment appointment) {
+    	if (null != appointment.getFilename() && 0 < appointment.getFilename().length()) {
+    		return appointment.getFilename();
+    	} else {
+    		return appointment.getUid();
+    	}
+    }
+
+    /**
+     * Gets the resource name from an url, i.e. the path's name without the 
+     * '.ics' extension.
+     * 
+     * @param url the webdav path
+     * @return the resource name
+     */
+    public static String getResourceName(WebdavPath url) {
+    	if (null != url) {
+    		String name = url.name();
+        	if (null != name && 4 < name.length() && name.toLowerCase().endsWith(".ics")) {
+        		return name.substring(0, name.length() - 4);
+        	}
+        	return name;
+    	}
+    	return null;
+    }
+
 }

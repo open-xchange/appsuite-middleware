@@ -50,6 +50,7 @@
 package com.openexchange.calendar;
 
 import static com.openexchange.java.Autoboxing.I;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -62,7 +63,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+
 import org.apache.commons.logging.Log;
+
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.calendar.storage.ParticipantStorage;
 import com.openexchange.database.provider.SimpleDBProvider;
@@ -313,7 +316,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 @Override
                 public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
                     final String uid = rs.getString(columnCount);
-                    cdao.setUid(uid);
+                    cdao.setUid(rs.wasNull() ? null : uid);
                 }
             });
             put(I(Appointment.SEQUENCE), new FieldFiller() {
@@ -351,6 +354,14 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                     if (!rs.wasNull()) {
                         cdao.setPrincipalId(principalId);
                     }
+                }
+            });
+            put(I(Appointment.FILENAME), new FieldFiller() {
+
+                @Override
+                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
+                    final String filename = rs.getString(columnCount);
+                    cdao.setFilename(rs.wasNull() ? null : filename);
                 }
             });
 
@@ -482,6 +493,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                     cdao.setOrganizer(organizer);
                 }
                 cdao.setUid(setString(i++, load_resultset));
+                cdao.setFilename(setString(i++, load_resultset));
                 cdao.setSequence(setInt(i++, load_resultset));
                 cdao.setOrganizerId(setInt(i++, load_resultset));
                 cdao.setPrincipal(setString(i++, load_resultset));
@@ -666,6 +678,9 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         }
         if (cdao.containsPrincipalId() && recColl.check(I(cdao.getPrincipalId()), I(edao.getPrincipalId())) && recColl.getFieldName(Appointment.PRINCIPAL_ID) != null) {
             ucols[uc++] = Appointment.PRINCIPAL_ID;
+        }
+        if (cdao.containsFilename() && recColl.check(cdao.getFilename(), edao.getFilename()) && recColl.getFieldName(Appointment.FILENAME) != null) {
+            ucols[uc++] = Appointment.FILENAME;
         }
         return uc;
     }
