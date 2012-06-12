@@ -471,6 +471,7 @@ public final class HtmlServiceImpl implements HtmlService {
         }
         String html = replaceHexEntities(htmlContent);
         html = processDownlevelRevealedConditionalComments(html);
+        html = dropDoubleAccents(html);
         // html = replaceHexNbsp(html);
         final FilterJerichoHandler handler;
         {
@@ -485,8 +486,7 @@ public final class HtmlServiceImpl implements HtmlService {
         if (dropExternalImages && null != modified) {
             modified[0] |= handler.isImageURLFound();
         }
-        String retval = handler.getHTML();
-        retval = dropDoubleAccents(retval);
+        final String retval = handler.getHTML();
         if (DEBUG) {
             final long dur = System.currentTimeMillis() - st;
             LOG.debug("\tHTMLServiceImpl.sanitize() took " + dur + "msec.");
