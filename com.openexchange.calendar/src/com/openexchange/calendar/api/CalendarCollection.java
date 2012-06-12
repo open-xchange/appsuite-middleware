@@ -70,7 +70,6 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.TimeZone;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.api2.ReminderService;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.calendar.CachedCalendarIterator;
@@ -113,6 +112,7 @@ import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.log.LogFactory;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
@@ -503,7 +503,13 @@ public final class CalendarCollection implements CalendarCollectionService {
     }
 
     @Override
-    public void setRecurrencePositionOrDateInDAO(final CalendarDataObject cdao) throws OXException {
+    public void setRecurrencePositionOrDateInDAO(final CalendarDataObject cdao)
+            throws OXException {
+        setRecurrencePositionOrDateInDAO(cdao, false);
+    }
+
+    @Override
+    public void setRecurrencePositionOrDateInDAO(final CalendarDataObject cdao, final boolean ignore_exceptions) throws OXException {
         if (cdao.containsRecurrencePosition() && cdao.getRecurrencePosition() > 0) {
             /*
              * Determine recurrence date position from recurrence position
@@ -511,10 +517,10 @@ public final class CalendarCollection implements CalendarCollectionService {
             fillDAO(cdao);
             RecurringResultsInterface rrs = calculateRecurring(cdao, 0, 0, cdao.getRecurrencePosition());
             RecurringResultInterface rr = rrs.getRecurringResult(0);
-            if (rr == null) {
+            if (rr == null && ignore_exceptions) {
                 rrs = calculateRecurring(cdao, 0, 0, cdao.getRecurrencePosition(), MAX_OCCURRENCESE, true);
                 if (rrs == null) {
-                	return;
+                    throw OXCalendarExceptionCodes.UNABLE_TO_CALCULATE_POSITION.create();
                 }
                 rr = rrs.getRecurringResult(0);
             }
