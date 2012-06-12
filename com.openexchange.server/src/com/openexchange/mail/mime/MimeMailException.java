@@ -62,6 +62,7 @@ import javax.mail.SendFailedException;
 import javax.mail.internet.AddressException;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.session.Session;
 import com.sun.mail.smtp.SMTPSendFailedException;
 
@@ -157,10 +158,11 @@ public class MimeMailException extends OXException {
      */
     public static OXException handleMessagingException(final MessagingException e, final MailConfig mailConfig, final Session session) {
         try {
-            if ((e instanceof javax.mail.AuthenticationFailedException) || ((e.getMessage() != null) && (e.getMessage().toLowerCase(
-                Locale.ENGLISH).indexOf(ERR_AUTH_FAILED) != -1))) {
-                final boolean temporary = (e.getMessage() != null) && ERR_TMP.equals(e.getMessage().toLowerCase(Locale.ENGLISH));
-                if (temporary) {
+            if ((e instanceof javax.mail.AuthenticationFailedException) || ((e.getMessage() != null) && (e.getMessage().toLowerCase(Locale.ENGLISH).indexOf(ERR_AUTH_FAILED) != -1))) {
+                if (null != mailConfig && MailAccount.DEFAULT_ID == mailConfig.getAccountId()) {
+                    return MimeMailExceptionCode.LOGIN_FAILED.create(e, mailConfig.getServer(), mailConfig.getLogin());
+                }
+                if ((e.getMessage() != null) && ERR_TMP.equals(e.getMessage().toLowerCase(Locale.ENGLISH))) {
                     return MimeMailExceptionCode.LOGIN_FAILED.create(
                         e,
                         mailConfig == null ? STR_EMPTY : mailConfig.getServer(),
