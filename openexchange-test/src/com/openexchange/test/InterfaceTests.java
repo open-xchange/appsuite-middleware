@@ -108,7 +108,6 @@ public final class InterfaceTests {
         /* TODO Enable the following test again. But this requires fixing the server. Currently the request fails.
         tests.addTestSuite(com.openexchange.webdav.client.NaughtyClientTest.class); */
         tests.addTestSuite(com.openexchange.ajax.FunambolTests.class);
-        tests.addTestSuite(com.openexchange.webdav.client.SmokeTest.class);
         tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.AppointmentParticipantsShouldBecomeUsersIfPossible.class);
         tests.addTestSuite(com.openexchange.ajax.task.TaskExternalUsersBecomeInternalUsers.class);
         tests.addTestSuite(com.openexchange.ajax.contact.AggregatingContactTest.class);
