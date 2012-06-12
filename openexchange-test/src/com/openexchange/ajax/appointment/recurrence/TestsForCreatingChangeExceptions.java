@@ -256,7 +256,7 @@ public class TestsForCreatingChangeExceptions extends ManagedAppointmentTest {
         changes = new Changes();
 
         UserResolver resolver = new UserResolver(getClient());
-        User[] resolveUser = resolver.resolveUser(getAJAXProperty("seconduser"));
+        User[] resolveUser = resolver.resolveUser(getAJAXProperty("seconduser") + "*");
         assertTrue("Precondition: Cannot start without having another user ready", resolveUser.length > 0);
         UserParticipant userParticipant = new UserParticipant(resolveUser[0].getId());
         Participant[] participants = new UserParticipant[]{userParticipant };
