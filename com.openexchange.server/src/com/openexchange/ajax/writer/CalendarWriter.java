@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.writer;
 
-import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.Date;
 import java.util.TimeZone;
@@ -285,14 +284,50 @@ public abstract class CalendarWriter extends CommonWriter {
         }
     };
 
+    protected static final FieldWriter<CalendarObject> ORGANIZER_ID_WRITER = new FieldWriter<CalendarObject>() {
+        @Override
+        public void write(final CalendarObject obj, final TimeZone timeZone, final JSONArray json) {
+            writeValue(obj.getOrganizerId(), json, obj.containsOrganizerId());
+        }
+        @Override
+        public void write(final CalendarObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
+            writeParameter(CalendarFields.ORGANIZER_ID, obj.getOrganizerId(), json, obj.containsOrganizerId());
+        }
+    };
+
+    protected static final FieldWriter<CalendarObject> PRINCIPAL_WRITER = new FieldWriter<CalendarObject>() {
+        @Override
+        public void write(final CalendarObject obj, final TimeZone timeZone, final JSONArray json) {
+            writeValue(obj.getPrincipal(), json, obj.containsPrincipal());
+        }
+        @Override
+        public void write(final CalendarObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
+            writeParameter(CalendarFields.PRINCIPAL, obj.getPrincipal(), json, obj.containsPrincipal());
+        }
+    };
+
+    protected static final FieldWriter<CalendarObject> PRINCIPAL_ID_WRITER = new FieldWriter<CalendarObject>() {
+        @Override
+        public void write(final CalendarObject obj, final TimeZone timeZone, final JSONArray json) {
+            writeValue(obj.getPrincipalId(), json, obj.containsPrincipalId());
+        }
+        @Override
+        public void write(final CalendarObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
+            writeParameter(CalendarFields.PRINCIPAL_ID, obj.getPrincipalId(), json, obj.containsPrincipalId());
+        }
+    };
+
     static {
-        final TIntObjectMap<FieldWriter<CalendarObject>> m = new TIntObjectHashMap<FieldWriter<CalendarObject>>(1, 1);
+        final TIntObjectHashMap<FieldWriter<CalendarObject>> m = new TIntObjectHashMap<FieldWriter<CalendarObject>>(1, 1);
         m.put(CalendarObject.CONFIRMATIONS, CONFIRMATIONS_WRITER);
         m.put(CalendarObject.ORGANIZER, ORGANIZER_WRITER);
         m.put(CalendarObject.UID, UID_WRITER);
         m.put(CalendarObject.SEQUENCE, SEQUENCE_WRITER);
+        m.put(CalendarObject.ORGANIZER_ID, ORGANIZER_ID_WRITER);
+        m.put(CalendarObject.PRINCIPAL, PRINCIPAL_WRITER);
+        m.put(CalendarObject.PRINCIPAL_ID, PRINCIPAL_ID_WRITER);
         WRITER_MAP = m;
     }
 
-    private static final TIntObjectMap<FieldWriter<CalendarObject>> WRITER_MAP;
+    private static final TIntObjectHashMap<FieldWriter<CalendarObject>> WRITER_MAP;
 }
