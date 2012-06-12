@@ -379,7 +379,7 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
         try {
             final CalendarDataObject original = getObjectById(object_id);
             final Date retval = delegate.setUserConfirmation(object_id, folderId, user_id, confirm, confirm_message);
-            final CalendarDataObject reloaded = getObjectById(object_id, folderId);
+            final CalendarDataObject reloaded = getObjectById(object_id);
             final ITipMailGenerator generator = generators.create(original, reloaded, session, onBehalfOf(folderId));
             final List<NotificationParticipant> recipients = generator.getRecipients();
             for (final NotificationParticipant notificationParticipant : recipients) {
