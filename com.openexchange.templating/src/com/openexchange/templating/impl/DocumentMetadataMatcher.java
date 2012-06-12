@@ -79,7 +79,6 @@ public class DocumentMetadataMatcher {
 
     public void propose(final DocumentMetadata document) {
         int newScore = 0;
-<<<<<<< HEAD
         final String fileName = document.getFileName();
         if (fileName == null) {
             return;
@@ -89,14 +88,6 @@ public class DocumentMetadataMatcher {
         }
         if(fileName.contains(".")) {
             final String filenameWithoutExtension = fileName.substring(0, fileName.lastIndexOf('.'));
-=======
-        String fileName = document.getFileName();
-        if(fileName != null && fileName.equals(name)) {
-            newScore = 100;
-        }
-        if(fileName != null && fileName.contains(".")) {
-            String filenameWithoutExtension = fileName.substring(0, fileName.lastIndexOf('.'));
->>>>>>> 10fc3c6... fixed some tests
             if(filenameWithoutExtension.equals(name)) {
                 newScore = 5;
             }
