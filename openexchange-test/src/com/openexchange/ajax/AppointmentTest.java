@@ -242,7 +242,7 @@ public class AppointmentTest extends AbstractAJAXTest {
                 appointmentObj2.getDayInMonth());
         assertEquals("until", appointmentObj1.getUntil(), appointmentObj2
                 .getUntil());
-        if (appointmentObj1.getOrganizer() != null) {
+        if (appointmentObj1.getOrganizer() != null && appointmentObj2.getOrganizer() != null) {
             assertEquals("organizer", appointmentObj1.getOrganizer(), appointmentObj2.getOrganizer());
         }
         if (appointmentObj1.containsUid()) {

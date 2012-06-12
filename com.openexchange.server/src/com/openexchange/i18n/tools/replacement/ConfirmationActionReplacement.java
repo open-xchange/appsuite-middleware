@@ -63,7 +63,7 @@ import com.openexchange.i18n.tools.TemplateToken;
 public final class ConfirmationActionReplacement extends LocalizedStringReplacement {
 
     private static String[] ACTIONS = { Notifications.CA_ACCEPTED, Notifications.CA_DECLINED,
-            Notifications.CA_TENTATIVELY_ACCEPTED };
+            Notifications.CA_TENTATIVELY_ACCEPTED, Notifications.STATUS_WAITING };
 
     public static final int ACTION_ACCEPTED = 0;
 

@@ -77,7 +77,7 @@ public final class AppointmentActionReplacement extends LocalizedStringReplaceme
 
     public static final int ACTION_TENTATIVE = 5;
 
-    public static final int ACTION_NONE = -1;
+    public static final int ACTION_NONE = 6;
 
     /**
      * Initializes a new {@link AppointmentActionReplacement}
