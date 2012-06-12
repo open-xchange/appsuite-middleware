@@ -93,7 +93,7 @@ public class DocumentMetadataMatcher {
             }
         }
 
-        if(document.getTitle().equals(name)) {
+        if(document.getTitle() != null && document.getTitle().equals(name)) {
             newScore = 7;
         }
 
