@@ -19,6 +19,7 @@ Import-Package: com.openexchange.admin.console,
  com.openexchange.admin.rmi.extensions,
  com.openexchange.admin.rmi.impl,
  com.openexchange.admin.tools,
+ com.openexchange.database,
  com.openexchange.exception,
  com.openexchange.groupware,
  com.openexchange.groupware.contexts,
@@ -30,7 +31,8 @@ Import-Package: com.openexchange.admin.console,
  com.openexchange.tools.pipesnfilters,
  com.openexchange.tools.sql,
  org.apache.commons.logging,
- org.osgi.framework
+ org.osgi.framework,
+ org.osgi.util.tracker;version="1.5.0"
 Require-Bundle: com.openexchange.admin,
  com.openexchange.admin.plugin.hosting,
  com.openexchange.admin.rmi
