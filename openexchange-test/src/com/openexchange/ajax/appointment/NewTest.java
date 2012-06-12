@@ -261,7 +261,7 @@ public class NewTest extends AppointmentTest {
 
         loadAppointment = loadAppointment(getWebConversation(), objectId, 2, appointmentFolderId, c.getTimeZone(), PROTOCOL + getHostName(), getSessionId());
 
-        Calendar check = new GregorianCalendar();
+        final Calendar check = new GregorianCalendar();
         check.setTimeZone(c.getTimeZone());
         check.setTime(loadAppointment.getStartDate());
 
@@ -466,8 +466,16 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setObjectID(objectId);
         final Appointment loadAppointment = loadAppointment(getSecondWebConversation(), objectId, targetFolder, timeZone, PROTOCOL + getHostName(), getSecondSessionId());
         compareObject(appointmentObj, loadAppointment, startTime, endTime);
-        deleteAppointment(getSecondWebConversation(), objectId, targetFolder, PROTOCOL + getHostName(), getSecondSessionId());
-        com.openexchange.webdav.xml.FolderTest.deleteFolder(getWebConversation(), new int[] { targetFolder }, PROTOCOL + getHostName(), getLogin(), getPassword(), "");
+        try {
+            deleteAppointment(getSecondWebConversation(), objectId, targetFolder, PROTOCOL + getHostName(), getSecondSessionId());
+        } catch (final Exception e) {
+            // Ignore
+        }
+        try {
+            com.openexchange.webdav.xml.FolderTest.deleteFolder(getWebConversation(), new int[] { targetFolder }, PROTOCOL + getHostName(), getLogin(), getPassword(), "");
+        } catch (final Exception e) {
+            // Ignore
+        }
     }
 
     public void testDailyRecurrence() throws Exception {
