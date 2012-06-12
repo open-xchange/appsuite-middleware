@@ -60,13 +60,13 @@ import com.openexchange.data.conversion.ical.ICalFile;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class ICalResource {
-	
+
 	private final String eTag;
 	private final String href;
 	private final ICalFile iCalFile;
 	
 	public ICalResource(String iCalString, String href, String eTag) throws IOException {
-		this.iCalFile = new ICalFile(new StringReader(iCalString));
+		this.iCalFile = new ICalFile(new StringReader(unfold(iCalString)));
 		this.href = href;
 		this.eTag = eTag;
 	}
@@ -106,7 +106,15 @@ public class ICalResource {
 
 	@Override
     public String toString() {
-		return this.iCalFile.toString();		
+		return fold(this.iCalFile.toString());		
 	}
 
+    private static String fold(String content) {
+    	return content.replaceAll(".{75}", "$0\r\n ");
+    }
+
+    private static String unfold(String content) {
+    	return content.replaceAll("(?:\\r\\n?|\\n)[ \t]", "");
+    }
+	
 }

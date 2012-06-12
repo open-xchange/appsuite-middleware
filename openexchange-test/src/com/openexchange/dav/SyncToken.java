@@ -49,7 +49,6 @@
 
 package com.openexchange.dav;
 
-import org.apache.jackrabbit.webdav.version.report.ReportInfo;
 
 /**
  * {@link SyncToken} - Holds the sync token
@@ -69,12 +68,6 @@ public class SyncToken {
 		this.token = token;		
 	}
 	
-	public void update(ReportInfo reportInfo) {
-		if (null != reportInfo) {
-						
-		}
-	}
-
 	/**
 	 * @return the token
 	 */

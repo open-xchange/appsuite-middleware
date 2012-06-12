@@ -73,11 +73,7 @@ public class NewTest extends CalDAVTest {
 	
 	public void testCreateSimpleOnClient() throws Exception {
 		/*
-		 * fetch sync token for later synchronization
-		 */
-		SyncToken syncToken = new SyncToken(super.fetchSyncToken());
-		/*
-		 * create appointment
+		 * create appointment on client
 		 */
     	String uid = randomUID();
     	String summary = "test";
@@ -85,7 +81,7 @@ public class NewTest extends CalDAVTest {
     	Date start = TimeTools.D("tomorrow at 3pm");
     	Date end = TimeTools.D("tomorrow at 4pm");
     	String iCal = generateICal(start, end, uid, summary, location);
-        assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putICal(super.getDefaultFolderID(), uid, iCal));
+        assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putICal(uid, iCal));
         /*
          * verify appointment on server
          */
@@ -95,12 +91,43 @@ public class NewTest extends CalDAVTest {
         /*
          * verify appointment on client
          */
-        Map<String, String> eTags = super.syncCollection(syncToken).getETagsStatusOK();
+        ICalResource iCalResource = super.get(uid, null);
+        assertEquals("UID wrong", uid, iCalResource.getUID());
+        assertEquals("SUMMARY wrong", summary, iCalResource.getSummary());
+        assertEquals("LOCATION wrong", location, iCalResource.getLocation());
+	}
+	
+	public void testCreateSimpleOnServer() throws Exception {
+		/*
+		 * fetch sync token for later synchronization
+		 */
+		SyncToken syncToken = new SyncToken(super.fetchSyncToken());		
+		/*
+		 * create appointment on server
+		 */
+    	String uid = randomUID();
+    	String summary = "hallo";
+    	String location = "achtung";
+    	Date start = TimeTools.D("next friday at 11:30");
+    	Date end = TimeTools.D("next friday at 12:45");
+		Appointment appointment = new Appointment();
+		appointment.setTitle(summary);
+		appointment.setLocation(location);
+		appointment.setStartDate(start);
+		appointment.setEndDate(end);
+		appointment.setUid(uid);
+		super.rememberForCleanUp(super.create(appointment));
+        /*
+         * verify appointment on client
+         */
+		Map<String, String> eTags = super.syncCollection(syncToken).getETagsStatusOK();
         assertTrue("no resource changes reported on sync collection", 0 < eTags.size());
         List<ICalResource> calendarData = super.calendarMultiget(eTags.keySet());
         ICalResource iCalResource = assertContains(uid, calendarData);
         assertEquals("SUMMARY wrong", summary, iCalResource.getSummary());
         assertEquals("LOCATION wrong", location, iCalResource.getLocation());
 	}
+	
+
 	
 }

@@ -50,6 +50,8 @@
 package com.openexchange.dav.caldav;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -58,6 +60,7 @@ import java.util.List;
 import java.util.TimeZone;
 
 import org.apache.commons.httpclient.HttpException;
+import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.jackrabbit.webdav.DavException;
 import org.apache.jackrabbit.webdav.MultiStatusResponse;
@@ -174,11 +177,15 @@ public abstract class CalDAVTest extends WebDAVTest {
 		}
 		return calendarData;
 	}
+
+	protected int putICal(String resourceName, String iCal) throws HttpException, IOException, OXException, URISyntaxException {
+		return putICal(getDefaultFolderID(), resourceName, iCal); 
+	}
 	
-	protected int putICal(String folderID, String resourceName, String iCal) throws HttpException, IOException, OXException {
+	protected int putICal(String folderID, String resourceName, String iCal) throws HttpException, IOException, OXException, URISyntaxException {
         PutMethod put = null;
         try {
-            final String href = "/caldav/" + folderID + "/" + resourceName + ".ics";
+            String href = "/caldav/" + folderID + "/" + urlEncode(resourceName) + ".ics";
             put = new PutMethod(getBaseUri() + href);
             put.addRequestHeader(Headers.IF_NONE_MATCH, "*");
             put.setRequestEntity(new StringRequestEntity(iCal, "text/calendar", null));
@@ -187,7 +194,63 @@ public abstract class CalDAVTest extends WebDAVTest {
             release(put);
         }
 	}
+
+	protected ICalResource get(String resourceName, String ifNoneMatchEtag) throws HttpException, IOException, OXException, URISyntaxException {
+		return get(getDefaultFolderID(), resourceName, ifNoneMatchEtag);
+	}
 	
+	protected ICalResource get(String folderID, String resourceName, String ifNoneMatchEtag) throws HttpException, IOException, OXException, URISyntaxException {
+		GetMethod get = null;
+        try {
+            String href = "/caldav/" + folderID + "/" + urlEncode(resourceName) + ".ics";
+            get = new GetMethod(getBaseUri() + href);
+            get.addRequestHeader(Headers.IF_NONE_MATCH, null != ifNoneMatchEtag ? ifNoneMatchEtag : "*");
+            assertEquals("response code wrong", StatusCodes.SC_OK, getWebDAVClient().executeMethod(get));
+            String responseBody = get.getResponseBodyAsString();
+            assertNotNull("got no response body", responseBody);
+            return new ICalResource(responseBody, href, get.getResponseHeader("ETag").getValue());
+        } finally {
+            release(get);
+        }
+	}
+	
+	private static String urlEncode(String name) throws URISyntaxException {
+		return new URI(null, name, null).toString();
+	}
+
+	protected int putICalUpdate(String resourceName, String iCal, String ifMatchEtag) throws HttpException, IOException, OXException, URISyntaxException {
+		return this.putICalUpdate(getDefaultFolderID(), resourceName, iCal, ifMatchEtag);
+	}
+	
+	protected int putICalUpdate(String folderID, String resourceName, String iCal, String ifMatchEtag) throws HttpException, IOException, OXException, URISyntaxException {
+        PutMethod put = null;
+        try {
+            String href = "/caldav/" + folderID + "/" + urlEncode(resourceName) + ".ics";
+            put = new PutMethod(getBaseUri() + href);
+            if (null != ifMatchEtag) {
+                put.addRequestHeader(Headers.IF_MATCH, ifMatchEtag);
+            }
+            put.setRequestEntity(new StringRequestEntity(iCal, "text/calendar", null));
+            return getWebDAVClient().executeMethod(put);
+        } finally {
+            release(put);
+        }
+	}
+	
+	protected int putICalUpdate(ICalResource iCalResource) throws HttpException, IOException, OXException {
+        PutMethod put = null;
+        try {
+            put = new PutMethod(getBaseUri() + iCalResource.getHref());
+            if (null != iCalResource.getETag()) {
+                put.addRequestHeader(Headers.IF_MATCH, iCalResource.getETag());
+            }
+            put.setRequestEntity(new StringRequestEntity(iCalResource.toString(), "text/calendar", null));
+            return getWebDAVClient().executeMethod(put);
+        } finally {
+            release(put);
+        }
+	}
+
 	protected Appointment getAppointment(String folderID, String uid) throws OXException {
 		Appointment[] appointments = this.testManager.all(parse(folderID), new Date(0), new Date(Long.MAX_VALUE), 
 				new int[] { Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.UID });
@@ -303,6 +366,16 @@ public abstract class CalDAVTest extends WebDAVTest {
     	assertNotNull("no iCal resource with UID '" + uid + "' found", match);
     	return match;
     }
+
+	protected Appointment create(Appointment appointment) {
+		return create(getDefaultFolderID(), appointment);
+	}
+	
+    protected Appointment create(String folderID, Appointment appointment) {
+		appointment.setParentFolderID(parse(folderID));
+		return getManager().insert(appointment);
+		
+	}
     
 
 }
