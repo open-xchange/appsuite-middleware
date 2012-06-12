@@ -249,7 +249,9 @@ public final class contacts extends XmlServlet<ContactService> {
                 throws IOException {
 
             final XMLOutputter xo = new XMLOutputter();
-
+            if (contactObject.getLastModified() == null) {
+            	contactObject.setLastModified(new Date(Long.MAX_VALUE));
+            }
             try {
                 switch (action) {
                 case DataParser.SAVE:
