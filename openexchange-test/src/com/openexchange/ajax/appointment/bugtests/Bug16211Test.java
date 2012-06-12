@@ -113,7 +113,7 @@ public class Bug16211Test extends AbstractAJAXSession {
         tz = client.getValues().getTimeZone();
         calendar = TimeTools.createCalendar(tz);
 
-        sharedAppointmentFolder = Create.createPublicFolder(client2, "Bug16211PublicFolder", FolderObject.CALENDAR);
+        sharedAppointmentFolder = Create.createPublicFolder(client2, "Bug16211PublicFolder"+System.currentTimeMillis(), FolderObject.CALENDAR);
         FolderTools.shareFolder(
             client2,
             EnumAPI.OX_NEW,
@@ -144,7 +144,7 @@ public class Bug16211Test extends AbstractAJAXSession {
     public void testMoveToPersonalFolder() throws Exception {
         // Use this to test if reminder of the moving user also has been updated. See Bug 16358
         // -------------
-        Appointment uApp = new Appointment();
+        final Appointment uApp = new Appointment();
         uApp.setParentFolderID(sharedAppointmentFolder.getObjectID());
         uApp.setObjectID(appointment.getObjectID());
         uApp.setAlarm(15);
@@ -199,9 +199,9 @@ public class Bug16211Test extends AbstractAJAXSession {
     @Override
     public void tearDown() throws Exception {
         // Delete Appointment
-        GetRequest toDeleteReq = new GetRequest(personalAppointmentFolder.getObjectID(), appointment.getObjectID());
-        GetResponse toDeleteResp = client.execute(toDeleteReq);
-        Appointment toDelete = toDeleteResp.getAppointment(tz);
+        final GetRequest toDeleteReq = new GetRequest(personalAppointmentFolder.getObjectID(), appointment.getObjectID());
+        final GetResponse toDeleteResp = client.execute(toDeleteReq);
+        final Appointment toDelete = toDeleteResp.getAppointment(tz);
         client.execute(new com.openexchange.ajax.appointment.action.DeleteRequest(toDelete));
 
         // Delete folders
