@@ -46,56 +46,54 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.loxandra.json;
+package com.openexchange.loxandra.json.action;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.UUID;
 
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.documentation.annotations.Module;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
-import com.openexchange.loxandra.json.action.AbstractAction;
-import com.openexchange.loxandra.json.action.GetAction;
-import com.openexchange.loxandra.json.action.NewAction;
+import com.openexchange.loxandra.dto.EAVContact;
+import com.openexchange.loxandra.json.EAVContactParser;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ *
  */
-@Module(name = "eavcontact", description = "Provides access to eav contact information.")
-public class EAVContactActionFactory implements AJAXActionServiceFactory {
+@Action(method = RequestMethod.GET, name = "get", description = "Get an EAV Contact.", parameters = { 
+		@Parameter(name = "uuid"), 
+		@Parameter(name = "limited") })
+public class GetAction extends AbstractAction {
 	
-	private static final Map<String, AbstractAction> actions = new ConcurrentHashMap<String, AbstractAction>(2);
+	private static Log log = LogFactory.getLog(GetAction.class);
 
 	/**
 	 * Constructor
 	 * @param serviceLookup
 	 */
-	public EAVContactActionFactory(final ServiceLookup serviceLookup) {
-        super();
-        actions.put("new", new NewAction(serviceLookup));
-        actions.put("get", new GetAction(serviceLookup));
-    }
-
-	/*
-	 * (non-Javadoc)
-	 * @see com.openexchange.documentation.AnnotatedServices#getSupportedServices()
-	 */
-	@Override
-	public Collection<?> getSupportedServices() {
-		return java.util.Collections.unmodifiableCollection(actions.values());
+	public GetAction(ServiceLookup serviceLookup) {
+		super(serviceLookup);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see com.openexchange.ajax.requesthandler.AJAXActionServiceFactory#createActionService(java.lang.String)
+	/* (non-Javadoc)
+	 * @see com.openexchange.ajax.requesthandler.AJAXActionService#perform(com.openexchange.ajax.requesthandler.AJAXRequestData, com.openexchange.tools.session.ServerSession)
 	 */
 	@Override
-	public AJAXActionService createActionService(String action) throws OXException {
-		return actions.get(action);
+	public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+		UUID u = UUID.fromString(requestData.getParameter("uuid"));
+		boolean limited = Boolean.parseBoolean(requestData.getParameter("limited"));
+		
+		EAVContact c = getContactService().getEAVContactService().getContact(u, limited);
+		EAVContactParser parser = new EAVContactParser();
+		return new AJAXRequestResult(parser.parse(c));
 	}
-
 
 }

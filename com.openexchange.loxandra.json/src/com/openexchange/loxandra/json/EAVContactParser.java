@@ -48,54 +48,84 @@
  */
 package com.openexchange.loxandra.json;
 
-import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.TimeZone;
+import java.util.UUID;
 
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.documentation.annotations.Module;
-import com.openexchange.exception.OXException;
-import com.openexchange.loxandra.json.action.AbstractAction;
-import com.openexchange.loxandra.json.action.GetAction;
-import com.openexchange.loxandra.json.action.NewAction;
-import com.openexchange.server.ServiceLookup;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.openexchange.groupware.contact.helpers.ContactField;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.loxandra.dto.EAVContact;
+import com.openexchange.loxandra.helpers.EAVContactHelper;
 
 /**
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ *
  */
-@Module(name = "eavcontact", description = "Provides access to eav contact information.")
-public class EAVContactActionFactory implements AJAXActionServiceFactory {
+public class EAVContactParser {
 	
-	private static final Map<String, AbstractAction> actions = new ConcurrentHashMap<String, AbstractAction>(2);
-
+	private static Log log = LogFactory.getLog(EAVContactParser.class);
+	
 	/**
-	 * Constructor
-	 * @param serviceLookup
+	 * Parse a {@link JSONObject} and creates an {@link EAVContact} 
+	 * 
+	 * @param json
+	 * @return an {@link EAVContact}
 	 */
-	public EAVContactActionFactory(final ServiceLookup serviceLookup) {
-        super();
-        actions.put("new", new NewAction(serviceLookup));
-        actions.put("get", new GetAction(serviceLookup));
-    }
-
-	/*
-	 * (non-Javadoc)
-	 * @see com.openexchange.documentation.AnnotatedServices#getSupportedServices()
-	 */
-	@Override
-	public Collection<?> getSupportedServices() {
-		return java.util.Collections.unmodifiableCollection(actions.values());
+	public EAVContact parse(final JSONObject json) {
+		final EAVContact c = new EAVContact();
+		
+		for (final int column : Contact.JSON_COLUMNS) {
+			
+			final ContactField field = ContactField.getByValue(column);
+			if (field != null && field.isDBField()) {
+				final String key = field.getAjaxName();
+				try {
+					if (json.has(key)) {
+						if (EAVContactHelper.isNonString(column))
+							c.set(column, new Date(Long.parseLong(json.getString(key))));
+						else
+							c.set(column, json.getString(key));
+					}
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
+		try {
+			c.addFolderUUID(UUID.fromString(json.getString("folderUUID")));
+			
+			JSONObject unnamedPropsJSON = json.getJSONObject("unnamed");
+			Iterator<String> iter = json.keys();
+			
+			while (iter.hasNext()) {
+				String string = (String) iter.next();
+				c.addUnnamedProperty(string, unnamedPropsJSON.getString(string));
+			}
+			
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		
+		return c;
 	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see com.openexchange.ajax.requesthandler.AJAXActionServiceFactory#createActionService(java.lang.String)
-	 */
-	@Override
-	public AJAXActionService createActionService(String action) throws OXException {
-		return actions.get(action);
+	
+	public JSONObject parse(final EAVContact c) {
+		JSONObject json = new JSONObject();
+		final EAVContactWriter contactWriter = new EAVContactWriter(TimeZone.getTimeZone("UTC"));
+		try {
+			contactWriter.writeContact(c, json);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return json;
 	}
-
-
 }
