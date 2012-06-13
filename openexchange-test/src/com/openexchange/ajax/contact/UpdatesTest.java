@@ -42,7 +42,7 @@ public class UpdatesTest extends AbstractContactTest {
             }
         } finally {
             try {
-                deleteContact(objectId, contactFolderId);
+                deleteContact(objectId, contactFolderId, true);
             } catch (final Exception e) {
                 // ignore
             }

@@ -4,11 +4,9 @@ package com.openexchange.ajax.contact;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.GetResponse;
@@ -35,7 +33,7 @@ public class SearchTest extends AbstractContactTest {
     public void testSearchLoginUser() throws Exception {
         final Contact user = loadUser(userId);
         final String displayName = user.getDisplayName();
-        ContactSearchObject cso = new ContactSearchObject();
+        final ContactSearchObject cso = new ContactSearchObject();
         cso.setDisplayName(displayName);
         cso.setFolders(FolderObject.SYSTEM_LDAP_FOLDER_ID);
 //        String username = AjaxInit.getAJAXProperty("user_participant1");
@@ -59,7 +57,7 @@ public class SearchTest extends AbstractContactTest {
             true);
         assertTrue("contact array size < 2", contactArray.length >= 2);
 
-        deleteContacts(objectId1, objectId2);
+        deleteContacts(true, objectId1, objectId2);
     }
 
     public void testSearchEmailComplete() throws Exception {
@@ -103,7 +101,7 @@ public class SearchTest extends AbstractContactTest {
             new int[] { Contact.INTERNAL_USERID });
         assertTrue("contact array size >= 3", contactArray2.length >= 3);
 
-        deleteContacts(objectId1, objectId2, objectId3);
+        deleteContacts(true, objectId1, objectId2, objectId3);
     }
 
     // Node 2652
@@ -127,7 +125,7 @@ public class SearchTest extends AbstractContactTest {
                 assertNotNull(objectData.opt(2));
             }
         } finally {
-            deleteContact(objectId, contactFolderId);
+            deleteContact(objectId, contactFolderId, true);
         }
     }
 
@@ -175,7 +173,7 @@ public class SearchTest extends AbstractContactTest {
                 }
             }
         } finally {
-            deleteContacts(contactIds);
+            deleteContacts(true, contactIds);
         }
 
     }
@@ -214,9 +212,9 @@ public class SearchTest extends AbstractContactTest {
         return insertSearchableContacts(contactFolderId);
     }
 
-    private void deleteContacts(final int... ids) throws IOException, SAXException, JSONException, Exception {
+    private void deleteContacts(final boolean ignoreFailure, final int... ids) throws IOException, SAXException, JSONException, Exception {
         for (final int objectId : ids) {
-            deleteContact(objectId, contactFolderId);
+            deleteContact(objectId, contactFolderId, ignoreFailure);
         }
     }
 
@@ -244,7 +242,7 @@ public class SearchTest extends AbstractContactTest {
             }
 
         } finally {
-            deleteContacts(objectIds);
+            deleteContacts(true, objectIds);
         }
 
     }
@@ -288,7 +286,7 @@ public class SearchTest extends AbstractContactTest {
             assertTrue("Expected Guenter Glorreich, but didn't find her", foundGuenter);
 
         } finally {
-            deleteContacts(objectIds);
+            deleteContacts(true, objectIds);
         }
     }
 
