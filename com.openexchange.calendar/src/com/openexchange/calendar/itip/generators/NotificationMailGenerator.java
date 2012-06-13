@@ -643,15 +643,15 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         if (templates == null) {
             return;
         }
-        final OXTemplate textTemplate = templates.loadTemplate(mail.getTemplateName()+".txt.tmpl", mail.getTemplateName()+".txt.tmpl", session, false);
-        final OXTemplate htmlTemplate = templates.loadTemplate(mail.getTemplateName()+".html.tmpl", mail.getTemplateName()+".html.tmpl", session, false);
+        final OXTemplate textTemplate = templates.loadTemplate(mail.getTemplateName()+".txt.tmpl");
+        final OXTemplate htmlTemplate = templates.loadTemplate(mail.getTemplateName()+".html.tmpl");
         
        
         final Map<String,Object> env = new HashMap<String, Object>();
         PassthroughWrapper wrapper = new PassthroughWrapper();
         
         env.put("mail", mail);
-        env.put("templating", templates.createHelper(env, session));
+        env.put("templating", templates.createHelper(env, null, false));
         env.put("formatters", dateHelperFor(mail.getRecipient()));
         env.put("labels",getLabelHelper(mail, wrapper, participant));
 		if (originalForRendering != null) {

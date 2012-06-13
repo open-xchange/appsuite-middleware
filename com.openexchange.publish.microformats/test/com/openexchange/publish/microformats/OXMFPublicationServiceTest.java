@@ -319,7 +319,7 @@ public class OXMFPublicationServiceTest extends TestCase {
         }
 
         @Override
-        public TemplatingHelper createHelper(final Object rootObject, final Session session) {
+        public TemplatingHelper createHelper(final Object rootObject, final Session session, boolean createCopy) {
             return null;
         }
     }
