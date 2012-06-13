@@ -125,7 +125,6 @@ public final class contacts extends XmlServlet<ContactService> {
             final int method = contactparser.getMethod();
 
             final Date lastModified = contactobject.getLastModified();
-            contactobject.removeLastModified();
 
             final int inFolder = contactparser.getFolder();
 
@@ -250,7 +249,7 @@ public final class contacts extends XmlServlet<ContactService> {
 
             final XMLOutputter xo = new XMLOutputter();
             if (contactObject.getLastModified() == null) {
-            	contactObject.setLastModified(new Date(Long.MAX_VALUE));
+            	contactObject.setLastModified(lastModified);
             }
             try {
                 switch (action) {
@@ -292,8 +291,7 @@ public final class contacts extends XmlServlet<ContactService> {
                             PERMISSION_EXCEPTION), clientId, os, xo);
                 } else if (exc.isConflict()) {
                     LOG.debug(_parsePropChilds, exc);
-                    writeResponse(contactObject, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc,
-                            CONFLICT_EXCEPTION), clientId, os, xo);
+                    writeResponse(contactObject, HttpServletResponse.SC_CONFLICT, MODIFICATION_EXCEPTION, clientId, os, xo);
                 } else if (exc.isNotFound()) {
                     LOG.debug(_parsePropChilds, exc);
                     writeResponse(contactObject, HttpServletResponse.SC_NOT_FOUND, OBJECT_NOT_FOUND_EXCEPTION,

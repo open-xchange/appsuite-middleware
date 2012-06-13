@@ -417,21 +417,23 @@ public class ContactWriter extends CommonWriter {
         final Element e_links = new Element(ContactFields.LINKS, XmlServlet.NS);
 
         final LinkEntryObject[] links = contactobject.getLinks();
-        for (int a = 0; a < links.length; a++) {
-            final int id = links[a].getLinkID();
-            String displayname = links[a].getLinkDisplayname();
-            if (displayname == null) {
-                displayname = Integer.toString(id);
+        if (links != null) {
+            for (int a = 0; a < links.length; a++) {
+                final int id = links[a].getLinkID();
+                String displayname = links[a].getLinkDisplayname();
+                if (displayname == null) {
+                    displayname = Integer.toString(id);
+                }
+
+                final Element e = new Element("link", XmlServlet.NS);
+                e.addContent(Integer.toString(id));
+                e.setAttribute("displayname", displayname, XmlServlet.NS);
+
+                e_links.addContent(e);
             }
-
-            final Element e = new Element("link", XmlServlet.NS);
-            e.addContent(Integer.toString(id));
-            e.setAttribute("displayname", displayname, XmlServlet.NS);
-
-            e_links.addContent(e);
+            e_prop.addContent(e_links);
         }
 
-        e_prop.addContent(e_links);
     }
 
     protected void writeDistributionList(final Contact contactobject, final Element e_prop) {
