@@ -63,6 +63,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
 import javax.mail.event.FolderEvent;
@@ -118,6 +119,12 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     private static final long serialVersionUID = -7510487764376433468L;
 
     /**
+     * The logger instance for {@link IMAPAccess} class.
+     */
+    private static final transient org.apache.commons.logging.Log LOG =
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(IMAPAccess.class));
+
+    /**
      * The max. temporary-down value; 5 Minutes.
      */
     private static final long MAX_TEMP_DOWN = 300000L;
@@ -125,13 +132,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     /**
      * The timeout for failed logins.
      */
-    private static final long FAILED_AUTH_TIMEOUT = 10000L;
-
-    /**
-     * The logger instance for {@link IMAPAccess} class.
-     */
-    private static final transient org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(IMAPAccess.class));
+    protected static final AtomicLong FAILED_AUTH_TIMEOUT = new AtomicLong();
 
     /**
      * Whether info logging is enabled for this class.
@@ -589,7 +590,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 proxyUser = login.substring(0, login.indexOf(proxyDelimiter));
                 user = login.substring(login.indexOf(proxyDelimiter) + proxyDelimiter.length(), login.length());
             }
-            checkFailedAuths(user, tmpPass);
+            checkFailedAuths(new LoginAndPass(user, tmpPass));
             /*
              * Get properties
              */
@@ -759,16 +760,15 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         return imapStore;
     }
 
-    private static void checkFailedAuths(final String login, final String pass) throws AuthenticationFailedException {
-        final LoginAndPass key = new LoginAndPass(login, pass);
+    private static void checkFailedAuths(final LoginAndPass loginAndPass) throws AuthenticationFailedException {
         final Map<LoginAndPass, StampAndError> map = failedAuths;
-        final StampAndError sae = map.get(key);
+        final StampAndError sae = map.get(loginAndPass);
         if (sae != null) {
             // TODO: Put time-out to imap.properties
-            if ((System.currentTimeMillis() - sae.stamp) <= FAILED_AUTH_TIMEOUT) {
+            if ((System.currentTimeMillis() - sae.stamp) <= FAILED_AUTH_TIMEOUT.get()) {
                 throw sae.error;
             }
-            map.remove(key);
+            map.remove(loginAndPass);
         }
     }
 
@@ -874,6 +874,13 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         final ConfigurationService confService = IMAPServiceRegistry.getService(ConfigurationService.class);
         final boolean useIMAPStoreCache = null == confService ? true : confService.getBoolProperty("com.openexchange.imap.useIMAPStoreCache", true);
         USE_IMAP_STORE_CACHE.set(useIMAPStoreCache);
+        long failedAuthTimeout;
+        try {
+            failedAuthTimeout = null == confService ? 10000L : Long.parseLong(confService.getProperty("com.openexchange.imap.failedAuthTimeout", "10000"));
+        } catch (final NumberFormatException e) {
+            failedAuthTimeout = 10000L;
+        }
+        FAILED_AUTH_TIMEOUT.set(failedAuthTimeout);
     }
 
     private static synchronized void initMaps() {
@@ -906,7 +913,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                          */
                         for (final Iterator<Entry<LoginAndPass, StampAndError>> iter = map2.entrySet().iterator(); iter.hasNext();) {
                             final Entry<LoginAndPass, StampAndError> entry = iter.next();
-                            if (System.currentTimeMillis() - entry.getValue().stamp > FAILED_AUTH_TIMEOUT) {
+                            if (System.currentTimeMillis() - entry.getValue().stamp > FAILED_AUTH_TIMEOUT.get()) {
                                 iter.remove();
                             }
                         }
@@ -1004,7 +1011,10 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             super();
             this.login = login;
             this.pass = pass;
-            hashCode = (login.hashCode()) ^ (pass.hashCode());
+            int hash = 7;
+            hash = 31 * hash + (null == login ? 0 : login.hashCode());
+            hash = 31 * hash + (null == pass ? 0 : pass.hashCode());
+            hashCode = hash;
         }
 
         @Override

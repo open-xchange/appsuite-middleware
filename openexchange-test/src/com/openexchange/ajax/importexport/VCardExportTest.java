@@ -49,9 +49,13 @@
 package com.openexchange.ajax.importexport;
 
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.TimeZone;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.ajax.contact.action.DeleteRequest;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.webdav.xml.ContactTest;
 
@@ -94,6 +98,8 @@ public class VCardExportTest extends AbstractVCardTest {
 
 		assertTrue("contact with surname: " + surname + " not found", found);
 
-		ContactTest.deleteContact(getWebConversation(), objectId, contactFolderId, getHostName(), getLogin(), getPassword(), "");
+		AJAXClient client = new AJAXClient(User.User1);
+		DeleteRequest del = new DeleteRequest(client.getValues().getPrivateContactFolder(), objectId, new Date());
+		client.execute(del);
 	}
 }

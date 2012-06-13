@@ -193,6 +193,18 @@ public class CalendarParser extends CommonParser {
             calendarobject.setSequence(parseInt(jsonobject, CalendarFields.SEQUENCE));
         }
 
+        if (jsonobject.has(CalendarFields.ORGANIZER_ID)) {
+            calendarobject.setOrganizerId(parseInt(jsonobject, CalendarFields.ORGANIZER_ID));
+        }
+
+        if (jsonobject.has(CalendarFields.PRINCIPAL)) {
+            calendarobject.setPrincipal(parseString(jsonobject, CalendarFields.PRINCIPAL));
+        }
+
+        if (jsonobject.has(CalendarFields.PRINCIPAL_ID)) {
+            calendarobject.setPrincipalId(parseInt(jsonobject, CalendarFields.PRINCIPAL_ID));
+        }
+
         parseField(parseAll, calendarobject, timeZone, jsonobject);
         parseElementCommon(calendarobject, jsonobject);
     }

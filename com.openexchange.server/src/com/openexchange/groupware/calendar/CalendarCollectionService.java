@@ -589,6 +589,16 @@ public interface CalendarCollectionService {
     public void setRecurrencePositionOrDateInDAO(final CalendarDataObject cdao) throws OXException;
 
     /**
+     * <code>getLongByPosition</code> return the long value for the given CalendarDataObject and the given recurring position. The method
+     * return 0 if the long can not be calculated.
+     *
+     * @param cdao a <code>CalendarDataObject</code>
+     * @param ignore_exceptions - Whether to ignore the holes left by delete exceptions
+     * @return a <code>long</code> value
+     */
+    public void setRecurrencePositionOrDateInDAO(CalendarDataObject cdao, boolean ignore_exceptions) throws OXException;
+
+    /**
      * Removes hours and minutes for the given date.
      *
      * @param millis milliseconds since January 1, 1970, 00:00:00 GMT not to exceed the milliseconds representation for the year 8099. A

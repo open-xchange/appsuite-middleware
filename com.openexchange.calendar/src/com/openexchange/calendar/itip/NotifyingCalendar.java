@@ -55,7 +55,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.calendar.itip.generators.AttachmentMemory;
@@ -76,6 +75,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.State;
 import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -379,7 +379,7 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
         try {
             final CalendarDataObject original = getObjectById(object_id);
             final Date retval = delegate.setUserConfirmation(object_id, folderId, user_id, confirm, confirm_message);
-            final CalendarDataObject reloaded = getObjectById(object_id, folderId);
+            final CalendarDataObject reloaded = getObjectById(object_id);
             final ITipMailGenerator generator = generators.create(original, reloaded, session, onBehalfOf(folderId));
             final List<NotificationParticipant> recipients = generator.getRecipients();
             for (final NotificationParticipant notificationParticipant : recipients) {
@@ -474,27 +474,31 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
     }
 
     private void calculateExceptionPosition(final CalendarDataObject source, final CalendarDataObject target, final boolean isDelete) throws OXException {
-        if (source.containsRecurrenceDatePosition()) {
-            target.setRecurrenceDatePosition(source.getRecurrenceDatePosition());
-        }
-        if (source.containsRecurrencePosition()) {
-            target.setRecurrencePosition(source.getRecurrencePosition());
-        }
-        if (!isDelete && target.isException()) {
-            return;
-        }
-        if (target.containsRecurrenceDatePosition() && target.getRecurrenceDatePosition() != null || target.containsRecurrencePosition() && target.getRecurrencePosition() != 0) {
-            calendarCollection.setRecurrencePositionOrDateInDAO(target);
-            RecurringResultsInterface recResults;
-            if (!target.isException()) {
-                recResults = calendarCollection.calculateRecurring(target, 0, 0, target.getRecurrencePosition());
-                if (recResults == null) {
-                	return;
-                }
-                final RecurringResultInterface recurringResult = recResults.getRecurringResult(0);
-                target.setStartDate(new Date(recurringResult.getStart()));
-                target.setEndDate(new Date(recurringResult.getEnd()));
+        try {
+            if (source.containsRecurrenceDatePosition()) {
+                target.setRecurrenceDatePosition(source.getRecurrenceDatePosition());
             }
+            if (source.containsRecurrencePosition()) {
+                target.setRecurrencePosition(source.getRecurrencePosition());
+            }
+            if (!isDelete && target.isException()) {
+                return;
+            }
+            if (target.containsRecurrenceDatePosition() && target.getRecurrenceDatePosition() != null || target.containsRecurrencePosition() && target.getRecurrencePosition() != 0) {
+                calendarCollection.setRecurrencePositionOrDateInDAO(target, true);
+                RecurringResultsInterface recResults;
+                if (!target.isException()) {
+                    recResults = calendarCollection.calculateRecurring(target, 0, 0, target.getRecurrencePosition());
+                    if (recResults == null) {
+                    	return;
+                    }
+                    final RecurringResultInterface recurringResult = recResults.getRecurringResult(0);
+                    target.setStartDate(new Date(recurringResult.getStart()));
+                    target.setEndDate(new Date(recurringResult.getEnd()));
+                }
+            }
+        } catch (final OXException x) {
+            // IGNORE: This is all best effort
         }
     }
 

@@ -90,6 +90,8 @@ public class UpdateMailTest extends AbstractMailTest {
     protected void setUp() throws Exception {
         super.setUp();
         values = getClient().getValues();
+        clearFolder(getSentFolder());
+        clearFolder(getInboxFolder());
     }
 
     @Override
