@@ -281,6 +281,7 @@ public final class contacts extends XmlServlet<ContactService> {
                 }
                 writeResponse(contactObject, HttpServletResponse.SC_OK, OK, clientId, os, xo);
             } catch (final OXException exc) {
+            	exc.log(LOG);
                 if (exc.isMandatory()) {
                     LOG.debug(_parsePropChilds, exc);
                     writeResponse(contactObject, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc,
