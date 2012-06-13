@@ -269,10 +269,9 @@ public final class tasks extends XmlServlet<TasksSQLInterface> {
                     LOG.debug(_parsePropChilds, exc);
                     writeResponse(task, HttpServletResponse.SC_FORBIDDEN, getErrorMessage(exc,
                             PERMISSION_EXCEPTION), clientId, os, xo);
-                } else if (exc.isConflict()) {
+                } else if (exc.isConflict() || exc.getCategories().contains(Category.CATEGORY_CONFLICT)) {
                     LOG.debug(_parsePropChilds, exc);
-                    writeResponse(task, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc,
-                            CONFLICT_EXCEPTION), clientId, os, xo);
+                    writeResponse(task, HttpServletResponse.SC_CONFLICT, MODIFICATION_EXCEPTION, clientId, os, xo);
                 } else if (exc.isNotFound()) {
                     LOG.debug(_parsePropChilds, exc);
                     writeResponse(task, HttpServletResponse.SC_NOT_FOUND, OBJECT_NOT_FOUND_EXCEPTION,

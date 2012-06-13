@@ -57,6 +57,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.TimeZone;
+
+import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
@@ -445,7 +447,7 @@ public class TaskTest extends AbstractWebdavXMLTest {
         assertEquals("check response status", 200, response[0].getStatus());
     }
 
-    public static int[] listTask(final WebConversation webCon, final int inFolder, String host, final String login, final String password) throws Exception {
+    public static int[] listTask(final WebConversation webCon, final int inFolder, String host, final String login, final String password, String context) throws Exception {
         host = AbstractWebdavXMLTest.appendPrefix(host);
 
         final Element ePropfind = new Element("propfind", webdav);
@@ -473,7 +475,7 @@ public class TaskTest extends AbstractWebdavXMLTest {
 
         final HttpClient httpclient = new HttpClient();
 
-        httpclient.getState().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login, password));
+        httpclient.getState().setCredentials(AuthScope.ANY, getCredentials(login, password, context));
         final PropFindMethod propFindMethod = new PropFindMethod(host + TASK_URL);
         propFindMethod.setDoAuthentication( true );
 
@@ -492,7 +494,13 @@ public class TaskTest extends AbstractWebdavXMLTest {
         return (int[])response[0].getDataObject();
     }
 
-    public static Task[] listTask(final WebConversation webCon, final int inFolder, final Date modified, final boolean changed, final boolean deleted, String host, final String login, final String password, String context) throws Exception {
+    private static Credentials getCredentials(String login, String password,
+			String context) {
+		
+    	return new UsernamePasswordCredentials((context == null || context.equals("")) ? login : login+"@"+context, password);
+	}
+
+	public static Task[] listTask(final WebConversation webCon, final int inFolder, final Date modified, final boolean changed, final boolean deleted, String host, final String login, final String password, String context) throws Exception {
         host = AbstractWebdavXMLTest.appendPrefix(host);
 
         if (!changed && !deleted) {
@@ -539,7 +547,7 @@ public class TaskTest extends AbstractWebdavXMLTest {
 
         final HttpClient httpclient = new HttpClient();
 
-        httpclient.getState().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login+"@"+context, password));
+        httpclient.getState().setCredentials(AuthScope.ANY, getCredentials(login, password, context));
         final PropFindMethod propFindMethod = new PropFindMethod(host + TASK_URL);
         propFindMethod.setDoAuthentication( true );
 
@@ -593,7 +601,7 @@ public class TaskTest extends AbstractWebdavXMLTest {
 
         final HttpClient httpclient = new HttpClient();
 
-        httpclient.getState().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login+"@"+context, password));
+        httpclient.getState().setCredentials(AuthScope.ANY, getCredentials(login, password, context));
         final PropFindMethod propFindMethod = new PropFindMethod(host + TASK_URL);
         propFindMethod.setDoAuthentication( true );
 
