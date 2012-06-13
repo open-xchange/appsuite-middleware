@@ -1,6 +1,8 @@
 package com.openexchange.webdav.xml.task;
 
 import java.util.Date;
+import java.util.Locale;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.webdav.xml.TaskTest;
@@ -30,7 +32,7 @@ public class DeleteTest extends TaskTest {
 			deleteTask(webCon, objectId, taskFolderId, new Date(0), PROTOCOL + hostName, login, password, context);
 			fail("expected concurent modification exception!");
 		} catch (final OXException exc) {
-			assertExceptionMessage(exc.getMessage(), XmlServlet.MODIFICATION_STATUS);
+			assertExceptionMessage(exc.getDisplayMessage(Locale.ENGLISH), XmlServlet.MODIFICATION_STATUS);
 		}
 
 		deleteTask(webCon, objectId, taskFolderId, PROTOCOL + hostName, login, password, context);
@@ -44,7 +46,7 @@ public class DeleteTest extends TaskTest {
 			deleteTask(webCon, (objectId + 1000), taskFolderId, PROTOCOL + hostName, login, password, context);
 			fail("expected object not found exception!");
 		} catch (final OXException exc) {
-			assertExceptionMessage(exc.getMessage(), XmlServlet.OBJECT_NOT_FOUND_STATUS);
+			assertExceptionMessage(exc.getDisplayMessage(Locale.ENGLISH), XmlServlet.OBJECT_NOT_FOUND_STATUS);
 		}
 
 		deleteTask(webCon, objectId, taskFolderId, PROTOCOL + hostName, login, password, context);
