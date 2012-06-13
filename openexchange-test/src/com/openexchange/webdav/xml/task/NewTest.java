@@ -50,6 +50,8 @@
 package com.openexchange.webdav.xml.task;
 
 import java.util.Date;
+import java.util.Locale;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.FolderObject;
@@ -60,6 +62,7 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.webdav.xml.FolderTest;
 import com.openexchange.webdav.xml.GroupUserTest;
 import com.openexchange.webdav.xml.TaskTest;
+import com.openexchange.webdav.xml.XmlServlet;
 
 public class NewTest extends TaskTest {
 
@@ -143,7 +146,7 @@ public class NewTest extends TaskTest {
             deleteTask(getWebConversation(), objectId, parentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
             fail("conflict exception expected!");
         } catch (final OXException exc) {
-            assertTrue(exc.similarTo(TaskExceptionCode.PRIVATE_FLAG));
+        	assertExceptionMessage(exc.getDisplayMessage(Locale.ENGLISH), "TSK-0008");
         }
     }
     // Bug 12011
