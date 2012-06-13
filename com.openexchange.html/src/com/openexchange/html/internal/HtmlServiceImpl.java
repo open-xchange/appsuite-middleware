@@ -1185,6 +1185,7 @@ public final class HtmlServiceImpl implements HtmlService {
     }
 
     private static final Pattern PATTERN_CC = Pattern.compile("(<!(?:--)?\\[if)([^\\]]+\\](?:--!?)?>)(.*?)((?:<!\\[endif\\])?(?:--)?>)", Pattern.DOTALL);
+    private static final Pattern PATTERN_CC2 = Pattern.compile("(<!(?:--)?\\[if)([^\\]]+\\](?:--!?)?>)(.*?)(<!\\[endif\\](?:--)?>)", Pattern.DOTALL);
 
     private static final String CC_START_IF = "<!-- [if";
 
@@ -1215,7 +1216,12 @@ public final class HtmlServiceImpl implements HtmlService {
      * @return The HTML content whose downlevel-revealed conditional comments contain valid HTML for non-IE browsers
      */
     private static String processDownlevelRevealedConditionalComments(final String htmlContent) {
-        final Matcher m = PATTERN_CC.matcher(htmlContent);
+        final String ret = processDownlevelRevealedConditionalComments0(htmlContent, PATTERN_CC2);
+        return processDownlevelRevealedConditionalComments0(ret, PATTERN_CC);
+    }
+    
+    private static String processDownlevelRevealedConditionalComments0(final String htmlContent, final Pattern p) {
+        final Matcher m = p.matcher(htmlContent);
         if (!m.find()) {
             /*
              * No conditional comments found
@@ -1246,12 +1252,13 @@ public final class HtmlServiceImpl implements HtmlService {
         return sb.toString();
     }
 
+    private static final Pattern PAT_VALID_COND = Pattern.compile("[a-zA-Z_0-9 -!]+");
+
     private static boolean isValidCondition(final String condition) {
         if (isEmpty(condition)) {
             return false;
         }
-        final String cond = condition.toUpperCase(Locale.US);
-        return (cond.indexOf("IE") >= 0) && (cond.indexOf('<') < 0) && (cond.indexOf('>') < 0);
+        return PAT_VALID_COND.matcher(condition.substring(0, condition.indexOf(']'))).matches();
     }
 
     /**

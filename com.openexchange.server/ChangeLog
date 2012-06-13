@@ -1,3 +1,7 @@
+* 2012-06-13 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22304: Drop remaining "<![endif]-->" from HTML content
+
 * 2012-06-12 - thorben.betten@open-xchange.com
 
  - Fix for bug 22294: Dealing with possible empty sub-type
