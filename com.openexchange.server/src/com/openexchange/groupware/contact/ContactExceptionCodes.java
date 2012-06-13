@@ -315,19 +315,18 @@ public enum ContactExceptionCodes implements OXExceptionCode {
                 args));
     }
 
-    private OXException specials(final OXException exc) {
-        switch(this) {
-        case CONTACT_NOT_FOUND: case CONTACT_OBJECT_MISSING:
-            exc.setGeneric(Generic.NOT_FOUND);
-            break;
-        case OBJECT_HAS_CHANGED:
-            exc.setGeneric(Generic.CONFLICT);
-            break;
-        }
-        
-        if (exc.getCategories().contains(Category.CATEGORY_PERMISSION_DENIED)) {
-            exc.setGeneric(Generic.NO_PERMISSION);
-        }
-        return exc;
-    }
+	private OXException specials(OXException exc) {
+		switch(this) {
+		case CONTACT_NOT_FOUND: case CONTACT_OBJECT_MISSING:
+			exc.setGeneric(Generic.NOT_FOUND);
+			break;
+		case OBJECT_HAS_CHANGED:
+			exc.setGeneric(Generic.CONFLICT);
+			break;
+		}
+		if (exc.getCategories().contains(Category.CATEGORY_PERMISSION_DENIED)) {
+			exc.setGeneric(Generic.NO_PERMISSION);
+		}
+		return exc;
+	}
 }

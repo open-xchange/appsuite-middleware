@@ -50,6 +50,8 @@
 package com.openexchange.webdav.xml.folder;
 
 import java.util.Date;
+import java.util.Locale;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
@@ -153,10 +155,10 @@ public class ListTest extends FolderTest {
         final int objectId = insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
 
         try {
-            loadFolder(getWebConversation(), (objectId+1000), PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+            loadFolder(getWebConversation(), (objectId+10000), PROTOCOL + getHostName(), getLogin(), getPassword(), context);
             fail("object not found exception expected!");
         } catch (final OXException exc) {
-            assertExceptionMessage(exc.getMessage(), XmlServlet.OBJECT_NOT_FOUND_STATUS);
+            assertExceptionMessage(exc.getDisplayMessage(Locale.ENGLISH), XmlServlet.OBJECT_NOT_FOUND_STATUS);
         }
 
         deleteFolder(getWebConversation(), new int[] { objectId }, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
@@ -176,7 +178,7 @@ public class ListTest extends FolderTest {
 
         final int objectId = insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
 
-        final int[] idArray = listFolder(getWebConversation(), getHostName(), getLogin(), getPassword());
+        final int[] idArray = listFolder(getWebConversation(), getHostName(), getLogin(), getPassword(),context);
 
         boolean found = false;
         for (int a = 0; a < idArray.length; a++) {
