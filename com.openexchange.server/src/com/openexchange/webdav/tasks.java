@@ -261,6 +261,7 @@ public final class tasks extends XmlServlet<TasksSQLInterface> {
                 }
                 writeResponse(task, HttpServletResponse.SC_OK, OK, clientId, os, xo);
             } catch (final OXException exc) {
+            	exc.log(LOG);
                 if (exc.isMandatory()) {
                     LOG.debug(_parsePropChilds, exc);
                     writeResponse(task, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc,

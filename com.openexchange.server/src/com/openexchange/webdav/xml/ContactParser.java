@@ -99,7 +99,7 @@ public class ContactParser extends CommonParser {
             parser.nextText();
             return;
         }
-
+        
         if (isTag(parser, ContactFields.LAST_NAME)) {
             contactobject.setSurName(getValue(parser));
             return;

@@ -1,6 +1,8 @@
 package com.openexchange.webdav.xml.contact;
 
 import java.io.ByteArrayInputStream;
+import java.util.Locale;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.AttachmentMetadata;
@@ -77,7 +79,7 @@ public class NewTest extends ContactTest {
 			deleteContact(getWebConversation(), objectId, parentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
 			fail("conflict exception expected!");
 		} catch (final OXException exc) {
-			assertTrue(exc.similarTo(ContactExceptionCodes.PFLAG_IN_PUBLIC_FOLDER.create()));
+			assertExceptionMessage(exc.getDisplayMessage(Locale.ENGLISH), "CON-0171");
 		}
 	}
 
