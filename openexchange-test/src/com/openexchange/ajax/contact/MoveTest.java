@@ -77,9 +77,9 @@ public class MoveTest extends AbstractContactTest {
         contactObj.setParentFolderID(contactFolderId);
         objectId = insertContact(contactObj);
 
-        folder = Create.createPrivateFolder("testCopy", FolderObject.CONTACT, userId);
+        folder = Create.createPrivateFolder("testCopy"+System.currentTimeMillis(), FolderObject.CONTACT, userId);
         folder.setParentFolderID(client.getValues().getPrivateContactFolder());
-        InsertResponse folderCreateResponse = client.execute(new InsertRequest(EnumAPI.OUTLOOK, folder));
+        final InsertResponse folderCreateResponse = client.execute(new InsertRequest(EnumAPI.OUTLOOK, folder));
         folderCreateResponse.fillObject(folder);
 
         targetFolder = folder.getObjectID();
@@ -97,9 +97,9 @@ public class MoveTest extends AbstractContactTest {
         contactObj.setParentFolderID(contactFolderId);
         objectId = insertContact(contactObj);
 
-        folder = Create.createPrivateFolder("testCopy", FolderObject.CONTACT, userId);
+        folder = Create.createPrivateFolder("testCopy"+System.currentTimeMillis(), FolderObject.CONTACT, userId);
         folder.setParentFolderID(client.getValues().getPrivateContactFolder());
-        InsertResponse folderCreateResponse = client.execute(new InsertRequest(EnumAPI.OUTLOOK, folder));
+        final InsertResponse folderCreateResponse = client.execute(new InsertRequest(EnumAPI.OUTLOOK, folder));
         folderCreateResponse.fillObject(folder);
 
         targetFolder = folder.getObjectID();
