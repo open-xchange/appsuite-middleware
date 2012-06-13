@@ -41,7 +41,11 @@ public class UpdatesTest extends AbstractContactTest {
                 assertNotNull(objectData.opt(2));
             }
         } finally {
-            deleteContact(objectId, contactFolderId);
+            try {
+                deleteContact(objectId, contactFolderId);
+            } catch (final Exception e) {
+                // ignore
+            }
         }
     }
 }
