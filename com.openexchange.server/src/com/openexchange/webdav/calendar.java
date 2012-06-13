@@ -359,8 +359,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
                             PERMISSION_EXCEPTION), clientId, os, xo);
                 } else if (exc.isConflict()) {
                     LOG.debug(_parsePropChilds, exc);
-                    writeResponse(appointmentobject, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc,
-                            CONFLICT_EXCEPTION), clientId, os, xo);
+                    writeResponse(appointmentobject, HttpServletResponse.SC_CONFLICT, MODIFICATION_EXCEPTION, clientId, os, xo);
                 } else if (exc.isNotFound()) {
                     LOG.debug(_parsePropChilds, exc);
                     writeResponse(appointmentobject, HttpServletResponse.SC_NOT_FOUND, OBJECT_NOT_FOUND_EXCEPTION,
