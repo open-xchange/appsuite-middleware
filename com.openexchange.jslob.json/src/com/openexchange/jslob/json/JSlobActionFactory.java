@@ -67,7 +67,7 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-@Module(name = "jslob", description = "Provides access to JSlob data associated with the current user and context.")
+@Module(name = "jslob", description = "Provides access to JSlob data associated with the current user and context. A REST-like access is provided, too (no <tt>action</tt> URL parameter)")
 public class JSlobActionFactory implements AJAXActionServiceFactory {
 
     private final Map<String, JSlobAction> actions;
