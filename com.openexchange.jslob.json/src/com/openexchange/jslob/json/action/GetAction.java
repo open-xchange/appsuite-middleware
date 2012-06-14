@@ -87,7 +87,12 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
     		"<br>" + 
     		"{\"somekey\": \"somevalue\"} <br>" + 
     		"<br>" + 
-    		"while currently all config cascade properties are mixed into every JSLob" 
+    		"while currently all config cascade properties are mixed into every JSLob" +
+    		"<br><br>" +
+    		"Or in a REST-like fashion vie GET request:<br>" +
+    		"GET /ajax/jslob/ui" +
+    		"<br>" + 
+            "{\"somekey\": \"somevalue\"} <br>"
     , method = RequestMethod.GET
     , parameters = {
         @Parameter(name = "serviceId", description = "Optional identifier for the JSlob. Default is <tt>com.openexchange.jslob.config</tt>", optional=true)
