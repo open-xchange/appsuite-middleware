@@ -66,7 +66,6 @@ import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.sax.SAXTransformerFactory;
 import javax.xml.transform.sax.TransformerHandler;
 import javax.xml.transform.stream.StreamResult;
-import org.apache.tika.config.TikaConfig;
 import org.apache.tika.detect.DefaultDetector;
 import org.apache.tika.detect.Detector;
 import org.apache.tika.exception.TikaException;
@@ -80,7 +79,6 @@ import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
 import org.apache.tika.parser.html.BoilerpipeContentHandler;
 import org.apache.tika.sax.BodyContentHandler;
-import org.apache.tika.utils.ParseUtils;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -157,10 +155,10 @@ public final class TikaDocumentHandler {
             metadata = new Metadata();
             context = new ParseContext();
             detector = new DefaultDetector();
-            parser = null == mimeType ? new AutoDetectParser(detector) : ParseUtils.getParser(mimeType, TikaConfig.getDefaultConfig());
+            parser = new AutoDetectParser(detector);
             context.set(Parser.class, parser);
             // context.set(EmbeddedDocumentExtractor.class, new FileEmbeddedDocumentExtractor(this));
-        } catch (final TikaException e) {
+        } catch (final Exception e) {
             throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
         }
     }
