@@ -56,14 +56,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.timer.ScheduledTimerTask;
@@ -203,9 +202,9 @@ public final class EventQueue {
 
     private static final AtomicBoolean shutdownComplete = new AtomicBoolean();
 
-    private static ScheduledTimerTask timerTask;
+    private static volatile ScheduledTimerTask timerTask;
 
-    private static EventDispatcher newEventDispatcher = null;
+    private static volatile EventDispatcher newEventDispatcher;
 
     private EventQueue() {
         super();
@@ -245,18 +244,17 @@ public final class EventQueue {
                             queue2,
                             shutdownComplete,
                             shuttingDown);
-                    timerTask = timer.scheduleWithFixedDelay(task2schedule, delay, delay);
+                    final ScheduledTimerTask timerTask = timer.scheduleWithFixedDelay(task2schedule, delay, delay);
                     task2schedule.setScheduledTimerTask(timerTask);
+                    EventQueue.timerTask = timerTask;
                 }
             }
-
             isEnabled = true;
         } else {
             if (LOG.isInfoEnabled()) {
                 LOG.info("EventQueue is disabled");
             }
         }
-
         isInit = true;
         shuttingDown.set(false);
     }
