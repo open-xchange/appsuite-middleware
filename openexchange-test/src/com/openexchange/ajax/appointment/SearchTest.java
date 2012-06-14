@@ -97,7 +97,7 @@ public class SearchTest extends AppointmentTest {
             getSessionId());
         assertTrue("appointment array size is 0", appointmentArray.length > 0);
 
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
     // Node 2652
@@ -125,7 +125,7 @@ public class SearchTest extends AppointmentTest {
                 assertNotNull(objectData.opt(2));
             }
         } finally {
-            deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId());
+            deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId(), false);
         }
     }
 }

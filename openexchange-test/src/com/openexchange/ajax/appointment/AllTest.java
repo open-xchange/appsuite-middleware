@@ -256,7 +256,7 @@ public class AllTest extends AppointmentTest {
 		}
 		assertFalse("appointment found one day after start date in day view", found);
 
-		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId());
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId(), false);
 	}
 
     // Bug 12171
@@ -283,7 +283,7 @@ public class AllTest extends AppointmentTest {
         }
         } finally {
             if(objectId != -1) {
-                deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId());
+                deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId(), false);
             }
         }
     }
@@ -313,7 +313,7 @@ public class AllTest extends AppointmentTest {
                 assertNotNull(objectData.opt(2));
             }
         } finally {
-            deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId());
+            deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId(), false);
         }
     }
 }

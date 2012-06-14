@@ -73,7 +73,7 @@ public class WeeklyRecurrenceTest extends AbstractRecurrenceTest {
 		occurrence = getOccurrenceByPosition(occurrenceArray, 4);
 		assertOccurrence(4, simpleDateFormatUTC.parse("2007-03-26 08:00:00"), simpleDateFormatUTC.parse("2007-03-26 10:00:00"), occurrence);
 
-		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
 	}
 
 	public void _notestWeeklyRecurrenceFromSummer2WinterTime() throws Exception {
@@ -133,7 +133,7 @@ public class WeeklyRecurrenceTest extends AbstractRecurrenceTest {
 		assertOccurrence(5, simpleDateFormatUTC.parse("2007-10-29 08:00:00"), simpleDateFormatUTC.parse("2007-10-29 10:00:00"), occurrence);
 
 
-		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
 	}
 }
 

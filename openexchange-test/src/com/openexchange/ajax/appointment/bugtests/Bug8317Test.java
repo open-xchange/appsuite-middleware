@@ -116,13 +116,13 @@ public class Bug8317Test extends AppointmentTest {
 
         try {
             final int objectId2 = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
-            deleteAppointment(getWebConversation(), objectId2, appointmentFolderId, getHostName(), getSessionId());
+            deleteAppointment(getWebConversation(), objectId2, appointmentFolderId, getHostName(), getSessionId(), true);
             fail("conflict exception expected!");
         } catch (final OXException exc) {
             // Perfect. The insertAppointment throws a OXException
             // And this is what we expect here !!!
         } finally {
-            deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId());
+            deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId(), false);
         }
     }
 }

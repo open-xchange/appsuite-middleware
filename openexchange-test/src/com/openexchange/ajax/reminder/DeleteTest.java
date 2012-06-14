@@ -95,7 +95,7 @@ public class DeleteTest extends ReminderTest {
         }
         assertNotSame("Reminder not found.", -1, pos);
         deleteReminder(getWebConversation(), reminderObj[pos].getObjectId(), getHostName(), getSessionId());
-        AppointmentTest.deleteAppointment(getWebConversation(), targetId, folderId, getHostName(), getSessionId());
+        AppointmentTest.deleteAppointment(getWebConversation(), targetId, folderId, getHostName(), getSessionId(), false);
     }
 
     public void testDeleteWithNonExisting() throws Exception {
@@ -131,6 +131,6 @@ public class DeleteTest extends ReminderTest {
         assertTrue("failed object size is not > 0", failedObjects.length > 0);
         assertEquals("fail object id not equals expected", reminderObj[pos].getObjectId()+1000, failedObjects[0]);
 
-        AppointmentTest.deleteAppointment(getWebConversation(), targetId, folderId, getHostName(), getSessionId());
+        AppointmentTest.deleteAppointment(getWebConversation(), targetId, folderId, getHostName(), getSessionId(), false);
     }
 }

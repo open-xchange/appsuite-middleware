@@ -99,6 +99,6 @@ public class Bug6055Test extends AppointmentTest {
         loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, getHostName(), getSessionId());
         compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
 
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId());
+        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId(), false);
     }
 }
