@@ -384,7 +384,7 @@ public class AppointmentTest extends AbstractAJAXTest {
         deleteAppointment(webCon, id, inFolder, recurrencePosition, new Date(System.currentTimeMillis() + APPEND_MODIFIED), host, session);
     }
 
-    public static void deleteAppointment(final WebConversation webCon, final int id, final int inFolder, final int recurrencePosition, final Date modified, final String host, final String session) throws OXException, OXException, IOException, JSONException {
+    public static void deleteAppointment(final WebConversation webCon, final int id, final int inFolder, final int recurrencePosition, final Date modified, final String host, final String session) throws OXException, IOException, JSONException {
         final AJAXSession ajaxSession = new AJAXSession(webCon, host, session);
         final DeleteRequest deleteRequest = new DeleteRequest(id, inFolder, recurrencePosition, modified);
         deleteRequest.setFailOnError(false);
