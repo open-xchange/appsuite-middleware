@@ -133,11 +133,18 @@ public class Bug16163Test extends AbstractAJAXSession {
             assertTrue("Response should contain folder identifier.", idPos >= 0);
             final int namePos = response.getColumnPos(FolderObject.FOLDER_NAME);
             assertTrue("Response should contain folder names.", namePos >= 0);
-            assertEquals("Path on Outlook like tree should have 4 parts.", 4, data.length);
+            assertTrue("Path on Outlook like tree should have at least 4 parts, but has " + data.length, data.length >= 4);
             assertEquals("Path should start with test folder but is folder " + data[0][namePos], Integer.toString(testFolder.getObjectID()), data[0][idPos]);
-            assertEquals("Parent of created folder should be virtual shared user folder but is " + data[1][namePos], FolderObject.SHARED_PREFIX + client.getValues().getUserId(), data[1][idPos]);
-            assertEquals("Parent of virtual shared user folder should be system shared root folder but is " + data[2][namePos], Integer.toString(FolderObject.SYSTEM_SHARED_FOLDER_ID), data[2][idPos]);
-            assertEquals("Root folder should be IPM_ROOT but is " + data[3][namePos], FolderStorage.PRIVATE_ID, data[3][idPos]);
+            if (4 == data.length) {
+                assertEquals("Parent of created folder should be virtual shared user folder but is " + data[1][namePos], FolderObject.SHARED_PREFIX + client.getValues().getUserId(), data[1][idPos]);
+                assertEquals("Parent of virtual shared user folder should be system shared root folder but is " + data[2][namePos], Integer.toString(FolderObject.SYSTEM_SHARED_FOLDER_ID), data[2][idPos]);
+                assertEquals("Root folder should be IPM_ROOT but is " + data[3][namePos], FolderStorage.PRIVATE_ID, data[3][idPos]);
+            } else {
+                assertEquals("Parent of created folder should be user1's Calendar folder but is " + data[1][namePos], Integer.toString(appointmentFolder), data[1][idPos]);
+                assertEquals("Parent of created folder should be virtual shared user folder but is " + data[2][namePos], FolderObject.SHARED_PREFIX + client.getValues().getUserId(), data[2][idPos]);
+                assertEquals("Parent of virtual shared user folder should be system shared root folder but is " + data[3][namePos], Integer.toString(FolderObject.SYSTEM_SHARED_FOLDER_ID), data[3][idPos]);
+                assertEquals("Root folder should be IPM_ROOT but is " + data[4][namePos], FolderStorage.PRIVATE_ID, data[4][idPos]);
+            }
         }
         {
             // Check cached folder.
