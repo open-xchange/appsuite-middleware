@@ -49,7 +49,6 @@
 
 package com.openexchange.textxtraction.internal;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -80,27 +79,16 @@ public final class CleanContentExtractor implements TextXtractService {
 
     @Override
     public String extractFrom(final InputStream inputStream, final String optMimeType) throws OXException {
-        final SecureRequest request = new SecureRequest();
-        request.setOption(SecureOptions.JustAnalyze, true);
-        /*
-         * Note that the SecureRequest object is REUSED for all the file.
-         */
-        final ByteArrayOutputStream out = Streams.newByteArrayOutputStream(8192);
         try {
-            final byte[] buf = new byte[2048];
-            for (int read; (read = inputStream.read(buf, 0, 2048)) > 0;) {
-                out.write(buf, 0, read);
-            }
-        } catch (final IOException e) {
-            throw TextXtractExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } finally {
-            Streams.close(inputStream);
-        }
-        request.setOption(SecureOptions.SourceDocument, ByteBuffer.wrap(out.toByteArray()));
-        final TextAppendingElementHandler elementHandlerImpl = new TextAppendingElementHandler();
-        request.setOption(SecureOptions.ElementHandler, elementHandlerImpl);
-        request.setOption(SecureOptions.OutputType, OutputTypeOption.ToHandler);
-        try {
+            final SecureRequest request = new SecureRequest();
+            request.setOption(SecureOptions.JustAnalyze, true);
+            /*
+             * Note that the SecureRequest object is REUSED for all the file.
+             */
+            request.setOption(SecureOptions.SourceDocument, inputStream);
+            final TextAppendingElementHandler elementHandlerImpl = new TextAppendingElementHandler();
+            request.setOption(SecureOptions.ElementHandler, elementHandlerImpl);
+            request.setOption(SecureOptions.OutputType, OutputTypeOption.ToHandler);
             /*
              * Execute the request
              */
@@ -117,6 +105,8 @@ public final class CleanContentExtractor implements TextXtractService {
             throw TextXtractExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw TextXtractExceptionCodes.ERROR.create(e, e.getMessage());
+        } finally {
+            Streams.close(inputStream);
         }
     }
 
@@ -127,7 +117,7 @@ public final class CleanContentExtractor implements TextXtractService {
         /*
          * Note that the SecureRequest object is REUSED for all the file.
          */
-        request.setOption(SecureOptions.SourceDocument, ByteBuffer.wrap(content.getBytes(Charsets.UTF_8)));
+        request.setOption(SecureOptions.SourceDocument, ByteBuffer.wrap(content.getBytes(Charsets.ISO_8859_1)));
         final TextAppendingElementHandler elementHandlerImpl = new TextAppendingElementHandler();
         request.setOption(SecureOptions.ElementHandler, elementHandlerImpl);
         request.setOption(SecureOptions.OutputType, OutputTypeOption.ToHandler);
