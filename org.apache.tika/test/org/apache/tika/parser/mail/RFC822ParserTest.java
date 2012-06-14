@@ -84,7 +84,7 @@ public class RFC822ParserTest extends TestCase {
         } catch (Exception e) {
             fail("Exception thrown: " + e.getMessage());
         }
-
+        
         //repeat, this time looking at content
         parser = new RFC822Parser();
         metadata = new Metadata();
@@ -152,7 +152,7 @@ public class RFC822ParserTest extends TestCase {
             fail("Exception thrown: " + e.getMessage());
         }
     }
-
+    
     /**
      * The from isn't in the usual form.
      * See TIKA-618
@@ -173,7 +173,7 @@ public class RFC822ParserTest extends TestCase {
      */
     public void testLongHeader() throws Exception {
         StringBuilder inputBuilder = new StringBuilder();
-        for (int i = 0; i < 200; ++i) {
+        for (int i = 0; i < 2000; ++i) {
             inputBuilder.append( //len > 50
                     "really really really really really really long name ");
         }
@@ -200,7 +200,7 @@ public class RFC822ParserTest extends TestCase {
                 new ByteArrayInputStream(data), handler, metadata, context);
         assertEquals(name.trim(), metadata.get(Metadata.AUTHOR));
     }
-
+    
     /**
      * Test for TIKA-678 - not all headers may be present
      */

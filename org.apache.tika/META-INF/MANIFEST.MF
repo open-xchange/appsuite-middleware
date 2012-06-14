@@ -7,7 +7,7 @@ Bundle-Vendor: Apache Software Foundation
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: .,
  lib/mockito-all-1.9.0-rc1.jar,
- lib/tika-app-0.10.jar
+ lib/tika-app-1.1.jar
 Export-Package: org.apache.tika;version="0.10.0",
  org.apache.tika.config;version="0.10.0",
  org.apache.tika.detect;version="0.10.0",

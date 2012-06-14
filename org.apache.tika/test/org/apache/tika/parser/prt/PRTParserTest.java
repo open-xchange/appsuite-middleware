@@ -45,7 +45,7 @@ public class PRTParserTest extends TikaTest {
           assertEquals(null, metadata.get(Metadata.DESCRIPTION));
 
           String contents = handler.toString();
-
+          
           assertContains("Front View", contents);
           assertContains("Back View", contents);
           assertContains("Bottom View", contents);
@@ -83,7 +83,7 @@ public class PRTParserTest extends TikaTest {
                 metadata.get(Metadata.DESCRIPTION));
 
           String contents = handler.toString();
-
+          
           assertContains("ITEM", contents);
           assertContains("REQ.", contents);
           assertContains("DESCRIPTION", contents);

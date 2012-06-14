@@ -18,16 +18,16 @@ package org.apache.tika.parser.odf;
 
 import java.io.InputStream;
 
-import junit.framework.TestCase;
-
+import org.apache.tika.TikaTest;
 import org.apache.tika.metadata.Metadata;
+import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
 import org.apache.tika.parser.opendocument.OpenOfficeParser;
 import org.apache.tika.sax.BodyContentHandler;
 import org.xml.sax.ContentHandler;
 
-public class ODFParserTest extends TestCase {
+public class ODFParserTest extends TikaTest {
     /**
      * For now, allow us to run some tests against both
      *  the old and the new parser
@@ -57,7 +57,7 @@ public class ODFParserTest extends TestCase {
              assertTrue(content.contains("Solr"));
              assertTrue(content.contains("one embedded"));
              assertTrue(content.contains("Rectangle Title"));
-             assertTrue(content.contains("a blue background and dark border"));
+             assertTrue(content.contains("a blue background and dark border"));        
           } finally {
              input.close();
           }
@@ -83,6 +83,17 @@ public class ODFParserTest extends TestCase {
              assertEquals(
                    "NeoOffice/2.2$Unix OpenOffice.org_project/680m18$Build-9161",
                    metadata.get("generator"));
+             
+             // Check the document statistics
+             assertEquals("1", metadata.get(Metadata.PAGE_COUNT));
+             assertEquals("1", metadata.get(Metadata.PARAGRAPH_COUNT));
+             assertEquals("14", metadata.get(Metadata.WORD_COUNT));
+             assertEquals("78", metadata.get(Metadata.CHARACTER_COUNT));
+             assertEquals("0", metadata.get(Metadata.TABLE_COUNT));
+             assertEquals("0", metadata.get(Metadata.OBJECT_COUNT));
+             assertEquals("0", metadata.get(Metadata.IMAGE_COUNT));
+             
+             // Check the old style statistics (these will be removed shortly)
              assertEquals("0", metadata.get("nbTab"));
              assertEquals("0", metadata.get("nbObject"));
              assertEquals("0", metadata.get("nbImg"));
@@ -118,7 +129,7 @@ public class ODFParserTest extends TestCase {
            Metadata metadata = new Metadata();
            ContentHandler handler = new BodyContentHandler();
            new OpenDocumentParser().parse(input, handler, metadata);
-
+  
            assertEquals(
                    "application/vnd.oasis.opendocument.formula",
                    metadata.get(Metadata.CONTENT_TYPE));
@@ -132,14 +143,21 @@ public class ODFParserTest extends TestCase {
                    "OpenOffice.org/2.2$Win32 OpenOffice.org_project/680m14$Build-9134",
                    metadata.get("generator"));
            assertEquals("Pangram, fox, dog", metadata.get(Metadata.KEYWORDS));
-
+           
            // User defined metadata
            assertEquals("Text 1", metadata.get("custom:Info 1"));
            assertEquals("2", metadata.get("custom:Info 2"));
            assertEquals("false", metadata.get("custom:Info 3"));
            assertEquals("true", metadata.get("custom:Info 4"));
-
+           
            // No statistics present
+           assertEquals(null, metadata.get(Metadata.PAGE_COUNT));
+           assertEquals(null, metadata.get(Metadata.PARAGRAPH_COUNT));
+           assertEquals(null, metadata.get(Metadata.WORD_COUNT));
+           assertEquals(null, metadata.get(Metadata.CHARACTER_COUNT));
+           assertEquals(null, metadata.get(Metadata.TABLE_COUNT));
+           assertEquals(null, metadata.get(Metadata.OBJECT_COUNT));
+           assertEquals(null, metadata.get(Metadata.IMAGE_COUNT));
            assertEquals(null, metadata.get("nbTab"));
            assertEquals(null, metadata.get("nbObject"));
            assertEquals(null, metadata.get("nbImg"));
@@ -147,7 +165,7 @@ public class ODFParserTest extends TestCase {
            assertEquals(null, metadata.get("nbPara"));
            assertEquals(null, metadata.get("nbWord"));
            assertEquals(null, metadata.get("nbCharacter"));
-
+  
            // Note - contents of maths files not currently supported
            String content = handler.toString();
            assertEquals("", content);
@@ -166,7 +184,7 @@ public class ODFParserTest extends TestCase {
            Metadata metadata = new Metadata();
            ContentHandler handler = new BodyContentHandler();
            new OpenDocumentParser().parse(input, handler, metadata);
-
+  
            assertEquals(
                    "application/vnd.oasis.opendocument.text",
                    metadata.get(Metadata.CONTENT_TYPE));
@@ -183,14 +201,23 @@ public class ODFParserTest extends TestCase {
                    "OpenOffice.org/3.1$Unix OpenOffice.org_project/310m19$Build-9420",
                    metadata.get("generator"));
            assertEquals("Apache, Lucene, Tika", metadata.get(Metadata.KEYWORDS));
-
+           
            // User defined metadata
            assertEquals("Bart Hanssens", metadata.get("custom:Editor"));
            assertEquals(null, metadata.get("custom:Info 2"));
            assertEquals(null, metadata.get("custom:Info 3"));
            assertEquals(null, metadata.get("custom:Info 4"));
-
-           // No statistics present
+           
+           // Check the document statistics
+           assertEquals("2", metadata.get(Metadata.PAGE_COUNT));
+           assertEquals("13", metadata.get(Metadata.PARAGRAPH_COUNT));
+           assertEquals("54", metadata.get(Metadata.WORD_COUNT));
+           assertEquals("351", metadata.get(Metadata.CHARACTER_COUNT));
+           assertEquals("0", metadata.get(Metadata.TABLE_COUNT));
+           assertEquals("2", metadata.get(Metadata.OBJECT_COUNT));
+           assertEquals("0", metadata.get(Metadata.IMAGE_COUNT));
+           
+           // Check the old style statistics (these will be removed shortly)
            assertEquals("0", metadata.get("nbTab"));
            assertEquals("2", metadata.get("nbObject"));
            assertEquals("0", metadata.get("nbImg"));
@@ -198,7 +225,7 @@ public class ODFParserTest extends TestCase {
            assertEquals("13", metadata.get("nbPara"));
            assertEquals("54", metadata.get("nbWord"));
            assertEquals("351", metadata.get("nbCharacter"));
-
+  
            String content = handler.toString();
            assertTrue(content.contains(
                  "Apache Tika Tika is part of the Lucene project."
@@ -207,4 +234,51 @@ public class ODFParserTest extends TestCase {
           input.close();
       }
    }
+
+    public void testODPMasterFooter() throws Exception {
+        InputStream input = ODFParserTest.class.getResourceAsStream(
+            "/test-documents/testMasterFooter.odp");
+        try {
+            Metadata metadata = new Metadata();
+            ContentHandler handler = new BodyContentHandler();
+            new AutoDetectParser().parse(input, handler, metadata);
+  
+            String content = handler.toString();
+            assertContains("Master footer is here", content);
+        } finally {
+            input.close();
+        }
+    }  
+
+    public void testODTFooter() throws Exception {
+        InputStream input = ODFParserTest.class.getResourceAsStream(
+            "/test-documents/testFooter.odt");
+        try {
+            Metadata metadata = new Metadata();
+            ContentHandler handler = new BodyContentHandler();
+            new AutoDetectParser().parse(input, handler, metadata);
+  
+            String content = handler.toString();
+            assertContains("Here is some text...", content);
+            assertContains("Here is some text on page 2", content);
+            assertContains("Here is footer text", content);
+        } finally {
+            input.close();
+        }
+    }  
+
+    public void testODSFooter() throws Exception {
+        InputStream input = ODFParserTest.class.getResourceAsStream(
+            "/test-documents/testFooter.ods");
+        try {
+            Metadata metadata = new Metadata();
+            ContentHandler handler = new BodyContentHandler();
+            new AutoDetectParser().parse(input, handler, metadata);
+  
+            String content = handler.toString();
+            assertContains("Here is a footer in the center area", content);
+        } finally {
+            input.close();
+        }
+    }  
 }
