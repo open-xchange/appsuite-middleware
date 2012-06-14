@@ -51,6 +51,12 @@ package com.openexchange.dav.caldav.bugs;
 
 import java.util.Date;
 
+import org.apache.jackrabbit.webdav.DavConstants;
+import org.apache.jackrabbit.webdav.MultiStatusResponse;
+import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
+import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
+
+import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.caldav.CalDAVTest;
 import com.openexchange.dav.caldav.ICalResource;
@@ -133,18 +139,37 @@ public class Bug22094Test extends CalDAVTest {
         /*
          * move appointment on client
          */
-//        assertEquals("response code wrong", StatusCodes.SC_OK, super.move(iCalResource, subfolderID));
-//        /*
-//         * verify appointment on server
-//         */
-//        appointment = super.getAppointment(uid);
-//        assertNotNull("appointment not found on server", appointment);
-//        assertEquals("folder ID wrong", subfolder.getObjectID(), appointment.getParentFolderID());
-//        /*
-//         * verify appointment on client
-//         */
-//        iCalResource = super.get(subfolderID, uid, null);
-//        assertEquals("UID wrong", uid, iCalResource.getUID());
+        assertEquals("response code wrong", StatusCodes.SC_CREATED, super.move(iCalResource, subfolderID));
+        /*
+         * update etag from moved appointment
+         */
+		DavPropertyNameSet props = new DavPropertyNameSet();
+        props.add(PropertyNames.GETETAG);
+        PropFindMethod propFind = new PropFindMethod(getWebDAVClient().getBaseURI() +  iCalResource.getHref(), 
+        		DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
+        MultiStatusResponse[] responses = getWebDAVClient().doPropFind(propFind);
+        assertNotNull("got no response", responses);
+        assertTrue("got no responses", 1 == responses.length);
+    	String eTag = this.extractTextContent(PropertyNames.GETETAG, responses[0]);
+    	assertNotNull("got no ETag from response", eTag);
+    	iCalResource.setEtag(eTag);
+        /*
+         * update resource on target location again
+         */
+        assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putICalUpdate(iCalResource));
+        /*
+         * verify appointment on client
+         */
+        iCalResource = super.get(subfolderID, uid, iCalResource.getETag());
+        assertEquals("UID wrong", uid, iCalResource.getUID());
+        /*
+         * verify moved appointment on server
+         */
+        assertNull("appointment still in source folder on server", super.getAppointment(uid));
+        appointment = super.getAppointment(subfolderID, uid);
+        super.rememberForCleanUp(appointment);
+        assertNotNull("appointment not found in target folder on server", appointment);
+        assertEquals("folder ID wrong", subfolder.getObjectID(), appointment.getParentFolderID());
 	}
 	
 }

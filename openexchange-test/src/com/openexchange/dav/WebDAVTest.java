@@ -439,6 +439,12 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
 		return dateFormat.format(date);
     }
     
+    protected static String formatAsDate(Date date) {
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+		dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+		return dateFormat.format(date);
+    }
+    
     /*
      * Additional assertXXX methods
      */
