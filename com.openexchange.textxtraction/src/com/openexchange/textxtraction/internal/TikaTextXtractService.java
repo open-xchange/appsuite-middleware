@@ -74,11 +74,14 @@ public final class TikaTextXtractService implements TextXtractService {
 
     private static final String UTF_8 = Charsets.UTF_8_NAME;
 
+    private final TextXtractService xtractService;
+
     /**
      * Initializes a new {@link TikaTextXtractService}.
      */
     public TikaTextXtractService() {
         super();
+        xtractService = new CleanContentExtractor();
     }
 
     private TikaDocumentHandler newDefaultHandler() throws OXException {
@@ -108,6 +111,14 @@ public final class TikaTextXtractService implements TextXtractService {
                         Streams.close(input);
                     }
                 }
+            }
+            try {
+                final String text = xtractService.extractFromResource(arg, optMimeType);
+                if (null != text) {
+                    return text;
+                }
+            } catch (final Exception e) {
+                // Ignore
             }
             /*
              * Non-HTML content
@@ -141,6 +152,14 @@ public final class TikaTextXtractService implements TextXtractService {
                 }
             }
         }
+        try {
+            final String text = xtractService.extractFrom(content, optMimeType);
+            if (null != text) {
+                return text;
+            }
+        } catch (final Exception e) {
+            // Ignore
+        }
         return (isEmpty(optMimeType) ? newDefaultHandler() : newHandler(optMimeType)).getDocumentContent(Streams.newByteArrayInputStream(content.getBytes(Charsets.UTF_8)));
     }
 
@@ -157,6 +176,14 @@ public final class TikaTextXtractService implements TextXtractService {
                     Streams.close(inputStream);
                 }
             }
+        }
+        try {
+            final String text = xtractService.extractFrom(inputStream, optMimeType);
+            if (null != text) {
+                return text;
+            }
+        } catch (final Exception e) {
+            // Ignore
         }
         return (isEmpty(optMimeType) ? newDefaultHandler() : newHandler(optMimeType)).getDocumentContent(inputStream);
     }

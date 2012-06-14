@@ -60,5 +60,6 @@ Import-Package: com.openexchange.exception,
  org.osgi.util.tracker
 Bundle-ActivationPolicy: lazy
 Export-Package: com.openexchange.textxtraction
-Bundle-ClassPath: lib/jericho-3.2.jar,
+Bundle-ClassPath: lib/CleanContent.jar,
+ lib/jericho-3.2.jar,
  .
