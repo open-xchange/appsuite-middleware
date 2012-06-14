@@ -211,10 +211,11 @@ public abstract class PasswordChangeService {
          */
         final int userId = session.getUserId();
         UserStorage.getInstance().invalidateUser(event.getContext(), userId);
-        /*
+        final ServerServiceRegistry serviceRegistry = ServerServiceRegistry.getInstance();
+        /*  
          * Update password in session
          */
-        final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+        final SessiondService sessiondService = serviceRegistry.getService(SessiondService.class);
         if (sessiondService == null) {
             throw new OXException(ServiceExceptionCode.SERVICE_UNAVAILABLE.create( SessiondService.class.getName()));
         }
@@ -224,7 +225,7 @@ public abstract class PasswordChangeService {
             LOG.error("Updating password in user session failed", e);
             throw e;
         }
-        final EventAdmin eventAdmin = ServerServiceRegistry.getInstance().getService(EventAdmin.class);
+        final EventAdmin eventAdmin = serviceRegistry.getService(EventAdmin.class);
         final int contextId = session.getContextId();
         if (null != eventAdmin) {
             final Map<String, Object> properties = new HashMap<String, Object>(5);
@@ -238,7 +239,7 @@ public abstract class PasswordChangeService {
         /*
          * Invalidate caches manually
          */
-        final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        final CacheService cacheService = serviceRegistry.getService(CacheService.class);
         if (null != cacheService) {
             try {
                 final CacheKey key = cacheService.newCacheKey(contextId, userId);
