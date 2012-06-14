@@ -48,14 +48,18 @@
  */
 package com.openexchange.loxandra.json;
 
+import java.util.Date;
+import java.util.Iterator;
 import java.util.TimeZone;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.writer.CommonWriter;
+import com.openexchange.groupware.contact.helpers.ContactField;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.loxandra.dto.EAVContact;
+import com.openexchange.loxandra.helpers.EAVContactHelper;
 import com.openexchange.tools.TimeZoneUtils;
 
 /**
@@ -75,10 +79,43 @@ public class EAVContactWriter extends CommonWriter {
         utc = TimeZoneUtils.getTimeZone("utc");
 	}
 	
+	/**
+	 * Deserialze an EAVContact to JSON
+	 * @param c EAVContact
+	 * @param j JSONObject
+	 * @throws JSONException
+	 */
 	public void writeContact(final EAVContact c, final JSONObject j) throws JSONException {
-		writeParameter("named:" + ContactFields.FIRST_NAME, c.getGivenName(), j);
-		writeParameter("named:" + ContactFields.LAST_NAME, c.getSurName(), j);
-		writeParameter("named:" + ContactFields.DISPLAY_NAME, c.getDisplayName(), j);
+		for (final int column : Contact.JSON_COLUMNS) {
+			
+			final ContactField field = ContactField.getByValue(column);
+			if (field != null && field.isDBField()) {
+				final String key = field.getAjaxName();
+				try {
+					if (c.contains(column)) {
+						if (EAVContactHelper.isNonString(column)) {
+							Date d = (Date)c.get(column);
+							writeParameter(key, d.getTime(), j);
+						} else 
+							writeParameter(key, (String)c.get(column), j);
+					}
+				} catch (IllegalArgumentException e) {
+					e.printStackTrace();
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
+		if (c.getFolderUUIDs().size() != 0)
+			writeParameter("folderUUID", c.getFolderUUIDs().get(0).toString(), j);
+		
+		JSONObject unnamedJson = new JSONObject();
+		Iterator<String> iter = c.getUnnamedPropertyNames().iterator();
+		while (iter.hasNext()) {
+			String key = (String) iter.next();
+			unnamedJson.put(key, c.getUnnamedProperty(key));
+		}
+		j.put("unnamed", unnamedJson);
 	}
-
 }

@@ -5,10 +5,13 @@ Bundle-SymbolicName: com.openexchange.loxandra.impl
 Bundle-Version: 6.21.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.config,
+Import-Package: com.openexchange.ajax.fields,
+ com.openexchange.config,
+ com.openexchange.groupware.contact.helpers,
  com.openexchange.groupware.container,
  com.openexchange.loxandra,
  com.openexchange.loxandra.dto,
+ com.openexchange.loxandra.helpers,
  com.openexchange.osgi,
  me.prettyprint.cassandra.serializers,
  me.prettyprint.cassandra.service,

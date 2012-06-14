@@ -114,8 +114,8 @@ public final class LoxandraActivator extends HousekeepingActivator {
 		// start embedded cassandra node
 		cassandra = new EmbeddedCassandraService();
         cassandra.init();
-        cassandra.start();
-        
+    	cassandra.start();
+
         /*cassandraThread = new Thread(cassandra);
         cassandraThread.setDaemon(true);
         cassandraThread.start();*/
@@ -126,9 +126,14 @@ public final class LoxandraActivator extends HousekeepingActivator {
         cassandraDaemon.activate();*/
         
 		// register eavcontactservice
-        registerService(EAVContactFactoryService.class, new CassandraEAVContactFactoryServiceImpl());
+
+    	
+    	registerService(EAVContactFactoryService.class, new CassandraEAVContactFactoryServiceImpl());
         registerService(EmbeddedCassandraService.class, cassandra);
         openTrackers();
+        
+        log.info("Loxandra Service started successfully.");
+        
 	}
 	
 	/*
@@ -139,11 +144,11 @@ public final class LoxandraActivator extends HousekeepingActivator {
 	protected void stopBundle() throws Exception {
 		log.info("stoping bundle: com.openexchange.loxandra");
 		
-		cassandraDaemon.deactivate();
-		cassandraDaemon = null;
+		//cassandraDaemon.deactivate();
+		//cassandraDaemon = null;
 
-		//cassandra.stop();
-		//cassandra = null;
+		cassandra.stop();
+		cassandra = null;
 		//cassandraThread = null;
 		//srv.teardown();
 		LoxandraServiceLookUp.set(null);

@@ -186,7 +186,9 @@ public class FunctionTests extends AbstractAJAXSession {
             };
             {
                 FolderObject folder = Create.folder(child01.getObjectID(), "NonDeleteableSubChild01", FolderObject.CALENDAR, FolderObject.PUBLIC, perms);
-                InsertResponse response = client.execute(new InsertRequest(EnumAPI.OX_NEW, folder));
+                folder.setCreator(secId);
+                folder.setCreatedBy(secId);
+                InsertResponse response = client2.execute(new InsertRequest(EnumAPI.OX_NEW, folder));
                 GetResponse response2 = client.execute(new GetRequest(EnumAPI.OX_NEW, response.getId()));
                 subChild01 = response2.getFolder();
                 subChild01.setLastModified(response2.getTimestamp());

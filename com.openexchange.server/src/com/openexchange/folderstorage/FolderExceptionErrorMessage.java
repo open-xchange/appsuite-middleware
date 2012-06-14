@@ -53,6 +53,7 @@ import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXException.Generic;
 
 /**
  * {@link FolderExceptionErrorMessage} - Error messages for folder exceptions.
@@ -251,7 +252,7 @@ public enum FolderExceptionErrorMessage implements OXExceptionCode {
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
-        return OXExceptionFactory.getInstance().create(this, new Object[0]);
+        return specials(OXExceptionFactory.getInstance().create(this, new Object[0]));
     }
 
     /**
@@ -261,7 +262,7 @@ public enum FolderExceptionErrorMessage implements OXExceptionCode {
      * @return The newly created {@link OXException} instance
      */
     public OXException create(final Object... args) {
-        return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
+        return specials(OXExceptionFactory.getInstance().create(this, (Throwable) null, args));
     }
 
     /**
@@ -272,7 +273,23 @@ public enum FolderExceptionErrorMessage implements OXExceptionCode {
      * @return The newly created {@link OXException} instance
      */
     public OXException create(final Throwable cause, final Object... args) {
-        return OXExceptionFactory.getInstance().create(this, cause, args);
+        return specials(OXExceptionFactory.getInstance().create(this, cause, args));
     }
+
+	private OXException specials(OXException exc) {
+		switch(this) {
+		case NOT_FOUND:
+			exc.setGeneric(Generic.NOT_FOUND);
+		}
+		
+		if (exc.getCategories().contains(Category.CATEGORY_CONFLICT)) {
+			exc.setGeneric(Generic.CONFLICT);
+		}
+		
+		if (exc.getCategories().contains(Category.CATEGORY_PERMISSION_DENIED)) {
+			exc.setGeneric(Generic.NO_PERMISSION);
+		}
+		return exc;
+	}
 
 }

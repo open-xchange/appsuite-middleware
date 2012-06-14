@@ -52,11 +52,9 @@ package com.openexchange.subscribe.json.actions;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -115,8 +113,14 @@ public class ListSubscriptionAction extends AbstractSubscribeAction {
 		try {
 			dynamicColumns = getDynamicColumns(parameters);
 			final List<String> dynamicColumnOrder = getDynamicColumnOrder(parameters);
-	        JSONObject json = (JSONObject) createResponse(subscriptions, basicColumns, dynamicColumns, dynamicColumnOrder);
-	        return new AJAXRequestResult(json, "json");
+			Object res = createResponse(subscriptions, basicColumns, dynamicColumns, dynamicColumnOrder);
+	        if (res instanceof JSONObject) {
+                JSONObject json = (JSONObject) res;
+                return new AJAXRequestResult(json, "json");
+            } else {
+                JSONArray json = (JSONArray) res;
+                return new AJAXRequestResult(json, "json");
+            }
 		} catch (JSONException e) {
 			throw new OXException(e);
 		}

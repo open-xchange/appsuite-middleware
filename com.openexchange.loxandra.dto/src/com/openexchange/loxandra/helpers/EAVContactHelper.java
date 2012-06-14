@@ -46,56 +46,30 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.loxandra.json;
+package com.openexchange.loxandra.helpers;
 
-import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.documentation.annotations.Module;
-import com.openexchange.exception.OXException;
-import com.openexchange.loxandra.json.action.AbstractAction;
-import com.openexchange.loxandra.json.action.GetAction;
-import com.openexchange.loxandra.json.action.NewAction;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.groupware.container.Contact;
 
 /**
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ *
  */
-@Module(name = "eavcontact", description = "Provides access to eav contact information.")
-public class EAVContactActionFactory implements AJAXActionServiceFactory {
+public class EAVContactHelper {
+	private static Map<Integer, String> nonStringFields = new HashMap<Integer, String>();
 	
-	private static final Map<String, AbstractAction> actions = new ConcurrentHashMap<String, AbstractAction>(2);
-
-	/**
-	 * Constructor
-	 * @param serviceLookup
-	 */
-	public EAVContactActionFactory(final ServiceLookup serviceLookup) {
-        super();
-        actions.put("new", new NewAction(serviceLookup));
-        actions.put("get", new GetAction(serviceLookup));
-    }
-
-	/*
-	 * (non-Javadoc)
-	 * @see com.openexchange.documentation.AnnotatedServices#getSupportedServices()
-	 */
-	@Override
-	public Collection<?> getSupportedServices() {
-		return java.util.Collections.unmodifiableCollection(actions.values());
+	static {
+		nonStringFields.put(Contact.ANNIVERSARY, "date");
+		nonStringFields.put(Contact.BIRTHDAY, "date");
+		nonStringFields.put(Contact.CREATION_DATE, "date");
+		nonStringFields.put(Contact.LAST_MODIFIED, "date");
+		nonStringFields.put(Contact.IMAGE_LAST_MODIFIED, "date");
+		nonStringFields.put(Contact.LAST_MODIFIED_OF_NEWEST_ATTACHMENT, "date");
 	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see com.openexchange.ajax.requesthandler.AJAXActionServiceFactory#createActionService(java.lang.String)
-	 */
-	@Override
-	public AJAXActionService createActionService(String action) throws OXException {
-		return actions.get(action);
+	
+	public static boolean isNonString(final int column) {
+		return nonStringFields.containsKey(column);
 	}
-
-
 }

@@ -88,12 +88,18 @@ public final class GetResponse extends AbstractAJAXResponse {
         }
         if (null == folder) {
             final FolderObject parsed = new FolderObject();
-            JSONObject data = (JSONObject) getData();
+            final JSONObject data = (JSONObject) getData();
             try {
                 if (data.has(FolderFields.ID)) {
                     rearrangeId(data);
                 }
-            } catch (JSONException e) {
+                if (data.has(FolderFields.FOLDER_ID)) {
+                    final String tmp = data.getString(FolderFields.FOLDER_ID);
+                    if (tmp.startsWith(FolderObject.SHARED_PREFIX)) {
+                        data.put(FolderFields.FOLDER_ID, Integer.toString(FolderObject.SYSTEM_SHARED_FOLDER_ID));
+                    }
+                }
+            } catch (final JSONException e) {
                 throw OXJSONExceptionCodes.JSON_READ_ERROR.create();
             }
             new FolderParser().parse(parsed, data);// .parse(parsed, (JSONObject) getData());
@@ -103,17 +109,17 @@ public final class GetResponse extends AbstractAJAXResponse {
         return folder;
     }
 
-    private void fillInFullName(JSONObject data, FolderObject parsed) {
+    private void fillInFullName(final JSONObject data, final FolderObject parsed) {
         if (data.has("full_name")) {
             parsed.setFullName(data.optString("full_name"));
         }
     }
 
-    private void rearrangeId(JSONObject data) throws JSONException {
+    private void rearrangeId(final JSONObject data) throws JSONException {
         try {
             Integer.parseInt(data.getString(FolderFields.ID));
-        } catch (NumberFormatException x) {
-            String id = data.getString(FolderFields.ID);
+        } catch (final NumberFormatException x) {
+            final String id = data.getString(FolderFields.ID);
             data.remove(FolderFields.ID);
             data.put("full_name", id);
         }

@@ -100,7 +100,7 @@ public class AllSubscriptionsTest extends AbstractSubscriptionTest {
         subMgr.newAction(subscription);
         assertFalse("Precondition: Creation of test file should work", subMgr.getLastResponse().hasError());
         List<String> columns = Arrays.asList("id","folder", "source");
-        JSONArray all = subMgr.allAction(columns);
+        JSONArray all = subMgr.allAction(folder.getObjectID(), columns);
         assertFalse("Should be able to handle all request", subMgr.getLastResponse().hasError());
 
         boolean containsSubscription = false;

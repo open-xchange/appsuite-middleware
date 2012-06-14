@@ -104,7 +104,7 @@ public class FolderTestManager implements TestManager{
     private Throwable lastException;
 
     @Override
-    public void setFailOnError(boolean failOnError) {
+    public void setFailOnError(final boolean failOnError) {
         this.failOnError = failOnError;
     }
 
@@ -117,11 +117,11 @@ public class FolderTestManager implements TestManager{
         return ignoreMailFolders;
     }
 
-    public void setIgnoreMailFolders(boolean ignoreMailFolders) {
+    public void setIgnoreMailFolders(final boolean ignoreMailFolders) {
         this.ignoreMailFolders = ignoreMailFolders;
     }
 
-    public void setLastResponse(AbstractAJAXResponse lastResponse) {
+    public void setLastResponse(final AbstractAJAXResponse lastResponse) {
         this.lastResponse = lastResponse;
     }
 
@@ -131,7 +131,7 @@ public class FolderTestManager implements TestManager{
     }
 
 
-    public FolderTestManager(AJAXClient client) {
+    public FolderTestManager(final AJAXClient client) {
         this.client = client;
         createdItems = new LinkedList<FolderObject>();
     }
@@ -140,14 +140,14 @@ public class FolderTestManager implements TestManager{
      * Creates a folder via HTTP-API and updates it with new id, timestamp and all other information that is updated after such requests.
      * Remembers this folder for cleanup later.
      */
-    public FolderObject insertFolderOnServer(FolderObject folderToCreate) {
-        InsertRequest request = new InsertRequest(EnumAPI.OX_OLD, folderToCreate);
+    public FolderObject insertFolderOnServer(final FolderObject folderToCreate) {
+        final InsertRequest request = new InsertRequest(EnumAPI.OX_OLD, folderToCreate);
         CommonInsertResponse response = null;
         try {
             response = client.execute(request);
             setLastResponse(response);
             response.fillObject(folderToCreate);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             doExceptionHandling(e, "NewRequest");
         }
         createdItems.add(folderToCreate);
@@ -157,7 +157,7 @@ public class FolderTestManager implements TestManager{
     /**
      * Create multiple folders via the HTTP-API at once
      */
-    public void insertFoldersOnServer(FolderObject[] folders) {
+    public void insertFoldersOnServer(final FolderObject[] folders) {
         for (int i = 0; i < folders.length; i++) {
             this.insertFolderOnServer(folders[i]);
         }
@@ -166,12 +166,12 @@ public class FolderTestManager implements TestManager{
     /**
      * Updates a folder via HTTP-API and returns the same folder for convenience
      */
-    public FolderObject updateFolderOnServer(FolderObject folder) {
-        UpdateRequest request = new UpdateRequest(EnumAPI.OX_OLD, folder);
+    public FolderObject updateFolderOnServer(final FolderObject folder) {
+        final UpdateRequest request = new UpdateRequest(EnumAPI.OX_OLD, folder);
         try {
             setLastResponse(client.execute(request));
             remember(folder);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             doExceptionHandling(e, "UpdateRequest");
         }
 
@@ -181,8 +181,8 @@ public class FolderTestManager implements TestManager{
     /**
      * Deletes a folder via HTTP-API
      */
-    public void deleteFolderOnServer(FolderObject folderToDelete) throws OXException, IOException, SAXException, JSONException {
-        DeleteRequest request = new DeleteRequest(EnumAPI.OX_OLD, folderToDelete);
+    public void deleteFolderOnServer(final FolderObject folderToDelete) throws OXException, IOException, SAXException, JSONException {
+        final DeleteRequest request = new DeleteRequest(EnumAPI.OX_OLD, folderToDelete);
         setLastResponse(client.execute(request));
         removeFolderFromCleanupList(folderToDelete);
     }
@@ -191,7 +191,7 @@ public class FolderTestManager implements TestManager{
      * Deletes a folder via HTTP-API
      */
     public void deleteFolderOnServer(final int folderID, final Date lastModified) throws OXException, IOException, SAXException, JSONException {
-        FolderObject fo = new FolderObject();
+        final FolderObject fo = new FolderObject();
         fo.setObjectID(folderID);
         fo.setLastModified(lastModified);
         deleteFolderOnServer(fo);
@@ -201,9 +201,9 @@ public class FolderTestManager implements TestManager{
      * Removes a folder form the cleanup list. This is somewhat complicated, because FolderObject lacks a proper #equals() and because
      * identifying folders is different for normal folders and mail folders
      */
-    private void removeFolderFromCleanupList(FolderObject folderToDelete) {
-        LinkedList<FolderObject> createdItemsCopy = new LinkedList<FolderObject>(createdItems);
-        for (FolderObject folder : createdItemsCopy) {
+    private void removeFolderFromCleanupList(final FolderObject folderToDelete) {
+        final LinkedList<FolderObject> createdItemsCopy = new LinkedList<FolderObject>(createdItems);
+        for (final FolderObject folder : createdItemsCopy) {
             // normal folder
             if (folder.getObjectID() == folderToDelete.getObjectID() && !folder.containsFullName() && !folderToDelete.containsFullName()) {
                 createdItems.remove(folder);
@@ -219,51 +219,53 @@ public class FolderTestManager implements TestManager{
     /**
      * Get a folder via HTTP-API with an existing FolderObject
      */
-    public FolderObject getFolderFromServer(FolderObject folder) {
-        if (folder.getObjectID() == 0)
+    public FolderObject getFolderFromServer(final FolderObject folder) {
+        if (folder.getObjectID() == 0) {
             return getFolderFromServer(folder.getFullName(), getFailOnError());
+        }
         return getFolderFromServer(folder.getObjectID(), getFailOnError());
     }
 
-    public FolderObject getFolderFromServer(FolderObject folder, boolean failOnErrorOverride) {
-        if (folder.getObjectID() == 0)
+    public FolderObject getFolderFromServer(final FolderObject folder, final boolean failOnErrorOverride) {
+        if (folder.getObjectID() == 0) {
             return getFolderFromServer(folder.getFullName(), failOnErrorOverride);
+        }
         return getFolderFromServer(folder.getObjectID(), failOnErrorOverride);
     }
 
-    public FolderObject getFolderFromServer(int folderID, boolean failOnErrorOverride, int[] additionalColumns) {
-        boolean oldValue = getFailOnError();
+    public FolderObject getFolderFromServer(final int folderID, final boolean failOnErrorOverride, final int[] additionalColumns) {
+        final boolean oldValue = getFailOnError();
         setFailOnError(failOnErrorOverride);
         FolderObject returnedFolder = null;
-        GetRequest request = new GetRequest(EnumAPI.OX_OLD, folderID, Arrays.addUniquely(FolderObject.ALL_COLUMNS,additionalColumns));
+        final GetRequest request = new GetRequest(EnumAPI.OX_OLD, folderID, Arrays.addUniquely(FolderObject.ALL_COLUMNS,additionalColumns));
         GetResponse response = null;
         try {
             response = client.execute(request);
             setLastResponse(response);
             returnedFolder = response.getFolder();
             setFailOnError(oldValue);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             doExceptionHandling(e, "GetRequest for folder with id " + folderID);
         }
         return returnedFolder;
     }
 
-    public FolderObject getFolderFromServer(String name) {
+    public FolderObject getFolderFromServer(final String name) {
         return getFolderFromServer(name, getFailOnError());
     }
 
     /**
      * Get a folder via HTTP-API with no existing FolderObject and the folders name as identifier
      */
-    public FolderObject getFolderFromServer(String name, boolean failOnErrorOverride) {
+    public FolderObject getFolderFromServer(final String name, final boolean failOnErrorOverride) {
         FolderObject returnedFolder = null;
-        GetRequest request = new GetRequest(EnumAPI.OX_OLD, name, failOnErrorOverride);
+        final GetRequest request = new GetRequest(EnumAPI.OX_OLD, name, failOnErrorOverride);
         GetResponse response = null;
         try {
             response = client.execute(request);
             setLastResponse(response);
             returnedFolder = response.getFolder();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             doExceptionHandling(e, "GetRequest");
         }
         return returnedFolder;
@@ -272,18 +274,25 @@ public class FolderTestManager implements TestManager{
     /**
      * Get a folder via HTTP-API with no existing FolderObject and the folders id as identifier
      */
-    public FolderObject getFolderFromServer(final int folderId, boolean failOnErrorOverride) {
-        boolean oldValue = getFailOnError();
+    public FolderObject getFolderFromServer(final int folderId, final boolean failOnErrorOverride) {
+        return getFolderByStringFromServer(Integer.toString(folderId), failOnErrorOverride);
+    }
+
+    /**
+     * Get a folder via HTTP-API with no existing FolderObject and the folders id as identifier
+     */
+    public FolderObject getFolderByStringFromServer(final String folderId, final boolean failOnErrorOverride) {
+        final boolean oldValue = getFailOnError();
         setFailOnError(failOnErrorOverride);
         FolderObject returnedFolder = null;
-        GetRequest request = new GetRequest(EnumAPI.OX_OLD, folderId, FolderObject.ALL_COLUMNS);
+        final GetRequest request = new GetRequest(EnumAPI.OX_OLD, folderId, FolderObject.ALL_COLUMNS);
         GetResponse response = null;
         try {
             response = client.execute(request);
             setLastResponse(response);
             returnedFolder = response.getFolder();
             setFailOnError(oldValue);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             doExceptionHandling(e, "GetRequest for folder with id " + folderId);
         }
         return returnedFolder;
@@ -298,13 +307,13 @@ public class FolderTestManager implements TestManager{
      */
     @Override
     public void cleanUp() {
-        Vector<FolderObject> deleteMe = new Vector<FolderObject>(createdItems);
+        final Vector<FolderObject> deleteMe = new Vector<FolderObject>(createdItems);
         try {
-            for (FolderObject folder : deleteMe) {
+            for (final FolderObject folder : deleteMe) {
                 folder.setLastModified(new Date(Long.MAX_VALUE));
                 deleteFolderOnServer(folder);
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             doExceptionHandling(e, "clean-up");
         }
 
@@ -314,25 +323,25 @@ public class FolderTestManager implements TestManager{
     /**
      * get all folders in one parent folder via the HTTP-API (List-Request)
      */
-    public FolderObject[] listFoldersOnServer(int parentFolderId) {
+    public FolderObject[] listFoldersOnServer(final int parentFolderId) {
         return listFoldersOnServer(parentFolderId, null);
     }
 
-    public FolderObject[] listFoldersOnServer(int parentFolderId, int[] additionalFields) {
-        Vector<FolderObject> allFolders = new Vector<FolderObject>();
-        ListRequest request = new ListRequest(EnumAPI.OX_OLD, Integer.toString(parentFolderId), Arrays.addUniquely(new int[] { FolderObject.OBJECT_ID },additionalFields), getFailOnError());
+    public FolderObject[] listFoldersOnServer(final int parentFolderId, final int[] additionalFields) {
+        final Vector<FolderObject> allFolders = new Vector<FolderObject>();
+        final ListRequest request = new ListRequest(EnumAPI.OX_OLD, Integer.toString(parentFolderId), Arrays.addUniquely(new int[] { FolderObject.OBJECT_ID },additionalFields), getFailOnError());
         try {
-            ListResponse response = client.execute(request);
-            Iterator<FolderObject> iterator = response.getFolder();
+            final ListResponse response = client.execute(request);
+            final Iterator<FolderObject> iterator = response.getFolder();
             while (iterator.hasNext()) {
                 allFolders.add(iterator.next());
             }
             setLastResponse(response);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             doExceptionHandling(e, "ListRequest");
         }
 
-        FolderObject[] folderArray = new FolderObject[allFolders.size()];
+        final FolderObject[] folderArray = new FolderObject[allFolders.size()];
         allFolders.copyInto(folderArray);
         return folderArray;
     }
@@ -340,45 +349,45 @@ public class FolderTestManager implements TestManager{
     /**
      * get all folders in one parent folder via the HTTP-API
      */
-    public FolderObject[] listFoldersOnServer(FolderObject folder) {
+    public FolderObject[] listFoldersOnServer(final FolderObject folder) {
         if (folder.getObjectID() != 0) {
             return listFoldersOnServer(folder.getObjectID());
         }
-        Vector<FolderObject> allFolders = new Vector<FolderObject>();
+        final Vector<FolderObject> allFolders = new Vector<FolderObject>();
         // FolderObject parentFolder = this.getFolderFromServer(parentFolderId);
-        ListRequest request = new ListRequest(EnumAPI.OX_OLD, folder.getFullName(), new int[] { FolderObject.OBJECT_ID }, getFailOnError());
+        final ListRequest request = new ListRequest(EnumAPI.OX_OLD, folder.getFullName(), new int[] { FolderObject.OBJECT_ID }, getFailOnError());
         try {
-            ListResponse response = client.execute(request);
+            final ListResponse response = client.execute(request);
             setLastResponse(response);
-            Iterator<FolderObject> iterator = response.getFolder();
+            final Iterator<FolderObject> iterator = response.getFolder();
             while (iterator.hasNext()) {
                 allFolders.add(iterator.next());
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             doExceptionHandling(e, "ListRequest");
         }
 
-        FolderObject[] folderArray = new FolderObject[allFolders.size()];
+        final FolderObject[] folderArray = new FolderObject[allFolders.size()];
         allFolders.copyInto(folderArray);
         return folderArray;
     }
 
     public FolderObject[] listRootFoldersOnServer() {
-        Vector<FolderObject> allFolders = new Vector<FolderObject>();
+        final Vector<FolderObject> allFolders = new Vector<FolderObject>();
         // FolderObject parentFolder = this.getFolderFromServer(parentFolderId);
-        RootRequest request = new RootRequest(EnumAPI.OX_OLD, new int[] { FolderObject.OBJECT_ID }, ignoreMailFolders);
+        final RootRequest request = new RootRequest(EnumAPI.OX_OLD, new int[] { FolderObject.OBJECT_ID }, ignoreMailFolders);
         try {
-            ListResponse response = client.execute(request);
+            final ListResponse response = client.execute(request);
             setLastResponse(response);
-            Iterator<FolderObject> iterator = response.getFolder();
+            final Iterator<FolderObject> iterator = response.getFolder();
             while (iterator.hasNext()) {
                 allFolders.add(iterator.next());
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             doExceptionHandling(e, "ListRequest for root folders");
         }
 
-        FolderObject[] folderArray = new FolderObject[allFolders.size()];
+        final FolderObject[] folderArray = new FolderObject[allFolders.size()];
         allFolders.copyInto(folderArray);
         return folderArray;
     }
@@ -386,46 +395,48 @@ public class FolderTestManager implements TestManager{
     /**
      * Get folders in a parent folder that were updated since a specific date via the HTTP-API
      */
-    public FolderObject[] getUpdatedFoldersOnServer(int folderId, Date lastModified) {
+    public FolderObject[] getUpdatedFoldersOnServer(final int folderId, final Date lastModified) {
         return getUpdatedFoldersOnServer(folderId, lastModified, null);
     }
 
-    public FolderObject[] getUpdatedFoldersOnServer(int folderId, Date lastModified, int[] additionalFields) {
-        Vector<FolderObject> allFolders = new Vector<FolderObject>();
-        UpdatesRequest request = new UpdatesRequest(EnumAPI.OX_OLD, folderId, Arrays.addUniquely(new int[] { FolderObject.OBJECT_ID }, additionalFields), -1, null, lastModified);
+    public FolderObject[] getUpdatedFoldersOnServer(final int folderId, final Date lastModified, final int[] additionalFields) {
+        final Vector<FolderObject> allFolders = new Vector<FolderObject>();
+        final UpdatesRequest request = new UpdatesRequest(EnumAPI.OX_OLD, folderId, Arrays.addUniquely(new int[] { FolderObject.OBJECT_ID }, additionalFields), -1, null, lastModified);
         try {
-            CommonUpdatesResponse response = client.execute(request);
-            int idPos = findIDPosition(response.getColumns());
+            final CommonUpdatesResponse response = client.execute(request);
+            final int idPos = findIDPosition(response.getColumns());
             final JSONArray data = (JSONArray) response.getResponse().getData();
             FolderObject fo = new FolderObject();
             for (int i = 0; i < data.length(); i++) {
-                JSONArray tempArray = data.getJSONArray(i);
-                fo = this.getFolderFromServer(tempArray.getInt(idPos), getFailOnError());
+                final JSONArray tempArray = data.getJSONArray(i);
+                fo = this.getFolderByStringFromServer(tempArray.getString(idPos), getFailOnError());
                 allFolders.add(fo);
             }
             setLastResponse(response);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             doExceptionHandling(e, "AllRequest");
         }
 
-        FolderObject[] folderArray = new FolderObject[allFolders.size()];
+        final FolderObject[] folderArray = new FolderObject[allFolders.size()];
         allFolders.copyInto(folderArray);
         return folderArray;
     }
 
-    private int findPositionOfColumn(int[] haystack, int needle) {
-        for(int i = 0; i < haystack.length; i++)
-            if(haystack[i] == needle)
+    private int findPositionOfColumn(final int[] haystack, final int needle) {
+        for(int i = 0; i < haystack.length; i++) {
+            if(haystack[i] == needle) {
                 return i;
+            }
+        }
         return -1;
     }
 
-    private int findIDPosition(int[] columns) {
+    private int findIDPosition(final int[] columns) {
         return findPositionOfColumn(columns, Appointment.OBJECT_ID);
     }
 
-    private void remember(FolderObject folder) {
-        for (FolderObject tempFolder : createdItems) {
+    private void remember(final FolderObject folder) {
+        for (final FolderObject tempFolder : createdItems) {
             if (tempFolder.getObjectID() == folder.getObjectID()) {
                 createdItems.set(createdItems.indexOf(tempFolder), folder);
             } else {
@@ -439,44 +450,48 @@ public class FolderTestManager implements TestManager{
      */
     // TODO: It would be nice if the fields of the returned FolderObjects were filled by the original AllRequest, not by separate
     // GetRequests
-    public FolderObject[] getAllFoldersOnServer(int folderId) {
-        Vector<FolderObject> allFolders = new Vector<FolderObject>();
-        CommonAllRequest request = new CommonAllRequest("/ajax/folders", folderId, new int[] { FolderObject.OBJECT_ID }, 0, null, getFailOnError());
+    public FolderObject[] getAllFoldersOnServer(final int folderId) {
+        final Vector<FolderObject> allFolders = new Vector<FolderObject>();
+        final CommonAllRequest request = new CommonAllRequest("/ajax/folders", folderId, new int[] { FolderObject.OBJECT_ID }, 0, null, getFailOnError());
         try {
-            CommonAllResponse response = client.execute(request);
+            final CommonAllResponse response = client.execute(request);
             final JSONArray data = (JSONArray) response.getResponse().getData();
             for (int i = 0; i < data.length(); i++) {
-                JSONArray temp = data.optJSONArray(i);
-                int tempFolderId = temp.getInt(0);
-                FolderObject tempFolder = getFolderFromServer(tempFolderId);
+                final JSONArray temp = data.optJSONArray(i);
+                final int tempFolderId = temp.getInt(0);
+                final FolderObject tempFolder = getFolderFromServer(tempFolderId);
                 allFolders.add(tempFolder);
             }
             setLastResponse(response);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             doExceptionHandling(e, "AllRequest");
         }
-        FolderObject[] folderArray = new FolderObject[allFolders.size()];
+        final FolderObject[] folderArray = new FolderObject[allFolders.size()];
         allFolders.copyInto(folderArray);
         return folderArray;
     }
 
-    protected void doExceptionHandling(Exception exception, String action) {
+    protected void doExceptionHandling(final Exception exception, final String action) {
         try {
             lastException = exception;
             throw exception;
-        } catch (OXException e) {
-            if (getFailOnError())
+        } catch (final OXException e) {
+            if (getFailOnError()) {
                 fail("AjaxException occured during " + action + ": " + e.getMessage());
-        } catch (IOException e) {
-            if (getFailOnError())
+            }
+        } catch (final IOException e) {
+            if (getFailOnError()) {
                 fail("IOException occured during " + action + ": " + e.getMessage());
-        } catch (SAXException e) {
-            if (getFailOnError())
+            }
+        } catch (final SAXException e) {
+            if (getFailOnError()) {
                 fail("SAXException occured during " + action + ": " + e.getMessage());
-        } catch (JSONException e) {
-            if (getFailOnError())
+            }
+        } catch (final JSONException e) {
+            if (getFailOnError()) {
                 fail("JSONException occured during " + action + ": " + e.getMessage());
-        } catch (Exception e) {
+            }
+        } catch (final Exception e) {
             fail("Unexpected error occured during " + action + ".");
             e.printStackTrace();
         }
@@ -490,16 +505,16 @@ public class FolderTestManager implements TestManager{
      * @param userIDs the IDs of the users that have admin permission on this one
      * @return a fodler object according to the input parameters
      */
-    public FolderObject generateFolder(String name, int moduleID, int parentID, int... userIDs){
+    public FolderObject generateFolder(final String name, final int moduleID, final int parentID, final int... userIDs){
         //create a folder
-        FolderObject folder = new FolderObject();
+        final FolderObject folder = new FolderObject();
         folder.setFolderName(name);
         folder.setType(FolderObject.PUBLIC);
         folder.setParentFolderID(parentID);
         folder.setModule(moduleID);
         // create permissions
-        ArrayList<OCLPermission> allPermissions = new ArrayList<OCLPermission>();
-        for(int userID: userIDs){
+        final ArrayList<OCLPermission> allPermissions = new ArrayList<OCLPermission>();
+        for(final int userID: userIDs){
             final OCLPermission permissions = new OCLPermission();
             permissions.setEntity(userID);
             permissions.setGroupPermission(false);
@@ -515,17 +530,17 @@ public class FolderTestManager implements TestManager{
         return folder;
     }
 
-    public FolderObject generateSharedFolder(String name, int moduleID, int parentID, int... userIDs){
+    public FolderObject generateSharedFolder(final String name, final int moduleID, final int parentID, final int... userIDs){
         //create a folder
-        FolderObject folder = new FolderObject();
+        final FolderObject folder = new FolderObject();
         folder.setFolderName(name);
         folder.setType(FolderObject.SHARED);
         folder.setParentFolderID(parentID);
         folder.setModule(moduleID);
         // create permissions
-        ArrayList<OCLPermission> allPermissions = new ArrayList<OCLPermission>();
+        final ArrayList<OCLPermission> allPermissions = new ArrayList<OCLPermission>();
         boolean firstUser = true;
-        for(int userID: userIDs){
+        for(final int userID: userIDs){
             final OCLPermission permissions = new OCLPermission();
             permissions.setEntity(userID);
             permissions.setGroupPermission(false);

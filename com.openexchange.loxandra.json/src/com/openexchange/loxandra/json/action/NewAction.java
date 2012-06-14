@@ -48,13 +48,10 @@
  */
 package com.openexchange.loxandra.json.action;
 
-import java.sql.Date;
-import java.util.UUID;
-
-import org.json.JSONException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
 
-import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
@@ -62,15 +59,21 @@ import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.loxandra.dto.EAVContact;
+import com.openexchange.loxandra.json.EAVContactParser;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
 /**
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-@Action(method = RequestMethod.PUT, name = "new", description = "Create an EAV Contact.", parameters = { @Parameter(name = "dunno yet") })
+@Action(method = RequestMethod.PUT, 
+		name = "new", 
+		description = "Create an EAV Contact.", 
+		parameters = { @Parameter(name = "") } )
 public class NewAction extends AbstractAction {
 
+	private static final Log log = LogFactory.getLog(NewAction.class);
+	
 	/**
 	 * Constructor
 	 * @param serviceLookup
@@ -84,20 +87,11 @@ public class NewAction extends AbstractAction {
 	 */
 	@Override
 	public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-		JSONObject j = (JSONObject) requestData.getData();
-		
-		EAVContact c = new EAVContact();
-		
-		try {
-			c.addFolderUUID(new UUID(1,1));
-			c.setGivenName(j.getString("named:" + ContactFields.FIRST_NAME));
-			c.setSurName(j.getString("named:" + ContactFields.LAST_NAME));
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-		
+		JSONObject jsonData = (JSONObject) requestData.getData();
+		EAVContactParser parser = new EAVContactParser();
+		final EAVContact c = parser.parse(jsonData);
 		getContactService().getEAVContactService().insertContact(c);
 		
-		return new AJAXRequestResult(c.getUUID(), new Date(System.currentTimeMillis()));
+		return new AJAXRequestResult(c.getUUID());
 	}
 }

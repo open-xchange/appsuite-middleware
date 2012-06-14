@@ -55,12 +55,9 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import javax.servlet.ServletException;
-
 import net.htmlparser.jericho.Config;
 import net.htmlparser.jericho.LoggerProvider;
-
 import org.apache.commons.logging.Log;
 import org.json.JSONObject;
 import org.osgi.framework.BundleActivator;
@@ -73,7 +70,6 @@ import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-
 import com.openexchange.ajax.Attachment;
 import com.openexchange.ajax.Folder;
 import com.openexchange.ajax.Infostore;
@@ -348,7 +344,7 @@ public final class ServerActivator extends HousekeepingActivator {
         }
         
         CONTEXT = context;
-        JSONObject.setMaxSize(getService(ConfigurationService.class).getIntProperty("com.openexchange.json.maxSize", 1000));
+        JSONObject.setMaxSize(getService(ConfigurationService.class).getIntProperty("com.openexchange.json.maxSize", 2500));
         Config.LoggerProvider = LoggerProvider.DISABLED;
         // get version information from MANIFEST file
         final Dictionary<?, ?> headers = context.getBundle().getHeaders();

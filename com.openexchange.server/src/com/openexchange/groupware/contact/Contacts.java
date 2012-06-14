@@ -75,12 +75,12 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 import javax.imageio.ImageIO;
 import javax.mail.internet.AddressException;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
@@ -100,6 +100,7 @@ import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.java.Charsets;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
@@ -183,7 +184,7 @@ public final class Contacts {
         final int scaledHeight = Integer.parseInt(ContactConfig.getInstance().getProperty(PROP_SCALE_IMAGE_HEIGHT));
         final long max_size = Long.parseLong(ContactConfig.getInstance().getProperty(PROP_MAX_IMAGE_SIZE));
 
-        final String myMime;
+        String myMime;
         if ((mime.toLowerCase().indexOf("jpg") != -1) || (mime.toLowerCase().indexOf("jpeg") != -1)) {
             myMime = "image/jpg";
         } else if ((mime.toLowerCase().indexOf("bmp") != -1)) {
@@ -207,6 +208,10 @@ public final class Contacts {
             check = false;
         }
         if (!check) {
+            final int pos = myMime == null ? -1 : myMime.indexOf('/');
+            if (pos >= 0) {
+                myMime = myMime.substring(pos+1).toUpperCase(Locale.US);
+            }
             throw ContactExceptionCodes.IMAGE_SCALE_PROBLEM.create(myMime, I(img.length), L(max_size));
         }
         BufferedImage bi = null;

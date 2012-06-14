@@ -87,18 +87,11 @@ public class FileUtils {
 				input = new BufferedInputStream(new FileInputStream(file));
 				while (totalBytesRead < result.length) {
 					int bytesRemaining = result.length - totalBytesRead;
-					// input.read() returns -1, 0, or more :
-					int bytesRead = input.read(result, totalBytesRead,
-							bytesRemaining);
+					int bytesRead = input.read(result, totalBytesRead, bytesRemaining);
 					if (bytesRead > 0) {
 						totalBytesRead = totalBytesRead + bytesRead;
 					}
 				}
-				/*
-				 * the above style is a bit tricky: it places bytes into the
-				 * 'result' array; 'result' is an output parameter; the while
-				 * loop usually has a single iteration only.
-				 */
 				log.info("Num bytes read: " + totalBytesRead);
 			} finally {
 				log.info("Closing input stream.");
