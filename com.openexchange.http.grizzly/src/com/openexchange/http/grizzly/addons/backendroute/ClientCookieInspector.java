@@ -55,8 +55,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import org.glassfish.grizzly.http.Cookie;
+import org.glassfish.grizzly.http.HttpRequestPacket;
 import org.glassfish.grizzly.http.util.CookieParserUtils;
 import org.glassfish.grizzly.http.util.CookieSerializerUtils;
+import org.glassfish.grizzly.http.util.Header;
+import org.glassfish.grizzly.http.util.MimeHeaders;
 import org.glassfish.grizzly.memory.ByteBufferWrapper;
 
 
@@ -66,26 +69,32 @@ import org.glassfish.grizzly.memory.ByteBufferWrapper;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class ClientCookieInspector extends AbstractCookieInspector {
-
+ 
     /**
      * Initializes a new {@link ClientCookieInspector}.
-     * @param headerLine the client Cookie: header line, must not be null
+     * @param httpRequestPacket the incoming request packet, must not be null
      * @param backendRoute the currently configured backendRoute, must not be null
      * @throws IllegalArgumentException for null parameters
      */
-    public ClientCookieInspector(String headerLine, String backendRoute) {
-        if(headerLine == null || backendRoute == null) {
+    public ClientCookieInspector(HttpRequestPacket httpRequestPacket, String backendRoute) {
+        if( httpRequestPacket == null || backendRoute == null) {
             throw new IllegalArgumentException();
         }
-        this.cookieMap=getCookieMapFromHeaderLine(headerLine);
-        this.backendRoute=backendRoute;
+        MimeHeaders requestMimeHeaders = httpRequestPacket.getHeaders();
+        String cookieHeader = requestMimeHeaders.getHeader(Header.Cookie);
+        this.cookieMap = getCookieMapFromHeaderLine(cookieHeader == null ? "" : cookieHeader);
+        this.backendRoute = backendRoute;
     }
     
     /**
      * Convert the client header line into a map<name, cookie> of cookies.
      * @param headerLine the header line from the client http request
+     * @throws IllegalArgumentException for null parameters
      */
     private Map<String, Cookie> getCookieMapFromHeaderLine(String headerLine) {
+        if(headerLine == null) {
+            throw new IllegalArgumentException();
+        }
         HashMap<String, Cookie> cookieMap = new HashMap<String, Cookie>(); 
         List<Cookie> cookieList = new LinkedList<Cookie>();
         CookieParserUtils.parseClientCookies(cookieList, headerLine, true);

@@ -139,9 +139,9 @@ public abstract class AbstractCookieInspector {
      */
     public boolean isJSessionIdValid() {
         Cookie jSessionIdCookie = cookieMap.get("JSESSIONID");
-//        if(jSessionIdCookie == null) {
-//            return false;
-//        }
+        if(jSessionIdCookie == null) {
+            return false;
+        }
         String jSessionIdValue = jSessionIdCookie.getValue();
         return (backendRoute.isEmpty() && isJSessionIdWithoutRoute(jSessionIdValue)) || isJSessionIdWithCorrectRoute(backendRoute, jSessionIdValue);
     }
@@ -173,7 +173,7 @@ public abstract class AbstractCookieInspector {
      * Get the JSessionid value from the header
      * @return the empty String if no value can be fond, the value otherwise
      */
-    public String getJSessionId() {
+    public String getJSessionIdValue() {
         Cookie result = cookieMap.get("JSESSIONID");
         return result == null ? "" : result.getValue();
     }
