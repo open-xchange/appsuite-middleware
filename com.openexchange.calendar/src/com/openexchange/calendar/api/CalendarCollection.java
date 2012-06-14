@@ -213,7 +213,7 @@ public final class CalendarCollection implements CalendarCollectionService {
         fieldMap.put(Integer.valueOf(CalendarDataObject.ORGANIZER_ID), "organizerId");
         fieldMap.put(Integer.valueOf(CalendarDataObject.PRINCIPAL), "principal");
         fieldMap.put(Integer.valueOf(CalendarDataObject.PRINCIPAL_ID), "principalId");
-        
+        fieldMap.put(Integer.valueOf(Appointment.FILENAME), "filename");
     }
 
     /**

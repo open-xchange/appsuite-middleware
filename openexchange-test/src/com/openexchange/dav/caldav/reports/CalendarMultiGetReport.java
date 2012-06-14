@@ -47,75 +47,45 @@
  *
  */
 
-package com.openexchange.dav.carddav.reports;
+package com.openexchange.dav.caldav.reports;
 
-import org.apache.jackrabbit.webdav.DavConstants;
-import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
+import org.apache.jackrabbit.webdav.DavException;
+import org.apache.jackrabbit.webdav.DavResource;
+import org.apache.jackrabbit.webdav.version.DeltaVConstants;
+import org.apache.jackrabbit.webdav.version.report.Report;
 import org.apache.jackrabbit.webdav.version.report.ReportInfo;
-import org.apache.jackrabbit.webdav.xml.DomUtil;
-import org.apache.jackrabbit.webdav.xml.Namespace;
+import org.apache.jackrabbit.webdav.version.report.ReportType;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import com.openexchange.dav.PropertyNames;
 
 /**
- * {@link SyncCollectionReportInfo}
- * 
- * Encapsulates the BODY of a {@link SyncCollectionReport} request ("sync-collection").
+ * {@link CalendarMultiGetReport}
  * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class SyncCollectionReportInfo extends ReportInfo {
+public class CalendarMultiGetReport implements Report, DeltaVConstants {
 
-    private final String syncToken;
+    public static final ReportType CALENDAR_MULTIGET = ReportType.register(PropertyNames.CALENDAR_MULTIGET.getName(), 
+    		PropertyNames.CALENDAR_MULTIGET.getNamespace(), CalendarMultiGetReport.class); 
 
-    /**
-     * Creates a new {@link SyncCollectionReportInfo}.
-     * @param syncToken The sync-token to include in the request 
-     */
-    public SyncCollectionReportInfo(final String syncToken) {
-    	this(syncToken, null);
-    }
-
-    /**
-     * Creates a new {@link SyncCollectionReportInfo}.
-     * @param syncToken The sync-token to include in the request 
-     * @param propertyNames the properties to include in the request
-     */
-    public SyncCollectionReportInfo(final String syncToken, final DavPropertyNameSet propertyNames) {
-        super(SyncCollectionReport.SYNC_COLLECTION, DavConstants.DEPTH_1, propertyNames);
-        this.syncToken = syncToken;
-    }
-    
-    /**
-     * Creates a new {@link SyncCollectionReportInfo}.
-     * @param propertyNames the properties to include in the request
-     */
-    public SyncCollectionReportInfo(final DavPropertyNameSet propertyNames) {
-    	this(null, propertyNames);
-    }
-    
     @Override
-    public Element toXml(final Document document) {
-    	/*
-    	 * create sync-collection element
-    	 */
-    	final Element syncCollectionElement = DomUtil.createElement(document, 
-    			SyncCollectionReport.SYNC_COLLECTION.getLocalName(), SyncCollectionReport.SYNC_COLLECTION.getNamespace());
-    	syncCollectionElement.setAttributeNS(Namespace.XMLNS_NAMESPACE.getURI(), 
-    			Namespace.XMLNS_NAMESPACE.getPrefix() + ":" + PropertyNames.NS_DAV.getPrefix(), PropertyNames.NS_DAV.getURI());
-    	/*
-    	 * append sync-token element
-    	 */
-    	if (null != this.syncToken) {
-            syncCollectionElement.appendChild(DomUtil.createElement(
-            		document, PropertyNames.SYNC_TOKEN.getName(), PropertyNames.NS_DAV, this.syncToken));
-    	}
-    	/*
-    	 * append properties element
-    	 */
-    	syncCollectionElement.appendChild(super.getPropertyNameSet().toXml(document));
-        return syncCollectionElement;
+    public ReportType getType() {
+        return CALENDAR_MULTIGET;
     }
+
+    @Override
+    public boolean isMultiStatusReport() {
+        return true;
+    }
+
+    @Override
+    public void init(DavResource dr, ReportInfo ri) throws DavException {
+    }
+
+	@Override
+    public Element toXml(Document arg0) {
+        throw new UnsupportedOperationException();
+	}
 }

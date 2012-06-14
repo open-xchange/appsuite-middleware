@@ -47,70 +47,62 @@
  *
  */
 
-package com.openexchange.dav.carddav.reports;
+package com.openexchange.contact.storage.rdb.sql;
 
-import java.io.IOException;
+import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.tools.sql.DBUtils.rollback;
 
-import org.apache.commons.httpclient.HttpConnection;
-import org.apache.commons.httpclient.HttpState;
-import org.apache.jackrabbit.webdav.DavException;
-import org.apache.jackrabbit.webdav.client.methods.ReportMethod;
-import org.apache.jackrabbit.webdav.version.report.ReportInfo;
-import org.apache.jackrabbit.webdav.xml.DomUtil;
-import org.apache.jackrabbit.webdav.xml.ElementIterator;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import java.sql.Connection;
+import java.sql.SQLException;
 
-import com.openexchange.dav.PropertyNames;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.databaseold.Database;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.tools.update.Column;
+import com.openexchange.tools.update.Tools;
 
 /**
- * {@link SyncCollectionReportMethod} - Report method for the 
- * "sync-collection" request.
+ * {@link AddFilenameColumnTask}
  * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class SyncCollectionReportMethod extends ReportMethod {
+public class AddFilenameColumnTask extends UpdateTaskAdapter {
 	
-	private String syncToken;
-	private Document responseDocument = null;
+	private final DatabaseService dbService;
+	
+	public AddFilenameColumnTask(DatabaseService dbService) {
+		super();
+		this.dbService = dbService;
+	}
 
-	public SyncCollectionReportMethod(String uri, ReportInfo reportInfo) throws IOException {
-		super(uri, reportInfo);
-		this.syncToken = null;
-	}
-	
-	public String getSyncTokenFromResponse() {
-		return syncToken;
-	}
-	
-	public SyncCollectionResponse getResponseBodyAsSyncCollection() throws IOException, DavException {
-        checkUsed();
-		return new SyncCollectionResponse(this.getResponseBodyAsMultiStatus(), this.syncToken);  
-	}
-	
     @Override
-    public Document getResponseBodyAsDocument() throws IOException {
-    	if (null == this.responseDocument) {
-    		this.responseDocument = super.getResponseBodyAsDocument();
-    	}
-        return responseDocument;
+    public String[] getDependencies() {
+        return new String[0];
     }
-	
-    @Override
-    protected void processResponseBody(HttpState httpState, HttpConnection httpConnection) {
-    	super.processResponseBody(httpState, httpConnection);
-    	Document document = null;
-    	try {
-			document = getResponseBodyAsDocument();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-        ElementIterator it = DomUtil.getChildren(document.getDocumentElement(), PropertyNames.SYNC_TOKEN.getName(), 
-        		PropertyNames.SYNC_TOKEN.getNamespace());
-        if (it.hasNext()) {
-            Element respElem = it.nextElement();
-            this.syncToken = respElem.getTextContent();
-        }
-    }	
 
+    @Override
+    public void perform(PerformParameters params) throws OXException {
+        int contextID = params.getContextId();
+        Connection connnection = dbService.getForUpdateTask(contextID);
+        Column filenameColumn = new Column("filename", "VARCHAR(255) COLLATE utf8_unicode_ci DEFAULT NULL");
+        try {
+            connnection.setAutoCommit(false);
+            Tools.checkAndAddColumns(connnection, Table.CONTACTS.getName(), filenameColumn);
+            Tools.checkAndAddColumns(connnection, Table.DELETED_CONTACTS.getName(), filenameColumn);
+            connnection.commit();
+        } catch (SQLException e) {
+            rollback(connnection);
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            rollback(connnection);
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
+        } finally {
+            autocommit(connnection);
+            Database.backNoTimeout(contextID, true, connnection);
+        }
+    }
+    
 }

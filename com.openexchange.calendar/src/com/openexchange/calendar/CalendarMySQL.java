@@ -54,6 +54,7 @@ import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.forSQLCommand;
 import static com.openexchange.tools.sql.DBUtils.rollback;
+
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
@@ -73,8 +74,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
+
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
+
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.ReminderService;
 import com.openexchange.caching.CacheKey;
@@ -120,6 +122,7 @@ import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.java.Autoboxing;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
@@ -405,6 +408,13 @@ public class CalendarMySQL implements CalendarSqlImp {
             public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao)
                     throws OXException, SQLException {
                 stmt.setInt(pos, cdao.getPrincipalId());
+            }
+        });
+        STATEMENT_FILLERS.put(Integer.valueOf(Appointment.FILENAME), new StatementFiller() {
+            @Override
+            public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao)
+                    throws OXException, SQLException {
+                stmt.setString(pos, cdao.getFilename());
             }
         });
     }
@@ -1560,7 +1570,7 @@ public class CalendarMySQL implements CalendarSqlImp {
     @Override
     public final String loadAppointment(final int oid, final Context c) throws SQLException {
         final StringBuilder sb = new StringBuilder(384);
-        sb.append("SELECT creating_date, created_from, changing_date, changed_from, fid, pflag, timestampfield01, timestampfield02, timezone, ").append(" intfield02, intfield03, field01, field02, intfield06, intfield08, field04, intfield07, field09, organizer, uid, sequence, organizerId, principal, principalId, intfield04, intfield05, field06, field07, field08 FROM prg_dates  WHERE cid = ");
+        sb.append("SELECT creating_date, created_from, changing_date, changed_from, fid, pflag, timestampfield01, timestampfield02, timezone, ").append(" intfield02, intfield03, field01, field02, intfield06, intfield08, field04, intfield07, field09, organizer, uid, filename, sequence, organizerId, principal, principalId, intfield04, intfield05, field06, field07, field08 FROM prg_dates  WHERE cid = ");
         sb.append(c.getContextId());
         sb.append(DATES_IDENTIFIER_IS);
         sb.append(oid);
@@ -1582,7 +1592,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         CalendarVolatileCache.getInstance().invalidateGroup(String.valueOf(cdao.getContextID()));
         PreparedStatement pst = null;
         try {
-            pst = writecon.prepareStatement("insert into prg_dates (creating_date, created_from, changing_date, changed_from," + "fid, pflag, cid, timestampfield01, timestampfield02, timezone, intfield01, intfield03, intfield06, intfield07, intfield08, " + "field01, field02, field04, field09, organizer, uid, sequence, organizerId, principal, principalId, intfield02, intfield04, intfield05, field06, field07, field08) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+            pst = writecon.prepareStatement("insert into prg_dates (creating_date, created_from, changing_date, changed_from," + "fid, pflag, cid, timestampfield01, timestampfield02, timezone, intfield01, intfield03, intfield06, intfield07, intfield08, " + "field01, field02, field04, field09, organizer, uid, filename, sequence, organizerId, principal, principalId, intfield02, intfield04, intfield05, field06, field07, field08) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
             cdao.setObjectID(IDGenerator.getId(cdao.getContext(), Types.APPOINTMENT, writecon));
             handleUid(cdao, so, !notify);
 
@@ -1633,13 +1643,16 @@ public class CalendarMySQL implements CalendarSqlImp {
             } else {
                 pst.setNull(i++, java.sql.Types.VARCHAR);
             }
-
             if (cdao.containsUid()) {
                 pst.setString(i++, cdao.getUid());
             } else {
                 pst.setNull(i++, java.sql.Types.VARCHAR);
             }
-
+            if (cdao.containsFilename()) {
+                pst.setString(i++, cdao.getFilename());
+            } else {
+                pst.setNull(i++, java.sql.Types.VARCHAR);
+            }
             if (cdao.containsSequence()) {
                 pst.setInt(i++, cdao.getSequence());
             } else {

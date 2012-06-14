@@ -254,8 +254,8 @@ public class ContactResource extends CardDAVResource {
 	                	 * the WebDAV path and the UID field in the vCard, so we need to store this UID in the contact
 	                	 * resource, too, to recognize later updates on the resource.
 	                	 */
-	            		LOG.debug(getUrl() + ": Storing UID from WebDAV path in Userfield 19.");
-	            		newContact.setUserField19(extractedUID);
+	            		LOG.debug(getUrl() + ": Storing WebDAV resource name in filename.");
+	            		newContact.setFilename(extractedUID);
 	            	}
 	    		}
 		    }

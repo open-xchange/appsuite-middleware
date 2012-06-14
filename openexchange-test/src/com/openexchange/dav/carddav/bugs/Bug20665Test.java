@@ -329,7 +329,7 @@ public class Bug20665Test extends CardDAVTest {
         /*
          * verify contact on server
          */
-        final Contact contact = super.findContact(uid); // need to use the 'find' method here to get the image
+        Contact contact = super.getContact(uid);
         super.rememberForCleanUp(contact);        
         assertEquals("uid wrong", uid, contact.getUid());
         assertTrue("no contact image found", contact.containsImage1());        

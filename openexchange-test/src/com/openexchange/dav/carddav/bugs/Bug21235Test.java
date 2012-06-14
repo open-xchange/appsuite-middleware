@@ -72,7 +72,7 @@ public class Bug21235Test extends CardDAVTest {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-		super.getCardDAVClient().setUserAgent(UserAgents.MACOS_10_6_8);
+		super.getWebDAVClient().setUserAgent(UserAgents.MACOS_10_6_8);
     }
     
 	public void testUpdateContact() throws Exception {

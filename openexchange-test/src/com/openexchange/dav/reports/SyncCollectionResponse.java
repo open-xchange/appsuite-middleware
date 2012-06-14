@@ -47,65 +47,75 @@
  *
  */
 
-package com.openexchange.ajax.fields;
+package com.openexchange.dav.reports;
 
-public interface CalendarFields extends CommonFields {
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-    public static final String TITLE = "title";
+import junit.framework.Assert;
 
-    public static final String START_DATE = "start_date";
+import org.apache.jackrabbit.webdav.MultiStatus;
+import org.apache.jackrabbit.webdav.MultiStatusResponse;
 
-    public static final String END_DATE = "end_date";
+import com.openexchange.dav.PropertyNames;
+import com.openexchange.dav.StatusCodes;
 
-    public static final String NOTE = "note";
+/**
+ * {@link SyncCollectionResponse} - Custom response to an "sync-collection" report 
+ * 
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ */
+public class SyncCollectionResponse {
+	
+	private final MultiStatusResponse[] responses;
+	private final String syncToken;
+	
+	public SyncCollectionResponse(MultiStatus multiStatus, String syncToken) {
+		super();
+		this.responses = multiStatus.getResponses();
+		this.syncToken = syncToken;
+	}
+	
+	/**
+	 * @return the syncToken
+	 */
+	public String getSyncToken() {
+		return syncToken;
+	}
 
-    public static final String ALARM = "alarm";
+	/**
+	 * @return the responses
+	 */
+	public MultiStatusResponse[] getResponses() {
+		return responses;
+	}
 
-    public static final String RECURRENCE_ID = "recurrence_id";
-
-    public static final String OLD_RECURRENCE_POSITION = "pos";
-
-    public static final String RECURRENCE_POSITION = "recurrence_position";
-
-    public static final String RECURRENCE_DATE_POSITION = "recurrence_date_position";
-
-    public static final String RECURRENCE_TYPE = "recurrence_type";
-
-    public static final String RECURRENCE_START = "recurrence_start";
-
-    public static final String CHANGE_EXCEPTIONS = "change_exceptions";
-
-    public static final String DELETE_EXCEPTIONS = "delete_exceptions";
-
-    public static final String DAYS = "days";
-
-    public static final String DAY_IN_MONTH = "day_in_month";
-
-    public static final String MONTH = "month";
-
-    public static final String INTERVAL = "interval";
-
-    public static final String UNTIL = "until";
-
-    public static final String OCCURRENCES = "occurrences";
-
-    public static final String NOTIFICATION = "notification";
-
-    public static final String RECURRENCE_CALCULATOR = "recurrence_calculator";
-
-    public static final String PARTICIPANTS = "participants";
-
-    public static final String USERS = "users";
-
-    public static final String CONFIRMATIONS = "confirmations";
-
-    public static final String ORGANIZER = "organizer";
-
-    public static final String ORGANIZER_ID = "organizerId";
-    
-    public static final String PRINCIPAL = "principal";
-    
-    public static final String PRINCIPAL_ID = "principalId";
-
-    public static final String SEQUENCE = "sequence";
+	public Map<String, String> getETagsStatusOK() {
+		Map<String, String> eTags = new HashMap<String, String>();
+        for (MultiStatusResponse response : responses) {
+        	if (response.getProperties(StatusCodes.SC_OK).contains(PropertyNames.GETETAG)) {
+	        	String href = response.getHref();
+	        	Assert.assertNotNull("got no href from response", href);
+	        	Object value = response.getProperties(StatusCodes.SC_OK).get(PropertyNames.GETETAG).getValue();
+	        	Assert.assertNotNull("got no ETag from response", value);
+	        	String eTag = (String)value;
+	        	eTags.put(href, eTag);
+        	}
+		}
+		return eTags;
+	}
+	
+	public List<String> getHrefsStatusNotFound() {
+		List<String> hrefs = new ArrayList<String>();
+        for (MultiStatusResponse response : responses) {
+        	if (null != response.getStatus() && 0 < response.getStatus().length && null != response.getStatus()[0] && 
+        			StatusCodes.SC_NOT_FOUND == response.getStatus()[0].getStatusCode()) {
+            	hrefs.add(response.getHref());
+        	}
+        }
+		return hrefs;
+	}
+	
 }

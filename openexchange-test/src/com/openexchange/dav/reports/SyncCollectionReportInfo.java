@@ -47,77 +47,75 @@
  *
  */
 
-package com.openexchange.contact.storage.rdb.internal;
+package com.openexchange.dav.reports;
+
+import org.apache.jackrabbit.webdav.DavConstants;
+import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
+import org.apache.jackrabbit.webdav.version.report.ReportInfo;
+import org.apache.jackrabbit.webdav.xml.DomUtil;
+import org.apache.jackrabbit.webdav.xml.Namespace;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
+import com.openexchange.dav.PropertyNames;
 
 /**
- * {@link Table} - Encapsulates the relevant database table names.
- *
+ * {@link SyncCollectionReportInfo}
+ * 
+ * Encapsulates the BODY of a {@link SyncCollectionReport} request ("sync-collection").
+ * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public enum Table {
+public class SyncCollectionReportInfo extends ReportInfo {
+
+    private final String syncToken;
+
     /**
-     * The 'prg_contacts' table
+     * Creates a new {@link SyncCollectionReportInfo}.
+     * @param syncToken The sync-token to include in the request 
      */
-    CONTACTS("prg_contacts"),
+    public SyncCollectionReportInfo(final String syncToken) {
+    	this(syncToken, null);
+    }
+
     /**
-     * The 'del_contacts' table
+     * Creates a new {@link SyncCollectionReportInfo}.
+     * @param syncToken The sync-token to include in the request 
+     * @param propertyNames the properties to include in the request
      */
-    DELETED_CONTACTS("del_contacts"),
-    /**
-     * The 'prg_contacts_image' table
-     */
-    IMAGES("prg_contacts_image"),
-    /**
-     * The 'del_contacts_image' table
-     */
-    DELETED_IMAGES("del_contacts_image"),
-    /**
-     * The 'prg_dlist' table
-     */
-    DISTLIST("prg_dlist"),
-    /**
-     * The 'del_dlist' table
-     */
-    DELETED_DISTLIST("del_dlist"),
-    /**
-     * The 'prg_contacts_linkage' table
-     */
-    LINKS("prg_contacts_linkage"),
-    /**
-     * The 'del_contacts_linkage' table
-     */
-    DELETED_LINKS("del_contacts_linkage"),
-    ;
-    
-    private final String name;
-    
-    private Table(final String name) {
-        this.name = name;
+    public SyncCollectionReportInfo(final String syncToken, final DavPropertyNameSet propertyNames) {
+        super(SyncCollectionReport.SYNC_COLLECTION, DavConstants.DEPTH_1, propertyNames);
+        this.syncToken = syncToken;
     }
     
     /**
-     * Gets the name of the table.
-     * 
-     * @return the name
+     * Creates a new {@link SyncCollectionReportInfo}.
+     * @param propertyNames the properties to include in the request
      */
-    public String getName() {
-        return this.name;
-    }
-    
-    public boolean isImageTable() {
-        return Table.IMAGES.equals(this) || Table.DELETED_IMAGES.equals(this);
-    }
-    
-    public boolean isDistListTable() {
-        return Table.DISTLIST.equals(this) || Table.DELETED_DISTLIST.equals(this);
-    }
-    
-    public boolean isContactTable() {
-        return Table.CONTACTS.equals(this) || Table.DELETED_CONTACTS.equals(this);
+    public SyncCollectionReportInfo(final DavPropertyNameSet propertyNames) {
+    	this(null, propertyNames);
     }
     
     @Override
-    public String toString() {
-        return this.getName();
+    public Element toXml(final Document document) {
+    	/*
+    	 * create sync-collection element
+    	 */
+    	final Element syncCollectionElement = DomUtil.createElement(document, 
+    			SyncCollectionReport.SYNC_COLLECTION.getLocalName(), SyncCollectionReport.SYNC_COLLECTION.getNamespace());
+    	syncCollectionElement.setAttributeNS(Namespace.XMLNS_NAMESPACE.getURI(), 
+    			Namespace.XMLNS_NAMESPACE.getPrefix() + ":" + PropertyNames.NS_DAV.getPrefix(), PropertyNames.NS_DAV.getURI());
+    	/*
+    	 * append sync-token element
+    	 */
+    	if (null != this.syncToken) {
+            syncCollectionElement.appendChild(DomUtil.createElement(
+            		document, PropertyNames.SYNC_TOKEN.getName(), PropertyNames.NS_DAV, this.syncToken));
+    	}
+    	/*
+    	 * append properties element
+    	 */
+    	syncCollectionElement.appendChild(super.getPropertyNameSet().toXml(document));
+        return syncCollectionElement;
     }
 }

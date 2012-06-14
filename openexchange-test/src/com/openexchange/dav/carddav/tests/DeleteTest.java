@@ -57,7 +57,7 @@ import com.openexchange.dav.SyncToken;
 import com.openexchange.dav.ThrowableHolder;
 import com.openexchange.dav.carddav.CardDAVTest;
 import com.openexchange.dav.carddav.VCardResource;
-import com.openexchange.dav.carddav.reports.SyncCollectionResponse;
+import com.openexchange.dav.reports.SyncCollectionResponse;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.FolderObject;

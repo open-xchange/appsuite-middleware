@@ -47,65 +47,57 @@
  *
  */
 
-package com.openexchange.ajax.fields;
+package com.openexchange.groupware.update.tasks;
 
-public interface CalendarFields extends CommonFields {
+import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.tools.sql.DBUtils.rollback;
 
-    public static final String TITLE = "title";
+import java.sql.Connection;
+import java.sql.SQLException;
 
-    public static final String START_DATE = "start_date";
+import com.openexchange.database.DatabaseService;
+import com.openexchange.databaseold.Database;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.update.Column;
+import com.openexchange.tools.update.Tools;
 
-    public static final String END_DATE = "end_date";
+/**
+ * {@link AppointmentAddFilenameColumnTask}
+ * 
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ */
+public class AppointmentAddFilenameColumnTask extends UpdateTaskAdapter {
 
-    public static final String NOTE = "note";
+    @Override
+    public String[] getDependencies() {
+        return new String[0];
+    }
 
-    public static final String ALARM = "alarm";
+    @Override
+    public void perform(PerformParameters params) throws OXException {
+        int contextID = params.getContextId();
+        DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+        Connection connnection = dbService.getForUpdateTask(contextID);
+        Column filenameColumn = new Column("filename", "VARCHAR(255) COLLATE utf8_unicode_ci DEFAULT NULL");
+        try {
+            connnection.setAutoCommit(false);
+            Tools.checkAndAddColumns(connnection, "prg_dates", filenameColumn);
+            Tools.checkAndAddColumns(connnection, "del_dates", filenameColumn);
+            connnection.commit();
+        } catch (SQLException e) {
+            rollback(connnection);
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            rollback(connnection);
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
+        } finally {
+            autocommit(connnection);
+            Database.backNoTimeout(contextID, true, connnection);
+        }
+    }
 
-    public static final String RECURRENCE_ID = "recurrence_id";
-
-    public static final String OLD_RECURRENCE_POSITION = "pos";
-
-    public static final String RECURRENCE_POSITION = "recurrence_position";
-
-    public static final String RECURRENCE_DATE_POSITION = "recurrence_date_position";
-
-    public static final String RECURRENCE_TYPE = "recurrence_type";
-
-    public static final String RECURRENCE_START = "recurrence_start";
-
-    public static final String CHANGE_EXCEPTIONS = "change_exceptions";
-
-    public static final String DELETE_EXCEPTIONS = "delete_exceptions";
-
-    public static final String DAYS = "days";
-
-    public static final String DAY_IN_MONTH = "day_in_month";
-
-    public static final String MONTH = "month";
-
-    public static final String INTERVAL = "interval";
-
-    public static final String UNTIL = "until";
-
-    public static final String OCCURRENCES = "occurrences";
-
-    public static final String NOTIFICATION = "notification";
-
-    public static final String RECURRENCE_CALCULATOR = "recurrence_calculator";
-
-    public static final String PARTICIPANTS = "participants";
-
-    public static final String USERS = "users";
-
-    public static final String CONFIRMATIONS = "confirmations";
-
-    public static final String ORGANIZER = "organizer";
-
-    public static final String ORGANIZER_ID = "organizerId";
-    
-    public static final String PRINCIPAL = "principal";
-    
-    public static final String PRINCIPAL_ID = "principalId";
-
-    public static final String SEQUENCE = "sequence";
 }

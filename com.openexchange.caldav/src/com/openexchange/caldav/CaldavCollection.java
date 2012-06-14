@@ -54,11 +54,11 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
+
 import com.openexchange.caldav.mixins.CTag;
 import com.openexchange.caldav.mixins.CalendarOrder;
 import com.openexchange.caldav.mixins.SupportedCalendarComponentSet;
@@ -72,6 +72,7 @@ import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.log.LogFactory;
 import com.openexchange.webdav.acl.mixins.CurrentUserPrivilegeSet;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.Protocol.Property;
@@ -83,11 +84,11 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.helpers.AbstractCollection;
 
-
 /**
  * A {@link CaldavCollection} bridges OX calendar folders to caldav collections. 
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class CaldavCollection extends AbstractCollection implements FilteringResource {
     
@@ -98,12 +99,15 @@ public class CaldavCollection extends AbstractCollection implements FilteringRes
     
     private static final Log LOG = LogFactory.getLog(CaldavCollection.class);
 
-    public CaldavCollection(final AbstractStandardCaldavCollection parent, final UserizedFolder folder, final GroupwareCaldavFactory factory) {
+    public CaldavCollection(AbstractStandardCaldavCollection parent, UserizedFolder folder, GroupwareCaldavFactory factory) {
+    	this(parent, folder, factory, -1);
+    }
+
+    public CaldavCollection(AbstractStandardCaldavCollection parent, UserizedFolder folder, GroupwareCaldavFactory factory, int order) {
         super();
         this.folder = folder;
         this.factory = factory;
-        url = parent.getUrl().dup().append(folder.getID());
-
+        this.url = parent.getUrl().dup().append(folder.getID());
         includeProperties(
             new CurrentUserPrivilegeSet(folder.getOwnPermission()),
             new SupportedReportSet(),
@@ -111,22 +115,9 @@ public class CaldavCollection extends AbstractCollection implements FilteringRes
             new CTag(getId(), factory),
             new SyncToken(getId(), factory)
         );
-    }
-
-    public CaldavCollection(final AbstractStandardCaldavCollection parent, final UserizedFolder folder, final GroupwareCaldavFactory factory, final int order) {
-        super();
-        this.folder = folder;
-        this.factory = factory;
-        url = parent.getUrl().dup().append(folder.getID());
-
-        includeProperties(
-            new CurrentUserPrivilegeSet(folder.getOwnPermission()),
-            new SupportedReportSet(),
-            new SupportedCalendarComponentSet(),
-            new CTag(getId(), factory),
-            new SyncToken(getId(), factory),
-            new CalendarOrder(order)
-        );
+        if (-1 < order) {
+            includeProperties(new CalendarOrder(order));
+        }
     }
 
     @Override
@@ -182,44 +173,39 @@ public class CaldavCollection extends AbstractCollection implements FilteringRes
             final CaldavResource resource = new CaldavResource(this, appointment, factory);
             children.add(resource);
         }
-        
         return children;
-        
     }
 
-
-    private static final Pattern NAME_PATTERN = Pattern.compile("^(\\d+)\\.ics");
-    private static final Pattern UUID_PATTERN = Pattern.compile("(.+?)\\.ics");
+    public CaldavResource getChild(String name) throws WebdavProtocolException {
+    	Integer id = resolveID(name);
+    	if (null != id) {
+            Appointment appointment = factory.getState().get(id.intValue(), this.getId());
+            if (null != appointment) {
+            	/*
+            	 * appointment resource
+            	 */
+                return new CaldavResource(this, appointment, factory);
+            }
+    	}
+    	/*
+    	 * resource not yet exists
+    	 */
+		return new CaldavResource(this, getUrl().dup().append(name), factory);
+    }
     
-    public CaldavResource getChild(final String name) throws WebdavProtocolException {
-        Matcher matcher = NAME_PATTERN.matcher(name);
-        int id = -1;
-        if (!matcher.find()) {
-            // Try UUID
-            matcher = UUID_PATTERN.matcher(name);
-            if (!matcher.find()) {
-                return new CaldavResource(this, getUrl().dup().append(name), factory);
-            }
-            String uuid = matcher.group(1);
-            if (null != uuid && uuid.endsWith("googlecom")) {
-            	uuid = uuid.substring(0, uuid.length() - 9) + "google.com";            	
-            	LOG.warn("Helping out iCal client to properly URL-encode dots in by assuming a value of '" + uuid + "'.");
-            }                        
-            id = factory.getState().resolveUUID(uuid, getId());
-            if (id == -1) {
-                return new CaldavResource(this, getUrl().dup().append(name), factory);
-            }
-        } else {
-            id = new Integer(matcher.group(1));
-        }
-        
-        
-        final Appointment appointment = factory.getState().get(id , getId());
-        if (appointment == null) {
-            // Not Found
-            return new CaldavResource(this, getUrl().dup().append(name), factory);
-        }
-        return new CaldavResource(this, appointment, factory);
+    private Integer resolveID(String resourceName) {
+    	if (null != resourceName && 0 < resourceName.length()) {
+        	if (4 < resourceName.length() && resourceName.toLowerCase().endsWith(".ics")) {
+        		resourceName = resourceName.substring(0, resourceName.length() - 4);
+        	}
+    		try {
+    			return new Integer(resourceName);
+    		} catch (NumberFormatException e) {
+    			// not a number
+    		}
+            return factory.getState().resolveResource(resourceName, getId());
+    	}
+    	return null;
     }
 
     @Override
@@ -375,6 +361,5 @@ public class CaldavCollection extends AbstractCollection implements FilteringRes
         }
         return new Date(tstamp);
     }
-
 
 }

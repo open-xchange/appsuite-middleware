@@ -61,6 +61,7 @@ import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
+import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.jackrabbit.webdav.DavException;
 import org.apache.jackrabbit.webdav.MultiStatusResponse;
@@ -74,9 +75,9 @@ import org.jdom.xpath.XPath;
 import org.w3c.dom.Element;
 
 import com.openexchange.configuration.ConfigurationException;
-import com.openexchange.dav.carddav.reports.SyncCollectionReportInfo;
-import com.openexchange.dav.carddav.reports.SyncCollectionReportMethod;
-import com.openexchange.dav.carddav.reports.SyncCollectionResponse;
+import com.openexchange.dav.reports.SyncCollectionReportInfo;
+import com.openexchange.dav.reports.SyncCollectionReportMethod;
+import com.openexchange.dav.reports.SyncCollectionResponse;
 import com.openexchange.exception.OXException;
 
 /**
@@ -84,12 +85,12 @@ import com.openexchange.exception.OXException;
  * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class WebDAVClient {
+public class WebDAVClient {
 	
 	private final HttpClient httpClient;
 	private String baseURI = null;
 
-	public WebDAVClient() throws OXException {
+	public WebDAVClient(String userAgent) throws OXException {
 		super();
         /*
          * setup log
@@ -105,6 +106,7 @@ public abstract class WebDAVClient {
         this.httpClient.getParams().setAuthenticationPreemptive(true); // authentication should be attempted preemptively in tests
         this.setCredentials(Config.getLogin(), Config.getPassword());
         this.setBaseURI(Config.getBaseUri());
+        this.setUserAgent(userAgent);
 	}
 	
 	/**
@@ -218,8 +220,21 @@ public abstract class WebDAVClient {
 	public MultiStatusResponse[] doPropFind(final PropFindMethod propFind) throws HttpException, IOException, DavException {
 		return this.doPropFind(propFind, StatusCodes.SC_MULTISTATUS);
 	}
+
+	public String doPost(PostMethod post) throws HttpException, IOException {
+		return this.doPost(post, StatusCodes.SC_OK);
+	}
 	
-	public Object queryXPath(final MultiStatusResponse response, final String xPath) throws ParserConfigurationException, JDOMException {
+	public String doPost(PostMethod post, int expectedStatus) throws HttpException, IOException {
+		try {
+	    	Assert.assertEquals("unexpected http status", expectedStatus, this.httpClient.executeMethod(post));
+	    	return post.getResponseBodyAsString();
+		} finally {
+			release(post);
+		}
+	}
+	
+	public static Object queryXPath(final MultiStatusResponse response, final String xPath) throws ParserConfigurationException, JDOMException {
 		final Element element = response.toXml(DomUtil.createDocument());
 		return XPath.selectSingleNode(element, xPath);
 	}

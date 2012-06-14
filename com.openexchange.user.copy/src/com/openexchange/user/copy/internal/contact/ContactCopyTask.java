@@ -53,6 +53,7 @@ import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.user.copy.internal.CopyTools.getIntOrNegative;
 import static com.openexchange.user.copy.internal.CopyTools.setIntOrNull;
 import static com.openexchange.user.copy.internal.CopyTools.setStringOrNull;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -62,6 +63,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactDatabaseGetter;
 import com.openexchange.groupware.contact.helpers.ContactDatabaseSetter;
@@ -490,7 +492,7 @@ public class ContactCopyTask implements CopyUserTaskService {
         for (final ContactField field : contactFields) {
             if (field.isDBField()) {
                 count++;
-                final String dbName = field.getFieldName();
+                final String dbName = field.getDbName();
                 if (first) {
                     sb.append(dbName);
                     first = false;

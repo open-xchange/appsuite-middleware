@@ -47,65 +47,70 @@
  *
  */
 
-package com.openexchange.ajax.fields;
+package com.openexchange.dav.reports;
 
-public interface CalendarFields extends CommonFields {
+import java.io.IOException;
 
-    public static final String TITLE = "title";
+import org.apache.commons.httpclient.HttpConnection;
+import org.apache.commons.httpclient.HttpState;
+import org.apache.jackrabbit.webdav.DavException;
+import org.apache.jackrabbit.webdav.client.methods.ReportMethod;
+import org.apache.jackrabbit.webdav.version.report.ReportInfo;
+import org.apache.jackrabbit.webdav.xml.DomUtil;
+import org.apache.jackrabbit.webdav.xml.ElementIterator;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
-    public static final String START_DATE = "start_date";
+import com.openexchange.dav.PropertyNames;
 
-    public static final String END_DATE = "end_date";
+/**
+ * {@link SyncCollectionReportMethod} - Report method for the 
+ * "sync-collection" request.
+ * 
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ */
+public class SyncCollectionReportMethod extends ReportMethod {
+	
+	private String syncToken;
+	private Document responseDocument = null;
 
-    public static final String NOTE = "note";
+	public SyncCollectionReportMethod(String uri, ReportInfo reportInfo) throws IOException {
+		super(uri, reportInfo);
+		this.syncToken = null;
+	}
+	
+	public String getSyncTokenFromResponse() {
+		return syncToken;
+	}
+	
+	public SyncCollectionResponse getResponseBodyAsSyncCollection() throws IOException, DavException {
+        checkUsed();
+		return new SyncCollectionResponse(this.getResponseBodyAsMultiStatus(), this.syncToken);  
+	}
+	
+    @Override
+    public Document getResponseBodyAsDocument() throws IOException {
+    	if (null == this.responseDocument) {
+    		this.responseDocument = super.getResponseBodyAsDocument();
+    	}
+        return responseDocument;
+    }
+	
+    @Override
+    protected void processResponseBody(HttpState httpState, HttpConnection httpConnection) {
+    	super.processResponseBody(httpState, httpConnection);
+    	Document document = null;
+    	try {
+			document = getResponseBodyAsDocument();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+        ElementIterator it = DomUtil.getChildren(document.getDocumentElement(), PropertyNames.SYNC_TOKEN.getName(), 
+        		PropertyNames.SYNC_TOKEN.getNamespace());
+        if (it.hasNext()) {
+            Element respElem = it.nextElement();
+            this.syncToken = respElem.getTextContent();
+        }
+    }	
 
-    public static final String ALARM = "alarm";
-
-    public static final String RECURRENCE_ID = "recurrence_id";
-
-    public static final String OLD_RECURRENCE_POSITION = "pos";
-
-    public static final String RECURRENCE_POSITION = "recurrence_position";
-
-    public static final String RECURRENCE_DATE_POSITION = "recurrence_date_position";
-
-    public static final String RECURRENCE_TYPE = "recurrence_type";
-
-    public static final String RECURRENCE_START = "recurrence_start";
-
-    public static final String CHANGE_EXCEPTIONS = "change_exceptions";
-
-    public static final String DELETE_EXCEPTIONS = "delete_exceptions";
-
-    public static final String DAYS = "days";
-
-    public static final String DAY_IN_MONTH = "day_in_month";
-
-    public static final String MONTH = "month";
-
-    public static final String INTERVAL = "interval";
-
-    public static final String UNTIL = "until";
-
-    public static final String OCCURRENCES = "occurrences";
-
-    public static final String NOTIFICATION = "notification";
-
-    public static final String RECURRENCE_CALCULATOR = "recurrence_calculator";
-
-    public static final String PARTICIPANTS = "participants";
-
-    public static final String USERS = "users";
-
-    public static final String CONFIRMATIONS = "confirmations";
-
-    public static final String ORGANIZER = "organizer";
-
-    public static final String ORGANIZER_ID = "organizerId";
-    
-    public static final String PRINCIPAL = "principal";
-    
-    public static final String PRINCIPAL_ID = "principalId";
-
-    public static final String SEQUENCE = "sequence";
 }

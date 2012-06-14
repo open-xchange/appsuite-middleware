@@ -47,26 +47,70 @@
  *
  */
 
-package com.openexchange.dav.carddav;
+package com.openexchange.dav.caldav.ical;
 
-import com.openexchange.dav.WebDAVClient;
-import com.openexchange.exception.OXException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.TimeZone;
+
+import com.openexchange.dav.caldav.ical.SimpleICal.Property;
+
+
 
 /**
- * {@link CardDAVClient}
+ * {@link ICalUtils}
  * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class CardDAVClient extends WebDAVClient {
-
-	/**
-	 * Initializes a new {@link CardDAVClient}.
-	 * 
-	 * @throws OXException
-	 */
-	public CardDAVClient() throws OXException {
-		super();
-		super.setUserAgent(UserAgents.MACOS_10_7_3);
-	}
+public final class ICalUtils {
 	
+	public static String fold(String content) {
+    	return content.replaceAll(".{75}", "$0\r\n ");
+    }
+
+    public static String unfold(String content) {
+    	return content.replaceAll("(?:\\r\\n?|\\n)[ \t]", "");
+    }
+	    
+	public static Date parseDate(Property property) throws ParseException {
+		SimpleDateFormat dateFormat = new SimpleDateFormat();
+		String tzid = property.getAttribute("TZID");
+		if (null != tzid) {
+			dateFormat.setTimeZone(TimeZone.getTimeZone(tzid));
+			dateFormat.applyPattern("yyyyMMdd'T'HHmm'00'");
+		} else {
+			dateFormat.applyPattern("yyyyMMdd'T'HHmm'00Z'");
+			dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+		}
+		return dateFormat.parse(property.getValue());
+	}
+
+	public static List<Date[]> parsePeriods(Property property) throws ParseException {
+		List<Date[]> periods = new ArrayList<Date[]>();
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
+		dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+		String[] splitted =  property.getValue().split(",");
+		for (String value : splitted) {
+			if (0 < value.trim().length()) {
+				String from = value.substring(0, value.indexOf('/'));
+				String until = value.substring(value.indexOf('/') + 1);
+				if (until.startsWith("PT")) {
+					throw new UnsupportedOperationException("durations not implemented");
+				}
+				Date[] period = new Date[2];
+				period[0] = dateFormat.parse(from);
+				period[1] = dateFormat.parse(until);
+				periods.add(period);
+			}
+		}
+		return periods;
+	}
+
+    private ICalUtils() {
+    	// 
+    }
+
 }

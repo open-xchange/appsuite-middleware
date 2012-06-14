@@ -175,9 +175,9 @@ public abstract class CardDAVCollection extends AbstractCollection {
      * @return the path
      */
     protected WebdavPath constructPathForChildResource(Contact contact) {
-		if (null != contact.getUserField19() && false == contact.getUserField19().equals(contact.getUid())) {
+		if (null != contact.getFilename() && false == contact.getFilename().equals(contact.getUid())) {
 			// for MacOS 10.6 and iOS clients
-	    	return constructPathForChildResource(contact.getUserField19());
+	    	return constructPathForChildResource(contact.getFilename());
 		} else {
 			return constructPathForChildResource(contact.getUid());
 		}

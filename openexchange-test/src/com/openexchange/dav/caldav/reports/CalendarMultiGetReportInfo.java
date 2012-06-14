@@ -47,61 +47,66 @@
  *
  */
 
-package com.openexchange.contact.storage.rdb.osgi;
+package com.openexchange.dav.caldav.reports;
 
-import org.apache.commons.logging.Log;
-
-import com.openexchange.contact.storage.ContactStorage;
-import com.openexchange.contact.storage.rdb.internal.RdbContactStorage;
-import com.openexchange.contact.storage.rdb.internal.RdbServiceLookup;
-import com.openexchange.contact.storage.rdb.sql.AddFilenameColumnTask;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.log.LogFactory;
-import com.openexchange.osgi.HousekeepingActivator;
-
+import org.apache.jackrabbit.webdav.DavConstants;
+import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
+import org.apache.jackrabbit.webdav.version.report.ReportInfo;
+import org.apache.jackrabbit.webdav.xml.DomUtil;
+import org.apache.jackrabbit.webdav.xml.Namespace;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 /**
- * {@link RdbContactStorageActivator}
- *
+ * {@link CalendarMultiGetReportInfo} - Encapsulates the BODY of a 
+ * {@link CalendarMultiGetReport} request ("calendar-multiget").
+ * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class RdbContactStorageActivator extends HousekeepingActivator {
+public class CalendarMultiGetReportInfo extends ReportInfo {
 
-    private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(RdbContactStorageActivator.class));
+    private final String[] hrefs;
 
     /**
-     * Initializes a new {@link RdbContactStorageActivator}.
+     * Creates a new {@link CalendarMultiGetReportInfo}.
+     * 
+     * @param hrefs The resource data references to include in the request 
      */
-    public RdbContactStorageActivator() {
-        super();
+    public CalendarMultiGetReportInfo(String[] hrefs) {
+    	this(hrefs, null);
+    }
+
+    /**
+     * Creates a new {@link CalendarMultiGetReportInfo}.
+     * 
+     * @param hrefs The resource data references to include in the request
+     *  
+     * @param propertyNames the properties to include in the request
+     */
+    public CalendarMultiGetReportInfo(String[] hrefs, DavPropertyNameSet propertyNames) {
+        super(CalendarMultiGetReport.CALENDAR_MULTIGET, DavConstants.DEPTH_0, propertyNames);
+        this.hrefs = hrefs;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class };
+    public Element toXml(final Document document) {
+    	/*
+    	 * create calendar-multiget element
+    	 */
+    	Element multiGetElement = DomUtil.createElement(document, CalendarMultiGetReport.CALENDAR_MULTIGET.getLocalName(), 
+    			CalendarMultiGetReport.CALENDAR_MULTIGET.getNamespace());
+    	multiGetElement.setAttributeNS(Namespace.XMLNS_NAMESPACE.getURI(), 
+    			Namespace.XMLNS_NAMESPACE.getPrefix() + ":" + DavConstants.NAMESPACE.getPrefix(), DavConstants.NAMESPACE.getURI());
+    	/*
+    	 * append properties element
+    	 */
+    	multiGetElement.appendChild(super.getPropertyNameSet().toXml(document));
+    	/*
+    	 * append hrefs
+    	 */
+    	for (String href : hrefs) {
+            multiGetElement.appendChild(DomUtil.createElement(document, DavConstants.XML_HREF, DavConstants.NAMESPACE, href));
+    	}
+        return multiGetElement;
     }
-
-    @Override
-    protected void startBundle() throws Exception {
-        try {
-            LOG.info("starting bundle: com.openexchange.contact.storage.rdb");
-            RdbServiceLookup.set(this);
-            registerService(ContactStorage.class, new RdbContactStorage());
-            DatabaseService dbService = getService(DatabaseService.class);
-            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new AddFilenameColumnTask(dbService)));
-        } catch (Exception e) {
-            LOG.error("error starting \"com.openexchange.contact.storage.rdb\"", e);
-            throw e;            
-        }
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: com.openexchange.contact.storage.rdb");
-        RdbServiceLookup.set(null);            
-        super.stopBundle();
-    }
-
 }

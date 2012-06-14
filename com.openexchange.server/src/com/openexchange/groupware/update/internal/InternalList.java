@@ -50,6 +50,7 @@
 package com.openexchange.groupware.update.internal;
 
 import org.apache.commons.logging.Log;
+
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.UpdateTaskV2;
@@ -451,6 +452,9 @@ public final class InternalList {
 
         // Creates indexes on tables "prg_dlist" and "del_dlist" to improve look-up.
         new com.openexchange.groupware.update.tasks.DListAddIndexForLookup(),
+
+        // Add 'filename' column to appointment tables.
+        new com.openexchange.groupware.update.tasks.AppointmentAddFilenameColumnTask()
 
     };
 }

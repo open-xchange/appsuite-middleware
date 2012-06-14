@@ -47,47 +47,87 @@
  *
  */
 
-package com.openexchange.dav.carddav.reports;
+package com.openexchange.dav.caldav;
 
-import org.apache.jackrabbit.webdav.DavException;
-import org.apache.jackrabbit.webdav.DavResource;
-import org.apache.jackrabbit.webdav.version.DeltaVConstants;
-import org.apache.jackrabbit.webdav.version.report.Report;
-import org.apache.jackrabbit.webdav.version.report.ReportInfo;
-import org.apache.jackrabbit.webdav.version.report.ReportType;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import java.io.IOException;
 
-import com.openexchange.dav.PropertyNames;
+import com.openexchange.dav.caldav.ical.SimpleICal;
+import com.openexchange.dav.caldav.ical.SimpleICal.SimpleICalException;
 
 /**
- * {@link SyncCollectionReport}
+ * {@link ICalResource}
  * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class SyncCollectionReport implements Report, DeltaVConstants {
+public class ICalResource {
+	
+	private final String eTag;
+	private final String href;
+	private final SimpleICal iCal;
+	
+	public ICalResource(String iCalString, String href, String eTag) throws IOException, SimpleICalException {
+		super();
+		this.iCal = new SimpleICal(iCalString);
+		this.href = href;
+		this.eTag = eTag;
+	}
+	
+	public ICalResource(String iCalString) throws IOException, com.openexchange.dav.caldav.ical.SimpleICal.SimpleICalException {
+		this(iCalString, null, null);
+	}
+	
+	public String getUID() {
+		return this.iCal.getVEvent().getPropertyValue("UID");
+	}	
 
-    public static final ReportType SYNC_COLLECTION = ReportType.register(PropertyNames.SYNC_COLLECTION.getName(), 
-    		PropertyNames.SYNC_COLLECTION.getNamespace(), SyncCollectionReport.class); 
+	public String getSummary() {
+		return this.iCal.getVEvent().getPropertyValue("SUMMARY");
+	}	
 
-    @Override
-    public ReportType getType() {
-        return SYNC_COLLECTION;
-    }
+	public String getLocation() {
+		return this.iCal.getVEvent().getPropertyValue("LOCATION");
+	}
+	
+	/**
+	 * @return the eTag
+	 */
+	public String getETag() {
+		return eTag;
+	}
 
-    @Override
-    public boolean isMultiStatusReport() {
-        return true;
-    }
+	/**
+	 * @return the href
+	 */
+	public String getHref() {
+		return href;
+	}
 
-    @Override
-    public void init(DavResource dr, ReportInfo ri) throws DavException {
-    	System.out.println("init");
-    }
+	/**
+	 * @return the iCal file
+	 */
+	public SimpleICal getICal() {
+		return iCal;
+	}
 
-    @Override
-    public Element toXml(Document dcmnt) {
-    	System.out.println("toxml");
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+	@Override
+    public String toString() {
+		return this.iCal.toString();		
+	}
+	
+//	private static Date parseDate(String[] line) throws ParseException {
+//        String parameter = line[1];
+//        String value = line[2];
+//		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmm'00Z'");
+//        if (null != parameter && parameter.toLowerCase().startsWith("tzid=")) {
+//        	String tzName = parameter.substring(5);
+//    		dateFormat.setTimeZone(TimeZone.getTimeZone(tzName));
+//    		dateFormat.applyPattern("yyyyMMdd'T'HHmm'00'");
+//        	
+//        } else {
+//    		dateFormat.applyPattern("yyyyMMdd'T'HHmm'00Z'");
+//    		dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+//        }        
+//		return dateFormat.parse(value);
+//	}
+
 }
