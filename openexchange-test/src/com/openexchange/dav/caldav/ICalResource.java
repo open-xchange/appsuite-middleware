@@ -50,7 +50,10 @@
 package com.openexchange.dav.caldav;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.util.Date;
 
+import com.openexchange.dav.caldav.ical.ICalUtils;
 import com.openexchange.dav.caldav.ical.SimpleICal;
 import com.openexchange.dav.caldav.ical.SimpleICal.SimpleICalException;
 
@@ -61,9 +64,9 @@ import com.openexchange.dav.caldav.ical.SimpleICal.SimpleICalException;
  */
 public class ICalResource {
 	
-	private final String eTag;
-	private final String href;
-	private final SimpleICal iCal;
+	private String eTag;
+	private String href;
+	private SimpleICal iCal;
 	
 	public ICalResource(String iCalString, String href, String eTag) throws IOException, SimpleICalException {
 		super();
@@ -84,6 +87,14 @@ public class ICalResource {
 		return this.iCal.getVEvent().getPropertyValue("SUMMARY");
 	}	
 
+	public Date getDTStart() throws ParseException {
+		return ICalUtils.parseDate(this.iCal.getVEvent().getProperty("DTSTART"));
+	}	
+
+	public Date getDTEnd() throws ParseException {
+		return ICalUtils.parseDate(this.iCal.getVEvent().getProperty("DTEND"));
+	}	
+
 	public String getLocation() {
 		return this.iCal.getVEvent().getPropertyValue("LOCATION");
 	}
@@ -95,11 +106,19 @@ public class ICalResource {
 		return eTag;
 	}
 
+	public void setEtag(String eTag) {
+		this.eTag = eTag;
+	}
+
 	/**
 	 * @return the href
 	 */
 	public String getHref() {
 		return href;
+	}
+
+	public void setHref(String href) {
+		this.href = href;
 	}
 
 	/**
@@ -114,20 +133,4 @@ public class ICalResource {
 		return this.iCal.toString();		
 	}
 	
-//	private static Date parseDate(String[] line) throws ParseException {
-//        String parameter = line[1];
-//        String value = line[2];
-//		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmm'00Z'");
-//        if (null != parameter && parameter.toLowerCase().startsWith("tzid=")) {
-//        	String tzName = parameter.substring(5);
-//    		dateFormat.setTimeZone(TimeZone.getTimeZone(tzName));
-//    		dateFormat.applyPattern("yyyyMMdd'T'HHmm'00'");
-//        	
-//        } else {
-//    		dateFormat.applyPattern("yyyyMMdd'T'HHmm'00Z'");
-//    		dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-//        }        
-//		return dateFormat.parse(value);
-//	}
-
 }

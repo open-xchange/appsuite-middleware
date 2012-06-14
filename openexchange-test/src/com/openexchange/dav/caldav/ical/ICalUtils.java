@@ -77,13 +77,18 @@ public final class ICalUtils {
 	    
 	public static Date parseDate(Property property) throws ParseException {
 		SimpleDateFormat dateFormat = new SimpleDateFormat();
-		String tzid = property.getAttribute("TZID");
-		if (null != tzid) {
-			dateFormat.setTimeZone(TimeZone.getTimeZone(tzid));
-			dateFormat.applyPattern("yyyyMMdd'T'HHmm'00'");
-		} else {
-			dateFormat.applyPattern("yyyyMMdd'T'HHmm'00Z'");
+		if ("DATE".equals(property.getAttribute("VALUE"))) {
+			dateFormat.applyPattern("yyyyMMdd");
 			dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+		} else {
+			String tzid = property.getAttribute("TZID");
+			if (null != tzid) {
+				dateFormat.setTimeZone(TimeZone.getTimeZone(tzid));
+				dateFormat.applyPattern("yyyyMMdd'T'HHmm'00'");
+			} else {
+				dateFormat.applyPattern("yyyyMMdd'T'HHmm'00Z'");
+				dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+			}
 		}
 		return dateFormat.parse(property.getValue());
 	}

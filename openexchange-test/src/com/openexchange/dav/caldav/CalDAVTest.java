@@ -206,13 +206,17 @@ public abstract class CalDAVTest extends WebDAVTest {
 	protected int move(ICalResource iCalResource, String targetFolderID) throws OXException, HttpException, IOException {
 		MoveMethod move = null;
         try {
-            String destinationUri = getBaseUri() + "/caldav/" + targetFolderID + "/" + 
-            		iCalResource.getHref().substring(1 + iCalResource.getHref().lastIndexOf('/')); 
-        	move = new MoveMethod(iCalResource.getHref(), destinationUri, false);
+        	String targetHref = "/caldav/" + targetFolderID + "/" + 
+    				iCalResource.getHref().substring(1 + iCalResource.getHref().lastIndexOf('/'));
+        	move = new MoveMethod(getBaseUri() + iCalResource.getHref(), getBaseUri() + targetHref, false);
         	if (null != iCalResource.getETag()) {
         		move.addRequestHeader(Headers.IF_MATCH, iCalResource.getETag());
             }
-        	return getWebDAVClient().executeMethod(move);
+        	int status = getWebDAVClient().executeMethod(move);
+        	if (StatusCodes.SC_CREATED == status) {
+        		iCalResource.setHref(targetHref);
+        	}
+        	return status;
         } finally {
             release(move);
         }
@@ -275,7 +279,7 @@ public abstract class CalDAVTest extends WebDAVTest {
 	}
 
 	protected Appointment getAppointment(String folderID, String uid) throws OXException {
-		Appointment[] appointments = this.testManager.all(parse(folderID), new Date(0), new Date(Long.MAX_VALUE), 
+		Appointment[] appointments = this.testManager.all(parse(folderID), new Date(0), new Date(100000000000000L), 
 				new int[] { Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.UID });
 		for (Appointment appointment : appointments) {
 			if (uid.equals(appointment.getUid())) {

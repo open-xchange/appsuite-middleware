@@ -76,11 +76,21 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  */
 @Action(
     name = "update"
-    , description = "Updates or sets the JSlob associated with the current user and context." 
+    , description = "Updates or sets single elements within the JSlob associated with the current user and context." +
+    		"This can be done in a REST-like fashion. The path info specifies the path to the element that is supposed to be updated" +
+    		"; e.g. /ajax/jslob/the/path/to/element. Then the request body is considered to be the the new value for the addressed element." +
+    		" If non-REST the request body is expected to be a JSON object containing of a \"path\" and \"value\" element with the same " +
+    		"semantics. If the \"path\" element is missing in request's JSON object, that JSON object is completely <b>merged</b> with the" +
+    		" current JSON object representing the user's configuration.<br><br>Examples:<br>" +
+    		"The fastes way of storing a configuration:<br>" + 
+    		"PUT /ajax/jslob/myKey?action=update&id=myId<br>" + 
+    		"\"MyValue\"\n" + 
+    		"<br>" + 
+    		"results in a jslob {myKey: \"MyValue\"}" 
     , method = RequestMethod.PUT
     , parameters = {
-        @Parameter(name = "serviceId", description = "Identifier for the JSLobService lookup in the JSlobServiceRegistry.", optional=true)
-        , @Parameter(name = "id", description = "The path of the JSlob.", optional=true)
+        @Parameter(name = "serviceId", description = "Optional identifier for the JSlob. Default is <tt>com.openexchange.jslob.config</tt>", optional=true)
+        , @Parameter(name = "id", description = "The path of the JSlob.", optional=false)
     }
     , requestBody = "A JSON object to perform update or set. If the object contains a path key-value pair update is performed, set otherwise."
     , responseDescription = "The updated JSlob."

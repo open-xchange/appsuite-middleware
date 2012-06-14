@@ -77,8 +77,8 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
     , description = "Sets the JSlob associated with the current user and context. Performs a delete if the passed JSlob is null." 
     , method = RequestMethod.PUT
     , parameters = {
-        @Parameter(name = "serviceId", description = "Identifier for the JSLobService lookup in the JSlobServiceRegistry.", optional=true)
-        , @Parameter(name = "id", description = "The path of the JSlob.", optional=true)
+        @Parameter(name = "serviceId", description = "Optional identifier for the JSlob. Default is <tt>com.openexchange.jslob.config</tt>", optional=true)
+        , @Parameter(name = "id", description = "The path of the JSlob.", optional=false)
     }
     , requestBody = "The JSON object to set with the current user and context or null to delete the JSlob."
 )
