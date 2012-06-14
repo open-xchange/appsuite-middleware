@@ -50,43 +50,45 @@
 package com.openexchange.dav.caldav.bugs;
 
 import java.util.Date;
-import java.util.List;
-import java.util.Map.Entry;
 
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.caldav.CalDAVTest;
 import com.openexchange.dav.caldav.ICalResource;
-import com.openexchange.dav.caldav.ical.SimpleICal.Property;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.groupware.container.FolderObject;
 
 /**
- * {@link NewTest} - 500 an CalDAVWriteEntityQueueableOperation. 
+ * {@link NewTest} - appointments can not be moved between calendars via iCal 
  * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class Bug21794Test extends CalDAVTest {
+public class Bug22094Test extends CalDAVTest {
 
-	public Bug21794Test(String name) {
+	public Bug22094Test(String name) {
 		super(name);
 	}
 
-	public void testDeclineImportedAppointment() throws Exception {
+	public void testMoveAppointment() throws Exception {
 		/*
-		 * create appointment
+		 * create target folder for move on server
 		 */
-		String uid = "WEBEX-MEETING CENTER-6.0292133-" + new Date().getTime();
-		String resourceName = uid.replace(".", "");		
-    	Date start = TimeTools.D("next monday at 15:30");
-    	Date end = TimeTools.D("next monday at 16:30");
+		FolderObject subfolder = super.createFolder("move test");
+		String subfolderID = Integer.toString(subfolder.getObjectID());
+		/*
+		 * create appointment in default folder on client
+		 */
+		String uid = randomUID();
+    	Date start = TimeTools.D("next thursday at 7:15");
+    	Date end = TimeTools.D("next thursday at 11:30");
+    	String title = "move test";
 		String iCal = 
 				"BEGIN:VCALENDAR" + "\r\n" +
 				"VERSION:2.0" + "\r\n" +
 				"PRODID:-//Apple Inc.//iCal 5.0.2//EN" + "\r\n" +
 				"CALSCALE:GREGORIAN" + "\r\n" +
 				"BEGIN:VTIMEZONE" + "\r\n" +
-				"TZID:Europe/Amsterdam" + "\r\n" +
+				"TZID:Europe/Berlin" + "\r\n" +
 				"BEGIN:DAYLIGHT" + "\r\n" +
 				"TZOFFSETFROM:+0100" + "\r\n" +
 				"RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU" + "\r\n" +
@@ -103,24 +105,20 @@ public class Bug21794Test extends CalDAVTest {
 				"END:STANDARD" + "\r\n" +
 				"END:VTIMEZONE" + "\r\n" +
 				"BEGIN:VEVENT" + "\r\n" +
-				"DTEND;TZID=Europe/Amsterdam:" + format(end, "Europe/Amsterdam") + "\r\n" +
-				"TRANSP:OPAQUE" + "\r\n" +
-				"ORGANIZER;CN=\"webex\":MAILTO:messenger@example.com" + "\r\n" +
+				"CREATED:" + formatAsUTC(new Date()) + "\r\n" +
 				"UID:" + uid + "\r\n" +
+				"DTEND;TZID=Europe/Berlin:" + format(end, "Europe/Berlin") + "\r\n" +
+				"TRANSP:OPAQUE" + "\r\n" +
+				"CLASS:PUBLIC" + "\r\n" +
+				"SUMMARY:" + title + "\r\n" +
+				"LAST-MODIFIED:" + formatAsUTC(new Date()) + "\r\n" +
 				"DTSTAMP:" + formatAsUTC(new Date()) + "\r\n" +
-				"LOCATION:https://open-xchange.webex.com/open-xchange-en" + "\r\n" +
-				"DESCRIPTION:stripped" + "\r\n" +
-				"SEQUENCE:2" + "\r\n" +
-				"SUMMARY:Agorum Integration" + "\r\n" +
-				"DTSTART;TZID=Europe/Amsterdam:" + format(start, "Europe/Amsterdam") + "\r\n" +
-				"CREATED:" + formatAsUTC(TimeTools.D("yesterday noon")) + "\r\n" +
-				"ATTENDEE;CN=\"Open-Xchange Presenter\";CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIP" + "\r\n" +
-				" ANT:MAILTO:webmeeting1@example.com" + "\r\n" +
+				"DTSTART;TZID=Europe/Berlin:" + format(start, "Europe/Berlin") + "\r\n" +
+				"SEQUENCE:1" + "\r\n" +
 				"END:VEVENT" + "\r\n" +
 				"END:VCALENDAR"
 		;
-
-		assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putICal(resourceName, iCal));
+		assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putICal(uid, iCal));
         /*
          * verify appointment on server
          */
@@ -130,55 +128,23 @@ public class Bug21794Test extends CalDAVTest {
         /*
          * verify appointment on client
          */
-        ICalResource iCalResource = super.get(resourceName, null);
+        ICalResource iCalResource = super.get(uid, null);
         assertEquals("UID wrong", uid, iCalResource.getUID());
         /*
-         * decline appointment on client
+         * move appointment on client
          */
-        List<Property> attendees = iCalResource.getICal().getVEvent().getProperties("ATTENDEE");
-        for (Property property : attendees) {
-			if (property.getValue().contains(super.getAJAXClient().getValues().getDefaultAddress())) {
-				for (Entry<String, String> attribute : property.getAttributes().entrySet()) {
-					if (attribute.getKey().equals("PARTSTAT")) {
-						attribute.setValue("DECLINED");
-						break;
-					}
-				}
-				break;
-			}
-		}
-        assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putICalUpdate(iCalResource));
-        /*
-         * verify appointment on server
-         */
-        appointment = super.getAppointment(uid);
-        assertNotNull("appointment not found on server", appointment);
-        UserParticipant[] users = appointment.getUsers();
-        assertNotNull("appointment has no users", users);
-        UserParticipant declinedPartipant = null;
-        for (UserParticipant user : users) {
-			if (getAJAXClient().getValues().getUserId() == user.getIdentifier()) {
-				declinedPartipant = user;
-				break;
-			}
-		}
-        assertNotNull("declining participant not found", declinedPartipant);
-        assertEquals("confirmation status wrong", Appointment.DECLINE, declinedPartipant.getConfirm());
-        /*
-         * verify appointment on client
-         */
-        iCalResource = super.get(resourceName, iCalResource.getETag());
-        assertEquals("UID wrong", uid, iCalResource.getUID());
-        Property attendee = null;
-        attendees = iCalResource.getICal().getVEvent().getProperties("ATTENDEE");
-        for (Property property : attendees) {
-			if (property.getValue().contains(super.getAJAXClient().getValues().getDefaultAddress())) {
-				attendee = property;
-				break;
-			}
-		}
-        assertNotNull("declining attendee not found", attendee);
-        assertEquals("partstat status wrong", "DECLINED", attendee.getAttribute("PARTSTAT"));
+//        assertEquals("response code wrong", StatusCodes.SC_OK, super.move(iCalResource, subfolderID));
+//        /*
+//         * verify appointment on server
+//         */
+//        appointment = super.getAppointment(uid);
+//        assertNotNull("appointment not found on server", appointment);
+//        assertEquals("folder ID wrong", subfolder.getObjectID(), appointment.getParentFolderID());
+//        /*
+//         * verify appointment on client
+//         */
+//        iCalResource = super.get(subfolderID, uid, null);
+//        assertEquals("UID wrong", uid, iCalResource.getUID());
 	}
 	
 }

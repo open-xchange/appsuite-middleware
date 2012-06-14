@@ -110,12 +110,7 @@ public class NewTest extends CalDAVTest {
     	String location = "achtung";
     	Date start = TimeTools.D("next friday at 11:30");
     	Date end = TimeTools.D("next friday at 12:45");
-		Appointment appointment = new Appointment();
-		appointment.setTitle(summary);
-		appointment.setLocation(location);
-		appointment.setStartDate(start);
-		appointment.setEndDate(end);
-		appointment.setUid(uid);
+		Appointment appointment = generateAppointment(start, end, uid, summary, location);
 		super.rememberForCleanUp(super.create(appointment));
         /*
          * verify appointment on client
@@ -128,6 +123,31 @@ public class NewTest extends CalDAVTest {
         assertEquals("LOCATION wrong", location, iCalResource.getLocation());
 	}
 	
-
+	public void testCreateWithDifferentName() throws Exception {
+		/*
+		 * create appointment on client
+		 */
+    	String resourceName = randomUID();
+    	String uid = randomUID();
+    	String summary = "test with filename";
+    	String location = "loco";
+    	Date start = TimeTools.D("last sunday at 2am");
+    	Date end = TimeTools.D("last sunday at 7am");
+    	String iCal = generateICal(start, end, uid, summary, location);
+        assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putICal(resourceName, iCal));
+        /*
+         * verify appointment on server
+         */
+        Appointment appointment = super.getAppointment(uid);
+        super.rememberForCleanUp(appointment);
+        assertEquals(appointment, start, end, uid, summary, location);
+        /*
+         * verify appointment on client
+         */
+        ICalResource iCalResource = super.get(resourceName, null);
+        assertEquals("UID wrong", uid, iCalResource.getUID());
+        assertEquals("SUMMARY wrong", summary, iCalResource.getSummary());
+        assertEquals("LOCATION wrong", location, iCalResource.getLocation());
+	}
 	
 }

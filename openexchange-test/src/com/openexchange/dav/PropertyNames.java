@@ -501,6 +501,26 @@ public final class PropertyNames {
 	 */
 	public static final DavPropertyName ME_CARD = DavPropertyName.create("me-card", NS_CALENDARSERVER);
 
+	/**
+	 * response xmlns="urn:ietf:params:xml:ns:caldav"
+	 */
+	public static final DavPropertyName RESPONSE_CALDAV = DavPropertyName.create("response", NS_CALDAV);
+
+	/**
+	 * recipient xmlns="urn:ietf:params:xml:ns:caldav"
+	 */
+	public static final DavPropertyName RECIPIENT = DavPropertyName.create("recipient", NS_CALDAV);
+
+	/**
+	 * request-status xmlns="urn:ietf:params:xml:ns:caldav"
+	 */
+	public static final DavPropertyName REQUEST_STATUS = DavPropertyName.create("request-status", NS_CALDAV);
+
+	/**
+	 * responsedescription xmlns="DAV:"
+	 */
+	public static final DavPropertyName RESPONSEDESCRIPTION = DavPropertyName.create("responsedescription", NS_DAV);
+
 	
 	private PropertyNames() {
 		// prevent instantiation

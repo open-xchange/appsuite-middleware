@@ -64,19 +64,23 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.jackrabbit.webdav.DavException;
 import org.apache.jackrabbit.webdav.MultiStatusResponse;
+import org.apache.jackrabbit.webdav.client.methods.MoveMethod;
 import org.apache.jackrabbit.webdav.client.methods.PutMethod;
 import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
 import org.apache.jackrabbit.webdav.version.report.ReportInfo;
+import org.json.JSONException;
 
 import com.openexchange.dav.Headers;
 import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.SyncToken;
 import com.openexchange.dav.WebDAVTest;
+import com.openexchange.dav.caldav.ical.SimpleICal.SimpleICalException;
 import com.openexchange.dav.caldav.reports.CalendarMultiGetReportInfo;
 import com.openexchange.dav.reports.SyncCollectionResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.test.CalendarTestManager;
 
 /**
@@ -120,6 +124,10 @@ public abstract class CalDAVTest extends WebDAVTest {
     	return Integer.toString(this.folderId);
     }
 
+    protected FolderObject createFolder(String folderName) throws OXException, IOException, JSONException {
+    	return createFolder(getFolder(this.folderId), folderName);
+    }
+
     /**
      * Gets the underlying {@link CalendarTestManager} instance.
      * 
@@ -153,11 +161,11 @@ public abstract class CalDAVTest extends WebDAVTest {
 		return this.syncCollection(syncToken, getDefaultFolderID());		
 	}
 
-	protected List<ICalResource> calendarMultiget(Collection<String> hrefs) throws OXException, IOException, DavException {
+	protected List<ICalResource> calendarMultiget(Collection<String> hrefs) throws OXException, IOException, DavException, SimpleICalException {
 		return calendarMultiget(getDefaultFolderID(), hrefs);
 	}
 	
-	protected List<ICalResource> calendarMultiget(String folderID, Collection<String> hrefs) throws OXException, IOException, DavException {
+	protected List<ICalResource> calendarMultiget(String folderID, Collection<String> hrefs) throws OXException, IOException, DavException, SimpleICalException {
 		List<ICalResource> calendarData = new ArrayList<ICalResource>();		
     	DavPropertyNameSet props = new DavPropertyNameSet();
     	props.add(PropertyNames.GETETAG);
@@ -194,12 +202,27 @@ public abstract class CalDAVTest extends WebDAVTest {
             release(put);
         }
 	}
+	
+	protected int move(ICalResource iCalResource, String targetFolderID) throws OXException, HttpException, IOException {
+		MoveMethod move = null;
+        try {
+            String destinationUri = getBaseUri() + "/caldav/" + targetFolderID + "/" + 
+            		iCalResource.getHref().substring(1 + iCalResource.getHref().lastIndexOf('/')); 
+        	move = new MoveMethod(iCalResource.getHref(), destinationUri, false);
+        	if (null != iCalResource.getETag()) {
+        		move.addRequestHeader(Headers.IF_MATCH, iCalResource.getETag());
+            }
+        	return getWebDAVClient().executeMethod(move);
+        } finally {
+            release(move);
+        }
+	}
 
-	protected ICalResource get(String resourceName, String ifNoneMatchEtag) throws HttpException, IOException, OXException, URISyntaxException {
+	protected ICalResource get(String resourceName, String ifNoneMatchEtag) throws HttpException, IOException, OXException, URISyntaxException, SimpleICalException {
 		return get(getDefaultFolderID(), resourceName, ifNoneMatchEtag);
 	}
 	
-	protected ICalResource get(String folderID, String resourceName, String ifNoneMatchEtag) throws HttpException, IOException, OXException, URISyntaxException {
+	protected ICalResource get(String folderID, String resourceName, String ifNoneMatchEtag) throws HttpException, IOException, OXException, URISyntaxException, SimpleICalException {
 		GetMethod get = null;
         try {
             String href = "/caldav/" + folderID + "/" + urlEncode(resourceName) + ".ics";
@@ -292,6 +315,16 @@ public abstract class CalDAVTest extends WebDAVTest {
     	return format(date, TimeZone.getTimeZone(timeZoneID));
     }
     
+    protected static Appointment generateAppointment(Date start, Date end, String uid, String summary, String location) {
+		Appointment appointment = new Appointment();
+		appointment.setTitle(summary);
+		appointment.setLocation(location);
+		appointment.setStartDate(start);
+		appointment.setEndDate(end);
+		appointment.setUid(uid);
+		return appointment;
+    }
+    
 	protected static String generateICal(Date start, Date end, String uid, String summary, String location) {
 		StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder
@@ -373,6 +406,7 @@ public abstract class CalDAVTest extends WebDAVTest {
 	
     protected Appointment create(String folderID, Appointment appointment) {
 		appointment.setParentFolderID(parse(folderID));
+		appointment.setIgnoreConflicts(true);
 		return getManager().insert(appointment);
 		
 	}

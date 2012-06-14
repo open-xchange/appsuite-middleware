@@ -61,6 +61,7 @@ import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
+import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.jackrabbit.webdav.DavException;
 import org.apache.jackrabbit.webdav.MultiStatusResponse;
@@ -219,8 +220,21 @@ public class WebDAVClient {
 	public MultiStatusResponse[] doPropFind(final PropFindMethod propFind) throws HttpException, IOException, DavException {
 		return this.doPropFind(propFind, StatusCodes.SC_MULTISTATUS);
 	}
+
+	public String doPost(PostMethod post) throws HttpException, IOException {
+		return this.doPost(post, StatusCodes.SC_OK);
+	}
 	
-	public Object queryXPath(final MultiStatusResponse response, final String xPath) throws ParserConfigurationException, JDOMException {
+	public String doPost(PostMethod post, int expectedStatus) throws HttpException, IOException {
+		try {
+	    	Assert.assertEquals("unexpected http status", expectedStatus, this.httpClient.executeMethod(post));
+	    	return post.getResponseBodyAsString();
+		} finally {
+			release(post);
+		}
+	}
+	
+	public static Object queryXPath(final MultiStatusResponse response, final String xPath) throws ParserConfigurationException, JDOMException {
 		final Element element = response.toXml(DomUtil.createDocument());
 		return XPath.selectSingleNode(element, xPath);
 	}

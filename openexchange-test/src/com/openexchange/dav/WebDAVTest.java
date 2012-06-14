@@ -73,7 +73,9 @@ import org.apache.jackrabbit.webdav.property.DavPropertyName;
 import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
 import org.apache.jackrabbit.webdav.version.report.ReportInfo;
 import org.json.JSONException;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertResponse;
@@ -228,6 +230,7 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
 		InsertResponse response = getClient().execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_NEW, folder));
 		folder.setObjectID(response.getId());
         folder.setLastModified(response.getTimestamp());
+        this.rememberForCleanUp(folder);
 		return folder;
     }
     
@@ -419,6 +422,15 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
     	final Object value = response.getProperties(StatusCodes.SC_OK).get(propertyName).getValue();
     	assertTrue("value is not a string in " + propertyName, value instanceof String);
     	return (String)value;
+    }
+    
+    protected static String extractChildTextContent(DavPropertyName propertyName, Element element) {
+    	NodeList nodes = element.getElementsByTagNameNS(propertyName.getNamespace().getURI(), propertyName.getName());
+    	assertNotNull("no child elements found by property name", nodes);
+    	assertEquals("0 or more than one child nodes found for property", 1, nodes.getLength());
+    	Node node = nodes.item(0);
+    	assertNotNull("no child element found by property name", node);
+    	return node.getTextContent();
     }
     
     protected static String formatAsUTC(final Date date) {
