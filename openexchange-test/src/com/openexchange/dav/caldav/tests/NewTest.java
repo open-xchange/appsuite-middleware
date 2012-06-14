@@ -123,6 +123,81 @@ public class NewTest extends CalDAVTest {
         assertEquals("LOCATION wrong", location, iCalResource.getLocation());
 	}
 	
+	public void testCreateAllDayOnClient() throws Exception {
+		/*
+		 * create appointment on client
+		 */
+    	String uid = randomUID();
+    	String summary = "test all day";
+    	Date start = TimeTools.D("midnight");
+    	Date end = TimeTools.D("tomorrow at midnight");
+    	String iCal = 
+    			"BEGIN:VCALENDAR" + "\r\n" +
+    			"VERSION:2.0" + "\r\n" +
+    			"PRODID:-//Apple Inc.//iCal 5.0.2//EN" + "\r\n" +
+    			"CALSCALE:GREGORIAN" + "\r\n" +
+    			"BEGIN:VEVENT" + "\r\n" +
+    			"CREATED:" + formatAsUTC(new Date()) + "\r\n" +
+    			"UID:" + uid + "\r\n" +
+    			"DTEND;VALUE=DATE:" + formatAsDate(end) + "\r\n" +
+    			"TRANSP:OPAQUE" + "\r\n" +
+    			"CLASS:PUBLIC" + "\r\n" +
+    			"SUMMARY:" + summary + "\r\n" +
+    			"LAST-MODIFIED:" + formatAsUTC(new Date()) + "\r\n" +
+    			"DTSTAMP:" + formatAsUTC(new Date()) + "\r\n" +
+    			"DTSTART;VALUE=DATE:" + formatAsDate(start) + "\r\n" +
+    			"SEQUENCE:0" + "\r\n" +
+    			"END:VEVENT" + "\r\n" +
+    			"END:VCALENDAR"
+		;
+        assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putICal(uid, iCal));
+        /*
+         * verify appointment on server
+         */
+        Appointment appointment = super.getAppointment(uid);
+        assertNotNull("appointmnet not found on server", appointment);
+        super.rememberForCleanUp(appointment);
+        assertEquals("title wrong", summary, appointment.getTitle());
+        assertTrue("full time wrong", appointment.getFullTime());
+        /*
+         * verify appointment on client
+         */
+        ICalResource iCalResource = super.get(uid, null);
+        assertEquals("UID wrong", uid, iCalResource.getUID());
+        assertEquals("SUMMARY wrong", summary, iCalResource.getSummary());
+        assertEquals("START wrong", start, iCalResource.getDTStart());
+        assertEquals("END wrong", end, iCalResource.getDTEnd());
+	}
+	
+	public void testAllDayOnServer() throws Exception {
+		/*
+		 * fetch sync token for later synchronization
+		 */
+		SyncToken syncToken = new SyncToken(super.fetchSyncToken());		
+		/*
+		 * create appointment on server
+		 */
+    	String uid = randomUID();
+    	String summary = "all day";
+    	String location = "testing";
+    	Date start = TimeTools.D("next monday at midnight");
+    	Date end = TimeTools.D("next tuesday at midnight");
+		Appointment appointment = generateAppointment(start, end, uid, summary, location);
+		appointment.setFullTime(true);
+		super.rememberForCleanUp(super.create(appointment));
+        /*
+         * verify appointment on client
+         */
+		Map<String, String> eTags = super.syncCollection(syncToken).getETagsStatusOK();
+        assertTrue("no resource changes reported on sync collection", 0 < eTags.size());
+        List<ICalResource> calendarData = super.calendarMultiget(eTags.keySet());
+        ICalResource iCalResource = assertContains(uid, calendarData);
+        assertEquals("SUMMARY wrong", summary, iCalResource.getSummary());
+        assertEquals("LOCATION wrong", location, iCalResource.getLocation());
+        assertEquals("START wrong", start, iCalResource.getDTStart());
+        assertEquals("END wrong", end, iCalResource.getDTEnd());
+	}
+	
 	public void testCreateWithDifferentName() throws Exception {
 		/*
 		 * create appointment on client

@@ -47,90 +47,22 @@
  *
  */
 
-package com.openexchange.dav.caldav;
+package com.openexchange.dav.caldav.bugs;
 
-import java.io.IOException;
-import java.text.ParseException;
-import java.util.Date;
-
-import com.openexchange.dav.caldav.ical.ICalUtils;
-import com.openexchange.dav.caldav.ical.SimpleICal;
-import com.openexchange.dav.caldav.ical.SimpleICal.SimpleICalException;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
- * {@link ICalResource}
+ * {@link CalDAVBugSuite}
  * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ICalResource {
-	
-	private String eTag;
-	private String href;
-	private SimpleICal iCal;
-	
-	public ICalResource(String iCalString, String href, String eTag) throws IOException, SimpleICalException {
-		super();
-		this.iCal = new SimpleICal(iCalString);
-		this.href = href;
-		this.eTag = eTag;
-	}
-	
-	public ICalResource(String iCalString) throws IOException, com.openexchange.dav.caldav.ical.SimpleICal.SimpleICalException {
-		this(iCalString, null, null);
-	}
-	
-	public String getUID() {
-		return this.iCal.getVEvent().getPropertyValue("UID");
-	}	
+public final class CalDAVBugSuite {
 
-	public String getSummary() {
-		return this.iCal.getVEvent().getPropertyValue("SUMMARY");
-	}	
-
-	public Date getDTStart() throws ParseException {
-		return ICalUtils.parseDate(this.iCal.getVEvent().getProperty("DTSTART"));
-	}	
-
-	public Date getDTEnd() throws ParseException {
-		return ICalUtils.parseDate(this.iCal.getVEvent().getProperty("DTEND"));
-	}	
-
-	public String getLocation() {
-		return this.iCal.getVEvent().getPropertyValue("LOCATION");
-	}
-	
-	/**
-	 * @return the eTag
-	 */
-	public String getETag() {
-		return eTag;
-	}
-
-	public void setEtag(String eTag) {
-		this.eTag = eTag;
-	}
-
-	/**
-	 * @return the href
-	 */
-	public String getHref() {
-		return href;
-	}
-
-	public void setHref(String href) {
-		this.href = href;
-	}
-
-	/**
-	 * @return the iCal file
-	 */
-	public SimpleICal getICal() {
-		return iCal;
-	}
-
-	@Override
-    public String toString() {
-		return this.iCal.toString();		
-	}
-	
+    public static Test suite() {
+        final TestSuite suite = new TestSuite();
+        suite.addTestSuite(Bug21794Test.class);
+        suite.addTestSuite(Bug22094Test.class);
+        return suite;
+    }
 }
