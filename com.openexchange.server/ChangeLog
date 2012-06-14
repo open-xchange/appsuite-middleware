@@ -1,3 +1,7 @@
+* 2012-06-14 - thorben.betten@open-xchange.com
+
+ - Partial fix for bug 21872: Abort default folder check if an over-quota error is encountered
+
 * 2012-06-13 - thorben.betten@open-xchange.com
 
  - Fix for bug 22304: Drop remaining "<![endif]-->" from HTML content
