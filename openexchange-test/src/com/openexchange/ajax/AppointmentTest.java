@@ -372,36 +372,36 @@ public class AppointmentTest extends AbstractAJAXTest {
         return objectId;
     }
 
-    public static void deleteAppointment(final WebConversation webCon, final int id, final int inFolder, final String host, final String session) throws Exception {
-        deleteAppointment(webCon, id, inFolder, new Date(System.currentTimeMillis() + APPEND_MODIFIED), host, session);
+    public static void deleteAppointment(final WebConversation webCon, final int id, final int inFolder, final String host, final String session, final boolean ignoreFailure) throws Exception {
+        deleteAppointment(webCon, id, inFolder, new Date(System.currentTimeMillis() + APPEND_MODIFIED), host, session, ignoreFailure);
     }
 
-    public static void deleteAppointment(final WebConversation webCon, final int id, final int inFolder, final Date modified, final String host, final String session) throws Exception {
-        deleteAppointment(webCon, id, inFolder, 0, modified, host, session);
+    public static void deleteAppointment(final WebConversation webCon, final int id, final int inFolder, final Date modified, final String host, final String session, final boolean ignoreFailure) throws Exception {
+        deleteAppointment(webCon, id, inFolder, 0, modified, host, session, ignoreFailure);
     }
 
-    public static void deleteAppointment(final WebConversation webCon, final int id, final int inFolder, final int recurrencePosition, final String host, final String session) throws Exception {
-        deleteAppointment(webCon, id, inFolder, recurrencePosition, new Date(System.currentTimeMillis() + APPEND_MODIFIED), host, session);
+    public static void deleteAppointment(final WebConversation webCon, final int id, final int inFolder, final int recurrencePosition, final String host, final String session, final boolean ignoreFailure) throws Exception {
+        deleteAppointment(webCon, id, inFolder, recurrencePosition, new Date(System.currentTimeMillis() + APPEND_MODIFIED), host, session, ignoreFailure);
     }
 
-    public static void deleteAppointment(final WebConversation webCon, final int id, final int inFolder, final int recurrencePosition, final Date modified, final String host, final String session) throws OXException, OXException, IOException, JSONException {
+    public static void deleteAppointment(final WebConversation webCon, final int id, final int inFolder, final int recurrencePosition, final Date modified, final String host, final String session, final boolean ignoreFailure) throws OXException, IOException, JSONException {
         final AJAXSession ajaxSession = new AJAXSession(webCon, host, session);
         final DeleteRequest deleteRequest = new DeleteRequest(id, inFolder, recurrencePosition, modified);
         deleteRequest.setFailOnError(false);
         final AbstractAJAXResponse response = Executor.execute(ajaxSession, deleteRequest);
 
-        if (response.hasError()) {
+        if (!ignoreFailure && response.hasError()) {
             throw new TestException("json error: " + response.getResponse().getErrorMessage());
         }
     }
 
-    public static void deleteAppointment(final WebConversation webCon, final int id, final int inFolder, final Date recurrenceDatePosition, final Date modified, final String host, final String session) throws Exception, OXException, IOException, SAXException {
+    public static void deleteAppointment(final WebConversation webCon, final int id, final int inFolder, final Date recurrenceDatePosition, final Date modified, final String host, final String session, final boolean ignoreFailure) throws Exception, OXException, IOException, SAXException {
         final AJAXSession ajaxSession = new AJAXSession(webCon, host, session);
         final DeleteRequest deleteRequest = new DeleteRequest(id, inFolder, recurrenceDatePosition, modified);
         deleteRequest.setFailOnError(false);
         final AbstractAJAXResponse response = Executor.execute(ajaxSession, deleteRequest);
 
-        if (response.hasError()) {
+        if (!ignoreFailure && response.hasError()) {
             throw new Exception("json error: " + response.getResponse().getErrorMessage());
         }
     }

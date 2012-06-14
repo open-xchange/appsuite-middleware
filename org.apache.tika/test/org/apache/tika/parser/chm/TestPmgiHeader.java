@@ -24,7 +24,6 @@ import org.apache.tika.parser.chm.accessor.ChmPmgiHeader;
 public class TestPmgiHeader extends TestCase {
     ChmPmgiHeader chmPmgiHeader = null;
 
-    @Override
     public void setUp() throws Exception {
         byte[] data = TestParameters.chmData;
         chmPmgiHeader = new ChmPmgiHeader();
@@ -39,7 +38,6 @@ public class TestPmgiHeader extends TestCase {
         Assert.assertEquals(TestParameters.VP_PMGI_FREE_SPACE, chmPmgiHeader.getFreeSpace());
     }
 
-    @Override
     public void tearDown() throws Exception {
     }
 }

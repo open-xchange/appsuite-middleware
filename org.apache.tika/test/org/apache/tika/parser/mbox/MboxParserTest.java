@@ -75,7 +75,7 @@ public class MboxParserTest extends TestCase {
             assertEquals("<author@domain.com>", metadata.get(Metadata.CREATOR));
             assertEquals(null, metadata.get(Metadata.MESSAGE_RECIPIENT_ADDRESS));
             assertEquals("<name@domain.com>", metadata.get("MboxParser-return-path"));
-            assertEquals("Should be ISO date in UTC, converted from 'Tue, 9 Jun 2009 23:58:45 -0400'",
+            assertEquals("Should be ISO date in UTC, converted from 'Tue, 9 Jun 2009 23:58:45 -0400'", 
                     "2009-06-10T03:58:45Z", metadata.get(Metadata.DATE));
         } catch (Exception e) {
             fail("Exception thrown: " + e.getMessage());
@@ -138,7 +138,7 @@ public class MboxParserTest extends TestCase {
             assertEquals("Jothi Padmanabhan <jothipn@yahoo-inc.com>", metadata.get(Metadata.AUTHOR));
             assertEquals("Jothi Padmanabhan <jothipn@yahoo-inc.com>", metadata.get(Metadata.CREATOR));
             assertEquals("core-user@hadoop.apache.org", metadata.get(Metadata.MESSAGE_RECIPIENT_ADDRESS));
-
+            
             verify(handler).startDocument();
             verify(handler, times(3)).startElement(eq(XHTMLContentHandler.XHTML), eq("p"), eq("p"), any(Attributes.class));
             verify(handler, times(3)).endElement(eq(XHTMLContentHandler.XHTML), eq("p"), eq("p"));

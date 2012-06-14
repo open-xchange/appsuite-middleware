@@ -215,11 +215,11 @@ public class TestMetadata extends TestCase {
      */
     public void testGetSetInt() {
         Metadata meta = new Metadata();
-
+        
         // Isn't initially set, will get null back
         assertEquals(null, meta.get(Metadata.IMAGE_WIDTH));
         assertEquals(null, meta.getInt(Metadata.IMAGE_WIDTH));
-
+        
         // Can only set as a single valued int
         try {
             meta.set(Metadata.BITS_PER_SAMPLE, 1);
@@ -229,35 +229,36 @@ public class TestMetadata extends TestCase {
             meta.set(Metadata.CREATION_DATE, 1);
             fail("Shouldn't be able to set a date property as an int");
         } catch(PropertyTypeException e) {}
-
+        
         // Can set it and retrieve it
         meta.set(Metadata.IMAGE_WIDTH, 22);
         assertEquals("22", meta.get(Metadata.IMAGE_WIDTH));
         assertEquals(22, meta.getInt(Metadata.IMAGE_WIDTH).intValue());
-
+        
         // If you save a non int value, you get null
         meta.set(Metadata.IMAGE_WIDTH, "INVALID");
         assertEquals("INVALID", meta.get(Metadata.IMAGE_WIDTH));
         assertEquals(null, meta.getInt(Metadata.IMAGE_WIDTH));
-
+        
         // If you try to retrieve a non simple int value, you get null
         meta.set(Metadata.IMAGE_WIDTH, 22);
         assertEquals(22, meta.getInt(Metadata.IMAGE_WIDTH).intValue());
         assertEquals(null, meta.getInt(Metadata.BITS_PER_SAMPLE));
         assertEquals(null, meta.getInt(Metadata.CREATION_DATE));
     }
-
+    
     /**
      * Tests for getting and setting date
      *  based properties
      */
     public void testGetSetDate() {
         Metadata meta = new Metadata();
-
+        long hour = 60 * 60 * 1000; 
+        
         // Isn't initially set, will get null back
         assertEquals(null, meta.get(Metadata.CREATION_DATE));
         assertEquals(null, meta.getInt(Metadata.CREATION_DATE));
-
+        
         // Can only set as a single valued date
         try {
             meta.set(Metadata.BITS_PER_SAMPLE, new Date(1000));
@@ -267,59 +268,66 @@ public class TestMetadata extends TestCase {
             meta.set(Metadata.IMAGE_WIDTH, new Date(1000));
             fail("Shouldn't be able to set an int property as an date");
         } catch(PropertyTypeException e) {}
-
+        
         // Can set it and retrieve it
         meta.set(Metadata.CREATION_DATE, new Date(1000));
         assertEquals("1970-01-01T00:00:01Z", meta.get(Metadata.CREATION_DATE));
         assertEquals(1000, meta.getDate(Metadata.CREATION_DATE).getTime());
-
+        
         // If you save a non date value, you get null
         meta.set(Metadata.CREATION_DATE, "INVALID");
         assertEquals("INVALID", meta.get(Metadata.CREATION_DATE));
         assertEquals(null, meta.getDate(Metadata.CREATION_DATE));
-
+        
         // If you try to retrieve a non simple date value, you get null
         meta.set(Metadata.CREATION_DATE, new Date(1000));
         assertEquals(1000, meta.getDate(Metadata.CREATION_DATE).getTime());
         assertEquals(null, meta.getInt(Metadata.BITS_PER_SAMPLE));
         assertEquals(null, meta.getInt(Metadata.CREATION_DATE));
-
+        
         // Our format doesn't include milliseconds
-        // This means things get rounded
+        // This means things get rounded 
         meta.set(Metadata.CREATION_DATE, new Date(1050));
         assertEquals("1970-01-01T00:00:01Z", meta.get(Metadata.CREATION_DATE));
         assertEquals(1000, meta.getDate(Metadata.CREATION_DATE).getTime());
-
+        
         // We can accept a number of different ISO-8601 variants
         meta.set(Metadata.CREATION_DATE, "1970-01-01T00:00:01Z");
         assertEquals(1000, meta.getDate(Metadata.CREATION_DATE).getTime());
-
+        
         meta.set(Metadata.CREATION_DATE, "1970-01-01 00:00:01Z");
         assertEquals(1000, meta.getDate(Metadata.CREATION_DATE).getTime());
-
+        
         meta.set(Metadata.CREATION_DATE, "1970-01-01T01:00:01+01:00");
         assertEquals(1000, meta.getDate(Metadata.CREATION_DATE).getTime());
-
+        
         meta.set(Metadata.CREATION_DATE, "1970-01-01 01:00:01+01:00");
         assertEquals(1000, meta.getDate(Metadata.CREATION_DATE).getTime());
-
+        
         meta.set(Metadata.CREATION_DATE, "1970-01-01T12:00:01+12:00");
         assertEquals(1000, meta.getDate(Metadata.CREATION_DATE).getTime());
-
+        
         meta.set(Metadata.CREATION_DATE, "1969-12-31T12:00:01-12:00");
         assertEquals(1000, meta.getDate(Metadata.CREATION_DATE).getTime());
+        
+        // Dates without times, come in at midday UTC
+        meta.set(Metadata.CREATION_DATE, "1970-01-01");
+        assertEquals(12*hour, meta.getDate(Metadata.CREATION_DATE).getTime());
+        
+        meta.set(Metadata.CREATION_DATE, "1970:01:01");
+        assertEquals(12*hour, meta.getDate(Metadata.CREATION_DATE).getTime());
     }
-
+    
     /**
      * Some documents, like jpegs, might have date in unspecified time zone
      * which should be handled like strings but verified to have parseable ISO 8601 format
      */
     public void testGetSetDateUnspecifiedTimezone() {
-        Metadata meta = new Metadata();
-
+        Metadata meta = new Metadata();    
+        
         meta.set(Metadata.DATE, "1970-01-01T00:00:01");
         assertEquals("should return string without time zone specifier because zone is not known",
         		"1970-01-01T00:00:01", meta.get(Metadata.DATE));
     }
-
+    
 }

@@ -70,8 +70,10 @@ public enum ConfigurationProperty {
      * Every client tells the backend through the client parameter on the login request his identy. This is not possible when using the HTTP
      * Authorization Header based login. So the client identifier for that request is defined here. It must be the same identifier that the
      * web frontend uses, if you set com.openexchange.cookie.hash to calculate and want the previously configured autologin to work.
+     * <p>
+     * Identifier for web UI is: <code>com.openexchange.ox.gui.dhtml</code>
      */
-    HTTP_AUTH_CLIENT("com.openexchange.ajax.login.http-auth.client", "com.openexchange.ox.gui.dhtml"),
+    HTTP_AUTH_CLIENT("com.openexchange.ajax.login.http-auth.client", "unknown"),
 
     /**
      * The version of the client when using the HTTP Authorization Header based login. This should not be the normal web frontend version

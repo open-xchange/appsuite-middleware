@@ -21,8 +21,13 @@ import java.util.Locale;
 
 import junit.framework.TestCase;
 
+import org.apache.tika.detect.DefaultDetector;
+import org.apache.tika.detect.Detector;
 import org.apache.tika.metadata.Metadata;
+import org.apache.tika.mime.MediaType;
+import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.parser.ParseContext;
+import org.apache.tika.parser.microsoft.ooxml.OOXMLParser;
 import org.apache.tika.sax.BodyContentHandler;
 import org.xml.sax.ContentHandler;
 
@@ -42,13 +47,13 @@ public class ExcelParserTest extends TestCase {
                     metadata.get(Metadata.CONTENT_TYPE));
             assertEquals("Simple Excel document", metadata.get(Metadata.TITLE));
             assertEquals("Keith Bennett", metadata.get(Metadata.AUTHOR));
-
+            
             // Mon Oct 01 17:13:56 BST 2007
             assertEquals("2007-10-01T16:13:56Z", metadata.get(Metadata.CREATION_DATE));
-
+            
             // Mon Oct 01 17:31:43 BST 2007
             assertEquals("2007-10-01T16:31:43Z", metadata.get(Metadata.LAST_SAVED));
-
+            
             String content = handler.toString();
             assertTrue(content.contains("Sample Excel Worksheet"));
             assertTrue(content.contains("Numbers and their Squares"));
@@ -107,24 +112,25 @@ public class ExcelParserTest extends TestCase {
             // Date Format: d-mmm-yy
             assertTrue(content.contains("17-May-07"));
 
+            // Date Format: m/d/yy
+            assertTrue(content.contains("10/3/09"));
+            
+            // Date/Time Format: m/d/yy h:mm
+            assertTrue(content.contains("1/19/08 4:35"));
+
+            
             // Below assertions represent outstanding formatting issues to be addressed
             // they are included to allow the issues to be progressed with the Apache POI
             // team - See TIKA-103.
 
             /*************************************************************************
-            // Date Format: m/d/yy
-            assertTrue(content.contains("03/10/2009"));
-
-            // Date/Time Format
-            assertTrue(content.contains("19/01/2008 04:35"));
-
             // Custom Number (0 "dollars and" .00 "cents")
             assertTrue(content.contains("19 dollars and .99 cents"));
 
             // Custom Number ("At" h:mm AM/PM "on" dddd mmmm d"," yyyy)
             assertTrue(content.contains("At 4:20 AM on Thursday May 17, 2007"));
 
-            // Fraction (2.5): # ?/?
+            // Fraction (2.5): # ?/?  (TODO Coming in POI 3.8 beta 6)
             assertTrue(content.contains("2 1 / 2"));
             **************************************************************************/
 
@@ -145,17 +151,17 @@ public class ExcelParserTest extends TestCase {
             context.set(Locale.class, Locale.US);
             ContentHandler handler = new BodyContentHandler();
             new OfficeParser().parse(input, handler, metadata, context);
-
+        
             assertEquals(
                     "application/vnd.ms-excel",
                     metadata.get(Metadata.CONTENT_TYPE));
-
+        
             String content = handler.toString();
-
+            
             // The first sheet has a pie chart
             assertTrue(content.contains("charttabyodawg"));
             assertTrue(content.contains("WhamPuff"));
-
+            
             // The second sheet has a bar chart and some text
             assertTrue(content.contains("Sheet1"));
             assertTrue(content.contains("Test Excel Spreasheet"));
@@ -164,7 +170,7 @@ public class ExcelParserTest extends TestCase {
             assertTrue(content.contains("fizzlepuff"));
             assertTrue(content.contains("whyaxis"));
             assertTrue(content.contains("eksaxis"));
-
+            
             // The third sheet has some text
             assertTrue(content.contains("Sheet2"));
             assertTrue(content.contains("dingdong"));
@@ -192,5 +198,96 @@ public class ExcelParserTest extends TestCase {
             input.close();
         }
     }
+    
+    public void testWorksSpreadsheet70() throws Exception {
+        InputStream input = ExcelParserTest.class.getResourceAsStream(
+                "/test-documents/testWORKSSpreadsheet7.0.xlr");
+        try {
+            Metadata metadata = new Metadata();
+            ContentHandler handler = new BodyContentHandler(-1);
+            ParseContext context = new ParseContext();
+            context.set(Locale.class, Locale.US);
+            new OfficeParser().parse(input, handler, metadata, context);
 
+            String content = handler.toString();
+            assertTrue(content.contains("Microsoft Works"));
+        } finally {
+            input.close();
+        }
+    }
+
+    /**
+     * We don't currently support the .xlsb file format 
+     *  (an OOXML container with binary blobs), but we 
+     *  shouldn't break on these files either (TIKA-826)  
+     */
+    public void testExcelXLSB() throws Exception {
+       Detector detector = new DefaultDetector();
+       AutoDetectParser parser = new AutoDetectParser();
+       
+       InputStream input = ExcelParserTest.class.getResourceAsStream(
+             "/test-documents/testEXCEL.xlsb");
+       Metadata m = new Metadata();
+       m.add(Metadata.RESOURCE_NAME_KEY, "excel.xlsb");
+       
+       // Should be detected correctly
+       MediaType type = null;
+       try {
+          type = detector.detect(input, m);
+          assertEquals("application/vnd.ms-excel.sheet.binary.macroenabled.12", type.toString());
+       } finally {
+          input.close();
+       }
+       
+       // OfficeParser won't handle it
+       assertEquals(false, (new OfficeParser()).getSupportedTypes(new ParseContext()).contains(type));
+       
+       // OOXMLParser won't handle it
+       assertEquals(false, (new OOXMLParser()).getSupportedTypes(new ParseContext()).contains(type));
+       
+       // AutoDetectParser doesn't break on it
+       input = ExcelParserTest.class.getResourceAsStream("/test-documents/testEXCEL.xlsb");
+
+       try {
+          ContentHandler handler = new BodyContentHandler(-1);
+          ParseContext context = new ParseContext();
+          context.set(Locale.class, Locale.US);
+          parser.parse(input, handler, m, context);
+
+          String content = handler.toString();
+          assertEquals("", content);
+       } finally {
+          input.close();
+       }
+    }
+    
+    /**
+     * Ensures that custom OLE2 (HPSF) properties are extracted
+     */
+    public void testCustomProperties() throws Exception {
+       InputStream input = ExcelParserTest.class.getResourceAsStream(
+             "/test-documents/testEXCEL_custom_props.xls");
+       Metadata metadata = new Metadata();
+       
+       try {
+          ContentHandler handler = new BodyContentHandler(-1);
+          ParseContext context = new ParseContext();
+          context.set(Locale.class, Locale.US);
+          new OfficeParser().parse(input, handler, metadata, context);
+       } finally {
+          input.close();
+       }
+       
+       assertEquals("application/vnd.ms-excel", metadata.get(Metadata.CONTENT_TYPE));
+       assertEquals("",                     metadata.get(Metadata.AUTHOR));
+       assertEquals("",                     metadata.get(Metadata.LAST_AUTHOR));
+       assertEquals("2011-08-22T13:45:54Z", metadata.get(Metadata.LAST_SAVED));
+       assertEquals("2006-09-12T15:06:44Z", metadata.get(Metadata.CREATION_DATE));
+       assertEquals("Microsoft Excel",      metadata.get(Metadata.APPLICATION_NAME));
+       assertEquals("true",                 metadata.get("custom:myCustomBoolean"));
+       assertEquals("3",                    metadata.get("custom:myCustomNumber"));
+       assertEquals("MyStringValue",        metadata.get("custom:MyCustomString"));
+       assertEquals("2010-12-30T22:00:00Z", metadata.get("custom:MyCustomDate"));
+       assertEquals("2010-12-29T22:00:00Z", metadata.get("custom:myCustomSecondDate"));
+    }
 }

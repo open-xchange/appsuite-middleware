@@ -75,6 +75,8 @@ import com.openexchange.filemanagement.ManagedFileManagement;
  */
 public final class TikaImageExtractingParser implements Parser {
 
+    private static final long serialVersionUID = -8054020195071839180L;
+
     private static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(TikaImageExtractingParser.class));
 
@@ -172,7 +174,6 @@ public final class TikaImageExtractingParser implements Parser {
         return false;
     }
 
-    @Override
     public void parse(final InputStream stream, final ContentHandler handler, final Metadata metadata) throws IOException, SAXException, TikaException {
         parse(stream, handler, metadata, new ParseContext());
     }

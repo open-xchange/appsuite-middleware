@@ -26,7 +26,6 @@ import org.apache.tika.parser.chm.core.ChmConstants;
 public class TestPmglHeader extends TestCase {
     ChmPmglHeader chmPmglHeader = null;
 
-    @Override
     public void setUp() throws Exception {
         byte[] data = TestParameters.chmData;
         chmPmglHeader = new ChmPmglHeader();
@@ -65,7 +64,6 @@ public class TestPmglHeader extends TestCase {
                 chmPmglHeader.getUnknown0008());
     }
 
-    @Override
     public void tearDown() throws Exception {
     }
 }

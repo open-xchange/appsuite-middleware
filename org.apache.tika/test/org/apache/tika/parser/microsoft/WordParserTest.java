@@ -18,6 +18,7 @@ package org.apache.tika.parser.microsoft;
 
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.util.Locale;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.sax.SAXTransformerFactory;
@@ -79,7 +80,7 @@ public class WordParserTest extends TikaTest {
     private XMLResult getXML(String filePath) throws Exception {
         InputStream input = null;
         Metadata metadata = new Metadata();
-
+        
         StringWriter sw = new StringWriter();
         SAXTransformerFactory factory = (SAXTransformerFactory)
                  SAXTransformerFactory.newInstance();
@@ -133,7 +134,7 @@ public class WordParserTest extends TikaTest {
         assertTrue(xml.contains("<a href=\"http://tika.apache.org/\">Tika</a>"));
         // Paragraphs with other styles
         assertTrue(xml.contains("<p class=\"signature\">This one"));
-
+        
         // Try with a document that contains images
         xml = getXML("/test-documents/testWORD_3imgs.doc").xml;
 
@@ -141,7 +142,7 @@ public class WordParserTest extends TikaTest {
         assertTrue("Image not found in:\n"+xml, xml.contains("src=\"embedded:image1.png\""));
         assertTrue("Image not found in:\n"+xml, xml.contains("src=\"embedded:image2.jpg\""));
         assertTrue("Image not found in:\n"+xml, xml.contains("src=\"embedded:image3.png\""));
-
+            
         // Text too
         assertTrue(xml.contains("<p>The end!"));
 
@@ -157,7 +158,7 @@ public class WordParserTest extends TikaTest {
         // TIKA-692: test document containing multiple
         // character runs within a bold tag:
         xml = getXML("/test-documents/testWORD_bold_character_runs2.doc").xml;
-
+            
         // Make sure bold text arrived as single
         // contiguous string even though Word parser
         // handled this as 3 character runs
@@ -202,8 +203,7 @@ public class WordParserTest extends TikaTest {
         assertContains("This is a footnote.", content);
         assertContains("This is the header text.", content);
         assertContains("This is the footer text.", content);
-        // TODO: WordExtractor misses this
-        //assertContains("Here is a text box", content);
+        assertContains("Here is a text box", content);
         assertContains("Bold", content);
         assertContains("italic", content);
         assertContains("underline", content);
@@ -252,5 +252,39 @@ public class WordParserTest extends TikaTest {
         assertContains("And then some Gothic text:", content);
         assertContains("\uD800\uDF32\uD800\uDF3f\uD800\uDF44\uD800\uDF39\uD800\uDF43\uD800\uDF3A", content);
     }
-
+    
+    /**
+     * Ensures that custom OLE2 (HPSF) properties are extracted
+     */
+    public void testCustomProperties() throws Exception {
+       InputStream input = WordParserTest.class.getResourceAsStream(
+             "/test-documents/testWORD_custom_props.doc");
+       Metadata metadata = new Metadata();
+       
+       try {
+          ContentHandler handler = new BodyContentHandler(-1);
+          ParseContext context = new ParseContext();
+          context.set(Locale.class, Locale.US);
+          new OfficeParser().parse(input, handler, metadata, context);
+       } finally {
+          input.close();
+       }
+       
+       assertEquals("application/msword",   metadata.get(Metadata.CONTENT_TYPE));
+       assertEquals("EJ04325S",             metadata.get(Metadata.AUTHOR));
+       assertEquals("Etienne Jouvin",       metadata.get(Metadata.LAST_AUTHOR));
+       assertEquals("2012-01-03T22:14:00Z", metadata.get(Metadata.LAST_SAVED));
+       assertEquals("2010-10-05T09:03:00Z", metadata.get(Metadata.CREATION_DATE));
+       assertEquals("Microsoft Office Word",metadata.get(Metadata.APPLICATION_NAME));
+       assertEquals("1",                    metadata.get(Metadata.PAGE_COUNT));
+       assertEquals("2",                    metadata.get(Metadata.WORD_COUNT));
+       assertEquals("My Title",             metadata.get(Metadata.TITLE));
+       assertEquals("My Keyword",           metadata.get(Metadata.KEYWORDS));
+       assertEquals("Normal.dotm",          metadata.get(Metadata.TEMPLATE));
+       assertEquals("My Comments",          metadata.get(Metadata.COMMENTS));
+       assertEquals("My subject",           metadata.get(Metadata.SUBJECT));
+       assertEquals("EDF-DIT",              metadata.get(Metadata.COMPANY));
+       assertEquals("MyStringValue",        metadata.get("custom:MyCustomString"));
+       assertEquals("2010-12-30T23:00:00Z", metadata.get("custom:MyCustomDate"));
+    }
 }
