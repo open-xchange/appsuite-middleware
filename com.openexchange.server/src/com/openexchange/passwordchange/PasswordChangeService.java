@@ -60,6 +60,9 @@ import org.osgi.service.event.EventAdmin;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.LoginInfo;
 import com.openexchange.authentication.service.Authentication;
+import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheKey;
+import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -206,7 +209,8 @@ public abstract class PasswordChangeService {
         /*
          * Invalidate user cache
          */
-        UserStorage.getInstance().invalidateUser(event.getContext(), session.getUserId());
+        final int userId = session.getUserId();
+        UserStorage.getInstance().invalidateUser(event.getContext(), userId);
         /*
          * Update password in session
          */
@@ -221,14 +225,37 @@ public abstract class PasswordChangeService {
             throw e;
         }
         final EventAdmin eventAdmin = ServerServiceRegistry.getInstance().getService(EventAdmin.class);
+        final int contextId = session.getContextId();
         if (null != eventAdmin) {
             final Map<String, Object> properties = new HashMap<String, Object>(5);
-            properties.put("com.openexchange.passwordchange.contextId", Integer.valueOf(session.getContextId()));
-            properties.put("com.openexchange.passwordchange.userId", Integer.valueOf(session.getUserId()));
+            properties.put("com.openexchange.passwordchange.contextId", Integer.valueOf(contextId));
+            properties.put("com.openexchange.passwordchange.userId", Integer.valueOf(userId));
             properties.put("com.openexchange.passwordchange.session", session);
             properties.put("com.openexchange.passwordchange.oldPassword", event.getOldPassword());
             properties.put("com.openexchange.passwordchange.newPassword", event.getNewPassword());
             eventAdmin.postEvent(new Event("com/openexchange/passwordchange", properties));
+        }
+        /*
+         * Invalidate caches manually
+         */
+        final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        if (null != cacheService) {
+            try {
+                final CacheKey key = cacheService.newCacheKey(contextId, userId);
+                Cache jcs = cacheService.getCache("User");
+                jcs.remove(key);
+
+                jcs = cacheService.getCache("UserConfiguration");
+                jcs.remove(key);
+
+                jcs = cacheService.getCache("UserSettingMail");
+                jcs.remove(key);
+
+                jcs = cacheService.getCache("MailAccount");
+                jcs.invalidateGroup(Integer.toString(contextId));
+            } catch (final OXException e) {
+                // Ignore
+            }
         }
     }
 
