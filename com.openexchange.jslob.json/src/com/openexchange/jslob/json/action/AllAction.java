@@ -72,7 +72,7 @@ import com.openexchange.server.ServiceLookup;
     , description = "Gets all JSlobs associated with the current user and context." 
     , method = RequestMethod.GET
     , parameters = {
-        @Parameter(name = "serviceId", description = "Identifier for the JSLobService lookup in the JSlobServiceRegistry.", optional=true)
+        @Parameter(name = "serviceId", description = "Optional identifier for the JSlob. Default is <tt>com.openexchange.jslob.config</tt>", optional=true)
     }
 )
 public final class AllAction extends JSlobAction {

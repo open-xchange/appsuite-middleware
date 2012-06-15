@@ -1788,13 +1788,6 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         /*
          * Check, if folder has subfolders
          */
-        if (!delFolder.hasSubfolders()) {
-            deleteableIDs.put(folderID, null);
-            return;
-        }
-        /*
-         * No subfolders detected
-         */
         final TIntList subfolders = OXFolderSQL.getSubfolderIDs(delFolder.getObjectID(), readCon, ctx);
         if (subfolders.isEmpty()) {
             deleteableIDs.put(folderID, null);

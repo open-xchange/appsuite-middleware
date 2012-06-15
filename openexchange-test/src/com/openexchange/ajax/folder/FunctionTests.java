@@ -101,10 +101,9 @@ public class FunctionTests extends AbstractAJAXSession {
         GetResponse response = client.execute(new UnknownActionRequest(EnumAPI.OX_OLD, FolderObject.SYSTEM_PUBLIC_FOLDER_ID, false));
         assertTrue("JSON response should contain an error message.", response.hasError());
         OXException exception = response.getException();
-        String error = exception.getMessage(); //was: getOrigMessage, maybe it should be .getCause().getMessage()?
+        String error = exception.getErrorCode(); //was: getOrigMessage, maybe it should be .getCause().getMessage()?
         assertTrue(
-            "Error is not the expected one: \"" + error + "\"",
-            error.equals("Action \"unknown\" NOT supported via GET on /ajax/folders") || error.equals("Unknown AJAX action: %s."));
+            "Error is not the expected one: \"" + error + "\"", error.equals("SVL-0001"));
     }
 
     private class UnknownActionRequest extends GetRequest {
@@ -187,7 +186,9 @@ public class FunctionTests extends AbstractAJAXSession {
             };
             {
                 FolderObject folder = Create.folder(child01.getObjectID(), "NonDeleteableSubChild01", FolderObject.CALENDAR, FolderObject.PUBLIC, perms);
-                InsertResponse response = client.execute(new InsertRequest(EnumAPI.OX_NEW, folder));
+                folder.setCreator(secId);
+                folder.setCreatedBy(secId);
+                InsertResponse response = client2.execute(new InsertRequest(EnumAPI.OX_NEW, folder));
                 GetResponse response2 = client.execute(new GetRequest(EnumAPI.OX_NEW, response.getId()));
                 subChild01 = response2.getFolder();
                 subChild01.setLastModified(response2.getTimestamp());

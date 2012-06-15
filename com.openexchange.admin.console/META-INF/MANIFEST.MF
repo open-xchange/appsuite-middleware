@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Open-Xchange Admin library bundle
+Bundle-Name: Open-Xchange Admin console bundle
 Bundle-SymbolicName: com.openexchange.admin.console
 Bundle-Version: 6.21.0
 Bundle-Vendor: Open-Xchange Inc.

@@ -76,7 +76,7 @@ public class DailyRecurrenceTest extends AbstractRecurrenceTest {
 		final Occurrence occurrence = getOccurrenceByPosition(occurrenceArray, 32);
 		assertOccurrence(32, simpleDateFormat.parse("2007-04-01 08:00:00"), simpleDateFormat.parse("2007-04-01 10:00:00"), occurrence, timeZone);
 
-		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
 	}
 
 	public void testFullTimeDailyRecurrenceFromWinter2SummerTime() throws Exception {
@@ -135,7 +135,7 @@ public class DailyRecurrenceTest extends AbstractRecurrenceTest {
 		final Occurrence occurrence = getOccurrenceByPosition(occurrenceArray, 32);
 		assertOccurrence(32, simpleDateFormatUTC.parse("2007-04-01 00:00:00"), simpleDateFormatUTC.parse("2007-04-02 00:00:00"), occurrence, timeZone);
 
-		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
 	}
 
 	public void testDailyRecurrenceFromSummer2WinterTime() throws Exception {
@@ -193,7 +193,7 @@ public class DailyRecurrenceTest extends AbstractRecurrenceTest {
 		final Occurrence occurrence = getOccurrenceByPosition(occurrenceArray, 32);
 		assertOccurrence(32, simpleDateFormat.parse("2007-11-01 08:00:00"), simpleDateFormat.parse("2007-11-01 10:00:00"), occurrence);
 
-		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
 	}
 
 	public void testFullTimeDailyRecurrenceFromSummer2WinterTime() throws Exception {
@@ -252,7 +252,7 @@ public class DailyRecurrenceTest extends AbstractRecurrenceTest {
 		final Occurrence occurrence = getOccurrenceByPosition(occurrenceArray, 32);
 		assertOccurrence(32, simpleDateFormatUTC.parse("2007-11-01 00:00:00"), simpleDateFormatUTC.parse("2007-11-02 00:00:00"), occurrence);
 
-		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
 	}
 }
 

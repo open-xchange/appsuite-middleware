@@ -59,7 +59,7 @@ import com.openexchange.dav.ThrowableHolder;
 import com.openexchange.dav.carddav.CardDAVTest;
 import com.openexchange.dav.carddav.UserAgents;
 import com.openexchange.dav.carddav.VCardResource;
-import com.openexchange.dav.carddav.reports.SyncCollectionResponse;
+import com.openexchange.dav.reports.SyncCollectionResponse;
 import com.openexchange.groupware.container.Contact;
 
 /**
@@ -74,7 +74,7 @@ public class UpgradeTest extends CardDAVTest {
 	}
 
 	public void testUpgradeWithGAB_10_6() throws Throwable {
-		super.getCardDAVClient().setUserAgent(UserAgents.MACOS_10_6_8);
+		super.getWebDAVClient().setUserAgent(UserAgents.MACOS_10_6_8);
 		/*
 		 * assume the following uids from previous syncs
 		 */
@@ -179,7 +179,7 @@ public class UpgradeTest extends CardDAVTest {
 	}
 	
 	public void testUpgradeWithGAB_10_7() throws Throwable {
-		super.getCardDAVClient().setUserAgent(UserAgents.MACOS_10_7_2);
+		super.getWebDAVClient().setUserAgent(UserAgents.MACOS_10_7_2);
 		/*
 		 * fetch a sync token
 		 */

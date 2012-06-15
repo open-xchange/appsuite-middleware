@@ -50,6 +50,7 @@
 package com.openexchange.groupware.update.internal;
 
 import org.apache.commons.logging.Log;
+
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.UpdateTaskV2;
@@ -321,7 +322,7 @@ public final class InternalList {
      */
     private static final UpdateTaskV2[] TASKS = new UpdateTaskV2[] {
         // Renames "Unified Mail" to "Unified Mail"
-        new com.openexchange.groupware.update.tasks.UnifiedInboxRenamerTask(),
+        new com.openexchange.groupware.update.tasks.UnifiedINBOXRenamerTask(),
 
         // Creates necessary tables for mail header cache
         new com.openexchange.groupware.update.tasks.HeaderCacheCreateTableTask(),
@@ -451,6 +452,9 @@ public final class InternalList {
 
         // Creates indexes on tables "prg_dlist" and "del_dlist" to improve look-up.
         new com.openexchange.groupware.update.tasks.DListAddIndexForLookup(),
+
+        // Add 'filename' column to appointment tables.
+        new com.openexchange.groupware.update.tasks.AppointmentAddFilenameColumnTask()
 
     };
 }

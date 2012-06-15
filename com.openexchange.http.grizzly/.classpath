@@ -4,6 +4,7 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="lib" path="lib/grizzly-http-2.2.5.jar" sourcepath="/home/marens/Development/git/grizzly~git/modules/http/target/grizzly-http-2.2.5-sources.jar"/>
 	<classpathentry kind="lib" path="lib/grizzly-http-server-2.2.5.jar" sourcepath="/home/marens/Development/git/grizzly~git/modules/http-server/target/grizzly-http-server-2.2.5-sources.jar">
 		<attributes>
@@ -18,5 +19,6 @@
 	<classpathentry kind="lib" path="lib/grizzly-websockets-2.2.5.jar"/>
 	<classpathentry kind="lib" path="lib/management-api-3.0.0-b012.jar"/>
 	<classpathentry kind="lib" path="lib/servlet-api-2.5.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.test"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

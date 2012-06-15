@@ -73,6 +73,6 @@ public interface TemplateService {
 
     public List<String> getTemplateNames(Session session, String... filter) throws OXException;
     
-    public TemplatingHelper createHelper(Object rootObject, Session session);
+    public TemplatingHelper createHelper(Object rootObject, Session session, boolean craeatCopy);
 
 }

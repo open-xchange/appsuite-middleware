@@ -72,7 +72,7 @@ public class Bug10760Test extends AbstractRecurrenceTest {
     protected void tearDown() throws Exception {
         super.tearDown();
         if(objectId != -1){
-            deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+            deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
         }
     }
 

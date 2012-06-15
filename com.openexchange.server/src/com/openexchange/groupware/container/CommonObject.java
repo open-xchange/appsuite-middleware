@@ -112,6 +112,8 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
 
     public static final int LAST_MODIFIED_OF_NEWEST_ATTACHMENT = 105;
     
+    public static final int FILENAME = 106;
+
     public static final int UID = 223;
 
     protected Marker marker;
@@ -132,6 +134,8 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
 
 	protected String uid;
 
+	protected String filename;
+	
     protected boolean b_personal_folder_id;
 
     protected boolean b_number_of_attachments;
@@ -147,6 +151,8 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
     protected boolean bLabel;
 
 	protected boolean b_uid;
+
+	protected boolean b_filename;
 
     /**
      * Initializes a new {@link CommonObject}.
@@ -196,6 +202,10 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
 
     public String getUid() {
         return uid;
+    }
+
+    public String getFilename() {
+        return filename;
     }
 
     // SET METHODS
@@ -248,6 +258,11 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
 		b_uid = true;
 	}
 
+	public void setFilename(String filename) {
+		this.filename = filename;
+		b_filename = true;
+	}
+
     // REMOVE METHODS
     public void removeCategories() {
         categories = null;
@@ -289,6 +304,11 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
         b_uid = false;
     }
 
+    public void removeFilename() {
+        filename = null;
+        b_filename = false;
+    }
+
     // CONTAINS METHODS
     public boolean containsCategories() {
         return b_categories;
@@ -322,6 +342,10 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
         return b_uid;
     }
 
+    public boolean containsFilename() {
+        return b_filename;
+    }
+
     @Override
     public void reset() {
         super.reset();
@@ -333,6 +357,7 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
         categories = null;
         label = 0;
         uid = null;
+        filename = null;
 
         b_personal_folder_id = false;
         b_number_of_attachments = false;
@@ -341,6 +366,7 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
         b_categories = false;
         bLabel = false;
         b_uid = false;
+        b_filename = false;
     }
 
     @Override
@@ -383,6 +409,10 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
             differingFields.add(I(UID));
         }
 
+        if ((!containsFilename() && other.containsFilename()) || (containsFilename() && other.containsFilename() && getFilename() != other.getFilename())) {
+            differingFields.add(I(FILENAME));
+        }
+
         return differingFields;
     }
 
@@ -410,6 +440,9 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
         case UID:
             setUid((String) value);
             break;
+        case FILENAME:
+            setFilename((String) value);
+            break;
         default:
             super.set(field, value);
 
@@ -433,6 +466,8 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
             return B(getPrivateFlag());
         case UID:
             return getUid();
+        case FILENAME:
+            return getFilename();
         default:
             return super.get(field);
 
@@ -456,6 +491,8 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
             return containsPrivateFlag();
         case UID:
             return containsUid();
+        case FILENAME:
+            return containsFilename();
         default:
             return super.contains(field);
 
@@ -485,6 +522,9 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
             break;
         case UID:
             removeUid();
+            break;
+        case FILENAME:
+            removeFilename();
             break;
         default:
             super.remove(field);

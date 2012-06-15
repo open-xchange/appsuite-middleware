@@ -55,7 +55,7 @@ public class FreeBusyTest extends AppointmentTest {
 
 		assertTrue("appointment with id " + objectId + " not found in free busy response!", found);
 
-		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
 	}
 
 	public void testFullTimeUserParticipant() throws Exception {
@@ -96,7 +96,7 @@ public class FreeBusyTest extends AppointmentTest {
 
 		assertTrue("appointment with id " + objectId + " not found in free busy response!", found);
 
-		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
 	}
 
 	public void testUserParticipantStatusFree() throws Exception {
@@ -129,7 +129,7 @@ public class FreeBusyTest extends AppointmentTest {
 
 		assertTrue("appointment with id " + objectId + " was found in free busy response!", found);
 
-		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
 	}
 
 	public void testResourceParticipantStatusFree() throws Exception {
@@ -189,7 +189,7 @@ public class FreeBusyTest extends AppointmentTest {
 
 		assertTrue("appointment with id " + objectId + " was found in free busy response!", found);
 
-		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
 	}
 }
 

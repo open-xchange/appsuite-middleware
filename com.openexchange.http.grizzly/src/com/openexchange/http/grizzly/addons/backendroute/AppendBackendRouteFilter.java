@@ -174,21 +174,16 @@ public class AppendBackendRouteFilter extends BaseFilter {
         }
         MimeHeaders requestMimeHeaders = httpRequestPacket.getHeaders();
         if (requestMimeHeaders.contains(Header.Cookie)) {
-            ClientCookieInspector clientCookieInspector = new ClientCookieInspector(requestMimeHeaders.getHeader(Header.Cookie), backendRoute);
+            ClientCookieInspector clientCookieInspector = new ClientCookieInspector(httpRequestPacket, backendRoute);
             if (clientCookieInspector.isJSessionIdExistant() && !clientCookieInspector.isJSessionIdValid()) {
-                writeToDebugLog(new StringBuilder("JSessionId is invalid: ").append(clientCookieInspector.getJSessionId()).toString());
+                writeToDebugLog(new StringBuilder("JSessionId is invalid: ").append(clientCookieInspector.getJSessionIdValue()).toString());
                 clientCookieInspector.fixJSessionId();
-                writeToDebugLog(new StringBuilder("Fixed JSessionId is: ").append(clientCookieInspector.getJSessionId()).toString());
-                
-                //fix request 
-//                requestMimeHeaders.removeHeader(Header.Cookie);
-//                ByteBufferWrapper cookieHeaderLine = clientCookieInspector.getCookieHeaderLine();
-//                requestMimeHeaders.addValue(Header.Cookie).setBuffer(cookieHeaderLine);
+                writeToDebugLog(new StringBuilder("Fixed JSessionId is: ").append(clientCookieInspector.getJSessionIdValue()).toString());
                 
                 //fix response
                 HttpResponsePacket httpResponsePacket = httpRequestPacket.getResponse();
                 ServerCookieInspector serverCookieInspector = new ServerCookieInspector(httpResponsePacket, backendRoute);
-                String fixedJSessionId = clientCookieInspector.getJSessionId();
+                String fixedJSessionId = clientCookieInspector.getJSessionIdValue();
                 serverCookieInspector.setJSessionIDCookieValue(fixedJSessionId);
                 ByteBufferWrapper setJSessionIdCookieHeader = serverCookieInspector.getSetJSessionIdCookieHeader();
                 MimeHeaders responseMimeHeaders = httpResponsePacket.getHeaders();

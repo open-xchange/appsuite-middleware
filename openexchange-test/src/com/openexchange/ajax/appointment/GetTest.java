@@ -91,7 +91,7 @@ public class GetTest extends AppointmentTest {
         appointmentObj.setObjectID(objectId);
         compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
 
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
     public void testGetWithParticipants() throws Exception {
@@ -115,7 +115,7 @@ public class GetTest extends AppointmentTest {
         appointmentObj.setObjectID(objectId);
         compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
 
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
     public void testGetWithAllFields() throws Exception {
@@ -161,7 +161,7 @@ public class GetTest extends AppointmentTest {
         appointmentObj.setObjectID(objectId);
         compareObject(appointmentObj, loadAppointment, newStartTime, newEndTime);
 
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
     public void testGetWithAllFieldsOnUpdate() throws Exception {
@@ -214,7 +214,7 @@ public class GetTest extends AppointmentTest {
         appointmentObj.setParentFolderID(appointmentFolderId);
         compareObject(appointmentObj, loadAppointment, newStartTime, newEndTime);
 
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
     // Node 2652
@@ -235,7 +235,7 @@ public class GetTest extends AppointmentTest {
             assertTrue(appointment.has("last_modified_utc"));
 
         } finally {
-            deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId());
+            deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId(), false);
         }
     }
 }

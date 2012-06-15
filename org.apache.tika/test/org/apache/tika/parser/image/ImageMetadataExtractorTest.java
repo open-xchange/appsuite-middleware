@@ -34,37 +34,37 @@ import junit.framework.TestCase;
 import static org.mockito.Mockito.*;
 
 public class ImageMetadataExtractorTest extends TestCase {
-
+    
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public void testHandleDirectories() throws MetadataException {
         Metadata metadata = mock(Metadata.class);
         ImageMetadataExtractor.DirectoryHandler handler1 = mock(ImageMetadataExtractor.DirectoryHandler.class);
         ImageMetadataExtractor e = new ImageMetadataExtractor(metadata, handler1);
-
+        
         Directory directory = new JpegCommentDirectory();
         Iterator directories = mock(Iterator.class);
         when(directories.hasNext()).thenReturn(true, false);
         when(directories.next()).thenReturn(directory);
         when(handler1.supports(JpegCommentDirectory.class)).thenReturn(true);
-
+        
         e.handle(directories);
         verify(handler1).supports(JpegCommentDirectory.class);
         verify(handler1).handle(directory, metadata);
     }
-
+    
     public void testExifHandlerSupports() {
         assertTrue(new ImageMetadataExtractor.ExifHandler().supports(ExifDirectory.class));
         assertFalse(new ImageMetadataExtractor.ExifHandler().supports(Directory.class));
         assertFalse(new ImageMetadataExtractor.ExifHandler().supports(JpegCommentDirectory.class));
     }
-
+    
     public void testExifHandlerParseDate() throws MetadataException {
         ExifDirectory exif = mock(ExifDirectory.class);
         when(exif.containsTag(ExifDirectory.TAG_DATETIME_ORIGINAL)).thenReturn(true);
         when(exif.getDate(ExifDirectory.TAG_DATETIME_ORIGINAL)).thenReturn(
                 new GregorianCalendar(2000, 0, 1, 0, 0, 0).getTime()); // jvm default timezone as in Metadata Extractor
         Metadata metadata = new Metadata();
-
+        
         new ImageMetadataExtractor.ExifHandler().handle(exif, metadata);
         assertEquals("Should be ISO date without time zone", "2000-01-01T00:00:00", metadata.get(DublinCore.DATE));
     }
@@ -75,22 +75,22 @@ public class ImageMetadataExtractorTest extends TestCase {
         when(exif.getDate(ExifDirectory.TAG_DATETIME)).thenReturn(
                 new GregorianCalendar(1999, 0, 1, 0, 0, 0).getTime()); // jvm default timezone as in Metadata Extractor
         Metadata metadata = new Metadata();
-
+        
         new ImageMetadataExtractor.ExifHandler().handle(exif, metadata);
         assertEquals("Should try EXIF Date/Time if Original is not set", "1999-01-01T00:00:00", metadata.get(DublinCore.DATE));
     }
-
+    
     public void testExifHandlerParseDateError() throws MetadataException {
         ExifDirectory exif = mock(ExifDirectory.class);
         when(exif.containsTag(ExifDirectory.TAG_DATETIME_ORIGINAL)).thenReturn(true);
         when(exif.getDate(ExifDirectory.TAG_DATETIME_ORIGINAL)).thenThrow(
                 new MetadataException("Tag 'X' cannot be cast to a java.util.Date."));
         Metadata metadata = new Metadata();
-
+        
         new ImageMetadataExtractor.ExifHandler().handle(exif, metadata);
         assertEquals("Parsing should proceed without date", null, metadata.get(DublinCore.DATE));
     }
-
+    
     public void testCopyUnknownFieldsHandler() throws MetadataException {
         Directory d = mock(Directory.class);
         Tag t1 = mock(Tag.class);
@@ -111,5 +111,5 @@ public class ImageMetadataExtractorTest extends TestCase {
                 metadata.get(Metadata.KEYWORDS));
         assertNull(metadata.get(Metadata.DESCRIPTION));
     }
-
+    
 }

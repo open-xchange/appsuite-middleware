@@ -40,9 +40,17 @@ public class DcXMLParserTest extends TestCase {
                     metadata.get(Metadata.CONTENT_TYPE));
             assertEquals("Tika test document", metadata.get(Metadata.TITLE));
             assertEquals("Rida Benjelloun", metadata.get(Metadata.CREATOR));
-            assertEquals(
-                    "Java, XML, XSLT, JDOM, Indexation",
-                    metadata.get(Metadata.SUBJECT));
+            
+            // The file contains 5 dc:subject tags, which come through as
+            //  a multi-valued Tika Metadata entry in file order
+            assertEquals(true, metadata.isMultiValued(Metadata.SUBJECT));
+            assertEquals(5,      metadata.getValues(Metadata.SUBJECT).length);
+            assertEquals("Java", metadata.getValues(Metadata.SUBJECT)[0]);
+            assertEquals("XML",  metadata.getValues(Metadata.SUBJECT)[1]);
+            assertEquals("XSLT", metadata.getValues(Metadata.SUBJECT)[2]);
+            assertEquals("JDOM", metadata.getValues(Metadata.SUBJECT)[3]);
+            assertEquals("Indexation", metadata.getValues(Metadata.SUBJECT)[4]);
+
             assertEquals(
                     "Framework d\'indexation des documents XML, HTML, PDF etc..",
                     metadata.get(Metadata.DESCRIPTION));
@@ -56,19 +64,19 @@ public class DcXMLParserTest extends TestCase {
 
             String content = handler.toString();
             assertTrue(content.contains("Tika test document"));
-
+            
             assertEquals("2000-12-01T00:00:00.000Z", metadata.get(Metadata.DATE));
         } finally {
             input.close();
         }
     }
-
+    
     public void testXMLParserNonAsciiChars() throws Exception {
         InputStream input = DcXMLParserTest.class.getResourceAsStream("/test-documents/testXML.xml");
         try {
             Metadata metadata = new Metadata();
             new DcXMLParser().parse(input, new DefaultHandler(), metadata);
-
+            
             final String expected = "Archim\u00E8de et Lius \u00E0 Ch\u00E2teauneuf testing chars en \u00E9t\u00E9";
             assertEquals(expected,metadata.get(Metadata.RIGHTS));
         } finally {

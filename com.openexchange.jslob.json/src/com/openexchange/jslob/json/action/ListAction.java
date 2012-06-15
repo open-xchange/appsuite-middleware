@@ -75,7 +75,7 @@ import com.openexchange.server.ServiceLookup;
     , description = "Get a list of JSlobs associated with the current user and context." 
     , method = RequestMethod.PUT
     , parameters = {
-        @Parameter(name = "serviceId", description = "Identifier for the JSLobService lookup in the JSlobServiceRegistry.", optional=true)
+        @Parameter(name = "serviceId", description = "Optional identifier for the JSlob. Default is <tt>com.openexchange.jslob.config</tt>", optional=true)
     }
     , requestBody = "An array containing JSlob identifiers."
     , responseDescription = "An array containing JSlobs."

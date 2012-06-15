@@ -79,7 +79,7 @@ public class HtmlParserTest extends TestCase {
                 "Title : Test Indexation Html", metadata.get(Metadata.TITLE));
         assertEquals("Tika Developers", metadata.get("Author"));
         assertEquals("5", metadata.get("refresh"));
-
+        
         assertEquals("51.2312", metadata.get(Geographic.LATITUDE));
         assertEquals("-5.1987", metadata.get(Geographic.LONGITUDE));
 
@@ -391,21 +391,21 @@ public class HtmlParserTest extends TestCase {
      */
     public void testBoilerplateRemoval() throws Exception {
         String path = "/test-documents/boilerplate.html";
-
+        
         Metadata metadata = new Metadata();
         BodyContentHandler handler = new BodyContentHandler();
         new HtmlParser().parse(
                 HtmlParserTest.class.getResourceAsStream(path),
                 new BoilerpipeContentHandler(handler),  metadata, new ParseContext());
-
+        
         String content = handler.toString();
         assertTrue(content.startsWith("This is the real meat"));
         assertTrue(content.endsWith("This is the end of the text.\n"));
         assertFalse(content.contains("boilerplate"));
         assertFalse(content.contains("footer"));
     }
-
-
+    
+    
     /**
      * Test case for TIKA-478. Don't emit <head> sub-elements inside of <body>.
      * @see <a href="https://issues.apache.org/jira/browse/TIKA-478">TIKA-478</a>
@@ -422,22 +422,22 @@ public class HtmlParserTest extends TestCase {
                 makeHtmlTransformer(sw), new Metadata(), new ParseContext());
 
         String result = sw.toString();
-
+        
         // Title element in <head> section
         assertTrue(Pattern.matches("(?s)<html.*<head>.*<title>Title</title>.*</head>.*$", result));
 
         // No meta elements in body
         assertFalse(Pattern.matches("(?s).*<body>.*<meta. *</body>.*$", result));
-
+        
         // meta elements should show up in <head> section
         assertTrue(Pattern.matches("(?s)<html.*<head>.*<meta .*</head>.*$", result));
-
+        
         // No link elements in body
         assertFalse(Pattern.matches("(?s).*<body>.*<link .*</body>.*$", result));
-
+        
         // link element should be in <head> section
         assertTrue(Pattern.matches("(?s)<html.*<head>.*<link .*</head>.*$", result));
-
+        
         // There should be ending elements.
         assertTrue(Pattern.matches("(?s).*</body>.*</html>$", result));
 
@@ -458,7 +458,7 @@ public class HtmlParserTest extends TestCase {
                 makeHtmlTransformer(sw), new Metadata(), new ParseContext());
 
         String result = sw.toString();
-
+        
         // <img> tag should exist, with fully resolved URL
         assertTrue(Pattern.matches("(?s).*src=\"http://domain.com/image.jpg\".*$", result));
     }
@@ -478,7 +478,7 @@ public class HtmlParserTest extends TestCase {
                 makeHtmlTransformer(sw), new Metadata(), new ParseContext());
 
         String result = sw.toString();
-
+        
         // <frame> tag should exist, with fully resolved URL
         assertTrue(Pattern.matches("(?s).*<frame .* src=\"http://domain.com/frame.html\"/>.*$", result));
     }
@@ -499,7 +499,7 @@ public class HtmlParserTest extends TestCase {
                 makeHtmlTransformer(sw), new Metadata(), new ParseContext());
 
         String result = sw.toString();
-
+        
         // <iframe> tag should exist, with fully resolved URL
         assertTrue(Pattern.matches("(?s).*<iframe .* src=\"http://domain.com/framed.html\".*$", result));
     }
@@ -521,7 +521,7 @@ public class HtmlParserTest extends TestCase {
                 makeHtmlTransformer(sw), new Metadata(), new ParseContext());
 
         String result = sw.toString();
-
+        
         // <map> tag should exist, with <area> tag with fully resolved URL
         assertTrue(Pattern.matches("(?s).*<map .*<area .* href=\"http://domain.com/map.html\".*</map>.*$", result));
     }
@@ -543,7 +543,7 @@ public class HtmlParserTest extends TestCase {
                 makeHtmlTransformer(sw), new Metadata(), new ParseContext());
 
         String result = sw.toString();
-
+        
         // <object> tag should exist with fully resolved URLs
         assertTrue(
               "<object> tag not correctly found in:\n" + result,
@@ -561,14 +561,14 @@ public class HtmlParserTest extends TestCase {
         Metadata metadata = new Metadata();
         metadata.add("Content-Type", "text/html; charset=utf-8");
         metadata.add("Language", null);
-
+        
         StringWriter sw = new StringWriter();
         new HtmlParser().parse(
                 new ByteArrayInputStream(test.getBytes("UTF-8")),
                 makeHtmlTransformer(sw), metadata, new ParseContext());
 
         String result = sw.toString();
-
+        
         // <meta> tag for Content-Type should exist, but nothing for Language
         assertTrue(Pattern.matches("(?s).*<meta name=\"Content-Type\" content=\"text/html; charset=utf-8\"/>.*$", result));
         assertFalse(Pattern.matches("(?s).*<meta name=\"Language\".*$", result));
@@ -589,10 +589,10 @@ public class HtmlParserTest extends TestCase {
                 makeHtmlTransformer(sw1), new Metadata(), new ParseContext());
 
         String result = sw1.toString();
-
+        
         // <frame> tag should exist, with fully resolved URL
         assertTrue(Pattern.matches("(?s).*<frame .* src=\"http://domain.com/frame.html\"/>.*$", result));
-
+        
         // <body> tag should not exist.
         assertFalse(Pattern.matches("(?s).*<body>.*$", result));
 
@@ -610,7 +610,7 @@ public class HtmlParserTest extends TestCase {
                 makeHtmlTransformer(sw2), new Metadata(), new ParseContext());
 
         result = sw2.toString();
-
+        
         // <frame> tags should exist, with relative URL (no base element specified)
         assertTrue(Pattern.matches("(?s).*<frame .* src=\"top.html\"/>.*$", result));
         assertTrue(Pattern.matches("(?s).*<frame .* src=\"left.html\"/>.*$", result));
@@ -628,22 +628,22 @@ public class HtmlParserTest extends TestCase {
      */
     public void testBoilerplateDelegation() throws Exception {
         String path = "/test-documents/boilerplate.html";
-
+        
         Metadata metadata = new Metadata();
         StringWriter sw = new StringWriter();
         new HtmlParser().parse(
                 HtmlParserTest.class.getResourceAsStream(path),
                 makeHtmlTransformer(sw),  metadata, new ParseContext());
-
+        
         String content = sw.toString();
-
+        
         // Should have <html>, <head>, <title>, <body> elements
         assertTrue(Pattern.matches("(?s).*<html xmlns=\"http://www.w3.org/1999/xhtml\">.*</html>.*$", content));
         assertTrue(Pattern.matches("(?s).*<head>.*</head>.*$", content));
         assertTrue(Pattern.matches("(?s).*<title>Title</title>.*$", content));
         assertTrue(Pattern.matches("(?s).*<body>.*</body>.*$", content));
     }
-
+    
     /**
      * Test case for TIKA-481. Verify href in <link> is resolved.
      * @see <a href="https://issues.apache.org/jira/browse/TIKA-481">TIKA-481</a>
@@ -660,16 +660,16 @@ public class HtmlParserTest extends TestCase {
                 makeHtmlTransformer(sw), new Metadata(), new ParseContext());
 
         String result = sw.toString();
-
+        
         // <link> tag should exist in <head>, with fully resolved URL
         assertTrue(Pattern.matches("(?s).*<head>.*<link rel=\"next\" href=\"http://domain.com/next.html\"/>.*</head>.*$", result));
     }
-
+    
 
     /**
      * Create ContentHandler that transforms SAX events into textual HTML output,
      * and writes it out to <writer> - typically this is a StringWriter.
-     *
+     * 
      * @param writer Where to write resulting HTML text.
      * @return ContentHandler suitable for passing to parse() methods.
      * @throws Exception
@@ -683,24 +683,24 @@ public class HtmlParserTest extends TestCase {
         handler.setResult(new StreamResult(writer));
         return handler;
     }
-
+    
     /**
      * Test case for TIKA-564. Support returning markup from BoilerpipeContentHandler.
      * @see <a href="https://issues.apache.org/jira/browse/TIKA-564">TIKA-564</a>
      */
     public void testBoilerplateWithMarkup() throws Exception {
         String path = "/test-documents/boilerplate.html";
-
+        
         Metadata metadata = new Metadata();
         StringWriter sw = new StringWriter();
         ContentHandler ch = makeHtmlTransformer(sw);
         BoilerpipeContentHandler bpch = new BoilerpipeContentHandler(ch);
         bpch.setIncludeMarkup(true);
-
+        
         new HtmlParser().parse(
                 HtmlParserTest.class.getResourceAsStream(path),
                 bpch,  metadata, new ParseContext());
-
+        
         String content = sw.toString();
         assertTrue("Has empty table elements", content.contains("<body><table><tr><td><table><tr><td>"));
         assertTrue("Has empty a element", content.contains("<a shape=\"rect\" href=\"Main.php\"/>"));

@@ -54,6 +54,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -737,6 +738,9 @@ public class IMAPDefaultFolderChecker {
                     modified.set(true);
                     return fullName;
                 } catch (final MessagingException e) {
+                    if (e.getMessage().toLowerCase(Locale.US).indexOf("quota") >= 0) {
+                        throw e;
+                    }
                     if (!retry) {
                         return fullName;
                     }
@@ -803,6 +807,9 @@ public class IMAPDefaultFolderChecker {
                     }
                     modified.set(true);
                 } catch (final MessagingException e) {
+                    if (e.getMessage().toLowerCase(Locale.US).indexOf("quota") >= 0) {
+                        throw e;
+                    }
                     final String prfx = prefixLen == 0 ? "INBOX" + sep : "";
                     LOG.warn("Creating default folder by full name \"" + fullName + "\" failed. Retry with prefix \"" + prfx + "\".", e);
                     ListLsubCache.clearCache(accountId, session);
@@ -818,6 +825,9 @@ public class IMAPDefaultFolderChecker {
                         }
                         modified.set(true);
                     } catch (final MessagingException e) {
+                        if (e.getMessage().toLowerCase(Locale.US).indexOf("quota") >= 0) {
+                            throw e;
+                        }
                         LOG.warn(
                             new StringBuilder(64).append("Creation of non-existing default IMAP folder \"").append(fullName).append(
                                 "\" failed.").toString(),

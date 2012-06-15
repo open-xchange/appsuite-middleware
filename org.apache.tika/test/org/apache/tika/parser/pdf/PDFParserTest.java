@@ -17,15 +17,21 @@
 package org.apache.tika.parser.pdf;
 
 import java.io.InputStream;
+import java.io.StringWriter;
+
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.sax.SAXTransformerFactory;
+import javax.xml.transform.sax.TransformerHandler;
+import javax.xml.transform.stream.StreamResult;
 
 import org.apache.tika.TikaTest;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
+import org.apache.tika.parser.PasswordProvider;
 import org.apache.tika.sax.BodyContentHandler;
 import org.xml.sax.ContentHandler;
-
 /**
  * Test case for parsing pdf files.
  */
@@ -48,8 +54,8 @@ public class PDFParserTest extends TikaTest {
         assertEquals("application/pdf", metadata.get(Metadata.CONTENT_TYPE));
         assertEquals("Bertrand Delacr\u00e9taz", metadata.get(Metadata.AUTHOR));
         assertEquals("Apache Tika - Apache Tika", metadata.get(Metadata.TITLE));
-
-        // Can't reliably test dates yet - see TIKA-451
+        
+        // Can't reliably test dates yet - see TIKA-451 
 //        assertEquals("Sat Sep 15 10:02:31 BST 2007", metadata.get(Metadata.CREATION_DATE));
 //        assertEquals("Sat Sep 15 10:02:31 BST 2007", metadata.get(Metadata.LAST_MODIFIED));
 
@@ -59,9 +65,9 @@ public class PDFParserTest extends TikaTest {
         assertTrue(content.contains("incubator"));
         assertTrue(content.contains("Apache Software Foundation"));
         // testing how the end of one paragraph is separated from start of the next one
-        assertTrue("should have word boundary after headline",
+        assertTrue("should have word boundary after headline", 
                 !content.contains("ToolkitApache"));
-        assertTrue("should have word boundary between paragraphs",
+        assertTrue("should have word boundary between paragraphs", 
                 !content.contains("libraries.Apache"));
     }
 
@@ -82,17 +88,17 @@ public class PDFParserTest extends TikaTest {
         assertEquals("application/pdf", metadata.get(Metadata.CONTENT_TYPE));
         assertEquals("Document author", metadata.get(Metadata.AUTHOR));
         assertEquals("Document title", metadata.get(Metadata.TITLE));
-
+        
         assertEquals("Custom Value", metadata.get("Custom Property"));
         assertEquals("Array Entry 1", metadata.get("Custom Array"));
         assertEquals(2, metadata.getValues("Custom Array").length);
         assertEquals("Array Entry 1", metadata.getValues("Custom Array")[0]);
         assertEquals("Array Entry 2", metadata.getValues("Custom Array")[1]);
-
+        
         String content = handler.toString();
         assertTrue(content.contains("Hello World!"));
     }
-
+    
     /**
      * PDFs can be "protected" with the default password. This means
      *  they're encrypted (potentially both text and metadata),
@@ -118,6 +124,35 @@ public class PDFParserTest extends TikaTest {
        assertEquals("Rethinking the Financial Network, Speech by Andrew G Haldane, Executive Director, Financial Stability delivered at the Financial Student Association, Amsterdam on 28 April 2009", metadata.get(Metadata.TITLE));
 
        String content = handler.toString();
+       assertTrue(content.contains("RETHINKING THE FINANCIAL NETWORK"));
+       assertTrue(content.contains("On 16 November 2002"));
+       assertTrue(content.contains("In many important respects"));
+       
+       
+       // Try again with an explicit empty password
+       handler = new BodyContentHandler();
+       metadata = new Metadata();
+       
+       context = new ParseContext();
+       context.set(PasswordProvider.class, new PasswordProvider() {
+           public String getPassword(Metadata metadata) {
+              return "";
+          }
+       });
+       
+       stream = PDFParserTest.class.getResourceAsStream(
+                  "/test-documents/testPDF_protected.pdf");
+       try {
+          parser.parse(stream, handler, metadata, context);
+       } finally {
+          stream.close();
+       }
+
+       assertEquals("application/pdf", metadata.get(Metadata.CONTENT_TYPE));
+       assertEquals("The Bank of England", metadata.get(Metadata.AUTHOR));
+       assertEquals("Speeches by Andrew G Haldane", metadata.get(Metadata.SUBJECT));
+       assertEquals("Rethinking the Financial Network, Speech by Andrew G Haldane, Executive Director, Financial Stability delivered at the Financial Student Association, Amsterdam on 28 April 2009", metadata.get(Metadata.TITLE));
+
        assertTrue(content.contains("RETHINKING THE FINANCIAL NETWORK"));
        assertTrue(content.contains("On 16 November 2002"));
        assertTrue(content.contains("In many important respects"));
@@ -211,5 +246,194 @@ public class PDFParserTest extends TikaTest {
         // process somehow, apparently lost the gothic
         // chars, so we cannot test this here:
         //assertContains("\uD800\uDF32\uD800\uDF3f\uD800\uDF44\uD800\uDF39\uD800\uDF43\uD800\uDF3A", content);
+    }
+
+    public void testAnnotations() throws Exception {
+        Parser parser = new AutoDetectParser(); // Should auto-detect!
+        ContentHandler handler = new BodyContentHandler();
+        Metadata metadata = new Metadata();
+        ParseContext context = new ParseContext();
+        InputStream stream = getResourceAsStream("/test-documents/testAnnotations.pdf");
+        try {
+            parser.parse(stream, handler, metadata, context);
+        } finally {
+            stream.close();
+        }
+        String content = handler.toString();
+        content = content.replaceAll("[\\s\u00a0]+"," ");
+        assertContains("Here is some text", content);
+        assertContains("Here is a comment", content);
+
+        // Test w/ annotation text disabled:
+        PDFParser pdfParser = new PDFParser();
+        pdfParser.setExtractAnnotationText(false);
+        handler = new BodyContentHandler();
+        metadata = new Metadata();
+        context = new ParseContext();
+        stream = getResourceAsStream("/test-documents/testAnnotations.pdf");
+        try {
+            pdfParser.parse(stream, handler, metadata, context);
+        } finally {
+            stream.close();
+        }
+        content = handler.toString();
+        content = content.replaceAll("[\\s\u00a0]+"," ");
+        assertContains("Here is some text", content);
+        assertEquals(-1, content.indexOf("Here is a comment"));
+
+        // TIKA-738: make sure no extra </p> tags
+        String xml = getXML("testAnnotations.pdf").xml;
+        assertEquals(substringCount("<p>", xml),
+                     substringCount("</p>", xml));
+    }
+
+    private static int substringCount(String needle, String haystack) {
+        int upto = -1;
+        int count = 0;
+        while(true) {
+            final int next = haystack.indexOf(needle, upto);
+            if (next == -1) {
+                break;
+            }
+            count++;
+            upto = next+1;
+        }
+
+        return count;
+    }
+
+    public void testPageNumber() throws Exception {
+        final XMLResult result = getXML("testPageNumber.pdf");
+        final String content = result.xml.replaceAll("\\s+","");
+        assertContains("<p>1</p>", content);
+    }
+
+    public void testDisableAutoSpace() throws Exception {
+        PDFParser parser = new PDFParser();
+        parser.setEnableAutoSpace(false);
+        ContentHandler handler = new BodyContentHandler();
+        Metadata metadata = new Metadata();
+        ParseContext context = new ParseContext();
+        InputStream stream = getResourceAsStream("/test-documents/testExtraSpaces.pdf");
+        try {
+            parser.parse(stream, handler, metadata, context);
+        } finally {
+            stream.close();
+        }
+        String content = handler.toString();
+        content = content.replaceAll("[\\s\u00a0]+"," ");
+        // Text is correct when autoSpace is off:
+        assertContains("Here is some formatted text", content);
+
+        parser.setEnableAutoSpace(true);
+        handler = new BodyContentHandler();
+        metadata = new Metadata();
+        context = new ParseContext();
+        stream = getResourceAsStream("/test-documents/testExtraSpaces.pdf");
+        try {
+            parser.parse(stream, handler, metadata, context);
+        } finally {
+            stream.close();
+        }
+        content = handler.toString();
+        content = content.replaceAll("[\\s\u00a0]+"," ");
+        // Text is correct when autoSpace is off:
+
+        // Text has extra spaces when autoSpace is on
+        assertEquals(-1, content.indexOf("Here is some formatted text"));
+    }
+
+    public void testDuplicateOverlappingText() throws Exception {
+        PDFParser parser = new PDFParser();
+        ContentHandler handler = new BodyContentHandler();
+        Metadata metadata = new Metadata();
+        ParseContext context = new ParseContext();
+        InputStream stream = getResourceAsStream("/test-documents/testOverlappingText.pdf");
+        // Default is false (keep overlapping text):
+        try {
+            parser.parse(stream, handler, metadata, context);
+        } finally {
+            stream.close();
+        }
+        String content = handler.toString();
+        assertContains("Text the first timeText the second time", content);
+
+        parser.setSuppressDuplicateOverlappingText(true);
+        handler = new BodyContentHandler();
+        metadata = new Metadata();
+        context = new ParseContext();
+        stream = getResourceAsStream("/test-documents/testOverlappingText.pdf");
+        try {
+            parser.parse(stream, handler, metadata, context);
+        } finally {
+            stream.close();
+        }
+        content = handler.toString();
+        // "Text the first" was dedup'd:
+        assertContains("Text the first timesecond time", content);
+    }
+
+    public void testSortByPosition() throws Exception {
+        PDFParser parser = new PDFParser();
+        parser.setEnableAutoSpace(false);
+        ContentHandler handler = new BodyContentHandler();
+        Metadata metadata = new Metadata();
+        ParseContext context = new ParseContext();
+        InputStream stream = getResourceAsStream("/test-documents/testPDFTwoTextBoxes.pdf");
+        // Default is false (do not sort):
+        try {
+            parser.parse(stream, handler, metadata, context);
+        } finally {
+            stream.close();
+        }
+        String content = handler.toString();
+        content = content.replaceAll("\\s+", " ");
+        assertContains("Left column line 1 Left column line 2 Right column line 1 Right column line 2", content);
+
+        parser.setSortByPosition(true);
+        handler = new BodyContentHandler();
+        metadata = new Metadata();
+        context = new ParseContext();
+        stream = getResourceAsStream("/test-documents/testPDFTwoTextBoxes.pdf");
+        try {
+            parser.parse(stream, handler, metadata, context);
+        } finally {
+            stream.close();
+        }
+        content = handler.toString();
+        content = content.replaceAll("\\s+", " ");
+        // Column text is now interleaved:
+        assertContains("Left column line 1 Right column line 1 Left colu mn line 2 Right column line 2", content);
+    }
+
+    private static class XMLResult {
+        public final String xml;
+        public final Metadata metadata;
+
+        public XMLResult(String xml, Metadata metadata) {
+            this.xml = xml;
+            this.metadata = metadata;
+      }
+    }
+
+    private XMLResult getXML(String filename) throws Exception {
+        Metadata metadata = new Metadata();
+        Parser parser = new AutoDetectParser(); // Should auto-detect!        
+        StringWriter sw = new StringWriter();
+        SAXTransformerFactory factory = (SAXTransformerFactory)
+                 SAXTransformerFactory.newInstance();
+        TransformerHandler handler = factory.newTransformerHandler();
+        handler.getTransformer().setOutputProperty(OutputKeys.METHOD, "xml");
+        handler.getTransformer().setOutputProperty(OutputKeys.INDENT, "no");
+        handler.setResult(new StreamResult(sw));
+
+        // Try with a document containing various tables and formattings
+        InputStream input = getResourceAsStream("/test-documents/" + filename);
+        try {
+            parser.parse(input, handler, metadata, new ParseContext());
+            return new XMLResult(sw.toString(), metadata);
+        } finally {
+            input.close();
+        }
     }
 }

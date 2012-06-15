@@ -283,6 +283,7 @@ public final class folders extends XmlServlet<FolderSQLInterface> {
 
                 writeResponse(folderObject, HttpServletResponse.SC_OK, OK, clientId, os, xo);
             } catch (final OXException exc) {
+            	exc.log(LOG);
                 if (exc.isMandatory()) {
                     LOG.debug(_parsePropChilds, exc);
                     writeResponse(folderObject, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc,

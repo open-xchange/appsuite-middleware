@@ -62,7 +62,7 @@ public class Bug9089Test extends AppointmentTest {
 		loadAppointment = loadAppointment(getWebConversation(), objectId, newFolderId, timeZone, getHostName(), getSessionId());
 		modified = loadAppointment.getLastModified();
 
-		deleteAppointment(getWebConversation(), objectId, newFolderId, modified, getHostName(), getSessionId());
+		deleteAppointment(getWebConversation(), objectId, newFolderId, modified, getHostName(), getSessionId(), false);
 		FolderTest.deleteFolder(getWebConversation(), new int[] { newFolderId }, modified, getHostName(), getLogin(), getPassword(), "");
 	}
 }

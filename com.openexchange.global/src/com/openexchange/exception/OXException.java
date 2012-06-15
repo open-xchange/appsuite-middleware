@@ -842,9 +842,9 @@ public class OXException extends Exception implements OXExceptionConstants, Seri
             } catch (final NullPointerException e) {
                 msg = null;
             } catch (final MissingFormatArgumentException e) {
-                LOG.debug("Missing format argument.", e);
+                LOG.debug("Missing format argument: >>" + msg + "<<", e);
             } catch (final IllegalFormatException e) {
-                LOG.error("Illegal message format.", e);
+                LOG.error("Illegal message format: >>" + msg + "<<", e);
             }
         }
         return msg;

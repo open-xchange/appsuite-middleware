@@ -37,6 +37,6 @@ public class Bug8836Test extends AppointmentTest {
 
 		compareObject(appointmentObj, loadAppointment);
 
-		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, modified, getHostName(), getSessionId());
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, modified, getHostName(), getSessionId(), false);
 	}
 }

@@ -494,16 +494,42 @@ public final class HtmlServiceImpl implements HtmlService {
         return retval;
     }
 
-    private static final Pattern PATTERN_ACCENTS1 = Pattern.compile(Pattern.quote("\u0060"));
+    private static final Pattern PATTERN_TAG = Pattern.compile("<\\w+?[^>]*>");
 
-    private static final Pattern PATTERN_ACCENTS2 = Pattern.compile(Pattern.quote("\u00b4"));
+    private static final Pattern PATTERN_DOUBLE_ACCENTS = Pattern.compile(Pattern.quote("\u0060\u0060")+"|"+Pattern.quote("\u00b4\u00b4"));
+
+    private static final Pattern PATTERN_ACCENT1 = Pattern.compile(Pattern.quote("\u0060"));
+
+    private static final Pattern PATTERN_ACCENT2 = Pattern.compile(Pattern.quote("\u00b4"));
 
     private static String dropDoubleAccents(final String html) {
         if (null == html || (html.indexOf('\u0060') < 0 && html.indexOf('\u00b4') < 0)) {
             return html;
         }
-        String ret = PATTERN_ACCENTS1.matcher(html).replaceAll("&#96;");
-        ret = PATTERN_ACCENTS2.matcher(ret).replaceAll("&#180;");
+        final Matcher m = PATTERN_TAG.matcher(html);
+        if (!m.find()) {
+            /*
+             * No conditional comments found
+             */
+            return html;
+        }
+        int lastMatch = 0;
+        final StringBuilder sb = new StringBuilder(html.length());
+        do {
+            sb.append(html.substring(lastMatch, m.start()));
+            final String match = m.group();
+            if (!isEmpty(match)) {
+                if (match.indexOf('\u0060') < 0 && match.indexOf('\u00b4') < 0) {
+                    sb.append(match);
+                } else {
+                    sb.append(PATTERN_DOUBLE_ACCENTS.matcher(match).replaceAll(""));
+                }
+            }
+            lastMatch = m.end();
+        } while (m.find());
+        sb.append(html.substring(lastMatch));
+        String ret = PATTERN_ACCENT1.matcher(sb.toString()).replaceAll("&#96;");
+        ret = PATTERN_ACCENT2.matcher(ret).replaceAll("&#180;");
         return ret;
     }
 
@@ -1159,6 +1185,7 @@ public final class HtmlServiceImpl implements HtmlService {
     }
 
     private static final Pattern PATTERN_CC = Pattern.compile("(<!(?:--)?\\[if)([^\\]]+\\](?:--!?)?>)(.*?)((?:<!\\[endif\\])?(?:--)?>)", Pattern.DOTALL);
+    private static final Pattern PATTERN_CC2 = Pattern.compile("(<!(?:--)?\\[if)([^\\]]+\\](?:--!?)?>)(.*?)(<!\\[endif\\](?:--)?>)", Pattern.DOTALL);
 
     private static final String CC_START_IF = "<!-- [if";
 
@@ -1189,7 +1216,12 @@ public final class HtmlServiceImpl implements HtmlService {
      * @return The HTML content whose downlevel-revealed conditional comments contain valid HTML for non-IE browsers
      */
     private static String processDownlevelRevealedConditionalComments(final String htmlContent) {
-        final Matcher m = PATTERN_CC.matcher(htmlContent);
+        final String ret = processDownlevelRevealedConditionalComments0(htmlContent, PATTERN_CC2);
+        return processDownlevelRevealedConditionalComments0(ret, PATTERN_CC);
+    }
+    
+    private static String processDownlevelRevealedConditionalComments0(final String htmlContent, final Pattern p) {
+        final Matcher m = p.matcher(htmlContent);
         if (!m.find()) {
             /*
              * No conditional comments found
@@ -1220,12 +1252,13 @@ public final class HtmlServiceImpl implements HtmlService {
         return sb.toString();
     }
 
+    private static final Pattern PAT_VALID_COND = Pattern.compile("[a-zA-Z_0-9 -!]+");
+
     private static boolean isValidCondition(final String condition) {
         if (isEmpty(condition)) {
             return false;
         }
-        final String cond = condition.toUpperCase(Locale.US);
-        return (cond.indexOf("IE") >= 0) && (cond.indexOf('<') < 0) && (cond.indexOf('>') < 0);
+        return PAT_VALID_COND.matcher(condition.substring(0, condition.indexOf(']'))).matches();
     }
 
     /**

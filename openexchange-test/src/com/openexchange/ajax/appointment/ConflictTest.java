@@ -124,8 +124,8 @@ public class ConflictTest extends AppointmentTest {
 
 		assertTrue("appointment id " + objectId + " not found in conflicts", found);
 
-		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, modified, PROTOCOL + getHostName(), getSessionId());
-		deleteAppointment(getWebConversation(), secondObjectId, appointmentFolderId, modified, PROTOCOL + getHostName(), getSessionId());
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, modified, PROTOCOL + getHostName(), getSessionId(), false);
+		deleteAppointment(getWebConversation(), secondObjectId, appointmentFolderId, modified, PROTOCOL + getHostName(), getSessionId(), false);
 	}
 
 	/**
@@ -162,7 +162,7 @@ public class ConflictTest extends AppointmentTest {
 
 		assertTrue("appointment id " + objectId + " not found in conflicts", found);
 
-		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
 	}
 
 	/**
@@ -199,7 +199,7 @@ public class ConflictTest extends AppointmentTest {
 
 		assertTrue("appointment id " + objectId + " not found in conflicts", found);
 
-		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
 	}
 
 	/**
@@ -236,7 +236,7 @@ public class ConflictTest extends AppointmentTest {
 
 		assertTrue("appointment id " + objectId + " not found in conflicts", found);
 
-		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
 	}
 
 	/**
@@ -273,7 +273,7 @@ public class ConflictTest extends AppointmentTest {
 
 		assertTrue("appointment id " + objectId + " not found in conflicts", found);
 
-		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
 	}
 
 	/**
@@ -311,7 +311,7 @@ public class ConflictTest extends AppointmentTest {
 
 		assertTrue("appointment id " + objectId + " not found in conflicts", found);
 
-		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
 	}
 
 	/**
@@ -349,7 +349,7 @@ public class ConflictTest extends AppointmentTest {
 
 		assertTrue("appointment id " + objectId + " not found in conflicts", found);
 
-		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
 	}
 
 	/**
@@ -388,7 +388,7 @@ public class ConflictTest extends AppointmentTest {
 
 		assertFalse("appointment id " + objectId + " found in conflicts", found);
 
-		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
 	}
 
 	/**
@@ -427,7 +427,7 @@ public class ConflictTest extends AppointmentTest {
 
 		assertFalse("appointment id " + objectId + " found in conflicts", found);
 
-		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
 	}
 
 	/**
@@ -466,7 +466,7 @@ public class ConflictTest extends AppointmentTest {
 
 		assertTrue("appointment id " + objectId + " not found in conflicts", found);
 
-		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
 	}
 
 	/**
@@ -503,7 +503,7 @@ public class ConflictTest extends AppointmentTest {
 
 		assertTrue("appointment id " + objectId + " not found in conflicts", found);
 
-		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
 	}
 
 	public static Appointment[] insertAppointmentReturnConflicts(final WebConversation webCon,

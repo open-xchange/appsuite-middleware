@@ -2,6 +2,7 @@ package com.openexchange.webdav.xml.appointment;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 import java.util.TimeZone;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
@@ -71,7 +72,7 @@ public class UpdateTest extends AppointmentTest {
 			updateAppointment(webCon, appointmentObj, objectId, appointmentFolderId, new Date(0), PROTOCOL + hostName, login, password, context);
 			fail("expected concurent modification exception!");
 		} catch (final OXException exc) {
-			assertExceptionMessage(exc.getMessage(), XmlServlet.MODIFICATION_STATUS);
+			assertExceptionMessage(exc.getDisplayMessage(Locale.ENGLISH), XmlServlet.MODIFICATION_STATUS);
 		}
 
 		final int[][] objectIdAndFolderId = { {objectId, appointmentFolderId } };
@@ -92,7 +93,7 @@ public class UpdateTest extends AppointmentTest {
 			updateAppointment(webCon, appointmentObj, (objectId + 1000), appointmentFolderId, new Date(0), PROTOCOL + hostName, login, password, context);
 			fail("expected object not found exception!");
 		} catch (final OXException exc) {
-			assertExceptionMessage(exc.getMessage(), XmlServlet.OBJECT_NOT_FOUND_STATUS);
+			assertExceptionMessage(exc.getDisplayMessage(Locale.ENGLISH), XmlServlet.OBJECT_NOT_FOUND_STATUS);
 		}
 
 		final int[][] objectIdAndFolderId = { {objectId, appointmentFolderId } };

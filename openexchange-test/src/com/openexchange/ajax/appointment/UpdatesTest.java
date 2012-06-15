@@ -88,7 +88,7 @@ public class UpdatesTest extends AppointmentTest {
 
 		assertTrue("created object not found in response", found);
 
-		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId());
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId(), false);
 	}
 
 	public void testModifiedWithoutFolderIdExtended() throws Exception {
@@ -137,8 +137,8 @@ public class UpdatesTest extends AppointmentTest {
 		assertFalse("invalid object id in reponse", found1);
 		assertTrue("created object not found in response", found2);
 
-		deleteAppointment(getWebConversation(), objectId1, appointmentFolderId, getHostName(), getSessionId());
-		deleteAppointment(getWebConversation(), objectId2, appointmentFolderId, getHostName(), getSessionId());
+		deleteAppointment(getWebConversation(), objectId1, appointmentFolderId, getHostName(), getSessionId(), false);
+		deleteAppointment(getWebConversation(), objectId2, appointmentFolderId, getHostName(), getSessionId(), false);
 	}
 
 
@@ -157,7 +157,7 @@ public class UpdatesTest extends AppointmentTest {
 
 		assertEquals("unexpected data in response", 0, appointmentArray.length);
 
-		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId());
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId(), false);
 	}
 
 	public void testModifiedRecurrenceAppointment() throws Exception {
@@ -187,7 +187,7 @@ public class UpdatesTest extends AppointmentTest {
 
 		assertTrue("object with object_id: " + objectId + " not found in response", found);
 
-		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId());
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId(), false);
 	}
 
 	private static Date decrementDate(final Date date) {

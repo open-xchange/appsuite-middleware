@@ -50,19 +50,15 @@
 package com.openexchange.ajax.requesthandler.responseRenderers;
 
 import static com.openexchange.java.Streams.close;
-
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
-
 import javax.activation.MimetypesFileTypeMap;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
-
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.ajax.helper.DownloadUtility;
@@ -230,7 +226,7 @@ public class FileResponseRenderer implements ResponseRenderer {
             return file;
         }
 
-        InputStream rotated = scaler.rotateAccordingExif(file.getStream(), file.getContentType());
+        final InputStream rotated = scaler.rotateAccordingExif(file.getStream(), file.getContentType());
         file = new FileHolder(rotated, -1, file.getContentType(), "");
         return file;
     }
@@ -278,32 +274,32 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
     }
     
-    private IFileHolder cropIfImage(AJAXRequestData request, IFileHolder file) throws IOException, OXException {
+    private IFileHolder cropIfImage(final AJAXRequestData request, final IFileHolder file) throws IOException, OXException {
     	if (null == this.scaler || false == isImage(file) || false == request.isSet("cropWidth") || false == request.isSet("cropHeight")) {
     		return file;
     	}
     	/*
     	 * get crop parameters
     	 */
-    	int cropX = request.isSet("cropX") ? request.getParameter("cropX", int.class).intValue() : 0;
-    	int cropY = request.isSet("cropY") ? request.getParameter("cropY", int.class).intValue() : 0;
-    	int cropWidth = request.getParameter("cropWidth", int.class).intValue();
-    	int cropHeight = request.getParameter("cropHeight", int.class).intValue();
+    	final int cropX = request.isSet("cropX") ? request.getParameter("cropX", int.class).intValue() : 0;
+    	final int cropY = request.isSet("cropY") ? request.getParameter("cropY", int.class).intValue() : 0;
+    	final int cropWidth = request.getParameter("cropWidth", int.class).intValue();
+    	final int cropHeight = request.getParameter("cropHeight", int.class).intValue();
     	/*
     	 * crop to new input stream
     	 */
         try {
-            InputStream croppedImage = scaler.crop(file.getStream(), cropX, cropY, cropWidth, cropHeight, file.getContentType());
+            final InputStream croppedImage = scaler.crop(file.getStream(), cropX, cropY, cropWidth, cropHeight, file.getContentType());
             return new FileHolder(croppedImage, -1, file.getContentType(), file.getName());
         } finally {
             Streams.close(file);
         }    
     }
 
-    private boolean isImage(IFileHolder file) {
+    private boolean isImage(final IFileHolder file) {
         String contentType = file.getContentType();
-        if (!contentType.startsWith("image/")) {
-            String fileName = file.getName();
+        if (null == contentType || !contentType.startsWith("image/")) {
+            final String fileName = file.getName();
             if (fileName == null || !(contentType = MimetypesFileTypeMap.getDefaultFileTypeMap().getContentType(fileName)).startsWith("image/")) {
                 return false;
             }

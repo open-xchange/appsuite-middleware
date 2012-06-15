@@ -87,6 +87,7 @@ public class FileMetadataWriter {
         while (files.hasNext()) {
             array.put(writeArray(files.next(), columns, timeZone));
         }
+        files.close();
         return array;
     }
 

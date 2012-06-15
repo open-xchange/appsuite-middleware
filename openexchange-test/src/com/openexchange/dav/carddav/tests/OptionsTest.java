@@ -83,7 +83,7 @@ public class OptionsTest extends CardDAVTest {
 		OptionsMethod options = null;
 		try {
 			options = new OptionsMethod(getBaseUri());
-	    	assertEquals("unexpected http status", StatusCodes.SC_OK, super.getCardDAVClient().executeMethod(options));
+	    	assertEquals("unexpected http status", StatusCodes.SC_OK, super.getWebDAVClient().executeMethod(options));
 	    	assertResponseHeaders(EXPECTED_ALLOW_HEADERS, "Allow", options);
 		} finally {
 			release(options);
@@ -98,7 +98,7 @@ public class OptionsTest extends CardDAVTest {
 		OptionsMethod options = null;
 		try {
 			options = new OptionsMethod(getBaseUri());
-	    	assertEquals("unexpected http status", StatusCodes.SC_OK, super.getCardDAVClient().executeMethod(options));
+	    	assertEquals("unexpected http status", StatusCodes.SC_OK, super.getWebDAVClient().executeMethod(options));
 	    	assertResponseHeaders(EXPECTED_DAV_HEADERS, "DAV", options);
 		} finally {
 			release(options);

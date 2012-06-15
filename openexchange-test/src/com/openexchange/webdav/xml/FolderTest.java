@@ -56,6 +56,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+
+import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
@@ -381,7 +383,7 @@ public class FolderTest extends AbstractWebdavXMLTest {
         return failed;
     }
 
-    public static int[] listFolder(final WebConversation webCon, String host, final String login, final String password) throws Exception {
+    public static int[] listFolder(final WebConversation webCon, String host, final String login, final String password, String context) throws Exception {
         host = AbstractWebdavXMLTest.appendPrefix(host);
 
         final Element ePropfind = new Element("propfind", webdav);
@@ -406,7 +408,7 @@ public class FolderTest extends AbstractWebdavXMLTest {
 
         final HttpClient httpclient = new HttpClient();
 
-        httpclient.getState().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login, password));
+        httpclient.getState().setCredentials(AuthScope.ANY, getCredentials(login, password, context));
         final PropFindMethod propFindMethod = new PropFindMethod(host + AbstractFolderRequest.FOLDER_URL);
         propFindMethod.setDoAuthentication( true );
 
@@ -425,7 +427,12 @@ public class FolderTest extends AbstractWebdavXMLTest {
         return (int[])response[0].getDataObject();
     }
 
-    public static FolderObject[] listFolder(final WebConversation webCon, final Date modified, final boolean changed, final boolean deleted, String host, final String login, final String password, String context) throws Exception {
+    private static Credentials getCredentials(String login, String password,
+			String context) {
+		return new UsernamePasswordCredentials((context == null || context.equals("")) ? login : login+"@"+context, password);
+	}
+
+	public static FolderObject[] listFolder(final WebConversation webCon, final Date modified, final boolean changed, final boolean deleted, String host, final String login, final String password, String context) throws Exception {
         host = AbstractWebdavXMLTest.appendPrefix(host);
 
         if (!changed && !deleted) {
@@ -469,7 +476,7 @@ public class FolderTest extends AbstractWebdavXMLTest {
 
         final HttpClient httpclient = new HttpClient();
 
-        httpclient.getState().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login+"@"+context, password));
+        httpclient.getState().setCredentials(AuthScope.ANY, getCredentials(login, password, context));
         final PropFindMethod propFindMethod = new PropFindMethod(host + AbstractFolderRequest.FOLDER_URL);
         propFindMethod.setDoAuthentication( true );
 
@@ -518,7 +525,7 @@ public class FolderTest extends AbstractWebdavXMLTest {
 
         final HttpClient httpclient = new HttpClient();
 
-        httpclient.getState().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login+"@"+context, password));
+        httpclient.getState().setCredentials(AuthScope.ANY, getCredentials(login, password, context));
         final PropFindMethod propFindMethod = new PropFindMethod(host + AbstractFolderRequest.FOLDER_URL);
         propFindMethod.setDoAuthentication( true );
 

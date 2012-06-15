@@ -82,9 +82,9 @@ public class CurrentUserPrincipalTest extends CardDAVTest {
         props.add(PropertyNames.CURRENT_USER_PRINCIPAL);
         props.add(PropertyNames.PRINCIPAL_URL);
         props.add(PropertyNames.RESOURCETYPE);
-        final PropFindMethod propFind = new PropFindMethod(super.getCardDAVClient().getBaseURI() + "/", 
+        final PropFindMethod propFind = new PropFindMethod(super.getWebDAVClient().getBaseURI() + "/", 
         		DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
-        final MultiStatusResponse response = assertSingleResponse(super.getCardDAVClient().doPropFind(propFind));
+        final MultiStatusResponse response = assertSingleResponse(super.getWebDAVClient().doPropFind(propFind));
         final String principal = super.extractHref(PropertyNames.CURRENT_USER_PRINCIPAL, response);
     	assertTrue("username not found in href child of " + PropertyNames.CURRENT_USER_PRINCIPAL, principal.contains(Config.getUsername()));
         final String principalURL = super.extractHref(PropertyNames.PRINCIPAL_URL, response);
@@ -102,8 +102,8 @@ public class CurrentUserPrincipalTest extends CardDAVTest {
         props.add(PropertyNames.CURRENT_USER_PRINCIPAL);	    	
         props.add(PropertyNames.PRINCIPAL_URL);
         props.add(PropertyNames.RESOURCETYPE);
-        final PropFindMethod propFind = new PropFindMethod(super.getCardDAVClient().getBaseURI() + "/.well-known/carddav", 
+        final PropFindMethod propFind = new PropFindMethod(super.getWebDAVClient().getBaseURI() + "/.well-known/carddav", 
         		DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
-        super.getCardDAVClient().doPropFind(propFind, StatusCodes.SC_NOT_FOUND);
+        super.getWebDAVClient().doPropFind(propFind, StatusCodes.SC_NOT_FOUND);
 	}
 }

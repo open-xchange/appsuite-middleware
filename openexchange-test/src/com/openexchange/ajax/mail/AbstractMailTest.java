@@ -91,6 +91,11 @@ public abstract class AbstractMailTest extends AbstractAJAXSession {
         super(name);
     }
 
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+    }
+
     /**
      * Gets the message count of specified mail folder.
      *

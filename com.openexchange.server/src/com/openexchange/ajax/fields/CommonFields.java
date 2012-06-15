@@ -61,4 +61,6 @@ public interface CommonFields extends FolderChildFields {
 
     public static final String LAST_MODIFIED_OF_NEWEST_ATTACHMENT_UTC = "lastModifiedOfNewestAttachmentUTC";
 
+    public static final String UID = "uid";
+
 }

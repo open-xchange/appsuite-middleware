@@ -52,6 +52,8 @@ package com.openexchange.webdav.xml.task;
 import static com.openexchange.java.Autoboxing.F;
 import static com.openexchange.java.Autoboxing.L;
 import java.util.Date;
+import java.util.Locale;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.webdav.xml.TaskTest;
@@ -114,7 +116,7 @@ public class ListTest extends TaskTest {
             loadTask(webCon, (objectId+1000), taskFolderId, PROTOCOL + hostName, login, password, context);
             fail("object not found exception expected!");
         } catch (final OXException exc) {
-            assertExceptionMessage(exc.getMessage(), XmlServlet.OBJECT_NOT_FOUND_STATUS);
+            assertExceptionMessage(exc.getDisplayMessage(Locale.ENGLISH), XmlServlet.OBJECT_NOT_FOUND_STATUS);
         }
 
         final int[][] objectIdAndFolderId = { { objectId ,taskFolderId } };
@@ -216,7 +218,7 @@ public class ListTest extends TaskTest {
         final Task taskObj = createTask("testList");
         final int objectId = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password, context);
 
-        final int[] idArray = listTask(getWebConversation(), taskFolderId, getHostName(), getLogin(), getPassword());
+        final int[] idArray = listTask(getWebConversation(), taskFolderId, getHostName(), getLogin(), getPassword(), context);
 
         boolean found = false;
         for (int a = 0; a < idArray.length; a++) {

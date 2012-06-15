@@ -32,7 +32,6 @@ public class TestChmLzxState extends TestCase {
     private ChmLzxState chmLzxState;
     private int windowSize;
 
-    @Override
     public void setUp() throws Exception {
         byte[] data = TestParameters.chmData;
 
@@ -92,7 +91,6 @@ public class TestChmLzxState extends TestCase {
 
     // TODO add more tests
 
-    @Override
     public void tearDown() throws Exception {
     }
 

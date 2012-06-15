@@ -69,7 +69,7 @@ public class Bug8724Test extends AppointmentTest {
 		final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, getHostName(), getSessionId());
 		final Date modified = loadAppointment.getLastModified();
 
-		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, modified, getHostName(), getSessionId());
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, modified, getHostName(), getSessionId(), false);
 	}
 
 	/**
@@ -100,6 +100,6 @@ public class Bug8724Test extends AppointmentTest {
 		final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, getHostName(), getSessionId());
 		final Date modified = loadAppointment.getLastModified();
 
-		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, modified, getHostName(), getSessionId());
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, modified, getHostName(), getSessionId(), false);
 	}
 }

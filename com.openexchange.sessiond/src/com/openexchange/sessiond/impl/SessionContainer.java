@@ -420,6 +420,11 @@ final class SessionContainer {
         return l.toArray(new SessionControl[l.size()]);
     }
 
+    boolean hasForContext(final int contextId) {
+        final ConcurrentTIntObjectHashMap<Map<String, Object>> map = userSessions.get(contextId);
+        return null != map && !map.isEmpty();
+    }
+
     /**
      * Returns a collection view of the {@link SessionControl} objects contained in this container. The collection is
      * <b><small>not</small></b> backed by the container, so changes to the map are not reflected in the container, but changes made to any

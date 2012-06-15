@@ -62,7 +62,7 @@ public class ContactExceptionMessages implements LocalizableStrings {
 
     public static final String INVALID_EMAIL_MSG = "Invalid E-Mail address: '%s'. Please correct the E-Mail address.";
 
-    public static final String IMAGE_SCALE_PROBLEM_MSG = "Unable to import this contact picture. Either the type is not part of the supported type (JPG, GIF, BMP or PNG) or the size exceed %3$d. Your mime type is %1$s and your image size is %2$d.";
+    public static final String IMAGE_SCALE_PROBLEM_MSG = "Unable to import this contact picture. Either the type is not part of the supported type (JPG, GIF, BMP or PNG) or the size exceed %3$d. Your file type is %1$s and your image size is %2$d.";
 
     public static final String NON_CONTACT_FOLDER_MSG = "You are not allowed to store this contact in a non-contact folder: folder id %1$d in context %2$d with user %3$d";
 

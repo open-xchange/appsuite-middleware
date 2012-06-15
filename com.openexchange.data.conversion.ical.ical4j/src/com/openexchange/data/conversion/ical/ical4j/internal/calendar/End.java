@@ -51,11 +51,14 @@ package com.openexchange.data.conversion.ical.ical4j.internal.calendar;
 
 import static com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools.toDate;
 import static com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools.toDateTime;
-import static com.openexchange.data.conversion.ical.ical4j.internal.ParserTools.parseDate;
+import static com.openexchange.data.conversion.ical.ical4j.internal.ParserTools.parseDateConsideringDateType;
+
 import java.util.List;
 import java.util.TimeZone;
+
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.property.DtEnd;
+
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
@@ -108,7 +111,7 @@ public final class End<T extends CalendarComponent, U extends CalendarObject> ex
      */
     @Override
     public void parse(final int index, final T component, final U calendar, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) {
-        calendar.setEndDate(parseDate(component, new DtEnd(), timeZone));
+        calendar.setEndDate(parseDateConsideringDateType(component, new DtEnd(), timeZone));
     }
 
 }

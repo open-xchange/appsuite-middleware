@@ -43,7 +43,7 @@ public class JpegParserTest extends TestCase {
         assertEquals("68", metadata.get(Metadata.IMAGE_LENGTH));
         assertEquals("8", metadata.get(Metadata.BITS_PER_SAMPLE));
         assertEquals(null, metadata.get(Metadata.SAMPLES_PER_PIXEL));
-
+        
         assertEquals("6.25E-4", metadata.get(Metadata.EXPOSURE_TIME)); // 1/1600
         assertEquals("5.6", metadata.get(Metadata.F_NUMBER));
         assertEquals("false", metadata.get(Metadata.FLASH_FIRED));
@@ -56,19 +56,19 @@ public class JpegParserTest extends TestCase {
         assertEquals("240.0", metadata.get(Metadata.RESOLUTION_HORIZONTAL));
         assertEquals("240.0", metadata.get(Metadata.RESOLUTION_VERTICAL));
         assertEquals("Inch", metadata.get(Metadata.RESOLUTION_UNIT));
-
+        
         // Check that EXIF/TIFF tags come through with their raw values too
         // (This may be removed for Tika 1.0, as we support more of them
         //  with explicit Metadata entries)
         assertEquals("Canon EOS 40D", metadata.get("Model"));
-
+        
         // Common tags
         //assertEquals("2009-10-02T23:02:49", metadata.get(Metadata.LAST_MODIFIED));
         assertEquals("Date/Time Original for when the photo was taken, unspecified time zone",
                 "2009-08-11T09:09:45", metadata.get(Metadata.DATE));
         List<String> keywords = Arrays.asList(metadata.getValues(Metadata.SUBJECT));
         assertTrue("'canon-55-250' expected in " + keywords, keywords.contains("canon-55-250"));
-        assertTrue("'moscow-birds' expected in " + keywords, keywords.contains("moscow-birds"));
+        assertTrue("'moscow-birds' expected in " + keywords, keywords.contains("moscow-birds")); 
         assertTrue("'serbor' expected in " + keywords, keywords.contains("serbor"));
         assertFalse(keywords.contains("canon-55-250 moscow-birds serbor"));
     }
@@ -79,17 +79,17 @@ public class JpegParserTest extends TestCase {
         InputStream stream =
             getClass().getResourceAsStream("/test-documents/testJPEG_GEO.jpg");
         parser.parse(stream, new DefaultHandler(), metadata, new ParseContext());
-
+        
         // Geo tags
         assertEquals("12.54321", metadata.get(Metadata.LATITUDE));
         assertEquals("-54.1234", metadata.get(Metadata.LONGITUDE));
-
+        
         // Core EXIF/TIFF tags
         assertEquals("100", metadata.get(Metadata.IMAGE_WIDTH));
         assertEquals("68", metadata.get(Metadata.IMAGE_LENGTH));
         assertEquals("8", metadata.get(Metadata.BITS_PER_SAMPLE));
         assertEquals(null, metadata.get(Metadata.SAMPLES_PER_PIXEL));
-
+        
         assertEquals("6.25E-4", metadata.get(Metadata.EXPOSURE_TIME)); // 1/1600
         assertEquals("5.6", metadata.get(Metadata.F_NUMBER));
         assertEquals("false", metadata.get(Metadata.FLASH_FIRED));
@@ -102,7 +102,7 @@ public class JpegParserTest extends TestCase {
         assertEquals("240.0", metadata.get(Metadata.RESOLUTION_HORIZONTAL));
         assertEquals("240.0", metadata.get(Metadata.RESOLUTION_VERTICAL));
         assertEquals("Inch", metadata.get(Metadata.RESOLUTION_UNIT));
-
+        
         // Common tags
         assertEquals("Date/Time Original for when the photo was taken, unspecified time zone",
                 "2009-08-11T09:09:45", metadata.get(Metadata.DATE));
@@ -112,14 +112,14 @@ public class JpegParserTest extends TestCase {
                 "2009-08-11T09:09:45", metadata.get(TIFF.ORIGINAL_DATE));
         assertEquals("canon-55-250", metadata.getValues(Metadata.KEYWORDS)[0]);
     }
-
+    
     public void testJPEGTitleAndDescription() throws Exception {
         Metadata metadata = new Metadata();
         metadata.set(Metadata.CONTENT_TYPE, "image/jpeg");
         InputStream stream =
             getClass().getResourceAsStream("/test-documents/testJPEG_commented.jpg");
         parser.parse(stream, new DefaultHandler(), metadata, new ParseContext());
-
+          
         // embedded comments with non-ascii characters
         assertEquals("Tosteberga \u00C4ngar", metadata.get(Metadata.TITLE));
         assertEquals("Bird site in north eastern Sk\u00E5ne, Sweden.\n(new line)", metadata.get(Metadata.DESCRIPTION));
@@ -127,18 +127,18 @@ public class JpegParserTest extends TestCase {
         assertEquals("Some Tourist", metadata.get(Metadata.CREATOR)); // Dublin Core
         // xmp handles spaces in keywords, returns "bird watching, nature reserve, coast, grazelands"
         // but we have to replace them with underscore
-
+        
         List<String> keywords = Arrays.asList(metadata.getValues(Metadata.KEYWORDS));
         assertTrue(keywords.contains("coast"));
         assertTrue(keywords.contains("bird watching"));
         assertEquals(keywords, Arrays.asList(metadata.getValues(Metadata.SUBJECT)));
-
+        
         // Core EXIF/TIFF tags
         assertEquals("103", metadata.get(Metadata.IMAGE_WIDTH));
         assertEquals("77", metadata.get(Metadata.IMAGE_LENGTH));
         assertEquals("8", metadata.get(Metadata.BITS_PER_SAMPLE));
         assertEquals(null, metadata.get(Metadata.SAMPLES_PER_PIXEL));
-
+        
         assertEquals("1.0E-6", metadata.get(Metadata.EXPOSURE_TIME)); // 1/1000000
         assertEquals("2.8", metadata.get(Metadata.F_NUMBER));
         assertEquals("4.6", metadata.get(Metadata.FOCAL_LENGTH));
@@ -149,31 +149,31 @@ public class JpegParserTest extends TestCase {
         assertEquals("1", metadata.get(Metadata.ORIENTATION)); // Not present
         assertEquals("300.0", metadata.get(Metadata.RESOLUTION_HORIZONTAL));
         assertEquals("300.0", metadata.get(Metadata.RESOLUTION_VERTICAL));
-        assertEquals("Inch", metadata.get(Metadata.RESOLUTION_UNIT));
+        assertEquals("Inch", metadata.get(Metadata.RESOLUTION_UNIT));          
     }
-
+    
     public void testJPEGTitleAndDescriptionPhotoshop() throws Exception {
         Metadata metadata = new Metadata();
         metadata.set(Metadata.CONTENT_TYPE, "image/jpeg");
         InputStream stream =
             getClass().getResourceAsStream("/test-documents/testJPEG_commented_pspcs2mac.jpg");
         parser.parse(stream, new DefaultHandler(), metadata, new ParseContext());
-
+          
         // embedded comments with non-ascii characters
         assertEquals("Tosteberga \u00C4ngar", metadata.get(Metadata.TITLE));
         assertEquals("Bird site in north eastern Sk\u00E5ne, Sweden.\n(new line)", metadata.get(Metadata.DESCRIPTION));
         assertEquals("Some Tourist", metadata.get(Metadata.CREATOR));
         List<String> subject = Arrays.asList(metadata.getValues(Metadata.SUBJECT));
-        assertTrue("got " + subject, subject.contains("bird watching"));
+        assertTrue("got " + subject, subject.contains("bird watching")); 
     }
-
+    
     public void testJPEGTitleAndDescriptionXnviewmp() throws Exception {
         Metadata metadata = new Metadata();
         metadata.set(Metadata.CONTENT_TYPE, "image/jpeg");
         InputStream stream =
             getClass().getResourceAsStream("/test-documents/testJPEG_commented_xnviewmp026.jpg");
         parser.parse(stream, new DefaultHandler(), metadata, new ParseContext());
-
+          
         // XnViewMp's default comment dialog has only comment, not headline.
         // Comment is embedded only if "Write comments in XMP" is enabled in settings
         assertEquals("Bird site in north eastern Sk\u00E5ne, Sweden.\n(new line)", metadata.get(Metadata.DESCRIPTION));
@@ -182,16 +182,16 @@ public class JpegParserTest extends TestCase {
         String[] subject = metadata.getValues(Metadata.SUBJECT);
         List<String> keywords = Arrays.asList(subject);
         assertTrue("'coast'" + " not in " + keywords, keywords.contains("coast"));
-        assertTrue("'nature reserve'" + " not in " + keywords, keywords.contains("nature reserve"));
+        assertTrue("'nature reserve'" + " not in " + keywords, keywords.contains("nature reserve"));     
     }
-
+    
     public void testJPEGoddTagComponent() throws Exception {
        Metadata metadata = new Metadata();
        metadata.set(Metadata.CONTENT_TYPE, "image/jpeg");
        InputStream stream =
            getClass().getResourceAsStream("/test-documents/testJPEG_oddTagComponent.jpg");
        parser.parse(stream, new DefaultHandler(), metadata, new ParseContext());
-
+       
        assertEquals(null, metadata.get(Metadata.TITLE));
        assertEquals(null, metadata.get(Metadata.DESCRIPTION));
        assertEquals("251", metadata.get(Metadata.IMAGE_WIDTH));

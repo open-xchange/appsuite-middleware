@@ -82,7 +82,7 @@ public class ExemplaryFolderTestManagerTest extends AbstractAJAXSession {
         manager = new FolderTestManager(getClient());
         // create a folder
         folderObject1 = new FolderObject();
-        folderObject1.setFolderName("ExemplaryFolderTestManagerTest-folder1");
+        folderObject1.setFolderName("ExemplaryFolderTestManagerTest-folder1"+System.currentTimeMillis());
         folderObject1.setType(FolderObject.PUBLIC);
         folderObject1.setParentFolderID(client.getValues().getPrivateInfostoreFolder());
         folderObject1.setModule(FolderObject.INFOSTORE);
@@ -101,7 +101,7 @@ public class ExemplaryFolderTestManagerTest extends AbstractAJAXSession {
 
         // create another folder
         folderObject2 = new FolderObject();
-        folderObject2.setFolderName("ExemplaryFolderTestManagerTest-folder2");
+        folderObject2.setFolderName("ExemplaryFolderTestManagerTest-folder2"+System.currentTimeMillis());
         folderObject2.setType(FolderObject.PUBLIC);
         folderObject2.setParentFolderID(client.getValues().getPrivateInfostoreFolder());
         folderObject2.setModule(FolderObject.INFOSTORE);
@@ -125,20 +125,22 @@ public class ExemplaryFolderTestManagerTest extends AbstractAJAXSession {
     }
 
     public void testCreatedFoldersAreReturnedByGetRequest() throws Exception {
-        FolderObject fo = manager.getFolderFromServer(folderObject1.getObjectID());
+        final FolderObject fo = manager.getFolderFromServer(folderObject1.getObjectID());
         assertEquals("The folder was not returned.", fo.getFolderName(), folderObject1.getFolderName());
     }
 
     public void testCreatedFoldersAppearInListRequest() throws Exception {
         boolean found1 = false;
         boolean found2 = false;
-        FolderObject[] allFolders = manager.listFoldersOnServer(client.getValues().getPrivateInfostoreFolder());
+        final FolderObject[] allFolders = manager.listFoldersOnServer(client.getValues().getPrivateInfostoreFolder());
         for (int i = 0; i < allFolders.length; i++) {
-            FolderObject fo = allFolders[i];
-            if (fo.getObjectID() == folderObject1.getObjectID())
+            final FolderObject fo = allFolders[i];
+            if (fo.getObjectID() == folderObject1.getObjectID()) {
                 found1 = true;
-            if (fo.getObjectID() == folderObject2.getObjectID())
+            }
+            if (fo.getObjectID() == folderObject2.getObjectID()) {
                 found2 = true;
+            }
         }
         assertTrue("First folder was not found.", found1);
         assertTrue("Second folder was not found.", found2);
@@ -147,15 +149,17 @@ public class ExemplaryFolderTestManagerTest extends AbstractAJAXSession {
     public void testCreatedFoldersAppearAsUpdatedSinceYesterday() throws Exception {
         boolean found1 = false;
         boolean found2 = false;
-        Date date = new Date();
+        final Date date = new Date();
         date.setDate(date.getDate() - 1);
-        FolderObject[] allFolders = manager.getUpdatedFoldersOnServer(client.getValues().getPrivateInfostoreFolder(), date);
+        final FolderObject[] allFolders = manager.getUpdatedFoldersOnServer(client.getValues().getPrivateInfostoreFolder(), date);
         for (int i = 0; i < allFolders.length; i++) {
-            FolderObject co = allFolders[i];
-            if (co.getObjectID() == folderObject1.getObjectID())
+            final FolderObject co = allFolders[i];
+            if (co.getObjectID() == folderObject1.getObjectID()) {
                 found1 = true;
-            if (co.getObjectID() == folderObject2.getObjectID())
+            }
+            if (co.getObjectID() == folderObject2.getObjectID()) {
                 found2 = true;
+            }
         }
         assertTrue("First folder was not found.", found1);
         assertTrue("Second folder was not found.", found2);

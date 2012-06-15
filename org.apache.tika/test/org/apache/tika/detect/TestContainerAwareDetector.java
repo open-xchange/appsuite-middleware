@@ -20,9 +20,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
-
 import junit.framework.TestCase;
-
 import org.apache.poi.poifs.filesystem.NPOIFSFileSystem;
 import org.apache.tika.io.TikaInputStream;
 import org.apache.tika.metadata.Metadata;
@@ -35,10 +33,10 @@ import org.apache.tika.mime.MimeTypes;
 public class TestContainerAwareDetector extends TestCase {
 
     private final Detector detector =
-        new ContainerAwareDetector(MimeTypes.getDefaultMimeTypes());
+        new CompositeDetector(MimeTypes.getDefaultMimeTypes());
 
-    private void assertDetect(String file, String type) throws Exception {
-        TikaInputStream stream = TikaInputStream.get(
+    private void assertDetect(final String file, final String type) throws Exception {
+        final TikaInputStream stream = TikaInputStream.get(
                 TestContainerAwareDetector.class.getResource(
                         "/test-documents/" + file));
         try {
@@ -64,7 +62,7 @@ public class TestContainerAwareDetector extends TestCase {
     }
 
     public void testOpenContainer() throws Exception {
-        TikaInputStream stream = TikaInputStream.get(
+        final TikaInputStream stream = TikaInputStream.get(
                 TestContainerAwareDetector.class.getResource(
                         "/test-documents/testPPT.ppt"));
         try {
@@ -111,16 +109,16 @@ public class TestContainerAwareDetector extends TestCase {
         return new File(System.getProperty("java.io.tmpdir")).listFiles(
                 new FilenameFilter() {
                     @Override
-                    public boolean accept(File dir, String name) {
+                    public boolean accept(final File dir, final String name) {
                         return name.startsWith("apache-tika-");
                     }
                 }).length;
     }
 
-    private void assertRemovalTempfiles(String fileName) throws Exception {
-        int numberOfTempFiles = countTemporaryFiles();
+    private void assertRemovalTempfiles(final String fileName) throws Exception {
+        final int numberOfTempFiles = countTemporaryFiles();
 
-        TikaInputStream stream = TikaInputStream.get(
+        final TikaInputStream stream = TikaInputStream.get(
                 TestContainerAwareDetector.class.getResource(
                         "/test-documents/" + fileName));
         try {
@@ -144,16 +142,16 @@ public class TestContainerAwareDetector extends TestCase {
         assertDetect("testJAR.jar", "application/java-archive");
     }
 
-    private TikaInputStream getTruncatedFile(String name, int n)
+    private TikaInputStream getTruncatedFile(final String name, final int n)
             throws IOException {
-        InputStream input =
+        final InputStream input =
             TestContainerAwareDetector.class.getResourceAsStream(
                     "/test-documents/" + name);
         try {
-            byte[] bytes = new byte[n];
+            final byte[] bytes = new byte[n];
             int m = 0;
             while (m < bytes.length) {
-                int i = input.read(bytes, m, bytes.length - m);
+                final int i = input.read(bytes, m, bytes.length - m);
                 if (i != -1) {
                     m += i;
                 } else {
@@ -168,7 +166,7 @@ public class TestContainerAwareDetector extends TestCase {
 
     public void testTruncatedFiles() throws Exception {
         // First up a truncated OOXML (zip) file
-        TikaInputStream xlsx = getTruncatedFile("testEXCEL.xlsx", 300);
+        final TikaInputStream xlsx = getTruncatedFile("testEXCEL.xlsx", 300);
         try {
             assertEquals(
                     MediaType.application("x-tika-ooxml"),
@@ -178,7 +176,7 @@ public class TestContainerAwareDetector extends TestCase {
         }
 
         // Now a truncated OLE2 file
-        TikaInputStream xls = getTruncatedFile("testEXCEL.xls", 400);
+        final TikaInputStream xls = getTruncatedFile("testEXCEL.xls", 400);
         try {
             assertEquals(
                     MediaType.application("x-tika-msoffice"),

@@ -78,4 +78,9 @@ public class RefreshSecretRequest extends AbstractRequest<RefreshSecretResponse>
 			}
 		};
 	}
+	
+	@Override
+	public Method getMethod() {
+	    return Method.GET;
+	}
 }

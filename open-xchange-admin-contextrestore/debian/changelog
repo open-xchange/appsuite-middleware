@@ -1,0 +1,5 @@
+open-xchange-admin-contextrestore (6.21.0-0) unstable; urgency=low
+
+  * Initial packaging
+
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Fri, 15 Jun 2012 10:56:54 +0200

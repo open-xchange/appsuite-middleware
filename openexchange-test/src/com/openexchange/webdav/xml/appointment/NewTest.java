@@ -52,6 +52,7 @@ package com.openexchange.webdav.xml.appointment;
 import java.io.ByteArrayInputStream;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 import java.util.TimeZone;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
@@ -367,7 +368,7 @@ public class NewTest extends AppointmentTest {
             deleteAppointment(getWebConversation(), objectId, parentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
             fail("conflict exception expected!");
         } catch (final OXException exc) {
-            assertExceptionMessage(exc.getMessage(), "APP-0070");
+            assertExceptionMessage(exc.getDisplayMessage(Locale.ENGLISH), "APP-0070");
         }
 
         FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, getHostName(), getLogin(), getPassword(), context);

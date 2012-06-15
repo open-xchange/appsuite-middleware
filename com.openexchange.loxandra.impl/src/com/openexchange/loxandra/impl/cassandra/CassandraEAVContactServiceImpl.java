@@ -52,6 +52,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.CharacterCodingException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -86,8 +87,12 @@ import org.apache.cassandra.utils.ByteBufferUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.openexchange.ajax.fields.ContactFields;
+import com.openexchange.groupware.contact.helpers.ContactField;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.loxandra.EAVContactService;
 import com.openexchange.loxandra.dto.EAVContact;
+import com.openexchange.loxandra.helpers.EAVContactHelper;
 
 /**
  * Cassandra Contact Data Access Object
@@ -121,6 +126,8 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 	
 	private final Keyspace keyspace;
 	
+	private static String cf_named_prop_prefix = "named";
+	
 	/**
 	 * Default Constructor. Initializes the CF templates.
 	 */
@@ -136,13 +143,17 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 	 */
 	@Override
 	public void insertContact(EAVContact c) {
-		c.setUUID(UUID.randomUUID());
+		if (c.getUUID() == null)
+			c.setUUID(UUID.randomUUID());
 		
 		ClockResolution clock = new MicrosecondsClockResolution();
 		c.setTimeUUID(TimeUUIDUtils.getTimeUUID(clock.createClock()));
 		
 		ColumnFamilyUpdater<UUID, Composite> personUpdater = personTemplate.createUpdater(c.getUUID()); //get Key and create updater object
 	    populateUpdater(c, personUpdater);
+	    
+	    personUpdater.setUUID(new Composite(cf_named_prop_prefix, "timeuuid"), c.getTimeUUID());
+	    personUpdater.setUUID(new Composite("folder", c.getFolderUUIDs().get(0)), c.getFolderUUIDs().get(0));
 	    
 	    ColumnFamilyUpdater<UUID, Composite> personFolderUpdater = personFolderTemplate.createUpdater(c.getFolderUUIDs().get(0)); //get Key and create updater object
 	    personFolderUpdater.setUUID(new Composite(c.getDisplayName(), c.getTimeUUID()), c.getUUID());
@@ -160,8 +171,6 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 	        personFolderTemplate.update(personFolderUpdater);	// INSERT into PersonFolder
 	        Mutator<String> m = HFactory.createMutator(keyspace, ss);
 	        m.incrementCounter("PersonsInFolder", CF_COUNTERS, c.getFolderUUIDs().get(0), 1L);
-	        
-	        log.debug("Entity COMPOSITE " + c.getUUID());
 	    } catch (HectorException e) {
 	        e.printStackTrace();
 	    }
@@ -174,29 +183,26 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 	 * @param updater
 	 */
 	private void populateUpdater(EAVContact c, ColumnFamilyUpdater<UUID, Composite> updater) {
-		if (c.containsNickname()) {
-            updater.setString(new Composite("named", "nickname"), c.getNickname());
-        }
-		if (c.containsDisplayName()) {
-            updater.setString(new Composite("named", "displayname"), c.getDisplayName());
-        }
-		if (c.containsGivenName()) {
-            updater.setString(new Composite("named", "givenname"), c.getGivenName());
-        }
-		if (c.containsSurName())
-         {
-            updater.setString(new Composite("named", "surname"), c.getSurName());
-		//TODO: complete...
-        }
-		
-		updater.setUUID(new Composite("named", "timeuuid"), c.getTimeUUID());
-		
-		updater.setUUID(new Composite("folder", c.getFolderUUIDs().get(0)), c.getFolderUUIDs().get(0));
+		for (final int column : Contact.JSON_COLUMNS) {
+			
+			final ContactField field = ContactField.getByValue(column);
+			if (field != null && field.isDBField()) {
+				
+				final String key = field.getAjaxName();
+				if (c.contains(column)) {
+					if (EAVContactHelper.isNonString(column))
+						updater.setDate(new Composite(cf_named_prop_prefix, key), (Date) c.get(column));
+					else
+						updater.setString(new Composite(cf_named_prop_prefix, key),(String) c.get(column));
+				}
+			}
+		}
 		
 		Iterator<String> iterator  = c.getKeysIterator();
 		while (iterator.hasNext()) {
 			String key = iterator.next();
 			updater.setValue(new Composite("unnamed", key), c.getUnnamedProperty(key), ss);
+			log.info("UNNAMED PROPERTIES : " + key);
 		}
 	}
 
@@ -254,20 +260,30 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 		}
 		
 		// setters
-		if (contact.containsNamedProperty("displayname")) {
-            contact.setDisplayName(ByteBufferUtil.string(contact.getNamedProperty("displayname")));
+		if (contact.containsNamedProperty(ContactFields.DISPLAY_NAME)) {
+            contact.setDisplayName(ByteBufferUtil.string(contact.getNamedProperty(ContactFields.DISPLAY_NAME)));
         }
-		if (contact.containsNamedProperty("givenname")) {
-            contact.setGivenName(ByteBufferUtil.string(contact.getNamedProperty("givenname")));
+		if (contact.containsNamedProperty(ContactFields.FIRST_NAME)) {
+            contact.setGivenName(ByteBufferUtil.string(contact.getNamedProperty(ContactFields.FIRST_NAME)));
         }
-		if (contact.containsNamedProperty("surname")) {
-            contact.setSurName(ByteBufferUtil.string(contact.getNamedProperty("surname")));
+		if (contact.containsNamedProperty(ContactFields.LAST_NAME)) {
+            contact.setSurName(ByteBufferUtil.string(contact.getNamedProperty(ContactFields.LAST_NAME)));
         }
-		if (contact.containsNamedProperty("email")) {
-            contact.setEmail1(ByteBufferUtil.string(contact.getNamedProperty("email")));
+		if (contact.containsNamedProperty(ContactFields.EMAIL1)) {
+            contact.setEmail1(ByteBufferUtil.string(contact.getNamedProperty(ContactFields.EMAIL1)));
         }
+		if (contact.containsNamedProperty(ContactFields.ADDRESS_BUSINESS)) {
+            contact.setAddressBusiness(ByteBufferUtil.string(contact.getNamedProperty(ContactFields.ADDRESS_BUSINESS)));
+        }
+		if (contact.containsNamedProperty("folderUUID")) {
+			contact.addFolderUUID(UUID.fromString(ByteBufferUtil.string(contact.getNamedProperty("folderUUID"))));
+		}
+		
+		//TODO: complete...
 		
 		contact.setTimeUUID(TimeUUIDUtils.uuid(contact.getNamedProperty("timeuuid")));
+		
+		log.info("EAV CONTACT: " + contact.getGivenName());
 		
 		contact.clearNamedProperties();
 	}
@@ -300,18 +316,18 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 		}
 		
 		// setters
-		if (contact.containsNamedProperty("nickname")) {
-            contact.setNickname(ByteBufferUtil.string(contact.getNamedProperty("nickname")));
+		if (contact.containsNamedProperty(ContactFields.NICKNAME)) {
+            contact.setNickname(ByteBufferUtil.string(contact.getNamedProperty(ContactFields.NICKNAME)));
         }
-		if (contact.containsNamedProperty("displayname")) {
-            contact.setDisplayName(ByteBufferUtil.string(contact.getNamedProperty("displayname")));
+		if (contact.containsNamedProperty(ContactFields.DISPLAY_NAME)) {
+            contact.setDisplayName(ByteBufferUtil.string(contact.getNamedProperty(ContactFields.DISPLAY_NAME)));
         }
-		if (contact.containsNamedProperty("givenname")) {
-            contact.setGivenName(ByteBufferUtil.string(contact.getNamedProperty("givenname")));
+		if (contact.containsNamedProperty(ContactFields.FIRST_NAME)) {
+            contact.setGivenName(ByteBufferUtil.string(contact.getNamedProperty(ContactFields.FIRST_NAME)));
         }
-		if (contact.containsNamedProperty("surname"))
+		if (contact.containsNamedProperty(ContactFields.LAST_NAME))
          {
-            contact.setSurName(ByteBufferUtil.string(contact.getNamedProperty("surname")));
+            contact.setSurName(ByteBufferUtil.string(contact.getNamedProperty(ContactFields.LAST_NAME)));
 		//TODO: complete...
         }
 		
@@ -387,7 +403,15 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 	 */
 	@Override
 	public void updateContact(EAVContact c) {
-		insertContact(c);
+		//insertContact(c);
+		ColumnFamilyUpdater<UUID, Composite> personUpdater = personTemplate.createUpdater(c.getUUID()); //get Key and create updater object
+	    populateUpdater(c, personUpdater);
+	    
+	    try {
+			personTemplate.update(personUpdater);
+	    } catch (HectorException e) {
+	        e.printStackTrace();
+	    }
 	}
 
 	/*
@@ -481,10 +505,10 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 
 	/*
 	 * (non-Javadoc)
-	 * @see loxandra.dao.ContactDAO#copyContactToFolder(loxandra.dto.EAVContact, java.util.UUID, java.util.UUID)
+	 * @see loxandra.dao.ContactDAO#copyContactToFolder(loxandra.dto.EAVContact, java.util.UUID)
 	 */
 	@Override
-	public void copyContactToFolder(EAVContact c, UUID oldFolderUUID, UUID newFolderUUID) {
+	public void copyContactToFolder(EAVContact c, UUID newFolderUUID) {
 	 	if (!existsContactInFolder(c, newFolderUUID)) {
 	 		ColumnFamilyUpdater<UUID, Composite> personFolderUpdater = personFolderTemplate.createUpdater(newFolderUUID); //get Key and create updater object
 		    personFolderUpdater.setUUID(new Composite(c.getDisplayName(), c.getTimeUUID()), c.getUUID());
@@ -527,7 +551,7 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 	 */
 	@Override
 	public void moveContactToFolder(EAVContact c, UUID oldFolderUUID, UUID newFolderUUID) {
-		copyContactToFolder(c, oldFolderUUID, newFolderUUID);
+		copyContactToFolder(c, newFolderUUID);
 		removeContactFromFolder(c, oldFolderUUID);
 	}
 
@@ -565,6 +589,6 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 	 														.setKey(folderUUID)
 	 														.setRange(start, end, false, 1).execute().get();
 	    
-	    return (slice.getColumns().size() == 0 ? false : true);
+	 	return (slice.getColumns().size() == 0 ? false : true);
 	}
 }

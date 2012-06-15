@@ -119,7 +119,7 @@ public class UpdateTest extends AppointmentTest {
         appointmentObj.removeParentFolderID();
 
         updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
     public void testUpdateAppointmentWithParticipant() throws Exception {
@@ -147,7 +147,7 @@ public class UpdateTest extends AppointmentTest {
         appointmentObj.removeParentFolderID();
 
         updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
     public void testUpdateRecurrenceWithPosition() throws Exception {
@@ -200,7 +200,7 @@ public class UpdateTest extends AppointmentTest {
         // Loaded change exception MUST NOT contain any recurrence information except recurrence identifier and position.
         compareObject(appointmentObj, loadAppointment, newStartTime, newEndTime);
 
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
     // Node 356
@@ -267,7 +267,7 @@ public class UpdateTest extends AppointmentTest {
 
         assertTrue("object with object_id: " + objectId + " not found in response", found);
 
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId());
+        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId(), false);
     }
 
     // Bug 12700    FIXME

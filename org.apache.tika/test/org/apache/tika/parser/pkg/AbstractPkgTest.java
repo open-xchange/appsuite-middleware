@@ -40,18 +40,17 @@ import org.xml.sax.SAXException;
 public abstract class AbstractPkgTest extends TestCase {
    protected ParseContext trackingContext;
    protected ParseContext recursingContext;
-
+   
    protected Parser autoDetectParser;
    protected EmbeddedTrackingParser tracker;
 
-   @Override
-protected void setUp() throws Exception {
+   protected void setUp() throws Exception {
       super.setUp();
-
+      
       tracker = new EmbeddedTrackingParser();
       trackingContext = new ParseContext();
       trackingContext.set(Parser.class, tracker);
-
+      
       autoDetectParser = new AutoDetectParser();
       recursingContext = new ParseContext();
       recursingContext.set(Parser.class, autoDetectParser);
@@ -63,25 +62,23 @@ protected void setUp() throws Exception {
       protected List<String> filenames = new ArrayList<String>();
       protected List<String> mediatypes = new ArrayList<String>();
       protected byte[] lastSeenStart;
-
+      
       public void reset() {
          filenames.clear();
          mediatypes.clear();
       }
-
-      @Override
-    public Set<MediaType> getSupportedTypes(ParseContext context) {
+      
+      public Set<MediaType> getSupportedTypes(ParseContext context) {
          // Cheat!
          return (new AutoDetectParser()).getSupportedTypes(context);
       }
 
-      @Override
-    public void parse(InputStream stream, ContentHandler handler,
+      public void parse(InputStream stream, ContentHandler handler,
             Metadata metadata, ParseContext context) throws IOException,
             SAXException, TikaException {
          filenames.add(metadata.get(Metadata.RESOURCE_NAME_KEY));
          mediatypes.add(metadata.get(Metadata.CONTENT_TYPE));
-
+         
          lastSeenStart = new byte[32];
          stream.read(lastSeenStart);
       }

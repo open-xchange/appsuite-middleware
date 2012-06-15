@@ -82,9 +82,9 @@ public class CopyTest extends AppointmentTest {
 			fail("conflicts found!");
 		}
 
-		deleteAppointment(getWebConversation(), objectId1, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+		deleteAppointment(getWebConversation(), objectId1, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
 		if (objectId2 > 0) {
-			deleteAppointment(getWebConversation(), objectId2, targetFolder, PROTOCOL + getHostName(), getSessionId());
+			deleteAppointment(getWebConversation(), objectId2, targetFolder, PROTOCOL + getHostName(), getSessionId(), false);
 		}
 	}
 }

@@ -29,9 +29,9 @@ public class DeleteTest extends AppointmentTest {
         insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
         final int id = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 
-        deleteAppointment(getWebConversation(), id, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+        deleteAppointment(getWebConversation(), id, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), true);
         try {
-            deleteAppointment(getWebConversation(), id, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+            deleteAppointment(getWebConversation(), id, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), true);
             fail("OXObjectNotFoundException expected!");
         } catch (final Exception ex) {
             assertTrue(true);
@@ -115,7 +115,7 @@ public class DeleteTest extends AppointmentTest {
             getSessionId());
         compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
 
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), true);
     }
 
     // Bug #12173
@@ -161,7 +161,7 @@ public class DeleteTest extends AppointmentTest {
             exceptionDate,
             new Date(Long.MAX_VALUE),
             PROTOCOL + getHostName(),
-            getSessionId());
+            getSessionId(), true);
 
         loadAppointment = loadAppointment(
             getWebConversation(),
@@ -173,7 +173,7 @@ public class DeleteTest extends AppointmentTest {
         // May not fail
 
         // Delete all
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), true);
 
     }
 }
