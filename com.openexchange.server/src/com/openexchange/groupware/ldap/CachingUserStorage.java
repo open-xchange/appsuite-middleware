@@ -55,7 +55,9 @@ import gnu.trove.ConcurrentTIntObjectHashMap;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -65,6 +67,7 @@ import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.Event;
+import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
@@ -393,7 +396,9 @@ public class CachingUserStorage extends UserStorage implements EventHandler {
     protected void startInternal() {
         final BundleContext context = ServerActivator.getContext();
         if (null != context) {
-            registration = context.registerService(EventHandler.class, this, null);
+            final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+            serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
+            registration = context.registerService(EventHandler.class, this, serviceProperties);
         }
     }
 
