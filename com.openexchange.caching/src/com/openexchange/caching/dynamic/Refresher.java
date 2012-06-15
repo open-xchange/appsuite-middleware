@@ -54,12 +54,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheExceptionCode;
 import com.openexchange.caching.CacheService;
 import com.openexchange.caching.osgi.CacheActivator;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 
 /**
  *
@@ -154,8 +154,6 @@ public abstract class Refresher<T extends Serializable> {
         }
         T retval = null;
         final Lock lock = factory.getCacheLock();
-        final Serializable key = factory.getKey();
-        Condition cond = null;
         try {
             if (!lock.tryLock(3, TimeUnit.SECONDS)) {
                 return factory.load();
@@ -167,6 +165,11 @@ public abstract class Refresher<T extends Serializable> {
             LOG.error(e.getMessage(), e);
             return factory.load();
         }
+        /*
+         * Lock acquired
+         */
+        final Serializable key = factory.getKey();
+        Condition cond = null;
         try {
             final Object tmp = cache.get(key);
             if (null == tmp) {
