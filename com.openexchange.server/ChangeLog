@@ -1,3 +1,7 @@
+* 2012-06-15 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22312: Context-sensitive locks & lowered timeout on tryLock() invocation to reduce possible concurrent cache access attempts
+
 * 2012-06-14 - thorben.betten@open-xchange.com
 
  - Partial fix for bug 21872: Abort default folder check if an over-quota error is encountered
