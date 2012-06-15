@@ -61,9 +61,9 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 if [ ${1:-0} -eq 2 ]; then
     CONFFILES="AdminDaemon.properties Group.properties ModuleAccessDefinitions.properties RMI.properties Resource.properties Sql.properties User.properties mpasswd plugin/hosting.properties"
     for FILE in ${CONFFILES}; do
-        if [ -e /opt/open-xchange/etc/groupware/${FILE} ]; then
+        if [ -e /opt/open-xchange/etc/admindaemon/${FILE} ]; then
             mv /opt/open-xchange/etc/${FILE} /opt/open-xchange/etc/${FILE}.rpmnew
-            mv /opt/open-xchange/etc/groupware/${FILE} /opt/open-xchange/etc/${FILE}
+            mv /opt/open-xchange/etc/admindaemon/${FILE} /opt/open-xchange/etc/${FILE}
         fi
     done
 fi

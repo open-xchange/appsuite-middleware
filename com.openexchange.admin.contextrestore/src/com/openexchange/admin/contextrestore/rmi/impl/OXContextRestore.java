@@ -12,10 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
-
 import com.openexchange.admin.contextrestore.dataobjects.VersionInformation;
 import com.openexchange.admin.contextrestore.osgi.Activator;
 import com.openexchange.admin.contextrestore.rmi.OXContextRestoreInterface;
@@ -34,6 +31,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.impl.BasicAuthenticator;
 import com.openexchange.admin.rmi.impl.OXCommonImpl;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
+import com.openexchange.log.LogFactory;
 
 /**
  * This class contains the implementation of the API defined in {@link OXContextRestoreInterface}
@@ -500,6 +498,7 @@ public static class Parser {
         basicauth = new BasicAuthenticator();
     }
 
+    @Override
     public String restore(final Context ctx, final String[] filenames, final Credentials auth, final boolean dryrun) throws InvalidDataException, InvalidCredentialsException, StorageException, OXContextRestoreException, DatabaseUpdateException {
         try {
             doNullCheck(ctx, filenames);

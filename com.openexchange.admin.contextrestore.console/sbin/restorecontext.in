@@ -53,8 +53,8 @@ OXFUNCTIONS=@oxfunctions@
 OXCONFIG=@oxscriptconf@
 
 test -f $OXFUNCTIONS || {
-	echo "missing common shell functions file"
-	exit 1
+    echo "missing common shell functions file"
+    exit 1
 }
 
 . $OXFUNCTIONS
