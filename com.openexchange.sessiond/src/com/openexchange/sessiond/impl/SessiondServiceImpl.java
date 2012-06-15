@@ -56,15 +56,16 @@ import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.log.LogFactory;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.AddSessionParameter;
 import com.openexchange.sessiond.SessionMatcher;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.sessiond.SessiondServiceExtended;
 
 /**
  * {@link SessiondServiceImpl} - Implementation of {@link SessiondService}
@@ -72,7 +73,7 @@ import com.openexchange.sessiond.SessiondService;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SessiondServiceImpl implements SessiondService {
+public class SessiondServiceImpl implements SessiondServiceExtended {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SessiondServiceImpl.class));
 
@@ -81,6 +82,11 @@ public class SessiondServiceImpl implements SessiondService {
     public SessiondServiceImpl() {
         super();
         migrateLock = new ReentrantLock();
+    }
+
+    @Override
+    public boolean hasForContext(final int contextId) {
+        return SessionHandler.hasForContext(contextId);
     }
 
     @Override

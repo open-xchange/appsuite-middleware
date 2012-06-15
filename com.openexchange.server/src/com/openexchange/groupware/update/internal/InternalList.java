@@ -322,7 +322,7 @@ public final class InternalList {
      */
     private static final UpdateTaskV2[] TASKS = new UpdateTaskV2[] {
         // Renames "Unified Mail" to "Unified Mail"
-        new com.openexchange.groupware.update.tasks.UnifiedInboxRenamerTask(),
+        new com.openexchange.groupware.update.tasks.UnifiedINBOXRenamerTask(),
 
         // Creates necessary tables for mail header cache
         new com.openexchange.groupware.update.tasks.HeaderCacheCreateTableTask(),

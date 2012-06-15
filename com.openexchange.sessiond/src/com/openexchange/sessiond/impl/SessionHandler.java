@@ -58,11 +58,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.caching.objects.CachedSession;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionCounter;
 import com.openexchange.sessiond.SessionExceptionCodes;
@@ -185,6 +185,16 @@ public final class SessionHandler {
         if (INFO) {
             LOG.info(new StringBuilder(64).append(propagate ? "Remote" : "Local").append(" removal of sessions: Context=").append(contextId).toString());
         }
+    }
+
+    /**
+     * Checks for any active session for specified context.
+     * 
+     * @param contextId The context identifier
+     * @return <code>true</code> if at least one active session is found; otherwise <code>false</code>
+     */
+    public static boolean hasForContext(final int contextId) {
+        return sessionData.hasForContext(contextId);
     }
 
     /**
