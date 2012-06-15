@@ -50,10 +50,15 @@
 package com.openexchange.solr.internal;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
+import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrDocumentList;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.solr.SolrCoreConfigService;
@@ -69,11 +74,11 @@ import com.openexchange.solr.SolrProperties;
  */
 public class SolrMBeanImpl extends StandardMBean implements SolrMBean {
     
-    private final EmbeddedSolrAccessImpl solrServer;
+    private final DelegationSolrAccessImpl solrServer;
     
     private final SolrCoreConfigService coreService;
 
-    public SolrMBeanImpl(EmbeddedSolrAccessImpl solrServer, SolrCoreConfigService coreService) throws NotCompliantMBeanException {
+    public SolrMBeanImpl(DelegationSolrAccessImpl solrServer, SolrCoreConfigService coreService) throws NotCompliantMBeanException {
         super(SolrMBean.class);
         this.solrServer = solrServer;
         this.coreService = coreService;
@@ -84,7 +89,7 @@ public class SolrMBeanImpl extends StandardMBean implements SolrMBean {
         ConfigurationService config = Services.getService(ConfigurationService.class);
         boolean isNode = config.getBoolProperty(SolrProperties.IS_NODE, false);
         if (isNode) {
-            return new ArrayList<String>(solrServer.getActiveCores());            
+            return new ArrayList<String>(solrServer.getEmbeddedServerAccess().getActiveCores());            
         }        
 
         throw new MBeanException(null, "This node is not a solr node.");
@@ -97,6 +102,49 @@ public class SolrMBeanImpl extends StandardMBean implements SolrMBean {
         } catch (OXException e) {
             throw new MBeanException(e, e.getMessage());
         }
+    }
+
+    @Override
+    public String search(int contextId, int userId, int module, String queryString, int limit) throws MBeanException {
+        SolrCoreIdentifier identifier = new SolrCoreIdentifier(contextId, userId, module);
+        SolrQuery query = new SolrQuery(queryString);
+        query.setStart(0);
+        query.setRows(limit > 0 ? limit : Integer.MAX_VALUE);
+        try {
+            QueryResponse response = solrServer.query(identifier, query);
+            SolrDocumentList results = response.getResults();
+            
+            StringBuilder sb = new StringBuilder("Documents found: ");
+            sb.append(results.getNumFound());
+            Iterator<SolrDocument> it = results.iterator();
+            int i = 1;
+            while (it.hasNext()) {
+                SolrDocument next = it.next();
+                sb.append("\n").append("    ").append(i++).append(". ");            
+                for (String fieldName : next.keySet()) {
+                    sb.append(fieldName).append(": ").append(String.valueOf(next.get(fieldName)));
+                    sb.append("\n        ");
+                }
+            }
+            
+            return sb.toString();
+        } catch (OXException e) {
+            throw new MBeanException(e, e.getMessage());
+        }        
+    }
+    
+    @Override
+    public long count(int contextId, int userId, int module, String queryString) throws MBeanException {
+        SolrCoreIdentifier identifier = new SolrCoreIdentifier(contextId, userId, module);
+        SolrQuery query = new SolrQuery(queryString);
+        query.setStart(0);
+        query.setRows(0);
+        try {
+            QueryResponse response = solrServer.query(identifier, query);
+            return response.getResults().getNumFound();
+        } catch (OXException e) {
+            throw new MBeanException(e, e.getMessage());
+        }  
     }
 
 }

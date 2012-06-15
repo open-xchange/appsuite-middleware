@@ -60,8 +60,8 @@ import com.openexchange.threadpool.ThreadPoolService;
 public class SolrActivator extends HousekeepingActivator {
 
 	static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SolrActivator.class));
-
-	private volatile EmbeddedSolrAccessImpl embeddedAccess;
+	
+	private volatile DelegationSolrAccessImpl delegationAccess;
 
 	private static RMISolrAccessService solrRMI;
 
@@ -78,9 +78,9 @@ public class SolrActivator extends HousekeepingActivator {
 	protected void startBundle() throws OXException {
 		Services.setServiceLookup(this);
 		new CheckConfigDBTables(getService(DatabaseService.class)).checkTables();
-		EmbeddedSolrAccessImpl embeddedAccess = this.embeddedAccess = new EmbeddedSolrAccessImpl();
+		EmbeddedSolrAccessImpl embeddedAccess = new EmbeddedSolrAccessImpl();
 		embeddedAccess.startUp();
-		DelegationSolrAccessImpl accessService = new DelegationSolrAccessImpl(embeddedAccess);
+		DelegationSolrAccessImpl accessService = this.delegationAccess = new DelegationSolrAccessImpl(embeddedAccess);
 		registerService(SolrAccessService.class, accessService);
 		SolrCoreConfigServiceImpl coreService = new SolrCoreConfigServiceImpl();
 		registerService(SolrCoreConfigService.class, coreService);
@@ -107,17 +107,18 @@ public class SolrActivator extends HousekeepingActivator {
 		    managementService.unregisterMBean(solrMBeanName);
 		    solrMBean = null;
 		}
-		EmbeddedSolrAccessImpl embeddedAccess = this.embeddedAccess;
+		EmbeddedSolrAccessImpl embeddedAccess = this.delegationAccess.getEmbeddedServerAccess();
 		if (embeddedAccess != null) {
 			embeddedAccess.shutDown();
-			this.embeddedAccess = null;
+			this.delegationAccess = null;
 		}
 	}
 	
 	private void registerMBean(SolrCoreConfigServiceImpl coreService) {
 	    try {
             solrMBeanName = new ObjectName(SolrMBean.DOMAIN, "name", "Solr Control");
-            solrMBean = new SolrMBeanImpl(embeddedAccess, coreService);
+            DelegationSolrAccessImpl delegationAccess = this.delegationAccess;
+            solrMBean = new SolrMBeanImpl(delegationAccess, coreService);
             track(ManagementService.class, new SimpleRegistryListener<ManagementService>() {
 
                 @Override
@@ -148,6 +149,7 @@ public class SolrActivator extends HousekeepingActivator {
 	private void registerEventHandler() {
 	    Dictionary<String, Object> ht = new Hashtable<String, Object>();
         ht.put(EventConstants.EVENT_TOPIC, new String[] { MessagingConstants.START_CORE_TOPIC });
+        final EmbeddedSolrAccessImpl embeddedAccess = this.delegationAccess.getEmbeddedServerAccess();
         EventHandler startCoreEventHandler = new EventHandler() {         
             @Override
             public void handleEvent(Event event) {
@@ -175,7 +177,7 @@ public class SolrActivator extends HousekeepingActivator {
 	private void registerRMIInterface() {
 		LOG.info("Registering Solr RMI Interface.");
 		ConfigurationService config = getService(ConfigurationService.class);
-		EmbeddedSolrAccessImpl embeddedAccess = this.embeddedAccess;
+		EmbeddedSolrAccessImpl embeddedAccess = this.delegationAccess.getEmbeddedServerAccess();
 		solrRMI = new RMISolrAccessImpl(embeddedAccess);
         try {
             RMISolrAccessService stub = (RMISolrAccessService) UnicastRemoteObject.exportObject(solrRMI, 0);
