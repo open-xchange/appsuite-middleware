@@ -53,9 +53,9 @@ import java.rmi.Remote;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.admin.rmi.OXUserCopyInterface;
 import com.openexchange.admin.soap.usercopy.soap.OXUserCopyServicePortType;
 import com.openexchange.admin.soap.usercopy.soap.OXUserCopyServicePortTypeImpl;
+import com.openexchange.admin.user.copy.rmi.OXUserCopyInterface;
 import com.openexchange.osgi.HousekeepingActivator;
 
 
