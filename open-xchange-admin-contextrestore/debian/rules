@@ -3,7 +3,7 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-installroot=$(CURDIR)/debian/open-xchange-admin
+installroot=$(CURDIR)/debian/open-xchange-admin-contextrestore
 
 configure: configure-stamp
 configure-stamp:
