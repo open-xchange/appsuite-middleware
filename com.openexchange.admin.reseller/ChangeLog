@@ -1,3 +1,7 @@
+* 2012-06-15 - jan.bauerdick@open-xchange.com
+
+ - Moved packages c.o.admin.reseller.rmi & c.o.admin.reseller.console to dedicated bundles
+
 * 2012-06-11 - jan.bauerdick@open-xchange.com
 
  - Refactored to run in groupware VM
