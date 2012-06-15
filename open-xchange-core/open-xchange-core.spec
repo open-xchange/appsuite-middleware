@@ -194,6 +194,8 @@ fi
 /opt/open-xchange/osgi/config.ini.template
 %dir /opt/open-xchange/sbin/
 /opt/open-xchange/sbin/*
+%dir /opt/open-xchange/templates/
+/opt/open-xchange/templates/*
 
 %changelog
 * Tue Apr 17 2012 Sonja Krause-Harder  <sonja.krause-harder@open-xchange.com>
