@@ -46,86 +46,63 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.loxandra.json;
+package com.openexchange.loxandra.json.action;
 
-import java.util.Date;
-import java.util.Iterator;
-import java.util.TimeZone;
+import java.util.UUID;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.openexchange.ajax.writer.CommonWriter;
-import com.openexchange.groupware.contact.helpers.ContactField;
-import com.openexchange.groupware.container.Contact;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
+import com.openexchange.exception.OXException;
 import com.openexchange.loxandra.dto.EAVContact;
-import com.openexchange.loxandra.helpers.EAVContactHelper;
-import com.openexchange.tools.TimeZoneUtils;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  *
  */
-public class EAVContactWriter extends CommonWriter {
-	
-	private static Log log = LogFactory.getLog(EAVContactWriter.class);
-	
-	private final TimeZone utc;
-	
+@Action(method = RequestMethod.PUT, 
+		name = "copy", 
+		description = "Copy an EAV Contact from one folder to another.", 
+		parameters = { @Parameter(name = "") } )
+public class CopyAction extends AbstractAction {
+
 	/**
 	 * Default Constructor
-	 * @param tz
+	 * @param serviceLookup
 	 */
-	public EAVContactWriter(TimeZone tz) {
-		super(tz, null);
-        utc = TimeZoneUtils.getTimeZone("utc");
+	public CopyAction(ServiceLookup serviceLookup) {
+		super(serviceLookup);
 	}
-	
-	/**
-	 * Deserialze an EAVContact to JSON
-	 * @param c EAVContact
-	 * @param j JSONObject
-	 * @throws JSONException
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.openexchange.ajax.requesthandler.AJAXActionService#perform(com.openexchange.ajax.requesthandler.AJAXRequestData, com.openexchange.tools.session.ServerSession)
 	 */
-	public void writeContact(final EAVContact c, final JSONObject j) throws JSONException {
-		for (final int column : Contact.JSON_COLUMNS) {
-			
-			final ContactField field = ContactField.getByValue(column);
-			if (field != null && field.isDBField()) {
-				final String key = field.getAjaxName();
-				try {
-					if (c.contains(column)) {
-						if (EAVContactHelper.isNonString(column)) {
-							Date d = (Date)c.get(column);
-							writeParameter(key, d.getTime(), j);
-						} else 
-							writeParameter(key, (String)c.get(column), j);
-					}
-				} catch (IllegalArgumentException e) {
-					e.printStackTrace();
-				} catch (JSONException e) {
-					e.printStackTrace();
-				}
-			}
+	@Override
+	public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+		JSONObject json = (JSONObject) requestData.getData();
+		EAVContact c = new EAVContact();
+		UUID folderUUID = null;
+		
+		try {
+			c.setUUID(UUID.fromString(json.getString("uuid")));
+			c.setTimeUUID(UUID.fromString(json.getString("timeuuid")));
+			c.setDisplayName(json.getString("display_name"));
+			folderUUID = UUID.fromString(json.getString("folderUUID"));
+		} catch (JSONException e) {
+			e.printStackTrace();
 		}
 		
-		if (c.getFolderUUIDs().size() != 0)
-			writeParameter("folderUUID", c.getFolderUUIDs().get(0).toString(), j);
+		getContactService().getEAVContactService().copyContactToFolder(c, folderUUID);
 		
-		if (c.getUUID() != null) //user set a custom uuid
-			writeParameter("uuid", c.getUUID().toString(), j);
-		
-		if (c.getTimeUUID() != null)
-			writeParameter("timeuuid", c.getTimeUUID().toString(), j);
-		
-		JSONObject unnamedJson = new JSONObject();
-		Iterator<String> iter = c.getUnnamedPropertyNames().iterator();
-		while (iter.hasNext()) {
-			String key = (String) iter.next();
-			unnamedJson.put(key, c.getUnnamedProperty(key));
-		}
-		j.put("unnamed", unnamedJson);
+		return new AJAXRequestResult(new JSONObject());
 	}
+
 }
