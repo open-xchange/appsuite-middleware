@@ -208,7 +208,9 @@ public class MailValidator {
         } catch (Exception e) {
             return false;
         } finally {
-            s.close();
+            if (s != null) {
+                s.close();
+            }
         }
         return greeting != null;
     }
