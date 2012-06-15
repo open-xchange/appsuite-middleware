@@ -50,6 +50,7 @@
 package com.openexchange.index.solr;
 
 import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.SolrParams;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.solr.internal.mail.MailSolrIndexAccess;
@@ -57,16 +58,22 @@ import com.openexchange.solr.SolrCoreIdentifier;
 
 public class MockMailSolrIndexAccess extends MailSolrIndexAccess {
     
-    private final InMemoryIndex executor;
+    private final InMemoryIndex index;
     
     /**
      * Initializes a new {@link MockMailSolrIndexAccess}.
      * @param identifier
      * @param triggerType
+     * @throws OXException 
      */
-    public MockMailSolrIndexAccess(int docs) {
+    public MockMailSolrIndexAccess(int docs) throws OXException {
         super(new SolrCoreIdentifier(1, 1, 1));
-        executor = new InMemoryIndex(docs);
+        index = new InMemoryIndex();
+        for (int i = 0; i < docs; i++) {      
+            SolrInputDocument doc = new SolrInputDocument();
+            doc.addField("time_" + i, System.currentTimeMillis());
+            index.addDocument(doc);
+        }
     }
     
     public static int getQueryRows() {
@@ -75,7 +82,7 @@ public class MockMailSolrIndexAccess extends MailSolrIndexAccess {
     
     @Override
     protected QueryResponse query(SolrParams query) throws OXException {
-        return executor.query(query);
+        return index.query(query);
     }
     
 }

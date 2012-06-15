@@ -63,16 +63,15 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.groupware.Types;
 import com.openexchange.index.IndexDocument;
+import com.openexchange.index.IndexDocument.Type;
 import com.openexchange.index.IndexField;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.SearchHandler;
-import com.openexchange.index.IndexDocument.Type;
 import com.openexchange.index.filestore.FilestoreIndexField;
 import com.openexchange.index.solr.internal.AbstractSolrIndexAccess;
 import com.openexchange.index.solr.internal.Services;
 import com.openexchange.index.solr.internal.mail.SearchTerm2Query;
-import com.openexchange.index.solr.mail.SolrMailField;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.solr.SolrCoreIdentifier;
 import com.openexchange.solr.SolrProperties;
@@ -113,14 +112,14 @@ public class SolrFilestoreIndexAccess extends AbstractSolrIndexAccess<File> {
 
     @Override
     public void addEnvelopeData(IndexDocument<File> document) throws OXException {
-        addDocument(SolrFilestoreDocumentConverter.convert(document.getObject()));        
+        addDocument(convertToDocument(document));        
     }
 
     @Override
     public void addEnvelopeData(Collection<IndexDocument<File>> documents) throws OXException {
         List<SolrInputDocument> inputDocuments = new ArrayList<SolrInputDocument>();
         for (IndexDocument<File> document : documents) {
-            inputDocuments.add(SolrFilestoreDocumentConverter.convert(document.getObject()));
+            inputDocuments.add(convertToDocument(document));
         }
         
         addDocuments(inputDocuments);  
@@ -128,14 +127,14 @@ public class SolrFilestoreIndexAccess extends AbstractSolrIndexAccess<File> {
 
     @Override
     public void addContent(IndexDocument<File> document, boolean full) throws OXException {
-        addDocument(SolrFilestoreDocumentConverter.convert(document.getObject()));  
+        addDocument(convertToDocument(document));  
     }
 
     @Override
     public void addContent(Collection<IndexDocument<File>> documents, boolean full) throws OXException {
         List<SolrInputDocument> inputDocuments = new ArrayList<SolrInputDocument>();
         for (IndexDocument<File> document : documents) {
-            inputDocuments.add(SolrFilestoreDocumentConverter.convert(document.getObject()));
+            inputDocuments.add(convertToDocument(document));
         }
         
         addDocuments(inputDocuments);  
@@ -143,17 +142,22 @@ public class SolrFilestoreIndexAccess extends AbstractSolrIndexAccess<File> {
 
     @Override
     public void addAttachments(IndexDocument<File> document, boolean full) throws OXException {
-        addDocument(SolrFilestoreDocumentConverter.convert(document.getObject()));  
+        addDocument(convertToDocument(document));  
     }
 
     @Override
     public void addAttachments(Collection<IndexDocument<File>> documents, boolean full) throws OXException {
         List<SolrInputDocument> inputDocuments = new ArrayList<SolrInputDocument>();
         for (IndexDocument<File> document : documents) {
-            inputDocuments.add(SolrFilestoreDocumentConverter.convert(document.getObject()));
+            inputDocuments.add(convertToDocument(document));
         }
         
         addDocuments(inputDocuments);
+    }
+    
+    private SolrInputDocument convertToDocument(IndexDocument<File> document) throws OXException {
+        // FIXME: account
+        return SolrFilestoreDocumentConverter.convert(contextId, userId, 0, document);
     }
 
     @Override

@@ -65,24 +65,24 @@ import com.openexchange.solr.SolrCoreIdentifier;
  */
 public class MockSolrFilestoreIndexAccess extends SolrFilestoreIndexAccess {
     
-    private final InMemoryIndex executor;
+    private final InMemoryIndex index;
 
     /**
      * Initializes a new {@link MockSolrFilestoreIndexAccess}.
      */
     public MockSolrFilestoreIndexAccess() {
         super(new SolrCoreIdentifier(1, 1, 1));
-        executor = new InMemoryIndex(0);
+        index = new InMemoryIndex();
     }
     
     @Override
     protected QueryResponse query(SolrParams query) throws OXException {
-        return executor.query(query);
+        return index.query(query);
     }
     
     @Override
     protected UpdateResponse addDocument(SolrInputDocument document) throws OXException {
-        return executor.addDocument(document);
+        return index.addDocument(document);
     }
 
 }

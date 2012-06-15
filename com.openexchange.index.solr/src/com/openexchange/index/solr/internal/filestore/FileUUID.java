@@ -47,69 +47,30 @@
  *
  */
 
-package com.openexchange.index.solr;
+package com.openexchange.index.solr.internal.filestore;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import org.apache.solr.client.solrj.response.QueryResponse;
-import org.apache.solr.client.solrj.response.UpdateResponse;
-import org.apache.solr.common.SolrInputDocument;
-import org.apache.solr.common.params.SolrParams;
-import com.openexchange.exception.OXException;
 
 
 /**
- * {@link InMemoryIndex}
+ * {@link FileUUID}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class InMemoryIndex {
+public class FileUUID {
     
-    private final List<Map<String, Object>> index = new ArrayList<Map<String,Object>>();
-
+    private final String fileUUID;
     
-    /**
-     * Initializes a new {@link InMemoryIndex}.
-     * @param identifier
-     * @param triggerType
-     */
-    public InMemoryIndex() {
-        super();        
+    
+    public FileUUID(int contextId, int userId, int accountId, String folderId, String fileId) {
+        super();
+        StringBuilder tmp = new StringBuilder(64);
+        tmp.append(contextId).append('/').append(userId).append('/').append(accountId).append('/').append(folderId).append('/').append(fileId);
+        fileUUID = tmp.toString();
     }
     
-    protected QueryResponse query(SolrParams query) throws OXException {
-        int start = Integer.parseInt(query.get("start"));
-        int rows = Integer.parseInt(query.get("rows"));
-        int end = start + rows;            
-        if (start > index.size()) {
-            return new MockQueryResponse(Collections.EMPTY_SET);
-        }
-        
-        if (end > index.size()) {
-            end = index.size();
-        }
-        
-        Set<Map<String, Object>> entries = new HashSet<Map<String, Object>>();
-        List<Map<String, Object>> subList = index.subList(start, end);
-        entries.addAll(subList);            
-        return new MockQueryResponse(entries);
-    }
-    
-    protected UpdateResponse addDocument(SolrInputDocument document) throws OXException {
-        UpdateResponse response = new UpdateResponse();
-        response.setElapsedTime(0L);
-        Map<String, Object> indexDocument = new HashMap<String, Object>();
-        for (String key : document.keySet()) {
-            indexDocument.put(key, document.get(key).getValue());
-        }
-        index.add(indexDocument);
-        
-        return response;
+    @Override
+    public String toString() {
+        return fileUUID;
     }
 
 }

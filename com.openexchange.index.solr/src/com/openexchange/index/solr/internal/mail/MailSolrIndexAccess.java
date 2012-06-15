@@ -257,64 +257,63 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
         Collection<SolrInputDocument> inputDocuments = new ArrayList<SolrInputDocument>();
         for (IndexDocument<MailMessage> document : documents) {
             MailMessage message = document.getObject();
-            SolrInputDocument inputDocument;
-            if (full) {
-                inputDocument = helper.inputDocumentFor(message, userId, contextId);
-            } else {
-                SolrDocument solrDocument = getIndexedDocument(document);
-                if (solrDocument == null) {
-                    MailUUID uuid = new MailUUID(contextId, userId, message.getAccountId(), message.getFolder(), message.getMailId());    
-                    throw SolrExceptionCodes.DOCUMENT_NOT_FOUND.create(uuid.toString());
-                }
-                
-                String contentFlagField = SolrMailField.CONTENT_FLAG.solrName();
-                if (contentFlagField == null) {
-                    return;
-                }
-                
-                Boolean contentFlag = (Boolean) solrDocument.getFieldValue(contentFlagField);
-                if (null != contentFlag && contentFlag.booleanValue()) {
-                    return;
-                }
-                inputDocument = new SolrInputDocument();
-                for (Entry<String, Object> entry : solrDocument.entrySet()) {
-                    String name = entry.getKey();
-                    SolrInputField field = new SolrInputField(name);
-                    field.setValue(entry.getValue(), 1.0f);
-                    inputDocument.put(name, field);
-                }
-            }
+            if (message != null) {
+                SolrInputDocument inputDocument;
+                if (full) {
+                    inputDocument = helper.inputDocumentFor(message, userId, contextId);
+                } else {
+                    SolrDocument solrDocument = getIndexedDocument(document);
+                    if (solrDocument == null) {
+                        MailUUID uuid = new MailUUID(contextId, userId, message.getAccountId(), message.getFolder(), message.getMailId());
+                        throw SolrExceptionCodes.DOCUMENT_NOT_FOUND.create(uuid.toString());
+                    }
 
-            if (message instanceof ContentAwareMailMessage) {
-                ContentAwareMailMessage contentAwareMessage = (ContentAwareMailMessage) message;
-                String text = contentAwareMessage.getPrimaryContent();
-                if (null == text) {
+                    String contentFlagField = SolrMailField.CONTENT_FLAG.solrName();
+                    if (contentFlagField == null) {
+                        return;
+                    }
+
+                    Boolean contentFlag = (Boolean) solrDocument.getFieldValue(contentFlagField);
+                    if (null != contentFlag && contentFlag.booleanValue()) {
+                        return;
+                    }
+                    inputDocument = new SolrInputDocument();
+                    for (Entry<String, Object> entry : solrDocument.entrySet()) {
+                        String name = entry.getKey();
+                        SolrInputField field = new SolrInputField(name);
+                        field.setValue(entry.getValue(), 1.0f);
+                        inputDocument.put(name, field);
+                    }
+                }
+                if (message instanceof ContentAwareMailMessage) {
+                    ContentAwareMailMessage contentAwareMessage = (ContentAwareMailMessage) message;
+                    String text = contentAwareMessage.getPrimaryContent();
+                    if (null == text) {
+                        TextFinder textFinder = new TextFinder();
+                        text = textFinder.getText(message);
+                    }
+                    if (null != text) {
+                        String contentField = SolrMailField.CONTENT.solrName();
+                        if (contentField != null) {
+                            inputDocument.setField(contentField, text);
+                        }
+                    }
+                } else {
                     TextFinder textFinder = new TextFinder();
-                    text = textFinder.getText(message);
-                }
-                if (null != text) {
-                    String contentField = SolrMailField.CONTENT.solrName();
-                    if (contentField != null) {
-                        inputDocument.setField(contentField, text);
+                    String text = textFinder.getText(message);
+                    if (null != text) {
+                        String contentField = SolrMailField.CONTENT.solrName();
+                        if (contentField != null) {
+                            inputDocument.setField(contentField, text);
+                        }
                     }
                 }
-            } else {
-                TextFinder textFinder = new TextFinder();
-                String text = textFinder.getText(message);
-                if (null != text) {
-                    String contentField = SolrMailField.CONTENT.solrName();
-                    if (contentField != null) {
-                        inputDocument.setField(contentField, text);
-                    }
+                String contentFlagField = SolrMailField.CONTENT_FLAG.solrName();
+                if (contentFlagField != null) {
+                    inputDocument.setField(contentFlagField, Boolean.TRUE);
                 }
+                inputDocuments.add(inputDocument);
             }
-            
-            String contentFlagField = SolrMailField.CONTENT_FLAG.solrName();
-            if (contentFlagField != null) {
-                inputDocument.setField(contentFlagField, Boolean.TRUE);    
-            }
-
-            inputDocuments.add(inputDocument);
         }
         
         addDocuments(inputDocuments);
@@ -591,14 +590,18 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
 
     private String buildQueryString(int accountId, String folder) {
         StringBuilder sb = new StringBuilder(128); 
+        boolean withAccount = false;
         if (SolrMailField.ACCOUNT.isIndexed() && accountId >= 0) {
-            sb.append(" AND ");
             sb.append('(').append(SolrMailField.ACCOUNT.solrName()).append(":\"").append(accountId).append("\")");
+            withAccount = true;
         }
             
         if (SolrMailField.FULL_NAME.isIndexed() && folder != null) {
-            sb.append(" AND ");
-            sb.append('(').append(SolrMailField.FULL_NAME.solrName()).append(":\"").append("\"" + folder + "\"").append("\")");
+            if (withAccount) {
+                sb.append(" AND ");
+            }
+            
+            sb.append('(').append(SolrMailField.FULL_NAME.solrName()).append(":\"").append(folder).append("\")");
         }  
         
         return sb.toString();
