@@ -152,7 +152,6 @@ public abstract class Refresher<T extends Serializable> {
         if (null == cache) {
             return factory.load();
         }
-        T retval = null;
         final Lock lock = factory.getCacheLock();
         try {
             if (!lock.tryLock(3, TimeUnit.SECONDS)) {
@@ -168,6 +167,7 @@ public abstract class Refresher<T extends Serializable> {
         /*
          * Lock acquired
          */
+        T retval = null;
         final Serializable key = factory.getKey();
         Condition cond = null;
         try {
