@@ -1,3 +1,7 @@
+* 2012-06-15 - jan.bauerdick@open-xchange.com
+
+ - Moved package c.o.admin.autocontextid.console to dedicated bundle
+
 * 2012-06-11 - jan.bauerdick@open-xchange.com
 
  - Refactored to run in groupware VM
