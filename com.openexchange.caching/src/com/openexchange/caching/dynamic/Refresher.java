@@ -154,7 +154,7 @@ public abstract class Refresher<T extends Serializable> {
         }
         final Lock lock = factory.getCacheLock();
         try {
-            if (!lock.tryLock(3, TimeUnit.SECONDS)) {
+            if (!lock.tryLock(500, TimeUnit.MILLISECONDS)) {
                 return factory.load();
             }
             // Lock obtained
