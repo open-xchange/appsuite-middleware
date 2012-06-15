@@ -55,4 +55,5 @@ Export-Package: org.apache.tika;version="1.1.0",
  org.apache.tika.parser.xml;version="1.1.0",
  org.apache.tika.sax;version="1.1.0",
  org.apache.tika.sax.xpath;version="1.1.0",
- org.apache.tika.utils;version="1.1.0"
+ org.apache.tika.utils;version="1.1.0",
+ org.apache.xmlbeans
