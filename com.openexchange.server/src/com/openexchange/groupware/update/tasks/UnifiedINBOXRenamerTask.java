@@ -63,13 +63,13 @@ import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 
 /**
- * {@link UnifiedInboxRenamerTask} - Renames "Unified Mail" to "Unified Mail".
+ * {@link UnifiedINBOXRenamerTask} - Renames "Unified Mail" to "Unified Mail".
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class UnifiedInboxRenamerTask extends UpdateTaskAdapter {
+public final class UnifiedINBOXRenamerTask extends UpdateTaskAdapter {
 
-    public UnifiedInboxRenamerTask() {
+    public UnifiedINBOXRenamerTask() {
         super();
     }
 
