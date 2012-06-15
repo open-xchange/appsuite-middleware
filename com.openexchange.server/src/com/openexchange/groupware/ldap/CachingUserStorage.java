@@ -139,9 +139,8 @@ public class CachingUserStorage extends UserStorage implements EventHandler {
     private void handleRemovedSession(final Session session) {
         final SessiondService service = SessiondService.SERVICE_REFERENCE.get();
         if (service instanceof SessiondServiceExtended) {
-            final SessiondServiceExtended serviceExtended = (SessiondServiceExtended) service;
             final int contextId = session.getContextId();
-            if (!serviceExtended.hasForContext(contextId)) {
+            if (!((SessiondServiceExtended) service).hasForContext(contextId)) {
                 cacheLockMap.remove(contextId);
             }
         }
