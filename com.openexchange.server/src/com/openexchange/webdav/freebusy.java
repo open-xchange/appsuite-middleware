@@ -308,9 +308,10 @@ public class freebusy extends HttpServlet {
     }
 
     private Participant findParticipant(final Context ctx, final String mailAddress) throws OXException {
+        final ServerServiceRegistry serviceRegistry = ServerServiceRegistry.getInstance();
         User user = null;
         try {
-            final UserService service = ServerServiceRegistry.getInstance().getService(UserService.class, true);
+            final UserService service = serviceRegistry.getService(UserService.class, true);
             user = service.searchUser(mailAddress, ctx);
         } catch (final ServiceException e) {
             LOG.error(e.getMessage(), e);
@@ -320,7 +321,7 @@ public class freebusy extends HttpServlet {
 
         Resource resource = null;
         try {
-            final ResourceService service = ServerServiceRegistry.getInstance().getService(ResourceService.class, true);
+            final ResourceService service = serviceRegistry.getService(ResourceService.class, true);
             final Resource[] resources = service.searchResourcesByMail(mailAddress, ctx);
             if (1 == resources.length) {
                 resource = resources[0];
