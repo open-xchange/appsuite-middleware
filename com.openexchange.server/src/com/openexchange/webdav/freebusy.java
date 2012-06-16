@@ -61,7 +61,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.ServiceException;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.context.ContextService;
@@ -74,6 +73,7 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.util.TimeZones;
+import com.openexchange.log.LogFactory;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -252,7 +252,7 @@ public class freebusy extends HttpServlet {
             printWriter.println("DTEND:" + outputFormat.format(end));
         }
         try {
-            final Session sessionObj = SessionObjectWrapper.createSessionObject(context.getMailadmin(), context, "freebusysessionobject");
+            final Session sessionObj = SessionObjectWrapper.createSessionObject(Participant.USER == type ? principalId : context.getMailadmin(), context, "freebusysessionobject");
             final AppointmentSQLInterface appointmentInterface = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class, true).createAppointmentSql(sessionObj);
             /*
              * Write free-busy elements

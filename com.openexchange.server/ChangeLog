@@ -1,6 +1,7 @@
 * 2012-06-16 - thorben.betten@open-xchange.com
 
  - Fix for bug 22297: Cancel consistency check for EAS folder tree (because not used, yet)
+ - Fix for bug 22152: Applying proper user identifier to temporary session if free-busy request is performed for a user participant
 
 * 2012-06-15 - thorben.betten@open-xchange.com
 
