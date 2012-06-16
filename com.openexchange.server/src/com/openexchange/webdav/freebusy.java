@@ -252,8 +252,11 @@ public class freebusy extends HttpServlet {
             printWriter.println("DTEND:" + outputFormat.format(end));
         }
         try {
-            final Session sessionObj = SessionObjectWrapper.createSessionObject(Participant.USER == type ? principalId : context.getMailadmin(), context, "freebusysessionobject");
-            final AppointmentSQLInterface appointmentInterface = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class, true).createAppointmentSql(sessionObj);
+            final AppointmentSQLInterface appointmentInterface;
+            {
+                final Session session = SessionObjectWrapper.createSessionObject(Participant.USER == type ? principalId : context.getMailadmin(), context, "freebusysessionobject");
+                appointmentInterface = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class, true).createAppointmentSql(session);
+            }
             /*
              * Write free-busy elements
              */
