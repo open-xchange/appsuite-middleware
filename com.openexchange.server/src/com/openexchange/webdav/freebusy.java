@@ -262,11 +262,9 @@ public class freebusy extends HttpServlet {
              */
             final SearchIterator<Appointment> it = appointmentInterface.getFreeBusyInformation(principalId, type, start, end);
             try {
-                synchronized (outputFormat) {
-                    while (it.hasNext()) {
-                        writeFreeBusy(it.next(), printWriter, outputFormat);
-                        printWriter.flush();
-                    }
+                while (it.hasNext()) {
+                    writeFreeBusy(it.next(), printWriter, outputFormat);
+                    printWriter.flush();
                 }
             } finally {
                 it.close();
@@ -302,9 +300,11 @@ public class freebusy extends HttpServlet {
         default:
             pw.print("FBTYPE=BUSY:");
         }
-        pw.print(format.format(appointment.getStartDate()));
-        pw.print('/');
-        pw.println(format.format(appointment.getEndDate()));
+        synchronized (format) {
+            pw.print(format.format(appointment.getStartDate()));
+            pw.print('/');
+            pw.println(format.format(appointment.getEndDate()));
+        }
     }
 
     private Participant findParticipant(final Context ctx, final String mailAddress) throws OXException {
