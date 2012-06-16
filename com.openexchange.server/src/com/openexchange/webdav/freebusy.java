@@ -143,14 +143,7 @@ public class freebusy extends HttpServlet {
             return;
         }
 
-        final Participant participant;
-        try {
-            participant = findParticipant(context, mailAddress);
-        } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
-            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Unable to resolve mail address to a user or a resource.");
-            return;
-        }
+        final Participant participant = findParticipant(context, mailAddress);
         if (null == participant) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND, "Unable to resolve mail address to a user or a resource.");
             return;
@@ -308,7 +301,7 @@ public class freebusy extends HttpServlet {
         }
     }
 
-    private Participant findParticipant(final Context ctx, final String mailAddress) throws OXException {
+    private Participant findParticipant(final Context ctx, final String mailAddress) {
         final ServerServiceRegistry serviceRegistry = ServerServiceRegistry.getInstance();
         User user = null;
         try {
