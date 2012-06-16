@@ -263,9 +263,11 @@ public class freebusy extends HttpServlet {
             } finally {
                 it.close();
             }
-        }catch (final ServiceException e) {
-                LOG.error("Calendar service not found.", e);
+        } catch (final ServiceException e) {
+            LOG.error("Calendar service not found.", e);
         } catch (final OXException e) {
+            LOG.error("Problem getting free busy information for '" + mailAddress + "'.", e);
+        } catch (final RuntimeException e) {
             LOG.error("Problem getting free busy information for '" + mailAddress + "'.", e);
         }
         printWriter.println("END:VFREEBUSY");
