@@ -116,7 +116,4 @@ public final class JsonCacheMediumTextTask extends UpdateTaskAdapter {
         }
     }
 
-    protected Column[] getColumns() {
-        return new Column[] { new Column("inProgress", "TINYINT default 0") };
-    }
 }
