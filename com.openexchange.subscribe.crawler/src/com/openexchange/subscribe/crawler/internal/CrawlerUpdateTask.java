@@ -163,7 +163,7 @@ public class CrawlerUpdateTask implements Runnable {
             if (possibleNewCrawlerDescription != null) {
                 LOG.info("There is a possible new crawler description : " + ymlFilename);
                 // is it compatible to the installed API?
-                if (possibleNewCrawlerDescription.getCrawlerApiVersion() <= activator.getCRAWLER_API_VERSION()) {
+                if (possibleNewCrawlerDescription.getCrawlerApiVersion() <= Activator.getCRAWLER_API_VERSION()) {
                     LOG.info("The API version fits");
                     final String path = config.getProperty(Activator.PATH_PROPERTY);
                     // it is an updated description for an existing crawler
@@ -181,7 +181,7 @@ public class CrawlerUpdateTask implements Runnable {
                         // it is a description for a completely new crawler
                     } else {
                         // only download configurations for new crawlers if this is enabled by configuration-file
-                        boolean onlyUpdateInstalled = Boolean.parseBoolean(config.getProperty(activator.ONLY_UPDATE_INSTALLED));
+                        boolean onlyUpdateInstalled = Boolean.parseBoolean(config.getProperty(Activator.ONLY_UPDATE_INSTALLED));
                         if (!onlyUpdateInstalled){
                             LOG.info("It is a completely new crawler and will be saved");
                             Yaml.dump(possibleNewCrawlerDescription, new File(path + ymlFilename));

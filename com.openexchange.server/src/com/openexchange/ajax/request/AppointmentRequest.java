@@ -917,7 +917,7 @@ public class AppointmentRequest extends CalendarRequest {
                     0,
                     0,
                     recurrencePosition,
-                    recColl.MAX_OCCURRENCESE,
+                    CalendarCollectionService.MAX_OCCURRENCESE,
                     true);
                 if (recuResults.size() == 0) {
                     if (LOG.isWarnEnabled()) {

@@ -160,7 +160,7 @@ public class AdminDaemon {
     }
 
     public void initAccessCombinationsInCache() throws ClassNotFoundException, OXGenericException {
-        this.cache.initAccessCombinations();
+        AdminDaemon.cache.initAccessCombinations();
     }
 
     public void initRMI(final BundleContext context) {

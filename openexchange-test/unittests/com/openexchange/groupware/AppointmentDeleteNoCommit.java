@@ -86,7 +86,7 @@ public class AppointmentDeleteNoCommit extends TestCase {
         super.setUp();
         final EventConfigImpl event = new EventConfigImpl();
         event.setEventQueueEnabled(false);
-        this.userid = getUserId();
+        AppointmentDeleteNoCommit.userid = getUserId();
         ContextStorage.start();
     }
 

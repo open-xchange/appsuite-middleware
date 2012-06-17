@@ -61,6 +61,7 @@ import com.openexchange.log.LogFactory;
 import com.openexchange.calendar.RecurringResults;
 import com.openexchange.calendar.Tools;
 import com.openexchange.calendar.api.CalendarCollection;
+import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.container.CalendarObject;
 
@@ -378,7 +379,7 @@ public class RecurringCalculation {
     private void checkValues() {
 		if (!contains_until) {
 			end_of_series = (start_of_series + (recurring_type == CalendarObject.YEARLY ? Constants.MILLI_YEAR
-					* recColl.MAX_OCCURRENCESE : Constants.MILLI_YEAR * 99));
+					* CalendarCollectionService.MAX_OCCURRENCESE : Constants.MILLI_YEAR * 99));
 			this.until = end_of_series;
 		}
 	}

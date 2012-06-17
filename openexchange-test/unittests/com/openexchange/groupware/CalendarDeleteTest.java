@@ -98,7 +98,7 @@ public class CalendarDeleteTest extends TestCase {
 
         try {
             final CalendarTest ct = new CalendarTest();
-            ct.dontDelete();
+            CalendarTest.dontDelete();
             ct.setUp();
             ct.testWholeDayWithDB();
             ct.testMultiSpanWholeDay();

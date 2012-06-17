@@ -55,6 +55,7 @@ import java.util.List;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.test.ContactTestManager;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
@@ -129,7 +130,7 @@ public class BasicManagedContactTests extends AbstractManagedContactTest {
 		List<String> sinograph = Arrays.asList( "\u963f", "\u6ce2","\u6b21","\u7684","\u9e45","\u5bcc","\u54e5","\u6cb3","\u6d01","\u79d1","\u4e86","\u4e48","\u5462","\u54e6","\u6279","\u4e03","\u5982","\u56db","\u8e22","\u5c4b","\u897f","\u8863","\u5b50");
 
 		for(String graphem: sinograph){
-			manager.newAction( manager.generateContact(folderID, graphem) );
+			manager.newAction( ContactTestManager.generateContact(folderID, graphem) );
 		}
 
 		int fieldNum = ContactField.SUR_NAME.getNumber();
@@ -145,7 +146,7 @@ public class BasicManagedContactTests extends AbstractManagedContactTest {
 		List<String> sinograph = Arrays.asList( "\u963f", "\u6ce2","\u6b21","\u7684","\u9e45","\u5bcc","\u54e5","\u6cb3","\u6d01","\u79d1","\u4e86","\u4e48","\u5462","\u54e6","\u6279","\u4e03","\u5982","\u56db","\u8e22","\u5c4b","\u897f","\u8863","\u5b50");
 
 		for(String graphem: sinograph){
-			manager.newAction( manager.generateContact(folderID, graphem) );
+			manager.newAction( ContactTestManager.generateContact(folderID, graphem) );
 		}
 
 		int fieldNum = ContactField.SUR_NAME.getNumber();
