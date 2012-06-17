@@ -230,23 +230,34 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
             final boolean update;
             final JSONValue prev;
             {
-                if (!rs.next()) {
-                    prev = null;
-                    update = false;
-                } else {
+                if (rs.next()) {
                     update = true;
                     final String sJson = rs.getString(1);
-                    if ("null".equals(sJson)) {
+                    if (rs.wasNull()) {
                         prev = null;
-                    } else {
-                        if ('{' == sJson.charAt(0)) {
-                            prev = new JSONObject(sJson);
-                        } else if ('[' == sJson.charAt(0)) {
-                            prev = new JSONArray(sJson);
+                    } else { // Not NULL
+                        if ("null".equalsIgnoreCase(sJson)) {
+                            prev = null;
                         } else {
-                            throw AjaxExceptionCodes.JSON_ERROR.create("Not a JSON value.");
+                            JSONValue tmp;
+                            try {
+                                if ('{' == sJson.charAt(0)) {
+                                    tmp = new JSONObject(sJson);
+                                } else if ('[' == sJson.charAt(0)) {
+                                    tmp = new JSONArray(sJson);
+                                } else {
+                                    throw AjaxExceptionCodes.JSON_ERROR.create("Not a JSON value: " + abbreviate(sJson, 0, 256));
+                                }
+                            } catch (final JSONException e) {
+                                // Read invalid JSON data
+                                tmp = null;
+                            }
+                            prev = tmp;
                         }
                     }
+                } else {
+                    prev = null;
+                    update = false;
                 }
             }
             DBUtils.closeSQLStuff(rs, stmt);
@@ -279,8 +290,6 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
             return true;
         } catch (final SQLException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
@@ -394,7 +403,7 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
                 final String hexString = Integer.toHexString(a);
                 sb.append("\\u");
                 if (2 == hexString.length()) {
-                    sb.append(2 == hexString.length() ? "00" : "");
+                    sb.append("00");
                 }
                 sb.append(hexString);
             } else {
@@ -402,6 +411,30 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
             }
         }
         return sb.toString();
+    }
+
+    private static String abbreviate(final String str, final int offset, final int maxWidth) {
+        if (str == null) {
+            return null;
+        }
+        final int length = str.length();
+        if (length <= maxWidth) {
+            return str;
+        }
+        int off = offset;
+        if (off > length) {
+            off = length;
+        }
+        if ((length - off) < (maxWidth - 3)) {
+            off = length - (maxWidth - 3);
+        }
+        if (off <= 4) {
+            return str.substring(0, maxWidth - 3) + "...";
+        }
+        if ((off + (maxWidth - 3)) < length) {
+            return "..." + abbreviate(str.substring(off), 0, maxWidth - 3);
+        }
+        return "..." + str.substring(length - (maxWidth - 3));
     }
 
 }
