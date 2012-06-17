@@ -192,7 +192,6 @@ public final class TikaDocumentHandler {
      * Gets the document's content.
      *
      * @param in The document's input stream
-     * @param output The output format
      * @return The content according to output format
      * @throws OXException If an error occurs
      */

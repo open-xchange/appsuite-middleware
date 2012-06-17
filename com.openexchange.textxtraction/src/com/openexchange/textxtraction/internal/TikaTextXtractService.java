@@ -49,17 +49,32 @@
 
 package com.openexchange.textxtraction.internal;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.EnumMap;
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 import net.htmlparser.jericho.Renderer;
 import net.htmlparser.jericho.Segment;
 import net.htmlparser.jericho.Source;
+import org.apache.commons.logging.Log;
+import org.apache.poi.extractor.ExtractorFactory;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
+import org.apache.tika.Tika;
+import org.apache.tika.detect.Detector;
 import org.apache.tika.io.TikaInputStream;
+import org.apache.tika.metadata.Metadata;
+import org.apache.tika.mime.MediaType;
+import org.apache.xmlbeans.XmlException;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
@@ -72,16 +87,37 @@ import com.openexchange.textxtraction.TextXtractService;
  */
 public final class TikaTextXtractService implements TextXtractService {
 
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(TikaTextXtractService.class);
+
+    private static enum DirectType {
+        /**
+         * The media type(s) belonging to MS Word
+         */
+        WORD,
+    }
+
     private static final String UTF_8 = Charsets.UTF_8_NAME;
 
-    private final TextXtractService xtractService;
+    private final TextXtractService outsideInXtractService;
+
+    private final Tika tika;
+
+    private final Map<DirectType, Set<MediaType>> directTypes;
 
     /**
      * Initializes a new {@link TikaTextXtractService}.
      */
     public TikaTextXtractService() {
         super();
-        xtractService = new CleanContentExtractor();
+        tika = new Tika();
+        outsideInXtractService = new CleanContentExtractor();
+        // Direct types map
+        directTypes = new EnumMap<DirectType, Set<MediaType>>(DirectType.class);
+        // MS Word media types
+        final Set<MediaType> set = new HashSet<MediaType>(2);
+        set.add(MediaType.application("msword"));
+        set.add(MediaType.application("vnd.ms-word"));
+        directTypes.put(DirectType.WORD, set);
     }
 
     private TikaDocumentHandler newDefaultHandler() throws OXException {
@@ -93,9 +129,9 @@ public final class TikaTextXtractService implements TextXtractService {
     }
 
     @Override
-    public String extractFromResource(final String arg, final String optMimeType) throws OXException {
+    public String extractFromResource(final String resource, final String optMimeType) throws OXException {
         try {
-            final File file = new File(arg);
+            final File file = new File(resource);
             if (null != optMimeType) {
                 if (optMimeType.toLowerCase(Locale.ENGLISH).startsWith("text/htm")) {
                     InputStream input = null;
@@ -103,7 +139,7 @@ public final class TikaTextXtractService implements TextXtractService {
                         if (file.isFile()) {
                             input = new FileInputStream(file);
                         } else {
-                            input = TikaInputStream.get(new URL(arg));
+                            input = TikaInputStream.get(new URL(resource));
                         }
                         final Source source = new Source(input);
                         return new Renderer(new Segment(source, 0, source.getEnd())).setMaxLineLength(9999).setIncludeHyperlinkURLs(false).toString();
@@ -113,7 +149,7 @@ public final class TikaTextXtractService implements TextXtractService {
                 }
             }
             try {
-                final String text = xtractService.extractFromResource(arg, optMimeType);
+                final String text = outsideInXtractService.extractFromResource(resource, optMimeType);
                 if (null != text) {
                     return text;
                 }
@@ -121,17 +157,59 @@ public final class TikaTextXtractService implements TextXtractService {
                 // Ignore
             }
             /*
-             * Non-HTML content
+             * Detect MIME type & continue processing
              */
-            final URL url;
-            if (file.isFile()) {
-                url = file.toURI().toURL();
-            } else {
-                url = new URL(arg);
+            try {
+                /*
+                 * Set input stream
+                 */
+                final InputStream in;
+                if (file.isFile()) {
+                    in = new BufferedInputStream(new FileInputStream(file));
+                } else {
+                    in = TikaInputStream.get(new URL(resource), new Metadata());
+                }
+                /*
+                 * Check with POI
+                 */
+                {
+                    final String text = poi2text(in);
+                    if (null != text) {
+                        Streams.close(in);
+                        return text;
+                    }
+                }
+                /*
+                 * The stream is marked and reset to the original position
+                 */
+                final MediaType mediaType;
+                if (isEmpty(optMimeType)) {
+                    final Detector detector = tika.getDetector();
+                    mediaType = detector.detect(in, new Metadata());
+                } else {
+                    mediaType = MediaType.parse(optMimeType);
+                }
+                /*
+                 * Check for direct support
+                 */
+                try {
+                    final Set<MediaType> set = directTypes.get(DirectType.WORD);
+                    for (final MediaType directType : set) {
+                        if (directType.getBaseType().equals(mediaType.getBaseType())) {
+                            return poi2text(in);
+                        }
+                    }
+                } catch (final Exception e) {
+                    // Ignore
+                }
+                /*
+                 * Otherwise handle with almighty Tika
+                 */
+                final TikaDocumentHandler documentHandler = isEmpty(optMimeType) ? newDefaultHandler() : newHandler(optMimeType);
+                return documentHandler.getDocumentContent(in);
+            } catch (final IOException e) {
+                throw TextXtractExceptionCodes.IO_ERROR.create(e, e.getMessage());
             }
-            final TikaDocumentHandler documentHandler = isEmpty(optMimeType) ? newDefaultHandler() : newHandler(optMimeType);
-            final InputStream input = TikaInputStream.get(url, documentHandler.getMetadata());
-            return documentHandler.getDocumentContent(input);
         } catch (final MalformedURLException e) {
             throw TextXtractExceptionCodes.ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
@@ -153,14 +231,58 @@ public final class TikaTextXtractService implements TextXtractService {
             }
         }
         try {
-            final String text = xtractService.extractFrom(content, optMimeType);
+            final String text = outsideInXtractService.extractFrom(content, optMimeType);
             if (null != text) {
                 return text;
             }
         } catch (final Exception e) {
             // Ignore
         }
-        return (isEmpty(optMimeType) ? newDefaultHandler() : newHandler(optMimeType)).getDocumentContent(Streams.newByteArrayInputStream(content.getBytes(Charsets.UTF_8)));
+        /*
+         * Detect MIME type & continue processing
+         */
+        try {
+            final ByteArrayInputStream in = Streams.newByteArrayInputStream(content.getBytes(Charsets.UTF_8));
+            /*
+             * Check with POI
+             */
+            {
+                final String text = poi2text(in);
+                if (null != text) {
+                    return text;
+                }
+            }
+            /*
+             * The stream is marked and reset to the original position
+             */
+            final MediaType mediaType;
+            if (isEmpty(optMimeType)) {
+                final Detector detector = tika.getDetector();
+                mediaType = detector.detect(in, new Metadata());
+            } else {
+                mediaType = MediaType.parse(optMimeType);
+            }
+            /*
+             * Check for direct support
+             */
+            try {
+                final Set<MediaType> set = directTypes.get(DirectType.WORD);
+                for (final MediaType directType : set) {
+                    if (directType.getBaseType().equals(mediaType.getBaseType())) {
+                        return poi2text(in);
+                    }
+                }
+            } catch (final Exception e) {
+                // Ignore
+            }
+            /*
+             * Otherwise handle with almighty Tika
+             */
+            final TikaDocumentHandler documentHandler = isEmpty(optMimeType) ? newDefaultHandler() : newHandler(optMimeType);
+            return documentHandler.getDocumentContent(in);
+        } catch (final IOException e) {
+            throw TextXtractExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        }
     }
 
     @Override
@@ -178,14 +300,89 @@ public final class TikaTextXtractService implements TextXtractService {
             }
         }
         try {
-            final String text = xtractService.extractFrom(inputStream, optMimeType);
+            final String text = outsideInXtractService.extractFrom(inputStream, optMimeType);
             if (null != text) {
                 return text;
             }
         } catch (final Exception e) {
             // Ignore
         }
-        return (isEmpty(optMimeType) ? newDefaultHandler() : newHandler(optMimeType)).getDocumentContent(inputStream);
+        /*
+         * Detect MIME type & continue processing
+         */
+        try {
+            /*
+             * The stream is marked and reset to the original position
+             */
+            final InputStream in;
+            if (inputStream == null || inputStream.markSupported()) {
+                in = inputStream;
+            } else {
+                in = new BufferedInputStream(inputStream);
+            }
+            /*
+             * Check with POI
+             */
+            {
+                final String text = poi2text(in);
+                if (null != text) {
+                    Streams.close(in);
+                    return text;
+                }
+            }
+            /*
+             * Detect media type
+             */
+            final MediaType mediaType;
+            if (isEmpty(optMimeType)) {
+                final Detector detector = tika.getDetector();
+                mediaType = detector.detect(in, new Metadata());
+            } else {
+                mediaType = MediaType.parse(optMimeType);
+            }
+            /*
+             * Check for direct support
+             */
+            try {
+                final Set<MediaType> set = directTypes.get(DirectType.WORD);
+                for (final MediaType directType : set) {
+                    if (directType.getBaseType().equals(mediaType.getBaseType())) {
+                        return poi2text(in);
+                    }
+                }
+            } catch (final Exception e) {
+                // Ignore
+            }
+            /*
+             * Otherwise handle with almighty Tika
+             */
+            final TikaDocumentHandler documentHandler = isEmpty(optMimeType) ? newDefaultHandler() : newHandler(optMimeType);
+            return documentHandler.getDocumentContent(in);
+        } catch (final IOException e) {
+            throw TextXtractExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Expects the input to be a MS document.
+     * 
+     * @param in The input stream
+     * @return The extracted text or <code>null</code>
+     * @throws IOException If an I/O error occurs
+     */
+    private String poi2text(final InputStream in) throws IOException {
+        try {
+            return ExtractorFactory.createExtractor(in).getText();
+        } catch (final InvalidFormatException e) {
+            LOG.debug(e.getMessage(), e);
+        } catch (final OpenXML4JException e) {
+            LOG.debug(e.getMessage(), e);
+        } catch (final XmlException e) {
+            LOG.debug(e.getMessage(), e);
+        } catch (final RuntimeException e) {
+            LOG.debug(e.getMessage(), e);
+        }
+        return null;
     }
 
     private static boolean isEmpty(final String string) {

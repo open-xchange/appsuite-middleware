@@ -64,6 +64,7 @@ import org.apache.poi.poifs.eventfilesystem.POIFSReaderListener;
 import org.apache.poi.poifs.filesystem.DocumentInputStream;
 import org.apache.poi.util.LittleEndian;
 import org.apache.xmlbeans.XmlException;
+import com.openexchange.java.Streams;
 
 /**
  * {@link ReadFileFormat}
@@ -146,6 +147,8 @@ public class ReadFileFormat {
             LOG.debug(e.getMessage(), e);
         } catch (final RuntimeException e) {
             LOG.debug(e.getMessage(), e);
+        } finally {
+            Streams.close(in);
         }
         return null;
     }
