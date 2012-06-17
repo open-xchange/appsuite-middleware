@@ -89,46 +89,6 @@ public class ReadFileFormat {
         textBuffer = new StringBuilder();
     }
 
-//    public String pdftotext(final String fileName) {
-//        PDFParser parser;
-//        String parsedText;
-//        PDFTextStripper pdfStripper;
-//        PDDocument pdDoc = null;
-//        COSDocument cosDoc = null;
-//        final File f = new File(fileName);
-//        try {
-//            parser = new PDFParser(new FileInputStream(f));
-//        } catch (final Exception e) {
-//            System.out.println("Unable to open PDF Parser.");
-//            return null;
-//        }
-//        try {
-//            parser.parse();
-//            cosDoc = parser.getDocument();
-//            pdfStripper = new PDFTextStripper();
-//            pdDoc = new PDDocument(cosDoc);
-//            parsedText = pdfStripper.getText(pdDoc);
-//            cosDoc.close();
-//            pdDoc.close();
-//        } catch (final Exception e) {
-//            System.out.println("An exception occured in parsing the PDF Document.");
-//            e.printStackTrace();
-//            try {
-//                if (cosDoc != null) {
-//                    cosDoc.close();
-//                }
-//                if (pdDoc != null) {
-//                    pdDoc.close();
-//                }
-//            } catch (final Exception e1) {
-//                e1.printStackTrace();
-//            }
-//            return null;
-//        }
-//        System.out.println("Done.");
-//        return parsedText;
-//    }
-
     /**
      * Expects the input to be a MS document.
      * 

@@ -66,6 +66,10 @@ import net.htmlparser.jericho.Renderer;
 import net.htmlparser.jericho.Segment;
 import net.htmlparser.jericho.Source;
 import org.apache.commons.logging.Log;
+import org.apache.pdfbox.cos.COSDocument;
+import org.apache.pdfbox.pdfparser.PDFParser;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.util.PDFTextStripper;
 import org.apache.poi.POIXMLDocument;
 import org.apache.poi.extractor.ExtractorFactory;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -94,9 +98,9 @@ public final class TikaTextXtractService implements TextXtractService {
 
     private static enum DirectType {
         /**
-         * The media type(s) belonging to MS Word
+         * The media type(s) belonging to PDF
          */
-        WORD,
+        PDF,
     }
 
     private static final String UTF_8 = Charsets.UTF_8_NAME;
@@ -116,11 +120,10 @@ public final class TikaTextXtractService implements TextXtractService {
         outsideInXtractService = new CleanContentExtractor();
         // Direct types map
         directTypes = new EnumMap<DirectType, Set<MediaType>>(DirectType.class);
-        // MS Word media types
+        // PDF media types
         final Set<MediaType> set = new HashSet<MediaType>(2);
-        set.add(MediaType.application("msword"));
-        set.add(MediaType.application("vnd.ms-word"));
-        directTypes.put(DirectType.WORD, set);
+        set.add(MediaType.application("pdf"));
+        directTypes.put(DirectType.PDF, set);
     }
 
     private TikaDocumentHandler newDefaultHandler() throws OXException {
@@ -176,7 +179,7 @@ public final class TikaTextXtractService implements TextXtractService {
                  * Check with POI
                  */
                 {
-                    final String text = poi2text(in);
+                    final String text = poitotext(in);
                     if (null != text) {
                         Streams.close(in);
                         return text;
@@ -196,10 +199,10 @@ public final class TikaTextXtractService implements TextXtractService {
                  * Check for direct support
                  */
                 try {
-                    final Set<MediaType> set = directTypes.get(DirectType.WORD);
+                    final Set<MediaType> set = directTypes.get(DirectType.PDF);
                     for (final MediaType directType : set) {
                         if (directType.getBaseType().equals(mediaType.getBaseType())) {
-                            return poi2text(in);
+                            return pdftotext(in);
                         }
                     }
                 } catch (final Exception e) {
@@ -250,7 +253,7 @@ public final class TikaTextXtractService implements TextXtractService {
              * Check with POI
              */
             {
-                final String text = poi2text(in);
+                final String text = poitotext(in);
                 if (null != text) {
                     return text;
                 }
@@ -269,10 +272,10 @@ public final class TikaTextXtractService implements TextXtractService {
              * Check for direct support
              */
             try {
-                final Set<MediaType> set = directTypes.get(DirectType.WORD);
+                final Set<MediaType> set = directTypes.get(DirectType.PDF);
                 for (final MediaType directType : set) {
                     if (directType.getBaseType().equals(mediaType.getBaseType())) {
-                        return poi2text(in);
+                        return pdftotext(in);
                     }
                 }
             } catch (final Exception e) {
@@ -327,7 +330,7 @@ public final class TikaTextXtractService implements TextXtractService {
              * Check with POI
              */
             {
-                final String text = poi2text(in);
+                final String text = poitotext(in);
                 if (null != text) {
                     Streams.close(in);
                     return text;
@@ -347,10 +350,10 @@ public final class TikaTextXtractService implements TextXtractService {
              * Check for direct support
              */
             try {
-                final Set<MediaType> set = directTypes.get(DirectType.WORD);
+                final Set<MediaType> set = directTypes.get(DirectType.PDF);
                 for (final MediaType directType : set) {
                     if (directType.getBaseType().equals(mediaType.getBaseType())) {
-                        return poi2text(in);
+                        return pdftotext(in);
                     }
                 }
             } catch (final Exception e) {
@@ -373,7 +376,7 @@ public final class TikaTextXtractService implements TextXtractService {
      * @return The extracted text or <code>null</code>
      * @throws IOException If an I/O error occurs
      */
-    private String poi2text(final InputStream in) throws IOException {
+    private String poitotext(final InputStream in) throws IOException {
         if (null == in) {
             return null;
         }
@@ -395,6 +398,41 @@ public final class TikaTextXtractService implements TextXtractService {
             LOG.debug(e.getMessage(), e);
         }
         return null;
+    }
+
+    private String pdftotext(final InputStream in) {
+        final PDFParser parser;
+        try {
+            parser = new PDFParser(in);
+        } catch (final Exception e) {
+            return null;
+        }
+        PDDocument pdDoc = null;
+        COSDocument cosDoc = null;
+        try {
+            parser.parse();
+            cosDoc = parser.getDocument();
+            pdDoc = new PDDocument(cosDoc);
+            return new PDFTextStripper().getText(pdDoc);
+        } catch (final Exception e) {
+            LOG.debug(e.getMessage(), e);
+            return null;
+        } finally {
+            if (pdDoc != null) {
+                try {
+                    pdDoc.close();
+                } catch (final IOException e) {
+                    // Ignore
+                }
+            }
+            if (cosDoc != null) {
+                try {
+                    cosDoc.close();
+                } catch (final IOException e) {
+                    // Ignore
+                }
+            }
+        }
     }
 
     private static boolean isEmpty(final String string) {

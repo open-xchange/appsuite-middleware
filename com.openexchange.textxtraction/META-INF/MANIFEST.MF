@@ -87,6 +87,7 @@ Import-Package: com.openexchange.exception,
 Export-Package: com.openexchange.textxtraction
 Bundle-ClassPath: lib/CleanContent.jar,
  lib/jericho-3.2.jar,
+ lib/pdfbox-1.7.0.jar,
  lib/poi-3.8.jar,
  lib/poi-contrib-3.6.jar,
  lib/poi-scratchpad-3.8.jar,

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry exported="true" kind="lib" path="lib/pdfbox-1.7.0.jar" sourcepath="source/pdfbox-1.7.0-src.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/poi-ooxml-3.8.jar" sourcepath="source/poi-ooxml-3.8-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/poi-3.8.jar" sourcepath="source/poi-3.8-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/poi-contrib-3.6.jar" sourcepath="source/poi-contrib-3.6-sources.jar"/>
