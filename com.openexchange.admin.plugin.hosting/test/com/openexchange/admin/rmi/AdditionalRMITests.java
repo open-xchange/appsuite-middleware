@@ -468,8 +468,9 @@ public class AdditionalRMITests extends AbstractRMITest {
                 assertTrue("Caught exception", true);
             }
         } finally {
-            if (contextCreated)
+            if (contextCreated) {
                 conInterface.delete(newContext, superAdminCredentials);
+            }
         }
     }
 

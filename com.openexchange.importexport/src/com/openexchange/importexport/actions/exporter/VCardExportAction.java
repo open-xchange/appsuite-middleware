@@ -65,8 +65,9 @@ public class VCardExportAction extends AbstractExportAction {
 
 	@Override
 	public Exporter getExporter() {
-		if(this.exporter == null)
-			exporter = new VCardExporter();
+		if(this.exporter == null) {
+            exporter = new VCardExporter();
+        }
 		return exporter;
 	}
 

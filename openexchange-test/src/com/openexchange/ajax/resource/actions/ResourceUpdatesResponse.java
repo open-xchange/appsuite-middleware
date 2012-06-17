@@ -84,8 +84,9 @@ public class ResourceUpdatesResponse extends AbstractAJAXResponse {
     protected List<Group> getGroups(String field) throws OXException, JSONException {
         LinkedList<Group> groups = new LinkedList<Group>();
         JSONObject data = (JSONObject) getData();
-        if(data.isNull(field))
+        if(data.isNull(field)) {
             return new LinkedList<Group>();
+        }
 
         JSONArray grp = data.getJSONArray(field);
 

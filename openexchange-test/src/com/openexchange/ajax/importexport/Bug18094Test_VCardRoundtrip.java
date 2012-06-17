@@ -128,17 +128,20 @@ public class Bug18094Test_VCardRoundtrip extends AbstractManagedContactTest {
 		List<ContactField> mismatches = new LinkedList<ContactField>();
 
 		for(ContactField field: ContactField.values()){
-			if(excluded.contains(field))
-				continue;
+			if(excluded.contains(field)) {
+                continue;
+            }
 			int number = field.getNumber();
 			Object actualValue = actual.get(number);
 			Object expectedValue = contact.get(number);
 
-			if(expectedValue == null && actualValue == null)
-				continue;
+			if(expectedValue == null && actualValue == null) {
+                continue;
+            }
 
-			if(expectedValue == null || !expectedValue.equals(actualValue))
-				mismatches.add(field);
+			if(expectedValue == null || !expectedValue.equals(actualValue)) {
+                mismatches.add(field);
+            }
 		}
 
 		java.util.Collections.sort(mismatches, new Comparator<ContactField>(){

@@ -65,8 +65,9 @@ public class PositiveAssertionOnCreate extends AbstractPositiveAssertion {
 
     @Override
     public void check(Appointment startAppointment, Changes changes, Expectations expectations) {
-        if (!startAppointment.containsParentFolderID())
+        if (!startAppointment.containsParentFolderID()) {
             startAppointment.setParentFolderID(folder);
+        }
 
         createAndCheck(startAppointment, changes, expectations);
 

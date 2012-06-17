@@ -277,8 +277,9 @@ public abstract class AbstractPubSubTest extends AbstractAJAXSession {
     private WebResponse getResponse(String url) throws IOException {
         WebConversation conv = new WebConversation();
         String correctedUrl = url;
-        if (!correctedUrl.startsWith("http"))
+        if (!correctedUrl.startsWith("http")) {
             correctedUrl = "http://" + url;
+        }
         GetMethodWebRequest req = new GetMethodWebRequest(correctedUrl);
         return conv.getResource(req);
     }
@@ -296,8 +297,9 @@ public abstract class AbstractPubSubTest extends AbstractAJAXSession {
         try {
             in = getResponse(url).getInputStream();
         } finally {
-            if (in != null)
+            if (in != null) {
                 in.close();
+            }
         }
         return in;
     }

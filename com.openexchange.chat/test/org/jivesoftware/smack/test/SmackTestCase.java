@@ -225,8 +225,9 @@ public abstract class SmackTestCase extends TestCase {
             // Connect to the server
             for (int i = 0; i < getMaxConnections(); i++) {
                 connections[i] = createConnection();
-                if (!createOfflineConnections())
+                if (!createOfflineConnections()) {
                     connections[i].connect();
+                }
             }
             // Use the host name that the server reports. This is a good idea in most
             // cases, but could fail if the user set a hostname in their XMPP server
@@ -239,8 +240,9 @@ public abstract class SmackTestCase extends TestCase {
                     String password = usernamePrefix + (i+1);
                     String currentUser = password;
 
-                    if (passwordPrefix != null)
+                    if (passwordPrefix != null) {
                         password = (samePassword ? passwordPrefix : passwordPrefix + (i+1));
+                    }
 
                     try {
                         getConnection(i).login(currentUser, password, "Smack");
@@ -248,8 +250,9 @@ public abstract class SmackTestCase extends TestCase {
                         e.printStackTrace();
 
                         // Create the test accounts
-                        if (!getConnection(0).getAccountManager().supportsAccountCreation())
+                        if (!getConnection(0).getAccountManager().supportsAccountCreation()) {
                             fail("Server does not support account creation");
+                        }
 
                         // Create the account and try logging in again as the
                         // same user.
@@ -276,13 +279,15 @@ public abstract class SmackTestCase extends TestCase {
     {
     	String password = usernamePrefix + (connectionIndex + 1);
 
-    	if (passwordPrefix != null)
-    		password = (samePassword ? passwordPrefix : passwordPrefix + (connectionIndex + 1));
+    	if (passwordPrefix != null) {
+            password = (samePassword ? passwordPrefix : passwordPrefix + (connectionIndex + 1));
+        }
 
     	XMPPConnection con = getConnection(connectionIndex);
 
-    	if (!con.isConnected())
-    		con.connect();
+    	if (!con.isConnected()) {
+            con.connect();
+        }
     	try {
     	    con.login(usernamePrefix + (connectionIndex + 1), password, "Smack");
     	} catch (XMPPException e) {

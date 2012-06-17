@@ -95,8 +95,9 @@ public abstract class AbstractReplyTest extends AbstractMailTest {
 
     protected boolean contains(List<String> from, String string) {
         for (String str2 : from) {
-            if (str2.contains(string))
+            if (str2.contains(string)) {
                 return true;
+            }
         }
         return false;
     }
@@ -127,10 +128,12 @@ public abstract class AbstractReplyTest extends AbstractMailTest {
     }
 
     public static void assertNullOrEmpty(String msg, Collection coll){
-        if(coll == null)
+        if(coll == null) {
             return;
-        if(coll.size() == 0)
+        }
+        if(coll.size() == 0) {
             return;
+        }
         fail(msg);
     }
 

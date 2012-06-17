@@ -92,13 +92,14 @@ public class GetAssociatedContactsRequest extends AbstractContactRequest<GetAsso
 
     @Override
     public Parameter[] getParameters() {
-        if(uuid != null)
+        if(uuid != null) {
             return new Params(
                 AJAXServlet.PARAMETER_ACTION,
                 FinalContactConstants.ACTION_GET_ASSOCIATED.getName(),
                 FinalContactConstants.PARAMETER_UUID.getName(),
                 String.valueOf(uuid)
             ).toArray();
+        }
 
         Params params = new Params(
             AJAXServlet.PARAMETER_ACTION,

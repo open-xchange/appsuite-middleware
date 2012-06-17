@@ -157,14 +157,17 @@ public class AllPublicationsRequest extends AbstractPublicationRequest<AllPublic
         LinkedList<Parameter> params = new LinkedList<Parameter>();
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL));
 
-        if( getId() > -1)
+        if( getId() > -1) {
             params.add(new Parameter("id", getId()));
+        }
 
-        if( getFolder() != null)
+        if( getFolder() != null) {
             params.add(new Parameter("folder", getFolder()));
+        }
 
-        if( getEntityModule() != null)
-        	params.add(new Parameter("entityModule", getEntityModule()));
+        if( getEntityModule() != null) {
+            params.add(new Parameter("entityModule", getEntityModule()));
+        }
 
         if(getColumns() != null){
             params.add(new Parameter("columns", Strings.join(getColumns(), ",")));

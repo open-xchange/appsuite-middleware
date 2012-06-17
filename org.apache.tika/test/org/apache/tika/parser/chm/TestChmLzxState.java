@@ -32,6 +32,7 @@ public class TestChmLzxState extends TestCase {
     private ChmLzxState chmLzxState;
     private int windowSize;
 
+    @Override
     public void setUp() throws Exception {
         byte[] data = TestParameters.chmData;
 
@@ -84,13 +85,15 @@ public class TestChmLzxState extends TestCase {
     }
 
     public void testToString() throws TikaException {
-        if (chmLzxState == null)
+        if (chmLzxState == null) {
             testChmLzxStateConstructor();
+        }
         Assert.assertTrue(chmLzxState.toString().length() > 20);
     }
 
     // TODO add more tests
 
+    @Override
     public void tearDown() throws Exception {
     }
 

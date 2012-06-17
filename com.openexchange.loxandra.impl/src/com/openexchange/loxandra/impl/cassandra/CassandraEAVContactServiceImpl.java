@@ -143,8 +143,9 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 	 */
 	@Override
 	public void insertContact(EAVContact c) {
-		if (c.getUUID() == null)
-			c.setUUID(UUID.randomUUID());
+		if (c.getUUID() == null) {
+            c.setUUID(UUID.randomUUID());
+        }
 		
 		ClockResolution clock = new MicrosecondsClockResolution();
 		c.setTimeUUID(TimeUUIDUtils.getTimeUUID(clock.createClock()));
@@ -190,10 +191,11 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 				
 				final String key = field.getAjaxName();
 				if (c.contains(column)) {
-					if (EAVContactHelper.isNonString(column))
-						updater.setDate(new Composite(cf_named_prop_prefix, key), (Date) c.get(column));
-					else
-						updater.setString(new Composite(cf_named_prop_prefix, key),(String) c.get(column));
+					if (EAVContactHelper.isNonString(column)) {
+                        updater.setDate(new Composite(cf_named_prop_prefix, key), (Date) c.get(column));
+                    } else {
+                        updater.setString(new Composite(cf_named_prop_prefix, key),(String) c.get(column));
+                    }
 				}
 			}
 		}

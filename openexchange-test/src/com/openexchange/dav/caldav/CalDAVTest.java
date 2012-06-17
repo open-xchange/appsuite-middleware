@@ -137,6 +137,7 @@ public abstract class CalDAVTest extends WebDAVTest {
     	return this.testManager;
     }
     
+    @Override
     protected String getDefaultUserAgent() {
     	return UserAgents.MACOS_10_7_3;
     }
@@ -145,7 +146,8 @@ public abstract class CalDAVTest extends WebDAVTest {
     	getManager().delete(appointment);
     }
 
-	protected String fetchSyncToken(String folderID) throws OXException, IOException, DavException {
+	@Override
+    protected String fetchSyncToken(String folderID) throws OXException, IOException, DavException {
 		return super.fetchSyncToken("/caldav/" + folderID);
 	}
 	
@@ -153,7 +155,8 @@ public abstract class CalDAVTest extends WebDAVTest {
 		return fetchSyncToken(getDefaultFolderID());
 	}
 	
-	protected SyncCollectionResponse syncCollection(SyncToken syncToken, String folderID) throws OXException, IOException, DavException {
+	@Override
+    protected SyncCollectionResponse syncCollection(SyncToken syncToken, String folderID) throws OXException, IOException, DavException {
 		return super.syncCollection(syncToken, "/caldav/" + folderID);		
 	}
 	

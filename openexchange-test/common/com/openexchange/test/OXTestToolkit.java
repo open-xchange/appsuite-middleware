@@ -76,8 +76,9 @@ public class OXTestToolkit {
     }
 
     public static void assertSameStream(String message, InputStream expected, InputStream actual){
-        if(message == null || message.equals(""))
+        if(message == null || message.equals("")) {
             message = "Comparing InputStreams";
+        }
         byte[] buff = new byte[256];
         byte[] buff2 = new byte[256];
         CRC32 crcActual = new CRC32();

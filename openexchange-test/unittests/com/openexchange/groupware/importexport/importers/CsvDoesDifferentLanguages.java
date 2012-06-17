@@ -133,8 +133,9 @@ public class CsvDoesDifferentLanguages extends TestCase {
 
     @Override
     protected void tearDown() throws Exception {
-        if(oldInstance != null)
+        if(oldInstance != null) {
             ServerServiceRegistry.getInstance().addService(CalendarCollectionService.class, oldInstance);
+        }
         super.tearDown();
     }
 

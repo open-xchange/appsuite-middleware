@@ -87,11 +87,13 @@ public class AnalyzeDirectory {
 
                                 for (int j = 0; j < options.length; j++) {
                                     if (options[j] instanceof ScrubOption) {
-                                        if (response.getResult((ScrubOption) options[j]) == ScrubOption.Reaction.EXISTS)
+                                        if (response.getResult((ScrubOption) options[j]) == ScrubOption.Reaction.EXISTS) {
                                             System.out.println("   " + options[j].getName());
+                                        }
                                     } else if (options[j] instanceof AnalyzeOption) {
-                                        if (response.getResult((AnalyzeOption) options[j]) == AnalyzeOption.Reaction.EXISTS)
+                                        if (response.getResult((AnalyzeOption) options[j]) == AnalyzeOption.Reaction.EXISTS) {
                                             System.out.println("   " + options[j].getName());
+                                        }
                                     }
                                 }
 

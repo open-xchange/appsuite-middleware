@@ -66,18 +66,24 @@ public class Asserts {
         cal1.setTime(date1);
         cal2.setTime(date2);
 
-        if(precision <= Calendar.SECOND)
+        if(precision <= Calendar.SECOND) {
             equalize(cal1, cal2, Calendar.MILLISECOND);
-        if(precision <= Calendar.MINUTE)
+        }
+        if(precision <= Calendar.MINUTE) {
             equalize(cal1, cal2, Calendar.SECOND);
-        if(precision <= Calendar.HOUR_OF_DAY)
+        }
+        if(precision <= Calendar.HOUR_OF_DAY) {
             equalize(cal1, cal2, Calendar.MINUTE);
-        if(precision <= Calendar.DAY_OF_MONTH)
+        }
+        if(precision <= Calendar.DAY_OF_MONTH) {
             equalize(cal1, cal2, Calendar.HOUR_OF_DAY);
-        if(precision <= Calendar.MONTH)
+        }
+        if(precision <= Calendar.MONTH) {
             equalize(cal1, cal2, Calendar.DAY_OF_MONTH);
-        if(precision <= Calendar.YEAR)
+        }
+        if(precision <= Calendar.YEAR) {
             equalize(cal1, cal2, Calendar.MONTH);
+        }
 
         junit.framework.Assert.assertEquals(message, cal1.getTime(), cal2.getTime());
     }

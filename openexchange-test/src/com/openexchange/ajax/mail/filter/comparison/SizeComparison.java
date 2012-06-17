@@ -92,22 +92,29 @@ public class SizeComparison extends AbstractComparison {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
+		if (this == obj) {
+            return true;
+        }
+		if (obj == null) {
+            return false;
+        }
+		if (getClass() != obj.getClass()) {
+            return false;
+        }
 		final SizeComparison other = (SizeComparison) obj;
-		if (comparator != other.comparator)
-			return false;
-		if (size != other.size)
-			return false;
+		if (comparator != other.comparator) {
+            return false;
+        }
+		if (size != other.size) {
+            return false;
+        }
 		if (name == null) {
-			if (other.name != null)
-				return false;
-		} else if (!name.equals(other.name))
-			return false;
+			if (other.name != null) {
+                return false;
+            }
+		} else if (!name.equals(other.name)) {
+            return false;
+        }
 
 		return true;
 	}

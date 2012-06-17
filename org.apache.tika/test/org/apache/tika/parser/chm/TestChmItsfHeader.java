@@ -30,6 +30,7 @@ import org.apache.tika.parser.chm.core.ChmConstants;
 public class TestChmItsfHeader extends TestCase {
     private ChmItsfHeader chmItsfHeader = null;
 
+    @Override
     public void setUp() throws Exception {
         chmItsfHeader = new ChmItsfHeader();
         byte[] data = TestParameters.chmData;
@@ -98,6 +99,7 @@ public class TestChmItsfHeader extends TestCase {
                 TestParameters.VP_ISTF_SIGNATURE));
     }
 
+    @Override
     public void tearDown() throws Exception {
         chmItsfHeader = null;
     }

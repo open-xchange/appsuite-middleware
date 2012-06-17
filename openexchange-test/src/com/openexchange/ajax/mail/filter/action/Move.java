@@ -80,24 +80,31 @@ public class Move extends AbstractAction {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
+		if (this == obj) {
+            return true;
+        }
+		if (obj == null) {
+            return false;
+        }
+		if (getClass() != obj.getClass()) {
+            return false;
+        }
 		final Move other = (Move) obj;
 		if (folder == null) {
-			if (other.folder != null)
-				return false;
-		} else if (!folder.equals(other.folder))
-			return false;
+			if (other.folder != null) {
+                return false;
+            }
+		} else if (!folder.equals(other.folder)) {
+            return false;
+        }
 
 		if (name == null) {
-			if (other.getName() != null)
-				return false;
-		} else if (!name.equals(other.getName()))
-				return false;
+			if (other.getName() != null) {
+                return false;
+            }
+		} else if (!name.equals(other.getName())) {
+            return false;
+        }
 
 		return true;
 	}

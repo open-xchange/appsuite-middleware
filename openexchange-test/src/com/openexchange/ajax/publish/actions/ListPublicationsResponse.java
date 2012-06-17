@@ -70,8 +70,9 @@ public class ListPublicationsResponse extends AbstractPublicationResponse {
         JSONArray all = (JSONArray) getData();
         LinkedList<JSONArray> allPubs = new LinkedList<JSONArray>();
 
-        if (all == null)
+        if (all == null) {
             return allPubs;
+        }
 
         for (int i = 0, length = all.length(); i < length; i++) {
             allPubs.add(all.getJSONArray(i));

@@ -73,14 +73,18 @@ class FreeBusyInformation {
     }
 
     public FreeBusyInformation(String type, String start, String end) throws ParseException {
-        if (type.equals("FREE"))
+        if (type.equals("FREE")) {
             this.type = Appointment.FREE;
-        if (type.equals("BUSY"))
+        }
+        if (type.equals("BUSY")) {
             this.type = Appointment.TENTATIVE;
-        if (type.equals("BUSY-UNAVAILABLE"))
+        }
+        if (type.equals("BUSY-UNAVAILABLE")) {
             this.type = Appointment.TEMPORARY;
-        if (type.equals("BUSY-TENTATIVE"))
+        }
+        if (type.equals("BUSY-TENTATIVE")) {
             this.type = Appointment.RESERVED;
+        }
         SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd'T'hhmmss'Z'");
         format.setTimeZone(TimeZone.getTimeZone("UTC"));
         this.start = format.parse(start);

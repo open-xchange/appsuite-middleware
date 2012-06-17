@@ -144,8 +144,9 @@ public class FreeBusyTest extends ManagedAppointmentTest {
         List<FreeBusyInformation> freeBusyStates = getFreeBusyState(getSecondWebConversation(), address[0], address[1], app.getStartDate());
         for(FreeBusyInformation info : freeBusyStates){
             if(Math.abs(info.start.getTime() - now.getTime()) < 2000
-            && Math.abs(info.end.getTime() - inAnHour.getTime()) < 2000)
+            && Math.abs(info.end.getTime() - inAnHour.getTime()) < 2000) {
                 return info.type;
+            }
         }
         return -1;
     }

@@ -73,8 +73,9 @@ public class MockConfigurationService implements ConfigurationService {
 
 	@Override
 	public String getProperty(String name, String defaultValue) {
-		if(props.containsKey(name))
-			return props.get(name);
+		if(props.containsKey(name)) {
+            return props.get(name);
+        }
 		return defaultValue;
 	}
 

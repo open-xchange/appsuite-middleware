@@ -218,13 +218,14 @@ public class AdvancedSearchTest extends AbstractManagedContactTest{
 
 		ContactField field = ContactField.SUR_NAME;
 		LinkedList<JSONObject> filters = new LinkedList<JSONObject>();
-		for(int i = 0; i < letters.length -1; i++)
-			filters.add( new JSONObject(
+		for(int i = 0; i < letters.length -1; i++) {
+            filters.add( new JSONObject(
 				"{'filter' : [ 'and', " +
 					"['>=' , {'field' : '"+field.getAjaxName()+"'} , '"+letters[i]+"'], " +
 					"['<' , {'field' : '"+field.getAjaxName()+"'}, '"+letters[i+1]+"'], " +
 					"['=' , {'field' : '"+ContactField.FOLDER_ID.getAjaxName()+"'}, "+folderID+"]" +
 				"]})"));
+        }
 
 		int currentPosition = 0;
 		for(JSONObject filter: filters){
@@ -256,13 +257,14 @@ public class AdvancedSearchTest extends AbstractManagedContactTest{
 
 		ContactField field = ContactField.SUR_NAME;
 		LinkedList<JSONObject> filters = new LinkedList<JSONObject>();
-		for(int i = 0; i < sinograph.size() - 1; i++)
-			filters.add( new JSONObject(
+		for(int i = 0; i < sinograph.size() - 1; i++) {
+            filters.add( new JSONObject(
 				"{'filter' : [ 'and', " +
 					"['>=' , {'field' : '"+field.getAjaxName()+"'} , '"+sinograph.get(i)+"'], " +
 					"['<' , {'field' : '"+field.getAjaxName()+"'}, '"+sinograph.get(i+1)+"'], " +
 					"['=' , {'field' : '"+ContactField.FOLDER_ID.getAjaxName()+"'}, "+folderID+"]" +
 				"]})"));
+        }
 
 		int currentPosition = 0;
 		for(JSONObject filter: filters){
@@ -309,8 +311,9 @@ public class AdvancedSearchTest extends AbstractManagedContactTest{
 			actuals.add(actualName);
 		}
 
-		for(int i = 0; i < actuals.size(); i++)
-			assertEquals("Graphen #"+i+" is wrong", sinograph.get(i), actuals.get(i));
+		for(int i = 0; i < actuals.size(); i++) {
+            assertEquals("Graphen #"+i+" is wrong", sinograph.get(i), actuals.get(i));
+        }
 	}
 
 	public void testNameThatAppearedTwice() throws Exception{
@@ -321,13 +324,14 @@ public class AdvancedSearchTest extends AbstractManagedContactTest{
 		List<String> sinograph = Arrays.asList( "\u963f", "\u6ce2","\u6b21","\u7684","\u9e45","\u5bcc","\u54e5","\u6cb3","\u6d01","\u79d1","\u4e86","\u4e48","\u5462","\u54e6","\u6279","\u4e03","\u5982","\u56db","\u8e22","\u5c4b","\u897f","\u8863","\u5b50");
 
 		LinkedList<JSONObject> filters = new LinkedList<JSONObject>();
-		for(int i = 0; i < sinograph.size() - 1; i++)
-			filters.add( new JSONObject(
+		for(int i = 0; i < sinograph.size() - 1; i++) {
+            filters.add( new JSONObject(
 				"{'filter' : [ 'and', " +
 					"['>=' , {'field' : '"+field.getAjaxName()+"'} , '"+sinograph.get(i)+"'], " +
 					"['<' , {'field' : '"+field.getAjaxName()+"'}, '"+sinograph.get(i+1)+"'], " +
 					"['=' , {'field' : '"+ContactField.FOLDER_ID.getAjaxName()+"'}, "+folderID+"]" +
 				"]})"));
+        }
 
 		int occurences = 0;
 		for(JSONObject filter: filters){

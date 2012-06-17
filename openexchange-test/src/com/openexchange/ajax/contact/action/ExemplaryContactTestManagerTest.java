@@ -121,8 +121,12 @@ public class ExemplaryContactTestManagerTest extends AbstractAJAXSession {
 		Contact [] allContacts = contactManager.allAction(folder.getObjectID());
 		for (int i=0; i<allContacts.length; i++) {
 			Contact co = allContacts[i];
-			if (co.getObjectID() == contactObject1.getObjectID()) found1=true;
-			if (co.getObjectID() == contactObject2.getObjectID()) found2=true;
+			if (co.getObjectID() == contactObject1.getObjectID()) {
+                found1=true;
+            }
+			if (co.getObjectID() == contactObject2.getObjectID()) {
+                found2=true;
+            }
 		}
 		assertTrue("First contact was not found.", found1);
 		assertTrue("Second contact was not found.", found2);
@@ -136,8 +140,12 @@ public class ExemplaryContactTestManagerTest extends AbstractAJAXSession {
 		Contact [] allContacts = contactManager.listAction(firstContact, secondContact);
 		for (int i=0; i<allContacts.length; i++) {
 			Contact co = allContacts[i];
-			if (co.getObjectID() == contactObject1.getObjectID()) found1=true;
-			if (co.getObjectID() == contactObject2.getObjectID()) found2=true;
+			if (co.getObjectID() == contactObject1.getObjectID()) {
+                found1=true;
+            }
+			if (co.getObjectID() == contactObject2.getObjectID()) {
+                found2=true;
+            }
 		}
 		assertTrue("First contact was not found.", found1);
 		assertTrue("Second contact was not found.", found2);
@@ -174,8 +182,12 @@ public class ExemplaryContactTestManagerTest extends AbstractAJAXSession {
 		Contact [] allContacts = contactManager.updatesAction(folder.getObjectID(), date);
 		for (int i=0; i<allContacts.length; i++) {
 			Contact co = allContacts[i];
-			if (co.getObjectID() == contactObject1.getObjectID()) found1=true;
-			if (co.getObjectID() == contactObject2.getObjectID()) found2=true;
+			if (co.getObjectID() == contactObject1.getObjectID()) {
+                found1=true;
+            }
+			if (co.getObjectID() == contactObject2.getObjectID()) {
+                found2=true;
+            }
 		}
 		assertTrue("First contact was not found.", found1);
 		assertTrue("Second contact was not found.", found2);

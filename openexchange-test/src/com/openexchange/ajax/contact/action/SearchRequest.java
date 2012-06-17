@@ -85,12 +85,15 @@ public class SearchRequest extends AbstractContactRequest<SearchResponse> {
 
         param(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_SEARCH);
         param(AJAXServlet.PARAMETER_COLUMNS, join(columns));
-        if (orderBy != -1)
+        if (orderBy != -1) {
             param(AJAXServlet.PARAMETER_SORT, String.valueOf(orderBy));
-        if (orderDir != null)
+        }
+        if (orderDir != null) {
             param(AJAXServlet.PARAMETER_ORDER, orderDir);
-        if (collation != null)
-        	param(AJAXServlet.PARAMETER_COLLATION, collation);
+        }
+        if (collation != null) {
+            param(AJAXServlet.PARAMETER_COLLATION, collation);
+        }
         try {
         	if(firstLetterOnly){
         		body.put("startletter", true);

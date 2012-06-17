@@ -79,8 +79,9 @@ public class ReplyRequest extends AbstractMailRequest<ReplyResponse> {
 
         public static ViewOption getBy(String str) {
             for (ViewOption option : values()) {
-                if (str.equals(option.toString()))
+                if (str.equals(option.toString())) {
                     return option;
+                }
             }
             return null;
         }
@@ -166,8 +167,9 @@ public class ReplyRequest extends AbstractMailRequest<ReplyResponse> {
         list.add( new Parameter(Mail.PARAMETER_ACTION, getAction()) );
         list.add( new Parameter(Mail.PARAMETER_FOLDERID, folderID) );
         list.add( new Parameter(Mail.PARAMETER_ID, mailID) );
-        if (getView() != null)
+        if (getView() != null) {
             list.add( new Parameter(Mail.PARAMETER_VIEW, getView().toString()) );
+        }
 
         return list.toArray(new Parameter[list.size()]);
     }

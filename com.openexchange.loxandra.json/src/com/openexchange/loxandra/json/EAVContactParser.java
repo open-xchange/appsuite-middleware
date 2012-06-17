@@ -90,10 +90,11 @@ public class EAVContactParser {
 				final String key = field.getAjaxName();
 				try {
 					if (json.has(key)) {
-						if (EAVContactHelper.isNonString(column))
-							c.set(column, new Date(Long.parseLong(json.getString(key))));
-						else
-							c.set(column, json.getString(key));
+						if (EAVContactHelper.isNonString(column)) {
+                            c.set(column, new Date(Long.parseLong(json.getString(key))));
+                        } else {
+                            c.set(column, json.getString(key));
+                        }
 					}
 				} catch (JSONException e) {
 					e.printStackTrace();
@@ -102,8 +103,9 @@ public class EAVContactParser {
 		}
 		
 		try {
-			if (json.has("folderUUID"))
-				c.addFolderUUID(UUID.fromString(json.getString("folderUUID")));
+			if (json.has("folderUUID")) {
+                c.addFolderUUID(UUID.fromString(json.getString("folderUUID")));
+            }
 			
 			c.setUUID(UUID.fromString(json.getString("uuid")));
 			
@@ -111,7 +113,7 @@ public class EAVContactParser {
 			Iterator<String> iter = unnamedPropsJSON.keys();
 			
 			while (iter.hasNext()) {
-				String string = (String) iter.next();
+				String string = iter.next();
 				c.addUnnamedProperty(string, unnamedPropsJSON.getString(string));
 			}
 			
@@ -140,7 +142,7 @@ public class EAVContactParser {
 		
 		Iterator<EAVContact> it = list.iterator();
 		while (it.hasNext()) {
-			EAVContact c = (EAVContact) it.next();
+			EAVContact c = it.next();
 			JSONObject j = new JSONObject();
 			
 			try {

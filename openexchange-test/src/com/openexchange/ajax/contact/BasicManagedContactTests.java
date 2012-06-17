@@ -114,8 +114,9 @@ public class BasicManagedContactTests extends AbstractManagedContactTest {
 
         Contact actual = null;
         for(Contact temp: allContactsOnServer){
-            if(temp.getObjectID() == expected.getObjectID())
+            if(temp.getObjectID() == expected.getObjectID()) {
                 actual = temp;
+            }
         }
         assertNotNull("Should find new contact in response of AllRequest", actual);
         assertTrue("Should contain field #1", actual.contains(1));

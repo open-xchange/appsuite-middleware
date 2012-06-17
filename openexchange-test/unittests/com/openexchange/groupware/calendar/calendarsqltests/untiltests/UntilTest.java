@@ -189,18 +189,21 @@ public abstract class UntilTest extends CalendarSqlTest {
     }
 
     private void overrideRecurringInformation(CalendarDataObject source, CalendarDataObject target) {
-        if (source.containsRecurrenceType())
+        if (source.containsRecurrenceType()) {
             target.setRecurrenceType(source.getRecurrenceType());
+        }
 
-        if (source.containsOccurrence())
+        if (source.containsOccurrence()) {
             target.setOccurrence(source.getOccurrence());
-        else
+        } else {
             target.removeOccurrence();
+        }
 
-        if (source.containsUntil())
+        if (source.containsUntil()) {
             target.setUntil(source.getUntil());
-        else
+        } else {
             target.removeUntil();
+        }
 
         List<Integer> fields = new ArrayList<Integer>() {
 
@@ -213,8 +216,9 @@ public abstract class UntilTest extends CalendarSqlTest {
         };
 
         for (int field : fields) {
-            if (source.contains(field))
+            if (source.contains(field)) {
                 target.set(field, source.get(field));
+            }
         }
     }
 

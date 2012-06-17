@@ -65,8 +65,9 @@ public enum TestMailField {
 
     public static TestMailField getBy(String fitnesse) {
         for (TestMailField field : values()) {
-            if (fitnesse.equals(field.fitnesse))
+            if (fitnesse.equals(field.fitnesse)) {
                 return field;
+            }
         }
         return null;
     }

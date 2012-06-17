@@ -232,8 +232,9 @@ public abstract class AbstractRMITest extends AbstractTest {
     
     public <T,S> boolean any(Collection<T> collection, S searched, Verifier<T,S> verifier){
         for(T elem: collection){
-            if(verifier.verify(elem, searched))
+            if(verifier.verify(elem, searched)) {
                 return true;
+            }
         }
         return false;
     }
@@ -245,8 +246,9 @@ public abstract class AbstractRMITest extends AbstractTest {
     /*** Creating test objects on the server ***/
     
     public Resource getTestResource(){
-        if(testResource != null && testResource.getId() != null)
+        if(testResource != null && testResource.getId() != null) {
             return testResource;
+        }
         Resource res = new Resource();
         res.setName("Testresource");
         res.setEmail("test-resource@testsystem.invalid");

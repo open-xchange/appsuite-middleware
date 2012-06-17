@@ -97,8 +97,9 @@ public class Bug15031Test extends CalendarSqlTest {
     public void testBug15031() throws Exception {
         CalendarDataObject[] conflicts = appointments.save(appointment2Update);
 
-        if (conflicts == null || conflicts.length != 1)
+        if (conflicts == null || conflicts.length != 1) {
             fail("Excpected conflicts");
+        }
 
         assertEquals("Wrong conflic", appointment.getObjectID(), conflicts[0].getObjectID());
     }

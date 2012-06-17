@@ -44,7 +44,8 @@ public abstract class AbstractPkgTest extends TestCase {
    protected Parser autoDetectParser;
    protected EmbeddedTrackingParser tracker;
 
-   protected void setUp() throws Exception {
+   @Override
+protected void setUp() throws Exception {
       super.setUp();
       
       tracker = new EmbeddedTrackingParser();
@@ -68,12 +69,14 @@ public abstract class AbstractPkgTest extends TestCase {
          mediatypes.clear();
       }
       
-      public Set<MediaType> getSupportedTypes(ParseContext context) {
+      @Override
+    public Set<MediaType> getSupportedTypes(ParseContext context) {
          // Cheat!
          return (new AutoDetectParser()).getSupportedTypes(context);
       }
 
-      public void parse(InputStream stream, ContentHandler handler,
+      @Override
+    public void parse(InputStream stream, ContentHandler handler,
             Metadata metadata, ParseContext context) throws IOException,
             SAXException, TikaException {
          filenames.add(metadata.get(Metadata.RESOURCE_NAME_KEY));
