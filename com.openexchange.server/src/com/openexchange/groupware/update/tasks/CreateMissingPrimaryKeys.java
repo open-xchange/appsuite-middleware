@@ -394,6 +394,119 @@ public final class CreateMissingPrimaryKeys extends UpdateTaskAdapter {
          * TODO: PRIMARY KEY for "aggregatingContacts"
          */
 
+        /*-
+         * ########################################################################################
+         * ################################ TIDY UP; See Bug #21882 ###############################
+         * ########################################################################################
+         */
+
+        /*-
+         * cid is a left-prefix of reminder_unique
+         * Key definitions:
+         *   KEY `cid` (`cid`,`target_id`),
+         *   UNIQUE KEY `reminder_unique` (`cid`,`target_id`,`module`,`userid`),
+         * Column types:
+         *     `cid` int(10) unsigned not null
+         *     `target_id` varchar(255) collate utf8_unicode_ci not null
+         *     `module` tinyint(3) unsigned not null
+         *     `userid` int(10) unsigned not null
+         * To remove this duplicate index, execute:
+         * ALTER TABLE `oxdatabase_6`.`reminder` DROP INDEX `cid`;
+         */
+        tasks.add(new Callable<Void>() {
+
+            @Override
+            public Void call() throws SQLException {
+                final String name = Tools.existsIndex(con, "reminder", splitter.split("(`cid`,`target_id`)"));
+                if (null != name) {
+                    Statement stmt = null;
+                    try {
+                        stmt = con.createStatement();
+                        stmt.execute("ALTER TABLE reminder DROP INDEX `" + name + "`");
+                    } finally {
+                        closeSQLStuff(stmt);
+                    }
+                }
+                return null;
+            }
+
+            @Override
+            public String toString() {
+                return "ALTER TABLE reminder DROP INDEX `cid`";
+            }
+        });
+        /*-
+         * cid is a left-prefix of PRIMARY
+         * Key definitions:
+         *   KEY `cid` (`cid`,`tree`,`user`,`folderId`)
+         *   PRIMARY KEY (`cid`,`tree`,`user`,`folderId`,`entity`),
+         * Column types:
+         *     `cid` int(10) unsigned not null
+         *     `tree` int(10) unsigned not null
+         *     `user` int(10) unsigned not null
+         *     `folderid` varchar(192) collate utf8_unicode_ci not null
+         *     `entity` int(10) unsigned not null
+         * To remove this duplicate index, execute:
+         * ALTER TABLE `oxdatabase_6`.`virtualBackupPermission` DROP INDEX `cid`;
+         */
+        tasks.add(new Callable<Void>() {
+
+            @Override
+            public Void call() throws SQLException {
+                final String name = Tools.existsIndex(con, "virtualBackupPermission", splitter.split("(`cid`,`tree`,`user`,`folderId`)"));
+                if (null != name) {
+                    Statement stmt = null;
+                    try {
+                        stmt = con.createStatement();
+                        stmt.execute("ALTER TABLE virtualBackupPermission DROP INDEX `" + name + "`");
+                    } finally {
+                        closeSQLStuff(stmt);
+                    }
+                }
+                return null;
+            }
+
+            @Override
+            public String toString() {
+                return "ALTER TABLE virtualBackupPermission DROP INDEX `cid`";
+            }
+        });
+        /*-
+         * cid is a left-prefix of PRIMARY
+         * Key definitions:
+         *   KEY `cid` (`cid`,`tree`,`user`,`folderId`)
+         *   PRIMARY KEY (`cid`,`tree`,`user`,`folderId`,`entity`),
+         * Column types:
+         *     `cid` int(10) unsigned not null
+         *     `tree` int(10) unsigned not null
+         *     `user` int(10) unsigned not null
+         *     `folderid` varchar(192) collate utf8_unicode_ci not null
+         *     `entity` int(10) unsigned not null
+         * To remove this duplicate index, execute:
+         * ALTER TABLE `oxdatabase_6`.`virtualPermission` DROP INDEX `cid`;
+         */
+        tasks.add(new Callable<Void>() {
+
+            @Override
+            public Void call() throws SQLException {
+                final String name = Tools.existsIndex(con, "virtualPermission", splitter.split("(`cid`,`tree`,`user`,`folderId`)"));
+                if (null != name) {
+                    Statement stmt = null;
+                    try {
+                        stmt = con.createStatement();
+                        stmt.execute("ALTER TABLE virtualPermission DROP INDEX `" + name + "`");
+                    } finally {
+                        closeSQLStuff(stmt);
+                    }
+                }
+                return null;
+            }
+
+            @Override
+            public String toString() {
+                return "ALTER TABLE virtualPermission DROP INDEX `cid`";
+            }
+        });
     }
 
     @Override
