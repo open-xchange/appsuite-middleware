@@ -155,7 +155,7 @@ public final class TikaDocumentHandler {
     }
 
     /**
-     * Gets the document's type.
+     * Gets the document's type & ensures specified {@link InputStream stream} is closed.
      *
      * @param in The document's input stream
      * @return The type
@@ -172,7 +172,7 @@ public final class TikaDocumentHandler {
     }
 
     /**
-     * Gets the document's language.
+     * Gets the document's language & ensures specified {@link InputStream stream} is closed.
      *
      * @param in The document's input stream
      * @return The language
@@ -189,7 +189,7 @@ public final class TikaDocumentHandler {
     }
 
     /**
-     * Gets the document's content.
+     * Gets the document's content & ensures specified {@link InputStream stream} is closed.
      *
      * @param in The document's input stream
      * @return The content according to output format

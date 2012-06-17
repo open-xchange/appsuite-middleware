@@ -66,9 +66,12 @@ import net.htmlparser.jericho.Renderer;
 import net.htmlparser.jericho.Segment;
 import net.htmlparser.jericho.Source;
 import org.apache.commons.logging.Log;
+import org.apache.poi.POIXMLDocument;
 import org.apache.poi.extractor.ExtractorFactory;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
+import org.apache.poi.openxml4j.opc.OPCPackage;
+import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.tika.Tika;
 import org.apache.tika.detect.Detector;
 import org.apache.tika.io.TikaInputStream;
@@ -82,7 +85,7 @@ import com.openexchange.textxtraction.TextXtractService;
 
 /**
  * {@link TikaTextXtractService} - The text extraction service based on Apache Tika.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TikaTextXtractService implements TextXtractService {
@@ -364,15 +367,24 @@ public final class TikaTextXtractService implements TextXtractService {
     }
 
     /**
-     * Expects the input to be a MS document.
+     * Checks the input for POIFS (OLE2) or OOXML (zip) header at start. If either present, plain text is extracted from input.
      * 
      * @param in The input stream
      * @return The extracted text or <code>null</code>
      * @throws IOException If an I/O error occurs
      */
     private String poi2text(final InputStream in) throws IOException {
+        if (null == in) {
+            return null;
+        }
         try {
-            return ExtractorFactory.createExtractor(in).getText();
+            if (POIFSFileSystem.hasPOIFSHeader(in)) {
+                return ExtractorFactory.createExtractor(new POIFSFileSystem(in)).getText();
+            }
+            if (POIXMLDocument.hasOOXMLHeader(in)) {
+                return ExtractorFactory.createExtractor(OPCPackage.open(in)).getText();
+            }
+            return null;
         } catch (final InvalidFormatException e) {
             LOG.debug(e.getMessage(), e);
         } catch (final OpenXML4JException e) {
