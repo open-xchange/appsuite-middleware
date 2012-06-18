@@ -70,8 +70,8 @@ import org.apache.jackrabbit.webdav.client.methods.PutMethod;
 import org.apache.jackrabbit.webdav.client.methods.ReportMethod;
 import org.apache.jackrabbit.webdav.version.report.ReportInfo;
 import org.apache.jackrabbit.webdav.xml.DomUtil;
-import org.jdom.JDOMException;
-import org.jdom.xpath.XPath;
+import org.jdom2.JDOMException;
+import org.jdom2.xpath.XPath;
 import org.w3c.dom.Element;
 
 import com.openexchange.configuration.ConfigurationException;

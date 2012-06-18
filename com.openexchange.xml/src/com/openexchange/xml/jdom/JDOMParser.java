@@ -50,8 +50,8 @@ package com.openexchange.xml.jdom;
 
 import java.io.IOException;
 import java.io.InputStream;
-import org.jdom.Document;
-import org.jdom.JDOMException;
+import org.jdom2.Document;
+import org.jdom2.JDOMException;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>

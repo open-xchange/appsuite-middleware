@@ -1,6 +1,6 @@
 package com.openexchange.webdav.action;
 
-import org.jdom.Namespace;
+import org.jdom2.Namespace;
 
 import com.openexchange.test.XMLCompare;
 import com.openexchange.webdav.protocol.Protocol;

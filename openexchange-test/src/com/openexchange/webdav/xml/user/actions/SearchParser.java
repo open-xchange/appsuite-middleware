@@ -49,7 +49,7 @@
 
 package com.openexchange.webdav.xml.user.actions;
 
-import org.jdom.Document;
+import org.jdom2.Document;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.Contact;

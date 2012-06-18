@@ -56,7 +56,7 @@ import java.io.OutputStream;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
-import org.jdom.output.XMLOutputter;
+import org.jdom2.output.XMLOutputter;
 
 import com.openexchange.java.Streams;
 import com.openexchange.log.LogFactory;

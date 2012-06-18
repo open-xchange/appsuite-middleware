@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry exported="true" kind="lib" path="lib/jdom-1.1.1.jar" sourcepath="lib/jdom-1.1.1-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/htmlcleaner-2.2.jar" sourcepath="lib/htmlcleaner-2.2-all.zip"/>
 	<classpathentry exported="true" kind="lib" path="extraClassPath/"/>
 	<classpathentry exported="true" kind="lib" path="lib/rome-1.0.jar" sourcepath="source/rome-1.0-sources.jar"/>

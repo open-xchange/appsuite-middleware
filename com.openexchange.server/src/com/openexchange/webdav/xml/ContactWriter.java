@@ -54,18 +54,14 @@ import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
-
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
-import org.jdom.Element;
-import org.jdom.Namespace;
-import org.jdom.Text;
-import org.jdom.output.XMLOutputter;
-
+import org.jdom2.Element;
+import org.jdom2.Namespace;
+import org.jdom2.Text;
+import org.jdom2.output.XMLOutputter;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.exception.OXException;
@@ -77,6 +73,7 @@ import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.LinkEntryObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -395,7 +392,7 @@ public class ContactWriter extends CommonWriter {
                 /*
                  * An element with the same name and same value already exists. check for "isInternal" attribute.
                  */
-                final org.jdom.Attribute attr = elem.getAttribute("isInternal");
+                final org.jdom2.Attribute attr = elem.getAttribute("isInternal");
                 if (null == attr) {
                     if (internalAddresses.contains(ia)) {
                         elem.setAttribute("isInternal", "true");

@@ -57,11 +57,10 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.Namespace;
-import org.jdom.output.XMLOutputter;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.Namespace;
+import org.jdom2.output.XMLOutputter;
 import org.kxml2.io.KXmlParser;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -77,6 +76,7 @@ import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.Version;
 import com.openexchange.session.Session;
 import com.openexchange.webdav.LastModifiedCache;
@@ -344,7 +344,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
 
             os.write(("</D:multistatus>").getBytes());
             os.flush();
-        } catch (final org.jdom.JDOMException exc) {
+        } catch (final org.jdom2.JDOMException exc) {
             LOG.error("doPropFind", exc);
             doError(req, resp, HttpServletResponse.SC_BAD_REQUEST, "XML ERROR");
         } catch (final OXException exc) {

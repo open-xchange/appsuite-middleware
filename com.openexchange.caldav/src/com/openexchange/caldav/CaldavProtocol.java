@@ -51,7 +51,7 @@ package com.openexchange.caldav;
 
 import java.util.Arrays;
 import java.util.List;
-import org.jdom.Namespace;
+import org.jdom2.Namespace;
 import com.openexchange.caldav.reports.CaldavMultigetReport;
 import com.openexchange.caldav.reports.CalendarQueryReport;
 import com.openexchange.caldav.reports.SyncCollection;

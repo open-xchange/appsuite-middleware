@@ -61,13 +61,13 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
-import org.jdom.Document;
-import org.jdom.JDOMException;
+import org.jdom2.Document;
+import org.jdom2.JDOMException;
 import com.openexchange.ajax.fields.Header;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.log.LogFactory;
 import com.openexchange.login.Interface;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.internal.LoginPerformer;
@@ -486,7 +486,7 @@ public abstract class OXServlet extends WebDavServlet {
      * @throws IOException if an exception occurs while reading the body.
      */
     protected Document getJDOMDocument(final HttpServletRequest req) throws JDOMException, IOException {
-        org.jdom.Document doc = null;
+        org.jdom2.Document doc = null;
         if (req.getContentLength() > 0) {
             doc = ServerServiceRegistry.getInstance().getService(JDOMParser.class).parse(req.getInputStream());
         }

@@ -49,7 +49,7 @@
 
 package com.openexchange.webdav.xml.framework;
 
-import org.jdom.Namespace;
+import org.jdom2.Namespace;
 
 /**
  *
