@@ -50,13 +50,8 @@
 package com.openexchange.textxtraction.internal;
 
 import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.Locale;
@@ -79,26 +74,26 @@ import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.tika.Tika;
-import org.apache.tika.detect.Detector;
-import org.apache.tika.io.TikaInputStream;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.mime.MediaType;
 import org.apache.xmlbeans.XmlException;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
+import com.openexchange.textxtraction.AbstractTextXtractService;
 import com.openexchange.textxtraction.DelegateTextXtraction;
 import com.openexchange.textxtraction.TextXtractExceptionCodes;
-import com.openexchange.textxtraction.TextXtractService;
 
 /**
  * {@link TikaTextXtractService} - The text extraction service based on Apache Tika.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class TikaTextXtractService implements TextXtractService {
+public final class TikaTextXtractService extends AbstractTextXtractService {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(TikaTextXtractService.class);
+
+    private static final int DEFAULT_BUFSIZE = 8192;
 
     private static enum DirectType {
         /**
@@ -160,168 +155,10 @@ public final class TikaTextXtractService implements TextXtractService {
     }
 
     @Override
-    public String extractFromResource(final String resource, final String optMimeType) throws OXException {
-        try {
-            final File file = new File(resource);
-            if (null != optMimeType) {
-                if (optMimeType.toLowerCase(Locale.ENGLISH).startsWith("text/htm")) {
-                    InputStream input = null;
-                    try {
-                        if (file.isFile()) {
-                            input = new FileInputStream(file);
-                        } else {
-                            input = TikaInputStream.get(new URL(resource));
-                        }
-                        final Source source = new Source(input);
-                        return new Renderer(new Segment(source, 0, source.getEnd())).setMaxLineLength(9999).setIncludeHyperlinkURLs(false).toString();
-                    } finally {
-                        Streams.close(input);
-                    }
-                }
-            }
-            try {
-                for (final DelegateTextXtraction delegatee : delegatees.keySet()) {
-                    final String text = delegatee.extractFromResource(resource, optMimeType);
-                    if (null != text) {
-                        return text;
-                    }
-                }
-            } catch (final Exception e) {
-                // Ignore
-            }
-            /*
-             * Detect MIME type & continue processing
-             */
-            try {
-                /*
-                 * Set input stream
-                 */
-                final InputStream in;
-                if (file.isFile()) {
-                    in = new BufferedInputStream(new FileInputStream(file));
-                } else {
-                    in = TikaInputStream.get(new URL(resource), new Metadata());
-                }
-                /*
-                 * Check with POI
-                 */
-                {
-                    final String text = poitotext(in);
-                    if (null != text) {
-                        Streams.close(in);
-                        return text;
-                    }
-                }
-                /*
-                 * The stream is marked and reset to the original position
-                 */
-                final MediaType mediaType;
-                if (isEmpty(optMimeType)) {
-                    final Detector detector = tika.getDetector();
-                    mediaType = detector.detect(in, new Metadata());
-                } else {
-                    mediaType = MediaType.parse(optMimeType);
-                }
-                /*
-                 * Check for direct support
-                 */
-                try {
-                    final Set<MediaType> set = directTypes.get(DirectType.PDF);
-                    for (final MediaType directType : set) {
-                        if (directType.getBaseType().equals(mediaType.getBaseType())) {
-                            return pdftotext(in);
-                        }
-                    }
-                } catch (final Exception e) {
-                    // Ignore
-                }
-                /*
-                 * Otherwise handle with almighty Tika
-                 */
-                final TikaDocumentHandler documentHandler = isEmpty(optMimeType) ? newDefaultHandler() : newHandler(optMimeType);
-                return documentHandler.getDocumentContent(in);
-            } catch (final IOException e) {
-                throw TextXtractExceptionCodes.IO_ERROR.create(e, e.getMessage());
-            }
-        } catch (final MalformedURLException e) {
-            throw TextXtractExceptionCodes.ERROR.create(e, e.getMessage());
-        } catch (final IOException e) {
-            throw TextXtractExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    @Override
-    public String extractFrom(final String content, final String optMimeType) throws OXException {
-        if (null != optMimeType) {
-            if (optMimeType.toLowerCase(Locale.ENGLISH).startsWith("text/htm")) {
-                final InputStream input = null;
-                try {
-                    final Source source = new Source(content);
-                    return new Renderer(new Segment(source, 0, content.length())).setMaxLineLength(9999).setIncludeHyperlinkURLs(false).toString();
-                } finally {
-                    Streams.close(input);
-                }
-            }
-        }
-        try {
-            for (final DelegateTextXtraction delegatee : delegatees.keySet()) {
-                final String text = delegatee.extractFrom(content, optMimeType);
-                if (null != text) {
-                    return text;
-                }
-            }
-        } catch (final Exception e) {
-            // Ignore
-        }
-        /*
-         * Detect MIME type & continue processing
-         */
-        try {
-            final ByteArrayInputStream in = Streams.newByteArrayInputStream(content.getBytes(Charsets.UTF_8));
-            /*
-             * Check with POI
-             */
-            {
-                final String text = poitotext(in);
-                if (null != text) {
-                    return text;
-                }
-            }
-            /*
-             * The stream is marked and reset to the original position
-             */
-            final MediaType mediaType;
-            if (isEmpty(optMimeType)) {
-                final Detector detector = tika.getDetector();
-                mediaType = detector.detect(in, new Metadata());
-            } else {
-                mediaType = MediaType.parse(optMimeType);
-            }
-            /*
-             * Check for direct support
-             */
-            try {
-                final Set<MediaType> set = directTypes.get(DirectType.PDF);
-                for (final MediaType directType : set) {
-                    if (directType.getBaseType().equals(mediaType.getBaseType())) {
-                        return pdftotext(in);
-                    }
-                }
-            } catch (final Exception e) {
-                // Ignore
-            }
-            /*
-             * Otherwise handle with almighty Tika
-             */
-            final TikaDocumentHandler documentHandler = isEmpty(optMimeType) ? newDefaultHandler() : newHandler(optMimeType);
-            return documentHandler.getDocumentContent(in);
-        } catch (final IOException e) {
-            throw TextXtractExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    @Override
     public String extractFrom(final InputStream inputStream, final String optMimeType) throws OXException {
+        if (null == inputStream) {
+            return null;
+        }
         if (null != optMimeType) {
             if (optMimeType.toLowerCase(Locale.ENGLISH).startsWith("text/htm")) {
                 try {
@@ -352,14 +189,9 @@ public final class TikaTextXtractService implements TextXtractService {
             /*
              * The stream is marked and reset to the original position
              */
-            final InputStream in;
-            if (inputStream == null || inputStream.markSupported()) {
-                in = inputStream;
-            } else {
-                in = new BufferedInputStream(inputStream);
-            }
+            final InputStream in = inputStream.markSupported() ? inputStream : new BufferedInputStream(inputStream, DEFAULT_BUFSIZE);
             /*
-             * Check with POI
+             * Check with POI (that automatically checks support by magic bytes)
              */
             {
                 final String text = poitotext(in);
@@ -371,13 +203,7 @@ public final class TikaTextXtractService implements TextXtractService {
             /*
              * Detect media type
              */
-            final MediaType mediaType;
-            if (isEmpty(optMimeType)) {
-                final Detector detector = tika.getDetector();
-                mediaType = detector.detect(in, new Metadata());
-            } else {
-                mediaType = MediaType.parse(optMimeType);
-            }
+            final MediaType mediaType = isEmpty(optMimeType) ? tika.getDetector().detect(in, new Metadata()) : MediaType.parse(optMimeType);
             /*
              * Check for direct support
              */
