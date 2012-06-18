@@ -51,11 +51,11 @@
     </target>
 
     <target name="createAndInstallLibs">
-        <symlink resource="${bundlesDir}/${Bundle-SymbolicName}/${Bundle-SymbolicName}.jar" link="${destDir}/${prefix}/${libDir}/${Bundle-SymbolicName}.jar" overwrite="true"/>
+        <symlink resource="${bundlesDir}/${Bundle-SymbolicName}.jar" link="${destDir}/${prefix}/${libDir}/${Bundle-SymbolicName}.jar" overwrite="true"/>
     </target>
 
     <target name="createLinks">
-        <property name="resellerLinks" value="createadmin,deleteadmin,changeadmin,listadmin,listrestrictions,initrestrictions,removerestrictions,updatemoduleaccessrestrictions,updaterestrictions"/>
+        <property name="resellerLinks" value="deleteadmin,changeadmin,listadmin,listrestrictions,initrestrictions,removerestrictions,updatemoduleaccessrestrictions,updaterestrictions"/>
         <foreach list="${resellerLinks}" target="createResellerLink" param="linkName"/>
     </target>
 
