@@ -22,6 +22,7 @@ Import-Package: com.openexchange.authentication,
  com.openexchange.server,
  com.openexchange.user,
  javax.mail,
+ javax.mail.internet,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.util.tracker
