@@ -57,3 +57,5 @@ Export-Package: org.apache.tika;version="1.1.0",
  org.apache.tika.sax.xpath;version="1.1.0",
  org.apache.tika.utils;version="1.1.0",
  org.apache.xmlbeans
+Import-Package: org.xml.sax,
+ org.xml.sax.helpers
