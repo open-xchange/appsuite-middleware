@@ -727,11 +727,19 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 }
                 // Hm... Something weird with executed "UID FETCH" command; retry manually...
                 final int[] seqNums = IMAPCommandsCollection.uids2SeqNums(imapFolder, new long[] { msgUID });
-                if ((null == seqNums) || (0 == seqNums.length) || (1 > seqNums[0])) {
+                if ((null == seqNums) || (0 == seqNums.length)) {
                     LOG.warn("No message with UID '" + msgUID + "' found in folder '" + fullName + '\'', cause);
                     return null;
                 }
-                msg = (IMAPMessage) imapFolder.getMessage(seqNums[0]);
+                final int msgnum = seqNums[0];
+                if (msgnum < 1) {
+                    /*
+                     * message-numbers start at 1
+                     */
+                    LOG.warn("No message with UID '" + msgUID + "' found in folder '" + fullName + '\'', cause);
+                    return null;
+                }
+                msg = (IMAPMessage) imapFolder.getMessage(msgnum);
             }
             if (msg == null) {
                 // throw new OXException(OXException.Code.MAIL_NOT_FOUND,
