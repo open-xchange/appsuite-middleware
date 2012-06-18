@@ -62,10 +62,9 @@ import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.groupware.Types;
 import com.openexchange.index.IndexAccess;
-import com.openexchange.index.IndexDocument;
+import com.openexchange.index.IndexDocument.Type;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.StandardIndexDocument;
-import com.openexchange.index.IndexDocument.Type;
 import com.openexchange.index.solr.internal.Services;
 import com.openexchange.session.Session;
 
@@ -78,6 +77,7 @@ import com.openexchange.session.Session;
 public class SolrFilestoreEventHandler implements EventHandler {
     
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SolrFilestoreEventHandler.class));
+    
 
     @Override
     public void handleEvent(Event event) {
@@ -90,13 +90,15 @@ public class SolrFilestoreEventHandler implements EventHandler {
                     IDBasedFileAccess access = accessFactory.createAccess(session);
                     String id = FileStorageEventHelper.extractObjectId(event);
                     File fileMetadata = access.getFileMetadata(id, FileStorageFileAccess.CURRENT_VERSION);
-                    InputStream is = access.getDocument(id, FileStorageFileAccess.CURRENT_VERSION);
-                    IndexAccess<File> indexAccess = indexService.acquireIndexAccess(Types.INFOSTORE, session);
                     StandardIndexDocument<File> document = new StandardIndexDocument<File>(fileMetadata, Type.INFOSTORE_DOCUMENT);
-                    document.addProperty("attachment", is);
-                    //TODO: evt. FileID öffentlich machen?
-//                    document.addProperty("account", )
-                    indexAccess.addAttachments(document, true);
+                    IndexAccess<File> indexAccess = indexService.acquireIndexAccess(Types.INFOSTORE, session);    
+                    if (hasAttachment(fileMetadata)) {
+                        InputStream is = access.getDocument(id, FileStorageFileAccess.CURRENT_VERSION);                                            
+                        document.addProperty(SolrFilestoreConstants.ATTACHMENT, is);
+                        indexAccess.addAttachments(document, true);
+                    } else {
+                        indexAccess.addContent(document, true);
+                    }
                     
                     LOG.info(FileStorageEventHelper.createDebugMessage("CreateEvent", event));
                 } else if (FileStorageEventHelper.isUpdateEvent(event)) {
@@ -105,9 +107,13 @@ public class SolrFilestoreEventHandler implements EventHandler {
                     LOG.info(FileStorageEventHelper.createDebugMessage("DeleteEvent", event));
                 }
             } catch (OXException e) {
-                // TODO: handle exception
+                LOG.error(e.getMessage(), e);
             }
         }        
+    }
+    
+    private static boolean hasAttachment(File file) {
+        return file.getFileName() == null && file.getFileSize() == 0;
     }
 
 }

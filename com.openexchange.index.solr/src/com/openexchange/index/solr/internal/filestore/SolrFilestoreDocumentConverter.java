@@ -49,11 +49,8 @@
 
 package com.openexchange.index.solr.internal.filestore;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map.Entry;
-import org.apache.commons.io.IOUtils;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import com.openexchange.exception.OXException;
@@ -67,7 +64,6 @@ import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexDocument.Type;
 import com.openexchange.index.StandardIndexDocument;
 import com.openexchange.index.filestore.FilestoreIndexField;
-import com.openexchange.index.solr.SolrIndexExceptionCodes;
 import com.openexchange.index.solr.internal.SolrResultConverter;
 
 
@@ -97,21 +93,23 @@ public class SolrFilestoreDocumentConverter implements SolrResultConverter<File>
         document.setField(SolrFilestoreField.UUID.getSolrName(), new FileUUID(contextId, userId, accountId, file.getFolderId(), file.getId()));
         document.setField(SolrFilestoreField.ACCOUNT.getSolrName(), accountId);
         InputStream fileIs = null;
-        if (indexDocument.getProperties().containsKey("attachment")) {
-            fileIs = (InputStream) indexDocument.getProperties().get("attachment");
+        if (indexDocument.getProperties().containsKey(SolrFilestoreConstants.ATTACHMENT)) {
+            fileIs = (InputStream) indexDocument.getProperties().get(SolrFilestoreConstants.ATTACHMENT);
+            document.setField(SolrFilestoreField.CONTENT.getSolrName(), fileIs);
         }
-        if (fileIs != null) {
-            // Load this file into memory
-            try {
-                byte[] byteArray = IOUtils.toByteArray(fileIs);
-                ByteArrayInputStream bais = new ByteArrayInputStream(byteArray);
-                document.setField(SolrFilestoreField.CONTENT.getSolrName(), bais);
-            } catch (IOException e) {
-                throw SolrIndexExceptionCodes.IO_ERROR.create(e.getMessage(), e);
-            } finally {
-                IOUtils.closeQuietly(fileIs);
-            }
-        }
+        
+//        if (fileIs != null) {
+//            // Load this file into memory
+//            try {
+//                byte[] byteArray = IOUtils.toByteArray(fileIs);
+//                ByteArrayInputStream bais = new ByteArrayInputStream(byteArray);
+//                document.setField(SolrFilestoreField.CONTENT.getSolrName(), bais);
+//            } catch (IOException e) {
+//                throw SolrIndexExceptionCodes.IO_ERROR.create(e.getMessage(), e);
+//            } finally {
+//                IOUtils.closeQuietly(fileIs);
+//            }
+//        }
         
         return document;
     }
