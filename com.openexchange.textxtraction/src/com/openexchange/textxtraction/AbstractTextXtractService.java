@@ -47,31 +47,60 @@
  *
  */
 
-package com.openexchange.textxtraction.internal;
+package com.openexchange.textxtraction;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.nio.charset.Charset;
+import org.apache.tika.io.TikaInputStream;
 import com.openexchange.exception.OXException;
-import com.openexchange.i18n.LocalizableStrings;
+import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 
 /**
- * Exception messages for {@link OXException} that must be translated.
- *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * {@link AbstractTextXtractService} - The abstract {@link TextXtractService} class providing default implementation for
+ * {@link #extractFrom(String, String)} and {@link #extractFromResource(String, String)}.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class TextXtractExceptionMessages implements LocalizableStrings {
-
-    public static final String ERROR_MSG = "An error occurred: %1$s";
-
-    public static final String TRUNCATED_MSG = "The following field(s) are too long: %1$s";
-
-    public static final String UNABLE_TO_CHANGE_DATA_MSG = "Unable to change data. (%1$s)";
-
-    // An I/O error occurred: %1$s
-    public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
+public abstract class AbstractTextXtractService implements DelegateTextXtraction {
 
     /**
-     * Prevent instantiation.
+     * The ISO-8859-1 character set.
      */
-    private TextXtractExceptionMessages() {
+    protected static final Charset CHARSET_ISO_8859_1 = Charsets.ISO_8859_1;
+
+    /**
+     * Initializes a new {@link AbstractTextXtractService}.
+     */
+    protected AbstractTextXtractService() {
         super();
     }
+
+    @Override
+    public String extractFrom(final String content, final String optMimeType) throws OXException {
+        return extractFrom(Streams.newByteArrayInputStream(content.getBytes(CHARSET_ISO_8859_1)), optMimeType);
+    }
+
+    @Override
+    public String extractFromResource(final String resource, final String optMimeType) throws OXException {
+        final File file = new File(resource);
+        InputStream input = null;
+        try {
+            if (file.isFile()) {
+                input = new FileInputStream(file);
+            } else {
+                input = TikaInputStream.get(new URL(resource));
+            }
+            return extractFrom(input, optMimeType);
+        } catch (final IOException e) {
+            throw TextXtractExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } finally {
+            Streams.close(input);
+        }
+    }
+
 }

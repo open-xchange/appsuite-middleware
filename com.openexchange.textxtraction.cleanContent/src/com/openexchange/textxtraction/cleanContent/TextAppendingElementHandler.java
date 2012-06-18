@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.textxtraction.internal;
+package com.openexchange.textxtraction.cleanContent;
 
 import java.io.IOException;
 import java.nio.CharBuffer;

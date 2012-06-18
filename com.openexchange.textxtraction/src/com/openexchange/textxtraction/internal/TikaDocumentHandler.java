@@ -80,6 +80,7 @@ import org.xml.sax.helpers.DefaultHandler;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
+import com.openexchange.textxtraction.TextXtractExceptionCodes;
 
 /**
  * {@link TikaDocumentHandler}

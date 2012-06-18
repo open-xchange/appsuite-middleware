@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.textxtraction.internal;
+package com.openexchange.textxtraction.cleanContent;
 
 import java.io.File;
 import java.io.IOException;
@@ -61,19 +61,20 @@ import net.bitform.api.secure.SecureResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
-import com.openexchange.textxtraction.TextXtractService;
+import com.openexchange.textxtraction.DelegateTextXtraction;
+import com.openexchange.textxtraction.TextXtractExceptionCodes;
 
 /**
- * {@link CleanContentExtractor} - The text extractor based on CleanContent SDK.
+ * {@link CleanContentTextXtraction} - The text extractor based on CleanContent SDK.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CleanContentExtractor implements TextXtractService {
+public final class CleanContentTextXtraction implements DelegateTextXtraction {
 
     /**
-     * Initializes a new {@link CleanContentExtractor}.
+     * Initializes a new {@link CleanContentTextXtraction}.
      */
-    public CleanContentExtractor() {
+    public CleanContentTextXtraction() {
         super();
     }
 

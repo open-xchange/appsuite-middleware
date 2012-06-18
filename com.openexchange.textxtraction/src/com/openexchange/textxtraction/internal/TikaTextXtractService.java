@@ -62,6 +62,8 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import net.htmlparser.jericho.Renderer;
 import net.htmlparser.jericho.Segment;
 import net.htmlparser.jericho.Source;
@@ -85,6 +87,8 @@ import org.apache.xmlbeans.XmlException;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
+import com.openexchange.textxtraction.DelegateTextXtraction;
+import com.openexchange.textxtraction.TextXtractExceptionCodes;
 import com.openexchange.textxtraction.TextXtractService;
 
 /**
@@ -105,7 +109,9 @@ public final class TikaTextXtractService implements TextXtractService {
 
     private static final String UTF_8 = Charsets.UTF_8_NAME;
 
-    private final TextXtractService outsideInXtractService;
+    private static final Object PRESENT = new Object();
+
+    private final ConcurrentMap<DelegateTextXtraction, Object> delegatees;
 
     private final Tika tika;
 
@@ -117,13 +123,32 @@ public final class TikaTextXtractService implements TextXtractService {
     public TikaTextXtractService() {
         super();
         tika = new Tika();
-        outsideInXtractService = new CleanContentExtractor();
+        delegatees = new ConcurrentHashMap<DelegateTextXtraction, Object>(4);
         // Direct types map
         directTypes = new EnumMap<DirectType, Set<MediaType>>(DirectType.class);
         // PDF media types
         final Set<MediaType> set = new HashSet<MediaType>(2);
         set.add(MediaType.application("pdf"));
         directTypes.put(DirectType.PDF, set);
+    }
+
+    /**
+     * Adds given delegate.
+     * 
+     * @param delegateTextXtraction The delegate to add
+     * @return <code>true</code> on success; otherwise <code>false</code>
+     */
+    public boolean addDelegateTextXtraction(final DelegateTextXtraction delegateTextXtraction) {
+        return null == delegatees.putIfAbsent(delegateTextXtraction, PRESENT);
+    }
+
+    /**
+     * Removes given delegate.
+     * 
+     * @param delegateTextXtraction The delegate to remove
+     */
+    public void removeDelegateTextXtraction(final DelegateTextXtraction delegateTextXtraction) {
+        delegatees.remove(delegateTextXtraction);
     }
 
     private TikaDocumentHandler newDefaultHandler() throws OXException {
@@ -155,9 +180,11 @@ public final class TikaTextXtractService implements TextXtractService {
                 }
             }
             try {
-                final String text = outsideInXtractService.extractFromResource(resource, optMimeType);
-                if (null != text) {
-                    return text;
+                for (final DelegateTextXtraction delegatee : delegatees.keySet()) {
+                    final String text = delegatee.extractFromResource(resource, optMimeType);
+                    if (null != text) {
+                        return text;
+                    }
                 }
             } catch (final Exception e) {
                 // Ignore
@@ -237,9 +264,11 @@ public final class TikaTextXtractService implements TextXtractService {
             }
         }
         try {
-            final String text = outsideInXtractService.extractFrom(content, optMimeType);
-            if (null != text) {
-                return text;
+            for (final DelegateTextXtraction delegatee : delegatees.keySet()) {
+                final String text = delegatee.extractFrom(content, optMimeType);
+                if (null != text) {
+                    return text;
+                }
             }
         } catch (final Exception e) {
             // Ignore
@@ -306,9 +335,12 @@ public final class TikaTextXtractService implements TextXtractService {
             }
         }
         try {
-            final String text = outsideInXtractService.extractFrom(inputStream, optMimeType);
-            if (null != text) {
-                return text;
+            for (final DelegateTextXtraction delegatee : delegatees.keySet()) {
+                final String text = delegatee.extractFrom(inputStream, optMimeType);
+                if (null != text) {
+                    Streams.close(inputStream);
+                    return text;
+                }
             }
         } catch (final Exception e) {
             // Ignore

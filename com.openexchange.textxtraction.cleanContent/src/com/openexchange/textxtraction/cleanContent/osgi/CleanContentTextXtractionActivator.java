@@ -47,66 +47,34 @@
  *
  */
 
-package com.openexchange.textxtraction.osgi;
+package com.openexchange.textxtraction.cleanContent.osgi;
 
 import org.apache.commons.logging.Log;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.textxtraction.DelegateTextXtraction;
-import com.openexchange.textxtraction.TextXtractService;
-import com.openexchange.textxtraction.internal.TikaTextXtractService;
+import com.openexchange.textxtraction.cleanContent.CleanContentTextXtraction;
 
 /**
- * {@link TextXtractionActivator}
+ * {@link CleanContentTextXtractionActivator}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class TextXtractionActivator extends HousekeepingActivator {
+public class CleanContentTextXtractionActivator extends HousekeepingActivator {
 
     /**
-     * Initializes a new {@link TextXtractionActivator}.
+     * Initializes a new {@link CleanContentTextXtractionActivator}.
      */
-    public TextXtractionActivator() {
+    public CleanContentTextXtractionActivator() {
         super();
     }
 
     @Override
     public void startBundle() throws Exception {
-        final Log log = com.openexchange.log.Log.loggerFor(TextXtractionActivator.class);
-        final String name = "com.openexchange.textxtraction";
+        final Log log = com.openexchange.log.Log.loggerFor(CleanContentTextXtractionActivator.class);
+        final String name = "com.openexchange.textxtraction.cleanContent";
         log.info("Starting bundle: " + name);
         try {
-            final TikaTextXtractService tikaTextXtractService = new TikaTextXtractService();
-            final BundleContext context = this.context;
-            track(DelegateTextXtraction.class, new ServiceTrackerCustomizer<DelegateTextXtraction, DelegateTextXtraction>() {
-
-                @Override
-                public DelegateTextXtraction addingService(final ServiceReference<DelegateTextXtraction> reference) {
-                    final DelegateTextXtraction service = context.getService(reference);
-                    if (tikaTextXtractService.addDelegateTextXtraction(service)) {
-                        return service;
-                    }
-                    context.ungetService(reference);
-                    return null;
-                }
-
-                @Override
-                public void modifiedService(final ServiceReference<DelegateTextXtraction> reference, final DelegateTextXtraction service) {
-                    // Nothing
-                }
-
-                @Override
-                public void removedService(final ServiceReference<DelegateTextXtraction> reference, final DelegateTextXtraction service) {
-                    if (null != service) {
-                        tikaTextXtractService.removeDelegateTextXtraction(service);
-                        context.ungetService(reference);
-                    }
-                }
-            });
-            openTrackers();
-            registerService(TextXtractService.class, tikaTextXtractService);
+            registerService(DelegateTextXtraction.class, new CleanContentTextXtraction());
         } catch (final Exception e) {
             log.info("Starting bundle failed: " + name, e);
             throw e;
@@ -115,11 +83,11 @@ public class TextXtractionActivator extends HousekeepingActivator {
 
     @Override
     public void stopBundle() throws Exception {
-        final Log log = com.openexchange.log.Log.loggerFor(TextXtractionActivator.class);
-        final String name = "com.openexchange.textxtraction";
+        final Log log = com.openexchange.log.Log.loggerFor(CleanContentTextXtractionActivator.class);
+        final String name = "com.openexchange.textxtraction.cleanContent";
         log.info("Stopping bundle: " + name);
         try {
-            cleanUp();
+            unregisterServices();
         } catch (final Exception e) {
             log.info("Stopping bundle failed: " + name, e);
             throw e;
@@ -128,8 +96,7 @@ public class TextXtractionActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        // TODO Auto-generated method stub
-        return null;
+        return new Class<?>[] {};
     }
 
 }

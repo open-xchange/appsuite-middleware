@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.textxtraction.internal;
+package com.openexchange.textxtraction;
 
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
