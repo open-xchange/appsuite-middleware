@@ -157,7 +157,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
     
     @Override
     public MailMessage[] searchMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws OXException {
-    	if (searchTerm == null || getIndexFacadeService() == null) {
+    	if (getIndexFacadeService() == null) {
             return messageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
         }
     	
@@ -170,7 +170,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
                 FolderJob folderJob = new FolderJob(folder, createJobInfo());
                 submitJob(folderJob);
                 return messageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
-            } else if (!SolrMailUtility.getIndexableFields(indexAccess).containsAll(mfs)) {
+            } else if (searchTerm == null || !SolrMailUtility.getIndexableFields(indexAccess).containsAll(mfs)) {
                 return messageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
             }
             
