@@ -524,8 +524,7 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
     }
     
     private void setFieldList(final SolrQuery solrQuery, final Set<SolrMailField> fields) {
-        final String[] solrFields = SolrMailField.solrNamesFor(fields);
-        solrQuery.setFields(solrFields);
+        solrQuery.setFields(SolrMailField.solrNamesFor(fields));
     }
 
     private String buildFacetQuery(final String solrName, final String from, final String to) {
