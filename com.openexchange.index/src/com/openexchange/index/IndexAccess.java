@@ -62,12 +62,13 @@ import com.openexchange.exception.OXException;
 public interface IndexAccess<V> {
     
     /**
-     * Returns if a folder within an account is already indexed.
+     * Checks if a folder within an account is already indexed.
      * If folder is <code>null</code>, the whole account is checked.
      * 
      * @param accountId The account id.
      * @param folderId The folder id or <code>null</code>.
-     * @return If a folder or account is indexed.
+     * @return <code>true</code> if a folder or account is indexed; otherwise <code>false</code>
+     * @throws OXException If check fails
      */
     boolean isIndexed(String accountId, String folderId) throws OXException;
     
