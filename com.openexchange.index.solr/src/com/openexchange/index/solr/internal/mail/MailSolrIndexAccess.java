@@ -458,11 +458,11 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
         }
         Map<IndexField, Map<String, Long>> facetCountsMap = null;
         do {
-            solrQuery.setStart(off);
+            solrQuery.setStart(Integer.valueOf(off));
             if ((fetched + maxRows) > len) {
                 maxRows = (len - fetched);
             }
-            solrQuery.setRows(maxRows);
+            solrQuery.setRows(Integer.valueOf(maxRows));
             final QueryResponse queryResponse = query(solrQuery);
             final SolrDocumentList results = queryResponse.getResults();
             for (final SolrDocument document : results) {
