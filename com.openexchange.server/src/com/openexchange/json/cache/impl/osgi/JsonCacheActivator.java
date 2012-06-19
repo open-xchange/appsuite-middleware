@@ -86,7 +86,8 @@ public final class JsonCacheActivator extends HousekeepingActivator {
         registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(
             new JsonCacheCreateTableTask(),
             new JsonCacheAddInProgressFieldTask(),
-            new JsonCacheMediumTextTask()));
+            new JsonCacheMediumTextTask(),
+            new JsonCacheAddOtherFieldsTask()));
         registerService(DeleteListener.class, new JsonCacheDeleteListener());
         /*
          * Register cache service
