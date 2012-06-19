@@ -1185,7 +1185,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             final boolean body = usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL);
             final boolean descending = OrderDirection.DESC.equals(order);
             if (!body) {
-                final boolean logIt = INFO; // TODO: Switch to DEBUG
+                final boolean logIt = DEBUG;
                 final long st = logIt ? System.currentTimeMillis() : 0L;
                 final Map<MessageId, MailMessage> mapping;
                 if (mergeWithSent) {
@@ -1233,7 +1233,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 }
                 if (logIt) {
                     final long dur = System.currentTimeMillis() - st;
-                    LOG.info("\tMessage fetch took " + dur + "msec for folder " + fullName);
+                    LOG.debug("\tMessage fetch took " + dur + "msec for folder " + fullName);
                 }
                 /*
                  * Apply account identifier
