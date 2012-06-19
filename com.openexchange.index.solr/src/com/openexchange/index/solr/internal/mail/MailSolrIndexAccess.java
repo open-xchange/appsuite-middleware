@@ -453,76 +453,73 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
         final SearchHandler searchHandler = checkQueryParametersAndGetSearchHandler(parameters);
         SolrQuery solrQuery;
         switch (searchHandler) {
-            case ALL_REQUEST:
-            {
-                final int accountId = getAccountId(parameters);
-                final String folder = parameters.getFolder();
-                if (folder == null) {
-                    solrQuery = new SolrQuery("*:*");
-                } else {
-                    final ConfigurationService config = Services.getService(ConfigurationService.class);
-                    final String handler = config.getProperty(SolrProperties.ALL_HANLDER);
-                    solrQuery = new SolrQuery("\"" + folder + "\"");
-                    solrQuery.setQueryType(handler);
-                }
-                solrQuery.setFilterQueries(buildFilterQueries(accountId, null));                
-                solrQuery.set("sortManually", setSortAndOrder(parameters, solrQuery));
-                break;
-            }                
-                
-            case SIMPLE:
-                {
-                    final ConfigurationService config = Services.getService(ConfigurationService.class);
-                    final String handler = config.getProperty(SolrProperties.SIMPLE_HANLDER);
-                    solrQuery = new SolrQuery(parameters.getPattern());
-                    solrQuery.setQueryType(handler);
-                    solrQuery.set("sortManually", setSortAndOrder(parameters, solrQuery));
-                    solrQuery.setFilterQueries(buildFilterQueries(getAccountId(parameters), parameters.getFolder()));
-                    break;
-                }
-                
-            case GET_REQUEST:
-                {
-                    final String[] ids = getIds(parameters);
-                    final int accountId = getAccountId(parameters);
-                    final String folder = parameters.getFolder();
-                    final String queryString = buildQueryString(accountId, folder);
-                    final StringBuilder sb = new StringBuilder(queryString);
-                    if (queryString.length() != 0) {
-                        sb.append(" AND (");
-                    } else {
-                        sb.append('(');
-                    }
-                    boolean first = true;
-                    for (final String id : ids) {
-                        if (first) {
-                            first = false;
-                        } else {
-                            sb.append(" OR ");
-                        }
-                        sb.append('(').append(SolrMailField.UUID.solrName()).append(":\"").append(id).append("\")");
-                    }
-                    sb.append(')');
-                    solrQuery = new SolrQuery(sb.toString());
-                    solrQuery.set("sortManually", setSortAndOrder(parameters, solrQuery));
-                    break;
-                }
-                
-            case CUSTOM:
-            {
+        case ALL_REQUEST: {
+            final int accountId = getAccountId(parameters);
+            final String folder = parameters.getFolder();
+            if (folder == null) {
+                solrQuery = new SolrQuery("*:*");
+            } else {
                 final ConfigurationService config = Services.getService(ConfigurationService.class);
-                final String handler = config.getProperty(SolrProperties.CUSTOM_HANLDER);
-                final SearchTerm<?> searchTerm = (SearchTerm<?>) parameters.getSearchTerm();
-                final StringBuilder queryBuilder = SearchTerm2Query.searchTerm2Query(searchTerm);
-                solrQuery = new SolrQuery(queryBuilder.toString());
+                final String handler = config.getProperty(SolrProperties.ALL_HANLDER);
+                solrQuery = new SolrQuery("\"" + folder + "\"");
                 solrQuery.setQueryType(handler);
-                solrQuery.set("sortManually", setSortAndOrder(parameters, solrQuery));
-                solrQuery.setFilterQueries(buildFilterQueries(getAccountId(parameters), parameters.getFolder()));
-                break;
             }
-            
-            default:
-                throw new NotImplementedException("Search handler " + searchHandler.name() + " is not implemented for MailSolrIndexAccess.query().");
+            solrQuery.addFilterQuery(buildFilterQueries(accountId, null));
+            solrQuery.set("sortManually", setSortAndOrder(parameters, solrQuery));
+            break;
+        }
+
+        case SIMPLE: {
+            final ConfigurationService config = Services.getService(ConfigurationService.class);
+            final String handler = config.getProperty(SolrProperties.SIMPLE_HANLDER);
+            solrQuery = new SolrQuery(parameters.getPattern());
+            solrQuery.setQueryType(handler);
+            solrQuery.set("sortManually", setSortAndOrder(parameters, solrQuery));
+            solrQuery.addFilterQuery(buildFilterQueries(getAccountId(parameters), parameters.getFolder()));
+            break;
+        }
+
+        case GET_REQUEST: {
+            final String[] ids = getIds(parameters);
+            final int accountId = getAccountId(parameters);
+            final String folder = parameters.getFolder();
+            final String queryString = buildQueryString(accountId, folder);
+            final StringBuilder sb = new StringBuilder(queryString);
+            if (queryString.length() != 0) {
+                sb.append(" AND (");
+            } else {
+                sb.append('(');
+            }
+            boolean first = true;
+            for (final String id : ids) {
+                if (first) {
+                    first = false;
+                } else {
+                    sb.append(" OR ");
+                }
+                sb.append('(').append(SolrMailField.UUID.solrName()).append(":\"").append(id).append("\")");
+            }
+            sb.append(')');
+            solrQuery = new SolrQuery(sb.toString());
+            solrQuery.set("sortManually", setSortAndOrder(parameters, solrQuery));
+            break;
+        }
+
+        case CUSTOM: {
+            final ConfigurationService config = Services.getService(ConfigurationService.class);
+            final String handler = config.getProperty(SolrProperties.CUSTOM_HANLDER);
+            final SearchTerm<?> searchTerm = (SearchTerm<?>) parameters.getSearchTerm();
+            final StringBuilder queryBuilder = SearchTerm2Query.searchTerm2Query(searchTerm);
+            solrQuery = new SolrQuery(queryBuilder.toString());
+            solrQuery.setQueryType(handler);
+            solrQuery.set("sortManually", setSortAndOrder(parameters, solrQuery));
+            solrQuery.addFilterQuery(buildFilterQueries(getAccountId(parameters), parameters.getFolder()));
+            break;
+        }
+
+        default:
+            throw new NotImplementedException(
+                "Search handler " + searchHandler.name() + " is not implemented for MailSolrIndexAccess.query().");
         }
 
         return solrQuery;
