@@ -557,7 +557,7 @@ public class AbstractContactTest extends AbstractAJAXSession {
 
     public void deleteContact(final int id, final int inFolder, final boolean ignoreFailure) throws Exception {
         try {
-            final DeleteRequest request = new DeleteRequest(inFolder, id, ignoreFailure ? new Date(Long.MAX_VALUE) : new Date());
+            final DeleteRequest request = new DeleteRequest(inFolder, id, ignoreFailure ? new Date(Long.MAX_VALUE) : new Date(), !ignoreFailure);
             client.execute(request);
         } catch (final Exception e) {
             if (!ignoreFailure) {
