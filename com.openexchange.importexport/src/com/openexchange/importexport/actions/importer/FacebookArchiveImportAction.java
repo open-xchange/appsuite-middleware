@@ -65,8 +65,9 @@ public class FacebookArchiveImportAction extends AbstractImportAction implements
 
 	@Override
 	public Importer getImporter() {
-		if(importer == null)
-			importer = new FacebookArchiveImporter();
+		if(importer == null) {
+            importer = new FacebookArchiveImporter();
+        }
 		return importer;
 	}
 

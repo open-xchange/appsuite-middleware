@@ -244,8 +244,9 @@ public class SubscriptionTestManager {
     }
 
     public void cleanUp() throws OXException, IOException, SAXException, JSONException {
-        if(createdItems.size() > 0)
+        if(createdItems.size() > 0) {
             deleteAction(createdItems);
+        }
     }
 
 }

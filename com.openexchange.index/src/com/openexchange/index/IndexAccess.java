@@ -60,17 +60,17 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface IndexAccess<V> {
-    
+
     /**
-     * Returns if a folder within an account is already indexed.
-     * If folder is <code>null</code>, the whole account is checked.
+     * Checks if a folder within an account is already indexed. If folder is <code>null</code>, the whole account is checked.
      * 
      * @param accountId The account id.
      * @param folderId The folder id or <code>null</code>.
-     * @return If a folder or account is indexed.
+     * @return <code>true</code> if a folder or account is indexed; otherwise <code>false</code>
+     * @throws OXException If check fails
      */
     boolean isIndexed(String accountId, String folderId) throws OXException;
-    
+
     /**
      * Gets the fields indexed by this access.
      * 
@@ -99,8 +99,8 @@ public interface IndexAccess<V> {
      * Adds specified document's content to associated index.
      * 
      * @param document The document to add
-     * @param full If <code>true</code> the document will be added as a whole. 
-     * Otherwise it will be loaded from the index and only the content will be added to the existing document.
+     * @param full If <code>true</code> the document will be added as a whole. Otherwise it will be loaded from the index and only the
+     *            content will be added to the existing document.
      * @throws OXException If parameter full is false but the document could not be found in the index or if an index error occurs.
      */
     void addContent(IndexDocument<V> document, boolean full) throws OXException;
@@ -109,8 +109,8 @@ public interface IndexAccess<V> {
      * Adds specified documents' contents to associated index.
      * 
      * @param documents The documents to add
-     * @param full If <code>true</code> the document will be added as a whole. 
-     * Otherwise it will be loaded from the index and only the content will be added to the existing document.
+     * @param full If <code>true</code> the document will be added as a whole. Otherwise it will be loaded from the index and only the
+     *            content will be added to the existing document.
      * @throws OXException If parameter full is false but one of the documents could not be found in the index or if an index error occurs.
      */
     void addContent(Collection<IndexDocument<V>> documents, boolean full) throws OXException;
@@ -119,8 +119,8 @@ public interface IndexAccess<V> {
      * Adds specified document's attachments to associated index.
      * 
      * @param document The document to add
-     * @param full If <code>true</code> the document will be added as a whole. 
-     * Otherwise it will be loaded from the index and only the attachment will be added to the existing document.
+     * @param full If <code>true</code> the document will be added as a whole. Otherwise it will be loaded from the index and only the
+     *            attachment will be added to the existing document.
      * @throws OXException If parameter full is false but the document could not be found in the index or if an index error occurs.
      */
     void addAttachments(IndexDocument<V> document, boolean full) throws OXException;
@@ -129,8 +129,8 @@ public interface IndexAccess<V> {
      * Adds specified documents' attachments to associated index.
      * 
      * @param documents The documents to add
-     * @param full If <code>true</code> the document will be added as a whole. 
-     * Otherwise it will be loaded from the index and only the attachment will be added to the existing document.
+     * @param full If <code>true</code> the document will be added as a whole. Otherwise it will be loaded from the index and only the
+     *            attachment will be added to the existing document.
      * @throws OXException If parameter full is false but one of the documents could not be found in the index or if an index error occurs.
      */
     void addAttachments(Collection<IndexDocument<V>> documents, boolean full) throws OXException;
@@ -173,6 +173,8 @@ public interface IndexAccess<V> {
 
     /**
      * Queries indexed documents by specified query parameters.
+     * <p>
+     * Actually a convenience method for {@link #query(QueryParameters, FacetParameters, Set)} with 2nd argument set to <code>null</code>.
      * 
      * @param parameters The query parameters
      * @param fields The fields to be filled within the returned documents. If set to <code>null</code> all known fields will be filled.
@@ -181,5 +183,17 @@ public interface IndexAccess<V> {
      * @throws InterruptedException If interrupted while retrieving results
      */
     IndexResult<V> query(QueryParameters parameters, Set<? extends IndexField> fields) throws OXException;
+
+    /**
+     * Queries indexed documents by specified query parameters.
+     * 
+     * @param parameters The query parameters
+     * @param facetParameters The <i>optional</i> facet parameters (pass <code>null</code> to not perform any facets)
+     * @param fields The fields to be filled within the returned documents. If set to <code>null</code> all known fields will be filled.
+     * @return The query result
+     * @throws OXException If query fails
+     * @throws InterruptedException If interrupted while retrieving results
+     */
+    IndexResult<V> query(QueryParameters parameters, FacetParameters facetParameters, Set<? extends IndexField> fields) throws OXException;
 
 }

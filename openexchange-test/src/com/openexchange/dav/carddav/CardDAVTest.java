@@ -131,6 +131,7 @@ public abstract class CardDAVTest extends WebDAVTest {
         super.tearDown();
     }
     
+    @Override
     protected String getDefaultUserAgent() {
     	return UserAgents.MACOS_10_7_3;
     }
@@ -508,6 +509,7 @@ public abstract class CardDAVTest extends WebDAVTest {
     	return this.getManager().newAction(contact);
     }
 
+    @Override
     protected FolderObject createFolder(FolderObject folder) throws OXException, IOException, JSONException {
 		InsertResponse response = getClient().execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_NEW, folder));
 		folder.setObjectID(response.getId());
@@ -515,6 +517,7 @@ public abstract class CardDAVTest extends WebDAVTest {
 		return folder;
     }
     
+    @Override
     protected FolderObject updateFolder(FolderObject folder) throws OXException, IOException, JSONException {
 		InsertResponse response = getClient().execute(new com.openexchange.ajax.folder.actions.UpdateRequest(EnumAPI.OX_NEW, folder));
         folder.setLastModified(response.getTimestamp());

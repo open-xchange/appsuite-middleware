@@ -158,8 +158,11 @@ public class Bug16107Test extends ManagedAppointmentTest {
 
         has = calendarManager.has(start, end);
         count = 0;
-        for(boolean b: has)
-            if(b) count++;
+        for(boolean b: has) {
+            if(b) {
+                count++;
+            }
+        }
 
         assertEquals("HasRequest should find the right amount of occurences in updated "+ name, occurences, count);
     }

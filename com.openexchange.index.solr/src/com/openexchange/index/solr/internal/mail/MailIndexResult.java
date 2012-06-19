@@ -50,7 +50,9 @@
 package com.openexchange.index.solr.internal.mail;
 
 import java.util.List;
+import java.util.Map;
 import com.openexchange.index.IndexDocument;
+import com.openexchange.index.IndexField;
 import com.openexchange.index.IndexResult;
 import com.openexchange.mail.dataobjects.MailMessage;
 
@@ -64,6 +66,8 @@ public final class MailIndexResult implements IndexResult<MailMessage> {
     private int numFound;
 
     private List<IndexDocument<MailMessage>> mails;
+
+    private Map<IndexField, Map<String, Long>> facetCounts;
 
     /**
      * Initializes a new {@link MailIndexResult}.
@@ -108,6 +112,20 @@ public final class MailIndexResult implements IndexResult<MailMessage> {
      */
     public void setResults(final List<IndexDocument<MailMessage>> mails) {
         this.mails = mails;
+    }
+
+    @Override
+    public Map<IndexField, Map<String, Long>> getFacetCounts() {
+        return facetCounts;
+    }
+    
+    /**
+     * Sets the facet counts
+     *
+     * @param facetCounts The facet counts to set
+     */
+    public void setFacetCounts(final Map<IndexField, Map<String, Long>> facetCounts) {
+        this.facetCounts = facetCounts;
     }
 
 }

@@ -64,8 +64,9 @@ public class ICalImportAction extends AbstractImportAction {
 
 	@Override
 	public Importer getImporter() {
-		if(importer == null)
-			importer = new ICalImporter();
+		if(importer == null) {
+            importer = new ICalImporter();
+        }
 		return importer;
 	}
 

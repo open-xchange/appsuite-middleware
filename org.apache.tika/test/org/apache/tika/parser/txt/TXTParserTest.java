@@ -30,7 +30,7 @@ import junit.framework.TestCase;
 
 public class TXTParserTest extends TestCase {
 
-    private Parser parser = new TXTParser();
+    private final Parser parser = new TXTParser();
 
     public void testEnglishText() throws Exception {
         String text =
@@ -150,6 +150,7 @@ public class TXTParserTest extends TestCase {
     private void assertExtractText(String msg, String expected, byte[] input)
             throws Exception {
         ContentHandler handler = new BodyContentHandler() {
+            @Override
             public void ignorableWhitespace(char[] ch, int off, int len) {
                 // Ignore the whitespace added by XHTMLContentHandler
             }

@@ -68,7 +68,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class IndexedFoldersCreateTableTask extends UpdateTaskAdapter {
     
-    private IndexedFoldersCreateTableService service;
+    private final IndexedFoldersCreateTableService service;
 
     public IndexedFoldersCreateTableTask(IndexedFoldersCreateTableService service) {
         super();

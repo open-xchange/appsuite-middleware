@@ -32,7 +32,7 @@ Import-Package: com.openexchange.authentication,
  javax.servlet;version="2.4.0",
  javax.servlet.http;version="2.4.0",
  org.apache.commons.logging,
- org.jdom,
+ org.jdom2,
  org.osgi.framework,
  org.osgi.service.http,
  org.osgi.util.tracker

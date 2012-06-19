@@ -80,6 +80,7 @@ import org.xml.sax.helpers.DefaultHandler;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
+import com.openexchange.textxtraction.TextXtractExceptionCodes;
 
 /**
  * {@link TikaDocumentHandler}
@@ -155,7 +156,7 @@ public final class TikaDocumentHandler {
     }
 
     /**
-     * Gets the document's type.
+     * Gets the document's type & ensures specified {@link InputStream stream} is closed.
      *
      * @param in The document's input stream
      * @return The type
@@ -172,7 +173,7 @@ public final class TikaDocumentHandler {
     }
 
     /**
-     * Gets the document's language.
+     * Gets the document's language & ensures specified {@link InputStream stream} is closed.
      *
      * @param in The document's input stream
      * @return The language
@@ -189,10 +190,9 @@ public final class TikaDocumentHandler {
     }
 
     /**
-     * Gets the document's content.
+     * Gets the document's content & ensures specified {@link InputStream stream} is closed.
      *
      * @param in The document's input stream
-     * @param output The output format
      * @return The content according to output format
      * @throws OXException If an error occurs
      */

@@ -187,8 +187,9 @@ public class MailTestManager {
         MoveMailRequest request = new MoveMailRequest(mail.getFolder(), destination, mail.getId(), failOnError);
         UpdateMailResponse response = client.execute(request);
         lastResponse = response;
-        if (lastResponse.hasError())
+        if (lastResponse.hasError()) {
             return null;
+        }
         TestMail modifiedMail = get(destination, response.getID());
         updateForCleanup(mail, modifiedMail);
         return modifiedMail;
@@ -200,8 +201,9 @@ public class MailTestManager {
     public TestMail get(String folder, String id) throws OXException, IOException, SAXException, JSONException {
         GetRequest request = new GetRequest(folder, id, failOnError);
         lastResponse = client.execute(request);
-        if (lastResponse.hasError())
+        if (lastResponse.hasError()) {
             return null;
+        }
         return new TestMail((JSONObject) lastResponse.getData());
     }
 
@@ -300,12 +302,15 @@ public class MailTestManager {
      */
     protected Set<String> extractAllRecipients(TestMail mail) {
         Set<String> recipients = new HashSet<String>();
-        if (mail.getFrom() != null)
+        if (mail.getFrom() != null) {
             recipients.addAll(mail.getTo());
-        if (mail.getCc() != null)
+        }
+        if (mail.getCc() != null) {
             recipients.addAll(mail.getCc());
-        if (mail.getBcc() != null)
+        }
+        if (mail.getBcc() != null) {
             recipients.addAll(mail.getBcc());
+        }
         return recipients;
     }
 
@@ -323,8 +328,9 @@ public class MailTestManager {
 
     private boolean containsSomewhat(String needle, Collection<String> haystack) {
         for (String hay : haystack) {
-            if (hay.contains(needle) || needle.contains(hay))
+            if (hay.contains(needle) || needle.contains(hay)) {
                 return true;
+            }
         }
         return false;
     }
@@ -335,14 +341,17 @@ public class MailTestManager {
      */
     public TestMail update(String folder, String id, TestMail updates, boolean add) throws OXException, IOException, SAXException, JSONException {
         UpdateMailRequest request = new UpdateMailRequest(folder, id);
-        if (updates.getColor() != -1)
+        if (updates.getColor() != -1) {
             request.setColor(updates.getColor());
-        if (updates.getFlags() != -1)
+        }
+        if (updates.getFlags() != -1) {
             request.setFlags(updates.getFlags());
-        if(add)
+        }
+        if(add) {
             request.doesUpdateFlags();
-        else
+        } else {
             request.removeFlags();
+        }
         UpdateMailResponse response = client.execute(request);
         TestMail result = get(folder, id);
         lastResponse = response;

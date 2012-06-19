@@ -171,8 +171,9 @@ public class UsmFailureDuringRecurrenceTest extends ManagedAppointmentTest {
         changes.update(update);
         calendarManager.update(update);
 
-        if(update.containsRecurrencePosition())
+        if(update.containsRecurrencePosition()) {
             assertFalse("Appointment and change exception should have different IDs", app.getObjectID() == update.getObjectID() );
+        }
 
         assertFalse("Update was expected to work", calendarManager.hasLastException());
 

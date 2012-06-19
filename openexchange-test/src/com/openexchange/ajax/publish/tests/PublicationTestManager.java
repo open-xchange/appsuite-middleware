@@ -239,8 +239,9 @@ public class PublicationTestManager {
         public void cleanUp() throws OXException, IOException, SAXException, JSONException {
             boolean failOnError2 = getFailOnError();
             setFailOnError(false);
-            if(createdItems.size() > 0)
+            if(createdItems.size() > 0) {
                 deleteAction(createdItems);
+            }
             setFailOnError(failOnError2);
         }
 

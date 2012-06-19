@@ -52,7 +52,7 @@ package com.openexchange.carddav;
 import java.util.Arrays;
 import java.util.List;
 
-import org.jdom.Namespace;
+import org.jdom2.Namespace;
 
 import com.openexchange.carddav.reports.AddressbookMultigetReport;
 import com.openexchange.carddav.reports.SyncCollection;

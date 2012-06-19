@@ -49,7 +49,7 @@
 
 package com.openexchange.caldav.mixins;
 
-import org.jdom.Namespace;
+import org.jdom2.Namespace;
 
 import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;

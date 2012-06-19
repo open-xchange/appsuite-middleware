@@ -237,10 +237,12 @@ public class ICalParserBugTests extends AbstractICalParserTest {
             assertEquals("Organizer should match", "ChinShimVeron.Koh@some-it.invalid", appointment.getOrganizer());
             boolean choegerFound = false, holgerFound = false;
             for(Participant p : appointment.getParticipants()){
-                if(p.getEmailAddress().matches("choeger@open-xchange.com"))
+                if(p.getEmailAddress().matches("choeger@open-xchange.com")) {
                     choegerFound = true;
-                if(p.getEmailAddress().matches("Holger.Achtziger@open-xchange.com"))
+                }
+                if(p.getEmailAddress().matches("Holger.Achtziger@open-xchange.com")) {
                     holgerFound = true;
+                }
             }
             assertTrue("Should contain CHoeger", choegerFound);
             assertTrue("Should contain Holger", holgerFound);

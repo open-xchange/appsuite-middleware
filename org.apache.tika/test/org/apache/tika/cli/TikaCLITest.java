@@ -170,8 +170,9 @@ public class TikaCLITest extends TestCase{
      */
     @Override
     public void tearDown() throws Exception {
-        if(profile != null && profile.exists())
+        if(profile != null && profile.exists()) {
             profile.delete();
+        }
         System.setOut(stdout);
     }
 

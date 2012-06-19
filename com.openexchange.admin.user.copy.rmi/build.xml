@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="com.openexchange.admin.user.copy.rmi overrides">
+
+    <description>
+        Symlinks admin user copy RMI client JAR to lib directory.
+    </description>
+
+    <import file="build-project.xml"/>    
+
+    <target name="postInstall">
+        <mkdir dir="${destDir}/${prefix}/${libDir}"/>
+        <symlink resource="${bundlesDir}/${Bundle-SymbolicName}.jar" link="${destDir}/${prefix}/${libDir}/${Bundle-SymbolicName}.jar" overwrite="true"/>
+    </target>
+
+</project>

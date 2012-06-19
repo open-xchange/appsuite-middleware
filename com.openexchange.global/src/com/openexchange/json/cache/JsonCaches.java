@@ -71,6 +71,8 @@ public final class JsonCaches {
 
     /**
      * The cache reference for fast look-up.
+     * 
+     * @see #getCache()
      */
     public static final AtomicReference<JsonCacheService> CACHE_REFERENCE = new AtomicReference<JsonCacheService>();
 
@@ -82,7 +84,7 @@ public final class JsonCaches {
     }
 
     /**
-     * Gets the cache
+     * Gets the cache.
      * 
      * @return The cache or <code>null</code> if absent
      */
@@ -199,7 +201,7 @@ public final class JsonCaches {
             }
             final JSONObject aj = (JSONObject) a;
             final JSONObject bj = (JSONObject) b;
-            for (final Map.Entry<String,Object> entry : aj.entrySet()) {
+            for (final Map.Entry<String, Object> entry : aj.entrySet()) {
                 final String name = entry.getKey();
                 if (!bj.has(name)) {
                     return false;

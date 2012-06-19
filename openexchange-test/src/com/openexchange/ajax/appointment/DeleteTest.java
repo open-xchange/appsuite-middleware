@@ -31,7 +31,7 @@ public class DeleteTest extends AppointmentTest {
 
         deleteAppointment(getWebConversation(), id, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), true);
         try {
-            deleteAppointment(getWebConversation(), id, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), true);
+            deleteAppointment(getWebConversation(), id, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
             fail("OXObjectNotFoundException expected!");
         } catch (final Exception ex) {
             assertTrue(true);

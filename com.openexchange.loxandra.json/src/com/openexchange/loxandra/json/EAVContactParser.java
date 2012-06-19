@@ -51,6 +51,7 @@ package com.openexchange.loxandra.json;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.UUID;
@@ -80,7 +81,7 @@ public class EAVContactParser {
 	 * @return an {@link EAVContact}
 	 */
 	public EAVContact parse(final JSONObject json) {
-		final EAVContact c = new EAVContact();
+		EAVContact c = new EAVContact();
 		
 		for (final int column : Contact.JSON_COLUMNS) {
 			
@@ -89,10 +90,11 @@ public class EAVContactParser {
 				final String key = field.getAjaxName();
 				try {
 					if (json.has(key)) {
-						if (EAVContactHelper.isNonString(column))
-							c.set(column, new Date(Long.parseLong(json.getString(key))));
-						else
-							c.set(column, json.getString(key));
+						if (EAVContactHelper.isNonString(column)) {
+                            c.set(column, new Date(Long.parseLong(json.getString(key))));
+                        } else {
+                            c.set(column, json.getString(key));
+                        }
 					}
 				} catch (JSONException e) {
 					e.printStackTrace();
@@ -101,13 +103,17 @@ public class EAVContactParser {
 		}
 		
 		try {
-			c.addFolderUUID(UUID.fromString(json.getString("folderUUID")));
+			if (json.has("folderUUID")) {
+                c.addFolderUUID(UUID.fromString(json.getString("folderUUID")));
+            }
+			
+			c.setUUID(UUID.fromString(json.getString("uuid")));
 			
 			JSONObject unnamedPropsJSON = json.getJSONObject("unnamed");
-			Iterator<String> iter = json.keys();
+			Iterator<String> iter = unnamedPropsJSON.keys();
 			
 			while (iter.hasNext()) {
-				String string = (String) iter.next();
+				String string = iter.next();
 				c.addUnnamedProperty(string, unnamedPropsJSON.getString(string));
 			}
 			
@@ -126,6 +132,28 @@ public class EAVContactParser {
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
+		
+		return json;
+	}
+	
+	public JSONObject parseList(final List<EAVContact> list) {
+		JSONObject json = new JSONObject();
+		final EAVContactWriter contactWriter = new EAVContactWriter(TimeZone.getTimeZone("UTC"));
+		
+		Iterator<EAVContact> it = list.iterator();
+		while (it.hasNext()) {
+			EAVContact c = it.next();
+			JSONObject j = new JSONObject();
+			
+			try {
+				contactWriter.writeContact(c, j);
+				json.put(c.getUUID().toString(), j);
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		
 		return json;
 	}
 }

@@ -5,6 +5,7 @@ BuildArch:     noarch
 BuildRequires: ant
 BuildRequires: ant-nodeps
 BuildRequires: open-xchange-log4j
+BuildRequires: open-xchange-xerces
 %if 0%{?suse_version}  && !0%{?sles_version}
 BuildRequires: java-sdk-openjdk
 %endif
@@ -25,6 +26,7 @@ URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       The main bundles for the Open-Xchange collaboration suite
 Requires:      open-xchange-osgi >= @OXVERSION@
+Requires:      open-xchange-xerces
 Provides:      open-xchange-ajp = %{version}
 Obsoletes:     open-xchange-ajp <= %{version}
 Provides:      open-xchange-cache = %{version}
@@ -194,6 +196,8 @@ fi
 /opt/open-xchange/osgi/config.ini.template
 %dir /opt/open-xchange/sbin/
 /opt/open-xchange/sbin/*
+%dir /opt/open-xchange/templates/
+/opt/open-xchange/templates/*
 
 %changelog
 * Tue Apr 17 2012 Sonja Krause-Harder  <sonja.krause-harder@open-xchange.com>

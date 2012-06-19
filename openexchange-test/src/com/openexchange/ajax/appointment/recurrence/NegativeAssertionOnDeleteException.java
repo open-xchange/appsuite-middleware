@@ -68,8 +68,9 @@ public class NegativeAssertionOnDeleteException extends AbstractNegativeAssertio
     public void check(Appointment startWith, Changes changes, OXException expectedError) {
         int recurrencePosition = (Integer) changes.get(Appointment.RECURRENCE_POSITION);
         Appointment copy = startWith.clone();
-        if(! startWith.containsObjectID())
+        if(! startWith.containsObjectID()) {
             manager.insert(copy);
+        }
 
         Appointment update = new Appointment();
         update.setParentFolderID(copy.getParentFolderID());

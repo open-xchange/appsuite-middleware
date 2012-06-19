@@ -109,11 +109,12 @@ public interface JsonCacheService {
      * 
      * @param id The identifier
      * @param jsonValue The JSON value to put
+     * @param duration The processing duration
      * @param userId The user identifier
      * @param contextId The user's context identifier
      * @throws OXException If JSON value cannot be put into cache for any reason
      */
-    void set(String id, JSONValue jsonValue, int userId, int contextId) throws OXException;
+    void set(String id, JSONValue jsonValue, long duration, int userId, int contextId) throws OXException;
 
     /**
      * Puts specified JSON value into cache if it differs from possibly existing one.
@@ -122,12 +123,13 @@ public interface JsonCacheService {
      * 
      * @param id The identifier
      * @param jsonValue The JSON value to put
+     * @param duration The processing duration
      * @param userId The user identifier
      * @param contextId The user's context identifier
      * @return <code>true</code> if put into cache; otherwise <code>false</code>
      * @throws OXException If JSON value cannot be put into cache for any reason
      */
-    boolean setIfDifferent(String id, JSONValue jsonValue, int userId, int contextId) throws OXException;
+    boolean setIfDifferent(String id, JSONValue jsonValue, long duration, int userId, int contextId) throws OXException;
 
     /**
      * Deletes denoted JSON value from cache.

@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open Xchange admin plugin contextrestore RMI bundle
+Bundle-SymbolicName: com.openexchange.admin.contextrestore.rmi
+Bundle-Version: 6.21.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.admin.rmi.dataobjects,
+ com.openexchange.admin.rmi.exceptions
+Export-Package: com.openexchange.admin.contextrestore.rmi,
+ com.openexchange.admin.contextrestore.rmi.exceptions

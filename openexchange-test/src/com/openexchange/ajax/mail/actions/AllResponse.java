@@ -83,27 +83,30 @@ public class AllResponse extends CommonAllResponse {
 
 		for (int i=0; i<mailAsArray.length() && i<columns.length; i++){
 			// MailID
-			if (columns[i] == 600) message.setMailId((String)mailAsArray.get(i));
-			// FolderID
-			else if (columns[i] == 601) message.setFolder((String)mailAsArray.get(i));
-			// hasAttachments
-			else if (columns[i] == 602) message.setHasAttachment((Boolean)mailAsArray.get(i));
-			// From
-			else if (columns[i] == 603) handleInnerArrays(mailAsArray, message, i, "from");
-			// Recipient_TO
-			else if (columns[i] == 604) handleInnerArrays(mailAsArray, message, i, "to");
-			// Recipient_CC
-			else if (columns[i] == 605) handleInnerArrays(mailAsArray, message, i, "cc");
-			// Recipient_BCC
-			else if (columns[i] == 606) handleInnerArrays(mailAsArray, message, i, "bcc");
-			// Subject
-			else if (columns[i] == 607) message.setSubject((String)mailAsArray.get(i));
-			// Size
-			else if (columns[i] == 608) message.setSize((Integer)mailAsArray.get(i));
-			// Sent date
-			//else if (columns[i] == 609) message.setSentDate(new Date((Long)mailAsArray.get(i)));
-			// Received date
-			//else if (columns[i] == 610) message.setReceivedDate(new Date((Long)mailAsArray.get(i)));
+			if (columns[i] == 600) {
+                message.setMailId((String)mailAsArray.get(i));
+            } else if (columns[i] == 601) {
+                message.setFolder((String)mailAsArray.get(i));
+            } else if (columns[i] == 602) {
+                message.setHasAttachment((Boolean)mailAsArray.get(i));
+            } else if (columns[i] == 603) {
+                handleInnerArrays(mailAsArray, message, i, "from");
+            } else if (columns[i] == 604) {
+                handleInnerArrays(mailAsArray, message, i, "to");
+            } else if (columns[i] == 605) {
+                handleInnerArrays(mailAsArray, message, i, "cc");
+            } else if (columns[i] == 606) {
+                handleInnerArrays(mailAsArray, message, i, "bcc");
+            } else if (columns[i] == 607) {
+                message.setSubject((String)mailAsArray.get(i));
+            } else if (columns[i] == 608)
+             {
+                message.setSize((Integer)mailAsArray.get(i));
+                // Sent date
+                //else if (columns[i] == 609) message.setSentDate(new Date((Long)mailAsArray.get(i)));
+                // Received date
+                //else if (columns[i] == 610) message.setReceivedDate(new Date((Long)mailAsArray.get(i)));
+            }
 		}
 
 		return message;

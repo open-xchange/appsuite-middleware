@@ -76,10 +76,12 @@ public class ParticipantComparisonFailure extends ComparisonFailure {
             expected == null ? null : expected.toString(),
             actual == null ? null : expected.toString()
         );
-        if(expected != null)
+        if(expected != null) {
             this.expectedParticipants = expected;
-        if(actual != null)
+        }
+        if(actual != null) {
             this.actualParticipants = actual;
+        }
 
     }
 

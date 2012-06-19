@@ -92,7 +92,7 @@ public class Activator extends HousekeepingActivator {
         this.daemon.getCurrentBundleStatus(context);
         this.daemon.registerBundleListener(context);
         try {
-            this.daemon.initCache();
+            AdminDaemon.initCache();
             this.daemon.initAccessCombinationsInCache();
         } catch (final OXGenericException e) {
             log.fatal(e.getMessage(), e);

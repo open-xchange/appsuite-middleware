@@ -50,27 +50,35 @@
 package com.openexchange.index;
 
 import java.util.List;
+import java.util.Map;
 
 /**
- * {@link IndexResult}
- *
+ * {@link IndexResult} - A simple container for queried index results.
+ * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface IndexResult<V> {
-	
-	/**
-	 * Gets the total number of results.
-	 * 
-	 * @return The total number of results.
-	 */
-	int getNumFound();
-	
-	/**
-	 * Gets the requested results as specified by {@link QueryParameters}'s paging.
-	 * 
-	 * @return The requested results.
-	 */
-	List<IndexDocument<V>> getResults();
+
+    /**
+     * Gets the total number of results.
+     * 
+     * @return The total number of results.
+     */
+    int getNumFound();
+
+    /**
+     * Gets the requested results as specified by {@link QueryParameters}'s paging.
+     * 
+     * @return The requested results.
+     */
+    List<IndexDocument<V>> getResults();
+
+    /**
+     * Gets the (<i>optional</i>) facet counts.
+     * 
+     * @return The facet counts; possibly empty or <code>null</code>
+     */
+    Map<IndexField, Map<String, Long>> getFacetCounts();
 
 }

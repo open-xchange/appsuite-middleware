@@ -52,6 +52,7 @@ package com.openexchange.index;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * {@link Indexes} - Utility class.
@@ -83,6 +84,11 @@ public final class Indexes {
         @Override
         public List<IndexDocument<Object>> getResults() {
             return Collections.emptyList();
+        }
+
+        @Override
+        public Map<IndexField, Map<String, Long>> getFacetCounts() {
+            return Collections.emptyMap();
         }
 
     }

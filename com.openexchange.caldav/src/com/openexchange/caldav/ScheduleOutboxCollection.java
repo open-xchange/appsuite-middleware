@@ -61,9 +61,9 @@ import java.util.TimeZone;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.output.XMLOutputter;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.output.XMLOutputter;
 
 import com.openexchange.caldav.mixins.ScheduleOutboxURL;
 import com.openexchange.data.conversion.ical.ConversionError;

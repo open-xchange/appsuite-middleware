@@ -98,22 +98,29 @@ public class HeaderTest extends AbstractTest {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
+		if (this == obj) {
+            return true;
+        }
+		if (obj == null) {
+            return false;
+        }
+		if (getClass() != obj.getClass()) {
+            return false;
+        }
 		final HeaderTest other = (HeaderTest) obj;
 		if (comparision == null) {
-			if (other.comparision != null)
-				return false;
-		} else if (!comparision.equals(other.comparision))
-			return false;
-		if (!Arrays.equals(headers, other.headers))
-			return false;
-		if (!Arrays.equals(values, other.values))
-			return false;
+			if (other.comparision != null) {
+                return false;
+            }
+		} else if (!comparision.equals(other.comparision)) {
+            return false;
+        }
+		if (!Arrays.equals(headers, other.headers)) {
+            return false;
+        }
+		if (!Arrays.equals(values, other.values)) {
+            return false;
+        }
 		return true;
 	}
 

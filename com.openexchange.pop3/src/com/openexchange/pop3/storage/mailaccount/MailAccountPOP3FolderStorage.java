@@ -178,13 +178,14 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
         if (!isDefaultFoldersChecked(mailSessionCache)) {
             checkDefaultFolders();
         }
-        final String retval = getDefaultMailFolder(index);
-        if (retval != null) {
-            return retval;
+        final String[] arr =
+            MailSessionCache.getInstance(session).getParameter(accountId, MailSessionParameterNames.getParamDefaultFolderArray());
+        if (null == arr) {
+            setDefaultFoldersChecked(false, mailSessionCache);
+            checkDefaultFolders();
+            return getDefaultMailFolder(index);
         }
-        setDefaultFoldersChecked(false, mailSessionCache);
-        checkDefaultFolders();
-        return getDefaultMailFolder(index);
+        return arr[index];
     }
 
     private String getDefaultMailFolder(final int index) {

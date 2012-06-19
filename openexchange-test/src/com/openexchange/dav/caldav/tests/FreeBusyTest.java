@@ -67,7 +67,7 @@ import org.apache.jackrabbit.webdav.MultiStatusResponse;
 import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
 import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
 import org.apache.jackrabbit.webdav.xml.DomUtil;
-import org.jdom.JDOMException;
+import org.jdom2.JDOMException;
 import org.json.JSONException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

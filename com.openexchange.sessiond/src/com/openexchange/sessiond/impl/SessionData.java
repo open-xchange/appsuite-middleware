@@ -62,9 +62,9 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessionMatcher;
@@ -295,6 +295,20 @@ final class SessionData {
             wlongTermLock.unlock();
         }
         return list;
+    }
+
+    boolean hasForContext(final int contextId) {
+        wlock.lock();
+        try {
+            for (final SessionContainer container : sessionList) {
+                if (container.hasForContext(contextId)) {
+                    return true;
+                }
+            }
+        } finally {
+            wlock.unlock();
+        }
+        return false;
     }
 
     public SessionControl getAnyActiveSessionForUser(final int userId, final int contextId, final boolean includeLongTerm) {

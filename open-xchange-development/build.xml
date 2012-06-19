@@ -15,6 +15,8 @@
     	<echo message="confDir: ${confDir}" />
     	<property name="solrDir" value="${basedir.unix}/solr" />
     	<echo message="solrDir: ${solrDir}" />
+    	<property name="snappyDir" value="${basedir.unix}/snappy" />
+    	<echo message="snappyDir: ${snappyDir}" />
     </target>
 
     <target name="prepare" depends="init">
@@ -48,11 +50,18 @@
         <antcall target="patchDataRetentionProperties"/>
         <antcall target="patchServerProperties"/>
     	<antcall target="pathSolrProperties"/>
+    	<antcall target="pathSnappyProperties"/>
     </target>
 	
 	<target name="pathSolrProperties">
 		<replace dir="${patchConfDir}">
 		    <replacefilter token="@oxsolrdir@" value="${solrDir}"/>
+		</replace>
+	</target>
+	
+	<target name="pathSnappyProperties">
+		<replace dir="${patchConfDir}">
+		    <replacefilter token="@oxsnappydir@" value="${snappyDir}"/>
 		</replace>
 	</target>
 

@@ -282,6 +282,7 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
             /*
              * Start response
              */
+            final long start = System.currentTimeMillis();
             List<MailMessage> mails = new LinkedList<MailMessage>();
             SearchIterator<MailMessage> it = null;
             try {
@@ -343,7 +344,7 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                     mails = mails.subList(fromIndex, toIndex);
                 }
             }
-            final AJAXRequestResult result = new AJAXRequestResult(mails, "mail");
+            final AJAXRequestResult result = new AJAXRequestResult(mails, "mail").setDurationByStart(start);
             result.setResponseProperty("cached", Boolean.valueOf(cache));
             return result;
         } catch (final RuntimeException e) {

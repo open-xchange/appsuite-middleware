@@ -113,33 +113,44 @@ public class Vacation extends AbstractAction {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (!super.equals(obj))
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
+		if (this == obj) {
+            return true;
+        }
+		if (!super.equals(obj)) {
+            return false;
+        }
+		if (getClass() != obj.getClass()) {
+            return false;
+        }
 		final Vacation other = (Vacation) obj;
-		if (!Arrays.equals(addresses, other.addresses))
-			return false;
-		if (days != other.days)
-			return false;
+		if (!Arrays.equals(addresses, other.addresses)) {
+            return false;
+        }
+		if (days != other.days) {
+            return false;
+        }
 		if (subject == null) {
-			if (other.subject != null)
-				return false;
-		} else if (!subject.equals(other.subject))
-			return false;
+			if (other.subject != null) {
+                return false;
+            }
+		} else if (!subject.equals(other.subject)) {
+            return false;
+        }
 		if (text == null) {
-			if (other.text != null)
-				return false;
-		} else if (!text.equals(other.text))
-			return false;
+			if (other.text != null) {
+                return false;
+            }
+		} else if (!text.equals(other.text)) {
+            return false;
+        }
 
 		if (name == null) {
-			if (other.getName() != null)
-				return false;
-		} else if (!name.equals(other.getName()))
-				return false;
+			if (other.getName() != null) {
+                return false;
+            }
+		} else if (!name.equals(other.getName())) {
+            return false;
+        }
 		return true;
 	}
 }

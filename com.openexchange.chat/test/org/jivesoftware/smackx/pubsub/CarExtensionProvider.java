@@ -18,7 +18,9 @@ public class CarExtensionProvider implements PacketExtensionProvider
 
 		for (int i=0; i<2; i++)
 		{
-			while (parser.next() != XmlPullParser.START_TAG);
+			while (parser.next() != XmlPullParser.START_TAG) {
+                ;
+            }
 
 			if (parser.getName().equals("paint"))
 			{
@@ -29,7 +31,9 @@ public class CarExtensionProvider implements PacketExtensionProvider
 				numTires = Integer.parseInt(parser.getAttributeValue(0));
 			}
 		}
-		while (parser.next() != XmlPullParser.END_TAG);
+		while (parser.next() != XmlPullParser.END_TAG) {
+            ;
+        }
 		return new CarExtension(color, numTires);
 	}
 

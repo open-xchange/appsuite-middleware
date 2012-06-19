@@ -66,7 +66,7 @@ public class ICalResource {
 	
 	private String eTag;
 	private String href;
-	private SimpleICal iCal;
+	private final SimpleICal iCal;
 	
 	public ICalResource(String iCalString, String href, String eTag) throws IOException, SimpleICalException {
 		super();

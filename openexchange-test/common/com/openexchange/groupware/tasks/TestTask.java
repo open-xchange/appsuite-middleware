@@ -87,35 +87,42 @@ public class TestTask extends Task {
     }
 
     public TestTask checkConsistencyOf(int... switches){
-        for(int currentSwitch : switches)
-        switch (currentSwitch) {
-        case DATES:
-            //appointments without start dates do not work
-            if( ! containsStartDate() )
-                setStartDate(new Date());
-            //appointments without end dates do not work
-            if( containsStartDate() && ! containsEndDate() )
-                setEndDate(this.getStartDate());
-            //appointments with end dates before start dates do not work
-            if( containsStartDate() && containsEndDate() )
-                if( getEndDate().compareTo(getStartDate()) < 0)
-                    setEndDate( getStartDate() );
-            break;
+        for(int currentSwitch : switches) {
+            switch (currentSwitch) {
+            case DATES:
+                //appointments without start dates do not work
+                if( ! containsStartDate() ) {
+                    setStartDate(new Date());
+                }
+                //appointments without end dates do not work
+                if( containsStartDate() && ! containsEndDate() ) {
+                    setEndDate(this.getStartDate());
+                }
+                //appointments with end dates before start dates do not work
+                if( containsStartDate() && containsEndDate() ) {
+                    if( getEndDate().compareTo(getStartDate()) < 0) {
+                        setEndDate( getStartDate() );
+                    }
+                }
+                break;
 
-        case RECURRENCES:
-            if( containsRecurrenceType()
-            || containsDays()
-            || containsDayInMonth()
-            || containsInterval()
-            ){
-                //if there is a recurrence, but no interval is set, set it to 1
-                if( ! containsInterval() )
-                    setInterval(1);
-                //if there is no start date, set it to the start of the recurrence
+            case RECURRENCES:
+                if( containsRecurrenceType()
+                || containsDays()
+                || containsDayInMonth()
+                || containsInterval()
+                ){
+                    //if there is a recurrence, but no interval is set, set it to 1
+                    if( ! containsInterval() )
+                     {
+                        setInterval(1);
+                    //if there is no start date, set it to the start of the recurrence
+                    }
 
+                }
+            default:
+                break;
             }
-        default:
-            break;
         }
         return this;
     }
@@ -212,22 +219,25 @@ public class TestTask extends Task {
     }
 
     public TestTask endsTheFollowingDay(){
-        if(! containsEndDate() )
+        if(! containsEndDate() ) {
             setEndDate( new Date() );
+        }
         setEndDate( shiftDateByDays(getEndDate(), 1));
         return this;
     }
 
     public TestTask startsTheDayBefore(){
-        if(! containsStartDate() )
+        if(! containsStartDate() ) {
             setStartDate( new Date() );
+        }
         setStartDate( shiftDateByDays(getStartDate(), -1));
         return this;
     }
 
     public TestTask endsTheDayBefore(){
-        if(! containsEndDate() )
+        if(! containsEndDate() ) {
             setEndDate( new Date() );
+        }
         setEndDate( shiftDateByDays(getEndDate(), -1));
         return this;
     }
@@ -259,22 +269,25 @@ public class TestTask extends Task {
     }
 
     public TestTask endsTomorrow(){
-        if(! containsEndDate() )
+        if(! containsEndDate() ) {
             setEndDate( new Date() );
+        }
         setEndDate( setDayToToday( getEndDate() ) );
         return endsTheFollowingDay();
     }
 
     public TestTask startsYesterday(){
-        if(! containsStartDate() )
+        if(! containsStartDate() ) {
             setStartDate( new Date() );
+        }
         setStartDate( setDayToToday( getStartDate() ) );
         return startsTheDayBefore();
     }
 
     public TestTask endsYesterday(){
-        if(! containsEndDate() )
+        if(! containsEndDate() ) {
             setEndDate( new Date() );
+        }
         setEndDate( setDayToToday( getEndDate() ) );
         return endsTheDayBefore();
     }
@@ -454,8 +467,9 @@ public class TestTask extends Task {
         //copy all fields of Task
         for(int field : Task.ALL_COLUMNS){
             Mapper mapper = Mapping.getMapping(field);
-            if(mapper != null &&  mapper.isSet(this) )
-                    mapper.set(newTask, mapper.get(this) );
+            if(mapper != null &&  mapper.isSet(this) ) {
+                mapper.set(newTask, mapper.get(this) );
+            }
         }
         //copy additional TestTask fields
         newTask.setTimezone(getTimezone());

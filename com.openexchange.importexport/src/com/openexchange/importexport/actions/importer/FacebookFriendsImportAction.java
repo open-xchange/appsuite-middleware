@@ -65,8 +65,9 @@ public class FacebookFriendsImportAction extends AbstractImportAction implements
 
 	@Override
 	public Importer getImporter() {
-		if(importer == null)
-			importer = new FacebookFriendsImporter();
+		if(importer == null) {
+            importer = new FacebookFriendsImporter();
+        }
 		return importer;
 	}
 

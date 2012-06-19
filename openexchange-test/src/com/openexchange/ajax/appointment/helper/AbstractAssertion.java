@@ -91,9 +91,11 @@ public class AbstractAssertion extends Assert {
     }
 
     protected Appointment find(List<Appointment> appointments, int folderToSearch, int id) {
-        for (Appointment app : appointments)
-            if (app.getParentFolderID() == folderToSearch && app.getObjectID() == id)
+        for (Appointment app : appointments) {
+            if (app.getParentFolderID() == folderToSearch && app.getObjectID() == id) {
                 return app;
+            }
+        }
         return null;
     }
 

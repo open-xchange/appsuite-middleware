@@ -52,6 +52,8 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.TimeZone;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -67,6 +69,8 @@ import com.openexchange.tools.TimeZoneUtils;
  *
  */
 public class EAVContactWriter extends CommonWriter {
+	
+	private static Log log = LogFactory.getLog(EAVContactWriter.class);
 	
 	private final TimeZone utc;
 	
@@ -96,8 +100,9 @@ public class EAVContactWriter extends CommonWriter {
 						if (EAVContactHelper.isNonString(column)) {
 							Date d = (Date)c.get(column);
 							writeParameter(key, d.getTime(), j);
-						} else 
-							writeParameter(key, (String)c.get(column), j);
+						} else {
+                            writeParameter(key, (String)c.get(column), j);
+                        }
 					}
 				} catch (IllegalArgumentException e) {
 					e.printStackTrace();
@@ -107,13 +112,22 @@ public class EAVContactWriter extends CommonWriter {
 			}
 		}
 		
-		if (c.getFolderUUIDs().size() != 0)
-			writeParameter("folderUUID", c.getFolderUUIDs().get(0).toString(), j);
+		if (c.getFolderUUIDs().size() != 0) {
+            writeParameter("folderUUID", c.getFolderUUIDs().get(0).toString(), j);
+        }
+		
+		if (c.getUUID() != null) {
+            writeParameter("uuid", c.getUUID().toString(), j);
+        }
+		
+		if (c.getTimeUUID() != null) {
+            writeParameter("timeuuid", c.getTimeUUID().toString(), j);
+        }
 		
 		JSONObject unnamedJson = new JSONObject();
 		Iterator<String> iter = c.getUnnamedPropertyNames().iterator();
 		while (iter.hasNext()) {
-			String key = (String) iter.next();
+			String key = iter.next();
 			unnamedJson.put(key, c.getUnnamedProperty(key));
 		}
 		j.put("unnamed", unnamedJson);

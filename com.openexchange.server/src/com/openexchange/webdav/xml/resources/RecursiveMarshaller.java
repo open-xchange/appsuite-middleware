@@ -52,7 +52,7 @@ package com.openexchange.webdav.xml.resources;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jdom.Element;
+import org.jdom2.Element;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.collections.Injector;

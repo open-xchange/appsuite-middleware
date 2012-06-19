@@ -65,12 +65,15 @@ public class PositiveAssertionOnUpdateOnly extends AbstractPositiveAssertion {
 
     @Override
     public void check(Appointment startAppointment, Changes changes, Expectations expectations) throws Exception {
-        if (!startAppointment.containsParentFolderID())
+        if (!startAppointment.containsParentFolderID()) {
             fail2("Cannot work with appointment lacking parent folder");
-        if (!startAppointment.containsObjectID())
+        }
+        if (!startAppointment.containsObjectID()) {
             fail2("Cannot work with appointment lacking ID");
-        if (!startAppointment.containsLastModified())
+        }
+        if (!startAppointment.containsLastModified()) {
             fail2("Cannot work with appointment lacking last_modified information");
+        }
         updateAndCheck(startAppointment, changes, expectations);
     }
 

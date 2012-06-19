@@ -29,6 +29,7 @@ import org.apache.tika.metadata.Metadata;
 public class TestChmDocumentInformation extends TestCase {
     private CHMDocumentInformation chmDoc = null;
 
+    @Override
     public void setUp() throws Exception {
         chmDoc = CHMDocumentInformation.load(
                 new ByteArrayInputStream(TestParameters.chmData));
@@ -46,6 +47,7 @@ public class TestChmDocumentInformation extends TestCase {
                 "The TCard method accepts only numeric arguments"));
     }
 
+    @Override
     public void tearDown() throws Exception {
     }
 

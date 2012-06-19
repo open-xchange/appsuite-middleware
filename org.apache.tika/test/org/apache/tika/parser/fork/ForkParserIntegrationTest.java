@@ -43,7 +43,7 @@ import org.xml.sax.SAXException;
  */
 public class ForkParserIntegrationTest extends TestCase {
 //    private TikaConfig tika = TikaConfig.getDefaultConfig();
-    private Tika tika = new Tika(); // TODO Use TikaConfig instead, when it works
+    private final Tika tika = new Tika(); // TODO Use TikaConfig instead, when it works
     
     /**
      * Simple text parsing
@@ -74,7 +74,7 @@ public class ForkParserIntegrationTest extends TestCase {
      */
     static class AnError extends Error {
         private static final long serialVersionUID = -6197267350768803348L;
-        private String message;
+        private final String message;
         AnError(String message) {
             super(message);
             this.message = message;
@@ -82,12 +82,18 @@ public class ForkParserIntegrationTest extends TestCase {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
 
             AnError anError = (AnError) o;
 
-            if (!message.equals(anError.message)) return false;
+            if (!message.equals(anError.message)) {
+                return false;
+            }
 
             return true;
         }
@@ -128,12 +134,16 @@ public class ForkParserIntegrationTest extends TestCase {
         public Error err = new AnError("Simulated fail");
         public RuntimeException re = null;
         
+        @Override
         public Set<MediaType> getSupportedTypes(ParseContext context) {
             return new HashSet<MediaType>(Arrays.asList(MediaType.TEXT_PLAIN));
         }
 
+        @Override
         public void parse(InputStream stream, ContentHandler handler, Metadata metadata, ParseContext context) throws IOException, SAXException, TikaException {
-            if (re != null) throw re;
+            if (re != null) {
+                throw re;
+            }
             throw err;
         }
     }
@@ -184,7 +194,8 @@ public class ForkParserIntegrationTest extends TestCase {
        
        ParseContext context = new ParseContext();
        context.set(Detector.class, new Detector() {
-          public MediaType detect(InputStream input, Metadata metadata) {
+          @Override
+        public MediaType detect(InputStream input, Metadata metadata) {
              return MediaType.OCTET_STREAM;
           }
        });

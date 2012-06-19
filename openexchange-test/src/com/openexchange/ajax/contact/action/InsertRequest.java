@@ -125,8 +125,9 @@ public class InsertRequest extends AbstractContactRequest<InsertResponse> {
 	 */
 	@Override
     public Object getBody() throws JSONException {
-		if(jsonObj != null)
-			return jsonObj;
+		if(jsonObj != null) {
+            return jsonObj;
+        }
 		return convert(contactObj);
 	}
 

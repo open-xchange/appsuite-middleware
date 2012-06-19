@@ -727,11 +727,19 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 }
                 // Hm... Something weird with executed "UID FETCH" command; retry manually...
                 final int[] seqNums = IMAPCommandsCollection.uids2SeqNums(imapFolder, new long[] { msgUID });
-                if ((null == seqNums) || (0 == seqNums.length) || (1 > seqNums[0])) {
+                if ((null == seqNums) || (0 == seqNums.length)) {
                     LOG.warn("No message with UID '" + msgUID + "' found in folder '" + fullName + '\'', cause);
                     return null;
                 }
-                msg = (IMAPMessage) imapFolder.getMessage(seqNums[0]);
+                final int msgnum = seqNums[0];
+                if (msgnum < 1) {
+                    /*
+                     * message-numbers start at 1
+                     */
+                    LOG.warn("No message with UID '" + msgUID + "' found in folder '" + fullName + '\'', cause);
+                    return null;
+                }
+                msg = (IMAPMessage) imapFolder.getMessage(msgnum);
             }
             if (msg == null) {
                 // throw new OXException(OXException.Code.MAIL_NOT_FOUND,
@@ -1101,7 +1109,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             boolean cached = false;
             List<ThreadSortNode> threadList = null;
             if (!mergeWithSent && imapConfig.getImapCapabilities().hasThreadReferences()) {
-                final boolean logIt = INFO; // TODO: Switch to DEBUG
+                final boolean logIt = DEBUG;
                 final long st = logIt ? System.currentTimeMillis() : 0L;
                 final String threadResp = ThreadSortUtil.getThreadResponse(imapFolder, "ALL");
                 /*
@@ -1111,7 +1119,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 ThreadSortNode.applyFullName(fullName, threadList);
                 if (logIt) {
                     final long dur = System.currentTimeMillis() - st;
-                    LOG.info("\tIMAP thread-sort took " + dur + "msec for folder " + fullName);
+                    LOG.debug("\tIMAP thread-sort took " + dur + "msec for folder " + fullName);
                 }
             } else {
                 /*
@@ -1177,7 +1185,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             final boolean body = usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL);
             final boolean descending = OrderDirection.DESC.equals(order);
             if (!body) {
-                final boolean logIt = INFO; // TODO: Switch to DEBUG
+                final boolean logIt = DEBUG;
                 final long st = logIt ? System.currentTimeMillis() : 0L;
                 final Map<MessageId, MailMessage> mapping;
                 if (mergeWithSent) {
@@ -1225,7 +1233,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 }
                 if (logIt) {
                     final long dur = System.currentTimeMillis() - st;
-                    LOG.info("\tMessage fetch took " + dur + "msec for folder " + fullName);
+                    LOG.debug("\tMessage fetch took " + dur + "msec for folder " + fullName);
                 }
                 /*
                  * Apply account identifier

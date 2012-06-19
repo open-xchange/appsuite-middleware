@@ -81,10 +81,11 @@ public interface EAVContactService {
 	
 	/**
 	 * Copy the contact to another folder
+	 * @param contact for copy
 	 * @param the folder UUID for copy
 	 * @return
 	 */
-	public void copyContactToFolder(EAVContact c, UUID oldFolderUUID, UUID newFolderUUID);
+	public void copyContactToFolder(EAVContact c, UUID newFolderUUID);
 	
 	/**
 	 * Move contact to another folder

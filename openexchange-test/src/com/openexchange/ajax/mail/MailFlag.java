@@ -93,8 +93,9 @@ public enum MailFlag {
     public static MailFlag getByValue(int value) {
         MailFlag[] values = values();
         for (MailFlag temp : values) {
-            if (temp.value == value)
+            if (temp.value == value) {
                 return temp;
+            }
         }
         return null;
     }
@@ -102,8 +103,9 @@ public enum MailFlag {
     public static MailFlag getByName(String searched) {
         MailFlag[] values = values();
         for (MailFlag temp : values) {
-            if (searched.trim().equalsIgnoreCase(temp.name))
+            if (searched.trim().equalsIgnoreCase(temp.name)) {
                 return temp;
+            }
         }
         return null;
     }
@@ -111,8 +113,9 @@ public enum MailFlag {
     public static Set<MailFlag> transform(int bitmask) {
         HashSet<MailFlag> set = new HashSet<MailFlag>();
         for (int i = 1; i <= bitmask;) {
-            if ((i & bitmask) > 0 && getByValue(i) != null)
+            if ((i & bitmask) > 0 && getByValue(i) != null) {
                 set.add(getByValue(i));
+            }
             i = i << 1;
         }
         return set;

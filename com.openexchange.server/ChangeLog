@@ -1,3 +1,24 @@
+* 2012-06-19 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22321: Invalidate caches on changes global address book permissions
+
+* 2012-06-18 - thorben.betten@open-xchange.com
+
+- Fix for bug 22319: Support for IDN domains in IMAP authentication bundle
+
+* 2012-06-17 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21882: Update task to apply suggested changes to database schema
+
+* 2012-06-16 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22297: Cancel consistency check for EAS folder tree (because not used, yet)
+ - Fix for bug 22152: Applying proper user identifier to temporary session if free-busy request is performed for a user participant
+
+* 2012-06-15 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22312: Context-sensitive locks & lowered timeout on tryLock() invocation to reduce possible concurrent cache access attempts
+
 * 2012-06-14 - thorben.betten@open-xchange.com
 
  - Partial fix for bug 21872: Abort default folder check if an over-quota error is encountered

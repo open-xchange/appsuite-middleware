@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Admin Usercopy
 Bundle-SymbolicName: com.openexchange.admin.user.copy
-Bundle-Version: 6.20.1.0
+Bundle-Version: 6.21.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-Activator: com.openexchange.admin.user.copy.osgi.Activator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -14,6 +14,7 @@ Import-Package: com.openexchange.admin.console,
  com.openexchange.admin.rmi.extensions,
  com.openexchange.admin.rmi.impl,
  com.openexchange.admin.storage.interfaces,
+ com.openexchange.admin.user.copy.rmi,
  com.openexchange.ajax.writer,
  com.openexchange.datatypes.genericonf,
  com.openexchange.exception,

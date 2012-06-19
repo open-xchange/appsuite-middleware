@@ -105,8 +105,9 @@ public class Params {
     }
 
     public void add(String... items){
-        if (items.length % 2 == 1)
+        if (items.length % 2 == 1) {
             throw new IllegalArgumentException("The number of arguments should be even: key, value, key, value...");
+        }
         for (int i = 0; i < items.length; i++) {
             if (i % 2 == 1) {
                 parameters.add(new Parameter(items[i - 1], items[i]));
@@ -127,8 +128,9 @@ public class Params {
     @Override
     public String toString(){
     	StringBuffer buffy = new StringBuffer();
-    	for(Parameter p: parameters)
-    		buffy.append('&').append(p.toString());
+    	for(Parameter p: parameters) {
+            buffy.append('&').append(p.toString());
+        }
 
     	buffy.replace(0, 1, "?");
     	return buffy.toString();

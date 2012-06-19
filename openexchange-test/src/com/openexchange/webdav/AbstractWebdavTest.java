@@ -51,7 +51,7 @@ package com.openexchange.webdav;
 
 import java.util.Properties;
 import junit.framework.TestCase;
-import org.jdom.Namespace;
+import org.jdom2.Namespace;
 import com.meterware.httpunit.Base64;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;

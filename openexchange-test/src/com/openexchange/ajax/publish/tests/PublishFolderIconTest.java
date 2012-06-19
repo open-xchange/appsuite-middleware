@@ -206,16 +206,20 @@ public class PublishFolderIconTest extends AbstractPublicationTest {
 
 
     private int findPositionOfColumn(int[] haystack, int needle) {
-        for(int i = 0; i < haystack.length; i++)
-            if(haystack[i] == needle)
+        for(int i = 0; i < haystack.length; i++) {
+            if(haystack[i] == needle) {
                 return i;
+            }
+        }
         return -1;
     }
 
     private int findPosition(JSONArray arr, int objectID, int idPos) throws JSONException {
-        for(int i = 0; i < arr.length(); i++)
-            if(arr.getJSONArray(i).getInt(idPos) == objectID)
+        for(int i = 0; i < arr.length(); i++) {
+            if(arr.getJSONArray(i).getInt(idPos) == objectID) {
                 return i;
+            }
+        }
         return -1;
     }
 }

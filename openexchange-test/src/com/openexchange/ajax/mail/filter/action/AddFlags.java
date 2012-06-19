@@ -81,20 +81,26 @@ public class AddFlags extends AbstractAction {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (!super.equals(obj))
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
+		if (this == obj) {
+            return true;
+        }
+		if (!super.equals(obj)) {
+            return false;
+        }
+		if (getClass() != obj.getClass()) {
+            return false;
+        }
 		final AddFlags other = (AddFlags) obj;
-		if (!Arrays.equals(flags, other.flags))
-			return false;
+		if (!Arrays.equals(flags, other.flags)) {
+            return false;
+        }
 		if (name == null) {
-			if (other.getName() != null)
-				return false;
-		} else if (!name.equals(other.getName()))
-				return false;
+			if (other.getName() != null) {
+                return false;
+            }
+		} else if (!name.equals(other.getName())) {
+            return false;
+        }
 
 		return true;
 	}

@@ -135,7 +135,8 @@ public class PDFParserTest extends TikaTest {
        
        context = new ParseContext();
        context.set(PasswordProvider.class, new PasswordProvider() {
-           public String getPassword(Metadata metadata) {
+           @Override
+        public String getPassword(Metadata metadata) {
               return "";
           }
        });

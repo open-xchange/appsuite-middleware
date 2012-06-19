@@ -56,12 +56,12 @@ import static com.openexchange.tools.update.Tools.existsIndex;
 import java.sql.Connection;
 import java.sql.SQLException;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.log.LogFactory;
 
 /**
  * {@link CalendarAddIndex2DatesMembers} - Creates indexes on tables "prg_contacts" and "del_contacts" to improve auto-complete
@@ -91,6 +91,9 @@ public final class CalendarAddIndex2DatesMembers extends UpdateTaskAdapter {
         } catch (final SQLException e) {
             rollback(con);
             throw createSQLError(e);
+        } catch (final RuntimeException e) {
+            rollback(con);
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
             autocommit(con);
             Database.backNoTimeout(contextId, true, con);

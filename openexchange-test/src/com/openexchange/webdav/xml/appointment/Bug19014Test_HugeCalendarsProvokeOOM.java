@@ -147,10 +147,12 @@ public class Bug19014Test_HugeCalendarsProvokeOOM extends ManagedAppointmentTest
 		while((line = ical.readLine()) != null){
 			System.out.println(line);
 			Matcher matcher = pattern.matcher(line);
-			if(line.contains("TZID:Europe/Berlin"))
-				numTzDefs++;
-			if(!matcher.find())
-				continue;
+			if(line.contains("TZID:Europe/Berlin")) {
+                numTzDefs++;
+            }
+			if(!matcher.find()) {
+                continue;
+            }
 			String group = matcher.group(1);
 			number.add(Integer.parseInt(group));
 		}
