@@ -73,7 +73,7 @@ public enum ConfigurationProperty {
      * <p>
      * Identifier for web UI is: <code>com.openexchange.ox.gui.dhtml</code>
      */
-    HTTP_AUTH_CLIENT("com.openexchange.ajax.login.http-auth.client", "unknown"),
+    HTTP_AUTH_CLIENT("com.openexchange.ajax.login.http-auth.client", "com.openexchange.ox.gui.dhtml"),
 
     /**
      * The version of the client when using the HTTP Authorization Header based login. This should not be the normal web frontend version
