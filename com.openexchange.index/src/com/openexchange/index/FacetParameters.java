@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,85 +47,85 @@
  *
  */
 
-package com.openexchange.index.solr.internal.mail;
+package com.openexchange.index;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import com.openexchange.index.IndexDocument;
-import com.openexchange.index.IndexField;
-import com.openexchange.index.IndexResult;
-import com.openexchange.mail.dataobjects.MailMessage;
+import java.util.Set;
 
 /**
- * {@link MailIndexResult} - The mail <code>IndexResult</code>.
+ * {@link FacetParameters} - Represents facet parameters.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailIndexResult implements IndexResult<MailMessage> {
-
-    private int numFound;
-
-    private List<IndexDocument<MailMessage>> mails;
-
-    private Map<IndexField, Map<String, Integer>> facetFields;
+public final class FacetParameters {
 
     /**
-     * Initializes a new {@link MailIndexResult}.
+     * The builder for {@link FacetParameters} instances.
      */
-    public MailIndexResult() {
-        this(0);
+    public static final class Builder {
+
+        private Set<IndexField> fields;
+        private List<FacetRange> ranges;
+
+        /**
+         * Initializes a new {@link FacetParameters.Builder}.
+         */
+        public Builder() {
+            super();
+        }
+
+        /**
+         * Sets the fields
+         * 
+         * @param fields The fields to set
+         * @return This builder with argument applied
+         */
+        public Builder setFields(final Set<IndexField> fields) {
+            this.fields = fields == null ? null : new HashSet<IndexField>(fields);
+            return this;
+        }
+
+        /**
+         * Sets the ranges
+         * 
+         * @param ranges The ranges to set
+         * @return This builder with argument applied
+         */
+        public Builder setRanges(final List<FacetRange> ranges) {
+            this.ranges = ranges == null ? null : new ArrayList<FacetRange>(ranges);
+            return this;
+        }
+
+        /**
+         * Builds {@link FacetParameters} instance.
+         * 
+         * @return The {@link FacetParameters} instance
+         */
+        public FacetParameters build() {
+            return new FacetParameters(fields, ranges);
+        }
     }
 
+    private final Set<IndexField> fields;
+    private final List<FacetRange> ranges;
+
     /**
-     * Initializes a new {@link MailIndexResult}.
-     * 
-     * @param numFound The <code>numFound</code> to set
+     * Initializes a new {@link FacetParameters}.
      */
-    public MailIndexResult(final int numFound) {
+    FacetParameters(final Set<IndexField> fields, final List<FacetRange> ranges) {
         super();
-        this.numFound = numFound;
+        this.fields = fields;
+        this.ranges = ranges;
     }
 
-    @Override
-    public int getNumFound() {
-        return numFound;
+    public Set<IndexField> getFacetFields() {
+        return fields;
     }
 
-    /**
-     * Sets the <code>numFound</code>
-     * 
-     * @param numFound The <code>numFound</code> to set
-     */
-    public void setNumFound(final int numFound) {
-        this.numFound = numFound;
-    }
-
-    @Override
-    public List<IndexDocument<MailMessage>> getResults() {
-        return mails;
-    }
-
-    /**
-     * Sets the mails
-     * 
-     * @param mails The mails to set
-     */
-    public void setResults(final List<IndexDocument<MailMessage>> mails) {
-        this.mails = mails;
-    }
-
-    @Override
-    public Map<IndexField, Map<String, Integer>> getFacetFields() {
-        return facetFields;
-    }
-    
-    /**
-     * Sets the facet fields
-     *
-     * @param facetFields The facet fields to set
-     */
-    public void setFacetFields(final Map<IndexField, Map<String, Integer>> facetFields) {
-        this.facetFields = facetFields;
+    public List<FacetRange> getFacetRanges() {
+        return ranges;
     }
 
 }

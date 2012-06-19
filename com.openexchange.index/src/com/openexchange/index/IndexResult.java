@@ -50,6 +50,7 @@
 package com.openexchange.index;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * {@link IndexResult} - A simple container for queried index results.
@@ -72,5 +73,12 @@ public interface IndexResult<V> {
 	 * @return The requested results.
 	 */
 	List<IndexDocument<V>> getResults();
+
+	/**
+	 * Gets the (<i>optional</i>) facet fields.
+	 * 
+	 * @return The facet fields; possibly empty or <code>null</code>
+	 */
+	Map<IndexField, Map<String, Integer>> getFacetFields();
 
 }

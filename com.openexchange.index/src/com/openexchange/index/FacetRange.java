@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,85 +47,60 @@
  *
  */
 
-package com.openexchange.index.solr.internal.mail;
-
-import java.util.List;
-import java.util.Map;
-import com.openexchange.index.IndexDocument;
-import com.openexchange.index.IndexField;
-import com.openexchange.index.IndexResult;
-import com.openexchange.mail.dataobjects.MailMessage;
+package com.openexchange.index;
 
 /**
- * {@link MailIndexResult} - The mail <code>IndexResult</code>.
+ * {@link FacetRange} - Represents a facet range.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailIndexResult implements IndexResult<MailMessage> {
+public final class FacetRange {
 
-    private int numFound;
+    private final IndexField field;
 
-    private List<IndexDocument<MailMessage>> mails;
+    private final String from;
 
-    private Map<IndexField, Map<String, Integer>> facetFields;
-
-    /**
-     * Initializes a new {@link MailIndexResult}.
-     */
-    public MailIndexResult() {
-        this(0);
-    }
+    private final String to;
 
     /**
-     * Initializes a new {@link MailIndexResult}.
+     * Initializes a new {@link FacetRange}.
      * 
-     * @param numFound The <code>numFound</code> to set
+     * @param field The index fields
+     * @param from The <code>from</code> value
+     * @param to The <code>to</code> value
      */
-    public MailIndexResult(final int numFound) {
+    public FacetRange(final IndexField field, final String from, final String to) {
         super();
-        this.numFound = numFound;
-    }
-
-    @Override
-    public int getNumFound() {
-        return numFound;
+        this.field = field;
+        this.from = from;
+        this.to = to;
     }
 
     /**
-     * Sets the <code>numFound</code>
+     * Gets the field
      * 
-     * @param numFound The <code>numFound</code> to set
+     * @return The field
      */
-    public void setNumFound(final int numFound) {
-        this.numFound = numFound;
-    }
-
-    @Override
-    public List<IndexDocument<MailMessage>> getResults() {
-        return mails;
+    public IndexField getField() {
+        return field;
     }
 
     /**
-     * Sets the mails
+     * Gets the <code>from</code> value
      * 
-     * @param mails The mails to set
+     * @return The <code>from</code> value
      */
-    public void setResults(final List<IndexDocument<MailMessage>> mails) {
-        this.mails = mails;
+    public String getFrom() {
+        return from;
     }
 
-    @Override
-    public Map<IndexField, Map<String, Integer>> getFacetFields() {
-        return facetFields;
-    }
-    
     /**
-     * Sets the facet fields
-     *
-     * @param facetFields The facet fields to set
+     * Gets the <code>to</code> value
+     * 
+     * @return The <code>to</code> value
      */
-    public void setFacetFields(final Map<IndexField, Map<String, Integer>> facetFields) {
-        this.facetFields = facetFields;
+    public String getTo() {
+        return to;
     }
 
 }

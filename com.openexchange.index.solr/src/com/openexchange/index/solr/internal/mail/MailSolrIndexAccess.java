@@ -69,6 +69,8 @@ import org.apache.solr.common.SolrInputField;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
+import com.openexchange.index.FacetParameters;
+import com.openexchange.index.FacetRange;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexDocument.Type;
 import com.openexchange.index.IndexField;
@@ -401,9 +403,48 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
 
     @Override
     public IndexResult<MailMessage> query(final QueryParameters parameters, final Set<? extends IndexField> fields) throws OXException {
+        return query(parameters, null, fields);
+    }
+
+    @Override
+    public IndexResult<MailMessage> query(final QueryParameters parameters, final FacetParameters facetParameters, final Set<? extends IndexField> fields) throws OXException {
         final Set<SolrMailField> solrFields = convertAndCheckFields(parameters, fields);
         final List<IndexDocument<MailMessage>> mails = new ArrayList<IndexDocument<MailMessage>>();
         final SolrQuery solrQuery = buildSolrQuery(parameters);
+        /*
+         * Check facet parameter
+         */
+        if (null != facetParameters) {
+            /*
+             * Check facet fields
+             */
+            final Set<IndexField> facetFields = facetParameters.getFacetFields();
+            if (null != facetFields) {
+                for (final IndexField facetField : facetFields) {
+                    if (facetField instanceof MailIndexField) {
+                        final String solrName = SolrMailField.solrMailFieldFor((MailIndexField) facetField).solrName();
+                        if (null != solrName) {
+                            solrQuery.addFacetField(solrName);
+                        }
+                    }
+                }
+            }
+            /*
+             * Check facet ranges
+             */
+            final List<FacetRange> facetRanges = facetParameters.getFacetRanges();
+            if (null != facetRanges) {
+                for (final FacetRange facetRange : facetRanges) {
+                    final IndexField rangeField = facetRange.getField();
+                    if (rangeField instanceof MailIndexField) {
+                        final String solrName = SolrMailField.solrMailFieldFor((MailIndexField) rangeField).solrName();
+                        if (null != solrName) {
+                            solrQuery.addFacetQuery(buildFacetQuery(solrName, facetRange.getFrom(), facetRange.getTo()));
+                        }
+                    }
+                }
+            }
+        }
         setFieldList(solrQuery, solrFields);
         int off = parameters.getOff();
         final int len = parameters.getLen();
@@ -447,6 +488,28 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
     private void setFieldList(final SolrQuery solrQuery, final Set<SolrMailField> fields) {
         final String[] solrFields = SolrMailField.solrNamesFor(fields);
         solrQuery.setFields(solrFields);
+    }
+
+    private String buildFacetQuery(final String solrName, final String from, final String to) {
+        if (null == from && null == to) {
+            return solrName;
+        }
+        /*-
+         * Something like:
+         * 
+         * "price:[* TO 9999]"
+         * "price:[10000 TO 19999]"
+         * "price:[20000 TO 29999]"
+         * "price:[30000 TO *]"
+         */
+        final StringBuilder sb = new StringBuilder(32);
+        sb.append(solrName);
+        sb.append(":[");
+        sb.append(null == from ? "*" : from);
+        sb.append(" TO ");
+        sb.append(null == to ? "*" : to);
+        sb.append(']');
+        return sb.toString();
     }
     
     private SolrQuery buildSolrQuery(final QueryParameters parameters) throws OXException {
