@@ -196,7 +196,9 @@ public class AJAXRequestResult {
 
     private long expires;
 
-	private OXException exception;
+    private OXException exception;
+
+    private long duration;
 
     /**
      * Initializes a new {@link AJAXRequestResult} with data and time stamp set to <code>null</code>.
@@ -245,6 +247,7 @@ public class AJAXRequestResult {
      */
     public AJAXRequestResult(final Object resultObject, final Date timestamp, final String format) {
         super();
+        duration = -1L;
         headers = new LinkedHashMap<String, String>(8);
         parameters = new HashMap<String, Object>(8);
         responseProperties = new HashMap<String, Object>(4);
@@ -253,6 +256,68 @@ public class AJAXRequestResult {
         this.format = null == format ? JSON : format;
         resultType = ResultType.COMMON;
         expires = -1;
+    }
+
+    /**
+     * Gets the duration.
+     * 
+     * @return The duration or <code>-1</code> if not set
+     */
+    public long getDuration() {
+        return duration;
+    }
+
+    /**
+     * Sets the duration
+     * 
+     * @param duration The duration to set
+     * @return This AJAX request result with duration applied
+     */
+    public AJAXRequestResult setDuration(final long duration) {
+        this.duration = duration < 0 ? -1L : duration;
+        return this;
+    }
+
+    /**
+     * Sets the duration by given processing start time stamp.
+     * 
+     * <pre>
+     * System.currentTimeMillis() - start;
+     * </pre>
+     * 
+     * @param start The start time stamp
+     * @return This AJAX request result with duration applied
+     */
+    public AJAXRequestResult setDurationByStart(final long start) {
+        return setDuration(System.currentTimeMillis() - start);
+    }
+
+    /**
+     * Adds given duration.
+     * 
+     * @param duration The duration to add
+     * @return This AJAX request result with duration applied
+     */
+    public AJAXRequestResult addDuration(final long duration) {
+        if (this.duration < 0) {
+            return setDuration(duration);
+        }
+        this.duration += duration;
+        return this;
+    }
+
+    /**
+     * Adds given duration by given start time stamp.
+     * 
+     * <pre>
+     * System.currentTimeMillis() - start;
+     * </pre>
+     * 
+     * @param start The start time stamp
+     * @return This AJAX request result with duration applied
+     */
+    public AJAXRequestResult addDurationByStart(final long start) {
+        return addDuration(System.currentTimeMillis() - start);
     }
 
     /**
@@ -562,12 +627,12 @@ public class AJAXRequestResult {
         setFormat(format);
     }
 
-	public void setException(OXException exception) {
-		this.exception = exception;
-	}
-	
-	public OXException getException() {
-		return exception;
-	}
+    public void setException(final OXException exception) {
+        this.exception = exception;
+    }
+
+    public OXException getException() {
+        return exception;
+    }
 
 }
