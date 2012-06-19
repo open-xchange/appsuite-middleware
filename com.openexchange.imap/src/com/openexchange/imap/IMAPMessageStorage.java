@@ -1109,7 +1109,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             boolean cached = false;
             List<ThreadSortNode> threadList = null;
             if (!mergeWithSent && imapConfig.getImapCapabilities().hasThreadReferences()) {
-                final boolean logIt = INFO; // TODO: Switch to DEBUG
+                final boolean logIt = DEBUG;
                 final long st = logIt ? System.currentTimeMillis() : 0L;
                 final String threadResp = ThreadSortUtil.getThreadResponse(imapFolder, "ALL");
                 /*
@@ -1119,7 +1119,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 ThreadSortNode.applyFullName(fullName, threadList);
                 if (logIt) {
                     final long dur = System.currentTimeMillis() - st;
-                    LOG.info("\tIMAP thread-sort took " + dur + "msec for folder " + fullName);
+                    LOG.debug("\tIMAP thread-sort took " + dur + "msec for folder " + fullName);
                 }
             } else {
                 /*
