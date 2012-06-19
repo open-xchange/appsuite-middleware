@@ -305,6 +305,10 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
 	public void freeResources(SolrCoreIdentifier identifier) {
 		embeddedAccess.freeResources(identifier);		
 	}
+	
+	public EmbeddedSolrAccessImpl getEmbeddedServerAccess() {
+	    return embeddedAccess;
+	}
     
     private SolrAccessService getDelegate(SolrCoreIdentifier identifier) throws OXException {
     	if (identifier == null) {

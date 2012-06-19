@@ -68,8 +68,9 @@ public class LanguageProfilerBuilderTest extends TestCase {
 
     private void createLanguageProfile() throws IOException, TikaException, URISyntaxException {
         // Sort of dependency injection
-        if (ngramProfile == null)
+        if (ngramProfile == null) {
             testCreateProfile();
+        }
 
         langProfile = new LanguageProfile();
 
@@ -97,7 +98,8 @@ public class LanguageProfilerBuilderTest extends TestCase {
     @Override
     public void tearDown() throws Exception {
         File profile = new File(profileName + "." + FILE_EXTENSION);
-        if (profile.exists())
+        if (profile.exists()) {
             profile.delete();
+        }
     }
 }

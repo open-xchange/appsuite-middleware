@@ -49,39 +49,101 @@
 
 package com.openexchange.textxtraction.internal;
 
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.util.EnumMap;
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import net.htmlparser.jericho.Renderer;
 import net.htmlparser.jericho.Segment;
 import net.htmlparser.jericho.Source;
-import org.apache.tika.io.TikaInputStream;
+import org.apache.commons.logging.Log;
+import org.apache.pdfbox.cos.COSDocument;
+import org.apache.pdfbox.pdfparser.PDFParser;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.util.PDFTextStripper;
+import org.apache.poi.POIXMLDocument;
+import org.apache.poi.extractor.ExtractorFactory;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
+import org.apache.poi.openxml4j.opc.OPCPackage;
+import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+import org.apache.tika.Tika;
+import org.apache.tika.metadata.Metadata;
+import org.apache.tika.mime.MediaType;
+import org.apache.xmlbeans.XmlException;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
-import com.openexchange.textxtraction.TextXtractService;
+import com.openexchange.textxtraction.AbstractTextXtractService;
+import com.openexchange.textxtraction.DelegateTextXtraction;
+import com.openexchange.textxtraction.TextXtractExceptionCodes;
 
 /**
  * {@link TikaTextXtractService} - The text extraction service based on Apache Tika.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class TikaTextXtractService implements TextXtractService {
+public final class TikaTextXtractService extends AbstractTextXtractService {
+
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(TikaTextXtractService.class);
+
+    private static final int DEFAULT_BUFSIZE = 8192;
+
+    private static enum DirectType {
+        /**
+         * The media type(s) belonging to PDF
+         */
+        PDF,
+    }
 
     private static final String UTF_8 = Charsets.UTF_8_NAME;
 
-    private final TextXtractService xtractService;
+    private static final Object PRESENT = new Object();
+
+    private final ConcurrentMap<DelegateTextXtraction, Object> delegatees;
+
+    private final Tika tika;
+
+    private final Map<DirectType, Set<MediaType>> directTypes;
 
     /**
      * Initializes a new {@link TikaTextXtractService}.
      */
     public TikaTextXtractService() {
         super();
-        xtractService = new CleanContentExtractor();
+        tika = new Tika();
+        delegatees = new ConcurrentHashMap<DelegateTextXtraction, Object>(4);
+        // Direct types map
+        directTypes = new EnumMap<DirectType, Set<MediaType>>(DirectType.class);
+        // PDF media types
+        final Set<MediaType> set = new HashSet<MediaType>(2);
+        set.add(MediaType.application("pdf"));
+        directTypes.put(DirectType.PDF, set);
+    }
+
+    /**
+     * Adds given delegate.
+     * 
+     * @param delegateTextXtraction The delegate to add
+     * @return <code>true</code> on success; otherwise <code>false</code>
+     */
+    public boolean addDelegateTextXtraction(final DelegateTextXtraction delegateTextXtraction) {
+        return null == delegatees.putIfAbsent(delegateTextXtraction, PRESENT);
+    }
+
+    /**
+     * Removes given delegate.
+     * 
+     * @param delegateTextXtraction The delegate to remove
+     */
+    public void removeDelegateTextXtraction(final DelegateTextXtraction delegateTextXtraction) {
+        delegatees.remove(delegateTextXtraction);
     }
 
     private TikaDocumentHandler newDefaultHandler() throws OXException {
@@ -93,78 +155,10 @@ public final class TikaTextXtractService implements TextXtractService {
     }
 
     @Override
-    public String extractFromResource(final String arg, final String optMimeType) throws OXException {
-        try {
-            final File file = new File(arg);
-            if (null != optMimeType) {
-                if (optMimeType.toLowerCase(Locale.ENGLISH).startsWith("text/htm")) {
-                    InputStream input = null;
-                    try {
-                        if (file.isFile()) {
-                            input = new FileInputStream(file);
-                        } else {
-                            input = TikaInputStream.get(new URL(arg));
-                        }
-                        final Source source = new Source(input);
-                        return new Renderer(new Segment(source, 0, source.getEnd())).setMaxLineLength(9999).setIncludeHyperlinkURLs(false).toString();
-                    } finally {
-                        Streams.close(input);
-                    }
-                }
-            }
-            try {
-                final String text = xtractService.extractFromResource(arg, optMimeType);
-                if (null != text) {
-                    return text;
-                }
-            } catch (final Exception e) {
-                // Ignore
-            }
-            /*
-             * Non-HTML content
-             */
-            final URL url;
-            if (file.isFile()) {
-                url = file.toURI().toURL();
-            } else {
-                url = new URL(arg);
-            }
-            final TikaDocumentHandler documentHandler = isEmpty(optMimeType) ? newDefaultHandler() : newHandler(optMimeType);
-            final InputStream input = TikaInputStream.get(url, documentHandler.getMetadata());
-            return documentHandler.getDocumentContent(input);
-        } catch (final MalformedURLException e) {
-            throw TextXtractExceptionCodes.ERROR.create(e, e.getMessage());
-        } catch (final IOException e) {
-            throw TextXtractExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    @Override
-    public String extractFrom(final String content, final String optMimeType) throws OXException {
-        if (null != optMimeType) {
-            if (optMimeType.toLowerCase(Locale.ENGLISH).startsWith("text/htm")) {
-                final InputStream input = null;
-                try {
-                    final Source source = new Source(content);
-                    return new Renderer(new Segment(source, 0, content.length())).setMaxLineLength(9999).setIncludeHyperlinkURLs(false).toString();
-                } finally {
-                    Streams.close(input);
-                }
-            }
-        }
-        try {
-            final String text = xtractService.extractFrom(content, optMimeType);
-            if (null != text) {
-                return text;
-            }
-        } catch (final Exception e) {
-            // Ignore
-        }
-        return (isEmpty(optMimeType) ? newDefaultHandler() : newHandler(optMimeType)).getDocumentContent(Streams.newByteArrayInputStream(content.getBytes(Charsets.UTF_8)));
-    }
-
-    @Override
     public String extractFrom(final InputStream inputStream, final String optMimeType) throws OXException {
+        if (null == inputStream) {
+            return null;
+        }
         if (null != optMimeType) {
             if (optMimeType.toLowerCase(Locale.ENGLISH).startsWith("text/htm")) {
                 try {
@@ -178,14 +172,125 @@ public final class TikaTextXtractService implements TextXtractService {
             }
         }
         try {
-            final String text = xtractService.extractFrom(inputStream, optMimeType);
-            if (null != text) {
-                return text;
+            for (final DelegateTextXtraction delegatee : delegatees.keySet()) {
+                final String text = delegatee.extractFrom(inputStream, optMimeType);
+                if (null != text) {
+                    Streams.close(inputStream);
+                    return text;
+                }
             }
         } catch (final Exception e) {
             // Ignore
         }
-        return (isEmpty(optMimeType) ? newDefaultHandler() : newHandler(optMimeType)).getDocumentContent(inputStream);
+        /*
+         * Detect MIME type & continue processing
+         */
+        try {
+            /*
+             * The stream is marked and reset to the original position
+             */
+            final InputStream in = inputStream.markSupported() ? inputStream : new BufferedInputStream(inputStream, DEFAULT_BUFSIZE);
+            /*
+             * Check with POI (that automatically checks support by magic bytes)
+             */
+            {
+                final String text = poitotext(in);
+                if (null != text) {
+                    Streams.close(in);
+                    return text;
+                }
+            }
+            /*
+             * Detect media type
+             */
+            final MediaType mediaType = isEmpty(optMimeType) ? tika.getDetector().detect(in, new Metadata()) : MediaType.parse(optMimeType);
+            /*
+             * Check for direct support
+             */
+            try {
+                final Set<MediaType> set = directTypes.get(DirectType.PDF);
+                for (final MediaType directType : set) {
+                    if (directType.getBaseType().equals(mediaType.getBaseType())) {
+                        return pdftotext(in);
+                    }
+                }
+            } catch (final Exception e) {
+                // Ignore
+            }
+            /*
+             * Otherwise handle with almighty Tika
+             */
+            final TikaDocumentHandler documentHandler = isEmpty(optMimeType) ? newDefaultHandler() : newHandler(optMimeType);
+            return documentHandler.getDocumentContent(in);
+        } catch (final IOException e) {
+            throw TextXtractExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Checks the input for POIFS (OLE2) or OOXML (zip) header at start. If either present, plain text is extracted from input.
+     * 
+     * @param in The input stream
+     * @return The extracted text or <code>null</code>
+     * @throws IOException If an I/O error occurs
+     */
+    private String poitotext(final InputStream in) throws IOException {
+        if (null == in) {
+            return null;
+        }
+        try {
+            if (POIFSFileSystem.hasPOIFSHeader(in)) {
+                return ExtractorFactory.createExtractor(new POIFSFileSystem(in)).getText();
+            }
+            if (POIXMLDocument.hasOOXMLHeader(in)) {
+                return ExtractorFactory.createExtractor(OPCPackage.open(in)).getText();
+            }
+            return null;
+        } catch (final InvalidFormatException e) {
+            LOG.debug(e.getMessage(), e);
+        } catch (final OpenXML4JException e) {
+            LOG.debug(e.getMessage(), e);
+        } catch (final XmlException e) {
+            LOG.debug(e.getMessage(), e);
+        } catch (final RuntimeException e) {
+            LOG.debug(e.getMessage(), e);
+        }
+        return null;
+    }
+
+    private String pdftotext(final InputStream in) {
+        final PDFParser parser;
+        try {
+            parser = new PDFParser(in);
+        } catch (final Exception e) {
+            return null;
+        }
+        PDDocument pdDoc = null;
+        COSDocument cosDoc = null;
+        try {
+            parser.parse();
+            cosDoc = parser.getDocument();
+            pdDoc = new PDDocument(cosDoc);
+            return new PDFTextStripper().getText(pdDoc);
+        } catch (final Exception e) {
+            LOG.debug(e.getMessage(), e);
+            return null;
+        } finally {
+            if (pdDoc != null) {
+                try {
+                    pdDoc.close();
+                } catch (final IOException e) {
+                    // Ignore
+                }
+            }
+            if (cosDoc != null) {
+                try {
+                    cosDoc.close();
+                } catch (final IOException e) {
+                    // Ignore
+                }
+            }
+        }
     }
 
     private static boolean isEmpty(final String string) {

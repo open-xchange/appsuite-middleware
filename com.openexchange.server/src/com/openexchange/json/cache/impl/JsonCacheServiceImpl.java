@@ -54,6 +54,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -155,7 +156,7 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
     }
 
     @Override
-    public void set(final String id, final JSONValue jsonValue, final int userId, final int contextId) throws OXException {
+    public void set(final String id, final JSONValue jsonValue, final long duration, final int userId, final int contextId) throws OXException {
         final Connection con = Database.get(contextId, true);
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -185,19 +186,34 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
             /*
              * Update or insert
              */
+            final long now = System.currentTimeMillis();
             final String asciiOnly = toJavaNotation(jsonValue.toString());
             if (update) {
-                stmt = con.prepareStatement("UPDATE jsonCache SET json=? WHERE cid=? AND user=? AND id=?");
+                stmt = con.prepareStatement("UPDATE jsonCache SET json=?, size=?, lastUpdate=?, took=? WHERE cid=? AND user=? AND id=?");
                 stmt.setString(1, asciiOnly);
-                stmt.setInt(2, contextId);
-                stmt.setInt(3, userId);
-                stmt.setString(4, id);
+                stmt.setLong(2, jsonValue.length());
+                stmt.setLong(3, now);
+                if (duration < 0) {
+                    stmt.setNull(4, Types.BIGINT);
+                } else {
+                    stmt.setLong(4, duration);
+                }
+                stmt.setInt(5, contextId);
+                stmt.setInt(6, userId);
+                stmt.setString(7, id);
             } else {
-                stmt = con.prepareStatement("INSERT INTO jsonCache (cid,user,id,json) VALUES (?,?,?,?)");
+                stmt = con.prepareStatement("INSERT INTO jsonCache (cid,user,id,json,size,lastUpdate,took) VALUES (?,?,?,?,?,?,?)");
                 stmt.setInt(1, contextId);
                 stmt.setInt(2, userId);
                 stmt.setString(3, id);
                 stmt.setString(4, asciiOnly);
+                stmt.setLong(5, jsonValue.length());
+                stmt.setLong(6, now);
+                if (duration < 0) {
+                    stmt.setNull(7, Types.BIGINT);
+                } else {
+                    stmt.setLong(7, duration);
+                }
             }
             stmt.executeUpdate();
         } catch (final SQLException e) {
@@ -211,7 +227,7 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
     }
 
     @Override
-    public boolean setIfDifferent(final String id, final JSONValue jsonValue, final int userId, final int contextId) throws OXException {
+    public boolean setIfDifferent(final String id, final JSONValue jsonValue, final long duration, final int userId, final int contextId) throws OXException {
         if (null == jsonValue) {
             return false;
         }
@@ -230,23 +246,34 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
             final boolean update;
             final JSONValue prev;
             {
-                if (!rs.next()) {
-                    prev = null;
-                    update = false;
-                } else {
+                if (rs.next()) {
                     update = true;
                     final String sJson = rs.getString(1);
-                    if ("null".equals(sJson)) {
+                    if (rs.wasNull()) {
                         prev = null;
-                    } else {
-                        if ('{' == sJson.charAt(0)) {
-                            prev = new JSONObject(sJson);
-                        } else if ('[' == sJson.charAt(0)) {
-                            prev = new JSONArray(sJson);
+                    } else { // Not NULL
+                        if ("null".equalsIgnoreCase(sJson)) {
+                            prev = null;
                         } else {
-                            throw AjaxExceptionCodes.JSON_ERROR.create("Not a JSON value.");
+                            JSONValue tmp;
+                            try {
+                                if ('{' == sJson.charAt(0)) {
+                                    tmp = new JSONObject(sJson);
+                                } else if ('[' == sJson.charAt(0)) {
+                                    tmp = new JSONArray(sJson);
+                                } else {
+                                    throw AjaxExceptionCodes.JSON_ERROR.create("Not a JSON value: " + abbreviate(sJson, 0, 256));
+                                }
+                            } catch (final JSONException e) {
+                                // Read invalid JSON data
+                                tmp = null;
+                            }
+                            prev = tmp;
                         }
                     }
+                } else {
+                    prev = null;
+                    update = false;
                 }
             }
             DBUtils.closeSQLStuff(rs, stmt);
@@ -262,25 +289,38 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
              * Update or insert
              */
             final String asciiOnly = toJavaNotation(jsonValue.toString());
+            final long now = System.currentTimeMillis();
             if (update) {
-                stmt = con.prepareStatement("UPDATE jsonCache SET json=? WHERE cid=? AND user=? AND id=?");
+                stmt = con.prepareStatement("UPDATE jsonCache SET json=?, size=?, lastUpdate=?, took=? WHERE cid=? AND user=? AND id=?");
                 stmt.setString(1, asciiOnly);
-                stmt.setInt(2, contextId);
-                stmt.setInt(3, userId);
-                stmt.setString(4, id);
+                stmt.setLong(2, jsonValue.length());
+                stmt.setLong(3, now);
+                if (duration < 0) {
+                    stmt.setNull(4, Types.BIGINT);
+                } else {
+                    stmt.setLong(4, duration);
+                }
+                stmt.setInt(5, contextId);
+                stmt.setInt(6, userId);
+                stmt.setString(7, id);
             } else {
-                stmt = con.prepareStatement("INSERT INTO jsonCache (cid,user,id,json) VALUES (?,?,?,?)");
+                stmt = con.prepareStatement("INSERT INTO jsonCache (cid,user,id,json,size,lastUpdate,took) VALUES (?,?,?,?,?,?,?)");
                 stmt.setInt(1, contextId);
                 stmt.setInt(2, userId);
                 stmt.setString(3, id);
                 stmt.setString(4, asciiOnly);
+                stmt.setLong(5, jsonValue.length());
+                stmt.setLong(6, now);
+                if (duration < 0) {
+                    stmt.setNull(7, Types.BIGINT);
+                } else {
+                    stmt.setLong(7, duration);
+                }
             }
             stmt.executeUpdate();
             return true;
         } catch (final SQLException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
@@ -309,12 +349,16 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
             final boolean update = rs.next();
             DBUtils.closeSQLStuff(rs, stmt);
             rs = null;
+            final long now = System.currentTimeMillis();
             if (!update) {
-                stmt = con.prepareStatement("INSERT INTO jsonCache (cid,user,id,json,inProgress) VALUES (?,?,?,?,1)");
+                stmt = con.prepareStatement("INSERT INTO jsonCache (cid,user,id,json,size,inProgress,inProgressSince,lastUpdate) VALUES (?,?,?,?,?,1,?,?)");
                 stmt.setInt(1, contextId);
                 stmt.setInt(2, userId);
                 stmt.setString(3, id);
                 stmt.setString(4, "null"); // Dummy
+                stmt.setLong(5, 0L);
+                stmt.setLong(6, now);
+                stmt.setLong(7, now);
                 boolean inserted;
                 try {
                     inserted = stmt.executeUpdate() > 0;
@@ -326,10 +370,11 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
                 }
             }
             DBUtils.closeSQLStuff(stmt);
-            stmt = con.prepareStatement("UPDATE jsonCache SET inProgress=1 WHERE cid=? AND user=? AND id=? AND inProgress=0");
-            stmt.setInt(1, contextId);
-            stmt.setInt(2, userId);
-            stmt.setString(3, id);
+            stmt = con.prepareStatement("UPDATE jsonCache SET inProgress=1, inProgressSince=? WHERE cid=? AND user=? AND id=? AND inProgress=0");
+            stmt.setLong(1, now);
+            stmt.setInt(2, contextId);
+            stmt.setInt(3, userId);
+            stmt.setString(4, id);
             final boolean updated = (stmt.executeUpdate() > 0);
             con.commit();
             return updated;
@@ -394,7 +439,7 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
                 final String hexString = Integer.toHexString(a);
                 sb.append("\\u");
                 if (2 == hexString.length()) {
-                    sb.append(2 == hexString.length() ? "00" : "");
+                    sb.append("00");
                 }
                 sb.append(hexString);
             } else {
@@ -402,6 +447,30 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
             }
         }
         return sb.toString();
+    }
+
+    private static String abbreviate(final String str, final int offset, final int maxWidth) {
+        if (str == null) {
+            return null;
+        }
+        final int length = str.length();
+        if (length <= maxWidth) {
+            return str;
+        }
+        int off = offset;
+        if (off > length) {
+            off = length;
+        }
+        if ((length - off) < (maxWidth - 3)) {
+            off = length - (maxWidth - 3);
+        }
+        if (off <= 4) {
+            return str.substring(0, maxWidth - 3) + "...";
+        }
+        if ((off + (maxWidth - 3)) < length) {
+            return "..." + abbreviate(str.substring(off), 0, maxWidth - 3);
+        }
+        return "..." + str.substring(length - (maxWidth - 3));
     }
 
 }

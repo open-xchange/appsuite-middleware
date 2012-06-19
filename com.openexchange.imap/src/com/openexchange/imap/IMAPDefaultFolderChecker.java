@@ -533,6 +533,10 @@ public class IMAPDefaultFolderChecker {
         }
     }
 
+    private static boolean isOverQuotaException(final MessagingException e) {
+        return (null != e && e.getMessage().toLowerCase(Locale.US).indexOf("quota") >= 0);
+    }
+
     private Callable<Object> performTaskFor(final int index, final String prefix, final String fullName, final String name, final char sep, final int type, final int subscribe, final AtomicBoolean modified, final MailSessionCache cache) throws OXException {
         try {
             if (null == fullName || 0 == fullName.length()) {
@@ -542,6 +546,12 @@ public class IMAPDefaultFolderChecker {
             }
             return null;
         } catch (final MessagingException e) {
+            if (isOverQuotaException(e)) {
+                /*
+                 * Special handling for over-quota error
+                 */
+                setDefaultMailFolder(index, null, cache);
+            }
             throw MimeMailException.handleMessagingException(e, imapConfig, session);
         }
     }
@@ -660,6 +670,7 @@ public class IMAPDefaultFolderChecker {
                 arr = cache.getParameter(accountId, key);
                 if (null == arr) {
                     arr = new String[6];
+                    Arrays.fill(arr, null);
                     cache.putParameter(accountId, key, arr);
                 }
             }
@@ -738,7 +749,7 @@ public class IMAPDefaultFolderChecker {
                     modified.set(true);
                     return fullName;
                 } catch (final MessagingException e) {
-                    if (e.getMessage().toLowerCase(Locale.US).indexOf("quota") >= 0) {
+                    if (isOverQuotaException(e)) {
                         throw e;
                     }
                     if (!retry) {
@@ -807,7 +818,7 @@ public class IMAPDefaultFolderChecker {
                     }
                     modified.set(true);
                 } catch (final MessagingException e) {
-                    if (e.getMessage().toLowerCase(Locale.US).indexOf("quota") >= 0) {
+                    if (isOverQuotaException(e)) {
                         throw e;
                     }
                     final String prfx = prefixLen == 0 ? "INBOX" + sep : "";
@@ -825,7 +836,7 @@ public class IMAPDefaultFolderChecker {
                         }
                         modified.set(true);
                     } catch (final MessagingException e) {
-                        if (e.getMessage().toLowerCase(Locale.US).indexOf("quota") >= 0) {
+                        if (isOverQuotaException(e)) {
                             throw e;
                         }
                         LOG.warn(

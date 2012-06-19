@@ -51,7 +51,7 @@ package com.openexchange.webdav.xml.user.actions;
 
 import java.util.Arrays;
 import java.util.Iterator;
-import org.jdom.Document;
+import org.jdom2.Document;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.webdav.xml.framework.AbstractWebDAVResponse;
 import com.openexchange.webdav.xml.types.Response;

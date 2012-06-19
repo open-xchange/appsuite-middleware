@@ -24,12 +24,13 @@ public class TaskAsserts extends TestCase{
 				+ "[" + getReadableName(mapping) + "], expected: "
 				+ expectedValue + ", but was: " + comparedValue,
 				TaskAsserts.checkOXDatesAreEqual((Date)expectedValue, (Date)comparedValue));
-		} else
-			assertEquals(
+		} else {
+            assertEquals(
 				"The following field should be equal in both Tasks: "
 				+ "[" + getReadableName(mapping) + "]",
 				expectedValue,
 				comparedValue );
+        }
 	}
 
 	/**

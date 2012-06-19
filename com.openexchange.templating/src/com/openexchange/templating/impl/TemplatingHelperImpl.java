@@ -68,7 +68,7 @@ public class TemplatingHelperImpl implements TemplatingHelper {
     private final Object rootObject;
     private final Session session;
     private final TemplateServiceImpl templateService;
-    private boolean createCopy;
+    private final boolean createCopy;
 
     public TemplatingHelperImpl(Object rootObject, Session session, TemplateServiceImpl templateServiceImpl, boolean createCopy) {
         super();

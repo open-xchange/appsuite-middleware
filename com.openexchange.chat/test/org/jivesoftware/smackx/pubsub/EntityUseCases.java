@@ -40,7 +40,9 @@ public class EntityUseCases extends SingleUserTestCase
 
 		int count = 0;
 
-		for(Iterator it = items.getItems(); it.hasNext(); it.next(),count++);
+		for(Iterator it = items.getItems(); it.hasNext(); it.next(),count++) {
+            ;
+        }
 
 		assertEquals(4, count);
 	}

@@ -37,7 +37,7 @@ import org.apache.tika.sax.WriteOutContentHandler;
  */
 public class RTFParserTest extends TikaTest {
 
-    private Tika tika = new Tika();
+    private final Tika tika = new Tika();
 
     private static class Result {
         public final String text;

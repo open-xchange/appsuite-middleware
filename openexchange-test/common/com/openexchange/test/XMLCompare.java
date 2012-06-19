@@ -11,17 +11,17 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.JDOMException;
-import org.jdom.input.SAXBuilder;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.JDOMException;
+import org.jdom2.input.SAXBuilder;
 
 public class XMLCompare {
 
 
 	private static Map<String,Method>  methods = new HashMap<String,Method>();
 	private static boolean inited;
-	private Set<String> checkTextNames = Collections.EMPTY_SET;
+	private Set<String> checkTextNames = Collections.emptySet();
 
 	public boolean compare(final String expect, final String got) throws UnsupportedEncodingException, JDOMException, IOException {
 		final SAXBuilder builder = new SAXBuilder();
@@ -39,7 +39,7 @@ public class XMLCompare {
 		final Method m = findCompareMethod(nodeName);
 		if(m != null) {
 			try {
-				return (Boolean) m.invoke(this,expectedDoc, gotDoc);
+				return ((Boolean) m.invoke(this,expectedDoc, gotDoc)).booleanValue();
 			} catch (final IllegalArgumentException e) {
 				e.printStackTrace();
 			} catch (final IllegalAccessException e) {

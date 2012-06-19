@@ -46,21 +46,23 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.xml.jdom.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
-import org.jdom.Document;
-import org.jdom.JDOMException;
-import org.jdom.input.SAXBuilder;
+import org.jdom2.Document;
+import org.jdom2.JDOMException;
+import org.jdom2.input.SAXBuilder;
 import com.openexchange.xml.jdom.JDOMParser;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class JDOMParserImpl implements JDOMParser {
+
     @Override
     public Document parse(final InputStream is) throws JDOMException, IOException {
-        return new SAXBuilder().build(is);
+        return null == is ? null : new SAXBuilder().build(is);
     }
 }

@@ -62,6 +62,7 @@ import javax.mail.MessagingException;
 import javax.mail.NoSuchProviderException;
 import javax.mail.Session;
 import javax.mail.Store;
+import javax.mail.internet.IDNA;
 import javax.security.auth.login.LoginException;
 import org.apache.commons.logging.Log;
 import com.openexchange.authentication.Authenticated;
@@ -181,7 +182,7 @@ public class IMAPAuthentication implements AuthenticationService {
             }
 
             if (props.get(PropertyNames.IMAP_SERVER.name) != null) {
-                host = (String) props.get(PropertyNames.IMAP_SERVER.name);
+                host = IDNA.toASCII((String) props.get(PropertyNames.IMAP_SERVER.name));
             }
 
             if (props.get(PropertyNames.IMAP_PORT.name) != null) {
@@ -246,7 +247,7 @@ public class IMAPAuthentication implements AuthenticationService {
 	            /*
 	             * Get IMAP server from primary account
 	             */
-	            host = defaultMailAccount.getMailServer();
+	            host = IDNA.toASCII(defaultMailAccount.getMailServer());
 	            port = defaultMailAccount.getMailPort();
 	            USE_IMAPS = defaultMailAccount.isMailSecure();
 	            LOG.debug("Parsed IMAP Infos: " + (USE_IMAPS ? "imaps" : "imap") + " " + host + " " + port + "  (" + userId + "@" + ctxId + ")");
@@ -358,7 +359,7 @@ public class IMAPAuthentication implements AuthenticationService {
     }
 
     @Override
-    public Authenticated handleAutoLoginInfo(LoginInfo loginInfo) throws OXException {
+    public Authenticated handleAutoLoginInfo(final LoginInfo loginInfo) throws OXException {
         throw LoginExceptionCodes.NOT_SUPPORTED.create(IMAPAuthentication.class.getName());
     }
 

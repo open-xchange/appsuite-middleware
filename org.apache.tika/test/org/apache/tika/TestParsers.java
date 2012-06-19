@@ -35,6 +35,7 @@ public class TestParsers extends TikaTest {
 
     private Tika tika;
 
+    @Override
     public void setUp() throws Exception {
         tc = TikaConfig.getDefaultConfig();
         tika = new Tika(tc);

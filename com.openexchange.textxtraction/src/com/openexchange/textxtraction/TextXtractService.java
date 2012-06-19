@@ -88,11 +88,11 @@ public interface TextXtractService {
      * <p>
      * An auto-detection mechanism is performed to determine file's/URL's document format if <code>optMimeType</code> is <code>null</code>.
      *
-     * @param arg The (resource) argument either denotes an URL or a file
+     * @param resource The (resource) argument either denotes an URL or a file
      * @param optMimeType The optional MIME type, pass <code>null</code> to auto-detect
      * @return The extracted plain-text
      * @throws OXException If text extraction fails for any reason
      */
-    String extractFromResource(String arg, String optMimeType) throws OXException;
+    String extractFromResource(String resource, String optMimeType) throws OXException;
 
 }

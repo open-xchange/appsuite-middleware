@@ -50,14 +50,22 @@ package com.openexchange.xml.jdom;
 
 import java.io.IOException;
 import java.io.InputStream;
-import org.jdom.Document;
-import org.jdom.JDOMException;
+import org.jdom2.Document;
+import org.jdom2.JDOMException;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public interface JDOMParser {
 
+    /**
+     * Parses given input stream to a jDOM document.
+     * 
+     * @param is The input stream to parse
+     * @return The parsed jDOM document
+     * @throws JDOMException If a jDOM error occurs
+     * @throws IOException If an I/O error occurs
+     */
     public Document parse(InputStream is) throws JDOMException, IOException;
 }
 

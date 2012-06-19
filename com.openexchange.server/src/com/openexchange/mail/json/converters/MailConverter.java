@@ -246,9 +246,9 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                 if (!JsonCaches.areEqual(jsonValue, newJsonValue)) {
                     final ServerSession ses = req.getSession();
                     if (null == jsonValue) {
-                        jsonCache.setIfDifferent(id, newJsonValue, ses.getUserId(), ses.getContextId());
+                        jsonCache.setIfDifferent(id, newJsonValue, result.getDuration(), ses.getUserId(), ses.getContextId());
                     } else {
-                        jsonCache.set(id, newJsonValue, ses.getUserId(), ses.getContextId());
+                        jsonCache.set(id, newJsonValue, result.getDuration(), ses.getUserId(), ses.getContextId());
                     }
                 }
             }
@@ -459,9 +459,9 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                 if (!JsonCaches.areEqual(jsonValue, newJsonValue)) {
                     final ServerSession ses = req.getSession();
                     if (null == jsonValue) {
-                        jsonCache.setIfDifferent(id, newJsonValue, ses.getUserId(), ses.getContextId());
+                        jsonCache.setIfDifferent(id, newJsonValue, result.getDuration(), ses.getUserId(), ses.getContextId());
                     } else {
-                        jsonCache.set(id, newJsonValue, ses.getUserId(), ses.getContextId());
+                        jsonCache.set(id, newJsonValue, result.getDuration(), ses.getUserId(), ses.getContextId());
                     }
                 }
             }

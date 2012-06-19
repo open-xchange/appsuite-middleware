@@ -278,6 +278,7 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
             /*
              * Start response
              */
+            final long start = System.currentTimeMillis();
             final int sortCol = sort == null ? MailListField.RECEIVED_DATE.getField() : Integer.parseInt(sort);
             if (!unseen && !ignoreDeleted) {
                 final List<List<MailMessage>> mails =
@@ -338,7 +339,7 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
             }
             final AJAXRequestResult result = new AJAXRequestResult(ThreadedStructure.valueOf(mails), "mail");
             result.setResponseProperty("cached", Boolean.valueOf(cached));
-            return result;
+            return result.setDurationByStart(start);
         } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }

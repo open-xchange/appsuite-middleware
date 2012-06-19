@@ -51,7 +51,7 @@ package com.openexchange.webdav.xml.user;
 
 import java.io.IOException;
 import java.util.Map;
-import org.jdom.JDOMException;
+import org.jdom2.JDOMException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.test.TestException;

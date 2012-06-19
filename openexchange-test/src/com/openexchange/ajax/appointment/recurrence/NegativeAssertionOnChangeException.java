@@ -68,8 +68,9 @@ public class NegativeAssertionOnChangeException extends AbstractNegativeAssertio
     @Override
     public void check(Appointment startWith, Changes changes, OXException expectedError) {
         Appointment copy = startWith.clone();
-        if(! startWith.containsObjectID())
+        if(! startWith.containsObjectID()) {
             manager.insert(copy);
+        }
 
         Appointment update = new Appointment();
         update.setParentFolderID(copy.getParentFolderID());

@@ -59,8 +59,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import com.openexchange.log.LogFactory;
-import org.jdom.Attribute;
-import org.jdom.Element;
+import org.jdom2.Attribute;
+import org.jdom2.Element;
 
 import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.webdav.protocol.WebdavPath;

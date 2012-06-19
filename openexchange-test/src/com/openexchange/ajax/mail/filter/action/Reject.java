@@ -80,24 +80,31 @@ public class Reject extends AbstractAction {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
+		if (this == obj) {
+            return true;
+        }
+		if (obj == null) {
+            return false;
+        }
+		if (getClass() != obj.getClass()) {
+            return false;
+        }
 		final Reject other = (Reject) obj;
 		if (text == null) {
-			if (other.text != null)
-				return false;
-		} else if (!text.equals(other.text))
-			return false;
+			if (other.text != null) {
+                return false;
+            }
+		} else if (!text.equals(other.text)) {
+            return false;
+        }
 
 		if (name == null) {
-			if (other.getName() != null)
-				return false;
-		} else if (!name.equals(other.getName()))
-				return false;
+			if (other.getName() != null) {
+                return false;
+            }
+		} else if (!name.equals(other.getName())) {
+            return false;
+        }
 
 		return true;
 	}

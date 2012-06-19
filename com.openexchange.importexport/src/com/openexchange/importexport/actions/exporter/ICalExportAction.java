@@ -65,8 +65,9 @@ public class ICalExportAction extends AbstractExportAction {
 
 	@Override
 	public Exporter getExporter() {
-		if(this.exporter == null)
-			this.exporter = new ICalExporter();
+		if(this.exporter == null) {
+            this.exporter = new ICalExporter();
+        }
 		return this.exporter;
 	}
 

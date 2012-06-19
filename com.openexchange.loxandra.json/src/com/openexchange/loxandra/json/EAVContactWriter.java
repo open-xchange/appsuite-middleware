@@ -100,8 +100,9 @@ public class EAVContactWriter extends CommonWriter {
 						if (EAVContactHelper.isNonString(column)) {
 							Date d = (Date)c.get(column);
 							writeParameter(key, d.getTime(), j);
-						} else 
-							writeParameter(key, (String)c.get(column), j);
+						} else {
+                            writeParameter(key, (String)c.get(column), j);
+                        }
 					}
 				} catch (IllegalArgumentException e) {
 					e.printStackTrace();
@@ -111,19 +112,22 @@ public class EAVContactWriter extends CommonWriter {
 			}
 		}
 		
-		if (c.getFolderUUIDs().size() != 0)
-			writeParameter("folderUUID", c.getFolderUUIDs().get(0).toString(), j);
+		if (c.getFolderUUIDs().size() != 0) {
+            writeParameter("folderUUID", c.getFolderUUIDs().get(0).toString(), j);
+        }
 		
-		if (c.getUUID() != null) //user set a custom uuid
-			writeParameter("uuid", c.getUUID().toString(), j);
+		if (c.getUUID() != null) {
+            writeParameter("uuid", c.getUUID().toString(), j);
+        }
 		
-		if (c.getTimeUUID() != null)
-			writeParameter("timeuuid", c.getTimeUUID().toString(), j);
+		if (c.getTimeUUID() != null) {
+            writeParameter("timeuuid", c.getTimeUUID().toString(), j);
+        }
 		
 		JSONObject unnamedJson = new JSONObject();
 		Iterator<String> iter = c.getUnnamedPropertyNames().iterator();
 		while (iter.hasNext()) {
-			String key = (String) iter.next();
+			String key = iter.next();
 			unnamedJson.put(key, c.getUnnamedProperty(key));
 		}
 		j.put("unnamed", unnamedJson);

@@ -84,8 +84,9 @@ public abstract class AbstractPositiveAssertion extends AbstractAssertion{
     }
 
     protected void updateAndCheck(Appointment startAppointment, Changes changes, Expectations expectations) {
-        if(null == approachUsedForTest)
+        if(null == approachUsedForTest) {
             approachUsedForTest = "Update existing";
+        }
         Appointment base = new Appointment();
         base.setLastModified(startAppointment.getLastModified());
         base.setObjectID(startAppointment.getObjectID());
@@ -101,8 +102,9 @@ public abstract class AbstractPositiveAssertion extends AbstractAssertion{
         Appointment copy = startAppointment.clone();
         changes.update(copy);
         create(copy);
-        if(manager.hasLastException())
+        if(manager.hasLastException()) {
             fail2("Could not create appointment, error: " + manager.getLastException());
+        }
         checkViaGet(copy.getParentFolderID(), copy.getObjectID(), expectations);
         checkViaList(copy.getParentFolderID(), copy.getObjectID(), expectations);
     }
@@ -112,8 +114,9 @@ public abstract class AbstractPositiveAssertion extends AbstractAssertion{
         try {
             List<Appointment> appointments = manager.list(new ListIDs(folderId, appointmentId), expectations.getKeys());
             Appointment actual = find(appointments, folderId, appointmentId);
-            if(manager.hasLastException())
+            if(manager.hasLastException()) {
                 fail2("Exception occured: " + manager.getLastException(), manager.getLastException());
+            }
             expectations.verify(state(),actual);
         } catch (Exception e) {
             fail2("Exception occurred: ", e);
@@ -127,8 +130,9 @@ public abstract class AbstractPositiveAssertion extends AbstractAssertion{
         Appointment actual;
         try {
             actual = manager.get(folderId, appointmentId);
-            if(manager.hasLastException())
+            if(manager.hasLastException()) {
                 fail2("Exception occured: " + manager.getLastException());
+            }
         } catch (Exception e) {
             fail2("Exception occurred: " + e);
             return;
@@ -141,8 +145,9 @@ public abstract class AbstractPositiveAssertion extends AbstractAssertion{
         Appointment actual;
         try {
             actual = manager.get(folderId, appointmentId, recurrencePos);
-            if(manager.hasLastException())
+            if(manager.hasLastException()) {
                 fail2("Exception occured: " + manager.getLastException());
+            }
         } catch (Exception e) {
             fail2("Exception occurred: " + e);
             return;

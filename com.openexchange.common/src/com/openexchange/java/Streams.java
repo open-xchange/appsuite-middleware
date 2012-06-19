@@ -148,10 +148,12 @@ public class Streams {
     public static void close(final Closeable... closeables) {
         if (null != closeables) {
             for (final Closeable toClose : closeables) {
-                try {
-                    toClose.close();
-                } catch (final Exception e) {
-                    // Ignore
+                if (null != toClose) {
+                    try {
+                        toClose.close();
+                    } catch (final Exception e) {
+                        // Ignore
+                    }
                 }
             }
         }

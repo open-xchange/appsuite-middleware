@@ -63,8 +63,9 @@ public class VCardImportAction extends AbstractImportAction {
 
 	@Override
 	public Importer getImporter() {
-		if(this.importer == null)
-			this.importer = new VCardImporter();
+		if(this.importer == null) {
+            this.importer = new VCardImporter();
+        }
 		return importer;
 	}
 }

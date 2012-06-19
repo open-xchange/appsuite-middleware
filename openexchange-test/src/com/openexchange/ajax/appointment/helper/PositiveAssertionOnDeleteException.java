@@ -72,8 +72,9 @@ public class PositiveAssertionOnDeleteException extends AbstractPositiveAssertio
         approachUsedForTest = "Creation, then DeleteException";
 
         create(copy);
-        if(manager.hasLastException())
+        if(manager.hasLastException()) {
             fail2("Could not create appointment, error: " + manager.getLastException());
+        }
 
 
         manager.createDeleteException(copy, recurrencePosition);

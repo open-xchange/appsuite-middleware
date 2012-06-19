@@ -98,7 +98,7 @@ public final class JsonCacheAddInProgressFieldTask extends UpdateTaskAdapter {
         final Connection con = dbService.getForUpdateTask(cid);
         try {
             DBUtils.startTransaction(con);
-            Tools.checkAndAddColumns(con, "jsonCache", getColumns());
+            Tools.checkAndAddColumns(con, "jsonCache", new Column[] { new Column("inProgress", "TINYINT default 0") });
             con.commit();
         } catch (final SQLException e) {
             rollback(con);
@@ -110,9 +110,5 @@ public final class JsonCacheAddInProgressFieldTask extends UpdateTaskAdapter {
             autocommit(con);
             Database.backNoTimeout(cid, true, con);
         }
-    }
-
-    protected Column[] getColumns() {
-        return new Column[] { new Column("inProgress", "TINYINT default 0") };
     }
 }

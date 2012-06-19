@@ -81,8 +81,9 @@ public class BasicManagedTaskTests extends ManagedTaskTest {
         Task[] allTasksOnServer = manager.getAllTasksOnServer(folderID, new int[] { 1, 4, 5, 20, 209 });
         actual = null;
         for(Task temp: allTasksOnServer){
-            if(expected.getObjectID() == temp.getObjectID())
+            if(expected.getObjectID() == temp.getObjectID()) {
                 actual = temp;
+            }
         }
         assertEquals("Should find one more element than before", numberBefore + 1, allTasksOnServer.length);
         assertNotNull("Should find the newly created element", actual);

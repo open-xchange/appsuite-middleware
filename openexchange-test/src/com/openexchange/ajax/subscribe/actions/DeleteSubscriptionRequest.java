@@ -92,8 +92,9 @@ public class DeleteSubscriptionRequest extends AbstractSubscriptionRequest<Delet
 
     @Override
     public Object getBody() throws JSONException {
-        if(IDs == null)
+        if(IDs == null) {
             throw new JSONException("Cannot create DeleteRequest: No IDs given for deletion!");
+        }
         return JSON.collection2jsonArray(getIDs());
     }
 

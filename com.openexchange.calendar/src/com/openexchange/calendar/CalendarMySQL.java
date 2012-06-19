@@ -92,6 +92,7 @@ import com.openexchange.exception.OXException.Generic;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCallbacks;
+import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarConfig;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarFolderObject;
@@ -2480,7 +2481,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             cdao.setDelExceptions(null);
         }
 
-        if (rec_action == collection.CHANGE_RECURRING_TYPE || changeMasterTime) {
+        if (rec_action == CalendarCollectionService.CHANGE_RECURRING_TYPE || changeMasterTime) {
             if (edao.getRecurrenceID() > 0 && edao.getObjectID() != edao.getRecurrenceID()) {
                 throw OXCalendarExceptionCodes.INVALID_RECURRENCE_TYPE_CHANGE.create(new Object[0]);
             }
@@ -2496,7 +2497,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             }
             // Fake a series deletion for MS Outlook
             backupAppointment(writecon, so.getContextId(), edao.getObjectID(), so.getUserId());
-        } else if (rec_action == collection.RECURRING_EXCEPTION_DELETE) {
+        } else if (rec_action == CalendarCollectionService.RECURRING_EXCEPTION_DELETE) {
             final List<Integer> exceptions = getExceptionList(null, ctx, edao.getRecurrenceID());
             if (exceptions != null && !exceptions.isEmpty()) {
                 final Integer oids[] = exceptions.toArray(new Integer[exceptions.size()]);
@@ -2508,7 +2509,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 }
             }
             collection.purgeExceptionFieldsFromObject(cdao);
-        } else if (rec_action == collection.RECURRING_EXCEPTION_DELETE_EXISTING) {
+        } else if (rec_action == CalendarCollectionService.RECURRING_EXCEPTION_DELETE_EXISTING) {
         	final Date[] deleteExceptions = cdao.getDeleteException();
 			final List<Integer> deleteExceptionPositions = new ArrayList<Integer>();
 			{
@@ -2549,7 +2550,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 					cdao.setChangeExceptions(cdates);
 				}
 			}
-        } else if (rec_action == collection.RECURRING_CREATE_EXCEPTION) {
+        } else if (rec_action == CalendarCollectionService.RECURRING_CREATE_EXCEPTION) {
             // Because the GUI only sends changed fields, we have to create a
             // merged object
             // from cdao and edao and then we force an insert!
@@ -2789,7 +2790,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         if (!solo_reminder) {
             collection.triggerModificationEvent(so, edao, cdao);
         }
-        if(rec_action == collection.RECURRING_CREATE_EXCEPTION) {
+        if(rec_action == CalendarCollectionService.RECURRING_CREATE_EXCEPTION) {
             CalendarCallbacks.getInstance().createdChangeExceptionInRecurringAppointment(cdao, clone,inFolder, so);
         }
         if (clone != null) {
@@ -2820,7 +2821,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 main = edao;
             }
             final RecurringResultsInterface rresults = collection.calculateRecurring(main, 0, 0, 0,
-                collection.MAX_OCCURRENCESE, true);
+                CalendarCollectionService.MAX_OCCURRENCESE, true);
             /*
              * Check if every possible occurrence is covered by a delete exception
              */
@@ -2837,7 +2838,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                  */
                 deleteSingleAppointment(main.getContextID(), main.getObjectID(), main.getCreatedBy(), main
                         .getCreatedBy(), inFolder, null, writecon, main.getFolderType(), so, ctx,
-                        collection.RECURRING_NO_ACTION, main, main, clientLastModified);
+                        CalendarCollectionService.RECURRING_NO_ACTION, main, main, clientLastModified);
             }
 
         }
@@ -4478,7 +4479,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                  */
                 deleteSingleAppointment(mdao.getContextID(), mdao.getObjectID(), mdao.getCreatedBy(), mdao
                         .getCreatedBy(), inFolder, null, writecon, mdao.getFolderType(), so, ctx,
-                        collection.RECURRING_NO_ACTION, mdao, mdao, clientLastModified);
+                        CalendarCollectionService.RECURRING_NO_ACTION, mdao, mdao, clientLastModified);
             }
         }
     }
@@ -4488,7 +4489,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         while (rs.next()) {
             final int oid = rs.getInt(1);
             final int owner = rs.getInt(2);
-            deleteSingleAppointment(so.getContextId(), oid, so.getUserId(), owner, fid, readcon, writecon, foldertype, so, ctx, collection.RECURRING_NO_ACTION, null, null, null);
+            deleteSingleAppointment(so.getContextId(), oid, so.getUserId(), owner, fid, readcon, writecon, foldertype, so, ctx, CalendarCollectionService.RECURRING_NO_ACTION, null, null, null);
         }
     }
 
@@ -4514,7 +4515,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                     readcon = DBPool.pickup(ctx);
                     close_read = true;
                 }
-                if (!checkIfUserIstheOnlyParticipant(cid, oid, readcon) && recurring_action != collection.RECURRING_VIRTUAL_ACTION) {
+                if (!checkIfUserIstheOnlyParticipant(cid, oid, readcon) && recurring_action != CalendarCollectionService.RECURRING_VIRTUAL_ACTION) {
                     if (close_read && readcon != null) {
                         DBPool.push(ctx, readcon);
                         close_read = false;
@@ -4535,7 +4536,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 					}
                     return;
                 }
-                if (recurring_action == collection.RECURRING_VIRTUAL_ACTION) {
+                if (recurring_action == CalendarCollectionService.RECURRING_VIRTUAL_ACTION) {
                     // Create an exception first, remove the user as participant
                     // and then return
                     if (checkIfUserIstheOnlyParticipant(cid, oid, readcon)) {
@@ -4597,7 +4598,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                         }
                     }
                     return;
-                } else if (recurring_action == collection.RECURRING_EXCEPTION_ACTION) {
+                } else if (recurring_action == CalendarCollectionService.RECURRING_EXCEPTION_ACTION) {
                     if (checkIfUserIstheOnlyParticipant(cid, oid, readcon)) {
                         // removal of change exception happens in updateAppointment()
                         final CalendarDataObject update = new CalendarDataObject();
@@ -4671,14 +4672,14 @@ public class CalendarMySQL implements CalendarSqlImp {
             }
         }
 
-        if (recurring_action == collection.RECURRING_VIRTUAL_ACTION) {
+        if (recurring_action == CalendarCollectionService.RECURRING_VIRTUAL_ACTION) {
             // this is an update with a new delete_exception
             if (edao == null) {
                 throw OXCalendarExceptionCodes.RECURRING_UNEXPECTED_DELETE_STATE.create(Integer.valueOf(uid), Integer.valueOf(oid), Integer.valueOf(-1));
             }
             createSingleVirtualDeleteException(cdao, edao, writecon, oid, uid, fid, so, ctx, clientLastModified);
             return;
-        } else if (recurring_action == collection.RECURRING_EXCEPTION_ACTION) {
+        } else if (recurring_action == CalendarCollectionService.RECURRING_EXCEPTION_ACTION) {
             // this is a deletion of a change exception aka existing exception
             if (edao.containsRecurrenceID() && edao.getRecurrenceID() > 0) {
                 // Necessary recurrence ID is present
@@ -4770,7 +4771,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                     }
                 }
             }
-        } else if (recurring_action == collection.RECURRING_FULL_DELETE) {
+        } else if (recurring_action == CalendarCollectionService.RECURRING_FULL_DELETE) {
             final List<Integer> al = getExceptionList(readcon, ctx, edao.getRecurrenceID());
             if (al != null && !al.isEmpty()) {
                 final Integer oids[] = al.toArray(new Integer[al.size()]);

@@ -77,5 +77,19 @@ public interface SolrMBean {
      */
     public void removeCoreEnvironment(int contextId, int userId, int module) throws MBeanException;
     
+    /**
+     * Runs a query against an index.
+     * 
+     * @param contextId The context id of the index.
+     * @param userId The user id of the index.
+     * @param module The module of the index.
+     * @param queryString The query String.
+     * @param limit A positive number to limit the results. Or a negative one to use Integer.MAX_MAX_VALUE. 
+     * @return A printable String that lists the results.
+     * @throws MBeanException
+     */
+    public String search(int contextId, int userId, int module, String queryString, int limit) throws MBeanException;   
 
+    public long count(int contextId, int userId, int module, String queryString) throws MBeanException;
+    
 }

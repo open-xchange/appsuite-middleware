@@ -130,8 +130,9 @@ public final class TimeTools {
 
         Date date = null;
         final Span span = Chronic.parse(value);
-        if (null == span)
+        if (null == span) {
             return null;
+        }
 
         date = span.getBeginCalendar().getTime();
 

@@ -51,7 +51,7 @@ package com.openexchange.webdav.xml;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
-import org.jdom.Element;
+import org.jdom2.Element;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.Participant;

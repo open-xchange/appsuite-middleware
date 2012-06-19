@@ -72,7 +72,7 @@ public class SimpleICal {
 	public static final String VEVENT = "VEVENT";
 	public static final String VTIMEZONE = "VTIMEZONE";
 
-	private String iCal;
+	private final String iCal;
 	private Component vCalendar;
 	
 	public SimpleICal(String iCal) throws IOException, SimpleICalException {
@@ -116,9 +116,9 @@ public class SimpleICal {
 	
     public static final class Component {
     	
-		private String name;
-		private List<Property> properties;
-		private List<Component> components;
+		private final String name;
+		private final List<Property> properties;
+		private final List<Component> components;
     
     	public Component(String name, BufferedReader reader) throws SimpleICalException, IOException {
     		super();
@@ -211,7 +211,7 @@ public class SimpleICal {
     	
     	private String name;
     	private String value;
-    	private Map<String, String> attributes;
+    	private final Map<String, String> attributes;
 
     	public Property(String line) throws SimpleICalException {
     		super();

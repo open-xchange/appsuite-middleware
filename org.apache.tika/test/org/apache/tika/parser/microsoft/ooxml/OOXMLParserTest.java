@@ -37,7 +37,7 @@ import org.xml.sax.ContentHandler;
 
 public class OOXMLParserTest extends TikaTest {
 
-    private Parser parser = new AutoDetectParser();
+    private final Parser parser = new AutoDetectParser();
 
     private InputStream getTestDocument(String name) {
         return TikaInputStream.get(OOXMLParserTest.class.getResourceAsStream(
