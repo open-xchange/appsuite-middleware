@@ -49,8 +49,17 @@
 
 package com.openexchange.file.storage.composition.internal;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import java.util.Collections;
 import java.util.List;
-import junit.framework.TestCase;
+import java.util.Set;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.exception.OXException;
@@ -61,6 +70,7 @@ import com.openexchange.file.storage.FileStorageEventHelper;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.InMemoryFileStorageFileAccess;
+import com.openexchange.session.Session;
 import com.openexchange.session.SimSession;
 
 
@@ -69,7 +79,7 @@ import com.openexchange.session.SimSession;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class FileEventTest extends TestCase {
+public class FileEventTest {
     
     private static final String SERVICE = "http://inmemoryfilestorage.ox";
     
@@ -78,12 +88,12 @@ public class FileEventTest extends TestCase {
     private InMemoryAccess fileAccess;
     
     
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
         fileAccess = new InMemoryAccess();
     }
     
+    @Test
     public void testSave() throws Exception {   
         final File file = new DefaultFile();
         file.setTitle("Title...");
@@ -102,13 +112,15 @@ public class FileEventTest extends TestCase {
         fileAccess.saveFileMetadata(file, 0);
     }
     
+    @Test
     public void testRemove() throws Exception {   
         final File file = new DefaultFile();
         file.setTitle("Title...");
         final FolderID srcfolder = new FolderID(SERVICE, ACCOUNT, "dasdb3424");
         file.setFolderId(srcfolder.toUniqueID());
-        fileAccess.saveFileMetadata(file, 0);
-        fileAccess.saveFileMetadata(file, 0);
+        fileAccess.saveFileMetadata(file, 0);        
+        final File updated = new DefaultFile(file);        
+        fileAccess.saveFileMetadata(updated, 0);
         
         fileAccess.setEventVerifier(new EventVerifier() {            
             @Override
@@ -116,16 +128,31 @@ public class FileEventTest extends TestCase {
                 assertTrue("Wrong topic.", event.getTopic().equals(FileStorageEventConstants.DELETE_TOPIC));
                 String folderId = FileStorageEventHelper.extractFolderId(event);
                 String objectId = FileStorageEventHelper.extractObjectId(event);
+                Set<Integer> versions = FileStorageEventHelper.extractVersions(event);
                 assertEquals("Wrong folder.", file.getFolderId(), folderId);
                 assertEquals("Wrong id.", file.getId(), objectId);
+                assertTrue("Too much versions.", versions.size() == 1);
+                Integer next = versions.iterator().next();
+                assertTrue("Wrong version.", next.intValue() == file.getVersion());
             }
         });
-        int[] notRemoved = fileAccess.removeVersion(file.getId(), new int[] { FileStorageFileAccess.CURRENT_VERSION });
+        int[] notRemoved = fileAccess.removeVersion(file.getId(), new int[] { file.getVersion() });
         assertTrue("Version not removed.", notRemoved.length == 0); 
         
-        // TODO: Test remove document
+        fileAccess.setEventVerifier(new EventVerifier() {            
+            @Override
+            public void verifyEvent(Event event) throws Exception {
+                assertTrue("Wrong topic.", event.getTopic().equals(FileStorageEventConstants.DELETE_TOPIC));
+                String folderId = FileStorageEventHelper.extractFolderId(event);
+                String objectId = FileStorageEventHelper.extractObjectId(event);
+                assertEquals("Wrong folder.", updated.getFolderId(), folderId);
+                assertEquals("Wrong id.", updated.getId(), objectId);
+            }
+        });
+        assertTrue("Deletion failed.", fileAccess.removeDocument(Collections.singletonList(updated.getId()), 0).size() == 0);
     }
     
+    @Test
     public void testMove() throws Exception {
         final File file = new DefaultFile();
         file.setTitle("Title...");
@@ -173,6 +200,7 @@ public class FileEventTest extends TestCase {
         fileAccess.move(moved, null, 0, null);                
     }
     
+    @Test
     public void testCopy() throws Exception {
         final File file = new DefaultFile();
         file.setTitle("Title...");
@@ -196,9 +224,30 @@ public class FileEventTest extends TestCase {
         assertNotNull("Copy was null.", copy);
     }
     
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
+    @Test
+    public void testUpdate() throws Exception {
+        final File file = new DefaultFile();
+        file.setTitle("Title...");
+        final FolderID srcfolder = new FolderID(SERVICE, ACCOUNT, "dasdb3424");
+        file.setFolderId(srcfolder.toUniqueID());
+        fileAccess.saveFileMetadata(file, 0);
+        
+        file.setTitle("Another title...");        
+        fileAccess.setEventVerifier(new EventVerifier() {            
+            @Override
+            public void verifyEvent(Event event) throws Exception {
+                assertTrue("Wrong topic.", event.getTopic().equals(FileStorageEventConstants.UPDATE_TOPIC));
+                String folderId = FileStorageEventHelper.extractFolderId(event);
+                String objectId = FileStorageEventHelper.extractObjectId(event);
+                assertEquals("Wrong folder.", file.getFolderId(), folderId);
+                assertEquals("Wrong id.", file.getId(), objectId);
+            }
+        });
+        fileAccess.saveFileMetadata(file, 0);
+    }
+    
+    @After
+    public void tearDown() throws Exception {
         fileAccess = null;
     }
     
@@ -241,6 +290,12 @@ public class FileEventTest extends TestCase {
         protected void postEvent(Event event) {
             String serviceId = (String) event.getProperty(FileStorageEventConstants.SERVICE);
             String accountId = (String) event.getProperty(FileStorageEventConstants.ACCOUNT_ID);
+            try {
+                Session session = FileStorageEventHelper.extractSession(event);
+                assertEquals("Wrong session.", this.session, session);
+            } catch (OXException e) {
+                fail(e.getMessage());
+            }
             
             assertEquals("Wrong service.", SERVICE, serviceId);
             assertEquals("Wrong account.", ACCOUNT, accountId);

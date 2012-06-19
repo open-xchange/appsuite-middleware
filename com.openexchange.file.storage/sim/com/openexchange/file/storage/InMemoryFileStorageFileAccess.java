@@ -156,7 +156,8 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess {
                 holder = new FileHolder(file, data);
             }
             VersionContainer versionContainer = new VersionContainer();
-            versionContainer.addVersion(holder);
+            int version = versionContainer.addVersion(holder);
+            file.setVersion(version);
             map.put(id, versionContainer);
         } else {
             VersionContainer versionContainer = map.get(id);
@@ -170,7 +171,8 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess {
             } else {
                 holder = new FileHolder(file, data);
             }
-            versionContainer.addVersion(holder);            
+            int version = versionContainer.addVersion(holder);     
+            file.setVersion(version);
         }
     }
 

@@ -93,9 +93,7 @@ public class FileStorageEventHelper {
         ht.put(FileStorageEventConstants.SERVICE, service);
         ht.put(FileStorageEventConstants.ACCOUNT_ID, accountId);           
         ht.put(FileStorageEventConstants.OBJECT_ID, objectId); 
-        if (folderId != null) {
-            ht.put(FileStorageEventConstants.FOLDER_ID, folderId);
-        }
+        ht.put(FileStorageEventConstants.FOLDER_ID, folderId);
         
         return ht;
     }
@@ -145,7 +143,7 @@ public class FileStorageEventHelper {
     public static String extractFolderId(Event event) throws OXException {
         Object idObj = event.getProperty(FileStorageEventConstants.FOLDER_ID);
         if (idObj == null) {
-            return null;
+            throw FileStorageExceptionCodes.MISSING_PARAMETER.create(FileStorageEventConstants.FOLDER_ID);
         }
         
         if (idObj instanceof String) {
@@ -153,6 +151,15 @@ public class FileStorageEventHelper {
         } else {
             throw FileStorageExceptionCodes.INVALID_PARAMETER.create(FileStorageEventConstants.FOLDER_ID, idObj.getClass().getName());
         }
+    }
+    
+    public static Set<Integer> extractVersions(Event event) {
+        Object versionsObj = event.getProperty(FileStorageEventConstants.VERSIONS);
+        if (versionsObj == null || !(versionsObj instanceof Set<?>)) {
+            return null;
+        }
+        
+        return (Set<Integer>) versionsObj;
     }
     
     public static String createDebugMessage(String eventName, Event event) {

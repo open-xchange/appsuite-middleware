@@ -47,69 +47,25 @@
  *
  */
 
-package com.openexchange.file.storage;
+package com.openexchange.file.storage.composition.internal;
 
-import java.util.HashMap;
-import java.util.Map;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
 
 
 /**
- * {@link VersionContainer}
+ * {@link UnitTests}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class VersionContainer {
-    
-    private final Map<Integer, FileHolder> versions = new HashMap<Integer, FileHolder>();
+@RunWith(Suite.class)
+@SuiteClasses({
+    CompositingFileAccessTest.class,
+    FileIDTest.class,
+    FolderIDTest.class,
+    FileEventTest.class
+})
+public class UnitTests {
 
-    private int currentVersion;
-
-    /**
-     * Initializes a new {@link VersionContainer}.
-     * @param version
-     * @param fileHolder
-     */
-    public VersionContainer() {
-        super();
-        currentVersion = -1;
-    }
-    
-    public boolean containsVersion(int version) {
-        return versions.containsKey(version);
-    }
-    
-    public FileHolder getVersion(int version) {
-        return versions.get(version);
-    }
-    
-    public int addVersion(FileHolder fileHolder) {
-        int version = ++currentVersion;  
-        versions.put(version, fileHolder);
-        
-        return version;
-    }
-    
-    public FileHolder removeVersion(int version)  {
-        FileHolder removed = versions.remove(version);
-        if (version == currentVersion) {
-            int tmp = -1;
-            for (int v : versions.keySet()) {
-                if (v > tmp) {
-                    tmp = v;
-                }
-            }
-            
-            currentVersion = tmp;
-        }
-        
-        return removed;
-    }
-    
-    public FileHolder getCurrentVersion() {
-        return versions.get(currentVersion);
-    }
-    
-    public int getCurrentVersionNumber() {
-        return currentVersion;
-    }
 }

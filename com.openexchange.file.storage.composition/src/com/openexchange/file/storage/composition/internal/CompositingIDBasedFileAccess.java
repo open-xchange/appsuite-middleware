@@ -265,7 +265,6 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
 
         
         final List<String> notDeleted = new ArrayList<String>(ids.size());
-
         for (final Map.Entry<FileStorageFileAccess, List<IDTuple>> deleteOp : deleteOperations.entrySet()) {
             final FileStorageFileAccess access = deleteOp.getKey();
             final List<IDTuple> toDelete = deleteOp.getValue();
@@ -286,18 +285,21 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
             String accountId = access.getAccountAccess().getAccountId();
             toDelete.removeAll(conflicted);
             for (IDTuple tuple : toDelete) {
-                String objectId = tuple.getId();
-                String folderId = tuple.getFolder();
-                if (folderId == null) {
+                String fileFolder = tuple.getFolder();
+                if (fileFolder == null) {
                     /*
                      * Reload the document to get it's folder id.
                      */
                     for (File file : reloaded) {
-                        if (file.getId().equals(objectId)) {
-                            folderId = file.getFolderId();
+                        if (file.getId().equals(tuple.getId())) {
+                            fileFolder = file.getFolderId();                            
                         }
                     }
+                } else {
+                    
                 }
+                String folderId = new FolderID(serviceId, accountId, fileFolder).toUniqueID();
+                String objectId = new FileID(serviceId, accountId, fileFolder, tuple.getId()).toUniqueID();
                 postEvent(FileStorageEventHelper.buildDeleteEvent(session, serviceId, accountId, folderId, objectId, null));
             }
         }
