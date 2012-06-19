@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -61,6 +62,8 @@ import java.util.Set;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrQuery.ORDER;
+import org.apache.solr.client.solrj.response.FacetField;
+import org.apache.solr.client.solrj.response.FacetField.Count;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
@@ -453,6 +456,7 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
         if (maxRows > QUERY_ROWS) {
             maxRows = QUERY_ROWS;
         }
+        Map<IndexField, Map<String, Long>> facetCountsMap = null;
         do {
             solrQuery.setStart(off);
             if ((fetched + maxRows) > len) {
@@ -463,6 +467,35 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
             final SolrDocumentList results = queryResponse.getResults();
             for (final SolrDocument document : results) {
                 mails.add(helper.readDocument(document, MailFillers.allFillers()));
+            }
+            final List<FacetField> facetFields = queryResponse.getFacetFields();
+            if (null != facetFields) {
+                if (null == facetCountsMap) {
+                    // Initialize map
+                    facetCountsMap = new HashMap<IndexField, Map<String,Long>>(facetFields.size());
+                }
+                for (final FacetField facetField : facetFields) {
+                    final List<Count> counts = facetField.getValues();
+                    if (null != counts) {
+                        final MailIndexField field = SolrMailField.fieldFor(facetField.getName());
+                        if (null != field) {
+                            Map<String, Long> map = facetCountsMap.get(field);
+                            if (null == map) {
+                                map = new HashMap<String, Long>(counts.size());
+                                facetCountsMap.put(field, map);
+                            }
+                            for (final Count count : counts) {
+                                final String countName = count.getName();
+                                final Long l = map.get(countName);
+                                if (null == l) {
+                                    map.put(countName, Long.valueOf(count.getCount()));
+                                } else {
+                                    map.put(countName, Long.valueOf(count.getCount() + l.longValue()));
+                                }
+                            }
+                        }
+                    }
+                }
             }
 
             if (results.size() < maxRows) {
@@ -475,14 +508,19 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
         
         if (mails.isEmpty()) {
             return Indexes.emptyResult();
-        } else {
-            if (solrQuery.getBool("sortManually", false)) {
-                Collections.sort(mails, new AddressComparator(parameters.getSortField(), parameters.getOrder()));
-            }
-            final MailIndexResult indexResult = new MailIndexResult(mails.size());
-            indexResult.setResults(mails);
-            return indexResult;
-        }        
+        }
+        /*
+         * Return appropriate result
+         */
+        if (solrQuery.getBool("sortManually", false)) {
+            Collections.sort(mails, new AddressComparator(parameters.getSortField(), parameters.getOrder()));
+        }
+        final MailIndexResult indexResult = new MailIndexResult(mails.size());
+        indexResult.setResults(mails);
+        if (null != facetCountsMap) {
+            indexResult.setFacetCounts(facetCountsMap);
+        }
+        return indexResult;        
     }
     
     private void setFieldList(final SolrQuery solrQuery, final Set<SolrMailField> fields) {

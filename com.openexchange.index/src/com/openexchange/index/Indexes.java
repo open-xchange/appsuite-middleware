@@ -87,7 +87,7 @@ public final class Indexes {
         }
 
         @Override
-        public Map<IndexField, Map<String, Integer>> getFacetFields() {
+        public Map<IndexField, Map<String, Long>> getFacetCounts() {
             return Collections.emptyMap();
         }
 

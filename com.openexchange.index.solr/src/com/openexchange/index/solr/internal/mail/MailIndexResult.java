@@ -67,7 +67,7 @@ public final class MailIndexResult implements IndexResult<MailMessage> {
 
     private List<IndexDocument<MailMessage>> mails;
 
-    private Map<IndexField, Map<String, Integer>> facetFields;
+    private Map<IndexField, Map<String, Long>> facetCounts;
 
     /**
      * Initializes a new {@link MailIndexResult}.
@@ -115,17 +115,17 @@ public final class MailIndexResult implements IndexResult<MailMessage> {
     }
 
     @Override
-    public Map<IndexField, Map<String, Integer>> getFacetFields() {
-        return facetFields;
+    public Map<IndexField, Map<String, Long>> getFacetCounts() {
+        return facetCounts;
     }
     
     /**
-     * Sets the facet fields
+     * Sets the facet counts
      *
-     * @param facetFields The facet fields to set
+     * @param facetCounts The facet counts to set
      */
-    public void setFacetFields(final Map<IndexField, Map<String, Integer>> facetFields) {
-        this.facetFields = facetFields;
+    public void setFacetCounts(final Map<IndexField, Map<String, Long>> facetCounts) {
+        this.facetCounts = facetCounts;
     }
 
 }

@@ -139,7 +139,6 @@ public enum SolrMailField {
         if (StringUtils.isEmpty(value)) {
             return null;
         }
-
         return value;
     }
     
@@ -150,6 +149,25 @@ public enum SolrMailField {
     public boolean isIndexed() {
         return !StringUtils.isEmpty(properties.getProperty(propertyName));
     }
+
+    /**
+     * Gets the appropriate index field for specified Solr name.
+     * 
+     * @param solrName The Solr name
+     * @return The index field or <code>null</code> 
+     */
+    public static MailIndexField fieldFor(final String solrName) {
+        if (null == solrName) {
+            return null;
+        }
+        for (final SolrMailField field : values()) {
+            if (solrName.equals(properties.getProperty(field.propertyName))) {
+                return field.indexField;
+            }
+        }
+        return null;
+    }
+    
 
     public static Set<MailIndexField> getIndexedFields() {
         return indexedFields;
