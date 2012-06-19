@@ -52,7 +52,7 @@ package com.openexchange.index;
 import java.util.List;
 
 /**
- * {@link IndexResult}
+ * {@link IndexResult} - A simple container for queried index results.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
