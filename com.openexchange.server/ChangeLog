@@ -1,3 +1,7 @@
+* 2012-06-19 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22321: Invalidate caches on changes global address book permissions
+
 * 2012-06-18 - thorben.betten@open-xchange.com
 
 - Fix for bug 22319: Support for IDN domains in IMAP authentication bundle
