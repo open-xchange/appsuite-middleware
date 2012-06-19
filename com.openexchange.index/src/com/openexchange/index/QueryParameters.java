@@ -141,17 +141,17 @@ public final class QueryParameters {
             return this;
         }
         
-        public Builder setFolder(String folder) {
+        public Builder setFolder(final String folder) {
             this.folder = folder;
             return this;
         }
         
-        public Builder setSortField(IndexField sortField) {
+        public Builder setSortField(final IndexField sortField) {
             this.sortField = sortField;
             return this;
         }
         
-        public Builder setOrder(Order order) {
+        public Builder setOrder(final Order order) {
             this.order = order;
             return this;
         }
@@ -175,12 +175,11 @@ public final class QueryParameters {
 
     private final Type type;
 
+    private final String folder;
     
-    String folder;
+    private final IndexField sortField;
     
-    IndexField sortField;
-    
-    Order order;
+    private final Order order;
 
     /**
      * Initializes a new {@link QueryParameters}.
