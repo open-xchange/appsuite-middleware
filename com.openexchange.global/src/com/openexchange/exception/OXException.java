@@ -112,7 +112,11 @@ public class OXException extends Exception implements OXExceptionConstants, Seri
         /**
          * No generic type set.
          */
-        NONE, NOT_FOUND,
+        NONE,
+        /**
+         * Not found.
+         */
+        NOT_FOUND,
         /**
          * The exception was caused due to missing permissions needed to access a certain module and/or module.
          */
