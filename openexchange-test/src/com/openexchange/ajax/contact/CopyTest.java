@@ -80,9 +80,15 @@ public class CopyTest extends AbstractContactTest {
 
     @Override
     protected void tearDown() throws Exception {
-        client.execute(new DeleteRequest(contactFolderId, objectId1, new Date()));
+        GetRequest getRequest1 = new GetRequest(contactFolderId, objectId1, tz, false);
+        GetResponse getResponse1 = client.execute(getRequest1);
+        Date lastModified1 = new Date(((JSONObject) getResponse1.getData()).getLong("last_modified"));
+        client.execute(new DeleteRequest(contactFolderId, objectId1, lastModified1));
         if (objectId2 > 0) {
-            client.execute(new DeleteRequest(targetFolder, objectId2, new Date()));
+            GetRequest getRequest2 = new GetRequest(contactFolderId, objectId2, tz, false);
+            GetResponse getResponse2 = client.execute(getRequest2);
+            Date lastModified2 = new Date(((JSONObject) getResponse2.getData()).getLong("last_modified"));
+            client.execute(new DeleteRequest(targetFolder, objectId2, lastModified2));
         }
         client.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OUTLOOK, folder));
 
