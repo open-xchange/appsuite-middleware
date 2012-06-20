@@ -108,7 +108,7 @@ public class UpdateTest extends AbstractContactTest {
 
         final byte[] b = loadImageByURL(client.getProtocol(), client.getHostname(), imageUrl);
 
-        OXTestToolkit.assertEqualsAndNotNull("image", contactObj.getImage1(), b);
+        OXTestToolkit.assertImageBytesEqualsAndNotNull("image", contactObj.getImage1(), b);
     }
 
     public void testUpdateContactWithImage() throws Exception {
@@ -129,6 +129,6 @@ public class UpdateTest extends AbstractContactTest {
 
         final byte[] b = loadImageByURL(client.getProtocol(), client.getHostname(), imageUrl);
 
-        OXTestToolkit.assertEqualsAndNotNull("image", contactObj.getImage1(), b);
+        OXTestToolkit.assertImageBytesEqualsAndNotNull("image", contactObj.getImage1(), b);
     }
 }
