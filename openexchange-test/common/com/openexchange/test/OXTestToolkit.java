@@ -33,6 +33,16 @@ public class OXTestToolkit {
         }
     }
 
+    public static void assertImageBytesEqualsAndNotNull(final String message, final byte[] expect, final byte[] value) throws Exception {
+        if (expect != null) {
+            Assert.assertNotNull(message + " is null", value);
+            Assert.assertTrue(message + " byte array size is not equals", expect.length <= value.length);
+            for (int a = 0; a < expect.length; a++) {
+                Assert.assertEquals(message + " byte in pos (" + a + ") is not equals", expect[a], value[a]);
+            }
+        }
+    }
+
     public static void assertEqualsAndNotNull(final String message, final Object expect, final Object value) throws Exception {
         if (expect != null) {
             Assert.assertNotNull(message + " is null", value);
@@ -44,7 +54,7 @@ public class OXTestToolkit {
         assertSameContent("", is1, is2);
     }
 
-    public static void assertSameContent(String message, final InputStream is1, final InputStream is2) throws IOException {
+    public static void assertSameContent(final String message, final InputStream is1, final InputStream is2) throws IOException {
         int i = 0;
         while ((i = is1.read()) != -1) {
             Assert.assertEquals(message, i, is2.read());
@@ -71,39 +81,39 @@ public class OXTestToolkit {
             I(c2.get(Calendar.YEAR)));
     }
 
-    public static void assertSameStream(InputStream expected, InputStream actual){
+    public static void assertSameStream(final InputStream expected, final InputStream actual){
         assertSameStream("", expected, actual);
     }
 
-    public static void assertSameStream(String message, InputStream expected, InputStream actual){
+    public static void assertSameStream(String message, final InputStream expected, final InputStream actual){
         if(message == null || message.equals("")) {
             message = "Comparing InputStreams";
         }
-        byte[] buff = new byte[256];
-        byte[] buff2 = new byte[256];
-        CRC32 crcActual = new CRC32();
-        CRC32 crcExpected = new CRC32();
+        final byte[] buff = new byte[256];
+        final byte[] buff2 = new byte[256];
+        final CRC32 crcActual = new CRC32();
+        final CRC32 crcExpected = new CRC32();
         try {
             while(expected.read(buff) != -1){
                 try {
                     actual.read(buff2);
-                } catch (IOException e){
+                } catch (final IOException e){
                     fail(message + ": 'actual' stream was shorter than 'expected' stream.");
                 }
                 crcActual.update(buff);
                 crcExpected.update(buff2);
             }
             assertEquals(message + ":'actual' stream was longer than 'expected' stream.", -1, actual.read(buff2));
-        } catch (IOException e) {
+        } catch (final IOException e) {
             fail(message + ": Could not read from 'expected' stream.");
         } finally {
             try {
                 actual.close();
-            } catch (IOException e) {
+            } catch (final IOException e) {
             }
             try {
                 expected.close();
-            } catch (IOException e) {
+            } catch (final IOException e) {
             }
         }
         assertEquals(message + ": Both streams should have the same checksum", crcExpected.getValue(), crcActual.getValue());

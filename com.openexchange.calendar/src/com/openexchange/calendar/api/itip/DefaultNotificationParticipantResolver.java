@@ -405,7 +405,7 @@ public class DefaultNotificationParticipantResolver implements
 		resourceConfiguration.setSendITIP(false);
 
 		for (final Integer resourceId : resourceIds) {
-			final Resource resource = resources.getResource(resourceId, ctx);
+			final Resource resource = resources.getResource(resourceId.intValue(), ctx);
 			if (resource.getMail() != null) {
 				final NotificationParticipant participant = new NotificationParticipant(
 						ITipRole.ATTENDEE, false, resource.getMail());
