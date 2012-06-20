@@ -76,7 +76,7 @@ public class RequestRegistryEntry implements Comparable<RequestRegistryEntry> {
      * @param request the incoming request to register
      * @param thread the thread associated with the request
      */
-    public RequestRegistryEntry(HttpServletRequest request, HttpServletResponse response, Thread thread) {
+    public RequestRegistryEntry(final HttpServletRequest request, final HttpServletResponse response, final Thread thread) {
         this.thread = thread;
         this.request = request;
         this.response = response;
@@ -89,7 +89,7 @@ public class RequestRegistryEntry implements Comparable<RequestRegistryEntry> {
      * @return the age of the entry in milliseconds
      */
     public long getAge() {
-        long currentTime = System.currentTimeMillis();
+        final long currentTime = System.currentTimeMillis();
         return currentTime - birthTime;
     }
 
@@ -108,11 +108,12 @@ public class RequestRegistryEntry implements Comparable<RequestRegistryEntry> {
      * @return the request parameters as String in the form of name=value&name=value
      */
     public String getRequestParameters() {
-        StringBuilder sb = new StringBuilder();
-        @SuppressWarnings("unchecked") Map<String, String[]> parameterMap = request.getParameterMap();
-        String[] parameterNames = parameterMap.keySet().toArray(new String[0]);
+        final StringBuilder sb = new StringBuilder();
+        @SuppressWarnings("unchecked")
+        final Map<String, String[]> parameterMap = request.getParameterMap();
+        final String[] parameterNames = parameterMap.keySet().toArray(new String[0]);
         for (int i = 0; i < parameterNames.length; i++) {
-            String[] parameterValues = parameterMap.get(parameterNames[i]);
+            final String[] parameterValues = parameterMap.get(parameterNames[i]);
             for (int j = 0; j < parameterValues.length; j++) {
                 sb.append(parameterNames[i]).append("=").append(parameterValues[j]);
                 if (j != parameterValues.length - 1) {
@@ -144,10 +145,6 @@ public class RequestRegistryEntry implements Comparable<RequestRegistryEntry> {
         return new StringBuilder("id=").append(thread.getId()).append(", name=").append(thread.getName()).toString();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see java.lang.Object#hashCode()
-     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -159,45 +156,44 @@ public class RequestRegistryEntry implements Comparable<RequestRegistryEntry> {
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
+    public boolean equals(final Object obj) {
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (!(obj instanceof RequestRegistryEntry)) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        final RequestRegistryEntry other = (RequestRegistryEntry) obj;
+        if (birthTime != other.birthTime) {
             return false;
-        RequestRegistryEntry other = (RequestRegistryEntry) obj;
-        if (birthTime != other.birthTime)
-            return false;
+        }
         if (request == null) {
-            if (other.request != null)
+            if (other.request != null) {
                 return false;
-        } else if (!request.equals(other.request))
+            }
+        } else if (!request.equals(other.request)) {
             return false;
+        }
         if (response == null) {
-            if (other.response != null)
+            if (other.response != null) {
                 return false;
-        } else if (!response.equals(other.response))
+            }
+        } else if (!response.equals(other.response)) {
             return false;
+        }
         if (thread == null) {
-            if (other.thread != null)
+            if (other.thread != null) {
                 return false;
-        } else if (!thread.equals(other.thread))
+            }
+        } else if (!thread.equals(other.thread)) {
             return false;
+        }
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see java.lang.Comparable#compareTo(java.lang.Object)
-     */
     @Override
-    public int compareTo(RequestRegistryEntry otherEntry) {
+    public int compareTo(final RequestRegistryEntry otherEntry) {
         if (this.birthTime < otherEntry.birthTime) {// this one is older
             return 1;
         } else if (birthTime > otherEntry.birthTime) {// this one is younger
