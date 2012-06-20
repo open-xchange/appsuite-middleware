@@ -33,4 +33,3 @@ Bundle-ClassPath: .,
  lib/management-api-3.0.0-b012.jar,
  lib/servlet-api-2.5.jar,
  lib/grizzly-http-servlet-2.2.5.jar
-Require-Bundle: com.openexchange.common
