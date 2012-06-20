@@ -1,5 +1,5 @@
 
-Name:          open-xchange-authentication-imap
+Name:          open-xchange-ajp
 BuildArch:     noarch
 #!BuildIgnore: post-build-checks
 BuildRequires: ant
@@ -23,14 +23,13 @@ License:       GPL-2.0
 BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
-Summary:       The Open-Xchange IMAP authentication
+Summary:       The Open-Xchange AJP Connector
 Requires:      open-xchange-core >= @OXVERSION@
-Provides:      open-xchange-authentication
-Conflicts:     open-xchange-authentication-ldap
-Conflicts:     open-xchange-authentication-database
+Provides:      open-xchange-httpservice
+Conflicts:     open-xchange-grizzly
 
 %description
-This package implements an authentication mechanism using an IMAP server.
+This package implements an AJP Connector and provides the OSGi HTTP service.
 
 
 Authors:
@@ -48,9 +47,9 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 
 %post
 if [ ${1:-0} -eq 2 ]; then
-    if [ -e /opt/open-xchange/etc/groupware/imapauth.properties ]; then
-        mv /opt/open-xchange/etc/imapauth.properties /opt/open-xchange/etc/imapauth.properties.rpmnew
-        mv /opt/open-xchange/etc/groupware/imapauth.properties /opt/open-xchange/etc/imapauth.properties
+    if [ -e /opt/open-xchange/etc/groupware/ajp.properties ]; then
+        mv /opt/open-xchange/etc/ajp.properties /opt/open-xchange/etc/ajp.properties.rpmnew
+        mv /opt/open-xchange/etc/groupware/ajp.properties /opt/open-xchange/etc/ajp.properties
     fi
 fi
 
@@ -67,3 +66,5 @@ fi
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Wed Jun 20 2012 Marc Arens  <marc.arens@open-xchange.com>
+Initial packaging

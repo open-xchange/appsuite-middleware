@@ -27,8 +27,6 @@ Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       The main bundles for the Open-Xchange collaboration suite
 Requires:      open-xchange-osgi >= @OXVERSION@
 Requires:      open-xchange-xerces
-Provides:      open-xchange-ajp = %{version}
-Obsoletes:     open-xchange-ajp <= %{version}
 Provides:      open-xchange-cache = %{version}
 Obsoletes:     open-xchange-cache <= %{version}
 Provides:      open-xchange-calendar = %{version}
