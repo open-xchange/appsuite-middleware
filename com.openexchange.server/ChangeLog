@@ -1,3 +1,7 @@
+* 2012-06-20 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 21895: Updating Appointments as organizer does not necessarily add the organizer as participant.
+
 * 2012-06-19 - thorben.betten@open-xchange.com
 
  - Fix for bug 22321: Invalidate caches on changes global address book permissions
