@@ -2,6 +2,7 @@
 package com.openexchange.ajax.contact;
 
 import java.util.Date;
+import org.json.JSONObject;
 import com.openexchange.ajax.contact.action.GetRequest;
 import com.openexchange.ajax.contact.action.GetResponse;
 import com.openexchange.groupware.container.Contact;
@@ -40,9 +41,10 @@ public class UpdateTest extends AbstractContactTest {
         contactEntry.setObjectID(contactId);
 
         final int objectId = createContactWithDistributionList("testUpdateWithDistributionList", contactEntry);
-
-        final GetRequest getRequest = new GetRequest(contactFolderId, objectId, getClient().getValues().getTimeZone());
-        final Date lastModified = client.execute(getRequest).getResponse().getTimestamp();
+        
+        GetRequest getRequest = new GetRequest(contactFolderId, objectId, tz, false);
+        GetResponse getResponse = client.execute(getRequest);
+        Date lastModified = new Date(((JSONObject) getResponse.getData()).getLong("last_modified"));
 
         final Contact contactObj = new Contact();
         contactObj.setSurName("testUpdateWithDistributionList");
@@ -69,14 +71,16 @@ public class UpdateTest extends AbstractContactTest {
         link2.setObjectID(linkId2);
 
         final int objectId = createContactWithLinks("testUpdateWithLinks", link1, link2);
-        
-        final GetRequest getRequest = new GetRequest(contactFolderId, objectId, getClient().getValues().getTimeZone());
-        final Date lastModified = client.execute(getRequest).getResponse().getTimestamp();
 
         final Contact link3 = createContactObject("link3");
         final int linkId3 = insertContact(link3);
+        
+        GetRequest getRequest = new GetRequest(contactFolderId, objectId, tz, false);
+        GetResponse getResponse = client.execute(getRequest);
+        Date lastModified = new Date(((JSONObject) getResponse.getData()).getLong("last_modified"));
 
         final Contact contactObj = new Contact();
+        
         contactObj.setSurName("testUpdateWithLinks");
         contactObj.setParentFolderID(contactFolderId);
         contactObj.setObjectID(objectId);
