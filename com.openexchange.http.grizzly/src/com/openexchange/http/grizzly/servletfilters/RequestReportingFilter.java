@@ -100,25 +100,42 @@ public class RequestReportingFilter implements Filter {
         } else {
             // register request
             RequestWatcherService requestWatcherService = serviceRegistry.getService(RequestWatcherService.class);
-            RequestRegistryEntry requestRegistryEntry = requestWatcherService.registerRequest(
-                httpServletRequest,
-                httpServletResponse,
-                Thread.currentThread());
+            // requestwatcher is enabled but service is missing, bundle not started etc ..
+            if (requestWatcherService == null) {
+                writeToErrorLog("The required RequestWatcherService isn't available. Not able to watch this request.");
+                chain.doFilter(httpServletRequest, httpServletResponse);
+            } else {
+                RequestRegistryEntry requestRegistryEntry = requestWatcherService.registerRequest(
+                    httpServletRequest,
+                    httpServletResponse,
+                    Thread.currentThread());
 
-            // proceed processing
-            chain.doFilter(request, response);
+                // proceed processing
+                chain.doFilter(request, response);
 
-            // debug duration
-            writeToDebugLog(new StringBuilder("Request took ").append(requestRegistryEntry.getAge()).append(" ms").append(" for url: ").append(
-                httpServletRequest.getRequestURL()).toString());
+                // debug duration
+                writeToDebugLog(new StringBuilder("Request took ").append(requestRegistryEntry.getAge()).append(" ms").append(" for url: ").append(
+                    httpServletRequest.getRequestURL()).toString());
 
-            // remove request from registry after processing finished
-            requestWatcherService.unregisterRequest(requestRegistryEntry);
+                // remove request from registry after processing finished
+                requestWatcherService.unregisterRequest(requestRegistryEntry);
+            }
         }
     }
 
     @Override
     public void destroy() {
+    }
+
+    /**
+     * Write a String to the error log.
+     * 
+     * @param logValue the String that should be logged
+     */
+    private static void writeToErrorLog(String logValue) {
+        if (LOG.isErrorEnabled()) {
+            LOG.error(logValue);
+        }
     }
 
     /**
