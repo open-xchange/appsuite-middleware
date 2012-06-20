@@ -78,13 +78,19 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
     protected static final Log LOG = LogFactory.getLog(RequestWatcherServiceImpl.class);
 
      //Navigable set, entries ordered by age(youngest first), weakly consistent iterator
-    ConcurrentSkipListSet<RequestRegistryEntry> requestRegistry = new ConcurrentSkipListSet<RequestRegistryEntry>();
+    private final ConcurrentSkipListSet<RequestRegistryEntry> requestRegistry;
 
-    private final RequestWatcherServiceRegistry serviceRegistry = RequestWatcherServiceRegistry.getInstance();
+    private final RequestWatcherServiceRegistry serviceRegistry;
 
-    private ScheduledTimerTask requestWatcherTask;
+    private volatile ScheduledTimerTask requestWatcherTask;
 
+    /**
+     * Initializes a new {@link RequestWatcherServiceImpl}.
+     */
     public RequestWatcherServiceImpl() {
+        super();
+        requestRegistry = new ConcurrentSkipListSet<RequestRegistryEntry>();
+        serviceRegistry = RequestWatcherServiceRegistry.getInstance();
         // Get Configuration
         final ConfigurationService configService = serviceRegistry.getService(ConfigurationService.class);
         final boolean isWatcherEnabled = configService.getBoolProperty("com.openexchange.http.requestwatcher.isEnabled", true);
@@ -93,7 +99,8 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
         if (isWatcherEnabled) {
             // Create ScheduledTimerTask to watch requests
             final TimerService timerService = serviceRegistry.getService(TimerService.class);
-            requestWatcherTask = timerService.scheduleAtFixedRate(new Runnable() {
+            final ConcurrentSkipListSet<RequestRegistryEntry> requestRegistry = this.requestRegistry;
+            final ScheduledTimerTask requestWatcherTask = timerService.scheduleAtFixedRate(new Runnable() {
 
                 /*
                  * Start at the end of the navigable Set to get the oldest request first. Then proceed to the younger requests. Stop
@@ -147,14 +154,10 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
                 1000,
                 watcherFrequency,
                 TimeUnit.MILLISECONDS);
+            this.requestWatcherTask = requestWatcherTask;
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.http.requestwatcher.osgi.RequestWatcherService#registerRequest(javax.servlet.http.HttpServletRequest,
-     * java.lang.Thread)
-     */
     @Override
     public RequestRegistryEntry registerRequest(final HttpServletRequest request, final HttpServletResponse response, final Thread thread) {
         final RequestRegistryEntry registryEntry = new RequestRegistryEntry(request, response, thread);
@@ -162,23 +165,18 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
         return registryEntry;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.http.requestwatcher.osgi.RequestWatcherService#unregisterRequest(com.openexchange.http.requestwatcher.
-     * RequestRegistryEntry)
-     */
     @Override
     public boolean unregisterRequest(final RequestRegistryEntry registryEntry) {
         return requestRegistry.remove(registryEntry);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.http.requestwatcher.osgi.services.RequestWatcherService#stopWatching()
-     */
     @Override
     public boolean stopWatching() {
-        return requestWatcherTask.cancel();
+        final ScheduledTimerTask requestWatcherTask = this.requestWatcherTask;
+        if (null != requestWatcherTask) {
+            return requestWatcherTask.cancel();
+        }
+        return true;
     }
 
 }
