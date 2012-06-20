@@ -2322,6 +2322,11 @@ msgstr ""
 msgid "The maximum number of HTTP sessions (%1$n) is exceeded."
 msgstr ""
 
+#. * Error while trying to interrupt Request processing
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.requestwatcher/src/com/openexchange/http/requestwatcher/RequestWatcherExceptionMessage.java:62
+msgid "Error while trying to interrupt Request processing"
+msgstr ""
+
 #. Messages //
 #. The first argument will contain the token found, the second the filename of the file we were trying to parse, the third contains the
 #. line number, the fourth a list of tokens expected at this stage.

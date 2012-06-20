@@ -490,7 +490,6 @@ setup()
     echo setting up open-xchange configuration ${CONFDIR}
 
     # this formular and parameters are from Holger
-    NSIZE=$(( ${SERVER_MEMORY} / 2 ))
     SERVEROPTS="-Xmx${SERVER_MEMORY}m -XX:+UseConcMarkSweepGC -XX:MaxPermSize=128M -Dsun.net.inetaddr.ttl=3600 -Dnetworkaddress.cache.ttl=3600 -Dnetworkaddress.cache.negative.ttl=10"
 
     v_setprop JAVA_XTRAOPTS "\"$SERVEROPTS\"" ${CONFDIR}/ox-scriptconf.sh
@@ -561,7 +560,6 @@ setup()
 
     v_setprop SERVER_NAME $SERVER_NAME ${CONFDIR}/AdminDaemon.properties
 
-    NSIZE=$(( ${CLT_MEMORY} / 2 ))
     CLTOPTS="-Xmx${CLT_MEMORY}m -XX:+UseConcMarkSweepGC -Djava.net.preferIPv4Stack=true"
     v_setprop JAVA_OXCMD_OPTS "\"$CLTOPTS\"" ${CONFDIR}/ox-scriptconf.sh
 
