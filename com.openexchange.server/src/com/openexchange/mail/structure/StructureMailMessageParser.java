@@ -83,10 +83,10 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
-import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.TNEFBodyPart;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.dataobjects.MIMEMultipartMailPart;
@@ -325,8 +325,8 @@ public final class StructureMailMessageParser {
         if (isText(lcct)) {
             if (isInline) {
                 final String content = readContent(mailPart, contentType);
-                final UUEncodedMultiPart uuencodedMP = parseUUEncodedParts ? new UUEncodedMultiPart(content) : null;
-                if (parseUUEncodedParts && uuencodedMP.isUUEncoded()) {
+                final UUEncodedMultiPart uuencodedMP;
+                if (parseUUEncodedParts && (uuencodedMP = new UUEncodedMultiPart(content)).isUUEncoded()) {
                     /*
                      * UUEncoded content detected. Handle normal text.
                      */
