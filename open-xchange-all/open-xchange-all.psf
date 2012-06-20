@@ -6,6 +6,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-xerces-sun"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-xerces-ibm"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-core"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-ajp"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-authentication-database"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-authentication-ldap"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-authentication-ucs"/>
