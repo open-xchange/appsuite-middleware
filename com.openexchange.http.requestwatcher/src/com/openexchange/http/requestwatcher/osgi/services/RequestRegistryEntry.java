@@ -89,8 +89,7 @@ public class RequestRegistryEntry implements Comparable<RequestRegistryEntry> {
      * @return the age of the entry in milliseconds
      */
     public long getAge() {
-        final long currentTime = System.currentTimeMillis();
-        return currentTime - birthTime;
+        return System.currentTimeMillis() - birthTime;
     }
 
     /**
