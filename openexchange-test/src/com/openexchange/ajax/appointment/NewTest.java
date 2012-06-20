@@ -59,6 +59,7 @@ import com.openexchange.ajax.FolderTest;
 import com.openexchange.ajax.ResourceTest;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.group.GroupTest;
+import com.openexchange.ajax.resource.ResourceTools;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Contact;
@@ -689,8 +690,8 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
-
-        final int resourceParticipantId = GroupTest.searchGroup(getWebConversation(), groupParticipant, PROTOCOL, getHostName(), getSessionId())[0].getIdentifier();
+        
+        final int resourceParticipantId = ResourceTools.getSomeResource(getClient());
 
         final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[2];
         participants[0] = new UserParticipant(userId);
@@ -700,13 +701,13 @@ public class NewTest extends AppointmentTest {
 
         final int objectId1 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 
+        appointmentObj.setIgnoreConflicts(false);
         try {
-            appointmentObj.setIgnoreConflicts(false);
             final int objectId2 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
             deleteAppointment(getWebConversation(), objectId2, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), true);
             assertEquals("conflict expected here object id should be 0", 0, objectId2);
         } catch (final OXException exc) {
-            assertTrue(true);
+            // Exception is expected
         }
 
         appointmentObj.setIgnoreConflicts(true);
