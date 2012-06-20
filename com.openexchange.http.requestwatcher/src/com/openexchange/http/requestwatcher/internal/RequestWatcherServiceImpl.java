@@ -75,6 +75,7 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
 
     private static final Log LOG = LogFactory.getLog(RequestWatcherServiceImpl.class);
 
+     //Navigable set, entries ordered by age(youngest first), weakly consistent iterator
     ConcurrentSkipListSet<RequestRegistryEntry> requestRegistry = new ConcurrentSkipListSet<RequestRegistryEntry>();
 
     private final RequestWatcherServiceRegistry serviceRegistry = RequestWatcherServiceRegistry.getInstance();
@@ -82,7 +83,7 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
     private ScheduledTimerTask requestWatcherTask;
 
     public RequestWatcherServiceImpl() {
-        // Get COnfiguration
+        // Get Configuration
         ConfigurationService configService = serviceRegistry.getService(ConfigurationService.class);
         boolean isWatcherEnabled = configService.getBoolProperty("com.openexchange.http.requestwatcher.isEnabled", true);
         int watcherFrequency = configService.getIntProperty("com.openexchange.http.requestwatcher.frequency", 30000);
