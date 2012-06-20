@@ -15,6 +15,6 @@ Import-Package: com.openexchange.config,
  com.openexchange.timer,
  javax.servlet,
  javax.servlet.http,
- org.apache.commons.logging",
+ org.apache.commons.logging,
  org.osgi.framework
 Export-Package: com.openexchange.http.requestwatcher.osgi.services
