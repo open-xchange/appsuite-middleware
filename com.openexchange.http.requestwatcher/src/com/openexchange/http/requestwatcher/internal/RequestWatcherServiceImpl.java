@@ -51,7 +51,6 @@ package com.openexchange.http.requestwatcher.internal;
 
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.TimerTask;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.TimeUnit;
 import javax.servlet.http.HttpServletRequest;
@@ -73,25 +72,35 @@ import com.openexchange.timer.TimerService;
  */
 public class RequestWatcherServiceImpl implements RequestWatcherService {
 
-    private static final Log LOG = LogFactory.getLog(RequestWatcherServiceImpl.class);
+    /**
+     * The logger.
+     */
+    protected static final Log LOG = LogFactory.getLog(RequestWatcherServiceImpl.class);
 
      //Navigable set, entries ordered by age(youngest first), weakly consistent iterator
-    ConcurrentSkipListSet<RequestRegistryEntry> requestRegistry = new ConcurrentSkipListSet<RequestRegistryEntry>();
+    private final ConcurrentSkipListSet<RequestRegistryEntry> requestRegistry;
 
-    private final RequestWatcherServiceRegistry serviceRegistry = RequestWatcherServiceRegistry.getInstance();
+    private final RequestWatcherServiceRegistry serviceRegistry;
 
-    private ScheduledTimerTask requestWatcherTask;
+    private volatile ScheduledTimerTask requestWatcherTask;
 
+    /**
+     * Initializes a new {@link RequestWatcherServiceImpl}.
+     */
     public RequestWatcherServiceImpl() {
+        super();
+        requestRegistry = new ConcurrentSkipListSet<RequestRegistryEntry>();
+        serviceRegistry = RequestWatcherServiceRegistry.getInstance();
         // Get Configuration
-        ConfigurationService configService = serviceRegistry.getService(ConfigurationService.class);
-        boolean isWatcherEnabled = configService.getBoolProperty("com.openexchange.http.requestwatcher.isEnabled", true);
-        int watcherFrequency = configService.getIntProperty("com.openexchange.http.requestwatcher.frequency", 30000);
+        final ConfigurationService configService = serviceRegistry.getService(ConfigurationService.class);
+        final boolean isWatcherEnabled = configService.getBoolProperty("com.openexchange.http.requestwatcher.isEnabled", true);
+        final int watcherFrequency = configService.getIntProperty("com.openexchange.http.requestwatcher.frequency", 30000);
         final int requestMaxAge = configService.getIntProperty("com.openexchange.http.requestwatcher.maxRequestAge", 60000);
         if (isWatcherEnabled) {
             // Create ScheduledTimerTask to watch requests
-            TimerService timerService = serviceRegistry.getService(TimerService.class);
-            requestWatcherTask = timerService.scheduleAtFixedRate(new TimerTask() {
+            final TimerService timerService = serviceRegistry.getService(TimerService.class);
+            final ConcurrentSkipListSet<RequestRegistryEntry> requestRegistry = this.requestRegistry;
+            final ScheduledTimerTask requestWatcherTask = timerService.scheduleAtFixedRate(new Runnable() {
 
                 /*
                  * Start at the end of the navigable Set to get the oldest request first. Then proceed to the younger requests. Stop
@@ -99,27 +108,30 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
                  */
                 @Override
                 public void run() {
-                    Iterator<RequestRegistryEntry> descendingEntryIterator = requestRegistry.descendingIterator();
+                    final boolean debugEnabled = LOG.isDebugEnabled();
+                    final Iterator<RequestRegistryEntry> descendingEntryIterator = requestRegistry.descendingIterator();
+                    final StringBuilder sb = new StringBuilder(256);
                     boolean stillOldRequestsLeft = true;
-                    while (descendingEntryIterator.hasNext() && stillOldRequestsLeft) {
-                        StringBuilder sb = new StringBuilder();
-                        if (LOG.isDebugEnabled()) {
-                            for (RequestRegistryEntry entry : requestRegistry) {
+                    while (stillOldRequestsLeft && descendingEntryIterator.hasNext()) {
+                        sb.setLength(0);
+                        if (debugEnabled) {
+                            for (final RequestRegistryEntry entry : requestRegistry) {
                                 sb.append("RegisteredThreads:\n\tage: ").append(entry.getAge()).append(" ms").append(", thread: ").append(
                                     entry.getThreadInfo());
                             }
-                            String entries = sb.toString();
+                            final String entries = sb.toString();
                             if (!entries.isEmpty()) {
                                 LOG.debug(sb);
                             }
                         }
-                        RequestRegistryEntry requestRegistryEntry = descendingEntryIterator.next();
+                        final RequestRegistryEntry requestRegistryEntry = descendingEntryIterator.next();
                         if (requestRegistryEntry.getAge() > requestMaxAge) {
-                            logRequestRegistryEntry(requestRegistryEntry);
+                            sb.setLength(0);
+                            logRequestRegistryEntry(requestRegistryEntry, sb);
                             try {
                                 requestRegistry.remove(requestRegistryEntry);
                                 requestRegistryEntry.stopProcessing();
-                            } catch (IOException e) {
+                            } catch (final IOException e) {
                                 LOG.error(RequestWatcherExceptionMessage.ERROR_WHILE_INTERRUPTING_REQUEST_PROCESSING_MSG, e.getCause());
                             }
                         } else {
@@ -128,11 +140,11 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
                     }
                 }
 
-                private void logRequestRegistryEntry(RequestRegistryEntry entry) {
+                private void logRequestRegistryEntry(final RequestRegistryEntry entry, final StringBuilder sb) {
                     final Throwable trace = new Throwable();
                     trace.setStackTrace(entry.getStackTrace());
                     RequestWatcherServiceImpl.LOG.info(
-                        new StringBuilder("Request for url: ").append(entry.getRequestUrl()).append("\nwith parameters: ").append(
+                        sb.append("Request for url: ").append(entry.getRequestUrl()).append("\nwith parameters: ").append(
                             entry.getRequestParameters()).append("\nwith thread: ").append(entry.getThreadInfo()).append("\nwith age: ").append(
                             entry.getAge()).append(" ms").append("\nexceeds max. age of: ").append(requestMaxAge).append(" ms.").toString(),
                         trace);
@@ -142,37 +154,29 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
                 1000,
                 watcherFrequency,
                 TimeUnit.MILLISECONDS);
+            this.requestWatcherTask = requestWatcherTask;
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.http.requestwatcher.osgi.RequestWatcherService#registerRequest(javax.servlet.http.HttpServletRequest,
-     * java.lang.Thread)
-     */
     @Override
-    public RequestRegistryEntry registerRequest(HttpServletRequest request, HttpServletResponse response, Thread thread) {
-        RequestRegistryEntry registryEntry = new RequestRegistryEntry(request, response, thread);
+    public RequestRegistryEntry registerRequest(final HttpServletRequest request, final HttpServletResponse response, final Thread thread) {
+        final RequestRegistryEntry registryEntry = new RequestRegistryEntry(request, response, thread);
         requestRegistry.add(registryEntry);
         return registryEntry;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.http.requestwatcher.osgi.RequestWatcherService#unregisterRequest(com.openexchange.http.requestwatcher.
-     * RequestRegistryEntry)
-     */
     @Override
-    public boolean unregisterRequest(RequestRegistryEntry registryEntry) {
+    public boolean unregisterRequest(final RequestRegistryEntry registryEntry) {
         return requestRegistry.remove(registryEntry);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.http.requestwatcher.osgi.services.RequestWatcherService#stopWatching()
-     */
+    @Override
     public boolean stopWatching() {
-        return requestWatcherTask.cancel();
+        final ScheduledTimerTask requestWatcherTask = this.requestWatcherTask;
+        if (null != requestWatcherTask) {
+            return requestWatcherTask.cancel();
+        }
+        return true;
     }
 
 }
