@@ -41,11 +41,14 @@ public class UpdateTest extends AbstractContactTest {
 
         final int objectId = createContactWithDistributionList("testUpdateWithDistributionList", contactEntry);
 
+        final GetRequest getRequest = new GetRequest(contactFolderId, objectId, getClient().getValues().getTimeZone());
+        final Date lastModified = client.execute(getRequest).getResponse().getTimestamp();
+
         final Contact contactObj = new Contact();
         contactObj.setSurName("testUpdateWithDistributionList");
         contactObj.setParentFolderID(contactFolderId);
         contactObj.setObjectID(objectId);
-        contactObj.setLastModified(new Date());
+        contactObj.setLastModified(lastModified);
 
         final DistributionListEntryObject[] entry = new DistributionListEntryObject[2];
         entry[0] = new DistributionListEntryObject("displayname a", "a@a.de", DistributionListEntryObject.INDEPENDENT);
@@ -66,6 +69,9 @@ public class UpdateTest extends AbstractContactTest {
         link2.setObjectID(linkId2);
 
         final int objectId = createContactWithLinks("testUpdateWithLinks", link1, link2);
+        
+        final GetRequest getRequest = new GetRequest(contactFolderId, objectId, getClient().getValues().getTimeZone());
+        final Date lastModified = client.execute(getRequest).getResponse().getTimestamp();
 
         final Contact link3 = createContactObject("link3");
         final int linkId3 = insertContact(link3);
@@ -81,7 +87,7 @@ public class UpdateTest extends AbstractContactTest {
         links[0].setLinkDisplayname(link3.getDisplayName());
 
         contactObj.setLinks(links);
-        contactObj.setLastModified(new Date());
+        contactObj.setLastModified(lastModified);
         contactObj.removeParentFolderID();
 
         updateContact(contactObj, contactFolderId);
