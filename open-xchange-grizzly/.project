@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<name>open-xchange-grizzly</name>
+	<comment></comment>
+	<projects>
+		<project>com.openexchange.http.grizzly</project>
+		<project>com.openexchange.http.requestwatcher</project>
+	</projects>
+	<buildSpec>
+		<buildCommand>
+			<name>com.csc.dip.projectset.ProjectSetBuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+	</buildSpec>
+	<natures>
+		<nature>com.csc.dip.projectset.ProjectSetNature</nature>
+	</natures>
+</projectDescription>
