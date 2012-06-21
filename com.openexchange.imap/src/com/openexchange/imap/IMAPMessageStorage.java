@@ -2616,9 +2616,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
              * Fill message
              */
             final long uid;
-            final MimeMessageFiller filler = new MimeMessageFiller(session, ctx);
-            composedMail.setFiller(filler);
             try {
+                final MimeMessageFiller filler = new MimeMessageFiller(session, ctx);
+                composedMail.setFiller(filler);
                 /*
                  * Set headers
                  */
