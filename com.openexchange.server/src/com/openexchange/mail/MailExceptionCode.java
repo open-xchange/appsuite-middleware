@@ -383,7 +383,7 @@ public enum MailExceptionCode implements OXExceptionCode {
     /**
      * Draft message could not be saved
      */
-    DRAFT_FAILED_UNKNOWN(MailExceptionStrings.DRAFT_FAILED_UNKNOWN_MSG, Category.CATEGORY_ERROR, 85),
+    DRAFT_FAILED_UNKNOWN(MailExceptionStrings.DRAFT_FAILED_UNKNOWN_MSG, Category.CATEGORY_USER_INPUT, 85),
     
     ;
 

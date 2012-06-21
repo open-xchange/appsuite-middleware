@@ -2105,7 +2105,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     @Override
     public long[] appendMessagesLong(final String destFullName, final MailMessage[] mailMessages) throws OXException {
-        if (null == mailMessages || mailMessages.length == 0) {
+        if (null == mailMessages) {
+            return new long[0];
+        }
+        final int length = mailMessages.length;
+        if (length == 0) {
             return new long[0];
         }
         Message[] msgs = null;
@@ -2130,17 +2134,18 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
             imapFolderStorage.removeFromCache(destFullName);
             /*
-             * Convert messages to JavaMail message objects
-             */
-            msgs =
-                MimeMessageConverter.convertMailMessages(
-                    mailMessages,
-                    MimeMessageConverter.BEHAVIOR_CLONE | MimeMessageConverter.BEHAVIOR_STREAM2FILE);
-            /*
              * Drop special "x-original-headers" header
              */
-            for (final Message message : msgs) {
-                message.removeHeader("x-original-headers");
+            for (final MailMessage mail : mailMessages) {
+                mail.removeHeader("x-original-headers");
+            }
+            /*
+             * Convert messages to JavaMail message objects
+             */
+            msgs = new Message[length];
+            msgs[0] = MimeMessageConverter.convertMailMessage(mailMessages[0], MimeMessageConverter.BEHAVIOR_CLONE);
+            for (int i = 1; i < length; i++) {
+                msgs[i] = MimeMessageConverter.convertMailMessage(mailMessages[i], MimeMessageConverter.BEHAVIOR_CLONE | MimeMessageConverter.BEHAVIOR_STREAM2FILE);
             }
             /*
              * Check if destination folder supports user flags
