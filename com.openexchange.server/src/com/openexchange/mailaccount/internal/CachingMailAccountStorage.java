@@ -65,6 +65,8 @@ import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.caching.dynamic.OXObjectFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.cache.memory.FolderMap;
+import com.openexchange.folderstorage.cache.memory.FolderMapManagement;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
@@ -119,6 +121,7 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
             cache.remove(newCacheKey(cacheService, id, user, cid));
             cache.invalidateGroup(Integer.toString(cid));
         }
+        FolderMapManagement.getInstance().dropFor(user, cid);
     }
 
     @Override
