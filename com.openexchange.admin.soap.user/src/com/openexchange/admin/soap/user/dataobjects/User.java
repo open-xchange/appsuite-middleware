@@ -3,6 +3,8 @@ package com.openexchange.admin.soap.user.dataobjects;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -2276,6 +2278,28 @@ public class User {
         this.smtpServer = value;
     }
 
+    private static final Pattern URL_PATTERN = Pattern.compile("^(.*?://)?(.*?)(:(.*?))?$");
+
+    private String getSmtpServer0() {
+        if (this.smtpServer != null) {
+            final Matcher matcher = URL_PATTERN.matcher(smtpServerString);
+            if (matcher.matches() && null != matcher.group(2)) {
+                return matcher.group(2);
+            }
+        }
+        return null;
+    }
+
+    private String getSmtpSchema0() {
+        if (this.smtpServer != null) {
+            final Matcher matcher = URL_PATTERN.matcher(smtpServerString);
+            if (matcher.matches() && null != matcher.group(1)) {
+                return matcher.group(1);
+            }
+        }
+        return "smtp://";
+    }
+
     /**
      * Ruft den Wert der smtpServerString-Eigenschaft ab.
      * 
@@ -2285,6 +2309,23 @@ public class User {
      *     
      */
     public String getSmtpServerString() {
+        if (smtpServerString == null) {
+            return null;
+        }
+        int port = 25;
+        final Matcher matcher = URL_PATTERN.matcher(smtpServerString);
+        if (matcher.matches() && null != matcher.group(4)) {
+            try {
+                port = Integer.parseInt(matcher.group(4));
+            } catch (final NumberFormatException e) {
+                port = 25;
+            }
+        }
+        if (port == 143) {
+            smtpServerString = getSmtpSchema0() + getSmtpServer0() + ':' + "25";
+        } else if (port == 993) {
+            smtpServerString = getSmtpSchema0() + getSmtpServer0() + ':' + "465";
+        }
         return smtpServerString;
     }
 
