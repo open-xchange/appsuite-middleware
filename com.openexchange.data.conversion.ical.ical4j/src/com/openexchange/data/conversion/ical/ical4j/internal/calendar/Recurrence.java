@@ -230,7 +230,7 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
             addDayForUntil(until);
             retval = new Recur(frequency, until);
         } else {
-            retval = new Recur(frequency, EmitterTools.toDate(calendar.getUntil()));
+            retval = new Recur(frequency, null);
         }
         return retval;
     }
