@@ -280,7 +280,7 @@ public final class CSSMatcher {
          */
         final String css = cssBuilder.toString();
         if (css.indexOf('{') < 0) {
-            return checkCSS(cssBuilder, styleMap, true);
+            return checkCSSElements(cssBuilder, styleMap, true);
         }
         final StringBuilder cssElemsBuffer = new StringBuilder(css.length());
         final Matcher m = PATTERN_STYLE_BLOCK.matcher(css);
@@ -405,7 +405,7 @@ public final class CSSMatcher {
          */
         final String css = cssBuilder.toString();
         if (css.indexOf('{') < 0) {
-            return checkCSS(cssBuilder, styleMap, true);
+            return checkCSSElements(cssBuilder, styleMap, removeIfAbsent);
         }
         final StringBuilder cssElemsBuffer = new StringBuilder(css.length());
         final Matcher m = PATTERN_STYLE_BLOCK.matcher(css);
