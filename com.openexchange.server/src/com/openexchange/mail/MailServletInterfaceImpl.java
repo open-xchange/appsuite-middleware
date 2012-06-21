@@ -2024,7 +2024,11 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
         initConnection(accountId);
         final String draftFullname = mailAccess.getFolderStorage().getDraftsFolder();
-        final String retval = mailAccess.getMessageStorage().saveDraft(draftFullname, draftMail).getMailPath().toString();
+        final MailMessage draftMessage = mailAccess.getMessageStorage().saveDraft(draftFullname, draftMail);
+        if (null == draftMessage) {
+            return null;
+        }
+        final String retval = draftMessage.getMailPath().toString();
         postEvent(accountId, draftFullname, true);
         return retval;
     }
