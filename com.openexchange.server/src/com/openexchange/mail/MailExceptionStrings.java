@@ -518,4 +518,7 @@ public final class MailExceptionStrings implements LocalizableStrings {
      */
     public final static String USED_PUBLISHING_FEATURE_MSG = "The attachments to this mail exceeded the size limit for attachments. Instead of sending the attachment in the email, the attachment was published and the link added to your email. Whoever receives the email can then download the attachment.";
 
+    // Draft message could not be saved
+    public static final String DRAFT_FAILED_UNKNOWN_MSG = "Draft message could not be saved";
+
 }
