@@ -51,7 +51,6 @@ package com.openexchange.mail.json.actions;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
@@ -91,7 +90,7 @@ public final class AutosaveAction extends AbstractMailAction {
             final ServerSession session = req.getSession();
             final MailServletInterface mailInterface = getMailInterface(req);
             String msgIdentifier = null;
-            List<OXException> warnings = new ArrayList<OXException>();
+            final List<OXException> warnings = new ArrayList<OXException>();
             {
                 final JSONObject jsonMailObj = (JSONObject) req.getRequest().getData();
                 /*
@@ -134,12 +133,12 @@ public final class AutosaveAction extends AbstractMailAction {
                 }
             }
             if (msgIdentifier == null) {
-                throw MailExceptionCode.SEND_FAILED_UNKNOWN.create();
+                throw MailExceptionCode.DRAFT_FAILED_UNKNOWN.create();
             }
             /*
              * Fill JSON response object
              */
-            AJAXRequestResult result = new AJAXRequestResult(msgIdentifier, "string");
+            final AJAXRequestResult result = new AJAXRequestResult(msgIdentifier, "string");
             result.addWarnings(warnings);
             return result;
         } catch (final RuntimeException e) {
