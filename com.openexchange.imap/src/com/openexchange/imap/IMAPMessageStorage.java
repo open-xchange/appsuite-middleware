@@ -709,6 +709,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     @Override
     public MailMessage getMessageLong(final String fullName, final long msgUID, final boolean markSeen) throws OXException {
+        if (msgUID < 0) {
+            return null;
+        }
         try {
             final int desiredMode = markSeen ? READ_WRITE : READ_ONLY;
             imapFolder = setAndOpenFolder(imapFolder, fullName, desiredMode);
