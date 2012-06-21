@@ -10,7 +10,7 @@
     <property name="prefix" value="/opt/open-xchange"/>
 
     <target name="installConf">
-        <copy todir="${destDir}/${prefix}/etc/groupware" overwrite="true">
+        <copy todir="${destDir}/${prefix}/etc" overwrite="true">
             <fileset dir="conf" includes="**"/>
         </copy>
     </target>
