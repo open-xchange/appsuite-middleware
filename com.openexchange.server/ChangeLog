@@ -1,3 +1,7 @@
+* 2012-06-21 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22224: Fixed setting look-up marker in appended message
+
 * 2012-06-20 - thorben.betten@open-xchange.com
 
  - Fix for bug 22336: Fixed possible StackOverflowError on non-css content sanitizing
