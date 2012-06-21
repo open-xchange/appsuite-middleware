@@ -2,6 +2,7 @@
 
  - Fix for bug 22227: Fixed setting look-up marker in appended message
  - Fix for bug 22166: Check SMTP port on SOAP-to-Object conversion
+ - Fix for bug 21389: Fixed sorting in drafts folder
 
 * 2012-06-20 - thorben.betten@open-xchange.com
 

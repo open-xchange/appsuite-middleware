@@ -847,7 +847,22 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             // Add desired fields
             usedFields.addAll(mailFields);
             // Add sort field
-            usedFields.add(null == sortField ? MailField.RECEIVED_DATE : MailField.toField(sortField.getListField()));
+            final MailSortField effectiveSortField;
+            if (null == sortField) {
+                effectiveSortField = MailSortField.RECEIVED_DATE;
+            } else {
+                if (MailSortField.SENT_DATE.equals(sortField)) {
+                    final String draftsFullname = imapAccess.getFolderStorage().getDraftsFolder();
+                    if (fullName.equals(draftsFullname)) {
+                        effectiveSortField = MailSortField.RECEIVED_DATE;
+                    } else {
+                        effectiveSortField = sortField;
+                    }
+                } else {
+                    effectiveSortField = sortField;
+                }
+            }
+            usedFields.add(null == effectiveSortField ? MailField.RECEIVED_DATE : MailField.toField(effectiveSortField.getListField()));
             /*
              * Shall a search be performed?
              */
@@ -861,7 +876,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  * Check if an all-fetch can be performed to only obtain UIDs of all folder's messages: FETCH 1: (UID)
                  */
                 final MailFields mfs = new MailFields(mailFields);
-                if (((null == sortField) || MailSortField.RECEIVED_DATE.equals(sortField)) && onlyLowCostFields(mfs)) {
+                if (((null == effectiveSortField) || MailSortField.RECEIVED_DATE.equals(effectiveSortField)) && onlyLowCostFields(mfs)) {
                     final MailMessage[] mailMessages = performLowCostFetch(fullName, mfs, order, indexRange);
                     imapFolderStorage.updateCacheIfDiffer(fullName, mailMessages.length);
                     return mailMessages;
@@ -880,7 +895,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 }
             }
             MailMessage[] mails = null;
-            Message[] msgs = IMAPSort.sortMessages(imapFolder, usedFields, filter, sortField, order, getLocale(), imapConfig);
+            Message[] msgs = IMAPSort.sortMessages(imapFolder, usedFields, filter, effectiveSortField, order, getLocale(), imapConfig);
             if (null != msgs) {
                 /*
                  * Sort was performed on IMAP server
@@ -966,7 +981,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  * Perform sort on temporary list
                  */
                 final List<MailMessage> msgList = Arrays.asList(mails);
-                Collections.sort(msgList, new MailMessageComparator(sortField, order == OrderDirection.DESC, getLocale()));
+                Collections.sort(msgList, new MailMessageComparator(effectiveSortField, order == OrderDirection.DESC, getLocale()));
                 mails = msgList.toArray(mails);
                 /*
                  * Get proper sub-array if an index range is specified
