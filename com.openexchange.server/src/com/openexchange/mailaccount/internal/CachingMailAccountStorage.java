@@ -65,9 +65,12 @@ import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.caching.dynamic.OXObjectFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.cache.memory.FolderMap;
 import com.openexchange.folderstorage.cache.memory.FolderMapManagement;
+import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
@@ -121,7 +124,11 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
             cache.remove(newCacheKey(cacheService, id, user, cid));
             cache.invalidateGroup(Integer.toString(cid));
         }
-        FolderMapManagement.getInstance().dropFor(user, cid);
+        final FolderMap folderMap = FolderMapManagement.getInstance().optFor(user, cid);
+        if (null != folderMap) {
+            folderMap.remove(MailFolder.DEFAULT_FOLDER_ID + id, FolderStorage.REAL_TREE_ID);
+            folderMap.remove(MailFolder.DEFAULT_FOLDER_ID + id, OutlookFolderStorage.OUTLOOK_TREE_ID);
+        }
     }
 
     @Override
