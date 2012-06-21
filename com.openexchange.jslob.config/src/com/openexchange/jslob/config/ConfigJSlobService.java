@@ -296,6 +296,10 @@ public final class ConfigJSlobService implements JSlobService {
                             throw new OXException(e);
                         }
                     }
+                    /*
+                     * We found a matching value in config cascade
+                     */
+                    return;
                 }
             }
             /*
@@ -415,38 +419,29 @@ public final class ConfigJSlobService implements JSlobService {
             List<JSONPathElement> path = attributedProperty.path;
             Object value = asJSObject(view.get(attributedProperty.propertyName, String.class));
             addValueByPath(path, value, jsonJSlob);
-            // Add the metadata as well
-            final StringBuilder sb;
-            {
-                final String preferencePath = attributedProperty.preferencePath;
-                sb = new StringBuilder(preferencePath.substring(0, preferencePath.lastIndexOf('/')));
-            }
-            final int resetLength = sb.length();
+            // Add the metadata as well as a separate JSON object
+            final JSONObject jMetaData = new JSONObject();
             final ComposedConfigProperty<String> preferenceItem = attributedProperty.property;
             final List<String> metadataNames = preferenceItem.getMetadataNames();
             if (null != metadataNames && !metadataNames.isEmpty()) {
                 for (final String metadataName : metadataNames) {
-                    // Parse metadata path
-                    sb.setLength(resetLength);
-                    sb.append('/').append(metadataName).append('/').append(METADATA_PREFIX);
-                    path = JSONPathElement.parsePath(sb.toString());
                     // Metadata value
                     final ComposedConfigProperty<String> prop = view.property(attributedProperty.propertyName, String.class);
                     value = asJSObject(prop.get(metadataName));
-                    // Add to JSlob
-                    addValueByPath(path, value, jsonJSlob);
+                    jMetaData.put(metadataName, value);
                 }
             }
             // Lastly, let's add configurability.
-            sb.setLength(resetLength);
-            sb.append('/').append("configurable").append('/').append(METADATA_PREFIX);
-            path = JSONPathElement.parsePath(sb.toString());
             final String finalScope = preferenceItem.get("final");
             final String isProtected = preferenceItem.get("protected");
             final boolean writable =
                 (finalScope == null || finalScope.equals("user")) && (isProtected == null || !preferenceItem.get("protected", boolean.class).booleanValue());
             value = Boolean.valueOf(writable);
-            addValueByPath(path, value, jsonJSlob);
+            jMetaData.put("configurable", value);
+            // Insert meta data
+            final String preferencePath = attributedProperty.preferencePath;
+            path = JSONPathElement.parsePath(preferencePath.substring(0, preferencePath.lastIndexOf('/')) + '/' + METADATA_PREFIX);
+            addValueByPath(path, jMetaData, jsonJSlob);
         } catch (final JSONException e) {
             throw JSlobExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }

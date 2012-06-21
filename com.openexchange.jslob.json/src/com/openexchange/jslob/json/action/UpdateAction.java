@@ -144,7 +144,7 @@ public final class UpdateAction extends JSlobAction {
                  * Update by JSON data
                  */
                 final JSONObject jsonData = (JSONObject) data;
-                if (jsonData.hasAndNotNull("path")) {
+                if (null != jsonData && jsonData.hasAndNotNull("path")) {
                     final JSONUpdate jsonUpdate = new JSONUpdate(jsonData.getString("path"), jsonData.get("value"));
                     /*
                      * Update...

@@ -91,7 +91,9 @@ public final class JSONUtil {
         }
         // Iterate others
         for (final JSONObject obj : jObjects) {
-            mergeInto(merged, obj);
+            if (null != obj) {
+                mergeInto(merged, obj);
+            }
         }
         return merged;
     }
