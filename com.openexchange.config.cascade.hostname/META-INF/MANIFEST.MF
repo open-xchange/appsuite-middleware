@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Hostname Service based on Config Cascade
 Bundle-SymbolicName: com.openexchange.config.cascade.hostname
-Bundle-Version: 6.20.5.0
+Bundle-Version: 6.20.6.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Import-Package: com.openexchange.config.cascade,
