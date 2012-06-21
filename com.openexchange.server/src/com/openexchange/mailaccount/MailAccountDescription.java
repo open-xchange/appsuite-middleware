@@ -381,7 +381,7 @@ public final class MailAccountDescription implements Serializable {
      */
     public void setTransportPort(final int transportPort) {
         transportUrl = null;
-        this.transportPort = transportPort;
+        this.transportPort = checkTransportPort(transportPort);
     }
 
     /**
@@ -506,6 +506,11 @@ public final class MailAccountDescription implements Serializable {
         }
     }
 
+    /**
+     * Sets transport server URI
+     * 
+     * @param transportServer The transport server URI
+     */
     public void setTransportServer(final URI transportServer) {
         if (null == transportServer) {
             // Parse like old parser to prevent problems.
@@ -522,6 +527,16 @@ public final class MailAccountDescription implements Serializable {
             setTransportServer(URITools.getHost(transportServer));
             setTransportPort(transportServer.getPort());
         }
+    }
+
+    private static int checkTransportPort(final int port) {
+        if (URIDefaults.IMAP.getPort() == port) {
+            return URIDefaults.SMTP.getPort();
+        }
+        if (URIDefaults.IMAP.getSSLPort() == port) {
+            return URIDefaults.SMTP.getSSLPort();
+        }
+        return port;
     }
 
     /**
