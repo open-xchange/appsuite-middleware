@@ -1,3 +1,14 @@
+* 2012-06-21 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 22337: Fixed Strange recipient and sender of counter mails.
+
+* 2012-06-21 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22227: Fixed setting look-up marker in appended message
+ - Fix for bug 22166: Check SMTP port on SOAP-to-Object conversion
+ - Fix for bug 21389: Fixed sorting in drafts folder
+ - Fix for bug 22056: Invalidate folder cache on mail account update
+
 * 2012-06-20 - thorben.betten@open-xchange.com
 
  - Fix for bug 22336: Fixed possible StackOverflowError on non-css content sanitizing

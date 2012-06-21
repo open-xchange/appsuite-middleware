@@ -304,6 +304,16 @@ public class NotificationMailGenerator implements ITipMailGenerator {
     protected NotificationMail noITIP(final NotificationParticipant recipient, final State.Type type) throws OXException {
         final NotificationMail mail = new NotificationMail();
         mail.setRecipient(recipient);
+        mail.setSender(recipient.isExternal() ? organizer : actor);
+        mail.setStateType(type);
+        initMail(mail);
+
+        return mail;
+    }
+
+    protected NotificationMail counterNoITIP(final NotificationParticipant recipient, final State.Type type) throws OXException {
+        final NotificationMail mail = new NotificationMail();
+        mail.setRecipient(recipient);
         mail.setSender(actor);
         mail.setStateType(type);
         initMail(mail);
@@ -921,7 +931,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
             	if (isCounterableOnly()) {
                     return counter(counter(participant), ITipRole.ORGANIZER);
             	} else {
-                    return counter(noITIP(participant, Type.MODIFIED), ITipRole.ORGANIZER);
+                    return counter(counterNoITIP(participant, Type.MODIFIED), ITipRole.ORGANIZER);
             	}
             }
             if (!participant.isExternal()) {

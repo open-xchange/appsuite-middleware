@@ -297,6 +297,17 @@ public final class FolderMap {
      * 
      * @param folderId the folder id
      * @param treeId the tree id
+     */
+    public void remove(final String folderId, final String treeId) {
+        map.remove(keyOf(folderId, treeId));
+    }
+
+    /**
+     * Removes the folder.
+     * 
+     * @param folderId the folder id
+     * @param treeId the tree id
+     * @param session The session
      * @return The folder
      */
     public Folder remove(final String folderId, final String treeId, final Session session) {

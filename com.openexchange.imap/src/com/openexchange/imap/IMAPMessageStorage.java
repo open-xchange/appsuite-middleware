@@ -847,7 +847,22 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             // Add desired fields
             usedFields.addAll(mailFields);
             // Add sort field
-            usedFields.add(null == sortField ? MailField.RECEIVED_DATE : MailField.toField(sortField.getListField()));
+            final MailSortField effectiveSortField;
+            if (null == sortField) {
+                effectiveSortField = MailSortField.RECEIVED_DATE;
+            } else {
+                if (MailSortField.SENT_DATE.equals(sortField)) {
+                    final String draftsFullname = imapAccess.getFolderStorage().getDraftsFolder();
+                    if (fullName.equals(draftsFullname)) {
+                        effectiveSortField = MailSortField.RECEIVED_DATE;
+                    } else {
+                        effectiveSortField = sortField;
+                    }
+                } else {
+                    effectiveSortField = sortField;
+                }
+            }
+            usedFields.add(null == effectiveSortField ? MailField.RECEIVED_DATE : MailField.toField(effectiveSortField.getListField()));
             /*
              * Shall a search be performed?
              */
@@ -861,7 +876,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  * Check if an all-fetch can be performed to only obtain UIDs of all folder's messages: FETCH 1: (UID)
                  */
                 final MailFields mfs = new MailFields(mailFields);
-                if (((null == sortField) || MailSortField.RECEIVED_DATE.equals(sortField)) && onlyLowCostFields(mfs)) {
+                if (((null == effectiveSortField) || MailSortField.RECEIVED_DATE.equals(effectiveSortField)) && onlyLowCostFields(mfs)) {
                     final MailMessage[] mailMessages = performLowCostFetch(fullName, mfs, order, indexRange);
                     imapFolderStorage.updateCacheIfDiffer(fullName, mailMessages.length);
                     return mailMessages;
@@ -880,7 +895,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 }
             }
             MailMessage[] mails = null;
-            Message[] msgs = IMAPSort.sortMessages(imapFolder, usedFields, filter, sortField, order, getLocale(), imapConfig);
+            Message[] msgs = IMAPSort.sortMessages(imapFolder, usedFields, filter, effectiveSortField, order, getLocale(), imapConfig);
             if (null != msgs) {
                 /*
                  * Sort was performed on IMAP server
@@ -966,7 +981,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  * Perform sort on temporary list
                  */
                 final List<MailMessage> msgList = Arrays.asList(mails);
-                Collections.sort(msgList, new MailMessageComparator(sortField, order == OrderDirection.DESC, getLocale()));
+                Collections.sort(msgList, new MailMessageComparator(effectiveSortField, order == OrderDirection.DESC, getLocale()));
                 mails = msgList.toArray(mails);
                 /*
                  * Get proper sub-array if an index range is specified
@@ -2105,7 +2120,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     @Override
     public long[] appendMessagesLong(final String destFullName, final MailMessage[] mailMessages) throws OXException {
-        if (null == mailMessages || mailMessages.length == 0) {
+        if (null == mailMessages) {
+            return new long[0];
+        }
+        final int length = mailMessages.length;
+        if (length == 0) {
             return new long[0];
         }
         Message[] msgs = null;
@@ -2130,17 +2149,18 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
             imapFolderStorage.removeFromCache(destFullName);
             /*
-             * Convert messages to JavaMail message objects
-             */
-            msgs =
-                MimeMessageConverter.convertMailMessages(
-                    mailMessages,
-                    MimeMessageConverter.BEHAVIOR_CLONE | MimeMessageConverter.BEHAVIOR_STREAM2FILE);
-            /*
              * Drop special "x-original-headers" header
              */
-            for (final Message message : msgs) {
-                message.removeHeader("x-original-headers");
+            for (final MailMessage mail : mailMessages) {
+                mail.removeHeader("x-original-headers");
+            }
+            /*
+             * Convert messages to JavaMail message objects
+             */
+            msgs = new Message[length];
+            msgs[0] = MimeMessageConverter.convertMailMessage(mailMessages[0], MimeMessageConverter.BEHAVIOR_CLONE);
+            for (int i = 1; i < length; i++) {
+                msgs[i] = MimeMessageConverter.convertMailMessage(mailMessages[i], MimeMessageConverter.BEHAVIOR_CLONE | MimeMessageConverter.BEHAVIOR_STREAM2FILE);
             }
             /*
              * Check if destination folder supports user flags
