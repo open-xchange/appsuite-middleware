@@ -2002,7 +2002,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         final boolean supportsMove = move && imapConfig.asMap().containsKey("MOVE");
         final AbstractIMAPCommand<long[]> command;
         if (supportsMove) {
-            command = new CopyIMAPCommand(imapFolder, tmp, destFullName, false, fast);
+            command = new MoveIMAPCommand(imapFolder, tmp, destFullName, false, fast);
         } else {
             command = new CopyIMAPCommand(imapFolder, tmp, destFullName, false, fast);
         }
