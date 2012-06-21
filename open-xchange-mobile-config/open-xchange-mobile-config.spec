@@ -74,10 +74,10 @@ ant -lib build/lib -Dbasedir=build -Dhtdoc=%{docroot} -DdestDir=%{buildroot} -Dp
 
 %files
 %defattr(-,root,root)
-%dir /opt/open-xchange/etc/groupware/settings
-%dir /opt/open-xchange/etc/groupware/meta
-%config(noreplace) /opt/open-xchange/etc/groupware/settings/*
-%config(noreplace) /opt/open-xchange/etc/groupware/meta/*
+%dir /opt/open-xchange/etc/settings
+%dir /opt/open-xchange/etc/meta
+%config(noreplace) /opt/open-xchange/etc/settings/*
+%config(noreplace) /opt/open-xchange/etc/meta/*
 
 %changelog
 * Thu Jun 21 2012 - marcus.klein@open-xchange.com
