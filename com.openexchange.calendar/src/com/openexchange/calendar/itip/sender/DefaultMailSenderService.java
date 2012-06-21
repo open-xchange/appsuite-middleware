@@ -172,6 +172,10 @@ public class DefaultMailSenderService implements MailSenderService {
      * @param sender
      */
     private String getSenderAddress(NotificationParticipant sender, Session session) {
+        if (sender.getUser() == null || sender.getUser().getId() != session.getUserId()) {
+            return getAddress(sender);
+        }
+
         ServerSession serverSession = null;
         try {
             serverSession = ServerSessionAdapter.valueOf(session);
