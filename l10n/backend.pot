@@ -1707,10 +1707,9 @@ msgstr ""
 msgid "Missing parameter: %1$s."
 msgstr ""
 
-#. Invalid parameter: %1$s with value '%2$s'.
+#. Invalid parameter: %1$s with type '%2$s'. Expected '%3$s'.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:109
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:109
-msgid "Invalid parameter: %1$s with value '%2$s'."
+msgid "Invalid parameter: %1$s with type '%2$s'. Expected '%3$s'."
 msgstr ""
 
 #. File part is read-only: %1$s
@@ -3073,6 +3072,11 @@ msgstr ""
 #. Unknown messaging service: %1$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:103
 msgid "Unknown messaging service: %1$s."
+msgstr ""
+
+#. Invalid parameter: %1$s with value '%2$s'.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:109
+msgid "Invalid parameter: %1$s with value '%2$s'."
 msgstr ""
 
 #. Messaging part is read-only: %1$s
