@@ -47,58 +47,70 @@
  *
  */
 
-package com.openexchange.file.storage.json.osgi;
+package com.openexchange.file.storage.json.actions.files;
 
-import com.openexchange.log.LogFactory;
-import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
-import com.openexchange.file.storage.json.FileConverter;
-import com.openexchange.file.storage.json.FileMetadataParser;
-import com.openexchange.file.storage.json.actions.files.FileActionFactory;
-import com.openexchange.file.storage.json.services.Services;
-import com.openexchange.file.storage.parse.FileMetadataParserService;
-import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
-import com.openexchange.groupware.attach.AttachmentBase;
-import com.openexchange.i18n.I18nService;
-import com.openexchange.index.IndexFacadeService;
-import com.openexchange.rdiff.RdiffService;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.File;
+import com.openexchange.index.IndexDocument;
+import com.openexchange.tools.iterator.SearchIterator;
+
 
 /**
- * {@link FileStorageJSONActivator}
+ * {@link FilestorageIndexSearchIterator}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class FileStorageJSONActivator extends AJAXModuleActivator {
+public class FilestorageIndexSearchIterator implements SearchIterator<File> {
+    
+    private final List<OXException> warnings = new ArrayList<OXException>();
+    
+    private final List<IndexDocument<File>> documents;
+    
+    private final Iterator<IndexDocument<File>> iterator;    
+    
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { FileStorageServiceRegistry.class, IDBasedFileAccessFactory.class, AttachmentBase.class };
+    public FilestorageIndexSearchIterator(List<IndexDocument<File>> documents) {
+        super();
+        this.documents = documents;
+        iterator = documents.iterator();
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        try {
-            Services.setServiceLookup(this);
-            rememberTracker(new ServiceTracker<I18nService, I18nService>(context, I18nService.class.getName(), new I18nServiceCustomizer(context)));
-            trackService(RdiffService.class);
-            trackService(IndexFacadeService.class);
-            openTrackers();
-            // registerModule(AccountActionFactory.INSTANCE, "infostore");
-            registerModule(FileActionFactory.INSTANCE, "infostore");
-            registerService(FileMetadataParserService.class, FileMetadataParser.getInstance(), null);
-            registerService(ResultConverter.class, new FileConverter());
-        } catch (final Exception x) {
-            com.openexchange.log.Log.valueOf(LogFactory.getLog(FileStorageJSONActivator.class)).error(x.getMessage(), x);
-            throw x;
-        }
+    public boolean hasNext() throws OXException {
+        return iterator.hasNext();
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        super.stopBundle();
-        Services.setServiceLookup(null);
+    public File next() throws OXException {
+        IndexDocument<File> next = iterator.next();
+        return next.getObject();
+    }
+
+    @Override
+    public void close() throws OXException {
+    }
+
+    @Override
+    public int size() {
+        return documents.size();
+    }
+
+    @Override
+    public boolean hasWarnings() {
+        return !warnings.isEmpty();
+    }
+
+    @Override
+    public void addWarning(OXException warning) {
+        warnings.add(warning);        
+    }
+
+    @Override
+    public OXException[] getWarnings() {
+        return warnings.toArray(new OXException[warnings.size()]);
     }
 
 }

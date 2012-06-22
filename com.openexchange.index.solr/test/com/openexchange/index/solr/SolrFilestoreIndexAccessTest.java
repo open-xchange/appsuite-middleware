@@ -52,6 +52,8 @@ package com.openexchange.index.solr;
 import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import junit.framework.TestCase;
 import com.openexchange.file.storage.DefaultFile;
@@ -62,6 +64,7 @@ import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.SearchHandler;
 import com.openexchange.index.StandardIndexDocument;
+import com.openexchange.index.solr.filestore.SolrFilestoreConstants;
 import com.openexchange.index.solr.internal.filestore.SolrFilestoreIndexAccess;
 
 
@@ -101,11 +104,17 @@ public class SolrFilestoreIndexAccessTest extends TestCase {
         file.setVersion(26);
         file.setVersionComment("Version comment...");
         
-        indexAccess.addEnvelopeData(new StandardIndexDocument<File>(file, Type.INFOSTORE_DOCUMENT));
-        QueryParameters params = new QueryParameters.Builder(Collections.EMPTY_MAP).setHandler(SearchHandler.ALL_REQUEST).setType(Type.INFOSTORE_DOCUMENT).build();
-        IndexResult<File> query = indexAccess.query(params, null);
-        assertTrue("Wrong result size", query.getNumFound() == 1);
-        File reloaded = query.getResults().get(0).getObject();
+        Map<String, Object> parameters = new HashMap<String, Object>();
+        parameters.put(SolrFilestoreConstants.SERVICE, "http://infostoreservice.ox");
+        parameters.put(SolrFilestoreConstants.ACCOUNT, "sada689");
+        StandardIndexDocument<File> document = new StandardIndexDocument<File>(file, Type.INFOSTORE_DOCUMENT);
+        document.setProperties(parameters);
+        indexAccess.addEnvelopeData(document);
+        
+        QueryParameters query = new QueryParameters.Builder(parameters).setHandler(SearchHandler.ALL_REQUEST).setType(Type.INFOSTORE_DOCUMENT).build();
+        IndexResult<File> result = indexAccess.query(query, null);
+        assertTrue("Wrong result size", result.getNumFound() == 1);
+        File reloaded = result.getResults().get(0).getObject();
         Set<Field> differences = file.differences(reloaded);
         assertTrue("There were differences.", differences.size() == 0);
     }

@@ -47,50 +47,22 @@
  *
  */
 
-package com.openexchange.file.storage.json.services;
+package com.openexchange.index.solr.filestore;
 
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
-import com.openexchange.groupware.attach.AttachmentBase;
-import com.openexchange.index.IndexFacadeService;
-import com.openexchange.rdiff.RdiffService;
-import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link Services}
+ * {@link SolrFilestoreConstants}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class Services {
-
-    private static AtomicReference<ServiceLookup> LOOKUP_REF = new AtomicReference<ServiceLookup>();
-
-    /**
-     * Sets the service look-up instance.
-     *
-     * @param serviceLookup The service look-up instance
-     */
-    public static void setServiceLookup(final ServiceLookup serviceLookup) {
-        LOOKUP_REF.set(serviceLookup);
-    }
-
-    public static IDBasedFileAccessFactory getFileAccessFactory() {
-        final ServiceLookup lookup = LOOKUP_REF.get();
-        return null == lookup ? null : lookup.getService(IDBasedFileAccessFactory.class);
-    }
-
-    public static AttachmentBase getAttachmentBase() {
-        final ServiceLookup lookup = LOOKUP_REF.get();
-        return null == lookup ? null : lookup.getService(AttachmentBase.class);
-    }
-
-    public static RdiffService getRdiffService() {
-        final ServiceLookup lookup = LOOKUP_REF.get();
-        return null == lookup ? null : lookup.getService(RdiffService.class);
-    }
+public class SolrFilestoreConstants {
     
-    public static IndexFacadeService getIndexFacade() {
-        final ServiceLookup lookup = LOOKUP_REF.get();
-        return null == lookup ? null : lookup.getService(IndexFacadeService.class);
-    }
+    public static final String ATTACHMENT = "attachment";
+    
+    public static final String ACCOUNT = "accountId";
+
+    public static final String SERVICE = "service";
+    
+    public static final String IDS = "ids";
+
 }

@@ -49,6 +49,8 @@
 
 package com.openexchange.index.filestore;
 
+import java.util.EnumMap;
+import java.util.Map;
 import com.openexchange.index.IndexField;
 import com.openexchange.file.storage.File.Field;
 
@@ -62,6 +64,7 @@ public enum FilestoreIndexField implements IndexField {
     
     UUID(null),
     ACCOUNT(null),
+    SERVICE(null),
     FOLDER(Field.FOLDER_ID),
     ID(Field.ID),
     CREATED_BY(Field.CREATED_BY),
@@ -83,6 +86,14 @@ public enum FilestoreIndexField implements IndexField {
     MD5_SUM(Field.FILE_MD5SUM);
     
     
+    private static final Map<Field, FilestoreIndexField> mapping = new EnumMap<Field, FilestoreIndexField>(Field.class);
+    
+    static {
+        for (FilestoreIndexField field : values()) {
+            mapping.put(field.getFileField(), field);
+        }
+    }
+    
     private Field field;
     
     private FilestoreIndexField(Field field) {
@@ -91,6 +102,10 @@ public enum FilestoreIndexField implements IndexField {
     
     public Field getFileField() {
         return field;
+    }
+    
+    public static FilestoreIndexField getByFileField(Field field) {
+        return mapping.get(field);
     }
 
 }

@@ -68,7 +68,10 @@ import com.openexchange.index.IndexField;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.StandardIndexDocument;
 import com.openexchange.index.filestore.FilestoreIndexField;
+import com.openexchange.index.solr.filestore.SolrFilestoreConstants;
+import com.openexchange.index.solr.internal.Services;
 import com.openexchange.index.solr.internal.SolrResultConverter;
+import com.openexchange.textxtraction.TextXtractService;
 
 
 /**
@@ -78,7 +81,7 @@ import com.openexchange.index.solr.internal.SolrResultConverter;
  */
 public class SolrFilestoreDocumentConverter implements SolrResultConverter<File> {
     
-    public static SolrInputDocument convert(int contextId, int userId, int accountId, IndexDocument<File> indexDocument) throws OXException {
+    public static SolrInputDocument convertStatic(int contextId, int userId, IndexDocument<File> indexDocument) throws OXException {
         File file = indexDocument.getObject();
         SolrInputDocument document = new SolrInputDocument();
         FileFieldSwitcher getter = new FileFieldGet();
@@ -88,32 +91,26 @@ public class SolrFilestoreDocumentConverter implements SolrResultConverter<File>
             if (fileField != null && fileField != Field.CONTENT) {
                 Object value = fileField.doSwitch(getter, file);
                 if (value != null) {
-                    document.setField(field.getSolrName(), value);
+                    document.setField(field.solrName(), value);
                 }
             }
         }
         
         // Special fields: uuid, account, content
-        document.setField(SolrFilestoreField.UUID.getSolrName(), new FileUUID(contextId, userId, accountId, file.getFolderId(), file.getId()));
-        document.setField(SolrFilestoreField.ACCOUNT.getSolrName(), accountId);
+        Map<String, Object> properties = indexDocument.getProperties();
+        String service = (String) properties.get(SolrFilestoreConstants.SERVICE);
+        String accountId = (String) properties.get(SolrFilestoreConstants.ACCOUNT);        
+        document.setField(SolrFilestoreField.UUID.solrName(), FileUUID.newUUID(contextId, userId, indexDocument));
+        document.setField(SolrFilestoreField.SERVICE.solrName(), service);
+        document.setField(SolrFilestoreField.ACCOUNT.solrName(), accountId);
         InputStream fileIs = null;
-        if (indexDocument.getProperties().containsKey(SolrFilestoreConstants.ATTACHMENT)) {
-            fileIs = (InputStream) indexDocument.getProperties().get(SolrFilestoreConstants.ATTACHMENT);
-            document.setField(SolrFilestoreField.CONTENT.getSolrName(), fileIs);
+        if (properties.containsKey(SolrFilestoreConstants.ATTACHMENT)) {
+            fileIs = (InputStream) properties.get(SolrFilestoreConstants.ATTACHMENT);            
+            // TODO: Move to UpdateProcessor
+            TextXtractService xtractService = Services.getService(TextXtractService.class);
+            String extractedText = xtractService.extractFrom(fileIs, file.getFileMIMEType());
+            document.setField(SolrFilestoreField.CONTENT.solrName(), extractedText);
         }
-        
-//        if (fileIs != null) {
-//            // Load this file into memory
-//            try {
-//                byte[] byteArray = IOUtils.toByteArray(fileIs);
-//                ByteArrayInputStream bais = new ByteArrayInputStream(byteArray);
-//                document.setField(SolrFilestoreField.CONTENT.getSolrName(), bais);
-//            } catch (IOException e) {
-//                throw SolrIndexExceptionCodes.IO_ERROR.create(e.getMessage(), e);
-//            } finally {
-//                IOUtils.closeQuietly(fileIs);
-//            }
-//        }
         
         return document;
     }
@@ -126,7 +123,7 @@ public class SolrFilestoreDocumentConverter implements SolrResultConverter<File>
         return indexDocument;
     }
     
-    private static File convertStatic(SolrDocument document) {
+    public static File convertStatic(SolrDocument document) {
         File file = new DefaultFile();
         FileFieldSwitcher setter = new FileFieldSet();
         for (Entry<String, Object> field : document) {

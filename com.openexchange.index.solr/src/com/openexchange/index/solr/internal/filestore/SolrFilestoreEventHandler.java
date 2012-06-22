@@ -65,6 +65,7 @@ import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexDocument.Type;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.StandardIndexDocument;
+import com.openexchange.index.solr.filestore.SolrFilestoreConstants;
 import com.openexchange.index.solr.internal.Services;
 import com.openexchange.session.Session;
 
@@ -84,27 +85,27 @@ public class SolrFilestoreEventHandler implements EventHandler {
         if (FileStorageEventHelper.isInfostoreEvent(event)) {
             try {
                 Session session = FileStorageEventHelper.extractSession(event);
+                IDBasedFileAccessFactory accessFactory = Services.getService(IDBasedFileAccessFactory.class);
+                IndexFacadeService indexService = Services.getService(IndexFacadeService.class);                    
+                IDBasedFileAccess access = accessFactory.createAccess(session);
+                IndexAccess<File> indexAccess = indexService.acquireIndexAccess(Types.INFOSTORE, session);  
+                String service = FileStorageEventHelper.extractService(event);
+                String accountId = FileStorageEventHelper.extractAccountId(event);                    
+                String id = FileStorageEventHelper.extractObjectId(event);
                 if (FileStorageEventHelper.isCreateEvent(event)) {
-                    IDBasedFileAccessFactory accessFactory = Services.getService(IDBasedFileAccessFactory.class);
-                    IndexFacadeService indexService = Services.getService(IndexFacadeService.class);                    
-                    IDBasedFileAccess access = accessFactory.createAccess(session);
-                    String id = FileStorageEventHelper.extractObjectId(event);
-                    File fileMetadata = access.getFileMetadata(id, FileStorageFileAccess.CURRENT_VERSION);
-                    StandardIndexDocument<File> document = new StandardIndexDocument<File>(fileMetadata, Type.INFOSTORE_DOCUMENT);
-                    IndexAccess<File> indexAccess = indexService.acquireIndexAccess(Types.INFOSTORE, session);    
-                    if (hasAttachment(fileMetadata)) {
-                        InputStream is = access.getDocument(id, FileStorageFileAccess.CURRENT_VERSION);                                            
-                        document.addProperty(SolrFilestoreConstants.ATTACHMENT, is);
-                        indexAccess.addAttachments(document, true);
-                    } else {
-                        indexAccess.addContent(document, true);
-                    }
-                    
-                    LOG.info(FileStorageEventHelper.createDebugMessage("CreateEvent", event));
+                    indexFile(access, indexAccess, session, id, service, accountId);
                 } else if (FileStorageEventHelper.isUpdateEvent(event)) {
-                    LOG.info(FileStorageEventHelper.createDebugMessage("UpdateEvent", event));
+                    // Just reindex
+                    indexFile(access, indexAccess, session, id, service, accountId);
                 } else if (FileStorageEventHelper.isDeleteEvent(event)) {
-                    LOG.info(FileStorageEventHelper.createDebugMessage("DeleteEvent", event));
+                    String folderId = FileStorageEventHelper.extractFolderId(event);
+                    FileUUID uuid = FileUUID.newUUID(session.getContextId(), session.getUserId(), service, accountId, folderId, id);
+                    indexAccess.deleteById(uuid.toString());     
+                    if (access.exists(id, FileStorageFileAccess.CURRENT_VERSION)) {
+                        // One or more versions have been deleted. 
+                        // We have to reindex the current one.                                           
+                        indexFile(access, indexAccess, session, id, service, accountId);
+                    }
                 }
             } catch (OXException e) {
                 LOG.error(e.getMessage(), e);
@@ -112,8 +113,22 @@ public class SolrFilestoreEventHandler implements EventHandler {
         }        
     }
     
-    private static boolean hasAttachment(File file) {
-        return file.getFileName() == null && file.getFileSize() == 0;
+    private void indexFile(IDBasedFileAccess access, IndexAccess<File> indexAccess, Session session, String id, String service, String accountId) throws OXException {        
+        File fileMetadata = access.getFileMetadata(id, FileStorageFileAccess.CURRENT_VERSION);
+        StandardIndexDocument<File> document = new StandardIndexDocument<File>(fileMetadata, Type.INFOSTORE_DOCUMENT);
+        document.addProperty(SolrFilestoreConstants.SERVICE, service);
+        document.addProperty(SolrFilestoreConstants.ACCOUNT, accountId);       
+        if (hasAttachment(fileMetadata)) {
+            InputStream is = access.getDocument(id, FileStorageFileAccess.CURRENT_VERSION);                                            
+            document.addProperty(SolrFilestoreConstants.ATTACHMENT, is);                        
+            indexAccess.addAttachments(document, true);
+        } else {
+            indexAccess.addContent(document, true);
+        }
+    }
+    
+    private boolean hasAttachment(File file) {
+        return file.getFileName() != null && file.getFileSize() > 0;
     }
 
 }
