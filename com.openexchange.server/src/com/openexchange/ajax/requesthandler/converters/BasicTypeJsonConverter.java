@@ -53,7 +53,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import com.openexchange.ajax.container.Response;
+import java.util.Map;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
@@ -62,30 +65,31 @@ import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link BasicTypeAPIResultConverter}
+ * {@link BasicTypeJsonConverter}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class BasicTypeAPIResultConverter implements ResultConverter {
+public final class BasicTypeJsonConverter implements ResultConverter {
+
+    private static final String JSON = "json";
 
     /**
      * The basic converters.
      */
     public static final List<ResultConverter> CONVERTERS = Collections.<ResultConverter> unmodifiableList(Arrays.<ResultConverter> asList(
-        new BasicTypeAPIResultConverter("string"),
-        new BasicTypeAPIResultConverter("int"),
-        new BasicTypeAPIResultConverter("float"),
-        new BasicTypeAPIResultConverter("boolean"),
-        new BasicTypeAPIResultConverter("json")));
+        new BasicTypeJsonConverter("string"),
+        new BasicTypeJsonConverter("int"),
+        new BasicTypeJsonConverter("float"),
+        new BasicTypeJsonConverter("boolean")));
 
     private final String inputFormat;
 
     /**
-     * Initializes a new {@link BasicTypeAPIResultConverter}.
+     * Initializes a new {@link BasicTypeJsonConverter}.
      * 
      * @param inputFormat The input format
      */
-    protected BasicTypeAPIResultConverter(final String inputFormat) {
+    protected BasicTypeJsonConverter(final String inputFormat) {
         this.inputFormat = inputFormat;
     }
 
@@ -96,7 +100,7 @@ public final class BasicTypeAPIResultConverter implements ResultConverter {
 
     @Override
     public String getOutputFormat() {
-        return "apiResponse";
+        return JSON;
     }
 
     @Override
@@ -106,17 +110,27 @@ public final class BasicTypeAPIResultConverter implements ResultConverter {
 
     @Override
     public void convert(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
-        final Response response = new Response(session);
-        response.setData(result.getResultObject());
-        response.setTimestamp(result.getTimestamp());
-        response.setProperties(result.getResponseProperties());
-        final Collection<OXException> warnings = result.getWarnings();
-        if (null != warnings && !warnings.isEmpty()) {
-            for (final OXException warning : warnings) {
-                response.addWarning(warning);
-            }
+        final Object resultObject = result.getResultObject();
+        if (resultObject instanceof Collection) {
+            result.setResultObject(new JSONArray((Collection<?>) resultObject), JSON);
+        } else if (resultObject instanceof Map) {
+            @SuppressWarnings("unchecked")
+            final Map<String, ? extends Object> map = (Map<String, ? extends Object>) resultObject;
+            result.setResultObject(new JSONObject(map), JSON);
+        } else {
+            result.setResultObject(asJSObject(resultObject.toString()), JSON);
         }
-        result.setResultObject(response);
+    }
+
+    private static Object asJSObject(final String propertyValue) {
+        if (null == propertyValue) {
+            return null;
+        }
+        try {
+            return new JSONTokener(propertyValue).nextValue();
+        } catch (final Exception e) {
+            return propertyValue;
+        }
     }
 
 }

@@ -67,6 +67,7 @@ import com.openexchange.ajax.requesthandler.DispatcherServlet;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.converters.BasicTypeAPIResultConverter;
+import com.openexchange.ajax.requesthandler.converters.BasicTypeJsonConverter;
 import com.openexchange.ajax.requesthandler.converters.DebugConverter;
 import com.openexchange.ajax.requesthandler.converters.preview.DownloadPreviewResultConverter;
 import com.openexchange.ajax.requesthandler.converters.preview.FilteredHTMLPreviewResultConverter;
@@ -115,8 +116,11 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
         /*
          * Add basic converters
          */
-        for(final ResultConverter converter : BasicTypeAPIResultConverter.CONVERTERS) {
-        	defaultConverter.addConverter(converter);
+        for (final ResultConverter converter : BasicTypeAPIResultConverter.CONVERTERS) {
+            defaultConverter.addConverter(converter);
+        }
+        for (final ResultConverter converter : BasicTypeJsonConverter.CONVERTERS) {
+            defaultConverter.addConverter(converter);
         }
         /*
          * Add preview converters
@@ -203,7 +207,7 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
 
             @Override
             public void added(final ServiceReference<AJAXActionServiceFactory> ref, final AJAXActionServiceFactory service) {
-                String module = (String) ref.getProperty("module");
+                final String module = (String) ref.getProperty("module");
                 dispatcher.register(module, service);
                 if (!servlets.contains(module)) {
                     registerSessionServlet(prefix + module, servlet);
