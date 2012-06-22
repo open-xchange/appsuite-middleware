@@ -2,6 +2,7 @@
 
  - Fix for bug 22350: Added dummy basic-type to JSON converter
  - Fix for bug 21838: Fixed saving/editing drafts with inline images
+ - Fix for bug 22377: Log a missing configuration property as a warning, but don't abort Servlet registration
 
 * 2012-06-21 - martin.herfurth@open-xchange.com
 
