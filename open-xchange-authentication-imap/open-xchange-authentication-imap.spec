@@ -13,7 +13,7 @@ BuildRequires: java-sdk-openjdk
 BuildRequires: java-1_6_0-ibm-devel
 %endif
 %if 0%{?rhel_version} || 0%{?fedora_version}
-BuildRequires: java-1.6.0-openjdk-devel
+BuildRequires: java-1.6.0-sun-devel
 %endif
 Version:       @OXVERSION@
 %define        ox_release 0

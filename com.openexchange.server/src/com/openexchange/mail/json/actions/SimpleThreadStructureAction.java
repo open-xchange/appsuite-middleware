@@ -113,6 +113,17 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                 final AJAXRequestResult result;
                 if (null == jsonValue) {
                     /*
+                     * Check mailbox size
+                     */
+                    final MailServletInterface mailInterface = getMailInterface(req);
+                    final String folderId = req.checkParameter(Mail.PARAMETER_MAILFOLDER);
+                    if (mailInterface.getMessageCount(folderId) <= mailInterface.getMailConfig().getMailProperties().getMailFetchLimit()) {
+                        /*
+                         * Mailbox considered small enough for direct hand-off
+                         */
+                        return perform0(req, mailInterface, false);
+                    }
+                    /*
                      * Return empty array immediately
                      */
                     result = new AJAXRequestResult(new JSONArray(), "json");

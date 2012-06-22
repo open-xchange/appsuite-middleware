@@ -107,6 +107,7 @@ import com.openexchange.groupware.upload.quotachecker.MailUploadQuotaChecker;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailFolderStorageEnhanced;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailMessageStorageBatch;
 import com.openexchange.mail.api.IMailMessageStorageExt;
@@ -1387,8 +1388,12 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         final FullnameArgument argument = prepareMailFolderParam(folder);
         final int accountId = argument.getAccountId();
         initConnection(accountId);
-        final String fullname = argument.getFullname();
-        return mailAccess.getFolderStorage().getFolder(fullname).getMessageCount();
+        final String fullName = argument.getFullname();
+        final IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
+        if (folderStorage instanceof IMailFolderStorageEnhanced) {
+            return ((IMailFolderStorageEnhanced) folderStorage).getTotalCounter(fullName);
+        }
+        return folderStorage.getFolder(fullName).getMessageCount();
     }
 
     @Override
@@ -1396,8 +1401,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         final FullnameArgument argument = prepareMailFolderParam(folder);
         final int accountId = argument.getAccountId();
         initConnection(accountId);
-        final String fullname = argument.getFullname();
-        return mailAccess.getMessageStorage().getImageAttachment(fullname, msgUID, cid);
+        final String fullName = argument.getFullname();
+        return mailAccess.getMessageStorage().getImageAttachment(fullName, msgUID, cid);
     }
 
     @Override
@@ -1407,11 +1412,11 @@ final class MailServletInterfaceImpl extends MailServletInterface {
          * the cache holds the desired messages no connection has to be fetched/established. This avoids a lot of overhead.
          */
         final int accountId;
-        final String fullname;
+        final String fullName;
         {
             final FullnameArgument argument = prepareMailFolderParam(folder);
             accountId = argument.getAccountId();
-            fullname = argument.getFullname();
+            fullName = argument.getFullname();
         }
         final boolean loadHeaders = (null != headerFields && 0 < headerFields.length);
         /*-
@@ -1421,7 +1426,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
          */
         try {
             final MailMessage[] mails =
-                MailMessageCache.getInstance().getMessages(uids, accountId, fullname, session.getUserId(), contextId);
+                MailMessageCache.getInstance().getMessages(uids, accountId, fullName, session.getUserId(), contextId);
             if (null != mails) {
                 /*
                  * List request can be served from cache; apply proper account ID to (unconnected) mail servlet interface
@@ -1449,7 +1454,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                         if (messageStorage instanceof IMailMessageStorageExt) {
                             final IMailMessageStorageExt messageStorageExt = (IMailMessageStorageExt) messageStorage;
                             for (final MailMessage header : messageStorageExt.getMessages(
-                                fullname,
+                                fullName,
                                 loadMe.toArray(STR_ARR),
                                 FIELDS_ID_INFO,
                                 headerFields)) {
@@ -1461,7 +1466,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                                 }
                             }
                         } else {
-                            for (final MailMessage header : messageStorage.getMessages(fullname, loadMe.toArray(STR_ARR), HEADERS)) {
+                            for (final MailMessage header : messageStorage.getMessages(fullName, loadMe.toArray(STR_ARR), HEADERS)) {
                                 if (null != header) {
                                     final MailMessage mailMessage = finder.get(header.getMailId());
                                     if (null != mailMessage) {
@@ -1486,7 +1491,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         if (messageStorage instanceof IMailMessageStorageExt) {
             mails =
                 ((IMailMessageStorageExt) messageStorage).getMessages(
-                    fullname,
+                    fullName,
                     uids,
                     MailField.toFields(MailListField.getFields(fields)),
                     headerFields);
@@ -1505,10 +1510,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             } else {
                 mailFields = MailField.toFields(MailListField.getFields(fields));
             }
-            mails = messageStorage.getMessages(fullname, uids, mailFields);
+            mails = messageStorage.getMessages(fullName, uids, mailFields);
         }
         try {
-            if (MailMessageCache.getInstance().containsFolderMessages(accountId, fullname, session.getUserId(), contextId)) {
+            if (MailMessageCache.getInstance().containsFolderMessages(accountId, fullName, session.getUserId(), contextId)) {
                 MailMessageCache.getInstance().putMessages(accountId, mails, session.getUserId(), contextId);
             }
         } catch (final OXException e) {
