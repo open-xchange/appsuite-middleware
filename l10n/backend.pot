@@ -2641,6 +2641,12 @@ msgstr ""
 msgid "Invalid path: %1$s."
 msgstr ""
 
+#. Referenced JSlob %1$s must not be set for service %2$s. Nothing will be done.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jslob/src/com/openexchange/jslob/JSlobExceptionMessages.java:83
+msgid ""
+"Referenced JSlob %1$s must not be set for service %2$s. Nothing will be done."
+msgstr ""
+
 #. A configuration error: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.loxandra/src/com/openexchange/loxandra/LoxandraExceptionMessages.java:70
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xmpp/src/com/openexchange/xmpp/XmppExceptionMessages.java:69
