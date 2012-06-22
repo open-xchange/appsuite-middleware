@@ -54,6 +54,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -197,6 +198,8 @@ public class MimeMessageFiller {
     protected final UserSettingMail usm;
 
     private Set<String> uploadFileIDs;
+
+    private Set<String> contentIds;
 
     private final HtmlService htmlService;
 
@@ -837,7 +840,18 @@ public class MimeMessageFiller {
                      * Add referenced parts from ONE referenced mail
                      */
                     for (int i = 0; i < size; i++) {
-                        addMessageBodyPart(primaryMultipart, mail.getEnclosedMailPart(i), false);
+                        final MailPart mailPart = mail.getEnclosedMailPart(i);
+                        boolean add = true;
+                        if (mailPart.getContentType().startsWith("image/")) {
+                            final String contentId = mailPart.getContentId();
+                            if (null != contentId && contentIds.contains(contentId)) {
+                                // Ignore
+                                add = false;
+                            }
+                        }
+                        if (add) {
+                            addMessageBodyPart(primaryMultipart, mailPart, false);
+                        }
                     }
                 }
             }
@@ -1185,7 +1199,6 @@ public class MimeMessageFiller {
                     final Map.Entry<String, String> e = iter.next();
                     relatedImageBodyPart.setHeader(e.getKey(), e.getValue());
                 }
-
             } else {
                 final DataSource dataSource;
                 if ("base64".equalsIgnoreCase(image.getTransferEncoding())) {
@@ -1222,6 +1235,24 @@ public class MimeMessageFiller {
              */
             relatedMultipart.addBodyPart(relatedImageBodyPart);
         }
+        /*
+         * Remember Content-Ids
+         */
+        contentIds = new HashSet<String>(8);
+        final int count = relatedMultipart.getCount();
+        for (int i = 0; i < count; i++) {
+            final BodyPart bodyPart = relatedMultipart.getBodyPart(i);
+            String[] header = bodyPart.getHeader(MessageHeaders.HDR_CONTENT_TYPE);
+            if (null != header && 0 < header.length && header[0].toLowerCase(Locale.US).startsWith("image/")) {
+                header = bodyPart.getHeader(MessageHeaders.HDR_CONTENT_ID);
+                if (null != header && 0 < header.length) {
+                    contentIds.add(header[0]);   
+                }
+            }
+        }
+        /*
+         * Return multipart/related
+         */
         return relatedMultipart;
     }
 
@@ -1591,7 +1622,7 @@ public class MimeMessageFiller {
                     }
                     final String iid;
                     if (null == id) {
-                        iid = m.getImageId();
+                        iid = urlDecode(m.getImageId());
                     } else {
                         /*
                          * Remember id to avoid duplicate attachment and for later cleanup
@@ -1599,13 +1630,7 @@ public class MimeMessageFiller {
                         uploadFileIDs.add(id);
                         iid = id;
                     }
-                    final boolean appendBodyPart;
-                    if (trackedIds.contains(iid)) {
-                        appendBodyPart = false;
-                    } else {
-                        trackedIds.add(iid);
-                        appendBodyPart = true;
-                    }
+                    final boolean appendBodyPart = trackedIds.add(iid);
                     m.appendLiteralReplacement(
                         sb,
                         imageTag.replaceFirst(
@@ -1621,6 +1646,27 @@ public class MimeMessageFiller {
         }
         m.appendTail(sb);
         return sb.toString();
+    }
+
+    private static String urlDecode(final String s) {
+        try {
+            return URLDecoder.decode(replaceURLCodePoints(s), "ISO-8859-1");
+        } catch (final UnsupportedEncodingException e) {
+            return s;
+        }
+    }
+
+    private static final Pattern PATTERN_CODE_POINT = Pattern.compile("%u00([a-fA-F0-9]{2})");
+
+    private static String replaceURLCodePoints(final String s) {
+        final Matcher m = PATTERN_CODE_POINT.matcher(s);
+        final StringBuffer buffer = new StringBuffer(s.length());
+        while (m.find()) {
+            final char[] chars = Character.toChars(Integer.parseInt(m.group(1), 16));
+            m.appendReplacement(buffer, Matcher.quoteReplacement(new String(chars)));
+        }
+        m.appendTail(buffer);
+        return buffer.toString();
     }
 
     private static final Pattern PATTERN_DASHES = Pattern.compile("-+");
@@ -1667,30 +1713,51 @@ public class MimeMessageFiller {
         /*
          * ... and cid
          */
-        tmp.setLength(0);
-        tmp.append(PATTERN_DASHES.matcher(id).replaceAll("")).append('@').append(Version.NAME);
-        final String cid = tmp.toString();
-        if (appendBodyPart) {
-            /*
-             * Append body part
-             */
-            final MimeBodyPart imgBodyPart = new MimeBodyPart();
-            imgBodyPart.setDataHandler(new DataHandler(imageProvider.getDataSource()));
+        final String cid;
+        if (id.indexOf('@') < 0) {
             tmp.setLength(0);
-            imgBodyPart.setContentID(tmp.append('<').append(cid).append('>').toString());
-            final ContentDisposition contentDisposition = new ContentDisposition(Part.INLINE);
-            if (fileName != null) {
-                contentDisposition.setFilenameParameter(fileName);
+            tmp.append(PATTERN_DASHES.matcher(id).replaceAll("")).append('@').append(Version.NAME);
+            cid = tmp.toString();
+        } else {
+            cid = PATTERN_DASHES.matcher(id).replaceAll("");
+        }
+        if (appendBodyPart) {
+            boolean found = false;
+            {
+                final Set<String> set = new HashSet<String>(2);
+                final int count = mp.getCount();
+                for (int i = 0; !found && i < count; i++) {
+                    final BodyPart bodyPart = mp.getBodyPart(i);
+                    final String[] header = bodyPart.getHeader(MessageHeaders.HDR_CONTENT_ID);
+                    if (null != header && 0 < header.length) {
+                        set.clear();
+                        set.addAll(Arrays.asList(header));
+                        found = set.contains(cid);
+                    }
+                }
             }
-            imgBodyPart.setHeader(
-                MessageHeaders.HDR_CONTENT_DISPOSITION,
-                MimeMessageUtility.foldContentDisposition(contentDisposition.toString()));
-            final ContentType ct = new ContentType(imageProvider.getContentType());
-            if (fileName != null && !ct.containsNameParameter()) {
-                ct.setNameParameter(fileName);
+            /*
+             * Append body part if not found
+             */
+            if (!found) {
+                final MimeBodyPart imgBodyPart = new MimeBodyPart();
+                imgBodyPart.setDataHandler(new DataHandler(imageProvider.getDataSource()));
+                tmp.setLength(0);
+                imgBodyPart.setContentID(tmp.append('<').append(cid).append('>').toString());
+                final ContentDisposition contentDisposition = new ContentDisposition(Part.INLINE);
+                if (fileName != null) {
+                    contentDisposition.setFilenameParameter(fileName);
+                }
+                imgBodyPart.setHeader(
+                    MessageHeaders.HDR_CONTENT_DISPOSITION,
+                    MimeMessageUtility.foldContentDisposition(contentDisposition.toString()));
+                final ContentType ct = new ContentType(imageProvider.getContentType());
+                if (fileName != null && !ct.containsNameParameter()) {
+                    ct.setNameParameter(fileName);
+                }
+                imgBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(ct.toString()));
+                mp.addBodyPart(imgBodyPart);
             }
-            imgBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(ct.toString()));
-            mp.addBodyPart(imgBodyPart);
         }
         return cid;
     }

@@ -1,6 +1,7 @@
 * 2012-06-22 - thorben.betten@open-xchange.com
 
  - Fix for bug 22350: Added dummy basic-type to JSON converter
+ - Fix for bug 21838: Fixed saving/editing drafts with inline images
 
 * 2012-06-21 - martin.herfurth@open-xchange.com
 
