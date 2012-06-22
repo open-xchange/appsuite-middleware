@@ -840,17 +840,21 @@ public class MimeMessageFiller {
                      * Add referenced parts from ONE referenced mail
                      */
                     for (int i = 0; i < size; i++) {
-                        final MailPart mailPart = mail.getEnclosedMailPart(i);
-                        boolean add = true;
-                        if (mailPart.getContentType().startsWith("image/")) {
-                            final String contentId = mailPart.getContentId();
-                            if (null != contentId && contentIds.contains(contentId)) {
-                                // Ignore
-                                add = false;
+                        if (null == contentIds) {
+                            addMessageBodyPart(primaryMultipart, mail.getEnclosedMailPart(i), false);
+                        } else {
+                            final MailPart mailPart = mail.getEnclosedMailPart(i);
+                            boolean add = true;
+                            if (mailPart.getContentType().startsWith("image/")) {
+                                final String contentId = mailPart.getContentId();
+                                if (null != contentId && contentIds.contains(contentId)) {
+                                    // Ignore
+                                    add = false;
+                                }
                             }
-                        }
-                        if (add) {
-                            addMessageBodyPart(primaryMultipart, mailPart, false);
+                            if (add) {
+                                addMessageBodyPart(primaryMultipart, mailPart, false);
+                            }
                         }
                     }
                 }
