@@ -42,6 +42,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.http.client.xml"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.i18n"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.importexport"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.index"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.jcharset"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.jslob"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.jslob.config"/>

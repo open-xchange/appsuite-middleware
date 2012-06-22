@@ -391,16 +391,47 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
     @Override
     public void deleteByQuery(final QueryParameters parameters) throws OXException {
         final SearchHandler searchHandler = checkQueryParametersAndGetSearchHandler(parameters);  
-        if (searchHandler.equals(SearchHandler.ALL_REQUEST)) {
-            final int accountId = getAccountId(parameters);
-            final String folder = parameters.getFolder();
-            String queryString = buildQueryString(accountId, folder);
-            if (queryString.length() == 0) {
-            	queryString = "*:*";
+        switch (searchHandler) {
+            case ALL_REQUEST:
+            {
+                final int accountId = getAccountId(parameters);
+                final String folder = parameters.getFolder();
+                String queryString = buildQueryString(accountId, folder);
+                if (queryString.length() == 0) {
+                    queryString = "*:*";
+                }
+                deleteDocumentsByQuery(queryString);
+                break;
             }
-            deleteDocumentsByQuery(queryString);
-        } else {
-            throw new NotImplementedException("Search handler " + searchHandler.name() + " is not implemented for MailSolrIndexAccess.deleteByQuery().");
+            
+            case GET_REQUEST:
+            {
+                final int accountId = getAccountId(parameters);
+                final String folder = parameters.getFolder();
+                final String[] ids = getIds(parameters);
+                String queryString = buildQueryString(accountId, folder);
+                final StringBuilder sb = new StringBuilder(queryString);
+                if (queryString.length() != 0) {
+                    sb.append(" AND (");
+                } else {
+                    sb.append('(');
+                }
+                boolean first = true;
+                for (final String id : ids) {
+                    if (first) {
+                        first = false;
+                    } else {
+                        sb.append(" OR ");
+                    }
+                    sb.append('(').append(SolrMailField.UUID.solrName()).append(":\"").append(id).append("\")");
+                }
+                sb.append(')');
+                deleteDocumentsByQuery(queryString);
+                break;                
+            }
+            
+            default:
+                throw new NotImplementedException("Search handler " + searchHandler.name() + " is not implemented for MailSolrIndexAccess.deleteByQuery().");
         }
     }
 

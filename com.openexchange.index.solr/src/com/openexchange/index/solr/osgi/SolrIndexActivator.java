@@ -70,6 +70,7 @@ import com.openexchange.index.solr.internal.filestore.SolrFilestoreEventHandler;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.solr.SolrAccessService;
+import com.openexchange.textxtraction.TextXtractService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
@@ -91,7 +92,7 @@ public class SolrIndexActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class[] {
             DatabaseService.class, UserService.class, ConfigurationService.class, TimerService.class, ThreadPoolService.class,
-            SolrAccessService.class, IDBasedFileAccessFactory.class };
+            SolrAccessService.class, IDBasedFileAccessFactory.class, TextXtractService.class };
     }
 
     @Override

@@ -51,29 +51,38 @@ package com.openexchange.index.solr.internal.filestore;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.SolrQuery.ORDER;
 import org.apache.solr.common.SolrInputDocument;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.FileFieldSwitcher;
+import com.openexchange.file.storage.meta.FileFieldGet;
+import com.openexchange.file.storage.meta.FileFieldSet;
 import com.openexchange.groupware.Types;
 import com.openexchange.index.FacetParameters;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexDocument.Type;
 import com.openexchange.index.IndexField;
 import com.openexchange.index.IndexResult;
+import com.openexchange.index.Indexes;
 import com.openexchange.index.QueryParameters;
+import com.openexchange.index.QueryParameters.Order;
 import com.openexchange.index.SearchHandler;
+import com.openexchange.index.StandardIndexDocument;
 import com.openexchange.index.filestore.FilestoreIndexField;
+import com.openexchange.index.solr.filestore.SolrFilestoreConstants;
 import com.openexchange.index.solr.internal.AbstractSolrIndexAccess;
 import com.openexchange.index.solr.internal.Services;
-import com.openexchange.index.solr.internal.mail.SearchTerm2Query;
-import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.solr.SolrCoreIdentifier;
 import com.openexchange.solr.SolrProperties;
 
@@ -97,7 +106,7 @@ public class SolrFilestoreIndexAccess extends AbstractSolrIndexAccess<File> {
      * Initializes a new {@link SolrFilestoreIndexAccess}.
      * @param identifier
      */
-    protected SolrFilestoreIndexAccess(SolrCoreIdentifier identifier) {
+    public SolrFilestoreIndexAccess(SolrCoreIdentifier identifier) {
         super(identifier);
     }
 
@@ -157,40 +166,165 @@ public class SolrFilestoreIndexAccess extends AbstractSolrIndexAccess<File> {
     }
     
     private SolrInputDocument convertToDocument(IndexDocument<File> document) throws OXException {
-        // FIXME: account
-        return SolrFilestoreDocumentConverter.convert(contextId, userId, 0, document);
+        return SolrFilestoreDocumentConverter.convertStatic(contextId, userId, document);
     }
 
     @Override
     public void change(IndexDocument<File> document, Set<? extends IndexField> fields) throws OXException {
-        // TODO Auto-generated method stub
+        Set<FilestoreIndexField> indexFields;
+        if (fields == null) {
+            indexFields = EnumSet.allOf(FilestoreIndexField.class);
+        } else {
+            indexFields = EnumSet.noneOf(FilestoreIndexField.class);
+            for (IndexField field : fields) {
+                if (field instanceof FilestoreIndexField) {
+                    indexFields.add((FilestoreIndexField) field);
+                }
+            }
+        }
         
+        File reloaded = loadFromIndex(FileUUID.newUUID(contextId, userId, document).toString());
+        if (reloaded == null) {
+            addAttachments(document, true);
+        } else {
+            FileFieldSwitcher setter = new FileFieldSet(); 
+            FileFieldSwitcher getter = new FileFieldGet();
+            for (FilestoreIndexField field : indexFields) {
+                Field fileField = field.getFileField();
+                if (fileField != null) {
+                    Object value = fileField.doSwitch(getter, document.getObject());
+                    fileField.doSwitch(setter, reloaded, value);
+                }
+            }
+            
+            StandardIndexDocument<File> changed = new StandardIndexDocument<File>(reloaded, Type.INFOSTORE_DOCUMENT);
+            changed.setProperties(document.getProperties());
+            addAttachments(changed, true);
+        }
     }
 
     @Override
     public void change(Collection<IndexDocument<File>> documents, Set<? extends IndexField> fields) throws OXException {
-        // TODO Auto-generated method stub
-        
-    }
+        for (IndexDocument<File> document : documents) {
+            change(document, fields);
+        }        
+    }    
 
     @Override
     public void deleteById(String id) throws OXException {
-        // TODO Auto-generated method stub
-        
+        deleteDocumentById(id);      
     }
 
     @Override
     public void deleteByQuery(QueryParameters parameters) throws OXException {
-        // TODO Auto-generated method stub
-        
+        final SearchHandler searchHandler = checkQueryParametersAndGetSearchHandler(parameters);  
+        switch (searchHandler) {
+            case ALL_REQUEST:
+            {
+                String service = getService(parameters);
+                String accountId = getAccountId(parameters);
+                String folder = parameters.getFolder();
+                String queryString = buildQueryString(service, accountId, folder);
+                if (queryString.length() == 0) {
+                    queryString = "*:*";
+                }
+                deleteDocumentsByQuery(queryString);
+                break;
+            }
+            
+            case GET_REQUEST:
+            {
+                String service = getService(parameters);
+                String accountId = getAccountId(parameters);
+                String folder = parameters.getFolder();
+                String queryString = buildQueryString(service, accountId, folder);
+                String[] ids = getIds(parameters);
+                final StringBuilder sb = new StringBuilder(queryString);
+                if (queryString.length() != 0) {
+                    sb.append(" AND (");
+                } else {
+                    sb.append('(');
+                }
+                boolean first = true;
+                for (final String id : ids) {
+                    if (first) {
+                        first = false;
+                    } else {
+                        sb.append(" OR ");
+                    }
+                    sb.append('(').append(SolrFilestoreField.UUID.solrName()).append(":\"").append(id).append("\")");
+                }
+                sb.append(')');
+                deleteDocumentsByQuery(queryString);
+                break;                
+            }
+            
+            default:
+                throw new NotImplementedException("Search handler " + searchHandler.name() + " is not implemented for SolrFilestoreIndexAccess.deleteByQuery().");
+        }        
+    }
+    
+    @Override
+    public IndexResult<File> query(QueryParameters parameters, FacetParameters facetParameters, Set<? extends IndexField> fields) throws OXException {
+        return query(parameters, null, fields);
     }
 
     @Override
     public IndexResult<File> query(QueryParameters parameters, Set<? extends IndexField> fields) throws OXException {
+        // TODO: implement faceting
+        Set<SolrFilestoreField> solrFields = convertAndCheckFields(parameters, fields);
         SolrQuery solrQuery = buildSolrQuery(parameters);
+        setFieldList(solrQuery, solrFields);        
         List<IndexDocument<File>> results = queryChunkWise(new SolrFilestoreDocumentConverter(), solrQuery, parameters.getOff(), parameters.getLen(), 100);
+        if (results.isEmpty()) {
+            return Indexes.emptyResult();
+        }
         
         return new SolrFilestoreIndexResult(results.size(), results, null);
+    }
+    
+    private void setFieldList(SolrQuery solrQuery, Set<SolrFilestoreField> solrFields) {
+        solrQuery.setFields(SolrFilestoreField.solrNamesFor(solrFields));
+    }
+
+    private File loadFromIndex(String id) throws OXException {
+        Map<String, Object> params = new HashMap<String, Object>(1);
+        params.put(SolrFilestoreConstants.IDS, new String[] { id });
+        QueryParameters query = new QueryParameters.Builder(params).setHandler(SearchHandler.GET_REQUEST).setType(Type.INFOSTORE_DOCUMENT).build();
+        IndexResult<File> result = query(query, null);
+        if (result.getNumFound() == 1) {
+            return result.getResults().get(0).getObject();
+        }
+        
+        return null;
+    }
+    
+    private String buildQueryString(String service, String accountId, String folder) {
+        StringBuilder sb = new StringBuilder(128); 
+        boolean firstSet = false;
+        
+        if (service != null) {
+            sb.append('(').append(SolrFilestoreField.SERVICE).append(":\"").append(service).append("\")");
+            firstSet = true;
+        }
+        
+        if (accountId != null) {
+            if (firstSet) {
+                sb.append(" AND ");
+            } else {
+                firstSet = true;
+            }
+            sb.append('(').append(SolrFilestoreField.ACCOUNT).append(":\"").append(accountId).append("\")");
+        }
+        
+        if (folder != null) {
+            if (firstSet) {
+                sb.append(" AND ");
+            }
+            sb.append('(').append(SolrFilestoreField.FOLDER).append(":\"").append(folder).append("\")");
+        }
+        
+        return sb.toString();
     }
     
     private SolrQuery buildSolrQuery(QueryParameters parameters) throws OXException {
@@ -199,7 +333,8 @@ public class SolrFilestoreIndexAccess extends AbstractSolrIndexAccess<File> {
         switch (searchHandler) {
             case ALL_REQUEST:
             {
-                int accountId = getAccountId(parameters);
+                String service = getService(parameters);
+                String accountId = getAccountId(parameters);
                 String folder = parameters.getFolder();
                 if (folder == null) {
                     solrQuery = new SolrQuery("*:*");
@@ -209,8 +344,9 @@ public class SolrFilestoreIndexAccess extends AbstractSolrIndexAccess<File> {
                     solrQuery = new SolrQuery("\"" + folder + "\"");
                     solrQuery.setQueryType(handler);
                 }
-//                solrQuery.setFilterQueries(buildFilterQueries(accountId, null));                
-//                solrQuery.set("sortManually", setSortAndOrder(parameters, solrQuery));
+                
+                solrQuery.setFilterQueries(buildFilterQueries(service, accountId, null));
+                setSortAndOrder(parameters, solrQuery);
                 break;
             }                
                 
@@ -220,50 +356,10 @@ public class SolrFilestoreIndexAccess extends AbstractSolrIndexAccess<File> {
                     String handler = config.getProperty(SolrProperties.SIMPLE_HANLDER);
                     solrQuery = new SolrQuery(parameters.getPattern());
                     solrQuery.setQueryType(handler);
-//                    solrQuery.set("sortManually", setSortAndOrder(parameters, solrQuery));
-//                    solrQuery.setFilterQueries(buildFilterQueries(getAccountId(parameters), parameters.getFolder()));
+                    setSortAndOrder(parameters, solrQuery);
+                    solrQuery.setFilterQueries(buildFilterQueries(getService(parameters), getAccountId(parameters), parameters.getFolder()));
                     break;
                 }
-//                
-//            case GET_REQUEST:
-//                {
-//                    String[] ids = getIds(parameters);
-//                    int accountId = getAccountId(parameters);
-//                    String folder = parameters.getFolder();
-//                    String queryString = buildQueryString(accountId, folder);
-//                    StringBuilder sb = new StringBuilder(queryString);
-//                    if (queryString.length() != 0) {
-//                        sb.append(" AND (");
-//                    } else {
-//                        sb.append('(');
-//                    }
-//                    boolean first = true;
-//                    for (String id : ids) {
-//                        if (first) {
-//                            first = false;
-//                        } else {
-//                            sb.append(" OR ");
-//                        }
-//                        sb.append('(').append(SolrMailField.UUID.solrName()).append(":\"").append(id).append("\")");
-//                    }
-//                    sb.append(')');
-//                    solrQuery = new SolrQuery(sb.toString());
-//                    solrQuery.set("sortManually", setSortAndOrder(parameters, solrQuery));
-//                    break;
-//                }
-                
-            case CUSTOM:
-            {
-                ConfigurationService config = Services.getService(ConfigurationService.class);
-                String handler = config.getProperty(SolrProperties.CUSTOM_HANLDER);
-                SearchTerm<?> searchTerm = (SearchTerm<?>) parameters.getSearchTerm();
-                StringBuilder queryBuilder = SearchTerm2Query.searchTerm2Query(searchTerm);
-                solrQuery = new SolrQuery(queryBuilder.toString());
-                solrQuery.setQueryType(handler);
-//                solrQuery.set("sortManually", setSortAndOrder(parameters, solrQuery));
-//                solrQuery.setFilterQueries(buildFilterQueries(getAccountId(parameters), parameters.getFolder()));
-                break;
-            }
             
             default:
                 throw new NotImplementedException("Search handler " + searchHandler.name() + " is not implemented for MailSolrIndexAccess.query().");
@@ -272,6 +368,34 @@ public class SolrFilestoreIndexAccess extends AbstractSolrIndexAccess<File> {
         return solrQuery;
     }
     
+    private void setSortAndOrder(QueryParameters parameters, SolrQuery solrQuery) {
+        IndexField sortField = parameters.getSortField();
+        if (sortField instanceof FilestoreIndexField) {
+            SolrFilestoreField indexField = SolrFilestoreField.getByIndexField((FilestoreIndexField) sortField);
+            if (indexField != null) {
+                Order order = parameters.getOrder();
+                solrQuery.setSortField(indexField.solrName(), order == null ? ORDER.desc : order.equals(Order.DESC) ? ORDER.desc : ORDER.asc);
+            }
+        }
+    }
+
+    private String[] buildFilterQueries(String service, String accountId, String folder) {
+        final List<String> filters = new ArrayList<String>(3);
+        if (service != null) {
+            filters.add(SolrFilestoreField.SERVICE.solrName() + ':' + "\"" + service + "\"");
+        }
+        
+        if (accountId != null) {
+            filters.add(SolrFilestoreField.ACCOUNT.solrName() + ':' + "\"" + accountId + "\"");
+        }
+        
+        if (folder != null) {
+            filters.add(SolrFilestoreField.FOLDER.solrName() + ':' + "\"" + folder + "\"");
+        }
+
+        return filters.toArray(new String[filters.size()]);
+    }
+
     private SearchHandler checkQueryParametersAndGetSearchHandler(QueryParameters parameters) {
         if (parameters == null) {
             throw new IllegalArgumentException("Parameter `parameters` must not be null!");
@@ -292,54 +416,62 @@ public class SolrFilestoreIndexAccess extends AbstractSolrIndexAccess<File> {
                 return searchHandler;
                 
             case CUSTOM:
-                Object searchTerm = parameters.getSearchTerm();
-                if (searchTerm == null) {
-                    throw new IllegalArgumentException("Parameter `search term` must not be null!");
-                } else if (!(searchTerm instanceof SearchTerm)) {
-                    throw new IllegalArgumentException("Parameter `search term` must be an instance of com.openexchange.mail.search.SearchTerm!");
-                }
-                return searchHandler;
+                throw new NotImplementedException("Search handler " + searchHandler.name() + " is not implemented for this action.");
                 
             case GET_REQUEST:
-                Map<String, Object> params = parameters.getParameters();
-                if (params == null) {
-                    throw new IllegalArgumentException("Parameter `parameters.parameters` must not be null!");
-                }
-                Object idsObj = params.get("ids");
-                if (idsObj == null) {
-                    throw new IllegalArgumentException("Parameter `parameters.parameters.ids` must not be null!");
-                } else if (!(idsObj instanceof String[])) {
-                    throw new IllegalArgumentException("Parameter `parameters.parameters.ids` must not be an instance of String[]!");
-                }
-                return searchHandler;
+                throw new NotImplementedException("Search handler " + searchHandler.name() + " is not implemented for this action.");
                 
             case SIMPLE:
                 if (parameters.getPattern() == null) {
                     throw new IllegalArgumentException("Parameter `pattern` must not be null!");
                 }
-                return searchHandler;                
+                return searchHandler;
                 
             default:
                 throw new NotImplementedException("Search handler " + searchHandler.name() + " is not implemented for this action.");
         }
     }
     
-    private int getAccountId(QueryParameters parameters) {
-        Object accountIdObj = parameters.getParameters().get("accountId");
-        if (accountIdObj == null || !(accountIdObj instanceof Integer)) {
-            return -1;
+    private Set<SolrFilestoreField> convertAndCheckFields(QueryParameters parameters, Set<? extends IndexField> fields) {
+        Set<SolrFilestoreField> set;
+        if (fields == null) {
+            set = EnumSet.allOf(SolrFilestoreField.class);
+        } else {        
+            set = EnumSet.noneOf(SolrFilestoreField.class);
+            for (IndexField field : fields) {
+                if (field instanceof FilestoreIndexField) {
+                    set.add(SolrFilestoreField.getByIndexField((FilestoreIndexField) field));
+                }
+            }
         }
         
-        return ((Integer) accountIdObj).intValue();
+        return set;        
+    }
+    
+    private String getAccountId(QueryParameters parameters) {
+        Object accountIdObj = parameters.getParameters().get(SolrFilestoreConstants.ACCOUNT);
+        if (!(accountIdObj instanceof String)) {
+            return null;
+        }
+        
+        return (String) accountIdObj;
+    }
+    
+    private String getService(QueryParameters parameters) {
+        Object serviceObj = parameters.getParameters().get(SolrFilestoreConstants.SERVICE);
+        if (!(serviceObj instanceof String)) {
+            return null;
+        }
+        
+        return (String) serviceObj;
     }
     
     private String[] getIds(QueryParameters parameters) {
-        return (String[]) parameters.getParameters().get("ids");
-    }
-
-    @Override
-    public IndexResult<File> query(QueryParameters parameters, FacetParameters facetParameters, Set<? extends IndexField> fields) throws OXException {
-        // TODO Auto-generated method stub
+        Object idsObj = parameters.getParameters().get(SolrFilestoreConstants.IDS);
+        if (idsObj instanceof String[]) {
+            return (String[]) idsObj;
+        }
+        
         return null;
     }
 }

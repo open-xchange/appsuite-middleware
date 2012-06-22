@@ -47,16 +47,70 @@
  *
  */
 
-package com.openexchange.index.solr.internal.filestore;
+package com.openexchange.file.storage.json.actions.files;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.File;
+import com.openexchange.index.IndexDocument;
+import com.openexchange.tools.iterator.SearchIterator;
 
 
 /**
- * {@link SolrFilestoreConstants}
+ * {@link FilestorageIndexSearchIterator}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class SolrFilestoreConstants {
+public class FilestorageIndexSearchIterator implements SearchIterator<File> {
     
-    public static final String ATTACHMENT = "attachment";
+    private final List<OXException> warnings = new ArrayList<OXException>();
+    
+    private final List<IndexDocument<File>> documents;
+    
+    private final Iterator<IndexDocument<File>> iterator;    
+    
+
+    public FilestorageIndexSearchIterator(List<IndexDocument<File>> documents) {
+        super();
+        this.documents = documents;
+        iterator = documents.iterator();
+    }
+
+    @Override
+    public boolean hasNext() throws OXException {
+        return iterator.hasNext();
+    }
+
+    @Override
+    public File next() throws OXException {
+        IndexDocument<File> next = iterator.next();
+        return next.getObject();
+    }
+
+    @Override
+    public void close() throws OXException {
+    }
+
+    @Override
+    public int size() {
+        return documents.size();
+    }
+
+    @Override
+    public boolean hasWarnings() {
+        return !warnings.isEmpty();
+    }
+
+    @Override
+    public void addWarning(OXException warning) {
+        warnings.add(warning);        
+    }
+
+    @Override
+    public OXException[] getWarnings() {
+        return warnings.toArray(new OXException[warnings.size()]);
+    }
 
 }

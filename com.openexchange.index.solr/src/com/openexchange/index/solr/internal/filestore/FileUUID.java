@@ -49,6 +49,11 @@
 
 package com.openexchange.index.solr.internal.filestore;
 
+import java.util.Map;
+import com.openexchange.file.storage.File;
+import com.openexchange.index.IndexDocument;
+import com.openexchange.index.solr.filestore.SolrFilestoreConstants;
+
 
 
 /**
@@ -61,16 +66,29 @@ public class FileUUID {
     private final String fileUUID;
     
     
-    public FileUUID(int contextId, int userId, int accountId, String folderId, String fileId) {
+    public FileUUID(int contextId, int userId, String service, String accountId, String folderId, String fileId) {
         super();
         StringBuilder tmp = new StringBuilder(64);
-        tmp.append(contextId).append('/').append(userId).append('/').append(accountId).append('/').append(folderId).append('/').append(fileId);
+        tmp.append(contextId).append('/').append(userId).append('/').append(service).append('/').append(accountId).append('/').append(folderId).append('/').append(fileId);
         fileUUID = tmp.toString();
     }
     
     @Override
     public String toString() {
         return fileUUID;
+    }
+    
+    public static FileUUID newUUID(int contextId, int userId, IndexDocument<File> document) {
+        File file = document.getObject();
+        Map<String, Object> properties = document.getProperties();
+        String service = (String) properties.get(SolrFilestoreConstants.SERVICE);
+        String accountId = (String) properties.get(SolrFilestoreConstants.ACCOUNT);
+        
+        return newUUID(contextId, userId, service, accountId, file.getFolderId(), file.getId());
+    }
+    
+    public static FileUUID newUUID(int contextId, int userId, String service, String accountId, String folderId, String fileId) {
+        return new FileUUID(contextId, userId, service, accountId, folderId, fileId);
     }
 
 }

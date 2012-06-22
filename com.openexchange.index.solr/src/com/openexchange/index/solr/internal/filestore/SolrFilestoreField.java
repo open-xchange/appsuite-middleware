@@ -51,6 +51,7 @@ package com.openexchange.index.solr.internal.filestore;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
@@ -66,25 +67,26 @@ public enum SolrFilestoreField {
 
     UUID("uuid", FilestoreIndexField.UUID, "param1"),
     ACCOUNT("account", FilestoreIndexField.ACCOUNT, "param2"),
-    FOLDER("folder_id", FilestoreIndexField.FOLDER, "param3"),
-    ID("id", FilestoreIndexField.ID, "param4"),
-    CREATED_BY("created_by", FilestoreIndexField.CREATED_BY, "param5"),
-    MODIFIED_BY("modified_by", FilestoreIndexField.MODIFIED_BY, "param6"),
-    CREATED("creation_date", FilestoreIndexField.CREATED, "param7"),
-    LAST_MODIFIED("last_modified", FilestoreIndexField.LAST_MODIFIED, "param8"),
-    TITLE("title", FilestoreIndexField.TITLE, "param9"),
-    VERSION("version", FilestoreIndexField.VERSION, "param10"),
-    FILE_SIZE("file_size", FilestoreIndexField.FILE_SIZE, "param11"),
-    MIME_TYPE("mime_type", FilestoreIndexField.MIME_TYPE, "param12"),
-    FILE_NAME("file_name", FilestoreIndexField.FILE_NAME, "param13"),
-    DESCRIPTION("description", FilestoreIndexField.DESCRIPTION, "param14"),
-    URL("url", FilestoreIndexField.URL, "param15"),
-    SEQUENCE_NUMBER("sequence_number", FilestoreIndexField.SEQUENCE_NUMBER, "param16"),
-    CATEGORIES("categories", FilestoreIndexField.CATEGORIES, "param17"),
-    COLOR_LABEL("color_label", FilestoreIndexField.COLOR_LABEL, "param18"),
-    VERSION_COMMENT("version_comment", FilestoreIndexField.VERSION_COMMENT, "param19"),
-    CONTENT("content", FilestoreIndexField.CONTENT, "param20"),
-    MD5_SUM("md5_sum", FilestoreIndexField.MD5_SUM, "param21");
+    SERVICE("service", FilestoreIndexField.SERVICE, "param3"),
+    FOLDER("folder_id", FilestoreIndexField.FOLDER, "param4"),
+    ID("id", FilestoreIndexField.ID, "param5"),
+    CREATED_BY("created_by", FilestoreIndexField.CREATED_BY, "param6"),
+    MODIFIED_BY("modified_by", FilestoreIndexField.MODIFIED_BY, "param7"),
+    CREATED("creation_date", FilestoreIndexField.CREATED, "param8"),
+    LAST_MODIFIED("last_modified", FilestoreIndexField.LAST_MODIFIED, "param9"),
+    TITLE("title", FilestoreIndexField.TITLE, "param10"),
+    VERSION("version", FilestoreIndexField.VERSION, "param11"),
+    FILE_SIZE("file_size", FilestoreIndexField.FILE_SIZE, "param12"),
+    MIME_TYPE("mime_type", FilestoreIndexField.MIME_TYPE, "param13"),
+    FILE_NAME("file_name", FilestoreIndexField.FILE_NAME, "param14"),
+    DESCRIPTION("description", FilestoreIndexField.DESCRIPTION, "param15"),
+    URL("url", FilestoreIndexField.URL, "param16"),
+    SEQUENCE_NUMBER("sequence_number", FilestoreIndexField.SEQUENCE_NUMBER, "param17"),
+    CATEGORIES("categories", FilestoreIndexField.CATEGORIES, "param18"),
+    COLOR_LABEL("color_label", FilestoreIndexField.COLOR_LABEL, "param19"),
+    VERSION_COMMENT("version_comment", FilestoreIndexField.VERSION_COMMENT, "param20"),
+    CONTENT("content", FilestoreIndexField.CONTENT, "param21"),
+    MD5_SUM("md5_sum", FilestoreIndexField.MD5_SUM, "param22");
     
 
     private String solrName;
@@ -95,13 +97,16 @@ public enum SolrFilestoreField {
     
     private static final Map<String, SolrFilestoreField> solrNameMapping = new HashMap<String, SolrFilestoreField>();
     
+    private static final Map<FilestoreIndexField, SolrFilestoreField> fieldMapping = new EnumMap<FilestoreIndexField, SolrFilestoreField>(FilestoreIndexField.class);
+    
     private static final Set<SolrFilestoreField> indexedFields = EnumSet.noneOf(SolrFilestoreField.class);
     
     static {
         for (SolrFilestoreField field : values()) {
-            String name = field.getSolrName();
+            String name = field.solrName();
             if (name != null) {
                 solrNameMapping.put(name, field);
+                fieldMapping.put(field.getIndexField(), field);
                 indexedFields.add(field);
             }
         }
@@ -111,8 +116,22 @@ public enum SolrFilestoreField {
         return solrNameMapping.get(solrName);
     }
     
+    public static SolrFilestoreField getByIndexField(FilestoreIndexField indexField) {
+        return fieldMapping.get(indexField);
+    }
+    
     public static Collection<SolrFilestoreField> getIndexedFields() {
         return Collections.unmodifiableCollection(solrNameMapping.values());
+    }
+    
+    public static String[] solrNamesFor(Set<SolrFilestoreField> solrFields) {
+        String[] names = new String[solrFields.size()];
+        int i = 0;
+        for (SolrFilestoreField field : solrFields) {
+            names[i++] = field.solrName();
+        }
+        
+        return names;
     }
 
     private SolrFilestoreField(String solrName, FilestoreIndexField indexField, String parameterName) {
@@ -121,7 +140,7 @@ public enum SolrFilestoreField {
         this.parameterName = parameterName;
     }
 
-    public String getSolrName() {
+    public String solrName() {
         return solrName;
     }
 
@@ -132,5 +151,4 @@ public enum SolrFilestoreField {
     public String getParameterName() {
         return parameterName;
     }
-
 }

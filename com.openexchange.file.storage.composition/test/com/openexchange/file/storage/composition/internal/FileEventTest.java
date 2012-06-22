@@ -287,18 +287,18 @@ public class FileEventTest {
         }
         
         @Override
-        protected void postEvent(Event event) {
-            String serviceId = (String) event.getProperty(FileStorageEventConstants.SERVICE);
-            String accountId = (String) event.getProperty(FileStorageEventConstants.ACCOUNT_ID);
+        protected void postEvent(Event event) {            
             try {
+                String serviceId = FileStorageEventHelper.extractService(event);
+                String accountId = FileStorageEventHelper.extractAccountId(event);
                 Session session = FileStorageEventHelper.extractSession(event);
+                assertEquals("Wrong service.", SERVICE, serviceId);
+                assertEquals("Wrong account.", ACCOUNT, accountId);
                 assertEquals("Wrong session.", this.session, session);
             } catch (OXException e) {
                 fail(e.getMessage());
             }
             
-            assertEquals("Wrong service.", SERVICE, serviceId);
-            assertEquals("Wrong account.", ACCOUNT, accountId);
             if (verifier != null) {
                 try {
                     verifier.verifyEvent(event);

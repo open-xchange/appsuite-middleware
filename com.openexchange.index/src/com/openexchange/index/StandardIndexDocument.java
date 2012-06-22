@@ -63,7 +63,7 @@ public class StandardIndexDocument<V> implements IndexDocument<V> {
 
     private final Type type;
     
-    private final Map<String, Object> properties;
+    private Map<String, Object> properties;
 
     /**
      * Initializes a new {@link StandardIndexDocument}.
@@ -104,6 +104,14 @@ public class StandardIndexDocument<V> implements IndexDocument<V> {
     
     public boolean containsProperty(String key) {
         return properties.containsKey(key);
+    }
+    
+    public void setProperties(Map<String, Object> properties) {
+        if (properties == null) {
+            return;
+        }
+        
+        this.properties = properties;
     }
 
 }

@@ -128,29 +128,19 @@ public class FileStorageEventHelper {
     }
     
     public static String extractObjectId(Event event) throws OXException {
-        Object idObj = event.getProperty(FileStorageEventConstants.OBJECT_ID);
-        if (idObj == null) {
-            throw FileStorageExceptionCodes.MISSING_PARAMETER.create(FileStorageEventConstants.OBJECT_ID);
-        }
-        
-        if (idObj instanceof String) {
-            return (String) idObj;
-        } else {
-            throw FileStorageExceptionCodes.INVALID_PARAMETER.create(FileStorageEventConstants.OBJECT_ID, idObj.getClass().getName());
-        }
+        return extractValue(event, FileStorageEventConstants.OBJECT_ID);
     }
 
     public static String extractFolderId(Event event) throws OXException {
-        Object idObj = event.getProperty(FileStorageEventConstants.FOLDER_ID);
-        if (idObj == null) {
-            throw FileStorageExceptionCodes.MISSING_PARAMETER.create(FileStorageEventConstants.FOLDER_ID);
-        }
-        
-        if (idObj instanceof String) {
-            return (String) idObj;
-        } else {
-            throw FileStorageExceptionCodes.INVALID_PARAMETER.create(FileStorageEventConstants.FOLDER_ID, idObj.getClass().getName());
-        }
+        return extractValue(event, FileStorageEventConstants.FOLDER_ID);
+    }
+    
+    public static String extractAccountId(Event event) throws OXException {
+        return extractValue(event, FileStorageEventConstants.ACCOUNT_ID);
+    }
+    
+    public static String extractService(Event event) throws OXException {
+        return extractValue(event, FileStorageEventConstants.SERVICE);
     }
     
     public static Set<Integer> extractVersions(Event event) {
@@ -177,6 +167,17 @@ public class FileStorageEventHelper {
         
         return sb.toString();
     }
+    
+    private static String extractValue(Event event, String key) throws OXException {
+        Object obj = event.getProperty(key);
+        if (obj == null) {
+            throw FileStorageExceptionCodes.MISSING_PARAMETER.create(key);
+        }
         
-
+        if (obj instanceof String) {
+            return (String) obj;
+        }
+        
+        throw FileStorageExceptionCodes.INVALID_PARAMETER.create(key, obj.getClass().getName(), String.class.getName());
+    }
 }
