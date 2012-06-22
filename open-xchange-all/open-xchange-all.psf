@@ -33,6 +33,8 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-recaptcha"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-unifiedmail"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-admin"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-admin-autocontextid"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-admin-reseller"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-spamhandler-default"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-spamhandler-spamassassin"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-indexing"/>
