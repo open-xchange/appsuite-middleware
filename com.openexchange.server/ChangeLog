@@ -8,6 +8,7 @@
  - Fix for bug 22166: Check SMTP port on SOAP-to-Object conversion
  - Fix for bug 21389: Fixed sorting in drafts folder
  - Fix for bug 22056: Invalidate folder cache on mail account update
+ - Fix for bug 22354: Use IMAP MOVE command for moving mails between folders if IMAP server supports it.
 
 * 2012-06-20 - thorben.betten@open-xchange.com
 
