@@ -49,11 +49,24 @@
 
 package com.openexchange.index.solr.internal.filestore;
 
+import java.io.InputStream;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
+import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageEventHelper;
+import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.composition.IDBasedFileAccess;
+import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
+import com.openexchange.groupware.Types;
+import com.openexchange.index.IndexAccess;
+import com.openexchange.index.IndexDocument.Type;
+import com.openexchange.index.IndexFacadeService;
+import com.openexchange.index.StandardIndexDocument;
+import com.openexchange.index.solr.internal.Services;
+import com.openexchange.session.Session;
 
 
 /**
@@ -64,18 +77,43 @@ import com.openexchange.file.storage.FileStorageEventHelper;
 public class SolrFilestoreEventHandler implements EventHandler {
     
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SolrFilestoreEventHandler.class));
+    
 
     @Override
     public void handleEvent(Event event) {
         if (FileStorageEventHelper.isInfostoreEvent(event)) {
-            if (FileStorageEventHelper.isCreateEvent(event)) {
-                LOG.info(FileStorageEventHelper.createDebugMessage("CreateEvent", event));
-            } else if (FileStorageEventHelper.isUpdateEvent(event)) {
-                LOG.info(FileStorageEventHelper.createDebugMessage("UpdateEvent", event));
-            } else if (FileStorageEventHelper.isDeleteEvent(event)) {
-                LOG.info(FileStorageEventHelper.createDebugMessage("DeleteEvent", event));
+            try {
+                Session session = FileStorageEventHelper.extractSession(event);
+                if (FileStorageEventHelper.isCreateEvent(event)) {
+                    IDBasedFileAccessFactory accessFactory = Services.getService(IDBasedFileAccessFactory.class);
+                    IndexFacadeService indexService = Services.getService(IndexFacadeService.class);                    
+                    IDBasedFileAccess access = accessFactory.createAccess(session);
+                    String id = FileStorageEventHelper.extractObjectId(event);
+                    File fileMetadata = access.getFileMetadata(id, FileStorageFileAccess.CURRENT_VERSION);
+                    StandardIndexDocument<File> document = new StandardIndexDocument<File>(fileMetadata, Type.INFOSTORE_DOCUMENT);
+                    IndexAccess<File> indexAccess = indexService.acquireIndexAccess(Types.INFOSTORE, session);    
+                    if (hasAttachment(fileMetadata)) {
+                        InputStream is = access.getDocument(id, FileStorageFileAccess.CURRENT_VERSION);                                            
+                        document.addProperty(SolrFilestoreConstants.ATTACHMENT, is);
+                        indexAccess.addAttachments(document, true);
+                    } else {
+                        indexAccess.addContent(document, true);
+                    }
+                    
+                    LOG.info(FileStorageEventHelper.createDebugMessage("CreateEvent", event));
+                } else if (FileStorageEventHelper.isUpdateEvent(event)) {
+                    LOG.info(FileStorageEventHelper.createDebugMessage("UpdateEvent", event));
+                } else if (FileStorageEventHelper.isDeleteEvent(event)) {
+                    LOG.info(FileStorageEventHelper.createDebugMessage("DeleteEvent", event));
+                }
+            } catch (OXException e) {
+                LOG.error(e.getMessage(), e);
             }
         }        
+    }
+    
+    private static boolean hasAttachment(File file) {
+        return file.getFileName() == null && file.getFileSize() == 0;
     }
 
 }

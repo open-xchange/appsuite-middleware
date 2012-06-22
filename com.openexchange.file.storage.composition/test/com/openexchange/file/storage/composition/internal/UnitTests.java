@@ -47,29 +47,25 @@
  *
  */
 
-package com.openexchange.index.solr;
+package com.openexchange.file.storage.composition.internal;
 
-import com.openexchange.i18n.LocalizableStrings;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
 
 
 /**
- * {@link SolrIndexExceptionMessages}
+ * {@link UnitTests}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public final class SolrIndexExceptionMessages implements LocalizableStrings {
+@RunWith(Suite.class)
+@SuiteClasses({
+    CompositingFileAccessTest.class,
+    FileIDTest.class,
+    FolderIDTest.class,
+    FileEventTest.class
+})
+public class UnitTests {
 
-    /**
-     * Initializes a new {@link SolrIndexExceptionMessages}.
-     */
-    public SolrIndexExceptionMessages() {
-        super();
-    }
-
-    // No IndexAccess implementation was found for module $1%s.
-    public static final String MISSING_ACCESS_FOR_MODULE_MSG = "No IndexAccess implementation was found for module $1%s.";
-    
-    // An I/O Error occurred: %1$s
-    public static final String IO_ERROR_MSG = "An I/O Error occurred: %1$s";
-    
 }

@@ -47,29 +47,30 @@
  *
  */
 
-package com.openexchange.index.solr;
+package com.openexchange.index.solr.internal.filestore;
 
-import com.openexchange.i18n.LocalizableStrings;
 
 
 /**
- * {@link SolrIndexExceptionMessages}
+ * {@link FileUUID}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public final class SolrIndexExceptionMessages implements LocalizableStrings {
-
-    /**
-     * Initializes a new {@link SolrIndexExceptionMessages}.
-     */
-    public SolrIndexExceptionMessages() {
+public class FileUUID {
+    
+    private final String fileUUID;
+    
+    
+    public FileUUID(int contextId, int userId, int accountId, String folderId, String fileId) {
         super();
+        StringBuilder tmp = new StringBuilder(64);
+        tmp.append(contextId).append('/').append(userId).append('/').append(accountId).append('/').append(folderId).append('/').append(fileId);
+        fileUUID = tmp.toString();
+    }
+    
+    @Override
+    public String toString() {
+        return fileUUID;
     }
 
-    // No IndexAccess implementation was found for module $1%s.
-    public static final String MISSING_ACCESS_FOR_MODULE_MSG = "No IndexAccess implementation was found for module $1%s.";
-    
-    // An I/O Error occurred: %1$s
-    public static final String IO_ERROR_MSG = "An I/O Error occurred: %1$s";
-    
 }

@@ -47,29 +47,53 @@
  *
  */
 
-package com.openexchange.index.solr;
+package com.openexchange.index.solr.internal.filestore;
 
-import com.openexchange.i18n.LocalizableStrings;
+import java.util.List;
+import java.util.Map;
+import com.openexchange.file.storage.File;
+import com.openexchange.index.IndexDocument;
+import com.openexchange.index.IndexField;
+import com.openexchange.index.IndexResult;
 
 
 /**
- * {@link SolrIndexExceptionMessages}
+ * {@link SolrFilestoreIndexResult}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public final class SolrIndexExceptionMessages implements LocalizableStrings {
+public class SolrFilestoreIndexResult implements IndexResult<File> {
 
+    private final int numFound;
+    
+    private final List<IndexDocument<File>> results;
+
+    private final Map<IndexField, Map<String, Long>> facetCounts;
+
+    
     /**
-     * Initializes a new {@link SolrIndexExceptionMessages}.
+     * Initializes a new {@link SolrFilestoreIndexResult}.
      */
-    public SolrIndexExceptionMessages() {
+    public SolrFilestoreIndexResult(int numFound, List<IndexDocument<File>> results, Map<IndexField, Map<String, Long>> facetCounts) {
         super();
+        this.numFound = numFound;
+        this.results = results;
+        this.facetCounts = facetCounts;
     }
 
-    // No IndexAccess implementation was found for module $1%s.
-    public static final String MISSING_ACCESS_FOR_MODULE_MSG = "No IndexAccess implementation was found for module $1%s.";
-    
-    // An I/O Error occurred: %1$s
-    public static final String IO_ERROR_MSG = "An I/O Error occurred: %1$s";
-    
+    @Override
+    public int getNumFound() {
+        return numFound;
+    }
+
+    @Override
+    public List<IndexDocument<File>> getResults() {
+        return results;
+    }
+
+    @Override
+    public Map<IndexField, Map<String, Long>> getFacetCounts() {
+        return facetCounts;
+    }
+
 }

@@ -49,27 +49,65 @@
 
 package com.openexchange.index.solr;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.util.Collections;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.Set;
+import junit.framework.TestCase;
+import com.openexchange.file.storage.DefaultFile;
+import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.File.Field;
+import com.openexchange.index.IndexDocument.Type;
+import com.openexchange.index.IndexResult;
+import com.openexchange.index.QueryParameters;
+import com.openexchange.index.SearchHandler;
+import com.openexchange.index.StandardIndexDocument;
+import com.openexchange.index.solr.internal.filestore.SolrFilestoreIndexAccess;
 
 
 /**
- * {@link UnitTests}
+ * {@link SolrFilestoreIndexAccessTest}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class UnitTests {
+public class SolrFilestoreIndexAccessTest extends TestCase {
     
-    public UnitTests() {
-        super();
-    }
+    private SolrFilestoreIndexAccess indexAccess;
     
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(MailSolrIndexAccessTest.class);
-        tests.addTestSuite(AddressComparatorTest.class);
-        tests.addTestSuite(SolrFilestoreIndexAccessTest.class);
-        return tests;
+    
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        indexAccess = new MockSolrFilestoreIndexAccess();
     }
 
+    public void testAddDocument() throws Exception {
+        File file = new DefaultFile();
+        file.setCategories("Ene mene muh");
+        file.setColorLabel(3);
+        file.setCreated(new GregorianCalendar(2005, 3, 12, 17, 24, 43).getTime());
+        file.setCreatedBy(5);
+        file.setDescription("This is the description");
+        file.setFileMD5Sum("234345645mlml4k5");
+        file.setFileMIMEType("text/html");
+        file.setFileName("A_file_name.html");
+        file.setFileSize(33456L);
+        file.setFolderId("A38");
+        file.setId("4352");
+        file.setLastModified(new Date());
+        file.setModifiedBy(16);
+        file.setTitle("I am the title, man...");
+        file.setURL("http://some.where");
+        file.setVersion(26);
+        file.setVersionComment("Version comment...");
+        
+        indexAccess.addEnvelopeData(new StandardIndexDocument<File>(file, Type.INFOSTORE_DOCUMENT));
+        QueryParameters params = new QueryParameters.Builder(Collections.EMPTY_MAP).setHandler(SearchHandler.ALL_REQUEST).setType(Type.INFOSTORE_DOCUMENT).build();
+        IndexResult<File> query = indexAccess.query(params, null);
+        assertTrue("Wrong result size", query.getNumFound() == 1);
+        File reloaded = query.getResults().get(0).getObject();
+        Set<Field> differences = file.differences(reloaded);
+        assertTrue("There were differences.", differences.size() == 0);
+    }
+    
 }

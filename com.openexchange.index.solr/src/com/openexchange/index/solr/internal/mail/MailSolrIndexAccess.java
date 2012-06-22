@@ -408,15 +408,8 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
     public IndexResult<MailMessage> query(final QueryParameters parameters, final Set<? extends IndexField> fields) throws OXException {
         return query(parameters, null, fields);
     }
-
-    @Override
-    public IndexResult<MailMessage> query(final QueryParameters parameters, final FacetParameters facetParameters, final Set<? extends IndexField> fields) throws OXException {
-        final Set<SolrMailField> solrFields = convertAndCheckFields(parameters, fields);
-        final List<IndexDocument<MailMessage>> mails = new ArrayList<IndexDocument<MailMessage>>();
-        final SolrQuery solrQuery = buildSolrQuery(parameters);
-        /*
-         * Check facet parameter
-         */
+    
+    private void addFaceting(SolrQuery solrQuery, FacetParameters facetParameters) {
         if (null != facetParameters) {
             /*
              * Check facet fields
@@ -448,6 +441,14 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
                 }
             }
         }
+    }
+
+    @Override
+    public IndexResult<MailMessage> query(final QueryParameters parameters, final FacetParameters facetParameters, final Set<? extends IndexField> fields) throws OXException {
+        final Set<SolrMailField> solrFields = convertAndCheckFields(parameters, fields);
+        final List<IndexDocument<MailMessage>> mails = new ArrayList<IndexDocument<MailMessage>>();
+        final SolrQuery solrQuery = buildSolrQuery(parameters);
+        addFaceting(solrQuery, facetParameters);
         setFieldList(solrQuery, solrFields);
         int off = parameters.getOff();
         final int len = parameters.getLen();
@@ -520,6 +521,24 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
         if (null != facetCountsMap) {
             indexResult.setFacetCounts(facetCountsMap);
         }
+        return indexResult;        
+    }
+    
+    public IndexResult<MailMessage> queryOld(QueryParameters parameters, Set<? extends IndexField> fields) throws OXException {
+        Set<SolrMailField> solrFields = convertAndCheckFields(parameters, fields);
+        SolrQuery solrQuery = buildSolrQuery(parameters);
+        setFieldList(solrQuery, solrFields);
+        List<IndexDocument<MailMessage>> mails = queryChunkWise(new SolrMailMessageConverter(), solrQuery, parameters.getOff(), parameters.getLen(), QUERY_ROWS);
+        if (mails.isEmpty()) {
+            return Indexes.emptyResult();
+        }
+
+        if (solrQuery.getBool("sortManually", false)) {
+            Collections.sort(mails, new AddressComparator(parameters.getSortField(), parameters.getOrder()));
+        }
+        final MailIndexResult indexResult = new MailIndexResult(mails.size());
+        indexResult.setResults(mails);
+        
         return indexResult;        
     }
     
@@ -712,16 +731,20 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
         return retval;
     }
 
-    private String buildQueryString(final int accountId, final String folder) {
-        final StringBuilder sb = new StringBuilder(128); 
+    private String buildQueryString(int accountId, String folder) {
+        StringBuilder sb = new StringBuilder(128); 
+        boolean withAccount = false;
         if (SolrMailField.ACCOUNT.isIndexed() && accountId >= 0) {
-            sb.append(" AND ");
             sb.append('(').append(SolrMailField.ACCOUNT.solrName()).append(":\"").append(accountId).append("\")");
+            withAccount = true;
         }
             
         if (SolrMailField.FULL_NAME.isIndexed() && folder != null) {
-            sb.append(" AND ");
-            sb.append('(').append(SolrMailField.FULL_NAME.solrName()).append(":\"").append("\"" + folder + "\"").append("\")");
+            if (withAccount) {
+                sb.append(" AND ");
+            }
+            
+            sb.append('(').append(SolrMailField.FULL_NAME.solrName()).append(":\"").append(folder).append("\")");
         }  
         
         return sb.toString();

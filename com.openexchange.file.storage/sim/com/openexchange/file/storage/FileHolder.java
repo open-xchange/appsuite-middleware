@@ -47,29 +47,62 @@
  *
  */
 
-package com.openexchange.index.solr;
+package com.openexchange.file.storage;
 
-import com.openexchange.i18n.LocalizableStrings;
-
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import org.apache.commons.io.IOUtils;
 
 /**
- * {@link SolrIndexExceptionMessages}
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link FileHolder}
+ * 
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public final class SolrIndexExceptionMessages implements LocalizableStrings {
+public class FileHolder {
 
-    /**
-     * Initializes a new {@link SolrIndexExceptionMessages}.
-     */
-    public SolrIndexExceptionMessages() {
+    private final File file;
+
+    private final byte[] content;
+
+
+    public FileHolder(File file) {
         super();
+        this.file = file;
+        this.content = null;
+    }
+        
+    public FileHolder(File file, byte[] content) {
+        super();
+        this.file = file;
+        this.content = content;
     }
 
-    // No IndexAccess implementation was found for module $1%s.
-    public static final String MISSING_ACCESS_FOR_MODULE_MSG = "No IndexAccess implementation was found for module $1%s.";
-    
-    // An I/O Error occurred: %1$s
-    public static final String IO_ERROR_MSG = "An I/O Error occurred: %1$s";
-    
+    public FileHolder(File file, InputStream content) {
+        super();
+        this.file = file;
+        byte[] tmp;
+        try {
+            tmp = IOUtils.toByteArray(content);
+        } catch (IOException e) {
+            tmp = new byte[0];
+        } finally {
+            IOUtils.closeQuietly(content);
+        }
+        
+        this.content = tmp;
+    }
+
+    public File getFile() {
+        return file;
+    }
+
+    public InputStream getContent() {
+        if (content == null) {
+            return null;
+        }
+        
+        return new ByteArrayInputStream(content);
+    }
+
 }

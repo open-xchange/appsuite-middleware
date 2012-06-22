@@ -49,27 +49,67 @@
 
 package com.openexchange.index.solr;
 
-import com.openexchange.i18n.LocalizableStrings;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.client.solrj.response.UpdateResponse;
+import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.params.SolrParams;
+import com.openexchange.exception.OXException;
 
 
 /**
- * {@link SolrIndexExceptionMessages}
+ * {@link InMemoryIndex}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public final class SolrIndexExceptionMessages implements LocalizableStrings {
+public class InMemoryIndex {
+    
+    private final List<Map<String, Object>> index = new ArrayList<Map<String,Object>>();
 
+    
     /**
-     * Initializes a new {@link SolrIndexExceptionMessages}.
+     * Initializes a new {@link InMemoryIndex}.
+     * @param identifier
+     * @param triggerType
      */
-    public SolrIndexExceptionMessages() {
-        super();
+    public InMemoryIndex() {
+        super();        
+    }
+    
+    protected QueryResponse query(SolrParams query) throws OXException {
+        int start = Integer.parseInt(query.get("start"));
+        int rows = Integer.parseInt(query.get("rows"));
+        int end = start + rows;            
+        if (start > index.size()) {
+            return new MockQueryResponse(Collections.EMPTY_SET);
+        }
+        
+        if (end > index.size()) {
+            end = index.size();
+        }
+        
+        Set<Map<String, Object>> entries = new HashSet<Map<String, Object>>();
+        List<Map<String, Object>> subList = index.subList(start, end);
+        entries.addAll(subList);            
+        return new MockQueryResponse(entries);
+    }
+    
+    protected UpdateResponse addDocument(SolrInputDocument document) throws OXException {
+        UpdateResponse response = new UpdateResponse();
+        response.setElapsedTime(0L);
+        Map<String, Object> indexDocument = new HashMap<String, Object>();
+        for (String key : document.keySet()) {
+            indexDocument.put(key, document.get(key).getValue());
+        }
+        index.add(indexDocument);
+        
+        return response;
     }
 
-    // No IndexAccess implementation was found for module $1%s.
-    public static final String MISSING_ACCESS_FOR_MODULE_MSG = "No IndexAccess implementation was found for module $1%s.";
-    
-    // An I/O Error occurred: %1$s
-    public static final String IO_ERROR_MSG = "An I/O Error occurred: %1$s";
-    
 }

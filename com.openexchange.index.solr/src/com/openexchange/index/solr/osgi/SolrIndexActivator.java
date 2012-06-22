@@ -60,6 +60,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.file.storage.FileStorageEventConstants;
+import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.solr.groupware.IndexedFoldersCreateTableService;
 import com.openexchange.index.solr.groupware.IndexedFoldersCreateTableTask;
@@ -90,7 +91,7 @@ public class SolrIndexActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class[] {
             DatabaseService.class, UserService.class, ConfigurationService.class, TimerService.class, ThreadPoolService.class,
-            SolrAccessService.class };
+            SolrAccessService.class, IDBasedFileAccessFactory.class };
     }
 
     @Override

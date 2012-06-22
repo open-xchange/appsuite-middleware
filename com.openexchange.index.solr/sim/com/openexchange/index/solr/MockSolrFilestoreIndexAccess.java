@@ -49,27 +49,40 @@
 
 package com.openexchange.index.solr;
 
-import com.openexchange.i18n.LocalizableStrings;
+import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.client.solrj.response.UpdateResponse;
+import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.params.SolrParams;
+import com.openexchange.exception.OXException;
+import com.openexchange.index.solr.internal.filestore.SolrFilestoreIndexAccess;
+import com.openexchange.solr.SolrCoreIdentifier;
 
 
 /**
- * {@link SolrIndexExceptionMessages}
+ * {@link MockSolrFilestoreIndexAccess}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public final class SolrIndexExceptionMessages implements LocalizableStrings {
+public class MockSolrFilestoreIndexAccess extends SolrFilestoreIndexAccess {
+    
+    private final InMemoryIndex index;
 
     /**
-     * Initializes a new {@link SolrIndexExceptionMessages}.
+     * Initializes a new {@link MockSolrFilestoreIndexAccess}.
      */
-    public SolrIndexExceptionMessages() {
-        super();
+    public MockSolrFilestoreIndexAccess() {
+        super(new SolrCoreIdentifier(1, 1, 1));
+        index = new InMemoryIndex();
+    }
+    
+    @Override
+    protected QueryResponse query(SolrParams query) throws OXException {
+        return index.query(query);
+    }
+    
+    @Override
+    protected UpdateResponse addDocument(SolrInputDocument document) throws OXException {
+        return index.addDocument(document);
     }
 
-    // No IndexAccess implementation was found for module $1%s.
-    public static final String MISSING_ACCESS_FOR_MODULE_MSG = "No IndexAccess implementation was found for module $1%s.";
-    
-    // An I/O Error occurred: %1$s
-    public static final String IO_ERROR_MSG = "An I/O Error occurred: %1$s";
-    
 }

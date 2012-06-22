@@ -47,29 +47,39 @@
  *
  */
 
-package com.openexchange.index.solr;
+package com.openexchange.index.solr.internal.mail;
 
-import com.openexchange.i18n.LocalizableStrings;
+import java.util.List;
+import java.util.Map;
+import org.apache.solr.common.SolrDocument;
+import com.openexchange.exception.OXException;
+import com.openexchange.index.IndexDocument;
+import com.openexchange.index.IndexField;
+import com.openexchange.index.IndexResult;
+import com.openexchange.index.solr.internal.SolrResultConverter;
+import com.openexchange.mail.dataobjects.MailMessage;
 
 
 /**
- * {@link SolrIndexExceptionMessages}
+ * {@link SolrMailMessageConverter}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public final class SolrIndexExceptionMessages implements LocalizableStrings {
+public class SolrMailMessageConverter implements SolrResultConverter<MailMessage> {
 
-    /**
-     * Initializes a new {@link SolrIndexExceptionMessages}.
-     */
-    public SolrIndexExceptionMessages() {
-        super();
+    @Override
+    public IndexDocument<MailMessage> convert(SolrDocument document) throws OXException {
+        IndexDocument<MailMessage> converted = SolrInputDocumentHelper.getInstance().readDocument(document, MailFillers.allFillers());
+        return converted;
     }
 
-    // No IndexAccess implementation was found for module $1%s.
-    public static final String MISSING_ACCESS_FOR_MODULE_MSG = "No IndexAccess implementation was found for module $1%s.";
-    
-    // An I/O Error occurred: %1$s
-    public static final String IO_ERROR_MSG = "An I/O Error occurred: %1$s";
-    
+    @Override
+    public IndexResult<MailMessage> createIndexResult(List<IndexDocument<MailMessage>> documents, Map<IndexField, Map<String, Long>> facetCounts) throws OXException {
+        MailIndexResult result = new MailIndexResult(documents.size());
+        result.setResults(documents);
+        result.setFacetCounts(facetCounts);
+        
+        return result;
+    }
+
 }

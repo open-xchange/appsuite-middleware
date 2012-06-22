@@ -49,27 +49,40 @@
 
 package com.openexchange.index.solr;
 
-import com.openexchange.i18n.LocalizableStrings;
+import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.params.SolrParams;
+import com.openexchange.exception.OXException;
+import com.openexchange.index.solr.internal.mail.MailSolrIndexAccess;
+import com.openexchange.solr.SolrCoreIdentifier;
 
-
-/**
- * {@link SolrIndexExceptionMessages}
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- */
-public final class SolrIndexExceptionMessages implements LocalizableStrings {
-
-    /**
-     * Initializes a new {@link SolrIndexExceptionMessages}.
-     */
-    public SolrIndexExceptionMessages() {
-        super();
-    }
-
-    // No IndexAccess implementation was found for module $1%s.
-    public static final String MISSING_ACCESS_FOR_MODULE_MSG = "No IndexAccess implementation was found for module $1%s.";
+public class MockMailSolrIndexAccess extends MailSolrIndexAccess {
     
-    // An I/O Error occurred: %1$s
-    public static final String IO_ERROR_MSG = "An I/O Error occurred: %1$s";
+    private final InMemoryIndex index;
+    
+    /**
+     * Initializes a new {@link MockMailSolrIndexAccess}.
+     * @param identifier
+     * @param triggerType
+     * @throws OXException 
+     */
+    public MockMailSolrIndexAccess(int docs) throws OXException {
+        super(new SolrCoreIdentifier(1, 1, 1));
+        index = new InMemoryIndex();
+        for (int i = 0; i < docs; i++) {      
+            SolrInputDocument doc = new SolrInputDocument();
+            doc.addField("time_" + i, System.currentTimeMillis());
+            index.addDocument(doc);
+        }
+    }
+    
+    public static int getQueryRows() {
+        return QUERY_ROWS;
+    }
+    
+    @Override
+    protected QueryResponse query(SolrParams query) throws OXException {
+        return index.query(query);
+    }
     
 }
