@@ -79,6 +79,9 @@ public final class JSlobExceptionMessages implements LocalizableStrings {
     // Invalid path: %1$s.
     public static final String INVALID_PATH = "Invalid path: %1$s.";
 
+    // Referenced JSlob %1$s must not be set for service %2$s. Nothing will be done.
+    public static final String SET_NOT_SUPPORTED = "Referenced JSlob %1$s must not be set for service %2$s. Nothing will be done.";
+
     /**
      * Initializes a new {@link JSlobExceptionMessages}.
      */
