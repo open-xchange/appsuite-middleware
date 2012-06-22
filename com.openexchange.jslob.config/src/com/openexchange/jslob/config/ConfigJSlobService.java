@@ -140,7 +140,6 @@ public final class ConfigJSlobService implements JSlobService {
                     attributes = new HashMap<String, AttributedProperty>(initialCapacity);
                     preferenceItems.put(key, attributes);
                 }
-                preferencePath = preferencePath + "/value"; // Avoid overriding value when appending meta & other property information
                 try {
                     attributes.put(preferencePath, new AttributedProperty(preferencePath, entry.getKey(), property));
                 } catch (final Exception e) {
@@ -212,10 +211,13 @@ public final class ConfigJSlobService implements JSlobService {
             getStorage().remove(new JSlobId(SERVICE_ID, id, user, context));
         } else {
             final JSONObject jObject = jsonJSlob.getJsonObject();
+            jObject.remove("meta");
             if (null == jObject) {
                 getStorage().remove(new JSlobId(SERVICE_ID, id, user, context));
                 return;
             }
+            List<List<JSONPathElement>> pathsToPurge = new ArrayList<List<JSONPathElement>>();
+            
             // Set (or replace) JSlob
             final Map<String, AttributedProperty> attributes = preferenceItems.get(id);
             if (null == attributes) {
@@ -228,17 +230,26 @@ public final class ConfigJSlobService implements JSlobService {
                     final Object value = JSONPathElement.getPathFrom(attributedProperty.path, jObject);
                     if (null != value) {
                         try {
-                            final String oldValue = view.get(attributedProperty.propertyName, String.class);
-                            // Clients have a habit of dumping the config back at us, so we only save differing values.
-                            if (!value.equals(oldValue)) {
-                                view.set("user", attributedProperty.propertyName, value);
-                            }
+                        	if (view.property(attributedProperty.propertyName, String.class).isDefined()) {
+                                pathsToPurge.add(attributedProperty.path);
+                        		final Object oldValue = asJSObject(view.get(attributedProperty.propertyName, String.class));
+                                // Clients have a habit of dumping the config back at us, so we only save differing values.
+                                if (!value.equals(oldValue)) {
+                                    view.set("user", attributedProperty.propertyName, value);
+                                }
+                        	} 
                         } catch (final OXException e) {
                             throw new OXException(e);
                         }
                     }
                 }
             }
+            
+            for(List<JSONPathElement> path: pathsToPurge) {
+            	JSONPathElement.remove(path, jObject);
+            }
+            // Finally store JSlob
+            getStorage().store(new JSlobId(SERVICE_ID, id, user, context), jsonJSlob);
         }
     }
 
@@ -428,6 +439,11 @@ public final class ConfigJSlobService implements JSlobService {
             List<JSONPathElement> path = attributedProperty.path;
             Object value = asJSObject(view.get(attributedProperty.propertyName, String.class));
             addValueByPath(path, value, jsonJSlob);
+            
+            List<JSONPathElement> metaPath = new ArrayList<JSONPathElement>(path.size()+1);
+            metaPath.add(new JSONPathElement(METADATA_PREFIX));
+            metaPath.addAll(path);
+            
             // Add the metadata as well as a separate JSON object
             final JSONObject jMetaData = new JSONObject();
             final ComposedConfigProperty<String> preferenceItem = attributedProperty.property;
@@ -448,9 +464,7 @@ public final class ConfigJSlobService implements JSlobService {
             value = Boolean.valueOf(writable);
             jMetaData.put("configurable", value);
             // Insert meta data
-            final String preferencePath = attributedProperty.preferencePath;
-            path = JSONPathElement.parsePath(preferencePath.substring(0, preferencePath.lastIndexOf('/')) + '/' + METADATA_PREFIX);
-            addValueByPath(path, jMetaData, jsonJSlob);
+            addValueByPath(metaPath, jMetaData, jsonJSlob);
         } catch (final JSONException e) {
             throw JSlobExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
