@@ -1325,7 +1325,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     }
                     list = list.subList(fromIndex, toIndex);
                 }
-                return new PropertizedList<List<MailMessage>>(list).setProperty("cached", Boolean.valueOf(cached)).setProperty("more", Boolean.valueOf(limit > 0));
+                return new PropertizedList<List<MailMessage>>(list).setProperty("cached", Boolean.valueOf(cached)).setProperty("more", Integer.valueOf(messageCount));
             }
             /*
              * Include body
