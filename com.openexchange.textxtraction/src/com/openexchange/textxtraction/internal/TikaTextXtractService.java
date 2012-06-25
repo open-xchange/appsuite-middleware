@@ -301,7 +301,7 @@ public final class TikaTextXtractService extends AbstractTextXtractService {
                 final NonClosableInputStream ncis = new NonClosableInputStream(in);
                 try {
                     ncis.mark(8192);
-                    return ExtractorFactory.createExtractor(OPCPackage.open(in)).getText();
+                    return ExtractorFactory.createExtractor(OPCPackage.open(ncis)).getText();
                 } finally {
                     if (ncis.closed) {
                         // Stream has been closed unexpectedly
