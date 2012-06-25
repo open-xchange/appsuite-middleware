@@ -103,6 +103,10 @@ public class ListRequest extends AbstractFolderRequest<ListResponse> {
         this(api, parentFolder, DEFAULT_COLUMNS, ignoreMail);
     }
 
+    public ListRequest(final API api, final String parentFolder, final boolean ignoreMail, final boolean failOnError) {
+        this(api, parentFolder, DEFAULT_COLUMNS, ignoreMail, failOnError);
+    }
+
     public ListRequest(final API api, final String parentFolder, final Modules[] allowedModules) {
         this(api, parentFolder, DEFAULT_COLUMNS, false, allowedModules, true);
     }

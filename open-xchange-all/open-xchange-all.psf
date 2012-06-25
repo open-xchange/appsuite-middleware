@@ -12,6 +12,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-authentication-ldap"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-authentication-ucs"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-authentication-imap"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-authentication-kerberos"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-authorization-standard"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-dav"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-imap"/>
