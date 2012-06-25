@@ -52,7 +52,6 @@ import java.util.Calendar;
 import java.util.Locale;
 import java.util.TimeZone;
 import com.openexchange.ajax.config.actions.Tree;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 
 /**
@@ -84,7 +83,7 @@ public class SimpleCredentials implements Cloneable {
     private boolean hasOXUpdater;
     private boolean hasOXUpdaterSet = false;
 
-    public SimpleCredentials(TestUserConfigFactory userConfigFactory, ContactFinder contactFinder) {
+    public SimpleCredentials(final TestUserConfigFactory userConfigFactory, final ContactFinder contactFinder) {
         super();
         this.userConfigFactory = userConfigFactory;
         this.contactFinder = contactFinder;
@@ -167,7 +166,7 @@ public class SimpleCredentials implements Cloneable {
         if (null == privateInfostoreFolderId) {
             try {
                 privateInfostoreFolderId = getConfig().getString(Tree.PrivateInfostoreFolder);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 privateInfostoreFolderId = "";
             }
         }
@@ -205,7 +204,7 @@ public class SimpleCredentials implements Cloneable {
         return timezone;
     }
 
-    public Locale getLocale() throws OXException {
+    public Locale getLocale() throws FixtureException {
         if (null == locale) {
             try {
                 final String[] language_country = getConfig().getString(Tree.Language).split("_");
@@ -215,6 +214,11 @@ public class SimpleCredentials implements Cloneable {
             }
         }
         return locale;
+    }
+
+    public void resetLocal() {
+        config = null;
+        locale = null;
     }
 
     public Calendar getCalendar() {
@@ -253,7 +257,7 @@ public class SimpleCredentials implements Cloneable {
     public Object clone() {
         try {
             return super.clone();
-        } catch (CloneNotSupportedException e) {
+        } catch (final CloneNotSupportedException e) {
             e.printStackTrace();
             return null;
         }

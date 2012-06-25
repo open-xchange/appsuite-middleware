@@ -739,7 +739,7 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
     @Override
     public void addHeader(final String name, final String value) {
         final List<String> prevValues = headers.get(name);
-        if (null == prevValues || SINGLE_VALUE_HEADERS.contains(name)) {
+        if (SINGLE_VALUE_HEADERS.contains(name)) {
             headers.put(name, Collections.singletonList(value));
         } else {
             /*
@@ -860,10 +860,9 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
             desc = String.format(desc, request.getServletPath());
         }
         String errorMsgStr = ERROR_PAGE_TEMPL;
-        errorMsgStr =
-            errorMsgStr.replaceAll("#STATUS_CODE#", Integer.toString(this.status)).replaceAll("#STATUS_MSG#", this.statusMsg).replaceFirst(
-                "#STATUS_DESC#",
-                desc);
+        errorMsgStr = errorMsgStr.replaceAll("#STATUS_CODE#", String.valueOf(this.status)).replaceAll(
+            "#STATUS_MSG#",
+            Matcher.quoteReplacement(this.statusMsg)).replaceFirst("#STATUS_DESC#", desc);
         synchronized (HEADER_DATE_FORMAT) {
             errorMsgStr = errorMsgStr.replaceFirst("#DATE#", HEADER_DATE_FORMAT.format(new Date(System.currentTimeMillis())));
         }

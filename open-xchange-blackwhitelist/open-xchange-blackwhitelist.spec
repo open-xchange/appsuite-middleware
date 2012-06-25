@@ -4,6 +4,7 @@ BuildArch:      noarch
 #!BuildIgnore: post-build-checks
 BuildRequires:  ant
 BuildRequires:  ant-nodeps
+BuildRequires:  open-xchange-core >= @OXVERSION@
 BuildRequires:  java-devel >= 1.6.0
 Version:        @OXVERSION@
 %define         ox_release 0

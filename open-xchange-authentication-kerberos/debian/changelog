@@ -1,0 +1,5 @@
+open-xchange-authentication-kerberos (6.21.0-0) unstable; urgency=low
+
+  * Initial package.
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 25 Jun 2012 16:40:11 +0200

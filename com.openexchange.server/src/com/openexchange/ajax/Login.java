@@ -656,7 +656,7 @@ public class Login extends AJAXServlet {
                                         throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
                                     }
                                 } catch (final UndeclaredThrowableException e) {
-                                    throw LoginExceptionCodes.UNKNOWN.create(e);
+                                    throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
                                 }
                                 final JSONObject json = new JSONObject();
                                 LoginWriter.write(session, json);
@@ -824,12 +824,16 @@ public class Login extends AJAXServlet {
         if (req.getHeader(Header.AUTH_HEADER) != null) {
             try {
                 doAuthHeaderLogin(req, resp);
+
             } catch (final OXException e) {
-                resp.setHeader("WWW-Authenticate", "Basic realm=\"Open-Xchange\"");
+                LOG.error(e.getMessage(), e);
+                resp.addHeader("WWW-Authenticate", "NEGOTIATE");
+                resp.addHeader("WWW-Authenticate", "Basic realm=\"Open-Xchange\"");
                 resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
             }
         } else {
-            resp.setHeader("WWW-Authenticate", "Basic realm=\"Open-Xchange\"");
+            resp.addHeader("WWW-Authenticate", "NEGOTIATE");
+            resp.addHeader("WWW-Authenticate", "Basic realm=\"Open-Xchange\"");
             resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization Required!");
         }
     }
@@ -1087,7 +1091,11 @@ public class Login extends AJAXServlet {
             if (AjaxExceptionCodes.PREFIX.equals(e.getPrefix())) {
                 throw e;
             }
-            LOG.error(e.getMessage(), e);
+            if (LoginExceptionCodes.REDIRECT.equals(e)) {
+                LOG.debug(e.getMessage(), e);
+            } else {
+                LOG.error(e.getMessage(), e);
+            }
             response.setException(e);
         } catch (final JSONException e) {
             final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
@@ -1397,14 +1405,22 @@ public class Login extends AJAXServlet {
 
     private void doAuthHeaderLogin(final HttpServletRequest req, final HttpServletResponse resp) throws OXException, IOException {
         final String auth = req.getHeader(Header.AUTH_HEADER);
+        final String version;
         final Credentials creds;
-        if (!Authorization.checkForBasicAuthorization(auth)) {
+        if (!Authorization.checkForAuthorizationHeader(auth)) {
             throw LoginExceptionCodes.UNKNOWN_HTTP_AUTHORIZATION.create();
         }
-        creds = Authorization.decode(auth);
-        final String client = parseClient(req);
         final LoginConfiguration conf = confReference.get();
-        final String version = conf.clientVersion;
+        if (Authorization.checkForBasicAuthorization(auth)) {
+            creds = Authorization.decode(auth);
+            version = conf.clientVersion;
+        } else if (Authorization.checkForKerberosAuthorization(auth)) {
+            creds = new Credentials("kerberos", "");
+            version = "Kerberos";
+        } else {
+            throw LoginExceptionCodes.UNKNOWN_HTTP_AUTHORIZATION.create("");
+        }
+        final String client = parseClient(req);
         final String clientIP = parseClientIP(req);
         final String userAgent = parseUserAgent(req);
         final Map<String, List<String>> headers = copyHeaders(req);
@@ -1480,6 +1496,7 @@ public class Login extends AJAXServlet {
         final Session session = result.getSession();
         Tools.disableCaching(resp);
         writeSecretCookie(resp, session, session.getHash(), req.isSecure());
+        addHeadersAndCookies(result, resp);
         resp.sendRedirect(generateRedirectURL(null, conf.httpAuthAutoLogin, session.getSessionID()));
     }
 
