@@ -1,3 +1,33 @@
+* 2012-06-22 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22350: Added dummy basic-type to JSON converter
+ - Fix for bug 21838: Fixed saving/editing drafts with inline images
+ - Fix for bug 22377: Log a missing configuration property as a warning, but don't abort Servlet registration
+
+* 2012-06-21 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 22337: Fixed Strange recipient and sender of counter mails.
+
+* 2012-06-21 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22227: Fixed setting look-up marker in appended message
+ - Fix for bug 22166: Check SMTP port on SOAP-to-Object conversion
+ - Fix for bug 21389: Fixed sorting in drafts folder
+ - Fix for bug 22056: Invalidate folder cache on mail account update
+ - Fix for bug 22354: Use IMAP MOVE command for moving mails between folders if IMAP server supports it.
+
+* 2012-06-20 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22336: Fixed possible StackOverflowError on non-css content sanitizing
+
+* 2012-06-20 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 21895: Updating Appointments as organizer does not necessarily add the organizer as participant.
+
+* 2012-06-19 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22321: Invalidate caches on changes global address book permissions
+
 * 2012-06-18 - thorben.betten@open-xchange.com
 
 - Fix for bug 22319: Support for IDN domains in IMAP authentication bundle

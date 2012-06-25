@@ -380,6 +380,10 @@ public enum MailExceptionCode implements OXExceptionCode {
      * The attachments to this mail exceeded the size limit for attachments. Instead of sending the attachment in the email, the attachment was published and the link added to your email. Whoever receives the email can then download the attachment.
      */
     USED_PUBLISHING_FEATURE(MailExceptionStrings.USED_PUBLISHING_FEATURE_MSG,  Category.CATEGORY_WARNING, 84),
+    /**
+     * Draft message could not be saved
+     */
+    DRAFT_FAILED_UNKNOWN(MailExceptionStrings.DRAFT_FAILED_UNKNOWN_MSG, Category.CATEGORY_USER_INPUT, 85),
     
     ;
 

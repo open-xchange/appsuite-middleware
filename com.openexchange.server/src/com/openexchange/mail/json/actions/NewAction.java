@@ -168,6 +168,9 @@ public final class NewAction extends AbstractMailAction {
                         final ComposedMailMessage composedMail =
                             MessageParser.parse4Draft(jsonMailObj, uploadEvent, session, accountId, warnings);
                         msgIdentifier = mailInterface.saveDraft(composedMail, false, accountId);
+                        if (msgIdentifier == null) {
+                            throw MailExceptionCode.DRAFT_FAILED_UNKNOWN.create();
+                        }
                     } else {
                         /*
                          * ... and send message

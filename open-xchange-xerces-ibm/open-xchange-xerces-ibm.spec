@@ -1,29 +1,20 @@
 
 Name:           open-xchange-xerces-ibm
 BuildArch:      noarch
-#!BuildIgnore: post-build-checks
+#!BuildIgnore:  post-build-checks
 BuildRequires:  ant
 BuildRequires:  ant-nodeps
-%if 0%{?suse_version}  && !0%{?sles_version}
-BuildRequires:  java-sdk-openjdk
-%endif
-%if 0%{?sles_version} == 11
-# SLES 11
-BuildRequires:  java-1_6_0-ibm-devel
-%endif
-%if 0%{?rhel_version} || 0%{?fedora_version}
-BuildRequires:  java-1.6.0-openjdk-devel
-%endif
-Version:    @OXVERSION@
-%define        ox_release 0
-Release:    %{ox_release}_<CI_CNT>.<B_CNT>
+BuildRequires:  java-sdk-ibm >= 1.6.0
+Version:    	@OXVERSION@
+%define         ox_release 0
+Release:     	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
-License:       GPL-2.0
+License:        GPL-2.0
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 URL:            http://www.open-xchange.com/
-Source:        %{name}_%{version}.orig.tar.bz2
+Source:         %{name}_%{version}.orig.tar.bz2
 Summary:        Xerces Compat for IBM Java
-Requires:       java-1_6_0-ibm
+Requires:       java-ibm >= 1.6.0
 Provides:       open-xchange-xerces
 Conflicts:      open-xchange-xerces-sun
 

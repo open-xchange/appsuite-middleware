@@ -709,6 +709,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     @Override
     public MailMessage getMessageLong(final String fullName, final long msgUID, final boolean markSeen) throws OXException {
+        if (msgUID < 0) {
+            return null;
+        }
         try {
             final int desiredMode = markSeen ? READ_WRITE : READ_ONLY;
             imapFolder = setAndOpenFolder(imapFolder, fullName, desiredMode);
@@ -844,7 +847,22 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             // Add desired fields
             usedFields.addAll(mailFields);
             // Add sort field
-            usedFields.add(null == sortField ? MailField.RECEIVED_DATE : MailField.toField(sortField.getListField()));
+            final MailSortField effectiveSortField;
+            if (null == sortField) {
+                effectiveSortField = MailSortField.RECEIVED_DATE;
+            } else {
+                if (MailSortField.SENT_DATE.equals(sortField)) {
+                    final String draftsFullname = imapAccess.getFolderStorage().getDraftsFolder();
+                    if (fullName.equals(draftsFullname)) {
+                        effectiveSortField = MailSortField.RECEIVED_DATE;
+                    } else {
+                        effectiveSortField = sortField;
+                    }
+                } else {
+                    effectiveSortField = sortField;
+                }
+            }
+            usedFields.add(null == effectiveSortField ? MailField.RECEIVED_DATE : MailField.toField(effectiveSortField.getListField()));
             /*
              * Shall a search be performed?
              */
@@ -858,7 +876,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  * Check if an all-fetch can be performed to only obtain UIDs of all folder's messages: FETCH 1: (UID)
                  */
                 final MailFields mfs = new MailFields(mailFields);
-                if (((null == sortField) || MailSortField.RECEIVED_DATE.equals(sortField)) && onlyLowCostFields(mfs)) {
+                if (((null == effectiveSortField) || MailSortField.RECEIVED_DATE.equals(effectiveSortField)) && onlyLowCostFields(mfs)) {
                     final MailMessage[] mailMessages = performLowCostFetch(fullName, mfs, order, indexRange);
                     imapFolderStorage.updateCacheIfDiffer(fullName, mailMessages.length);
                     return mailMessages;
@@ -877,7 +895,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 }
             }
             MailMessage[] mails = null;
-            Message[] msgs = IMAPSort.sortMessages(imapFolder, usedFields, filter, sortField, order, getLocale(), imapConfig);
+            Message[] msgs = IMAPSort.sortMessages(imapFolder, usedFields, filter, effectiveSortField, order, getLocale(), imapConfig);
             if (null != msgs) {
                 /*
                  * Sort was performed on IMAP server
@@ -963,7 +981,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  * Perform sort on temporary list
                  */
                 final List<MailMessage> msgList = Arrays.asList(mails);
-                Collections.sort(msgList, new MailMessageComparator(sortField, order == OrderDirection.DESC, getLocale()));
+                Collections.sort(msgList, new MailMessageComparator(effectiveSortField, order == OrderDirection.DESC, getLocale()));
                 mails = msgList.toArray(mails);
                 /*
                  * Get proper sub-array if an index range is specified
@@ -1019,22 +1037,42 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     }
 
     /**
+     * Indicates whether <tt>Threadable</tt> cache is enabled.
+     * 
+     * @return <code>true</code> if enabled; otherwise <code>false</code>
+     */
+    public static boolean isThreadableCacheEnabled() {
+        return false;
+    }
+
+    /**
      * Gets the <tt>Threadable</tt> with cache look-up.
      * 
      * @param f The IMAP folder
      * @param sorted Whether the returned <tt>Threadable</tt> is supposed to be thread-sorted
      * @param cache <code>true</code> to immediately return a possibly cached element; otherwise <code>false</code>
+     * @param limit The max. number of messages
      * @return The <tt>Threadable</tt> either from cache or newly generated
      * @throws MessagingException If <tt>Threadable</tt> cannot be returned for any reason
      */
-    protected ThreadableResult getThreadableFor(final IMAPFolder f, final boolean sorted, final boolean cache) throws MessagingException {
+    protected ThreadableResult getThreadableFor(final IMAPFolder f, final boolean sorted, final boolean cache, final int limit) throws MessagingException {
+        if (!isThreadableCacheEnabled()) {
+            Threadable threadable = Threadable.getAllThreadablesFrom(imapFolder, limit);
+            if (sorted) {
+                threadable = new Threader().thread(threadable);
+            }
+            return new ThreadableResult(threadable, false);
+        }
+        /*
+         * Fetch from cache (if present)
+         */
         final ThreadableCacheEntry entry = ThreadableCache.getInstance().getEntry(f.getFullName(), accountId, session);
         synchronized (entry) {
             final boolean logIt = INFO; // TODO: Switch to DEBUG
             final long st = logIt ? System.currentTimeMillis() : 0L;
             TLongCollection uids = null;
             if (null == entry.getThreadable() || sorted != entry.isSorted()) {
-                Threadable threadable = Threadable.getAllThreadablesFrom(imapFolder);
+                Threadable threadable = Threadable.getAllThreadablesFrom(imapFolder, limit);
                 if (sorted) {
                     threadable = new Threader().thread(threadable);
                 }
@@ -1054,7 +1092,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         @Override
                         public void run() {
                             try {
-                                Threadable threadable = Threadable.getAllThreadablesFrom(imapFolder);
+                                Threadable threadable = Threadable.getAllThreadablesFrom(imapFolder, limit);
                                 if (sorted) {
                                     threadable = new Threader().thread(threadable);
                                 }
@@ -1071,7 +1109,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     }
                     return new ThreadableResult((Threadable) retval.clone(), true);
                 }
-                Threadable threadable = Threadable.getAllThreadablesFrom(imapFolder);
+                Threadable threadable = Threadable.getAllThreadablesFrom(imapFolder, limit);
                 if (sorted) {
                     threadable = new Threader().thread(threadable);
                 }
@@ -1089,14 +1127,16 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     }
 
     @Override
-    public List<List<MailMessage>> getThreadSortedMessages(final String fullName, final boolean includeSent, final boolean cache, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final MailField[] mailFields) throws OXException {
+    public List<List<MailMessage>> getThreadSortedMessages(final String fullName, final boolean includeSent, final boolean cache, final IndexRange indexRange, final long max, final MailSortField sortField, final OrderDirection order, final MailField[] mailFields) throws OXException {
         IMAPFolder sentFolder = null;
         try {
             final String sentFullName = imapFolderStorage.getSentFolder();
             imapFolder = setAndOpenFolder(imapFolder, fullName, READ_ONLY);
-            if (0 >= imapFolder.getMessageCount() || (null != indexRange && (indexRange.end - indexRange.start) < 1)) {
+            final int messageCount = imapFolder.getMessageCount();
+            if (0 >= messageCount || (null != indexRange && (indexRange.end - indexRange.start) < 1)) {
                 return Collections.emptyList();
             }
+            final int limit = max <= 0 ? -1 : (messageCount <= max ? -1 : (int) max);
             final boolean mergeWithSent = includeSent && !sentFullName.equals(fullName);
             if (mergeWithSent) {
                 sentFolder = (IMAPFolder) imapStore.getFolder(sentFullName);
@@ -1111,7 +1151,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             if (!mergeWithSent && imapConfig.getImapCapabilities().hasThreadReferences()) {
                 final boolean logIt = DEBUG;
                 final long st = logIt ? System.currentTimeMillis() : 0L;
-                final String threadResp = ThreadSortUtil.getThreadResponse(imapFolder, "ALL");
+                final String threadResp =
+                    ThreadSortUtil.getThreadResponse(
+                        imapFolder,
+                        limit <= 0 ? "ALL" : (Integer.toString(messageCount - limit + 1) + ':' + Integer.toString(messageCount)));
                 /*
                  * Parse THREAD response to a list structure and extract sequence numbers
                  */
@@ -1135,11 +1178,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     
                             @Override
                             public ThreadableResult call() throws Exception {
-                                return getThreadableFor(sent, false, cache);
+                                return getThreadableFor(sent, false, cache, limit);
                             }
                         });
                     }
-                    final ThreadableResult threadableResult = getThreadableFor(imapFolder, false, cache);
+                    final ThreadableResult threadableResult = getThreadableFor(imapFolder, false, cache, limit);
                     final ThreadableResult sentThreadableResult = getFrom(future);
                     Threadable threadable = threadableResult.threadable;
                     Threadable.append(threadable, sentThreadableResult.threadable);
@@ -1154,7 +1197,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         LOG.info("\tIn-application thread-sort (incl. sent messages) took " + dur + "msec for folder " + fullName);
                     }
                 } else {
-                    final ThreadableResult threadableResult = getThreadableFor(imapFolder, true, cache);
+                    final ThreadableResult threadableResult = getThreadableFor(imapFolder, true, cache, limit);
                     cached = threadableResult.cached;
                     threadList = Threadable.toNodeList(threadableResult.threadable);
                     if (logIt) {
@@ -1282,7 +1325,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     }
                     list = list.subList(fromIndex, toIndex);
                 }
-                return new PropertizedList<List<MailMessage>>(list).setProperty("cached", Boolean.valueOf(cached));
+                return new PropertizedList<List<MailMessage>>(list).setProperty("cached", Boolean.valueOf(cached)).setProperty("more", Integer.valueOf(messageCount));
             }
             /*
              * Include body
@@ -1442,7 +1485,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  */
                 threadResp = ThreadSortUtil.getThreadResponse(imapFolder, sortRange);
             } else {
-                final Threadable threadable = new Threader().thread(Threadable.getAllThreadablesFrom(imapFolder));
+                final Threadable threadable = new Threader().thread(Threadable.getAllThreadablesFrom(imapFolder, -1));
                 threadResp = Threadable.toThreadReferences(threadable, null == filter ? null : new TIntHashSet(filter));
             }
             /*
@@ -1984,7 +2027,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         final boolean supportsMove = move && imapConfig.asMap().containsKey("MOVE");
         final AbstractIMAPCommand<long[]> command;
         if (supportsMove) {
-            command = new CopyIMAPCommand(imapFolder, tmp, destFullName, false, fast);
+            command = new MoveIMAPCommand(imapFolder, tmp, destFullName, false, fast);
         } else {
             command = new CopyIMAPCommand(imapFolder, tmp, destFullName, false, fast);
         }
@@ -2102,7 +2145,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     @Override
     public long[] appendMessagesLong(final String destFullName, final MailMessage[] mailMessages) throws OXException {
-        if (null == mailMessages || mailMessages.length == 0) {
+        if (null == mailMessages) {
+            return new long[0];
+        }
+        final int length = mailMessages.length;
+        if (length == 0) {
             return new long[0];
         }
         Message[] msgs = null;
@@ -2127,17 +2174,18 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
             imapFolderStorage.removeFromCache(destFullName);
             /*
-             * Convert messages to JavaMail message objects
-             */
-            msgs =
-                MimeMessageConverter.convertMailMessages(
-                    mailMessages,
-                    MimeMessageConverter.BEHAVIOR_CLONE | MimeMessageConverter.BEHAVIOR_STREAM2FILE);
-            /*
              * Drop special "x-original-headers" header
              */
-            for (final Message message : msgs) {
-                message.removeHeader("x-original-headers");
+            for (final MailMessage mail : mailMessages) {
+                mail.removeHeader("x-original-headers");
+            }
+            /*
+             * Convert messages to JavaMail message objects
+             */
+            msgs = new Message[length];
+            msgs[0] = MimeMessageConverter.convertMailMessage(mailMessages[0], MimeMessageConverter.BEHAVIOR_CLONE);
+            for (int i = 1; i < length; i++) {
+                msgs[i] = MimeMessageConverter.convertMailMessage(mailMessages[i], MimeMessageConverter.BEHAVIOR_CLONE | MimeMessageConverter.BEHAVIOR_STREAM2FILE);
             }
             /*
              * Check if destination folder supports user flags
@@ -2613,9 +2661,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
              * Fill message
              */
             final long uid;
-            final MimeMessageFiller filler = new MimeMessageFiller(session, ctx);
-            composedMail.setFiller(filler);
             try {
+                final MimeMessageFiller filler = new MimeMessageFiller(session, ctx);
+                composedMail.setFiller(filler);
                 /*
                  * Set headers
                  */

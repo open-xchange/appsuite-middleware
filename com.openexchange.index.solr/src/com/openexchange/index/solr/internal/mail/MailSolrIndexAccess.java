@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -61,6 +62,8 @@ import java.util.Set;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrQuery.ORDER;
+import org.apache.solr.client.solrj.response.FacetField;
+import org.apache.solr.client.solrj.response.FacetField.Count;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
@@ -69,6 +72,8 @@ import org.apache.solr.common.SolrInputField;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
+import com.openexchange.index.FacetParameters;
+import com.openexchange.index.FacetRange;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexDocument.Type;
 import com.openexchange.index.IndexField;
@@ -386,24 +391,95 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
     @Override
     public void deleteByQuery(final QueryParameters parameters) throws OXException {
         final SearchHandler searchHandler = checkQueryParametersAndGetSearchHandler(parameters);  
-        if (searchHandler.equals(SearchHandler.ALL_REQUEST)) {
-            final int accountId = getAccountId(parameters);
-            final String folder = parameters.getFolder();
-            String queryString = buildQueryString(accountId, folder);
-            if (queryString.length() == 0) {
-            	queryString = "*:*";
+        switch (searchHandler) {
+            case ALL_REQUEST:
+            {
+                final int accountId = getAccountId(parameters);
+                final String folder = parameters.getFolder();
+                String queryString = buildQueryString(accountId, folder);
+                if (queryString.length() == 0) {
+                    queryString = "*:*";
+                }
+                deleteDocumentsByQuery(queryString);
+                break;
             }
-            deleteDocumentsByQuery(queryString);
-        } else {
-            throw new NotImplementedException("Search handler " + searchHandler.name() + " is not implemented for MailSolrIndexAccess.deleteByQuery().");
+            
+            case GET_REQUEST:
+            {
+                final int accountId = getAccountId(parameters);
+                final String folder = parameters.getFolder();
+                final String[] ids = getIds(parameters);
+                String queryString = buildQueryString(accountId, folder);
+                final StringBuilder sb = new StringBuilder(queryString);
+                if (queryString.length() != 0) {
+                    sb.append(" AND (");
+                } else {
+                    sb.append('(');
+                }
+                boolean first = true;
+                for (final String id : ids) {
+                    if (first) {
+                        first = false;
+                    } else {
+                        sb.append(" OR ");
+                    }
+                    sb.append('(').append(SolrMailField.UUID.solrName()).append(":\"").append(id).append("\")");
+                }
+                sb.append(')');
+                deleteDocumentsByQuery(queryString);
+                break;                
+            }
+            
+            default:
+                throw new NotImplementedException("Search handler " + searchHandler.name() + " is not implemented for MailSolrIndexAccess.deleteByQuery().");
         }
     }
 
     @Override
     public IndexResult<MailMessage> query(final QueryParameters parameters, final Set<? extends IndexField> fields) throws OXException {
+        return query(parameters, null, fields);
+    }
+    
+    private void addFaceting(SolrQuery solrQuery, FacetParameters facetParameters) {
+        if (null != facetParameters) {
+            /*
+             * Check facet fields
+             */
+            final Set<IndexField> facetFields = facetParameters.getFacetFields();
+            if (null != facetFields) {
+                for (final IndexField facetField : facetFields) {
+                    if (facetField instanceof MailIndexField) {
+                        final String solrName = SolrMailField.solrMailFieldFor((MailIndexField) facetField).solrName();
+                        if (null != solrName) {
+                            solrQuery.addFacetField(solrName);
+                        }
+                    }
+                }
+            }
+            /*
+             * Check facet ranges
+             */
+            final List<FacetRange> facetRanges = facetParameters.getFacetRanges();
+            if (null != facetRanges) {
+                for (final FacetRange facetRange : facetRanges) {
+                    final IndexField rangeField = facetRange.getField();
+                    if (rangeField instanceof MailIndexField) {
+                        final String solrName = SolrMailField.solrMailFieldFor((MailIndexField) rangeField).solrName();
+                        if (null != solrName) {
+                            solrQuery.addFacetQuery(buildFacetQuery(solrName, facetRange.getFrom(), facetRange.getTo()));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    public IndexResult<MailMessage> query(final QueryParameters parameters, final FacetParameters facetParameters, final Set<? extends IndexField> fields) throws OXException {
         final Set<SolrMailField> solrFields = convertAndCheckFields(parameters, fields);
         final List<IndexDocument<MailMessage>> mails = new ArrayList<IndexDocument<MailMessage>>();
         final SolrQuery solrQuery = buildSolrQuery(parameters);
+        addFaceting(solrQuery, facetParameters);
         setFieldList(solrQuery, solrFields);
         int off = parameters.getOff();
         final int len = parameters.getLen();
@@ -412,16 +488,46 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
         if (maxRows > QUERY_ROWS) {
             maxRows = QUERY_ROWS;
         }
+        Map<IndexField, Map<String, Long>> facetCountsMap = null;
         do {
-            solrQuery.setStart(off);
+            solrQuery.setStart(Integer.valueOf(off));
             if ((fetched + maxRows) > len) {
                 maxRows = (len - fetched);
             }
-            solrQuery.setRows(maxRows);
+            solrQuery.setRows(Integer.valueOf(maxRows));
             final QueryResponse queryResponse = query(solrQuery);
             final SolrDocumentList results = queryResponse.getResults();
             for (final SolrDocument document : results) {
                 mails.add(helper.readDocument(document, MailFillers.allFillers()));
+            }
+            final List<FacetField> facetFields = queryResponse.getFacetFields();
+            if (null != facetFields) {
+                if (null == facetCountsMap) {
+                    // Initialize map
+                    facetCountsMap = new HashMap<IndexField, Map<String,Long>>(facetFields.size());
+                }
+                for (final FacetField facetField : facetFields) {
+                    final List<Count> counts = facetField.getValues();
+                    if (null != counts) {
+                        final MailIndexField field = SolrMailField.fieldFor(facetField.getName());
+                        if (null != field) {
+                            Map<String, Long> map = facetCountsMap.get(field);
+                            if (null == map) {
+                                map = new HashMap<String, Long>(counts.size());
+                                facetCountsMap.put(field, map);
+                            }
+                            for (final Count count : counts) {
+                                final String countName = count.getName();
+                                final Long l = map.get(countName);
+                                if (null == l) {
+                                    map.put(countName, Long.valueOf(count.getCount()));
+                                } else {
+                                    map.put(countName, Long.valueOf(count.getCount() + l.longValue()));
+                                }
+                            }
+                        }
+                    }
+                }
             }
 
             if (results.size() < maxRows) {
@@ -434,19 +540,63 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
         
         if (mails.isEmpty()) {
             return Indexes.emptyResult();
-        } else {
-            if (solrQuery.getBool("sortManually", false)) {
-                Collections.sort(mails, new AddressComparator(parameters.getSortField(), parameters.getOrder()));
-            }
-            final MailIndexResult indexResult = new MailIndexResult(mails.size());
-            indexResult.setResults(mails);
-            return indexResult;
-        }        
+        }
+        /*
+         * Return appropriate result
+         */
+        if (solrQuery.getBool("sortManually", false)) {
+            Collections.sort(mails, new AddressComparator(parameters.getSortField(), parameters.getOrder()));
+        }
+        final MailIndexResult indexResult = new MailIndexResult(mails.size());
+        indexResult.setResults(mails);
+        if (null != facetCountsMap) {
+            indexResult.setFacetCounts(facetCountsMap);
+        }
+        return indexResult;        
+    }
+    
+    public IndexResult<MailMessage> queryOld(QueryParameters parameters, Set<? extends IndexField> fields) throws OXException {
+        Set<SolrMailField> solrFields = convertAndCheckFields(parameters, fields);
+        SolrQuery solrQuery = buildSolrQuery(parameters);
+        setFieldList(solrQuery, solrFields);
+        List<IndexDocument<MailMessage>> mails = queryChunkWise(new SolrMailMessageConverter(), solrQuery, parameters.getOff(), parameters.getLen(), QUERY_ROWS);
+        if (mails.isEmpty()) {
+            return Indexes.emptyResult();
+        }
+
+        if (solrQuery.getBool("sortManually", false)) {
+            Collections.sort(mails, new AddressComparator(parameters.getSortField(), parameters.getOrder()));
+        }
+        final MailIndexResult indexResult = new MailIndexResult(mails.size());
+        indexResult.setResults(mails);
+        
+        return indexResult;        
     }
     
     private void setFieldList(final SolrQuery solrQuery, final Set<SolrMailField> fields) {
-        final String[] solrFields = SolrMailField.solrNamesFor(fields);
-        solrQuery.setFields(solrFields);
+        solrQuery.setFields(SolrMailField.solrNamesFor(fields));
+    }
+
+    private String buildFacetQuery(final String solrName, final String from, final String to) {
+        if (null == from && null == to) {
+            return solrName;
+        }
+        /*-
+         * Something like:
+         * 
+         * "price:[* TO 9999]"
+         * "price:[10000 TO 19999]"
+         * "price:[20000 TO 29999]"
+         * "price:[30000 TO *]"
+         */
+        final StringBuilder sb = new StringBuilder(32);
+        sb.append(solrName);
+        sb.append(":[");
+        sb.append(null == from ? "*" : from);
+        sb.append(" TO ");
+        sb.append(null == to ? "*" : to);
+        sb.append(']');
+        return sb.toString();
     }
     
     private SolrQuery buildSolrQuery(final QueryParameters parameters) throws OXException {
@@ -612,16 +762,20 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
         return retval;
     }
 
-    private String buildQueryString(final int accountId, final String folder) {
-        final StringBuilder sb = new StringBuilder(128); 
+    private String buildQueryString(int accountId, String folder) {
+        StringBuilder sb = new StringBuilder(128); 
+        boolean withAccount = false;
         if (SolrMailField.ACCOUNT.isIndexed() && accountId >= 0) {
-            sb.append(" AND ");
             sb.append('(').append(SolrMailField.ACCOUNT.solrName()).append(":\"").append(accountId).append("\")");
+            withAccount = true;
         }
             
         if (SolrMailField.FULL_NAME.isIndexed() && folder != null) {
-            sb.append(" AND ");
-            sb.append('(').append(SolrMailField.FULL_NAME.solrName()).append(":\"").append("\"" + folder + "\"").append("\")");
+            if (withAccount) {
+                sb.append(" AND ");
+            }
+            
+            sb.append('(').append(SolrMailField.FULL_NAME.solrName()).append(":\"").append(folder).append("\")");
         }  
         
         return sb.toString();

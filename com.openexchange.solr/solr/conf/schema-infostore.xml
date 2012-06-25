@@ -27,6 +27,7 @@
 
     <fields>
         <field name="uuid" type="string" stored="true" indexed="true" />
+        <field name="service" type="string" stored="true" indexed="true" />
         <field name="account" type="string" stored="true" indexed="true" />
         <!-- infostore.id -->
         <field name="id" type="int" stored="true" indexed="true" />
@@ -64,7 +65,8 @@
         <field name="mime_type" type="string" stored="true" indexed="true" />
         <!-- infostore_document.file_md5sum -->
         <field name="md5_sum" type="string" stored="true" indexed="false" />
-        <field name="attachment" type="text" stored="false" indexed="true" />
+        <field name="content" type="text" stored="false" indexed="true" />
+        <field name="sequence_number" type="long" stored="true" indexed="true" />
     </fields>
 
     <uniqueKey>uuid</uniqueKey>

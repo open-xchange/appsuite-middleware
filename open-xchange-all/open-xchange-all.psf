@@ -6,6 +6,8 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-xerces-sun"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-xerces-ibm"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-core"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-ajp"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-grizzly"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-authentication-database"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-authentication-ldap"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-authentication-ucs"/>
@@ -31,11 +33,15 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-recaptcha"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-unifiedmail"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-admin"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-admin-autocontextid"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-admin-reseller"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-admin-user-copy"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-spamhandler-default"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-spamhandler-spamassassin"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-indexing"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-messaging-sms"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-spamsettings-generic"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-blackwhitelist"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-mobile-config"/>
 </provider>
 </psf>

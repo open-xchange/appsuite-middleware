@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <psf version="2.0">
 <provider id="org.eclipse.egit.core.GitProvider">
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.ajp"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.caching"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.calendar"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.calendar.json"/>
@@ -43,9 +42,12 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.http.client.xml"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.i18n"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.importexport"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.index"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.jcharset"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.jslob"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.jslob.config"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.jslob.json"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.jslob.storage.db"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.logging"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.logging.tracking"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.mail.autoconfig"/>
@@ -86,7 +88,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.textxtraction"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.threadpool"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.tx"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.url.mail.attachment"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.user.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.xml"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.xmpp"/>

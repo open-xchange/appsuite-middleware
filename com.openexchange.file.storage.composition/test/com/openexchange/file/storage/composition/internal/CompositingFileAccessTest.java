@@ -55,6 +55,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -66,6 +67,7 @@ import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAccountManager;
@@ -327,17 +329,24 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     // Somewhat brittle test
     @Test
     public void testRemoveDocuments() throws OXException {
-        final FileStorageFileAccess.IDTuple tuple = new FileStorageFileAccess.IDTuple(fileId.getFolderId(), fileId.getFileId());
+        final FileStorageFileAccess.IDTuple tuple = new FileStorageFileAccess.IDTuple(fileId.getFolderId(), fileId.getFileId());  
+        final FileStorageFileAccess.IDTuple tuple2 = new FileStorageFileAccess.IDTuple(fileId2.getFolderId(), fileId2.getFileId());
         fileAccess.expectCall("hashCode").andReturn(1); // Look if it's there
         fileAccess.expectCall("hashCode").andReturn(1); // Store it
+        fileAccess.expectCall("getDocuments", Collections.singletonList(tuple), Arrays.asList(new Field[] { Field.ID, Field.FOLDER_ID }));
         fileAccess.expectCall("hashCode").andReturn(2); // Look if it's there
         fileAccess.expectCall("hashCode").andReturn(2); // Store it
+        fileAccess.expectCall("getDocuments", Collections.singletonList(tuple2), Arrays.asList(new Field[] { Field.ID, Field.FOLDER_ID }));
 
         fileAccess.expectCall("removeDocument", Arrays.asList(tuple), 12L).andReturn(Arrays.asList(tuple));
         fileAccess.expectCall("getAccountAccess").andReturn(this);
+        fileAccess.expectCall("getAccountAccess").andReturn(this);
+        fileAccess.expectCall("getAccountAccess").andReturn(this);
 
-        final FileStorageFileAccess.IDTuple tuple2 = new FileStorageFileAccess.IDTuple(fileId2.getFolderId(), fileId2.getFileId());
+        
         fileAccess.expectCall("removeDocument", Arrays.asList(tuple2), 12L).andReturn(Arrays.asList(tuple2));
+        fileAccess.expectCall("getAccountAccess").andReturn(this);
+        fileAccess.expectCall("getAccountAccess").andReturn(this);
         fileAccess.expectCall("getAccountAccess").andReturn(this);
 
         final List<String> ids = Arrays.asList(fileId.toUniqueID(), fileId2.toUniqueID());
@@ -359,8 +368,9 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     public void testRemoveVersions() throws OXException {
         final int[] versions = new int[] { 1, 2, 3 };
 
-        fileAccess.expectCall("removeVersion", fileId.getFolderId(), fileId.getFileId(), versions);
-
+        fileAccess.expectCall("removeVersion", fileId.getFolderId(), fileId.getFileId(), versions).andReturn(new int[0]);
+        fileAccess.expectCall("getAccountAccess").andReturn(this);
+        fileAccess.expectCall("getAccountAccess").andReturn(this);
         removeVersion(fileId.toUniqueID(), versions);
 
         verifyAccount();
@@ -483,8 +493,9 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
         file.setId(fileId.toUniqueID());
         file.setFolderId(folderId.toUniqueID());
 
-        fileAccess.expectCall("saveDocument", file, EMPTY_INPUT_STREAM, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER);
-
+        fileAccess.expectCall("getFileMetadata", folderId.getFolderId(), fileId.getFileId(), FileStorageFileAccess.CURRENT_VERSION).andReturn(file);
+        fileAccess.expectCall("saveDocument", file, EMPTY_INPUT_STREAM, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER);        
+        
         saveDocument(file, EMPTY_INPUT_STREAM, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER);
 
         verifyAccount();
@@ -499,8 +510,9 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
         file.setId(fileId.toUniqueID());
         file.setFolderId(folderId.toUniqueID());
 
+        fileAccess.expectCall("getFileMetadata", folderId.getFolderId(), fileId.getFileId(), FileStorageFileAccess.CURRENT_VERSION).andReturn(file);
         fileAccess.expectCall("saveDocument", file, EMPTY_INPUT_STREAM, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, Arrays.asList(File.Field.TITLE));
-
+        
         saveDocument(file, EMPTY_INPUT_STREAM, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, Arrays.asList(File.Field.TITLE));
 
         verifyAccount();
@@ -515,6 +527,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
         file.setId(fileId.toUniqueID());
         file.setFolderId(folderId.toUniqueID());
 
+        fileAccess.expectCall("getFileMetadata", folderId.getFolderId(), fileId.getFileId(), FileStorageFileAccess.CURRENT_VERSION).andReturn(file);
         fileAccess.expectCall("saveFileMetadata", file, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, Arrays.asList(File.Field.TITLE));
 
         saveFileMetadata(file, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, Arrays.asList(File.Field.TITLE));
@@ -531,6 +544,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
         file.setId(fileId.toUniqueID());
         file.setFolderId(folderId.toUniqueID());
 
+        fileAccess.expectCall("getFileMetadata", folderId.getFolderId(), fileId.getFileId(), FileStorageFileAccess.CURRENT_VERSION).andReturn(file);
         fileAccess.expectCall("saveFileMetadata", file, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, Arrays.asList(File.Field.TITLE));
 
         saveFileMetadata(file, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, Arrays.asList(File.Field.TITLE));

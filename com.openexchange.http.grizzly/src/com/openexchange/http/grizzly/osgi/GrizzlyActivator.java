@@ -63,6 +63,7 @@ import com.openexchange.http.grizzly.GrizzlyExceptionCode;
 import com.openexchange.http.grizzly.addons.backendroute.BackendRouteAddOn;
 import com.openexchange.http.grizzly.addons.backendroute.AppendBackendRouteFilter;
 import com.openexchange.http.grizzly.services.http.HttpServiceFactory;
+import com.openexchange.http.requestwatcher.osgi.services.RequestWatcherService;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -83,7 +84,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { ConfigurationService.class };
+        return new Class[] { ConfigurationService.class, RequestWatcherService.class };
     }
 
     /*
@@ -93,7 +94,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
     @Override
     protected void handleAvailability(Class<?> clazz) {
         if (LOG.isInfoEnabled()) {
-            LOG.info("Service " + clazz.getName() + " is available again");
+            LOG.info("Service " + clazz.getName() + " is available again.");
         }
         Object service = getService(clazz);
         GrizzlyServiceRegistry.getInstance().addService(clazz, service);
@@ -106,7 +107,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
     @Override
     protected void handleUnavailability(Class<?> clazz) {
         if (LOG.isInfoEnabled()) {
-            LOG.info("Service " + clazz.getName() + " is available again");
+            LOG.info("Service " + clazz.getName() + " is no longer available.");
         }
         GrizzlyServiceRegistry.getInstance().removeService(clazz);
     }

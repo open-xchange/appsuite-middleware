@@ -50,6 +50,7 @@
 package com.openexchange.textxtraction.internal;
 
 import java.io.BufferedInputStream;
+import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.EnumMap;
@@ -100,6 +101,10 @@ public final class TikaTextXtractService extends AbstractTextXtractService {
          * The media type(s) belonging to PDF
          */
         PDF,
+        /**
+         * The media type(s) belonging to Open Office documents
+         */
+        OPEN_OFFICE,
     }
 
     private static final String UTF_8 = Charsets.UTF_8_NAME;
@@ -122,9 +127,35 @@ public final class TikaTextXtractService extends AbstractTextXtractService {
         // Direct types map
         directTypes = new EnumMap<DirectType, Set<MediaType>>(DirectType.class);
         // PDF media types
-        final Set<MediaType> set = new HashSet<MediaType>(2);
+        Set<MediaType> set = new HashSet<MediaType>(2);
         set.add(MediaType.application("pdf"));
         directTypes.put(DirectType.PDF, set);
+        // OpenOffice documents
+        /*-
+         * == Documents
+         * OpenDocument-Text   .odt    application/vnd.oasis.opendocument.text
+         * OpenDocument-Tabellendokument   .ods    application/vnd.oasis.opendocument.spreadsheet
+         * OpenDocument-Praesentation   .odp    application/vnd.oasis.opendocument.presentation
+         * OpenDocument-Zeichnung  .odg    application/vnd.oasis.opendocument.graphics
+         * OpenDocument-Diagramm   .odc    application/vnd.oasis.opendocument.chart
+         * OpenDocument-Formel .odf    application/vnd.oasis.opendocument.formula
+         * OpenDocument-Bild   .odi    application/vnd.oasis.opendocument.image
+         * OpenDocument-Globaldokument .odm    application/vnd.oasis.opendocument.text-master
+         * == Template
+         * OpenDocument-Textvorlage    .ott    application/vnd.oasis.opendocument.text-template
+         * OpenDocument-Tabellenvorlage    .ots    application/vnd.oasis.opendocument.spreadsheet-template
+         * OpenDocument-Praesentationsvorlage   .otp    application/vnd.oasis.opendocument.presentation-template
+         * OpenDocument-Zeichnungsvorlage  .otg    application/vnd.oasis.opendocument.graphics-template
+         */
+        set = new HashSet<MediaType>(8);
+        set.add(MediaType.application("vnd.oasis.opendocument.text"));
+        set.add(MediaType.application("vnd.oasis.opendocument.spreadsheet"));
+        set.add(MediaType.application("vnd.oasis.opendocument.presentation"));
+        set.add(MediaType.application("vnd.oasis.opendocument.text-master"));
+        set.add(MediaType.application("vnd.oasis.opendocument.text-template"));
+        set.add(MediaType.application("vnd.oasis.opendocument.spreadsheet-template"));
+        set.add(MediaType.application("vnd.oasis.opendocument.presentation-template"));
+        directTypes.put(DirectType.OPEN_OFFICE, set);
     }
 
     /**
@@ -152,6 +183,20 @@ public final class TikaTextXtractService extends AbstractTextXtractService {
 
     private TikaDocumentHandler newHandler(final String mimeType) throws OXException {
         return new TikaDocumentHandler(mimeType, UTF_8);
+    }
+
+    @Override
+    public String extractFrom(final String content, final String optMimeType) throws OXException {
+        if (null == content) {
+            return null;
+        }
+        if (null != optMimeType) {
+            if (optMimeType.toLowerCase(Locale.ENGLISH).startsWith("text/htm")) {
+                final Source source = new Source(content);
+                return new Renderer(new Segment(source, 0, source.getEnd())).setMaxLineLength(9999).setIncludeHyperlinkURLs(false).toString();
+            }
+        }
+        return super.extractFrom(content, optMimeType);
     }
 
     @Override
@@ -217,6 +262,16 @@ public final class TikaTextXtractService extends AbstractTextXtractService {
             } catch (final Exception e) {
                 // Ignore
             }
+            try {
+                final Set<MediaType> set = directTypes.get(DirectType.OPEN_OFFICE);
+                for (final MediaType directType : set) {
+                    if (directType.getBaseType().equals(mediaType.getBaseType())) {
+                        return OpenOfficeExtractor.getText(in);
+                    }
+                }
+            } catch (final Exception e) {
+                // Ignore
+            }
             /*
              * Otherwise handle with almighty Tika
              */
@@ -243,7 +298,18 @@ public final class TikaTextXtractService extends AbstractTextXtractService {
                 return ExtractorFactory.createExtractor(new POIFSFileSystem(in)).getText();
             }
             if (POIXMLDocument.hasOOXMLHeader(in)) {
-                return ExtractorFactory.createExtractor(OPCPackage.open(in)).getText();
+                final NonClosableInputStream ncis = new NonClosableInputStream(in);
+                try {
+                    ncis.mark(8192);
+                    return ExtractorFactory.createExtractor(OPCPackage.open(in)).getText();
+                } finally {
+                    if (ncis.closed) {
+                        // Stream has been closed unexpectedly
+                        ncis.reset();
+                    } else {
+                        ncis.mark(0);
+                    }
+                }
             }
             return null;
         } catch (final InvalidFormatException e) {
@@ -306,5 +372,19 @@ public final class TikaTextXtractService extends AbstractTextXtractService {
             isWhitespace = Character.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
+    }
+
+    private static final class NonClosableInputStream extends FilterInputStream {
+
+        protected volatile boolean closed;
+
+        protected NonClosableInputStream(final InputStream _inputStream) {
+            super(_inputStream);
+        }
+
+        @Override
+        public void close() throws IOException {
+            closed = true;
+        }
     }
 }

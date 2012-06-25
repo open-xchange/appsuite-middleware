@@ -79,6 +79,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.http.grizzly.GrizzlyExceptionMessage;
 import com.openexchange.http.grizzly.osgi.GrizzlyServiceRegistry;
 import com.openexchange.http.grizzly.servletfilters.BackendRouteFilter;
+import com.openexchange.http.grizzly.servletfilters.RequestReportingFilter;
 import com.openexchange.log.LogFactory;
 
 /**
@@ -193,7 +194,10 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
         ReentrantLock lock = OSGiCleanMapper.getLock();
         lock.lock();
         try {
+            // TODO: clean up OX servlet structure so we can apply alias and servlet validation
+
             // validateAlias4RegOk(alias);
+
             /*
              * Currently only checks if servlet is already registered. This prevents the same servlet with different aliases. Disabled until
              * we don't have to register the DispatcherServlet multiple times under different aliases.
@@ -211,25 +215,22 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
             OSGiServletHandler servletHandler = findOrCreateOSGiServletHandler(servlet, context, initparams);
             servletHandler.setServletPath(alias);
 
-//            /*
-//             * Get backendRoute from configService and add BackendRouteFilter to ServletHandler.
-//             */
-//            ConfigurationService configService = GrizzlyServiceRegistry.getInstance().getService(ConfigurationService.class);
-//            if (configService == null) {
-//                throw new IllegalStateException(String.format(
-//                    GrizzlyExceptionMessage.NEEDED_SERVICE_MISSING_MSG,
-//                    ConfigurationService.class.getName()));
-//            }
-//            final String backendRoute = configService.getProperty("com.openexchange.http.grizzly.backendRoute", "");
-//            servletHandler.addFilter(
-//                new BackendRouteFilter(),
-//                BackendRouteFilter.class.getName(),
-//                new HashMap<String, String>() {
-//
-//                    {
-//                        this.put("backendRoute", backendRoute);
-//                    }
-//                });
+            /*
+             * Get configparams from configService and add Filters to ServletHandler.
+             */
+            ConfigurationService configService = GrizzlyServiceRegistry.getInstance().getService(ConfigurationService.class);
+            if (configService == null) {
+                throw new IllegalStateException(String.format(
+                    GrizzlyExceptionMessage.NEEDED_SERVICE_MISSING_MSG,
+                    ConfigurationService.class.getName()));
+            }
+            boolean isRequestWatcherEnabled = configService.getBoolProperty("com.openexchange.http.requestwatcher.isEnabled", true);
+            if (isRequestWatcherEnabled) {
+                servletHandler.addFilter(
+                    new RequestReportingFilter(GrizzlyServiceRegistry.getInstance()),
+                    RequestReportingFilter.class.getName(),
+                    null);
+            }
 
             /*
              * Servlet would be started several times if registered with multiple aliases. Starting means: 1. Set ContextPath 2. Instantiate
@@ -420,7 +421,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
         OSGiServletHandler osgiServletHandler;
 
         if (mapper.containsContext(httpContext)) {
-            if(LOG.isDebugEnabled()) {
+            if (LOG.isDebugEnabled()) {
                 LOG.debug("Reusing ServletHandler");
             }
             // new servlet handler for same configuration, different servlet and alias
@@ -428,7 +429,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
             osgiServletHandler = servletHandlers.get(0).newServletHandler(servlet);
             servletHandlers.add(osgiServletHandler);
         } else {
-            if(LOG.isDebugEnabled()) {
+            if (LOG.isDebugEnabled()) {
                 LOG.debug("Creating new ServletHandler");
             }
             HashMap<String, String> params;

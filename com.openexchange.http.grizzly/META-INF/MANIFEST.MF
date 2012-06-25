@@ -2,19 +2,30 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Grizzly Bundle
 Bundle-SymbolicName: com.openexchange.http.grizzly
-Bundle-Version: 7.0.0.0
+Bundle-Version: 6.21.0
 Bundle-Activator: com.openexchange.http.grizzly.osgi.GrizzlyActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.config,
  com.openexchange.configuration,
  com.openexchange.exception,
+ com.openexchange.http.requestwatcher.osgi.services,
  com.openexchange.i18n,
  com.openexchange.log,
  com.openexchange.osgi,
  com.openexchange.server,
+ javax.management,
+ javax.management.modelmbean,
+ javax.management.openmbean,
+ javax.naming,
+ javax.naming.directory,
+ javax.net.ssl,
+ javax.security.auth,
+ javax.security.auth.x500,
+ javax.security.cert,
  javax.servlet,
  javax.servlet.http,
+ javax.servlet.resources,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.service.http,
@@ -32,4 +43,3 @@ Bundle-ClassPath: .,
  lib/management-api-3.0.0-b012.jar,
  lib/servlet-api-2.5.jar,
  lib/grizzly-http-servlet-2.2.5.jar
-Require-Bundle: com.openexchange.common

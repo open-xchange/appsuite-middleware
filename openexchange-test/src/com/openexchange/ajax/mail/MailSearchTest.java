@@ -53,7 +53,6 @@ import java.io.IOException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.mail.actions.MailSearchRequest;
 import com.openexchange.ajax.mail.actions.MailSearchResponse;
@@ -109,13 +108,13 @@ public class MailSearchTest extends AbstractMailTest {
         assertEquals("Should still yield two results after being sent a different one", 2, search.length());
     }
 
-    public JSONArray searchBySubject(final String pattern) throws OXException, IOException, SAXException, JSONException {
+    public JSONArray searchBySubject(final String pattern) throws OXException, IOException, JSONException {
         final JSONArray body = new JSONArray();
         final JSONObject obj = new JSONObject();
         obj.put(Mail.PARAMETER_COL, MailListField.SUBJECT.getField());
         obj.put(Mail.PARAMETER_SEARCHPATTERN, pattern);
         body.put(obj);
-        final MailSearchRequest request = new MailSearchRequest(body, folder, COLUMNS_DEFAULT_LIST, -1, "asc", true);
+        final MailSearchRequest request = new MailSearchRequest(body, folder, COLUMNS_DEFAULT_LIST, 0, "asc", true);
         final MailSearchResponse response = getClient().execute(request);
         return response.getDataAsJSONArray();
     }

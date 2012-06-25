@@ -275,11 +275,14 @@ public final class CSSMatcher {
             return checkCSS(cssBuilder, styleMap, true);
         }
         boolean modified = false;
-        final StringBuilder cssElemsBuffer = new StringBuilder(128);
         /*
          * Feed matcher with buffer's content and reset
          */
         final String css = cssBuilder.toString();
+        if (css.indexOf('{') < 0) {
+            return checkCSSElements(cssBuilder, styleMap, true);
+        }
+        final StringBuilder cssElemsBuffer = new StringBuilder(css.length());
         final Matcher m = PATTERN_STYLE_BLOCK.matcher(css);
         cssBuilder.setLength(0);
         int lastPos = 0;
@@ -397,11 +400,14 @@ public final class CSSMatcher {
      */
     public static boolean checkCSS(final StringBuilder cssBuilder, final Map<String, Set<String>> styleMap, final boolean removeIfAbsent) {
         boolean modified = false;
-        final StringBuilder cssElemsBuffer = new StringBuilder(128);
         /*
          * Feed matcher with buffer's content and reset
          */
         final String css = cssBuilder.toString();
+        if (css.indexOf('{') < 0) {
+            return checkCSSElements(cssBuilder, styleMap, removeIfAbsent);
+        }
+        final StringBuilder cssElemsBuffer = new StringBuilder(css.length());
         final Matcher m = PATTERN_STYLE_BLOCK.matcher(css);
         cssBuilder.setLength(0);
         int lastPos = 0;
@@ -448,8 +454,12 @@ public final class CSSMatcher {
             /*
              * Feed matcher with buffer's content and reset
              */
-            final Matcher m = PATTERN_STYLE_BLOCK.matcher(cssBuilder.toString());
-            final MatcherReplacer mr = new MatcherReplacer(m, cssBuilder.toString());
+            final String css = cssBuilder.toString();
+            if (css.indexOf('{') < 0) {
+                return checkCSSElements(cssBuilder, styleMap, removeIfAbsent);
+            }
+            final Matcher m = PATTERN_STYLE_BLOCK.matcher(css);
+            final MatcherReplacer mr = new MatcherReplacer(m, css);
             cssBuilder.setLength(0);
             while (m.find()) {
                 modified |= checkCSSElements(cssElemsBuffer.append(m.group(2)), styleMap, removeIfAbsent);

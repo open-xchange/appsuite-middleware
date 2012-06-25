@@ -123,7 +123,7 @@ public enum FileStorageExceptionCodes implements OXExceptionCode {
      */
     MISSING_PARAMETER(FileStorageExceptionMessages.MISSING_PARAMETER_MSG, Category.CATEGORY_USER_INPUT, 17),
     /**
-     * Invalid parameter: %1$s with value '%2$s'.
+     * Invalid parameter: %1$s with type '%2$s'. Expected '%3$s'.
      */
     INVALID_PARAMETER(FileStorageExceptionMessages.INVALID_PARAMETER_MSG, Category.CATEGORY_USER_INPUT, 18),
     /**

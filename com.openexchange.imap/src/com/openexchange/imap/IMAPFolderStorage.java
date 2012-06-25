@@ -1123,7 +1123,17 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         } finally {
             if (createMe != null && created) {
                 try {
-                    ListLsubCache.addSingle(createMe.getFullName(), accountId, createMe, session);
+                    final Folder parent = createMe.getParent();
+                    if (null != parent) {
+                        final String parentFullName = parent.getFullName();
+                        ListLsubCache.addSingle(parentFullName, accountId, createMe, session);
+                        if ("".equals(parentFullName)) {
+                            ListLsubCache.addSingle(MailFolder.DEFAULT_FOLDER_ID, accountId, createMe, session);
+                        }
+                        ListLsubCache.addSingle(createMe.getFullName(), accountId, createMe, session);
+                    } else {
+                        ListLsubCache.clearCache(accountId, session);
+                    }
                 } catch (final MessagingException e) {
                     // Updating LIST/LSUB cache failed
                     ListLsubCache.clearCache(accountId, session);

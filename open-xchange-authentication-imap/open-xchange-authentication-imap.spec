@@ -5,16 +5,7 @@ BuildArch:     noarch
 BuildRequires: ant
 BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
-%if 0%{?suse_version}  && !0%{?sles_version}
-BuildRequires: java-sdk-openjdk
-%endif
-%if 0%{?sles_version} == 11
-# SLES 11
-BuildRequires: java-1_6_0-ibm-devel
-%endif
-%if 0%{?rhel_version} || 0%{?fedora_version}
-BuildRequires: java-1.6.0-openjdk-devel
-%endif
+BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
 %define        ox_release 0
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
@@ -50,7 +41,7 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 if [ ${1:-0} -eq 2 ]; then
     if [ -e /opt/open-xchange/etc/groupware/imapauth.properties ]; then
         mv /opt/open-xchange/etc/imapauth.properties /opt/open-xchange/etc/imapauth.properties.rpmnew
-        mv /opt/open-xchange/etc/groupware/imapauth.properties /opt/open-xchange/etc/imapauth.properties.properties
+        mv /opt/open-xchange/etc/groupware/imapauth.properties /opt/open-xchange/etc/imapauth.properties
     fi
 fi
 

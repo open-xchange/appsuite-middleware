@@ -62,11 +62,11 @@ import org.glassfish.grizzly.http.Cookie;
  */
 public abstract class AbstractCookieInspector {
     
-    private static final Pattern JSESSIONID_WITHOUT_ROUTE = Pattern.compile("^\\d*$");
+    private static final Pattern JSESSIONID_WITHOUT_ROUTE = Pattern.compile("^\\w*$");
     /** Value of the backendRoute in pattern group 1 */
-    private static final Pattern JSESSIONID_ROUTE_MATCHES_PATTERN = Pattern.compile("^\\d+\\.(.+)$");
+    private static final Pattern JSESSIONID_ROUTE_MATCHES_PATTERN = Pattern.compile("^\\w+\\.(.+)$");
     /** Value of the routeless JSessionId in froup 1 */
-    private static final Pattern JSESSIONID_REMOVE_ROUTE_PATTERN = Pattern.compile("^(\\d+)(\\.(.+))?$");
+    private static final Pattern JSESSIONID_REMOVE_ROUTE_PATTERN = Pattern.compile("^(\\w+)(\\.(.+))?$");
     protected String backendRoute;
     protected Map<String, Cookie> cookieMap;
     

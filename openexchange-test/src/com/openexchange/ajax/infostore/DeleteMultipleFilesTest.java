@@ -50,6 +50,9 @@
 package com.openexchange.ajax.infostore;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -91,29 +94,45 @@ public class DeleteMultipleFilesTest extends InfostoreAJAXTest {
         client = new AJAXClient(User.User1);
         itemIds = new ArrayList<Integer>();
         folderIds = new ArrayList<Integer>();
+        File f1 = File.createTempFile("file1", "txt");
+        writeBytes("Hello World", f1);
         
-        File ods = new File("testData/TestODS.ods");
         DocumentMetadataImpl data1 = new DocumentMetadataImpl();
-        data1.setFileName(ods.getName());
+        data1.setFileName(f1.getName());
         data1.setFolderId(client.getValues().getPrivateInfostoreFolder());
         data1.setCreationDate(new Date());
-        NewInfostoreRequest newReq1 = new NewInfostoreRequest(data1, ods);
+        NewInfostoreRequest newReq1 = new NewInfostoreRequest(data1, f1);
         NewInfostoreResponse newRes1 = client.execute(newReq1);
         itemIds.add(newRes1.getID());
         folderIds.add((int) data1.getFolderId());
         
-        File odt = new File("testData/TestODT.odt");
+        File f2 = File.createTempFile("file2", "txt");
+        writeBytes("Hello World2", f2);
+
         DocumentMetadataImpl data2 = new DocumentMetadataImpl();
-        data2.setFileName(odt.getName());
+        data2.setFileName(f2.getName());
         data2.setFolderId(client.getValues().getPrivateInfostoreFolder());
         data2.setCreationDate(new Date());
-        NewInfostoreRequest newReq2 = new NewInfostoreRequest(data2, odt);
+        NewInfostoreRequest newReq2 = new NewInfostoreRequest(data2, f2);
         NewInfostoreResponse newRes2 = client.execute(newReq2);
         itemIds.add(newRes2.getID());
         folderIds.add((int) data2.getFolderId());
     }
     
-    @Override
+    private void writeBytes(String string, File ods) {
+    	PrintWriter p = null;
+    	try {
+			p = new PrintWriter(new FileWriter(ods));
+			p.write(string);
+		} catch (IOException e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		} finally {
+			if (p != null) { p.close(); }
+		}
+	}
+
+	@Override
     public void tearDown() throws Exception {
         super.tearDown();
     }

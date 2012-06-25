@@ -810,9 +810,10 @@ public final class MessageParser {
             return Collections.emptyMap();
         }
         final Map<String, ReferencedMailPart> retval = new HashMap<String, ReferencedMailPart>(len);
-        final MailAccess<?, ?> access = MailAccess.getInstance(session, parentMsgRef.getAccountId());
-        access.connect();
+        MailAccess<?, ?> access = null;
         try {
+            access = MailAccess.getInstance(session, parentMsgRef.getAccountId());
+            access.connect();
             final MailMessage referencedMail =
                 access.getMessageStorage().getMessage(parentMsgRef.getFolder(), parentMsgRef.getMailID(), false);
             if (null == referencedMail) {
@@ -826,7 +827,9 @@ public final class MessageParser {
                 retval.put(e.getKey(), provider.getNewReferencedPart(e.getValue(), session));
             }
         } finally {
-            access.close(true);
+            if (null != access) {
+                access.close(true);
+            }
         }
         return retval;
     }

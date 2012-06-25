@@ -109,6 +109,8 @@ public class UpdatePerformer extends AbstrakterDingeMacher {
             int owner = session.getUserId();
             if (analysis.getMessage().getOwner() > 0) {
                 owner = analysis.getMessage().getOwner();
+            } else if (appointment.getPrincipalId() > 0) {
+                owner = appointment.getPrincipalId();
             }
             ensureParticipant(appointment, action, owner);
             Appointment original = determineOriginalAppointment(change, processed, session);

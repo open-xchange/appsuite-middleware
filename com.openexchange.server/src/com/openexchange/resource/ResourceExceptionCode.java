@@ -21,23 +21,23 @@ public enum ResourceExceptionCode implements OXExceptionCode {
     /**
      * Cannot find resource group with identifier %1$d.
      */
-    RESOURCEGROUP_NOT_FOUND(ResourceExceptionMessage.RESOURCEGROUP_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 3),
+    RESOURCEGROUP_NOT_FOUND(ResourceExceptionMessage.RESOURCEGROUP_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 3),
     /**
      * Found resource groups with same identifier %1$d.
      */
-    RESOURCEGROUP_CONFLICT(ResourceExceptionMessage.RESOURCEGROUP_CONFLICT_MSG, Category.CATEGORY_ERROR, 4),
+    RESOURCEGROUP_CONFLICT(ResourceExceptionMessage.RESOURCEGROUP_CONFLICT_MSG, Category.CATEGORY_USER_INPUT, 4),
     /**
      * Cannot find resource with identifier %1$d.
      */
-    RESOURCE_NOT_FOUND(ResourceExceptionMessage.RESOURCE_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 5),
+    RESOURCE_NOT_FOUND(ResourceExceptionMessage.RESOURCE_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 5),
     /**
      * Found resource(s) with same identifier %1$s.
      */
-    RESOURCE_CONFLICT(ResourceExceptionMessage.RESOURCE_CONFLICT_MSG, Category.CATEGORY_ERROR, 6),
+    RESOURCE_CONFLICT(ResourceExceptionMessage.RESOURCE_CONFLICT_MSG, Category.CATEGORY_USER_INPUT, 6),
     /**
      * No resource given.
      */
-    NULL(ResourceExceptionMessage.NULL_MSG, Category.CATEGORY_ERROR, 7),
+    NULL(ResourceExceptionMessage.NULL_MSG, Category.CATEGORY_USER_INPUT, 7),
     /**
      * Missing mandatory field(s) in given resource.
      */
