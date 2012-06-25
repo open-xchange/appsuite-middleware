@@ -30,6 +30,54 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+#. The client send a ticket within the browser request and the verification of this ticket failed.
+#. %1$s will be replaced with a detailed exception message.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:63
+msgid "Verification of client ticket failed: %1$s"
+msgstr ""
+
+#. If the problem could not be specified in some more detailed way this message can be used.
+#. %1$s is replaced by some own message that will not be translated.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:67
+msgid "Unknown problem: \"%1$s\"."
+msgstr ""
+
+#. The Kerberos ticket granting service denied to issue a delegate ticket for the client.
+#. %1$s will be replaced with the Kerberos name of the client.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:71
+msgid "Failed to get a delegate ticket for %1$s."
+msgstr ""
+
+#. Some problem occurred while talking to Kerberos server.
+#. %1$s will be replaced with the message from the underlying exception.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:75
+msgid "Communication to Kerberos server failed: %1$s"
+msgstr ""
+
+#. Initial login of this service on the Kerberos server failed.
+#. %1$s will be replaced with the detailed not translated message from the underlying implementation.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:79
+msgid "Authenticating this service against the Kerberos server failed: %1$s"
+msgstr ""
+
+#. When shutting down this service the termination of the service ticket failed.
+#. %1$s will be replaced with the detailed not translated message from the underlying implementation.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:83
+msgid "Problem while terminating service ticket: %1$s"
+msgstr ""
+
+#. Written to the log file if the session contains a Kerberos subject that does not contain any ticket that needs a renewal.
+#. %1$s is replaced with the subjects principal name.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:87
+msgid "Can not find credentials in subject %1$s that need a renewal."
+msgstr ""
+
+#. Written to the log file if the session does not contain a Kerberos subject for the delegation.
+#. %1$s is replaced with the session identifier.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:91
+msgid "No Kerberos delegation ticket found in session %1$s."
+msgstr ""
+
 #. A cache error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caching/src/com/openexchange/caching/CacheExceptionMessage.java:69
 msgid "A cache error occurred: %1$s"
