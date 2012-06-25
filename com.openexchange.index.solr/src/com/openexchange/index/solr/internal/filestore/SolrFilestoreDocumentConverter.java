@@ -50,6 +50,7 @@
 package com.openexchange.index.solr.internal.filestore;
 
 import java.io.InputStream;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -91,7 +92,11 @@ public class SolrFilestoreDocumentConverter implements SolrResultConverter<File>
             if (fileField != null && fileField != Field.CONTENT) {
                 Object value = fileField.doSwitch(getter, file);
                 if (value != null) {
-                    document.setField(field.solrName(), value);
+                    if (fileField == Field.CREATED || fileField == Field.LAST_MODIFIED) {
+                        document.setField(field.solrName(), ((Date) value).getTime());
+                    } else {
+                        document.setField(field.solrName(), value);
+                    }
                 }
             }
         }
