@@ -73,6 +73,7 @@ import com.openexchange.mail.json.converters.MailConverter;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.collections.PropertizedList;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -262,13 +263,11 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                 if (null == s) {
                     max = -1L;
                 } else {
-                    long tmp;
                     try {
-                        tmp = Long.parseLong(s.trim());
+                        max = Long.parseLong(s.trim());
                     } catch (final NumberFormatException e) {
-                        tmp = -1L;
+                        throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("max", s);
                     }
-                    max = tmp;
                 }
             }
             final boolean includeSent = req.optBool("includeSent", false);
