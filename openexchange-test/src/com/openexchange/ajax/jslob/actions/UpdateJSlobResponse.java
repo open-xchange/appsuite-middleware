@@ -80,7 +80,8 @@ public final class UpdateJSlobResponse extends AbstractAJAXResponse {
      */
     public JSlob getJSlob() throws JSONException {
         final JSONObject jData = (JSONObject) getData();
-        final JSlob jSlob = new JSlob(jData.getJSONObject("jslob"));
+        final JSlob jSlob = new JSlob(jData.getJSONObject("tree"));
+        jSlob.setMetaObject(jData.getJSONObject("meta"));
         jSlob.setId(new JSlobId(null, jData.getString("id"), 0, 0));
         return jSlob;
     }

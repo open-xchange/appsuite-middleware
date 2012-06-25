@@ -87,7 +87,9 @@ public final class AllJSlobResponse extends AbstractAJAXResponse {
         final List<JSlob> list = new ArrayList<JSlob>(len);
         for (int i = 0; i < len; i++) {            
             final JSONObject jData = jslobs.getJSONObject(i);
-            final JSlob jSlob = new JSlob(jData.getJSONObject("jslob"));
+            final JSlob jSlob = new JSlob(jData.getJSONObject("tree"));
+            jSlob.setMetaObject(jData.getJSONObject("meta"));
+
             jSlob.setId(new JSlobId(null, jData.getString("id"), 0, 0));
             list.add(jSlob);
         }
