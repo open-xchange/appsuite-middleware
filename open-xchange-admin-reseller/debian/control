@@ -8,7 +8,7 @@ Homepage: http://www.open-xchange.com
 
 Package: open-xchange-admin-reseller
 Architecture: all
-Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@), open-xchange-admin (>= @OXVERSION@)
+Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@), open-xchange-admin (>= @OXVERSION@), open-xchange-admin-autocontextid (>= @OXVERSION@)
 Replaces: open-xchange-admin-plugin-reseller
 Conflicts: open-xchange-admin-plugin-reseller
 Description: Open Xchange Admin Reseller Plugin
