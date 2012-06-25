@@ -1037,6 +1037,15 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     }
 
     /**
+     * Indicates whether <tt>Threadable</tt> cache is enabled.
+     * 
+     * @return <code>true</code> if enabled; otherwise <code>false</code>
+     */
+    public static boolean isThreadableCacheEnabled() {
+        return false;
+    }
+
+    /**
      * Gets the <tt>Threadable</tt> with cache look-up.
      * 
      * @param f The IMAP folder
@@ -1046,6 +1055,16 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
      * @throws MessagingException If <tt>Threadable</tt> cannot be returned for any reason
      */
     protected ThreadableResult getThreadableFor(final IMAPFolder f, final boolean sorted, final boolean cache) throws MessagingException {
+        if (!isThreadableCacheEnabled()) {
+            Threadable threadable = Threadable.getAllThreadablesFrom(imapFolder);
+            if (sorted) {
+                threadable = new Threader().thread(threadable);
+            }
+            return new ThreadableResult(threadable, false);
+        }
+        /*
+         * Fetch from cache (if present)
+         */
         final ThreadableCacheEntry entry = ThreadableCache.getInstance().getEntry(f.getFullName(), accountId, session);
         synchronized (entry) {
             final boolean logIt = INFO; // TODO: Switch to DEBUG

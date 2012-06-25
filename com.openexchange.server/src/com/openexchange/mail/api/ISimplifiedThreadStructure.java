@@ -75,7 +75,7 @@ public interface ISimplifiedThreadStructure {
      *
      * @param folder The folder full name
      * @param includeSent <code>true</code> to include sent mails in thread; otherwise <code>false</code>
-     * @param cache TODO
+     * @param cache Whether caller allows to serve this call with possibly cached content
      * @param indexRange The optional index range
      * @param sortField The sort field applied to thread root elements
      * @param order Whether ascending or descending sort order
