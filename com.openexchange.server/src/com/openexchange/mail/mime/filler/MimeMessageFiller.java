@@ -1635,11 +1635,12 @@ public class MimeMessageFiller {
                         iid = id;
                     }
                     final boolean appendBodyPart = trackedIds.add(iid);
-                    m.appendLiteralReplacement(
-                        sb,
-                        imageTag.replaceFirst(
-                            "(?i)src=\"[^\"]*\"",
-                            "src=\"cid:" + processLocalImage(imageProvider, iid, appendBodyPart, tmp, mp) + "\""));
+                    /*
+                     * Replace "src" attribute
+                     */
+                    String iTag = imageTag.replaceFirst("(?i)src=\"[^\"]*\"", "src=\"cid:" + processLocalImage(imageProvider, iid, appendBodyPart, tmp, mp) + "\"");
+                    iTag = iTag.replaceFirst("(?i)id=\"[^\"]*@" + Version.NAME + "\"", "");
+                    m.appendLiteralReplacement(sb, iTag);
                 } else {
                     /*
                      * Re-append as-is
