@@ -682,11 +682,12 @@ public final class Threadable implements Cloneable {
      * Gets the <tt>Threadable</tt>s for given IMAP folder.
      * 
      * @param imapFolder The IMAP folders
+     * @param limit The max. number of messages or <code>-1</code>
      * @return The fetched <tt>Threadable</tt>s
      * @throws MessagingException If an error occurs
      */
-    public static Threadable getAllThreadablesFrom(final IMAPFolder imapFolder) throws MessagingException {
-        return getAllThreadablesFrom(imapFolder, false);
+    public static Threadable getAllThreadablesFrom(final IMAPFolder imapFolder, final int limit) throws MessagingException {
+        return getAllThreadablesFrom(imapFolder, limit, false);
     }
 
     /**
@@ -702,11 +703,12 @@ public final class Threadable implements Cloneable {
      * Gets the <tt>Threadable</tt>s for given IMAP folder.
      * 
      * @param imapFolder The IMAP folders
+     * @param limit The max. number of messages or <code>-1</code>
      * @param fetchSingleFields <code>true</code> to fetch single fields; otherwise <code>false</code> for complete headers
      * @return The fetched <tt>Threadable</tt>s
      * @throws MessagingException If an error occurs
      */
-    public static Threadable getAllThreadablesFrom(final IMAPFolder imapFolder, final boolean fetchSingleFields) throws MessagingException {
+    public static Threadable getAllThreadablesFrom(final IMAPFolder imapFolder, final int limit, final boolean fetchSingleFields) throws MessagingException {
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             /*
@@ -721,7 +723,17 @@ public final class Threadable implements Cloneable {
                 final String command;
                 final Response[] r;
                 {
-                    StringBuilder sb = new StringBuilder(128).append("FETCH ").append(1 == messageCount ? "1" : "1:*").append(" (");
+                    StringBuilder sb = new StringBuilder(128).append("FETCH ");
+                    if (1 == messageCount) {
+                        sb.append("1");
+                    } else {
+                        if (limit < 0) {
+                            sb.append("1:*");
+                        } else {
+                            sb.append(messageCount - limit + 1).append(':').append(messageCount); 
+                        }
+                    }
+                    sb.append(" (");
                     final boolean rev1 = protocol.isREV1();
                     if (fetchSingleFields) {
                         if (rev1) {
