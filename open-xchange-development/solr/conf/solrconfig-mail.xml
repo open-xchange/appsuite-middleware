@@ -114,8 +114,7 @@
 		</arr>
 	</requestHandler>
 
-	<!-- <searchComponent name="queryModifier" class="de.kippdata.cria.solrext.searchcomponents.FormalFieldQueryModifier"> -->
-    <searchComponent name="queryModifier" class="com.openexchange.solr.components.FormalFieldQueryModifier">
+    <searchComponent name="queryModifier" class="de.kippdata.cria.solrext.searchcomponents.FormalFieldQueryModifier">
 		<str name="param1">uuid</str>
 		<str name="param2">timestamp</str>
 		<str name="param3">account</str>

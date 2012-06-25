@@ -203,8 +203,8 @@ public class SolrIndexFacadeService implements IndexFacadeService {
             case Types.EMAIL:
                 return new MailSolrIndexAccess(identifier);
                 
-//            case Types.INFOSTORE:
-//                return new SolrFilestoreIndexAccess(identifier);
+            case Types.INFOSTORE:
+                return new SolrFilestoreIndexAccess(identifier);
                 
             default:
                 throw SolrIndexExceptionCodes.MISSING_ACCESS_FOR_MODULE.create(module);
