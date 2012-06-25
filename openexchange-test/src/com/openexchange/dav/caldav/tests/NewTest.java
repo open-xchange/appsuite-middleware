@@ -49,10 +49,10 @@
 
 package com.openexchange.dav.caldav.tests;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.SyncToken;
 import com.openexchange.dav.caldav.CalDAVTest;
@@ -181,7 +181,10 @@ public class NewTest extends CalDAVTest {
     	String summary = "all day";
     	String location = "testing";
     	Date start = TimeTools.D("next monday at midnight");
-    	Date end = TimeTools.D("next tuesday at midnight");
+    	Calendar calendar = Calendar.getInstance();
+    	calendar.setTime(start);
+    	calendar.add(Calendar.DAY_OF_YEAR, 1);    	
+    	Date end = calendar.getTime();
 		Appointment appointment = generateAppointment(start, end, uid, summary, location);
 		appointment.setFullTime(true);
 		super.rememberForCleanUp(super.create(appointment));
