@@ -392,6 +392,7 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                 req.getParameter(Mail.PARAMETER_SORT),
                 req.getParameter(Mail.PARAMETER_ORDER),
                 req.getParameter("limit"),
+                req.getParameter("max"),
                 req.getParameter(Mail.LEFT_HAND_LIMIT),
                 req.getParameter(Mail.RIGHT_HAND_LIMIT),
                 req.getParameter("includeSent"),
