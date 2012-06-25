@@ -77,12 +77,13 @@ public interface ISimplifiedThreadStructure {
      * @param includeSent <code>true</code> to include sent mails in thread; otherwise <code>false</code>
      * @param cache Whether caller allows to serve this call with possibly cached content
      * @param indexRange The optional index range
+     * @param max The max. number of messages to consider
      * @param sortField The sort field applied to thread root elements
      * @param order Whether ascending or descending sort order
      * @param fields The fields to pre-fill in returned instances of {@link MailMessage}
      * @return The thread-sorted messages or <code>null</code> if SORT is not supported by mail server
      * @throws OXException If messages cannot be returned
      */
-    public List<List<MailMessage>> getThreadSortedMessages(final String folder, boolean includeSent, boolean cache, IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final MailField[] fields) throws OXException;
+    public List<List<MailMessage>> getThreadSortedMessages(String folder, boolean includeSent, boolean cache, IndexRange indexRange, long max, MailSortField sortField, OrderDirection order, MailField[] fields) throws OXException;
     
 }

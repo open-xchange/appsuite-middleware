@@ -384,7 +384,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
     static final MailMessageComparator COMPARATOR = new MailMessageComparator(MailSortField.RECEIVED_DATE, true, null);
 
     @Override
-    public List<List<MailMessage>> getThreadSortedMessages(final String fullName, final boolean includeSent, boolean cache, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final MailField[] mailFields) throws OXException {
+    public List<List<MailMessage>> getThreadSortedMessages(final String fullName, final boolean includeSent, final boolean cache, final IndexRange indexRange, final long max, final MailSortField sortField, final OrderDirection order, final MailField[] mailFields) throws OXException {
         if (DEFAULT_FOLDER_ID.equals(fullName)) {
             throw UnifiedInboxException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.create(fullName);
         }
@@ -431,7 +431,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                             // Get account's messages
                             final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
                             if (messageStorage instanceof ISimplifiedThreadStructure) {
-                                final List<List<MailMessage>> list = ((ISimplifiedThreadStructure) messageStorage).getThreadSortedMessages(fn, includeSent, false, null, sortField, order, checkedFields);
+                                final List<List<MailMessage>> list = ((ISimplifiedThreadStructure) messageStorage).getThreadSortedMessages(fn, includeSent, false, null, max, sortField, order, checkedFields);
                                 final UnifiedInboxUID helper = new UnifiedInboxUID();
                                 for (final List<MailMessage> list2 : list) {
                                     for (final MailMessage accountMail : list2) {
@@ -595,7 +595,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             // Get account's messages
             final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
             if (messageStorage instanceof ISimplifiedThreadStructure) {
-                return ((ISimplifiedThreadStructure) messageStorage).getThreadSortedMessages(fullName, includeSent, false, indexRange, sortField, order, mailFields);
+                return ((ISimplifiedThreadStructure) messageStorage).getThreadSortedMessages(fullName, includeSent, false, indexRange, max, sortField, order, mailFields);
             }
             /*-
              * 1. Send 'all' request with id, folder_id, level, and received_date - you need all that data.

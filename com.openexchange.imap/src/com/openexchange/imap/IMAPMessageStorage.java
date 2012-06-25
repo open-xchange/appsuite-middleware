@@ -1126,7 +1126,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     }
 
     @Override
-    public List<List<MailMessage>> getThreadSortedMessages(final String fullName, final boolean includeSent, final boolean cache, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final MailField[] mailFields) throws OXException {
+    public List<List<MailMessage>> getThreadSortedMessages(final String fullName, final boolean includeSent, final boolean cache, final IndexRange indexRange, long max, final MailSortField sortField, final OrderDirection order, final MailField[] mailFields) throws OXException {
         IMAPFolder sentFolder = null;
         try {
             final String sentFullName = imapFolderStorage.getSentFolder();
