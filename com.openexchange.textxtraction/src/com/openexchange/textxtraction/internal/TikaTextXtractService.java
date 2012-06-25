@@ -299,14 +299,18 @@ public final class TikaTextXtractService extends AbstractTextXtractService {
             }
             if (POIXMLDocument.hasOOXMLHeader(in)) {
                 final NonClosableInputStream ncis = new NonClosableInputStream(in);
+                boolean resetMark = true;
                 try {
                     ncis.mark(8192);
                     return ExtractorFactory.createExtractor(OPCPackage.open(ncis)).getText();
-                } finally {
+                } catch (final Exception e) {
                     if (ncis.closed) {
                         // Stream has been closed unexpectedly
                         ncis.reset();
-                    } else {
+                        resetMark = false;
+                    }
+                } finally {
+                    if (resetMark) {
                         ncis.mark(0);
                     }
                 }
@@ -319,6 +323,8 @@ public final class TikaTextXtractService extends AbstractTextXtractService {
         } catch (final XmlException e) {
             LOG.debug(e.getMessage(), e);
         } catch (final RuntimeException e) {
+            LOG.debug(e.getMessage(), e);
+        } catch (final Exception e) {
             LOG.debug(e.getMessage(), e);
         }
         return null;

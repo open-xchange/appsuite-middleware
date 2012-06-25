@@ -714,6 +714,99 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         return count;
     }
 
+//    @Override
+//    public MailPart getAttachmentLong(final String fullName, final long msgUID, final String sectionId) throws OXException {
+//        if (msgUID < 0 || null == sectionId) {
+//            return null;
+//        }
+//        try {
+//            imapFolder = setAndOpenFolder(imapFolder, fullName, Folder.READ_ONLY);
+//            if (0 >= imapFolder.getMessageCount()) {
+//                return null;
+//            }
+//            imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+//                
+//                @Override
+//                public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+//                    final StringBuilder cmd = new StringBuilder(32);
+//                    cmd.append("UID FETCH ").append(msgUID).append(" (");
+//                    cmd.append("BODY.PEEK[").append(sectionId).append(']').append(')');
+//                    final Response[] r = protocol.command(cmd.toString(), null);
+//                    final Response response = r[r.length - 1];
+//                    if (response.isOK()) {
+//                        final Class<BODY> c = BODY.class;
+//                        BODY body = null;
+//                        for (int i = 0, len = r.length - 1; null == body && i < len; i++) {
+//                            if (!(r[i] instanceof FetchResponse)) {
+//                                continue;
+//                            }
+//                            final FetchResponse f = (FetchResponse) r[i];
+//                            final int itemCount = f.getItemCount();
+//                            for (int j = 0; j < itemCount; j++) {
+//                                final com.sun.mail.imap.protocol.Item item = f.getItem(j);
+//                                if (c.isInstance(item)) {
+//                                    body = (BODY) item;
+//                                }
+//                            }
+//                            r[i] = null;
+//                        }
+//                        protocol.notifyResponseHandlers(r);
+//                        // Convert to part
+//                        if (null == body) {
+//                            return null;
+//                        }
+//                        new MimeBodyPart(new UnsynchronizedByteArrayInputStream(body.data.getBytes()));
+//                        
+//                        
+//                    } else if (response.isBAD()) {
+//                        if (ImapUtility.isInvalidMessageset(response)) {
+//                            return null;
+//                        }
+//                        throw new BadCommandException(IMAPException.getFormattedMessage(
+//                            IMAPException.Code.PROTOCOL_ERROR,
+//                            cmd.toString(),
+//                            response.toString() + " ("+imapFolder.getStore().toString()+")"));
+//                    } else if (response.isNO()) {
+//                        throw new CommandFailedException(IMAPException.getFormattedMessage(
+//                            IMAPException.Code.PROTOCOL_ERROR,
+//                            cmd.toString(),
+//                            response.toString() + " ("+imapFolder.getStore().toString()+")"));
+//                    } else {
+//                        protocol.handleResult(response);
+//                    }
+//                }
+//            });
+//            
+//            
+//            
+//            final IMAPMessage msg = (IMAPMessage) imapFolder.getMessageByUID(msgUID);
+//            Part p = examinePart(msg, contentId);
+//            if (null == p) {
+//                // Retry...
+//                final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(8192);
+//                msg.writeTo(out);
+//                final MimeMessage tmp = new MimeMessage(MimeDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(out.toByteArray()));
+//                p = examinePart(tmp, contentId);
+//                if (null == p) {
+//                    throw MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND.create(contentId, Long.valueOf(msgUID), fullName);
+//                }
+//            }
+//            return MimeMessageConverter.convertPart(p, false);
+//        } catch (final MessagingException e) {
+//            if (ImapUtility.isInvalidMessageset(e)) {
+//                return null;
+//            }
+//            throw MimeMailException.handleMessagingException(e, imapConfig, session);
+//        } catch (final IOException e) {
+//            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+//        } catch (final RuntimeException e) {
+//            throw handleRuntimeException(e);
+//        }
+//        
+//        
+//        return super.getAttachmentLong(fullName, msgUID, sectionId);
+//    }
+
     @Override
     public MailPart getImageAttachmentLong(final String fullName, final long msgUID, final String contentId) throws OXException {
         if (msgUID < 0 || null == contentId) {
