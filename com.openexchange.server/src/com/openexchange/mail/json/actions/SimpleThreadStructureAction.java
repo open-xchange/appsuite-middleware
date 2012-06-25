@@ -102,6 +102,7 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
          * Try JSON cache
          */
         //req.getRequest().putParameter("cache", "true");
+        //req.getRequest().putParameter("max", "10000");
         final boolean cache = req.optBool("cache", false);
         if (cache && CACHABLE_FORMATS.contains(req.getRequest().getFormat())) {
             final JsonCacheService jsonCache = JsonCaches.getCache();
