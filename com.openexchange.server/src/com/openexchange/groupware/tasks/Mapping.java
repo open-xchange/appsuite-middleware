@@ -68,6 +68,7 @@ import java.util.Map;
 import java.util.Set;
 import com.openexchange.groupware.tasks.mapping.ActualCosts;
 import com.openexchange.groupware.tasks.mapping.ActualDuration;
+import com.openexchange.groupware.tasks.mapping.Filename;
 import com.openexchange.groupware.tasks.mapping.ObjectID;
 import com.openexchange.groupware.tasks.mapping.RecurrenceCount;
 import com.openexchange.groupware.tasks.mapping.Status;
@@ -93,6 +94,7 @@ public final class Mapping {
      */
     public static final Mapper<? extends Object>[] MAPPERS = new Mapper<?>[] {
         UID.SINGLETON,
+        Filename.SINGLETON,
         new Mapper<Boolean>() {
             @Override
             public int getId() {
