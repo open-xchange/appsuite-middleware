@@ -109,9 +109,9 @@ public final class ImageMatcher {
                 prefix = prefix.substring(1);
             }
             REGEX_IMAGE_URL =
-                "(<img[^>]*?)(src=\")(?:.*?)" + prefix + ImageActionFactory.ALIAS_APPENDIX + "([^\"]+?)(?:\\?|&amp;|&)(uid=)([^\"&]+)(?:(&[^\"]+\")|(\"))([^>]*/?>)";
+                "(<img[^>]*?)(src=\")(?:[^>]*?)" + prefix + ImageActionFactory.ALIAS_APPENDIX + "([^\"]+?)(?:\\?|&amp;|&)(uid=)([^\"&]+)(?:(&[^\"]+\")|(\"))([^>]*/?>)";
             REGEX_FILE_URL =
-                "(<img[^>]*?)(src=\")(?:.*?)" + prefix + "file([^\"]+?)(?:\\?|&amp;|&)(id=)([^\"&]+)(?:(&[^\"]+\")|(\"))([^>]*/?>)";
+                "(<img[^>]*?)(src=\")(?:[^>]*?)" + prefix + "file([^\"]+?)(?:\\?|&amp;|&)(id=)([^\"&]+)(?:(&[^\"]+\")|(\"))([^>]*/?>)";
 
             PATTERN_REF_IMG =
                 Pattern.compile("(?:" + REGEX_FILE_URL + ")|(?:" + REGEX_IMAGE_URL + ')', Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
