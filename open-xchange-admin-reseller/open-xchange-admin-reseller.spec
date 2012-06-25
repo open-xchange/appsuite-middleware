@@ -18,6 +18,7 @@ Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       Open Xchange Admin Reseller Plugin
 Requires:      open-xchange-core >= @OXVERSION@
 Requires:      open-xchange-admin >= @OXVERSION@
+Requires:      open-xchange-admin-autocontextid >= @OXVERSION@
 Provides:      open-xchange-admin-plugin-reseller = %{version}
 Obsoletes:     open-xchange-admin-plugin-reseller <= %{version}
 
