@@ -47,55 +47,93 @@
  *
  */
 
-package com.openexchange.osgi;
+package com.openexchange.kerberos.impl;
 
-import java.util.Collection;
-import java.util.Stack;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.framework.Filter;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.util.tracker.ServiceTracker;
+import javax.security.auth.Subject;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.ietf.jgss.GSSCredential;
+import org.ietf.jgss.GSSException;
+import com.openexchange.kerberos.ClientPrincipal;
+import com.openexchange.kerberos.KerberosUtils;
 
 /**
- * {@link Tools}
+ * {@link ClientPrincipalImpl}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Tools {
+public final class ClientPrincipalImpl implements ClientPrincipal {
 
-    /**
-     * Generates an OR filter matching the services given in the classes varargs.
-     * @throws InvalidSyntaxException if the syntax of the generated filter is not correct.
-     */
-    public static final Filter generateServiceFilter(final BundleContext context, final Class<?>... classes) throws InvalidSyntaxException {
-        if (classes.length < 2) {
-            throw new IllegalArgumentException("At least the classes of 2 services must be given.");
-        }
-        final StringBuilder sb = new StringBuilder("(|(");
-        for (final Class<?> clazz : classes) {
-            sb.append(Constants.OBJECTCLASS);
-            sb.append('=');
-            sb.append(clazz.getName());
-            sb.append(")(");
-        }
-        sb.setCharAt(sb.length() - 1, ')');
-        return context.createFilter(sb.toString());
-    }
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ClientPrincipalImpl.class));
 
-    public static final void open(Collection<ServiceTracker<?,?>> trackers) {
-        for (ServiceTracker<?,?> tracker : trackers) {
-            tracker.open();
-        }
-    }
+    private Subject clientSubject;
+    private Subject delegateSubject;
+    private byte[] clientTicket;
+    private byte[] responseTicket;
 
-    public static final void close(Stack<ServiceTracker<?,?>> trackers) {
-        while (!trackers.isEmpty()) {
-            trackers.pop().close();
-        }
-    }
-
-    private Tools() {
+    public ClientPrincipalImpl() {
         super();
+    }
+
+    void setClientTicket(byte[] clientTicket) {
+        this.clientTicket = clientTicket;
+    }
+
+    void setResponseTicket(byte[] responseTicket) {
+        this.responseTicket = responseTicket;
+    }
+
+    void setClientSubject(Subject clientSubject) {
+        this.clientSubject = clientSubject;
+    }
+
+    void setDelegateSubject(Subject delegateSubject) {
+        this.delegateSubject = delegateSubject;
+    }
+
+    @Override
+    public String getName() {
+        return KerberosUtils.getFirst(clientSubject.getPrincipals()).getName();
+    }
+
+    @Override
+    public Subject getDelegateSubject() {
+        return delegateSubject;
+    }
+
+    @Override
+    public byte[] getResponseTicket() {
+        return responseTicket;
+    }
+
+    public Subject getClientSubject() {
+        return clientSubject;
+    }
+
+    @Override
+    public byte[] getClientTicket() {
+        return clientTicket;
+    }
+
+    @Override
+    public void dispose() {
+        if (null != clientSubject) {
+            for (final GSSCredential credential : clientSubject.getPrivateCredentials(GSSCredential.class)) {
+                try {
+                    credential.dispose();
+                } catch (GSSException e) {
+                    LOG.error(e.getMessage(), e);
+                }
+            }
+        }
+        if (null != delegateSubject) {
+            for (final GSSCredential credential : delegateSubject.getPrivateCredentials(GSSCredential.class)) {
+                try {
+                    credential.dispose();
+                } catch (GSSException e) {
+                    LOG.error(e.getMessage(), e);
+                }
+            }
+        }
     }
 }

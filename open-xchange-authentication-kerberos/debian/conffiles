@@ -1,0 +1,3 @@
+opt/open-xchange/etc/kerberos.properties
+opt/open-xchange/etc/kerberosLogin.conf
+opt/open-xchange/etc/krb5.conf

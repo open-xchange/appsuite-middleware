@@ -47,55 +47,34 @@
  *
  */
 
-package com.openexchange.osgi;
+package com.openexchange.kerberos.impl;
 
-import java.util.Collection;
-import java.util.Stack;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.framework.Filter;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.util.tracker.ServiceTracker;
+import java.security.PrivilegedExceptionAction;
+import org.ietf.jgss.GSSCredential;
+import org.ietf.jgss.GSSException;
+import org.ietf.jgss.GSSManager;
+import org.ietf.jgss.Oid;
 
 /**
- * {@link Tools}
+ * {@link CredentialFetcher}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Tools {
+public class CredentialFetcher implements PrivilegedExceptionAction<GSSCredential> {
 
-    /**
-     * Generates an OR filter matching the services given in the classes varargs.
-     * @throws InvalidSyntaxException if the syntax of the generated filter is not correct.
-     */
-    public static final Filter generateServiceFilter(final BundleContext context, final Class<?>... classes) throws InvalidSyntaxException {
-        if (classes.length < 2) {
-            throw new IllegalArgumentException("At least the classes of 2 services must be given.");
-        }
-        final StringBuilder sb = new StringBuilder("(|(");
-        for (final Class<?> clazz : classes) {
-            sb.append(Constants.OBJECTCLASS);
-            sb.append('=');
-            sb.append(clazz.getName());
-            sb.append(")(");
-        }
-        sb.setCharAt(sb.length() - 1, ')');
-        return context.createFilter(sb.toString());
-    }
+    private final GSSManager manager;
 
-    public static final void open(Collection<ServiceTracker<?,?>> trackers) {
-        for (ServiceTracker<?,?> tracker : trackers) {
-            tracker.open();
-        }
-    }
-
-    public static final void close(Stack<ServiceTracker<?,?>> trackers) {
-        while (!trackers.isEmpty()) {
-            trackers.pop().close();
-        }
-    }
-
-    private Tools() {
+    public CredentialFetcher(GSSManager manager) {
         super();
+        this.manager = manager;
+    }
+
+    @Override
+    public GSSCredential run() throws GSSException {
+        return manager.createCredential(null, GSSCredential.INDEFINITE_LIFETIME, getSPNEGOOid(), GSSCredential.ACCEPT_ONLY);
+    }
+
+    private static Oid getSPNEGOOid() throws GSSException {
+        return new Oid("1.3.6.1.5.5.2");
     }
 }

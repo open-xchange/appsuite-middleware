@@ -47,55 +47,25 @@
  *
  */
 
-package com.openexchange.osgi;
+package com.openexchange.kerberos;
 
-import java.util.Collection;
-import java.util.Stack;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.framework.Filter;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.util.tracker.ServiceTracker;
+import javax.security.auth.Subject;
 
 /**
- * {@link Tools}
+ * {@link ClientPrincipal}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Tools {
+public interface ClientPrincipal {
 
-    /**
-     * Generates an OR filter matching the services given in the classes varargs.
-     * @throws InvalidSyntaxException if the syntax of the generated filter is not correct.
-     */
-    public static final Filter generateServiceFilter(final BundleContext context, final Class<?>... classes) throws InvalidSyntaxException {
-        if (classes.length < 2) {
-            throw new IllegalArgumentException("At least the classes of 2 services must be given.");
-        }
-        final StringBuilder sb = new StringBuilder("(|(");
-        for (final Class<?> clazz : classes) {
-            sb.append(Constants.OBJECTCLASS);
-            sb.append('=');
-            sb.append(clazz.getName());
-            sb.append(")(");
-        }
-        sb.setCharAt(sb.length() - 1, ')');
-        return context.createFilter(sb.toString());
-    }
+    String getName();
 
-    public static final void open(Collection<ServiceTracker<?,?>> trackers) {
-        for (ServiceTracker<?,?> tracker : trackers) {
-            tracker.open();
-        }
-    }
+    Subject getDelegateSubject();
 
-    public static final void close(Stack<ServiceTracker<?,?>> trackers) {
-        while (!trackers.isEmpty()) {
-            trackers.pop().close();
-        }
-    }
+    byte[] getResponseTicket();
 
-    private Tools() {
-        super();
-    }
+    byte[] getClientTicket();
+
+    void dispose();
+
 }

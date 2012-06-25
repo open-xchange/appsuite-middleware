@@ -76,6 +76,7 @@ Import-Package: com.openexchange.api2,
  javax.mail.search,
  javax.net,
  javax.net.ssl,
+ javax.security.auth,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.service.event

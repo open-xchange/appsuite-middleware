@@ -47,55 +47,46 @@
  *
  */
 
-package com.openexchange.osgi;
-
-import java.util.Collection;
-import java.util.Stack;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.framework.Filter;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.util.tracker.ServiceTracker;
+package com.openexchange.kerberos.impl;
 
 /**
- * {@link Tools}
+ * Enumerates the possible configuration properties for the Kerberos authentication module.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Tools {
+public enum ConfigurationProperty {
 
     /**
-     * Generates an OR filter matching the services given in the classes varargs.
-     * @throws InvalidSyntaxException if the syntax of the generated filter is not correct.
+     * Path to the JAAS configuration file.
      */
-    public static final Filter generateServiceFilter(final BundleContext context, final Class<?>... classes) throws InvalidSyntaxException {
-        if (classes.length < 2) {
-            throw new IllegalArgumentException("At least the classes of 2 services must be given.");
-        }
-        final StringBuilder sb = new StringBuilder("(|(");
-        for (final Class<?> clazz : classes) {
-            sb.append(Constants.OBJECTCLASS);
-            sb.append('=');
-            sb.append(clazz.getName());
-            sb.append(")(");
-        }
-        sb.setCharAt(sb.length() - 1, ')');
-        return context.createFilter(sb.toString());
+    JAAS_CONF("java.security.auth.login.config", "/opt/open-xchange/etc/groupware/kerberosLogin.conf"),
+    /**
+     * Wether Suns Kerberos implementation should write debugging information or not.
+     */
+    DEBUG("sun.security.krb5.debug", "false"),
+    /**
+     * Path to the krb5.conf configuration file.
+     */
+    KRB5_CONF("java.security.krb5.conf", "/opt/open-xchange/etc/groupware/krb5.conf"),
+    /**
+     * Name of the module in the Java authentication and authorization configuration file.
+     */
+    MODULE_NAME("com.openexchange.kerberos.moduleName", "Open-Xchange");
+
+    private final String propertyName;
+
+    private final String defaultValue;
+
+    private ConfigurationProperty(final String propertyName, final String defaultValue) {
+        this.propertyName = propertyName;
+        this.defaultValue = defaultValue;
     }
 
-    public static final void open(Collection<ServiceTracker<?,?>> trackers) {
-        for (ServiceTracker<?,?> tracker : trackers) {
-            tracker.open();
-        }
+    public String getName() {
+        return propertyName;
     }
 
-    public static final void close(Stack<ServiceTracker<?,?>> trackers) {
-        while (!trackers.isEmpty()) {
-            trackers.pop().close();
-        }
-    }
-
-    private Tools() {
-        super();
+    public String getDefault() {
+        return defaultValue;
     }
 }

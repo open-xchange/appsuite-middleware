@@ -47,55 +47,82 @@
  *
  */
 
-package com.openexchange.osgi;
+package com.openexchange.authentication.kerberos.impl;
 
-import java.util.Collection;
-import java.util.Stack;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.framework.Filter;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.util.tracker.ServiceTracker;
+import static com.openexchange.kerberos.KerberosUtils.SESSION_PRINCIPAL;
+import static com.openexchange.kerberos.KerberosUtils.SESSION_SUBJECT;
+import com.openexchange.authentication.Authenticated;
+import com.openexchange.authentication.Cookie;
+import com.openexchange.authentication.Header;
+import com.openexchange.authentication.ResponseEnhancement;
+import com.openexchange.authentication.ResultCode;
+import com.openexchange.authentication.SessionEnhancement;
+import com.openexchange.kerberos.ClientPrincipal;
+import com.openexchange.session.Session;
+import com.openexchange.tools.encoding.Base64;
 
 /**
- * {@link Tools}
+ * {@link Authed}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Tools {
+public class Authed implements Authenticated, SessionEnhancement, ResponseEnhancement {
 
-    /**
-     * Generates an OR filter matching the services given in the classes varargs.
-     * @throws InvalidSyntaxException if the syntax of the generated filter is not correct.
-     */
-    public static final Filter generateServiceFilter(final BundleContext context, final Class<?>... classes) throws InvalidSyntaxException {
-        if (classes.length < 2) {
-            throw new IllegalArgumentException("At least the classes of 2 services must be given.");
-        }
-        final StringBuilder sb = new StringBuilder("(|(");
-        for (final Class<?> clazz : classes) {
-            sb.append(Constants.OBJECTCLASS);
-            sb.append('=');
-            sb.append(clazz.getName());
-            sb.append(")(");
-        }
-        sb.setCharAt(sb.length() - 1, ')');
-        return context.createFilter(sb.toString());
-    }
+    private final String contextInfo;
+    private final String userInfo;
+    private final ClientPrincipal principal;
 
-    public static final void open(Collection<ServiceTracker<?,?>> trackers) {
-        for (ServiceTracker<?,?> tracker : trackers) {
-            tracker.open();
-        }
-    }
-
-    public static final void close(Stack<ServiceTracker<?,?>> trackers) {
-        while (!trackers.isEmpty()) {
-            trackers.pop().close();
-        }
-    }
-
-    private Tools() {
+    public Authed(String contextInfo, String userInfo, ClientPrincipal principal) {
         super();
+        this.contextInfo = contextInfo;
+        this.userInfo = userInfo;
+        this.principal = principal;
+    }
+
+    @Override
+    public void enhanceSession(Session session) {
+        session.setParameter(SESSION_SUBJECT, principal.getDelegateSubject());
+        session.setParameter(SESSION_PRINCIPAL, principal);
+    }
+
+    @Override
+    public String getContextInfo() {
+        return contextInfo;
+    }
+
+    @Override
+    public String getUserInfo() {
+        return userInfo;
+    }
+
+    @Override
+    public ResultCode getCode() {
+        return ResultCode.SUCCEEDED;
+    }
+
+    @Override
+    public Header[] getHeaders() {
+        return new Header[] {
+            new Header() {
+                @Override
+                public String getValue() {
+                    return "Negotiate " + Base64.encode(principal.getResponseTicket());
+                }
+                @Override
+                public String getName() {
+                    return "WWW-Authenticate";
+                }
+            }
+        };
+    }
+
+    @Override
+    public Cookie[] getCookies() {
+        return new Cookie[0];
+    }
+
+    @Override
+    public String getRedirect() {
+        return null;
     }
 }

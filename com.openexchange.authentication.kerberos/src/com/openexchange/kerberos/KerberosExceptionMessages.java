@@ -47,55 +47,50 @@
  *
  */
 
-package com.openexchange.osgi;
+package com.openexchange.kerberos;
 
-import java.util.Collection;
-import java.util.Stack;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.framework.Filter;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link Tools}
+ * {@link KerberosExceptionMessages}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Tools {
+final class KerberosExceptionMessages implements LocalizableStrings {
 
-    /**
-     * Generates an OR filter matching the services given in the classes varargs.
-     * @throws InvalidSyntaxException if the syntax of the generated filter is not correct.
-     */
-    public static final Filter generateServiceFilter(final BundleContext context, final Class<?>... classes) throws InvalidSyntaxException {
-        if (classes.length < 2) {
-            throw new IllegalArgumentException("At least the classes of 2 services must be given.");
-        }
-        final StringBuilder sb = new StringBuilder("(|(");
-        for (final Class<?> clazz : classes) {
-            sb.append(Constants.OBJECTCLASS);
-            sb.append('=');
-            sb.append(clazz.getName());
-            sb.append(")(");
-        }
-        sb.setCharAt(sb.length() - 1, ')');
-        return context.createFilter(sb.toString());
-    }
+    // The client send a ticket within the browser request and the verification of this ticket failed.
+    // %1$s will be replaced with a detailed exception message.
+    static final String TICKET_WRONG_MSG = "Verification of client ticket failed: %1$s";
 
-    public static final void open(Collection<ServiceTracker<?,?>> trackers) {
-        for (ServiceTracker<?,?> tracker : trackers) {
-            tracker.open();
-        }
-    }
+    // If the problem could not be specified in some more detailed way this message can be used.
+    // %1$s is replaced by some own message that will not be translated.
+    static final String UNKNOWN_MSG = "Unknown problem: \"%1$s\".";
 
-    public static final void close(Stack<ServiceTracker<?,?>> trackers) {
-        while (!trackers.isEmpty()) {
-            trackers.pop().close();
-        }
-    }
+    // The Kerberos ticket granting service denied to issue a delegate ticket for the client.
+    // %1$s will be replaced with the Kerberos name of the client.
+    static final String DELEGATE_FAILED_MSG = "Failed to get a delegate ticket for %1$s.";
 
-    private Tools() {
+    // Some problem occurred while talking to Kerberos server.
+    // %1$s will be replaced with the message from the underlying exception.
+    static final String COMM_FAILED_MSG = "Communication to Kerberos server failed: %1$s";
+
+    // Initial login of this service on the Kerberos server failed.
+    // %1$s will be replaced with the detailed not translated message from the underlying implementation.
+    static final String LOGIN_FAILED_MSG = "Authenticating this service against the Kerberos server failed: %1$s";
+
+    // When shutting down this service the termination of the service ticket failed.
+    // %1$s will be replaced with the detailed not translated message from the underlying implementation.
+    static final String LOGOUT_FAILED_MSG = "Problem while terminating service ticket: %1$s";
+
+    // Written to the log file if the session contains a Kerberos subject that does not contain any ticket that needs a renewal.
+    // %1$s is replaced with the subjects principal name.
+    static final String NO_CREDENTIALS_MSG = "Can not find credentials in subject %1$s that need a renewal.";
+
+    // Written to the log file if the session does not contain a Kerberos subject for the delegation.
+    // %1$s is replaced with the session identifier.
+    static final String TICKET_MISSING_MSG = "No Kerberos delegation ticket found in session %1$s.";
+
+    private KerberosExceptionMessages() {
         super();
     }
 }

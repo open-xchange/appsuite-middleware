@@ -47,55 +47,52 @@
  *
  */
 
-package com.openexchange.osgi;
+package com.openexchange.authentication.kerberos.impl;
 
-import java.util.Collection;
-import java.util.Stack;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.framework.Filter;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.authentication.Authenticated;
+import com.openexchange.authentication.Cookie;
+import com.openexchange.authentication.Header;
+import com.openexchange.authentication.ResponseEnhancement;
+import com.openexchange.authentication.ResultCode;
 
 /**
- * {@link Tools}
+ * {@link Redirect}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Tools {
+public class Redirect implements Authenticated, ResponseEnhancement {
 
-    /**
-     * Generates an OR filter matching the services given in the classes varargs.
-     * @throws InvalidSyntaxException if the syntax of the generated filter is not correct.
-     */
-    public static final Filter generateServiceFilter(final BundleContext context, final Class<?>... classes) throws InvalidSyntaxException {
-        if (classes.length < 2) {
-            throw new IllegalArgumentException("At least the classes of 2 services must be given.");
-        }
-        final StringBuilder sb = new StringBuilder("(|(");
-        for (final Class<?> clazz : classes) {
-            sb.append(Constants.OBJECTCLASS);
-            sb.append('=');
-            sb.append(clazz.getName());
-            sb.append(")(");
-        }
-        sb.setCharAt(sb.length() - 1, ')');
-        return context.createFilter(sb.toString());
-    }
-
-    public static final void open(Collection<ServiceTracker<?,?>> trackers) {
-        for (ServiceTracker<?,?> tracker : trackers) {
-            tracker.open();
-        }
-    }
-
-    public static final void close(Stack<ServiceTracker<?,?>> trackers) {
-        while (!trackers.isEmpty()) {
-            trackers.pop().close();
-        }
-    }
-
-    private Tools() {
+    public Redirect() {
         super();
+    }
+
+    @Override
+    public ResultCode getCode() {
+        return ResultCode.REDIRECT;
+    }
+
+    @Override
+    public Header[] getHeaders() {
+        return new Header[0];
+    }
+
+    @Override
+    public Cookie[] getCookies() {
+        return new Cookie[0];
+    }
+
+    @Override
+    public String getRedirect() {
+        return "/ajax/login/httpAuth";
+    }
+
+    @Override
+    public String getContextInfo() {
+        return null;
+    }
+
+    @Override
+    public String getUserInfo() {
+        return null;
     }
 }

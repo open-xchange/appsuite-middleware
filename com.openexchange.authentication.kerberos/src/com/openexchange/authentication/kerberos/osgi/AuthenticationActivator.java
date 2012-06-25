@@ -47,55 +47,46 @@
  *
  */
 
-package com.openexchange.osgi;
+package com.openexchange.authentication.kerberos.osgi;
 
-import java.util.Collection;
+import static com.openexchange.osgi.Tools.generateServiceFilter;
 import java.util.Stack;
+import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.context.ContextService;
+import com.openexchange.kerberos.KerberosService;
+import com.openexchange.osgi.Tools;
+import com.openexchange.user.UserService;
 
 /**
- * {@link Tools}
+ * Activator for Kerberos authentication bundle.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Tools {
+public class AuthenticationActivator implements BundleActivator {
 
-    /**
-     * Generates an OR filter matching the services given in the classes varargs.
-     * @throws InvalidSyntaxException if the syntax of the generated filter is not correct.
-     */
-    public static final Filter generateServiceFilter(final BundleContext context, final Class<?>... classes) throws InvalidSyntaxException {
-        if (classes.length < 2) {
-            throw new IllegalArgumentException("At least the classes of 2 services must be given.");
-        }
-        final StringBuilder sb = new StringBuilder("(|(");
-        for (final Class<?> clazz : classes) {
-            sb.append(Constants.OBJECTCLASS);
-            sb.append('=');
-            sb.append(clazz.getName());
-            sb.append(")(");
-        }
-        sb.setCharAt(sb.length() - 1, ')');
-        return context.createFilter(sb.toString());
+    private Stack<ServiceTracker<?, ?>> trackers = new Stack<ServiceTracker<?, ?>>();
+
+    public AuthenticationActivator() {
+        super();
     }
 
-    public static final void open(Collection<ServiceTracker<?,?>> trackers) {
-        for (ServiceTracker<?,?> tracker : trackers) {
-            tracker.open();
-        }
+    @Override
+    public void start(BundleContext context) throws InvalidSyntaxException {
+        Filter filter = generateServiceFilter(context, KerberosService.class, ContextService.class, UserService.class);
+        trackers.push(new ServiceTracker<Object, Object>(context, filter, new AuthenticationRegisterer(context)));
+//        filter = generateServiceFilter(context, TimerService.class, KerberosService.class);
+//        trackers.push(new ServiceTracker(context, filter, new RenewalLoginHandlerRegisterer(context)));
+        Tools.open(trackers);
     }
 
-    public static final void close(Stack<ServiceTracker<?,?>> trackers) {
+    @Override
+    public void stop(final BundleContext context) {
         while (!trackers.isEmpty()) {
             trackers.pop().close();
         }
-    }
-
-    private Tools() {
-        super();
     }
 }
