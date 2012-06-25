@@ -77,7 +77,6 @@ import com.openexchange.jsieve.export.exceptions.OXSieveHandlerInvalidCredential
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mailfilter.internal.MailFilterProperties;
 import com.openexchange.mailfilter.services.MailFilterServletServiceRegistry;
-import com.openexchange.kerberos.KerberosUtils;
 
 /**
  * This class is used to deal with the communication with sieve. For a description of the communication system to sieve see
@@ -691,7 +690,7 @@ public class SieveHandler {
 
         SaslClient sc = null;
         try {
-            sc = Sasl.createSaslClient(new String[]{"GSSAPI"}, authname, "sieve", sieve_host, saslProps, KerberosUtils.getCallbackHandler(user, sieve_auth_passwd));
+            sc = Sasl.createSaslClient(new String[]{"GSSAPI"}, authname, "sieve", sieve_host, saslProps, null);
             byte[] response = sc.evaluateChallenge(new byte[0]);
             String b64resp = com.openexchange.tools.encoding.Base64.encode(response);
             
