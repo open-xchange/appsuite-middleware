@@ -320,10 +320,14 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
             List<List<MailMessage>> mails =
                 mailInterface.getAllSimpleThreadStructuredMessages(folderId, includeSent, false, sortCol, orderDir, columns, null, max);
             boolean cached = false;
+            boolean more = false;
             if (mails instanceof PropertizedList) {
                 final PropertizedList<List<MailMessage>> propertizedList = (PropertizedList<List<MailMessage>>) mails;
-                final Boolean b = (Boolean) propertizedList.getProperty("cached");
+                Boolean b = (Boolean) propertizedList.getProperty("cached");
                 cached = null != b && b.booleanValue();
+
+                b = (Boolean) propertizedList.getProperty("more");
+                more = null != b && b.booleanValue();
             }
             boolean foundUnseen;
             for (final Iterator<List<MailMessage>> iterator = mails.iterator(); iterator.hasNext();) {
@@ -364,6 +368,7 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
             }
             final AJAXRequestResult result = new AJAXRequestResult(ThreadedStructure.valueOf(mails), "mail");
             result.setResponseProperty("cached", Boolean.valueOf(cached));
+            result.setResponseProperty("more", Boolean.valueOf(more));
             return result.setDurationByStart(start);
         } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
