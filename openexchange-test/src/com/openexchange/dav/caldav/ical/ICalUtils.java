@@ -81,6 +81,9 @@ public final class ICalUtils {
     }
 	    
 	public static Date parseDate(Property property) throws ParseException {
+	    if (null == property || null == property.getValue()) {
+	        return null;
+	    }
 		SimpleDateFormat dateFormat = new SimpleDateFormat();
 		if ("DATE".equals(property.getAttribute("VALUE"))) {
 			dateFormat.applyPattern("yyyyMMdd");
@@ -91,13 +94,23 @@ public final class ICalUtils {
 				dateFormat.setTimeZone(TimeZone.getTimeZone(tzid));
 				dateFormat.applyPattern("yyyyMMdd'T'HHmmss");
 			} else {
-				dateFormat.applyPattern("yyyyMMdd'T'HHmmssZ'");
+				dateFormat.applyPattern("yyyyMMdd'T'HHmmss'Z'");
 				dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 			}
 		}
 		return dateFormat.parse(property.getValue());
 	}
-
+	
+	public static String format(Date date, TimeZone timeZone) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmm'00'");
+        dateFormat.setTimeZone(timeZone);
+        return dateFormat.format(date);
+    }
+    
+    public static String format(Date date, String timeZoneID) {
+        return format(date, TimeZone.getTimeZone(timeZoneID));
+    }
+    
 	public static List<Date[]> parsePeriods(Property property) throws ParseException {
 		List<Date[]> periods = new ArrayList<Date[]>();
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss");

@@ -84,11 +84,11 @@ public class ICalResource {
 		this(iCalString, null, null);
 	}
 		   
-	public Component getVEvent() {
-	    List<Component> components = vCalendar.getComponents(VEVENT);
-	    return 0 < components.size() ? components.get(0) : null;
+    public Component getVEvent() {
+        List<Component> components = vCalendar.getComponents(VEVENT);
+        return 0 < components.size() ? components.get(0) : null;
     }
-	    
+        
 	public Component getVFreeBusy() {
 	    List<Component> components = vCalendar.getComponents(VFREEBUSY);
 	    return 0 < components.size() ? components.get(0) : null;
@@ -100,6 +100,10 @@ public class ICalResource {
 	    
 	public List<Component> getVFreeBusys() {
 	    return vCalendar.getComponents(VFREEBUSY);      
+	}
+
+	public void addComponent(Component component) {
+	    vCalendar.getComponents().add(component);     
 	}
 
 	@Override

@@ -90,14 +90,18 @@ public class SimpleICal {
 		private final List<Property> properties;
 		private final List<Component> components;
     
-    	public Component(String name, BufferedReader reader) throws SimpleICalException, IOException {
-    		super();
-    		this.name = name;
-    		this.properties = new ArrayList<SimpleICal.Property>();
-    		this.components = new ArrayList<SimpleICal.Component>();
-    		parse(reader);
-    	}
-    	
+        public Component(String name, BufferedReader reader) throws SimpleICalException, IOException {
+            this(name);
+            parse(reader);
+        }
+        
+        public Component(String name) {
+            super();
+            this.name = name;
+            this.properties = new ArrayList<SimpleICal.Property>();
+            this.components = new ArrayList<SimpleICal.Component>();
+        }
+        
     	public String getUID() {
 	        return this.getPropertyValue("UID");
 	    }   
@@ -110,9 +114,13 @@ public class SimpleICal {
 	        this.setProperty("SUMMARY", summary);
 	    }   
 
-	    public Date getDTStart() throws ParseException {
-	        return ICalUtils.parseDate(this.getProperty("DTSTART"));
-	    }   
+        public Date getRecurrenceID() throws ParseException {
+            return ICalUtils.parseDate(this.getProperty("RECURRENCE-ID"));
+        }   
+
+        public Date getDTStart() throws ParseException {
+            return ICalUtils.parseDate(this.getProperty("DTSTART"));
+        }   
 
 	    public void setDTStart(Date start) throws ParseException {
 	        this.setProperty("DTSTART", ICalUtils.formatAsUTC(start));
