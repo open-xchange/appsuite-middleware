@@ -2,7 +2,6 @@
 <classpath>
 	<classpathentry excluding="com/openexchange/admin/reseller/storage/mysqlStorage/OXAuthMySQLStorage.java" kind="src" path="src"/>
 	<classpathentry kind="src" path="test"/>
-	<classpathentry excluding=".classpath|.cvsignore|.project|.settings/|COPYING|ChangeLog|build.properties|build.xml|build/|classes/|etc/|jar/|javadoc/|packaging/|sbin/|src/|test/" kind="src" path=""/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>

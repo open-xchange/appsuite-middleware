@@ -50,11 +50,10 @@
 package com.openexchange.dav.caldav;
 
 import java.io.IOException;
-import java.text.ParseException;
-import java.util.Date;
-
+import java.util.List;
 import com.openexchange.dav.caldav.ical.ICalUtils;
 import com.openexchange.dav.caldav.ical.SimpleICal;
+import com.openexchange.dav.caldav.ical.SimpleICal.Component;
 import com.openexchange.dav.caldav.ical.SimpleICal.SimpleICalException;
 
 /**
@@ -64,41 +63,54 @@ import com.openexchange.dav.caldav.ical.SimpleICal.SimpleICalException;
  */
 public class ICalResource {
 	
-	private String eTag;
+    public static final String VFREEBUSY = "VFREEBUSY";
+    public static final String VCALENDAR = "VCALENDAR";
+    public static final String VEVENT = "VEVENT";
+    public static final String VTODO = "VTODO";
+    public static final String VTIMEZONE = "VTIMEZONE";
+
+    private String eTag;
 	private String href;
-	private final SimpleICal iCal;
+    private final Component vCalendar;
 	
 	public ICalResource(String iCalString, String href, String eTag) throws IOException, SimpleICalException {
 		super();
-		this.iCal = new SimpleICal(iCalString);
 		this.href = href;
 		this.eTag = eTag;
+		this.vCalendar = SimpleICal.parse(iCalString);
 	}
 	
 	public ICalResource(String iCalString) throws IOException, com.openexchange.dav.caldav.ical.SimpleICal.SimpleICalException {
 		this(iCalString, null, null);
 	}
+		   
+    public Component getVEvent() {
+        List<Component> components = vCalendar.getComponents(VEVENT);
+        return 0 < components.size() ? components.get(0) : null;
+    }
+        
+	public Component getVFreeBusy() {
+	    List<Component> components = vCalendar.getComponents(VFREEBUSY);
+	    return 0 < components.size() ? components.get(0) : null;
+    }
 	
-	public String getUID() {
-		return this.iCal.getVEvent().getPropertyValue("UID");
-	}	
-
-	public String getSummary() {
-		return this.iCal.getVEvent().getPropertyValue("SUMMARY");
-	}	
-
-	public Date getDTStart() throws ParseException {
-		return ICalUtils.parseDate(this.iCal.getVEvent().getProperty("DTSTART"));
-	}	
-
-	public Date getDTEnd() throws ParseException {
-		return ICalUtils.parseDate(this.iCal.getVEvent().getProperty("DTEND"));
-	}	
-
-	public String getLocation() {
-		return this.iCal.getVEvent().getPropertyValue("LOCATION");
+	public List<Component> getVEvents() {
+	    return vCalendar.getComponents(VEVENT);     
+    }
+	    
+	public List<Component> getVFreeBusys() {
+	    return vCalendar.getComponents(VFREEBUSY);      
 	}
-	
+
+	public void addComponent(Component component) {
+	    vCalendar.getComponents().add(component);     
+	}
+
+	@Override
+	public String toString() {
+	    return ICalUtils.fold(this.vCalendar.toString());
+	}
+		
 	/**
 	 * @return the eTag
 	 */
@@ -119,18 +131,6 @@ public class ICalResource {
 
 	public void setHref(String href) {
 		this.href = href;
-	}
-
-	/**
-	 * @return the iCal file
-	 */
-	public SimpleICal getICal() {
-		return iCal;
-	}
-
-	@Override
-    public String toString() {
-		return this.iCal.toString();		
 	}
 	
 }

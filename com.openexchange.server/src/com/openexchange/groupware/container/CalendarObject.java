@@ -1618,4 +1618,40 @@ public abstract class CalendarObject extends CommonObject {
 	public String toString() {
 		return "[" + this.getObjectID() + "] " + this.getTitle();
 	}
+	
+	@Override
+    public CalendarObject clone() {
+	    CalendarObject retval;
+        try {
+            retval = (CalendarObject) super.clone();
+            
+            if (getParticipants() != null) {
+                Participant[] clonedParticipants = new Participant[getParticipants().length];
+                for (int i = 0; i < getParticipants().length; i++) {
+                    clonedParticipants[i] = getParticipants()[i].getClone();
+                }
+                retval.setParticipants(clonedParticipants);
+            }
+            
+            if (getConfirmations() != null) {
+                ConfirmableParticipant[] clonedConfirmations = new ConfirmableParticipant[getConfirmations().length];
+                for (int i = 0; i < getConfirmations().length; i++) {
+                    clonedConfirmations[i] = getConfirmations()[i].getClone();
+                }
+                retval.setConfirmations(clonedConfirmations);
+            }
+            
+            if (getUsers() != null) {
+                UserParticipant[] clonedUsers = new UserParticipant[getUsers().length];
+                for (int i = 0; i <  getUsers().length; i++) {
+                    clonedUsers[i] = getUsers()[i].getClone();
+                }
+                retval.setUsers(clonedUsers);
+            }
+            
+        } catch (CloneNotSupportedException e) {
+            throw new InternalError(e.getMessage());
+        }
+	    return retval;
+	}
 }

@@ -51,7 +51,6 @@ package com.openexchange.data.conversion.ical.ical4j.internal.calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
-
 import net.fortuna.ical4j.model.Component;
 import net.fortuna.ical4j.model.ComponentList;
 import net.fortuna.ical4j.model.Dur;
@@ -62,9 +61,9 @@ import net.fortuna.ical4j.model.component.VToDo;
 import net.fortuna.ical4j.model.property.Action;
 import net.fortuna.ical4j.model.property.Description;
 import net.fortuna.ical4j.model.property.Trigger;
-
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.ConversionWarning.Code;
 import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools;
@@ -167,17 +166,20 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
         } else {
             remindOn = ParserTools.recalculateAsNeeded(icaldate, alarm.getTrigger(), timeZone);
         }
-
-        final int delta = useDuration ? temp  : (int) ((cObj.getStartDate().getTime() - remindOn.getTime())/1000);
-
+        
         if(Appointment.class.isAssignableFrom(cObj.getClass())) {
+            final int delta = useDuration ? temp  : (int) ((cObj.getStartDate().getTime() - remindOn.getTime())/1000);
             final Appointment appObj = (Appointment) cObj;
             appObj.setAlarm(delta / 60);
             appObj.setAlarmFlag(true); // bugfix: 7473
         } else {
-            final Task taskObj = (Task) cObj;
-            taskObj.setAlarm(new Date(taskObj.getStartDate().getTime() - delta * 1000));
-            taskObj.setAlarmFlag(true); // bugfix: 7473
+            if (useDuration && null == cObj.getEndDate()) {
+                warnings.add(new ConversionWarning(index, Code.INSUFFICIENT_INFORMATION));
+            } else {
+                final Task taskObj = (Task) cObj;
+                taskObj.setAlarm(useDuration ? new Date(taskObj.getEndDate().getTime() - temp * 1000) : remindOn);
+                taskObj.setAlarmFlag(true); // bugfix: 7473
+            }
         }
     }
 

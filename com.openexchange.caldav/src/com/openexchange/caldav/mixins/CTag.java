@@ -50,7 +50,10 @@
 package com.openexchange.caldav.mixins;
 
 import java.util.Date;
-import com.openexchange.caldav.GroupwareCaldavFactory;
+import org.apache.commons.logging.Log;
+import com.openexchange.caldav.resources.CommonFolderCollection;
+import com.openexchange.log.LogFactory;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 
@@ -64,31 +67,31 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
  * @see <a href="https://trac.calendarserver.org/browser/CalendarServer/trunk/doc/Extensions/caldav-ctag.txt">caldav-ctag-02</a>
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class CTag extends SingleXMLPropertyMixin {
 	
-	private static final String CTAG_PREFIX = "http://www.open-xchange.com/caldav/ctag/";
-	
-    private final int folderId;
-    private final GroupwareCaldavFactory factory;
-    private String value;
+    private static final Log LOG = LogFactory.getLog(CTag.class);
+
+	private final CommonFolderCollection<?> collection;
+    private String value = null;
     
-    public CTag(final int folderId, final GroupwareCaldavFactory factory) {
-    	super("http://calendarserver.org/ns/", "getctag");
-        this.folderId = folderId;
-        this.factory = factory;
-    }	
-	
+    public CTag(CommonFolderCollection<?> collection) {
+        super("http://calendarserver.org/ns/", "getctag");
+        this.collection = collection;        
+    }   
+    
     @Override
     protected String getValue() {
-    	if (null == this.value) {
-    		final Date lastModification = this.factory.getState().getLastModification(this.folderId);
-    		if (null != lastModification) {
-    			this.value = String.format("%s%d_%d", CTag.CTAG_PREFIX, this.folderId, lastModification.getTime());
-    		} else {
-    			this.value = String.format("%s%d", CTag.CTAG_PREFIX, this.folderId);
-    		}
-    	}
-    	return this.value;
+        if (null == value && null != collection) {
+            try {
+                Date lastModified = this.collection.getLastModified();
+                String folderID = null != collection.getFolder() ? collection.getFolder().getID() : "0";
+                this.value = "http://www.open-xchange.com/ctags/" + folderID + "-" + (null != lastModified ? lastModified.getTime() : 0);
+            } catch (WebdavProtocolException e) {
+                LOG.error("error determining ctag from collection", e);
+            }
+        }
+        return value;
     }
 }

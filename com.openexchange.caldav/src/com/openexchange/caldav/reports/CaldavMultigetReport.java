@@ -131,7 +131,7 @@ public class CaldavMultigetReport extends WebdavPropfindAction {
             return Collections.emptyList();
         }
 
-        List children = requestBody.getRootElement().getChildren("href", DAV_NS);
+        List<Element> children = requestBody.getRootElement().getChildren("href", DAV_NS);
         if (children == null || children.isEmpty()) {
             return Collections.emptyList();
         }

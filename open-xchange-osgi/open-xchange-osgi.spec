@@ -4,16 +4,7 @@ BuildArch:     noarch
 #!BuildIgnore: post-build-checks
 BuildRequires: ant
 BuildRequires: ant-nodeps
-%if 0%{?suse_version}  && !0%{?sles_version}
-BuildRequires: java-sdk-openjdk
-%endif
-%if 0%{?sles_version} == 11
-# SLES 11
-BuildRequires: java-1_6_0-ibm-devel
-%endif
-%if 0%{?rhel_version} || 0%{?fedora_version}
-BuildRequires: java-1.6.0-openjdk-devel
-%endif
+BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
 %define        ox_release 0
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
@@ -24,20 +15,7 @@ URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       OSGi bundles commonly used by all Open-Xchange packages
 PreReq:        /usr/sbin/useradd
-%if 0%{?suse_version} && ! 0%{?sles_version} == 11
-Requires:      java-openjdk
-%endif
-%if 0%{?sles_version} == 11
-# SLES11
-Requires:      java-1_6_0-ibm
-%endif
-%if 0%{?fedora_version}
-Requires:      java-1.6.0-openjdk
-%endif
-%if 0%{?rhel_version}
-# RHEL5 removed sun-java5, but some might still use it, so just depend on sun-java
-Requires:      java-sun
-%endif
+Requires:	java >= 1.6.0
 Provides:       open-xchange-common = %{version}
 Obsoletes:      open-xchange-common <= %{version}
 Provides:       open-xchange-activation = %{version}

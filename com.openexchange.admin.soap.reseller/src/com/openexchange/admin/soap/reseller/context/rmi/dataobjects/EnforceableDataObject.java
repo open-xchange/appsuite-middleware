@@ -13,7 +13,7 @@ import com.openexchange.admin.soap.reseller.context.reseller.rmi.dataobjects.Res
 
 
 /**
- * <p>Java-Klasse für EnforceableDataObject complex type.
+ * <p>Java-Klasse f\u00fcr EnforceableDataObject complex type.
  * 
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
  * 

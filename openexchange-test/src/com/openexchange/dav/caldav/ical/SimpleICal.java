@@ -52,7 +52,9 @@ package com.openexchange.dav.caldav.ical;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,52 +69,20 @@ import java.util.Map.Entry;
 public class SimpleICal {
 	
 	private static final String CRLF = "\r\n";
-	public static final String VFREEBUSY = "VFREEBUSY";
-	public static final String VCALENDAR = "VCALENDAR";
-	public static final String VEVENT = "VEVENT";
-	public static final String VTIMEZONE = "VTIMEZONE";
-
-	private final String iCal;
-	private Component vCalendar;
 	
-	public SimpleICal(String iCal) throws IOException, SimpleICalException {
-		super();
-		this.iCal = ICalUtils.unfold(iCal);
-		parse();
-	}
-
-	public Component getVEvent() {
-		List<Component> components = vCalendar.getComponents(VEVENT);
-		return 0 < components.size() ? components.get(0) : null;
-	}
-	
-	public Component getVFreeBusy() {
-		List<Component> components = vCalendar.getComponents(VFREEBUSY);
-		return 0 < components.size() ? components.get(0) : null;
-	}
-	
-	public List<Component> getVEvents() {
-		return vCalendar.getComponents(VEVENT);		
-	}
-	
-	public List<Component> getVFreeBusys() {
-		return vCalendar.getComponents(VFREEBUSY);		
-	}
-	
-	private void parse() throws IOException, SimpleICalException {
-		BufferedReader reader = new BufferedReader(new StringReader(iCal));
-		String line = reader.readLine();
-		if (null == line || false == line.startsWith("BEGIN:VCALENDAR")) {
-			throw new SimpleICalException("VCALENDAR component expected");
-		}
-		this.vCalendar = new Component("VCALENDAR", reader);
-		reader.close();
-	}
-	
-	@Override
-	public String toString() {
-		return ICalUtils.fold(this.vCalendar.toString());
-	}
+	public static Component parse(String iCal) throws IOException, SimpleICalException {
+	    BufferedReader reader = null;
+	    try {
+	        reader = new BufferedReader(new StringReader(ICalUtils.unfold(iCal)));
+            String line = reader.readLine();
+            if (null == line || false == line.startsWith("BEGIN:VCALENDAR")) {
+                throw new SimpleICalException("VCALENDAR component expected");
+            }
+            return new Component("VCALENDAR", reader);
+	    } finally {
+	        reader.close();
+	    }
+    }
 	
     public static final class Component {
     	
@@ -120,13 +90,53 @@ public class SimpleICal {
 		private final List<Property> properties;
 		private final List<Component> components;
     
-    	public Component(String name, BufferedReader reader) throws SimpleICalException, IOException {
-    		super();
-    		this.name = name;
-    		this.properties = new ArrayList<SimpleICal.Property>();
-    		this.components = new ArrayList<SimpleICal.Component>();
-    		parse(reader);
-    	}
+        public Component(String name, BufferedReader reader) throws SimpleICalException, IOException {
+            this(name);
+            parse(reader);
+        }
+        
+        public Component(String name) {
+            super();
+            this.name = name;
+            this.properties = new ArrayList<SimpleICal.Property>();
+            this.components = new ArrayList<SimpleICal.Component>();
+        }
+        
+    	public String getUID() {
+	        return this.getPropertyValue("UID");
+	    }   
+
+	    public String getSummary() {
+	        return this.getPropertyValue("SUMMARY");
+	    }   
+
+	    public void setSummary(String summary) throws ParseException {
+	        this.setProperty("SUMMARY", summary);
+	    }   
+
+        public Date getRecurrenceID() throws ParseException {
+            return ICalUtils.parseDate(this.getProperty("RECURRENCE-ID"));
+        }   
+
+        public Date getDTStart() throws ParseException {
+            return ICalUtils.parseDate(this.getProperty("DTSTART"));
+        }   
+
+	    public void setDTStart(Date start) throws ParseException {
+	        this.setProperty("DTSTART", ICalUtils.formatAsUTC(start));
+	    }   
+
+	    public Date getDTEnd() throws ParseException {
+	        return ICalUtils.parseDate(this.getProperty("DTEND"));
+	    }   
+
+	    public void setDTEnd(Date start) throws ParseException {
+	        this.setProperty("DTEND", ICalUtils.formatAsUTC(start));
+	    }   
+
+	    public String getLocation() {
+	        return this.getPropertyValue("LOCATION");
+	    }
     	
     	public List<Component> getComponents() {
     		return components;
@@ -163,15 +173,30 @@ public class SimpleICal {
     		return name;
     	}
     	
-    	public Property getProperty(String name) {
-    		for (Property property : this.properties) {
-    			if (name.equals(property.name)) {
-    				return property;
-    			}
-			}
-    		return null;
-    	}
-    	
+        public Property getProperty(String name) {
+            for (Property property : this.properties) {
+                if (name.equals(property.name)) {
+                    return property;
+                }
+            }
+            return null;
+        }
+        
+        public void setProperty(String name, String value, Map<String, String> attributes) {
+            for (Property property : this.properties) {
+                if (name.equals(property.name)) {
+                    property.value = value;
+                    property.attributes = attributes;
+                    return;
+                }
+            }
+            this.properties.add(new Property(name, value, attributes));
+        }
+        
+        public void setProperty(String name, String value) {
+            this.setProperty(name, value, new HashMap<String, String>());
+        }
+        
     	public List<Property> getProperties(String name) {
     		List<Property> properties = new ArrayList<SimpleICal.Property>();
     		for (Property property : this.properties) {
@@ -211,13 +236,20 @@ public class SimpleICal {
     	
     	private String name;
     	private String value;
-    	private final Map<String, String> attributes;
+    	private Map<String, String> attributes;
 
     	public Property(String line) throws SimpleICalException {
-    		super();
-    		this.attributes = new HashMap<String, String>();
+    	    super();
+            this.attributes = new HashMap<String, String>();
     		this.parse(line);
     	}
+
+    	public Property(String name, String value, Map<String, String> attributes) {
+            super();
+            this.name = name;
+            this.value = value;
+            this.attributes = attributes;
+        }
     	
     	private void parse(String line) throws SimpleICalException {
     		int index = line.indexOf(':');

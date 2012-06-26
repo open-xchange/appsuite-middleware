@@ -50,12 +50,10 @@
 package com.openexchange.dav.caldav.bugs;
 
 import java.util.Date;
-
 import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.MultiStatusResponse;
 import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
 import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
-
 import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.caldav.CalDAVTest;
@@ -135,7 +133,8 @@ public class Bug22094Test extends CalDAVTest {
          * verify appointment on client
          */
         ICalResource iCalResource = super.get(uid, null);
-        assertEquals("UID wrong", uid, iCalResource.getUID());
+        assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
+        assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
         /*
          * move appointment on client
          */
@@ -161,7 +160,8 @@ public class Bug22094Test extends CalDAVTest {
          * verify appointment on client
          */
         iCalResource = super.get(subfolderID, uid, iCalResource.getETag());
-        assertEquals("UID wrong", uid, iCalResource.getUID());
+        assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
+        assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
         /*
          * verify moved appointment on server
          */

@@ -118,4 +118,16 @@ public abstract class AbstractConfirmableParticipant implements ConfirmableParti
     public boolean containsMessage() {
         return bMessage;
     }
+    
+    @Override
+    public AbstractConfirmableParticipant clone() throws CloneNotSupportedException {
+        AbstractConfirmableParticipant retval = (AbstractConfirmableParticipant) super.clone();
+        
+        retval.bMessage = bMessage;
+        retval.bStatus = bStatus;
+        retval.message = message;
+        retval.status = status;
+        
+        return retval;
+    }
 }

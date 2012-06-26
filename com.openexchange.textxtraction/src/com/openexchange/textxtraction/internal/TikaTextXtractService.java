@@ -50,6 +50,7 @@
 package com.openexchange.textxtraction.internal;
 
 import java.io.BufferedInputStream;
+import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.EnumMap;
@@ -297,7 +298,22 @@ public final class TikaTextXtractService extends AbstractTextXtractService {
                 return ExtractorFactory.createExtractor(new POIFSFileSystem(in)).getText();
             }
             if (POIXMLDocument.hasOOXMLHeader(in)) {
-                return ExtractorFactory.createExtractor(OPCPackage.open(in)).getText();
+                final NonClosableInputStream ncis = new NonClosableInputStream(in);
+                boolean resetMark = true;
+                try {
+                    ncis.mark(8192);
+                    return ExtractorFactory.createExtractor(OPCPackage.open(ncis)).getText();
+                } catch (final Exception e) {
+                    if (ncis.closed) {
+                        // Stream has been closed unexpectedly
+                        ncis.reset();
+                        resetMark = false;
+                    }
+                } finally {
+                    if (resetMark) {
+                        ncis.mark(0);
+                    }
+                }
             }
             return null;
         } catch (final InvalidFormatException e) {
@@ -307,6 +323,8 @@ public final class TikaTextXtractService extends AbstractTextXtractService {
         } catch (final XmlException e) {
             LOG.debug(e.getMessage(), e);
         } catch (final RuntimeException e) {
+            LOG.debug(e.getMessage(), e);
+        } catch (final Exception e) {
             LOG.debug(e.getMessage(), e);
         }
         return null;
@@ -360,5 +378,19 @@ public final class TikaTextXtractService extends AbstractTextXtractService {
             isWhitespace = Character.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
+    }
+
+    private static final class NonClosableInputStream extends FilterInputStream {
+
+        protected volatile boolean closed;
+
+        protected NonClosableInputStream(final InputStream _inputStream) {
+            super(_inputStream);
+        }
+
+        @Override
+        public void close() throws IOException {
+            closed = true;
+        }
     }
 }

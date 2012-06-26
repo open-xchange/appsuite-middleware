@@ -53,7 +53,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import com.openexchange.contact.storage.rdb.internal.Tools;
 import com.openexchange.contact.storage.rdb.mapping.Mappers;
 import com.openexchange.contact.storage.rdb.sql.Table;
@@ -141,11 +140,14 @@ public class ContactSearchAdapter extends DefaultSearchAdapter {
 				stringBuilder.append(selectClause).append(" WHERE ").append(contextIDClause).append(" AND ").append(folderIDsClause).append(" AND ");
 				Entry<ContactField, Object> entry = iterator.next();
 				appendComparison(entry.getKey(), entry.getValue());
-			}
-			while (iterator.hasNext()) {
-				Entry<ContactField, Object> entry = iterator.next();
-				stringBuilder.append(" AND ");
-				appendComparison(entry.getKey(), entry.getValue());
+	            while (iterator.hasNext()) {
+	                entry = iterator.next();
+	                stringBuilder.append(" AND ");
+	                appendComparison(entry.getKey(), entry.getValue());
+	            }
+			} else {
+			    // no comparison, just use folders and context id			    
+	             stringBuilder.append(selectClause).append(" WHERE ").append(contextIDClause).append(" AND ").append(folderIDsClause);
 			}
 		}
 	}

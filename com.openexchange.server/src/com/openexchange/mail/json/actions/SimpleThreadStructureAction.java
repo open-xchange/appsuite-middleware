@@ -73,6 +73,7 @@ import com.openexchange.mail.json.converters.MailConverter;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.collections.PropertizedList;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -101,6 +102,7 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
          * Try JSON cache
          */
         //req.getRequest().putParameter("cache", "true");
+        //req.getRequest().putParameter("max", "10000");
         final boolean cache = req.optBool("cache", false);
         if (cache && CACHABLE_FORMATS.contains(req.getRequest().getFormat())) {
             final JsonCacheService jsonCache = JsonCaches.getCache();
@@ -111,7 +113,18 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                 final ServerSession session = req.getSession();
                 final JSONValue jsonValue = jsonCache.opt(id, session.getUserId(), session.getContextId());
                 final AJAXRequestResult result;
-                if (null == jsonValue) {
+                if (null == jsonValue || 0 == jsonValue.length()) {
+                    /*
+                     * Check mailbox size
+                     */
+                    final MailServletInterface mailInterface = getMailInterface(req);
+                    final String folderId = req.checkParameter(Mail.PARAMETER_MAILFOLDER);
+                    if (mailInterface.getMessageCount(folderId) <= mailInterface.getMailConfig().getMailProperties().getMailFetchLimit()) {
+                        /*
+                         * Mailbox considered small enough for direct hand-off
+                         */
+                        return perform0(req, mailInterface, false);
+                    }
                     /*
                      * Return empty array immediately
                      */
@@ -245,6 +258,19 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                     fromToIndices = new int[] { start, end };
                 }
             }
+            final long max;
+            {
+                final String s = req.getParameter("max");
+                if (null == s) {
+                    max = -1L;
+                } else {
+                    try {
+                        max = Long.parseLong(s.trim());
+                    } catch (final NumberFormatException e) {
+                        throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("max", s);
+                    }
+                }
+            }
             final boolean includeSent = req.optBool("includeSent", false);
             final boolean unseen = req.optBool("unseen", false);
             final boolean ignoreDeleted = !req.optBool("deleted", true);
@@ -289,16 +315,20 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                         sortCol,
                         orderDir,
                         columns,
-                        fromToIndices);
+                        fromToIndices, max);
                 return new AJAXRequestResult(ThreadedStructure.valueOf(mails), "mail");
             }
             List<List<MailMessage>> mails =
-                mailInterface.getAllSimpleThreadStructuredMessages(folderId, includeSent, false, sortCol, orderDir, columns, null);
+                mailInterface.getAllSimpleThreadStructuredMessages(folderId, includeSent, false, sortCol, orderDir, columns, null, max);
             boolean cached = false;
+            int more = -1;
             if (mails instanceof PropertizedList) {
                 final PropertizedList<List<MailMessage>> propertizedList = (PropertizedList<List<MailMessage>>) mails;
                 final Boolean b = (Boolean) propertizedList.getProperty("cached");
                 cached = null != b && b.booleanValue();
+
+                final Integer i = (Integer) propertizedList.getProperty("more");
+                more = null == i ? -1 : i.intValue();
             }
             boolean foundUnseen;
             for (final Iterator<List<MailMessage>> iterator = mails.iterator(); iterator.hasNext();) {
@@ -339,6 +369,9 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
             }
             final AJAXRequestResult result = new AJAXRequestResult(ThreadedStructure.valueOf(mails), "mail");
             result.setResponseProperty("cached", Boolean.valueOf(cached));
+            if (more > 0) {
+                result.setResponseProperty("more", Integer.valueOf(more));
+            }
             return result.setDurationByStart(start);
         } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -359,6 +392,7 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                 req.getParameter(Mail.PARAMETER_SORT),
                 req.getParameter(Mail.PARAMETER_ORDER),
                 req.getParameter("limit"),
+                req.getParameter("max"),
                 req.getParameter(Mail.LEFT_HAND_LIMIT),
                 req.getParameter(Mail.RIGHT_HAND_LIMIT),
                 req.getParameter("includeSent"),

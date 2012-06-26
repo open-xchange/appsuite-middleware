@@ -14,7 +14,7 @@ import com.openexchange.admin.soap.reseller.resource.soap.dataobjects.Resource;
 
 
 /**
- * <p>Java-Klasse für anonymous complex type.
+ * <p>Java-Klasse f\u00fcr anonymous complex type.
  * 
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
  * 

@@ -50,7 +50,6 @@
 package com.openexchange.caldav.osgi;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.service.http.HttpService;
 import com.openexchange.caldav.mixins.CalendarHomeSet;
 import com.openexchange.caldav.mixins.CalendarUserAddressSet;
@@ -63,6 +62,7 @@ import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
+import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.user.UserService;
@@ -88,7 +88,7 @@ public class CaldavActivator extends HousekeepingActivator {
     
     private static final Class<?>[] NEEDED = new Class[]{ICalEmitter.class, ICalParser.class, AppointmentSqlFactoryService.class, CalendarCollectionService.class, FolderService.class, UserService.class, ConfigViewFactory.class, HttpService.class};
 
-    private OSGiPropertyMixin mixin;
+    private volatile OSGiPropertyMixin mixin;
     
     @Override
     protected Class<?>[] getNeededServices() {
@@ -101,19 +101,20 @@ public class CaldavActivator extends HousekeepingActivator {
             CalDAV.setServiceLookup(this);
             CaldavPerformer.setServices(this);
             
-            HttpService httpService = getService(HttpService.class);
+            final HttpService httpService = getService(HttpService.class);
             httpService.registerServlet(SERVLET_PATH, new CalDAV(), null, null);
             httpService.registerServlet(NULL_PATH, new DevNullServlet(), null, null);
             
-            CaldavPerformer performer = CaldavPerformer.getInstance();
-            mixin = new OSGiPropertyMixin(context, performer);
+            final CaldavPerformer performer = CaldavPerformer.getInstance();
+            final OSGiPropertyMixin mixin = new OSGiPropertyMixin(context, performer);
             performer.setGlobalMixins(mixin);
+            this.mixin = mixin;
             
             registerService(PropertyMixin.class, new CalendarHomeSet());
             registerService(PropertyMixinFactory.class, new PropertyMixinFactory() {
 
                 @Override
-                public PropertyMixin create(SessionHolder sessionHolder) {
+                public PropertyMixin create(final SessionHolder sessionHolder) {
                     return new CalendarUserAddressSet(sessionHolder);
                 }
                 
@@ -122,18 +123,22 @@ public class CaldavActivator extends HousekeepingActivator {
             
             registerService(PathRegistration.class, new PathRegistration("caldav"));
             openTrackers();
-        } catch (Throwable t) {
+        } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
         }
     }
     
     @Override
     protected void stopBundle() throws Exception {
-        HttpService httpService = getService(HttpService.class);
+        final HttpService httpService = getService(HttpService.class);
         httpService.unregister(SERVLET_PATH);
         httpService.unregister(NULL_PATH);
-        
-        mixin.close();
+
+        final OSGiPropertyMixin mixin = this.mixin;
+        if (null != mixin) {
+            mixin.close();
+            this.mixin = null;
+        }
         super.stopBundle();
     }
 

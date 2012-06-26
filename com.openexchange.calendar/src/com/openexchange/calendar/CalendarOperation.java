@@ -817,6 +817,10 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             if (!cdao.containsParticipants()) {
                 if (null != edao && null != edao.getParticipants()) {
                     cdao.setParticipants(edao.getParticipants());
+                }
+            }
+            if (!cdao.containsUserParticipants()) {
+                if (null != edao && null != edao.getUsers()) {
                     cdao.setUsers(edao.getUsers());
                 }
             }

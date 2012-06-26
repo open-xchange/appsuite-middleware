@@ -49,7 +49,7 @@
 
 package com.openexchange.ajax.requesthandler.converters;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -63,49 +63,50 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link BasicTypeAPIResultConverter}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class BasicTypeAPIResultConverter implements ResultConverter {
+public final class BasicTypeAPIResultConverter implements ResultConverter {
 
-	/**
-	 * The basic converters.
-	 */
-	public static final List<ResultConverter> CONVERTERS = Collections.<ResultConverter> unmodifiableList(new ArrayList<ResultConverter>() {
-    {
-		add(new BasicTypeAPIResultConverter("string"));
-		add(new BasicTypeAPIResultConverter("int"));
-		add(new BasicTypeAPIResultConverter("float"));
-		add(new BasicTypeAPIResultConverter("boolean"));
-		add(new BasicTypeAPIResultConverter("json"));
+    /**
+     * The basic converters.
+     */
+    public static final List<ResultConverter> CONVERTERS = Collections.<ResultConverter> unmodifiableList(Arrays.<ResultConverter> asList(
+        new BasicTypeAPIResultConverter("string"),
+        new BasicTypeAPIResultConverter("int"),
+        new BasicTypeAPIResultConverter("float"),
+        new BasicTypeAPIResultConverter("boolean"),
+        new BasicTypeAPIResultConverter("json")));
 
-	}});
+    private final String inputFormat;
 
-	private final String inputFormat;
+    /**
+     * Initializes a new {@link BasicTypeAPIResultConverter}.
+     * 
+     * @param inputFormat The input format
+     */
+    protected BasicTypeAPIResultConverter(final String inputFormat) {
+        this.inputFormat = inputFormat;
+    }
 
-	protected BasicTypeAPIResultConverter(final String inputFormat) {
-		this.inputFormat = inputFormat;
-	}
+    @Override
+    public String getInputFormat() {
+        return inputFormat;
+    }
 
-	@Override
-	public String getInputFormat() {
-		return inputFormat;
-	}
+    @Override
+    public String getOutputFormat() {
+        return "apiResponse";
+    }
 
-	@Override
-	public String getOutputFormat() {
-		return "apiResponse";
-	}
+    @Override
+    public Quality getQuality() {
+        return Quality.GOOD;
+    }
 
-	@Override
-	public Quality getQuality() {
-		return Quality.GOOD;
-	}
-
-	@Override
-	public void convert(final AJAXRequestData requestData, final AJAXRequestResult result,
-			final ServerSession session, final Converter converter) throws OXException {
-		final Response response = new Response(session);
+    @Override
+    public void convert(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
+        final Response response = new Response(session);
         response.setData(result.getResultObject());
         response.setTimestamp(result.getTimestamp());
         response.setProperties(result.getResponseProperties());
@@ -116,6 +117,6 @@ public class BasicTypeAPIResultConverter implements ResultConverter {
             }
         }
         result.setResultObject(response);
-	}
+    }
 
 }

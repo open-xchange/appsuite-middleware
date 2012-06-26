@@ -1,3 +1,7 @@
+* 2012-06-26 - thorben.betten@open-xchange.com
+
+  - Fix for bug 22264: Replace possible "<br>" tags with LF
+
 * 2012-05-20 - thorben.betten@open-xchange.com
 
   - Bugfix #22014 - Specifying proper charset on upsell mail composal

@@ -252,7 +252,7 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
         }
         if (analysis.getChanges().isEmpty() && analysis.getAnnotations().isEmpty()) {
             change = new ITipChange();
-            change.setNewAppointment((original != null) ? original : update);
+            change.setNewAppointment((original != null) ? original.clone() : update);
             if (original != null) {
             	change.setCurrentAppointment(original);
             }

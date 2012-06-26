@@ -13,6 +13,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.datatypes.genericonf"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.datatypes.genericonf.storage"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.data.conversion.ical.ical4j"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.file.storage"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.file.storage.composition"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.file.storage.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.global"/>

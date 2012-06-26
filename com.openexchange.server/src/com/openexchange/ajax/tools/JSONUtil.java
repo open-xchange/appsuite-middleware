@@ -125,9 +125,6 @@ public final class JSONUtil {
                     j1.put(key, object2);
                 }
             } else {
-                if (j1.hasAndNotNull(key) && !object2.equals(j1.get(key))) {
-                    throw new JSONException("JSON merge failed for key \"" + key + "\": Conflicting values " + j1.get(key) + " != " + object2);
-                }
                 j1.put(key, object2);
             }
         }

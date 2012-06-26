@@ -67,6 +67,8 @@ public class UnitTests {
     public static Test suite() {
         final TestSuite tests = new TestSuite();
         tests.addTestSuite(MailSolrIndexAccessTest.class);
+        tests.addTestSuite(AddressComparatorTest.class);
+        tests.addTestSuite(SolrFilestoreIndexAccessTest.class);
         return tests;
     }
 

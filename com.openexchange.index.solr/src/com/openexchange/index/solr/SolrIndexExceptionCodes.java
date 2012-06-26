@@ -68,6 +68,10 @@ public enum SolrIndexExceptionCodes implements OXExceptionCode {
      */
     MISSING_ACCESS_FOR_MODULE(SolrIndexExceptionMessages.MISSING_ACCESS_FOR_MODULE_MSG, CATEGORY_ERROR, 1001),
     
+    /**
+     * An I/O Error occurred: %1$s
+     */
+    IO_ERROR(SolrIndexExceptionMessages.IO_ERROR_MSG, CATEGORY_ERROR, 1002),
     ;
 
     private final String message;

@@ -52,7 +52,6 @@ package com.openexchange.dav.caldav.bugs;
 import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
-
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.caldav.CalDAVTest;
 import com.openexchange.dav.caldav.ICalResource;
@@ -131,11 +130,12 @@ public class Bug21794Test extends CalDAVTest {
          * verify appointment on client
          */
         ICalResource iCalResource = super.get(resourceName, null);
-        assertEquals("UID wrong", uid, iCalResource.getUID());
+        assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
+        assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
         /*
          * decline appointment on client
          */
-        List<Property> attendees = iCalResource.getICal().getVEvent().getProperties("ATTENDEE");
+        List<Property> attendees = iCalResource.getVEvent().getProperties("ATTENDEE");
         for (Property property : attendees) {
 			if (property.getValue().contains(super.getAJAXClient().getValues().getDefaultAddress())) {
 				for (Entry<String, String> attribute : property.getAttributes().entrySet()) {
@@ -168,9 +168,10 @@ public class Bug21794Test extends CalDAVTest {
          * verify appointment on client
          */
         iCalResource = super.get(resourceName, iCalResource.getETag());
-        assertEquals("UID wrong", uid, iCalResource.getUID());
+        assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
+        assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
         Property attendee = null;
-        attendees = iCalResource.getICal().getVEvent().getProperties("ATTENDEE");
+        attendees = iCalResource.getVEvent().getProperties("ATTENDEE");
         for (Property property : attendees) {
 			if (property.getValue().contains(super.getAJAXClient().getValues().getDefaultAddress())) {
 				attendee = property;

@@ -1836,12 +1836,15 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         /*
          * Write headers&cookies to JK_AJP13_SEND_HEADERS message
          */
-        final int numHeaders = response.getNumOfHeaders();
+        int numHeaders = 0;
         final byte[] headers;
         {
             sink.reset();
             for (final Entry<String, List<String>> entry : response.getHeaderEntrySet()) {
-                writeHeaderSafe(entry.getKey(), toValue(entry.getValue()), sink);
+                for (String value : entry.getValue()) {
+                    writeHeaderSafe(entry.getKey(), value, sink);
+                    numHeaders++;
+                }
             }
             headers = sink.toByteArray();
         }

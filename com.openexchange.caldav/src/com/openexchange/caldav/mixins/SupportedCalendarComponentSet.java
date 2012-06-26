@@ -54,19 +54,40 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 
 /**
- * {@link SupportedCalendarComponentSet}
+ * {@link SupportedCalendarComponentSet} 
+ * 
+ * Specifies the calendar component types (e.g., VEVENT, VTODO, etc.) that 
+ * calendar object resources can contain in the calendar collection.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class SupportedCalendarComponentSet extends SingleXMLPropertyMixin {
+    
+    public static final String VEVENT = "VEVENT";
+    public static final String VTODO = "VTODO";
+    
+    private final String[] components;
 
     public SupportedCalendarComponentSet() {
+        this(VEVENT);
+    }
+
+    public SupportedCalendarComponentSet(String...components) {
         super(CaldavProtocol.CAL_NS.getURI(), "supported-calendar-component-set");
+        this.components = components;
     }
 
     @Override
     protected String getValue() {
-        return "<CAL:comp name=\"VEVENT\"/>";
+        StringBuilder stringBuilder = new StringBuilder();
+        if (null != this.components) {
+            for (String component : components) {
+                stringBuilder.append("<CAL:comp name=\"").append(component).append("\"/>");
+            }
+        }
+        return stringBuilder.toString();
+//        return "<CAL:comp name=\"VEVENT\"/><CAL:comp name=\"VTODO\"/>";
     }
 
 }

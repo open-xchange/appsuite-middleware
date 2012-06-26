@@ -58,7 +58,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
-
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
@@ -69,7 +68,6 @@ import org.apache.jackrabbit.webdav.client.methods.PutMethod;
 import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
 import org.apache.jackrabbit.webdav.version.report.ReportInfo;
 import org.json.JSONException;
-
 import com.openexchange.dav.Headers;
 import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.StatusCodes;
@@ -398,7 +396,7 @@ public abstract class CalDAVTest extends WebDAVTest {
     public static ICalResource assertContains(String uid, Collection<ICalResource> iCalResources) {
     	ICalResource match = null;
     	for (ICalResource iCalResource : iCalResources) {
-    		if (uid.equals(iCalResource.getUID())) {
+    		if (uid.equals(iCalResource.getVEvent().getUID())) {
     			assertNull("duplicate match for UID '" + uid + "'", match);
     			match = iCalResource;
     		}

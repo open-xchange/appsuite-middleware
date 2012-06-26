@@ -105,8 +105,8 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
     //  Missing parameter: %1$s
     public static final String MISSING_PARAMETER_MSG = "Missing parameter: %1$s.";
 
-    // Invalid parameter: %1$s with value '%2$s'.
-    public static final String INVALID_PARAMETER_MSG = "Invalid parameter: %1$s with value '%2$s'.";
+    // Invalid parameter: %1$s with type '%2$s'. Expected '%3$s'.
+    public static final String INVALID_PARAMETER_MSG = "Invalid parameter: %1$s with type '%2$s'. Expected '%3$s'.";
 
     // File part is read-only: %1$s
     public static final String READ_ONLY_MSG = "File part is read-only.: %1$s";

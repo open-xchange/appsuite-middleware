@@ -49,26 +49,16 @@
 
 package com.openexchange.index.solr;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 import junit.framework.TestCase;
-import org.apache.solr.client.solrj.response.QueryResponse;
-import org.apache.solr.common.params.SolrParams;
-import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexDocument.Type;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.SearchHandler;
 import com.openexchange.index.solr.internal.Services;
-import com.openexchange.index.solr.internal.mail.MailSolrIndexAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.solr.SolrCoreIdentifier;
 
 
 /**
@@ -148,48 +138,6 @@ public class MailSolrIndexAccessTest extends TestCase {
             .build();
         IndexResult<MailMessage> result = indexAccess.query(parameters, null);
         assertTrue(result.getNumFound() == expected);
-    }
-    
-    private static class MockMailSolrIndexAccess extends MailSolrIndexAccess {
-        
-        private static final List<Map<String, Object>> index = new ArrayList<Map<String,Object>>();
-
-        
-        /**
-         * Initializes a new {@link MockMailSolrIndexAccess}.
-         * @param identifier
-         * @param triggerType
-         */
-        public MockMailSolrIndexAccess(int docs) {
-            super(new SolrCoreIdentifier(1, 1, 1));
-            for (int i = 0; i < docs; i++) {                
-                index.add(Collections.singletonMap("time_" + i, (Object) System.currentTimeMillis()));
-            }
-        }
-        
-        public static int getQueryRows() {
-            return QUERY_ROWS;
-        }
-        
-        @Override
-        protected QueryResponse query(SolrParams query) throws OXException {
-            int start = Integer.parseInt(query.get("start"));
-            int rows = Integer.parseInt(query.get("rows"));
-            int end = start + rows;            
-            if (start > index.size()) {
-                return new MockQueryResponse(Collections.EMPTY_SET);
-            }
-            
-            if (end > index.size()) {
-                end = index.size();
-            }
-            
-            Set<Map<String, Object>> entries = new HashSet<Map<String, Object>>(QUERY_ROWS);
-            List<Map<String, Object>> subList = index.subList(start, end);
-            entries.addAll(subList);            
-            return new MockQueryResponse(entries);
-        }
-        
     }
 
 }

@@ -140,9 +140,9 @@ public final class JsonCaches {
      * @param hash Array of bytes to convert to hex-string
      * @return Generated hex string
      */
-    public static String asHex(final byte hash[]) {
+    public static String asHex(final byte[] hash) {
         final int length = hash.length;
-        final char buf[] = new char[length * 2];
+        final char[] buf = new char[length * 2];
         for (int i = 0, x = 0; i < length; i++) {
             buf[x++] = HEX_CHARS[(hash[i] >>> 4) & 0xf];
             buf[x++] = HEX_CHARS[hash[i] & 0xf];

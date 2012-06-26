@@ -63,6 +63,7 @@ import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.MimeMessage;
@@ -479,6 +480,8 @@ public final class MyServletRequest  {
         return raw_text;
     }
 
+    private static final Pattern P_RPL = Pattern.compile("<br/?>");
+
     private void sendUpsellEmail(final String to, final String from,final String text,final String subject) throws OXException{
         MailConfig mailConfig = null;
         try {
@@ -494,7 +497,7 @@ public final class MyServletRequest  {
                 /*
                  * Set text content
                  */
-                mimeMessage.setText(text, "UTF-8");
+                mimeMessage.setText(P_RPL.matcher(text).replaceAll("\n"), "UTF-8");
                 mimeMessage.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
                 mimeMessage.setHeader(MessageHeaders.HDR_CONTENT_TYPE, "text/plain; charset=UTF-8");
                 /*

@@ -55,7 +55,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
-
 import com.openexchange.dav.caldav.ical.SimpleICal.Property;
 
 
@@ -67,6 +66,12 @@ import com.openexchange.dav.caldav.ical.SimpleICal.Property;
  */
 public final class ICalUtils {
 	
+    public static String formatAsUTC(final Date date) {
+        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmm'00Z'");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        return dateFormat.format(date);
+    }
+
 	public static String fold(String content) {
     	return content.replaceAll(".{75}", "$0\r\n ");
     }
@@ -76,6 +81,9 @@ public final class ICalUtils {
     }
 	    
 	public static Date parseDate(Property property) throws ParseException {
+	    if (null == property || null == property.getValue()) {
+	        return null;
+	    }
 		SimpleDateFormat dateFormat = new SimpleDateFormat();
 		if ("DATE".equals(property.getAttribute("VALUE"))) {
 			dateFormat.applyPattern("yyyyMMdd");
@@ -84,15 +92,25 @@ public final class ICalUtils {
 			String tzid = property.getAttribute("TZID");
 			if (null != tzid) {
 				dateFormat.setTimeZone(TimeZone.getTimeZone(tzid));
-				dateFormat.applyPattern("yyyyMMdd'T'HHmm'00'");
+				dateFormat.applyPattern("yyyyMMdd'T'HHmmss");
 			} else {
-				dateFormat.applyPattern("yyyyMMdd'T'HHmm'00Z'");
+				dateFormat.applyPattern("yyyyMMdd'T'HHmmss'Z'");
 				dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 			}
 		}
 		return dateFormat.parse(property.getValue());
 	}
-
+	
+	public static String format(Date date, TimeZone timeZone) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmm'00'");
+        dateFormat.setTimeZone(timeZone);
+        return dateFormat.format(date);
+    }
+    
+    public static String format(Date date, String timeZoneID) {
+        return format(date, TimeZone.getTimeZone(timeZoneID));
+    }
+    
 	public static List<Date[]> parsePeriods(Property property) throws ParseException {
 		List<Date[]> periods = new ArrayList<Date[]>();
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss");

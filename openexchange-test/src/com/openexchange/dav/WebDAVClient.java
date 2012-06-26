@@ -50,11 +50,7 @@
 package com.openexchange.dav;
 
 import java.io.IOException;
-
-import javax.xml.parsers.ParserConfigurationException;
-
 import junit.framework.Assert;
-
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
@@ -69,11 +65,6 @@ import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
 import org.apache.jackrabbit.webdav.client.methods.PutMethod;
 import org.apache.jackrabbit.webdav.client.methods.ReportMethod;
 import org.apache.jackrabbit.webdav.version.report.ReportInfo;
-import org.apache.jackrabbit.webdav.xml.DomUtil;
-import org.jdom2.JDOMException;
-import org.jdom2.xpath.XPath;
-import org.w3c.dom.Element;
-
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.dav.reports.SyncCollectionReportInfo;
 import com.openexchange.dav.reports.SyncCollectionReportMethod;
@@ -234,11 +225,6 @@ public class WebDAVClient {
 		}
 	}
 	
-	public static Object queryXPath(final MultiStatusResponse response, final String xPath) throws ParserConfigurationException, JDOMException {
-		final Element element = response.toXml(DomUtil.createDocument());
-		return XPath.selectSingleNode(element, xPath);
-	}
-
 	private static void release(final HttpMethod method) {
 		if (null != method) {
 			method.releaseConnection();

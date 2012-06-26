@@ -1,3 +1,33 @@
+* 2012-06-26 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22392: Fixed StackOverflowError
+ - Fix for bug 22393: Fixed possible NPE
+ - Fix for bug 22264: Replace possible "<br>" tags with LF
+ - Fix for bug 22390: Try restart transaction for three times before failure
+ - Fix for bug 22402: Fixed NPE in CaldavActivator
+ - Fix for bug 22404: Re-check parsed from addresses to not be empty
+
+* 2012-06-26 - tobias.friedrich@open-xchange.com
+
+- Fix for bug 22352: Correct handling of numerical resource names
+- Fix for bug 22338: Let the appointment service assign last modified timestamps on updates
+- Fix for bug 22395: Correct parsing of recurrence-id of change exceptions
+
+* 2012-06-26 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 22283: Update confirmation status of an existing Appointment from an iMip-Invitation.
+
+* 2012-06-25 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22380: Fixed loading of a recently saved message's images
+ - Fix for bug 22382: Checking a session's password prior to passing it to crypto service
+
+* 2012-06-22 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22350: Added dummy basic-type to JSON converter
+ - Fix for bug 21838: Fixed saving/editing drafts with inline images
+ - Fix for bug 22377: Log a missing configuration property as a warning, but don't abort Servlet registration
+
 * 2012-06-21 - martin.herfurth@open-xchange.com
 
  - Fix for bug 22337: Fixed Strange recipient and sender of counter mails.

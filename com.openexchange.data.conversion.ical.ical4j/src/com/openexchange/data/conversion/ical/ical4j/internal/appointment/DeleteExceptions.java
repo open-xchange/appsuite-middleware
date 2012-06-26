@@ -112,7 +112,7 @@ public class DeleteExceptions extends AbstractVerifyingAttributeConverter<VEvent
         final PropertyList exdates = vEvent.getProperties("EXDATE");
         final int size = exdates.size();
         for (int i = 0; i < size; i++) {
-            final ExDate exdate = (ExDate) exdates.get(0);
+            final ExDate exdate = (ExDate) exdates.get(i);
 
             final DateList dates = exdate.getDates();
             final int size2 = dates.size();
