@@ -1,3 +1,7 @@
+* 2012-06-26 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22392: Fixed StackOverflowError
+
 * 2012-06-26 - tobias.friedrich@open-xchange.com
 
 - Fix for bug 22352: Correct handling of numerical resource names
