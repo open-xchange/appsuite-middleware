@@ -2,6 +2,7 @@
 
  - Fix for bug 22392: Fixed StackOverflowError
  - Fix for bug 22393: Fixed possible NPE
+ - Fix for bug 22264: Replace possible "<br>" tags with LF
 
 * 2012-06-26 - tobias.friedrich@open-xchange.com
 
