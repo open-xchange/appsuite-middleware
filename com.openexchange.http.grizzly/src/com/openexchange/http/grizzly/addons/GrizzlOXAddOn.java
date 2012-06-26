@@ -47,30 +47,47 @@
  *
  */
 
-package com.openexchange.http.grizzly.addons.backendroute;
+package com.openexchange.http.grizzly.addons;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.glassfish.grizzly.filterchain.BaseFilter;
 import org.glassfish.grizzly.filterchain.Filter;
 import org.glassfish.grizzly.filterchain.FilterChainBuilder;
 import org.glassfish.grizzly.http.server.AddOn;
 import org.glassfish.grizzly.http.server.HttpServerFilter;
 import org.glassfish.grizzly.http.server.NetworkListener;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.http.grizzly.filters.backendroute.AppendBackendRouteFilter;
+import com.openexchange.http.grizzly.filters.keepalive.EASKeepAliveFilter;
+import com.openexchange.http.grizzly.osgi.GrizzlyServiceRegistry;
 import com.openexchange.http.grizzly.util.FilterChainUtils;
 
 /**
- * {@link BackendRouteAddOn}
+ * {@link GrizzlOXAddOn}
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class BackendRouteAddOn implements AddOn {
+public class GrizzlOXAddOn implements AddOn {
 
-    private static final Log LOG = LogFactory.getLog(BackendRouteAddOn.class);
+    private static final Log LOG = LogFactory.getLog(GrizzlOXAddOn.class);
 
-    private final Filter filter;
+    private final List<Filter> filters = new ArrayList<Filter>();
 
-    public BackendRouteAddOn(AppendBackendRouteFilter filter) {
-        this.filter = filter;
+    public GrizzlOXAddOn() {
+        //init the features of the GrizzlOXAddOn
+        
+        //1. BackendRouteFilter
+        ConfigurationService configurationService = GrizzlyServiceRegistry.getInstance().getService(ConfigurationService.class);
+        final String backendRoute = configurationService.getProperty("com.openexchange.http.grizzly.backendRoute", "");
+        AppendBackendRouteFilter appendBackendRouteFilter = new AppendBackendRouteFilter(backendRoute);
+        filters.add(appendBackendRouteFilter);
+        
+        //2. EASKeepAliveFilter
+        EASKeepAliveFilter easKeepAliveFilter = new EASKeepAliveFilter();
+        filters.add(easKeepAliveFilter);
     }
 
     @Override
@@ -81,9 +98,11 @@ public class BackendRouteAddOn implements AddOn {
         }
         int httpServerFilterIdx = builder.indexOfType(HttpServerFilter.class);
         if (httpServerFilterIdx > 0) {
-            builder.add(httpServerFilterIdx - 1, filter);
+            builder.addAll(httpServerFilterIdx -1 , filters);
         }
-        LOG.info("FilterChain after adding Watchers:\n" + FilterChainUtils.formatFilterChainString(builder.build()));
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("FilterChain after adding Watchers:\n" + FilterChainUtils.formatFilterChainString(builder.build()));
+        }
     }
 
 }
