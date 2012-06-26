@@ -59,7 +59,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.jackrabbit.webdav.DavConstants;
@@ -72,7 +71,6 @@ import org.json.JSONException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-
 import com.openexchange.ajax.user.UserResolver;
 import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.caldav.CalDAVTest;
@@ -219,7 +217,8 @@ public class FreeBusyTest extends CalDAVTest {
 	
 	private Map<String, List<FreeBusySlot>> extractFreeBusy(ICalResource iCalResource) throws ParseException {
 		Map<String, List<FreeBusySlot>> freeBusy = new HashMap<String, List<FreeBusySlot>>();
-		for (Component freeBusyComponent : iCalResource.getICal().getVFreeBusys()) {
+        assertNotNull("No VFREEBUSY in iCal found", iCalResource.getVFreeBusys());
+		for (Component freeBusyComponent : iCalResource.getVFreeBusys()) {
 			Property attendee = freeBusyComponent.getProperty("ATTENDEE");
 			assertNotNull("VFREEBUSY without ATTENDEE", attendee);
 			ArrayList<FreeBusySlot> freeBusySlots  = new ArrayList<FreeBusyTest.FreeBusySlot>();

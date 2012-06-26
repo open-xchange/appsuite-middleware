@@ -92,9 +92,10 @@ public class NewTest extends CalDAVTest {
          * verify appointment on client
          */
         ICalResource iCalResource = super.get(uid, null);
-        assertEquals("UID wrong", uid, iCalResource.getUID());
-        assertEquals("SUMMARY wrong", summary, iCalResource.getSummary());
-        assertEquals("LOCATION wrong", location, iCalResource.getLocation());
+        assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
+        assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
+        assertEquals("SUMMARY wrong", summary, iCalResource.getVEvent().getSummary());
+        assertEquals("LOCATION wrong", location, iCalResource.getVEvent().getLocation());
 	}
 	
 	public void testCreateSimpleOnServer() throws Exception {
@@ -119,8 +120,9 @@ public class NewTest extends CalDAVTest {
         assertTrue("no resource changes reported on sync collection", 0 < eTags.size());
         List<ICalResource> calendarData = super.calendarMultiget(eTags.keySet());
         ICalResource iCalResource = assertContains(uid, calendarData);
-        assertEquals("SUMMARY wrong", summary, iCalResource.getSummary());
-        assertEquals("LOCATION wrong", location, iCalResource.getLocation());
+        assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
+        assertEquals("SUMMARY wrong", summary, iCalResource.getVEvent().getSummary());
+        assertEquals("LOCATION wrong", location, iCalResource.getVEvent().getLocation());
 	}
 	
 	public void testCreateAllDayOnClient() throws Exception {
@@ -163,10 +165,11 @@ public class NewTest extends CalDAVTest {
          * verify appointment on client
          */
         ICalResource iCalResource = super.get(uid, null);
-        assertEquals("UID wrong", uid, iCalResource.getUID());
-        assertEquals("SUMMARY wrong", summary, iCalResource.getSummary());
-        assertEquals("START wrong", start, iCalResource.getDTStart());
-        assertEquals("END wrong", end, iCalResource.getDTEnd());
+        assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
+        assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
+        assertEquals("SUMMARY wrong", summary, iCalResource.getVEvent().getSummary());
+        assertEquals("START wrong", start, iCalResource.getVEvent().getDTStart());
+        assertEquals("END wrong", end, iCalResource.getVEvent().getDTEnd());
 	}
 	
 	public void testAllDayOnServer() throws Exception {
@@ -195,10 +198,11 @@ public class NewTest extends CalDAVTest {
         assertTrue("no resource changes reported on sync collection", 0 < eTags.size());
         List<ICalResource> calendarData = super.calendarMultiget(eTags.keySet());
         ICalResource iCalResource = assertContains(uid, calendarData);
-        assertEquals("SUMMARY wrong", summary, iCalResource.getSummary());
-        assertEquals("LOCATION wrong", location, iCalResource.getLocation());
-        assertEquals("START wrong", start, iCalResource.getDTStart());
-        assertEquals("END wrong", end, iCalResource.getDTEnd());
+        assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
+        assertEquals("SUMMARY wrong", summary, iCalResource.getVEvent().getSummary());
+        assertEquals("LOCATION wrong", location, iCalResource.getVEvent().getLocation());
+        assertEquals("START wrong", start, iCalResource.getVEvent().getDTStart());
+        assertEquals("END wrong", end, iCalResource.getVEvent().getDTEnd());
 	}
 	
 	public void testCreateWithDifferentName() throws Exception {
@@ -223,9 +227,10 @@ public class NewTest extends CalDAVTest {
          * verify appointment on client
          */
         ICalResource iCalResource = super.get(resourceName, null);
-        assertEquals("UID wrong", uid, iCalResource.getUID());
-        assertEquals("SUMMARY wrong", summary, iCalResource.getSummary());
-        assertEquals("LOCATION wrong", location, iCalResource.getLocation());
+        assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
+        assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
+        assertEquals("SUMMARY wrong", summary, iCalResource.getVEvent().getSummary());
+        assertEquals("LOCATION wrong", location, iCalResource.getVEvent().getLocation());
 	}
 	
 }

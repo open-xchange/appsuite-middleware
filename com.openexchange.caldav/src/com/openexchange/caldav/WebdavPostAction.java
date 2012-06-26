@@ -52,12 +52,8 @@ package com.openexchange.caldav;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
-import org.jdom2.output.XMLOutputter;
-
 import com.openexchange.java.Streams;
 import com.openexchange.log.LogFactory;
 import com.openexchange.webdav.action.AbstractAction;
@@ -76,7 +72,6 @@ public class WebdavPostAction extends AbstractAction {
 	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(WebdavPostAction.class));
 
     protected final GroupwareCaldavFactory factory;
-    protected final XMLOutputter outputter = new XMLOutputter();
     
     public WebdavPostAction(GroupwareCaldavFactory factory) {
 	    this.factory = factory;
@@ -93,7 +88,7 @@ public class WebdavPostAction extends AbstractAction {
 			 * only iCal files supported
 			 */
 			throw WebdavProtocolException.generalError(request.getUrl(), HttpServletResponse.SC_BAD_REQUEST);
-		} else if (false == resource instanceof ScheduleOutboxCollection) {
+        } else if (false == resource instanceof com.openexchange.caldav.resources.ScheduleOutboxCollection) {
 			/*
 			 * only the schedule-outbox resource can fulfill the request
 			 */

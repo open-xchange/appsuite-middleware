@@ -56,7 +56,7 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.Namespace;
-import com.openexchange.caldav.GroupwareCaldavFactory;
+import com.openexchange.caldav.resources.CommonFolderCollection;
 import com.openexchange.webdav.action.WebdavPropfindAction;
 import com.openexchange.webdav.action.WebdavRequest;
 import com.openexchange.webdav.action.WebdavResponse;
@@ -101,17 +101,12 @@ public class SyncCollection extends WebdavPropfindAction {
         } catch (final IOException e) {
             forceAllProp = true;
         }
+
         final ResourceMarshaller marshaller = getMarshaller(req, forceAllProp, requestBody, null);
-
         final String token = getSyncToken(req, requestBody);
-        
-        final Syncstatus<WebdavResource> syncStatus = ((GroupwareCaldavFactory) req.getFactory()).getSyncStatusSince(req.getCollection(), token);
-        
+        Syncstatus<WebdavResource> syncStatus = ((CommonFolderCollection<?>)req.getCollection()).getSyncStatus(token); 
         final List<Element> all = new ArrayList<Element>();
-
-        
         final int[] statusCodes = syncStatus.getStatusCodes();
-        
         final PropertiesMarshaller helper = new PropertiesMarshaller(req.getURLPrefix(), req.getCharset());
         
         for (final int sc : statusCodes) {
@@ -147,12 +142,12 @@ public class SyncCollection extends WebdavPropfindAction {
 
     private String getSyncToken(final WebdavRequest req, final Document requestBody) throws WebdavProtocolException {
 
-        final List children = requestBody.getRootElement().getChildren("sync-token", DAV_NS);
+        final List<Element> children = requestBody.getRootElement().getChildren("sync-token", DAV_NS);
         if (children == null || children.isEmpty()) {
             return null;
         }
 
-        final Element tokenElement = (Element) children.get(0);
+        final Element tokenElement = children.get(0);
         return tokenElement.getText();
     }
 }

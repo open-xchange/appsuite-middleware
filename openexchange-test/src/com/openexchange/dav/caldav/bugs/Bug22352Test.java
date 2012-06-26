@@ -47,66 +47,51 @@
  *
  */
 
-package com.openexchange.caldav;
+package com.openexchange.dav.caldav.bugs;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.openexchange.caldav.mixins.CalendarHomeSet;
-import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.webdav.protocol.Protocol.Property;
-import com.openexchange.webdav.protocol.WebdavPath;
-import com.openexchange.webdav.protocol.WebdavProperty;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
-import com.openexchange.webdav.protocol.WebdavResource;
+import java.util.Date;
+import com.openexchange.dav.StatusCodes;
+import com.openexchange.dav.caldav.CalDAVTest;
+import com.openexchange.dav.caldav.ICalResource;
+import com.openexchange.groupware.calendar.TimeTools;
+import com.openexchange.groupware.container.Appointment;
 
 /**
- * The {@link RootCollection} is a caldav collection containing, as its subcollections, all calendars of a user.
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link Bug22352Test} - problems interpreting URL 
+ * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class RootCollection extends AbstractStandardCaldavCollection {
-    
-    public RootCollection(GroupwareCaldavFactory factory) {
-        super(factory);
-        includeProperties(new CalendarHomeSet());
-    }
+public class Bug22352Test extends CalDAVTest {
 
-    @Override
-	public List<WebdavResource> getChildren() throws WebdavProtocolException {
-    	List<UserizedFolder> folders;
-		try {
-			folders = this.factory.getState().getVisibleFolders();
-		} catch (final OXException e) {
-            throw internalError(e);
-		}
-    	final List<WebdavResource> children = new ArrayList<WebdavResource>(folders.size());
-    	int order = 0;
-    	for (final UserizedFolder folder : folders) {
-			children.add(new CaldavCollection(this, folder, this.factory, ++order));
-		}
-        return children;
-    }
+	public Bug22352Test(String name) {
+		super(name);
+	}
 
-    @Override
-	public WebdavPath getUrl() {
-        return GroupwareCaldavFactory.ROOT_URL;
+    public void testLongNumericResourceName() throws Exception {
+        /*
+         * create appointment on client
+         */
+        String uid = "2010042814505442675";
+        String summary = "bug 22352";
+        String location = "test";
+        Date start = TimeTools.D("tomorrow at 3pm");
+        Date end = TimeTools.D("tomorrow at 4pm");
+        String iCal = generateICal(start, end, uid, summary, location);
+        assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putICal(uid, iCal));
+        /*
+         * verify appointment on server
+         */
+        Appointment appointment = super.getAppointment(uid);
+        super.rememberForCleanUp(appointment);
+        assertEquals(appointment, start, end, uid, summary, location);
+        /*
+         * verify appointment on client
+         */
+        ICalResource iCalResource = super.get(uid, null);
+        assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
+        assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
+        assertEquals("SUMMARY wrong", summary, iCalResource.getVEvent().getSummary());
+        assertEquals("LOCATION wrong", location, iCalResource.getVEvent().getLocation());
     }
-
-    @Override
-	public String getDisplayName() throws WebdavProtocolException {
-        return "";
-    }
-    
-    @Override
-	protected WebdavProperty internalGetProperty(String namespace, String name) throws WebdavProtocolException {
-        return null;
-    }
-
-    @Override
-    protected boolean isset(Property p) {
-        return true;
-    }
+	
 }
