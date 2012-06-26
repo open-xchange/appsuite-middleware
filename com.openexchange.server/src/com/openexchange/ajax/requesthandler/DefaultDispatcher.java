@@ -250,15 +250,25 @@ public class DefaultDispatcher implements Dispatcher {
                 synchronized (actionFactories) {
                     try {
                         current = actionFactories.get(module);
-                        final CombinedActionFactory combinedFactory;
-                        if (current instanceof CombinedActionFactory) {
-                            combinedFactory = (CombinedActionFactory) current;
+                        final Module moduleAnnotation = current.getClass().getAnnotation(Module.class);
+                        if (null == moduleAnnotation) {
+                            final StringBuilder sb = new StringBuilder(512).append("There is already a factory associated with module \"");
+                            sb.append(module).append("\": ").append(current.getClass().getName());
+                            sb.append(". Therefore registration is denied for factory \"").append(factory.getClass().getName());
+                            sb.append("\". Unless these two factories provide the \"").append(Module.class.getName()).append(
+                                "\" annotation to specify what actions are supported by each factory.");
+                            LOG.warn(sb.toString());
                         } else {
-                            combinedFactory = new CombinedActionFactory();
-                            combinedFactory.add(current);
-                            actionFactories.put(module, combinedFactory);
+                            final CombinedActionFactory combinedFactory;
+                            if (current instanceof CombinedActionFactory) {
+                                combinedFactory = (CombinedActionFactory) current;
+                            } else {
+                                combinedFactory = new CombinedActionFactory();
+                                combinedFactory.add(current);
+                                actionFactories.put(module, combinedFactory);
+                            }
+                            combinedFactory.add(factory);
                         }
-                        combinedFactory.add(factory);
                     } catch (final IllegalArgumentException e) {
                         LOG.error(e.getMessage());
                     }

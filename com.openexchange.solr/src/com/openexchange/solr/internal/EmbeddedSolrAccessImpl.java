@@ -485,6 +485,10 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
         case Types.EMAIL:
             configFile = config.getProperty(SolrProperties.CONFIG_FILE_MAIL);
             break;
+            
+        case Types.INFOSTORE:
+            configFile = config.getProperty(SolrProperties.CONFIG_FILE_INFOSTORE);
+            break;
 
         default:
             throw SolrExceptionCodes.UNKNOWN_MODULE.create(module);
@@ -499,6 +503,10 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
         switch (module) {
         case Types.EMAIL:
             schemaFile = config.getProperty(SolrProperties.SCHEMA_FILE_MAIL);
+            break;
+            
+        case Types.INFOSTORE:
+            schemaFile = config.getProperty(SolrProperties.SCHEMA_FILE_INFOSTORE);
             break;
 
         default:

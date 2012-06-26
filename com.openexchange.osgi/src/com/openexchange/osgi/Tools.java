@@ -50,6 +50,7 @@
 package com.openexchange.osgi;
 
 import java.util.Collection;
+import java.util.Stack;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
@@ -85,6 +86,12 @@ public class Tools {
     public static final void open(Collection<ServiceTracker<?,?>> trackers) {
         for (ServiceTracker<?,?> tracker : trackers) {
             tracker.open();
+        }
+    }
+
+    public static final void close(Stack<ServiceTracker<?,?>> trackers) {
+        while (!trackers.isEmpty()) {
+            trackers.pop().close();
         }
     }
 

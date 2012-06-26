@@ -59,11 +59,15 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.internet.AddressException;
+import javax.security.sasl.Sasl;
+import javax.security.sasl.SaslClient;
+import javax.security.sasl.SaslException;
 import org.apache.commons.logging.Log;
 import com.openexchange.log.LogFactory;
 import com.openexchange.config.ConfigurationService;
@@ -329,19 +333,26 @@ public class SieveHandler {
             measureEnd("tlsNegotiation");
             sasl = capa.getSasl();
         }
+
         /*
-         * Check for PLAIN authentication support
+         * Check for supported authentication support
          */
-        if (null == sasl || !sasl.contains("PLAIN")) {
+        if (null == sasl || (!sasl.contains("PLAIN") && !sasl.contains("GSSAPI")) ) {
             throw new OXSieveHandlerException(
-                new StringBuilder(64).append("The server doesn't suppport PLAIN authentication over a ").append(
+                new StringBuilder(64).append("The server doesn't support PLAIN, nor GSSAPI authentication over a ").append(
                     issueTLS ? "TLS" : "plain-text").append(" connection.").toString(),
                 sieve_host,
                 sieve_host_port,
                 null);
         }
         measureStart();
-        if (!selectAuth("PLAIN", commandBuilder)) {
+        String useAuth = "PLAIN";
+        // FIXME: make that configurable?
+        // stronger mechs win
+        if( sasl.contains("GSSAPI") ) {
+            useAuth = "GSSAPI";
+        }
+        if (!selectAuth(useAuth, commandBuilder)) {
             throw new OXSieveHandlerInvalidCredentialsException("Authentication failed");
         }
         log.debug("Authentication to sieve successful");
@@ -661,6 +672,97 @@ public class SieveHandler {
         }
     }
 
+    
+    private boolean authGSSAPI(final StringBuilder commandBuilder) throws IOException, UnsupportedEncodingException, OXSieveHandlerException {
+        final String user = getRightEncodedString(sieve_user, "username");
+        final String authname = getRightEncodedString(sieve_auth, "authname");
+        
+        final HashMap<String, String> saslProps = new HashMap<String, String>();
+
+        // Mutual authentication
+        saslProps.put("javax.security.sasl.server.authentication", "true");
+        /**
+         *  TODO: do we want encrypted transfer after auth without ssl?
+         *  if yes, we need to wrap the whole rest of the communication with sc.wrap/sc.unwrap
+         *  and qop to auth-int or auth-conf
+         */
+        saslProps.put("javax.security.sasl.qop", "auth");
+
+        SaslClient sc = null;
+        try {
+            sc = Sasl.createSaslClient(new String[]{"GSSAPI"}, authname, "sieve", sieve_host, saslProps, null);
+            byte[] response = sc.evaluateChallenge(new byte[0]);
+            String b64resp = com.openexchange.tools.encoding.Base64.encode(response);
+            
+            bos_sieve.write(new String(SIEVE_AUTH + "\"GSSAPI\" {" + b64resp.length() + "+}").getBytes());
+            bos_sieve.write(CRLF.getBytes());
+            bos_sieve.flush();
+            bos_sieve.write(b64resp.getBytes());
+            bos_sieve.write(CRLF.getBytes());
+            bos_sieve.flush();
+
+
+            while (true) {
+                String temp = bis_sieve.readLine();
+                if (null != temp) {
+                    if (temp.startsWith(SIEVE_OK)) {
+                        AUTH = true;
+                        return true;
+                    } else if (temp.startsWith(SIEVE_NO)) {
+                        AUTH = false;
+                        return false;
+                    } else if ( temp.length() == 0 ) {
+                        // cyrus managesieve sends empty answers and it looks like these have to be ignored?!?
+                        continue;
+                    } else {
+                        // continuation
+                        // -> https://tools.ietf.org/html/rfc5804#section-1.2
+                        byte []cont;
+                        // some implementations such as cyrus timsieved always use literals
+                        if (temp.startsWith("{") ) {
+                            int cnt = Integer.parseInt(temp.substring(1, temp.length()-1));
+                            char[] buf = new char[cnt];
+                            bis_sieve.read(buf, 0, cnt);
+                            cont = com.openexchange.tools.encoding.Base64.decode(new String(buf));
+                        } else {
+                            // dovecot managesieve sends quoted strings
+                            cont = com.openexchange.tools.encoding.Base64.decode(temp.replaceAll("\"", ""));
+                        }
+                        if( sc.isComplete() ) {
+                            AUTH = true;
+                            return true;
+                        }
+                        response = sc.evaluateChallenge(cont);
+                        String respLiteral;
+                        if( null == response || response.length == 0 ) {
+                            respLiteral = "{0+}";
+                        } else {
+                            b64resp = com.openexchange.tools.encoding.Base64.encode(response);
+                            respLiteral = "{" + b64resp.length() + "+}";
+                        }
+                        bos_sieve.write(new String(respLiteral+CRLF).getBytes());
+                        if( null != response && response.length > 0 ) {
+                            bos_sieve.write(new String(b64resp + CRLF).getBytes());
+                        } else {
+                            bos_sieve.write(CRLF.getBytes());
+                        }
+                        bos_sieve.flush();
+                    }
+                } else {
+                    AUTH = false;
+                    return false;
+                }
+            }
+        } catch (SaslException e) {
+            log.error("SASL challenge failed", e);
+            throw e;
+        } finally {
+            if( null != sc ) {
+                sc.dispose();
+            }
+        }
+    }
+    
     private boolean authPLAIN(final StringBuilder commandBuilder) throws IOException, UnsupportedEncodingException, OXSieveHandlerException {
         final String username = getRightEncodedString(sieve_user, "username");
         final String authname = getRightEncodedString(sieve_auth, "authname");
@@ -875,6 +977,8 @@ public class SieveHandler {
             return authPLAIN(commandBuilder);
         } else if (auth_mech.equals("LOGIN")) {
             return authLOGIN(commandBuilder);
+        } else if (auth_mech.equals("GSSAPI")) {
+            return authGSSAPI(commandBuilder);
         }
         return false;
     }

@@ -98,6 +98,9 @@ public final class ImageMatcher {
      * 
      * @param prefixService The prefix service to set
      */
+    /**
+     * @param prefixService
+     */
     public static void setPrefixService(final DispatcherPrefixService prefixService) {
         if (null == prefixService) {
             REGEX_IMAGE_URL = null;
@@ -109,9 +112,9 @@ public final class ImageMatcher {
                 prefix = prefix.substring(1);
             }
             REGEX_IMAGE_URL =
-                "(<img[^>]*?)(src=\")(?:.*?)" + prefix + ImageActionFactory.ALIAS_APPENDIX + "([^\"]+?)(?:\\?|&amp;|&)(uid=)([^\"&]+)(?:(&[^\"]+\")|(\"))([^>]*/?>)";
+                "(<img[^>]*?)(src=\")(?:[^>]*?)" + prefix + ImageActionFactory.ALIAS_APPENDIX + "([^\"]+?)(?:\\?|&amp;|&)(uid=)([^\"&]+)(?:(&[^\"]+\")|(\"))([^>]*/?>)";
             REGEX_FILE_URL =
-                "(<img[^>]*?)(src=\")(?:.*?)" + prefix + "file([^\"]+?)(?:\\?|&amp;|&)(id=)([^\"&]+)(?:(&[^\"]+\")|(\"))([^>]*/?>)";
+                "(<img[^>]*?)(src=\")(?:[^>]*?)" + prefix + "file([^\"]+?)(?:\\?|&amp;|&)(id=)([^\"&]+)(?:(&[^\"]+\")|(\"))([^>]*/?>)";
 
             PATTERN_REF_IMG =
                 Pattern.compile("(?:" + REGEX_FILE_URL + ")|(?:" + REGEX_IMAGE_URL + ')', Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
@@ -127,7 +130,7 @@ public final class ImageMatcher {
         super();
         final Pattern pattern = PATTERN_REF_IMG;
         if (null == pattern) {
-            throw new IllegalStateException(ImageMatcher.class.getSimpleName()+" not initialized, yet.");
+            throw new IllegalStateException(ImageMatcher.class.getSimpleName() + " not initialized, yet.");
         }
         matcher = pattern.matcher(content);
     }
@@ -215,22 +218,41 @@ public final class ImageMatcher {
         return matcher.group(GROUP_IMG_ID);
     }
 
+    /**
+     * Gets the start index of the previous match.
+     * 
+     * @return The start index
+     */
     public int start() {
         return matcher.start();
     }
 
+    /**
+     * Gets the end index of the previous match.
+     * 
+     * @return The end index
+     */
     public int end() {
         return matcher.end();
     }
 
+    /**
+     * Implements a non-terminal append-and-replace step.
+     */
     public Matcher appendReplacement(final StringBuffer sb, final String replacement) {
         return matcher.appendReplacement(sb, replacement);
     }
 
+    /**
+     * Implements a non-terminal append-and-replace step.
+     */
     public Matcher appendLiteralReplacement(final StringBuffer sb, final String replacement) {
         return matcher.appendReplacement(sb, Matcher.quoteReplacement(replacement));
     }
 
+    /**
+     * Implements a non-terminal append-and-replace step.
+     */
     public StringBuffer appendTail(final StringBuffer sb) {
         return matcher.appendTail(sb);
     }

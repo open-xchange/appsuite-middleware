@@ -53,6 +53,8 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketTimeoutException;
 import java.nio.charset.UnsupportedCharsetException;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Locale;
@@ -69,6 +71,7 @@ import javax.mail.MessagingException;
 import javax.mail.event.FolderEvent;
 import javax.mail.event.FolderListener;
 import javax.mail.internet.IDNA;
+import javax.security.auth.Subject;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.acl.ACLExtension;
@@ -144,6 +147,32 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      */
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
+    private static final String KERBEROS_SESSION_SUBJECT = "kerberosSubject";
+
+    private static final class SaslImapLoginAction implements PrivilegedExceptionAction<Object> {
+
+        private final IMAPStore is;
+        private final String server;
+        private final int port;
+        private final String login;
+        private final String pw;
+
+        protected SaslImapLoginAction(final IMAPStore is,final String server, final int port, final String login, final String pw) {
+            super();
+            this.is = is;
+            this.server = server;
+            this.port = port;
+            this.login = login;
+            this.pw = pw;
+        }
+
+        @Override
+        public Object run() throws MessagingException {
+            is.connect(server, port, login, pw);
+            return null;
+        }
+    }
+
     /**
      * The flag indicating whether to use IMAPStoreCache.
      */
@@ -194,6 +223,11 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      * The IMAP session.
      */
     private transient javax.mail.Session imapSession;
+    
+    /**
+     * The Kerberos subject.
+     */
+    private transient Subject kerberosSubject;
 
     /**
      * The IMAP protocol.
@@ -295,6 +329,32 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         return imapStore;
     }
 
+    /**
+     * Checks if Kerberos authentication is supposed to be performed.
+     * 
+     * @return <code>true</code> for Kerberos authentication; otherwise <code>false</code>
+     */
+    private boolean isKerberosAuth() {
+        return MailAccount.DEFAULT_ID == accountId && null != kerberosSubject;
+    }
+
+    private static void handlePrivilegedActionException(final PrivilegedActionException e) throws MessagingException, OXException {
+        if (null == e) {
+            return;
+        }
+        final Exception cause = e.getException();
+        if (null == cause) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e.getCause(), e.getMessage());
+        }
+        if (cause instanceof MessagingException) {
+            throw (MessagingException) cause;
+        }
+        if (cause instanceof OXException) {
+            throw (OXException) cause;
+        }
+        throw MailExceptionCode.UNEXPECTED_ERROR.create(cause.getCause(), cause.getMessage());
+    }
+
     private void reset() {
         super.resetFields();
         folderStorage = null;
@@ -303,6 +363,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         imapStore = null;
         imapSession = null;
         connected = false;
+        kerberosSubject = null;
     }
 
     @Override
@@ -550,6 +611,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             return;
         }
         final IMAPConfig config = getIMAPConfig();
+        final Session s = config.getSession();
+        this.kerberosSubject = (Subject) s.getParameter(KERBEROS_SESSION_SUBJECT);
         try {
             final IIMAPProperties imapConfProps = (IIMAPProperties) config.getMailProperties();
             final boolean tmpDownEnabled = (imapConfProps.getImapTemporaryDown() > 0);
@@ -598,10 +661,14 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             if ((null != getMailProperties()) && !getMailProperties().isEmpty()) {
                 imapProps.putAll(getMailProperties());
             }
-            if (isProxyAuth) {
+            /*
+             * Kerberos and/or proxy authentication
+             */
+            final boolean kerberosAuth = isKerberosAuth();
+            if (kerberosAuth || isProxyAuth) {
                 imapProps.put("mail.imap.sasl.enable", "true");
                 imapProps.put("mail.imap.sasl.authorizationid", user);
-                imapProps.put("mail.imap.sasl.mechanisms", "PLAIN");
+                imapProps.put("mail.imap.sasl.mechanisms", (kerberosAuth ? "GSSAPI" : "PLAIN"));
             }
             /*
              * Get parameterized IMAP session
@@ -741,7 +808,15 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
          * ... and connect it
          */
         try {
-            imapStore.connect(server, port, login, pw);
+            if (isKerberosAuth()) {
+                try {
+                    Subject.doAs(kerberosSubject, new SaslImapLoginAction(imapStore, server, port, login, pw));
+                } catch (final PrivilegedActionException e) {
+                    handlePrivilegedActionException(e);
+                }
+            } else {
+                imapStore.connect(server, port, login, pw);
+            }
         } catch (final AuthenticationFailedException e) {
             /*
              * Retry connect with AUTH=PLAIN disabled

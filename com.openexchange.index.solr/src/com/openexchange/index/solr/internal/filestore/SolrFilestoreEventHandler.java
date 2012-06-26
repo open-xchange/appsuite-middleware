@@ -109,6 +109,8 @@ public class SolrFilestoreEventHandler implements EventHandler {
                 }
             } catch (OXException e) {
                 LOG.error(e.getMessage(), e);
+            } catch (Throwable e) {
+                LOG.error(e.getMessage(), e);
             }
         }        
     }

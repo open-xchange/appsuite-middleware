@@ -90,7 +90,10 @@ public enum FilestoreIndexField implements IndexField {
     
     static {
         for (FilestoreIndexField field : values()) {
-            mapping.put(field.getFileField(), field);
+            Field fileField = field.getFileField();
+            if (fileField != null) {
+                mapping.put(fileField, field);
+            }            
         }
     }
     

@@ -59,6 +59,8 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.nio.charset.UnsupportedCharsetException;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -77,6 +79,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
+import javax.security.auth.Subject;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -88,6 +91,7 @@ import com.openexchange.java.Charsets;
 import com.openexchange.java.Java7ConcurrentLinkedQueue;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
@@ -125,7 +129,34 @@ public final class SMTPTransport extends MailTransport {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(SMTPTransport.class));
 
+    private static final class SaslSmtpLoginAction implements PrivilegedExceptionAction<Object> {
+
+        private final Transport transport;
+        private final String server;
+        private final int port;
+        private final String login;
+        private final String pw;
+
+        protected SaslSmtpLoginAction(final Transport transport, final String server, final int port, final String login, final String pw) {
+            super();
+            this.transport = transport;
+            this.server = server;
+            this.port = port;
+            this.login = login;
+            this.pw = pw;
+        }
+
+        @Override
+        public Object run() throws MessagingException {
+            transport.connect(server, port, login, pw);
+            return null;
+        }
+
+    }
+
     // private static final String CHARENC_ISO_8859_1 = "ISO-8859-1";
+
+    private static final String KERBEROS_SESSION_SUBJECT = "kerberosSubject";
 
     private static volatile String staticHostName;
 
@@ -147,6 +178,8 @@ public final class SMTPTransport extends MailTransport {
     private final int accountId;
 
     private final Session session;
+
+    private transient Subject kerberosSubject;
 
     private final Context ctx;
 
@@ -232,6 +265,32 @@ public final class SMTPTransport extends MailTransport {
         pendingInvocations.offer(task);
     }
 
+    /**
+     * Checks if Kerberos authentication is supposed to be performed.
+     * 
+     * @return <code>true</code> for Kerberos authentication; otherwise <code>false</code>
+     */
+    private boolean isKerberosAuth() {
+        return MailAccount.DEFAULT_ID == accountId && null != kerberosSubject;
+    }
+
+    private static void handlePrivilegedActionException(final PrivilegedActionException e) throws MessagingException, OXException {
+        if (null == e) {
+            return;
+        }
+        final Exception cause = e.getException();
+        if (null == cause) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e.getCause(), e.getMessage());
+        }
+        if (cause instanceof MessagingException) {
+            throw (MessagingException) cause;
+        }
+        if (cause instanceof OXException) {
+            throw (OXException) cause;
+        }
+        throw MailExceptionCode.UNEXPECTED_ERROR.create(cause, cause.getMessage());
+    }
+
     private javax.mail.Session getSMTPSession() throws OXException {
         if (null == smtpSession) {
             synchronized (this) {
@@ -242,6 +301,22 @@ public final class SMTPTransport extends MailTransport {
                      * Set properties
                      */
                     final ISMTPProperties smtpProperties = smtpConfig.getSMTPProperties();
+                    /*
+                     * Check for Kerberos subject
+                     */
+                    this.kerberosSubject = (Subject) session.getParameter(KERBEROS_SESSION_SUBJECT);
+                    final boolean kerberosAuth = isKerberosAuth();
+                    if (kerberosAuth) {
+                        smtpProps.put("mail.smtp.auth", "true"); 
+                        smtpProps.put("mail.smtp.sasl.enable", "true");
+                        smtpProps.put("mail.smtp.sasl.authorizationid", smtpConfig.getLogin());
+                        smtpProps.put("mail.smtp.sasl.mechanisms", (kerberosAuth ? "GSSAPI" : "PLAIN"));
+                    } else {
+                        smtpProps.put("mail.smtp.auth", smtpProperties.isSmtpAuth() ? "true" : "false");
+                    }
+                    /*
+                     * Localhost, & timeouts
+                     */
                     final String smtpLocalhost = smtpProperties.getSmtpLocalhost();
                     if (smtpLocalhost != null) {
                         smtpProps.put("mail.smtp.localhost", smtpLocalhost);
@@ -252,7 +327,6 @@ public final class SMTPTransport extends MailTransport {
                     if (smtpProperties.getSmtpConnectionTimeout() > 0) {
                         smtpProps.put("mail.smtp.connectiontimeout", Integer.toString(smtpProperties.getSmtpConnectionTimeout()));
                     }
-                    smtpProps.put("mail.smtp.auth", smtpProperties.isSmtpAuth() ? "true" : "false");
                     /*
                      * Check if a secure SMTP connection should be established
                      */
@@ -468,14 +542,25 @@ public final class SMTPTransport extends MailTransport {
             final long start = System.currentTimeMillis();
             final Transport transport = getSMTPSession().getTransport(SMTPProvider.PROTOCOL_SMTP.getName());
             try {
+                final String server = IDNA.toASCII(smtpConfig.getServer());
+                final int port = smtpConfig.getPort();
                 if (smtpConfig.getSMTPProperties().isSmtpAuth()) {
-                    transport.connect(
-                        IDNA.toASCII(smtpConfig.getServer()),
-                        smtpConfig.getPort(),
-                        smtpConfig.getLogin(),
-                        encodePassword(smtpConfig.getPassword()));
+                    if (isKerberosAuth()) {
+                        try {
+                            Subject.doAs(kerberosSubject, new SaslSmtpLoginAction(
+                                transport,
+                                server,
+                                port,
+                                smtpConfig.getLogin(),
+                                encodePassword(smtpConfig.getPassword())));
+                        } catch (final PrivilegedActionException e) {
+                            handlePrivilegedActionException(e);
+                        }
+                    } else {
+                        transport.connect(server, port, smtpConfig.getLogin(), encodePassword(smtpConfig.getPassword()));
+                    }
                 } else {
-                    transport.connect(IDNA.toASCII(smtpConfig.getServer()), smtpConfig.getPort(), null, null);
+                    transport.connect(server, port, null, null);
                 }
             } catch (final javax.mail.AuthenticationFailedException e) {
                 throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
@@ -509,11 +594,25 @@ public final class SMTPTransport extends MailTransport {
                 final long start = System.currentTimeMillis();
                 final Transport transport = getSMTPSession().getTransport(SMTPProvider.PROTOCOL_SMTP.getName());
                 try {
+                    final String server = IDNA.toASCII(smtpConfig.getServer());
+                    final int port = smtpConfig.getPort();
                     if (smtpConfig.getSMTPProperties().isSmtpAuth()) {
-                        final String encPass = encodePassword(smtpConfig.getPassword());
-                        transport.connect(IDNA.toASCII(smtpConfig.getServer()), smtpConfig.getPort(), smtpConfig.getLogin(), encPass);
+                        if (isKerberosAuth()) {
+                            try {
+                                Subject.doAs(kerberosSubject, new SaslSmtpLoginAction(
+                                    transport,
+                                    server,
+                                    port,
+                                    smtpConfig.getLogin(),
+                                    encodePassword(smtpConfig.getPassword())));
+                            } catch (final PrivilegedActionException e) {
+                                handlePrivilegedActionException(e);
+                            }
+                        } else {
+                            transport.connect(server, port, smtpConfig.getLogin(), encodePassword(smtpConfig.getPassword()));
+                        }
                     } else {
-                        transport.connect(IDNA.toASCII(smtpConfig.getServer()), smtpConfig.getPort(), null, null);
+                        transport.connect(server, port, null, null);
                     }
                 } catch (final javax.mail.AuthenticationFailedException e) {
                     throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
@@ -577,11 +676,25 @@ public final class SMTPTransport extends MailTransport {
                 final long start = System.currentTimeMillis();
                 final Transport transport = getSMTPSession().getTransport(SMTPProvider.PROTOCOL_SMTP.getName());
                 try {
+                    final String server = IDNA.toASCII(smtpConfig.getServer());
+                    final int port = smtpConfig.getPort();
                     if (smtpConfig.getSMTPProperties().isSmtpAuth()) {
-                        final String encPass = encodePassword(smtpConfig.getPassword());
-                        transport.connect(IDNA.toASCII(smtpConfig.getServer()), smtpConfig.getPort(), smtpConfig.getLogin(), encPass);
+                        if (isKerberosAuth()) {
+                            try {
+                                Subject.doAs(kerberosSubject, new SaslSmtpLoginAction(
+                                    transport,
+                                    server,
+                                    port,
+                                    smtpConfig.getLogin(),
+                                    encodePassword(smtpConfig.getPassword())));
+                            } catch (final PrivilegedActionException e) {
+                                handlePrivilegedActionException(e);
+                            }
+                        } else {
+                            transport.connect(server, port, smtpConfig.getLogin(), encodePassword(smtpConfig.getPassword()));
+                        }
                     } else {
-                        transport.connect(IDNA.toASCII(smtpConfig.getServer()), smtpConfig.getPort(), null, null);
+                        transport.connect(server, port, null, null);
                     }
                 } catch (final javax.mail.AuthenticationFailedException e) {
                     throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
@@ -621,13 +734,13 @@ public final class SMTPTransport extends MailTransport {
     }
 
     @Override
-    protected void shutdown() throws OXException {
+    protected void shutdown() {
         SMTPSessionProperties.resetDefaultSessionProperties();
         SMTPCapabilityCache.tearDown();
     }
 
     @Override
-    protected void startup() throws OXException {
+    protected void startup() {
         SMTPCapabilityCache.init();
     }
 
@@ -660,11 +773,25 @@ public final class SMTPTransport extends MailTransport {
         final SMTPConfig config = getTransportConfig0();
         try {
             try {
+                final String server = IDNA.toASCII(config.getServer());
+                final int port = config.getPort();
                 if (config.getSMTPProperties().isSmtpAuth()) {
-                    final String encPass = encodePassword(config.getPassword());
-                    transport.connect(IDNA.toASCII(config.getServer()), config.getPort(), config.getLogin(), encPass);
+                    if (isKerberosAuth()) {
+                        try {
+                            Subject.doAs(kerberosSubject, new SaslSmtpLoginAction(
+                                transport,
+                                server,
+                                port,
+                                config.getLogin(),
+                                encodePassword(config.getPassword())));
+                        } catch (final PrivilegedActionException e) {
+                            handlePrivilegedActionException(e);
+                        }
+                    } else {
+                        transport.connect(server, port, config.getLogin(), encodePassword(config.getPassword()));
+                    }
                 } else {
-                    transport.connect(IDNA.toASCII(config.getServer()), config.getPort(), null, null);
+                    transport.connect(server, port, null, null);
                 }
                 close = true;
             } catch (final javax.mail.AuthenticationFailedException e) {

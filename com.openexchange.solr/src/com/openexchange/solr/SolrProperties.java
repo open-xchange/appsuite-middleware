@@ -64,6 +64,10 @@ public class SolrProperties {
     public static final String SCHEMA_FILE_MAIL = "com.openexchange.solr.schemaMail";
     
     public static final String CONFIG_FILE_MAIL = "com.openexchange.solr.configMail";
+    
+    public static final String SCHEMA_FILE_INFOSTORE = "com.openexchange.solr.schemaInfostore";
+    
+    public static final String CONFIG_FILE_INFOSTORE = "com.openexchange.solr.configInfostore";
         
     public static final String IS_NODE = "com.openexchange.solr.isSolrNode";
     

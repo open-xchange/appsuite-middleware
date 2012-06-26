@@ -1,3 +1,8 @@
+* 2012-06-25 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22380: Fixed loading of a recently saved message's images
+ - Fix for bug 22382: Checking a session's password prior to passing it to crypto service
+
 * 2012-06-22 - thorben.betten@open-xchange.com
 
  - Fix for bug 22350: Added dummy basic-type to JSON converter
