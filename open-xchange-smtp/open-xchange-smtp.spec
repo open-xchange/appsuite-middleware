@@ -23,7 +23,7 @@ The Open-Xchange Server SMTP Bundle.
 Authors:
 --------
     Open-Xchange
-    
+
 %prep
 %setup -q
 
