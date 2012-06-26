@@ -18,7 +18,7 @@ import com.openexchange.admin.soap.reseller.group.rmi.exceptions.StorageExceptio
 
 
 /**
- * <p>Java-Klasse für Exception complex type.
+ * <p>Java-Klasse f\u00fcr Exception complex type.
  * 
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
  * 
