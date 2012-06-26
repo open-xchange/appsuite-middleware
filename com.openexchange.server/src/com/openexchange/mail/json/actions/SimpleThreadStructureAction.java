@@ -113,7 +113,7 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                 final ServerSession session = req.getSession();
                 final JSONValue jsonValue = jsonCache.opt(id, session.getUserId(), session.getContextId());
                 final AJAXRequestResult result;
-                if (null == jsonValue) {
+                if (null == jsonValue || 0 == jsonValue.length()) {
                     /*
                      * Check mailbox size
                      */

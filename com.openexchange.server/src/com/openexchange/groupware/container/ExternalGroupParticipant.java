@@ -183,13 +183,20 @@ public class ExternalGroupParticipant implements Participant, Comparable<Partici
     }
 
     @Override
-    public Object clone() throws CloneNotSupportedException {
-        return super.clone();
+    public ExternalGroupParticipant clone() throws CloneNotSupportedException {
+        ExternalGroupParticipant retval = (ExternalGroupParticipant) super.clone();
+
+        retval.setDisplayName(this.getDisplayName());
+        retval.setEmailAddress(this.getEmailAddress());
+        retval.setIdentifier(this.getIdentifier());
+        retval.setIgnoreNotification(this.isIgnoreNotification());
+
+        return retval;
     }
 
     @Override
     public Participant getClone() throws CloneNotSupportedException {
-        return (Participant) clone();
+        return clone();
     }
 
     @Override

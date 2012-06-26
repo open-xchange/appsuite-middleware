@@ -1,5 +1,5 @@
 
-Name:          open-xchange-smtp
+Name:          open-xchange-soap-cxf
 BuildArch:     noarch
 #!BuildIgnore: post-build-checks
 BuildRequires: ant
@@ -14,11 +14,11 @@ License:       GPL-2.0
 BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
-Summary:       The Open-Xchange Server SMTP Bundle
+Summary:       Bundle to offer SOAP webservices as discovered in the OSGi system
 Requires:      open-xchange-core >= @OXVERSION@
 
 %description
-The Open-Xchange Server SMTP Bundle.
+Bundle to offer SOAP webservices as discovered in the OSGi system
 
 Authors:
 --------
@@ -42,7 +42,5 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/bundles/*
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
-%dir /opt/open-xchange/etc/
-%config(noreplace) /opt/open-xchange/etc/*
 
 %changelog

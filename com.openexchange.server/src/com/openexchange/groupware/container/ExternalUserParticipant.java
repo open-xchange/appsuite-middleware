@@ -50,6 +50,7 @@
 package com.openexchange.groupware.container;
 
 import com.openexchange.groupware.container.participants.AbstractConfirmableParticipant;
+import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 
 /**
  * {@link ExternalUserParticipant} - Represents an external user participant.
@@ -62,7 +63,7 @@ public class ExternalUserParticipant extends AbstractConfirmableParticipant impl
 
     private String displayName;
 
-    private final String emailaddress;
+    private String emailaddress;
 
     private boolean ignoreNotification;
 
@@ -173,13 +174,20 @@ public class ExternalUserParticipant extends AbstractConfirmableParticipant impl
     }
 
     @Override
-    public Object clone() throws CloneNotSupportedException {
-        return super.clone();
+    public ExternalUserParticipant clone() throws CloneNotSupportedException {
+        ExternalUserParticipant retval = (ExternalUserParticipant) super.clone();
+
+        retval.setDisplayName(this.getDisplayName());
+        retval.emailaddress = this.emailaddress;
+        retval.setIdentifier(this.getIdentifier());
+        retval.setIgnoreNotification(this.isIgnoreNotification());
+
+        return retval;
     }
 
     @Override
-    public Participant getClone() throws CloneNotSupportedException {
-        return (Participant) clone();
+    public ConfirmableParticipant getClone() throws CloneNotSupportedException {
+        return clone();
     }
 
     @Override

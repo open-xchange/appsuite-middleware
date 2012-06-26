@@ -426,8 +426,6 @@ public class CalendarDataObject extends Appointment {
             clone.setNotification(getNotification());
         }
         clone.setIgnoreConflicts(ignoreConflicts);
-        clone.setUsers(getUsers());
-        clone.setParticipants(getParticipants());
         clone.setRecurrenceCalculator(getRecurrenceCalculator());
         clone.setRecurrence(getRecurrence());
         clone.setFolderType(getFolderType());

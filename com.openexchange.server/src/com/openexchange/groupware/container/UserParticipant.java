@@ -273,15 +273,27 @@ public class UserParticipant implements Participant, Comparable<Participant> {
     }
 
     @Override
-    public Object clone() throws CloneNotSupportedException {
+    public UserParticipant clone() throws CloneNotSupportedException {
         final UserParticipant clone = (UserParticipant) super.clone();
         clone.alarmDate = (Date) (alarmDate == null ? null : alarmDate.clone());
+        clone.alarmMinutes = alarmMinutes;
+        clone.b_confirm = b_confirm;
+        clone.b_confirmMessage = b_confirmMessage;
+        clone.bAlarmMinutes = bAlarmMinutes;
+        clone.confirm = confirm;
+        clone.confirmMessage = confirmMessage;
+        clone.displayName = displayName;
+        clone.emailaddress = emailaddress;
+        clone.id = id;
+        clone.ignoreNotification = ignoreNotification;
+        clone.isModified = isModified;
+        clone.pfid = pfid;
         return clone;
     }
 
     @Override
-    public Participant getClone() throws CloneNotSupportedException {
-        return (Participant) clone();
+    public UserParticipant getClone() throws CloneNotSupportedException {
+        return clone();
     }
 
     @Override
