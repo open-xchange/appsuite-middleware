@@ -9,6 +9,6 @@ Homepage: http://www.open-xchange.com
 Package: open-xchange-admin-user-copy
 Architecture: all
 Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@), open-xchange-admin (>= @OXVERSION@)
-Replaces: open-xchange-admin-plugin-usermove
-Conflicts: open-xchange-admin-plugin-usermove
+Replaces: open-xchange-admin-plugin-user-copy, open-xchange-admin-plugin-user-copy-client
+Conflicts: open-xchange-admin-plugin-user-copy, open-xchange-admin-plugin-user-copy-client
 Description: Open Xchange Admin User Copy Plugin
