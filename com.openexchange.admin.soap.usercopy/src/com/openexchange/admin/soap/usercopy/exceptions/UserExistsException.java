@@ -8,7 +8,7 @@ import com.openexchange.admin.soap.usercopy.soap.Exception;
 
 
 /**
- * <p>Java-Klasse für UserExistsException complex type.
+ * <p>Java-Klasse f\u00fcr UserExistsException complex type.
  * 
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
  * 

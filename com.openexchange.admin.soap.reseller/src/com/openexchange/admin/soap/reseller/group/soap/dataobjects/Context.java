@@ -12,7 +12,7 @@ import com.openexchange.admin.soap.reseller.group.reseller.soap.dataobjects.Rese
 
 
 /**
- * <p>Java-Klasse für Context complex type.
+ * <p>Java-Klasse f\u00fcr Context complex type.
  * 
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
  * 

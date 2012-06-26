@@ -15,7 +15,7 @@ import com.openexchange.admin.soap.reseller.service.rmi.dataobjects.EnforceableD
 
 
 /**
- * <p>Java-Klasse für Restriction complex type.
+ * <p>Java-Klasse f\u00fcr Restriction complex type.
  * 
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
  * 
@@ -110,8 +110,8 @@ public class Restriction
      * Zeile 0 von http://192.168.32.167/servlet/axis2/services/OXResellerService?wsdl#types3
      * Zeile 0 von http://192.168.32.167/servlet/axis2/services/OXResellerService?wsdl#types6
      * <p>
-     * Um diese Eigenschaft zu entfernen, wenden Sie eine Eigenschaftenanpassung für eine
-     * der beiden folgenden Deklarationen an, um deren Namen zu ändern: 
+     * Um diese Eigenschaft zu entfernen, wenden Sie eine Eigenschaftenanpassung f\u00fcr eine
+     * der beiden folgenden Deklarationen an, um deren Namen zu ÔøΩndern: 
      * Gets the value of the rest property.
      * 
      * <p>

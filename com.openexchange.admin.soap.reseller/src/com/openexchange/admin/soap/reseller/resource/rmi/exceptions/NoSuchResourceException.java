@@ -8,7 +8,7 @@ import com.openexchange.admin.soap.reseller.resource.reseller.soap.Exception;
 
 
 /**
- * <p>Java-Klasse für NoSuchResourceException complex type.
+ * <p>Java-Klasse f\u00fcr NoSuchResourceException complex type.
  * 
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
  * 

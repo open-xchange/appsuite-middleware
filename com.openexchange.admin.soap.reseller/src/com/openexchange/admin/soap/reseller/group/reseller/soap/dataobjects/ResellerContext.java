@@ -13,7 +13,7 @@ import com.openexchange.admin.soap.reseller.group.soap.dataobjects.Context;
 
 
 /**
- * <p>Java-Klasse für ResellerContext complex type.
+ * <p>Java-Klasse f\u00fcr ResellerContext complex type.
  * 
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
  * 
