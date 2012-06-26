@@ -176,13 +176,20 @@ public class ResourceGroupParticipant implements Participant, Comparable<Partici
     }
 
     @Override
-    public Object clone() throws CloneNotSupportedException {
-        return super.clone();
+    public ResourceGroupParticipant clone() throws CloneNotSupportedException {
+        ResourceGroupParticipant retval = (ResourceGroupParticipant) super.clone();
+
+        retval.setDisplayName(this.getDisplayName());
+        retval.setEmailAddress(this.getEmailAddress());
+        retval.setIdentifier(this.getIdentifier());
+        retval.setIgnoreNotification(this.isIgnoreNotification());
+
+        return retval;
     }
 
     @Override
     public Participant getClone() throws CloneNotSupportedException {
-        return (Participant) clone();
+        return clone();
     }
 
     @Override
