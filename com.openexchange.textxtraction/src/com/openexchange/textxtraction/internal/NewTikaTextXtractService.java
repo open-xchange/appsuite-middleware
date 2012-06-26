@@ -52,14 +52,17 @@ package com.openexchange.textxtraction.internal;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Locale;
+
 import net.htmlparser.jericho.Renderer;
 import net.htmlparser.jericho.Segment;
 import net.htmlparser.jericho.Source;
+
 import org.apache.commons.logging.Log;
 import org.apache.tika.Tika;
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.exception.TikaException;
 import org.xml.sax.SAXException;
+
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.textxtraction.AbstractTextXtractService;
@@ -85,7 +88,12 @@ public class NewTikaTextXtractService extends AbstractTextXtractService {
     public NewTikaTextXtractService(ConfigurationService service) {
         super();
         try {
-            TikaConfig config = new TikaConfig(service.getProperty(TextXtractionProperties.TIKA_CONFIG));
+        	String tikaConfigPath = service.getProperty(TextXtractionProperties.TIKA_CONFIG);
+        	if (tikaConfigPath == null) {
+        		throw new IllegalStateException("Property " + TextXtractionProperties.TIKA_CONFIG + " must not be null.");
+        	}
+        	
+            TikaConfig config = new TikaConfig(tikaConfigPath);
             tika = new Tika(config);        
         } catch (TikaException e) {
             LOG.error(e.getMessage(), e);
