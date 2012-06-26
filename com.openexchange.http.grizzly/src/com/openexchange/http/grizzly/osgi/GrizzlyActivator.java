@@ -60,8 +60,8 @@ import org.osgi.service.http.NamespaceException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.grizzly.GrizzlyExceptionCode;
-import com.openexchange.http.grizzly.addons.backendroute.BackendRouteAddOn;
-import com.openexchange.http.grizzly.addons.backendroute.AppendBackendRouteFilter;
+import com.openexchange.http.grizzly.addons.GrizzlOXAddOn;
+import com.openexchange.http.grizzly.filters.backendroute.AppendBackendRouteFilter;
 import com.openexchange.http.grizzly.services.http.HttpServiceFactory;
 import com.openexchange.http.requestwatcher.osgi.services.RequestWatcherService;
 import com.openexchange.log.Log;
@@ -141,8 +141,6 @@ public class GrizzlyActivator extends HousekeepingActivator {
             final boolean hasJMXEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasJMXEnabled", true);
             final boolean hasWebsocketsEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasWebsocketsEnabled", true);
             final boolean hasCometEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasCometEnabled", false);
-            final String backendRoute = configService.getProperty("com.openexchange.http.grizzly.backendRoute", "");
-            
 
             /*
              *  create, configure and start server
@@ -174,7 +172,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
             if (LOG.isInfoEnabled()) {
                 LOG.info("Enabling BackendRouteAddon for Grizzly server.");
             }
-            networkListener.registerAddOn(new BackendRouteAddOn(new AppendBackendRouteFilter(backendRoute)));
+            networkListener.registerAddOn(new GrizzlOXAddOn());
             
             if (LOG.isInfoEnabled()) {
                 LOG.info(String.format(
