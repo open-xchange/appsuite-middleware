@@ -3,6 +3,7 @@
  - Fix for bug 22392: Fixed StackOverflowError
  - Fix for bug 22393: Fixed possible NPE
  - Fix for bug 22264: Replace possible "<br>" tags with LF
+ - Fix for bug 22390: Try restart transaction for three times before failure
 
 * 2012-06-26 - tobias.friedrich@open-xchange.com
 
