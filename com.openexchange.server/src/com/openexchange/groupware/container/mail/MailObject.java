@@ -60,6 +60,7 @@ import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
+import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.MimeBodyPart;
@@ -367,6 +368,9 @@ public class MailObject {
              * Set from
              */
             InternetAddress[] internetAddrs = parseAddressList(fromAddr, false);
+            if (null == internetAddrs || 0 == internetAddrs.length) {
+                throw MimeMailException.handleMessagingException(new AddressException("\"From\" cannot be parsed: " + fromAddr));
+            }
             msg.setFrom(internetAddrs[0]);
             msg.setReplyTo(internetAddrs);
             /*
