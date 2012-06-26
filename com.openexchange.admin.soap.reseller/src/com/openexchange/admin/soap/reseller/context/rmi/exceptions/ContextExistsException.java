@@ -8,7 +8,7 @@ import com.openexchange.admin.soap.reseller.context.reseller.soap.Exception;
 
 
 /**
- * <p>Java-Klasse für ContextExistsException complex type.
+ * <p>Java-Klasse f\u00fcr ContextExistsException complex type.
  * 
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
  * 
