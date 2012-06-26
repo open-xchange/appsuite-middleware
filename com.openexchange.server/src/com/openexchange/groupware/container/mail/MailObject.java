@@ -50,13 +50,11 @@
 package com.openexchange.groupware.container.mail;
 
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.parseAddressList;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Date;
-
 import javax.activation.DataHandler;
 import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
@@ -67,7 +65,6 @@ import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-
 import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
@@ -156,17 +153,29 @@ public class MailObject {
     }
 
     private final void validateMailObject() throws OXException {
-        if (fromAddr == null || fromAddr.length() == 0) {
+        if (isEmpty(fromAddr)) {
             throw MailExceptionCode.MISSING_FIELD.create("From");
         } else if (toAddrs == null || toAddrs.length == 0) {
             throw MailExceptionCode.MISSING_FIELD.create("To");
-        } else if (contentType == null || contentType.length() == 0) {
+        } else if (isEmpty(contentType)) {
             throw MailExceptionCode.MISSING_FIELD.create("Content-Type");
         } else if (subject == null) {
             throw MailExceptionCode.MISSING_FIELD.create("Subject");
         } else if (text == null) {
             throw MailExceptionCode.MISSING_FIELD.create("Text");
         }
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
     /**
@@ -606,7 +615,7 @@ public class MailObject {
         this.subject = subject;
     }
     
-    public void setUid(String uid) {
+    public void setUid(final String uid) {
 		this.uid = uid;
 	}
     
@@ -614,7 +623,7 @@ public class MailObject {
 		return uid;
 	}
 
-    public void setRecurrenceDatePosition(long time) {
+    public void setRecurrenceDatePosition(final long time) {
     	this.recurrenceDatePosition = time;
 	}
     
