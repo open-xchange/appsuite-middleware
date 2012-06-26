@@ -63,10 +63,10 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.log.LogFactory;
 
 /**
  * Utilities for database resource handling.
@@ -418,6 +418,26 @@ public final class DBUtils {
         final Statement statement = connection.createStatement();
         statement.execute("SET @@foreign_key_checks = " + value);
         statement.close();
+    }
+
+    /**
+     * Checks if passed <tt>SQLException</tt> (or any of chained <tt>SQLException</tt>s) indicates a failed transaction rollback.
+     * 
+     * <pre>
+     * Deadlock found when trying to get lock; try restarting transaction
+     * </pre>
+     * 
+     * @param sqlException The SQL exception to check
+     * @return <code>true</code> if a failed transaction rollback is indicated; otherwise <code>false</code>
+     */
+    public static boolean isTransactionRollbackException(final SQLException sqlException) {
+        if (null == sqlException) {
+            return false;
+        }
+        if (sqlException.getClass().getName().endsWith("TransactionRollbackException")) {
+            return true;
+        }
+        return isTransactionRollbackException(sqlException.getNextException());
     }
 
 }
