@@ -557,76 +557,72 @@ public class RdbUserStorage extends UserStorage {
         final String mech = user.getPasswordMech();
         final int shadowLastChanged = user.getShadowLastChange();
 
-        final int max = 3;
-        int retryCount = 0;
-        SQLException transactionRollbackException;
-        do {
-            transactionRollbackException = null;
-            final Connection con;
-            try {
-                con = DBPool.pickupWriteable(context);
-            } catch (final OXException e) {
-                throw LdapExceptionCode.NO_CONNECTION.create(e).setPrefix("USR");
-            }
-            try {
-                DBUtils.startTransaction(con);
-                // Update time zone and language
-                if (null != timeZone && null != preferredLanguage) {
-                    PreparedStatement stmt = null;
-                    try {
-                        final String sql = "UPDATE user SET timeZone=?,preferredLanguage=? WHERE cid=? AND id=?";
-                        stmt = con.prepareStatement(sql);
-                        int pos = 1;
-                        stmt.setString(pos++, timeZone);
-                        stmt.setString(pos++, preferredLanguage);
-                        stmt.setInt(pos++, contextId);
-                        stmt.setInt(pos++, userId);
-                        stmt.execute();
-                    } finally {
-                        closeSQLStuff(stmt);
+        try {
+            final DBUtils.TransactionRollbackCondition condition = new DBUtils.TransactionRollbackCondition(3);
+            do {
+                final Connection con;
+                try {
+                    con = DBPool.pickupWriteable(context);
+                } catch (final OXException e) {
+                    throw LdapExceptionCode.NO_CONNECTION.create(e).setPrefix("USR");
+                }
+                try {
+                    DBUtils.startTransaction(con);
+                    // Update time zone and language
+                    if (null != timeZone && null != preferredLanguage) {
+                        PreparedStatement stmt = null;
+                        try {
+                            final String sql = "UPDATE user SET timeZone=?,preferredLanguage=? WHERE cid=? AND id=?";
+                            stmt = con.prepareStatement(sql);
+                            int pos = 1;
+                            stmt.setString(pos++, timeZone);
+                            stmt.setString(pos++, preferredLanguage);
+                            stmt.setInt(pos++, contextId);
+                            stmt.setInt(pos++, userId);
+                            stmt.execute();
+                        } finally {
+                            closeSQLStuff(stmt);
+                        }
                     }
-                }
-                if (null != user.getAttributes()) {
-                    updateAttributes(context, user, con);
-                }
-                if (null != password && null != mech) {
-                    String encodedPassword = null;
-                    PreparedStatement stmt = null;
-                    try {
-                        encodedPassword = PasswordMechanism.getEncodedPassword(mech, password);
-                        stmt = con.prepareStatement(SQL_UPDATE_PASSWORD);
-                        int pos = 1;
-                        stmt.setString(pos++, encodedPassword);
-                        stmt.setInt(pos++, shadowLastChanged);
-                        stmt.setInt(pos++, contextId);
-                        stmt.setInt(pos++, userId);
-                        stmt.execute();
-                    } catch (final UnsupportedEncodingException e) {
-                        throw new SQLException(e.toString());
-                    } catch (final NoSuchAlgorithmException e) {
-                        throw new SQLException(e.toString());
-                    } finally {
-                        closeSQLStuff(stmt);
+                    if (null != user.getAttributes()) {
+                        updateAttributes(context, user, con);
                     }
+                    if (null != password && null != mech) {
+                        String encodedPassword = null;
+                        PreparedStatement stmt = null;
+                        try {
+                            encodedPassword = PasswordMechanism.getEncodedPassword(mech, password);
+                            stmt = con.prepareStatement(SQL_UPDATE_PASSWORD);
+                            int pos = 1;
+                            stmt.setString(pos++, encodedPassword);
+                            stmt.setInt(pos++, shadowLastChanged);
+                            stmt.setInt(pos++, contextId);
+                            stmt.setInt(pos++, userId);
+                            stmt.execute();
+                        } catch (final UnsupportedEncodingException e) {
+                            throw new SQLException(e.toString());
+                        } catch (final NoSuchAlgorithmException e) {
+                            throw new SQLException(e.toString());
+                        } finally {
+                            closeSQLStuff(stmt);
+                        }
+                    }
+                    con.commit();
+                } catch (final SQLException e) {
+                    rollback(con);
+                    if (!condition.isFailedTransactionRollback(e)) {
+                        throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
+                    }
+                } catch (final OXException e) {
+                    rollback(con);
+                    throw new OXException(e);
+                } finally {
+                    autocommit(con);
+                    DBPool.closeWriterSilent(context, con);
                 }
-                con.commit();
-            } catch (final SQLException e) {
-                rollback(con);
-                if (!DBUtils.isTransactionRollbackException(e)) {
-                    throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
-                }
-                transactionRollbackException = e;
-            } catch (final OXException e) {
-                rollback(con);
-                throw new OXException(e);
-            } finally {
-                autocommit(con);
-                DBPool.closeWriterSilent(context, con);
-            }
-        } while ((null != transactionRollbackException) && (++retryCount <= max));
-        // Check exception reference
-        if (null != transactionRollbackException) {
-            throw LdapExceptionCode.SQL_ERROR.create(transactionRollbackException, transactionRollbackException.getMessage()).setPrefix("USR");
+            } while (condition.checkRetry());
+        } catch (final SQLException e) {
+            throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
         }
     }
 
