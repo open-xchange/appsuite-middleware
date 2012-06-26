@@ -1,0 +1,5 @@
+open-xchange-soap-cxf (6.21.0-0) unstable; urgency=low
+
+  * Initial release
+
+ -- Marcus Klein <marcus.kleni@open-xchange.com>  Tue, 26 Jun 2012 12:01:29 +0200
