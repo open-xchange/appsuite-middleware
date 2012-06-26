@@ -56,128 +56,135 @@ import org.osgi.service.event.Event;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
-
 /**
  * {@link FileStorageEventHelper}
- *
+ * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class FileStorageEventHelper {
 
-    public static Event buildUpdateEvent(Session session, String service, String accountId, String folderId, String objectId) {
-        Event event = new Event(FileStorageEventConstants.UPDATE_TOPIC, buildProperties(session, service, accountId, folderId, objectId));        
+    public static Event buildUpdateEvent(final Session session, final String service, final String accountId, final String folderId, final String objectId) {
+        final Event event =
+            new Event(FileStorageEventConstants.UPDATE_TOPIC, buildProperties(session, service, accountId, folderId, objectId));
         return event;
     }
-    
-    public static Event buildCreateEvent(Session session, String service, String accountId, String folderId, String objectId) {        
-        Event event = new Event(FileStorageEventConstants.CREATE_TOPIC, buildProperties(session, service, accountId, folderId, objectId));        
+
+    public static Event buildCreateEvent(final Session session, final String service, final String accountId, final String folderId, final String objectId) {
+        final Event event =
+            new Event(FileStorageEventConstants.CREATE_TOPIC, buildProperties(session, service, accountId, folderId, objectId));
         return event;
-    }   
-    
-    public static Event buildDeleteEvent(Session session, String service, String accountId, String folderId, String objectId, Set<Integer> versions) {
-        Dictionary<String,Object> properties = buildProperties(session, service, accountId, folderId, objectId);
+    }
+
+    public static Event buildDeleteEvent(final Session session, final String service, final String accountId, final String folderId, final String objectId, final Set<Integer> versions) {
+        final Dictionary<String, Object> properties = buildProperties(session, service, accountId, folderId, objectId);
         /*
          * version may be null to indicate a complete deletion of a document.
          */
         if (versions != null) {
             properties.put(FileStorageEventConstants.VERSIONS, versions);
         }
-        
-        Event event = new Event(FileStorageEventConstants.DELETE_TOPIC, properties);        
-        return event;
+        return new Event(FileStorageEventConstants.DELETE_TOPIC, properties);
     }
-    
-    private static Dictionary<String, Object> buildProperties(Session session, String service, String accountId, String folderId, String objectId) {
-        Dictionary<String, Object> ht = new Hashtable<String, Object>();
-        ht.put(FileStorageEventConstants.SESSION, session);
-        ht.put(FileStorageEventConstants.SERVICE, service);
-        ht.put(FileStorageEventConstants.ACCOUNT_ID, accountId);           
-        ht.put(FileStorageEventConstants.OBJECT_ID, objectId); 
-        ht.put(FileStorageEventConstants.FOLDER_ID, folderId);
-        
+
+    private static Dictionary<String, Object> buildProperties(final Session session, final String service, final String accountId, final String folderId, final String objectId) {
+        final Dictionary<String, Object> ht = new Hashtable<String, Object>();
+        if (null != session) {
+            ht.put(FileStorageEventConstants.SESSION, session);
+        }
+        if (null != service) {
+            ht.put(FileStorageEventConstants.SERVICE, service);
+        }
+        if (null != accountId) {
+            ht.put(FileStorageEventConstants.ACCOUNT_ID, accountId);
+        }
+        if (null != objectId) {
+            ht.put(FileStorageEventConstants.OBJECT_ID, objectId);
+        }
+        if (null != folderId) {
+            ht.put(FileStorageEventConstants.FOLDER_ID, folderId);
+        }
         return ht;
     }
-    
-    public static boolean isCreateEvent(Event event) {
+
+    public static boolean isCreateEvent(final Event event) {
         return event.getTopic().equals(FileStorageEventConstants.CREATE_TOPIC);
     }
-    
-    public static boolean isUpdateEvent(Event event) {
+
+    public static boolean isUpdateEvent(final Event event) {
         return event.getTopic().equals(FileStorageEventConstants.UPDATE_TOPIC);
     }
-    
-    public static boolean isDeleteEvent(Event event) {
+
+    public static boolean isDeleteEvent(final Event event) {
         return event.getTopic().equals(FileStorageEventConstants.DELETE_TOPIC);
     }
-    
-    public static boolean isInfostoreEvent(Event event) {
+
+    public static boolean isInfostoreEvent(final Event event) {
         return "com.openexchange.infostore".equals(event.getProperty(FileStorageEventConstants.SERVICE));
     }
 
-    public static Session extractSession(Event event) throws OXException {
-        Object sessionObj = event.getProperty(FileStorageEventConstants.SESSION);
+    public static Session extractSession(final Event event) throws OXException {
+        final Object sessionObj = event.getProperty(FileStorageEventConstants.SESSION);
         if (sessionObj == null) {
             throw FileStorageExceptionCodes.MISSING_PARAMETER.create(FileStorageEventConstants.SESSION);
         }
-        
-        if (sessionObj instanceof Session) {
-            return (Session) sessionObj;
-        } else {
+
+        if (!(sessionObj instanceof Session)) {
             throw FileStorageExceptionCodes.INVALID_PARAMETER.create(FileStorageEventConstants.SESSION, sessionObj.getClass().getName());
         }
+        return (Session) sessionObj;
     }
-    
-    public static String extractObjectId(Event event) throws OXException {
+
+    public static String extractObjectId(final Event event) throws OXException {
         return extractValue(event, FileStorageEventConstants.OBJECT_ID);
     }
 
-    public static String extractFolderId(Event event) throws OXException {
+    public static String extractFolderId(final Event event) throws OXException {
         return extractValue(event, FileStorageEventConstants.FOLDER_ID);
     }
-    
-    public static String extractAccountId(Event event) throws OXException {
+
+    public static String extractAccountId(final Event event) throws OXException {
         return extractValue(event, FileStorageEventConstants.ACCOUNT_ID);
     }
-    
-    public static String extractService(Event event) throws OXException {
+
+    public static String extractService(final Event event) throws OXException {
         return extractValue(event, FileStorageEventConstants.SERVICE);
     }
-    
-    public static Set<Integer> extractVersions(Event event) {
-        Object versionsObj = event.getProperty(FileStorageEventConstants.VERSIONS);
+
+    public static Set<Integer> extractVersions(final Event event) {
+        final Object versionsObj = event.getProperty(FileStorageEventConstants.VERSIONS);
         if (versionsObj == null || !(versionsObj instanceof Set<?>)) {
             return null;
         }
-        
+
         return (Set<Integer>) versionsObj;
     }
-    
-    public static String createDebugMessage(String eventName, Event event) {
-        StringBuilder sb = new StringBuilder("Received ");
+
+    public static String createDebugMessage(final String eventName, final Event event) {
+        final StringBuilder sb = new StringBuilder("Received ");
         sb.append(eventName);
         sb.append(": ");
         sb.append(event.toString());
-        for (String key : event.getPropertyNames()) {
-            Object value = event.getProperty(key);            
+        for (final String key : event.getPropertyNames()) {
+            final Object value = event.getProperty(key);
             sb.append("\n    ");
             sb.append(key);
             sb.append(": ");
-            sb.append(value.toString());            
+            sb.append(value.toString());
         }
-        
+
         return sb.toString();
     }
-    
-    private static String extractValue(Event event, String key) throws OXException {
-        Object obj = event.getProperty(key);
+
+    private static String extractValue(final Event event, final String key) throws OXException {
+        final Object obj = event.getProperty(key);
         if (obj == null) {
             throw FileStorageExceptionCodes.MISSING_PARAMETER.create(key);
         }
-        
+
         if (obj instanceof String) {
             return (String) obj;
         }
-        
+
         throw FileStorageExceptionCodes.INVALID_PARAMETER.create(key, obj.getClass().getName(), String.class.getName());
     }
 }
