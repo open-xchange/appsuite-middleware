@@ -57,6 +57,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.Test;
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -142,7 +143,12 @@ public class DeleteMultipleFilesTest extends InfostoreAJAXTest {
         DeleteInfostoreRequest delReq = new DeleteInfostoreRequest(itemIds, folderIds, new Date());
         DeleteInfostoreResponse delRes = client.execute(delReq);
         JSONArray json = (JSONArray) delRes.getData();
-        assertTrue("Delete failed: " + delRes.getResponse().toString(), json.isNull(0));
+        int len = json.length();
+        for (int i = 0; i < len; i++) {
+            final JSONObject jObject = json.getJSONObject(i);
+            assertFalse("Delete failed: " + delRes.getResponse().toString(), itemIds.contains(Integer.valueOf(jObject.getInt("id"))));
+        }
+        //assertTrue("Delete failed: " + delRes.getResponse().toString(), json.isNull(0));
     }
 
 }

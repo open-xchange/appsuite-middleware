@@ -88,7 +88,7 @@ public class ResellerAdmin
      * Zeile 0 von http://192.168.32.167/servlet/axis2/services/OXResellerGroupService?wsdl#types4
      * <p>
      * Um diese Eigenschaft zu entfernen, wenden Sie eine Eigenschaftenanpassung f\u00fcr eine
-     * der beiden folgenden Deklarationen an, um deren Namen zu �ndern: 
+     * der beiden folgenden Deklarationen an, um deren Namen zu \u00e4ndern: 
      * Gets the value of the rest property.
      * 
      * <p>
