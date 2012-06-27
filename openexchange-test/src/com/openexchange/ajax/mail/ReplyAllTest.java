@@ -103,12 +103,18 @@ public class ReplyAllTest extends AbstractReplyTest {
         final String mail1 = client1.getValues().getSendAddress(); // note: doesn't work the other way around on the dev system, because only the
         final String mail2 = client2.getValues().getSendAddress(); // first account is set up correctly.
 
-        final List<Contact> otherContacts;
+        List<Contact> otherContacts;
         {
-            final ContactSearchObject searchObject = new ContactSearchObject();
+            ContactSearchObject searchObject = new ContactSearchObject();
             searchObject.setEmail1("*" + AJAXConfig.getProperty(AJAXConfig.Property.CONTEXTNAME)+"*");
             searchObject.addFolder(6);
             otherContacts = extract(2, contactManager.searchAction(searchObject), Arrays.asList(mail1,mail2));
+            if (otherContacts.isEmpty()) {
+                searchObject = new ContactSearchObject();
+                searchObject.setEmail1("*");
+                searchObject.addFolder(6);
+                otherContacts = extract(2, contactManager.searchAction(searchObject), Arrays.asList(mail1,mail2));
+            }
         }
         assertTrue("Precondition: This test needs at least two other contacts in the global address book to work, but has "+otherContacts.size(), otherContacts.size() > 1);
 
