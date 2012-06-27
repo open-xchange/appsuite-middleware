@@ -134,6 +134,18 @@ public class SolrMBeanImpl extends StandardMBean implements SolrMBean {
     }
     
     @Override
+    public long delete(int contextId, int userId, int module, String queryString) throws MBeanException {
+        SolrCoreIdentifier identifier = new SolrCoreIdentifier(contextId, userId, module);
+        try {
+            long count = count(contextId, userId, module, queryString);
+            solrServer.deleteByQuery(identifier, queryString, true);
+            return count;
+        } catch (OXException e) {
+            throw new MBeanException(e, e.getMessage());
+        }
+    }
+    
+    @Override
     public long count(int contextId, int userId, int module, String queryString) throws MBeanException {
         SolrCoreIdentifier identifier = new SolrCoreIdentifier(contextId, userId, module);
         SolrQuery query = new SolrQuery(queryString);
@@ -146,5 +158,4 @@ public class SolrMBeanImpl extends StandardMBean implements SolrMBean {
             throw new MBeanException(e, e.getMessage());
         }  
     }
-
 }

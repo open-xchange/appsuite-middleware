@@ -54,6 +54,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import org.apache.commons.logging.Log;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import com.openexchange.exception.OXException;
@@ -81,6 +82,9 @@ import com.openexchange.textxtraction.TextXtractService;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SolrFilestoreDocumentConverter implements SolrResultConverter<File> {
+    
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(SolrFilestoreDocumentConverter.class);
+    
     
     public static SolrInputDocument convertStatic(int contextId, int userId, IndexDocument<File> indexDocument) throws OXException {
         File file = indexDocument.getObject();
@@ -113,8 +117,12 @@ public class SolrFilestoreDocumentConverter implements SolrResultConverter<File>
             fileIs = (InputStream) properties.get(SolrFilestoreConstants.ATTACHMENT);            
             // TODO: Move to UpdateProcessor
             TextXtractService xtractService = Services.getService(TextXtractService.class);
-            String extractedText = xtractService.extractFrom(fileIs, file.getFileMIMEType());
-            document.setField(SolrFilestoreField.CONTENT.solrName(), extractedText);
+            try {
+                String extractedText = xtractService.extractFrom(fileIs, file.getFileMIMEType());
+                document.setField(SolrFilestoreField.CONTENT.solrName(), extractedText);
+            } catch (OXException e) {
+                LOG.warn("Could not extract text from attachment. Only the douments metadata will be indexed.", e);
+            }
         }
         
         return document;
