@@ -49,23 +49,27 @@
 
 package com.openexchange.textxtraction.internal;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Locale;
-
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import net.htmlparser.jericho.Renderer;
 import net.htmlparser.jericho.Segment;
 import net.htmlparser.jericho.Source;
-
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.tika.Tika;
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.exception.TikaException;
 import org.xml.sax.SAXException;
-
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.textxtraction.AbstractTextXtractService;
+import com.openexchange.textxtraction.DelegateTextXtraction;
 import com.openexchange.textxtraction.TextXtractExceptionCodes;
 
 
@@ -78,6 +82,10 @@ public class NewTikaTextXtractService extends AbstractTextXtractService {
     
     private static final Log LOG = com.openexchange.log.Log.loggerFor(NewTikaTextXtractService.class);
     
+    private static final Object PRESENT = new Object();
+    
+    private final ConcurrentMap<DelegateTextXtraction, Object> delegatees;
+    
     private Tika tika = null;
 
 
@@ -87,7 +95,8 @@ public class NewTikaTextXtractService extends AbstractTextXtractService {
      */
     public NewTikaTextXtractService(ConfigurationService service) {
         super();
-        try {
+        delegatees = new ConcurrentHashMap<DelegateTextXtraction, Object>(4);
+        try {            
         	String tikaConfigPath = service.getProperty(TextXtractionProperties.TIKA_CONFIG);
         	if (tikaConfigPath == null) {
         		throw new IllegalStateException("Property " + TextXtractionProperties.TIKA_CONFIG + " must not be null.");
@@ -103,22 +112,76 @@ public class NewTikaTextXtractService extends AbstractTextXtractService {
             LOG.error(e.getMessage(), e);
         }        
     }
+    
+    /**
+     * Adds given delegate.
+     * 
+     * @param delegateTextXtraction The delegate to add
+     * @return <code>true</code> on success; otherwise <code>false</code>
+     */
+    public boolean addDelegateTextXtraction(final DelegateTextXtraction delegateTextXtraction) {
+        return null == delegatees.putIfAbsent(delegateTextXtraction, PRESENT);
+    }
+
+    /**
+     * Removes given delegate.
+     * 
+     * @param delegateTextXtraction The delegate to remove
+     */
+    public void removeDelegateTextXtraction(final DelegateTextXtraction delegateTextXtraction) {
+        delegatees.remove(delegateTextXtraction);
+    }
 
     @Override
     public String extractFrom(InputStream inputStream, String optMimeType) throws OXException {
         if (tika == null) {
             throw new IllegalStateException("Tika must not be null. The service has not been initalized correctly.");
+        }        
+        
+        // FIXME:
+        // Extend the delegation interface to return if it destroys the initial input stream.
+        // Only spool to hdd if that's the case.
+        long start = System.currentTimeMillis();    
+        FileOutputStream fos = null;
+        File tempFile;
+        try {
+            tempFile = File.createTempFile(Long.toString(start), "ox.tmp");
+            fos = new FileOutputStream(tempFile);
+            IOUtils.copy(inputStream, fos);                       
+        } catch (IOException e) {
+            throw TextXtractExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } finally {
+            IOUtils.closeQuietly(inputStream); 
+            IOUtils.closeQuietly(fos);
         }
         
-        long start = System.currentTimeMillis();
-        try {            
-            String text = tika.parseToString(inputStream);
-            return text;
+        FileInputStream fis = null;
+        try {
+            for (DelegateTextXtraction delegatee : delegatees.keySet()) {
+                fis = new FileInputStream(tempFile);
+                String text = delegatee.extractFrom(fis, optMimeType);
+                IOUtils.closeQuietly(fis);
+                if (null != text) {                        
+                    return text;
+                }
+            }
+        } catch (Exception e) {
+            throw TextXtractExceptionCodes.ERROR.create(e, e.getMessage());
+        } finally {
+            IOUtils.closeQuietly(fis);
+        }
+            
+        try {
+            fis = new FileInputStream(tempFile);
+            String text = tika.parseToString(fis);
+            
+            return text;        
         } catch (IOException e) {
             throw TextXtractExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (TikaException e) {
             throw TextXtractExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
+            IOUtils.closeQuietly(fis);
             if (LOG.isDebugEnabled()) {
                 long diff = System.currentTimeMillis() - start;
                 LOG.debug("Textextraction lasted " + diff + "ms.");
@@ -133,7 +196,7 @@ public class NewTikaTextXtractService extends AbstractTextXtractService {
         }
         if (null != optMimeType) {
             if (optMimeType.toLowerCase(Locale.ENGLISH).startsWith("text/htm")) {
-                final Source source = new Source(content);
+                Source source = new Source(content);
                 return new Renderer(new Segment(source, 0, source.getEnd())).setMaxLineLength(9999).setIncludeHyperlinkURLs(false).toString();
             }
         }

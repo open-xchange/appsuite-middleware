@@ -130,7 +130,7 @@ public class SolrFilestoreEventHandler implements EventHandler {
     }
     
     private boolean hasAttachment(File file) {
-        return file.getFileName() != null && file.getFileSize() > 0;
+        return file.getFileName() != null && !file.getFileName().isEmpty() && file.getFileSize() > 0;
     }
 
 }

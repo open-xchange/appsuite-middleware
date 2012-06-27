@@ -176,7 +176,7 @@ public class UnitTests {
         tests.addTestSuite(com.openexchange.tools.file.FileStorageThreadTest.class);
         tests.addTestSuite(com.openexchange.tools.file.QuotaFileStorageTest.class);
         tests.addTestSuite(com.openexchange.groupware.IDGeneratorTest.class);
-        tests.addTest(com.openexchange.test.LostAndFoundUnitTests.suite());
+//        tests.addTest(com.openexchange.test.LostAndFoundUnitTests.suite());
 
         // Mail
         tests.addTest(com.openexchange.mail.MailAPITestSuite.suite());

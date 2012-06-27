@@ -88,8 +88,28 @@ public interface SolrMBean {
      * @return A printable String that lists the results.
      * @throws MBeanException
      */
-    public String search(int contextId, int userId, int module, String queryString, int limit) throws MBeanException;   
-
-    public long count(int contextId, int userId, int module, String queryString) throws MBeanException;
+    public String search(int contextId, int userId, int module, String queryString, int limit) throws MBeanException;
     
+    /**
+     * Deletes documents by the given query.
+     * 
+     * @param contextId The context id of the index.
+     * @param userId The user id of the index.
+     * @param module The module of the index.
+     * @param queryString The query String.
+     * @return The number of deleted documents.
+     * @throws MBeanException
+     */
+    public long delete(int contextId, int userId, int module, String queryString) throws MBeanException;
+
+    /**
+     * Counts the number of documents found by the given query.
+     * 
+     * @param contextId The context id of the index.
+     * @param userId The user id of the index.
+     * @param module The module of the index.
+     * @param queryString The query String.
+     * @throws MBeanException
+     */
+    public long count(int contextId, int userId, int module, String queryString) throws MBeanException;    
 }

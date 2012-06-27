@@ -58,6 +58,7 @@ import net.bitform.api.secure.SecureOptions;
 import net.bitform.api.secure.SecureOptions.OutputTypeOption;
 import net.bitform.api.secure.SecureRequest;
 import net.bitform.api.secure.SecureResponse;
+import org.apache.commons.io.IOUtils;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
@@ -80,13 +81,19 @@ public final class CleanContentTextXtraction implements DelegateTextXtraction {
 
     @Override
     public String extractFrom(final InputStream inputStream, final String optMimeType) throws OXException {
+        boolean extracted = false;
         try {
             final SecureRequest request = new SecureRequest();
             request.setOption(SecureOptions.JustAnalyze, true);
             /*
              * Note that the SecureRequest object is REUSED for all the file.
-             */
-            request.setOption(SecureOptions.SourceDocument, inputStream);
+             */  
+            // FIXME: After NewTikaTextXtractService has been refactored, 
+            // we maybe can use the FileInputStream directly instead of
+            // copying the file into a byte buffer.
+            byte[] byteArray = IOUtils.toByteArray(inputStream);
+            ByteBuffer buffer = ByteBuffer.wrap(byteArray);
+            request.setOption(SecureOptions.SourceDocument, buffer);
             final TextAppendingElementHandler elementHandlerImpl = new TextAppendingElementHandler();
             request.setOption(SecureOptions.ElementHandler, elementHandlerImpl);
             request.setOption(SecureOptions.OutputType, OutputTypeOption.ToHandler);
@@ -99,6 +106,7 @@ public final class CleanContentTextXtraction implements DelegateTextXtraction {
              */
             final SecureResponse response = request.getResponse();
             if (response.getResult(SecureOptions.WasProcessed)) {
+                extracted = true;
                 return elementHandlerImpl.getText();
             }
             return null;
@@ -107,7 +115,9 @@ public final class CleanContentTextXtraction implements DelegateTextXtraction {
         } catch (final RuntimeException e) {
             throw TextXtractExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
-            Streams.close(inputStream);
+            if (extracted) {
+                Streams.close(inputStream);
+            }
         }
     }
 

@@ -50,8 +50,12 @@
 package com.openexchange.textxtraction.osgi;
 
 import org.apache.commons.logging.Log;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.textxtraction.DelegateTextXtraction;
 import com.openexchange.textxtraction.TextXtractService;
 import com.openexchange.textxtraction.internal.NewTikaTextXtractService;
 
@@ -76,34 +80,33 @@ public class TextXtractionActivator extends HousekeepingActivator {
         log.info("Starting bundle: " + name);
         try {
             final NewTikaTextXtractService tikaTextXtractService = new NewTikaTextXtractService(getService(ConfigurationService.class));
-//            final BundleContext context = this.context;
-//            final TikaTextXtractService tikaTextXtractService = new TikaTextXtractService();
-//            track(DelegateTextXtraction.class, new ServiceTrackerCustomizer<DelegateTextXtraction, DelegateTextXtraction>() {
-//
-//                @Override
-//                public DelegateTextXtraction addingService(final ServiceReference<DelegateTextXtraction> reference) {
-//                    final DelegateTextXtraction service = context.getService(reference);
-//                    if (tikaTextXtractService.addDelegateTextXtraction(service)) {
-//                        return service;
-//                    }
-//                    context.ungetService(reference);
-//                    return null;
-//                }
-//
-//                @Override
-//                public void modifiedService(final ServiceReference<DelegateTextXtraction> reference, final DelegateTextXtraction service) {
-//                    // Nothing
-//                }
-//
-//                @Override
-//                public void removedService(final ServiceReference<DelegateTextXtraction> reference, final DelegateTextXtraction service) {
-//                    if (null != service) {
-//                        tikaTextXtractService.removeDelegateTextXtraction(service);
-//                        context.ungetService(reference);
-//                    }
-//                }
-//            });
-//            openTrackers();
+            final BundleContext context = this.context;
+            track(DelegateTextXtraction.class, new ServiceTrackerCustomizer<DelegateTextXtraction, DelegateTextXtraction>() {
+
+                @Override
+                public DelegateTextXtraction addingService(final ServiceReference<DelegateTextXtraction> reference) {
+                    final DelegateTextXtraction service = context.getService(reference);
+                    if (tikaTextXtractService.addDelegateTextXtraction(service)) {
+                        return service;
+                    }
+                    context.ungetService(reference);
+                    return null;
+                }
+
+                @Override
+                public void modifiedService(final ServiceReference<DelegateTextXtraction> reference, final DelegateTextXtraction service) {
+                    // Nothing
+                }
+
+                @Override
+                public void removedService(final ServiceReference<DelegateTextXtraction> reference, final DelegateTextXtraction service) {
+                    if (null != service) {
+                        tikaTextXtractService.removeDelegateTextXtraction(service);
+                        context.ungetService(reference);
+                    }
+                }
+            });
+            openTrackers();
             registerService(TextXtractService.class, tikaTextXtractService);
         } catch (final Exception e) {
             log.info("Starting bundle failed: " + name, e);
