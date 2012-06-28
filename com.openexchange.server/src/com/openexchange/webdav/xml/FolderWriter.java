@@ -119,16 +119,12 @@ public class FolderWriter extends FolderChildWriter {
             if (exc.isGeneric(Generic.NOT_FOUND) || OXFolderExceptionCode.FOLDER_COULD_NOT_BE_LOADED.equals(exc) || OXFolderExceptionCode.NOT_EXISTS.equals(exc)) {
                 writeResponseElement(eProp, 0, HttpServletResponse.SC_NOT_FOUND, XmlServlet.OBJECT_NOT_FOUND_EXCEPTION, xo, os);
             } else {
-                writeResponseElement(eProp, 0, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, XmlServlet.SERVER_ERROR_EXCEPTION, xo, os);
+                writeResponseElement(eProp, 0, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, getErrorMessage(XmlServlet.SERVER_ERROR_EXCEPTION, XmlServlet.SERVER_ERROR_STATUS), xo, os);
             }
         } catch (final Exception ex) {
             LOG.error(ex.getMessage(), ex);
             writeResponseElement(eProp, 0, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, getErrorMessage(XmlServlet.SERVER_ERROR_EXCEPTION, XmlServlet.SERVER_ERROR_STATUS), xo, os);
         }
-    }
-
-    private static String getErrorMessage(final String message, final int errorCode) {
-        return String.format(message, Integer.toString(errorCode));
     }
 
     public void startWriter(final boolean modified, final boolean deleted, final boolean bList, final Date lastsync, final OutputStream os) throws Exception {
