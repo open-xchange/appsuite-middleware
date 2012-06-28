@@ -71,6 +71,7 @@ import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalSession;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXException.Truncated;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
@@ -227,12 +228,15 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             /*
              * create appointment
              */
+            appointmentToSave.removeObjectID(); // in case it's already assigned due to retry operations
+            appointmentToSave.setParentFolderID(null != object ? object.getParentFolderID() : parentFolderID);
             getAppointmentInterface().insertAppointmentObject(this.appointmentToSave);
             Date clientLastModified = appointmentToSave.getLastModified();
             /*
              * create change exceptions
              */
             for (CalendarDataObject exception : exceptionsToSave) {
+                exception.removeObjectID(); // in case it's already assigned due to retry operations
                 exception.setObjectID(appointmentToSave.getObjectID());
                 getAppointmentInterface().updateAppointmentObject(exception, parentFolderID, clientLastModified);
                 clientLastModified = exception.getLastModified();
@@ -406,6 +410,32 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
         }
 
         cdo.removeDeleteExceptions();
+    }
+
+    @Override
+    protected boolean trimTruncatedAttribute(Truncated truncated) {
+        boolean hasTrimmed = false;
+        if (null != this.appointmentToSave) {
+            hasTrimmed |= trimTruncatedAttribute(truncated, appointmentToSave);
+        }
+        if (null != this.exceptionsToSave && 0 < this.exceptionsToSave.size()) {
+            for (CalendarDataObject calendarObject : exceptionsToSave) {
+                hasTrimmed |= trimTruncatedAttribute(truncated, calendarObject);
+            }
+        }
+        return hasTrimmed;
+    }
+    
+    private static boolean trimTruncatedAttribute(Truncated truncated, CalendarDataObject calendarObject) {
+        Object value = calendarObject.get(truncated.getId());
+        if (null != value && String.class.isInstance(value)) {
+            String stringValue = (String)value;
+            if (stringValue.length() > truncated.getMaxSize()) {
+                calendarObject.set(truncated.getId(), stringValue.substring(0, truncated.getMaxSize()));
+                return true;
+            }
+        }
+        return false;
     }
 
     private static boolean looksLikeMaster(CalendarDataObject cdo) {
