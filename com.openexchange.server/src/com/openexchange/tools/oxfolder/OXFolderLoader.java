@@ -142,7 +142,7 @@ public final class OXFolderLoader {
                 stmt.setInt(2, folderId);
                 rs = stmt.executeQuery();
                 if (!rs.next()) {
-                    throw OXFolderExceptionCode.NOT_EXISTS.create(folderId, ctx.getContextId());
+                    throw OXFolderExceptionCode.NOT_EXISTS.create(Integer.valueOf(folderId), Integer.valueOf(ctx.getContextId()));
                 }
                 final FolderObject folderObj = new FolderObject(rs.getString(2), folderId, rs.getInt(3), rs.getInt(4), rs.getInt(6));
                 folderObj.setParentFolderID(rs.getInt(1));
