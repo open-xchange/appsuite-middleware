@@ -4,7 +4,7 @@
 
 * 2012-06-26 - martin.herfurth@open-xchange.com
 
- - Fix for bug 22397: Adding ivalid user ids to appointment participants is no longer possible.
+ - Fix for bug 22397: Adding invalid user ids to appointment participants is no longer possible.
 
 * 2012-06-26 - thorben.betten@open-xchange.com
 
