@@ -172,9 +172,10 @@ public final class OXFolderLoader {
             }
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.FOLDER_COULD_NOT_BE_LOADED.create(e, String.valueOf(folderId), String.valueOf(ctx.getContextId()));
-        } catch (final OXException e) {
-            throw OXFolderExceptionCode.FOLDER_COULD_NOT_BE_LOADED.create(e, String.valueOf(folderId), String.valueOf(ctx.getContextId()));
         }
+        //catch (final OXException e) {
+        //    throw OXFolderExceptionCode.FOLDER_COULD_NOT_BE_LOADED.create(e, String.valueOf(folderId), String.valueOf(ctx.getContextId()));
+        //}
     }
 
     /**
