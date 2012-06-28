@@ -159,6 +159,8 @@ import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.filler.MimeMessageFiller;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
+import com.openexchange.mail.parser.MailMessageParser;
+import com.openexchange.mail.parser.handlers.ImageMessageHandler;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.text.TextFinder;
 import com.openexchange.mail.utils.MailMessageComparator;
@@ -818,6 +820,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 return null;
             }
             final IMAPMessage msg = (IMAPMessage) imapFolder.getMessageByUID(msgUID);
+            if (null == msg) {
+                throw MailExceptionCode.MAIL_NOT_FOUND.create(Long.valueOf(msgUID), fullName);
+            }
             Part p = examinePart(msg, contentId);
             if (null == p) {
                 // Retry...
@@ -826,7 +831,20 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 final MimeMessage tmp = new MimeMessage(MimeDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(out.toByteArray()));
                 p = examinePart(tmp, contentId);
                 if (null == p) {
-                    throw MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND.create(contentId, Long.valueOf(msgUID), fullName);
+                    /*
+                     * Look-up with ImageMessageHandler class
+                     */
+                    final ImageMessageHandler handler = new ImageMessageHandler(contentId);
+                    final MailMessage mail = MimeMessageConverter.convertMessage(msg, false);
+                    mail.setFolder(fullName);
+                    mail.setMailId(Long.toString(msgUID));
+                    mail.setUnreadMessages(IMAPCommandsCollection.getUnread(imapFolder));
+                    new MailMessageParser().parseMailMessage(mail, handler);
+                    final MailPart imagePart = handler.getImagePart();
+                    if (null == imagePart) {
+                        throw MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND.create(contentId, Long.valueOf(msgUID), fullName);
+                    }
+                    return imagePart;
                 }
             }
             return MimeMessageConverter.convertPart(p, false);
