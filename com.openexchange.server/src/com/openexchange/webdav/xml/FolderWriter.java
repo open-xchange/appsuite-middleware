@@ -123,8 +123,12 @@ public class FolderWriter extends FolderChildWriter {
             }
         } catch (final Exception ex) {
             LOG.error(ex.getMessage(), ex);
-            writeResponseElement(eProp, 0, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, XmlServlet.SERVER_ERROR_EXCEPTION, xo, os);
+            writeResponseElement(eProp, 0, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, getErrorMessage(XmlServlet.SERVER_ERROR_EXCEPTION, XmlServlet.SERVER_ERROR_STATUS), xo, os);
         }
+    }
+
+    private static String getErrorMessage(final String message, final int errorCode) {
+        return String.format(message, Integer.toString(errorCode));
     }
 
     public void startWriter(final boolean modified, final boolean deleted, final boolean bList, final Date lastsync, final OutputStream os) throws Exception {
