@@ -103,7 +103,6 @@ import com.openexchange.mail.mime.ParameterizedHeader;
 import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
-import com.openexchange.mail.mime.dataobjects.MIMEMultipartMailPart;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.structure.Base64JSONString;
 import com.openexchange.mail.structure.StructureHandler;
@@ -194,6 +193,8 @@ public final class MIMEStructureHandler implements StructureHandler {
         return this;
     }
 
+    private static final int MB = 1048576;
+
     @Override
     public boolean handleEnd(final MailMessage mail) throws OXException {
         /*
@@ -213,10 +214,26 @@ public final class MIMEStructureHandler implements StructureHandler {
             bytes = buf.toByteArray();
         }
         /*
-         * Detect first empty line
+         * Detect first double CR?LF sequence
          */
-        final int pos = MIMEMultipartMailPart.getHeaderEnd(bytes);
-        if (pos <= 0) {
+        int pos = -1;
+        {
+            int count = 0;
+            final int length = bytes.length;
+            for (int i = 0; i < length; i++) {
+                final byte b = bytes[i];
+                if ('\n' == b) {
+                    if (++count >= 2) {
+                        pos = i;
+                    }
+                } else if ('\r' == b) {
+                    // Nothing
+                } else {
+                    count = 0;
+                }
+            }
+        }
+        if (pos <= 0 || pos >= MB) {
             // No headers ?
             return true;
         }

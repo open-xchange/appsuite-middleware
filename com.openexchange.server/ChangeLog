@@ -1,3 +1,7 @@
+* 2012-06-28 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22411: Restrict number of bytes allowed for an Email's header part when converting into special "x-original-headers" header
+
 * 2012-06-26 - martin.herfurth@open-xchange.com
 
  - Fix for bug 22397: Adding ivalid user ids to appointment participants is no longer possible.
