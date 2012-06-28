@@ -58,6 +58,7 @@ import com.openexchange.ajax.AJAXFile;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.ajax.requesthandler.ETagAwareAJAXActionService;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -83,6 +84,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
     @Parameter(name = "id", description = "The ID of the uploaded file.")
 }, responseDescription = "The content of the requested file is directly written into output stream.")
+@DispatcherNotes(defaultFormat = "file", allowPublicSession = true)
 public final class GetAction implements ETagAwareAJAXActionService {
 
     private final ServiceLookup services;
@@ -129,7 +131,7 @@ public final class GetAction implements ETagAwareAJAXActionService {
              * Content type
              */
             final String fileName = file.getFileName();
-            String disposition = file.getContentDisposition();
+            final String disposition = file.getContentDisposition();
             final ContentType contentType = new ContentType(file.getContentType());
             if (contentType.getBaseType().equalsIgnoreCase("application/octet-stream")) {
                 /*
