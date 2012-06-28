@@ -52,7 +52,9 @@ package com.openexchange.caldav;
 import java.util.Date;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.container.CommonObject;
+import com.openexchange.groupware.tasks.TaskExceptionCode;
 import com.openexchange.webdav.protocol.WebdavPath;
 
 
@@ -124,6 +126,10 @@ public class Tools {
             }
         }
         return name;
+    }
+
+    public static boolean isDataTruncation(final OXException e) {
+        return OXCalendarExceptionCodes.TRUNCATED_SQL_ERROR.equals(e) || TaskExceptionCode.TRUNCATED.equals(e);
     }
 
     private Tools() {
