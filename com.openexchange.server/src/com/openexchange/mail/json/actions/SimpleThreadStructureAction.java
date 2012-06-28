@@ -260,9 +260,18 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
             }
             final long max;
             {
-                final String s = req.getParameter("max");
+                String s = req.getParameter("max");
                 if (null == s) {
-                    max = -1L;
+                    s = req.getParameter("maximum");
+                    if (null == s) {
+                        max = -1L;
+                    } else {
+                        try {
+                            max = Long.parseLong(s.trim());
+                        } catch (final NumberFormatException e) {
+                            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("maximum", s);
+                        }
+                    }
                 } else {
                     try {
                         max = Long.parseLong(s.trim());
