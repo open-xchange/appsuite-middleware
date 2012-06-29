@@ -173,27 +173,35 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
     
     protected abstract List<T> getObjectsInRange(Date from, Date until) throws OXException;
     
-    private static FilterAnalyzer RANGE_QUERY_ANALYZER = new FilterAnalyzerBuilder()
+    private static FilterAnalyzer VEVENT_RANGE_QUERY_ANALYZER = new FilterAnalyzerBuilder()
         .compFilter("VCALENDAR")
             .compFilter("VEVENT")
                 .timeRange().capture().end()
             .end()
         .end()
     .build();
-    
+
+    private static FilterAnalyzer VTODO_RANGE_QUERY_ANALYZER = new FilterAnalyzerBuilder()
+        .compFilter("VCALENDAR")
+            .compFilter("VTODO")
+                .timeRange().capture().end()
+            .end()
+        .end()
+    .build();
+
     
     @Override
     public List<WebdavResource> filter(Filter filter) throws WebdavProtocolException {
         List<Object> arguments = new ArrayList<Object>(2);
-        if (RANGE_QUERY_ANALYZER.match(filter, arguments) && !arguments.isEmpty()) {
+        if (VEVENT_RANGE_QUERY_ANALYZER.match(filter, arguments) || VTODO_RANGE_QUERY_ANALYZER.match(filter, arguments)) {
             Date from = toDate(arguments.get(0));
-            if (from.before(getIntervalStart())) {
+            if (null == from || from.before(getIntervalStart())) {
                 from = getIntervalStart();
             }
             Date until = toDate(arguments.get(1));
-            if (until.after(getIntervalEnd())) {
+            if (null == until || until.after(getIntervalEnd())) {
                 until = getIntervalEnd();
-            }            
+            }
             try {
                 List<T> objects = this.getObjectsInRange(from, until);
                 if (null == objects || 0 == objects.size()) {
