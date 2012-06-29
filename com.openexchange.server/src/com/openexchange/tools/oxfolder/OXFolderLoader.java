@@ -142,7 +142,7 @@ public final class OXFolderLoader {
                 stmt.setInt(2, folderId);
                 rs = stmt.executeQuery();
                 if (!rs.next()) {
-                    throw OXFolderExceptionCode.NOT_EXISTS.create(folderId, ctx.getContextId());
+                    throw OXFolderExceptionCode.NOT_EXISTS.create(Integer.valueOf(folderId), Integer.valueOf(ctx.getContextId()));
                 }
                 final FolderObject folderObj = new FolderObject(rs.getString(2), folderId, rs.getInt(3), rs.getInt(4), rs.getInt(6));
                 folderObj.setParentFolderID(rs.getInt(1));
@@ -172,9 +172,10 @@ public final class OXFolderLoader {
             }
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.FOLDER_COULD_NOT_BE_LOADED.create(e, String.valueOf(folderId), String.valueOf(ctx.getContextId()));
-        } catch (final OXException e) {
-            throw OXFolderExceptionCode.FOLDER_COULD_NOT_BE_LOADED.create(e, String.valueOf(folderId), String.valueOf(ctx.getContextId()));
         }
+        //catch (final OXException e) {
+        //    throw OXFolderExceptionCode.FOLDER_COULD_NOT_BE_LOADED.create(e, String.valueOf(folderId), String.valueOf(ctx.getContextId()));
+        //}
     }
 
     /**

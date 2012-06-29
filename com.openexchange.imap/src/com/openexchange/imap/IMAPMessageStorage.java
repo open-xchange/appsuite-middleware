@@ -82,6 +82,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.regex.Pattern;
 import javax.mail.FetchProfile;
 import javax.mail.FetchProfile.Item;
 import javax.mail.Flags;
@@ -150,6 +151,8 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.ThreadSortMailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.mime.ContentDisposition;
+import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.ExtendedMimeMessage;
 import com.openexchange.mail.mime.ManagedMimeMessage;
 import com.openexchange.mail.mime.MessageHeaders;
@@ -807,6 +810,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 //        return super.getAttachmentLong(fullName, msgUID, sectionId);
 //    }
 
+    private static final Pattern FILENAME_PATTERN = Pattern.compile("[0-9a-z&&[^.\\s>\"]]+\\.[0-9a-z&&[^.\\s>\"]]+");
+
     @Override
     public MailPart getImageAttachmentLong(final String fullName, final long msgUID, final String contentId) throws OXException {
         if (msgUID < 0 || null == contentId) {
@@ -818,6 +823,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 return null;
             }
             final IMAPMessage msg = (IMAPMessage) imapFolder.getMessageByUID(msgUID);
+            if (null == msg) {
+                throw MailExceptionCode.MAIL_NOT_FOUND.create(Long.valueOf(msgUID), fullName);
+            }
             Part p = examinePart(msg, contentId);
             if (null == p) {
                 // Retry...
@@ -847,6 +855,18 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             final String ct = getFirstHeaderFrom(MessageHeaders.HDR_CONTENT_TYPE, part).toLowerCase(Locale.US);
             if (ct.startsWith("image/")) {
                 final String partContentId = getFirstHeaderFrom(MessageHeaders.HDR_CONTENT_ID, part);
+                if (null == partContentId) {
+                    /*
+                     * Compare with file name
+                     */
+                    final String realFilename = getRealFilename(part);
+                    if (MimeMessageUtility.equalsCID(contentId, realFilename)) {
+                        return part;
+                    }
+                }
+                /*
+                 * Compare with Content-Id
+                 */
                 if (MimeMessageUtility.equalsCID(contentId, partContentId)) {
                     return part;
                 }
@@ -868,6 +888,41 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             throw MimeMailException.handleMessagingException(e, imapConfig, session);
         } catch (final IOException e) {
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private static String getRealFilename(final Part part) throws MessagingException {
+        final String fileName = part.getFileName();
+        if (fileName != null) {
+            return fileName;
+        }
+        final String hdr = getFirstHeaderFrom(MessageHeaders.HDR_CONTENT_DISPOSITION, part);
+        if (hdr == null) {
+            return getContentTypeFilename(part);
+        }
+        try {
+            final String retval = new ContentDisposition(hdr).getFilenameParameter();
+            if (retval == null) {
+                return getContentTypeFilename(part);
+            }
+            return retval;
+        } catch (final OXException e) {
+            return getContentTypeFilename(part);
+        }
+    }
+
+    private static final String PARAM_NAME = "name";
+
+    private static String getContentTypeFilename(final Part part) throws MessagingException {
+        final String hdr = getFirstHeaderFrom(MessageHeaders.HDR_CONTENT_TYPE, part);
+        if (hdr == null || hdr.length() == 0) {
+            return null;
+        }
+        try {
+            return new ContentType(hdr).getParameter(PARAM_NAME);
+        } catch (final OXException e) {
+            LOG.error(e.getMessage(), e);
+            return null;
         }
     }
 

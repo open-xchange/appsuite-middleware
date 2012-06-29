@@ -257,4 +257,26 @@ public class DataWriter {
         return retvalBuilder.toString();
     }
 
+    /**
+     * Gets the error message for given arguments.
+     * 
+     * @param message The message template in <tt>printf</tt> style
+     * @param arg The message argument
+     * @return The error message
+     */
+    protected static String getErrorMessage(final String message, final String arg) {
+        return String.format(message, arg);
+    }
+
+    /**
+     * Gets the error message for given arguments.
+     * 
+     * @param message The message template in <tt>printf</tt> style
+     * @param errorCode The error code
+     * @return The error message
+     */
+    protected static String getErrorMessage(final String message, final int errorCode) {
+        return getErrorMessage(message, Integer.toString(errorCode));
+    }
+
 }
