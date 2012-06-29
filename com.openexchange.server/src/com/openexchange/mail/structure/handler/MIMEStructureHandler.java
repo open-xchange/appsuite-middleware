@@ -205,46 +205,24 @@ public final class MIMEStructureHandler implements StructureHandler {
             return true;
         }
         /*
-         * Write message to byte array
+         * Write headers to byte array
          */
-        byte[] bytes;
+        final byte[] bytes;
         {
             final ByteArrayOutputStream buf = new UnsynchronizedByteArrayOutputStream(2048);
-            mail.writeTo(buf);
+            MimeMessageUtility.writeHeaders(mail, buf);
             bytes = buf.toByteArray();
         }
-        /*
-         * Detect first double CR?LF sequence
-         */
-        int pos = -1;
-        {
-            int count = 0;
-            final int length = bytes.length;
-            for (int i = 0; i < length; i++) {
-                final byte b = bytes[i];
-                if ('\n' == b) {
-                    if (++count >= 2) {
-                        pos = i;
-                    }
-                } else if ('\r' == b) {
-                    // Nothing
-                } else {
-                    count = 0;
-                }
-            }
-        }
-        if (pos <= 0 || pos >= MB) {
+        final int length = bytes.length;
+        if (length <= 0 || length >= MB) {
             // No headers ?
             return true;
         }
-        final byte[] bs = new byte[pos + 1]; // Append last \n
-        System.arraycopy(bytes, 0, bs, 0, pos + 1);
-        bytes = null;
         /*
          * Insert literal base64-encoded headers
          */
         try {
-            headersJsonObject.put("x-original-headers", new String(Base64.encodeBase64(bs))); // ASCII-only, no charset needed
+            headersJsonObject.put("x-original-headers", new String(Base64.encodeBase64(bytes))); // ASCII-only, no charset needed
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
