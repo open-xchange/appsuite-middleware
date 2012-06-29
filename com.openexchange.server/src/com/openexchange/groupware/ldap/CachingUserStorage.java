@@ -299,7 +299,7 @@ public class CachingUserStorage extends UserStorage implements EventHandler {
                 try {
                     cache.put(key, Integer.valueOf(identifier));
                 } catch (final OXException e) {
-                    throw LdapExceptionCode.CACHE_PROBLEM.create(e).setPrefix("USR");
+                    throw LdapExceptionCode.CACHE_PROBLEM.create(e, new Object[0]).setPrefix("USR");
                 }
             } else {
                 if (LOG.isTraceEnabled()) {

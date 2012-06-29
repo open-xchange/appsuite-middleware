@@ -57,7 +57,6 @@ import java.util.List;
 import java.util.Queue;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.jdom2.Element;
 import org.jdom2.output.XMLOutputter;
 import com.openexchange.api2.FolderSQLInterface;
@@ -68,6 +67,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -116,14 +116,14 @@ public class FolderWriter extends FolderChildWriter {
             final FolderObject folderObj = sqlinterface.getFolderById(objectId);
             writeObject(folderObj, eProp, false, xo, os);
         } catch (final OXException exc) {
-            if (exc.isGeneric(Generic.NOT_FOUND)) {
+            if (exc.isGeneric(Generic.NOT_FOUND) || OXFolderExceptionCode.FOLDER_COULD_NOT_BE_LOADED.equals(exc) || OXFolderExceptionCode.NOT_EXISTS.equals(exc)) {
                 writeResponseElement(eProp, 0, HttpServletResponse.SC_NOT_FOUND, XmlServlet.OBJECT_NOT_FOUND_EXCEPTION, xo, os);
             } else {
-                writeResponseElement(eProp, 0, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, XmlServlet.SERVER_ERROR_EXCEPTION, xo, os);
+                writeResponseElement(eProp, 0, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, getErrorMessage(XmlServlet.SERVER_ERROR_EXCEPTION, XmlServlet.SERVER_ERROR_STATUS), xo, os);
             }
         } catch (final Exception ex) {
             LOG.error(ex.getMessage(), ex);
-            writeResponseElement(eProp, 0, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, XmlServlet.SERVER_ERROR_EXCEPTION, xo, os);
+            writeResponseElement(eProp, 0, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, getErrorMessage(XmlServlet.SERVER_ERROR_EXCEPTION, XmlServlet.SERVER_ERROR_STATUS), xo, os);
         }
     }
 

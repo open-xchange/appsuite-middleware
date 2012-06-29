@@ -54,6 +54,7 @@ import java.util.TimeZone;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.contact.action.DeleteRequest;
+import com.openexchange.ajax.contact.action.GetRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.groupware.container.Contact;
@@ -95,11 +96,18 @@ public class VCardExportTest extends AbstractVCardTest {
 				ContactTest.compareObject(contactObj, contactArray[a]);
 			}
 		}
-
 		assertTrue("contact with surname: " + surname + " not found", found);
 
-		AJAXClient client = new AJAXClient(User.User1);
-		DeleteRequest del = new DeleteRequest(client.getValues().getPrivateContactFolder(), objectId, new Date());
+		final AJAXClient client = new AJAXClient(User.User1);
+		final GetRequest getRequest = new GetRequest(contactFolderId, objectId, client.getValues().getTimeZone(), false);
+		Date lastModified;
+		try {
+            lastModified = client.execute(getRequest).getContact().getLastModified();
+        } catch (final Exception e) {
+            lastModified = new Date(System.currentTimeMillis() + 10000);
+        }
+
+		final DeleteRequest del = new DeleteRequest(client.getValues().getPrivateContactFolder(), objectId, lastModified, false);
 		client.execute(del);
 	}
 }

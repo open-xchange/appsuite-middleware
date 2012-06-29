@@ -104,7 +104,7 @@ public class IMAPAuthentication implements AuthenticationService {
 
     private static Properties props;
 
-    private final static String IMAP_AUTH_PROPERTY_FILE = "/opt/open-xchange/etc/groupware/imapauth.properties";
+    private final static String IMAP_AUTH_PROPERTY_FILE = "/opt/open-xchange/etc/imapauth.properties";
 
     /**
      * The string for <code>ISO-8859-1</code> character encoding.

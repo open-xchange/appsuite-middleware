@@ -55,9 +55,18 @@ import javax.management.StandardMBean;
 import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.LogFactory;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.api.MailConfig;
 import com.openexchange.service.indexing.EchoIndexJob;
 import com.openexchange.service.indexing.IndexingService;
 import com.openexchange.service.indexing.IndexingServiceMBean;
+import com.openexchange.service.indexing.mail.MailJobInfo;
+import com.openexchange.service.indexing.mail.MailJobInfo.Builder;
+import com.openexchange.service.indexing.mail.job.FolderJob;
+import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondService;
 
 /**
  * {@link IndexingServiceMBeanImpl}
@@ -113,6 +122,44 @@ public final class IndexingServiceMBeanImpl extends StandardMBean implements Ind
             throw new MBeanException(new IllegalStateException("Missing indexing service."));
         }
         ((IndexingServiceImpl) indexingService).getServiceInit().dropReceiver();
+    }
+
+    @Override
+    public void queueIndexingJob(int contextId, int userId, String fullName) throws MBeanException {
+        final IndexingService indexingService = Services.optService(IndexingService.class);
+        if (null == indexingService) {
+            throw new MBeanException(new IllegalStateException("Missing indexing service."));
+        }
+        
+        final SessiondService sessiondService = Services.getService(SessiondService.class);
+        if (null != sessiondService) {
+            final Session session = sessiondService.getAnyActiveSessionForUser(userId, contextId);
+            if (null != session) {
+                MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage> mailAccess = null;
+                try {
+                    mailAccess = MailAccess.getInstance(userId, contextId);
+                    mailAccess.connect();
+                    MailConfig mailConfig = mailAccess.getMailConfig();
+                    Builder jobInfoBuilder = new MailJobInfo.Builder(session.getUserId(), session.getContextId()).accountId(mailAccess.getAccountId()).login(
+                            mailConfig.getLogin()).password(mailConfig.getPassword()).server(mailConfig.getServer()).port(mailConfig.getPort()).secure(
+                            mailConfig.isSecure()).primaryPassword(session.getPassword());
+                    
+
+                    FolderJob folderJob = new FolderJob(fullName, jobInfoBuilder.build(), true);
+                    indexingService.addJob(folderJob);
+                } catch (OXException e) {
+                    throw new MBeanException(e, e.getMessage());
+                } finally {
+                    if (mailAccess != null) {
+                        mailAccess.close(false);
+                    }
+                }
+            } else {
+                throw new MBeanException(new IllegalStateException("Did not find an active session for this user."));
+            }
+        } else {
+            throw new MBeanException(new IllegalStateException("Missing sessiond service."));
+        }        
     }
 
 }

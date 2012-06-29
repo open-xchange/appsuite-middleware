@@ -58,7 +58,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import com.openexchange.caldav.Tools;
 import com.openexchange.data.conversion.ical.ConversionError;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXException.ProblematicAttribute;
+import com.openexchange.exception.OXException.Truncated;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.log.LogFactory;
 import com.openexchange.webdav.protocol.Protocol.Property;
@@ -77,7 +80,9 @@ import com.openexchange.webdav.protocol.helpers.AbstractResource;
 public abstract class CommonResource<T extends CommonObject> extends AbstractResource {
     
     protected static Log LOG = LogFactory.getLog(CommonResource.class);
+    private static final int MAX_RETRIES = 3;
     
+    private int retryCount = 0;
     protected final WebdavFactory factory;
     protected final WebdavPath url;
     protected final CommonFolderCollection<T> parent;
@@ -118,6 +123,52 @@ public abstract class CommonResource<T extends CommonObject> extends AbstractRes
         return protocolException(new Throwable(), statusCode);
     }
     
+    protected boolean handle(OXException e) throws WebdavProtocolException {
+        boolean retry = false;
+        if (Tools.isDataTruncation(e)) {
+            /*
+             * handle by trimming truncated fields
+             */
+            if (this.trimTruncatedAttributes(e)) {
+                LOG.warn(this.getUrl() + ": " + e.getMessage() + " - trimming fields and trying again.");
+                retry = true;
+            }
+        } else if (Category.CATEGORY_PERMISSION_DENIED.equals(e.getCategory())) {
+            /*
+             * throw appropriate protocol exception
+             */            
+            throw protocolException(e, HttpServletResponse.SC_FORBIDDEN);
+        } else if (Category.CATEGORY_CONFLICT.equals(e.getCategory())) {
+            /*
+             * throw appropriate protocol exception
+             */            
+            throw protocolException(e, HttpServletResponse.SC_CONFLICT);
+        } else {
+            throw protocolException(e);
+        }
+        
+        if (retry) {
+            retryCount++;
+            return retryCount <= MAX_RETRIES; 
+        } else {
+            return false;
+        }
+    }
+    
+    protected abstract boolean trimTruncatedAttribute(Truncated truncated);
+    
+    private boolean trimTruncatedAttributes(OXException e) {
+        boolean hasTrimmed = false;
+        if (null != e.getProblematics()) {
+            for (ProblematicAttribute problematic : e.getProblematics()) {
+                if (Truncated.class.isInstance(problematic)) {
+                    hasTrimmed |= this.trimTruncatedAttribute((Truncated)problematic);                    
+                }                 
+            }            
+        }
+        return hasTrimmed;
+    }
+    
     protected abstract String getFileExtension();
 
     protected abstract void saveObject() throws OXException;
@@ -136,7 +187,11 @@ public abstract class CommonResource<T extends CommonObject> extends AbstractRes
         try {
             this.createObject();
         } catch (OXException e) {
-            throw protocolException(e);
+            if (handle(e)) {
+                create();
+            } else {
+                throw protocolException(e);
+            }
         }
     }
 
@@ -148,7 +203,11 @@ public abstract class CommonResource<T extends CommonObject> extends AbstractRes
         try {
             this.deleteObject();
         } catch (OXException e) {
-            throw protocolException(e);
+            if (handle(e)) {
+                delete();
+            } else {
+                throw protocolException(e);
+            }
         }
     }
 
@@ -160,7 +219,11 @@ public abstract class CommonResource<T extends CommonObject> extends AbstractRes
         try {
             this.saveObject();
         } catch (OXException e) {
-            throw protocolException(e);
+            if (handle(e)) {
+                save();
+            } else {
+                throw protocolException(e);
+            }
         }    
     }    
     

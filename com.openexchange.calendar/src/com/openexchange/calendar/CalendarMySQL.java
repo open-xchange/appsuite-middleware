@@ -2742,6 +2742,11 @@ public class CalendarMySQL implements CalendarSqlImp {
                     // Update last-modified of master
                     updateLastModified(edao.getRecurrenceID(), ctx.getContextId(), so.getUserId(), cdao.getLastModified().getTime(), writecon);
                 }
+            } catch (OXException e) {
+                if (!writecon.getAutoCommit()) {
+                    writecon.rollback();
+                }
+                throw e;
             } finally {
                 collection.closePreparedStatement(pst);
             }

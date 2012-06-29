@@ -52,6 +52,7 @@ package com.openexchange.mail.parser;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -1079,7 +1080,12 @@ public final class MailMessageParser {
             charset = cs;
         } else {
             if (contentType.startsWith(PRIMARY_TEXT)) {
-                charset = CharsetDetector.detectCharset(mailPart.getInputStream());
+                final InputStream inputStream = mailPart.getInputStream();
+                if (null == inputStream) {
+                    charset = MailProperties.getInstance().getDefaultMimeCharset();
+                } else {
+                    charset = CharsetDetector.detectCharset(inputStream);
+                }
             } else {
                 charset = MailProperties.getInstance().getDefaultMimeCharset();
             }

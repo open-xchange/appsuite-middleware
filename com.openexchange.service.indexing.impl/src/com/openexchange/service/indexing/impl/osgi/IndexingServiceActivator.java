@@ -72,6 +72,7 @@ import com.openexchange.service.indexing.impl.IndexingServiceImpl;
 import com.openexchange.service.indexing.impl.IndexingServiceInit;
 import com.openexchange.service.indexing.impl.IndexingServiceMBeanImpl;
 import com.openexchange.service.indexing.impl.Services;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 
 /**
@@ -94,7 +95,7 @@ public final class IndexingServiceActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
             ConfigurationService.class, MQService.class, ThreadPoolService.class, DatabaseService.class, MailService.class,
-            SmalAccessService.class, IndexFacadeService.class };
+            SmalAccessService.class, IndexFacadeService.class, SessiondService.class };
     }
 
     @Override

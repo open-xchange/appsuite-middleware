@@ -185,7 +185,7 @@ public final class VCardMailPartAttachTest extends AbstractConversionTest {
                         .has(MailJSONField.ATTACHMENTS.getKey())
                         && !fetchedMailObject.isNull(MailJSONField.ATTACHMENTS.getKey()));
                 final JSONArray attachmentArray = fetchedMailObject.getJSONArray(MailJSONField.ATTACHMENTS.getKey());
-                assertEquals("Unexpected number of attachments in JSON mail object", 2, attachmentArray.length());
+                assertTrue("Unexpected number of attachments in JSON mail object: " + attachmentArray.length(), attachmentArray.length() >= 2);
                 final JSONObject vcardAttachmentObject = attachmentArray.getJSONObject(1);
                 assertTrue("JSON attachment object does not refer to a VCard file", vcardAttachmentObject.getString(
                         MailJSONField.CONTENT_TYPE.getKey()).startsWith("text/vcard"));

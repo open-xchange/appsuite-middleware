@@ -11,6 +11,7 @@ Import-Package: com.openexchange.exception,
  com.openexchange.log,
  com.openexchange.osgi,
  com.openexchange.textxtraction,
+ org.apache.commons.io,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.util.tracker

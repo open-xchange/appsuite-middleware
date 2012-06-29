@@ -63,6 +63,7 @@ import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalSession;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXException.Truncated;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.webdav.protocol.WebdavPath;
 
@@ -117,6 +118,8 @@ public class TaskResource extends CalDAVResource<Task> {
 
     @Override
     protected void createObject() throws OXException {
+        taskToSave.removeObjectID(); // in case it's already assigned due to retry operations
+        taskToSave.setParentFolderID(null != object ? object.getParentFolderID() : parentFolderID);
         getTaskInterface().insertTaskObject(this.taskToSave);
     }
 
@@ -161,6 +164,21 @@ public class TaskResource extends CalDAVResource<Task> {
                 taskToSave.setParentFolderID(this.parentFolderID);
             }
         }
+    }
+
+    @Override
+    protected boolean trimTruncatedAttribute(Truncated truncated) {
+        if (null != this.taskToSave) {
+            Object value = this.taskToSave.get(truncated.getId());
+            if (null != value && String.class.isInstance(value)) {
+                String stringValue = (String)value;
+                if (stringValue.length() > truncated.getMaxSize()) {
+                    taskToSave.set(truncated.getId(), stringValue.substring(0, truncated.getMaxSize()));
+                    return true;
+                }
+            }        
+        }
+        return false;
     }
 
     private void checkForExplicitRemoves(Task originalTask, Task updatedTask) {
