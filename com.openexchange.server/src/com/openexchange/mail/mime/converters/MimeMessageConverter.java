@@ -54,6 +54,7 @@ import static com.openexchange.mail.mime.utils.MimeMessageUtility.decodeMultiEnc
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.getFileName;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.hasAttachments;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.unfold;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -85,6 +86,10 @@ import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+import org.apache.james.mime4j.MimeException;
+import org.apache.james.mime4j.parser.ContentHandler;
+import org.apache.james.mime4j.parser.MimeStreamParser;
+import org.apache.james.mime4j.stream.MimeConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.java.Charsets;
@@ -114,6 +119,7 @@ import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
+import com.sun.mail.imap.IMAPMessage;
 import com.sun.mail.pop3.POP3Folder;
 
 /**
@@ -2147,14 +2153,38 @@ public final class MimeMessageConverter {
          */
         HeaderCollection headers = null;
         try {
-            headers = new HeaderCollection();
-            for (final Enumeration<?> e = part.getAllHeaders(); e.hasMoreElements();) {
-                final Header h = (Header) e.nextElement();
-                final String value = h.getValue();
-                if (value == null || isEmpty(value)) {
-                    headers.addHeader(h.getName(), STR_EMPTY);
-                } else {
-                    headers.addHeader(h.getName(), unfold(value));
+            headers = new HeaderCollection(128);
+            if (part instanceof IMAPMessage) {
+                final ContentHandler handler = new HeaderContentHandler(headers);
+                final MimeConfig config = new MimeConfig();
+                config.setMaxLineLen(-1);
+                config.setMaxHeaderLen(-1);
+                config.setMaxHeaderCount(-1);
+                final MimeStreamParser parser = new MimeStreamParser(config);
+                parser.setContentHandler(handler);
+                try {
+                    ByteArrayOutputStream out = new HeaderOutputStream();
+                    part.writeTo(out);
+                    final ByteArrayInputStream in = new UnsynchronizedByteArrayInputStream(out.toByteArray());
+                    out = null;
+                    parser.parse(in);
+                } catch (final IOException e1) {
+                    LOG.warn("Unable to parse headers. Assuming no headers...", e1);
+                    headers = new HeaderCollection(0);
+                } catch (final MimeException e1) {
+                    if (!HeaderContentHandler.END_HEADER_EXCEPTION.equals(e1)) {
+                        throw new MessagingException(e1.getMessage(), e1);
+                    }
+                }
+            } else {
+                for (final Enumeration<?> e = part.getAllHeaders(); e.hasMoreElements();) {
+                    final Header h = (Header) e.nextElement();
+                    final String value = h.getValue();
+                    if (value == null || isEmpty(value)) {
+                        headers.addHeader(h.getName(), STR_EMPTY);
+                    } else {
+                        headers.addHeader(h.getName(), unfold(value));
+                    }
                 }
             }
         } catch (final MessagingException e) {
