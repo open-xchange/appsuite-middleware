@@ -100,6 +100,8 @@ public final class FolderJob extends AbstractMailJob {
     protected final String fullName;
 
     private final InsertType insertType;
+    
+    private final boolean forced;
 
     private volatile boolean ignoreDeleted;
 
@@ -120,6 +122,19 @@ public final class FolderJob extends AbstractMailJob {
     public FolderJob(final String fullName, final MailJobInfo info) {
         this(fullName, info, null);
     }
+    
+    /**
+     * Initializes a new {@link FolderJob} with default span.
+     * <p>
+     * This job is performed is span is exceeded and if able to exclusively set sync flag.
+     * 
+     * @param fullName The folder full name
+     * @param info The job information
+     * @param forced Force this job to be executed?
+     */
+    public FolderJob(final String fullName, final MailJobInfo info, boolean forced) {
+        this(fullName, info, null, forced);
+    }
 
     /**
      * Initializes a new {@link FolderJob} with default span.
@@ -131,10 +146,25 @@ public final class FolderJob extends AbstractMailJob {
      * @param insertType The insert type for new mails; {@link InsertType#ATTACHMENTS} is default
      */
     public FolderJob(final String fullName, final MailJobInfo info, final InsertType insertType) {
+        this(fullName, info, insertType, false);
+    }
+    
+    /**
+     * Initializes a new {@link FolderJob} with default span.
+     * <p>
+     * This job is performed is span is exceeded and if able to exclusively set sync flag.
+     * 
+     * @param fullName The folder full name
+     * @param info The job information
+     * @param insertType The insert type for new mails; {@link InsertType#ATTACHMENTS} is default
+     * @param forced Force this job to be executed?
+     */
+    public FolderJob(final String fullName, final MailJobInfo info, final InsertType insertType, boolean forced) {
         super(info);
         this.fullName = fullName;
         span = com.openexchange.service.indexing.mail.Constants.DEFAULT_MILLIS;
         this.insertType = null == insertType ? InsertType.ATTACHMENTS : insertType;
+        this.forced = forced;
     }
 
     private static int getBlockSize() {
@@ -188,6 +218,24 @@ public final class FolderJob extends AbstractMailJob {
         indexMails = indexMail;
         return this;
     }
+    
+    private boolean checkAndSync(long then) throws OXException, InterruptedException {
+        boolean unlock = true;
+        boolean indexed = IndexFolderManager.isIndexed(contextId, userId, Types.EMAIL, String.valueOf(accountId), fullName);
+        long now = System.currentTimeMillis();
+
+        if (forced || !indexed || (now - then) > span) {
+            unlock = syncFolder();
+            if (!indexed) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Initially indexed folder " + fullName + ". Info: " + info);
+                }
+                IndexFolderManager.setIndexed(contextId, userId, Types.EMAIL, String.valueOf(accountId), fullName);
+            }
+        }
+        
+        return unlock;
+    }
 
     @Override
     protected void performMailJob() throws OXException, InterruptedException {
@@ -199,22 +247,29 @@ public final class FolderJob extends AbstractMailJob {
         boolean unlock = false;
         final long then = IndexFolderManager.getTimestamp(contextId, userId, Types.EMAIL, String.valueOf(accountId), fullName);
         try {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(Thread.currentThread().getName() + " performs folder job for folder " + fullName + ". " + info);
+            }
             if (IndexFolderManager.lock(contextId, userId, Types.EMAIL, String.valueOf(accountId), fullName)) {
-                unlock = true;
-                final boolean indexed = IndexFolderManager.isIndexed(contextId, userId, Types.EMAIL, String.valueOf(accountId), fullName);
-                final long now = System.currentTimeMillis();
-
-                if (!indexed || (now - then) > span) {
-                    unlock = syncFolder();
-                    if (!indexed) {
-                        IndexFolderManager.setIndexed(contextId, userId, Types.EMAIL, String.valueOf(accountId), fullName);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(Thread.currentThread().getName() + " got the lock.");
+                }
+                unlock = checkAndSync(then);
+            } else {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(Thread.currentThread().getName() + " did not get the lock.");
+                }
+                if (IndexFolderManager.isLocked(contextId, userId, Types.EMAIL, String.valueOf(accountId), fullName) && (System.currentTimeMillis() - then) > (Constants.HOUR_MILLIS * 6)) {
+                    LOG.warn("Found a possible unreleased folder lock for " + info + " on folder " + fullName + ". Unlocking now.");
+                    IndexFolderManager.unlock(contextId, userId, Types.EMAIL, String.valueOf(accountId), fullName);
+                    
+                    if (IndexFolderManager.lock(contextId, userId, Types.EMAIL, String.valueOf(accountId), fullName)) {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug(Thread.currentThread().getName() + " got the retry-lock.");
+                        }
+                        unlock = checkAndSync(then);
                     }
                 }
-            } else {
-                if ((System.currentTimeMillis() - then) > (Constants.HOUR_MILLIS * 6)) {
-                    LOG.warn("Found a possible unreleased folder lock for " + info + ". Unlocking now.");
-                    IndexFolderManager.unlock(contextId, userId, Types.EMAIL, String.valueOf(accountId), fullName);
-                }                
             }
         } catch (final InterruptedException e) {
             resetTimestamp(then);
@@ -248,7 +303,7 @@ public final class FolderJob extends AbstractMailJob {
         final long st = LOG.isDebugEnabled() ? System.currentTimeMillis() : 0L;
         try {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Starting folder job: " + info);
+                LOG.debug("Starting sync: " + info);
             }
             final IndexAccess<MailMessage> indexAccess = storageAccess.getIndexAccess();
             /*
