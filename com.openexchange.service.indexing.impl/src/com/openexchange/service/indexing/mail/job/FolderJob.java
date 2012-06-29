@@ -197,12 +197,12 @@ public final class FolderJob extends AbstractMailJob {
         }
 
         boolean unlock = false;
-        long then = IndexFolderManager.getTimestamp(contextId, userId, Types.EMAIL, String.valueOf(accountId), fullName);
+        final long then = IndexFolderManager.getTimestamp(contextId, userId, Types.EMAIL, String.valueOf(accountId), fullName);
         try {
             if (IndexFolderManager.lock(contextId, userId, Types.EMAIL, String.valueOf(accountId), fullName)) {
                 unlock = true;
-                boolean indexed = IndexFolderManager.isIndexed(contextId, userId, Types.EMAIL, String.valueOf(accountId), fullName);
-                long now = System.currentTimeMillis();
+                final boolean indexed = IndexFolderManager.isIndexed(contextId, userId, Types.EMAIL, String.valueOf(accountId), fullName);
+                final long now = System.currentTimeMillis();
 
                 if (!indexed || (now - then) > span) {
                     unlock = syncFolder();
@@ -216,15 +216,15 @@ public final class FolderJob extends AbstractMailJob {
                     IndexFolderManager.unlock(contextId, userId, Types.EMAIL, String.valueOf(accountId), fullName);
                 }                
             }
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             resetTimestamp(then);
             LOG.warn(SIMPLE_NAME + " failed: " + info, e);
             throw e;
-        } catch (RuntimeException e) {
+        } catch (final RuntimeException e) {
             resetTimestamp(then);
             LOG.warn(SIMPLE_NAME + " failed: " + info, e);
             throw IndexExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage(), e);
-        } catch (OXException e) {
+        } catch (final OXException e) {
             resetTimestamp(then);
             LOG.warn(SIMPLE_NAME + " failed: " + info, e);
             throw e;
@@ -232,7 +232,7 @@ public final class FolderJob extends AbstractMailJob {
             if (unlock) {
                 try {
                     IndexFolderManager.unlock(contextId, userId, Types.EMAIL, String.valueOf(accountId), fullName);
-                } catch (OXException e) {
+                } catch (final OXException e) {
                     // SQLException. Retry
                     IndexFolderManager.unlock(contextId, userId, Types.EMAIL, String.valueOf(accountId), fullName);
                 }
@@ -240,7 +240,7 @@ public final class FolderJob extends AbstractMailJob {
         }
     }
     
-    private void resetTimestamp(long then) throws OXException {
+    private void resetTimestamp(final long then) throws OXException {
         IndexFolderManager.setTimestamp(contextId, userId, Types.EMAIL, String.valueOf(accountId), fullName, then);
     }
 
@@ -549,32 +549,89 @@ public final class FolderJob extends AbstractMailJob {
             setTimestamp(fullName, System.currentTimeMillis());
         } catch (final OXException e) {
             if (null != documents) {
-                // Batch add failed; retry one-by-one
-                int count = 0;
-                for (final IndexDocument<MailMessage> document : documents) {
-                    try {
-                        switch (insertType) {
-                            case ENVELOPE:
-                                indexAccess.addEnvelopeData(document);
-                                break;
-                            case BODY:
-                                indexAccess.addContent(document, true);
-                                break;
-                            default:
-                                indexAccess.addAttachments(document, true);
-                                break;
+                storageAccess.releaseAccess();
+                add2IndexNonBatch(ids, fullName, indexAccess);
+            }
+        } finally {
+            storageAccess.releaseMailAccess();
+        }
+    }
+
+    private void add2IndexNonBatch(final List<String> ids, final String fullName, final IndexAccess<MailMessage> indexAccess) throws OXException {
+        List<IndexDocument<MailMessage>> documents = null;
+        try {
+            final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = storageAccess.mailAccessFor();
+            /*
+             * Specify fields
+             */
+            final MailFields fields = SolrMailUtility.getIndexableFields(indexAccess);
+            final List<MailMessage> mails = Arrays.asList(mailAccess.getMessageStorage().getMessages(
+                fullName,
+                ids.toArray(new String[ids.size()]),
+                fields.toArray()));
+            // Read primary content
+            final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
+            if (messageStorage instanceof IMailMessageStorageExt) {
+                // Message storage overrides getPrimaryContents()
+                final int chunk = getContentRetrievalChunkSize();
+                final int size = mails.size();
+                if (chunk > 0) {
+                    int start = 0;
+                    while (start < size) {
+                        int end = start + chunk;
+                        if (end > size) {
+                            end = size;
                         }
-                        if ((++count % 100) == 0) {
-                            setTimestamp(fullName, System.currentTimeMillis());
+                        final String[] mailIds = new String[end - start];
+                        int index = 0;
+                        for (int i = start; i < end; i++) {
+                            mailIds[index++] = mails.get(i).getMailId();
                         }
-                    } catch (final Exception inner) {
-                        final MailMessage mail = document.getObject();
-                        LOG.warn(
-                            "Mail " + mail.getMailId() + " from folder " + mail.getFolder() + " of account " + accountId + " could not be added to index.",
-                            inner);
+                        final String[] primaryContents = messageStorage.getPrimaryContents(fullName, mailIds);
+                        index = 0;
+                        for (int i = start; i < end; i++) {
+                            mails.set(i, new ContentAwareMailMessage(primaryContents[index++], mails.get(i)));
+                        }
+                        start = end;
+                    }
+                } else {
+                    final String[] mailIds = new String[1];
+                    for (int i = 0; i < size; i++) {
+                        final MailMessage message = mails.get(i);
+                        mailIds[0] = message.getMailId();
+                        final String[] primaryContents = messageStorage.getPrimaryContents(fullName, mailIds);
+                        mails.set(i, new ContentAwareMailMessage(primaryContents[0], message));
                     }
                 }
             }
+            // Convert to IndexDocument
+            documents = toDocuments(mails);
+            int count = 0;
+            for (final IndexDocument<MailMessage> document : documents) {
+                try {
+                    switch (insertType) {
+                        case ENVELOPE:
+                            indexAccess.addEnvelopeData(document);
+                            break;
+                        case BODY:
+                            indexAccess.addContent(document, true);
+                            break;
+                        default:
+                            indexAccess.addAttachments(document, true);
+                            break;
+                    }
+                    if ((++count % 100) == 0) {
+                        setTimestamp(fullName, System.currentTimeMillis());
+                    }
+                } catch (final Exception inner) {
+                    final MailMessage mail = document.getObject();
+                    LOG.warn(
+                        "Mail " + mail.getMailId() + " from folder " + mail.getFolder() + " of account " + accountId + " could not be added to index.",
+                        inner);
+                }
+            }
+        } catch (final OXException e) {
+            // One-by-one add failed, too
         } finally {
             storageAccess.releaseMailAccess();
         }
