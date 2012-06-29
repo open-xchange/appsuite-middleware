@@ -73,7 +73,7 @@ public abstract class CalDAVResource<T extends CalendarObject> extends CommonRes
     
     public static final String EXTENSION_ICS = ".ics"; 
     public static final String CONTENT_TYPE = "text/calendar"; 
-    
+
     private String iCalFile = null;
     private TimeZone timeZone = null;
     protected final GroupwareCaldavFactory factory;
@@ -172,9 +172,14 @@ public abstract class CalDAVResource<T extends CalendarObject> extends CommonRes
         try {
             this.move(targetCollection.getFolder().getID());
         } catch (OXException e) {
-            throw protocolException(e);
+            if (handle(e)) {
+                return move(dest, noroot, overwrite);
+            } else {
+                throw protocolException(e);
+            }
         }
         this.parent = targetCollection;
         return this;
     }
+    
 }

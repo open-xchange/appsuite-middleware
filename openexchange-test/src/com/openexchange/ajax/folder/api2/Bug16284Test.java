@@ -76,7 +76,7 @@ public class Bug16284Test extends AbstractAJAXSession {
 
     private AJAXClient client;
 
-    public Bug16284Test(String name) {
+    public Bug16284Test(final String name) {
         super(name);
     }
 
@@ -92,14 +92,14 @@ public class Bug16284Test extends AbstractAJAXSession {
     }
 
     public void testListWithoutInfoStore() throws Throwable {
-        PathRequest request = new PathRequest(EnumAPI.OUTLOOK, MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, MailFolder.DEFAULT_FOLDER_ID), COLUMNS, false);
-        PathResponse response = client.execute(request);
+        final PathRequest request = new PathRequest(EnumAPI.OUTLOOK, MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, MailFolder.DEFAULT_FOLDER_ID), COLUMNS, false);
+        final PathResponse response = client.execute(request);
 
         if (!response.hasError()) {
-            fail("Expected an error that primary account's root folder does not exist in Outllok folder tree.");
+            fail("Expected an error that primary account's root folder does not exist in Outlook folder tree.");
             return;
         }
         final OXException exception = response.getException();
-        assertTrue("Unexpected error number.", FolderExceptionErrorMessage.NOT_FOUND.create().similarTo(exception));
+        assertTrue("Unexpected error number.", FolderExceptionErrorMessage.prefix().equals(exception.getPrefix()) && FolderExceptionErrorMessage.NOT_FOUND.getNumber() == exception.getCode());
     }
 }

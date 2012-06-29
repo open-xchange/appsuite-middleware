@@ -86,13 +86,13 @@ public class CaldavActivator extends HousekeepingActivator {
 
     private static final Log LOG = LogFactory.getLog(CaldavActivator.class);
     
-    private static final Class<?>[] NEEDED = new Class[]{ICalEmitter.class, ICalParser.class, AppointmentSqlFactoryService.class, CalendarCollectionService.class, FolderService.class, UserService.class, ConfigViewFactory.class, HttpService.class};
-
     private volatile OSGiPropertyMixin mixin;
     
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED;
+        return new Class[] {
+            ICalEmitter.class, ICalParser.class, AppointmentSqlFactoryService.class, CalendarCollectionService.class, FolderService.class,
+            UserService.class, ConfigViewFactory.class, HttpService.class };
     }
 
     @Override
@@ -131,9 +131,10 @@ public class CaldavActivator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         final HttpService httpService = getService(HttpService.class);
-        httpService.unregister(SERVLET_PATH);
-        httpService.unregister(NULL_PATH);
-
+        if (null != httpService) {
+            httpService.unregister(SERVLET_PATH);
+            httpService.unregister(NULL_PATH);
+        }
         final OSGiPropertyMixin mixin = this.mixin;
         if (null != mixin) {
             mixin.close();

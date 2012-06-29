@@ -978,10 +978,13 @@ public class Login extends AJAXServlet {
         if (conf.cookieForceHTTPS || secure) {
             cookie.setSecure(true);
         }
-        if (!conf.sessiondAutoLogin) {
-            return;
+        if (conf.sessiondAutoLogin || conf.cookieExpiry < 0) {
+            /*
+             * A negative value means that the cookie is not stored persistently and will be deleted when the Web browser exits. A zero
+             * value causes the cookie to be deleted.
+             */
+            cookie.setMaxAge(conf.cookieExpiry);
         }
-        cookie.setMaxAge(conf.cookieExpiry);
     }
 
     protected boolean doAutoLogin(final HttpServletRequest req, final HttpServletResponse resp) throws IOException, OXException {

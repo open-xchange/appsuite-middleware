@@ -51,9 +51,9 @@ package com.openexchange.folderstorage;
 
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXException.Generic;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
-import com.openexchange.exception.OXException.Generic;
 
 /**
  * {@link FolderExceptionErrorMessage} - Error messages for folder exceptions.
@@ -209,6 +209,15 @@ public enum FolderExceptionErrorMessage implements OXExceptionCode {
 
     ;
 
+    private static final String PREFIX = "FLD";
+
+    /**
+     * The prefix for this error codes.
+     */
+    public static String prefix() {
+        return PREFIX;
+    }
+
     private final Category category;
 
     private final int detailNumber;
@@ -223,7 +232,7 @@ public enum FolderExceptionErrorMessage implements OXExceptionCode {
 
     @Override
     public String getPrefix() {
-        return "FLD";
+        return PREFIX;
     }
 
     @Override
@@ -276,7 +285,7 @@ public enum FolderExceptionErrorMessage implements OXExceptionCode {
         return specials(OXExceptionFactory.getInstance().create(this, cause, args));
     }
 
-	private OXException specials(OXException exc) {
+	private OXException specials(final OXException exc) {
 		switch(this) {
 		case NOT_FOUND:
 			exc.setGeneric(Generic.NOT_FOUND);

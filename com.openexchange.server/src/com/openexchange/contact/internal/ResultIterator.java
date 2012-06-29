@@ -54,9 +54,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import org.apache.commons.logging.Log;
-
 import com.openexchange.contact.storage.ContactStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
@@ -297,7 +295,7 @@ public class ResultIterator implements SearchIterator<Contact> {
 					EffectivePermission permission = Tools.getPermission(session.getContextId(), folderID, session.getUserId());
 					canReadAllObjects = permission.canReadAllObjects();
 				} catch (final OXException e) {
-					LOG.warn("Unable to determine effective permissions for folder '" + folderID + "'", e);
+					LOG.debug("Unable to determine effective permissions for folder '" + folderID + "'", e);
 				}
 				canReadAllMap.put(folderID, Boolean.valueOf(canReadAllObjects));
 			}				

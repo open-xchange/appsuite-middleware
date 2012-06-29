@@ -50,16 +50,21 @@
 package com.openexchange.mail.mime.utils;
 
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
+import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -70,11 +75,14 @@ import java.util.concurrent.FutureTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.BodyPart;
+import javax.mail.Header;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
+import javax.mail.Part;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MailDateFormat;
+import javax.mail.internet.MimePart;
 import javax.mail.internet.MimeUtility;
 import javax.mail.internet.ParseException;
 import org.apache.commons.codec.DecoderException;
@@ -94,9 +102,12 @@ import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.HeaderName;
 import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.mail.mime.dataobjects.MimeMailMessage;
+import com.openexchange.mail.mime.dataobjects.MimeMailPart;
 import com.openexchange.mail.utils.CharsetDetector;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -1448,6 +1459,158 @@ public final class MimeMessageUtility {
                     LOG.error(e.getMessage(), e);
                 }
             }
+        }
+    }
+
+    /**
+     * Writes specified part's headers to given output stream.
+     * 
+     * @param p The part
+     * @param os The output stream
+     * @throws OXException If an I/O error occurs
+     */
+    public static void writeHeaders(final MailPart p, final OutputStream os) throws OXException {
+        if (p instanceof MimeMailMessage) {
+            writeHeaders(((MimeMailMessage) p).getMimeMessage(), os);
+            return;
+        }
+        if (p instanceof MimeMailPart) {
+            writeHeaders(((MimeMailPart) p).getPart(), os);
+            return;
+        }
+        try {
+            final LineOutputStream los;
+            if (os instanceof LineOutputStream) {
+                los = (LineOutputStream) os;
+            } else {
+                los = new LineOutputStream(os);
+            }
+            /*
+             * Write headers
+             */
+            final StringBuilder sb = new StringBuilder(256);
+            for (final Iterator<Entry<String, String>> it = p.getHeadersIterator(); it.hasNext();) {
+                final Entry<String, String> entry = it.next();
+                sb.setLength(0);
+                sb.append(entry.getKey()).append(": ");
+                sb.append(fold(sb.length(), entry.getValue()));
+                los.writeln(sb);
+            }
+            /*
+             * The CRLF separator between header and content
+             */
+            los.writeln();
+            os.flush();
+        } catch (final IOException e) {
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Writes specified part's headers to given output stream.
+     * 
+     * @param p The part
+     * @param os The output stream
+     * @throws OXException If an error occurs
+     */
+    public static void writeHeaders(final Part p, final OutputStream os) throws OXException {
+        if (p instanceof MimePart) {
+            writeHeaders((MimePart) p, os);
+            return;
+        }
+        try {
+            final LineOutputStream los;
+            if (os instanceof LineOutputStream) {
+                los = (LineOutputStream) os;
+            } else {
+                los = new LineOutputStream(os);
+            }
+            /*
+             * Write headers
+             */
+            @SuppressWarnings("unchecked")
+            final
+            Enumeration<Header> headers = p.getAllHeaders();
+            final StringBuilder sb = new StringBuilder(256);
+            while (headers.hasMoreElements()) {
+                final Header header = headers.nextElement();
+                sb.setLength(0);
+                sb.append(header.getName()).append(": ");
+                sb.append(fold(sb.length(), header.getValue()));
+                los.writeln(sb);
+            }
+            /*
+             * The CRLF separator between header and content
+             */
+            los.writeln();
+            os.flush();
+        } catch (final MessagingException e) {
+            throw MimeMailException.handleMessagingException(e);
+        } catch (final IOException e) {
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Writes specified part's headers to given output stream.
+     * 
+     * @param p The part
+     * @param os The output stream
+     * @throws OXException If an error occurs
+     */
+    public static void writeHeaders(final MimePart p, final OutputStream os) throws OXException {
+        try {
+            final LineOutputStream los;
+            if (os instanceof LineOutputStream) {
+                los = (LineOutputStream) os;
+            } else {
+                los = new LineOutputStream(os);
+            }
+            /*
+             * Write headers
+             */
+            for (@SuppressWarnings("unchecked") final Enumeration<String> hdrLines = p.getNonMatchingHeaderLines(null); hdrLines.hasMoreElements();) {
+                los.writeln(hdrLines.nextElement());
+            }
+            /*
+             * The CRLF separator between header and content
+             */
+            los.writeln();
+            os.flush();
+        } catch (final MessagingException e) {
+            throw MimeMailException.handleMessagingException(e);
+        } catch (final IOException e) {
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private static final class LineOutputStream extends FilterOutputStream {
+
+        private static final byte[] newline = { (byte) '\r', (byte) '\n' };
+
+        protected LineOutputStream(final OutputStream out) {
+            super(out);
+        }
+
+        protected void writeln(final CharSequence s) throws IOException {
+            out.write(getBytes(s));
+            out.write(newline);
+        }
+
+        protected void writeln() throws IOException {
+            out.write(newline);
+        }
+
+        private static byte[] getBytes(final CharSequence s) {
+            if (null == s) {
+                return new byte[0];
+            }
+            final int len = s.length();
+            final byte[] bytes = new byte[len];
+            for (int i = 0; i < len; i++) {
+                bytes[i] = (byte) s.charAt(i);
+            }
+            return bytes;
         }
     }
 
