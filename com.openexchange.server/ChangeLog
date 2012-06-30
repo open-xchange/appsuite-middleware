@@ -1,3 +1,7 @@
+* 2012-06-30 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22428: Added missing import
+
 * 2012-06-28 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 22418: Using debug loglevel
