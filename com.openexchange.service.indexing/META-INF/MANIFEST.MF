@@ -8,6 +8,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.exception,
  com.openexchange.log,
  javax.jms,
+ javax.management,
  javax.net,
  javax.net.ssl,
  org.apache.commons.logging,
