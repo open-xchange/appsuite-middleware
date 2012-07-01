@@ -27,7 +27,7 @@
 	<property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar" />
 	<property name="globaljar" value="com.openexchange.global.jar" />
 	<property name="serverjar" value="com.openexchange.server.jar" />
-	<property name="mailjar" value="mail-1.4.3.jar" />
+	<property name="mailjar" value="mail-1.4.5.jar" />
 	<property name="activationjar" value="activation-1.1.1.jar" />
 	<property name="jsonjar" value="json.jar" />
 	<property name="servletjar" value="javax.servlet_2.4.0.v200706111738.jar" />
