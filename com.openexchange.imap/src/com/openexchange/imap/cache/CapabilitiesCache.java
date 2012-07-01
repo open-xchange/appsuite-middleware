@@ -62,11 +62,7 @@ import com.openexchange.mail.cache.SessionMailCache;
 import com.openexchange.mail.cache.SessionMailCacheEntry;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.session.Session;
-import com.sun.mail.iap.ProtocolException;
-import com.sun.mail.imap.IMAPFolder;
-import com.sun.mail.imap.IMAPFolder.ProtocolCommand;
 import com.sun.mail.imap.IMAPStore;
-import com.sun.mail.imap.protocol.IMAPProtocol;
 
 /**
  * {@link CapabilitiesCache} - A cache to check for capabilities for a certain IMAP server.
@@ -192,18 +188,7 @@ public final class CapabilitiesCache {
             /*
              * Get as map
              */
-            final Map<String, String> map;
-            {
-                final IMAPFolder f = (IMAPFolder) imapStore.getDefaultFolder();
-                @SuppressWarnings("unchecked") final Map<String, String> m = (Map<String, String>) f.doCommandIgnoreFailure(new ProtocolCommand() {
-                    
-                    @Override
-                    public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
-                        return protocol.getCapabilities();
-                    }
-                });
-                map = m;
-            }
+            @SuppressWarnings("unchecked") final Map<String, String> map = imapStore.getCapabilities();
             imapCaps.setACL(map.containsKey(IMAPCapabilities.CAP_ACL));
             imapCaps.setThreadReferences(map.containsKey(IMAPCapabilities.CAP_THREAD_REFERENCES));
             imapCaps.setThreadOrderedSubject(map.containsKey(IMAPCapabilities.CAP_THREAD_ORDEREDSUBJECT));
