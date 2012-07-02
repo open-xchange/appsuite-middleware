@@ -54,9 +54,12 @@ import static com.openexchange.mail.mime.utils.MimeMessageUtility.decodeMultiEnc
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.getFileName;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.hasAttachments;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.unfold;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -68,7 +71,9 @@ import java.util.Date;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.activation.DataHandler;
@@ -87,13 +92,24 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import org.apache.james.mime4j.MimeException;
+import org.apache.james.mime4j.io.LineReaderInputStream;
+import org.apache.james.mime4j.io.LineReaderInputStreamAdaptor;
 import org.apache.james.mime4j.parser.ContentHandler;
 import org.apache.james.mime4j.parser.MimeStreamParser;
+import org.apache.james.mime4j.stream.DefaultFieldBuilder;
+import org.apache.james.mime4j.stream.EntityState;
+import org.apache.james.mime4j.stream.Field;
+import org.apache.james.mime4j.stream.FieldBuilder;
 import org.apache.james.mime4j.stream.MimeConfig;
+import org.apache.james.mime4j.stream.MimeTokenStream;
+import org.apache.james.mime4j.stream.RawField;
+import org.apache.james.mime4j.util.ByteArrayBuffer;
+import org.apache.james.mime4j.util.CharsetUtil;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
@@ -129,6 +145,7 @@ import com.sun.mail.pop3.POP3Folder;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MimeMessageConverter {
+
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MimeMessageConverter.class));
 
@@ -346,6 +363,8 @@ public final class MimeMessageConverter {
      */
     public static final int BEHAVIOR_STREAM2FILE = 1 << 1;
 
+    private static final String X_ORIGINAL_HEADERS = "x-original-headers";
+
     /**
      * Converts given instance of {@link MailMessage} into a JavaMail-conform {@link Message} object.
      *
@@ -374,9 +393,9 @@ public final class MimeMessageConverter {
                     mail.writeTo(out);
                     mimeMessage =
                         new MimeMessage(MimeDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(out.toByteArray()));
-                    mimeMessage.removeHeader("x-original-headers");
+                    mimeMessage.removeHeader(X_ORIGINAL_HEADERS);
                 } else {
-                    final File file = checkForFile(mail);
+                    File file = checkForFile(mail);
                     if (null == file) {
                         FileOutputStream fos = null;
                         try {
@@ -386,24 +405,23 @@ public final class MimeMessageConverter {
                             fos.flush();
                             fos.close();
                             fos = null;
-                            mimeMessage = new ManagedMimeMessage(MimeDefaultSession.getDefaultSession(), newTempFile);
+                            file = newTempFile;
                         } catch (final IOException e) {
                             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
                         } finally {
-                            if (null != fos) {
-                                try {
-                                    fos.close();
-                                } catch (final IOException e) {
-                                    // Ignore
-                                }
-                            }
+                            Streams.close(fos);
                         }
-                    } else {
-                        try {
-                            mimeMessage = new ManagedMimeMessage(MimeDefaultSession.getDefaultSession(), file);
-                        } catch (final IOException e) {
-                            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-                        }
+                    }
+                    // Check invalid header
+                    final Set<String> invalidHeaderNames = new HashSet<String>(1);
+                    checkInvalidHeader(file, invalidHeaderNames);
+                    if (!invalidHeaderNames.isEmpty()) {
+                        file = dropInvalidHeaders(file, fileManagement.newTempFile());
+                    }
+                    try {
+                        mimeMessage = new ManagedMimeMessage(MimeDefaultSession.getDefaultSession(), file);
+                    } catch (final IOException e) {
+                        throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
                     }
                 }
             }
@@ -433,6 +451,43 @@ public final class MimeMessageConverter {
         }
     }
 
+    private static void checkInvalidHeader(final File file, final Set<String> invalidHeaderNames) throws OXException {
+        final MimeConfig config = new MimeConfig();
+        config.setMaxLineLen(-1);
+        config.setMaxHeaderLen(-1);
+        config.setMaxHeaderCount(-1);
+        final MimeTokenStream stream = new MimeTokenStream(config);
+        InputStream instream = null;
+        try {
+            instream = new BufferedInputStream(new FileInputStream(file));
+            stream.parse(instream);
+            boolean headers = false;
+            for (EntityState state = stream.getState(); !EntityState.T_END_OF_STREAM.equals(state); state = stream.next()) {
+                if (headers) {
+                    if (EntityState.T_FIELD.equals(state)) {
+                        final Field field = stream.getField();
+                        if (X_ORIGINAL_HEADERS.equals(field.getName())) {
+                            invalidHeaderNames.add(X_ORIGINAL_HEADERS);
+                        }
+                    } else if (EntityState.T_END_HEADER.equals(state)) {
+                        headers = false;
+                        break;
+                    }
+                } else {
+                    if (EntityState.T_START_HEADER.equals(state)) {
+                        headers = true;
+                    }
+                }
+            }
+        } catch (final IOException e) {
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        } catch (final MimeException e) {
+            // Ignore
+        } finally {
+            Streams.close(instream);
+        }
+    }
+
     private static File checkForFile(final MailMessage mail) {
         if (mail instanceof MimeMailMessage) {
             final MimeMessage mimeMessage = ((MimeMailMessage) mail).getMimeMessage();
@@ -441,6 +496,75 @@ public final class MimeMessageConverter {
             }
         }
         return null;
+    }
+
+    private static File dropInvalidHeaders(final File file, final File newTempFile) {
+        InputStream in = null;
+        BufferedOutputStream out = null;
+        try {
+            in = new BufferedInputStream(new FileInputStream(file));
+            out = new BufferedOutputStream(new FileOutputStream(newTempFile));
+            {
+                final LineReaderInputStream instream = new LineReaderInputStreamAdaptor(in, -1);
+                int lineCount = 0;
+                final ByteArrayBuffer linebuf = new ByteArrayBuffer(64);
+                final FieldBuilder fieldBuilder = new DefaultFieldBuilder(-1);
+                boolean endOfHeader = false;
+                while (!endOfHeader) {
+                    fieldBuilder.reset();
+                    for (;;) {
+                        // If there's still data stuck in the line buffer
+                        // copy it to the field buffer
+                        int len = linebuf.length();
+                        if (len > 0) {
+                            fieldBuilder.append(linebuf);
+                        }
+                        linebuf.clear();
+                        if (instream.readLine(linebuf) == -1) {
+                            endOfHeader = true;
+                            break;
+                        }
+                        len = linebuf.length();
+                        if (len > 0 && linebuf.byteAt(len - 1) == '\n') {
+                            len--;
+                        }
+                        if (len > 0 && linebuf.byteAt(len - 1) == '\r') {
+                            len--;
+                        }
+                        if (len == 0) {
+                            // empty line detected
+                            endOfHeader = true;
+                            break;
+                        }
+                        lineCount++;
+                        if (lineCount > 1) {
+                            final int ch = linebuf.byteAt(0);
+                            if (ch != CharsetUtil.SP && ch != CharsetUtil.HT) {
+                                // new header detected
+                                break;
+                            }
+                        }
+                    }
+                    final RawField rawfield = fieldBuilder.build();
+                    if (rawfield != null && !X_ORIGINAL_HEADERS.equalsIgnoreCase(rawfield.getName())) {
+                        final ByteArrayBuffer buffer = fieldBuilder.getRaw();
+                        out.write(buffer.buffer(), 0, buffer.length());
+                    }
+                } // End of Headers
+            }
+            // Write rest
+            final int l = 2048;
+            final byte[] buf = new byte[l];
+            for (int read; (read = in.read(buf, 0, l)) > 0;) {
+                out.write(buf, 0, read);
+            }
+            out.flush();
+            return newTempFile;
+        } catch (final Exception e) {
+            return file;
+        } finally {
+            Streams.close(in, out);
+        }
     }
 
     /**
