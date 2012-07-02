@@ -2149,9 +2149,18 @@ public final class MimeMessageConverter {
 
     private static final int DEFAULT_MESSAGE_SIZE = 8192;
 
+    private static volatile Boolean enableMime4j;
+
     private static boolean useMime4j() {
-        final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-        return null == service ? false : service.getBoolProperty("com.openexchange.mail.mime.enableMime4j", false);
+        Boolean tmp = enableMime4j;
+        if (null == tmp) {
+            synchronized (MimeMessageConverter.class) {
+                final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                tmp = Boolean.valueOf(null == service ? false : service.getBoolProperty("com.openexchange.mail.mime.enableMime4j", false));
+                enableMime4j = tmp;
+            }
+        }
+        return tmp.booleanValue();
     }
 
     private static void setHeaders(final Part part, final MailPart mailPart) {
