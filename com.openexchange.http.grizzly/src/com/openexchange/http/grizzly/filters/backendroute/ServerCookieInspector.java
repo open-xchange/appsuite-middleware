@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.http.grizzly.addons.backendroute;
+package com.openexchange.http.grizzly.filters.backendroute;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;

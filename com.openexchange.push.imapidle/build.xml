@@ -37,7 +37,7 @@
     <property name="serverjar" value="com.openexchange.server.jar"/>
     <property name="imapjar" value="com.openexchange.imap.jar"/>
     <property name="configreadjar" value="com.openexchange.configread.jar"/>
-    <property name="mailjar" value="mail-1.4.3.jar"/>
+    <property name="mailjar" value="mail-1.4.5.jar"/>
 
     <!-- Classpath -->
     <path id="project.classpath">

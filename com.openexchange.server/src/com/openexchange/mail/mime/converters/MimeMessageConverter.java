@@ -2147,6 +2147,10 @@ public final class MimeMessageConverter {
 
     private static final int DEFAULT_MESSAGE_SIZE = 8192;
 
+    private static boolean useMime4j() {
+        return false;
+    }
+
     private static void setHeaders(final Part part, final MailPart mailPart) {
         /*
          * HEADERS
@@ -2154,7 +2158,7 @@ public final class MimeMessageConverter {
         HeaderCollection headers = null;
         try {
             headers = new HeaderCollection(128);
-            if (part instanceof IMAPMessage) {
+            if (useMime4j() && (part instanceof IMAPMessage)) {
                 final ContentHandler handler = new HeaderContentHandler(headers);
                 final MimeConfig config = new MimeConfig();
                 config.setMaxLineLen(-1);

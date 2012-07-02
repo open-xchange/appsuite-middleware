@@ -74,6 +74,8 @@ public final class MailRequest {
 
     private final AJAXRequestData requestData;
 
+    private Long max;
+
     /**
      * Initializes a new {@link MailRequest}.
      *
@@ -84,6 +86,37 @@ public final class MailRequest {
         super();
         this.requestData = request;
         this.session = session;
+    }
+
+    /**
+     * Gets the '<code>max</code>' parameter.
+     * 
+     * @return The '<code>max</code>' parameter
+     * @throws OXException If <code>max</code> is not a number
+     */
+    public long getMax() throws OXException {
+        if (null == max) {
+            String s = requestData.getParameter("max");
+            if (null == s) {
+                s = requestData.getParameter("maximum");
+                if (null == s) {
+                    max = Long.valueOf(-1L);
+                } else {
+                    try {
+                        max = Long.valueOf(s.trim());
+                    } catch (final NumberFormatException e) {
+                        throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("maximum", s);
+                    }
+                }
+            } else {
+                try {
+                    max = Long.valueOf(s.trim());
+                } catch (final NumberFormatException e) {
+                    throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("max", s);
+                }
+            }
+        }
+        return max.longValue();
     }
 
     public String checkParameter(final String name) throws OXException {

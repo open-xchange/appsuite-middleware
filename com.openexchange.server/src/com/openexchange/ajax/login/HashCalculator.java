@@ -54,11 +54,11 @@ import java.security.NoSuchAlgorithmException;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.ajax.fields.Header;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Charsets;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.encoding.Base64;
 
@@ -83,7 +83,9 @@ public class HashCalculator {
         try {
             final MessageDigest md = MessageDigest.getInstance("MD5");
             md.update((null == userAgent ? parseUserAgent(req, "") : userAgent).getBytes(Charsets.UTF_8));
-            md.update(client.getBytes(Charsets.UTF_8));
+            if (null != client) {
+                md.update(client.getBytes(Charsets.UTF_8));
+            }
             final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
             final String fieldList = null == service ? "" : service.getProperty("com.openexchange.cookie.hash.fields", "");
             final String[] fields = PATTERN_SPLIT.split(fieldList, 0);

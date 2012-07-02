@@ -2,6 +2,7 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="test"/>
+	<classpathentry exported="true" kind="lib" path="lib/mail-1.4.5.jar" sourcepath="lib/mail-1.4.5.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/apache-mime4j-core-0.7.2.jar" sourcepath="source/apache-mime4j-core-0.7.2-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/apache-mime4j-dom-0.7.2.jar" sourcepath="source/apache-mime4j-dom-0.7.2-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/apache-mime4j-storage-0.7.2.jar" sourcepath="source/apache-mime4j-storage-0.7.2-sources.jar"/>
@@ -14,7 +15,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/commons-collections-3.2.1.jar" sourcepath="source/commons-collections-3.2.1-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/guava-12.0.jar" sourcepath="source/guava-12.0-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/trove-3.0.2.jar" sourcepath="source/trove-3.0.2-src.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/mail-1.4.3.jar" sourcepath="lib/mail-1.4.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/chardet-1.1.jar" sourcepath="source/chardet-1.1-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/tnef-1.6.0.jar" sourcepath="source/tnef-1.6.0-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-fileupload-1.2.1.jar" sourcepath="source/commons-fileupload-1.2.1-sources.jar"/>
