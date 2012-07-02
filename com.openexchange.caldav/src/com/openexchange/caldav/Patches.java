@@ -64,6 +64,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
@@ -264,7 +265,7 @@ public class Patches {
          * @param update
          * @throws WebdavProtocolException
          */
-        public static void patchParticipantListRemovingAliases(GroupwareCaldavFactory factory, Appointment update) throws WebdavProtocolException {
+        public static void patchParticipantListRemovingAliases(GroupwareCaldavFactory factory, Appointment update) throws OXException {
             // Firstly, let's build a Set of all aliases that are already taking part in this appointment
             Set<String> knownInternalMailAddresses = new HashSet<String>();
             Participant[] participants = update.getParticipants();
@@ -595,7 +596,7 @@ public class Patches {
          * @param appointment
          * @throws WebdavProtocolException
          */
-        public static void setOrganizerInformation(GroupwareCaldavFactory factory, Appointment appointment) throws WebdavProtocolException {
+        public static void setOrganizerInformation(GroupwareCaldavFactory factory, Appointment appointment) throws OXException {
             String organizer = appointment.getOrganizer();
             if (null == organizer) {
                 int createdBy = appointment.getCreatedBy();

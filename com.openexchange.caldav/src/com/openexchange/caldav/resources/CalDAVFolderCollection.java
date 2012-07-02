@@ -66,15 +66,17 @@ import com.openexchange.caldav.reports.FilteringResource;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
 /**
- * {@link CalDAVFolderCollection} - 
+ * {@link CalDAVFolderCollection}
  * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @param <T>
@@ -119,6 +121,20 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
             this.intervalEnd = factory.end();
         }
         return this.intervalEnd;
+    }
+    
+    @Override
+    public User getOwner() throws OXException {
+        if (PrivateType.getInstance().equals(this.folder.getType())) {
+            return factory.getUser();
+        } else if (null != folder.getPermissions()) {
+            for (Permission permission : folder.getPermissions()) {
+                if (permission.isAdmin()) {
+                    return factory.resolveUser(permission.getEntity());
+                }
+            }
+        }         
+        return null;
     }
     
     protected static <T extends CalendarObject>boolean isInInterval(T object, Date intervalStart, Date intervalEnd) {
@@ -228,20 +244,15 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
         }
         return new Date(tstamp);
     }
-
+    
     private String getOwnerName() {
-        for (Permission permission : folder.getPermissions()) {
-            if (permission.isAdmin()) {
-                int entity = permission.getEntity();
-                try {
-                    return factory.resolveUser(entity).getDisplayName();
-                } catch (WebdavProtocolException e) {
-                    LOG.error(e.getMessage(), e);
-                    return Integer.toString(entity);
-                }
-            }
+        User owner = null;
+        try {
+            owner = this.getOwner();
+        } catch (OXException e) {
+            LOG.error("Error resolving owner", e);
         }
-        return null;
+        return null != owner ? owner.getDisplayName() : null;
     }
 
 }

@@ -53,6 +53,7 @@ import org.apache.commons.logging.Log;
 import org.osgi.service.http.HttpService;
 import com.openexchange.caldav.mixins.CalendarHomeSet;
 import com.openexchange.caldav.mixins.CalendarUserAddressSet;
+import com.openexchange.caldav.mixins.ScheduleInboxURL;
 import com.openexchange.caldav.mixins.ScheduleOutboxURL;
 import com.openexchange.caldav.servlet.CalDAV;
 import com.openexchange.caldav.servlet.CaldavPerformer;
@@ -120,6 +121,7 @@ public class CaldavActivator extends HousekeepingActivator {
                 
             });
             registerService(PropertyMixin.class, new ScheduleOutboxURL());
+            registerService(PropertyMixin.class, new ScheduleInboxURL());
             
             registerService(PathRegistration.class, new PathRegistration("caldav"));
             openTrackers();

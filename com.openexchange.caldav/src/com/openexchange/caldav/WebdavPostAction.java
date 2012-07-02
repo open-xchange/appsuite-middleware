@@ -83,9 +83,10 @@ public class WebdavPostAction extends AbstractAction {
 		if (null != request.getHeader("content-length")) {
 			resource.setLength(new Long(request.getHeader("content-length")));
 		}
-		if (false == "text/calendar".equalsIgnoreCase(request.getHeader("content-type"))) {
+		String contentType = request.getHeader("content-type");
+		if (null == contentType || false == contentType.toLowerCase().contains("text/calendar")) {
 			/*
-			 * only iCal files supported
+			 * only 'text/calendar' files supported
 			 */
 			throw WebdavProtocolException.generalError(request.getUrl(), HttpServletResponse.SC_BAD_REQUEST);
         } else if (false == resource instanceof com.openexchange.caldav.resources.ScheduleOutboxCollection) {

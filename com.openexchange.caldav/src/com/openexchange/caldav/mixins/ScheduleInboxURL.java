@@ -47,31 +47,33 @@
  *
  */
 
-package com.openexchange.webdav.action;
+package com.openexchange.caldav.mixins;
 
-import com.openexchange.webdav.protocol.Protocol.WEBDAV_METHOD;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.caldav.CaldavProtocol;
+import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
-public class WebdavOptionsAction extends AbstractAction {
+/**
+ * The {@link ScheduleInboxURL}
+ * 
+ * This property allows a client to determine where the scheduling Inbox 
+ * collection of the current user is located so that processing of 
+ * scheduling messages can occur. If not present, then the associated 
+ * calendar user is not enabled for reception of scheduling messages on the 
+ * server.
+ * 
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ */
+public class ScheduleInboxURL extends SingleXMLPropertyMixin {
+	
+	public static final String SCHEDULE_INBOX = "schedule-inbox"; 
 
-	@Override
-    public void perform(final WebdavRequest req, final WebdavResponse res)
-			throws WebdavProtocolException {
-		res.setHeader("Content-Length","0");
-		res.setHeader("Allow", join(req.getResource().getOptions()));
-		res.setHeader("DAV", "1, 2, 3, access-control, calendar-access, addressbook, extended-mkcol, calendar-auto-schedule, calendar-schedule");
-		res.setHeader("Accept-Ranges", "bytes");
-		res.setHeader("MS-Author-Via", "DAV"); // Hack for Windows Webfolder
-	}
+    public ScheduleInboxURL() {
+        super(CaldavProtocol.CAL_NS.getURI(), "schedule-inbox-URL");
+    }
 
-	private String join(final WEBDAV_METHOD[] options) {
-		final StringBuffer buffer = new StringBuffer();
-		for(final WEBDAV_METHOD m : options) {
-			buffer.append(m.toString());
-			buffer.append(", ");
-		}
-		buffer.setLength(buffer.length()-2);
-		return buffer.toString();
-	}
+    @Override
+    protected String getValue() {
+        return "<D:href>/caldav/" + SCHEDULE_INBOX + "</D:href>";
+    }
 
 }
