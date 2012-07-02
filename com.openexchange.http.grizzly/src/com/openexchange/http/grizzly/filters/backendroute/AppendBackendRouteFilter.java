@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.http.grizzly.addons.backendroute;
+package com.openexchange.http.grizzly.filters.backendroute;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -103,6 +103,26 @@ public class AppendBackendRouteFilter extends BaseFilter {
         setBackendRoute(backendRoute);
     }
     
+    
+    
+    /* (non-Javadoc)
+     * @see org.glassfish.grizzly.filterchain.BaseFilter#handleAccept(org.glassfish.grizzly.filterchain.FilterChainContext)
+     */
+    @Override
+    public NextAction handleAccept(FilterChainContext ctx) throws IOException {
+        LOG.info(ctx.getMessage());
+        return super.handleAccept(ctx);
+    }
+
+    /* (non-Javadoc)
+     * @see org.glassfish.grizzly.filterchain.BaseFilter#handleClose(org.glassfish.grizzly.filterchain.FilterChainContext)
+     */
+    @Override
+    public NextAction handleClose(FilterChainContext ctx) throws IOException {
+        LOG.info(ctx.getMessage());
+        return super.handleClose(ctx);
+    }
+
     /** 
      * While handling reads we have to handle several different cases of JSessionId in the incoming request:
      * <ol>

@@ -37,7 +37,7 @@
     <property name="configjar" value="com.openexchange.configread.jar"/>
     <property name="twitterjar" value="com.openexchange.twitter.jar"/>
     <property name="commonjar" value="common.jar"/>
-    <property name="mailjar" value="mail-1.4.3.jar"/>
+    <property name="mailjar" value="mail-1.4.5.jar"/>
     <property name="activationjar" value="activation-1.1.1.jar"/>
 
     <!-- Classpath -->

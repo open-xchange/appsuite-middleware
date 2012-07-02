@@ -73,7 +73,6 @@ import com.openexchange.mail.json.converters.MailConverter;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.collections.PropertizedList;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -106,20 +105,22 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
         final boolean cache = req.optBool("cache", false);
         if (cache && CACHABLE_FORMATS.contains(req.getRequest().getFormat())) {
             final JsonCacheService jsonCache = JsonCaches.getCache();
-            if (null != jsonCache) {
+            if (jsonCache != null) {
                 final long st = DEBUG ? System.currentTimeMillis() : 0L;
                 final String sha1Sum = getSha1For(req);
                 final String id = "com.openexchange.mail." + sha1Sum;
                 final ServerSession session = req.getSession();
                 final JSONValue jsonValue = jsonCache.opt(id, session.getUserId(), session.getContextId());
                 final AJAXRequestResult result;
-                if (null == jsonValue || 0 == jsonValue.length()) {
+                if (jsonValue == null || jsonValue.length() == 0) {
                     /*
-                     * Check mailbox size
+                     * Check mailbox size and 'max' parameter
                      */
+                    final long max = req.getMax();
                     final MailServletInterface mailInterface = getMailInterface(req);
                     final String folderId = req.checkParameter(Mail.PARAMETER_MAILFOLDER);
-                    if (mailInterface.getMessageCount(folderId) <= mailInterface.getMailConfig().getMailProperties().getMailFetchLimit()) {
+                    final int mailFetchLimit = mailInterface.getMailConfig().getMailProperties().getMailFetchLimit();
+                    if (mailInterface.getMessageCount(folderId) <= mailFetchLimit || (max > 0 && max <= mailFetchLimit)) {
                         /*
                          * Mailbox considered small enough for direct hand-off
                          */
@@ -258,28 +259,7 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                     fromToIndices = new int[] { start, end };
                 }
             }
-            final long max;
-            {
-                String s = req.getParameter("max");
-                if (null == s) {
-                    s = req.getParameter("maximum");
-                    if (null == s) {
-                        max = -1L;
-                    } else {
-                        try {
-                            max = Long.parseLong(s.trim());
-                        } catch (final NumberFormatException e) {
-                            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("maximum", s);
-                        }
-                    }
-                } else {
-                    try {
-                        max = Long.parseLong(s.trim());
-                    } catch (final NumberFormatException e) {
-                        throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("max", s);
-                    }
-                }
-            }
+            final long max = req.getMax();
             final boolean includeSent = req.optBool("includeSent", false);
             final boolean unseen = req.optBool("unseen", false);
             final boolean ignoreDeleted = !req.optBool("deleted", true);
