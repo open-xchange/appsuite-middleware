@@ -326,7 +326,7 @@ public final class FolderJob extends AbstractMailJob {
                         final Map<String, Object> params = new HashMap<String, Object>();
                         params.put("accountId", Integer.valueOf(accountId));
                         final Builder queryBuilder = new Builder(params).setType(MAIL);
-                        indexAccess.deleteByQuery(queryBuilder.setHandler(SearchHandler.ALL_REQUEST).setFolder(fullName).build());
+                        indexAccess.deleteByQuery(queryBuilder.setHandler(SearchHandler.ALL_REQUEST).setFolders(Collections.singleton(fullName)).build());
                         return false;
                     }
                     if (null == storageMails) {

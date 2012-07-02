@@ -152,7 +152,7 @@ public final class IndexAccessAdapter {
                 final QueryParameters query = new QueryParameters.Builder(params)
                 .setHandler(SearchHandler.ALL_REQUEST)
                 .setType(Type.MAIL)
-                .setFolder(fullName).build();
+                .setFolders(Collections.singleton(fullName)).build();
                 
                 indexAccess.deleteByQuery(query);
                 return;
@@ -175,7 +175,7 @@ public final class IndexAccessAdapter {
         params.put("accountId", accountId);
         final QueryParameters qp =
             new QueryParameters.Builder(params).setLength(1).setOffset(0).setType(IndexDocument.Type.MAIL).setHandler(
-                SearchHandler.ALL_REQUEST).setFolder(fullName).build();
+                SearchHandler.ALL_REQUEST).setFolders(Collections.singleton(fullName)).build();
         final Set<MailIndexField> fields = new HashSet<MailIndexField>(1);
         fields.add(MailIndexField.ID);
         return indexAccess.query(qp, fields).getNumFound() > 0L;
@@ -239,7 +239,7 @@ public final class IndexAccessAdapter {
                 }
             }
             final QueryParameters query =
-                new QueryParameters.Builder(params).setHandler(SearchHandler.ALL_REQUEST).setFolder(fullName).setType(Type.MAIL).build();
+                new QueryParameters.Builder(params).setHandler(SearchHandler.ALL_REQUEST).setFolders(Collections.singleton(fullName)).setType(Type.MAIL).build();
             final IndexResult<MailMessage> result = indexAccess.query(query, null);
             final List<MailMessage> mails = new ArrayList<MailMessage>();
             mails.addAll(IndexDocumentHelper.messagesFrom(result.getResults()));

@@ -336,5 +336,62 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
         
         return converter.createIndexResult(indexDocuments, facetCountsMap);
     }
-
+    
+    protected String buildQueryString(String fieldName, String value) {
+        if (fieldName == null || value == null) {
+            return null;
+        }
+        
+        StringBuilder sb = new StringBuilder(); 
+        sb.append('(').append(fieldName).append(":\"").append(value).append("\")");
+        return sb.toString();
+    }
+    
+    protected String buildQueryStringWithOr(String fieldName, Set<String> values) {
+        if (fieldName == null || values == null || values.isEmpty()) {
+            return null;
+        }
+        
+        StringBuilder sb = new StringBuilder();
+        sb.append('(');
+        boolean first = true;
+        for (String value : values) {
+            if (first) {
+                sb.append('(').append(fieldName).append(":\"").append(value).append("\")");
+                first = false;
+            } else {
+                sb.append(" OR (").append(fieldName).append(":\"").append(value).append("\")");
+            }
+        }
+        
+        sb.append(')');
+        return sb.toString();
+    }
+    
+    protected String catenateQueriesWithAnd(String... queries) {
+        if (queries == null || queries.length == 0) {
+            return null;
+        }
+        
+        StringBuilder sb = new StringBuilder();
+        sb.append('(');
+        boolean first = true;
+        for (String query : queries) {
+            if (query != null) {
+                if (first) {
+                    sb.append(query);
+                    first = false; 
+                } else {
+                    sb.append(" AND ").append(query);
+                }
+            }
+        }
+        
+        if (sb.length() == 1) {
+            return null;
+        }
+        
+        sb.append(')');
+        return sb.toString();
+    }
 }
