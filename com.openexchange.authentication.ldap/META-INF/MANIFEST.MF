@@ -16,4 +16,4 @@ Import-Package: com.openexchange.authentication,
  javax.naming.ldap,
  org.apache.commons.logging,
  org.osgi.framework
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
