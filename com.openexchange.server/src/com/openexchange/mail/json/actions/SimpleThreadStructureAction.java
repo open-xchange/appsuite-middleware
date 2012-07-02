@@ -122,14 +122,8 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                     final String folderId = req.checkParameter(Mail.PARAMETER_MAILFOLDER);
                     {
                         final int messageCount = mailInterface.getMessageCount(folderId);
-                        if (messageCount <= 0) {
-                            /*
-                             * Mailbox considered small enough for direct hand-off
-                             */
-                            return perform0(req, mailInterface, false);
-                        }
-                        final int fetchLimit = getFetchLimit(mailInterface);
-                        if (messageCount <= fetchLimit || (max > 0 && max <= fetchLimit)) {
+                        final int fetchLimit;
+                        if ((messageCount <= 0) || (messageCount <= (fetchLimit = getFetchLimit(mailInterface))) || ((max > 0) && (max <= fetchLimit))) {
                             /*
                              * Mailbox considered small enough for direct hand-off
                              */
