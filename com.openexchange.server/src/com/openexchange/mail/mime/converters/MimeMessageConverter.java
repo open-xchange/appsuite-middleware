@@ -373,6 +373,7 @@ public final class MimeMessageConverter {
                     mail.writeTo(out);
                     mimeMessage =
                         new MimeMessage(MimeDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(out.toByteArray()));
+                    mimeMessage.removeHeader("x-original-headers");
                 } else {
                     final File file = checkForFile(mail);
                     if (null == file) {
