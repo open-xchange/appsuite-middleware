@@ -53,7 +53,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -61,22 +60,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import net.fortuna.ical4j.model.NumberList;
+import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.PropertyList;
 import net.fortuna.ical4j.model.Recur;
 import net.fortuna.ical4j.model.WeekDay;
 import net.fortuna.ical4j.model.WeekDayList;
 import net.fortuna.ical4j.model.component.CalendarComponent;
+import net.fortuna.ical4j.model.property.DtStart;
 import net.fortuna.ical4j.model.property.RRule;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ConversionWarning.Code;
 import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
-import com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools;
-import com.openexchange.data.conversion.ical.ical4j.internal.ParserTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.tasks.Task;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -205,11 +205,7 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
         if (calendar.containsOccurrence()) {
             recur.append(";COUNT=").append(calendar.getOccurrence());
         } else if (calendar.containsUntil()) {
-            synchronized (date) {
-                Date until = (Date) calendar.getUntil().clone();
-                addDayForUntil(until);
-                recur.append(";UNTIL=").append(date.format(until));
-            }
+            recur.append(";UNTIL=").append(getUntil(calendar).toString());
         }
         return recur;
     }
@@ -226,19 +222,13 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
         if (calendar.containsOccurrence()) {
             retval = new Recur(frequency, calendar.getOccurrence());
         } else if (calendar.containsUntil()) {
-            net.fortuna.ical4j.model.Date until = EmitterTools.toDate(calendar.getUntil());
-            addDayForUntil(until);
-            retval = new Recur(frequency, until);
+            retval = new Recur(frequency, getUntil(calendar));
         } else {
             retval = new Recur(frequency, null);
         }
         return retval;
     }
-
-    private void addDayForUntil(Date date) {
-        date.setTime(date.getTime() + 86400000L);
-    }
-
+    
     /**
      * {@inheritDoc}
      */
@@ -293,12 +283,9 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
             cObj.setRecurrenceCount(recurrenceCount);
             setOccurrenceIfNeededRecoveryFIXME(cObj, recurrenceCount);
         } else if (null != rrule.getUntil()) {
-            Date until = new Date(rrule.getUntil().getTime());
-            cObj.setUntil(ParserTools.recalculateMidnight(until, TimeZone.getTimeZone("UTC"))); // OX always has 00:00 UTC same say as until
-                                                                                                // value
+            cObj.setUntil(getUntil(rrule, component));
         }
     }
-
 
     private void setOccurrenceIfNeededRecoveryFIXME(final U cObj, final int recurrenceCount) {
         if (Appointment.class.isAssignableFrom(cObj.getClass())) {
@@ -409,4 +396,128 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
             cObj.setDays(days);
         }
     }
+    
+    /**
+     * Determines the {@link net.fortuna.ical4j.model.Date} from the supplied
+     * recurring calendar object, ready-to-use in ical4j components. <p/>
+     * While date-only until dates are used as is (for tasks and whole day 
+     * appointments), date-time specific until dates are calculated based on 
+     * the appointments timezone to include the last-possible start-time of 
+     * the last occurrence.    
+     * 
+     * @param calendarObject the recurring calendar object
+     * @return the calculated until date
+     * @see http://tools.ietf.org/html/rfc5545#section-3.3.10
+     */
+    private net.fortuna.ical4j.model.Date getUntil(U calendarObject) {
+        if (calendarObject.containsUntil()) {
+            /*
+             * OX stores series end as date without time (00:00 UTC).
+             */            
+            if (isWholeDay(calendarObject)) {
+                /*
+                 * use DATE value type with UTC time - equal to the stored date
+                 */
+                return new net.fortuna.ical4j.model.Date(calendarObject.getUntil());
+            } 
+            /*
+             * Since DTSTART is specified as date with local time and time zone 
+             * reference, use DATE-TIME value type with UTC time for non-whole-day
+             * events.
+             */
+            Calendar utcUntilCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+            utcUntilCalendar.setTime(calendarObject.getUntil());
+            /* 
+             * The effective last possible until date-time is 23:59:59 on the 
+             * series until date in the recurring appointments timezone, so we 
+             * first need to assume the series end being in the appointment's 
+             * timezone, and afterwards add this portion of time. 
+             */
+            java.util.TimeZone appointmentTimeZone = getTimeZone(calendarObject); 
+            Calendar effectiveUntilCalendar = Calendar.getInstance(appointmentTimeZone);
+            effectiveUntilCalendar.set(
+                utcUntilCalendar.get(Calendar.YEAR), 
+                utcUntilCalendar.get(Calendar.MONTH), 
+                utcUntilCalendar.get(Calendar.DAY_OF_MONTH), 
+                23, 59, 59);
+            /*
+             * finally, build an ical4j date-time
+             */
+            net.fortuna.ical4j.model.DateTime dateTime = new net.fortuna.ical4j.model.DateTime(true);
+            dateTime.setTime(effectiveUntilCalendar.getTime().getTime());
+            return dateTime;
+        }
+
+        return null;
+    }
+
+    /**
+     * Extracts the {@link java.util.Date} from the <code>UNTIL</code> 
+     * parameter of the supplied {@link Recur} instance, ready-to-use in 
+     * calendar objects. <p/> 
+     * The value is transformed to an UTC date (without time) implicitly, 
+     * based on the parent component's timezone. Doing so, this date represents 
+     * the date of the last occurrence, compatible with the server's internal 
+     * handling of the "until" property for calendar objects.
+     * 
+     * @param recur the recurrence rule
+     * @param component the parent component
+     * @return the extracted until date
+     * @see http://tools.ietf.org/html/rfc5545#section-3.3.10
+     */
+    private java.util.Date getUntil(Recur recur, T component) {
+        if (null != recur && null != recur.getUntil()) {
+            net.fortuna.ical4j.model.Date until = recur.getUntil();
+            if (net.fortuna.ical4j.model.DateTime.class.isInstance(until)) {
+                /*
+                 * consider DATE-TIME value type with UTC time - determine date 
+                 * of the last occurrence in the appointment's timezone  
+                 */
+                Calendar effectiveUntilCalendar = Calendar.getInstance(getTimeZone(component));
+                effectiveUntilCalendar.setTime(until);
+                /*
+                 * determine OX until date based on the effective until date 
+                 */
+                Calendar utcUntilCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+                utcUntilCalendar.set(
+                    effectiveUntilCalendar.get(Calendar.YEAR), 
+                    effectiveUntilCalendar.get(Calendar.MONTH), 
+                    effectiveUntilCalendar.get(Calendar.DAY_OF_MONTH), 
+                    0, 0, 0);
+                utcUntilCalendar.set(Calendar.MILLISECOND, 0);
+                return utcUntilCalendar.getTime();
+            } else {
+                /*
+                 * consider DATE value type - already in OX format
+                 */
+                return until;
+            }
+        }
+        return null;
+    }
+    
+    private boolean isWholeDay(U calendarObject) {
+        return null != calendarObject && (Task.class.isInstance(calendarObject) ||
+            (Appointment.class.isInstance(calendarObject) && ((Appointment)calendarObject).getFullTime()));
+    }
+    
+    private TimeZone getTimeZone(U calendarObject) {
+        String timeZoneID = null;
+        if (null != calendarObject && Appointment.class.isInstance(calendarObject)) {
+            timeZoneID = ((Appointment)calendarObject).getTimezone();
+        }
+        return java.util.TimeZone.getTimeZone(null != timeZoneID ? timeZoneID : "UTC");
+    }
+    
+    private TimeZone getTimeZone(T component) {
+        TimeZone timeZone = null;
+        if (null != component) {
+            DtStart dtStart = (DtStart)component.getProperty(Property.DTSTART);
+            if (null != dtStart) {
+                timeZone = dtStart.getTimeZone();
+            }
+        }
+        return null != timeZone ? timeZone : TimeZone.getTimeZone("UTC");
+    }
+    
 }

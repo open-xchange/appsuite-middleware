@@ -54,7 +54,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -294,12 +293,8 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
              */
             String iCal = new String(bytes.toByteArray(), "UTF-8");
             iCal = Patches.Outgoing.removeEmptyRDates(iCal);
-            iCal = Patches.Outgoing.correctRRuleUntil(iCal);
-//            iCal = Patches.Outgoing.correctRRuleUntil(iCal, getTimeZone());
             return iCal;
         } catch (UnsupportedEncodingException e) {
-            throw protocolException(e);
-        } catch (ParseException e) {
             throw protocolException(e);
         }
     }
@@ -357,10 +352,10 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
         /*
          * apply patches
          */
-        String patchedICal = Patches.Incoming.correctRRuleUntil(iCal);
+        String patchedICal = iCal;
         
         //XXX to make the UserResolver do it's job correctly
-        patchedICal = patchedICal.replace("424242669@devel-mail.netline.de", "@premium");
+        //patchedICal = patchedICal.replace("424242669@devel-mail.netline.de", "@premium");
         /*
          * parse appointments
          */

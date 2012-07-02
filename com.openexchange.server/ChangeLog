@@ -1,3 +1,11 @@
+* 2012-07-02 - tobias.friedrich@open-xchange.com
+
+- Fix for bug 22451: Demystified until parameter in recurrence rules
+
+* 2012-07-02 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22448: Changed error message for code SES-0007
+
 * 2012-06-30 - thorben.betten@open-xchange.com
 
  - Fix for bug 22428: Added missing import
