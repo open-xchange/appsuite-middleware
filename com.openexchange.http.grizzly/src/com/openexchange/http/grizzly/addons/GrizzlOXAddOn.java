@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.glassfish.grizzly.filterchain.BaseFilter;
 import org.glassfish.grizzly.filterchain.Filter;
 import org.glassfish.grizzly.filterchain.FilterChainBuilder;
 import org.glassfish.grizzly.http.server.AddOn;
@@ -61,7 +60,6 @@ import org.glassfish.grizzly.http.server.HttpServerFilter;
 import org.glassfish.grizzly.http.server.NetworkListener;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.http.grizzly.filters.backendroute.AppendBackendRouteFilter;
-import com.openexchange.http.grizzly.filters.keepalive.EASKeepAliveFilter;
 import com.openexchange.http.grizzly.osgi.GrizzlyServiceRegistry;
 import com.openexchange.http.grizzly.util.FilterChainUtils;
 
