@@ -113,7 +113,7 @@ public class SearchAction extends AbstractFileAction {
         final SortDirection sortingOrder = request.getSortingOrder();
         final IndexFacadeService indexFacade = Services.getIndexFacade();
         SearchIterator<File> results;
-        if (indexFacade == null) {
+        if (true) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Using fallback search.");
             }
