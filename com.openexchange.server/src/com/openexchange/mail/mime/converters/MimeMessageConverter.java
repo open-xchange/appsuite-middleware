@@ -90,6 +90,7 @@ import org.apache.james.mime4j.MimeException;
 import org.apache.james.mime4j.parser.ContentHandler;
 import org.apache.james.mime4j.parser.MimeStreamParser;
 import org.apache.james.mime4j.stream.MimeConfig;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.java.Charsets;
@@ -2149,7 +2150,8 @@ public final class MimeMessageConverter {
     private static final int DEFAULT_MESSAGE_SIZE = 8192;
 
     private static boolean useMime4j() {
-        return false;
+        final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+        return null == service ? false : service.getBoolProperty("com.openexchange.mail.mime.enableMime4j", false);
     }
 
     private static void setHeaders(final Part part, final MailPart mailPart) {
