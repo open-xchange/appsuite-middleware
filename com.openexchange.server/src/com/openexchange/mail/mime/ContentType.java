@@ -391,12 +391,13 @@ public class ContentType extends ParameterizedHeader {
                 // Primary type
                 {
                     String pt = 0 == slashPos ? DEFAULT_PRIMTYPE : type.substring(0, slashPos).trim();
-                    if (pt.charAt(0) == '"' || pt.charAt(0) == '\'') {
+                    char fc;
+                    if ((fc = pt.charAt(0)) == '"' || fc == '\'') {
                         pt = pt.substring(1);
                     }
                     if (pt.toLowerCase(Locale.US).startsWith("content-type:")) {
                         pt = pt.substring(13);
-                        if (pt.charAt(0) == '"' || pt.charAt(0) == '\'') {
+                        if ((fc = pt.charAt(0)) == '"' || fc == '\'') {
                             pt = pt.substring(1);
                         }
                     }
@@ -409,7 +410,8 @@ public class ContentType extends ParameterizedHeader {
                 {
                     String st = slashPos < type.length() ? type.substring(slashPos + 1).trim() : DEFAULT_SUBTYPE;
                     final int mlen = st.length() - 1;
-                    if (mlen > 0 && (st.charAt(mlen) == '"' || st.charAt(mlen) == '\'')) {
+                    char lc;
+                    if (mlen > 0 && ((lc = st.charAt(mlen)) == '"' || lc == '\'')) {
                         st = st.substring(0, mlen);
                     }
                     if (isInvalidToken(st)) {
