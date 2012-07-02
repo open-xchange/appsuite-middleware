@@ -56,11 +56,13 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.caldav.Tools;
 import com.openexchange.caldav.mixins.CTag;
+import com.openexchange.caldav.mixins.Owner;
 import com.openexchange.caldav.mixins.SyncToken;
 import com.openexchange.caldav.reports.Syncstatus;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.container.CommonObject;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.webdav.acl.mixins.CurrentUserPrivilegeSet;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavPath;
@@ -95,7 +97,7 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends Com
         this.factory = factory;
         this.folder = folder;
         this.folderID = Tools.parse(folder.getID());
-        includeProperties(new CurrentUserPrivilegeSet(folder.getOwnPermission()), new CTag(this), new SyncToken(this));
+        includeProperties(new CurrentUserPrivilegeSet(folder.getOwnPermission()), new CTag(this), new SyncToken(this), new Owner(this));
         LOG.debug(getUrl() + ": initialized.");
     }
     
@@ -242,6 +244,8 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends Com
     protected abstract AbstractResource createResource(T object, WebdavPath url) throws OXException;
     
     protected abstract String getFileExtension();
+    
+    public abstract User getOwner() throws OXException;
     
     /**
      * Constructs a {@link WebdavPath} for a child resource of this

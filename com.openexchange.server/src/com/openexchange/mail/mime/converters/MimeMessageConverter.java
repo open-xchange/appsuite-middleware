@@ -90,6 +90,7 @@ import org.apache.james.mime4j.MimeException;
 import org.apache.james.mime4j.parser.ContentHandler;
 import org.apache.james.mime4j.parser.MimeStreamParser;
 import org.apache.james.mime4j.stream.MimeConfig;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.java.Charsets;
@@ -373,6 +374,7 @@ public final class MimeMessageConverter {
                     mail.writeTo(out);
                     mimeMessage =
                         new MimeMessage(MimeDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(out.toByteArray()));
+                    mimeMessage.removeHeader("x-original-headers");
                 } else {
                     final File file = checkForFile(mail);
                     if (null == file) {
@@ -2147,8 +2149,18 @@ public final class MimeMessageConverter {
 
     private static final int DEFAULT_MESSAGE_SIZE = 8192;
 
+    private static volatile Boolean enableMime4j;
+
     private static boolean useMime4j() {
-        return false;
+        Boolean tmp = enableMime4j;
+        if (null == tmp) {
+            synchronized (MimeMessageConverter.class) {
+                final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                tmp = Boolean.valueOf(null == service ? false : service.getBoolProperty("com.openexchange.mail.mime.enableMime4j", false));
+                enableMime4j = tmp;
+            }
+        }
+        return tmp.booleanValue();
     }
 
     private static void setHeaders(final Part part, final MailPart mailPart) {

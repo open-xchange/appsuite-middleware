@@ -223,13 +223,14 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
         }
     }
     
-    private Appointment patch(CalendarDataObject appointment) throws WebdavProtocolException {
+    private Appointment patch(CalendarDataObject appointment) throws OXException {
         if (null != appointment) {
             Patches.Outgoing.removeAlarmInSharedFolder(getFolder(), appointment);
             Patches.Outgoing.resolveGroupParticipants(appointment);
             Patches.Outgoing.setOrganizerInformation(factory, appointment);
             Patches.Outgoing.setOrganizersParticipantStatus(appointment);
             Patches.Outgoing.setSeriesStartAndEnd(factory, appointment);
+//            Patches.Outgoing.removeImplicitParticipant(appointment, getFolder());
         }
         return appointment;
     }

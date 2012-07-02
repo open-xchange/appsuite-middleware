@@ -140,7 +140,7 @@ public class MailSearchHandler implements SearchHandler {
                                                                 .setOrder(Order.DESC);                    
                     String fullName = query.getFullName();
                     if (fullName != null) {
-                        builder.setFolder(fullName);
+                        builder.setFolders(Collections.singleton(fullName));
                     }
                     QueryParameters parameters = builder.setHandler(com.openexchange.index.SearchHandler.CUSTOM).setSearchTerm(mailSearchTerm).build();
                     MailField[] mailFields = MailField.getFields(fields);

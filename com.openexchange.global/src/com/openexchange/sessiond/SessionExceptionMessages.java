@@ -70,7 +70,7 @@ public final class SessionExceptionMessages implements LocalizableStrings {
 
     public static final String PASSWORD_UPDATE_FAILED_MSG = "Password could not be changed";
 
-    public static final String MAX_SESSION_PER_USER_EXCEPTION_MSG = "Max. session size for user %1$s in context %2$s exceeded";
+    public static final String MAX_SESSION_PER_USER_EXCEPTION_MSG = "Max. number of sessions exceeded for user %1$s in context %2$s";
 
     public static final String DUPLICATE_AUTHID_MSG = "Found duplicate used authentication identifier. Login of existing session: %1$s. Current denied login request: %2$s.";
 

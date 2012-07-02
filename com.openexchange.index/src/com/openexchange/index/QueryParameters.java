@@ -50,6 +50,7 @@
 package com.openexchange.index;
 
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.index.IndexDocument.Type;
 
 /**
@@ -71,7 +72,7 @@ public final class QueryParameters {
         int off;
         int len;
         String pattern;
-        String folder;
+        Set<String> folders;
         IndexField sortField;
         Order order;
         Map<String, Object> parameters;
@@ -91,7 +92,7 @@ public final class QueryParameters {
         private void init() {
             off = 0;
             len = Integer.MAX_VALUE;
-            folder = null;
+            folders = null;
             sortField = null;
             order = null;
         }
@@ -141,8 +142,8 @@ public final class QueryParameters {
             return this;
         }
         
-        public Builder setFolder(final String folder) {
-            this.folder = folder;
+        public Builder setFolders(final Set<String> folders) {
+            this.folders = folders;
             return this;
         }
         
@@ -175,7 +176,7 @@ public final class QueryParameters {
 
     private final Type type;
 
-    private final String folder;
+    private final Set<String> folders;
     
     private final IndexField sortField;
     
@@ -193,7 +194,7 @@ public final class QueryParameters {
         pattern = builder.pattern;
         type = builder.type;
         searchTerm = builder.searchTerm;
-        folder = builder.folder;
+        folders = builder.folders;
         sortField = builder.sortField;
         order = builder.order;
     }
@@ -239,8 +240,8 @@ public final class QueryParameters {
      * 
      * @return The folder
      */
-    public String getFolder() {
-        return folder;
+    public Set<String> getFolders() {
+        return folders;
     }
 
     /**

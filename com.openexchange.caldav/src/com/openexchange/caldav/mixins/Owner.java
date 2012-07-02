@@ -47,56 +47,47 @@
  *
  */
 
-package com.openexchange.file.storage.json.services;
+package com.openexchange.caldav.mixins;
 
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
-import com.openexchange.folderstorage.FolderService;
-import com.openexchange.groupware.attach.AttachmentBase;
-import com.openexchange.index.IndexFacadeService;
-import com.openexchange.rdiff.RdiffService;
-import com.openexchange.server.ServiceLookup;
+import org.apache.commons.logging.Log;
+import com.openexchange.caldav.CaldavProtocol;
+import com.openexchange.caldav.resources.CommonFolderCollection;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.log.LogFactory;
+import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 /**
- * {@link Services}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * The {@link Owner}
+ * 
+ * This property identifies a particular principal as being the "owner" of the 
+ * resource. Since the owner of a resource often has special access control 
+ * capabilities (e.g., the owner frequently has permanent DAV:write-acl 
+ * privilege), clients might display the resource owner in their user 
+ * interface.
+ * 
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class Services {
+public class Owner extends SingleXMLPropertyMixin {
 
-    private static AtomicReference<ServiceLookup> LOOKUP_REF = new AtomicReference<ServiceLookup>();
+    private static final Log LOG = LogFactory.getLog(Owner.class);
+    private static final String PROPERTY_NAME = "owner";
+    private final CommonFolderCollection<?> collection;    
 
-    /**
-     * Sets the service look-up instance.
-     *
-     * @param serviceLookup The service look-up instance
-     */
-    public static void setServiceLookup(final ServiceLookup serviceLookup) {
-        LOOKUP_REF.set(serviceLookup);
-    }
-
-    public static IDBasedFileAccessFactory getFileAccessFactory() {
-        final ServiceLookup lookup = LOOKUP_REF.get();
-        return null == lookup ? null : lookup.getService(IDBasedFileAccessFactory.class);
-    }
-
-    public static AttachmentBase getAttachmentBase() {
-        final ServiceLookup lookup = LOOKUP_REF.get();
-        return null == lookup ? null : lookup.getService(AttachmentBase.class);
-    }
-
-    public static RdiffService getRdiffService() {
-        final ServiceLookup lookup = LOOKUP_REF.get();
-        return null == lookup ? null : lookup.getService(RdiffService.class);
+    public Owner(CommonFolderCollection<?> collection) {
+        super(CaldavProtocol.DAV_NS.getURI(), PROPERTY_NAME);
+        this.collection = collection;
     }
     
-    public static IndexFacadeService getIndexFacade() {
-        final ServiceLookup lookup = LOOKUP_REF.get();
-        return null == lookup ? null : lookup.getService(IndexFacadeService.class);
+    @Override
+    protected String getValue() {
+        User owner = null;
+        try {
+            owner = collection.getOwner();
+        } catch (OXException e) {
+            LOG.error("error determining owner from collection", e);
+        }
+        return null != owner ? "<D:href>/principals/users/" + owner.getLoginInfo() + "</D:href>" : null;
     }
 
-    public static FolderService getFolderService() {
-        final ServiceLookup lookup = LOOKUP_REF.get();
-        return null == lookup ? null : lookup.getService(FolderService.class);
-    }
 }

@@ -58,6 +58,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.TasksSQLInterface;
+import com.openexchange.caldav.mixins.ScheduleInboxURL;
 import com.openexchange.caldav.mixins.ScheduleOutboxURL;
 import com.openexchange.caldav.resources.CommonCollection;
 import com.openexchange.config.cascade.ComposedConfigProperty;
@@ -268,13 +269,8 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
 		}
     }
 
-    public User resolveUser(int userID) throws WebdavProtocolException {
-        try {
-            return users.getUser(userID, getContext());
-        } catch (OXException e) {
-            LOG.error(e.getMessage(), e);
-            throw WebdavProtocolException.generalError(e, new WebdavPath(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        }
+    public User resolveUser(int userID) throws OXException {
+        return users.getUser(userID, getContext());
     }
 
     // Efficient loading based on loading hints
@@ -316,6 +312,8 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
                 collection = new com.openexchange.caldav.resources.CalDAVRootCollection(factory);
             } else if (ScheduleOutboxURL.SCHEDULE_OUTBOX.equals(url.name())) {
                 collection = factory.mixin(new com.openexchange.caldav.resources.ScheduleOutboxCollection(factory));
+            } else if (ScheduleInboxURL.SCHEDULE_INBOX.equals(url.name())) {
+                collection = factory.mixin(new com.openexchange.caldav.resources.ScheduleInboxCollection(factory));
             } else {
                 CommonCollection rootCollection = this.resolveCollection(ROOT_URL);
                 collection = (CommonCollection)rootCollection.getChild(url.name());                

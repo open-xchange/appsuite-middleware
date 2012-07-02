@@ -180,7 +180,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
                                                     .setOffset(0)
                                                     .setLength(Integer.MAX_VALUE)
                                                     .setType(IndexDocument.Type.MAIL)
-                                                    .setFolder(folder);
+                                                    .setFolders(Collections.singleton(folder));
             
             
             if (null != sortField) {

@@ -25,8 +25,6 @@
         </deletionPolicy>
     </mainIndex>
 
-    <!-- <jmx /> -->
-
     <updateHandler class="solr.DirectUpdateHandler2" />
 
     <query>
@@ -92,19 +90,9 @@
             <str name="q.op">OR</str>
         </lst>
 
-        <!-- Use this only if "components" is not specified to use the defaults -->
-        <!--
-            <arr name="first-components">
-            <str>queryModifier</str>
-            </arr>
-        -->
         <arr name="components">
             <str>queryModifier</str>
             <str>query</str>
-            <!-- Uncomment for debugging purposes only -->
-            <!--
-                <str>debug</str>
-            -->
         </arr>
     </requestHandler>
 
@@ -135,13 +123,4 @@
 
     <requestHandler name="/update" class="solr.XmlUpdateRequestHandler" />
     <requestHandler name="/update/javabin" class="solr.BinaryUpdateRequestHandler" />
-    <!-- <requestHandler name="/analysis/document" class="solr.DocumentAnalysisRequestHandler"
-        /> -->
-    <!-- <requestHandler name="/analysis/field" class="solr.FieldAnalysisRequestHandler"
-        /> -->
-    <!-- <requestHandler name="/update/csv" class="solr.CSVRequestHandler" startup="lazy"
-        /> -->
-    <!-- <requestHandler name="/admin/" class="org.apache.solr.handler.admin.AdminHandlers"
-        /> -->
-
 </config>

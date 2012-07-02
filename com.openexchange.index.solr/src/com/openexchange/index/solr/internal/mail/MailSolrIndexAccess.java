@@ -395,9 +395,9 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
             case ALL_REQUEST:
             {
                 final int accountId = getAccountId(parameters);
-                final String folder = parameters.getFolder();
-                String queryString = buildQueryString(accountId, folder);
-                if (queryString.length() == 0) {
+                final Set<String> folders = parameters.getFolders();
+                String queryString = buildQueryString(accountId, folders);
+                if (queryString == null || queryString.length() == 0) {
                     queryString = "*:*";
                 }
                 deleteDocumentsByQuery(queryString);
@@ -407,9 +407,9 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
             case GET_REQUEST:
             {
                 final int accountId = getAccountId(parameters);
-                final String folder = parameters.getFolder();
+                final Set<String> folders = parameters.getFolders();
                 final String[] ids = getIds(parameters);
-                String queryString = buildQueryString(accountId, folder);
+                String queryString = buildQueryString(accountId, folders);
                 final StringBuilder sb = new StringBuilder(queryString);
                 if (queryString.length() != 0) {
                     sb.append(" AND (");
@@ -605,16 +605,12 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
         switch (searchHandler) {
         case ALL_REQUEST: {
             final int accountId = getAccountId(parameters);
-            final String folder = parameters.getFolder();
-            if (folder == null) {
-                solrQuery = new SolrQuery("*:*");
-            } else {
-                final ConfigurationService config = Services.getService(ConfigurationService.class);
-                final String handler = config.getProperty(SolrProperties.ALL_HANLDER);
-                solrQuery = new SolrQuery("\"" + folder + "\"");
-                solrQuery.setQueryType(handler);
-            }
-            solrQuery.addFilterQuery(buildFilterQueries(accountId, null));
+            final Set<String> folders = parameters.getFolders();                
+            final ConfigurationService config = Services.getService(ConfigurationService.class);
+            final String handler = config.getProperty(SolrProperties.ALL_HANLDER);
+            solrQuery = new SolrQuery("*:*");
+            solrQuery.setQueryType(handler);
+            solrQuery.addFilterQuery(buildFilterQueries(accountId, folders));
             solrQuery.set("sortManually", setSortAndOrder(parameters, solrQuery));
             break;
         }
@@ -625,16 +621,16 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
             solrQuery = new SolrQuery(parameters.getPattern());
             solrQuery.setQueryType(handler);
             solrQuery.set("sortManually", setSortAndOrder(parameters, solrQuery));
-            solrQuery.addFilterQuery(buildFilterQueries(getAccountId(parameters), parameters.getFolder()));
+            solrQuery.addFilterQuery(buildFilterQueries(getAccountId(parameters), parameters.getFolders()));
             break;
         }
 
         case GET_REQUEST: {
             final String[] ids = getIds(parameters);
             final int accountId = getAccountId(parameters);
-            final String folder = parameters.getFolder();
-            final String queryString = buildQueryString(accountId, folder);
-            final StringBuilder sb = new StringBuilder(queryString);
+            final Set<String> folders = parameters.getFolders();
+            final String queryString = buildQueryString(accountId, folders);
+            final StringBuilder sb = new StringBuilder(queryString == null ? "" : queryString);
             if (queryString.length() != 0) {
                 sb.append(" AND (");
             } else {
@@ -663,7 +659,7 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
             solrQuery = new SolrQuery(queryBuilder.toString());
             solrQuery.setQueryType(handler);
             solrQuery.set("sortManually", setSortAndOrder(parameters, solrQuery));
-            solrQuery.addFilterQuery(buildFilterQueries(getAccountId(parameters), parameters.getFolder()));
+            solrQuery.addFilterQuery(buildFilterQueries(getAccountId(parameters), parameters.getFolders()));
             break;
         }
 
@@ -762,32 +758,34 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
         return retval;
     }
 
-    private String buildQueryString(int accountId, String folder) {
-        StringBuilder sb = new StringBuilder(128); 
-        boolean withAccount = false;
+    private String buildQueryString(int accountId, Set<String> folders) {
+        String accountQuery = null;
         if (SolrMailField.ACCOUNT.isIndexed() && accountId >= 0) {
-            sb.append('(').append(SolrMailField.ACCOUNT.solrName()).append(":\"").append(accountId).append("\")");
-            withAccount = true;
+            accountQuery = buildQueryString(SolrMailField.ACCOUNT.solrName(), String.valueOf(accountId));
         }
-            
-        if (SolrMailField.FULL_NAME.isIndexed() && folder != null) {
-            if (withAccount) {
-                sb.append(" AND ");
-            }
-            
-            sb.append('(').append(SolrMailField.FULL_NAME.solrName()).append(":\"").append(folder).append("\")");
+        
+        String folderQuery = null;
+        if (SolrMailField.FULL_NAME.isIndexed()) {
+            folderQuery = buildQueryStringWithOr(SolrMailField.FULL_NAME.solrName(), folders);    
         }  
         
-        return sb.toString();
+        return catenateQueriesWithAnd(accountQuery, folderQuery);
     }
     
-    private String[] buildFilterQueries(final int accountId, final String folder) {
-        final List<String> filters = new ArrayList<String>(2);
+    private String[] buildFilterQueries(final int accountId, final Set<String> folders) {
+        List<String> filters = new ArrayList<String>(2);
         if (SolrMailField.ACCOUNT.isIndexed() && accountId >= 0) {
-            filters.add(SolrMailField.ACCOUNT.solrName() + ':' + Integer.toString(accountId));
+            String accountQuery = buildQueryString(SolrMailField.ACCOUNT.solrName(), String.valueOf(accountId));
+            if (accountQuery != null) {
+                filters.add(accountQuery);
+            }
         }
-        if (SolrMailField.FULL_NAME.isIndexed() && folder != null) {
-            filters.add(SolrMailField.FULL_NAME.solrName() + ':' + "\"" + folder + "\"");
+        
+        if (SolrMailField.FULL_NAME.isIndexed()) {
+            String folderQuery = buildQueryStringWithOr(SolrMailField.FULL_NAME.solrName(), folders);  
+            if (folderQuery != null) {
+                filters.add(folderQuery);
+            }
         }
         
         return filters.toArray(new String[filters.size()]);
