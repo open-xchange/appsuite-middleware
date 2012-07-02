@@ -86,8 +86,8 @@ public class GrizzlOXAddOn implements AddOn {
         filters.add(appendBackendRouteFilter);
         
         //2. EASKeepAliveFilter
-        EASKeepAliveFilter easKeepAliveFilter = new EASKeepAliveFilter();
-        filters.add(easKeepAliveFilter);
+//        EASKeepAliveFilter easKeepAliveFilter = new EASKeepAliveFilter("");
+//        filters.add(easKeepAliveFilter);
     }
 
     @Override
