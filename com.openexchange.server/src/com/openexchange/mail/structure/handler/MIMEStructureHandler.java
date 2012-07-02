@@ -215,7 +215,7 @@ public final class MIMEStructureHandler implements StructureHandler {
         }
         final int length = bytes.length;
         if (length <= 0 || length >= MB) {
-            // No headers ?
+            // No headers or far too many bytes
             return true;
         }
         /*

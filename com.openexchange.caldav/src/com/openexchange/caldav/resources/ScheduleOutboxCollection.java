@@ -211,7 +211,7 @@ public class ScheduleOutboxCollection extends CommonCollection {
         if (null != participant && Participant.USER == participant.getType()) {
             try {
                 return factory.resolveUser(participant.getIdentifier());
-            } catch (WebdavProtocolException e) {
+            } catch (OXException e) {
                 LOG.error("error resolving participant", e);
             }
         }

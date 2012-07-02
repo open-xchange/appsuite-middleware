@@ -47,31 +47,47 @@
  *
  */
 
-package com.openexchange.webdav.action;
+package com.openexchange.caldav.mixins;
 
-import com.openexchange.webdav.protocol.Protocol.WEBDAV_METHOD;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
+import org.apache.commons.logging.Log;
+import com.openexchange.caldav.CaldavProtocol;
+import com.openexchange.caldav.resources.CommonFolderCollection;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.log.LogFactory;
+import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
-public class WebdavOptionsAction extends AbstractAction {
+/**
+ * The {@link Owner}
+ * 
+ * This property identifies a particular principal as being the "owner" of the 
+ * resource. Since the owner of a resource often has special access control 
+ * capabilities (e.g., the owner frequently has permanent DAV:write-acl 
+ * privilege), clients might display the resource owner in their user 
+ * interface.
+ * 
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ */
+public class Owner extends SingleXMLPropertyMixin {
 
-	@Override
-    public void perform(final WebdavRequest req, final WebdavResponse res)
-			throws WebdavProtocolException {
-		res.setHeader("Content-Length","0");
-		res.setHeader("Allow", join(req.getResource().getOptions()));
-		res.setHeader("DAV", "1, 2, 3, access-control, calendar-access, addressbook, extended-mkcol, calendar-auto-schedule, calendar-schedule");
-		res.setHeader("Accept-Ranges", "bytes");
-		res.setHeader("MS-Author-Via", "DAV"); // Hack for Windows Webfolder
-	}
+    private static final Log LOG = LogFactory.getLog(Owner.class);
+    private static final String PROPERTY_NAME = "owner";
+    private final CommonFolderCollection<?> collection;    
 
-	private String join(final WEBDAV_METHOD[] options) {
-		final StringBuffer buffer = new StringBuffer();
-		for(final WEBDAV_METHOD m : options) {
-			buffer.append(m.toString());
-			buffer.append(", ");
-		}
-		buffer.setLength(buffer.length()-2);
-		return buffer.toString();
-	}
+    public Owner(CommonFolderCollection<?> collection) {
+        super(CaldavProtocol.DAV_NS.getURI(), PROPERTY_NAME);
+        this.collection = collection;
+    }
+    
+    @Override
+    protected String getValue() {
+        User owner = null;
+        try {
+            owner = collection.getOwner();
+        } catch (OXException e) {
+            LOG.error("error determining owner from collection", e);
+        }
+        return null != owner ? "<D:href>/principals/users/" + owner.getLoginInfo() + "</D:href>" : null;
+    }
 
 }

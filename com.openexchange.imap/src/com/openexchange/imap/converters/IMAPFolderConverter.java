@@ -150,6 +150,8 @@ public final class IMAPFolderConverter {
 
     private static final String ATTRIBUTE_HAS_CHILDREN = "\\haschildren";
 
+    private static final String ATTRIBUTE_NO_INFERIORS = "\\noinferiors";
+
     // private static final String ATTRIBUTE_HAS_NO_CHILDREN = "\\HasNoChildren";
 
     /**
@@ -299,6 +301,10 @@ public final class IMAPFolderConverter {
                         }
                         if (imapConfig.getImapCapabilities().hasChildren() && attrs.contains(ATTRIBUTE_HAS_CHILDREN)) {
                             mailFolder.setSubfolders(true);
+                        }
+                        if (attrs.contains(ATTRIBUTE_NO_INFERIORS)) {
+                            mailFolder.setSubfolders(true);
+                            mailFolder.setSubscribedSubfolders(false);
                         }
                     }
                     if (!mailFolder.containsSubfolders()) {
