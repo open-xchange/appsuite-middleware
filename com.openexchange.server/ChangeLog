@@ -1,3 +1,7 @@
+* 2012-07-03 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22454: Chunk-wise IMAP search
+
 * 2012-07-02 - tobias.friedrich@open-xchange.com
 
 - Fix for bug 22451: Demystified until parameter in recurrence rules

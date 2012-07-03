@@ -53,12 +53,18 @@ import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.mime.utils.MimeStorageUtility.getFetchProfile;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.list.linked.TIntLinkedList;
+
+import java.util.LinkedList;
+import java.util.List;
+
 import javax.mail.FolderClosedException;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.StoreClosedException;
 import javax.mail.search.SearchException;
 import javax.mail.search.SearchTerm;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCapabilities;
 import com.openexchange.imap.IMAPException;
@@ -72,6 +78,7 @@ import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.protocol.IMAPProtocol;
+import com.sun.mail.imap.protocol.MessageSet;
 
 /**
  * {@link IMAPSearch}
@@ -280,8 +287,35 @@ public final class IMAPSearch {
             @Override
             public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
                 try {
-                    return protocol.search(term);
+                    final int messageCount = imapFolder.getMessageCount();
+                    if (messageCount <= 0) {
+                        return new int[0];
+                    }
+                    final List<MessageSet> sets = new LinkedList<MessageSet>();
+                    {
+                        int chunkSize = MailProperties.getInstance().getMailFetchLimit();
+                        int start = 1;
+                        while (start <= messageCount) {
+                            if ((start + chunkSize) > messageCount) {
+                                chunkSize = (messageCount - start + 1);
+                            }
+                            sets.add(new MessageSet(start, start + chunkSize - 1));
+                            start += chunkSize;
+                        }
+                        if (start <= messageCount) {
+                            sets.add(new MessageSet(start, messageCount));
+                        }
+                    }
+                    final TIntList ret = new TIntLinkedList();
+                    final MessageSet[] arr = new MessageSet[1];
+                    for (final MessageSet messageSet : sets) {
+                        arr[0] = messageSet;
+                        ret.add(protocol.search(arr, term));
+                    }
+                    return ret.toArray();
                 } catch (final SearchException e) {
+                    throw new ProtocolException(e.getMessage(), e);
+                } catch (final MessagingException e) {
                     throw new ProtocolException(e.getMessage(), e);
                 }
             }
