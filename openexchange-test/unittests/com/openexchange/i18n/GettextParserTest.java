@@ -263,7 +263,7 @@ public class GettextParserTest extends TestCase {
         } catch (final OXException x) {
             assertEquals(I18NErrorMessages.UNEXPECTED_TOKEN.getNumber(), x
                 .getCode());
-            final Object[] messageArgs = x.getDisplayArgs();
+            final Object[] messageArgs = x.getLogArgs();
             final String incorrectToken = (String) messageArgs[0];
             final String filename = (String) messageArgs[1];
             final int line = i((Integer) messageArgs[2]);
@@ -292,7 +292,7 @@ public class GettextParserTest extends TestCase {
             assertEquals(
                 com.openexchange.i18n.parsing.I18NErrorMessages.UNEXPECTED_TOKEN_CONSUME
                     .getNumber(), x.getCode());
-            final Object[] messageArgs = x.getDisplayArgs();
+            final Object[] messageArgs = x.getLogArgs();
             final String incorrectToken = (String) messageArgs[0];
             final String filename = (String) messageArgs[1];
             final int line = i((Integer) messageArgs[2]);
@@ -318,7 +318,7 @@ public class GettextParserTest extends TestCase {
         } catch (final OXException x) {
             assertEquals(I18NErrorMessages.EXPECTED_NUMBER.getNumber(), x
                 .getCode());
-            final Object[] messageArgs = x.getDisplayArgs();
+            final Object[] messageArgs = x.getLogArgs();
             final String incorrectToken = (String) messageArgs[0];
             final String filename = (String) messageArgs[1];
             final int line = i((Integer) messageArgs[2]);
@@ -342,7 +342,7 @@ public class GettextParserTest extends TestCase {
         } catch (final OXException x) {
             assertEquals(I18NErrorMessages.MALFORMED_TOKEN.getNumber(), x
                 .getCode());
-            final Object[] messageArgs = x.getDisplayArgs();
+            final Object[] messageArgs = x.getLogArgs();
             final String incorrectToken = (String) messageArgs[0];
             final String expected = (String) messageArgs[1];
             final String filename = (String) messageArgs[2];
@@ -362,7 +362,7 @@ public class GettextParserTest extends TestCase {
         } catch (final OXException e) {
             assertEquals(I18NErrorMessages.IO_EXCEPTION.getNumber(), e
                 .getCode());
-            assertEquals("test.po", e.getDisplayArgs()[0]);
+            assertEquals("test.po", e.getLogArgs()[0]);
             assertEquals("BUMM!", e.getCause().getMessage());
         }
     }
