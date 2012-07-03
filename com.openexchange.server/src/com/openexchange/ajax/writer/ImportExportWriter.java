@@ -98,7 +98,7 @@ public class ImportExportWriter extends DataWriter {
         if (importResult.hasError()) {
             final OXException exception = importResult.getException();
             final JSONObject jsonObject = new JSONObject();
-            ResponseWriter.addException(jsonObject, exception, session.getUser().getLocale());
+            ResponseWriter.addException(jsonObject, exception, null != session ? session.getUser().getLocale() : null);
 
             jsonwriter.object();
             writeDepth1(jsonObject);
@@ -110,7 +110,7 @@ public class ImportExportWriter extends DataWriter {
                 for (final ConversionWarning warning : warnings) {
                     jsonwriter.object();
                     final JSONObject jsonWarning = new JSONObject();
-                    ResponseWriter.addWarning(jsonWarning, warning,  session.getUser().getLocale());
+                    ResponseWriter.addWarning(jsonWarning, warning, null != session ? session.getUser().getLocale() : null);
                     writeDepth1(jsonWarning);
                     jsonwriter.endObject();
                 }
