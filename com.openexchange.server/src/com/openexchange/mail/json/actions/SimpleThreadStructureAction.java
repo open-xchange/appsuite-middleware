@@ -107,6 +107,8 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
         if (cache && CACHABLE_FORMATS.contains(req.getRequest().getFormat())) {
             final JsonCacheService jsonCache = JsonCaches.getCache();
             if (jsonCache != null) {
+                System.out.println("SimpleThreadStructureAction.perform(): JsonCacheService is available" + req.session2String());
+
                 final long st = DEBUG ? System.currentTimeMillis() : 0L;
                 final String sha1Sum = getSha1For(req);
                 final String id = "com.openexchange.mail." + sha1Sum;
@@ -114,6 +116,9 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                 final JSONValue jsonValue = jsonCache.opt(id, session.getUserId(), session.getContextId());
                 final AJAXRequestResult result;
                 if (jsonValue == null || jsonValue.length() == 0) {
+                    System.out.println("SimpleThreadStructureAction.perform(): JSON cache value absent for folder "
+                            + req.checkParameter(Mail.PARAMETER_MAILFOLDER) + req.session2String());
+
                     /*
                      * Check mailbox size and 'max' parameter
                      */
@@ -124,6 +129,10 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                         final int messageCount = mailInterface.getMessageCount(folderId);
                         final int fetchLimit;
                         if ((messageCount <= 0) || (messageCount <= (fetchLimit = getFetchLimit(mailInterface))) || ((max > 0) && (max <= fetchLimit))) {
+                            System.out.println("SimpleThreadStructureAction.perform(): Folder "
+                                    + req.checkParameter(Mail.PARAMETER_MAILFOLDER) + " considered small enough fpor dirtect hand-off."
+                                    + req.session2String());
+
                             /*
                              * Mailbox considered small enough for direct hand-off
                              */
@@ -133,9 +142,13 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                     /*
                      * Return empty array immediately
                      */
+                    System.out.println("SimpleThreadStructureAction.perform(): Returning empty JSON cache value & separately handling folder " + req.checkParameter(Mail.PARAMETER_MAILFOLDER) + req.session2String());
+                    
                     result = new AJAXRequestResult(new JSONArray(), "json");
                     result.setResponseProperty("cached", Boolean.TRUE);
                 } else {
+                    System.out.println("SimpleThreadStructureAction.perform(): Returning loaded JSON cache value & separately handling folder " + req.checkParameter(Mail.PARAMETER_MAILFOLDER) + req.session2String());
+                    
                     result = new AJAXRequestResult(jsonValue, "json");
                     result.setResponseProperty("cached", Boolean.TRUE);
                     if (DEBUG) {
@@ -197,7 +210,7 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                         }
                     }
                 };
-                ThreadPools.getThreadPool().submit(ThreadPools.task(r));
+                ThreadPools.getThreadPool().submit(ThreadPools.task(r, "SeparateThreader-"));
                 /*
                  * Return cached JSON result
                  */
@@ -226,6 +239,8 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
      */
     protected AJAXRequestResult perform0(final MailRequest req, final MailServletInterface mailInterface, final boolean cache) throws OXException {
         try {
+            System.out.println("SimpleThreadStructureAction.perform0(): Starting non-cached simple-thread-structure, thread="+Thread.currentThread().getName()+""
+                    + req.session2String());
             /*
              * Read in parameters
              */
