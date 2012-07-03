@@ -53,6 +53,7 @@ import java.util.List;
 import java.util.TimeZone;
 import net.fortuna.ical4j.model.ComponentList;
 import net.fortuna.ical4j.model.Dur;
+import net.fortuna.ical4j.model.Parameter;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.component.VAlarm;
@@ -146,11 +147,17 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
          */
         Trigger trigger = getTrigger(index, component, warnings);
         if (null != trigger) {
+            /*
+             * determine related date
+             */
+            Parameter relatedParameter = trigger.getParameter("RELATED");
+            Date relatedDate = null != relatedParameter && "END".equals(relatedParameter.getValue()) ? 
+                calendarObject.getEndDate() : calendarObject.getStartDate();
             if (Appointment.class.isAssignableFrom(calendarObject.getClass())) {
                 /*
                  * set relative alarm timespan 
                  */
-                Long duration = parseTriggerDuration(index, trigger, calendarObject.getStartDate(), timeZone, warnings);
+                Long duration = parseTriggerDuration(index, trigger, relatedDate, timeZone, warnings);
                 if (null != duration) {
                     Appointment appointment = (Appointment)calendarObject;
                     appointment.setAlarmFlag(true);
@@ -160,7 +167,7 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
                 /*
                  * set absolute alarm date-time
                  */
-                Date date = parseTriggerDate(index, trigger, calendarObject.getEndDate(), timeZone, warnings);
+                Date date = parseTriggerDate(index, trigger, relatedDate, timeZone, warnings);
                 if (null != date) {
                     Task task = (Task)calendarObject;
                     task.setAlarmFlag(true);
@@ -229,6 +236,9 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
         if (null != duration) {
             if (false == duration.isNegative()) {
                 warnings.add(new ConversionWarning(index, "Ignoring non-negative duration for alarm trigger"));
+                return null;
+            } else if (null == start) {
+                warnings.add(new ConversionWarning(index, "Need corresponding time for relative trigger"));
                 return null;
             } else {
                 return duration.getTime(start);
