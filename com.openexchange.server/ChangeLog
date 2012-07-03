@@ -3,6 +3,7 @@
  - Fix for bug 22454: Chunk-wise IMAP search
  - Fix for bug 22351: More lenient handling for less FETCH responses than expected
  - Partly fix for bug 22093: Dealing with non-selectable folders during action=all request
+ - Fix for 22093: Dealing with non-selectable folders during folder listing
 
 * 2012-07-02 - tobias.friedrich@open-xchange.com
 
