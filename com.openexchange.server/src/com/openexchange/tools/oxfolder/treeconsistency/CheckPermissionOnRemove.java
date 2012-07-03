@@ -228,12 +228,12 @@ public final class CheckPermissionOnRemove extends CheckPermission {
              * Delete read permissions
              */
             final int[] users = entry.getValue().getUsers();
-            for (int j = 0; j < users.length; j++) {
+            for (final int user : users) {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Auto-Delete system-folder-read permission for user "
-                            + UserStorage.getStorageUser(users[j], ctx).getDisplayName() + " from folder " + fid);
+                            + UserStorage.getStorageUser(user, ctx).getDisplayName() + " from folder " + fid);
                 }
-                deleteSystemFolderReadPermission(fid, users[j]);
+                deleteSystemFolderReadPermission(fid, user);
             }
             final int[] groups = entry.getValue().getGroups();
             for (final int group : groups) {
