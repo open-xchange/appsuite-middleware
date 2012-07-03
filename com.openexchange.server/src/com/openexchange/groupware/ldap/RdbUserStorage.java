@@ -566,6 +566,7 @@ public class RdbUserStorage extends UserStorage {
                 } catch (final OXException e) {
                     throw LdapExceptionCode.NO_CONNECTION.create(e).setPrefix("USR");
                 }
+                condition.resetTransactionRollbackException();
                 try {
                     DBUtils.startTransaction(con);
                     // Update time zone and language
