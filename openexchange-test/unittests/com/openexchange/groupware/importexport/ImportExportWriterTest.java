@@ -49,19 +49,21 @@
 
 package com.openexchange.groupware.importexport;
 
-import com.openexchange.exception.OXException;
-import java.util.*;
-
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import junit.framework.TestCase;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.writer.ImportExportWriter;
 import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.exception.OXException;
 
 public class ImportExportWriterTest extends TestCase {
 
@@ -121,7 +123,7 @@ public class ImportExportWriterTest extends TestCase {
 
         for(int i = 0, size = jsonWarnings.length(); i < size; i++) {
             JSONObject warning = jsonWarnings.getJSONObject(i);
-            assertTrue(expectedStrings.remove(warning.getString("error")));
+            assertTrue(expectedStrings.remove(warning.getJSONObject("warnings").getJSONArray("error_stack").get(0)));
         }
         assertTrue(expectedStrings.isEmpty());
     }

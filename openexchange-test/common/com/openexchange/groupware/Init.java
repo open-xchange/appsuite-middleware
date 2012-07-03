@@ -513,6 +513,18 @@ public final class Init {
     }
 
     private static void startAndInjectImportExportServices() throws OXException {
+        if (null == com.openexchange.importexport.osgi.ImportExportServices.LOOKUP.get()) {
+            com.openexchange.importexport.osgi.ImportExportServices.LOOKUP.set(new ServiceLookup() {
+                @Override
+                public <S> S getService(final Class<? extends S> clazz) {
+                    return TestServiceRegistry.getInstance().getService(clazz);
+                }
+                @Override
+                public <S> S getOptionalService(final Class<? extends S> clazz) {
+                    return null;
+                }
+            });
+        }
     }
     
     private static void startAndInjectIDGeneratorService() {
