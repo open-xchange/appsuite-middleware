@@ -1,3 +1,9 @@
+open-xchange-spamhandler-spamassassin (6.21.0-2) unstable; urgency=low
+
+  * Release build for EDP drop #2
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 04 Jun 2012 12:59:39 +0200
+
 open-xchange-spamhandler-spamassassin (6.21.0-1) unstable; urgency=low
 
   * Internal release build for EDP drop #2

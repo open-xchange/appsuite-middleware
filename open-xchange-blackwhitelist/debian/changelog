@@ -1,3 +1,9 @@
+open-xchange-blackwhitelist (6.21.0-2) unstable; urgency=low
+
+  * Release build for EDP drop #2
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 04 Jun 2012 12:59:44 +0200
+
 open-xchange-blackwhitelist (6.21.0-1) unstable; urgency=low
 
   * Internal release build for EDP drop #2
