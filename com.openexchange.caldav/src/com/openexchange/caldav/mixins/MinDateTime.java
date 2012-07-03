@@ -47,50 +47,42 @@
  *
  */
 
-package com.openexchange.caldav;
+package com.openexchange.caldav.mixins;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.Date;
 import org.jdom2.Namespace;
-import com.openexchange.caldav.reports.CaldavMultigetReport;
-import com.openexchange.caldav.reports.CalendarQueryReport;
-import com.openexchange.caldav.reports.SyncCollection;
-import com.openexchange.webdav.action.WebdavAction;
-import com.openexchange.webdav.protocol.Protocol;
+import com.openexchange.caldav.CaldavProtocol;
+import com.openexchange.caldav.Tools;
+import com.openexchange.caldav.resources.CalDAVFolderCollection;
+import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
+
 
 /**
- * The {@link CaldavProtocol} contains constants useful for our caldav implementation
+ * {@link MinDateTime}
  * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * Provides a DATE-TIME value indicating the earliest date and
+ * time (in UTC) that the server is willing to accept for any DATE or
+ * DATE-TIME value in a calendar object resource stored in a calendar
+ * collection.
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class CaldavProtocol extends Protocol {
+public class MinDateTime extends SingleXMLPropertyMixin {
 
-    /** urn:ietf:params:xml:ns:caldav */
-    public static final Namespace CAL_NS = Namespace.getNamespace("CAL", "urn:ietf:params:xml:ns:caldav");
-
-    /** http://apple.com/ns/ical/ */
-    public static final Namespace APPLE_NS = Namespace.getNamespace("APPLE", "http://apple.com/ns/ical/");
+    public static final String PROPERTY_NAME = "min-date-time";
+    public static final Namespace NAMESPACE = CaldavProtocol.CAL_NS;
     
-    private static final List<Namespace> ADDITIONAL_NAMESPACES = Arrays.asList(CAL_NS, APPLE_NS);
-
-//    public static final String CAL_NAMESPACE = "CAL:";
-
-    public static final String CALENDAR = "<CAL:calendar />";
+    private final CalDAVFolderCollection<?> collection;
     
-    @Override
-    public List<Namespace> getAdditionalNamespaces() {
-        return ADDITIONAL_NAMESPACES;
+    public MinDateTime(CalDAVFolderCollection<?> collection) {
+        super(NAMESPACE.getURI(), PROPERTY_NAME);
+        this.collection = collection;
     }
-    
+
     @Override
-    public WebdavAction getReportAction(String ns, String name) {
-        if (ns.equals(CaldavMultigetReport.NAMESPACE) && name.equals(CaldavMultigetReport.NAME)) {
-            return new CaldavMultigetReport(this);
-        } else if (ns.equals(CalendarQueryReport.NAMESPACE) && name.equals(CalendarQueryReport.NAME)) {
-            return new CalendarQueryReport(this);
-        } else if (ns.equals(SyncCollection.NAMESPACE) && name.equals(SyncCollection.NAME)) {
-            return new SyncCollection(this);
-        }
-        return null;
+    protected String getValue() {
+        Date minDateTime = collection.getIntervalStart();
+        return null != minDateTime ? Tools.formatAsUTC(minDateTime) : null;
     }
+
 }

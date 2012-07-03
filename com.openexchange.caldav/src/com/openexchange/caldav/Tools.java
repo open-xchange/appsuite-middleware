@@ -49,7 +49,9 @@
 
 package com.openexchange.caldav;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
@@ -130,6 +132,12 @@ public class Tools {
 
     public static boolean isDataTruncation(final OXException e) {
         return OXCalendarExceptionCodes.TRUNCATED_SQL_ERROR.equals(e) || TaskExceptionCode.TRUNCATED.equals(e);
+    }
+
+    public static String formatAsUTC(Date date) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmm'00Z'");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        return dateFormat.format(date);
     }
 
     private Tools() {
