@@ -65,7 +65,7 @@ import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 
 /**
- * {@link Bug22451Test} - Wrong un​til date after expor​ting and importing r​ecurring appointment​ 
+ * {@link Bug22451Test} - Wrong until date after exporting and importing recurring appointment​ 
  * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
