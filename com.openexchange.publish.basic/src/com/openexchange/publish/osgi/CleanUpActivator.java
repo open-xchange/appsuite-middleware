@@ -58,9 +58,9 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.context.ContextService;
+import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.publish.helpers.AbstractPublicationService;
 import com.openexchange.publish.impl.EntityCleanUp;
 import com.openexchange.publish.impl.FolderCleanUpEventHandler;
 import com.openexchange.publish.impl.InfostoreCleanUpEventHandler;
@@ -78,7 +78,7 @@ public class CleanUpActivator extends HousekeepingActivator {
     public void startBundle() throws Exception {
         final ContextService contexts = getService(ContextService.class);
 
-        final EntityCleanUp entityCleanUp = new EntityCleanUp(AbstractPublicationService.getDefaultStorage());
+        final EntityCleanUp entityCleanUp = new EntityCleanUp();
 
         registrations = new LinkedList<ServiceRegistration<?>>();
 
@@ -92,7 +92,7 @@ public class CleanUpActivator extends HousekeepingActivator {
             new FolderCleanUpEventHandler(entityCleanUp, "infostore", FolderObject.INFOSTORE, contexts),
             "com/openexchange/groupware/folder/delete");
 
-        registerHandler(context, new InfostoreCleanUpEventHandler(entityCleanUp, contexts), "com/openexchange/groupware/infostore/delete");
+        registerHandler(context, new InfostoreCleanUpEventHandler(entityCleanUp, contexts), FileStorageEventConstants.DELETE_TOPIC);
 
     }
 

@@ -47,57 +47,85 @@
  *
  */
 
-package com.openexchange.publish.impl;
+package com.openexchange.file.storage.composition;
 
-import org.apache.commons.logging.Log;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventHandler;
-import com.openexchange.context.ContextService;
-import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.FileStorageEventHelper;
-import com.openexchange.file.storage.composition.FileID;
-import com.openexchange.groupware.contexts.Context;
-
+import java.util.List;
+import com.openexchange.tools.id.IDMangler;
 
 /**
- * {@link InfostoreCleanUpEventHandler}
+ * {@link FileID}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class InfostoreCleanUpEventHandler implements EventHandler {
-    
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(InfostoreCleanUpEventHandler.class);
-    
-    private final EntityCleanUp entityCleanUp;
-    
-    private final ContextService contextService;
-    
+public class FileID {
 
-    public InfostoreCleanUpEventHandler(EntityCleanUp entityCleanUp, ContextService contextService) {
-        super();
-        this.entityCleanUp = entityCleanUp;
-        this.contextService = contextService;
+    private String serviceId;
+
+    private String accountId;
+
+    private String folderId;
+
+    private String fileId;
+
+    public FileID(String serviceId, String accountId, String folderId, String fileId) {
+        this.serviceId = serviceId;
+        this.accountId = accountId;
+        this.folderId = folderId;
+        this.fileId = fileId;
     }
 
-    @Override
-    public void handleEvent(Event event) {
-        if (FileStorageEventHelper.isInfostoreEvent(event) && FileStorageEventHelper.isDeleteEvent(event)) {
-            Context context;
-            try {
-                context = contextService.getContext(FileStorageEventHelper.extractSession(event).getContextId());
-            } catch (OXException e) {
-                LOG.error("Could not delete all dependent publications: " + e.getMessage(), e);
-                return;
-            }
+    public FileID(String uniqueID) {
+        List<String> unmangled = IDMangler.unmangle(uniqueID);
 
-            try {
-                FileID fileID = new FileID(FileStorageEventHelper.extractObjectId(event));
-                entityCleanUp.cleanUp(context, "infostore/object", fileID.getFileId());
-            } catch (OXException e) {
-                LOG.error("Could not delete all dependent publications: " + e.getMessage(), e);
-            }
-        }        
+        if (unmangled.size() == 1) {
+            serviceId = "com.openexchange.infostore";
+            accountId = "infostore";
+            folderId = null;
+            fileId = uniqueID;
+        } else {
+            serviceId = unmangled.get(0);
+            accountId = unmangled.get(1);
+            folderId = unmangled.get(2);
+            fileId = unmangled.get(3);
+        }
     }
 
+    public String getService() {
+        return serviceId;
+    }
+
+    public void setService(String serviceId) {
+        this.serviceId = serviceId;
+    }
+
+    public String getAccountId() {
+        return accountId;
+    }
+
+    public void setAccountId(String accountId) {
+        this.accountId = accountId;
+    }
+
+    public String getFolderId() {
+        return folderId;
+    }
+
+    public void setFolderId(String folderId) {
+        this.folderId = folderId;
+    }
+
+    public String getFileId() {
+        return fileId;
+    }
+
+    public void setFileId(String fileId) {
+        this.fileId = fileId;
+    }
+
+    public String toUniqueID() {
+        if (serviceId.equals("com.openexchange.infostore") && accountId.equals("infostore")) {
+            return fileId;
+        }
+        return IDMangler.mangle(serviceId, accountId, folderId, fileId);
+    }
 }

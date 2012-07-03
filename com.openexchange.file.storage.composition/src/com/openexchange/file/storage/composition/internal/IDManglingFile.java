@@ -52,6 +52,8 @@ package com.openexchange.file.storage.composition.internal;
 import java.util.Date;
 import java.util.Set;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.composition.FileID;
+import com.openexchange.file.storage.composition.FolderID;
 
 /**
  * {@link IDManglingFile}

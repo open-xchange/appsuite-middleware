@@ -65,13 +65,15 @@ import com.openexchange.webdav.protocol.Protocol;
  */
 public class CaldavProtocol extends Protocol {
 
+    /** urn:ietf:params:xml:ns:caldav */
     public static final Namespace CAL_NS = Namespace.getNamespace("CAL", "urn:ietf:params:xml:ns:caldav");
 
+    /** http://apple.com/ns/ical/ */
     public static final Namespace APPLE_NS = Namespace.getNamespace("APPLE", "http://apple.com/ns/ical/");
     
     private static final List<Namespace> ADDITIONAL_NAMESPACES = Arrays.asList(CAL_NS, APPLE_NS);
 
-    public static final String CAL_NAMESPACE = "CAL:";
+//    public static final String CAL_NAMESPACE = "CAL:";
 
     public static final String CALENDAR = "<CAL:calendar />";
     

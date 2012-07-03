@@ -47,60 +47,59 @@
  *
  */
 
-package com.openexchange.file.storage.composition.internal;
+package com.openexchange.file.storage.composition;
 
 import java.util.List;
 import com.openexchange.tools.id.IDMangler;
 
+
 /**
- * {@link FileID}
+ * {@link FolderID}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class FileID {
-
-    private String serviceId;
-
+public class FolderID {
+    private String service;
     private String accountId;
-
     private String folderId;
 
-    private String fileId;
-
-    public FileID(String serviceId, String accountId, String folderId, String fileId) {
-        this.serviceId = serviceId;
+    public FolderID(String service, String accountId, String folderId) {
+        super();
+        this.service = service;
         this.accountId = accountId;
         this.folderId = folderId;
-        this.fileId = fileId;
     }
 
-    public FileID(String uniqueID) {
+    public FolderID(String uniqueID) {
         List<String> unmangled = IDMangler.unmangle(uniqueID);
-
-        if (unmangled.size() == 1) {
-            serviceId = "com.openexchange.infostore";
+        if(unmangled.size() == 1) {
+            service = "com.openexchange.infostore";
             accountId = "infostore";
-            folderId = null;
-            fileId = uniqueID;
+            folderId = uniqueID;
         } else {
-            serviceId = unmangled.get(0);
+            service = unmangled.get(0);
             accountId = unmangled.get(1);
-            folderId = unmangled.get(2);
-            fileId = unmangled.get(3);
+            if(unmangled.size() > 2) {
+                folderId = unmangled.get(2);
+            } else {
+                folderId = "";
+            }
         }
     }
 
+
     public String getService() {
-        return serviceId;
+        return service;
     }
 
-    public void setService(String serviceId) {
-        this.serviceId = serviceId;
+    public void setService(String service) {
+        this.service = service;
     }
 
     public String getAccountId() {
         return accountId;
     }
+
 
     public void setAccountId(String accountId) {
         this.accountId = accountId;
@@ -114,18 +113,12 @@ public class FileID {
         this.folderId = folderId;
     }
 
-    public String getFileId() {
-        return fileId;
-    }
-
-    public void setFileId(String fileId) {
-        this.fileId = fileId;
-    }
-
     public String toUniqueID() {
-        if (serviceId.equals("com.openexchange.infostore") && accountId.equals("infostore")) {
-            return fileId;
+        if(service.equals("com.openexchange.infostore") && accountId.equals("infostore")) {
+            return folderId;
         }
-        return IDMangler.mangle(serviceId, accountId, folderId, fileId);
+        return IDMangler.mangle(service, accountId, folderId);
     }
+
+
 }

@@ -47,78 +47,42 @@
  *
  */
 
-package com.openexchange.file.storage.composition.internal;
+package com.openexchange.caldav.mixins;
 
-import java.util.List;
-import com.openexchange.tools.id.IDMangler;
+import java.util.Date;
+import org.jdom2.Namespace;
+import com.openexchange.caldav.CaldavProtocol;
+import com.openexchange.caldav.Tools;
+import com.openexchange.caldav.resources.CalDAVFolderCollection;
+import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 
 /**
- * {@link FolderID}
+ * {@link MinDateTime}
+ * 
+ * Provides a DATE-TIME value indicating the earliest date and
+ * time (in UTC) that the server is willing to accept for any DATE or
+ * DATE-TIME value in a calendar object resource stored in a calendar
+ * collection.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class FolderID {
-    private String service;
-    private String accountId;
-    private String folderId;
+public class MinDateTime extends SingleXMLPropertyMixin {
 
-    public FolderID(String service, String accountId, String folderId) {
-        super();
-        this.service = service;
-        this.accountId = accountId;
-        this.folderId = folderId;
+    public static final String PROPERTY_NAME = "min-date-time";
+    public static final Namespace NAMESPACE = CaldavProtocol.CAL_NS;
+    
+    private final CalDAVFolderCollection<?> collection;
+    
+    public MinDateTime(CalDAVFolderCollection<?> collection) {
+        super(NAMESPACE.getURI(), PROPERTY_NAME);
+        this.collection = collection;
     }
 
-    public FolderID(String uniqueID) {
-        List<String> unmangled = IDMangler.unmangle(uniqueID);
-        if(unmangled.size() == 1) {
-            service = "com.openexchange.infostore";
-            accountId = "infostore";
-            folderId = uniqueID;
-        } else {
-            service = unmangled.get(0);
-            accountId = unmangled.get(1);
-            if(unmangled.size() > 2) {
-                folderId = unmangled.get(2);
-            } else {
-                folderId = "";
-            }
-        }
+    @Override
+    protected String getValue() {
+        Date minDateTime = collection.getIntervalStart();
+        return null != minDateTime ? Tools.formatAsUTC(minDateTime) : null;
     }
-
-
-    public String getService() {
-        return service;
-    }
-
-    public void setService(String service) {
-        this.service = service;
-    }
-
-    public String getAccountId() {
-        return accountId;
-    }
-
-
-    public void setAccountId(String accountId) {
-        this.accountId = accountId;
-    }
-
-    public String getFolderId() {
-        return folderId;
-    }
-
-    public void setFolderId(String folderId) {
-        this.folderId = folderId;
-    }
-
-    public String toUniqueID() {
-        if(service.equals("com.openexchange.infostore") && accountId.equals("infostore")) {
-            return folderId;
-        }
-        return IDMangler.mangle(service, accountId, folderId);
-    }
-
 
 }

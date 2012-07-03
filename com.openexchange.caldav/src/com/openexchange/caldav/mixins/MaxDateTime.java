@@ -47,57 +47,42 @@
  *
  */
 
-package com.openexchange.publish.impl;
+package com.openexchange.caldav.mixins;
 
-import org.apache.commons.logging.Log;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventHandler;
-import com.openexchange.context.ContextService;
-import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.FileStorageEventHelper;
-import com.openexchange.file.storage.composition.FileID;
-import com.openexchange.groupware.contexts.Context;
+import java.util.Date;
+import org.jdom2.Namespace;
+import com.openexchange.caldav.CaldavProtocol;
+import com.openexchange.caldav.Tools;
+import com.openexchange.caldav.resources.CalDAVFolderCollection;
+import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 
 /**
- * {@link InfostoreCleanUpEventHandler}
+ * {@link MaxDateTime}
+ * 
+ * Provides a DATE-TIME value indicating the latest date and
+ * time (in UTC) that the server is willing to accept for any DATE or
+ * DATE-TIME value in a calendar object resource stored in a calendar
+ * collection.
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class InfostoreCleanUpEventHandler implements EventHandler {
-    
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(InfostoreCleanUpEventHandler.class);
-    
-    private final EntityCleanUp entityCleanUp;
-    
-    private final ContextService contextService;
-    
+public class MaxDateTime extends SingleXMLPropertyMixin {
 
-    public InfostoreCleanUpEventHandler(EntityCleanUp entityCleanUp, ContextService contextService) {
-        super();
-        this.entityCleanUp = entityCleanUp;
-        this.contextService = contextService;
+    public static final String PROPERTY_NAME = "max-date-time";
+    public static final Namespace NAMESPACE = CaldavProtocol.CAL_NS;
+    
+    private final CalDAVFolderCollection<?> collection;
+    
+    public MaxDateTime(CalDAVFolderCollection<?> collection) {
+        super(NAMESPACE.getURI(), PROPERTY_NAME);
+        this.collection = collection;
     }
 
     @Override
-    public void handleEvent(Event event) {
-        if (FileStorageEventHelper.isInfostoreEvent(event) && FileStorageEventHelper.isDeleteEvent(event)) {
-            Context context;
-            try {
-                context = contextService.getContext(FileStorageEventHelper.extractSession(event).getContextId());
-            } catch (OXException e) {
-                LOG.error("Could not delete all dependent publications: " + e.getMessage(), e);
-                return;
-            }
-
-            try {
-                FileID fileID = new FileID(FileStorageEventHelper.extractObjectId(event));
-                entityCleanUp.cleanUp(context, "infostore/object", fileID.getFileId());
-            } catch (OXException e) {
-                LOG.error("Could not delete all dependent publications: " + e.getMessage(), e);
-            }
-        }        
+    protected String getValue() {
+        Date maxDateTime = collection.getIntervalEnd();
+        return null != maxDateTime ? Tools.formatAsUTC(maxDateTime) : null;
     }
 
 }
