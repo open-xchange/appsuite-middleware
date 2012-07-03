@@ -1,6 +1,7 @@
 * 2012-07-03 - thorben.betten@open-xchange.com
 
  - Fix for bug 22454: Chunk-wise IMAP search
+ - Fix for bug 22351: More lenient handling for less FETCH responses than expected
 
 * 2012-07-02 - tobias.friedrich@open-xchange.com
 
