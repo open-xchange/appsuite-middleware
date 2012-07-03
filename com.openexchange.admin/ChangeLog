@@ -1,3 +1,7 @@
+* 2012-07-03 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21743: Retry on detected MySQL deadlock
+
 * 2012-06-06 - marcus.klein@open-xchange.com
 
  - Fix for bug 22263: RequireBundle is still necessary for com.openexchange.admin & com.openexchange.admin.plugin.hosting bundles.
