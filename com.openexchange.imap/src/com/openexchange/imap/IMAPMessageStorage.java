@@ -1367,8 +1367,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 return Collections.emptyList();
             }
             final int limit = max <= 0 ? -1 : (messageCount <= max ? -1 : (int) max);
-            System.out.println("IMAPMessageStorage.getThreadSortedMessages(): Max set to " + limit + ". (userId="+session.getUserId()+", contextId="+session.getContextId()+")");
-            
             final boolean mergeWithSent = includeSent && !sentFullName.equals(fullName);
             if (mergeWithSent) {
                 sentFolder = (IMAPFolder) imapStore.getFolder(sentFullName);

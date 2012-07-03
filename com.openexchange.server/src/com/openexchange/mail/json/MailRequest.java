@@ -94,34 +94,24 @@ public final class MailRequest {
     private static final Set<String> ALIASES_MAX = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("max", "maximum")));
 
     /**
-     * Gets the '<code>max</code>' parameter.
+     * Gets the <code>max</code> parameter.
      * 
-     * @return The '<code>max</code>' parameter
+     * @return The <code>max</code> parameter
      * @throws OXException If <code>max</code> is not a number
      */
     public long getMax() throws OXException {
         String s = null;
         for (final Iterator<String> it = ALIASES_MAX.iterator(); (null == s) && it.hasNext();) {
-            final String name = it.next();
-            s = requestData.getParameter(name);
-            System.out.println("MailRequest.getMax(): Request parameter \"" + name + "\": " + (null == s ? "<not available>" : s)
-                    + session2String());
+            s = requestData.getParameter(it.next());
         }
         if (null == s) {
-            System.out.println("MailRequest.getMax(): Parameter \"max\" absent, returning -1" + session2String());
             return -1L;
         }
         try {
-            final long ret = Long.parseLong(s.trim());
-            System.out.println("MailRequest.getMax(): Parsed \"max\" parameter: " + ret + session2String());
-            return ret;
+            return Long.parseLong(s.trim());
         } catch (final NumberFormatException e) {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("max", s);
         }
-    }
-
-    public String session2String() {
-        return " (userId=" + session.getUserId() + ", contextId=" + session.getContextId() + ")";
     }
 
     public String checkParameter(final String name) throws OXException {
