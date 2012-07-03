@@ -176,6 +176,7 @@ public final class ImportAction extends AbstractMailAction {
                         final MimeMessage message;
                         try {
                             message = new MimeMessage(defaultSession, is);
+                            message.removeHeader("x-original-headers");
                         } finally {
                             try {
                                 is.close();

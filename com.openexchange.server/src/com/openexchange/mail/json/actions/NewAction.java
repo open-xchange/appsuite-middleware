@@ -238,6 +238,7 @@ public final class NewAction extends AbstractMailAction {
             final PutNewMailData data;
             {
                 final MimeMessage message = new MimeMessage(MimeDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(((String) req.getRequest().getData()).getBytes(com.openexchange.java.Charsets.US_ASCII)));
+                message.removeHeader("x-original-headers");
                 final String fromAddr = message.getHeader(MessageHeaders.HDR_FROM, null);
                 final InternetAddress fromAddress;
                 final MailMessage mail;
