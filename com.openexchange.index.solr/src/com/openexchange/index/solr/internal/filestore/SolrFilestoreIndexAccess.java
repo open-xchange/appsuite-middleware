@@ -223,8 +223,8 @@ public class SolrFilestoreIndexAccess extends AbstractSolrIndexAccess<File> {
             {
                 String service = getService(parameters);
                 String accountId = getAccountId(parameters);
-                String folder = parameters.getFolder();
-                String queryString = buildQueryString(service, accountId, folder);
+                Set<String> folders = parameters.getFolders();
+                String queryString = buildQueryString(service, accountId, folders);
                 if (queryString.length() == 0) {
                     queryString = "*:*";
                 }
@@ -236,8 +236,8 @@ public class SolrFilestoreIndexAccess extends AbstractSolrIndexAccess<File> {
             {
                 String service = getService(parameters);
                 String accountId = getAccountId(parameters);
-                String folder = parameters.getFolder();
-                String queryString = buildQueryString(service, accountId, folder);
+                Set<String> folders = parameters.getFolders();
+                String queryString = buildQueryString(service, accountId, folders);
                 String[] ids = getIds(parameters);
                 final StringBuilder sb = new StringBuilder(queryString);
                 if (queryString.length() != 0) {
@@ -299,32 +299,12 @@ public class SolrFilestoreIndexAccess extends AbstractSolrIndexAccess<File> {
         return null;
     }
     
-    private String buildQueryString(String service, String accountId, String folder) {
-        StringBuilder sb = new StringBuilder(128); 
-        boolean firstSet = false;
+    private String buildQueryString(String service, String accountId, Set<String> folders) {
+        String serviceQuery = buildQueryString(SolrFilestoreField.SERVICE.solrName(), service);
+        String accountQuery = buildQueryString(SolrFilestoreField.ACCOUNT.solrName(), accountId);
+        String folderQuery = buildQueryStringWithOr(SolrFilestoreField.FOLDER.solrName(), folders);
         
-        if (service != null) {
-            sb.append('(').append(SolrFilestoreField.SERVICE).append(":\"").append(service).append("\")");
-            firstSet = true;
-        }
-        
-        if (accountId != null) {
-            if (firstSet) {
-                sb.append(" AND ");
-            } else {
-                firstSet = true;
-            }
-            sb.append('(').append(SolrFilestoreField.ACCOUNT).append(":\"").append(accountId).append("\")");
-        }
-        
-        if (folder != null) {
-            if (firstSet) {
-                sb.append(" AND ");
-            }
-            sb.append('(').append(SolrFilestoreField.FOLDER).append(":\"").append(folder).append("\")");
-        }
-        
-        return sb.toString();
+        return catenateQueriesWithAnd(serviceQuery, accountQuery, folderQuery);
     }
     
     private SolrQuery buildSolrQuery(QueryParameters parameters) throws OXException {
@@ -335,17 +315,13 @@ public class SolrFilestoreIndexAccess extends AbstractSolrIndexAccess<File> {
             {
                 String service = getService(parameters);
                 String accountId = getAccountId(parameters);
-                String folder = parameters.getFolder();
-                if (folder == null) {
-                    solrQuery = new SolrQuery("*:*");
-                } else {
-                    ConfigurationService config = Services.getService(ConfigurationService.class);
-                    String handler = config.getProperty(SolrProperties.ALL_HANLDER);
-                    solrQuery = new SolrQuery("\"" + folder + "\"");
-                    solrQuery.setQueryType(handler);
-                }
+                Set<String> folders = parameters.getFolders();
+                solrQuery = new SolrQuery("*:*");
+                ConfigurationService config = Services.getService(ConfigurationService.class);
+                String handler = config.getProperty(SolrProperties.ALL_HANLDER);
+                solrQuery.setQueryType(handler);
                 
-                solrQuery.setFilterQueries(buildFilterQueries(service, accountId, null));
+                solrQuery.setFilterQueries(buildFilterQueries(service, accountId, folders));
                 setSortAndOrder(parameters, solrQuery);
                 break;
             }                
@@ -357,7 +333,7 @@ public class SolrFilestoreIndexAccess extends AbstractSolrIndexAccess<File> {
                     solrQuery = new SolrQuery(parameters.getPattern());
                     solrQuery.setQueryType(handler);
                     setSortAndOrder(parameters, solrQuery);
-                    solrQuery.setFilterQueries(buildFilterQueries(getService(parameters), getAccountId(parameters), parameters.getFolder()));
+                    solrQuery.setFilterQueries(buildFilterQueries(getService(parameters), getAccountId(parameters), parameters.getFolders()));
                     break;
                 }
             
@@ -379,18 +355,21 @@ public class SolrFilestoreIndexAccess extends AbstractSolrIndexAccess<File> {
         }
     }
 
-    private String[] buildFilterQueries(String service, String accountId, String folder) {
+    private String[] buildFilterQueries(String service, String accountId, Set<String> folders) {
         final List<String> filters = new ArrayList<String>(3);
-        if (service != null) {
-            filters.add(SolrFilestoreField.SERVICE.solrName() + ':' + "\"" + service + "\"");
+        String serviceQuery = buildQueryString(SolrFilestoreField.SERVICE.solrName(), service);
+        if (serviceQuery != null) {
+            filters.add(serviceQuery);
         }
         
-        if (accountId != null) {
-            filters.add(SolrFilestoreField.ACCOUNT.solrName() + ':' + "\"" + accountId + "\"");
+        String accountQuery = buildQueryString(SolrFilestoreField.ACCOUNT.solrName(), accountId);
+        if (accountQuery != null) {
+            filters.add(accountQuery);
         }
         
-        if (folder != null) {
-            filters.add(SolrFilestoreField.FOLDER.solrName() + ':' + "\"" + folder + "\"");
+        String folderQuery = buildQueryStringWithOr(SolrFilestoreField.FOLDER.solrName(), folders);
+        if (folderQuery != null) {
+            filters.add(folderQuery);
         }
 
         return filters.toArray(new String[filters.size()]);

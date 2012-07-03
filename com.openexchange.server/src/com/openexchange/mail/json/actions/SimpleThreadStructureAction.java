@@ -65,6 +65,7 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.OrderDirection;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.ThreadedStructure;
 import com.openexchange.mail.json.MailRequest;
@@ -119,12 +120,15 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                     final long max = req.getMax();
                     final MailServletInterface mailInterface = getMailInterface(req);
                     final String folderId = req.checkParameter(Mail.PARAMETER_MAILFOLDER);
-                    final int mailFetchLimit = mailInterface.getMailConfig().getMailProperties().getMailFetchLimit();
-                    if (mailInterface.getMessageCount(folderId) <= mailFetchLimit || (max > 0 && max <= mailFetchLimit)) {
-                        /*
-                         * Mailbox considered small enough for direct hand-off
-                         */
-                        return perform0(req, mailInterface, false);
+                    {
+                        final int messageCount = mailInterface.getMessageCount(folderId);
+                        final int fetchLimit;
+                        if ((messageCount <= 0) || (messageCount <= (fetchLimit = getFetchLimit(mailInterface))) || ((max > 0) && (max <= fetchLimit))) {
+                            /*
+                             * Mailbox considered small enough for direct hand-off
+                             */
+                            return perform0(req, mailInterface, false);
+                        }
                     }
                     /*
                      * Return empty array immediately
@@ -204,6 +208,17 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
          * Perform
          */
         return perform0(req, getMailInterface(req), cache);
+    }
+
+    private int getFetchLimit(final MailServletInterface mailInterface) throws OXException {
+        if (null == mailInterface) {
+            return MailProperties.getInstance().getMailFetchLimit();
+        }
+        try {
+            return mailInterface.getMailConfig().getMailProperties().getMailFetchLimit();
+        } catch (final RuntimeException e) {
+            return MailProperties.getInstance().getMailFetchLimit();
+        }
     }
 
     /**

@@ -582,7 +582,7 @@ public final class SMTPTransport extends MailTransport {
         final SMTPConfig smtpConfig = getTransportConfig0();
         try {
             final SMTPMessage smtpMessage = new SMTPMessage(getSMTPSession(), MimeHeaderNameChecker.sanitizeHeaderNames(asciiBytes));
-            
+            smtpMessage.removeHeader("x-original-headers");
             /*
              * Check recipients
              */

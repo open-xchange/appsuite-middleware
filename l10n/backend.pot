@@ -2223,7 +2223,7 @@ msgid "Password could not be changed"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/sessiond/SessionExceptionMessages.java:73
-msgid "Max. session size for user %1$s in context %2$s exceeded"
+msgid "Max. number of sessions exceeded for user %1$s in context %2$s"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/sessiond/SessionExceptionMessages.java:75

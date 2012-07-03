@@ -51,6 +51,7 @@ package com.openexchange.file.storage.json.services;
 
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
+import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.rdiff.RdiffService;
@@ -92,5 +93,10 @@ public class Services {
     public static IndexFacadeService getIndexFacade() {
         final ServiceLookup lookup = LOOKUP_REF.get();
         return null == lookup ? null : lookup.getService(IndexFacadeService.class);
+    }
+
+    public static FolderService getFolderService() {
+        final ServiceLookup lookup = LOOKUP_REF.get();
+        return null == lookup ? null : lookup.getService(FolderService.class);
     }
 }

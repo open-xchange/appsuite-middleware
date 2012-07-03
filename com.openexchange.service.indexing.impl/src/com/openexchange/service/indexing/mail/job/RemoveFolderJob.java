@@ -49,6 +49,7 @@
 
 package com.openexchange.service.indexing.mail.job;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.logging.Log;
@@ -100,7 +101,7 @@ public final class RemoveFolderJob extends AbstractMailJob {
             final IndexAccess<MailMessage> indexAccess = storageAccess.getIndexAccess();
             final Map<String, Object> params = new HashMap<String, Object>();
             params.put("accountId", Integer.valueOf(accountId));
-            final QueryParameters query = new QueryParameters.Builder(params).setHandler(SearchHandler.ALL_REQUEST).setType(MAIL).setFolder(fullName).build();
+            final QueryParameters query = new QueryParameters.Builder(params).setHandler(SearchHandler.ALL_REQUEST).setType(MAIL).setFolders(Collections.singleton(fullName)).build();
             indexAccess.deleteByQuery(query);            
         } catch (final RuntimeException e) {
             LOG.error(SIMPLE_NAME + " \"" + info + "\" failed.", e);

@@ -49,8 +49,9 @@
 
 package com.openexchange.index.solr;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
 
 
 /**
@@ -58,18 +59,14 @@ import junit.framework.TestSuite;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
+@RunWith(Suite.class)
+@SuiteClasses({
+    AbstractSolrIndexAccessTest.class,
+    MailSolrIndexAccessTest.class,
+    AddressComparatorTest.class,
+    SolrFilestoreIndexAccessTest.class
+})
+
 public class UnitTests {
-    
-    public UnitTests() {
-        super();
-    }
-    
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(MailSolrIndexAccessTest.class);
-        tests.addTestSuite(AddressComparatorTest.class);
-        tests.addTestSuite(SolrFilestoreIndexAccessTest.class);
-        return tests;
-    }
 
 }

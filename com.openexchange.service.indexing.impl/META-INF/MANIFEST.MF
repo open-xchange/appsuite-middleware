@@ -48,15 +48,14 @@ Import-Package: com.openexchange.config,
  javax.mail.search,
  javax.mail.util,
  javax.management,
+ javax.naming,
  javax.net,
  javax.net.ssl,
- javax.management,
- javax.naming,
  javax.servlet,
  org.apache.commons.logging,
  org.eclipse.osgi.framework.console,
  org.osgi.framework,
  org.osgi.util.tracker
+Bundle-Activator: com.openexchange.service.indexing.impl.osgi.IndexingServiceActivator
 Export-Package: com.openexchange.service.indexing.mail,
  com.openexchange.service.indexing.mail.job
-Bundle-Activator: com.openexchange.service.indexing.impl.osgi.IndexingServiceActivator

@@ -11,5 +11,5 @@ Import-Package: com.openexchange.config,
  com.openexchange.server,
  org.apache.commons.logging,
  org.osgi.framework
-Bundle-Activator: org.xerial.snappy.SnappyBundleActivator
+Bundle-Activator: org.xerial.snappy.SnappyActivator
 Export-Package: org.xerial.snappy
