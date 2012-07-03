@@ -110,7 +110,7 @@ public final class Start<T extends CalendarComponent, U extends CalendarObject> 
         final Date start = parseDateConsideringDateType(component, dtStart, timeZone);
 
         calendar.setStartDate(start);
-        if (component.getProperty(DtEnd.DTEND) == null) {
+        if (component.getProperty(DtEnd.DTEND) == null && calendar instanceof Appointment) {
             // If an end is specified end date will be overwritten.
             if (isDateTime) {
                 /* RFC 2445 4.6.1:
@@ -120,7 +120,7 @@ public final class Start<T extends CalendarComponent, U extends CalendarObject> 
                  * the "DTSTART" property.
                  */
                 calendar.setEndDate(start);
-            } else if (calendar instanceof Appointment) {
+            } else {
                 // Only the date is specified. Then we have to set the end to at
                 // least 1 day later. Will be overwritten if DTEND is specified.
                 final Calendar calendarUTC = new GregorianCalendar();
