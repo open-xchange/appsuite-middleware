@@ -1,5 +1,5 @@
 #!/bin/bash
-# preinst script for open-xchange
+# preinst script for open-xchange-spamhandler-cloudmark
 #
 # see: dh_installdeb(1)
 

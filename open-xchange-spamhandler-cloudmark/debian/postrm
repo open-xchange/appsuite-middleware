@@ -1,5 +1,5 @@
 #!/bin/bash
-# postrm script for open-xchange
+# postrm script for open-xchange-spamhandler-cloudmark
 #
 # see: dh_installdeb(1)
 
