@@ -472,6 +472,26 @@ public final class DBUtils {
     }
 
     /**
+     * Extracts possibly nested <tt>SQLException</tt> reference.
+     * 
+     * @param exception The parental exception to extract from
+     * @return The <tt>SQLException</tt> reference or <code>null</code>
+     */
+    public static SQLException extractSqlException(final Exception exception) {
+        if (null == exception) {
+            return null;
+        }
+        if (exception instanceof SQLException) {
+            return (SQLException) exception;
+        }
+        final Throwable cause = exception.getCause();
+        if (null == cause || !(cause instanceof Exception)) {
+            return null;
+        }
+        return extractSqlException((Exception) cause);
+    }
+
+    /**
      * Checks for retry condition for a failed transaction roll-back.
      */
     public static final class TransactionRollbackCondition {

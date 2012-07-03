@@ -6,7 +6,7 @@ Bundle-Version: 6.21.0
 OXVersion: 6.21.0
 OXRevision: 4
 Bundle-Activator: com.openexchange.admin.osgi.Activator
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Vendor: Open-Xchange Inc.
 Import-Package: com.mysql.jdbc,
  com.openexchange.admin.rmi,
