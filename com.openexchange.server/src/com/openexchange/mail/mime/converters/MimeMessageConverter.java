@@ -412,14 +412,9 @@ public final class MimeMessageConverter {
                             Streams.close(fos);
                         }
                     }
-                    // Check invalid header
-                    final Set<String> invalidHeaderNames = new HashSet<String>(1);
-                    checkInvalidHeader(file, invalidHeaderNames);
-                    if (!invalidHeaderNames.isEmpty()) {
-                        file = dropInvalidHeaders(file, fileManagement.newTempFile());
-                    }
                     try {
                         mimeMessage = new ManagedMimeMessage(MimeDefaultSession.getDefaultSession(), file);
+                        mimeMessage.removeHeader(X_ORIGINAL_HEADERS);
                     } catch (final IOException e) {
                         throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
                     }
@@ -451,43 +446,6 @@ public final class MimeMessageConverter {
         }
     }
 
-    private static void checkInvalidHeader(final File file, final Set<String> invalidHeaderNames) throws OXException {
-        final MimeConfig config = new MimeConfig();
-        config.setMaxLineLen(-1);
-        config.setMaxHeaderLen(-1);
-        config.setMaxHeaderCount(-1);
-        final MimeTokenStream stream = new MimeTokenStream(config);
-        InputStream instream = null;
-        try {
-            instream = new BufferedInputStream(new FileInputStream(file));
-            stream.parse(instream);
-            boolean headers = false;
-            for (EntityState state = stream.getState(); !EntityState.T_END_OF_STREAM.equals(state); state = stream.next()) {
-                if (headers) {
-                    if (EntityState.T_FIELD.equals(state)) {
-                        final Field field = stream.getField();
-                        if (X_ORIGINAL_HEADERS.equals(field.getName())) {
-                            invalidHeaderNames.add(X_ORIGINAL_HEADERS);
-                        }
-                    } else if (EntityState.T_END_HEADER.equals(state)) {
-                        headers = false;
-                        break;
-                    }
-                } else {
-                    if (EntityState.T_START_HEADER.equals(state)) {
-                        headers = true;
-                    }
-                }
-            }
-        } catch (final IOException e) {
-            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-        } catch (final MimeException e) {
-            // Ignore
-        } finally {
-            Streams.close(instream);
-        }
-    }
-
     private static File checkForFile(final MailMessage mail) {
         if (mail instanceof MimeMailMessage) {
             final MimeMessage mimeMessage = ((MimeMailMessage) mail).getMimeMessage();
@@ -496,75 +454,6 @@ public final class MimeMessageConverter {
             }
         }
         return null;
-    }
-
-    private static File dropInvalidHeaders(final File file, final File newTempFile) {
-        InputStream in = null;
-        BufferedOutputStream out = null;
-        try {
-            in = new BufferedInputStream(new FileInputStream(file));
-            out = new BufferedOutputStream(new FileOutputStream(newTempFile));
-            {
-                final LineReaderInputStream instream = new LineReaderInputStreamAdaptor(in, -1);
-                int lineCount = 0;
-                final ByteArrayBuffer linebuf = new ByteArrayBuffer(64);
-                final FieldBuilder fieldBuilder = new DefaultFieldBuilder(-1);
-                boolean endOfHeader = false;
-                while (!endOfHeader) {
-                    fieldBuilder.reset();
-                    for (;;) {
-                        // If there's still data stuck in the line buffer
-                        // copy it to the field buffer
-                        int len = linebuf.length();
-                        if (len > 0) {
-                            fieldBuilder.append(linebuf);
-                        }
-                        linebuf.clear();
-                        if (instream.readLine(linebuf) == -1) {
-                            endOfHeader = true;
-                            break;
-                        }
-                        len = linebuf.length();
-                        if (len > 0 && linebuf.byteAt(len - 1) == '\n') {
-                            len--;
-                        }
-                        if (len > 0 && linebuf.byteAt(len - 1) == '\r') {
-                            len--;
-                        }
-                        if (len == 0) {
-                            // empty line detected
-                            endOfHeader = true;
-                            break;
-                        }
-                        lineCount++;
-                        if (lineCount > 1) {
-                            final int ch = linebuf.byteAt(0);
-                            if (ch != CharsetUtil.SP && ch != CharsetUtil.HT) {
-                                // new header detected
-                                break;
-                            }
-                        }
-                    }
-                    final RawField rawfield = fieldBuilder.build();
-                    if (rawfield != null && !X_ORIGINAL_HEADERS.equalsIgnoreCase(rawfield.getName())) {
-                        final ByteArrayBuffer buffer = fieldBuilder.getRaw();
-                        out.write(buffer.buffer(), 0, buffer.length());
-                    }
-                } // End of Headers
-            }
-            // Write rest
-            final int l = 2048;
-            final byte[] buf = new byte[l];
-            for (int read; (read = in.read(buf, 0, l)) > 0;) {
-                out.write(buf, 0, read);
-            }
-            out.flush();
-            return newTempFile;
-        } catch (final Exception e) {
-            return file;
-        } finally {
-            Streams.close(in, out);
-        }
     }
 
     /**

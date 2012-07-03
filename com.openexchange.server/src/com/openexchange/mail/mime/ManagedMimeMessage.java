@@ -168,25 +168,15 @@ public final class ManagedMimeMessage extends MimeMessage {
      * @throws IOException If an I/O error occurs
      */
     public ManagedMimeMessage(final Session session, final File file) throws MessagingException, IOException {
-        this(session, file, new FileInputStream(file));
+        this(session, file, new SharedFileInputStream(file, DEFAULT_MAX_INMEMORY_SIZE));
     }
 
-    private ManagedMimeMessage(final Session session, final File file, final FileInputStream fis) throws MessagingException {
-        super(session, fis);
+    private ManagedMimeMessage(final Session session, final File file, final InputStream in) throws MessagingException {
+        super(session, in);
         closeables = new ArrayList<Closeable>(2);
-        closeables.add(fis);
+        closeables.add(in);
         this.managedFile = null;
         this.file = file;
-    }
-
-    @Override
-    public void writeTo(final OutputStream os) throws IOException, MessagingException {
-        flush2stream(os);
-    }
-
-    @Override
-    public void writeTo(final OutputStream os, final String[] ignoreList) throws IOException, MessagingException {
-        flush2stream(os);
     }
 
     /**
@@ -196,30 +186,6 @@ public final class ManagedMimeMessage extends MimeMessage {
      */
     public File getFile() {
         return null == file ? managedFile.getFile() : file;
-    }
-
-    private void flush2stream(final OutputStream os) throws FileNotFoundException, IOException {
-        InputStream is = null;
-        try {
-            is = new FileInputStream(getFile());
-            // now copy the data to the output stream
-            final int buflen = 8192;
-            final byte[] buf = new byte[buflen];
-            for (int read; (read = is.read(buf, 0, buflen)) > 0;) {
-                os.write(buf, 0, read);
-            }
-            os.flush();
-            is.close();
-        } finally {
-            if (null != is) {
-                try {
-                    is.close();
-                } catch (final Exception e) {
-                    // Ignore
-                }
-            }
-        }
-        os.flush();
     }
 
     @Override

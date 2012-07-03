@@ -50,6 +50,12 @@
 package com.openexchange.mail.mime.utils;
 
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -88,6 +94,14 @@ import javax.mail.internet.ParseException;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.net.QuotedPrintableCodec;
+import org.apache.james.mime4j.io.LineReaderInputStream;
+import org.apache.james.mime4j.io.LineReaderInputStreamAdaptor;
+import org.apache.james.mime4j.stream.DefaultFieldBuilder;
+import org.apache.james.mime4j.stream.FieldBuilder;
+import org.apache.james.mime4j.stream.RawField;
+import org.apache.james.mime4j.util.ByteArrayBuffer;
+import org.apache.james.mime4j.util.CharsetUtil;
+
 import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFileManagement;
@@ -95,6 +109,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.image.ImageActionFactory;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -1611,6 +1626,85 @@ public final class MimeMessageUtility {
                 bytes[i] = (byte) s.charAt(i);
             }
             return bytes;
+        }
+    }
+
+    private static final String X_ORIGINAL_HEADERS = "x-original-headers";
+
+    /**
+     * Drops invalid "X-Original-Headers" header from RFC822 source file.
+     * 
+     * @param file The file
+     * @param newTempFile The new file (to write cleansed content to)
+     * @return The resulting file
+     */
+    public static File dropInvalidHeaders(final File file, final File newTempFile) {
+        InputStream in = null;
+        BufferedOutputStream out = null;
+        try {
+            in = new BufferedInputStream(new FileInputStream(file));
+            out = new BufferedOutputStream(new FileOutputStream(newTempFile));
+            {
+                @SuppressWarnings("resource")
+				final LineReaderInputStream instream = new LineReaderInputStreamAdaptor(in, -1);
+                int lineCount = 0;
+                final ByteArrayBuffer linebuf = new ByteArrayBuffer(64);
+                final FieldBuilder fieldBuilder = new DefaultFieldBuilder(-1);
+                boolean endOfHeader = false;
+                while (!endOfHeader) {
+                    fieldBuilder.reset();
+                    for (;;) {
+                        // If there's still data stuck in the line buffer
+                        // copy it to the field buffer
+                        int len = linebuf.length();
+                        if (len > 0) {
+                            fieldBuilder.append(linebuf);
+                        }
+                        linebuf.clear();
+                        if (instream.readLine(linebuf) == -1) {
+                            endOfHeader = true;
+                            break;
+                        }
+                        len = linebuf.length();
+                        if (len > 0 && linebuf.byteAt(len - 1) == '\n') {
+                            len--;
+                        }
+                        if (len > 0 && linebuf.byteAt(len - 1) == '\r') {
+                            len--;
+                        }
+                        if (len == 0) {
+                            // empty line detected
+                            endOfHeader = true;
+                            break;
+                        }
+                        lineCount++;
+                        if (lineCount > 1) {
+                            final int ch = linebuf.byteAt(0);
+                            if (ch != CharsetUtil.SP && ch != CharsetUtil.HT) {
+                                // new header detected
+                                break;
+                            }
+                        }
+                    }
+                    final RawField rawfield = fieldBuilder.build();
+                    if (rawfield != null && !X_ORIGINAL_HEADERS.equalsIgnoreCase(rawfield.getName())) {
+                        final ByteArrayBuffer buffer = fieldBuilder.getRaw();
+                        out.write(buffer.buffer(), 0, buffer.length());
+                    }
+                } // End of Headers
+            }
+            // Write rest
+            final int l = 2048;
+            final byte[] buf = new byte[l];
+            for (int read; (read = in.read(buf, 0, l)) > 0;) {
+                out.write(buf, 0, read);
+            }
+            out.flush();
+            return newTempFile;
+        } catch (final Exception e) {
+            return file;
+        } finally {
+            Streams.close(in, out);
         }
     }
 
