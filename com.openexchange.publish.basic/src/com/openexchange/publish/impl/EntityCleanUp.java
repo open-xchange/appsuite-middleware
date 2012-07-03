@@ -54,6 +54,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationStorage;
+import com.openexchange.publish.helpers.AbstractPublicationService;
 
 
 /**
@@ -63,16 +64,18 @@ import com.openexchange.publish.PublicationStorage;
  *
  */
 public class EntityCleanUp {
-    private final PublicationStorage storage;
 
-    public EntityCleanUp(PublicationStorage storage) {
-        this.storage = storage;
+    public EntityCleanUp() {
+        super();
     }
 
     public void cleanUp(Context ctx, String module, String entityId) throws OXException {
+        PublicationStorage storage = AbstractPublicationService.getDefaultStorage();
         List<Publication> publications = storage.getPublications(ctx, module, entityId);
-        for (Publication publication : publications) {
-            storage.forgetPublication(publication);
-        }
+        if (publications != null) {
+            for (Publication publication : publications) {
+                storage.forgetPublication(publication);
+            }
+        }        
     }
 }

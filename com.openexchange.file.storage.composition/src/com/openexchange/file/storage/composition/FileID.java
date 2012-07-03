@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.composition.internal;
+package com.openexchange.file.storage.composition;
 
 import java.util.List;
 import com.openexchange.tools.id.IDMangler;
