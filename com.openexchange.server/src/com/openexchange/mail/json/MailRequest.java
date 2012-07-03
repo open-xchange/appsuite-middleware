@@ -94,9 +94,9 @@ public final class MailRequest {
     private static final Set<String> ALIASES_MAX = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("max", "maximum")));
 
     /**
-     * Gets the '<code>max</code>' parameter.
+     * Gets the <code>max</code> parameter.
      * 
-     * @return The '<code>max</code>' parameter
+     * @return The <code>max</code> parameter
      * @throws OXException If <code>max</code> is not a number
      */
     public long getMax() throws OXException {
