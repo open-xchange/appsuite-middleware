@@ -197,7 +197,7 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                         }
                     }
                 };
-                ThreadPools.getThreadPool().submit(ThreadPools.task(r, "SeparateThreader-"));
+                ThreadPools.getThreadPool().submit(ThreadPools.task(r));
                 /*
                  * Return cached JSON result
                  */
