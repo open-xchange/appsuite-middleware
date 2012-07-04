@@ -86,7 +86,7 @@ public class AbstractVCardTest extends AbstractContactTest {
 		if(loginParts.length == 2) {
             context = loginParts[1];
         } else {
-            context = "defaultcontext";
+            context = AjaxInit.getAJAXProperty("contextName");
         }
 
         ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId(context));
