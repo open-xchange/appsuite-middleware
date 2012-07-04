@@ -1,3 +1,7 @@
+* 2012-07-04 - thorben.betten@open-xchange.com
+
+ - Fix for bug 17693: Responding with a "try-again" error code if "json_0" multipart part is missing
+
 * 2012-07-03 - thorben.betten@open-xchange.com
 
  - Fix for bug 22454: Chunk-wise IMAP searches
