@@ -164,6 +164,7 @@ import com.openexchange.subscribe.internal.ContactFolderMultipleUpdaterStrategy;
 import com.openexchange.subscribe.internal.ContactFolderUpdaterStrategy;
 import com.openexchange.subscribe.internal.StrategyFolderUpdaterService;
 import com.openexchange.subscribe.internal.SubscriptionExecutionServiceImpl;
+import com.openexchange.subscribe.osgi.SubscriptionServiceRegistry;
 import com.openexchange.test.TestInit;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.internal.ThreadPoolProperties;
@@ -529,6 +530,8 @@ public final class Init {
                     return null;
                 }
             });
+            SubscriptionServiceRegistry.getInstance().addService(
+                ContactInterfaceDiscoveryService.class, services.get(ContactInterfaceDiscoveryService.class));
         }
     }
     

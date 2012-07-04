@@ -133,7 +133,7 @@ public final class NewAction extends AbstractMailAction {
                     {
                         final String json0 = uploadEvent.getFormField(Mail.UPLOAD_FORMFIELD_MAIL);
                         if (json0 == null || json0.trim().length() == 0) {
-                            throw MailExceptionCode.MISSING_PARAM.create(Mail.UPLOAD_FORMFIELD_MAIL);
+                            throw MailExceptionCode.PROCESSING_ERROR.create(MailExceptionCode.MISSING_PARAM.create(Mail.UPLOAD_FORMFIELD_MAIL), new Object[0]);
                         }
                         jsonMailObj = new JSONObject(json0);
                     }

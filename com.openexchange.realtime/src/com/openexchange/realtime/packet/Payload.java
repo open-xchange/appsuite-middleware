@@ -47,66 +47,34 @@
  *
  */
 
-package com.openexchange.groupware.importexport;
+package com.openexchange.realtime.packet;
 
-import junit.framework.JUnit4TestAdapter;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.Init;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.importexport.formats.Format;
-import com.openexchange.importexport.importers.Importer;
-import com.openexchange.importexport.importers.VCardImporter;
-import com.openexchange.test.AjaxInit;
-import com.openexchange.tools.session.ServerSessionFactory;
-
-public class AbstractVCardTest extends AbstractContactTest {
-
-	public final Format format = Format.VCARD;
-	@SuppressWarnings("hiding")
-	public final Importer imp = new VCardImporter();
-    protected static Context ctx;
-
-    public static junit.framework.Test suite() {
-		return new JUnit4TestAdapter(VCardImportTest.class);
+/**
+ * {@link Payload}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ */
+public class Payload {
+	private String format;
+	private Object data;
+	
+	public Payload(Object data, String format) {
+		this.data = data;
+		this.format = format;
 	}
-
-	@BeforeClass
-	public static void initialize() throws Exception {
-		Init.startServer();
-		final UserStorage uStorage = UserStorage.getInstance();
-
-		final String[] loginParts = AjaxInit.getAJAXProperty("login").split("@");
-		final String name = loginParts[0];
-		String context = null;
-		if(loginParts.length == 2) {
-            context = loginParts[1];
-        } else {
-            context = AjaxInit.getAJAXProperty("contextName");
-        }
-
-        ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId(context));
-        userId = uStorage.getUserId(name, ctx);
-	    sessObj = ServerSessionFactory.createServerSession(userId, 1, "vcard-tests");
-		userId = sessObj.getUserId();
+	
+	public Object getData() {
+		return data;
 	}
-
-    @AfterClass
-    public static void shutdown() throws Exception {
-        Init.stopServer();
-    }
-
-    public AbstractVCardTest() {
-		super();
+	
+	public void setData(Object data, String format) {
+		this.data = data;
+		this.format = format;
 	}
-
-	@After
-	public void cleanUpAfterTest() throws OXException {
-		deleteTestFolder(folderId);
+	
+	public String getFormat() {
+		return format;
 	}
-
+	
+	
 }

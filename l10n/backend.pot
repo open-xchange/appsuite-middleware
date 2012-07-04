@@ -4172,6 +4172,15 @@ msgid ""
 "startup."
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeExceptionMessages.java:61
+msgid "Unknown channel %1$s"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeExceptionMessages.java:62
+msgid ""
+"No appropriate channel found for recipient %1$s with payload namespace %2$s"
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rmi/src/com/openexchange/rmi/exceptions/OXRMIExceptionMessage.java:62
 msgid "Start of RMI service failed."
 msgstr ""
@@ -8083,6 +8092,11 @@ msgstr ""
 #. Draft message could not be saved
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:522
 msgid "Draft message could not be saved"
+msgstr ""
+
+#. There was a problem processing the request. Please try again.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:525
+msgid "There was a problem processing the request. Please try again."
 msgstr ""
 
 #. *

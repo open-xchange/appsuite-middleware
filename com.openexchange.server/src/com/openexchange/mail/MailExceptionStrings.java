@@ -521,4 +521,7 @@ public final class MailExceptionStrings implements LocalizableStrings {
     // Draft message could not be saved
     public static final String DRAFT_FAILED_UNKNOWN_MSG = "Draft message could not be saved";
 
+    // There was a problem processing the request. Please try again.
+    public static final String PROCESSING_ERROR_MSG = "There was a problem processing the request. Please try again.";
+
 }

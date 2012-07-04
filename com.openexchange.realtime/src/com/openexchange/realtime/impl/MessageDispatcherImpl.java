@@ -47,66 +47,72 @@
  *
  */
 
-package com.openexchange.groupware.importexport;
+package com.openexchange.realtime.impl;
 
-import junit.framework.JUnit4TestAdapter;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import java.util.HashMap;
+import java.util.Map;
+
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.Init;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.importexport.formats.Format;
-import com.openexchange.importexport.importers.Importer;
-import com.openexchange.importexport.importers.VCardImporter;
-import com.openexchange.test.AjaxInit;
-import com.openexchange.tools.session.ServerSessionFactory;
+import com.openexchange.realtime.Channel;
+import com.openexchange.realtime.MessageDispatcher;
+import com.openexchange.realtime.RealtimeExceptionCodes;
+import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.tools.session.ServerSession;
 
-public class AbstractVCardTest extends AbstractContactTest {
+/**
+ * {@link MessageDispatcherImpl}
+ * 
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco
+ *         Laguna</a>
+ */
+public class MessageDispatcherImpl implements MessageDispatcher {
 
-	public final Format format = Format.VCARD;
-	@SuppressWarnings("hiding")
-	public final Importer imp = new VCardImporter();
-    protected static Context ctx;
+	private Map<String, Channel> channels = new HashMap<String, Channel>();
 
-    public static junit.framework.Test suite() {
-		return new JUnit4TestAdapter(VCardImportTest.class);
+	public void send(Stanza stanza, ServerSession session) throws OXException {
+		ID to = stanza.getTo();
+
+		String protocol = to.getProtocol();
+		Channel channel = null;
+
+		if (protocol != null) {
+			channel = channels.get(protocol);
+			if (channel == null) {
+				throw RealtimeExceptionCodes.UNKNOWN_CHANNEL.create(protocol);
+			}
+		} else {
+			channel = chooseChannel(stanza, session);
+			if (channel == null) {
+				throw RealtimeExceptionCodes.NO_APPROPRIATE_CHANNEL.create(to.toString(), stanza.getNamespace());
+			}
+		}
+
+
+		channel.send(stanza, session);
+
 	}
 
-	@BeforeClass
-	public static void initialize() throws Exception {
-		Init.startServer();
-		final UserStorage uStorage = UserStorage.getInstance();
-
-		final String[] loginParts = AjaxInit.getAJAXProperty("login").split("@");
-		final String name = loginParts[0];
-		String context = null;
-		if(loginParts.length == 2) {
-            context = loginParts[1];
-        } else {
-            context = AjaxInit.getAJAXProperty("contextName");
-        }
-
-        ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId(context));
-        userId = uStorage.getUserId(name, ctx);
-	    sessObj = ServerSessionFactory.createServerSession(userId, 1, "vcard-tests");
-		userId = sessObj.getUserId();
+	private Channel chooseChannel(Stanza stanza, ServerSession session) throws OXException {
+		ID to = stanza.getTo();
+		String namespace = stanza.getNamespace();
+		
+		Channel candidate = null;
+		for(Channel channel: channels.values()){
+			if ((candidate == null || candidate.getPriority() < channel.getPriority()) && channel.canHandle(namespace, to, session)) {
+				candidate = channel;
+			}
+		}
+		
+		return candidate;
 	}
-
-    @AfterClass
-    public static void shutdown() throws Exception {
-        Init.stopServer();
-    }
-
-    public AbstractVCardTest() {
-		super();
+	
+	public void addChannel(Channel channel) {
+		channels.put(channel.getProtocol(), channel);
 	}
-
-	@After
-	public void cleanUpAfterTest() throws OXException {
-		deleteTestFolder(folderId);
+	
+	public void removeChannel(Channel channel) {
+		channels.remove(channel.getProtocol());
 	}
 
 }

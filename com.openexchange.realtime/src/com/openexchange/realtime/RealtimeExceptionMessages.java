@@ -47,66 +47,18 @@
  *
  */
 
-package com.openexchange.groupware.importexport;
+package com.openexchange.realtime;
 
-import junit.framework.JUnit4TestAdapter;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.Init;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.importexport.formats.Format;
-import com.openexchange.importexport.importers.Importer;
-import com.openexchange.importexport.importers.VCardImporter;
-import com.openexchange.test.AjaxInit;
-import com.openexchange.tools.session.ServerSessionFactory;
+import com.openexchange.i18n.LocalizableStrings;
 
-public class AbstractVCardTest extends AbstractContactTest {
+/**
+ * {@link RealtimeExceptionMessages}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ */
+public class RealtimeExceptionMessages implements LocalizableStrings {
 
-	public final Format format = Format.VCARD;
-	@SuppressWarnings("hiding")
-	public final Importer imp = new VCardImporter();
-    protected static Context ctx;
-
-    public static junit.framework.Test suite() {
-		return new JUnit4TestAdapter(VCardImportTest.class);
-	}
-
-	@BeforeClass
-	public static void initialize() throws Exception {
-		Init.startServer();
-		final UserStorage uStorage = UserStorage.getInstance();
-
-		final String[] loginParts = AjaxInit.getAJAXProperty("login").split("@");
-		final String name = loginParts[0];
-		String context = null;
-		if(loginParts.length == 2) {
-            context = loginParts[1];
-        } else {
-            context = AjaxInit.getAJAXProperty("contextName");
-        }
-
-        ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId(context));
-        userId = uStorage.getUserId(name, ctx);
-	    sessObj = ServerSessionFactory.createServerSession(userId, 1, "vcard-tests");
-		userId = sessObj.getUserId();
-	}
-
-    @AfterClass
-    public static void shutdown() throws Exception {
-        Init.stopServer();
-    }
-
-    public AbstractVCardTest() {
-		super();
-	}
-
-	@After
-	public void cleanUpAfterTest() throws OXException {
-		deleteTestFolder(folderId);
-	}
+	public static final String UNKNOWN_CHANNEL = "Unknown channel %1$s";
+	public static final String NO_APPROPRIATE_CHANNEL = "No appropriate channel found for recipient %1$s with payload namespace %2$s";
 
 }
