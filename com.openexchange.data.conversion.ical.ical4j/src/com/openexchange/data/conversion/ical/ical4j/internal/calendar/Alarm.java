@@ -234,7 +234,7 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
     private java.util.Date parseTriggerDate(int index, Trigger trigger, java.util.Date start, TimeZone timeZone, List<ConversionWarning> warnings) {
         Dur duration = trigger.getDuration();
         if (null != duration) {
-            if (false == duration.isNegative()) {
+            if (false == duration.isNegative() && false == new Dur("PT0S").equals(duration)) {
                 warnings.add(new ConversionWarning(index, "Ignoring non-negative duration for alarm trigger"));
                 return null;
             } else if (null == start) {
@@ -263,7 +263,7 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
     private Long parseTriggerDuration(int index, Trigger trigger, java.util.Date start, TimeZone timeZone, List<ConversionWarning> warnings) {
         Dur duration = trigger.getDuration();
         if (null != duration) {
-            if (false == duration.isNegative()) {
+            if (false == duration.isNegative() && false == new Dur("PT0S").equals(duration)) {
                 warnings.add(new ConversionWarning(index, "Ignoring non-negative duration for alarm trigger"));
                 return null;
             } else {

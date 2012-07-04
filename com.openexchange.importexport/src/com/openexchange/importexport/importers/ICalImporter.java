@@ -481,7 +481,11 @@ public class ICalImporter extends AbstractImporter {
 					bob.append(")\n");
 				}
 			}
-			return ImportExportExceptionCodes.TRUNCATION.create(bob.toString());
+			OXException exception = ImportExportExceptionCodes.TRUNCATION.create(bob.toString());
+			for (ProblematicAttribute problematic : problematics) {
+	            exception.addProblematic(problematic);
+            }
+			return exception;
 		}
 		return e;
 	}
