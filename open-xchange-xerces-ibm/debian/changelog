@@ -1,3 +1,9 @@
+open-xchange-xerces-ibm (6.21.0-3) unstable; urgency=low
+
+  * Release build for EDP drop #2
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 03 Jul 2012 18:43:55 +0200
+
 open-xchange-xerces-ibm (6.21.0-2) unstable; urgency=low
 
   * Release build for EDP drop #2
