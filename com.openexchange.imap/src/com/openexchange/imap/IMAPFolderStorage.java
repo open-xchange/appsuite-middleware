@@ -487,8 +487,18 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
 
     @Override
     public MailFolder getFolder(final String fullName) throws OXException {
-        final MailFolder m = checkNonHoldsMessages(fullName);
-        return null == m ? FolderCache.getCachedFolder(fullName, this) : m;
+        try {
+            return FolderCache.getCachedFolder(fullName, this);
+        } catch (final OXException e) {
+            if (IMAPException.Code.FOLDER_NOT_FOUND.equals(e) || MimeMailExceptionCode.FOLDER_NOT_FOUND.equals(e)) {
+                final MailFolder m = checkNonHoldsMessages(fullName);
+                if (null == m) {
+                    throw e;
+                }
+                return m;
+            }
+            throw e;
+        }
     }
 
     private MailFolder checkNonHoldsMessages(final String fullName) {
