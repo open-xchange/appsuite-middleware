@@ -487,14 +487,14 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
 
     @Override
     public MailFolder getFolder(final String fullName) throws OXException {
-        final MailFolder m = checkNonHoldsFolders(fullName);
+        final MailFolder m = checkNonHoldsMessages(fullName);
         return null == m ? FolderCache.getCachedFolder(fullName, this) : m;
     }
 
-    private MailFolder checkNonHoldsFolders(final String fullName) {
+    private MailFolder checkNonHoldsMessages(final String fullName) {
         try {
             final ListLsubEntry listEntry = ListLsubCache.getCachedLISTEntry(fullName, accountId, imapStore, session);
-            if (null == listEntry || !listEntry.exists() || listEntry.hasInferiors()) {
+            if (null == listEntry || listEntry.exists() || listEntry.canOpen()) {
                 return null;
             }
             final MailFolder mf = new MailFolder();
@@ -521,7 +521,8 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             // permission
             final ACLPermission ownPermission = new ACLPermission();
             ownPermission.setEntity(session.getUserId());
-            ownPermission.parseRights(new Rights(), imapConfig);
+            final Rights rights = IMAPFolderConverter.getOwnRights((IMAPFolder) imapStore.getFolder(fullName), session, imapConfig);
+            ownPermission.parseRights(rights, imapConfig);
             mf.setOwnPermission(ownPermission);
             mf.addPermission(ownPermission);
             return mf;
