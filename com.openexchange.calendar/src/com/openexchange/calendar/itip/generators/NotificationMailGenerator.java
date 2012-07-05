@@ -930,6 +930,8 @@ public class NotificationMailGenerator implements ITipMailGenerator {
             if (participant.hasRole(ITipRole.ORGANIZER)) {
             	if (isCounterableOnly()) {
                     return counter(counter(participant), ITipRole.ORGANIZER);
+            	} else if (ignorableChangedOnly()) {
+            	    return null;
             	} else {
                     return counter(counterNoITIP(participant, Type.MODIFIED), ITipRole.ORGANIZER);
             	}
@@ -945,8 +947,16 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         		return false;
         	}
         	
-        	return diff.onlyTheseChanged(AppointmentFields.START_DATE,  AppointmentFields.END_DATE,  AppointmentFields.LOCATION,  AppointmentFields.TITLE, AppointmentFields.PARTICIPANTS, AppointmentFields.USERS, AppointmentFields.CONFIRMATIONS);
+        	return diff.anyFieldChangedOf(AppointmentFields.START_DATE,  AppointmentFields.END_DATE,  AppointmentFields.LOCATION,  AppointmentFields.TITLE, AppointmentFields.PARTICIPANTS, AppointmentFields.USERS, AppointmentFields.CONFIRMATIONS);
 		}
+        
+        protected boolean ignorableChangedOnly() {
+            if (diff == null) {
+                return true;
+            }
+            
+            return diff.onlyTheseChanged(AppointmentFields.SHOW_AS);
+        }
 
 		protected boolean onlyMyStateChanged() {
             if (stateChanged != null) {
@@ -1062,6 +1072,8 @@ public class NotificationMailGenerator implements ITipMailGenerator {
                 if (participant.hasRole(ITipRole.ORGANIZER)) {
                 	if (isCounterableOnly()) {
                         return update(counter(participant));
+                	} else if (ignorableChangedOnly()) {
+                	    return null;
                 	} else {
                         return update(noITIP(participant, Type.MODIFIED));
                 	}
