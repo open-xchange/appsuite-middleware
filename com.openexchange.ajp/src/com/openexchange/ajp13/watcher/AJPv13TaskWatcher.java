@@ -177,7 +177,7 @@ public class AJPv13TaskWatcher {
                     return;
                 }
                 final boolean logExceededTasks = AJPv13Config.getAJPWatcherEnabled();
-                if (logExceededTasks && log.isInfoEnabled() && AJPv13Config.getAJPWatcherPermission()) {
+                if (logExceededTasks && log.isInfoEnabled()) {
                     final AtomicInteger countWaiting = new AtomicInteger();
                     final AtomicInteger countProcessing = new AtomicInteger();
                     final AtomicInteger countExceeded = new AtomicInteger();
@@ -197,34 +197,25 @@ public class AJPv13TaskWatcher {
                      */
                     threadPoolService.invokeAll(tasks);
                     /*
-                     * All threads are listening longer than specified max listener running time
+                     * Check if all threads are listening longer than specified max listener running time
                      */
-                    final int numProcessing = countProcessing.get();
-                    if (numProcessing > 0 && countExceeded.get() == numProcessing) {
-                        final String delimStr = "\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
-                        log.error(new StringBuilder(128 + delimStr.length()).append(delimStr).append(
-                            "AJP-Watcher's run done: SYSTEM DEADLOCK DETECTED!").append(" Going to stop and re-initialize system").append(
-                            delimStr).toString());
-                        /*
-                         * Restart AJP Server
-                         */
-                        try {
-                            AJPv13ServerImpl.restartAJPServer();
-                        } catch (final AJPv13Exception e) {
-                            log.error(e.getMessage(), e);
+                    if (AJPv13Config.getAJPWatcherPermission()) {
+                        final int numProcessing = countProcessing.get();
+                        if (numProcessing > 0 && countExceeded.get() == numProcessing) {
+                            final String delimStr = "\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
+                            log.error(new StringBuilder(128 + delimStr.length()).append(delimStr).append(
+                                "AJP-Watcher's run done: SYSTEM DEADLOCK DETECTED!").append(" Going to stop and re-initialize system").append(
+                                delimStr).toString());
+                            /*
+                             * Restart AJP Server
+                             */
+                            try {
+                                AJPv13ServerImpl.restartAJPServer();
+                            } catch (final AJPv13Exception e) {
+                                log.error(e.getMessage(), e);
+                            }
                         }
                     }
-                    /*-
-                     *
-                    else {
-                        if (log.isTraceEnabled()) {
-                            final String delimStr = "\n+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
-                            log.trace(new StringBuilder(128 + delimStr.length()).append(delimStr).append("AJP-Watcher's run done: ").append(
-                                "    Waiting=").append(countWaiting).append("    Running=").append(countProcessing).append("    Exceeded=").append(
-                                countExceeded).append("    Total=").append(listeners.size()).append(delimStr).toString());
-                        }
-                    }
-                     */
                 } else {
                     /*
                      * Create a list of tasks
