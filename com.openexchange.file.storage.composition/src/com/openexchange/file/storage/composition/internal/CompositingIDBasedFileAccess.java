@@ -73,6 +73,8 @@ import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.composition.FileID;
+import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.groupware.results.AbstractTimedResult;
 import com.openexchange.groupware.results.Delta;

@@ -192,81 +192,17 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
         return calendarUtils;
     }
 
-    public String getConfigValue(String key, String defaultValue) throws WebdavProtocolException {
-        try {
-            ConfigView view = configs.getView(sessionHolder.getUser().getId(), sessionHolder.getContext().getContextId());
-            ComposedConfigProperty<String> property = view.property(key, String.class);
-            if (false == property.isDefined()) {
-                return defaultValue;
-            }
-            return property.get();
-        } catch (OXException e) {
-            LOG.error(e.getMessage(), e);
-            throw WebdavProtocolException.generalError(e, new WebdavPath(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+    public String getConfigValue(String key, String defaultValue) throws OXException {
+        ConfigView view = configs.getView(sessionHolder.getUser().getId(), sessionHolder.getContext().getContextId());
+        ComposedConfigProperty<String> property = view.property(key, String.class);
+        if (null == property || false == property.isDefined()) {
+            return defaultValue;
         }
+        return property.get();
     }
 
     public State getState() {
         return stateHolder.get();
-    }
-    public Date end() throws WebdavProtocolException {
-        final String value = getConfigValue("com.openexchange.caldav.interval.end", "one_year");
-        int addYears = 2;
-        if (value.equals("two_years")) {
-            addYears = 3;
-        }
-        final Calendar instance = Calendar.getInstance();
-        instance.add(Calendar.YEAR, addYears);
-        instance.set(Calendar.DAY_OF_YEAR, 0);
-        instance.set(Calendar.HOUR_OF_DAY, 0);
-        instance.set(Calendar.MINUTE, 0);
-        instance.set(Calendar.SECOND, 0);
-        instance.set(Calendar.MILLISECOND, 0);
-
-        return instance.getTime();
-    }
-
-    public Date start() throws WebdavProtocolException {
-        final String value = getConfigValue("com.openexchange.caldav.interval.start", "one_month");
-
-        if (value.equals("one_year")) {
-            final Calendar instance = Calendar.getInstance();
-            instance.add(Calendar.YEAR, -1);
-            instance.set(Calendar.DAY_OF_YEAR, 0);
-            instance.set(Calendar.HOUR_OF_DAY, 0);
-            instance.set(Calendar.MINUTE, 0);
-            instance.set(Calendar.SECOND, 0);
-            instance.set(Calendar.MILLISECOND, 0);
-
-            return instance.getTime();
-        }
-
-        final Calendar instance = Calendar.getInstance();
-
-        if (value.equals("six_months")) {
-            instance.add(Calendar.MONTH, -6);
-        } else {
-            instance.add(Calendar.MONTH, -1);
-        }
-        instance.set(Calendar.DAY_OF_MONTH, 1);
-        instance.set(Calendar.HOUR_OF_DAY, 0);
-        instance.set(Calendar.MINUTE, 0);
-        instance.set(Calendar.SECOND, 0);
-        instance.set(Calendar.MILLISECOND, 0);
-        return instance.getTime();
-
-    }
-    
-    /**
-     * Gets the used folder tree identifier for folder operations.
-     */
-    public String getTreeID() {
-        try {
-			return this.getConfigValue("com.openexchange.caldav.tree", FolderStorage.REAL_TREE_ID);
-		} catch (final WebdavProtocolException e) {
-			LOG.warn("falling back to tree id '" + FolderStorage.REAL_TREE_ID +"'.", e);
-			return FolderStorage.REAL_TREE_ID;
-		}
     }
 
     public User resolveUser(int userID) throws OXException {
@@ -287,15 +223,101 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
         }
     }
 
+    /**
+     * {@link State} - Thread-local CalDAV state
+     *
+     * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+     */
     public static final class State {
         
         private final Map<WebdavPath, CommonCollection> knownCollections;
         private final GroupwareCaldavFactory factory;
+        
+        private Date minDateTime = null;
+        private Date maxDateTime = null;
+        private String treeID;
 
         public State(final GroupwareCaldavFactory factory) {
             super();
             this.factory = factory;
             this.knownCollections = new HashMap<WebdavPath, CommonCollection>();
+        }
+        
+        /**
+         * Gets the used folder tree identifier.
+         * 
+         * @return the folder tree ID
+         */
+        public String getTreeID() {
+            if (null == this.treeID) {
+                try {
+                    treeID = factory.getConfigValue("com.openexchange.caldav.tree", FolderStorage.REAL_TREE_ID);
+                } catch (OXException e) {
+                    LOG.warn("falling back to tree id '" + FolderStorage.REAL_TREE_ID + "'.", e);
+                    treeID = FolderStorage.REAL_TREE_ID;
+                }
+            }
+            return treeID;
+        }
+        
+        /**
+         * Gets the configured minimum date-time for the CalDAV interface 
+         * 
+         * @return the minimum date
+         */
+        public Date getMinDateTime() {
+            if (null == this.minDateTime) {
+                String value = null;
+                try {
+                    value = factory.getConfigValue("com.openexchange.caldav.interval.start", "one_month");
+                } catch (OXException e) {
+                    LOG.warn("falling back to 'one_month' as interval start", e);
+                    value = "one_month";
+                }
+                Calendar calendar = Calendar.getInstance();
+                calendar.set(Calendar.HOUR_OF_DAY, 0);
+                calendar.set(Calendar.MINUTE, 0);
+                calendar.set(Calendar.SECOND, 0);
+                calendar.set(Calendar.MILLISECOND, 0);                
+                if ("one_year".equals(value)) {
+                    calendar.add(Calendar.YEAR, -1);
+                    calendar.set(Calendar.DAY_OF_YEAR, 1);
+                } else if ("six_months".equals(value)) {
+                    calendar.add(Calendar.MONTH, -6);
+                    calendar.set(Calendar.DAY_OF_MONTH, 1);
+                } else {
+                    calendar.add(Calendar.MONTH, -1);
+                    calendar.set(Calendar.DAY_OF_MONTH, 1);
+                }                
+                this.minDateTime = calendar.getTime();                
+            }
+            return minDateTime;
+        }
+
+        /**
+         * Gets the configured maximum date-time for the CalDAV interface 
+         * 
+         * @return the maximum date
+         */
+        public Date getMaxDateTime() {
+            if (null == this.maxDateTime) {
+                String value = null;
+                try {
+                    value = factory.getConfigValue("com.openexchange.caldav.interval.end", "one_year");
+                } catch (OXException e) {
+                    LOG.warn("falling back to 'one_year' as interval end", e);
+                    value = "one_year";
+                }
+                Calendar calendar = Calendar.getInstance();
+                calendar.add(Calendar.YEAR, "two_years".equals(value) ? 3 : 2);
+                calendar.set(Calendar.DAY_OF_YEAR, 1);
+                calendar.set(Calendar.HOUR_OF_DAY, 0);
+                calendar.set(Calendar.MINUTE, 0);
+                calendar.set(Calendar.SECOND, 0);
+                calendar.set(Calendar.MILLISECOND, 0);
+                this.maxDateTime = calendar.getTime();                
+            }
+            return maxDateTime;
         }
 
         public CommonCollection resolveCollection(WebdavPath url) throws WebdavProtocolException {

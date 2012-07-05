@@ -25,7 +25,7 @@ public class Attachments implements ChangeDescriptionGenerator {
 	
 	@Override
     public String[] getFields() {
-		return new String[]{};
+		return new String[] {};
 	}
 
 	@Override

@@ -133,7 +133,7 @@ public final class NewAction extends AbstractMailAction {
                     {
                         final String json0 = uploadEvent.getFormField(Mail.UPLOAD_FORMFIELD_MAIL);
                         if (json0 == null || json0.trim().length() == 0) {
-                            throw MailExceptionCode.MISSING_PARAM.create(Mail.UPLOAD_FORMFIELD_MAIL);
+                            throw MailExceptionCode.PROCESSING_ERROR.create(MailExceptionCode.MISSING_PARAM.create(Mail.UPLOAD_FORMFIELD_MAIL), new Object[0]);
                         }
                         jsonMailObj = new JSONObject(json0);
                     }
@@ -238,6 +238,7 @@ public final class NewAction extends AbstractMailAction {
             final PutNewMailData data;
             {
                 final MimeMessage message = new MimeMessage(MimeDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(((String) req.getRequest().getData()).getBytes(com.openexchange.java.Charsets.US_ASCII)));
+                message.removeHeader("x-original-headers");
                 final String fromAddr = message.getHeader(MessageHeaders.HDR_FROM, null);
                 final InternetAddress fromAddress;
                 final MailMessage mail;

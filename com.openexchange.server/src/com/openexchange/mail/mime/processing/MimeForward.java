@@ -309,6 +309,8 @@ public final class MimeForward {
                 multipart.addBodyPart(textPart);
                 forwardMsg.setContent(multipart);
                 forwardMsg.saveChanges();
+                // Remove generated Message-Id header
+                forwardMsg.removeHeader(MessageHeaders.HDR_MESSAGE_ID);
             }
             final CompositeMailMessage compositeMail = new CompositeMailMessage(MimeMessageConverter.convertMessage(forwardMsg));
             /*
@@ -346,6 +348,8 @@ public final class MimeForward {
             forwardMsg.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
             forwardMsg.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(originalContentType.toString()));
             forwardMsg.saveChanges();
+            // Remove generated Message-Id header
+            forwardMsg.removeHeader(MessageHeaders.HDR_MESSAGE_ID);
             forwardMail = MimeMessageConverter.convertMessage(forwardMsg);
         } else {
             /*
@@ -368,6 +372,8 @@ public final class MimeForward {
                 multipart.addBodyPart(textPart);
                 forwardMsg.setContent(multipart);
                 forwardMsg.saveChanges();
+                // Remove generated Message-Id header
+                forwardMsg.removeHeader(MessageHeaders.HDR_MESSAGE_ID);
             }
             final CompositeMailMessage compositeMail = new CompositeMailMessage(MimeMessageConverter.convertMessage(forwardMsg));
             /*
@@ -439,6 +445,8 @@ public final class MimeForward {
             multipart.addBodyPart(textPart);
             forwardMsg.setContent(multipart);
             forwardMsg.saveChanges();
+            // Remove generated Message-Id header
+            forwardMsg.removeHeader(MessageHeaders.HDR_MESSAGE_ID);
             compositeMail = new CompositeMailMessage(MimeMessageConverter.convertMessage(forwardMsg));
         }
         /*

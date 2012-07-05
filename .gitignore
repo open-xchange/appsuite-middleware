@@ -13,6 +13,8 @@ com.openexchange.axis2/lib/*.jar
 com.openexchange.axis2/tmp/*
 com.openexchange.common/jars
 build/build
+build/
+build
 build/tmp
 com.openexchange.global/jars
 com.openexchange.config.cascade/jars

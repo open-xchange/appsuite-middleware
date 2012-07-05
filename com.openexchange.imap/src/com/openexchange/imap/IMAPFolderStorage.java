@@ -487,9 +487,60 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
 
     @Override
     public MailFolder getFolder(final String fullName) throws OXException {
-        return FolderCache.getCachedFolder(fullName, this);
+        try {
+            return FolderCache.getCachedFolder(fullName, this);
+        } catch (final OXException e) {
+            if (IMAPException.Code.FOLDER_NOT_FOUND.equals(e) || MimeMailExceptionCode.FOLDER_NOT_FOUND.equals(e)) {
+                final MailFolder m = checkNonHoldsMessages(fullName);
+                if (null == m) {
+                    throw e;
+                }
+                return m;
+            }
+            throw e;
+        }
     }
 
+    private MailFolder checkNonHoldsMessages(final String fullName) {
+        try {
+            final ListLsubEntry listEntry = ListLsubCache.getCachedLISTEntry(fullName, accountId, imapStore, session);
+            if (null == listEntry || listEntry.exists() || listEntry.canOpen()) {
+                return null;
+            }
+            final MailFolder mf = new MailFolder();
+            mf.setDefaultFolder(false);
+            mf.setDefaultFolderType(DefaultFolderType.NONE);
+            mf.setDeletedMessageCount(-1);
+            mf.setExists(true);
+            mf.setFullname(fullName);
+            mf.setHoldsFolders(false);
+            mf.setHoldsMessages(listEntry.canOpen());
+            mf.setMessageCount(-1);
+            mf.setName(listEntry.getName());
+            mf.setNewMessageCount(-1);
+            final ListLsubEntry parent = listEntry.getParent();
+            mf.setParentFullname(null == parent ? MailFolder.DEFAULT_FOLDER_ID : parent.getFullName());
+            mf.setRootFolder(false);
+            mf.setSeparator(listEntry.getSeparator());
+            mf.setShared(false);
+            mf.setSubfolders(false);
+            mf.setSubscribed(listEntry.isSubscribed());
+            mf.setSubscribedSubfolders(false);
+            mf.setSupportsUserFlags(false);
+            mf.setUnreadMessageCount(-1);
+            // permission
+            final ACLPermission ownPermission = new ACLPermission();
+            ownPermission.setEntity(session.getUserId());
+            final Rights rights = IMAPFolderConverter.getOwnRights((IMAPFolder) imapStore.getFolder(fullName), session, imapConfig);
+            ownPermission.parseRights(rights, imapConfig);
+            mf.setOwnPermission(ownPermission);
+            mf.addPermission(ownPermission);
+            return mf;
+        } catch (final Exception e) {
+            // Ignore
+            return null;
+        }
+    }
     // private static final String PATTERN_ALL = "%";
 
     @Override

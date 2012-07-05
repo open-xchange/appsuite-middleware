@@ -164,6 +164,7 @@ import com.openexchange.subscribe.internal.ContactFolderMultipleUpdaterStrategy;
 import com.openexchange.subscribe.internal.ContactFolderUpdaterStrategy;
 import com.openexchange.subscribe.internal.StrategyFolderUpdaterService;
 import com.openexchange.subscribe.internal.SubscriptionExecutionServiceImpl;
+import com.openexchange.subscribe.osgi.SubscriptionServiceRegistry;
 import com.openexchange.test.TestInit;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.internal.ThreadPoolProperties;
@@ -319,6 +320,7 @@ public final class Init {
          */
         injectProperty();
         injectTestServices();
+
         for (final Initialization init : inits) {
             init.start();
             started.add(init);
@@ -513,6 +515,20 @@ public final class Init {
     }
 
     private static void startAndInjectImportExportServices() throws OXException {
+        if (null == com.openexchange.importexport.osgi.ImportExportServices.LOOKUP.get()) {
+            com.openexchange.importexport.osgi.ImportExportServices.LOOKUP.set(new ServiceLookup() {
+                @Override
+                public <S> S getService(final Class<? extends S> clazz) {
+                    return TestServiceRegistry.getInstance().getService(clazz);
+                }
+                @Override
+                public <S> S getOptionalService(final Class<? extends S> clazz) {
+                    return null;
+                }
+            });
+            SubscriptionServiceRegistry.getInstance().addService(
+                ContactInterfaceDiscoveryService.class, services.get(ContactInterfaceDiscoveryService.class));
+        }
     }
     
     private static void startAndInjectIDGeneratorService() {

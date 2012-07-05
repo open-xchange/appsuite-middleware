@@ -162,7 +162,7 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
     protected Collection<Appointment> getModifiedObjects(Date since) throws OXException {
         try {
             return filter(getAppointmentInterface().getModifiedAppointmentsInFolder(
-                folderID, factory.start(), factory.end(), BASIC_COLUMNS, since));
+                folderID, getIntervalStart(), getIntervalEnd(), BASIC_COLUMNS, since));
         } catch (SQLException e) {
             throw protocolException(e);
         }
@@ -230,7 +230,6 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
             Patches.Outgoing.setOrganizerInformation(factory, appointment);
             Patches.Outgoing.setOrganizersParticipantStatus(appointment);
             Patches.Outgoing.setSeriesStartAndEnd(factory, appointment);
-//            Patches.Outgoing.removeImplicitParticipant(appointment, getFolder());
         }
         return appointment;
     }

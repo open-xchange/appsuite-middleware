@@ -54,12 +54,10 @@ import java.util.GregorianCalendar;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
-
 import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.property.DateProperty;
-
 import org.apache.commons.collections.BidiMap;
 import org.apache.commons.collections.bidimap.TreeBidiMap;
 
@@ -99,7 +97,10 @@ public final class ParserTools {
         final TimeZone UTC = TimeZone.getTimeZone("UTC");
         Date date;
         if (isDateTime) {
-            date = toDate(value, timeZone);
+            date = new Date(value.getDate().getTime());
+            if (inDefaultTimeZone(value, timeZone)) {
+                date = recalculate(date, timeZone);
+            }
         } else {
             date = toDate(value, UTC);
         }

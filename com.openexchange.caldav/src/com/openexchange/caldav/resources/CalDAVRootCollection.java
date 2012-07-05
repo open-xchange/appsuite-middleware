@@ -220,7 +220,7 @@ public class CalDAVRootCollection extends CommonCollection {
     private List<UserizedFolder> getVisibleFolders(Type type, ContentType contentType) throws OXException {
         List<UserizedFolder> folders = new ArrayList<UserizedFolder>();
         FolderResponse<UserizedFolder[]> visibleFoldersResponse = getFolderService().getVisibleFolders(
-                factory.getTreeID(), contentType, type, false, factory.getSession(), null);
+                factory.getState().getTreeID(), contentType, type, false, factory.getSession(), null);
         UserizedFolder[] response = visibleFoldersResponse.getResponse();
         for (UserizedFolder folder : response) {
             if (Permission.READ_OWN_OBJECTS < folder.getOwnPermission().getReadPermission() && false == isTrashFolder(folder)) {

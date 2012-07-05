@@ -437,7 +437,58 @@ public final class DBUtils {
         if (sqlException.getClass().getName().endsWith("TransactionRollbackException")) {
             return true;
         }
-        return isTransactionRollbackException(sqlException.getNextException());
+        if (isTransactionRollbackException(sqlException.getNextException())) {
+            return true;
+        }
+        final Throwable cause = sqlException.getCause();
+        if (null == cause || !(cause instanceof Exception)) {
+            return false;
+        }
+        return isTransactionRollbackException((Exception) cause);
+    }
+
+    /**
+     * Checks if passed <tt>SQLException</tt> (or any of chained <tt>SQLException</tt>s) indicates a failed transaction roll-back.
+     * 
+     * <pre>
+     * Deadlock found when trying to get lock; try restarting transaction
+     * </pre>
+     * 
+     * @param exception The exception to check
+     * @return <code>true</code> if a failed transaction roll-back is indicated; otherwise <code>false</code>
+     */
+    public static boolean isTransactionRollbackException(final Exception exception) {
+        if (null == exception) {
+            return false;
+        }
+        if (exception instanceof SQLException) {
+            return isTransactionRollbackException((SQLException) exception);
+        }
+        final Throwable cause = exception.getCause();
+        if (null == cause || !(cause instanceof Exception)) {
+            return false;
+        }
+        return isTransactionRollbackException((Exception) cause);
+    }
+
+    /**
+     * Extracts possibly nested <tt>SQLException</tt> reference.
+     * 
+     * @param exception The parental exception to extract from
+     * @return The <tt>SQLException</tt> reference or <code>null</code>
+     */
+    public static SQLException extractSqlException(final Exception exception) {
+        if (null == exception) {
+            return null;
+        }
+        if (exception instanceof SQLException) {
+            return (SQLException) exception;
+        }
+        final Throwable cause = exception.getCause();
+        if (null == cause || !(cause instanceof Exception)) {
+            return null;
+        }
+        return extractSqlException((Exception) cause);
     }
 
     /**
@@ -483,6 +534,13 @@ public final class DBUtils {
          */
         public SQLException getTransactionRollbackException() {
             return transactionRollbackException;
+        }
+
+        /**
+         * Resets the reference that indicates a failed transaction roll-back.
+         */
+        public void resetTransactionRollbackException() {
+            transactionRollbackException = null;
         }
 
         /**

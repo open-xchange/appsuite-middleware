@@ -53,6 +53,7 @@ import java.util.List;
 import java.util.TimeZone;
 import net.fortuna.ical4j.model.ComponentList;
 import net.fortuna.ical4j.model.Dur;
+import net.fortuna.ical4j.model.Parameter;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.component.VAlarm;
@@ -91,11 +92,12 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
     }
 
     private void emitAppointmentAlarm(final Appointment appointmentObject, final VEvent component, final List<ConversionWarning> warnings) {
-        if(0 >= appointmentObject.getAlarm()) {
+        if (false == appointmentObject.containsAlarm() || 0 > appointmentObject.getAlarm()) {
             return;
         }
         final VAlarm alarm = new VAlarm();
-        final Dur duration = new Dur(String.format("-PT%dM", Integer.valueOf(appointmentObject.getAlarm())));
+        final Dur duration = new Dur(String.format("%sPT%dM", 
+            0 == appointmentObject.getAlarm() ? "" : "-", Integer.valueOf(appointmentObject.getAlarm())));
         final Trigger trigger = new Trigger(duration);
         alarm.getProperties().add(trigger);
 
@@ -146,11 +148,17 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
          */
         Trigger trigger = getTrigger(index, component, warnings);
         if (null != trigger) {
+            /*
+             * determine related date
+             */
+            Parameter relatedParameter = trigger.getParameter("RELATED");
+            Date relatedDate = null != relatedParameter && "END".equals(relatedParameter.getValue()) ? 
+                calendarObject.getEndDate() : calendarObject.getStartDate();
             if (Appointment.class.isAssignableFrom(calendarObject.getClass())) {
                 /*
                  * set relative alarm timespan 
                  */
-                Long duration = parseTriggerDuration(index, trigger, calendarObject.getStartDate(), timeZone, warnings);
+                Long duration = parseTriggerDuration(index, trigger, relatedDate, timeZone, warnings);
                 if (null != duration) {
                     Appointment appointment = (Appointment)calendarObject;
                     appointment.setAlarmFlag(true);
@@ -160,7 +168,7 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
                 /*
                  * set absolute alarm date-time
                  */
-                Date date = parseTriggerDate(index, trigger, calendarObject.getEndDate(), timeZone, warnings);
+                Date date = parseTriggerDate(index, trigger, relatedDate, timeZone, warnings);
                 if (null != date) {
                     Task task = (Task)calendarObject;
                     task.setAlarmFlag(true);
@@ -227,8 +235,11 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
     private java.util.Date parseTriggerDate(int index, Trigger trigger, java.util.Date start, TimeZone timeZone, List<ConversionWarning> warnings) {
         Dur duration = trigger.getDuration();
         if (null != duration) {
-            if (false == duration.isNegative()) {
+            if (false == duration.isNegative() && false == new Dur("PT0S").equals(duration)) {
                 warnings.add(new ConversionWarning(index, "Ignoring non-negative duration for alarm trigger"));
+                return null;
+            } else if (null == start) {
+                warnings.add(new ConversionWarning(index, "Need corresponding time for relative trigger"));
                 return null;
             } else {
                 return duration.getTime(start);
@@ -253,7 +264,7 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
     private Long parseTriggerDuration(int index, Trigger trigger, java.util.Date start, TimeZone timeZone, List<ConversionWarning> warnings) {
         Dur duration = trigger.getDuration();
         if (null != duration) {
-            if (false == duration.isNegative()) {
+            if (false == duration.isNegative() && false == new Dur("PT0S").equals(duration)) {
                 warnings.add(new ConversionWarning(index, "Ignoring non-negative duration for alarm trigger"));
                 return null;
             } else {

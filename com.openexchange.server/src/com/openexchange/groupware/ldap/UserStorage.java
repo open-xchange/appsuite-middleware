@@ -323,7 +323,23 @@ public abstract class UserStorage {
      * @return an instance implementing the user storage interface.
      */
     public static UserStorage getInstance() {
-        return instance;
+        UserStorage tmp = instance;
+        if (null == tmp) {
+            synchronized (UserStorage.class) {
+                tmp = instance;
+                if (null == tmp) {
+                    try {
+                        tmp = new CachingUserStorage(new RdbUserStorage());
+                        tmp.startInternal();
+                        instance = tmp;
+                    } catch (final OXException e) {
+                        // Cannot occur
+                        LOG.warn(e.getMessage(), e);
+                    }
+                }
+            }
+        }
+        return tmp;
     }
 
     /**

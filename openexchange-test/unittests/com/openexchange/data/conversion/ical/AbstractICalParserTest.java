@@ -49,7 +49,6 @@
 
 package com.openexchange.data.conversion.ical;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
 import java.util.ArrayList;
 import java.util.Date;
@@ -61,6 +60,7 @@ import com.openexchange.data.conversion.ical.ical4j.ICal4JParser;
 import com.openexchange.data.conversion.ical.ical4j.internal.ResourceResolver;
 import com.openexchange.data.conversion.ical.ical4j.internal.UserResolver;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
@@ -237,7 +237,7 @@ public abstract class AbstractICalParserTest extends TestCase {
 
         assertTrue(0 != result.size()); // Warnings don't abort parsing of the object
         assertEquals(1, warnings.size());
-        assertEquals(warning, warnings.get(0).getFormattedMessage());
+        assertEquals(warning, warnings.get(0).getSoleMessage());
     }
 
     protected void assertErrorWhenParsingAppointment(final String icalText, final String error) throws ConversionError {
@@ -245,8 +245,7 @@ public abstract class AbstractICalParserTest extends TestCase {
         final ArrayList<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
         parser.parseAppointments(icalText, TimeZone.getTimeZone("UTC"), new ContextImpl(23), errors, warnings);
         assertEquals(1, errors.size());
-        assertEquals(error, errors.get(0).getFormattedMessage());
-
+        assertEquals(error, errors.get(0).getSoleMessage());
     }
 
     protected void warningOnAppRecurrence(final String recurrence, final String warning) throws ConversionError {

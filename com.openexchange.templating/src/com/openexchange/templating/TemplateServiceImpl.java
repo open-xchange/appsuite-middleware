@@ -247,7 +247,7 @@ public class TemplateServiceImpl implements TemplateService {
     protected String loadFromFileSystem(final String defaultTemplateName) throws OXException {
         final File templateFile = getTemplateFile(defaultTemplateName);
         if (!templateFile.exists() || !templateFile.exists() || !templateFile.canRead()) {
-            return "Unfilled Template: " + defaultTemplateName;
+        	throw TemplateErrorMessage.TemplateNotFound.create(defaultTemplateName);
         }
         BufferedReader reader = null;
         try {

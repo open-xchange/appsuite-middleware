@@ -70,6 +70,7 @@ import com.openexchange.file.storage.FileStorageEventHelper;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.InMemoryFileStorageFileAccess;
+import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.session.Session;
 import com.openexchange.session.SimSession;
 
