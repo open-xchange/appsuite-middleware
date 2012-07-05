@@ -92,11 +92,12 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
     }
 
     private void emitAppointmentAlarm(final Appointment appointmentObject, final VEvent component, final List<ConversionWarning> warnings) {
-        if(0 >= appointmentObject.getAlarm()) {
+        if (false == appointmentObject.containsAlarm() || 0 > appointmentObject.getAlarm()) {
             return;
         }
         final VAlarm alarm = new VAlarm();
-        final Dur duration = new Dur(String.format("-PT%dM", Integer.valueOf(appointmentObject.getAlarm())));
+        final Dur duration = new Dur(String.format("%sPT%dM", 
+            0 == appointmentObject.getAlarm() ? "" : "-", Integer.valueOf(appointmentObject.getAlarm())));
         final Trigger trigger = new Trigger(duration);
         alarm.getProperties().add(trigger);
 
