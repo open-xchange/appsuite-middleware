@@ -313,7 +313,6 @@ public final class Init {
             /*
              * Already running
              */
-            System.out.println("----> Server already running.");
             return;
         }
         /*
@@ -322,10 +321,7 @@ public final class Init {
         injectProperty();
         injectTestServices();
 
-        System.out.println("----> Server not running.");
         for (final Initialization init : inits) {
-
-            System.out.println("----> Init: " + init.getClass().getName());
             init.start();
             started.add(init);
         }
