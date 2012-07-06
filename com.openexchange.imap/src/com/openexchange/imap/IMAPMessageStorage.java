@@ -826,9 +826,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             Part p = examinePart(msg, contentId);
             if (null == p) {
                 // Retry...
-                final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(8192);
+                ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(8192);
                 msg.writeTo(out);
                 final MimeMessage tmp = new MimeMessage(MimeDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(out.toByteArray()));
+                out = null;
                 p = examinePart(tmp, contentId);
                 if (null == p) {
                     throw MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND.create(contentId, Long.valueOf(msgUID), fullName);
