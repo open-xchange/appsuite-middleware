@@ -5,10 +5,8 @@ Bundle-SymbolicName: com.openexchange.admin.reseller.rmi
 Bundle-Version: 6.21.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.admin.rmi.dataobjects,
- com.openexchange.admin.rmi.exceptions,
- com.openexchange.admin.rmi.extensions
 Export-Package: com.openexchange.admin.reseller.rmi,
  com.openexchange.admin.reseller.rmi.dataobjects,
  com.openexchange.admin.reseller.rmi.exceptions,
  com.openexchange.admin.reseller.rmi.extensions
+Require-Bundle: com.openexchange.admin.rmi

@@ -8,9 +8,8 @@ Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.mysql.jdbc,
  com.openexchange.admin.console,
- com.openexchange.admin.rmi,
- com.openexchange.admin.rmi.dataobjects,
- com.openexchange.admin.rmi.exceptions,
+ com.openexchange.admin.contextrestore.rmi,
+ com.openexchange.admin.contextrestore.rmi.exceptions,
  com.openexchange.admin.storage.interfaces,
  com.openexchange.admin.tools,
  com.openexchange.database,
@@ -25,6 +24,5 @@ Import-Package: com.mysql.jdbc,
  org.osgi.framework;version="1.3.0"
 Bundle-ActivationPolicy: lazy
 Require-Bundle: com.openexchange.admin.plugin.hosting,
- com.openexchange.admin,
  com.openexchange.admin.rmi,
- com.openexchange.admin.contextrestore.rmi
+ com.openexchange.admin
