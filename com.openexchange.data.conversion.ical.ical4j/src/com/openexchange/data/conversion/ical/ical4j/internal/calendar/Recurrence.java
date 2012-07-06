@@ -249,7 +249,14 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
         }
         final Recur rrule = ((RRule) list.get(0)).getRecur();
         if ("DAILY".equalsIgnoreCase(rrule.getFrequency())) {
-            cObj.setRecurrenceType(Appointment.DAILY);
+            if (null != rrule.getDayList() && 0 < rrule.getDayList().size()) {
+                // used as "each weekday" by some clients: FREQ=DAILY;INTERVAL=1;WKST=SU;BYDAY=MO,TU,WE,TH,FR
+                // save as 'weekly' type with daymask
+                cObj.setRecurrenceType(Appointment.WEEKLY);
+                setDays(index, cObj, rrule, startDate);
+            } else {
+                cObj.setRecurrenceType(Appointment.DAILY);
+            }
             if (!rrule.getMonthList().isEmpty()) {
                 throw new ConversionError(index, Code.BYMONTH_NOT_SUPPORTED);
             }
