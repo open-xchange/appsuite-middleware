@@ -2089,7 +2089,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 uid = mailAccess.getMessageStorage().appendMessages(draftFullname, new MailMessage[] { filledMail })[0];
             }
             if (null == uid) {
-                throw MailExceptionCode.MAIL_NOT_FOUND.create(Long.valueOf(-1L), draftFullname);
+                return null;
             }
             /*
              * Check for draft-edit operation: Delete old version
