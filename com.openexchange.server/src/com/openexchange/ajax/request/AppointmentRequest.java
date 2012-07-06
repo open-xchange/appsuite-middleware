@@ -737,7 +737,8 @@ public class AppointmentRequest extends CalendarRequest {
             final AppointmentSQLInterface appointmentsql = appointmentFactory.createAppointmentSql(session);
             final CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
             if (showAppointmentInAllFolders) {
-                it = appointmentsql.getAppointmentsBetween(user.getId(), start, end, _appointmentFields, orderBy, orderDir);
+                it = appointmentsql.getAppointmentsBetween(start, end, _appointmentFields, orderBy, orderDir);
+                //it = appointmentsql.getAppointmentsBetween(user.getId(), start, end, _appointmentFields, orderBy, orderDir);
             } else {
                 final boolean old = appointmentsql.getIncludePrivateAppointments();
                 appointmentsql.setIncludePrivateAppointments(showPrivateAppointments);

@@ -424,6 +424,32 @@ public class CalendarMySQL implements CalendarSqlImp {
         super();
     }
 
+    public PreparedStatement getAllAppointments(Context c, Date d1, Date d2, String select, Connection readcon, int orderBy, Order orderDir) throws OXException, SQLException {
+        StringBuilder sb = new StringBuilder(64);
+        sb.append(parseSelect(select));
+        sb.append(" pd JOIN prg_dates_members pdm ON pd.intfield01 = pdm.object_id AND pd.cid = pdm.cid");
+
+        sb.append(WHERE);
+        getRange(sb);
+
+        if (collection.getFieldName(orderBy) == null || Order.NO_ORDER.equals(orderDir)) {
+            sb.append(ORDER_BY);
+        } else {
+            sb.append(PDM_ORDER_BY);
+            sb.append(collection.getFieldName(orderBy));
+            sb.append(' ');
+            sb.append(forSQLCommand(orderDir));
+        }
+
+        PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        int a = 1;
+
+        pst.setTimestamp(a++, new Timestamp(d2.getTime()));
+        pst.setTimestamp(a++, new Timestamp(d1.getTime()));
+
+        return pst;
+    }
+
     @Override
     public final PreparedStatement getAllAppointmentsForUser(final Context c, final int uid, final int groups[], final UserConfiguration uc, final java.util.Date d1, final java.util.Date d2, final String select, final Connection readcon, final java.util.Date since, final int orderBy, final Order orderDir) throws OXException, SQLException {
         return getAllAppointmentsForUser(c, uid, groups, uc, d1, d2, select, readcon, since, orderBy, orderDir, false);

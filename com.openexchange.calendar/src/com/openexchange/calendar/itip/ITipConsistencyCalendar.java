@@ -535,6 +535,10 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
 		return delegate.getAppointmentsBetween(user_uid, start, end, cols,
 				orderBy, order);
 	}
+	
+    public SearchIterator<Appointment> getAppointmentsBetween(Date start, Date end, int cols[], int orderBy, Order order) throws OXException, SQLException {
+        return delegate.getAppointmentsBetween(start, end, cols, orderBy, order);
+    }
 
 	@Override
     public int resolveUid(final String uid) throws OXException {
