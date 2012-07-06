@@ -107,7 +107,7 @@ public class UWACopyTask implements CopyUserTaskService {
     /**
      * @see com.openexchange.user.copy.CopyUserTaskService#copyUser(java.util.Map)
      */
-    public ObjectMapping<?> copyUser(final Map<String, ObjectMapping<?>> copied) throws OXException {
+    public ObjectMapping<?> copyUser(final Map<String, ObjectMapping<?>> copied) throws OXException {        
         final CopyTools copyTools = new CopyTools(copied);        
         final Integer srcCtxId = copyTools.getSourceContextId();
         final Integer dstCtxId = copyTools.getDestinationContextId();
@@ -116,8 +116,14 @@ public class UWACopyTask implements CopyUserTaskService {
         final Connection srcCon = copyTools.getSourceConnection();
         final Connection dstCon = copyTools.getDestinationConnection();
         
-        final List<Widget> widgets = loadWidgetsFromDB(srcCon, i(srcCtxId), i(srcUsrId));
-        writeWidgetsToDB(dstCon, i(dstCtxId), i(dstUsrId), widgets);
+        try {
+            if (DBUtils.tableExists(srcCon, "uwaWidget")) {
+                final List<Widget> widgets = loadWidgetsFromDB(srcCon, i(srcCtxId), i(srcUsrId));
+                writeWidgetsToDB(dstCon, i(dstCtxId), i(dstUsrId), widgets);
+            }
+        } catch (SQLException e) {
+            throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
+        }       
         
         return null;
     }

@@ -68,6 +68,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.UUID;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.junit.Test;
@@ -76,6 +77,7 @@ import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.exceptions.ContextExistsException;
 import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.attach.actions.AllResponse;
@@ -94,6 +96,7 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractColumnsResponse;
 import com.openexchange.ajax.framework.CommonAllResponse;
+import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.ListID;
 import com.openexchange.ajax.framework.ListIDs;
@@ -169,10 +172,35 @@ public class RoundtripTest extends AbstractRMITest {
     public void setUp() throws Exception {
         super.setUp();
         ci = getContextInterface();
+        Context[] contexts = ci.list("UserMove*", superAdminCredentials);
+        for (Context ctx : contexts) {
+            System.out.println("Deletimng context " + ctx.getName() + " in schema " + ctx.getReadDatabase().getScheme());
+            ci.delete(ctx, superAdminCredentials);
+        }
+        
         admin = newUser("oxadmin", "secret", "Admin User", "Admin", "User", "oxadmin@netline.de");
-        srcCtx = ci.create(newContext("UserMoveSourceCtx", 23432545), admin, "all", superAdminCredentials);
-        dstCtx = ci.create(newContext("UserMoveDestinationCtx", 23432546), admin, "all", superAdminCredentials);
-
+        
+        int ctxId = Integer.MAX_VALUE;
+        boolean created = false;
+        while (!created) {
+            try {
+                srcCtx = ci.create(newContext("UserMoveSourceCtx_" + ctxId, ctxId), admin, "all", superAdminCredentials);
+                created = true;
+            } catch (ContextExistsException e) {
+                --ctxId;
+            }
+        }
+        
+        created = false;
+        while (!created) {
+            try {
+                dstCtx = ci.create(newContext("UserMoveDestinationCtx_" + ctxId, --ctxId), admin, "all", superAdminCredentials);
+                created = true;
+            } catch (ContextExistsException e) {
+                --ctxId;
+            }
+        }
+            
         ui = getUserInterface();
         final User test = newUser("user", "secret", "Test User", "Test", "User", "test.user@netline.de");
         test.setImapServer("devel-mail.netline.de");
@@ -181,7 +209,7 @@ public class RoundtripTest extends AbstractRMITest {
         srcUser = ui.create(srcCtx, test, getCredentials());
 
         AJAXConfig.init();
-        userSession = performLogin("user@UserMoveSourceCtx", "secret");
+        userSession = performLogin("user@" + srcCtx.getName() , "secret");
         userClient = new AJAXClient(userSession);
 
         Create.createPrivateFolder("Private folder test", Types.APPOINTMENT, userClient.getValues().getUserId());
@@ -205,6 +233,8 @@ public class RoundtripTest extends AbstractRMITest {
             TimeZone.getTimeZone("Europe/Berlin"));
         com.openexchange.ajax.task.actions.InsertResponse newTaskResponse = userClient.execute(newTaskRequest);
         newTaskResponse.fillTask(newTask);
+        
+        
         
         FolderObject taskFolder = new FolderObject("Task folder", 90, FolderObject.TASK, FolderObject.PRIVATE, userClient.getValues().getUserId());
         taskFolder.setParentFolderID(userClient.getValues().getPrivateTaskFolder());
@@ -246,7 +276,7 @@ public class RoundtripTest extends AbstractRMITest {
         AppointmentInsertResponse appointmentResponse = userClient.execute(newAppointmentRequest);
         appointmentResponse.fillObject(newAppointment);
         
-        FolderObject appointmentFolder = new FolderObject("Appointment folder", 91, FolderObject.CALENDAR, FolderObject.PRIVATE, userClient.getValues().getUserId());
+        FolderObject appointmentFolder = com.openexchange.ajax.folder.Create.createPrivateFolder(UUID.randomUUID().toString(), FolderObject.CALENDAR, userClient.getValues().getUserId());
         appointmentFolder.setParentFolderID(userClient.getValues().getPrivateAppointmentFolder());
         OCLPermission appointmentPerm = new OCLPermission();
         appointmentPerm.setEntity(userClient.getValues().getUserId());
@@ -388,8 +418,8 @@ public class RoundtripTest extends AbstractRMITest {
     }
 
     private void compareUsers(final User orig, final User copied) throws Exception {
-        final AJAXSession origSession = performLogin("user@UserMoveSourceCtx", "secret");
-        final AJAXSession copiedSession = performLogin("user@UserMoveDestinationCtx", "secret");
+        final AJAXSession origSession = performLogin("user@" + srcCtx.getName(), "secret");
+        final AJAXSession copiedSession = performLogin("user@" + dstCtx.getName(), "secret");
         origClient = new AJAXClient(origSession);
         copiedClient = new AJAXClient(copiedSession);
 
