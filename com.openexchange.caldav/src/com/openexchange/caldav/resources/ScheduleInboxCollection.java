@@ -55,6 +55,9 @@ import java.util.Date;
 import java.util.List;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.mixins.ScheduleInboxURL;
+import com.openexchange.caldav.mixins.SyncToken;
+import com.openexchange.caldav.query.Filter;
+import com.openexchange.caldav.reports.FilteringResource;
 import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
@@ -71,7 +74,7 @@ import com.openexchange.webdav.protocol.helpers.AbstractResource;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ScheduleInboxCollection extends CommonCollection {
+public class ScheduleInboxCollection extends CommonCollection implements FilteringResource {
 
     /**
      * Initializes a new {@link ScheduleInboxCollection}.
@@ -80,6 +83,7 @@ public class ScheduleInboxCollection extends CommonCollection {
      */
     public ScheduleInboxCollection(GroupwareCaldavFactory factory) {
         super(factory, new WebdavPath(ScheduleInboxURL.SCHEDULE_INBOX));
+        includeProperties(new SyncToken(this));
     }
     
     @Override
@@ -89,7 +93,6 @@ public class ScheduleInboxCollection extends CommonCollection {
 
     @Override
     public void putBody(InputStream body, boolean guessSize) throws WebdavProtocolException {
-        // swallow everything
     }   
     
     @Override
@@ -134,17 +137,22 @@ public class ScheduleInboxCollection extends CommonCollection {
 
     @Override
     public Date getCreationDate() throws WebdavProtocolException {
-        return null;
+        return new Date(0);
     }
 
     @Override
     public Date getLastModified() throws WebdavProtocolException {
-        return null;
+        return new Date(0);
     }
 
     @Override
     public AbstractResource getChild(String name) throws WebdavProtocolException {
         return null;
+    }
+
+    @Override
+    public List<WebdavResource> filter(Filter filter) throws WebdavProtocolException {
+        return Collections.emptyList();
     }
 
 }

@@ -50,6 +50,7 @@
 package com.openexchange.admin.reseller.osgi;
 
 import java.rmi.Remote;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.Hashtable;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -58,6 +59,7 @@ import com.openexchange.admin.plugins.BasicAuthenticatorPluginInterface;
 import com.openexchange.admin.plugins.OXContextPluginInterface;
 import com.openexchange.admin.plugins.OXUserPluginInterface;
 import com.openexchange.admin.reseller.daemons.ClientAdminThreadExtended;
+import com.openexchange.admin.reseller.rmi.OXResellerInterface;
 import com.openexchange.admin.reseller.rmi.impl.OXReseller;
 import com.openexchange.admin.reseller.rmi.impl.OXResellerContextImpl;
 import com.openexchange.admin.reseller.rmi.impl.OXResellerUserImpl;
@@ -84,7 +86,8 @@ public class Activator extends HousekeepingActivator {
             initCache();
 
             final OXReseller reseller = new OXReseller();
-            registerService(Remote.class, reseller, null);
+            OXResellerInterface reseller_stub = (OXResellerInterface) UnicastRemoteObject.exportObject(reseller, 0);
+            registerService(Remote.class, reseller_stub, null);
             LOG.info("RMI Interface for reseller bundle bound to RMI registry");
 
             final Hashtable<String, String> props = new Hashtable<String, String>();

@@ -428,9 +428,10 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
             if (pos >= 0 && ++pos < server.length()) {
                 server = server.substring(pos);
             }
-            throw new MessagingException(
-                new StringBuilder(32).append("Expected ").append(length).append(" FETCH responses but got ").append(index).append(
-                    " from IMAP folder \"").append(imapFolder.getFullName()).append("\" on server \"").append(server).append("\".").toString());
+            final MessagingException e = new MessagingException(new StringBuilder(32).append("Expected ").append(length)
+                    .append(" FETCH responses but got ").append(index).append(" from IMAP folder \"").append(imapFolder.getFullName())
+                    .append("\" on server \"").append(server).append("\".").toString());
+            LOG.warn(e.getMessage(), e);
         }
         return retval;
     }

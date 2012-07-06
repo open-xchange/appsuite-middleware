@@ -335,15 +335,17 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
     }
     
     private List<CalendarDataObject> parse(InputStream body) throws IOException, ConversionError {
+        UnsynchronizedByteArrayOutputStream baos = null;
         try {
             int buflen = 2048;
             byte[] buf = new byte[buflen];
-            UnsynchronizedByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream(8192);
+            baos = new UnsynchronizedByteArrayOutputStream(8192);
             for (int read = body.read(buf, 0, buflen); read > 0; read = body.read(buf, 0, buflen)) {
                 baos.write(buf, 0, read);
             }
             return this.parse(new String(baos.toByteArray(), "UTF-8"));
         } finally {
+            Streams.close(baos);
             Streams.close(body);
         }
     }
@@ -369,14 +371,19 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
          */
         for (int field : CALDAV_FIELDS) {
             if (oldAppointment.contains(field) && false == cdo.contains(field)) {
-                cdo.set(field, cdo.get(field)); 
+                if (Appointment.ALARM == field) {
+                    // -1 resets alarm
+                    cdo.setAlarm(-1);                                                            
+                } else {
+                    cdo.set(field, cdo.get(field)); 
+                }
             }
         }
+        /*
+         * reset previously set recurrence specific fields
+         */
         if (CalendarObject.NO_RECURRENCE != oldAppointment.getRecurrenceType() && 
                 CalendarObject.NO_RECURRENCE != cdo.getRecurrenceType()) {
-            /*
-             * reset previously set recurrence specific fields
-             */
             for (int field : RECURRENCE_FIELDS) {
                 if (oldAppointment.contains(field) && false == cdo.contains(field)) {
                     cdo.set(field, Appointment.UNTIL == field ? null : cdo.get(field)); // getUntil returns 'max until date' if not set 

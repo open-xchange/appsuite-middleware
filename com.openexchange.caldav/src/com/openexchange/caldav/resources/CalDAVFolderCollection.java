@@ -58,6 +58,8 @@ import javax.servlet.http.HttpServletResponse;
 import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.mixins.CalendarOrder;
+import com.openexchange.caldav.mixins.MaxDateTime;
+import com.openexchange.caldav.mixins.MinDateTime;
 import com.openexchange.caldav.mixins.SupportedReportSet;
 import com.openexchange.caldav.query.Filter;
 import com.openexchange.caldav.query.FilterAnalyzer;
@@ -83,10 +85,8 @@ import com.openexchange.webdav.protocol.WebdavResource;
  */
 public abstract class CalDAVFolderCollection<T extends CalendarObject> extends CommonFolderCollection<T> implements FilteringResource {
 
-    protected static int NO_ORDER = -1; 
+    protected static final int NO_ORDER = -1; 
     
-    private Date intervalStart;
-    private Date intervalEnd;
     protected GroupwareCaldavFactory factory;
 
     public CalDAVFolderCollection(GroupwareCaldavFactory factory, WebdavPath url, UserizedFolder folder) throws OXException {
@@ -96,7 +96,7 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
     public CalDAVFolderCollection(GroupwareCaldavFactory factory, WebdavPath url, UserizedFolder folder, int order) throws OXException {
         super(factory, url, folder);
         this.factory = factory;
-        includeProperties(new SupportedReportSet());    
+        includeProperties(new SupportedReportSet(), new MinDateTime(this), new MaxDateTime(this));    
         if (NO_ORDER != order) {
             includeProperties(new CalendarOrder(order));
         }
@@ -109,18 +109,12 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
         return CalDAVResource.EXTENSION_ICS;
     }    
     
-    public Date getIntervalStart() throws WebdavProtocolException {
-        if (null == this.intervalStart) {
-            this.intervalStart = factory.start();
-        }
-        return this.intervalStart;
+    public Date getIntervalStart() {
+        return factory.getState().getMinDateTime();
     }
     
-    public Date getIntervalEnd() throws WebdavProtocolException {
-        if (null == this.intervalEnd) {
-            this.intervalEnd = factory.end();
-        }
-        return this.intervalEnd;
+    public Date getIntervalEnd() {
+        return factory.getState().getMaxDateTime();
     }
     
     @Override

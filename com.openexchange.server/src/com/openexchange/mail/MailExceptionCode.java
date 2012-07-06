@@ -384,6 +384,10 @@ public enum MailExceptionCode implements OXExceptionCode {
      * Draft message could not be saved
      */
     DRAFT_FAILED_UNKNOWN(MailExceptionStrings.DRAFT_FAILED_UNKNOWN_MSG, Category.CATEGORY_USER_INPUT, 85),
+    /**
+     * There was a problem processing the request. Please try again.
+     */
+    PROCESSING_ERROR(MailExceptionStrings.PROCESSING_ERROR_MSG, Category.CATEGORY_TRY_AGAIN, 86),
     
     ;
 

@@ -82,7 +82,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.regex.Pattern;
 import javax.mail.FetchProfile;
 import javax.mail.FetchProfile.Item;
 import javax.mail.Flags;
@@ -810,7 +809,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 //        return super.getAttachmentLong(fullName, msgUID, sectionId);
 //    }
 
-    private static final Pattern FILENAME_PATTERN = Pattern.compile("[0-9a-z&&[^.\\s>\"]]+\\.[0-9a-z&&[^.\\s>\"]]+");
+    //private static final Pattern FILENAME_PATTERN = Pattern.compile("[0-9a-z&&[^.\\s>\"]]+\\.[0-9a-z&&[^.\\s>\"]]+");
 
     @Override
     public MailPart getImageAttachmentLong(final String fullName, final long msgUID, final String contentId) throws OXException {
@@ -1069,7 +1068,14 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     @Override
     public MailMessage[] searchMessages(final String fullName, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] mailFields) throws OXException {
         try {
-            imapFolder = setAndOpenFolder(imapFolder, fullName, READ_ONLY);
+            try {
+                imapFolder = setAndOpenFolder(imapFolder, fullName, READ_ONLY);
+            } catch (final OXException e) {
+                if (IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.equals(e)) {
+                    return EMPTY_RETVAL;
+                }
+                throw e;
+            }
             if (imapFolder.getMessageCount() <= 0) {
                 return EMPTY_RETVAL;
             }

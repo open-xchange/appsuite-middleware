@@ -51,7 +51,6 @@ package com.openexchange.groupware.contexts.impl;
 
 import java.util.List;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
@@ -68,7 +67,7 @@ public abstract class ContextStorage {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContextStorage.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ContextStorage.class);
 
     /**
      * Singleton implementation.
@@ -86,7 +85,23 @@ public abstract class ContextStorage {
      * @return an instance implementing the context storage.
      */
     public static ContextStorage getInstance() {
-        return impl;
+        ContextStorage tmp = impl;
+        if (null == tmp) {
+            synchronized (ContextStorage.class) {
+                tmp = impl;
+                if (null == tmp) {
+                    try {
+                        tmp = new CachingContextStorage(new RdbContextStorage());
+                        tmp.startUp();
+                        impl = tmp;
+                    } catch (final OXException e) {
+                        // Cannot occur
+                        LOG.warn(e.getMessage(), e);
+                    }
+                }
+            }
+        }
+        return tmp;
     }
 
     /**
@@ -181,24 +196,27 @@ public abstract class ContextStorage {
      * @throws OXException if initialization of contexts fails.
      */
     public static void start() throws OXException {
+        ContextStorage impl = ContextStorage.impl;
         if (null != impl) {
             LOG.error("Duplicate initialization of ContextStorage.");
             return;
         }
         impl = new CachingContextStorage(new RdbContextStorage());
         impl.startUp();
+        ContextStorage.impl = impl;
     }
 
     /**
      * Shutdown.
      */
     public static void stop() throws OXException {
+        final ContextStorage impl = ContextStorage.impl;
         if (null == impl) {
             LOG.error("Duplicate shutdown of ContextStorage.");
             return;
         }
         impl.shutDown();
-        impl = null;
+        ContextStorage.impl = null;
     }
 
     /**

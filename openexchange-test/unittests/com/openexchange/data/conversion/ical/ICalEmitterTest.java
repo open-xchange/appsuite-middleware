@@ -49,12 +49,11 @@
 
 package com.openexchange.data.conversion.ical;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.data.conversion.ical.Assert.assertNoProperty;
 import static com.openexchange.data.conversion.ical.Assert.assertProperty;
 import static com.openexchange.data.conversion.ical.Assert.assertStandardAppFields;
+import static com.openexchange.data.conversion.ical.Assert.assertStandardTaskFields;
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
-
 import java.io.IOException;
 import java.io.StringReader;
 import java.text.SimpleDateFormat;
@@ -65,12 +64,10 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
-
 import junit.framework.TestCase;
-
-
 import com.openexchange.data.conversion.ical.ical4j.ICal4JEmitter;
 import com.openexchange.data.conversion.ical.ical4j.internal.UserResolver;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.ExternalUserParticipant;
@@ -274,7 +271,7 @@ public class ICalEmitterTest extends TestCase {
         appointment.setUntil(D("23/04/1989 00:00"));
         ical = serialize(appointment);
 
-        assertProperty(ical, "RRULE", "FREQ=DAILY;UNTIL=19890423;INTERVAL=2");
+        assertProperty(ical, "RRULE", "FREQ=DAILY;UNTIL=19890423T235959Z;INTERVAL=2");
 
         // Ignore RRULE for Exceptions
         appointment = getDefault();
@@ -543,7 +540,7 @@ public class ICalEmitterTest extends TestCase {
         task.setStartDate(start);
         task.setEndDate(end);
         final ICalFile ical = serialize(task);
-        assertStandardAppFields(ical, start, end);
+        assertStandardTaskFields(ical, start, end);
     }
 
     public void testTaskUid() throws IOException {

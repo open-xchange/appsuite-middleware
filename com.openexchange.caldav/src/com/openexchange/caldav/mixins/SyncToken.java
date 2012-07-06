@@ -51,7 +51,7 @@ package com.openexchange.caldav.mixins;
 
 import java.util.Date;
 import org.apache.commons.logging.Log;
-import com.openexchange.caldav.resources.CommonFolderCollection;
+import com.openexchange.caldav.resources.CommonCollection;
 import com.openexchange.log.LogFactory;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
@@ -69,9 +69,9 @@ public class SyncToken extends SingleXMLPropertyMixin {
     private static final Log LOG = LogFactory.getLog(SyncToken.class);
 
     private String value = null;
-    private final CommonFolderCollection<?> collection;
+    private final CommonCollection collection;
 
-    public SyncToken(CommonFolderCollection<?> collection) {
+    public SyncToken(CommonCollection collection) {
         super(Protocol.DAV_NS.getURI(), "sync-token");
         this.collection = collection;
     }

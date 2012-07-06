@@ -122,7 +122,8 @@ public class TestContextToolkit {
 
     public Context getContextByName(final String name) {
         try {
-            return ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId(name));
+            final ContextStorage storage = ContextStorage.getInstance();
+            return storage.getContext(storage.getContextId(name));
         } catch (final OXException e) {
             e.printStackTrace();
             return null;
