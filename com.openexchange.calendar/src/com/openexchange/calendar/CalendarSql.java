@@ -1222,6 +1222,41 @@ public class CalendarSql implements AppointmentSQLInterface {
     public SearchIterator<Appointment> getAppointmentsBetween(final int user_uid, final Date start, final Date end, final int cols[], final int orderBy, final Order orderDir) throws OXException, SQLException {
         return getModifiedAppointmentsBetween(user_uid, start, end, cols, null, orderBy, orderDir);
     }
+    
+    public SearchIterator<Appointment> getAppointmentsBetween(Date start, Date end, int cols[], int orderBy, Order order) throws OXException, SQLException {
+        if (session == null) {
+            throw OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL.create();
+        }
+        Connection readcon = null;
+        PreparedStatement prep = null;
+        ResultSet rs = null;
+        boolean close_connection = true;
+        final Context ctx = Tools.getContext(session);
+        try {
+            readcon = DBPool.pickup(ctx);
+            cols = recColl.checkAndAlterCols(cols);
+            final CalendarOperation co = new CalendarOperation();
+            prep = cimp.getAllAppointments(ctx, start, end, StringCollection.getSelect(cols, DATES_TABLE_NAME), readcon, orderBy, order);
+            rs = cimp.getResultSet(prep);
+            co.setResultSet(rs, prep, cols, cimp, readcon, 0, 0, session, ctx);
+            close_connection = false;
+            return new AppointmentIteratorAdapter(new CachedCalendarIterator(co, ctx, session.getUserId()));
+        } catch(final SQLException sqle) {
+            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
+        } catch(final OXException oxc) {
+            throw oxc;
+        } catch(final RuntimeException e) {
+            throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, Integer.valueOf(36));
+        } finally {
+            if (close_connection) {
+                recColl.closeResultSet(rs);
+                recColl.closePreparedStatement(prep);
+            }
+            if (readcon != null && close_connection) {
+                DBPool.push(ctx, readcon);
+            }
+        }
+    }
 
     public static final CalendarSqlImp getCalendarSqlImplementation() {
         if (cimp != null){
