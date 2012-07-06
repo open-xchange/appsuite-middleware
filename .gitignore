@@ -112,6 +112,7 @@ com.openexchange.subscribe.json/jars
 com.openexchange.subscribe.microformats/jars
 com.openexchange.subscribe.msn/jars
 com.openexchange.templating.json/jars
+openexchange-test/conf/test.properties
 com.openexchange.templating/jars
 com.openexchange.templating/tmp
 com.openexchange.twitter/jars
