@@ -56,6 +56,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.CalendarFields;
+import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.OrderFields;
 import com.openexchange.ajax.fields.SearchFields;
 import com.openexchange.ajax.fields.TaskFields;
@@ -142,11 +143,11 @@ public class SearchAction extends TaskAction {
             searchObj.setPattern(DataParser.parseString(jData, SearchFields.PATTERN));
         }
 
-        searchObj.setTitle(DataParser.parseString(jData, TaskFields.TITLE));
+        searchObj.setTitle(DataParser.parseString(jData, CalendarFields.TITLE));
         searchObj.setPriority(DataParser.parseInt(jData, TaskFields.PRIORITY));
         searchObj.setSearchInNote(DataParser.parseBoolean(jData, "searchinnote"));
         searchObj.setStatus(DataParser.parseInt(jData, TaskFields.STATUS));
-        searchObj.setCatgories(DataParser.parseString(jData, TaskFields.CATEGORIES));
+        searchObj.setCatgories(DataParser.parseString(jData, CommonFields.CATEGORIES));
         searchObj.setSubfolderSearch(DataParser.parseBoolean(jData, "subfoldersearch"));
 
         if (jData.has(CalendarFields.PARTICIPANTS)) {

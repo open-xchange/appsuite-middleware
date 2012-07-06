@@ -109,7 +109,7 @@ public class WebdavProppatchAction extends AbstractAction {
 			multistatus.addContent(response);
 
 			final WebdavResource resource = req.getResource();
-			for(final Element element : (List<Element>) requestDoc.getRootElement().getChildren()) {
+			for(final Element element : requestDoc.getRootElement().getChildren()) {
 				PropertyAction action = null;
 				if(element.getNamespace().equals(DAV_NS)) {
 					if("set".equals(element.getName())) {
@@ -123,7 +123,7 @@ public class WebdavProppatchAction extends AbstractAction {
 					continue;
 				}
 
-				for(final Element prop : (List<Element>) element.getChildren("prop", DAV_NS)) {
+				for(final Element prop : element.getChildren("prop", DAV_NS)) {
 					response.addContent(action.perform(prop, resource));
 				}
 			}
@@ -166,7 +166,7 @@ public class WebdavProppatchAction extends AbstractAction {
 				return propstat;
 			}
 
-			final Element propertyElement = (Element) propElement.getChildren().get(0);
+			final Element propertyElement = propElement.getChildren().get(0);
 			final WebdavProperty property = new WebdavProperty();
 			property.setNamespace(propertyElement.getNamespaceURI());
 			property.setName(propertyElement.getName());
@@ -228,7 +228,7 @@ public class WebdavProppatchAction extends AbstractAction {
 				propstat.addContent(statusElement);
 				return propstat;
 			}
-			final Element propertyElement = (Element) propElement.getChildren().get(0);
+			final Element propertyElement = propElement.getChildren().get(0);
 
 			try {
 				resource.removeProperty(propertyElement.getNamespaceURI(), propertyElement.getName());

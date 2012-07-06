@@ -53,6 +53,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import org.json.JSONArray;
 import com.openexchange.ajax.AJAXFile;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -98,13 +99,13 @@ public final class NewAction implements AJAXActionService {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create("Not an upload request.");
         }
         final UploadEvent upload = requestData.getUploadEvent();
-        final String moduleParam = requestData.getParameter(AJAXFile.PARAMETER_MODULE);
+        final String moduleParam = requestData.getParameter(AJAXServlet.PARAMETER_MODULE);
         if (moduleParam == null) {
-            throw UploadException.UploadCode.MISSING_PARAM.create(AJAXFile.PARAMETER_MODULE);
+            throw UploadException.UploadCode.MISSING_PARAM.create(AJAXServlet.PARAMETER_MODULE);
         }
-        final String fileTypeFilter = requestData.getParameter(AJAXFile.PARAMETER_TYPE);
+        final String fileTypeFilter = requestData.getParameter(AJAXServlet.PARAMETER_TYPE);
         if (fileTypeFilter == null) {
-            throw UploadException.UploadCode.MISSING_PARAM.create(AJAXFile.PARAMETER_TYPE);
+            throw UploadException.UploadCode.MISSING_PARAM.create(AJAXServlet.PARAMETER_TYPE);
         }
         /*
          * Iterate uploaded files

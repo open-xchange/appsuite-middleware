@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import javax.xml.transform.OutputKeys;
+import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.sax.SAXTransformerFactory;
 import javax.xml.transform.sax.TransformerHandler;
 import javax.xml.transform.stream.StreamResult;
@@ -34,7 +35,9 @@ import junit.framework.TestCase;
 
 import org.apache.tika.Tika;
 import org.apache.tika.exception.TikaException;
+import org.apache.tika.metadata.DublinCore;
 import org.apache.tika.metadata.Geographic;
+import org.apache.tika.metadata.HttpHeaders;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.sax.BodyContentHandler;
@@ -76,7 +79,7 @@ public class HtmlParserTest extends TestCase {
         }
 
         assertEquals(
-                "Title : Test Indexation Html", metadata.get(Metadata.TITLE));
+                "Title : Test Indexation Html", metadata.get(DublinCore.TITLE));
         assertEquals("Tika Developers", metadata.get("Author"));
         assertEquals("5", metadata.get("refresh"));
         
@@ -119,8 +122,8 @@ public class HtmlParserTest extends TestCase {
         String content = new Tika().parseToString(
                 HtmlParserTest.class.getResourceAsStream(path), metadata);
 
-        assertEquals("application/xhtml+xml", metadata.get(Metadata.CONTENT_TYPE));
-        assertEquals("XHTML test document", metadata.get(Metadata.TITLE));
+        assertEquals("application/xhtml+xml", metadata.get(HttpHeaders.CONTENT_TYPE));
+        assertEquals("XHTML test document", metadata.get(DublinCore.TITLE));
 
         assertEquals("Tika Developers", metadata.get("Author"));
         assertEquals("5", metadata.get("refresh"));
@@ -244,7 +247,7 @@ public class HtmlParserTest extends TestCase {
         new HtmlParser().parse (
                 new ByteArrayInputStream(test.getBytes("UTF-8")),
                 new BodyContentHandler(),  metadata, new ParseContext());
-        assertEquals("ISO-8859-1", metadata.get(Metadata.CONTENT_ENCODING));
+        assertEquals("ISO-8859-1", metadata.get(HttpHeaders.CONTENT_ENCODING));
     }
 
     /**
@@ -258,7 +261,7 @@ public class HtmlParserTest extends TestCase {
         new HtmlParser().parse (
                 new ByteArrayInputStream(test.getBytes("UTF-8")),
                 new BodyContentHandler(),  metadata, new ParseContext());
-        assertEquals("\u017d", metadata.get(Metadata.TITLE));
+        assertEquals("\u017d", metadata.get(DublinCore.TITLE));
     }
 
     /**
@@ -274,14 +277,14 @@ public class HtmlParserTest extends TestCase {
         new HtmlParser().parse (
                 new ByteArrayInputStream(test.getBytes("UTF-8")),
                 new BodyContentHandler(),  metadata, new ParseContext());
-        assertEquals("UTF-8", metadata.get(Metadata.CONTENT_ENCODING));
+        assertEquals("UTF-8", metadata.get(HttpHeaders.CONTENT_ENCODING));
 
         metadata = new Metadata();
-        metadata.set(Metadata.CONTENT_TYPE, "text/html; charset=ISO-8859-1");
+        metadata.set(HttpHeaders.CONTENT_TYPE, "text/html; charset=ISO-8859-1");
         new HtmlParser().parse (
                 new ByteArrayInputStream(test.getBytes("UTF-8")),
                 new BodyContentHandler(),  metadata, new ParseContext());
-        assertEquals("ISO-8859-1", metadata.get(Metadata.CONTENT_ENCODING));
+        assertEquals("ISO-8859-1", metadata.get(HttpHeaders.CONTENT_ENCODING));
     }
 
     /**
@@ -310,12 +313,12 @@ public class HtmlParserTest extends TestCase {
     public void testIgnoreCharsetDetectorLanguage() throws Exception {
         String test = "<html><title>Simple Content</title><body></body></html>";
         Metadata metadata = new Metadata();
-        metadata.add(Metadata.CONTENT_LANGUAGE, "en");
+        metadata.add(HttpHeaders.CONTENT_LANGUAGE, "en");
         new HtmlParser().parse (
                 new ByteArrayInputStream(test.getBytes("UTF-8")),
                 new BodyContentHandler(),  metadata, new ParseContext());
 
-        assertEquals("en", metadata.get(Metadata.CONTENT_LANGUAGE));
+        assertEquals("en", metadata.get(HttpHeaders.CONTENT_LANGUAGE));
     }
 
     /**
@@ -332,7 +335,7 @@ public class HtmlParserTest extends TestCase {
         new HtmlParser().parse (
                 new ByteArrayInputStream(test1.getBytes("UTF-8")),
                 new BodyContentHandler(),  metadata, new ParseContext());
-        assertEquals("ISO-8859-1", metadata.get(Metadata.CONTENT_ENCODING));
+        assertEquals("ISO-8859-1", metadata.get(HttpHeaders.CONTENT_ENCODING));
 
         // Some HTML pages have errors like ';;' versus '; ' as separator
         String test2 =
@@ -344,7 +347,7 @@ public class HtmlParserTest extends TestCase {
         new HtmlParser().parse (
                 new ByteArrayInputStream(test2.getBytes("UTF-8")),
                 new BodyContentHandler(),  metadata, new ParseContext());
-        assertEquals("ISO-8859-1", metadata.get(Metadata.CONTENT_ENCODING));
+        assertEquals("ISO-8859-1", metadata.get(HttpHeaders.CONTENT_ENCODING));
     }
 
     /**
@@ -360,14 +363,14 @@ public class HtmlParserTest extends TestCase {
         new HtmlParser().parse (
                 new ByteArrayInputStream(test.getBytes("UTF-8")),
                 new BodyContentHandler(),  metadata, new ParseContext());
-        assertEquals("UTF-8", metadata.get(Metadata.CONTENT_ENCODING));
+        assertEquals("UTF-8", metadata.get(HttpHeaders.CONTENT_ENCODING));
 
         metadata = new Metadata();
-        metadata.set(Metadata.CONTENT_TYPE, "charset=ISO-8859-1;text/html");
+        metadata.set(HttpHeaders.CONTENT_TYPE, "charset=ISO-8859-1;text/html");
         new HtmlParser().parse (
                 new ByteArrayInputStream(test.getBytes("UTF-8")),
                 new BodyContentHandler(),  metadata, new ParseContext());
-        assertEquals("ISO-8859-1", metadata.get(Metadata.CONTENT_ENCODING));
+        assertEquals("ISO-8859-1", metadata.get(HttpHeaders.CONTENT_ENCODING));
     }
 
 
@@ -382,7 +385,7 @@ public class HtmlParserTest extends TestCase {
                 HtmlParserTest.class.getResourceAsStream(path),
                 new BodyContentHandler(),  metadata, new ParseContext());
 
-        assertEquals("windows-1251", metadata.get(Metadata.CONTENT_ENCODING));
+        assertEquals("windows-1251", metadata.get(HttpHeaders.CONTENT_ENCODING));
     }
 
     /**
@@ -675,7 +678,7 @@ public class HtmlParserTest extends TestCase {
      * @throws Exception
      */
     private ContentHandler makeHtmlTransformer(Writer writer) throws Exception {
-        SAXTransformerFactory factory = (SAXTransformerFactory)SAXTransformerFactory.newInstance();
+        SAXTransformerFactory factory = (SAXTransformerFactory)TransformerFactory.newInstance();
         TransformerHandler handler = factory.newTransformerHandler();
         handler.getTransformer().setOutputProperty(OutputKeys.METHOD, "html");
         handler.getTransformer().setOutputProperty(OutputKeys.INDENT, "no");

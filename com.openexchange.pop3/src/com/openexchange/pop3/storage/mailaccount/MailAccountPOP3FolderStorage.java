@@ -82,6 +82,7 @@ import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.pop3.POP3Access;
 import com.openexchange.pop3.POP3ExceptionCode;
 import com.openexchange.pop3.services.POP3ServiceRegistry;
+import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.NoSpamHandler;
 import com.openexchange.spamhandler.SpamHandler;
@@ -714,10 +715,10 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
         final MailPermission mp = getPOP3MailPermission();
         if (MailFolder.DEFAULT_FOLDER_ID.equals(mailFolder.getFullname())) {
             mp.setAllPermission(
-                MailPermission.CREATE_SUB_FOLDERS,
-                MailPermission.NO_PERMISSIONS,
-                MailPermission.NO_PERMISSIONS,
-                MailPermission.NO_PERMISSIONS);
+                OCLPermission.CREATE_SUB_FOLDERS,
+                OCLPermission.NO_PERMISSIONS,
+                OCLPermission.NO_PERMISSIONS,
+                OCLPermission.NO_PERMISSIONS);
             mailFolder.setRootFolder(true);
         } else {
             setDefaultFolderInfo(mailFolder);

@@ -58,6 +58,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.openexchange.ajax.fields.AppointmentFields;
+import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Change;
 import com.openexchange.groupware.container.Differ;
@@ -270,7 +271,7 @@ public class AppointmentDiff {
         // First, let's see if any fields besides the state tracking fields have changed
         HashSet<String> differing = new HashSet<String>(differingFieldNames);
         
-        for(String field: new String[]{AppointmentFields.PARTICIPANTS, AppointmentFields.USERS, AppointmentFields.CONFIRMATIONS}) {
+        for(String field: new String[]{CalendarFields.PARTICIPANTS, CalendarFields.USERS, CalendarFields.CONFIRMATIONS}) {
             differing.remove(field);
         }
         if (!differing.isEmpty()) {
@@ -278,7 +279,7 @@ public class AppointmentDiff {
         }
         
         // Hm, okay, so now let's see if any participants were added or removed. That also means this mail is not only about state changes.
-        for(String field: new String[]{AppointmentFields.PARTICIPANTS, AppointmentFields.USERS, AppointmentFields.CONFIRMATIONS}) {
+        for(String field: new String[]{CalendarFields.PARTICIPANTS, CalendarFields.USERS, CalendarFields.CONFIRMATIONS}) {
             FieldUpdate update = getUpdateFor(field);
             if (update == null) {
                 continue;
@@ -301,7 +302,7 @@ public class AppointmentDiff {
 			return false;
 		}
 		
-        for(String field: new String[]{AppointmentFields.PARTICIPANTS, AppointmentFields.USERS, AppointmentFields.CONFIRMATIONS}) {
+        for(String field: new String[]{CalendarFields.PARTICIPANTS, CalendarFields.USERS, CalendarFields.CONFIRMATIONS}) {
             FieldUpdate update = getUpdateFor(field);
             if (update == null) {
                 continue;
@@ -323,16 +324,16 @@ public class AppointmentDiff {
 		HashSet<String> differing = new HashSet<String>(differingFieldNames);
         
 		
-        for(String field: new String[]{AppointmentFields.PARTICIPANTS, AppointmentFields.USERS, AppointmentFields.CONFIRMATIONS}) {
+        for(String field: new String[]{CalendarFields.PARTICIPANTS, CalendarFields.USERS, CalendarFields.CONFIRMATIONS}) {
             differing.remove(field);
         }
         // If any other field than the participants fields as changed and the participant fields were not changed, we're done, as no state changes could have occurred
-        if (!differing.isEmpty() && !anyFieldChangedOf(AppointmentFields.PARTICIPANTS, AppointmentFields.USERS, AppointmentFields.CONFIRMATIONS)) {
+        if (!differing.isEmpty() && !anyFieldChangedOf(CalendarFields.PARTICIPANTS, CalendarFields.USERS, CalendarFields.CONFIRMATIONS)) {
             return true;
         }
         
         // Hm, okay, so now let's see if any participants state has changed. That means, that something other than a detail field has changed
-        for(String field: new String[]{AppointmentFields.PARTICIPANTS, AppointmentFields.USERS, AppointmentFields.CONFIRMATIONS}) {
+        for(String field: new String[]{CalendarFields.PARTICIPANTS, CalendarFields.USERS, CalendarFields.CONFIRMATIONS}) {
             FieldUpdate update = getUpdateFor(field);
             if (update == null) {
                 continue;

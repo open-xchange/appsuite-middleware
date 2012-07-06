@@ -69,6 +69,7 @@ import com.google.gdata.util.ServiceException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
 import com.openexchange.subscribe.crawler.internal.LoginStep;
@@ -172,19 +173,19 @@ public class GoogleCalendarAPIStep extends AbstractStep<CalendarDataObject[], Ob
                 if (frequencyMatcher.find()) {
                     final String freq = frequencyMatcher.group(1);
                     if (freq.equals("DAILY")) {
-                        oxEvent.setRecurrenceType(Appointment.DAILY);
+                        oxEvent.setRecurrenceType(CalendarObject.DAILY);
                         LOG.debug("Frequence : " + freq);
                     } else if (freq.equals("WEEKLY")) {
-                        oxEvent.setRecurrenceType(Appointment.WEEKLY);
+                        oxEvent.setRecurrenceType(CalendarObject.WEEKLY);
                         LOG.debug("Frequence : " + freq);
                     } else if (freq.equals("MONTHLY") && startDate != null) {
-                        oxEvent.setRecurrenceType(Appointment.MONTHLY);
+                        oxEvent.setRecurrenceType(CalendarObject.MONTHLY);
                         LOG.debug("Frequence : " + freq);
                         // oxEvent.setDayInMonth(startDate.getDate());
                         // LOG.debug("***** Day : " + startDate.getDay());
                     } else if (freq.equals("YEARLY") && startDate != null) {
                         LOG.debug("Frequence : " + freq);
-                        oxEvent.setRecurrenceType(Appointment.YEARLY);
+                        oxEvent.setRecurrenceType(CalendarObject.YEARLY);
                         oxEvent.setDayInMonth(startDate.getDate());
                         oxEvent.setMonth(startDate.getMonth());
                         LOG.debug("Month : " + startDate.getMonth());
@@ -198,19 +199,19 @@ public class GoogleCalendarAPIStep extends AbstractStep<CalendarDataObject[], Ob
                     final String weekDay = weekDayMatcher.group(1);
                     LOG.debug("Weekday : " + weekDay);
                     if (weekDay.equals("MO")) {
-                        oxEvent.setDays(CalendarDataObject.MONDAY);
+                        oxEvent.setDays(CalendarObject.MONDAY);
                     } else if (weekDay.equals("TU")) {
-                        oxEvent.setDays(CalendarDataObject.TUESDAY);
+                        oxEvent.setDays(CalendarObject.TUESDAY);
                     } else if (weekDay.equals("WE")) {
-                        oxEvent.setDays(CalendarDataObject.WEDNESDAY);
+                        oxEvent.setDays(CalendarObject.WEDNESDAY);
                     } else if (weekDay.equals("TH")) {
-                        oxEvent.setDays(CalendarDataObject.THURSDAY);
+                        oxEvent.setDays(CalendarObject.THURSDAY);
                     } else if (weekDay.equals("FR")) {
-                        oxEvent.setDays(CalendarDataObject.FRIDAY);
+                        oxEvent.setDays(CalendarObject.FRIDAY);
                     } else if (weekDay.equals("SA")) {
-                        oxEvent.setDays(CalendarDataObject.SATURDAY);
+                        oxEvent.setDays(CalendarObject.SATURDAY);
                     } else if (weekDay.equals("SU")) {
-                        oxEvent.setDays(CalendarDataObject.SUNDAY);
+                        oxEvent.setDays(CalendarObject.SUNDAY);
                     }
                 }
                 // MonthDay information will be set here

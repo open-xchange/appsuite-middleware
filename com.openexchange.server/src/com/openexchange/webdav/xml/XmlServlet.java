@@ -67,6 +67,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Generic;
+import com.openexchange.exception.OXExceptionConstants;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.Attachments;
@@ -87,6 +88,7 @@ import com.openexchange.webdav.WebdavExceptionCode;
 import com.openexchange.webdav.xml.fields.CalendarFields;
 import com.openexchange.webdav.xml.fields.CommonFields;
 import com.openexchange.webdav.xml.fields.DataFields;
+import com.openexchange.webdav.xml.fields.FolderChildFields;
 
 /**
  * {@link XmlServlet} - The XML servlet.
@@ -276,13 +278,13 @@ public abstract class XmlServlet<I> extends PermissionServlet {
                         System.out.println("invalid value in element lastsync");
                     }
 
-                    final Element eFolderId = eProp.getChild(CommonFields.FOLDER_ID, Namespace.getNamespace(PREFIX,
+                    final Element eFolderId = eProp.getChild(FolderChildFields.FOLDER_ID, Namespace.getNamespace(PREFIX,
                             NAMESPACE));
                     if (eFolderId != null) {
                         try {
                             folder_id = Integer.parseInt(eFolderId.getText());
                         } catch (final NumberFormatException exc) {
-                            throw WebdavExceptionCode.INVALID_VALUE.create(exc, CommonFields.FOLDER_ID, eFolderId.getText());
+                            throw WebdavExceptionCode.INVALID_VALUE.create(exc, FolderChildFields.FOLDER_ID, eFolderId.getText());
                         }
                     }
 
@@ -313,13 +315,13 @@ public abstract class XmlServlet<I> extends PermissionServlet {
                         throw WebdavExceptionCode.INVALID_VALUE.create(exc, DataFields.OBJECT_ID, eObjectId.getText());
                     }
 
-                    final Element eFolderId = eProp.getChild(CommonFields.FOLDER_ID, Namespace.getNamespace(PREFIX,
+                    final Element eFolderId = eProp.getChild(FolderChildFields.FOLDER_ID, Namespace.getNamespace(PREFIX,
                             NAMESPACE));
                     if (eFolderId != null) {
                         try {
                             folder_id = Integer.parseInt(eFolderId.getText());
                         } catch (final NumberFormatException exc) {
-                            throw WebdavExceptionCode.INVALID_VALUE.create(exc, CommonFields.FOLDER_ID, eFolderId.getText());
+                            throw WebdavExceptionCode.INVALID_VALUE.create(exc, FolderChildFields.FOLDER_ID, eFolderId.getText());
                         }
                     }
                 } else {
@@ -355,7 +357,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
                     LOG.error(exc.getMessage(), exc);
                 }
                 doError(req, resp, HttpServletResponse.SC_CONFLICT, "Conflict: " + exc.getMessage());
-            } else if (OXException.CATEGORY_PERMISSION_DENIED.equals(exc.getCategory())) {
+            } else if (OXExceptionConstants.CATEGORY_PERMISSION_DENIED.equals(exc.getCategory())) {
                 doError(req, resp, HttpServletResponse.SC_FORBIDDEN, exc.getMessage());
             } else if (Category.CATEGORY_CONFLICT.equals(exc.getCategory())) {
                 LOG.error("doPropFind", exc);

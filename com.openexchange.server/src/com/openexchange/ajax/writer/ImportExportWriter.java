@@ -57,6 +57,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.DataFields;
+import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.importexport.ImportResult;
@@ -118,14 +119,14 @@ public class ImportExportWriter extends DataWriter {
 
                 writeParameter(DataFields.ID, importResult.getObjectId());
                 writeParameter(DataFields.LAST_MODIFIED, importResult.getDate());
-                writeParameter(CommonFields.FOLDER_ID, importResult.getFolder());
+                writeParameter(FolderChildFields.FOLDER_ID, importResult.getFolder());
             }
             jsonwriter.endObject();
         } else {
     		jsonwriter.object();
     		writeParameter(DataFields.ID, importResult.getObjectId());
     		writeParameter(DataFields.LAST_MODIFIED, importResult.getDate());
-    		writeParameter(CommonFields.FOLDER_ID, importResult.getFolder());
+    		writeParameter(FolderChildFields.FOLDER_ID, importResult.getFolder());
     		jsonwriter.endObject();
         }
    }

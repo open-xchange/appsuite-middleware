@@ -54,6 +54,7 @@ import java.sql.Connection;
 import java.util.Date;
 import java.util.Set;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
@@ -199,7 +200,7 @@ public class TasksDelete implements DeleteListener {
      * @throws OXException if an exception occurs.
      */
     private void changeCFMB(final DeleteEvent event, final Connection con) throws OXException {
-        final int[] modified = new int[] { Task.CREATED_BY, Task.MODIFIED_BY, Task.LAST_MODIFIED };
+        final int[] modified = new int[] { DataObject.CREATED_BY, DataObject.MODIFIED_BY, DataObject.LAST_MODIFIED };
         final Context ctx = event.getContext();
         final int userId = event.getId();
         final TaskStorage stor = TaskStorage.getInstance();

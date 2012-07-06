@@ -30,6 +30,9 @@ import junit.framework.TestCase;
 
 import org.apache.james.mime4j.stream.MimeConfig;
 import org.apache.tika.exception.TikaException;
+import org.apache.tika.metadata.DublinCore;
+import org.apache.tika.metadata.MSOffice;
+import org.apache.tika.metadata.Message;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
@@ -58,8 +61,8 @@ public class RFC822ParserTest extends TestCase {
             verify(handler, never()).endElement(XHTMLContentHandler.XHTML, "div", "div");
             verify(handler).endDocument();
             //note no leading spaces, and no quotes
-            assertEquals("Julien Nioche (JIRA) <jira@apache.org>", metadata.get(Metadata.AUTHOR));
-            assertEquals("[jira] Commented: (TIKA-461) RFC822 messages not parsed", metadata.get(Metadata.SUBJECT));
+            assertEquals("Julien Nioche (JIRA) <jira@apache.org>", metadata.get(MSOffice.AUTHOR));
+            assertEquals("[jira] Commented: (TIKA-461) RFC822 messages not parsed", metadata.get(DublinCore.SUBJECT));
         } catch (Exception e) {
             fail("Exception thrown: " + e.getMessage());
         }
@@ -146,8 +149,8 @@ public class RFC822ParserTest extends TestCase {
             parser.parse(stream, handler, metadata, new ParseContext());
             //tests correct decoding of internationalized headers, both
             //quoted-printable (Q) and Base64 (B).
-            assertEquals("Keld J\u00F8rn Simonsen <keld@dkuug.dk>", metadata.get(Metadata.AUTHOR));
-            assertEquals("If you can read this you understand the example.", metadata.get(Metadata.SUBJECT));
+            assertEquals("Keld J\u00F8rn Simonsen <keld@dkuug.dk>", metadata.get(MSOffice.AUTHOR));
+            assertEquals("If you can read this you understand the example.", metadata.get(DublinCore.SUBJECT));
         } catch (Exception e) {
             fail("Exception thrown: " + e.getMessage());
         }
@@ -164,8 +167,8 @@ public class RFC822ParserTest extends TestCase {
        ContentHandler handler = mock(DefaultHandler.class);
 
        parser.parse(stream, handler, metadata, new ParseContext());
-       assertEquals("Saved by Windows Internet Explorer 7", metadata.get(Metadata.AUTHOR));
-       assertEquals("Air Permit Programs | Air & Radiation | US EPA", metadata.get(Metadata.SUBJECT));
+       assertEquals("Saved by Windows Internet Explorer 7", metadata.get(MSOffice.AUTHOR));
+       assertEquals("Air Permit Programs | Air & Radiation | US EPA", metadata.get(DublinCore.SUBJECT));
     }
 
     /**
@@ -198,7 +201,7 @@ public class RFC822ParserTest extends TestCase {
         context.set(MimeConfig.class, config);
         parser.parse(
                 new ByteArrayInputStream(data), handler, metadata, context);
-        assertEquals(name.trim(), metadata.get(Metadata.AUTHOR));
+        assertEquals(name.trim(), metadata.get(MSOffice.AUTHOR));
     }
     
     /**
@@ -211,16 +214,16 @@ public class RFC822ParserTest extends TestCase {
        ContentHandler handler = new BodyContentHandler();
 
        parser.parse(stream, handler, metadata, new ParseContext());
-       assertEquals(true, metadata.isMultiValued(Metadata.AUTHOR));
-       assertEquals("xyz", metadata.getValues(Metadata.AUTHOR)[0]);
-       assertEquals("abc", metadata.getValues(Metadata.AUTHOR)[1]);
-       assertEquals(true, metadata.isMultiValued(Metadata.MESSAGE_FROM));
-       assertEquals("xyz", metadata.getValues(Metadata.MESSAGE_FROM)[0]);
-       assertEquals("abc", metadata.getValues(Metadata.MESSAGE_FROM)[1]);
-       assertEquals(true, metadata.isMultiValued(Metadata.MESSAGE_TO));
-       assertEquals("abc", metadata.getValues(Metadata.MESSAGE_TO)[0]);
-       assertEquals("def", metadata.getValues(Metadata.MESSAGE_TO)[1]);
-       assertEquals("abcd", metadata.get(Metadata.SUBJECT));
+       assertEquals(true, metadata.isMultiValued(MSOffice.AUTHOR));
+       assertEquals("xyz", metadata.getValues(MSOffice.AUTHOR)[0]);
+       assertEquals("abc", metadata.getValues(MSOffice.AUTHOR)[1]);
+       assertEquals(true, metadata.isMultiValued(Message.MESSAGE_FROM));
+       assertEquals("xyz", metadata.getValues(Message.MESSAGE_FROM)[0]);
+       assertEquals("abc", metadata.getValues(Message.MESSAGE_FROM)[1]);
+       assertEquals(true, metadata.isMultiValued(Message.MESSAGE_TO));
+       assertEquals("abc", metadata.getValues(Message.MESSAGE_TO)[0]);
+       assertEquals("def", metadata.getValues(Message.MESSAGE_TO)[1]);
+       assertEquals("abcd", metadata.get(DublinCore.SUBJECT));
        assertTrue(handler.toString().contains("bar biz bat"));
     }
 

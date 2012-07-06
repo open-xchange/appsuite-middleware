@@ -65,6 +65,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import javax.activation.FileTypeMap;
 import javax.activation.MimetypesFileTypeMap;
 import org.apache.commons.logging.Log;
 import com.openexchange.log.LogFactory;
@@ -534,7 +535,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         if (attachment.getFilename() != null && (attachment.getFileMIMEType() == null || attachment.getFileMIMEType().equals(
             "application/unknown"))) {
             // Try guessing by filename
-            final String mimetypes = MimetypesFileTypeMap.getDefaultFileTypeMap().getContentType(attachment.getFilename());
+            final String mimetypes = FileTypeMap.getDefaultFileTypeMap().getContentType(attachment.getFilename());
             attachment.setFileMIMEType(mimetypes);
         }
     }

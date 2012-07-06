@@ -582,18 +582,18 @@ public class AdminCache {
         if (user.getPasswordMech() == null) {
             String pwmech = getProperties().getUserProp(AdminProperties.User.DEFAULT_PASSWORD_MECHANISM, "SHA");
             pwmech = "{" + pwmech + "}";
-            if (pwmech.equalsIgnoreCase(User.CRYPT_MECH)) {
-                user.setPasswordMech(User.CRYPT_MECH);
-            } else if (pwmech.equalsIgnoreCase(User.SHA_MECH)) {
-                user.setPasswordMech(User.SHA_MECH);
+            if (pwmech.equalsIgnoreCase(PasswordMechObject.CRYPT_MECH)) {
+                user.setPasswordMech(PasswordMechObject.CRYPT_MECH);
+            } else if (pwmech.equalsIgnoreCase(PasswordMechObject.SHA_MECH)) {
+                user.setPasswordMech(PasswordMechObject.SHA_MECH);
             } else {
                 log.warn("WARNING: unknown password mechanism " + pwmech + " using SHA");
-                user.setPasswordMech(User.SHA_MECH);
+                user.setPasswordMech(PasswordMechObject.SHA_MECH);
             }
         }
-        if (user.getPasswordMech().equals(User.CRYPT_MECH)) {
+        if (user.getPasswordMech().equals(PasswordMechObject.CRYPT_MECH)) {
             passwd = UnixCrypt.crypt(user.getPassword());
-        } else if (user.getPasswordMech().equals(User.SHA_MECH)) {
+        } else if (user.getPasswordMech().equals(PasswordMechObject.SHA_MECH)) {
             passwd = SHACrypt.makeSHAPasswd(user.getPassword());
         } else {
             log.error("unsupported password mechanism: " + user.getPasswordMech());

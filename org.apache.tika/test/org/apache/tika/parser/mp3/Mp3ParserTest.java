@@ -21,6 +21,9 @@ import java.io.InputStream;
 
 import junit.framework.TestCase;
 
+import org.apache.tika.metadata.DublinCore;
+import org.apache.tika.metadata.HttpHeaders;
+import org.apache.tika.metadata.MSOffice;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.metadata.XMPDM;
 import org.apache.tika.parser.AutoDetectParser;
@@ -50,9 +53,9 @@ public class Mp3ParserTest extends TestCase {
             stream.close();
         }
 
-        assertEquals("audio/mpeg", metadata.get(Metadata.CONTENT_TYPE));
-        assertEquals("Test Title", metadata.get(Metadata.TITLE));
-        assertEquals("Test Artist", metadata.get(Metadata.AUTHOR));
+        assertEquals("audio/mpeg", metadata.get(HttpHeaders.CONTENT_TYPE));
+        assertEquals("Test Title", metadata.get(DublinCore.TITLE));
+        assertEquals("Test Artist", metadata.get(MSOffice.AUTHOR));
 
         String content = handler.toString();
         assertTrue(content.contains("Test Title"));
@@ -85,9 +88,9 @@ public class Mp3ParserTest extends TestCase {
         }
 
         // Check core properties
-        assertEquals("audio/mpeg", metadata.get(Metadata.CONTENT_TYPE));
-        assertEquals("Test Title", metadata.get(Metadata.TITLE));
-        assertEquals("Test Artist", metadata.get(Metadata.AUTHOR));
+        assertEquals("audio/mpeg", metadata.get(HttpHeaders.CONTENT_TYPE));
+        assertEquals("Test Title", metadata.get(DublinCore.TITLE));
+        assertEquals("Test Artist", metadata.get(MSOffice.AUTHOR));
 
         // Check the textual contents
         String content = handler.toString();
@@ -134,9 +137,9 @@ public class Mp3ParserTest extends TestCase {
             stream.close();
         }
 
-        assertEquals("audio/mpeg", metadata.get(Metadata.CONTENT_TYPE));
-        assertEquals("Test Title", metadata.get(Metadata.TITLE));
-        assertEquals("Test Artist", metadata.get(Metadata.AUTHOR));
+        assertEquals("audio/mpeg", metadata.get(HttpHeaders.CONTENT_TYPE));
+        assertEquals("Test Title", metadata.get(DublinCore.TITLE));
+        assertEquals("Test Artist", metadata.get(MSOffice.AUTHOR));
 
         String content = handler.toString();
         assertTrue(content.contains("Test Title"));
@@ -168,9 +171,9 @@ public class Mp3ParserTest extends TestCase {
             stream.close();
         }
 
-        assertEquals("audio/mpeg", metadata.get(Metadata.CONTENT_TYPE));
-        assertEquals("Test Title", metadata.get(Metadata.TITLE));
-        assertEquals("Test Artist", metadata.get(Metadata.AUTHOR));
+        assertEquals("audio/mpeg", metadata.get(HttpHeaders.CONTENT_TYPE));
+        assertEquals("Test Title", metadata.get(DublinCore.TITLE));
+        assertEquals("Test Artist", metadata.get(MSOffice.AUTHOR));
 
         String content = handler.toString();
         assertTrue(content.contains("Test Title"));
@@ -202,9 +205,9 @@ public class Mp3ParserTest extends TestCase {
            stream.close();
        }
 
-       assertEquals("audio/mpeg", metadata.get(Metadata.CONTENT_TYPE));
-       assertEquals("Une chason en Fran\u00e7ais", metadata.get(Metadata.TITLE));
-       assertEquals("Test Artist \u2468\u2460", metadata.get(Metadata.AUTHOR));
+       assertEquals("audio/mpeg", metadata.get(HttpHeaders.CONTENT_TYPE));
+       assertEquals("Une chason en Fran\u00e7ais", metadata.get(DublinCore.TITLE));
+       assertEquals("Test Artist \u2468\u2460", metadata.get(MSOffice.AUTHOR));
        assertEquals("Test Artist \u2468\u2460", metadata.get(XMPDM.ARTIST));
        assertEquals("Test Album \u2460\u2468", metadata.get(XMPDM.ALBUM));
 
@@ -240,9 +243,9 @@ public class Mp3ParserTest extends TestCase {
             stream.close();
         }
 
-        assertEquals("audio/mpeg", metadata.get(Metadata.CONTENT_TYPE));
-        assertEquals("Test Title", metadata.get(Metadata.TITLE));
-        assertEquals("Test Artist", metadata.get(Metadata.AUTHOR));
+        assertEquals("audio/mpeg", metadata.get(HttpHeaders.CONTENT_TYPE));
+        assertEquals("Test Title", metadata.get(DublinCore.TITLE));
+        assertEquals("Test Artist", metadata.get(MSOffice.AUTHOR));
 
         String content = handler.toString();
         assertTrue(content.contains("Test Title"));
@@ -305,9 +308,9 @@ public class Mp3ParserTest extends TestCase {
            stream.close();
        }
 
-       assertEquals("audio/mpeg", metadata.get(Metadata.CONTENT_TYPE));
-       assertEquals("Plus loin vers l'ouest", metadata.get(Metadata.TITLE));
-       assertEquals("Merzhin", metadata.get(Metadata.AUTHOR));
+       assertEquals("audio/mpeg", metadata.get(HttpHeaders.CONTENT_TYPE));
+       assertEquals("Plus loin vers l'ouest", metadata.get(DublinCore.TITLE));
+       assertEquals("Merzhin", metadata.get(MSOffice.AUTHOR));
 
        String content = handler.toString();
        assertTrue(content.contains("Plus loin vers l'ouest"));
@@ -340,9 +343,9 @@ public class Mp3ParserTest extends TestCase {
        }
 
        // Check we coud get the headers from the start
-       assertEquals("audio/mpeg", metadata.get(Metadata.CONTENT_TYPE));
-       assertEquals("Girl you have no faith in medicine", metadata.get(Metadata.TITLE));
-       assertEquals("The White Stripes", metadata.get(Metadata.AUTHOR));
+       assertEquals("audio/mpeg", metadata.get(HttpHeaders.CONTENT_TYPE));
+       assertEquals("Girl you have no faith in medicine", metadata.get(DublinCore.TITLE));
+       assertEquals("The White Stripes", metadata.get(MSOffice.AUTHOR));
 
        String content = handler.toString();
        assertTrue(content.contains("Girl you have no faith in medicine"));

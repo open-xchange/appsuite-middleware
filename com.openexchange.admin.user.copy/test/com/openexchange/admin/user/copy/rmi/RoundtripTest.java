@@ -72,7 +72,6 @@ import java.util.UUID;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.junit.Test;
-import com.openexchange.admin.rmi.AbstractRMITest;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -953,6 +952,7 @@ public class RoundtripTest extends AbstractRMITest {
 
     private final class FolderComparator implements Comparator<FolderObject> {
 
+        @Override
         public int compare(final FolderObject o1, final FolderObject o2) {
             return o1.getObjectID() - o2.getObjectID();
         }
@@ -961,6 +961,7 @@ public class RoundtripTest extends AbstractRMITest {
 
     private final class CommonObjectComparator implements Comparator<CommonObject> {
 
+        @Override
         public int compare(final CommonObject o1, final CommonObject o2) {
             return o1.getObjectID() - o2.getObjectID();
         }
@@ -969,6 +970,7 @@ public class RoundtripTest extends AbstractRMITest {
     
     private final class ReminderObjectComparator implements Comparator<ReminderObject> {
 
+        @Override
         public int compare(final ReminderObject o1, final ReminderObject o2) {
             return o1.getObjectId() - o2.getObjectId();
         }
@@ -977,6 +979,7 @@ public class RoundtripTest extends AbstractRMITest {
     
     private final class AttachmentComparator implements Comparator<AttachmentMetadata> {
 
+        @Override
         public int compare(final AttachmentMetadata o1, final AttachmentMetadata o2) {
             return o1.getId() - o2.getId();
         }
@@ -985,6 +988,7 @@ public class RoundtripTest extends AbstractRMITest {
     
     private final class MailAccountComparator implements Comparator<MailAccountDescription> {
 
+        @Override
         public int compare(final MailAccountDescription o1, final MailAccountDescription o2) {
             return o1.getId() - o2.getId();
         }

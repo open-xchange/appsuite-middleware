@@ -69,6 +69,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.Change;
 import com.openexchange.groupware.container.ConfirmationChange;
 import com.openexchange.groupware.container.Difference;
@@ -284,13 +285,13 @@ public class Participants implements ChangeDescriptionGenerator{
                 int newStatus = cchange.getNewStatus();
                 ChangeType changeType = null;
                 switch (newStatus) {
-                case Appointment.ACCEPT: 
+                case CalendarObject.ACCEPT: 
                     changeType = ChangeType.ACCEPT; 
                     break;
-                case Appointment.DECLINE: 
+                case CalendarObject.DECLINE: 
                     changeType = ChangeType.DECLINE; 
                     break;
-                case Appointment.TENTATIVE: 
+                case CalendarObject.TENTATIVE: 
                     changeType = ChangeType.TENTATIVE; 
                     break;
                 }

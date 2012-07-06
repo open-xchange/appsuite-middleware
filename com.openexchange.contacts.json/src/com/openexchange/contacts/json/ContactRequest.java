@@ -72,6 +72,7 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.SpecialAlphanumSortContactComparator;
 import com.openexchange.groupware.contact.helpers.UseCountComparator;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.search.SearchTerm;
@@ -420,7 +421,7 @@ public class ContactRequest {
     private int[] removeVirtual(final int[] columns) {
         final TIntList helper = new TIntArrayList(columns.length);
         for (final int col : columns) {
-            if (col == Contact.LAST_MODIFIED_UTC) {
+            if (col == DataObject.LAST_MODIFIED_UTC) {
                 // SKIP
             } else if (col == Contact.IMAGE1_URL) {
                 helper.add(Contact.IMAGE1);
@@ -433,10 +434,10 @@ public class ContactRequest {
     }
 
     private int[] checkOrInsertLastModified(final int[] columns) {
-        if (!Arrays.contains(columns, Contact.LAST_MODIFIED)) {
+        if (!Arrays.contains(columns, DataObject.LAST_MODIFIED)) {
             final int[] newColumns = new int[columns.length + 1];
             System.arraycopy(columns, 0, newColumns, 0, columns.length);
-            newColumns[columns.length] = Contact.LAST_MODIFIED;
+            newColumns[columns.length] = DataObject.LAST_MODIFIED;
 
             return newColumns;
         } else {

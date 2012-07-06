@@ -56,11 +56,14 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.ContactFields;
+import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.DistributionListFields;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.ContactSetter;
+import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.LinkEntryObject;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
@@ -82,10 +85,10 @@ public class ContactParser {
         map.put(Contact.DISTRIBUTIONLIST, "distributionlist");
         map.put(Contact.LINKS, "links");
         //Specials from Contact.JSON.COLUMNS
-        map.put(Contact.CREATION_DATE, "date");
-        map.put(Contact.LAST_MODIFIED, "date");
+        map.put(DataObject.CREATION_DATE, "date");
+        map.put(DataObject.LAST_MODIFIED, "date");
         map.put(Contact.IMAGE_LAST_MODIFIED, "date");
-        map.put(Contact.LAST_MODIFIED_OF_NEWEST_ATTACHMENT, "date");
+        map.put(CommonObject.LAST_MODIFIED_OF_NEWEST_ATTACHMENT, "date");
         specialColumns = map;
     }
 
@@ -177,20 +180,20 @@ public class ContactParser {
             try {
                 entry = jsonDistributionList.getJSONObject(i);
                 distributionList[i] = new DistributionListEntryObject();
-                if (hasAndNotEmptyOrNull(entry, DistributionListFields.ID)) {
-                    distributionList[i].setEntryID(entry.getInt(DistributionListFields.ID));
+                if (hasAndNotEmptyOrNull(entry, DataFields.ID)) {
+                    distributionList[i].setEntryID(entry.getInt(DataFields.ID));
                 }
 
-                if (hasAndNotEmptyOrNull(entry, DistributionListFields.FIRST_NAME)) {
-                    distributionList[i].setFirstname(entry.getString(DistributionListFields.FIRST_NAME));
+                if (hasAndNotEmptyOrNull(entry, ContactFields.FIRST_NAME)) {
+                    distributionList[i].setFirstname(entry.getString(ContactFields.FIRST_NAME));
                 }
 
-                if (hasAndNotEmptyOrNull(entry, DistributionListFields.LAST_NAME)) {
-                    distributionList[i].setFirstname(entry.getString(DistributionListFields.LAST_NAME));
+                if (hasAndNotEmptyOrNull(entry, ContactFields.LAST_NAME)) {
+                    distributionList[i].setFirstname(entry.getString(ContactFields.LAST_NAME));
                 }
 
-                if (hasAndNotEmptyOrNull(entry, DistributionListFields.DISPLAY_NAME)) {
-                    distributionList[i].setDisplayname(entry.getString(DistributionListFields.DISPLAY_NAME));
+                if (hasAndNotEmptyOrNull(entry, ContactFields.DISPLAY_NAME)) {
+                    distributionList[i].setDisplayname(entry.getString(ContactFields.DISPLAY_NAME));
                 }
 
                 if (hasAndNotEmptyOrNull(entry, DistributionListFields.MAIL)) {
@@ -224,12 +227,12 @@ public class ContactParser {
         for (int i = 0; i < links.length; i++) {
             links[i] = new LinkEntryObject();
             final JSONObject entry = jsonLinks.getJSONObject(i);
-            if (hasAndNotEmptyOrNull(entry, ContactFields.ID)) {
-                links[i].setLinkID(entry.getInt(ContactFields.ID));
+            if (hasAndNotEmptyOrNull(entry, DataFields.ID)) {
+                links[i].setLinkID(entry.getInt(DataFields.ID));
             }
 
-            if (hasAndNotEmptyOrNull(entry, DistributionListFields.DISPLAY_NAME)) {
-                links[i].setLinkDisplayname(entry.getString(DistributionListFields.DISPLAY_NAME));
+            if (hasAndNotEmptyOrNull(entry, ContactFields.DISPLAY_NAME)) {
+                links[i].setLinkDisplayname(entry.getString(ContactFields.DISPLAY_NAME));
             }
         }
 

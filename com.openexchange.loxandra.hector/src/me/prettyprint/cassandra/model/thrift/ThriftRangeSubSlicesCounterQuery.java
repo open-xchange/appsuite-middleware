@@ -8,7 +8,6 @@ import me.prettyprint.cassandra.model.AbstractSliceQuery;
 import me.prettyprint.cassandra.model.HKeyRange;
 import me.prettyprint.cassandra.model.KeyspaceOperationCallback;
 import me.prettyprint.cassandra.model.OrderedCounterRowsImpl;
-import me.prettyprint.cassandra.model.OrderedRowsImpl;
 import me.prettyprint.cassandra.model.QueryResultImpl;
 import me.prettyprint.cassandra.serializers.LongSerializer;
 import me.prettyprint.cassandra.service.KeyspaceService;
@@ -16,13 +15,9 @@ import me.prettyprint.cassandra.utils.Assert;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.OrderedCounterRows;
-import me.prettyprint.hector.api.beans.OrderedRows;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.query.QueryResult;
 import me.prettyprint.hector.api.query.RangeSubSlicesCounterQuery;
-import me.prettyprint.hector.api.query.RangeSubSlicesQuery;
-
-import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.CounterColumn;
 

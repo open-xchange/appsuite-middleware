@@ -52,6 +52,10 @@ package com.openexchange.groupware.tasks;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import com.openexchange.ajax.fields.CalendarFields;
+import com.openexchange.ajax.fields.CommonFields;
+import com.openexchange.ajax.fields.DataFields;
+import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.fields.ParticipantsFields;
 import com.openexchange.ajax.fields.TaskFields;
 import com.openexchange.search.SearchAttributeFetcher;
@@ -191,7 +195,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
          * Calendar Fields
          */
 
-        m.put(TaskFields.ALARM, new AttributeGetter() {
+        m.put(CalendarFields.ALARM, new AttributeGetter() {
 
             @Override
             public Object getObject(final Task candidate) {
@@ -199,7 +203,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
             }
         });
 
-        m.put(TaskFields.CHANGE_EXCEPTIONS, new AttributeGetter() {
+        m.put(CalendarFields.CHANGE_EXCEPTIONS, new AttributeGetter() {
 
             @Override
             public Object getObject(final Task candidate) {
@@ -223,7 +227,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
             }
         });
 
-        m.put(TaskFields.DAY_IN_MONTH, new AttributeGetter() {
+        m.put(CalendarFields.DAY_IN_MONTH, new AttributeGetter() {
 
             @Override
             public Object getObject(final Task candidate) {
@@ -231,7 +235,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
             }
         });
 
-        m.put(TaskFields.DAYS, new AttributeGetter() {
+        m.put(CalendarFields.DAYS, new AttributeGetter() {
 
             @Override
             public Object getObject(final Task candidate) {
@@ -239,7 +243,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
             }
         });
 
-        m.put(TaskFields.DELETE_EXCEPTIONS, new AttributeGetter() {
+        m.put(CalendarFields.DELETE_EXCEPTIONS, new AttributeGetter() {
 
             @Override
             public Object getObject(final Task candidate) {
@@ -247,7 +251,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
             }
         });
 
-        m.put(TaskFields.END_DATE, new AttributeGetter() {
+        m.put(CalendarFields.END_DATE, new AttributeGetter() {
 
             @Override
             public Object getObject(final Task candidate) {
@@ -255,7 +259,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
             }
         });
 
-        m.put(TaskFields.INTERVAL, new AttributeGetter() {
+        m.put(CalendarFields.INTERVAL, new AttributeGetter() {
 
             @Override
             public Object getObject(final Task candidate) {
@@ -263,7 +267,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
             }
         });
 
-        m.put(TaskFields.MONTH, new AttributeGetter() {
+        m.put(CalendarFields.MONTH, new AttributeGetter() {
 
             @Override
             public Object getObject(final Task candidate) {
@@ -271,7 +275,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
             }
         });
 
-        m.put(TaskFields.NOTE, new AttributeGetter() {
+        m.put(CalendarFields.NOTE, new AttributeGetter() {
 
             @Override
             public Object getObject(final Task candidate) {
@@ -279,7 +283,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
             }
         });
 
-        m.put(TaskFields.NOTIFICATION, new AttributeGetter() {
+        m.put(CalendarFields.NOTIFICATION, new AttributeGetter() {
 
             @Override
             public Object getObject(final Task candidate) {
@@ -287,7 +291,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
             }
         });
 
-        m.put(TaskFields.OCCURRENCES, new AttributeGetter() {
+        m.put(CalendarFields.OCCURRENCES, new AttributeGetter() {
 
             @Override
             public Object getObject(final Task candidate) {
@@ -295,7 +299,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
             }
         });
 
-        m.put(TaskFields.PARTICIPANTS, new AttributeGetter() {
+        m.put(CalendarFields.PARTICIPANTS, new AttributeGetter() {
 
             @Override
             public Object getObject(final Task candidate) {
@@ -303,7 +307,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
             }
         });
 
-        m.put(TaskFields.RECURRENCE_CALCULATOR, new AttributeGetter() {
+        m.put(CalendarFields.RECURRENCE_CALCULATOR, new AttributeGetter() {
 
             @Override
             public Object getObject(final Task candidate) {
@@ -311,7 +315,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
             }
         });
 
-        m.put(TaskFields.RECURRENCE_DATE_POSITION, new AttributeGetter() {
+        m.put(CalendarFields.RECURRENCE_DATE_POSITION, new AttributeGetter() {
 
             @Override
             public Object getObject(final Task candidate) {
@@ -319,7 +323,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
             }
         });
 
-        m.put(TaskFields.RECURRENCE_ID, new AttributeGetter() {
+        m.put(CalendarFields.RECURRENCE_ID, new AttributeGetter() {
 
             @Override
             public Object getObject(final Task candidate) {
@@ -327,7 +331,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
             }
         });
 
-        m.put(TaskFields.RECURRENCE_POSITION, new AttributeGetter() {
+        m.put(CalendarFields.RECURRENCE_POSITION, new AttributeGetter() {
 
             @Override
             public Object getObject(final Task candidate) {
@@ -335,7 +339,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
             }
         });
 
-        m.put(TaskFields.RECURRENCE_START, new AttributeGetter() {
+        m.put(CalendarFields.RECURRENCE_START, new AttributeGetter() {
 
             @Override
             public Object getObject(final Task candidate) {
@@ -344,7 +348,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
             }
         });
 
-        m.put(TaskFields.RECURRENCE_TYPE, new AttributeGetter() {
+        m.put(CalendarFields.RECURRENCE_TYPE, new AttributeGetter() {
 
             @Override
             public Object getObject(final Task candidate) {
@@ -352,7 +356,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
             }
         });
 
-        m.put(TaskFields.START_DATE, new AttributeGetter() {
+        m.put(CalendarFields.START_DATE, new AttributeGetter() {
 
             @Override
             public Object getObject(final Task candidate) {
@@ -360,7 +364,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
             }
         });
 
-        m.put(TaskFields.TITLE, new AttributeGetter() {
+        m.put(CalendarFields.TITLE, new AttributeGetter() {
 
             @Override
             public Object getObject(final Task candidate) {
@@ -368,14 +372,14 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
             }
         });
 
-        m.put(TaskFields.UNTIL, new AttributeGetter() {
+        m.put(CalendarFields.UNTIL, new AttributeGetter() {
 
             @Override
             public Object getObject(final Task candidate) {
                 return candidate.getUntil();
             }
         });
-        m.put(TaskFields.USERS, new AttributeGetter() {
+        m.put(CalendarFields.USERS, new AttributeGetter() {
 
             @Override
             public Object getObject(final Task candidate) {
@@ -387,7 +391,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
          * Common fields
          */
 
-        m.put(TaskFields.CATEGORIES, new AttributeGetter() {
+        m.put(CommonFields.CATEGORIES, new AttributeGetter() {
 
             @Override
             public Object getObject(final Task candidate) {
@@ -395,7 +399,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
             }
         });
 
-        m.put(TaskFields.COLORLABEL, new AttributeGetter() {
+        m.put(CommonFields.COLORLABEL, new AttributeGetter() {
 
             @Override
             public Object getObject(final Task candidate) {
@@ -403,7 +407,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
             }
         });
 
-        m.put(TaskFields.CREATED_BY, new AttributeGetter() {
+        m.put(DataFields.CREATED_BY, new AttributeGetter() {
 
             @Override
             public Object getObject(final Task candidate) {
@@ -411,7 +415,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
             }
         });
 
-        m.put(TaskFields.CREATION_DATE, new AttributeGetter() {
+        m.put(DataFields.CREATION_DATE, new AttributeGetter() {
 
             @Override
             public Object getObject(final Task candidate) {
@@ -419,7 +423,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
             }
         });
 
-        m.put(TaskFields.FOLDER_ID, new AttributeGetter() {
+        m.put(FolderChildFields.FOLDER_ID, new AttributeGetter() {
 
             @Override
             public Object getObject(final Task candidate) {
@@ -427,7 +431,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
             }
         });
 
-        m.put(TaskFields.ID, new AttributeGetter() {
+        m.put(DataFields.ID, new AttributeGetter() {
 
             @Override
             public Object getObject(final Task candidate) {
@@ -435,7 +439,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
             }
         });
 
-        m.put(TaskFields.LAST_MODIFIED, new AttributeGetter() {
+        m.put(DataFields.LAST_MODIFIED, new AttributeGetter() {
 
             @Override
             public Object getObject(final Task candidate) {
@@ -443,7 +447,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
             }
         });
 
-        m.put(TaskFields.MODIFIED_BY, new AttributeGetter() {
+        m.put(DataFields.MODIFIED_BY, new AttributeGetter() {
 
             @Override
             public Object getObject(final Task candidate) {
@@ -451,7 +455,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
             }
         });
 
-        m.put(TaskFields.PRIVATE_FLAG, new AttributeGetter() {
+        m.put(CommonFields.PRIVATE_FLAG, new AttributeGetter() {
 
             @Override
             public Object getObject(final Task candidate) {

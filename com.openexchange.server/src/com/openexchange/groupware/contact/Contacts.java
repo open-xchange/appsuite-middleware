@@ -59,6 +59,7 @@ import static com.openexchange.tools.sql.DBUtils.rollback;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -87,8 +88,11 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contact.database.PrivateFlag;
 import com.openexchange.groupware.contact.helpers.ContactField;
+import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.DistributionListEntryObject;
+import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.LinkEntryObject;
 import com.openexchange.groupware.contexts.Context;
@@ -219,7 +223,7 @@ public final class Contacts {
             bi = ImageIO.read(new UnsynchronizedByteArrayInputStream(img));
             if (null == bi) {
                 // No appropriate ImageReader found
-                final BufferedImage targetImage = new BufferedImage(scaledWidth, scaledHeight, BufferedImage.SCALE_SMOOTH);
+                final BufferedImage targetImage = new BufferedImage(scaledWidth, scaledHeight, Image.SCALE_SMOOTH);
                 final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(8192);
                 ImageIO.write(targetImage, fileType, out);
                 bi = ImageIO.read(new UnsynchronizedByteArrayInputStream(out.toByteArray()));
@@ -424,7 +428,7 @@ public final class Contacts {
 
             for (int i = 0; i < 650; i++) {
                 final Mapper mapper = mapping[i];
-                if ((mapper != null) && mapper.containsElement(contact) && (i != Contact.DISTRIBUTIONLIST) && (i != Contact.LINKS) && (i != Contact.OBJECT_ID) && (i != Contact.IMAGE_LAST_MODIFIED) && (i != Contact.IMAGE1_CONTENT_TYPE)) {
+                if ((mapper != null) && mapper.containsElement(contact) && (i != Contact.DISTRIBUTIONLIST) && (i != Contact.LINKS) && (i != DataObject.OBJECT_ID) && (i != Contact.IMAGE_LAST_MODIFIED) && (i != Contact.IMAGE1_CONTENT_TYPE)) {
                     insert_fields.append(mapper.getDBFieldName()).append(',');
                     insert_values.append("?,");
                 }
@@ -487,7 +491,7 @@ public final class Contacts {
             ps = writecon.prepareStatement(insert.toString());
             int counter = 1;
             for (int i = 2; i < 650; i++) {
-                if ((mapping[i] != null) && mapping[i].containsElement(contact) && (i != Contact.DISTRIBUTIONLIST) && (i != Contact.LINKS) && (i != Contact.OBJECT_ID) && (i != Contact.IMAGE_LAST_MODIFIED) && (i != Contact.IMAGE1_CONTENT_TYPE)) {
+                if ((mapping[i] != null) && mapping[i].containsElement(contact) && (i != Contact.DISTRIBUTIONLIST) && (i != Contact.LINKS) && (i != DataObject.OBJECT_ID) && (i != Contact.IMAGE_LAST_MODIFIED) && (i != Contact.IMAGE1_CONTENT_TYPE)) {
                     mapping[i].fillPreparedStatement(ps, counter, contact);
                     counter++;
                 }
@@ -773,7 +777,7 @@ public final class Contacts {
             for (int i = 0; i < modtrim.length; i++) {
                 final int field = modtrim[i];
                 final Mapper mapper = mapping[field];
-                if ((mapper != null) && mapper.containsElement(co) && (field != Contact.DISTRIBUTIONLIST) && (field != Contact.LINKS) && (field != Contact.OBJECT_ID) && (i != Contact.IMAGE1_CONTENT_TYPE)) {
+                if ((mapper != null) && mapper.containsElement(co) && (field != Contact.DISTRIBUTIONLIST) && (field != Contact.LINKS) && (field != DataObject.OBJECT_ID) && (i != Contact.IMAGE1_CONTENT_TYPE)) {
 
                     addressBusinessChanged |= (Arrays.binarySearch(Contact.ADDRESS_FIELDS_BUSINESS, field) >= 0);
                     addressHomeChanged |= (Arrays.binarySearch(Contact.ADDRESS_FIELDS_HOME, field) >= 0);
@@ -821,7 +825,7 @@ public final class Contacts {
             int counter = 1;
             for (int i = 0; i < modtrim.length; i++) {
                 final Mapper mapper = mapping[modtrim[i]];
-                if ((mapper != null) && mapper.containsElement(co) && (modtrim[i] != Contact.DISTRIBUTIONLIST) && (modtrim[i] != Contact.LINKS) && (modtrim[i] != Contact.OBJECT_ID) && (i != Contact.IMAGE1_CONTENT_TYPE)) {
+                if ((mapper != null) && mapper.containsElement(co) && (modtrim[i] != Contact.DISTRIBUTIONLIST) && (modtrim[i] != Contact.LINKS) && (modtrim[i] != DataObject.OBJECT_ID) && (i != Contact.IMAGE1_CONTENT_TYPE)) {
                     mapper.fillPreparedStatement(ps, counter, co);
                     counter++;
                 }
@@ -1111,7 +1115,7 @@ public final class Contacts {
                 cso.setDisplayName(contact.getDisplayName());
                 cso.setIgnoreOwn(contact.getObjectID());
                 csql.setContactSearchObject(cso);
-                final int[] cols = new int[] { Contact.OBJECT_ID, Contact.FOLDER_ID, Contact.DISPLAY_NAME };
+                final int[] cols = new int[] { DataObject.OBJECT_ID, FolderChildObject.FOLDER_ID, Contact.DISPLAY_NAME };
                 csql.setSelect(csql.iFgetColsString(cols).toString());
                 csql.setSearchHabit(" AND ");
                 try {
@@ -1173,7 +1177,7 @@ public final class Contacts {
             for (int i = 0; i < modtrim.length; i++) {
                 final int field = modtrim[i];
                 final Mapper mapper = mapping[field];
-                if ((mapper != null) && mapper.containsElement(contact) && (field != Contact.DISTRIBUTIONLIST) && (field != Contact.LINKS) && (field != Contact.OBJECT_ID) && (i != Contact.IMAGE1_CONTENT_TYPE)) {
+                if ((mapper != null) && mapper.containsElement(contact) && (field != Contact.DISTRIBUTIONLIST) && (field != Contact.LINKS) && (field != DataObject.OBJECT_ID) && (i != Contact.IMAGE1_CONTENT_TYPE)) {
                     update.append(mapper.getDBFieldName()).append(" = ?,");
                 }
             }
@@ -1217,7 +1221,7 @@ public final class Contacts {
             for (int i = 0; i < modtrim.length; i++) {
                 final int field = modtrim[i];
                 final Mapper mapper = mapping[field];
-                if ((mapper != null) && mapper.containsElement(contact) && (field != Contact.DISTRIBUTIONLIST) && (field != Contact.LINKS) && (field != Contact.OBJECT_ID) && (i != Contact.IMAGE1_CONTENT_TYPE)) {
+                if ((mapper != null) && mapper.containsElement(contact) && (field != Contact.DISTRIBUTIONLIST) && (field != Contact.LINKS) && (field != DataObject.OBJECT_ID) && (i != Contact.IMAGE1_CONTENT_TYPE)) {
                     mapper.fillPreparedStatement(ps, counter, contact);
                     counter++;
                 }
@@ -5767,7 +5771,7 @@ public final class Contacts {
             }
         };
         /** ************** * field69 * * ************ */
-        mapping[Contact.CATEGORIES] = new Mapper() {
+        mapping[CommonObject.CATEGORIES] = new Mapper() {
 
             @Override
             public String getDBFieldName() {
@@ -6691,7 +6695,7 @@ public final class Contacts {
             }
         };
         /** ************** * intfield01 * * ************ */
-        mapping[Contact.OBJECT_ID] = new Mapper() {
+        mapping[DataObject.OBJECT_ID] = new Mapper() {
 
             @Override
             public String getDBFieldName() {
@@ -6773,7 +6777,7 @@ public final class Contacts {
             }
         };
         /** ************** * intfield03 * * ************ */
-        mapping[Contact.NUMBER_OF_LINKS] = new Mapper() {
+        mapping[CommonObject.NUMBER_OF_LINKS] = new Mapper() {
 
             @Override
             public String getDBFieldName() {
@@ -6904,7 +6908,7 @@ public final class Contacts {
             }
         };
         /** ************** * fid * * ************ */
-        mapping[Contact.FOLDER_ID] = new Mapper() {
+        mapping[FolderChildObject.FOLDER_ID] = new Mapper() {
 
             @Override
             public String getDBFieldName() {
@@ -6985,9 +6989,9 @@ public final class Contacts {
                 return "Context id";
             }
         };
-        mapping[Contact.PRIVATE_FLAG] = new PrivateFlag();
+        mapping[CommonObject.PRIVATE_FLAG] = new PrivateFlag();
         /** ************** * created_from * * ************ */
-        mapping[Contact.CREATED_BY] = new Mapper() {
+        mapping[DataObject.CREATED_BY] = new Mapper() {
 
             @Override
             public String getDBFieldName() {
@@ -7028,7 +7032,7 @@ public final class Contacts {
             }
         };
         /** ************** * changed_from * * ************ */
-        mapping[Contact.MODIFIED_BY] = new Mapper() {
+        mapping[DataObject.MODIFIED_BY] = new Mapper() {
 
             @Override
             public String getDBFieldName() {
@@ -7069,7 +7073,7 @@ public final class Contacts {
             }
         };
         /** ************** * creating_date * * ************ */
-        mapping[Contact.CREATION_DATE] = new Mapper() {
+        mapping[DataObject.CREATION_DATE] = new Mapper() {
 
             @Override
             public String getDBFieldName() {
@@ -7112,7 +7116,7 @@ public final class Contacts {
             }
         };
         /** ************** * changing_date * * ************ */
-        mapping[Contact.LAST_MODIFIED] = new Mapper() {
+        mapping[DataObject.LAST_MODIFIED] = new Mapper() {
 
             @Override
             public String getDBFieldName() {
@@ -7508,7 +7512,7 @@ public final class Contacts {
             }
         };
         /** ************** * intfield05 * * ************ */
-        mapping[Contact.COLOR_LABEL] = new Mapper() {
+        mapping[CommonObject.COLOR_LABEL] = new Mapper() {
 
             @Override
             public String getDBFieldName() {
@@ -7699,7 +7703,7 @@ public final class Contacts {
             }
         };
         /** ************** * intfield08 * * ************ */
-        mapping[Contact.NUMBER_OF_ATTACHMENTS] = new Mapper() {
+        mapping[CommonObject.NUMBER_OF_ATTACHMENTS] = new Mapper() {
 
             @Override
             public String getDBFieldName() {
@@ -8053,7 +8057,7 @@ public final class Contacts {
             }
         };
         /** ************** * UID * * ************ */
-        mapping[Contact.UID] = new Mapper() {
+        mapping[CommonObject.UID] = new Mapper() {
 
             @Override
             public String getDBFieldName() {

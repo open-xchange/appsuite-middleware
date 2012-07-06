@@ -19,6 +19,7 @@ package org.apache.tika.parser.audio;
 import junit.framework.TestCase;
 
 import org.apache.tika.Tika;
+import org.apache.tika.metadata.HttpHeaders;
 import org.apache.tika.metadata.Metadata;
 
 public class MidiParserTest extends TestCase {
@@ -29,7 +30,7 @@ public class MidiParserTest extends TestCase {
         String content = new Tika().parseToString(
                 MidiParserTest.class.getResourceAsStream(path), metadata);
 
-        assertEquals("audio/midi", metadata.get(Metadata.CONTENT_TYPE));
+        assertEquals("audio/midi", metadata.get(HttpHeaders.CONTENT_TYPE));
         assertEquals("2", metadata.get("tracks"));
         assertEquals("0", metadata.get("patches"));
         assertEquals("PPQ", metadata.get("divisionType"));

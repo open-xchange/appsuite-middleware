@@ -55,6 +55,7 @@ import com.openexchange.caldav.resources.CommonFolderCollection;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.log.LogFactory;
+import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 /**
@@ -75,7 +76,7 @@ public class Owner extends SingleXMLPropertyMixin {
     private final CommonFolderCollection<?> collection;    
 
     public Owner(CommonFolderCollection<?> collection) {
-        super(CaldavProtocol.DAV_NS.getURI(), PROPERTY_NAME);
+        super(Protocol.DAV_NS.getURI(), PROPERTY_NAME);
         this.collection = collection;
     }
     

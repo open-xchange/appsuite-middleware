@@ -71,12 +71,13 @@ public class FormalFieldQueryModifier extends SearchComponent {
     private final String QUERY = "q";
     private final String DESCRIPTION = "SearchComponent that modifies a query";
     private final String REF = "$Revision: 1.6 $";
-    private Map<String,String> rawMap = new HashMap<String,String>();
+    private final Map<String,String> rawMap = new HashMap<String,String>();
     private FormalFieldParser fieldParser;
     
     private static final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(FormalFieldQueryModifier.class));
 
 
+    @Override
     @SuppressWarnings("rawtypes")
     public void init(NamedList args) {
       for (int i=0; i < args.size(); i++) {
@@ -86,25 +87,31 @@ public class FormalFieldQueryModifier extends SearchComponent {
       }
     }
 
+    @Override
     public String getDescription() {
       return DESCRIPTION;
     }
 
+    @Override
     public String getSource() {
       return null;
     }
 
+    @Override
     public String getSourceId() {
       return null;
     }
 
+    @Override
     public String getVersion() {
       return REF;
     }
 
+    @Override
     public void process(ResponseBuilder rb) throws IOException { }
 
 
+    @Override
     public void prepare(ResponseBuilder rb) throws IOException {
       log.debug("[prepare]: Start");
 
@@ -125,7 +132,7 @@ public class FormalFieldQueryModifier extends SearchComponent {
     }
     
     private static final class FormalFieldParser {
-        private Map<String,List<String>> formalFieldMap;
+        private final Map<String,List<String>> formalFieldMap;
 
 
         public FormalFieldParser(Map<String,String> mapping) {
@@ -317,8 +324,8 @@ public class FormalFieldQueryModifier extends SearchComponent {
     }
     
     private static final class Token {
-        private String term;
-        private TokenTypes type;
+        private final String term;
+        private final TokenTypes type;
 
         public Token(String term, TokenTypes type) {
           this.term = term;

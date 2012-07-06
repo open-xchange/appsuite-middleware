@@ -64,6 +64,7 @@ import org.apache.commons.logging.Log;
 import com.openexchange.log.LogFactory;
 
 import com.openexchange.ajax.fields.AppointmentFields;
+import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.calendar.AppointmentDiff;
 import com.openexchange.calendar.itip.generators.ITipMailGenerator;
 import com.openexchange.calendar.itip.generators.NotificationMail;
@@ -296,7 +297,7 @@ public class AppointmentNotificationPool implements
 			this.lastKnownStartDateForNextOccurrence = newAppointment.getStartDate().getTime();
 			Update update = new Update(original, newAppointment, session, sharedFolderOwner);
 			updates.add(update);
-			if (update.getDiff().anyFieldChangedOf(AppointmentFields.START_DATE, AppointmentFields.END_DATE, AppointmentFields.LOCATION, AppointmentFields.RECURRENCE_TYPE, AppointmentFields.DAY_IN_MONTH, AppointmentFields.DAYS, AppointmentFields.FULL_TIME, AppointmentFields.INTERVAL, AppointmentFields.MONTH, AppointmentFields.RECURRENCE_POSITION, AppointmentFields.RECURRENCE_DATE_POSITION)) {
+			if (update.getDiff().anyFieldChangedOf(CalendarFields.START_DATE, CalendarFields.END_DATE, AppointmentFields.LOCATION, CalendarFields.RECURRENCE_TYPE, CalendarFields.DAY_IN_MONTH, CalendarFields.DAYS, AppointmentFields.FULL_TIME, CalendarFields.INTERVAL, CalendarFields.MONTH, CalendarFields.RECURRENCE_POSITION, CalendarFields.RECURRENCE_DATE_POSITION)) {
 				// Participant State has been reset
 				// Purge state only changes
 				Iterator<Update> iterator = updates.iterator();

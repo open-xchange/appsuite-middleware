@@ -67,7 +67,6 @@ import org.apache.commons.logging.Log;
 import com.openexchange.log.LogFactory;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.tx.DBService;
-import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.FolderObject;

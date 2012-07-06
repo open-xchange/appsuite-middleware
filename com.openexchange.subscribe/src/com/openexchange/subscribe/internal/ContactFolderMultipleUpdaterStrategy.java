@@ -64,6 +64,7 @@ import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.contact.OverridingContactInterface;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.generic.TargetFolderDefinition;
 import com.openexchange.groupware.search.Order;
@@ -171,7 +172,7 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
             folderId,
             0,
             numberOfContacts,
-            Contact.OBJECT_ID,
+            DataObject.OBJECT_ID,
             Order.ASCENDING,
             null,
             COMPARISON_COLUMNS);

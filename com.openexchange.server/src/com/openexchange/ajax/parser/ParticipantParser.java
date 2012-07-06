@@ -206,6 +206,7 @@ public class ParticipantParser {
             this.type = type;
         }
         
+        @Override
         public JSONParticipant clone() throws CloneNotSupportedException {
             JSONParticipant retval = (JSONParticipant) super.clone();
             

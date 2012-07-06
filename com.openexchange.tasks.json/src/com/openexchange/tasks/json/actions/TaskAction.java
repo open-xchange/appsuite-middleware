@@ -61,6 +61,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
@@ -136,7 +137,7 @@ public abstract class TaskAction implements AJAXActionService {
     protected int[] removeVirtualColumns(final int[] columns) {
         final TIntList tmp = new TIntArrayList(columns.length);
         for (final int col : columns) {
-            if (col != Task.LAST_MODIFIED_UTC) {
+            if (col != DataObject.LAST_MODIFIED_UTC) {
                 tmp.add(col);
             }
         }

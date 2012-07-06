@@ -61,6 +61,8 @@ import org.json.JSONObject;
 import org.json.JSONValue;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.CalendarFields;
+import com.openexchange.ajax.fields.CommonFields;
+import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.fields.OrderFields;
 import com.openexchange.ajax.fields.ResponseFields;
@@ -182,7 +184,7 @@ public class TaskRequest extends CalendarRequest {
         timestamp = task.getLastModified();
 
         final JSONObject jsonResponseObject = new JSONObject();
-        jsonResponseObject.put(TaskFields.ID, task.getObjectID());
+        jsonResponseObject.put(DataFields.ID, task.getObjectID());
 
         return jsonResponseObject;
     }
@@ -462,11 +464,11 @@ public class TaskRequest extends CalendarRequest {
             searchObj.setPattern(DataParser.parseString(jData, SearchFields.PATTERN));
         }
 
-        searchObj.setTitle(DataParser.parseString(jData, TaskFields.TITLE));
+        searchObj.setTitle(DataParser.parseString(jData, CalendarFields.TITLE));
         searchObj.setPriority(DataParser.parseInt(jData, TaskFields.PRIORITY));
         searchObj.setSearchInNote(DataParser.parseBoolean(jData, "searchinnote"));
         searchObj.setStatus(DataParser.parseInt(jData, TaskFields.STATUS));
-        searchObj.setCatgories(DataParser.parseString(jData, TaskFields.CATEGORIES));
+        searchObj.setCatgories(DataParser.parseString(jData, CommonFields.CATEGORIES));
         searchObj.setSubfolderSearch(DataParser.parseBoolean(jData, "subfoldersearch"));
 
         if (jData.has(CalendarFields.PARTICIPANTS)) {
@@ -522,7 +524,7 @@ public class TaskRequest extends CalendarRequest {
         timestamp = new Date(0);
 
         final JSONObject jsonResponseObject = new JSONObject();
-        jsonResponseObject.put(TaskFields.ID, taskObj.getObjectID());
+        jsonResponseObject.put(DataFields.ID, taskObj.getObjectID());
 
         return jsonResponseObject;
     }
@@ -530,7 +532,7 @@ public class TaskRequest extends CalendarRequest {
     private int[] removeVirtualColumns(final int[] columns) {
         final TIntList tmp = new TIntArrayList(columns.length);
         for (final int col : columns) {
-            if (col != Task.LAST_MODIFIED_UTC) {
+            if (col != DataObject.LAST_MODIFIED_UTC) {
                 tmp.add(col);
             }
         }

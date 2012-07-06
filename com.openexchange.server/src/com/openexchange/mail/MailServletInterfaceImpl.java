@@ -2819,7 +2819,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         if (rateLimit > 0) {
             final Long parameter = (Long) session.getParameter(LAST_SEND_TIME);
             if (null != parameter && (parameter.longValue() + rateLimit) >= System.currentTimeMillis()) {
-                final NumberFormat numberInstance = DecimalFormat.getNumberInstance(UserStorage.getStorageUser(session.getUserId(), session.getContextId()).getLocale());
+                final NumberFormat numberInstance = NumberFormat.getNumberInstance(UserStorage.getStorageUser(session.getUserId(), session.getContextId()).getLocale());
                 throw MailExceptionCode.SENT_QUOTA_EXCEEDED.create(numberInstance.format(((double) rateLimit) / 1000));
             }
         }

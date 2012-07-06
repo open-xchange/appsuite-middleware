@@ -63,6 +63,7 @@ import java.util.Set;
 import java.util.Vector;
 import javax.mail.FetchProfile;
 import javax.mail.Flags;
+import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.UIDFolder;
@@ -517,7 +518,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
              * Get message count
              */
             final int messageCount;
-            inbox.open(POP3Folder.READ_WRITE);
+            inbox.open(Folder.READ_WRITE);
             try {
                 synchronized (inbox) {
                     messageCount = inbox.getMessageCount();
@@ -690,7 +691,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
              * Ensure INBOX is open
              */
             if (!inbox.isOpen()) {
-                inbox.open(POP3Folder.READ_WRITE);
+                inbox.open(Folder.READ_WRITE);
             }
             /*
              * Do batch-append

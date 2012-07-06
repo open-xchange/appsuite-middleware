@@ -65,6 +65,7 @@ import org.json.JSONObject;
 import org.json.JSONValue;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.ContactFields;
+import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.parser.ContactParser;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.request.ContactRequest;
@@ -277,7 +278,7 @@ public class Contact extends DataServlet {
                     contactInterface.insertContactObject(contactobject);
 
                     final JSONObject jData = new JSONObject();
-                    jData.put(ContactFields.ID, contactobject.getObjectID());
+                    jData.put(DataFields.ID, contactobject.getObjectID());
 
                     response.setData(jData);
                 } finally {

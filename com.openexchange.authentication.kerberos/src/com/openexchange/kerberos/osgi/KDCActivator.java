@@ -58,7 +58,7 @@ import com.openexchange.osgi.Tools;
 
 public class KDCActivator implements BundleActivator {
 
-    private Stack<ServiceTracker<?, ?>> trackers = new Stack<ServiceTracker<?, ?>>();
+    private final Stack<ServiceTracker<?, ?>> trackers = new Stack<ServiceTracker<?, ?>>();
 
 	@Override
     public void start(BundleContext context) {

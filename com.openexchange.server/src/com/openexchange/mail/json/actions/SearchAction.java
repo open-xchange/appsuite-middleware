@@ -53,6 +53,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.parser.SearchTermParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -106,11 +107,11 @@ public final class SearchAction extends AbstractMailAction {
              * Read in parameters
              */
             final String folderId = req.checkParameter(Mail.PARAMETER_MAILFOLDER);
-            final int[] columns = req.checkIntArray(Mail.PARAMETER_COLUMNS);
-            final String sort = req.getParameter(Mail.PARAMETER_SORT);
-            final String order = req.getParameter(Mail.PARAMETER_ORDER);
+            final int[] columns = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
+            final String sort = req.getParameter(AJAXServlet.PARAMETER_SORT);
+            final String order = req.getParameter(AJAXServlet.PARAMETER_ORDER);
             if (sort != null && order == null) {
-                throw MailExceptionCode.MISSING_PARAM.create(Mail.PARAMETER_ORDER);
+                throw MailExceptionCode.MISSING_PARAM.create(AJAXServlet.PARAMETER_ORDER);
             }
             final JSONValue searchValue = (JSONValue) req.getRequest().getData();
             /*
@@ -133,7 +134,7 @@ public final class SearchAction extends AbstractMailAction {
                     for (int i = 0; i < length; i++) {
                         final JSONObject tmp = ja.getJSONObject(i);
                         searchCols[i] = tmp.getInt(Mail.PARAMETER_COL);
-                        searchPats[i] = tmp.getString(Mail.PARAMETER_SEARCHPATTERN);
+                        searchPats[i] = tmp.getString(AJAXServlet.PARAMETER_SEARCHPATTERN);
                     }
                     /*
                      * Search mails
@@ -148,7 +149,7 @@ public final class SearchAction extends AbstractMailAction {
                         } else if (order.equalsIgnoreCase("desc")) {
                             orderDir = OrderDirection.DESC.getOrder();
                         } else {
-                            throw MailExceptionCode.INVALID_INT_VALUE.create(Mail.PARAMETER_ORDER);
+                            throw MailExceptionCode.INVALID_INT_VALUE.create(AJAXServlet.PARAMETER_ORDER);
                         }
                     }
                     final OXJSONWriter jsonWriter = new OXJSONWriter();
@@ -220,7 +221,7 @@ public final class SearchAction extends AbstractMailAction {
                     } else if (order.equalsIgnoreCase("desc")) {
                         orderDir = OrderDirection.DESC.getOrder();
                     } else {
-                        throw MailExceptionCode.INVALID_INT_VALUE.create(Mail.PARAMETER_ORDER);
+                        throw MailExceptionCode.INVALID_INT_VALUE.create(AJAXServlet.PARAMETER_ORDER);
                     }
                 }
                 final int sortCol = sort == null ? MailListField.RECEIVED_DATE.getField() : Integer.parseInt(sort);

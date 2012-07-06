@@ -371,7 +371,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
          */
         for (int field : CALDAV_FIELDS) {
             if (oldAppointment.contains(field) && false == cdo.contains(field)) {
-                if (Appointment.ALARM == field) {
+                if (CalendarObject.ALARM == field) {
                     // -1 resets alarm
                     cdo.setAlarm(-1);                                                            
                 } else {
@@ -386,7 +386,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                 CalendarObject.NO_RECURRENCE != cdo.getRecurrenceType()) {
             for (int field : RECURRENCE_FIELDS) {
                 if (oldAppointment.contains(field) && false == cdo.contains(field)) {
-                    cdo.set(field, Appointment.UNTIL == field ? null : cdo.get(field)); // getUntil returns 'max until date' if not set 
+                    cdo.set(field, CalendarObject.UNTIL == field ? null : cdo.get(field)); // getUntil returns 'max until date' if not set 
                 }
             }
         } 

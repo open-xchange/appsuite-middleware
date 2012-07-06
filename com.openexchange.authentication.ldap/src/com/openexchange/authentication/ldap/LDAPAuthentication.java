@@ -182,7 +182,7 @@ public class LDAPAuthentication implements AuthenticationService {
             if( subtreeSearch ) {
                 // get user dn from user
                 final Properties aprops = (Properties)props.clone();
-                aprops.put(LdapContext.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
+                aprops.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
                 if( bindDN != null && bindDN.length() > 0 ) {
                     LOG.debug("Using bindDN=" + bindDN);
                     aprops.put(Context.SECURITY_PRINCIPAL, bindDN);
@@ -299,7 +299,7 @@ public class LDAPAuthentication implements AuthenticationService {
      * @throws LoginException if configuration fails.
      */
     private void init() throws OXException {
-        props.put(LdapContext.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
+        props.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
 
         if (!props.containsKey(PropertyNames.UID_ATTRIBUTE.name)) {
             throw LoginExceptionCodes.MISSING_PROPERTY.create(PropertyNames.UID_ATTRIBUTE.name);
@@ -311,9 +311,9 @@ public class LDAPAuthentication implements AuthenticationService {
         }
         baseDN = props.getProperty(PropertyNames.BASE_DN.name);
 
-        final String url = props.getProperty(LdapContext.PROVIDER_URL);
+        final String url = props.getProperty(Context.PROVIDER_URL);
         if (null == url) {
-            throw LoginExceptionCodes.MISSING_PROPERTY.create(LdapContext.PROVIDER_URL);
+            throw LoginExceptionCodes.MISSING_PROPERTY.create(Context.PROVIDER_URL);
         } else if (url.startsWith("ldaps")) {
             props.put("java.naming.ldap.factory.socket", TrustAllSSLSocketFactory.class.getName());
         }

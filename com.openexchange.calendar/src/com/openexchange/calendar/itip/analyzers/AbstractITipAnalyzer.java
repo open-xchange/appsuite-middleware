@@ -62,6 +62,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 import com.openexchange.ajax.fields.AppointmentFields;
+import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.calendar.AppointmentDiff;
 import com.openexchange.calendar.AppointmentDiff.FieldUpdate;
 import com.openexchange.calendar.itip.ITipAnalysis;
@@ -86,6 +87,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.Change;
 import com.openexchange.groupware.container.ConfirmationChange;
 import com.openexchange.groupware.container.Difference;
@@ -252,7 +254,7 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 
 			final AppointmentDiff diff = change.getDiff();
 			FieldUpdate update = diff
-					.getUpdateFor(AppointmentFields.CONFIRMATIONS);
+					.getUpdateFor(CalendarFields.CONFIRMATIONS);
 			if (update != null) {
 				final Difference difference = (Difference) update.getExtraInfo();
 				final List<Change> changed = difference.getChanged();
@@ -316,8 +318,8 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 		final HashSet<String> differing = new HashSet<String>(
 				diff.getDifferingFieldNames());
 
-		for (final String field : new String[] { AppointmentFields.PARTICIPANTS,
-				AppointmentFields.USERS, AppointmentFields.CONFIRMATIONS }) {
+		for (final String field : new String[] { CalendarFields.PARTICIPANTS,
+				CalendarFields.USERS, CalendarFields.CONFIRMATIONS }) {
 			differing.remove(field);
 		}
 		if (!differing.isEmpty()) {
@@ -325,8 +327,8 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 		}
 
 		// Hm, okay, so no let's see if any participants were added or removed.
-		for (final String field : new String[] { AppointmentFields.PARTICIPANTS,
-				AppointmentFields.USERS, AppointmentFields.CONFIRMATIONS }) {
+		for (final String field : new String[] { CalendarFields.PARTICIPANTS,
+				CalendarFields.USERS, CalendarFields.CONFIRMATIONS }) {
 			final FieldUpdate update = diff.getUpdateFor(field);
 			if (update == null) {
 				continue;
@@ -513,8 +515,8 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 				final AppointmentDiff diff = AppointmentDiff.compare(
 						change.getCurrentAppointment(),
 						change.getNewAppointment());
-				if (diff.anyFieldChangedOf(AppointmentFields.START_DATE,
-						AppointmentFields.END_DATE)) {
+				if (diff.anyFieldChangedOf(CalendarFields.START_DATE,
+						CalendarFields.END_DATE)) {
 					return true;
 				}
 				return false;
@@ -524,8 +526,8 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 			}
 			final AppointmentDiff diff = change.getDiff();
 			if (diff != null
-					&& diff.anyFieldChangedOf(AppointmentFields.START_DATE,
-							AppointmentFields.END_DATE)) {
+					&& diff.anyFieldChangedOf(CalendarFields.START_DATE,
+							CalendarFields.END_DATE)) {
 				return true;
 			}
 		}
@@ -533,7 +535,7 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 	}
 	
 	protected void ensureParticipant(final CalendarDataObject appointment, final Session session, int owner) {
-        final int confirm = CalendarDataObject.NONE;
+        final int confirm = CalendarObject.NONE;
         final Participant[] participants = appointment.getParticipants();
         boolean found = false;
         if (null != participants) {

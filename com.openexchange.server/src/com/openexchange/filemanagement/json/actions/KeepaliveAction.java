@@ -51,6 +51,7 @@ package com.openexchange.filemanagement.json.actions;
 
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXFile;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -84,7 +85,7 @@ public final class KeepaliveAction implements AJAXActionService {
 
     @Override
     public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
-        final String id = requestData.checkParameter(AJAXFile.PARAMETER_ID);
+        final String id = requestData.checkParameter(AJAXServlet.PARAMETER_ID);
         final ManagedFileManagement management = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
         management.getByID(id);
         return new AJAXRequestResult(JSONObject.NULL, "json");

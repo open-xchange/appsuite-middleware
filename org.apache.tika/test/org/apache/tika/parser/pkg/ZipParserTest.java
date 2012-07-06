@@ -19,6 +19,7 @@ package org.apache.tika.parser.pkg;
 import java.io.InputStream;
 
 import org.apache.tika.Tika;
+import org.apache.tika.metadata.HttpHeaders;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.parser.Parser;
@@ -43,7 +44,7 @@ public class ZipParserTest extends AbstractPkgTest {
             stream.close();
         }
 
-        assertEquals("application/zip", metadata.get(Metadata.CONTENT_TYPE));
+        assertEquals("application/zip", metadata.get(HttpHeaders.CONTENT_TYPE));
         String content = handler.toString();
         assertTrue(content.contains("testEXCEL.xls"));
         assertTrue(content.contains("Sample Excel Worksheet"));

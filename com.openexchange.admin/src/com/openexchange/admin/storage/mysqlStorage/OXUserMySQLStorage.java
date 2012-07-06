@@ -1784,7 +1784,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         final ArrayList<User> userlist = new ArrayList<User>();
         try {
             read_ox_con = cache.getConnectionForContext(context_id);
-            final OXToolStorageInterface oxtool = OXToolMySQLStorage.getInstance();
+            final OXToolStorageInterface oxtool = OXToolStorageInterface.getInstance();
             final int adminForContext = oxtool.getAdminForContext(ctx, read_ox_con);
 
             stmt = read_ox_con.prepareStatement("SELECT uid FROM login2user WHERE cid = ? AND id = ?");

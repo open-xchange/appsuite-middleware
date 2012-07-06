@@ -95,7 +95,7 @@ public class MessagingMessageWriterTest extends TestCase {
         message.setUserFlags(Arrays.asList("eins", "zwo", "drei", "vier", "f\u00fcnf"));
         message.setSize(13);
         message.setThreadLevel(15);
-        message.setDisposition(MessagingMessage.INLINE);
+        message.setDisposition(MessagingPart.INLINE);
         message.setId("message123");
         message.setFolder("niceFolder17");
         message.setPicture("http://www.somesite.invalid/somepic.png");
@@ -240,7 +240,7 @@ public class MessagingMessageWriterTest extends TestCase {
         final SimpleMessagingMessage binMessage = new SimpleMessagingMessage();
         binMessage.setSectionId("1");
         binMessage.setContent("content".getBytes("UTF-8"));
-        binMessage.setDisposition(MessagingMessage.ATTACHMENT);
+        binMessage.setDisposition(MessagingPart.ATTACHMENT);
         binMessage.setFileName("content.txt");
 
         final SimpleMessagingMessage plainMessage = new SimpleMessagingMessage();
@@ -266,7 +266,7 @@ public class MessagingMessageWriterTest extends TestCase {
         final JSONObject firstContent = array.getJSONObject(0);
 
         assertion = new JSONAssertion().isObject().hasKey("sectionId").withValue("1").hasKey("body").withValue(Base64.encode("content")).hasKey(
-            "disposition").withValue(MessagingMessage.ATTACHMENT).hasKey("fileName").withValue("content.txt").objectEnds();
+            "disposition").withValue(MessagingPart.ATTACHMENT).hasKey("fileName").withValue("content.txt").objectEnds();
 
         assertValidates(assertion, firstContent);
 

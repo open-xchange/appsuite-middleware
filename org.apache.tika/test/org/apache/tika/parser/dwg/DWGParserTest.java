@@ -20,6 +20,9 @@ import java.io.InputStream;
 
 import junit.framework.TestCase;
 
+import org.apache.tika.metadata.DublinCore;
+import org.apache.tika.metadata.HttpHeaders;
+import org.apache.tika.metadata.MSOffice;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.sax.BodyContentHandler;
 import org.xml.sax.ContentHandler;
@@ -73,20 +76,20 @@ public class DWGParserTest extends TestCase {
             ContentHandler handler = new BodyContentHandler();
             new DWGParser().parse(input, handler, metadata);
 
-            assertEquals("image/vnd.dwg", metadata.get(Metadata.CONTENT_TYPE));
+            assertEquals("image/vnd.dwg", metadata.get(HttpHeaders.CONTENT_TYPE));
 
             assertEquals("The quick brown fox jumps over the lazy dog", 
-                    metadata.get(Metadata.TITLE));
+                    metadata.get(DublinCore.TITLE));
             assertEquals("Gym class featuring a brown fox and lazy dog",
-                    metadata.get(Metadata.SUBJECT));
+                    metadata.get(DublinCore.SUBJECT));
             assertEquals("Nevin Nollop",
-                    metadata.get(Metadata.AUTHOR));
+                    metadata.get(MSOffice.AUTHOR));
             assertEquals("Pangram, fox, dog",
-                    metadata.get(Metadata.KEYWORDS));
+                    metadata.get(MSOffice.KEYWORDS));
             assertEquals("Lorem ipsum",
-                    metadata.get(Metadata.COMMENTS).substring(0,11));
+                    metadata.get(MSOffice.COMMENTS).substring(0,11));
             assertEquals("http://www.alfresco.com",
-                    metadata.get(Metadata.RELATION));
+                    metadata.get(DublinCore.RELATION));
 
             String content = handler.toString();
             assertTrue(content.contains("The quick brown fox jumps over the lazy dog"));
@@ -103,14 +106,14 @@ public class DWGParserTest extends TestCase {
             ContentHandler handler = new BodyContentHandler();
             new DWGParser().parse(input, handler, metadata);
 
-            assertEquals("image/vnd.dwg", metadata.get(Metadata.CONTENT_TYPE));
+            assertEquals("image/vnd.dwg", metadata.get(HttpHeaders.CONTENT_TYPE));
             
-            assertNull(metadata.get(Metadata.TITLE));
-            assertNull(metadata.get(Metadata.SUBJECT));
-            assertNull(metadata.get(Metadata.AUTHOR));
-            assertNull(metadata.get(Metadata.KEYWORDS));
-            assertNull(metadata.get(Metadata.COMMENTS));
-            assertNull(metadata.get(Metadata.RELATION));
+            assertNull(metadata.get(DublinCore.TITLE));
+            assertNull(metadata.get(DublinCore.SUBJECT));
+            assertNull(metadata.get(MSOffice.AUTHOR));
+            assertNull(metadata.get(MSOffice.KEYWORDS));
+            assertNull(metadata.get(MSOffice.COMMENTS));
+            assertNull(metadata.get(DublinCore.RELATION));
 
             String content = handler.toString();
             assertTrue(content.contains(""));
@@ -125,22 +128,22 @@ public class DWGParserTest extends TestCase {
             ContentHandler handler = new BodyContentHandler();
             new DWGParser().parse(input, handler, metadata);
 
-            assertEquals("image/vnd.dwg", metadata.get(Metadata.CONTENT_TYPE));
+            assertEquals("image/vnd.dwg", metadata.get(HttpHeaders.CONTENT_TYPE));
 
             assertEquals("Test Title", 
-                    metadata.get(Metadata.TITLE));
+                    metadata.get(DublinCore.TITLE));
             assertEquals("Test Subject",
-                    metadata.get(Metadata.SUBJECT));
+                    metadata.get(DublinCore.SUBJECT));
             assertEquals("My Author",
-                    metadata.get(Metadata.AUTHOR));
+                    metadata.get(MSOffice.AUTHOR));
             assertEquals("My keyword1, MyKeyword2",
-                    metadata.get(Metadata.KEYWORDS));
+                    metadata.get(MSOffice.KEYWORDS));
             assertEquals("This is a comment",
-                    metadata.get(Metadata.COMMENTS));
+                    metadata.get(MSOffice.COMMENTS));
             assertEquals("bejanpol",
-                    metadata.get(Metadata.LAST_AUTHOR));
+                    metadata.get(MSOffice.LAST_AUTHOR));
             assertEquals("http://mycompany/drawings",
-                    metadata.get(Metadata.RELATION));
+                    metadata.get(DublinCore.RELATION));
             assertEquals("MyCustomPropertyValue",
                   metadata.get("MyCustomProperty"));
 

@@ -111,7 +111,7 @@ public final class EndDateReplacement extends AbstractFormatDateReplacement {
         if (!fulltime || null == endDate || isTask) {
             return endDate;
         }
-        final Calendar calendar = GregorianCalendar.getInstance(TimeZoneUtils.getTimeZone("UTC"));
+        final Calendar calendar = Calendar.getInstance(TimeZoneUtils.getTimeZone("UTC"));
         calendar.setTime(endDate);
         calendar.add(Calendar.DAY_OF_MONTH, -1);
         return calendar.getTime();

@@ -21,6 +21,7 @@ import java.util.GregorianCalendar;
 import java.util.Iterator;
 
 import org.apache.tika.metadata.DublinCore;
+import org.apache.tika.metadata.MSOffice;
 import org.apache.tika.metadata.Metadata;
 
 import com.drew.metadata.Directory;
@@ -97,10 +98,10 @@ public class ImageMetadataExtractorTest extends TestCase {
         when(t1.getTagName()).thenReturn("Image Description");
         when(t1.getDescription()).thenReturn("t1");
         Tag t2 = mock(Tag.class);
-        when(t2.getTagName()).thenReturn(Metadata.KEYWORDS);
+        when(t2.getTagName()).thenReturn(MSOffice.KEYWORDS);
         when(t2.getDescription()).thenReturn("known");
         Tag t3 = mock(Tag.class);
-        when(t3.getTagName()).thenReturn(Metadata.DESCRIPTION);
+        when(t3.getTagName()).thenReturn(DublinCore.DESCRIPTION);
         when(t3.getDescription()).thenReturn("known");
         Iterator<Tag> tags = Arrays.asList(t1, t2, t3).iterator();
         when(d.getTagIterator()).thenReturn(tags);
@@ -108,8 +109,8 @@ public class ImageMetadataExtractorTest extends TestCase {
         new ImageMetadataExtractor.CopyUnknownFieldsHandler().handle(d, metadata);
         assertEquals("t1", metadata.get("Image Description"));
         assertNull("keywords should be excluded from bulk copy because it is a defined field",
-                metadata.get(Metadata.KEYWORDS));
-        assertNull(metadata.get(Metadata.DESCRIPTION));
+                metadata.get(MSOffice.KEYWORDS));
+        assertNull(metadata.get(DublinCore.DESCRIPTION));
     }
     
 }

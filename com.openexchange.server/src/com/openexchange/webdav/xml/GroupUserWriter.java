@@ -83,6 +83,7 @@ import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.webdav.xml.fields.ContactFields;
 import com.openexchange.webdav.xml.fields.DataFields;
+import com.openexchange.webdav.xml.fields.FolderChildFields;
 
 /**
  * AppointmentWriter
@@ -269,8 +270,8 @@ public class GroupUserWriter extends ContactWriter {
             final User u = userStorage.getUser(userId, ctx);
 
             addElement("uid", userId, e);
-            addElement(ContactFields.OBJECT_ID, contactobject.getObjectID(), e);
-            addElement(ContactFields.FOLDER_ID, FolderObject.SYSTEM_LDAP_FOLDER_ID, e);
+            addElement(DataFields.OBJECT_ID, contactobject.getObjectID(), e);
+            addElement(FolderChildFields.FOLDER_ID, FolderObject.SYSTEM_LDAP_FOLDER_ID, e);
             final String primaryAddress = u.getMail();
             {
                 final Element child = addElement("email1", primaryAddress, e);

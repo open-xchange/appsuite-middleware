@@ -66,6 +66,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.CommonObject;
+import com.openexchange.groupware.container.DataObject;
+import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.tasks.mapping.ActualCosts;
 import com.openexchange.groupware.tasks.mapping.ActualDuration;
 import com.openexchange.groupware.tasks.mapping.Filename;
@@ -98,7 +102,7 @@ public final class Mapping {
         new Mapper<Boolean>() {
             @Override
             public int getId() {
-                return Task.PRIVATE_FLAG;
+                return CommonObject.PRIVATE_FLAG;
             }
             @Override
             public boolean isSet(final Task task) {
@@ -135,7 +139,7 @@ public final class Mapping {
         new Mapper<Date>() {
             @Override
             public int getId() {
-                return Task.CREATION_DATE;
+                return DataObject.CREATION_DATE;
             }
             @Override
             public boolean isSet(final Task task) {
@@ -174,7 +178,7 @@ public final class Mapping {
         new Mapper<Date>() {
             @Override
             public int getId() {
-                return Task.LAST_MODIFIED;
+                return DataObject.LAST_MODIFIED;
             }
             @Override
             public boolean isSet(final Task task) {
@@ -212,7 +216,7 @@ public final class Mapping {
         new Mapper<Integer>() {
             @Override
             public int getId() {
-                return Task.CREATED_BY;
+                return DataObject.CREATED_BY;
             }
             @Override
             public boolean isSet(final Task task) {
@@ -249,7 +253,7 @@ public final class Mapping {
         new Mapper<Integer>() {
             @Override
             public int getId() {
-                return Task.MODIFIED_BY;
+                return DataObject.MODIFIED_BY;
             }
             @Override
             public boolean isSet(final Task task) {
@@ -288,7 +292,7 @@ public final class Mapping {
         new Mapper<Date>() {
             @Override
             public int getId() {
-                return Task.START_DATE;
+                return CalendarObject.START_DATE;
             }
             @Override
             public boolean isSet(final Task task) {
@@ -333,7 +337,7 @@ public final class Mapping {
         new Mapper<Date>() {
             @Override
             public int getId() {
-                return Task.END_DATE;
+                return CalendarObject.END_DATE;
             }
             @Override
             public boolean isSet(final Task task) {
@@ -422,7 +426,7 @@ public final class Mapping {
         new Mapper<String>() {
             @Override
             public int getId() {
-                return Task.TITLE;
+                return CalendarObject.TITLE;
             }
             @Override
             public boolean isSet(final Task task) {
@@ -465,7 +469,7 @@ public final class Mapping {
         new Mapper<String>() {
             @Override
             public int getId() {
-                return Task.NOTE;
+                return CalendarObject.NOTE;
             }
             @Override
             public boolean isSet(final Task task) {
@@ -587,7 +591,7 @@ public final class Mapping {
         new Mapper<String>() {
             @Override
             public int getId() {
-                return Task.CATEGORIES;
+                return CommonObject.CATEGORIES;
             }
             @Override
             public boolean isSet(final Task task) {
@@ -850,7 +854,7 @@ public final class Mapping {
         new Mapper<Integer>() {
             @Override
             public int getId() {
-                return Task.COLOR_LABEL;
+                return CommonObject.COLOR_LABEL;
             }
             @Override
             public boolean isSet(final Task task) {
@@ -889,7 +893,7 @@ public final class Mapping {
         new Mapper<Integer>() {
             @Override
             public int getId() {
-                return Task.RECURRENCE_TYPE;
+                return CalendarObject.RECURRENCE_TYPE;
             }
             @Override
             public boolean isSet(final Task task) {
@@ -926,7 +930,7 @@ public final class Mapping {
         new Mapper<Integer>() {
             @Override
             public int getId() {
-                return Task.INTERVAL;
+                return CalendarObject.INTERVAL;
             }
             @Override
             public boolean isSet(final Task task) {
@@ -965,7 +969,7 @@ public final class Mapping {
         new Mapper<Integer>() {
             @Override
             public int getId() {
-                return Task.DAYS;
+                return CalendarObject.DAYS;
             }
             @Override
             public boolean isSet(final Task task) {
@@ -1008,7 +1012,7 @@ public final class Mapping {
         new Mapper<Integer>() {
             @Override
             public int getId() {
-                return Task.DAY_IN_MONTH;
+                return CalendarObject.DAY_IN_MONTH;
             }
             @Override
             public boolean isSet(final Task task) {
@@ -1047,7 +1051,7 @@ public final class Mapping {
         new Mapper<Integer>() {
             @Override
             public int getId() {
-                return Task.MONTH;
+                return CalendarObject.MONTH;
             }
             @Override
             public boolean isSet(final Task task) {
@@ -1086,7 +1090,7 @@ public final class Mapping {
         new Mapper<Date>() {
             @Override
             public int getId() {
-                return Task.UNTIL;
+                return CalendarObject.UNTIL;
             }
             @Override
             public boolean isSet(final Task task) {
@@ -1131,7 +1135,7 @@ public final class Mapping {
         new Mapper<Integer>() {
             @Override
             public int getId() {
-                return Task.NUMBER_OF_ATTACHMENTS;
+                return CommonObject.NUMBER_OF_ATTACHMENTS;
             }
             @Override
             public boolean isSet(final Task task) {
@@ -1232,9 +1236,9 @@ public final class Mapping {
         ID_MAPPING = Collections.unmodifiableMap(tmp);
         final Set<Integer> tmp2 = new HashSet<Integer>();
         tmp2.addAll(ID_MAPPING.keySet());
-        tmp2.add(Integer.valueOf(Task.PARTICIPANTS));
-        tmp2.add(Integer.valueOf(Task.FOLDER_ID));
-        tmp2.add(Integer.valueOf(Task.ALARM));
+        tmp2.add(Integer.valueOf(CalendarObject.PARTICIPANTS));
+        tmp2.add(Integer.valueOf(FolderChildObject.FOLDER_ID));
+        tmp2.add(Integer.valueOf(CalendarObject.ALARM));
         ALL_ATTRIBUTES = Collections.unmodifiableSet(tmp2);
         final List<Mapper<String>> tmp3 = new ArrayList<Mapper<String>>();
         for (final Mapper<? extends Object> mapper : Mapping.MAPPERS) {

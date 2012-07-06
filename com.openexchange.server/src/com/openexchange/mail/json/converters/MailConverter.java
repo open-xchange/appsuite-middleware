@@ -60,6 +60,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -168,7 +169,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
             final String action = requestData.getParameter("action");
             if (resultObject instanceof MailMessage) {
                 final MailMessage mail = (MailMessage) resultObject;
-                if (Mail.ACTION_GET.equals(action)) {
+                if (AJAXServlet.ACTION_GET.equals(action)) {
                     convertSingle4Get(mail, requestData, result, session);
                 } else {
                     convertSingle(mail, requestData, result, session);
@@ -177,9 +178,9 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                 convertThreadStructure((ThreadedStructure) resultObject, requestData, result, session);
             } else {
                 @SuppressWarnings("unchecked") final Collection<MailMessage> mails = (Collection<MailMessage>) resultObject;
-                if (Mail.ACTION_ALL.equalsIgnoreCase(action)) {
+                if (AJAXServlet.ACTION_ALL.equalsIgnoreCase(action)) {
                     convertMultiple4All(mails, requestData, result, session);
-                } else if (Mail.ACTION_LIST.equalsIgnoreCase(action)) {
+                } else if (AJAXServlet.ACTION_LIST.equalsIgnoreCase(action)) {
                     convertMultiple4List(mails, requestData, result, session);
                 } else {
                     // throw AjaxExceptionCodes.UNKNOWN_ACTION.create(action);
@@ -200,7 +201,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         /*
          * Read in parameters
          */
-        final int[] columns = requestData.checkIntArray(Mail.PARAMETER_COLUMNS);
+        final int[] columns = requestData.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
         final String[] headers = requestData.getParameterValues(Mail.PARAMETER_HEADERS);
         /*
          * Pre-Select field writers
@@ -351,7 +352,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         /*
          * Read in parameters
          */
-        final int[] columns = requestData.checkIntArray(Mail.PARAMETER_COLUMNS);
+        final int[] columns = requestData.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
         final String[] headers = requestData.getParameterValues(Mail.PARAMETER_HEADERS);
         /*
          * Pre-Select field writers
@@ -391,8 +392,8 @@ public final class MailConverter implements ResultConverter, MailActionConstants
     }
 
     private void convertMultiple4All(final Collection<MailMessage> mails, final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session) throws OXException, JSONException {
-        final int[] columns = requestData.checkIntArray(Mail.PARAMETER_COLUMNS);
-        final String sort = requestData.getParameter(Mail.PARAMETER_SORT);
+        final int[] columns = requestData.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
+        final String sort = requestData.getParameter(AJAXServlet.PARAMETER_SORT);
         /*
          * Get mail interface
          */
@@ -522,7 +523,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
          * Overwrite settings with request's parameters
          */
         final DisplayMode displayMode = AbstractMailAction.detectDisplayMode(editDraft, view, usmNoSave);
-        final String folderPath = requestData.checkParameter(Mail.PARAMETER_FOLDERID);
+        final String folderPath = requestData.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
         /*
          * Check for possible unseen action
          */
@@ -563,11 +564,11 @@ public final class MailConverter implements ResultConverter, MailActionConstants
              */
             final String uid;
             {
-                String tmp2 = requestData.getParameter(Mail.PARAMETER_ID);
+                String tmp2 = requestData.getParameter(AJAXServlet.PARAMETER_ID);
                 if (null == tmp2) {
                     tmp2 = requestData.getParameter(Mail.PARAMETER_MESSAGE_ID);
                     if (null == tmp2) {
-                        throw AjaxExceptionCodes.MISSING_PARAMETER.create(Mail.PARAMETER_ID);
+                        throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_ID);
                     }
                     uid = mailInterface.getMailIDByMessageID(folderPath, tmp2);
                 } else {

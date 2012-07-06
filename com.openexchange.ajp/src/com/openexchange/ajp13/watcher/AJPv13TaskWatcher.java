@@ -58,6 +58,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import com.openexchange.ajp13.AJPv13Config;
+import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.ajp13.AJPv13ServiceRegistry;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.najp.AJPv13ServerImpl;
@@ -210,7 +211,7 @@ public class AJPv13TaskWatcher {
                              * Restart AJP Server
                              */
                             try {
-                                AJPv13ServerImpl.restartAJPServer();
+                                AJPv13Server.restartAJPServer();
                             } catch (final AJPv13Exception e) {
                                 log.error(e.getMessage(), e);
                             }
