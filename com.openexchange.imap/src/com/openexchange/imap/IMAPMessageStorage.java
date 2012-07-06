@@ -809,17 +809,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 //        return super.getAttachmentLong(fullName, msgUID, sectionId);
 //    }
 
-    private static boolean useSuper() {
-        return true;
-    }
-
     @Override
     public MailPart getImageAttachmentLong(final String fullName, final long msgUID, final String contentId) throws OXException {
         if (msgUID < 0 || null == contentId) {
             return null;
-        }
-        if (useSuper()) {
-            return super.getAttachmentLong(fullName, msgUID, contentId);
         }
         try {
             imapFolder = setAndOpenFolder(imapFolder, fullName, Folder.READ_ONLY);
