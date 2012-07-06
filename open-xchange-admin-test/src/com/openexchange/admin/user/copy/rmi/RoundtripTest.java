@@ -96,7 +96,6 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractColumnsResponse;
 import com.openexchange.ajax.framework.CommonAllResponse;
-import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.ListID;
 import com.openexchange.ajax.framework.ListIDs;
@@ -174,8 +173,12 @@ public class RoundtripTest extends AbstractRMITest {
         ci = getContextInterface();
         Context[] contexts = ci.list("UserMove*", superAdminCredentials);
         for (Context ctx : contexts) {
-            System.out.println("Deletimng context " + ctx.getName() + " in schema " + ctx.getReadDatabase().getScheme());
-            ci.delete(ctx, superAdminCredentials);
+            System.out.println("Deleting context " + ctx.getName() + " in schema " + ctx.getReadDatabase().getScheme());
+            try {
+                ci.delete(ctx, superAdminCredentials);
+            } catch (Exception e) {
+                System.out.println("Error during context deletion.");
+            }
         }
         
         admin = newUser("oxadmin", "secret", "Admin User", "Admin", "User", "oxadmin@netline.de");
