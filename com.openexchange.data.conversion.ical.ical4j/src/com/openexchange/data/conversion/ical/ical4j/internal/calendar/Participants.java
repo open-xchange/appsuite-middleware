@@ -73,7 +73,6 @@ import net.fortuna.ical4j.model.parameter.Rsvp;
 import net.fortuna.ical4j.model.property.Attendee;
 import net.fortuna.ical4j.model.property.Resources;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ConversionWarning.Code;
@@ -93,6 +92,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.NotificationConfig;
 import com.openexchange.groupware.notify.NotificationConfig.NotificationProperty;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.resource.Resource;
 
@@ -202,7 +202,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
                 parameters.add(PartStat.DECLINED);
                 break;
             case CalendarObject.TENTATIVE:
-                parameters.add(PartStat.NEEDS_ACTION);
+                parameters.add(PartStat.TENTATIVE);
                 break;
             case CalendarObject.NONE:
             default:
