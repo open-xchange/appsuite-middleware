@@ -116,6 +116,7 @@ public class TelnetChannel implements Channel {
 
 	@Override
 	public void send(Stanza stanza, ServerSession session) throws OXException {
+		// Breakpoint
 		ID recipient = stanza.getTo();
 		String namespace = stanza.getNamespace();
 		for (TelnetChatPlugin writer : plugins) {

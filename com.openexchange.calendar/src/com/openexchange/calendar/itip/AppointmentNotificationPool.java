@@ -174,8 +174,8 @@ public class AppointmentNotificationPool implements
 			if (handlingSuggestion == HandlingSuggestion.DONE) {
 				drop(contextId, objectID);
 			}
-		} catch (OXException e) {
-			LOG.error(e.getMessage(), e);
+		} catch (Throwable t) {
+			LOG.error(t.getMessage(), t);
 			drop(contextId, objectID);
 		}
 	}
