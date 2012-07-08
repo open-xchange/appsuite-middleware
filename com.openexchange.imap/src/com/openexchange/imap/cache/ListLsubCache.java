@@ -133,7 +133,7 @@ public final class ListLsubCache {
 
     private static final boolean DO_STATUS = false;
 
-    private static final boolean DO_GETACL = true;
+    private static final boolean DO_GETACL = false;
 
     private static final ConcurrentMap<Key, ConcurrentMap<Integer, Future<ListLsubCollection>>> MAP = new ConcurrentHashMap<Key, ConcurrentMap<Integer, Future<ListLsubCollection>>>();
 
@@ -331,6 +331,30 @@ public final class ListLsubCache {
                 collection.update(fullName, imapFolder, DO_STATUS, DO_GETACL);
                 entry = collection.getList(fullName);
                 return null == entry ? ListLsubCollection.emptyEntryFor(fullName) : entry;
+            }
+        } catch (final MessagingException e) {
+            throw MimeMailException.handleMessagingException(e);
+        }
+    }
+
+    /**
+     * Initializes ACL list
+     * 
+     * @param accountId The account identifier
+     * @param imapStore The IMAP store
+     * @param session The session
+     * @throws OXException If initialization fails
+     */
+    public static void initACLs(final int accountId, final AccessedIMAPStore imapStore, final Session session) throws OXException {
+        if (DO_GETACL) {
+            // Already perform during initialization
+            return;
+        }
+        try {
+            final IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder(INBOX);
+            final ListLsubCollection collection = getCollection(accountId, imapFolder, session);
+            synchronized (collection) {
+                collection.initACLs(imapFolder);
             }
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
