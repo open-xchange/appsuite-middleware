@@ -58,4 +58,16 @@ public class IQ extends Stanza {
 	public static enum Type {
 		get, set, result, error
 	}
+	
+	private Type type;
+
+	public Type getType() {
+		return type;
+	}
+
+	public void setType(Type type) {
+		this.type = type;
+	}
+	
+	
 }

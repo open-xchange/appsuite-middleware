@@ -2,20 +2,24 @@ package com.openexchange.realtime.osgi;
 
 import org.osgi.framework.ServiceReference;
 
+import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.MessageDispatcher;
 import com.openexchange.realtime.impl.MessageDispatcherImpl;
+import com.openexchange.realtime.packet.Payload;
 
 public class RTActivator extends HousekeepingActivator {
 	@Override
 	protected Class<?>[] getNeededServices() {
-		return null;
+		return new Class[]{SimpleConverter.class};
 	}
 
 	@Override
 	protected void startBundle() throws Exception {
+		Payload.services = this;
+		
 		final MessageDispatcherImpl dispatcher = new MessageDispatcherImpl();
 		
 		registerService(MessageDispatcher.class, dispatcher);
@@ -30,6 +34,8 @@ public class RTActivator extends HousekeepingActivator {
 				dispatcher.removeChannel(service);
 			}
 		});
+		
+		openTrackers();
 	}
 
 
