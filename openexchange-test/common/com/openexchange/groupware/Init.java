@@ -152,6 +152,7 @@ import com.openexchange.resource.internal.ResourceServiceImpl;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.I18nServices;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.SessiondInit;
 import com.openexchange.sessiond.impl.SessiondServiceImpl;
@@ -651,6 +652,7 @@ public final class Init {
             imapServiceRegistry.addService(UnifiedInboxManagement.class, services.get(UnifiedInboxManagement.class));
             imapServiceRegistry.addService(ThreadPoolService.class, services.get(ThreadPoolService.class));
             imapServiceRegistry.addService(TimerService.class, services.get(TimerService.class));
+            imapServiceRegistry.addService(DatabaseService.class, services.get(DatabaseService.class));
             IMAPStoreCache.initInstance();
             /*
              * Register IMAP bundle
