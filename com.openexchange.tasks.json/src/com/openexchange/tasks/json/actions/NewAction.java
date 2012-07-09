@@ -52,6 +52,7 @@ package com.openexchange.tasks.json.actions;
 import java.util.Date;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.TaskFields;
 import com.openexchange.ajax.parser.TaskParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -106,7 +107,7 @@ public class NewAction extends TaskAction {
         final Date timestamp = task.getLastModified();
 
         final JSONObject jsonResponseObject = new JSONObject();
-        jsonResponseObject.put(TaskFields.ID, task.getObjectID());
+        jsonResponseObject.put(DataFields.ID, task.getObjectID());
 
         return new AJAXRequestResult(jsonResponseObject, timestamp, "json");
     }

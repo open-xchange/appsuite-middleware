@@ -71,7 +71,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.preview.PreviewExceptionCodes;
 import com.openexchange.session.Session;
-import com.openexchange.threadpool.AbstractTask;
 
 /**
  * {@link TransformationObservationTask}

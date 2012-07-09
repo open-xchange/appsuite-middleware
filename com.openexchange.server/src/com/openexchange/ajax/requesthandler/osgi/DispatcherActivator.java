@@ -60,6 +60,7 @@ import com.openexchange.ajax.requesthandler.AJAXActionCustomizerFactory;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXResultDecoratorRegistry;
+import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.DefaultConverter;
 import com.openexchange.ajax.requesthandler.DefaultDispatcher;
 import com.openexchange.ajax.requesthandler.Dispatcher;
@@ -112,6 +113,8 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
          * Specify default converters
          */
         final DefaultConverter defaultConverter = new DefaultConverter();
+        registerService(Converter.class, defaultConverter);
+        
         defaultConverter.addConverter(new DebugConverter());
         /*
          * Add basic converters

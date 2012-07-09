@@ -206,6 +206,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         if (null != krbSubject) {
             Subject.doAs(krbSubject, new PrivilegedExceptionAction<Object>() {
 
+                @Override
                 public Object run() throws Exception {
                     sieveHandler.initializeConnection();
                     return null;

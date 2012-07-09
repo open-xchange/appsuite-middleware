@@ -50,6 +50,7 @@
 package com.openexchange.subscribe.crawler.internal;
 
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.DataObject;
 
 /**
  * {@link ContactSanitizer}
@@ -63,7 +64,7 @@ public class ContactSanitizer {
      */
     public void sanitize(final Contact contact) {
         for (final int field : Contact.ALL_COLUMNS) {
-            if (field == Contact.LAST_MODIFIED_UTC) {
+            if (field == DataObject.LAST_MODIFIED_UTC) {
                 continue;
             }
             if (contact.contains(field)) {

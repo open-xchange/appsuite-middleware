@@ -1,6 +1,5 @@
 package me.prettyprint.cassandra.service;
 
-import java.net.SocketTimeoutException;
 import java.util.NoSuchElementException;
 
 import me.prettyprint.hector.api.exceptions.HCassandraInternalException;

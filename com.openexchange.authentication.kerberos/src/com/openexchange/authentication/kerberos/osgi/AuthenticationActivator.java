@@ -68,7 +68,7 @@ import com.openexchange.user.UserService;
  */
 public class AuthenticationActivator implements BundleActivator {
 
-    private Stack<ServiceTracker<?, ?>> trackers = new Stack<ServiceTracker<?, ?>>();
+    private final Stack<ServiceTracker<?, ?>> trackers = new Stack<ServiceTracker<?, ?>>();
 
     public AuthenticationActivator() {
         super();

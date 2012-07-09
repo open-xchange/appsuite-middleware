@@ -268,7 +268,7 @@ public class IMAPDefaultFolderChecker {
                                 try {
                                     IMAPCommandsCollection.createFolder(tmp, sep, FOLDER_TYPE);
                                 } catch (final MessagingException e) {
-                                    IMAPCommandsCollection.createFolder(tmp, sep, IMAPFolder.HOLDS_MESSAGES);
+                                    IMAPCommandsCollection.createFolder(tmp, sep, Folder.HOLDS_MESSAGES);
                                 }
                                 ListLsubCache.addSingle(INBOX, accountId, tmp, session);
                                 inboxFolder = (IMAPFolder) imapStore.getFolder(INBOX);
@@ -295,7 +295,7 @@ public class IMAPDefaultFolderChecker {
                         final int type;
                         final boolean mboxEnabled = MBoxEnabledCache.isMBoxEnabled(imapConfig, inboxFolder, prefix);
                         if (mboxEnabled) {
-                            type = IMAPFolder.HOLDS_MESSAGES;
+                            type = Folder.HOLDS_MESSAGES;
                         } else {
                             type = FOLDER_TYPE;
                         }

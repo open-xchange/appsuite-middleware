@@ -56,6 +56,7 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -109,7 +110,7 @@ public final class EditAction extends AbstractMailAction {
              */
             String msgIdentifier = null;
             {
-                final JSONObject jsonMailObj = new JSONObject(uploadEvent.getFormField(Mail.UPLOAD_FORMFIELD_MAIL));
+                final JSONObject jsonMailObj = new JSONObject(uploadEvent.getFormField(AJAXServlet.UPLOAD_FORMFIELD_MAIL));
                 //final ServerSession session = (ServerSession) uploadEvent.getParameter(UPLOAD_PARAM_SESSION);
                 /*
                  * Resolve "From" to proper mail account

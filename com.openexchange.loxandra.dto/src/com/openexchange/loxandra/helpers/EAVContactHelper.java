@@ -51,7 +51,9 @@ package com.openexchange.loxandra.helpers;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.DataObject;
 
 /**
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
@@ -63,10 +65,10 @@ public class EAVContactHelper {
 	static {
 		nonStringFields.put(Contact.ANNIVERSARY, "date");
 		nonStringFields.put(Contact.BIRTHDAY, "date");
-		nonStringFields.put(Contact.CREATION_DATE, "date");
-		nonStringFields.put(Contact.LAST_MODIFIED, "date");
+		nonStringFields.put(DataObject.CREATION_DATE, "date");
+		nonStringFields.put(DataObject.LAST_MODIFIED, "date");
 		nonStringFields.put(Contact.IMAGE_LAST_MODIFIED, "date");
-		nonStringFields.put(Contact.LAST_MODIFIED_OF_NEWEST_ATTACHMENT, "date");
+		nonStringFields.put(CommonObject.LAST_MODIFIED_OF_NEWEST_ATTACHMENT, "date");
 	}
 	
 	public static boolean isNonString(final int column) {

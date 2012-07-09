@@ -82,7 +82,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.regex.Pattern;
 import javax.mail.FetchProfile;
 import javax.mail.FetchProfile.Item;
 import javax.mail.Flags;
@@ -810,8 +809,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 //        return super.getAttachmentLong(fullName, msgUID, sectionId);
 //    }
 
-    private static final Pattern FILENAME_PATTERN = Pattern.compile("[0-9a-z&&[^.\\s>\"]]+\\.[0-9a-z&&[^.\\s>\"]]+");
-
     @Override
     public MailPart getImageAttachmentLong(final String fullName, final long msgUID, final String contentId) throws OXException {
         if (msgUID < 0 || null == contentId) {
@@ -829,9 +826,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             Part p = examinePart(msg, contentId);
             if (null == p) {
                 // Retry...
-                final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(8192);
+                ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(8192);
                 msg.writeTo(out);
                 final MimeMessage tmp = new MimeMessage(MimeDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(out.toByteArray()));
+                out = null;
                 p = examinePart(tmp, contentId);
                 if (null == p) {
                     throw MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND.create(contentId, Long.valueOf(msgUID), fullName);

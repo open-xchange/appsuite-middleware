@@ -55,10 +55,7 @@ import java.util.HashSet;
 import java.util.Set;
 import org.glassfish.grizzly.http.HttpRequestPacket;
 import org.glassfish.grizzly.http.util.Header;
-import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import com.openexchange.http.grizzly.filters.backendroute.ClientCookieInspector;
 

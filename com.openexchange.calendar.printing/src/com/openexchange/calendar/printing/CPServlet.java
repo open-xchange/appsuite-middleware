@@ -78,6 +78,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.DataObject;
+import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
@@ -175,10 +178,10 @@ public class CPServlet extends PermissionServlet {
             SearchIterator<Appointment> iterator;
             if (params.hasFolder()) {
                 iterator = appointmentSql.getAppointmentsBetweenInFolder(params.getFolder(), new int[] {
-                    Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.USERS }, params.getStart(), params.getEnd(), -1, null);
+                    DataObject.OBJECT_ID, FolderChildObject.FOLDER_ID, CalendarObject.USERS }, params.getStart(), params.getEnd(), -1, null);
             } else {
                 iterator = appointmentSql.getAppointmentsBetween(session.getUserId(), params.getStart(), params.getEnd(), new int[] {
-                    Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.USERS }, -1, null);
+                    DataObject.OBJECT_ID, FolderChildObject.FOLDER_ID, CalendarObject.USERS }, -1, null);
             }
             final List<Appointment> idList = SearchIteratorAdapter.toList(iterator);
 

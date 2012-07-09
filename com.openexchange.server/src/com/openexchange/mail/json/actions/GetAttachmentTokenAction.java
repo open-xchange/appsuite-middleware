@@ -51,6 +51,7 @@ package com.openexchange.mail.json.actions;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
@@ -61,6 +62,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.attachment.AttachmentToken;
+import com.openexchange.mail.attachment.AttachmentTokenConstants;
 import com.openexchange.mail.attachment.AttachmentTokenRegistry;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.json.MailRequest;
@@ -98,8 +100,8 @@ public final class GetAttachmentTokenAction extends AbstractMailAction {
             /*
              * Read in parameters
              */
-            final String folderPath = req.checkParameter(Mail.PARAMETER_FOLDERID);
-            final String uid = req.checkParameter(Mail.PARAMETER_ID);
+            final String folderPath = req.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
+            final String uid = req.checkParameter(AJAXServlet.PARAMETER_ID);
             final String sequenceId = req.getParameter(Mail.PARAMETER_MAILATTCHMENT);
             final String imageContentId = req.getParameter(Mail.PARAMETER_MAILCID);
             /*
@@ -144,7 +146,7 @@ public final class GetAttachmentTokenAction extends AbstractMailAction {
             if (mailPart == null) {
                 throw MailExceptionCode.NO_ATTACHMENT_FOUND.create(sequenceId);
             }
-            final AttachmentToken token = new AttachmentToken(ttlMillis <= 0 ? AttachmentToken.DEFAULT_TIMEOUT : ttlMillis);
+            final AttachmentToken token = new AttachmentToken(ttlMillis <= 0 ? AttachmentTokenConstants.DEFAULT_TIMEOUT : ttlMillis);
             token.setAccessInfo(mailInterface.getAccountID(), session);
             token.setAttachmentInfo(folderPath, uid, sequenceId);
             AttachmentTokenRegistry.getInstance().putToken(token.setOneTime(oneTime).setCheckIp(checkIp), session);

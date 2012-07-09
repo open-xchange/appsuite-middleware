@@ -161,8 +161,8 @@ public class WebdavPropfindAction extends AbstractAction {
 			marshaller = new PropfindResponseMarshaller(req.getURLPrefix(), req.getCharset());
 			loadingHints.setProps(LoadingHints.Property.SOME);
 
-			for(final Element props : (List<Element>) requestBody.getRootElement().getChildren("prop", DAV_NS)){
-				for(final Element requested : (List<Element>) props.getChildren()) {
+			for(final Element props : requestBody.getRootElement().getChildren("prop", DAV_NS)){
+				for(final Element requested : props.getChildren()) {
 					((PropfindResponseMarshaller) marshaller).addProperty(requested.getNamespaceURI(), requested.getName());
 					loadingHints.addProperty(requested.getNamespaceURI(), requested.getName());
 				}

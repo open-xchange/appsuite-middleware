@@ -13,6 +13,8 @@ com.openexchange.axis2/lib/*.jar
 com.openexchange.axis2/tmp/*
 com.openexchange.common/jars
 build/build
+build/
+build
 build/tmp
 com.openexchange.global/jars
 com.openexchange.config.cascade/jars
@@ -112,6 +114,7 @@ com.openexchange.subscribe.json/jars
 com.openexchange.subscribe.microformats/jars
 com.openexchange.subscribe.msn/jars
 com.openexchange.templating.json/jars
+openexchange-test/conf/test.properties
 com.openexchange.templating/jars
 com.openexchange.templating/tmp
 com.openexchange.twitter/jars
@@ -209,3 +212,5 @@ com.openexchange.spamhandler.spamassassin/jars/
 com.openexchange.spamsettings.generic/jars/
 com.openexchange.xerces.ibm/jars/
 com.openexchange.xmpp/jars/
+openexchange-test/local
+openexchange-test/local/test.properties

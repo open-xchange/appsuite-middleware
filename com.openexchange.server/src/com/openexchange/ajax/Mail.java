@@ -146,6 +146,7 @@ import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailMessageStorageExt;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.attachment.AttachmentToken;
+import com.openexchange.mail.attachment.AttachmentTokenConstants;
 import com.openexchange.mail.attachment.AttachmentTokenRegistry;
 import com.openexchange.mail.cache.MailMessageCache;
 import com.openexchange.mail.config.MailProperties;
@@ -1817,8 +1818,8 @@ public class Mail extends PermissionServlet implements UploadListener {
                 for (int i = 0; i < insertedObjs.length; i++) {
                     final CommonObject current = insertedObjs[i];
                     jo.reset();
-                    jo.put(CommonFields.ID, current.getObjectID());
-                    jo.put(CommonFields.FOLDER_ID, current.getParentFolderID());
+                    jo.put(DataFields.ID, current.getObjectID());
+                    jo.put(FolderChildFields.FOLDER_ID, current.getParentFolderID());
                     jsonWriter.value(jo);
                 }
             } finally {
@@ -2073,7 +2074,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 if (mailPart == null) {
                     throw MailExceptionCode.NO_ATTACHMENT_FOUND.create(sequenceId);
                 }
-                final AttachmentToken token = new AttachmentToken(ttlMillis <= 0 ? AttachmentToken.DEFAULT_TIMEOUT : ttlMillis);
+                final AttachmentToken token = new AttachmentToken(ttlMillis <= 0 ? AttachmentTokenConstants.DEFAULT_TIMEOUT : ttlMillis);
                 token.setAccessInfo(mailInterface.getAccountID(), session);
                 token.setAttachmentInfo(folderPath, uid, sequenceId);
                 AttachmentTokenRegistry.getInstance().putToken(token.setOneTime(true), session);
@@ -3380,7 +3381,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         try {
             final String sourceFolder = paramContainer.checkStringParam(PARAMETER_FOLDERID);
             final JSONObject bodyObj = new JSONObject(body);
-            final String destFolder = bodyObj.hasAndNotNull(FolderFields.FOLDER_ID) ? bodyObj.getString(FolderFields.FOLDER_ID) : null;
+            final String destFolder = bodyObj.hasAndNotNull(FolderChildFields.FOLDER_ID) ? bodyObj.getString(FolderChildFields.FOLDER_ID) : null;
             final Integer colorLabel =
                 bodyObj.hasAndNotNull(CommonFields.COLORLABEL) ? Integer.valueOf(bodyObj.getInt(CommonFields.COLORLABEL)) : null;
             final Integer flagBits =
@@ -4226,7 +4227,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         try {
             final String uid = paramContainer.checkStringParam(PARAMETER_ID);
             final String sourceFolder = paramContainer.checkStringParam(PARAMETER_FOLDERID);
-            final String destFolder = new JSONObject(body).getString(FolderFields.FOLDER_ID);
+            final String destFolder = new JSONObject(body).getString(FolderChildFields.FOLDER_ID);
             MailServletInterface mailInterface = mailInterfaceArg;
             boolean closeMailInterface = false;
             try {

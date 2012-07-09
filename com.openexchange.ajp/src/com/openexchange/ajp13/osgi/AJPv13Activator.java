@@ -237,7 +237,7 @@ public final class AJPv13Activator extends HousekeepingActivator {
 
         @Override
         public void stop() throws OXException {
-            com.openexchange.ajp13.najp.AJPv13ServerImpl.stopAJPServer();
+            AJPv13Server.stopAJPServer();
             AJPv13Config.getInstance().stop();
             AJPv13Server.releaseInstrance();
         }

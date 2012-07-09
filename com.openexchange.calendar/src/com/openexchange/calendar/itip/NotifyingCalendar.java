@@ -251,6 +251,11 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
     }
 
     @Override
+    public SearchIterator<Appointment> getAppointmentsBetween(Date start, Date end, int cols[], int orderBy, Order order) throws OXException, SQLException {
+        return delegate.getAppointmentsBetween(start, end, cols, orderBy, order);
+    }
+
+    @Override
     public SearchIterator<Appointment> getAppointmentsBetweenInFolder(final int folderId, final int[] cols, final Date start, final Date end, final int from, final int to, final int orderBy, final Order orderDir) throws OXException, SQLException {
         return delegate.getAppointmentsBetweenInFolder(folderId, cols, start, end, from, to, orderBy, orderDir);
     }

@@ -60,6 +60,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.openexchange.ajax.fields.AppointmentFields;
+import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.calendar.AppointmentDiff;
 import com.openexchange.calendar.AppointmentDiff.FieldUpdate;
 import com.openexchange.calendar.api.CalendarCollection;
@@ -76,6 +77,7 @@ import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.Change;
 import com.openexchange.groupware.container.ConfirmationChange;
 import com.openexchange.groupware.container.Difference;
@@ -396,7 +398,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
 
         final Appointment reply = new Appointment();
         for (final int field : Appointment.ALL_COLUMNS) {
-            if (field == Appointment.USERS || field == Appointment.PARTICIPANTS || field == Appointment.CONFIRMATIONS) {
+            if (field == CalendarObject.USERS || field == CalendarObject.PARTICIPANTS || field == CalendarObject.CONFIRMATIONS) {
                 continue;
             }
             if (appointment.contains(field)) {
@@ -442,7 +444,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         message.setMethod(ITipMethod.REFRESH);
 
         final Appointment address = appointment.clone();
-        for (final int field : new int[] { Appointment.USERS, Appointment.CONFIRMATIONS, Appointment.PARTICIPANTS, Appointment.NOTE, Appointment.LOCATION }) {
+        for (final int field : new int[] { CalendarObject.USERS, CalendarObject.CONFIRMATIONS, CalendarObject.PARTICIPANTS, CalendarObject.NOTE, Appointment.LOCATION }) {
             address.remove(field);
         }
 
@@ -930,6 +932,8 @@ public class NotificationMailGenerator implements ITipMailGenerator {
             if (participant.hasRole(ITipRole.ORGANIZER)) {
             	if (isCounterableOnly()) {
                     return counter(counter(participant), ITipRole.ORGANIZER);
+            	} else if (ignorableChangedOnly()) {
+            	    return null;
             	} else {
                     return counter(counterNoITIP(participant, Type.MODIFIED), ITipRole.ORGANIZER);
             	}
@@ -945,8 +949,16 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         		return false;
         	}
         	
-        	return diff.onlyTheseChanged(AppointmentFields.START_DATE,  AppointmentFields.END_DATE,  AppointmentFields.LOCATION,  AppointmentFields.TITLE, AppointmentFields.PARTICIPANTS, AppointmentFields.USERS, AppointmentFields.CONFIRMATIONS);
+        	return diff.anyFieldChangedOf(CalendarFields.START_DATE,  CalendarFields.END_DATE,  AppointmentFields.LOCATION,  CalendarFields.TITLE, CalendarFields.PARTICIPANTS, CalendarFields.USERS, CalendarFields.CONFIRMATIONS);
 		}
+        
+        protected boolean ignorableChangedOnly() {
+            if (diff == null) {
+                return true;
+            }
+            
+            return diff.onlyTheseChanged(AppointmentFields.SHOW_AS);
+        }
 
 		protected boolean onlyMyStateChanged() {
             if (stateChanged != null) {
@@ -1062,6 +1074,8 @@ public class NotificationMailGenerator implements ITipMailGenerator {
                 if (participant.hasRole(ITipRole.ORGANIZER)) {
                 	if (isCounterableOnly()) {
                         return update(counter(participant));
+                	} else if (ignorableChangedOnly()) {
+                	    return null;
                 	} else {
                         return update(noITIP(participant, Type.MODIFIED));
                 	}

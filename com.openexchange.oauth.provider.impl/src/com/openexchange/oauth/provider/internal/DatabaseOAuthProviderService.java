@@ -204,7 +204,7 @@ public class DatabaseOAuthProviderService extends AbstractOAuthProviderService i
         if (loadAccessors) {
             final TIntList contextIds = getContextIds(databaseService);
             final ConcurrentMap<OAuthAccessor, Object> tokens = this.tokens;
-            final Object present = DatabaseOAuthProviderService.PRESENT;
+            final Object present = AbstractOAuthProviderService.PRESENT;
             final Runnable loader = new Runnable() {
 
                 @Override

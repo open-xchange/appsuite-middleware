@@ -68,11 +68,15 @@ import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.DistributionListFields;
+import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.datasource.ContactImageDataSource;
 import com.openexchange.groupware.contact.helpers.ContactField;
+import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.DistributionListEntryObject;
+import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.LinkEntryObject;
 import com.openexchange.groupware.tools.mappings.json.ArrayMapping;
 import com.openexchange.groupware.tools.mappings.json.BooleanMapping;
@@ -155,7 +159,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             	// also query IMAGE_LAST_MODIFIED, since old implementation didn't reset NUMBER_OF_IMAGES on image removal, so that 
             	// there may be contacts with NUMBER_OF_IMAGES = 1, but actually without image data.
             	fields.add(ContactField.IMAGE_LAST_MODIFIED);
-            } else if (Contact.LAST_MODIFIED_UTC == columnID) {
+            } else if (DataObject.LAST_MODIFIED_UTC == columnID) {
             	// query LAST_MODIFIED to set last modified utc afterwards
             	fields.add(ContactField.LAST_MODIFIED);
             } else {
@@ -1762,7 +1766,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.CATEGORIES, new StringMapping<Contact>(ContactFields.CATEGORIES, 100) {
+        mappings.put(ContactField.CATEGORIES, new StringMapping<Contact>(CommonFields.CATEGORIES, 100) {
 
             @Override
             public void set(Contact contact, String value) { 
@@ -2245,7 +2249,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.OBJECT_ID, new IntegerMapping<Contact>(DataFields.ID, Contact.OBJECT_ID) {
+        mappings.put(ContactField.OBJECT_ID, new IntegerMapping<Contact>(DataFields.ID, DataObject.OBJECT_ID) {
 
             @Override
             public void set(Contact contact, Integer value) { 
@@ -2350,20 +2354,20 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
                 //FIXME: ui sends wrong values for "id": ===========> Bug #21894
                 // "distribution_list":[{"id":"","mail_field":0,"mail":"otto@example.com","display_name":"otto"},
                 //                      {"id":1,"mail_field":1,"mail":"horst@example.com","display_name":"horst"}]
-                if (entry.hasAndNotNull(DistributionListFields.ID) && 0 < entry.getString(DistributionListFields.ID).length()) {
-                	member.setEntryID(entry.getInt(DistributionListFields.ID));
+                if (entry.hasAndNotNull(DataFields.ID) && 0 < entry.getString(DataFields.ID).length()) {
+                	member.setEntryID(entry.getInt(DataFields.ID));
                 }
-                if (entry.hasAndNotNull(DistributionListFields.FOLDER_ID)) {
-                	member.setFolderID(entry.getInt(DistributionListFields.FOLDER_ID));
+                if (entry.hasAndNotNull(FolderChildFields.FOLDER_ID)) {
+                	member.setFolderID(entry.getInt(FolderChildFields.FOLDER_ID));
                 }
-                if (entry.hasAndNotNull(DistributionListFields.FIRST_NAME)) {
-                	member.setFirstname(entry.getString(DistributionListFields.FIRST_NAME));
+                if (entry.hasAndNotNull(ContactFields.FIRST_NAME)) {
+                	member.setFirstname(entry.getString(ContactFields.FIRST_NAME));
                 }
-                if (entry.hasAndNotNull(DistributionListFields.LAST_NAME)) {
-                	member.setFirstname(entry.getString(DistributionListFields.LAST_NAME));
+                if (entry.hasAndNotNull(ContactFields.LAST_NAME)) {
+                	member.setFirstname(entry.getString(ContactFields.LAST_NAME));
                 }
-                if (entry.hasAndNotNull(DistributionListFields.DISPLAY_NAME)) {
-                	member.setDisplayname(entry.getString(DistributionListFields.DISPLAY_NAME));
+                if (entry.hasAndNotNull(ContactFields.DISPLAY_NAME)) {
+                	member.setDisplayname(entry.getString(ContactFields.DISPLAY_NAME));
                 }
                 if (entry.hasAndNotNull(DistributionListFields.MAIL)) {
                 	member.setEmailaddress(entry.getString(DistributionListFields.MAIL));
@@ -2384,11 +2388,11 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 			            JSONObject entry = new JSONObject();
 			            int emailField = distributionList[i].getEmailfield();
 			            if (DistributionListEntryObject.INDEPENDENT != emailField) {
-			                entry.put(DistributionListFields.ID, distributionList[i].getEntryID());
-			                entry.put(DistributionListFields.FOLDER_ID, distributionList[i].getFolderID());
+			                entry.put(DataFields.ID, distributionList[i].getEntryID());
+			                entry.put(FolderChildFields.FOLDER_ID, distributionList[i].getFolderID());
 			            }
 			            entry.put(DistributionListFields.MAIL, distributionList[i].getEmailaddress());
-			            entry.put(DistributionListFields.DISPLAY_NAME, distributionList[i].getDisplayname());
+			            entry.put(ContactFields.DISPLAY_NAME, distributionList[i].getDisplayname());
 			            entry.put(DistributionListFields.MAIL_FIELD, emailField);
 			            jsonArray.put(entry);
 			        }
@@ -2434,7 +2438,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 			}
         });
 
-        mappings.put(ContactField.FOLDER_ID, new IntegerMapping<Contact>(ContactFields.FOLDER_ID, Contact.FOLDER_ID) {
+        mappings.put(ContactField.FOLDER_ID, new IntegerMapping<Contact>(FolderChildFields.FOLDER_ID, FolderChildObject.FOLDER_ID) {
 
             @Override
             public void set(Contact contact, Integer value) { 
@@ -2480,7 +2484,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 //            }
 //        });
 
-        mappings.put(ContactField.PRIVATE_FLAG, new BooleanMapping<Contact>(ContactFields.PRIVATE_FLAG, Contact.PRIVATE_FLAG) {
+        mappings.put(ContactField.PRIVATE_FLAG, new BooleanMapping<Contact>(CommonFields.PRIVATE_FLAG, CommonObject.PRIVATE_FLAG) {
 
             @Override
             public void set(Contact contact, Boolean value) { 
@@ -2503,7 +2507,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
         
-        mappings.put(ContactField.CREATED_BY, new IntegerMapping<Contact>(ContactFields.CREATED_BY, 2) {
+        mappings.put(ContactField.CREATED_BY, new IntegerMapping<Contact>(DataFields.CREATED_BY, 2) {
 
             @Override
             public void set(Contact contact, Integer value) { 
@@ -2526,7 +2530,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.MODIFIED_BY, new IntegerMapping<Contact>(ContactFields.MODIFIED_BY, 3) {
+        mappings.put(ContactField.MODIFIED_BY, new IntegerMapping<Contact>(DataFields.MODIFIED_BY, 3) {
 
             @Override
             public void set(Contact contact, Integer value) { 
@@ -2549,7 +2553,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.CREATION_DATE, new TimeMapping<Contact>(ContactFields.CREATION_DATE, 4) {
+        mappings.put(ContactField.CREATION_DATE, new TimeMapping<Contact>(DataFields.CREATION_DATE, 4) {
 
             @Override
             public void set(Contact contact, Date value) { 
@@ -2572,7 +2576,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.LAST_MODIFIED, new TimeMapping<Contact>(ContactFields.LAST_MODIFIED, Contact.LAST_MODIFIED) {
+        mappings.put(ContactField.LAST_MODIFIED, new TimeMapping<Contact>(DataFields.LAST_MODIFIED, DataObject.LAST_MODIFIED) {
 
             @Override
             public void set(Contact contact, Date value) { 
@@ -3007,7 +3011,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.NUMBER_OF_ATTACHMENTS, new IntegerMapping<Contact>(ContactFields.NUMBER_OF_ATTACHMENTS, 104) {
+        mappings.put(ContactField.NUMBER_OF_ATTACHMENTS, new IntegerMapping<Contact>(CommonFields.NUMBER_OF_ATTACHMENTS, 104) {
 
             @Override
             public void set(Contact contact, Integer value) { 
@@ -3150,7 +3154,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.LAST_MODIFIED_OF_NEWEST_ATTACHMENT, new DateMapping<Contact>(ContactFields.LAST_MODIFIED_OF_NEWEST_ATTACHMENT_UTC, 105) {
+        mappings.put(ContactField.LAST_MODIFIED_OF_NEWEST_ATTACHMENT, new DateMapping<Contact>(CommonFields.LAST_MODIFIED_OF_NEWEST_ATTACHMENT_UTC, 105) {
 
             @Override
             public void set(Contact contact, Date value) { 
@@ -3196,7 +3200,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.LAST_MODIFIED_UTC, new DateMapping<Contact>(ContactFields.LAST_MODIFIED_UTC, Contact.LAST_MODIFIED_UTC) {
+        mappings.put(ContactField.LAST_MODIFIED_UTC, new DateMapping<Contact>(DataFields.LAST_MODIFIED_UTC, DataObject.LAST_MODIFIED_UTC) {
 
 			@Override
 			public boolean isSet(Contact contact) {
@@ -3288,7 +3292,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.UID, new StringMapping<Contact>(ContactFields.UID, Contact.UID) {
+        mappings.put(ContactField.UID, new StringMapping<Contact>(CommonFields.UID, CommonObject.UID) {
 
             @Override
             public void set(Contact contact, String value) { 

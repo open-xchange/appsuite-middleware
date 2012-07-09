@@ -69,6 +69,7 @@ public class Activator extends HousekeepingActivator {
         final Log log = com.openexchange.log.Log.loggerFor(Activator.class);
         try {
             track(UserCopyService.class, new RMIUserCopyRegisterer(context));
+            openTrackers();
             log.info("Started bundle: com.openexchange.admin.user.copy");
         } catch (final Exception e) {
             log.error("Error starting bundle: com.openexchange.admin.user.copy", e);
@@ -91,6 +92,6 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return null;
+        return new Class<?>[0];
     }
 }

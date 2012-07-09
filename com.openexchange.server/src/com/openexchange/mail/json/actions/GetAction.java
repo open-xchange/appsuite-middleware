@@ -61,6 +61,7 @@ import javax.mail.internet.MimeMessage;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -140,8 +141,8 @@ public final class GetAction extends AbstractMailAction {
             }
             for (int i = 0; i < length; i++) {
                 final JSONObject folderAndID = paths.getJSONObject(i);
-                requestData.putParameter(Mail.PARAMETER_FOLDERID, folderAndID.getString(Mail.PARAMETER_FOLDERID));
-                requestData.putParameter(Mail.PARAMETER_ID, folderAndID.get(Mail.PARAMETER_ID).toString());
+                requestData.putParameter(AJAXServlet.PARAMETER_FOLDERID, folderAndID.getString(AJAXServlet.PARAMETER_FOLDERID));
+                requestData.putParameter(AJAXServlet.PARAMETER_ID, folderAndID.get(AJAXServlet.PARAMETER_ID).toString());
             }
             /*
              * ... and fake a GET request
@@ -160,7 +161,7 @@ public final class GetAction extends AbstractMailAction {
             /*
              * Read in parameters
              */
-            final String folderPath = req.checkParameter(Mail.PARAMETER_FOLDERID);
+            final String folderPath = req.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
             // final String uid = paramContainer.checkStringParam(PARAMETER_ID);
             String tmp = req.getParameter(Mail.PARAMETER_SHOW_SRC);
             final boolean showMessageSource = ("1".equals(tmp) || Boolean.parseBoolean(tmp));
@@ -208,11 +209,11 @@ public final class GetAction extends AbstractMailAction {
              */
             final String uid;
             {
-                String tmp2 = req.getParameter(Mail.PARAMETER_ID);
+                String tmp2 = req.getParameter(AJAXServlet.PARAMETER_ID);
                 if (null == tmp2) {
                     tmp2 = req.getParameter(Mail.PARAMETER_MESSAGE_ID);
                     if (null == tmp2) {
-                        throw AjaxExceptionCodes.MISSING_PARAMETER.create(Mail.PARAMETER_ID);
+                        throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_ID);
                     }
                     uid = mailInterface.getMailIDByMessageID(folderPath, tmp2);
                 } else {

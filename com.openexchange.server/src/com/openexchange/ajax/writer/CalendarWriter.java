@@ -57,8 +57,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONWriter;
 import com.openexchange.ajax.fields.CalendarFields;
+import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.ParticipantsFields;
 import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.container.participants.ConfirmableParticipant;
@@ -269,7 +271,7 @@ public abstract class CalendarWriter extends CommonWriter {
         }
         @Override
         public void write(final CalendarObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
-            writeParameter(CalendarFields.UID, obj.getUid(), json, obj.containsUid());
+            writeParameter(CommonFields.UID, obj.getUid(), json, obj.containsUid());
         }
     };
 
@@ -321,7 +323,7 @@ public abstract class CalendarWriter extends CommonWriter {
         final TIntObjectHashMap<FieldWriter<CalendarObject>> m = new TIntObjectHashMap<FieldWriter<CalendarObject>>(1, 1);
         m.put(CalendarObject.CONFIRMATIONS, CONFIRMATIONS_WRITER);
         m.put(CalendarObject.ORGANIZER, ORGANIZER_WRITER);
-        m.put(CalendarObject.UID, UID_WRITER);
+        m.put(CommonObject.UID, UID_WRITER);
         m.put(CalendarObject.SEQUENCE, SEQUENCE_WRITER);
         m.put(CalendarObject.ORGANIZER_ID, ORGANIZER_ID_WRITER);
         m.put(CalendarObject.PRINCIPAL, PRINCIPAL_WRITER);

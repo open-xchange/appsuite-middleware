@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.mime.processing;
 
+import static com.openexchange.mail.mime.filler.MimeMessageFiller.setReplyHeaders;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.parseAddressList;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.unfold;
 import static java.util.regex.Matcher.quoteReplacement;
@@ -460,6 +461,9 @@ public final class MimeReply {
             replyMsg.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
             replyMsg.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(retvalContentType.toString()));
             replyMsg.saveChanges();
+            // Remove generated Message-Id for template message
+            replyMsg.removeHeader(MessageHeaders.HDR_MESSAGE_ID);
+            setReplyHeaders(originalMsg, replyMsg);
             replyMail = MimeMessageConverter.convertMessage(replyMsg);
             if (null != msgref) {
                 replyMail.setMsgref(msgref);

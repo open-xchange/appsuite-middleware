@@ -112,13 +112,13 @@ public class ICal4JITipParser extends ICal4JParser implements ITipParser {
             
             boolean microsoft = looksLikeMicrosoft(calendar);
             
-            Method method = (Method) calendar.getProperty(Method.METHOD);
+            Method method = (Method) calendar.getProperty(Property.METHOD);
             ITipMethod methodValue = (method == null) ? ITipMethod.NO_METHOD : ITipMethod.get(method.getValue());
             
             List<AttributeConverter<VEvent, Appointment>> converters = AppointmentConverters.getConverters(methodValue);
 
             int i = 0;
-            for (Object componentObj : calendar.getComponents(VEvent.VEVENT)) {
+            for (Object componentObj : calendar.getComponents(Component.VEVENT)) {
                 Component vevent = (Component) componentObj;
                 try {
                     CalendarDataObject appointment = convertAppointment(i++, (VEvent) vevent, defaultTZ, converters, ctx, warnings);
@@ -140,8 +140,8 @@ public class ICal4JITipParser extends ICal4JParser implements ITipParser {
                     } else {
                         message.setAppointment(appointment);
                     }
-                    if (vevent.getProperty(Comment.COMMENT) != null ) {
-                        message.setComment(vevent.getProperty(Comment.COMMENT).getValue());
+                    if (vevent.getProperty(Property.COMMENT) != null ) {
+                        message.setComment(vevent.getProperty(Property.COMMENT).getValue());
                     }
                     
                 } catch (ConversionError conversionError) {

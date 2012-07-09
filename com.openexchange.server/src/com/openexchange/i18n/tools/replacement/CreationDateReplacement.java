@@ -96,7 +96,7 @@ public final class CreationDateReplacement extends AbstractDateReplacement {
         if (d == null) {
             return d;
         }
-        final Calendar helper = GregorianCalendar.getInstance(ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class).getTimeZone("UTC"), Locale.ENGLISH);
+        final Calendar helper = Calendar.getInstance(ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class).getTimeZone("UTC"), Locale.ENGLISH);
         helper.setTime(d);
         helper.set(Calendar.SECOND, 0);
         helper.set(Calendar.MILLISECOND, 0);

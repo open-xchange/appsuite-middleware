@@ -269,7 +269,7 @@ public final class IMAPCommandsCollection {
                     Boolean retval = Boolean.TRUE;
                     boolean delete = false;
                     try {
-                        if ((type & IMAPFolder.HOLDS_MESSAGES) == 0) {
+                        if ((type & Folder.HOLDS_MESSAGES) == 0) {
                             // Only holds folders
                             final char separator = getSeparator(p);
                             p.create(fullName + separator);
@@ -281,7 +281,7 @@ public final class IMAPCommandsCollection {
                              * Some IMAP servers do not allow creation of folders that can contain messages AND subfolders. Verify that
                              * created folder may also contain subfolders.
                              */
-                            if ((type & IMAPFolder.HOLDS_FOLDERS) != 0) {
+                            if ((type & Folder.HOLDS_FOLDERS) != 0) {
                                 final ListInfo[] li = p.list("", fullName);
                                 if (li != null && !li[0].hasInferiors) {
                                     /*
@@ -304,7 +304,7 @@ public final class IMAPCommandsCollection {
                     if (DEBUG) {
                         LOG.debug("Either creation or deletion of temporary folder failed. Assume maildir folder format.", e);
                     }
-                    return Boolean.valueOf((((type & IMAPFolder.HOLDS_MESSAGES) > 0)) && ((type & IMAPFolder.HOLDS_FOLDERS) > 0));
+                    return Boolean.valueOf((((type & Folder.HOLDS_MESSAGES) > 0)) && ((type & Folder.HOLDS_FOLDERS) > 0));
                 }
             }
         }))).booleanValue();
@@ -1268,7 +1268,7 @@ public final class IMAPCommandsCollection {
                 final String fullName = newFolder.getFullName();
                 // Encode the mbox as per RFC2060
                 final String mbox;
-                if ((type & IMAPFolder.HOLDS_MESSAGES) == 0) {
+                if ((type & Folder.HOLDS_MESSAGES) == 0) {
                     // Only holds folders
                     mbox = prepareStringArgument(fullName + separator);
                 } else {
@@ -1283,7 +1283,7 @@ public final class IMAPCommandsCollection {
                     /*
                      * Certain IMAP servers do not allow creation of folders that can contain messages AND subfolders.
                      */
-                    if ((type & IMAPFolder.HOLDS_FOLDERS) != 0) {
+                    if ((type & Folder.HOLDS_FOLDERS) != 0) {
                         final ListInfo[] li = protocol.list("", fullName);
                         if (errorOnUnsupportedType && li != null && !li[0].hasInferiors) {
                             protocol.delete(fullName);

@@ -1,3 +1,11 @@
+* 2012-07-06 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22489: Dealing with failed auto-save
+
+* 2012-07-05 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22473: Fixed own rights for INBOX folder
+
 * 2012-07-04 - thorben.betten@open-xchange.com
 
  - Fix for bug 17693: Responding with a "try-again" error code if "json_0" multipart part is missing

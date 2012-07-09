@@ -19,6 +19,8 @@ package org.apache.tika.parser.txt;
 import java.io.ByteArrayInputStream;
 import java.io.StringWriter;
 
+import org.apache.tika.metadata.DublinCore;
+import org.apache.tika.metadata.HttpHeaders;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
@@ -47,11 +49,11 @@ public class TXTParserTest extends TestCase {
                 new ParseContext());
         String content = writer.toString();
 
-        assertEquals("text/plain", metadata.get(Metadata.CONTENT_TYPE));
+        assertEquals("text/plain", metadata.get(HttpHeaders.CONTENT_TYPE));
         
         // TIKA-501: Remove language detection from TXTParser
-        assertNull(metadata.get(Metadata.CONTENT_LANGUAGE));
-        assertNull(metadata.get(Metadata.LANGUAGE));
+        assertNull(metadata.get(HttpHeaders.CONTENT_LANGUAGE));
+        assertNull(metadata.get(DublinCore.LANGUAGE));
 
         assertTrue(content.contains("Hello"));
         assertTrue(content.contains("World"));
@@ -67,8 +69,8 @@ public class TXTParserTest extends TestCase {
         parser.parse(
                 new ByteArrayInputStream(text.getBytes("UTF-8")),
                 handler, metadata, new ParseContext());
-        assertEquals("text/plain", metadata.get(Metadata.CONTENT_TYPE));
-        assertEquals("UTF-8", metadata.get(Metadata.CONTENT_ENCODING));
+        assertEquals("text/plain", metadata.get(HttpHeaders.CONTENT_TYPE));
+        assertEquals("UTF-8", metadata.get(HttpHeaders.CONTENT_ENCODING));
 
         assertTrue(handler.toString().contains(text));
     }
@@ -78,7 +80,7 @@ public class TXTParserTest extends TestCase {
         Metadata metadata = new Metadata();
         parser.parse(
                 new ByteArrayInputStream(new byte[0]), handler, metadata, new ParseContext());
-        assertEquals("text/plain", metadata.get(Metadata.CONTENT_TYPE));
+        assertEquals("text/plain", metadata.get(HttpHeaders.CONTENT_TYPE));
         assertEquals("\n", handler.toString());
     }
 
@@ -111,14 +113,14 @@ public class TXTParserTest extends TestCase {
                 new ByteArrayInputStream(test2.getBytes("UTF-8")),
                 new BodyContentHandler(),  metadata, new ParseContext());
         
-        assertEquals("UTF-8", metadata.get(Metadata.CONTENT_ENCODING));
+        assertEquals("UTF-8", metadata.get(HttpHeaders.CONTENT_ENCODING));
 
-        metadata.set(Metadata.CONTENT_ENCODING, "ISO-8859-1");
+        metadata.set(HttpHeaders.CONTENT_ENCODING, "ISO-8859-1");
         parser.parse(
                 new ByteArrayInputStream(test2.getBytes("UTF-8")),
                 new BodyContentHandler(),  metadata, new ParseContext());
         
-        assertEquals("ISO-8859-1", metadata.get(Metadata.CONTENT_ENCODING));
+        assertEquals("ISO-8859-1", metadata.get(HttpHeaders.CONTENT_ENCODING));
     }
 
     /**
@@ -136,15 +138,15 @@ public class TXTParserTest extends TestCase {
                 new ByteArrayInputStream(test2.getBytes("UTF-8")),
                 new BodyContentHandler(),  metadata, new ParseContext());
 
-        assertEquals("UTF-8", metadata.get(Metadata.CONTENT_ENCODING));
+        assertEquals("UTF-8", metadata.get(HttpHeaders.CONTENT_ENCODING));
 
         metadata = new Metadata();
-        metadata.set(Metadata.CONTENT_TYPE, "text/html; charset=ISO-8859-1");
+        metadata.set(HttpHeaders.CONTENT_TYPE, "text/html; charset=ISO-8859-1");
         parser.parse(
                 new ByteArrayInputStream(test2.getBytes("UTF-8")),
                 new BodyContentHandler(),  metadata, new ParseContext());
 
-        assertEquals("ISO-8859-1", metadata.get(Metadata.CONTENT_ENCODING));
+        assertEquals("ISO-8859-1", metadata.get(HttpHeaders.CONTENT_ENCODING));
     }
 
     private void assertExtractText(String msg, String expected, byte[] input)
@@ -157,7 +159,7 @@ public class TXTParserTest extends TestCase {
         };
         Metadata metadata = new Metadata();
         parser.parse(new ByteArrayInputStream(input), handler, metadata, new ParseContext());
-        assertEquals("text/plain", metadata.get(Metadata.CONTENT_TYPE));
+        assertEquals("text/plain", metadata.get(HttpHeaders.CONTENT_TYPE));
         assertEquals(msg, expected, handler.toString());
     }
 
@@ -170,13 +172,13 @@ public class TXTParserTest extends TestCase {
         final String test = "Simple Content";
 
         Metadata metadata = new Metadata();
-        metadata.set(Metadata.LANGUAGE, "en");
+        metadata.set(DublinCore.LANGUAGE, "en");
 
         parser.parse(
                 new ByteArrayInputStream(test.getBytes("UTF-8")),
                 new BodyContentHandler(),  metadata, new ParseContext());
 
-        assertEquals("en", metadata.get(Metadata.LANGUAGE));
+        assertEquals("en", metadata.get(DublinCore.LANGUAGE));
     }
 
     public void testCP866() throws Exception {
@@ -188,8 +190,8 @@ public class TXTParserTest extends TestCase {
                 metadata,
                 new ParseContext());
 
-        assertEquals("text/plain", metadata.get(Metadata.CONTENT_TYPE));
-        assertEquals("IBM866", metadata.get(Metadata.CONTENT_ENCODING));
+        assertEquals("text/plain", metadata.get(HttpHeaders.CONTENT_TYPE));
+        assertEquals("IBM866", metadata.get(HttpHeaders.CONTENT_ENCODING));
     }
 
     public void testEBCDIC_CP500() throws Exception {
@@ -201,8 +203,8 @@ public class TXTParserTest extends TestCase {
                 metadata,
                 new ParseContext());
 
-        assertEquals("text/plain", metadata.get(Metadata.CONTENT_TYPE));
-        assertEquals("IBM500", metadata.get(Metadata.CONTENT_ENCODING));
+        assertEquals("text/plain", metadata.get(HttpHeaders.CONTENT_TYPE));
+        assertEquals("IBM500", metadata.get(HttpHeaders.CONTENT_ENCODING));
         
         // Additional check that it isn't too eager on short blocks of text
         metadata = new Metadata();
@@ -213,7 +215,7 @@ public class TXTParserTest extends TestCase {
                 metadata,
                 new ParseContext());
 
-        assertNotSame("IBM500", metadata.get(Metadata.CONTENT_ENCODING));
+        assertNotSame("IBM500", metadata.get(HttpHeaders.CONTENT_ENCODING));
     }
 
 }

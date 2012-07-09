@@ -54,6 +54,7 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
+import javax.activation.FileTypeMap;
 import javax.activation.MimetypesFileTypeMap;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -300,7 +301,7 @@ public class FileResponseRenderer implements ResponseRenderer {
         String contentType = file.getContentType();
         if (null == contentType || !contentType.startsWith("image/")) {
             final String fileName = file.getName();
-            if (fileName == null || !(contentType = MimetypesFileTypeMap.getDefaultFileTypeMap().getContentType(fileName)).startsWith("image/")) {
+            if (fileName == null || !(contentType = FileTypeMap.getDefaultFileTypeMap().getContentType(fileName)).startsWith("image/")) {
                 return false;
             }
         }

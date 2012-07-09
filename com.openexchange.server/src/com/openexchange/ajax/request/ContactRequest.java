@@ -655,7 +655,7 @@ public class ContactRequest {
     private int[] removeVirtual(final int[] columns) {
         final TIntList helper = new TIntArrayList(columns.length);
         for (final int col : columns) {
-            if (col == Contact.LAST_MODIFIED_UTC) {
+            if (col == DataObject.LAST_MODIFIED_UTC) {
                 // SKIP
             } else if (col == Contact.IMAGE1_URL) {
                 helper.add(Contact.IMAGE1);

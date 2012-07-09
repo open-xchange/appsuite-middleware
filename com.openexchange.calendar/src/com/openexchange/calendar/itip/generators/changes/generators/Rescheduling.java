@@ -112,14 +112,14 @@ public class Rescheduling implements ChangeDescriptionGenerator {
         Date startDate = updated.getStartDate();
 		Date endDate = updated.getEndDate();
 
-		DateFormat longDate = SimpleDateFormat.getDateInstance(DateFormat.LONG, locale);
+		DateFormat longDate = DateFormat.getDateInstance(DateFormat.LONG, locale);
         longDate.setTimeZone(timezone);
         if (updated.getFullTime()) {
         	longDate.setTimeZone(TimeZone.getTimeZone("UTC"));
         	endDate = forceCorrectDay(endDate);
         }
         
-        DateFormat time = SimpleDateFormat.getTimeInstance(DateFormat.SHORT, locale);
+        DateFormat time = DateFormat.getTimeInstance(DateFormat.SHORT, locale);
         time.setTimeZone(timezone);
 		switch (format) {
         case SAME_DAY:
@@ -142,7 +142,7 @@ public class Rescheduling implements ChangeDescriptionGenerator {
         Date startDate = original.getStartDate();
 		Date endDate = original.getEndDate();
 
-		DateFormat longDate = SimpleDateFormat.getDateInstance(DateFormat.LONG, locale);
+		DateFormat longDate = DateFormat.getDateInstance(DateFormat.LONG, locale);
         if (original.getFullTime()) {
             longDate.setTimeZone(TimeZone.getTimeZone("UTC"));
         	endDate = forceCorrectDay(endDate);
@@ -150,7 +150,7 @@ public class Rescheduling implements ChangeDescriptionGenerator {
             longDate.setTimeZone(timezone);
         }
         
-        DateFormat time = SimpleDateFormat.getTimeInstance(DateFormat.SHORT, locale);
+        DateFormat time = DateFormat.getTimeInstance(DateFormat.SHORT, locale);
         time.setTimeZone(timezone);
         
 		switch (format) {

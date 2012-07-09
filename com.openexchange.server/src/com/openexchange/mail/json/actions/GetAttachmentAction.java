@@ -59,6 +59,7 @@ import java.util.UUID;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -147,8 +148,8 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
             /*
              * Read in parameters
              */
-            final String folderPath = req.checkParameter(Mail.PARAMETER_FOLDERID);
-            final String uid = req.checkParameter(Mail.PARAMETER_ID);
+            final String folderPath = req.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
+            final String uid = req.checkParameter(AJAXServlet.PARAMETER_ID);
             final String sequenceId = req.getParameter(Mail.PARAMETER_MAILATTCHMENT);
             final String imageContentId = req.getParameter(Mail.PARAMETER_MAILCID);
             final boolean saveToDisk;
@@ -244,8 +245,8 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
             /*
              * Read in parameters
              */
-            final String folderPath = req.checkParameter(Mail.PARAMETER_FOLDERID);
-            final String uid = req.checkParameter(Mail.PARAMETER_ID);
+            final String folderPath = req.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
+            final String uid = req.checkParameter(AJAXServlet.PARAMETER_ID);
             final String sequenceId = req.checkParameter(Mail.PARAMETER_MAILATTCHMENT);
             final String destFolderIdentifier = req.checkParameter(Mail.PARAMETER_DESTINATION_FOLDER);
             /*

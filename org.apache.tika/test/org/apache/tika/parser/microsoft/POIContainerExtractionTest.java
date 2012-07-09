@@ -18,7 +18,6 @@ package org.apache.tika.parser.microsoft;
 
 import org.apache.tika.extractor.ContainerExtractor;
 import org.apache.tika.extractor.ParserContainerExtractor;
-import org.apache.tika.mime.MediaType;
 
 /**
  * Tests that the various POI powered parsers are

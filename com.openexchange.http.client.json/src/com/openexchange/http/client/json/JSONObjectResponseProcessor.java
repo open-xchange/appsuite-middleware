@@ -4,7 +4,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.http.client.builder.HTTPResponse;
 import com.openexchange.http.client.builder.HTTPResponseProcessor;
 import com.openexchange.http.client.exceptions.OxHttpClientExceptionCodes;
 

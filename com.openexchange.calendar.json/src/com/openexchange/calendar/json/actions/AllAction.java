@@ -174,7 +174,7 @@ public final class AllAction extends AppointmentAction {
 
                 // Workaround to fill appointments with alarm times
                 // TODO: Move me down into the right layer if there is time for some refactoring.
-                if (com.openexchange.tools.arrays.Arrays.contains(columns, Appointment.ALARM)) {
+                if (com.openexchange.tools.arrays.Arrays.contains(columns, CalendarObject.ALARM)) {
                     if (!appointment.containsAlarm() && appointment.containsUserParticipants()) {
                         final OXFolderAccess ofa = new OXFolderAccess(session.getContext());
 

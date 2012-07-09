@@ -56,6 +56,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Authenticator;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -144,7 +145,7 @@ public class TransportHandler {
             stream.flush();
             stream.close();
 
-            if (httpsURLConnection.getResponseCode() != HttpsURLConnection.HTTP_OK) {
+            if (httpsURLConnection.getResponseCode() != HttpURLConnection.HTTP_OK) {
                 throw new MalformedURLException("Problem contacting report server: " + httpsURLConnection.getResponseCode());
             }
             final BufferedReader in = new BufferedReader(new InputStreamReader(httpsURLConnection.getInputStream()));

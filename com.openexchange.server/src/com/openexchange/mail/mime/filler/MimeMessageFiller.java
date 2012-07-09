@@ -593,7 +593,7 @@ public class MimeMessageFiller {
      * @param mimeMessage The MIME message
      * @throws MessagingException If setting the reply headers fails
      */
-    public void setReplyHeaders(final MailMessage referencedMail, final MimeMessage mimeMessage) throws MessagingException {
+    public static void setReplyHeaders(final MailMessage referencedMail, final MimeMessage mimeMessage) throws MessagingException {
         if (null == referencedMail) {
             /*
              * Obviously referenced mail does no more exist; cancel setting reply headers Message-Id, In-Reply-To, and References.

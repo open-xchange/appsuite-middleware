@@ -60,6 +60,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
@@ -104,15 +105,15 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
 							.getObjectID());
 					final AppointmentDiff diff = AppointmentDiff
 							.compare(loaded, cdao);
-					if (diff.anyFieldChangedOf(Appointment.START_DATE,
-							Appointment.END_DATE,
-							Appointment.RECURRENCE_POSITION,
-							Appointment.RECURRENCE_ID,
-							Appointment.RECURRENCE_DATE_POSITION,
-							Appointment.RECURRENCE_COUNT,
+					if (diff.anyFieldChangedOf(CalendarObject.START_DATE,
+							CalendarObject.END_DATE,
+							CalendarObject.RECURRENCE_POSITION,
+							CalendarObject.RECURRENCE_ID,
+							CalendarObject.RECURRENCE_DATE_POSITION,
+							CalendarObject.RECURRENCE_COUNT,
 							Appointment.RECURRENCE_START,
-							Appointment.FULL_TIME, Appointment.TITLE,
-							Appointment.LOCATION, Appointment.PARTICIPANTS)) {
+							Appointment.FULL_TIME, CalendarObject.TITLE,
+							Appointment.LOCATION, CalendarObject.PARTICIPANTS)) {
 						cdao.setSequence(loaded.getSequence() + 1);
 					}
 					if (cdao.getRecurrenceType() == 0) {
@@ -535,6 +536,11 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
 		return delegate.getAppointmentsBetween(user_uid, start, end, cols,
 				orderBy, order);
 	}
+	
+    @Override
+    public SearchIterator<Appointment> getAppointmentsBetween(Date start, Date end, int cols[], int orderBy, Order order) throws OXException, SQLException {
+        return delegate.getAppointmentsBetween(start, end, cols, orderBy, order);
+    }
 
 	@Override
     public int resolveUid(final String uid) throws OXException {

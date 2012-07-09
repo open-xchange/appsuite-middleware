@@ -82,6 +82,7 @@ import org.json.JSONWriter;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderFieldList;
 import com.openexchange.ajax.customizer.folder.BulkAdditionalFolderFieldsList;
+import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.helper.ParamContainer;
@@ -102,6 +103,7 @@ import com.openexchange.exception.OXException.Generic;
 import com.openexchange.exception.OXExceptionConstants;
 import com.openexchange.folderstorage.messaging.MessagingFolderIdentifier;
 import com.openexchange.groupware.EnumComponent;
+import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -1514,7 +1516,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                  * Add deleted OX folders from above
                  */
                 q.addAll(deletedQueue);
-                final FolderFieldWriter idWriter = folderWriter.getFolderFieldWriter(new int[] { FolderObject.OBJECT_ID })[0];
+                final FolderFieldWriter idWriter = folderWriter.getFolderFieldWriter(new int[] { DataObject.OBJECT_ID })[0];
                 size = q.size();
                 iter = q.iterator();
                 for (int i = 0; i < size; i++) {
@@ -1897,8 +1899,8 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                      */
                     final int accountId = mfi.getAccountId();
                     boolean done = false;
-                    if (jsonObj.has(FolderFields.FOLDER_ID)) {
-                        final MessagingFolderIdentifier pfi = new MessagingFolderIdentifier(jsonObj.getString(FolderFields.FOLDER_ID));
+                    if (jsonObj.has(FolderChildFields.FOLDER_ID)) {
+                        final MessagingFolderIdentifier pfi = new MessagingFolderIdentifier(jsonObj.getString(FolderChildFields.FOLDER_ID));
                         if (accountId != pfi.getAccountId()) {
                             /*
                              * Move to another account... Use new folder storage API
@@ -1986,7 +1988,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
          */
         try {
             final Context ctx = session.getContext();
-            final String parentFolder = paramContainer.checkStringParam(FolderFields.FOLDER_ID);
+            final String parentFolder = paramContainer.checkStringParam(FolderChildFields.FOLDER_ID);
             int parentFolderId = -1;
             if ((parentFolderId = getUnsignedInteger(parentFolder)) >= 0) {
                 final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(session);

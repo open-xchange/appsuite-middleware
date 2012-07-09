@@ -261,6 +261,8 @@ public class TaskCopyTest extends AbstractUserCopyTest {
         assertEquals(original.getTargetCosts(), copied.getTargetCosts());
         assertEquals(original.getTargetDuration(), copied.getTargetDuration());
         assertEquals(original.getUntil(), copied.getUntil());
+        assertEquals(original.getUid(), copied.getUid());
+        assertEquals(original.getFilename(), copied.getFilename());
         if (original.getParticipants() != null) {
             checkParticipants(Arrays.asList(original.getParticipants()), Arrays.asList(copied.getParticipants()), mapping);
         }

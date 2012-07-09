@@ -52,6 +52,7 @@ package com.openexchange.groupware.tasks.mapping;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.tasks.Mapper;
 import com.openexchange.groupware.tasks.Mapping;
 import com.openexchange.groupware.tasks.Task;
@@ -70,7 +71,7 @@ public final class Filename implements Mapper<String> {
 
     @Override
     public int getId() {
-        return Task.FILENAME;
+        return CommonObject.FILENAME;
     }
 
     @Override

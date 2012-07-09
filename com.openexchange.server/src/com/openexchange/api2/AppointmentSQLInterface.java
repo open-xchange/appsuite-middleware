@@ -398,6 +398,17 @@ public interface AppointmentSQLInterface {
     SearchIterator<Appointment> getAppointmentsBetween(int user_uid, Date start, Date end, int cols[], int orderBy, Order order) throws OXException, SQLException;
 
     /**
+     * Lists all appointments in all folders for the whole context between start and end.
+     *
+     * @param start The given start date
+     * @param end The given end date
+     * @return A SearchIterator contains AppointmentObjects
+     * @throws OXException
+     * @throws SQLException
+     */
+    SearchIterator<Appointment> getAppointmentsBetween(Date start, Date end, int cols[], int orderBy, Order order) throws OXException, SQLException;
+
+    /**
      * Resolves the given uid.
      *
      * @param uid

@@ -53,7 +53,6 @@ import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDEN
 import java.util.List;
 import java.util.Map;
 import javax.security.auth.login.LoginException;
-import org.omg.CORBA.UserException;
 import com.openexchange.ajax.fields.Header;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.AuthenticationService;
@@ -79,7 +78,7 @@ import com.openexchange.user.UserService;
  */
 public class KerberosAuthentication implements AuthenticationService {
 
-    private KerberosService kerberosService;
+    private final KerberosService kerberosService;
     private final ContextService contextService;
     private final UserService userService;
 

@@ -19,6 +19,7 @@ package org.apache.tika.parser.video;
 import junit.framework.TestCase;
 
 import org.apache.tika.Tika;
+import org.apache.tika.metadata.HttpHeaders;
 import org.apache.tika.metadata.Metadata;
 
 public class FLVParserTest extends TestCase {
@@ -31,7 +32,7 @@ public class FLVParserTest extends TestCase {
                 FLVParserTest.class.getResourceAsStream(path), metadata);
 
         assertEquals("", content);
-        assertEquals("video/x-flv", metadata.get(Metadata.CONTENT_TYPE));
+        assertEquals("video/x-flv", metadata.get(HttpHeaders.CONTENT_TYPE));
         assertEquals("true", metadata.get("hasVideo"));
         assertEquals("false", metadata.get("stereo"));
         assertEquals("true", metadata.get("hasAudio"));

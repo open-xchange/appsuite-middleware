@@ -403,7 +403,7 @@ public class Patches {
          * @param appointment
          */
         public static void setSeriesStartAndEnd(GroupwareCaldavFactory factory, CalendarDataObject appointment) {
-            if (Appointment.NO_RECURRENCE != appointment.getRecurrenceType()) {
+            if (CalendarObject.NO_RECURRENCE != appointment.getRecurrenceType()) {
                 CalendarCollectionService calUtils = factory.getCalendarUtilities();
                 calUtils.safelySetStartAndEndDateForRecurringAppointment(appointment);
             }

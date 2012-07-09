@@ -78,5 +78,6 @@ public interface ConfirmableParticipant extends Participant {
 
     boolean containsMessage();
     
+    @Override
     ConfirmableParticipant getClone() throws CloneNotSupportedException;
 }

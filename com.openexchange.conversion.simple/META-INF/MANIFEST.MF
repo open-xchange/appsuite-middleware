@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Simple Conversion
+Bundle-SymbolicName: com.openexchange.conversion.simple
+Bundle-Version: 6.22.0.0
+Bundle-Activator: com.openexchange.conversion.simple.osgi.SimpleConverterActivator
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Import-Package: com.openexchange.ajax.requesthandler,
+ com.openexchange.exception,
+ com.openexchange.osgi,
+ com.openexchange.session,
+ com.openexchange.tools.session,
+ org.osgi.framework;version="1.3.0"
+Export-Package: com.openexchange.conversion.simple

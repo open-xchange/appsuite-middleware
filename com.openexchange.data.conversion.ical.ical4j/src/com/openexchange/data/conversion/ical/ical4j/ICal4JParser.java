@@ -95,6 +95,7 @@ import com.openexchange.data.conversion.ical.ical4j.internal.ParserTools;
 import com.openexchange.data.conversion.ical.ical4j.internal.TaskConverters;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.log.LogFactory;
@@ -115,13 +116,13 @@ public class ICal4JParser implements ICalParser {
 
     private static final Map<String, Integer> WEEKDAYS = new HashMap<String, Integer>(7);
     static {
-        WEEKDAYS.put("MO", Integer.valueOf(Appointment.MONDAY));
-        WEEKDAYS.put("TU", Integer.valueOf(Appointment.TUESDAY));
-        WEEKDAYS.put("WE", Integer.valueOf(Appointment.WEDNESDAY));
-        WEEKDAYS.put("TH", Integer.valueOf(Appointment.THURSDAY));
-        WEEKDAYS.put("FR", Integer.valueOf(Appointment.FRIDAY));
-        WEEKDAYS.put("SA", Integer.valueOf(Appointment.SATURDAY));
-        WEEKDAYS.put("SO", Integer.valueOf(Appointment.SUNDAY));
+        WEEKDAYS.put("MO", Integer.valueOf(CalendarObject.MONDAY));
+        WEEKDAYS.put("TU", Integer.valueOf(CalendarObject.TUESDAY));
+        WEEKDAYS.put("WE", Integer.valueOf(CalendarObject.WEDNESDAY));
+        WEEKDAYS.put("TH", Integer.valueOf(CalendarObject.THURSDAY));
+        WEEKDAYS.put("FR", Integer.valueOf(CalendarObject.FRIDAY));
+        WEEKDAYS.put("SA", Integer.valueOf(CalendarObject.SATURDAY));
+        WEEKDAYS.put("SO", Integer.valueOf(CalendarObject.SUNDAY));
     }
 
     public ICal4JParser() {
@@ -349,7 +350,7 @@ public class ICal4JParser implements ICalParser {
 
     private static final TimeZone determineTimeZone(final CalendarComponent component,
         final TimeZone defaultTZ){
-        for (final String name : new String[] { DtStart.DTSTART, DtEnd.DTEND, Due.DUE, Completed.COMPLETED }) {
+        for (final String name : new String[] { Property.DTSTART, Property.DTEND, Property.DUE, Property.COMPLETED }) {
             final DateProperty dateProp = (DateProperty) component.getProperty(name);
             if (dateProp != null) {
                 return chooseTimeZone(dateProp, defaultTZ);

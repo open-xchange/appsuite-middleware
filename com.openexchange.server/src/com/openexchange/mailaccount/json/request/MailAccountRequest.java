@@ -478,7 +478,7 @@ public final class MailAccountRequest {
         // Set server and port
         final String server;
         {
-            final String[] tmp = TransportConfig.parseProtocol(transportServerURL);
+            final String[] tmp = MailConfig.parseProtocol(transportServerURL);
             server = tmp == null ? transportServerURL : tmp[1];
         }
         final int pos = server.indexOf(':');

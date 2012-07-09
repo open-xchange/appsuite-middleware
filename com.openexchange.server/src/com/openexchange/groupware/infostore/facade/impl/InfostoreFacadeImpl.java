@@ -122,6 +122,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.EffectivePermission;
+import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.collections.Injector;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
@@ -1235,9 +1236,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         columns = addLastModifiedIfNeeded(columns);
         boolean onlyOwn = false;
         final EffectivePermission isperm = security.getFolderPermission(folderId, ctx, user, userConfig);
-        if (isperm.getReadPermission() == EffectivePermission.NO_PERMISSIONS) {
+        if (isperm.getReadPermission() == OCLPermission.NO_PERMISSIONS) {
             throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
-        } else if (isperm.getReadPermission() == EffectivePermission.READ_OWN_OBJECTS) {
+        } else if (isperm.getReadPermission() == OCLPermission.READ_OWN_OBJECTS) {
             onlyOwn = true;
         }
         boolean addLocked = false;
@@ -1346,9 +1347,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
     public Delta<DocumentMetadata> getDelta(final long folderId, final long updateSince, Metadata[] columns, final Metadata sort, final int order, final boolean ignoreDeleted, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         boolean onlyOwn = false;
         final EffectivePermission isperm = security.getFolderPermission(folderId, ctx, user, userConfig);
-        if (isperm.getReadPermission() == EffectivePermission.NO_PERMISSIONS) {
+        if (isperm.getReadPermission() == OCLPermission.NO_PERMISSIONS) {
             throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
-        } else if (isperm.getReadPermission() == EffectivePermission.READ_OWN_OBJECTS) {
+        } else if (isperm.getReadPermission() == OCLPermission.READ_OWN_OBJECTS) {
             onlyOwn = true;
         }
         boolean addLocked = false;

@@ -48,7 +48,6 @@
  */
 package com.openexchange.loxandra.json.action;
 
-import java.util.ArrayList;
 import java.util.UUID;
 
 import org.json.JSONArray;

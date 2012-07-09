@@ -58,6 +58,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.TimeZone;
+import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.property.DtEnd;
 import net.fortuna.ical4j.model.property.DtStart;
@@ -94,7 +95,7 @@ public final class Start<T extends CalendarComponent, U extends CalendarObject> 
 
     @Override
     public boolean hasProperty(final T component) {
-        return null != component.getProperty(DtStart.DTSTART);
+        return null != component.getProperty(Property.DTSTART);
     }
 
     @Override
@@ -110,7 +111,7 @@ public final class Start<T extends CalendarComponent, U extends CalendarObject> 
         final Date start = parseDateConsideringDateType(component, dtStart, timeZone);
 
         calendar.setStartDate(start);
-        if (component.getProperty(DtEnd.DTEND) == null && calendar instanceof Appointment) {
+        if (component.getProperty(Property.DTEND) == null && calendar instanceof Appointment) {
             // If an end is specified end date will be overwritten.
             if (isDateTime) {
                 /* RFC 2445 4.6.1:

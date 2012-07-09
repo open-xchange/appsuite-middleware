@@ -57,6 +57,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.session.Session;
 import com.openexchange.webdav.WebdavExceptionCode;
+import com.openexchange.webdav.xml.fields.CalendarFields;
 import com.openexchange.webdav.xml.fields.TaskFields;
 
 /**
@@ -162,11 +163,11 @@ public class TaskParser extends CalendarParser {
             }
 
             return ;
-        } else if (isTag(parser, TaskFields.ALARM)) {
+        } else if (isTag(parser, CalendarFields.ALARM)) {
             taskobject.setAlarm(getValueAsDate(parser));
 
             return ;
-        } else if (isTag(parser, TaskFields.ALARM_FLAG)) {
+        } else if (isTag(parser, CalendarFields.ALARM_FLAG)) {
             taskobject.setAlarmFlag(getValueAsBoolean(parser));
 
             return ;

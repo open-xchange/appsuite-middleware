@@ -66,6 +66,7 @@ import net.oauth.v2.OAuth2ProblemException;
 import net.oauth.v2.server.OAuth2Servlet;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.oauth.provider.OAuthProviderConstants;
 import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.internal.DatabaseOAuth2ProviderService;
 import com.openexchange.oauth.provider.internal.OAuthProviderServiceLookup;
@@ -150,8 +151,8 @@ public class AuthorizationServlet2 extends AbstractAuthorizationServlet {
             final OAuth2Accessor accessor = new OAuth2Accessor(client);
             final int userId = ((User) map.get("user")).getId();
             final int contextId = ((Context) map.get("context")).getContextId();
-            accessor.setProperty(OAuthProviderService.PROP_LOGIN, login);
-            accessor.setProperty(OAuthProviderService.PROP_PASSWORD, password);
+            accessor.setProperty(OAuthProviderConstants.PROP_LOGIN, login);
+            accessor.setProperty(OAuthProviderConstants.PROP_PASSWORD, password);
             providerService.markAsAuthorized(accessor, userId, contextId);
             /*
              * Process by response type

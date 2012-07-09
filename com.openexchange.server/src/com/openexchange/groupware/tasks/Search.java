@@ -61,6 +61,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.groupware.search.SearchObject;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -114,7 +115,7 @@ public class Search {
     }
 
     private void checkConditions() throws OXException {
-        if (TaskSearchObject.NO_PATTERN == search.getPattern()) {
+        if (SearchObject.NO_PATTERN == search.getPattern()) {
             return;
         }
         final int minimumSearchCharacters;

@@ -56,6 +56,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.logging.Log;
 import com.openexchange.log.LogFactory;
+import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.ajp13.coyote.ActionCode;
 import com.openexchange.ajp13.coyote.AjpProcessor;
 import com.openexchange.ajp13.coyote.Constants;
@@ -209,7 +210,7 @@ public final class CoyoteTask implements Task<Object> {
             ajpProcessor.action(ActionCode.STOP, null);
             // ajpProcessor.recycle();
             closeQuitely(client);
-            AJPv13ServerImpl.decrementNumberOfOpenAJPSockets();
+            AJPv13Server.decrementNumberOfOpenAJPSockets();
         }
         // }
         return null;

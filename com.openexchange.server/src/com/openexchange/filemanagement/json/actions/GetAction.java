@@ -55,6 +55,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import com.openexchange.ajax.AJAXFile;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -121,9 +122,9 @@ public final class GetAction implements ETagAwareAJAXActionService {
     @Override
     public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
         try {
-            final String id = requestData.getParameter(AJAXFile.PARAMETER_ID);
+            final String id = requestData.getParameter(AJAXServlet.PARAMETER_ID);
             if (id == null || id.length() == 0) {
-                throw UploadException.UploadCode.MISSING_PARAM.create(AJAXFile.PARAMETER_ID).setAction(AJAXFile.ACTION_GET);
+                throw UploadException.UploadCode.MISSING_PARAM.create(AJAXServlet.PARAMETER_ID).setAction(AJAXServlet.ACTION_GET);
             }
             final ManagedFileManagement management = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
             final ManagedFile file = management.getByID(id);

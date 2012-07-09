@@ -21,6 +21,7 @@ import org.apache.tika.detect.Detector;
 import org.apache.tika.extractor.ContainerExtractor;
 import org.apache.tika.extractor.ParserContainerExtractor;
 import org.apache.tika.io.TikaInputStream;
+import org.apache.tika.metadata.DublinCore;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.mime.MediaType;
 import org.apache.tika.parser.ParseContext;
@@ -54,7 +55,7 @@ public class TNEFParserTest extends AbstractPOIContainerExtractionTest {
       TNEFParser tnef = new TNEFParser();
       tnef.parse(stream, handler, metadata, new ParseContext());
       
-      assertEquals("This is a test message", metadata.get(Metadata.SUBJECT));
+      assertEquals("This is a test message", metadata.get(DublinCore.SUBJECT));
    }
    
     /**

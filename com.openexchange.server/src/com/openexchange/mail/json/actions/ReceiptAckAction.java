@@ -51,6 +51,7 @@ package com.openexchange.mail.json.actions;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
@@ -89,13 +90,13 @@ public final class ReceiptAckAction extends AbstractMailAction {
              * Read in parameters
              */
             final JSONObject bodyObj = (JSONObject) req.getRequest().getData();
-            final String folderPath = bodyObj.has(Mail.PARAMETER_FOLDERID) ? bodyObj.getString(Mail.PARAMETER_FOLDERID) : null;
+            final String folderPath = bodyObj.has(AJAXServlet.PARAMETER_FOLDERID) ? bodyObj.getString(AJAXServlet.PARAMETER_FOLDERID) : null;
             if (null == folderPath) {
-                throw MailExceptionCode.MISSING_PARAM.create(Mail.PARAMETER_FOLDERID);
+                throw MailExceptionCode.MISSING_PARAM.create(AJAXServlet.PARAMETER_FOLDERID);
             }
-            final String uid = bodyObj.has(Mail.PARAMETER_ID) ? bodyObj.getString(Mail.PARAMETER_ID) : null;
+            final String uid = bodyObj.has(AJAXServlet.PARAMETER_ID) ? bodyObj.getString(AJAXServlet.PARAMETER_ID) : null;
             if (null == uid) {
-                throw MailExceptionCode.MISSING_PARAM.create(Mail.PARAMETER_ID);
+                throw MailExceptionCode.MISSING_PARAM.create(AJAXServlet.PARAMETER_ID);
             }
             final String fromAddr =
                 bodyObj.has(MailJSONField.FROM.getKey()) && !bodyObj.isNull(MailJSONField.FROM.getKey()) ? bodyObj.getString(MailJSONField.FROM.getKey()) : null;

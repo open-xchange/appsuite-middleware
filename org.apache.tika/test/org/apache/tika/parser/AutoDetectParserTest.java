@@ -20,7 +20,9 @@ import junit.framework.TestCase;
 
 import org.apache.tika.detect.Detector;
 import org.apache.tika.exception.TikaException;
+import org.apache.tika.metadata.HttpHeaders;
 import org.apache.tika.metadata.Metadata;
+import org.apache.tika.metadata.TikaMetadataKeys;
 import org.apache.tika.mime.MediaType;
 import org.apache.tika.sax.BodyContentHandler;
 import org.xml.sax.ContentHandler;
@@ -71,13 +73,13 @@ public class AutoDetectParserTest extends TestCase {
 
         try {
             Metadata metadata = new Metadata();
-            metadata.set(Metadata.RESOURCE_NAME_KEY, tp.resourceStatedName);
-            metadata.set(Metadata.CONTENT_TYPE, tp.statedType);
+            metadata.set(TikaMetadataKeys.RESOURCE_NAME_KEY, tp.resourceStatedName);
+            metadata.set(HttpHeaders.CONTENT_TYPE, tp.statedType);
             ContentHandler handler = new BodyContentHandler();
             new AutoDetectParser().parse(input, handler, metadata);
 
             assertEquals("Bad content type: " + tp,
-                    tp.realType, metadata.get(Metadata.CONTENT_TYPE));
+                    tp.realType, metadata.get(HttpHeaders.CONTENT_TYPE));
 
             if (tp.expectedContentFragment != null) {
                assertTrue("Expected content not found: " + tp,

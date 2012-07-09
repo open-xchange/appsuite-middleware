@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.json.actions;
 
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
@@ -90,7 +91,7 @@ public final class GetStructureAction extends AbstractMailAction {
              * Read in parameters
              */
             AJAXRequestResult data = getJSONNullResult();
-            final String folderPath = req.checkParameter(Mail.PARAMETER_FOLDERID);
+            final String folderPath = req.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
             // final String uid = paramContainer.checkStringParam(PARAMETER_ID);
             final boolean unseen;
             {
@@ -118,11 +119,11 @@ public final class GetStructureAction extends AbstractMailAction {
             final MailServletInterface mailInterface = getMailInterface(req);
             final String uid;
             {
-                String tmp2 = req.getParameter(Mail.PARAMETER_ID);
+                String tmp2 = req.getParameter(AJAXServlet.PARAMETER_ID);
                 if (null == tmp2) {
                     tmp2 = req.getParameter(Mail.PARAMETER_MESSAGE_ID);
                     if (null == tmp2) {
-                        throw AjaxExceptionCodes.MISSING_PARAMETER.create(Mail.PARAMETER_ID);
+                        throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_ID);
                     }
                     uid = mailInterface.getMailIDByMessageID(folderPath, tmp2);
                 } else {

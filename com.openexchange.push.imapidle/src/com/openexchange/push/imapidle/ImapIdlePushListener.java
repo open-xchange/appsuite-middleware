@@ -55,6 +55,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import javax.mail.Folder;
 import javax.mail.MessagingException;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCapabilities;
@@ -505,7 +506,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
             final IMAPStore imapStore = istore.getImapStore();
             final IMAPFolder inbox = (IMAPFolder) imapStore.getFolder(folder);
             try {
-                inbox.open(IMAPFolder.READ_WRITE);
+                inbox.open(Folder.READ_WRITE);
                 if (isDebugEnabled()) {
                     LOG.info("starting IDLE for Context: " + session.getContextId() + ", Login: " + session.getLoginName() + ", Session: " + session.getSessionID());
                 }

@@ -50,6 +50,7 @@
 package com.openexchange.server.impl;
 
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.Properties;
 import java.util.Stack;
 import org.apache.commons.logging.Log;
@@ -337,15 +338,15 @@ public class Starter implements Initialization {
             }
             final long totalMemory = Runtime.getRuntime().totalMemory() >> 10;
             if (LOG.isInfoEnabled()) {
-                LOG.info("VM Total Memory       : " + DecimalFormat.getNumberInstance().format(totalMemory) + " KB");
+                LOG.info("VM Total Memory       : " + NumberFormat.getNumberInstance().format(totalMemory) + " KB");
             }
             final long freeMemory = Runtime.getRuntime().freeMemory() >> 10;
             if (LOG.isInfoEnabled()) {
-                LOG.info("VM Free Memory        : " + DecimalFormat.getNumberInstance().format(freeMemory) + " KB");
+                LOG.info("VM Free Memory        : " + NumberFormat.getNumberInstance().format(freeMemory) + " KB");
             }
             final long usedMemory = totalMemory - freeMemory;
             if (LOG.isInfoEnabled()) {
-                LOG.info("VM Used Memory        : " + DecimalFormat.getNumberInstance().format(usedMemory) + " KB");
+                LOG.info("VM Used Memory        : " + NumberFormat.getNumberInstance().format(usedMemory) + " KB");
             }
         } catch (final Exception gee) {
             LOG.error(gee.getMessage(), gee);
