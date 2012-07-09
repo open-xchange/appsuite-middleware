@@ -337,8 +337,8 @@ public final class CSSMatcher {
             builder.append(s.substring(0, pos));
         }
         for (final String line : SPLIT_LINES.split(s.substring(pos), 0)) {
-            final int insertPos = builder.length();
-            boolean tagFound = false;
+            // final int insertPos = builder.length();
+            // boolean tagFound = false;
             for (final String word : SPLIT_WORDS.split(line, 0)) {
                 if (isEmpty(word)) {
                     builder.append(word);
@@ -353,11 +353,12 @@ public final class CSSMatcher {
                             builder.append('#').append(cssPrefix).append('-').append(replaceDotsAndHashes(word.substring(1), cssPrefix)).append(' ');
                         }
                     } else {
-                        if (!tagFound) {
-                            builder.insert(insertPos, '#' + cssPrefix + ' ');
-                            tagFound = true;
-                        }
-                        builder.append(replaceDotsAndHashes(word, cssPrefix)).append(' ');
+//                        if (!tagFound) {
+//                            builder.insert(insertPos, '#' + cssPrefix + ' ');
+//                            tagFound = true;
+//                        }
+//                        builder.append(replaceDotsAndHashes(word, cssPrefix)).append(' ');
+                        builder.append('#').append(cssPrefix).append(' ').append(replaceDotsAndHashes(word, cssPrefix)).append(' ');
                     }
                 }
             }
