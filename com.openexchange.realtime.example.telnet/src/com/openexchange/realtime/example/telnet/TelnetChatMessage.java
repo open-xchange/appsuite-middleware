@@ -65,8 +65,8 @@ import com.openexchange.tools.session.ServerSession;
 public class TelnetChatMessage {
 	private Map<String, String> headers = new HashMap<String, String>();
 	private String payload = "";
-	private ServerSession session;
-	private ID from;
+	private final ServerSession session;
+	private final ID from;
 
 	public TelnetChatMessage(String payload, ID from, ServerSession session) {
 		super();

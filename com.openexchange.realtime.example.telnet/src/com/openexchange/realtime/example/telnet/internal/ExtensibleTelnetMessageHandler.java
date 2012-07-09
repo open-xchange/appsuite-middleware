@@ -63,7 +63,7 @@ import com.openexchange.realtime.example.telnet.TelnetChatPlugin;
  *         Laguna</a>
  */
 public class ExtensibleTelnetMessageHandler {
-	private Map<String, TelnetChatPlugin> handlers = new HashMap<String, TelnetChatPlugin>();
+	private final Map<String, TelnetChatPlugin> handlers = new HashMap<String, TelnetChatPlugin>();
 
 	public void handle(TelnetChatMessage message) throws OXException {
 		message.requireHeader("service");

@@ -66,7 +66,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.MessageDispatcher;
 import com.openexchange.realtime.example.websocket.StanzaSender;
 import com.openexchange.realtime.example.websocket.WSHandler;
 import com.openexchange.realtime.packet.ID;
@@ -89,9 +88,9 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler impleme
 	    private WebSocketServerHandshaker handshaker;
 	    
 	    
-	    private ServiceLookup services;
-	    private HandlerLibrary library;
-	    private WSChannel channel;
+	    private final ServiceLookup services;
+	    private final HandlerLibrary library;
+	    private final WSChannel channel;
 	    
 		private ChannelHandlerContext ctx;
 		private ServerSession session;
@@ -235,7 +234,8 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler impleme
 		}
 
 
-		public void send(Stanza stanza) throws OXException {
+		@Override
+        public void send(Stanza stanza) throws OXException {
 			ctx.getChannel().write(new TextWebSocketFrame(RequestWriter.write(stanza).toString()));
 		}
 

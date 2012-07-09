@@ -68,7 +68,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class MessageDispatcherImpl implements MessageDispatcher {
 
-	private Map<String, Channel> channels = new HashMap<String, Channel>();
+	private final Map<String, Channel> channels = new HashMap<String, Channel>();
 
 	public void send(Stanza stanza, ServerSession session) throws OXException {
 		ID to = stanza.getTo();

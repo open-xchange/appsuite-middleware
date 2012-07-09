@@ -64,7 +64,7 @@ import com.openexchange.realtime.packet.ID;
  */
 public class IDMap<T> implements Map<ID, T>{
 	
-	private Map<ID, T> delegate = new HashMap<ID, T>();
+	private final Map<ID, T> delegate = new HashMap<ID, T>();
 
 	public int size() {
 		return delegate.size();
@@ -114,11 +114,13 @@ public class IDMap<T> implements Map<ID, T>{
 		return delegate.entrySet();
 	}
 
-	public boolean equals(Object o) {
+	@Override
+    public boolean equals(Object o) {
 		return delegate.equals(o);
 	}
 
-	public int hashCode() {
+	@Override
+    public int hashCode() {
 		return delegate.hashCode();
 	}
 	

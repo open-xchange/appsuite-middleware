@@ -68,7 +68,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class PresencePlugin implements TelnetChatPlugin {
 
-	private ServiceLookup services;
+	private final ServiceLookup services;
 	
 	public PresencePlugin(ServiceLookup services) {
 		this.services = services;

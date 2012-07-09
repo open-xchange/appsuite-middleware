@@ -61,7 +61,7 @@ import com.openexchange.realtime.example.websocket.WSHandler;
  *         Laguna</a>
  */
 public class HandlerLibrary {
-	private List<WSHandler> handlers = new ArrayList<WSHandler>();
+	private final List<WSHandler> handlers = new ArrayList<WSHandler>();
 
 	public WSHandler getHandlerFor(String namespace) {
 		for (WSHandler transformer : handlers) {
