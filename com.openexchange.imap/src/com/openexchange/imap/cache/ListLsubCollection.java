@@ -443,6 +443,7 @@ final class ListLsubCollection {
         if (!((IMAPStore) imapFolder.getStore()).hasCapability("ACL")) {
             return;
         }
+        final long st = DEBUG ? System.currentTimeMillis() : 0L;
         final ConcurrentMap<String, ListLsubEntryImpl> primary;
         final ConcurrentMap<String, ListLsubEntryImpl> lookup;
         if (listMap.size() > lsubMap.size()) {
@@ -473,6 +474,12 @@ final class ListLsubCollection {
                         e);
                 }
             }
+        }
+        if (DEBUG) {
+            final long dur = System.currentTimeMillis() - st;
+            final StringBuilder sb = new StringBuilder(64);
+            sb.append("LIST/LSUB cache built GETACL entries in ").append(dur).append("msec.");
+            LOG.debug(sb.toString());
         }
     }
 

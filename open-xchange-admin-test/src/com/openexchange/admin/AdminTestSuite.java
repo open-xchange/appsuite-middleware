@@ -59,6 +59,9 @@ import com.openexchange.admin.rmi.TaskMgmtTest;
 import com.openexchange.admin.rmi.UserTest;
 import com.openexchange.admin.tools.Bug19733Test;
 import com.openexchange.admin.tools.NetUtilTest;
+import com.openexchange.admin.user.copy.rmi.RoundtripTest;
+import com.openexchange.admin.user.copy.rmi.UserCopyTest;
+import com.openexchange.admin.user.copy.rmi.UserExistsTest;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
@@ -70,7 +73,10 @@ import com.openexchange.admin.tools.NetUtilTest;
       NetUtilTest.class,
       Bug19733Test.class,
       DBWeightTest.class,
-      AllTests.class
+      AllTests.class,
+      RoundtripTest.class,
+      UserCopyTest.class,
+      UserExistsTest.class
 })
 public class AdminTestSuite {
     

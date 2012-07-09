@@ -87,7 +87,7 @@ public final class ListLsubCache {
 
         private final int hash;
 
-        public Key(final int user, final int cid) {
+        protected Key(final int user, final int cid) {
             super();
             this.user = user;
             this.cid = cid;
@@ -133,7 +133,7 @@ public final class ListLsubCache {
 
     private static final boolean DO_STATUS = false;
 
-    private static final boolean DO_GETACL = false;
+    private static final boolean DO_GETACL = true;
 
     private static final ConcurrentMap<Key, ConcurrentMap<Integer, Future<ListLsubCollection>>> MAP = new ConcurrentHashMap<Key, ConcurrentMap<Integer, Future<ListLsubCollection>>>();
 

@@ -212,3 +212,5 @@ com.openexchange.spamhandler.spamassassin/jars/
 com.openexchange.spamsettings.generic/jars/
 com.openexchange.xerces.ibm/jars/
 com.openexchange.xmpp/jars/
+openexchange-test/local
+openexchange-test/local/test.properties
