@@ -184,7 +184,7 @@ public class ReportClient extends AbstractJMXTools {
                 System.out.println("No option selected. Using the default (display and send)");
             case MULTIPLE:
                 if( ReportMode.NONE != mode ) {
-                    System.out.println("To many arguments. Using the default (display and send)");
+                    System.out.println("Too many arguments. Using the default (display and send)");
                 }
             case DISPLAYANDSEND:
             default:
