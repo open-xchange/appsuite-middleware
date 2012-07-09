@@ -342,25 +342,31 @@ public final class CSSMatcher {
             for (final String line : SPLIT_LINES.split(s.substring(pos), 0)) {
                 final int insertPos = builder.length();
                 boolean tagFound = false;
-                for (final String word : SPLIT_WORDS.split(line, 0)) {
-                    if (isEmpty(word)) {
-                        builder.append(word);
-                    } else {
-                        final char first = word.charAt(0);
-                        if ('.' == first) {
-                            builder.append('.').append(cssPrefix).append('-').append(replaceDotsAndHashes(word.substring(1), cssPrefix, helper)).append(' ');
-                        } else if ('#' == first) {
-                            if (word.indexOf('.') < 0) { // contains no dots
-                                builder.append('#').append(cssPrefix).append('-').append(replaceDotsAndHashes(word.substring(1), cssPrefix, helper)).append(' ');
-                            } else {
-                                builder.append('#').append(cssPrefix).append('-').append(replaceDotsAndHashes(word.substring(1), cssPrefix, helper)).append(' ');
-                            }
+                final String[] words = SPLIT_WORDS.split(line, 0);
+                if (1 == words.length && "body".equalsIgnoreCase(words[0])) {
+                    // Special treatment of "body" selector
+                    builder.append('#').append(cssPrefix).append(' ');
+                } else {
+                    for (final String word : words) {
+                        if (isEmpty(word)) {
+                            builder.append(word);
                         } else {
-                            if (!tagFound) {
-                                builder.insert(insertPos, '#' + cssPrefix + ' ');
-                                tagFound = true;
+                            final char first = word.charAt(0);
+                            if ('.' == first) {
+                                builder.append('.').append(cssPrefix).append('-').append(replaceDotsAndHashes(word.substring(1), cssPrefix, helper)).append(' ');
+                            } else if ('#' == first) {
+                                if (word.indexOf('.') < 0) { // contains no dots
+                                    builder.append('#').append(cssPrefix).append('-').append(replaceDotsAndHashes(word.substring(1), cssPrefix, helper)).append(' ');
+                                } else {
+                                    builder.append('#').append(cssPrefix).append('-').append(replaceDotsAndHashes(word.substring(1), cssPrefix, helper)).append(' ');
+                                }
+                            } else {
+                                if (!tagFound) {
+                                    builder.insert(insertPos, '#' + cssPrefix + ' ');
+                                    tagFound = true;
+                                }
+                                builder.append(replaceDotsAndHashes(word, cssPrefix, helper)).append(' ');
                             }
-                            builder.append(replaceDotsAndHashes(word, cssPrefix, helper)).append(' ');
                         }
                     }
                 }
@@ -368,21 +374,27 @@ public final class CSSMatcher {
             }
         } else {
             for (final String line : SPLIT_LINES.split(s.substring(pos), 0)) {
-                for (final String word : SPLIT_WORDS.split(line, 0)) {
-                    if (isEmpty(word)) {
-                        builder.append(word);
-                    } else {
-                        final char first = word.charAt(0);
-                        if ('.' == first) {
-                            builder.append('.').append(cssPrefix).append('-').append(replaceDotsAndHashes(word.substring(1), cssPrefix, helper)).append(' ');
-                        } else if ('#' == first) {
-                            if (word.indexOf('.') < 0) { // contains no dots
-                                builder.append('#').append(cssPrefix).append('-').append(replaceDotsAndHashes(word.substring(1), cssPrefix, helper)).append(' ');
-                            } else {
-                                builder.append('#').append(cssPrefix).append('-').append(replaceDotsAndHashes(word.substring(1), cssPrefix, helper)).append(' ');
-                            }
+                final String[] words = SPLIT_WORDS.split(line, 0);
+                if (1 == words.length && "body".equalsIgnoreCase(words[0])) {
+                    // Special treatment of "body" selector
+                    builder.append('#').append(cssPrefix).append(' ');
+                } else {
+                    for (final String word : words) {
+                        if (isEmpty(word)) {
+                            builder.append(word);
                         } else {
-                            builder.append('#').append(cssPrefix).append(' ').append(replaceDotsAndHashes(word, cssPrefix, helper)).append(' ');
+                            final char first = word.charAt(0);
+                            if ('.' == first) {
+                                builder.append('.').append(cssPrefix).append('-').append(replaceDotsAndHashes(word.substring(1), cssPrefix, helper)).append(' ');
+                            } else if ('#' == first) {
+                                if (word.indexOf('.') < 0) { // contains no dots
+                                    builder.append('#').append(cssPrefix).append('-').append(replaceDotsAndHashes(word.substring(1), cssPrefix, helper)).append(' ');
+                                } else {
+                                    builder.append('#').append(cssPrefix).append('-').append(replaceDotsAndHashes(word.substring(1), cssPrefix, helper)).append(' ');
+                                }
+                            } else {
+                                builder.append('#').append(cssPrefix).append(' ').append(replaceDotsAndHashes(word, cssPrefix, helper)).append(' ');
+                            }
                         }
                     }
                 }
