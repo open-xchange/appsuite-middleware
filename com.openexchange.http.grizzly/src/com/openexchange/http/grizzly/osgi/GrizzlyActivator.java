@@ -55,13 +55,15 @@ import org.glassfish.grizzly.comet.CometAddOn;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.grizzly.http.server.NetworkListener;
 import org.glassfish.grizzly.websockets.WebSocketAddOn;
+import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.FrameworkListener;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.http.atmosphere.AtmosphereService;
 import com.openexchange.http.grizzly.GrizzlyExceptionCode;
 import com.openexchange.http.grizzly.addons.GrizzlOXAddOn;
-import com.openexchange.http.grizzly.filters.backendroute.AppendBackendRouteFilter;
 import com.openexchange.http.grizzly.services.http.HttpServiceFactory;
 import com.openexchange.http.requestwatcher.osgi.services.RequestWatcherService;
 import com.openexchange.log.Log;
@@ -84,7 +86,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { ConfigurationService.class, RequestWatcherService.class };
+        return new Class[] { ConfigurationService.class, RequestWatcherService.class, AtmosphereService.class };
     }
 
     /*
@@ -118,6 +120,20 @@ public class GrizzlyActivator extends HousekeepingActivator {
             if (LOG.isInfoEnabled()) {
                 LOG.info("Starting Grizzly server.");
             }
+            context.addFrameworkListener(new FrameworkListener() {
+                
+                @Override
+                public void frameworkEvent(FrameworkEvent event) {
+                    if(event.getBundle().getSymbolicName().equalsIgnoreCase("com.openexchange.http.grizzly")) {
+                        int eventType = event.getType();
+                        if(eventType == FrameworkEvent.ERROR) {
+                            LOG.error(event.toString(), event.getThrowable());
+                        } else {
+                            LOG.info(event.toString(), event.getThrowable());
+                        }
+                    }
+                }
+                });
             
             GrizzlyServiceRegistry grizzlyServiceRegistry = GrizzlyServiceRegistry.getInstance();
             
@@ -138,8 +154,8 @@ public class GrizzlyActivator extends HousekeepingActivator {
              */
             final String httpHost = configService.getProperty("com.openexchange.http.grizzly.httpNetworkListenerHost", "0.0.0.0");
             final int httpPort = configService.getIntProperty("com.openexchange.http.grizzly.httpNetworkListenerPort", 8080);
-            final boolean hasJMXEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasJMXEnabled", true);
-            final boolean hasWebsocketsEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasWebsocketsEnabled", true);
+            final boolean hasJMXEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasJMXEnabled", false);
+            final boolean hasWebsocketsEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasWebSocketsEnabled", false);
             final boolean hasCometEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasCometEnabled", false);
 
             /*
@@ -159,6 +175,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
                 if (LOG.isInfoEnabled()) {
                     LOG.info("Enabling WebSockets for Grizzly server.");
                 }
+                WebSocketAddOn webSocketAddOn = new WebSocketAddOn();
                 networkListener.registerAddOn(new WebSocketAddOn());
             }
             
@@ -190,8 +207,14 @@ public class GrizzlyActivator extends HousekeepingActivator {
             serviceFactory = new HttpServiceFactory(grizzly, context.getBundle());
 
             registerService(HttpService.class.getName(), serviceFactory);
-
+            
+//            AtmosphereServiceImpl atmosphereServiceImpl = new AtmosphereServiceImpl(context.getBundle());
+//            registerService(AtmosphereServiceImpl.class, atmosphereServiceImpl);
+         
             grizzly.start();
+
+            
+            
         } catch (final IOException e) {
             throw GrizzlyExceptionCode.GRIZZLY_SERVER_NOT_STARTED.create(e, new Object[] {});
         }
