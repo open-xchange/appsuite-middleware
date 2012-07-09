@@ -118,7 +118,7 @@ public class ReportClient extends AbstractJMXTools {
     
     private CLIOption showcombi = null;
     
-    public enum ReportMode { SENDONLY, DISPLAYONLY, SAVEONLY, MULTIPLE, NONE };
+    public enum ReportMode { SENDONLY, DISPLAYONLY, SAVEONLY, MULTIPLE, DISPLAYANDSEND, NONE };
 
     public static void main(final String args[]) {
         final AbstractJMXTools t = new ReportClient();
@@ -150,7 +150,9 @@ public class ReportClient extends AbstractJMXTools {
             }
 
             if (null != parser.getOptionValue(this.displayonly)) {
-                if( ReportMode.NONE != mode ) {
+                if( ReportMode.SENDONLY == mode  ) {
+                    mode = ReportMode.DISPLAYANDSEND;
+                } else if( ReportMode.NONE != mode) {
                     mode = ReportMode.MULTIPLE;
                 } else {
                     mode = ReportMode.DISPLAYONLY;
@@ -179,13 +181,14 @@ public class ReportClient extends AbstractJMXTools {
                 break;
 
             case NONE:
-                System.err.println("No option selected. Using the default one (display and send)");
+                System.out.println("No option selected. Using the default (display and send)");
             case MULTIPLE:
+                if( ReportMode.NONE != mode ) {
+                    System.out.println("To many arguments. Using the default (display and send)");
+                }
+            case DISPLAYANDSEND:
             default:
                 savereport = false;
-                if( ReportMode.NONE != mode ) {
-                    System.err.println("More than one of the stat options given. Using the default one (display and send)");
-                }
                 new TransportHandler().sendReport(totals, macDetails, contextDetails, versions, clc, savereport);
                 print(totals, contextDetails, macDetails, versions, parser, clc);
                 break;
