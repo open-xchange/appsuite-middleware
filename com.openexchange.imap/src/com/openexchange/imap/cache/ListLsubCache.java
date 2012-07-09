@@ -87,7 +87,7 @@ public final class ListLsubCache {
 
         private final int hash;
 
-        public Key(final int user, final int cid) {
+        protected Key(final int user, final int cid) {
             super();
             this.user = user;
             this.cid = cid;
