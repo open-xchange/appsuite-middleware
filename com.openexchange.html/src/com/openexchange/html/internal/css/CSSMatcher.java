@@ -313,6 +313,7 @@ public final class CSSMatcher {
 
     private static final Pattern SPLIT_LINES = Pattern.compile("\r?\n");
     private static final Pattern SPLIT_WORDS = Pattern.compile("\\s+");
+    private static final boolean INSERT_HASH_ONLY_ONCE = false;
 
     private static String prefixBlock(final String match, final String cssPrefix) {
         if (isEmpty(match) || isEmpty(cssPrefix)) {
@@ -336,33 +337,56 @@ public final class CSSMatcher {
         if (pos > 0) {
             builder.append(s.substring(0, pos));
         }
-        for (final String line : SPLIT_LINES.split(s.substring(pos), 0)) {
-            // final int insertPos = builder.length();
-            // boolean tagFound = false;
-            for (final String word : SPLIT_WORDS.split(line, 0)) {
-                if (isEmpty(word)) {
-                    builder.append(word);
-                } else {
-                    final char first = word.charAt(0);
-                    if ('.' == first) {
-                        builder.append('.').append(cssPrefix).append('-').append(replaceDotsAndHashes(word.substring(1), cssPrefix)).append(' ');
-                    } else if ('#' == first) {
-                        if (word.indexOf('.') < 0) { // contains no dots
-                            builder.append('#').append(cssPrefix).append('-').append(replaceDotsAndHashes(word.substring(1), cssPrefix)).append(' ');
-                        } else {
-                            builder.append('#').append(cssPrefix).append('-').append(replaceDotsAndHashes(word.substring(1), cssPrefix)).append(' ');
-                        }
+        if (INSERT_HASH_ONLY_ONCE) {
+            for (final String line : SPLIT_LINES.split(s.substring(pos), 0)) {
+                final int insertPos = builder.length();
+                boolean tagFound = false;
+                for (final String word : SPLIT_WORDS.split(line, 0)) {
+                    if (isEmpty(word)) {
+                        builder.append(word);
                     } else {
-//                        if (!tagFound) {
-//                            builder.insert(insertPos, '#' + cssPrefix + ' ');
-//                            tagFound = true;
-//                        }
-//                        builder.append(replaceDotsAndHashes(word, cssPrefix)).append(' ');
-                        builder.append('#').append(cssPrefix).append(' ').append(replaceDotsAndHashes(word, cssPrefix)).append(' ');
+                        final char first = word.charAt(0);
+                        if ('.' == first) {
+                            builder.append('.').append(cssPrefix).append('-').append(replaceDotsAndHashes(word.substring(1), cssPrefix)).append(' ');
+                        } else if ('#' == first) {
+                            if (word.indexOf('.') < 0) { // contains no dots
+                                builder.append('#').append(cssPrefix).append('-').append(replaceDotsAndHashes(word.substring(1), cssPrefix)).append(' ');
+                            } else {
+                                builder.append('#').append(cssPrefix).append('-').append(replaceDotsAndHashes(word.substring(1), cssPrefix)).append(' ');
+                            }
+                        } else {
+                            if (!tagFound) {
+                                builder.insert(insertPos, '#' + cssPrefix + ' ');
+                                tagFound = true;
+                            }
+                            builder.append(replaceDotsAndHashes(word, cssPrefix)).append(' ');
+                        }
                     }
                 }
+                builder.append('\n');
             }
-            builder.append('\n');
+        } else {
+            for (final String line : SPLIT_LINES.split(s.substring(pos), 0)) {
+                for (final String word : SPLIT_WORDS.split(line, 0)) {
+                    if (isEmpty(word)) {
+                        builder.append(word);
+                    } else {
+                        final char first = word.charAt(0);
+                        if ('.' == first) {
+                            builder.append('.').append(cssPrefix).append('-').append(replaceDotsAndHashes(word.substring(1), cssPrefix)).append(' ');
+                        } else if ('#' == first) {
+                            if (word.indexOf('.') < 0) { // contains no dots
+                                builder.append('#').append(cssPrefix).append('-').append(replaceDotsAndHashes(word.substring(1), cssPrefix)).append(' ');
+                            } else {
+                                builder.append('#').append(cssPrefix).append('-').append(replaceDotsAndHashes(word.substring(1), cssPrefix)).append(' ');
+                            }
+                        } else {
+                            builder.append('#').append(cssPrefix).append(' ').append(replaceDotsAndHashes(word, cssPrefix)).append(' ');
+                        }
+                    }
+                }
+                builder.append('\n');
+            }
         }
         builder.deleteCharAt(builder.length()-1);
         return builder.append('{').toString();
