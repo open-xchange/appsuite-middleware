@@ -49,8 +49,8 @@
 
 package com.openexchange.realtime.impl;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.Channel;
@@ -68,12 +68,12 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class MessageDispatcherImpl implements MessageDispatcher {
 
-	private final Map<String, Channel> channels = new HashMap<String, Channel>();
+	private final Map<String, Channel> channels = new ConcurrentHashMap<String, Channel>();
 
-	public void send(Stanza stanza, ServerSession session) throws OXException {
-		ID to = stanza.getTo();
+	public void send(final Stanza stanza, final ServerSession session) throws OXException {
+		final ID to = stanza.getTo();
 
-		String protocol = to.getProtocol();
+		final String protocol = to.getProtocol();
 		Channel channel = null;
 
 		if (protocol != null) {
@@ -94,12 +94,12 @@ public class MessageDispatcherImpl implements MessageDispatcher {
 
 	}
 
-	private Channel chooseChannel(Stanza stanza, ServerSession session) throws OXException {
-		ID to = stanza.getTo();
-		String namespace = stanza.getNamespace();
+	private Channel chooseChannel(final Stanza stanza, final ServerSession session) throws OXException {
+		final ID to = stanza.getTo();
+		final String namespace = stanza.getNamespace();
 		
 		Channel candidate = null;
-		for(Channel channel: channels.values()){
+		for(final Channel channel: channels.values()){
 			if ((candidate == null || candidate.getPriority() < channel.getPriority()) && channel.canHandle(namespace, to, session)) {
 				candidate = channel;
 			}
@@ -108,11 +108,11 @@ public class MessageDispatcherImpl implements MessageDispatcher {
 		return candidate;
 	}
 	
-	public void addChannel(Channel channel) {
+	public void addChannel(final Channel channel) {
 		channels.put(channel.getProtocol(), channel);
 	}
 	
-	public void removeChannel(Channel channel) {
+	public void removeChannel(final Channel channel) {
 		channels.remove(channel.getProtocol());
 	}
 
