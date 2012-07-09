@@ -337,6 +337,7 @@ public final class CSSMatcher {
         if (pos > 0) {
             builder.append(s.substring(0, pos));
         }
+        final StringBuilder helper = new StringBuilder(length << 1);
         if (INSERT_HASH_ONLY_ONCE) {
             for (final String line : SPLIT_LINES.split(s.substring(pos), 0)) {
                 final int insertPos = builder.length();
@@ -347,19 +348,19 @@ public final class CSSMatcher {
                     } else {
                         final char first = word.charAt(0);
                         if ('.' == first) {
-                            builder.append('.').append(cssPrefix).append('-').append(replaceDotsAndHashes(word.substring(1), cssPrefix)).append(' ');
+                            builder.append('.').append(cssPrefix).append('-').append(replaceDotsAndHashes(word.substring(1), cssPrefix, helper)).append(' ');
                         } else if ('#' == first) {
                             if (word.indexOf('.') < 0) { // contains no dots
-                                builder.append('#').append(cssPrefix).append('-').append(replaceDotsAndHashes(word.substring(1), cssPrefix)).append(' ');
+                                builder.append('#').append(cssPrefix).append('-').append(replaceDotsAndHashes(word.substring(1), cssPrefix, helper)).append(' ');
                             } else {
-                                builder.append('#').append(cssPrefix).append('-').append(replaceDotsAndHashes(word.substring(1), cssPrefix)).append(' ');
+                                builder.append('#').append(cssPrefix).append('-').append(replaceDotsAndHashes(word.substring(1), cssPrefix, helper)).append(' ');
                             }
                         } else {
                             if (!tagFound) {
                                 builder.insert(insertPos, '#' + cssPrefix + ' ');
                                 tagFound = true;
                             }
-                            builder.append(replaceDotsAndHashes(word, cssPrefix)).append(' ');
+                            builder.append(replaceDotsAndHashes(word, cssPrefix, helper)).append(' ');
                         }
                     }
                 }
@@ -373,15 +374,15 @@ public final class CSSMatcher {
                     } else {
                         final char first = word.charAt(0);
                         if ('.' == first) {
-                            builder.append('.').append(cssPrefix).append('-').append(replaceDotsAndHashes(word.substring(1), cssPrefix)).append(' ');
+                            builder.append('.').append(cssPrefix).append('-').append(replaceDotsAndHashes(word.substring(1), cssPrefix, helper)).append(' ');
                         } else if ('#' == first) {
                             if (word.indexOf('.') < 0) { // contains no dots
-                                builder.append('#').append(cssPrefix).append('-').append(replaceDotsAndHashes(word.substring(1), cssPrefix)).append(' ');
+                                builder.append('#').append(cssPrefix).append('-').append(replaceDotsAndHashes(word.substring(1), cssPrefix, helper)).append(' ');
                             } else {
-                                builder.append('#').append(cssPrefix).append('-').append(replaceDotsAndHashes(word.substring(1), cssPrefix)).append(' ');
+                                builder.append('#').append(cssPrefix).append('-').append(replaceDotsAndHashes(word.substring(1), cssPrefix, helper)).append(' ');
                             }
                         } else {
-                            builder.append('#').append(cssPrefix).append(' ').append(replaceDotsAndHashes(word, cssPrefix)).append(' ');
+                            builder.append('#').append(cssPrefix).append(' ').append(replaceDotsAndHashes(word, cssPrefix, helper)).append(' ');
                         }
                     }
                 }
@@ -392,26 +393,26 @@ public final class CSSMatcher {
         return builder.append('{').toString();
     }
 
-    private static String replaceDotsAndHashes(final String word, final String cssPrefix) {
+    private static String replaceDotsAndHashes(final String word, final String cssPrefix, final StringBuilder helper) {
         final int length = word.length();
-        final StringBuilder sb = new StringBuilder(length << 1);
+        helper.setLength(0);
         int prev = 0;
         for (int i = 0; i < length; i++) {
             final char c = word.charAt(i);
             if ('.' == c) {
-                sb.append(prev == i ? "" : word.substring(prev, i));
-                sb.append('.').append(cssPrefix).append('-');
+                helper.append(prev == i ? "" : word.substring(prev, i));
+                helper.append('.').append(cssPrefix).append('-');
                 prev = i + 1;
             } else if ('#' == c) {
-                sb.append(prev == i ? "" : word.substring(prev, i));
-                sb.append('#').append(cssPrefix).append('-');
+                helper.append(prev == i ? "" : word.substring(prev, i));
+                helper.append('#').append(cssPrefix).append('-');
                 prev = i + 1;
             }
         }
         if (prev < length) {
-            sb.append(word.substring(prev));
+            helper.append(word.substring(prev));
         }
-        return sb.toString();
+        return helper.toString();
     }
 
     /**
