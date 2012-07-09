@@ -80,7 +80,10 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.encoding.Base64;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.webdav.xml.fields.CommonFields;
 import com.openexchange.webdav.xml.fields.ContactFields;
+import com.openexchange.webdav.xml.fields.DataFields;
+import com.openexchange.webdav.xml.fields.FolderChildFields;
 
 /**
  * ContactWriter
@@ -233,8 +236,8 @@ public class ContactWriter extends CommonWriter {
 
     public void addContent2PropElement(final Element e, final Contact contactobject, final boolean delete, final boolean externalUser) throws OXException, SearchIteratorException, UnsupportedEncodingException, AddressException {
         if (delete) {
-            addElement(ContactFields.OBJECT_ID, contactobject.getObjectID(), e);
-            addElement(ContactFields.LAST_MODIFIED, contactobject.getLastModified(), e);
+            addElement(DataFields.OBJECT_ID, contactobject.getObjectID(), e);
+            addElement(DataFields.LAST_MODIFIED, contactobject.getLastModified(), e);
             addElement("object_status", "DELETE", e);
         } else {
             writeCommonElements(contactobject, e);
@@ -271,7 +274,7 @@ public class ContactWriter extends CommonWriter {
         addElement(ContactFields.BIRTHDAY, contactobject.getBirthday(), e);
         addElement(ContactFields.BRANCHES, contactobject.getBranches(), e);
         addElement(ContactFields.BUSINESS_CATEGORY, contactobject.getBusinessCategory(), e);
-        addElement(ContactFields.CATEGORIES, contactobject.getCategories(), e);
+        addElement(CommonFields.CATEGORIES, contactobject.getCategories(), e);
         addElement(ContactFields.MOBILE1, contactobject.getCellularTelephone1(), e);
         addElement(ContactFields.MOBILE2, contactobject.getCellularTelephone2(), e);
         addElement(ContactFields.CITY, contactobject.getCityHome(), e);
@@ -448,7 +451,7 @@ public class ContactWriter extends CommonWriter {
             final Element e = new Element("email", XmlServlet.NS);
             e.addContent(correctCharacterData(email));
             e.setAttribute("id", Integer.toString(distributionlist[a].getEntryID()), XmlServlet.NS);
-            e.setAttribute(ContactFields.FOLDER_ID, Integer.toString(distributionlist[a].getFolderID()), XmlServlet.NS);
+            e.setAttribute(FolderChildFields.FOLDER_ID, Integer.toString(distributionlist[a].getFolderID()), XmlServlet.NS);
             e.setAttribute("displayname", displayname.trim(), XmlServlet.NS);
             e.setAttribute("emailfield", Integer.toString(distributionlist[a].getEmailfield()), XmlServlet.NS);
 

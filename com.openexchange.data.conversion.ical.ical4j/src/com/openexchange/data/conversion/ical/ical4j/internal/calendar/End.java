@@ -56,6 +56,7 @@ import static com.openexchange.data.conversion.ical.ical4j.internal.ParserTools.
 import java.util.List;
 import java.util.TimeZone;
 
+import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.property.DtEnd;
 
@@ -95,7 +96,7 @@ public final class End<T extends CalendarComponent, U extends CalendarObject> ex
      */
     @Override
     public boolean hasProperty(final T component) {
-        return null != component.getProperty(DtEnd.DTEND);
+        return null != component.getProperty(Property.DTEND);
     }
 
     /**

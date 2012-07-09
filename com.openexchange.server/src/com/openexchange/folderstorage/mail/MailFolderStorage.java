@@ -126,6 +126,7 @@ import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.internal.RdbMailAccountStorage;
 import com.openexchange.osgi.ServiceRegistry;
+import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -380,10 +381,10 @@ public final class MailFolderStorage implements FolderStorage {
                         final MailPermission mailPerm = provider.createNewMailPermission(session, accountId);
                         mailPerm.setEntity(session.getUserId());
                         mailPerm.setAllPermission(
-                            MailPermission.ADMIN_PERMISSION,
-                            MailPermission.ADMIN_PERMISSION,
-                            MailPermission.ADMIN_PERMISSION,
-                            MailPermission.ADMIN_PERMISSION);
+                            OCLPermission.ADMIN_PERMISSION,
+                            OCLPermission.ADMIN_PERMISSION,
+                            OCLPermission.ADMIN_PERMISSION,
+                            OCLPermission.ADMIN_PERMISSION);
                         mailPerm.setFolderAdmin(true);
                         mailPerm.setGroupPermission(false);
                         mailPermissions[0] = mailPerm;
@@ -841,7 +842,7 @@ public final class MailFolderStorage implements FolderStorage {
             mailPerm.setEntity(session.getUserId());
             mailPerm.setGroupPermission(false);
             mailPerm.setFolderAdmin(true);
-            final int max = MailPermission.ADMIN_PERMISSION;
+            final int max = OCLPermission.ADMIN_PERMISSION;
             mailPerm.setAllPermission(max, max, max, max);
             mfd.addPermission(mailPerm);
         }

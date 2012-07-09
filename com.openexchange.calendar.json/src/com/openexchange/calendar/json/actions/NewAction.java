@@ -57,6 +57,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.AppointmentFields;
+import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.parser.AppointmentParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.writer.AppointmentWriter;
@@ -124,7 +125,7 @@ public final class NewAction extends AppointmentAction {
 
         Date timestamp = null;
         if (conflicts == null) {
-            jsonResponseObj.put(AppointmentFields.ID, appointmentObj.getObjectID());
+            jsonResponseObj.put(DataFields.ID, appointmentObj.getObjectID());
             timestamp = appointmentObj.getLastModified();
         } else {
             final JSONArray jsonConflictArray = new JSONArray();

@@ -52,6 +52,7 @@ package com.openexchange.mail.json.actions;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
@@ -107,8 +108,8 @@ public final class GetForwardAction extends AbstractMailAction {
             /*
              * Read in parameters
              */
-            final String folderPath = req.checkParameter(Mail.PARAMETER_FOLDERID);
-            final String uid = req.checkParameter(Mail.PARAMETER_ID);
+            final String folderPath = req.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
+            final String uid = req.checkParameter(AJAXServlet.PARAMETER_ID);
             final String view = req.getParameter(Mail.PARAMETER_VIEW);
             final UserSettingMail usmNoSave = (UserSettingMail) session.getUserSettingMail().clone();
             /*
@@ -144,8 +145,8 @@ public final class GetForwardAction extends AbstractMailAction {
             final String[] ids = new String[paths.length()];
             for (int i = 0; i < folders.length; i++) {
                 final JSONObject folderAndID = paths.getJSONObject(i);
-                folders[i] = folderAndID.getString(Mail.PARAMETER_FOLDERID);
-                ids[i] = folderAndID.getString(Mail.PARAMETER_ID);
+                folders[i] = folderAndID.getString(AJAXServlet.PARAMETER_FOLDERID);
+                ids[i] = folderAndID.getString(AJAXServlet.PARAMETER_ID);
             }
             final String view = req.getParameter(Mail.PARAMETER_VIEW);
             final UserSettingMail usmNoSave = (UserSettingMail) session.getUserSettingMail().clone();

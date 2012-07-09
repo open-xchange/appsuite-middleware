@@ -54,6 +54,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.AppointmentFields;
 import com.openexchange.ajax.fields.CalendarFields;
+import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 
@@ -119,8 +120,8 @@ public class AppointmentParser extends CalendarParser {
             appointmentobject.setLocation(parseString(jsonobject, AppointmentFields.LOCATION));
         }
 
-        if (jsonobject.has(AppointmentFields.COLORLABEL)) {
-            appointmentobject.setLabel(parseInt(jsonobject, AppointmentFields.COLORLABEL));
+        if (jsonobject.has(CommonFields.COLORLABEL)) {
+            appointmentobject.setLabel(parseInt(jsonobject, CommonFields.COLORLABEL));
         }
 
         if (jsonobject.has(CalendarFields.ALARM)) {
@@ -135,7 +136,7 @@ public class AppointmentParser extends CalendarParser {
             appointmentobject.setTimezone(parseString(jsonobject, AppointmentFields.TIMEZONE));
         }
 
-        if (jsonobject.has(AppointmentFields.RECURRENCE_START)) {
+        if (jsonobject.has(CalendarFields.RECURRENCE_START)) {
             appointmentobject.setRecurringStart(parseDate(jsonobject, CalendarFields.RECURRENCE_START).getTime());
         }
 

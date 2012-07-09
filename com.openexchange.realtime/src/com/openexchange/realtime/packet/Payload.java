@@ -49,12 +49,20 @@
 
 package com.openexchange.realtime.packet;
 
+import com.openexchange.conversion.simple.SimpleConverter;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
+
 /**
  * {@link Payload}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class Payload {
+	
+	public static ServiceLookup services;
+	
 	private String format;
 	private Object data;
 	
@@ -74,6 +82,14 @@ public class Payload {
 	
 	public String getFormat() {
 		return format;
+	}
+	
+	public Payload to(String toFormat, ServerSession session) throws OXException {
+		if (toFormat.equals(format)) {
+			return new Payload(data, toFormat);
+		}
+		SimpleConverter converter = services.getService(SimpleConverter.class);
+		return new Payload(converter.convert(format, toFormat, data, session), toFormat);
 	}
 	
 	

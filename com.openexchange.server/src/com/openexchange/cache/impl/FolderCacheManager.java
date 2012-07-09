@@ -59,6 +59,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
 import com.openexchange.log.LogFactory;
+import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
@@ -372,7 +373,7 @@ public final class FolderCacheManager {
             throw OXFolderExceptionCode.CACHE_NOT_ENABLED.create();
         }
         if (!folderObj.containsObjectID()) {
-            throw OXFolderExceptionCode.MISSING_FOLDER_ATTRIBUTE.create(FolderFields.ID, I(-1), I(ctx.getContextId()));
+            throw OXFolderExceptionCode.MISSING_FOLDER_ATTRIBUTE.create(DataFields.ID, I(-1), I(ctx.getContextId()));
         }
         return putIfAbsentInternal(new InstanceFolderProvider(folderObj.clone()), ctx, elemAttribs);
     }
@@ -458,7 +459,7 @@ public final class FolderCacheManager {
             return;
         }
         if (!folderObj.containsObjectID()) {
-            throw OXFolderExceptionCode.MISSING_FOLDER_ATTRIBUTE.create(FolderFields.ID, I(-1), I(ctx.getContextId()));
+            throw OXFolderExceptionCode.MISSING_FOLDER_ATTRIBUTE.create(DataFields.ID, I(-1), I(ctx.getContextId()));
         }
         if (null != elemAttribs) {
             /*

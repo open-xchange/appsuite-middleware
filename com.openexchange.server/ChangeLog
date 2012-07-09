@@ -1,3 +1,7 @@
+* 2012-07-06 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22489: Dealing with failed auto-save
+
 * 2012-07-05 - thorben.betten@open-xchange.com
 
  - Fix for bug 22473: Fixed own rights for INBOX folder

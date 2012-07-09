@@ -58,6 +58,7 @@ import javax.mail.internet.MimeMessage;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
@@ -124,16 +125,16 @@ public final class NewAction extends AbstractMailAction {
         final AJAXRequestData request = req.getRequest();
         final List<OXException> warnings = new ArrayList<OXException>();
         try {
-            if (request.hasUploads() || request.getParameter(Mail.UPLOAD_FORMFIELD_MAIL) != null) {
+            if (request.hasUploads() || request.getParameter(AJAXServlet.UPLOAD_FORMFIELD_MAIL) != null) {
                 final ServerSession session = req.getSession();
                 final UploadEvent uploadEvent = request.getUploadEvent();
                 String msgIdentifier = null;
                 {
                     final JSONObject jsonMailObj;
                     {
-                        final String json0 = uploadEvent.getFormField(Mail.UPLOAD_FORMFIELD_MAIL);
+                        final String json0 = uploadEvent.getFormField(AJAXServlet.UPLOAD_FORMFIELD_MAIL);
                         if (json0 == null || json0.trim().length() == 0) {
-                            throw MailExceptionCode.PROCESSING_ERROR.create(MailExceptionCode.MISSING_PARAM.create(Mail.UPLOAD_FORMFIELD_MAIL), new Object[0]);
+                            throw MailExceptionCode.PROCESSING_ERROR.create(MailExceptionCode.MISSING_PARAM.create(AJAXServlet.UPLOAD_FORMFIELD_MAIL), new Object[0]);
                         }
                         jsonMailObj = new JSONObject(json0);
                     }
@@ -217,7 +218,7 @@ public final class NewAction extends AbstractMailAction {
             /*
              * Read in parameters
              */
-            final String folder = req.getParameter(Mail.PARAMETER_FOLDERID);
+            final String folder = req.getParameter(AJAXServlet.PARAMETER_FOLDERID);
             final int flags;
             {
                 final int i = req.optInt(Mail.PARAMETER_FLAGS);

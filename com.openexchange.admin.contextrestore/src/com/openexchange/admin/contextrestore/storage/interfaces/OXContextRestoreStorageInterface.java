@@ -12,12 +12,10 @@ import java.sql.SQLException;
 import org.apache.commons.logging.Log;
 import com.openexchange.log.LogFactory;
 
-import com.openexchange.admin.contextrestore.dataobjects.VersionInformation;
 import com.openexchange.admin.contextrestore.rmi.exceptions.OXContextRestoreException;
 import com.openexchange.admin.contextrestore.rmi.impl.OXContextRestore.Parser.PoolIdSchemaAndVersionInfo;
 import com.openexchange.admin.contextrestore.tools.PropertyHandlerExtended;
 import com.openexchange.admin.rmi.dataobjects.Context;
-import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
 /**

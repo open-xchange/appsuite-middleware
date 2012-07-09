@@ -20,6 +20,9 @@ import java.io.InputStream;
 import java.util.Locale;
 
 import org.apache.tika.TikaTest;
+import org.apache.tika.metadata.DublinCore;
+import org.apache.tika.metadata.HttpHeaders;
+import org.apache.tika.metadata.MSOffice;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.sax.BodyContentHandler;
@@ -37,9 +40,9 @@ public class PowerPointParserTest extends TikaTest {
 
             assertEquals(
                     "application/vnd.ms-powerpoint",
-                    metadata.get(Metadata.CONTENT_TYPE));
-            assertEquals("Sample Powerpoint Slide", metadata.get(Metadata.TITLE));
-            assertEquals("Keith Bennett", metadata.get(Metadata.AUTHOR));
+                    metadata.get(HttpHeaders.CONTENT_TYPE));
+            assertEquals("Sample Powerpoint Slide", metadata.get(DublinCore.TITLE));
+            assertEquals("Keith Bennett", metadata.get(MSOffice.AUTHOR));
             String content = handler.toString();
             assertTrue(content.contains("Sample Powerpoint Slide"));
             assertTrue(content.contains("Powerpoint X for Mac"));
@@ -100,11 +103,11 @@ public class PowerPointParserTest extends TikaTest {
 
         assertContains("Keyword1 Keyword2", content);
         assertEquals("Keyword1 Keyword2",
-                     metadata.get(Metadata.KEYWORDS));
+                     metadata.get(MSOffice.KEYWORDS));
 
         assertContains("Subject is here", content);
         assertEquals("Subject is here",
-                     metadata.get(Metadata.SUBJECT));
+                     metadata.get(DublinCore.SUBJECT));
 
         assertContains("Suddenly some Japanese text:", content);
         // Special version of (GHQ)
@@ -196,14 +199,14 @@ public class PowerPointParserTest extends TikaTest {
           input.close();
        }
        
-       assertEquals("application/vnd.ms-powerpoint", metadata.get(Metadata.CONTENT_TYPE));
-       assertEquals("JOUVIN ETIENNE",       metadata.get(Metadata.AUTHOR));
-       assertEquals("EJ04325S",             metadata.get(Metadata.LAST_AUTHOR));
-       assertEquals("2011-08-22T13:32:58Z", metadata.get(Metadata.LAST_SAVED));
-       assertEquals("2011-08-22T13:30:53Z", metadata.get(Metadata.CREATION_DATE));
-       assertEquals("1",                    metadata.get(Metadata.SLIDE_COUNT));
-       assertEquals("3",                    metadata.get(Metadata.WORD_COUNT));
-       assertEquals("Test extraction properties pptx", metadata.get(Metadata.TITLE));
+       assertEquals("application/vnd.ms-powerpoint", metadata.get(HttpHeaders.CONTENT_TYPE));
+       assertEquals("JOUVIN ETIENNE",       metadata.get(MSOffice.AUTHOR));
+       assertEquals("EJ04325S",             metadata.get(MSOffice.LAST_AUTHOR));
+       assertEquals("2011-08-22T13:32:58Z", metadata.get(MSOffice.LAST_SAVED));
+       assertEquals("2011-08-22T13:30:53Z", metadata.get(MSOffice.CREATION_DATE));
+       assertEquals("1",                    metadata.get(MSOffice.SLIDE_COUNT));
+       assertEquals("3",                    metadata.get(MSOffice.WORD_COUNT));
+       assertEquals("Test extraction properties pptx", metadata.get(DublinCore.TITLE));
        assertEquals("true",                 metadata.get("custom:myCustomBoolean"));
        assertEquals("3",                    metadata.get("custom:myCustomNumber"));
        assertEquals("MyStringValue",        metadata.get("custom:MyCustomString"));

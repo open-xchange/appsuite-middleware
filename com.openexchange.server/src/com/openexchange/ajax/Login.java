@@ -113,6 +113,7 @@ import com.openexchange.login.Interface;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginPerformer;
+import com.openexchange.oauth.provider.OAuthProviderConstants;
 import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -1019,8 +1020,8 @@ public class Login extends AJAXServlet {
                     final OAuthMessage requestMessage = OAuthServlet.getMessage(req2, null);
                     final OAuthAccessor accessor = providerService.getAccessor(requestMessage);
                     providerService.getValidator().validateMessage(requestMessage, accessor);
-                    final String login = accessor.<String> getProperty(OAuthProviderService.PROP_LOGIN);
-                    final String password = accessor.<String> getProperty(OAuthProviderService.PROP_PASSWORD);
+                    final String login = accessor.<String> getProperty(OAuthProviderConstants.PROP_LOGIN);
+                    final String password = accessor.<String> getProperty(OAuthProviderConstants.PROP_PASSWORD);
                     final LoginRequest request = parseLogin(req2, login, password, false);
                     return LoginPerformer.getInstance().doLogin(request);
                 } catch (final OAuthProblemException e) {

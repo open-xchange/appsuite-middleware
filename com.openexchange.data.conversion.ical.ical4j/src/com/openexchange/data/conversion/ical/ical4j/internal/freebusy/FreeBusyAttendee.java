@@ -56,6 +56,7 @@ import java.util.TimeZone;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.IDNA;
 
+import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.VFreeBusy;
 import net.fortuna.ical4j.model.property.Attendee;
 import net.fortuna.ical4j.model.property.Description;
@@ -101,7 +102,7 @@ public final class FreeBusyAttendee<T extends VFreeBusy, U extends FreeBusyInfor
 
     @Override
     public boolean hasProperty(T calendarComponent) {
-        return null != calendarComponent.getProperty(Description.ATTENDEE);
+        return null != calendarComponent.getProperty(Property.ATTENDEE);
     }
 
     @Override

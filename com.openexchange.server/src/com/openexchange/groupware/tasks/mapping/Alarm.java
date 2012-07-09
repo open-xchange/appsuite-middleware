@@ -53,6 +53,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
+import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.tasks.Mapper;
 import com.openexchange.groupware.tasks.Mapping;
 import com.openexchange.groupware.tasks.Task;
@@ -89,7 +90,7 @@ public class Alarm implements Mapper<Date>{
 
     @Override
     public int getId() {
-        return Task.ALARM;
+        return CalendarObject.ALARM;
     }
 
     @Override

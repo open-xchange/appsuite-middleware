@@ -57,7 +57,11 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.CommonObject;
+import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.groupware.search.SearchObject;
 import com.openexchange.groupware.search.TaskSearchObject;
 
 /**
@@ -227,12 +231,12 @@ public final class SQL {
             final Mapper<?> mapper = Mapping.getMapping(i);
             if (null == mapper) {
                 switch (i) {
-                case Task.LAST_MODIFIED_OF_NEWEST_ATTACHMENT:
-                case Task.PARTICIPANTS:
-                case Task.USERS:
-                case Task.ALARM:
+                case CommonObject.LAST_MODIFIED_OF_NEWEST_ATTACHMENT:
+                case CalendarObject.PARTICIPANTS:
+                case CalendarObject.USERS:
+                case CalendarObject.ALARM:
                     break;
-                case Task.FOLDER_ID:
+                case FolderChildObject.FOLDER_ID:
                     if (folder) {
                         sql.append("folder,");
                     }
@@ -326,13 +330,13 @@ public final class SQL {
     static String getPatternWhere(final TaskSearchObject search) {
         final StringBuilder sql = new StringBuilder();
         // This compare is correct. NO_PATTERN is null and cannot be compared with Object.equals()
-        if (TaskSearchObject.NO_PATTERN != search.getPattern()) {
+        if (SearchObject.NO_PATTERN != search.getPattern()) {
             sql.append('(');
-            sql.append(Mapping.getMapping(Task.TITLE).getDBColumnName());
+            sql.append(Mapping.getMapping(CalendarObject.TITLE).getDBColumnName());
             sql.append(" LIKE ? OR ");
-            sql.append(Mapping.getMapping(Task.NOTE).getDBColumnName());
+            sql.append(Mapping.getMapping(CalendarObject.NOTE).getDBColumnName());
             sql.append(" LIKE ? OR ");
-            sql.append(Mapping.getMapping(Task.CATEGORIES).getDBColumnName());
+            sql.append(Mapping.getMapping(CommonObject.CATEGORIES).getDBColumnName());
             sql.append(" LIKE ?)");
         }
         return sql.toString();

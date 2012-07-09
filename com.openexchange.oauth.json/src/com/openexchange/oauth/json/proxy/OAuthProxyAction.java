@@ -3,7 +3,6 @@ package com.openexchange.oauth.json.proxy;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.client.HTTPClient;
 import com.openexchange.http.client.builder.HTTPDeleteRequestBuilder;

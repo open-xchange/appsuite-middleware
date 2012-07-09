@@ -76,6 +76,7 @@ import com.openexchange.groupware.contact.ContactUnificationState;
 import com.openexchange.groupware.contact.helpers.SpecialAlphanumSortContactComparator;
 import com.openexchange.groupware.contact.helpers.UseCountComparator;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -539,7 +540,7 @@ public class LdapContactInterface implements ContactInterface {
         for (final int col : cols) {
             columns.add(Autoboxing.I(col));
         }
-        columns.add(Integer.valueOf(Contact.CREATION_DATE));
+        columns.add(Integer.valueOf(DataObject.CREATION_DATE));
         return columns;
     }
 

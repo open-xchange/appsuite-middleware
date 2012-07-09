@@ -54,8 +54,11 @@ import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.fields.CommonFields;
+import com.openexchange.ajax.fields.DataFields;
+import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.CommonObject;
@@ -96,8 +99,8 @@ public final class GetVersitAction extends AbstractMailAction {
             /*
              * Read in parameters
              */
-            final String folderPath = req.checkParameter(Mail.PARAMETER_FOLDERID);
-            final String uid = req.checkParameter(Mail.PARAMETER_ID);
+            final String folderPath = req.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
+            final String uid = req.checkParameter(AJAXServlet.PARAMETER_ID);
             // final String msgUID =
             // paramContainer.checkStringParam(PARAMETER_ID);
             final String partIdentifier = req.checkParameter(Mail.PARAMETER_MAILATTCHMENT);
@@ -148,8 +151,8 @@ public final class GetVersitAction extends AbstractMailAction {
             for (int i = 0; i < insertedObjs.length; i++) {
                 final CommonObject current = insertedObjs[i];
                 jo.reset();
-                jo.put(CommonFields.ID, current.getObjectID());
-                jo.put(CommonFields.FOLDER_ID, current.getParentFolderID());
+                jo.put(DataFields.ID, current.getObjectID());
+                jo.put(FolderChildFields.FOLDER_ID, current.getParentFolderID());
                 jsonWriter.value(jo);
             }
             jsonWriter.endArray();

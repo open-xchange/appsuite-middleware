@@ -58,6 +58,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
@@ -105,7 +106,7 @@ public final class Tools {
         retval.setLastModified(new Date());
         retval.setCreatedBy(userId);
         retval.setModifiedBy(userId);
-        retval.setRecurrenceType(Task.NO_RECURRENCE);
+        retval.setRecurrenceType(CalendarObject.NO_RECURRENCE);
         retval.setNumberOfAttachments(0);
         return retval;
     }

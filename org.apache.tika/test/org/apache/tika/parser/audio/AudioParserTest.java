@@ -19,6 +19,7 @@ package org.apache.tika.parser.audio;
 import junit.framework.TestCase;
 
 import org.apache.tika.Tika;
+import org.apache.tika.metadata.HttpHeaders;
 import org.apache.tika.metadata.Metadata;
 
 public class AudioParserTest extends TestCase {
@@ -29,7 +30,7 @@ public class AudioParserTest extends TestCase {
         String content = new Tika().parseToString(
                 AudioParserTest.class.getResourceAsStream(path), metadata);
 
-        assertEquals("audio/x-wav", metadata.get(Metadata.CONTENT_TYPE));
+        assertEquals("audio/x-wav", metadata.get(HttpHeaders.CONTENT_TYPE));
         assertEquals("44100.0", metadata.get("samplerate"));
         assertEquals("2", metadata.get("channels"));
         assertEquals("16", metadata.get("bits"));
@@ -44,7 +45,7 @@ public class AudioParserTest extends TestCase {
         String content = new Tika().parseToString(
                 AudioParserTest.class.getResourceAsStream(path), metadata);
 
-        assertEquals("audio/x-aiff", metadata.get(Metadata.CONTENT_TYPE));
+        assertEquals("audio/x-aiff", metadata.get(HttpHeaders.CONTENT_TYPE));
         assertEquals("44100.0", metadata.get("samplerate"));
         assertEquals("2", metadata.get("channels"));
         assertEquals("16", metadata.get("bits"));
@@ -59,7 +60,7 @@ public class AudioParserTest extends TestCase {
         String content = new Tika().parseToString(
                 AudioParserTest.class.getResourceAsStream(path), metadata);
 
-        assertEquals("audio/basic", metadata.get(Metadata.CONTENT_TYPE));
+        assertEquals("audio/basic", metadata.get(HttpHeaders.CONTENT_TYPE));
         assertEquals("44100.0", metadata.get("samplerate"));
         assertEquals("2", metadata.get("channels"));
         assertEquals("16", metadata.get("bits"));

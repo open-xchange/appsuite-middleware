@@ -54,6 +54,7 @@ import java.util.TimeZone;
 
 import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.model.Period;
+import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.VFreeBusy;
 import net.fortuna.ical4j.model.parameter.FbType;
 import net.fortuna.ical4j.model.property.FreeBusy;
@@ -114,7 +115,7 @@ public final class FreeBusySlots<T extends VFreeBusy, U extends FreeBusyInformat
 
 	@Override
 	public boolean hasProperty(T t) {
-        return null != t.getProperty(net.fortuna.ical4j.model.property.FreeBusy.FREEBUSY);
+        return null != t.getProperty(Property.FREEBUSY);
 	}
 
 	@Override

@@ -54,6 +54,7 @@ import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONValue;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -216,18 +217,18 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
              * Read in parameters
              */
             final String folderId = req.checkParameter(Mail.PARAMETER_MAILFOLDER);
-            int[] columns = req.checkIntArray(Mail.PARAMETER_COLUMNS);
-            final String sort = req.getParameter(Mail.PARAMETER_SORT);
-            final String order = req.getParameter(Mail.PARAMETER_ORDER);
+            int[] columns = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
+            final String sort = req.getParameter(AJAXServlet.PARAMETER_SORT);
+            final String order = req.getParameter(AJAXServlet.PARAMETER_ORDER);
             if (sort != null && order == null) {
-                throw MailExceptionCode.MISSING_PARAM.create(Mail.PARAMETER_ORDER);
+                throw MailExceptionCode.MISSING_PARAM.create(AJAXServlet.PARAMETER_ORDER);
             }
             final int[] fromToIndices;
             {
                 final String s = req.getParameter("limit");
                 if (null == s) {
-                    final int leftHandLimit = req.optInt(Mail.LEFT_HAND_LIMIT);
-                    final int rightHandLimit = req.optInt(Mail.RIGHT_HAND_LIMIT);
+                    final int leftHandLimit = req.optInt(AJAXServlet.LEFT_HAND_LIMIT);
+                    final int rightHandLimit = req.optInt(AJAXServlet.RIGHT_HAND_LIMIT);
                     if (leftHandLimit == MailRequest.NOT_FOUND || rightHandLimit == MailRequest.NOT_FOUND) {
                         fromToIndices = null;
                     } else {
@@ -287,7 +288,7 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                 } else if (order.equalsIgnoreCase("desc")) {
                     orderDir = OrderDirection.DESC.getOrder();
                 } else {
-                    throw MailExceptionCode.INVALID_INT_VALUE.create(Mail.PARAMETER_ORDER);
+                    throw MailExceptionCode.INVALID_INT_VALUE.create(AJAXServlet.PARAMETER_ORDER);
                 }
             }
             /*
@@ -373,12 +374,12 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
             JsonCaches.getSHA1Sum(
                 "all",
                 req.checkParameter(Mail.PARAMETER_MAILFOLDER),
-                req.checkParameter(Mail.PARAMETER_COLUMNS),
-                req.getParameter(Mail.PARAMETER_SORT),
-                req.getParameter(Mail.PARAMETER_ORDER),
+                req.checkParameter(AJAXServlet.PARAMETER_COLUMNS),
+                req.getParameter(AJAXServlet.PARAMETER_SORT),
+                req.getParameter(AJAXServlet.PARAMETER_ORDER),
                 req.getParameter("limit"),
-                req.getParameter(Mail.LEFT_HAND_LIMIT),
-                req.getParameter(Mail.RIGHT_HAND_LIMIT),
+                req.getParameter(AJAXServlet.LEFT_HAND_LIMIT),
+                req.getParameter(AJAXServlet.RIGHT_HAND_LIMIT),
                 req.getParameter("unseen"),
                 req.getParameter("deleted"));
         return sha1Sum;

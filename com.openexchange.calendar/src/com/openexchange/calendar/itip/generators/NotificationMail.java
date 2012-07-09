@@ -66,6 +66,7 @@ import com.openexchange.data.conversion.ical.itip.ITipMessage;
 import com.openexchange.data.conversion.ical.itip.ITipMethod;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.notify.State.Type;
 
@@ -325,9 +326,9 @@ public class NotificationMail {
     
     private boolean onlyPseudoChangesOnParticipants() {
         AppointmentDiff appDiff = getDiff();
-        boolean onlyParticipantsChanged = appDiff.exactlyTheseChanged(CalendarField.getByColumn(Appointment.PARTICIPANTS).getJsonName());
+        boolean onlyParticipantsChanged = appDiff.exactlyTheseChanged(CalendarField.getByColumn(CalendarObject.PARTICIPANTS).getJsonName());
         if (onlyParticipantsChanged) {
-            FieldUpdate participantUpdate = appDiff.getUpdateFor(CalendarField.getByColumn(Appointment.PARTICIPANTS).getJsonName());
+            FieldUpdate participantUpdate = appDiff.getUpdateFor(CalendarField.getByColumn(CalendarObject.PARTICIPANTS).getJsonName());
             Participant[] oldParticipants = (Participant[]) participantUpdate.getOriginalValue();
             Participant[] newParticipants = (Participant[]) participantUpdate.getNewValue();
 
@@ -366,7 +367,7 @@ public class NotificationMail {
     }
     
     private boolean isNotWorthUpdateNotification(final Appointment original, final Appointment modified) {
-        if (original.containsRecurrenceType() && original.getRecurrenceType() != Appointment.NO_RECURRENCE) {
+        if (original.containsRecurrenceType() && original.getRecurrenceType() != CalendarObject.NO_RECURRENCE) {
             if (endsInPast(original)) {
                 return endsInPast(modified);
             } else {
@@ -389,7 +390,7 @@ public class NotificationMail {
         final Date now = new Date();
         final Date endDate = appointment.getEndDate();
         final Date until = appointment.getUntil();
-        if (appointment.isException() || appointment.getRecurrenceType() == Appointment.NO_RECURRENCE) {
+        if (appointment.isException() || appointment.getRecurrenceType() == CalendarObject.NO_RECURRENCE) {
             return endDate.before(now);
         } else {
             if (until == null) {

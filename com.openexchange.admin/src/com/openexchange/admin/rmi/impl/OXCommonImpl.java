@@ -58,10 +58,8 @@ import com.openexchange.admin.rmi.dataobjects.NameAndIdObject;
 import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.dataobjects.Server;
 import com.openexchange.admin.rmi.dataobjects.User;
-import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.*;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
 
 /**
  * General abstraction class used by all impl classes

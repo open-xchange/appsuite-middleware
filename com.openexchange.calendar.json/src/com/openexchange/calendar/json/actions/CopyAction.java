@@ -58,6 +58,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.AppointmentFields;
+import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -135,7 +136,7 @@ public final class CopyAction extends AppointmentAction {
                 jsonConflictArray.put(jsonAppointmentObj);
             }
         } else {
-            jsonResponseObj.put(AppointmentFields.ID, appointmentObj.getObjectID());
+            jsonResponseObj.put(DataFields.ID, appointmentObj.getObjectID());
             timestamp = appointmentObj.getLastModified();
         }
 

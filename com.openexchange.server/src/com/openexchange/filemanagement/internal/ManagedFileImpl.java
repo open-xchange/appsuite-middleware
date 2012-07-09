@@ -57,14 +57,12 @@ import java.io.InputStream;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
-import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileExceptionErrorMessage;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.image.ImageLocation;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
 /**

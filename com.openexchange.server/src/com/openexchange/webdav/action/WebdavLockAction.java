@@ -154,7 +154,7 @@ public class WebdavLockAction extends AbstractAction {
 
     private void configureLock(final WebdavRequest req, final WebdavLock lock) throws JDOMException, IOException {
         final Element root = req.getBodyAsDocument().getRootElement();
-        final Element lockscope = (Element) root.getChild("lockscope",DAV_NS).getChildren().get(0);
+        final Element lockscope = root.getChild("lockscope",DAV_NS).getChildren().get(0);
 
         if(lockscope.getNamespace().equals(DAV_NS)) {
         	if(lockscope.getName().equalsIgnoreCase("shared")) {

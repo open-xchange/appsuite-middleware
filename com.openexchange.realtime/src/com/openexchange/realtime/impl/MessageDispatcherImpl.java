@@ -84,7 +84,8 @@ public class MessageDispatcherImpl implements MessageDispatcher {
 		} else {
 			channel = chooseChannel(stanza, session);
 			if (channel == null) {
-				throw RealtimeExceptionCodes.NO_APPROPRIATE_CHANNEL.create(to.toString(), stanza.getNamespace());
+				return; // Probably not online
+				//throw RealtimeExceptionCodes.NO_APPROPRIATE_CHANNEL.create(to.toString(), stanza.getNamespace());
 			}
 		}
 

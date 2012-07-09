@@ -61,6 +61,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
+import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
@@ -254,7 +255,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
         try {
             if (insert) {
                 if (!folderobject.containsParentFolderID()) {
-                    throw OXFolderExceptionCode.MISSING_FOLDER_ATTRIBUTE.create(FolderFields.FOLDER_ID, Integer.valueOf(ctx.getContextId()));
+                    throw OXFolderExceptionCode.MISSING_FOLDER_ATTRIBUTE.create(FolderChildFields.FOLDER_ID, Integer.valueOf(ctx.getContextId()));
                 }
                 final int parentFolderID = folderobject.getParentFolderID();
                 if (parentFolderID == FolderObject.SYSTEM_PUBLIC_FOLDER_ID && !userConfiguration.hasFullPublicFolderAccess()) {

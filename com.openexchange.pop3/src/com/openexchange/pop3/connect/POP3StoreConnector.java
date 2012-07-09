@@ -64,6 +64,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.mail.AuthenticationFailedException;
+import javax.mail.Folder;
 import javax.mail.MessagingException;
 import javax.mail.internet.IDNA;
 import com.openexchange.exception.OXException;
@@ -399,7 +400,7 @@ public final class POP3StoreConnector {
             final boolean hasUidl = (capabilities.indexOf("UIDL") >= 0);
             if (!hasTop || !hasUidl) {
                 final POP3Folder inbox = (POP3Folder) pop3Store.getFolder("INBOX");
-                inbox.open(POP3Folder.READ_ONLY);
+                inbox.open(Folder.READ_ONLY);
                 try {
                     final POP3Prober prober = new POP3Prober(pop3Store, inbox);
                     if (!prober.probeUIDL()) {

@@ -56,6 +56,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Folder;
+import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.exception.OXException;
@@ -115,12 +116,12 @@ public final class MessagingFolderParser {
         public void parse(final JSONObject folderJsonObject) throws OXException {
             try {
 
-                if (folderJsonObject.hasAndNotNull(FolderFields.ID)) {
-                    setID(folderJsonObject.getString(FolderFields.ID));
+                if (folderJsonObject.hasAndNotNull(DataFields.ID)) {
+                    setID(folderJsonObject.getString(DataFields.ID));
                 }
 
-                if (folderJsonObject.hasAndNotNull(FolderFields.FOLDER_ID)) {
-                    setParentID(folderJsonObject.getString(FolderFields.FOLDER_ID));
+                if (folderJsonObject.hasAndNotNull(FolderChildFields.FOLDER_ID)) {
+                    setParentID(folderJsonObject.getString(FolderChildFields.FOLDER_ID));
                 }
 
                 if (folderJsonObject.hasAndNotNull(FolderFields.TITLE)) {

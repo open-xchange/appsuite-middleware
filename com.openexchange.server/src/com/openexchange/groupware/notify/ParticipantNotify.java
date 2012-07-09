@@ -554,7 +554,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             }
 
             // Set correct recurrence information if CalendarObject is an Appointment
-            if (newApp.getRecurrenceType() != Appointment.NO_RECURRENCE) {
+            if (newApp.getRecurrenceType() != CalendarObject.NO_RECURRENCE) {
                 try {
                     ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class, true).fillDAO(
                         (CalendarDataObject) newApp);
@@ -958,7 +958,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                     return null;
                 }
 
-                if (cal.getRecurrenceType() == Appointment.NO_RECURRENCE && p.type == Participant.EXTERNAL_USER) {
+                if (cal.getRecurrenceType() == CalendarObject.NO_RECURRENCE && p.type == Participant.EXTERNAL_USER) {
                     msg.message = generateMessageMultipart(session, cal, textMessage, state.getModule(), state.getType(), ITipMethod.REQUEST, p, strings, b);
                 } else {
                     msg.message = textMessage;
@@ -1185,7 +1185,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             final ICalEmitter emitter = ServerServiceRegistry.getInstance().getService(ICalEmitter.class);
             final ICalSession icalSession = emitter.createSession(new SimpleMode(ZoneInfo.OUTLOOK));
             Date until = null;
-            if (Appointment.NO_RECURRENCE != app.getRecurrenceType()) {
+            if (CalendarObject.NO_RECURRENCE != app.getRecurrenceType()) {
                 until = app.getEndDate();
                 app.setEndDate(computeFirstOccurrenceEnd(app));
             }
@@ -2344,7 +2344,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
      * @return The first occurence's end time.
      */
     private static Date computeFirstOccurrenceEnd(final long startMillis, final long endMillis) {
-        final Calendar cal = GregorianCalendar.getInstance(getCalendarTools().getTimeZone("UTC"), Locale.ENGLISH);
+        final Calendar cal = Calendar.getInstance(getCalendarTools().getTimeZone("UTC"), Locale.ENGLISH);
         cal.setTimeInMillis(endMillis);
         final int hourOfDay = cal.get(Calendar.HOUR_OF_DAY);
         final int minutes = cal.get(Calendar.MINUTE);

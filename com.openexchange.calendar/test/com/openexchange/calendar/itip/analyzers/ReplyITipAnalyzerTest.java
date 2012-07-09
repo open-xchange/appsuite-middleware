@@ -68,6 +68,7 @@ import com.openexchange.data.conversion.ical.itip.ITipMessage;
 import com.openexchange.data.conversion.ical.itip.ITipMethod;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
@@ -254,7 +255,7 @@ public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
                 } else {
                     // External Participant
                     assertEquals(externalParticipant.getEmailAddress(), externalInMergedAppointment.getEmailAddress());
-                    assertEquals(CalendarDataObject.ACCEPT, externalInMergedAppointment.getConfirm());
+                    assertEquals(CalendarObject.ACCEPT, externalInMergedAppointment.getConfirm());
                 }
                 break;
             default:
@@ -395,7 +396,7 @@ public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
 
         // The reply contains an appointment
         CalendarDataObject appointment = appointment("123-123-123-123");
-        appointment.setRecurrenceType(CalendarDataObject.WEEKLY);
+        appointment.setRecurrenceType(CalendarObject.WEEKLY);
         appointment.setInterval(1);
         
         // And an exception
@@ -475,7 +476,7 @@ public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
                 } else {
                     // External Participant
                     assertEquals(externalParticipant.getEmailAddress(), externalInMergedAppointment.getEmailAddress());
-                    assertEquals(CalendarDataObject.ACCEPT, externalInMergedAppointment.getConfirm());
+                    assertEquals(CalendarObject.ACCEPT, externalInMergedAppointment.getConfirm());
                 }
                 break;
             default:

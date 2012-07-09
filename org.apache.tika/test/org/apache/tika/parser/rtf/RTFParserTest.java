@@ -22,12 +22,17 @@ import java.io.InputStream;
 import java.io.StringWriter;
 
 import javax.xml.transform.OutputKeys;
+import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.sax.SAXTransformerFactory;
 import javax.xml.transform.sax.TransformerHandler;
 import javax.xml.transform.stream.StreamResult;
 
 import org.apache.tika.Tika;
 import org.apache.tika.TikaTest;
+import org.apache.tika.metadata.ClimateForcast;
+import org.apache.tika.metadata.DublinCore;
+import org.apache.tika.metadata.HttpHeaders;
+import org.apache.tika.metadata.MSOffice;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.sax.WriteOutContentHandler;
@@ -61,7 +66,7 @@ public class RTFParserTest extends TikaTest {
                      new ParseContext());
         String content = writer.toString();
 
-        assertEquals("application/rtf", metadata.get(Metadata.CONTENT_TYPE));
+        assertEquals("application/rtf", metadata.get(HttpHeaders.CONTENT_TYPE));
         assertContains("Test", content);
         assertContains("indexation Word", content);
     }
@@ -131,7 +136,7 @@ public class RTFParserTest extends TikaTest {
 
         // Verify title, since it was also encoded with MS932:
         Result r = getResult("testRTF-ms932.rtf");
-        assertEquals("\u30bf\u30a4\u30c8\u30eb", r.metadata.get(Metadata.TITLE));
+        assertEquals("\u30bf\u30a4\u30c8\u30eb", r.metadata.get(DublinCore.TITLE));
     }
 
     public void testUmlautSpacesExtraction() throws Exception {
@@ -152,9 +157,9 @@ public class RTFParserTest extends TikaTest {
         // Verify title -- this title uses upr escape inside
         // title info field:
         assertEquals("\u30be\u30eb\u30b2\u3068\u5c3e\u5d0e\u3001\u6de1\u3005\u3068\u6700\u671f\u3000",
-                     r.metadata.get(Metadata.TITLE));
-        assertEquals("VMazel", r.metadata.get(Metadata.AUTHOR));
-        assertEquals("StarWriter", r.metadata.get(Metadata.COMMENT));
+                     r.metadata.get(DublinCore.TITLE));
+        assertEquals("VMazel", r.metadata.get(MSOffice.AUTHOR));
+        assertEquals("StarWriter", r.metadata.get(ClimateForcast.COMMENT));
         assertContains("1.", content);
         assertContains("4.", content);
        
@@ -233,11 +238,11 @@ public class RTFParserTest extends TikaTest {
 
         assertContains("Keyword1 Keyword2", content);
         assertEquals("Keyword1 Keyword2",
-                     r.metadata.get(Metadata.KEYWORDS));
+                     r.metadata.get(MSOffice.KEYWORDS));
 
         assertContains("Subject is here", content);
         assertEquals("Subject is here",
-                     r.metadata.get(Metadata.SUBJECT));
+                     r.metadata.get(DublinCore.SUBJECT));
 
         assertContains("Suddenly some Japanese text:", content);
         // Special version of (GHQ)
@@ -314,7 +319,7 @@ public class RTFParserTest extends TikaTest {
         
         StringWriter sw = new StringWriter();
         SAXTransformerFactory factory = (SAXTransformerFactory)
-                 SAXTransformerFactory.newInstance();
+                 TransformerFactory.newInstance();
         TransformerHandler handler = factory.newTransformerHandler();
         handler.getTransformer().setOutputProperty(OutputKeys.METHOD, "xml");
         handler.getTransformer().setOutputProperty(OutputKeys.INDENT, "no");

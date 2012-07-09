@@ -2,7 +2,6 @@ package com.openexchange.oauth.json.proxy;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -17,7 +16,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
-import com.openexchange.oauth.OAuthExceptionMessages;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;

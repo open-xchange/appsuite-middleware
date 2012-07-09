@@ -1037,7 +1037,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                 co.setRequestedFolder(searchobject.getFolder());
             } else {
                 final int ara[] = new int[1];
-                ara[0] = Appointment.PARTICIPANTS;
+                ara[0] = CalendarObject.PARTICIPANTS;
                 cols = recColl.enhanceCols(cols, ara, 1);
             }
             cols = recColl.checkAndAlterCols(cols);
@@ -1223,6 +1223,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         return getModifiedAppointmentsBetween(user_uid, start, end, cols, null, orderBy, orderDir);
     }
     
+    @Override
     public SearchIterator<Appointment> getAppointmentsBetween(Date start, Date end, int cols[], int orderBy, Order order) throws OXException, SQLException {
         if (session == null) {
             throw OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL.create();

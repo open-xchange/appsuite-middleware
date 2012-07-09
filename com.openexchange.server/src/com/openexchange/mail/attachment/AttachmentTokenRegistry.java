@@ -53,7 +53,6 @@ import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.timer.ScheduledTimerTask;

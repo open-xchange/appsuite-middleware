@@ -52,6 +52,7 @@ package com.openexchange.service.indexing.impl;
 import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.exception.OXException;
+import com.openexchange.mq.MQConstants;
 import com.openexchange.mq.MQService;
 import com.openexchange.mq.queue.MQQueueAsyncReceiver;
 import com.openexchange.mq.queue.MQQueueSender;
@@ -108,7 +109,7 @@ public final class IndexingServiceInit {
          */
 
         final Map<String, Object> params = new HashMap<String, Object>(1);
-        params.put(MQService.QUEUE_PARAM_DURABLE, Boolean.TRUE);
+        params.put(MQConstants.QUEUE_PARAM_DURABLE, Boolean.TRUE);
         service.lookupQueue(indexingQueue, true, params);
         /*
          * Create queue sender

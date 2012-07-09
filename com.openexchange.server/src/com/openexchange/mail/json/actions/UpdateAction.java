@@ -51,6 +51,7 @@ package com.openexchange.mail.json.actions;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.DataFields;
@@ -99,9 +100,9 @@ public final class UpdateAction extends AbstractMailAction {
             /*
              * Read in parameters
              */
-            final String sourceFolder = req.checkParameter(Mail.PARAMETER_FOLDERID);
+            final String sourceFolder = req.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
             final JSONObject bodyObj = (JSONObject) req.getRequest().getData();
-            final String destFolder = bodyObj.hasAndNotNull(FolderFields.FOLDER_ID) ? bodyObj.getString(FolderFields.FOLDER_ID) : null;
+            final String destFolder = bodyObj.hasAndNotNull(FolderChildFields.FOLDER_ID) ? bodyObj.getString(FolderChildFields.FOLDER_ID) : null;
             final Integer colorLabel =
                 bodyObj.hasAndNotNull(CommonFields.COLORLABEL) ? Integer.valueOf(bodyObj.getInt(CommonFields.COLORLABEL)) : null;
             final Integer flagBits =
@@ -127,7 +128,7 @@ public final class UpdateAction extends AbstractMailAction {
             jsonWriter.object();
             final String uid;
             {
-                String tmp = req.getParameter(Mail.PARAMETER_ID);
+                String tmp = req.getParameter(AJAXServlet.PARAMETER_ID);
                 if (null == tmp) {
                     tmp = req.getParameter(Mail.PARAMETER_MESSAGE_ID);
                     if (null == tmp) {

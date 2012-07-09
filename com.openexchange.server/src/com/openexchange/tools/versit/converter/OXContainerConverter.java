@@ -82,6 +82,7 @@ import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.activation.FileTypeMap;
 import javax.activation.MimetypesFileTypeMap;
 import javax.imageio.ImageIO;
 import javax.mail.internet.AddressException;
@@ -282,7 +283,7 @@ public class OXContainerConverter {
         try {
             final Task taskContainer = new Task();
             // CLASS
-            PrivacyProperty(taskContainer, object, P_CLASS, Task.PRIVATE_FLAG);
+            PrivacyProperty(taskContainer, object, P_CLASS, CommonObject.PRIVATE_FLAG);
             // COMPLETED
             DateTimeProperty(taskContainer, object, P_COMPLETED, Task.DATE_COMPLETED);
             // GEO is ignored
@@ -321,7 +322,7 @@ public class OXContainerConverter {
                 }
             }
             // SUMMARY
-            StringProperty(taskContainer, object, P_SUMMARY, Task.TITLE);
+            StringProperty(taskContainer, object, P_SUMMARY, CalendarObject.TITLE);
             // TODO UID
             // property = object.getProperty("UID");
             // if (property != null) {
@@ -332,8 +333,8 @@ public class OXContainerConverter {
             // }
             // URL is ignored
             // DUE and DURATION
-            if (!DateTimeProperty(taskContainer, object, "DUE", Task.END_DATE)) {
-                DurationProperty(taskContainer, object, "DURATION", P_DTSTART, Task.END_DATE);
+            if (!DateTimeProperty(taskContainer, object, "DUE", CalendarObject.END_DATE)) {
+                DurationProperty(taskContainer, object, "DURATION", P_DTSTART, CalendarObject.END_DATE);
             }
             // Multiple properties
             final int count = object.getPropertyCount();
@@ -373,7 +374,7 @@ public class OXContainerConverter {
                 taskContainer.setCategories(cats.toString());
             }
             // DESCRIPTION (fix: 7718)
-            StringProperty(taskContainer, object, P_DESCRIPTION, Task.NOTE);
+            StringProperty(taskContainer, object, P_DESCRIPTION, CalendarObject.NOTE);
             // VALARM
             AddAlarms(taskContainer, object);
             return taskContainer;
@@ -386,10 +387,10 @@ public class OXContainerConverter {
     public CalendarDataObject convertAppointment(final VersitObject object) throws ConverterException {
         final CalendarDataObject appContainer = new CalendarDataObject();
         // CLASS
-        PrivacyProperty(appContainer, object, P_CLASS, Task.PRIVATE_FLAG);
+        PrivacyProperty(appContainer, object, P_CLASS, CommonObject.PRIVATE_FLAG);
         // CREATED is ignored
         // DESCRIPTION
-        StringProperty(appContainer, object, P_DESCRIPTION, Appointment.NOTE);
+        StringProperty(appContainer, object, P_DESCRIPTION, CalendarObject.NOTE);
         // DTSTART
         Property property = object.getProperty(P_DTSTART);
         if (property != null) {
@@ -412,7 +413,7 @@ public class OXContainerConverter {
         // TODO SEQUENCE
         // STATUS is ignored
         // SUMMARY
-        StringProperty(appContainer, object, P_SUMMARY, Appointment.TITLE);
+        StringProperty(appContainer, object, P_SUMMARY, CalendarObject.TITLE);
         // TRANSP
         property = object.getProperty("TRANSP");
         if (property != null) {
@@ -436,13 +437,13 @@ public class OXContainerConverter {
         // URL is ignored
         // TODO RECURRENCE-ID
         // DTEND and DURATION
-        if (!DateTimeProperty(appContainer, object, "DTEND", Appointment.END_DATE) && !DurationProperty(
+        if (!DateTimeProperty(appContainer, object, "DTEND", CalendarObject.END_DATE) && !DurationProperty(
             appContainer,
             object,
             "DURATION",
             P_DTSTART,
-            Appointment.END_DATE)) {
-            DateTimeProperty(appContainer, object, "DSTART", Appointment.END_DATE);
+            CalendarObject.END_DATE)) {
+            DateTimeProperty(appContainer, object, "DSTART", CalendarObject.END_DATE);
         }
         // Multiple properties
         final StringBuilder cats = new StringBuilder();
@@ -651,7 +652,7 @@ public class OXContainerConverter {
         // URL
         StringProperty(contactContainer, object, "URL", Contact.URL);
         // UID
-        StringProperty(contactContainer, object, "UID", Contact.UID);
+        StringProperty(contactContainer, object, "UID", CommonObject.UID);
         // VERSION is ignored
         // TODO CLASS
         // KEY is ignored
@@ -855,7 +856,7 @@ public class OXContainerConverter {
                 }
             }
         }
-        ListValue(contactContainer, Contact.CATEGORIES, cats, ",");
+        ListValue(contactContainer, CommonObject.CATEGORIES, cats, ",");
 
         return contactContainer;
     }
@@ -1177,7 +1178,7 @@ public class OXContainerConverter {
             throw new ConverterException("RRULE without DTSTART");
         }
         final Calendar cal = ((DateTimeValue) start.getValue()).calendar;
-        final int[] recurTypes = { Task.NONE, Task.NONE, Task.NONE, Task.DAILY, Task.WEEKLY, Task.MONTHLY, Task.YEARLY };
+        final int[] recurTypes = { CalendarObject.NONE, CalendarObject.NONE, CalendarObject.NONE, CalendarObject.DAILY, CalendarObject.WEEKLY, CalendarObject.MONTHLY, CalendarObject.YEARLY };
         calContainerObj.setRecurrenceType(recurTypes[recur.Freq]);
         if (recur.Until != null) {
             calContainerObj.setUntil(recur.Until.calendar.getTime());
@@ -2087,7 +2088,7 @@ public class OXContainerConverter {
     }
 
     private static String getMimeType(final String filename) {
-        return MimetypesFileTypeMap.getDefaultFileTypeMap().getContentType(filename);
+        return FileTypeMap.getDefaultFileTypeMap().getContentType(filename);
     }
 
     private static boolean isValidImage(final byte[] data) {

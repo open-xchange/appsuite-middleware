@@ -60,6 +60,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13Connection;
+import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.ajp13.AbstractAJPv13Request;
 import com.openexchange.ajp13.AJPv13RequestHandler;
 import com.openexchange.ajp13.AJPv13Response;
@@ -507,7 +508,7 @@ public final class AJPv13Task implements Task<Object>, com.openexchange.ajp13.wa
                     monitor.incrementNumRequests();
                     processing = false;
                 }
-                AJPv13ServerImpl.decrementNumberOfOpenAJPSockets();
+                AJPv13Server.decrementNumberOfOpenAJPSockets();
                 /*
                  * Drop logging info for executing thread
                  */

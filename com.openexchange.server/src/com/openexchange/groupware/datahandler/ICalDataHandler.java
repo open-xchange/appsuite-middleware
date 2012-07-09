@@ -66,6 +66,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.CalendarFields;
+import com.openexchange.ajax.fields.DataFields;
+import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.configuration.ServerConfig;
@@ -107,7 +109,7 @@ public abstract class ICalDataHandler implements DataHandler {
         for (final Task task : tasks) {
             task.setParentFolderID(taskFolder);
             taskSql.insertTaskObject(task);
-            folderAndIdArray.put(new JSONObject().put(CalendarFields.FOLDER_ID, taskFolder).put(CalendarFields.ID, task.getObjectID()));
+            folderAndIdArray.put(new JSONObject().put(FolderChildFields.FOLDER_ID, taskFolder).put(DataFields.ID, task.getObjectID()));
         }
     }
 
@@ -140,13 +142,13 @@ public abstract class ICalDataHandler implements DataHandler {
                 appointment.setObjectID(objectId);
                 appointment.setIgnoreConflicts(true);
                 updateAppointment(appointment, calendarFolder, appointmentSql);
-                folderAndIdArray.put(new JSONObject().put(CalendarFields.FOLDER_ID, calendarFolder).put(CalendarFields.ID, objectId));
+                folderAndIdArray.put(new JSONObject().put(FolderChildFields.FOLDER_ID, calendarFolder).put(DataFields.ID, objectId));
             } else {
                 appointment.setParentFolderID(calendarFolder);
                 appointment.setIgnoreConflicts(true);
                 appointmentSql.insertAppointmentObject(appointment);
-                folderAndIdArray.put(new JSONObject().put(CalendarFields.FOLDER_ID, calendarFolder).put(
-                    CalendarFields.ID,
+                folderAndIdArray.put(new JSONObject().put(FolderChildFields.FOLDER_ID, calendarFolder).put(
+                    DataFields.ID,
                     appointment.getObjectID()));
             }
         }

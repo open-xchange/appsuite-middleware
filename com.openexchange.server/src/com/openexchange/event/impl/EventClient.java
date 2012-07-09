@@ -74,10 +74,10 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -715,7 +715,7 @@ public class EventClient {
             }
             for (final UserParticipant participant : object.getUsers()) {
                 final int participantId = participant.getIdentifier();
-                if (UserParticipant.NO_ID == participantId) {
+                if (Participant.NO_ID == participantId) {
                     continue;
                 }
                 getFolderSet(retval, participantId);

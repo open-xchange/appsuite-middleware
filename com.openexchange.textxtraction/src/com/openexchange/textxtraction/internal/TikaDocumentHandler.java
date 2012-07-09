@@ -59,6 +59,7 @@ import java.io.Writer;
 import java.nio.charset.UnsupportedCharsetException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.sax.SAXTransformerFactory;
 import javax.xml.transform.sax.TransformerHandler;
 import javax.xml.transform.stream.StreamResult;
@@ -297,7 +298,7 @@ public final class TikaDocumentHandler {
      * @throws TransformerConfigurationException if the transformer can not be created
      */
     protected static TransformerHandler getTransformerHandler(final OutputStream output, final String method, final String encoding) throws TransformerConfigurationException {
-        final SAXTransformerFactory factory = (SAXTransformerFactory) SAXTransformerFactory.newInstance();
+        final SAXTransformerFactory factory = (SAXTransformerFactory) TransformerFactory.newInstance();
         final TransformerHandler handler = factory.newTransformerHandler();
         handler.getTransformer().setOutputProperty(OutputKeys.METHOD, method);
         handler.getTransformer().setOutputProperty(OutputKeys.INDENT, "yes");

@@ -21,11 +21,15 @@ import java.io.StringWriter;
 import java.util.Locale;
 
 import javax.xml.transform.OutputKeys;
+import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.sax.SAXTransformerFactory;
 import javax.xml.transform.sax.TransformerHandler;
 import javax.xml.transform.stream.StreamResult;
 
 import org.apache.tika.TikaTest;
+import org.apache.tika.metadata.DublinCore;
+import org.apache.tika.metadata.HttpHeaders;
+import org.apache.tika.metadata.MSOffice;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.microsoft.ooxml.OOXMLParserTest;
@@ -44,9 +48,9 @@ public class WordParserTest extends TikaTest {
 
             assertEquals(
                     "application/msword",
-                    metadata.get(Metadata.CONTENT_TYPE));
-            assertEquals("Sample Word Document", metadata.get(Metadata.TITLE));
-            assertEquals("Keith Bennett", metadata.get(Metadata.AUTHOR));
+                    metadata.get(HttpHeaders.CONTENT_TYPE));
+            assertEquals("Sample Word Document", metadata.get(DublinCore.TITLE));
+            assertEquals("Keith Bennett", metadata.get(MSOffice.AUTHOR));
             assertTrue(handler.toString().contains("Sample Word Document"));
         } finally {
             input.close();
@@ -83,7 +87,7 @@ public class WordParserTest extends TikaTest {
         
         StringWriter sw = new StringWriter();
         SAXTransformerFactory factory = (SAXTransformerFactory)
-                 SAXTransformerFactory.newInstance();
+                 TransformerFactory.newInstance();
         TransformerHandler handler = factory.newTransformerHandler();
         handler.getTransformer().setOutputProperty(OutputKeys.METHOD, "xml");
         handler.getTransformer().setOutputProperty(OutputKeys.INDENT, "no");
@@ -113,9 +117,9 @@ public class WordParserTest extends TikaTest {
 
         assertEquals(
                      "application/msword",
-                     metadata.get(Metadata.CONTENT_TYPE));
-        assertEquals("Sample Word Document", metadata.get(Metadata.TITLE));
-        assertEquals("Keith Bennett", metadata.get(Metadata.AUTHOR));
+                     metadata.get(HttpHeaders.CONTENT_TYPE));
+        assertEquals("Sample Word Document", metadata.get(DublinCore.TITLE));
+        assertEquals("Keith Bennett", metadata.get(MSOffice.AUTHOR));
         assertTrue(xml.contains("Sample Word Document"));
 
         // Check that custom headings came through
@@ -175,10 +179,10 @@ public class WordParserTest extends TikaTest {
 
             assertEquals(
                     "application/msword",
-                    metadata.get(Metadata.CONTENT_TYPE));
-            assertEquals("The quick brown fox jumps over the lazy dog", metadata.get(Metadata.TITLE));
-            assertEquals("Gym class featuring a brown fox and lazy dog", metadata.get(Metadata.SUBJECT));
-            assertEquals("Nevin Nollop", metadata.get(Metadata.AUTHOR));
+                    metadata.get(HttpHeaders.CONTENT_TYPE));
+            assertEquals("The quick brown fox jumps over the lazy dog", metadata.get(DublinCore.TITLE));
+            assertEquals("Gym class featuring a brown fox and lazy dog", metadata.get(DublinCore.SUBJECT));
+            assertEquals("Nevin Nollop", metadata.get(MSOffice.AUTHOR));
             assertTrue(handler.toString().contains("The quick brown fox jumps over the lazy dog"));
         } finally {
             input.close();
@@ -237,11 +241,11 @@ public class WordParserTest extends TikaTest {
 
         assertContains("Keyword1 Keyword2", content);
         assertEquals("Keyword1 Keyword2",
-                     metadata.get(Metadata.KEYWORDS));
+                     metadata.get(MSOffice.KEYWORDS));
 
         assertContains("Subject is here", content);
         assertEquals("Subject is here",
-                     metadata.get(Metadata.SUBJECT));
+                     metadata.get(DublinCore.SUBJECT));
 
         assertContains("Suddenly some Japanese text:", content);
         // Special version of (GHQ)
@@ -270,20 +274,20 @@ public class WordParserTest extends TikaTest {
           input.close();
        }
        
-       assertEquals("application/msword",   metadata.get(Metadata.CONTENT_TYPE));
-       assertEquals("EJ04325S",             metadata.get(Metadata.AUTHOR));
-       assertEquals("Etienne Jouvin",       metadata.get(Metadata.LAST_AUTHOR));
-       assertEquals("2012-01-03T22:14:00Z", metadata.get(Metadata.LAST_SAVED));
-       assertEquals("2010-10-05T09:03:00Z", metadata.get(Metadata.CREATION_DATE));
-       assertEquals("Microsoft Office Word",metadata.get(Metadata.APPLICATION_NAME));
-       assertEquals("1",                    metadata.get(Metadata.PAGE_COUNT));
-       assertEquals("2",                    metadata.get(Metadata.WORD_COUNT));
-       assertEquals("My Title",             metadata.get(Metadata.TITLE));
-       assertEquals("My Keyword",           metadata.get(Metadata.KEYWORDS));
-       assertEquals("Normal.dotm",          metadata.get(Metadata.TEMPLATE));
-       assertEquals("My Comments",          metadata.get(Metadata.COMMENTS));
-       assertEquals("My subject",           metadata.get(Metadata.SUBJECT));
-       assertEquals("EDF-DIT",              metadata.get(Metadata.COMPANY));
+       assertEquals("application/msword",   metadata.get(HttpHeaders.CONTENT_TYPE));
+       assertEquals("EJ04325S",             metadata.get(MSOffice.AUTHOR));
+       assertEquals("Etienne Jouvin",       metadata.get(MSOffice.LAST_AUTHOR));
+       assertEquals("2012-01-03T22:14:00Z", metadata.get(MSOffice.LAST_SAVED));
+       assertEquals("2010-10-05T09:03:00Z", metadata.get(MSOffice.CREATION_DATE));
+       assertEquals("Microsoft Office Word",metadata.get(MSOffice.APPLICATION_NAME));
+       assertEquals("1",                    metadata.get(MSOffice.PAGE_COUNT));
+       assertEquals("2",                    metadata.get(MSOffice.WORD_COUNT));
+       assertEquals("My Title",             metadata.get(DublinCore.TITLE));
+       assertEquals("My Keyword",           metadata.get(MSOffice.KEYWORDS));
+       assertEquals("Normal.dotm",          metadata.get(MSOffice.TEMPLATE));
+       assertEquals("My Comments",          metadata.get(MSOffice.COMMENTS));
+       assertEquals("My subject",           metadata.get(DublinCore.SUBJECT));
+       assertEquals("EDF-DIT",              metadata.get(MSOffice.COMPANY));
        assertEquals("MyStringValue",        metadata.get("custom:MyCustomString"));
        assertEquals("2010-12-30T23:00:00Z", metadata.get("custom:MyCustomDate"));
     }

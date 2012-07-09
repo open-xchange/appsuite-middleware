@@ -51,6 +51,7 @@ package com.openexchange.mail.json.actions;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
@@ -101,7 +102,7 @@ public final class GetUpdatesAction extends AbstractMailAction {
              * Read in parameters
              */
             final String folderId = req.checkParameter(Mail.PARAMETER_MAILFOLDER);
-            final String ignore = req.getParameter(Mail.PARAMETER_IGNORE);
+            final String ignore = req.getParameter(AJAXServlet.PARAMETER_IGNORE);
             boolean bIgnoreDelete = false;
             boolean bIgnoreModified = false;
             if (ignore != null && ignore.indexOf("deleted") != -1) {
@@ -113,7 +114,7 @@ public final class GetUpdatesAction extends AbstractMailAction {
             final OXJSONWriter jsonWriter = new OXJSONWriter();
             jsonWriter.array();
             if (!bIgnoreModified || !bIgnoreDelete) {
-                final int[] columns = req.checkIntArray(Mail.PARAMETER_COLUMNS);
+                final int[] columns = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
                 final int userId = session.getUserId();
                 final int contextId = session.getContextId();
                 final MailServletInterface mailInterface = getMailInterface(req);

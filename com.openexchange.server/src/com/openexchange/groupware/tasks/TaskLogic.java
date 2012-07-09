@@ -204,7 +204,7 @@ public final class TaskLogic {
             task.setPrivateFlag(false);
         }
         if (!task.containsRecurrenceType()) {
-            task.setRecurrenceType(Task.NO_RECURRENCE);
+            task.setRecurrenceType(CalendarObject.NO_RECURRENCE);
         }
         if (!task.containsNumberOfAttachments()) {
             task.setNumberOfAttachments(0);
@@ -358,24 +358,24 @@ public final class TaskLogic {
      * @throws OXException if a necessary recurrence attribute is missing.
      */
     private static void checkRecurrence(final Task task, final Task oldTask) throws OXException {
-        if (Task.NO_RECURRENCE == task.getRecurrenceType() && oldTask != null && Task.NO_RECURRENCE == oldTask.getRecurrenceType()) {
+        if (CalendarObject.NO_RECURRENCE == task.getRecurrenceType() && oldTask != null && CalendarObject.NO_RECURRENCE == oldTask.getRecurrenceType()) {
             return;
         }
         // First simple checks on start and end date.
-        if (Task.NO_RECURRENCE != task.getRecurrenceType()) {
+        if (CalendarObject.NO_RECURRENCE != task.getRecurrenceType()) {
             if (null == oldTask) {
                 if (!task.containsStartDate()) {
-                    throw TaskExceptionCode.MISSING_RECURRENCE_VALUE.create(Integer.valueOf(Task.START_DATE));
+                    throw TaskExceptionCode.MISSING_RECURRENCE_VALUE.create(Integer.valueOf(CalendarObject.START_DATE));
                 }
                 if (!task.containsEndDate()) {
-                    throw TaskExceptionCode.MISSING_RECURRENCE_VALUE.create(Integer.valueOf(Task.END_DATE));
+                    throw TaskExceptionCode.MISSING_RECURRENCE_VALUE.create(Integer.valueOf(CalendarObject.END_DATE));
                 }
             } else {
                 if (task.containsStartDate() && null == task.getStartDate()) {
-                    throw TaskExceptionCode.MISSING_RECURRENCE_VALUE.create(Integer.valueOf(Task.START_DATE));
+                    throw TaskExceptionCode.MISSING_RECURRENCE_VALUE.create(Integer.valueOf(CalendarObject.START_DATE));
                 }
                 if (task.containsEndDate() && null == task.getEndDate()) {
-                    throw TaskExceptionCode.MISSING_RECURRENCE_VALUE.create(Integer.valueOf(Task.START_DATE));
+                    throw TaskExceptionCode.MISSING_RECURRENCE_VALUE.create(Integer.valueOf(CalendarObject.START_DATE));
                 }
             }
         }
@@ -383,7 +383,7 @@ public final class TaskLogic {
         copyRecurringValues(task, oldTask);
         // Remove values for check
         boolean daysRemoved = false;
-        if (Task.NO_RECURRENCE != task.getRecurrenceType() && task.containsDays() && 0 == task.getDays()) {
+        if (CalendarObject.NO_RECURRENCE != task.getRecurrenceType() && task.containsDays() && 0 == task.getDays()) {
             daysRemoved = true;
             task.removeDays();
         }
@@ -421,26 +421,26 @@ public final class TaskLogic {
         if (null == oldTask) {
             return;
         }
-        if ((task.containsRecurrenceType() && Task.NO_RECURRENCE != task.getRecurrenceType()) || (!task.containsRecurrenceType() && oldTask.containsRecurrenceType())) {
+        if ((task.containsRecurrenceType() && CalendarObject.NO_RECURRENCE != task.getRecurrenceType()) || (!task.containsRecurrenceType() && oldTask.containsRecurrenceType())) {
             if (!task.containsRecurrenceType()) {
                 task.setRecurrenceType(oldTask.getRecurrenceType());
             }
-            if (Task.DAILY == task.getRecurrenceType() || Task.WEEKLY == task.getRecurrenceType() || Task.MONTHLY == task.getRecurrenceType()) {
+            if (CalendarObject.DAILY == task.getRecurrenceType() || CalendarObject.WEEKLY == task.getRecurrenceType() || CalendarObject.MONTHLY == task.getRecurrenceType()) {
                 if (!task.containsInterval() && oldTask.containsInterval()) {
                     task.setInterval(oldTask.getInterval());
                 }
             }
-            if (Task.WEEKLY == task.getRecurrenceType()) {
+            if (CalendarObject.WEEKLY == task.getRecurrenceType()) {
                 if (!task.containsDays() && oldTask.containsDays()) {
                     task.setDays(oldTask.getDays());
                 }
             }
-            if (Task.MONTHLY == task.getRecurrenceType() || Task.YEARLY == task.getRecurrenceType()) {
+            if (CalendarObject.MONTHLY == task.getRecurrenceType() || CalendarObject.YEARLY == task.getRecurrenceType()) {
                 if (!task.containsDayInMonth() && oldTask.containsDayInMonth()) {
                     task.setDayInMonth(oldTask.getDayInMonth());
                 }
             }
-            if (Task.YEARLY == task.getRecurrenceType()) {
+            if (CalendarObject.YEARLY == task.getRecurrenceType()) {
                 if (!task.containsMonth() && oldTask.containsMonth()) {
                     task.setMonth(oldTask.getMonth());
                 }
@@ -615,7 +615,7 @@ public final class TaskLogic {
         // If the end of recurrence information is changed from 'after x occurrences' to 'at *date*'
         // the field recurrence_count has explicitly to be unset.
         if (oldTask.containsOccurrence() && !task.containsOccurrence()) {
-            fields.add(I(Task.RECURRENCE_COUNT));
+            fields.add(I(CalendarObject.RECURRENCE_COUNT));
         }
 
         final int[] retval = new int[fields.size()];

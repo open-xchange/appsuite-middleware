@@ -53,7 +53,10 @@ import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Folder;
+import com.openexchange.ajax.fields.DataFields;
+import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
@@ -95,23 +98,23 @@ public class FolderParser {
     }
 
     public static int getModuleFromString(final String moduleStr, final int objectId) throws OXException {
-        if (moduleStr.equalsIgnoreCase(Folder.MODULE_TASK)) {
+        if (moduleStr.equalsIgnoreCase(AJAXServlet.MODULE_TASK)) {
             return FolderObject.TASK;
-        } else if (moduleStr.equalsIgnoreCase(Folder.MODULE_CALENDAR)) {
+        } else if (moduleStr.equalsIgnoreCase(AJAXServlet.MODULE_CALENDAR)) {
             return FolderObject.CALENDAR;
-        } else if (moduleStr.equalsIgnoreCase(Folder.MODULE_CONTACT)) {
+        } else if (moduleStr.equalsIgnoreCase(AJAXServlet.MODULE_CONTACT)) {
             return FolderObject.CONTACT;
-        } else if (moduleStr.equalsIgnoreCase(Folder.MODULE_UNBOUND)) {
+        } else if (moduleStr.equalsIgnoreCase(AJAXServlet.MODULE_UNBOUND)) {
             return FolderObject.UNBOUND;
-        } else if (moduleStr.equalsIgnoreCase(Folder.MODULE_MAIL)) {
+        } else if (moduleStr.equalsIgnoreCase(AJAXServlet.MODULE_MAIL)) {
             return FolderObject.MAIL;
-        } else if (moduleStr.equalsIgnoreCase(Folder.MODULE_PROJECT)) {
+        } else if (moduleStr.equalsIgnoreCase(AJAXServlet.MODULE_PROJECT)) {
             return FolderObject.PROJECT;
-        } else if (moduleStr.equalsIgnoreCase(Folder.MODULE_INFOSTORE)) {
+        } else if (moduleStr.equalsIgnoreCase(AJAXServlet.MODULE_INFOSTORE)) {
             return FolderObject.INFOSTORE;
-        } else if (moduleStr.equals(Folder.MODULE_MESSAGING)) {
+        } else if (moduleStr.equals(AJAXServlet.MODULE_MESSAGING)) {
             return FolderObject.MESSAGING;
-        } else if (moduleStr.equalsIgnoreCase(Folder.MODULE_SYSTEM)) {
+        } else if (moduleStr.equalsIgnoreCase(AJAXServlet.MODULE_SYSTEM)) {
             if (objectId == FolderObject.SYSTEM_OX_PROJECT_FOLDER_ID) {
                 return FolderObject.PROJECT;
             } else if (objectId == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
@@ -126,16 +129,16 @@ public class FolderParser {
 
     protected void parseElementFolder(final FolderObject fo, final JSONObject jsonObj) throws OXException,
             JSONException {
-        if (jsonObj.has(FolderFields.ID)) {
-            if (fo.containsObjectID() && fo.getObjectID() != jsonObj.getInt(FolderFields.ID)) {
-                throw OXFolderExceptionCode.PARAMETER_MISMATCH.create(FolderFields.ID, FolderFields.ID);
+        if (jsonObj.has(DataFields.ID)) {
+            if (fo.containsObjectID() && fo.getObjectID() != jsonObj.getInt(DataFields.ID)) {
+                throw OXFolderExceptionCode.PARAMETER_MISMATCH.create(DataFields.ID, DataFields.ID);
             }
             if (!fo.containsObjectID()) {
-                fo.setObjectID(jsonObj.getInt(FolderFields.ID));
+                fo.setObjectID(jsonObj.getInt(DataFields.ID));
             }
         }
-        if (jsonObj.has(FolderFields.FOLDER_ID)) {
-            fo.setParentFolderID(jsonObj.getInt(FolderFields.FOLDER_ID));
+        if (jsonObj.has(FolderChildFields.FOLDER_ID)) {
+            fo.setParentFolderID(jsonObj.getInt(FolderChildFields.FOLDER_ID));
         }
         if (jsonObj.has(FolderFields.TITLE)) {
             fo.setFolderName(jsonObj.getString(FolderFields.TITLE));

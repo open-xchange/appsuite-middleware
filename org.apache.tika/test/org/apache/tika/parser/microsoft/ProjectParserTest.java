@@ -18,6 +18,9 @@ package org.apache.tika.parser.microsoft;
 
 import java.io.InputStream;
 
+import org.apache.tika.metadata.DublinCore;
+import org.apache.tika.metadata.HttpHeaders;
+import org.apache.tika.metadata.MSOffice;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.sax.BodyContentHandler;
@@ -59,21 +62,21 @@ public class ProjectParserTest extends TestCase {
 
        assertEquals(
                "application/vnd.ms-project",
-               metadata.get(Metadata.CONTENT_TYPE));
+               metadata.get(HttpHeaders.CONTENT_TYPE));
        
-       assertEquals("The quick brown fox jumps over the lazy dog", metadata.get(Metadata.TITLE));
-       assertEquals("Gym class featuring a brown fox and lazy dog", metadata.get(Metadata.SUBJECT));
-       assertEquals("Nevin Nollop", metadata.get(Metadata.AUTHOR));
-       assertEquals("", metadata.get(Metadata.LAST_AUTHOR));
-       assertEquals("Pangram, fox, dog", metadata.get(Metadata.KEYWORDS));
-       assertEquals("Comment Vulpes vulpes comment", metadata.get(Metadata.COMMENTS));
+       assertEquals("The quick brown fox jumps over the lazy dog", metadata.get(DublinCore.TITLE));
+       assertEquals("Gym class featuring a brown fox and lazy dog", metadata.get(DublinCore.SUBJECT));
+       assertEquals("Nevin Nollop", metadata.get(MSOffice.AUTHOR));
+       assertEquals("", metadata.get(MSOffice.LAST_AUTHOR));
+       assertEquals("Pangram, fox, dog", metadata.get(MSOffice.KEYWORDS));
+       assertEquals("Comment Vulpes vulpes comment", metadata.get(MSOffice.COMMENTS));
        
-       assertEquals("Category1", metadata.get(Metadata.CATEGORY));
-       assertEquals("Mr Burns", metadata.get(Metadata.MANAGER));
-       assertEquals("CompanyA", metadata.get(Metadata.COMPANY));
+       assertEquals("Category1", metadata.get(MSOffice.CATEGORY));
+       assertEquals("Mr Burns", metadata.get(MSOffice.MANAGER));
+       assertEquals("CompanyA", metadata.get(MSOffice.COMPANY));
        
-       assertEquals("2011-11-24T10:58:00Z", metadata.get(Metadata.CREATION_DATE));
-       assertEquals("2011-11-24T11:31:00Z", metadata.get(Metadata.LAST_SAVED));
+       assertEquals("2011-11-24T10:58:00Z", metadata.get(MSOffice.CREATION_DATE));
+       assertEquals("2011-11-24T11:31:00Z", metadata.get(MSOffice.LAST_SAVED));
        
        // Custom Project metadata is present with prefix
        assertEquals("0%", metadata.get("custom:% Complete"));

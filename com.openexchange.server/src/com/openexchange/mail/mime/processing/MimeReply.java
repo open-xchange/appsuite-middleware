@@ -97,7 +97,6 @@ import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
-import com.openexchange.mail.mime.filler.MimeMessageFiller;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.InlineContentHandler;

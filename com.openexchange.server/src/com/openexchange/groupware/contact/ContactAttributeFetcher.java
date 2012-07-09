@@ -52,7 +52,10 @@ package com.openexchange.groupware.contact;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.ContactFields;
+import com.openexchange.ajax.fields.DataFields;
+import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.search.SearchAttributeFetcher;
 
@@ -665,7 +668,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
          * Common fields
          */
 
-        m.put(ContactFields.CATEGORIES, new AttributeGetter() {
+        m.put(CommonFields.CATEGORIES, new AttributeGetter() {
 
             @Override
             public Object getObject(final Contact candidate) {
@@ -673,7 +676,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
             }
         });
 
-        m.put(ContactFields.COLORLABEL, new AttributeGetter() {
+        m.put(CommonFields.COLORLABEL, new AttributeGetter() {
 
             @Override
             public Object getObject(final Contact candidate) {
@@ -681,7 +684,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
             }
         });
 
-        m.put(ContactFields.CREATED_BY, new AttributeGetter() {
+        m.put(DataFields.CREATED_BY, new AttributeGetter() {
 
             @Override
             public Object getObject(final Contact candidate) {
@@ -689,7 +692,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
             }
         });
 
-        m.put(ContactFields.CREATION_DATE, new AttributeGetter() {
+        m.put(DataFields.CREATION_DATE, new AttributeGetter() {
 
             @Override
             public Object getObject(final Contact candidate) {
@@ -697,7 +700,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
             }
         });
 
-        m.put(ContactFields.FOLDER_ID, new AttributeGetter() {
+        m.put(FolderChildFields.FOLDER_ID, new AttributeGetter() {
 
             @Override
             public Object getObject(final Contact candidate) {
@@ -705,7 +708,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
             }
         });
 
-        m.put(ContactFields.ID, new AttributeGetter() {
+        m.put(DataFields.ID, new AttributeGetter() {
 
             @Override
             public Object getObject(final Contact candidate) {
@@ -713,7 +716,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
             }
         });
 
-        m.put(ContactFields.LAST_MODIFIED, new AttributeGetter() {
+        m.put(DataFields.LAST_MODIFIED, new AttributeGetter() {
 
             @Override
             public Object getObject(final Contact candidate) {
@@ -721,7 +724,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
             }
         });
 
-        m.put(ContactFields.MODIFIED_BY, new AttributeGetter() {
+        m.put(DataFields.MODIFIED_BY, new AttributeGetter() {
 
             @Override
             public Object getObject(final Contact candidate) {
@@ -729,7 +732,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
             }
         });
 
-        m.put(ContactFields.PRIVATE_FLAG, new AttributeGetter() {
+        m.put(CommonFields.PRIVATE_FLAG, new AttributeGetter() {
 
             @Override
             public Object getObject(final Contact candidate) {

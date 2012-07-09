@@ -23,7 +23,11 @@ import junit.framework.TestCase;
 
 import org.apache.tika.detect.DefaultDetector;
 import org.apache.tika.detect.Detector;
+import org.apache.tika.metadata.DublinCore;
+import org.apache.tika.metadata.HttpHeaders;
+import org.apache.tika.metadata.MSOffice;
 import org.apache.tika.metadata.Metadata;
+import org.apache.tika.metadata.TikaMetadataKeys;
 import org.apache.tika.mime.MediaType;
 import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.parser.ParseContext;
@@ -44,15 +48,15 @@ public class ExcelParserTest extends TestCase {
 
             assertEquals(
                     "application/vnd.ms-excel",
-                    metadata.get(Metadata.CONTENT_TYPE));
-            assertEquals("Simple Excel document", metadata.get(Metadata.TITLE));
-            assertEquals("Keith Bennett", metadata.get(Metadata.AUTHOR));
+                    metadata.get(HttpHeaders.CONTENT_TYPE));
+            assertEquals("Simple Excel document", metadata.get(DublinCore.TITLE));
+            assertEquals("Keith Bennett", metadata.get(MSOffice.AUTHOR));
             
             // Mon Oct 01 17:13:56 BST 2007
-            assertEquals("2007-10-01T16:13:56Z", metadata.get(Metadata.CREATION_DATE));
+            assertEquals("2007-10-01T16:13:56Z", metadata.get(MSOffice.CREATION_DATE));
             
             // Mon Oct 01 17:31:43 BST 2007
-            assertEquals("2007-10-01T16:31:43Z", metadata.get(Metadata.LAST_SAVED));
+            assertEquals("2007-10-01T16:31:43Z", metadata.get(MSOffice.LAST_SAVED));
             
             String content = handler.toString();
             assertTrue(content.contains("Sample Excel Worksheet"));
@@ -79,7 +83,7 @@ public class ExcelParserTest extends TestCase {
 
             assertEquals(
                     "application/vnd.ms-excel",
-                    metadata.get(Metadata.CONTENT_TYPE));
+                    metadata.get(HttpHeaders.CONTENT_TYPE));
 
             String content = handler.toString();
 
@@ -154,7 +158,7 @@ public class ExcelParserTest extends TestCase {
         
             assertEquals(
                     "application/vnd.ms-excel",
-                    metadata.get(Metadata.CONTENT_TYPE));
+                    metadata.get(HttpHeaders.CONTENT_TYPE));
         
             String content = handler.toString();
             
@@ -191,7 +195,7 @@ public class ExcelParserTest extends TestCase {
 
             assertEquals(
                     "application/vnd.ms-excel",
-                    metadata.get(Metadata.CONTENT_TYPE));
+                    metadata.get(HttpHeaders.CONTENT_TYPE));
             String content = handler.toString();
             assertTrue(content.contains("Number Formats"));
         } finally {
@@ -228,7 +232,7 @@ public class ExcelParserTest extends TestCase {
        InputStream input = ExcelParserTest.class.getResourceAsStream(
              "/test-documents/testEXCEL.xlsb");
        Metadata m = new Metadata();
-       m.add(Metadata.RESOURCE_NAME_KEY, "excel.xlsb");
+       m.add(TikaMetadataKeys.RESOURCE_NAME_KEY, "excel.xlsb");
        
        // Should be detected correctly
        MediaType type = null;
@@ -278,12 +282,12 @@ public class ExcelParserTest extends TestCase {
           input.close();
        }
        
-       assertEquals("application/vnd.ms-excel", metadata.get(Metadata.CONTENT_TYPE));
-       assertEquals("",                     metadata.get(Metadata.AUTHOR));
-       assertEquals("",                     metadata.get(Metadata.LAST_AUTHOR));
-       assertEquals("2011-08-22T13:45:54Z", metadata.get(Metadata.LAST_SAVED));
-       assertEquals("2006-09-12T15:06:44Z", metadata.get(Metadata.CREATION_DATE));
-       assertEquals("Microsoft Excel",      metadata.get(Metadata.APPLICATION_NAME));
+       assertEquals("application/vnd.ms-excel", metadata.get(HttpHeaders.CONTENT_TYPE));
+       assertEquals("",                     metadata.get(MSOffice.AUTHOR));
+       assertEquals("",                     metadata.get(MSOffice.LAST_AUTHOR));
+       assertEquals("2011-08-22T13:45:54Z", metadata.get(MSOffice.LAST_SAVED));
+       assertEquals("2006-09-12T15:06:44Z", metadata.get(MSOffice.CREATION_DATE));
+       assertEquals("Microsoft Excel",      metadata.get(MSOffice.APPLICATION_NAME));
        assertEquals("true",                 metadata.get("custom:myCustomBoolean"));
        assertEquals("3",                    metadata.get("custom:myCustomNumber"));
        assertEquals("MyStringValue",        metadata.get("custom:MyCustomString"));

@@ -8,8 +8,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.activation.UnsupportedDataTypeException;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.http.client.AbstractHTTPClient;
 import com.openexchange.http.client.HTTPClient;

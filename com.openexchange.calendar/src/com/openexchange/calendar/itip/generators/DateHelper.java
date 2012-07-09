@@ -60,6 +60,7 @@ import java.util.TimeZone;
 import com.openexchange.calendar.itip.HumanReadableRecurrences;
 import com.openexchange.calendar.itip.Messages;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.CalendarObject;
 
 
 /**
@@ -83,8 +84,8 @@ public class DateHelper {
         super();
         this.appointment = appointment;
         if (locale != null && tz != null) {
-            timeFormat = SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT, locale);
-            dateFormat = SimpleDateFormat.getDateInstance(SimpleDateFormat.FULL, locale);
+            timeFormat = DateFormat.getTimeInstance(DateFormat.SHORT, locale);
+            dateFormat = DateFormat.getDateInstance(DateFormat.FULL, locale);
             this.locale = locale;
             this.timezone = tz;
             weekdayFormat = new SimpleDateFormat("E", locale);
@@ -107,7 +108,7 @@ public class DateHelper {
     public String getDateSpec() {
         StringBuilder b = new StringBuilder();
         b.append(formatDate(appointment));
-        if (appointment.getRecurrenceType() != Appointment.NO_RECURRENCE) {
+        if (appointment.getRecurrenceType() != CalendarObject.NO_RECURRENCE) {
             b.append(" - ").append(formatRecurrenceRule(appointment));
         }
         return b.toString();

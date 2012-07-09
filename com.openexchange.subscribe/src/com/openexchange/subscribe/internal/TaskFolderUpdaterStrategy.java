@@ -56,6 +56,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.generic.TargetFolderDefinition;
 import com.openexchange.groupware.search.Order;
@@ -130,7 +131,7 @@ public class TaskFolderUpdaterStrategy implements FolderUpdaterStrategy<Task> {
         // filter out LAST_MODIFIED_UTC as it is a virtual column and will not work
         final ArrayList<Integer> filteredColumns = new ArrayList<Integer>();
         for (int i = 0; i<columns.length; i++){
-            if (columns[i] != Task.LAST_MODIFIED_UTC){
+            if (columns[i] != DataObject.LAST_MODIFIED_UTC){
                 filteredColumns.add(columns[i]);
             }
         }

@@ -61,7 +61,6 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.grizzly.GrizzlyExceptionCode;
 import com.openexchange.http.grizzly.addons.GrizzlOXAddOn;
-import com.openexchange.http.grizzly.filters.backendroute.AppendBackendRouteFilter;
 import com.openexchange.http.grizzly.services.http.HttpServiceFactory;
 import com.openexchange.http.requestwatcher.osgi.services.RequestWatcherService;
 import com.openexchange.log.Log;

@@ -235,7 +235,7 @@ public class ICalExporter implements Exporter {
                 try {
                     while (searchIterator.hasNext()) {
                         final Appointment appointment = searchIterator.next();
-                        if (Appointment.NO_RECURRENCE != appointment.getRecurrenceType()) {
+                        if (CalendarObject.NO_RECURRENCE != appointment.getRecurrenceType()) {
                             if (!appointment.containsTimezone()) {
                                 appointment.setTimezone(user.getTimeZone());
                             }

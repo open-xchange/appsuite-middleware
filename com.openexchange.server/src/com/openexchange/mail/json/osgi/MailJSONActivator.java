@@ -68,6 +68,8 @@ import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.contact.ContactSearchMultiplexer;
 import com.openexchange.groupware.contact.datasource.ContactImageDataSource;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.DataObject;
+import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.image.ImageLocation;
@@ -108,7 +110,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
         registerService(ResultConverter.class, converter);
         registerService(ResultConverter.class, new MailJSONConverter(converter));
 
-        final int[] columns = new int[] { Contact.OBJECT_ID, Contact.FOLDER_ID, Contact.IMAGE1 };
+        final int[] columns = new int[] { DataObject.OBJECT_ID, FolderChildObject.FOLDER_ID, Contact.IMAGE1 };
         registerService(AJAXResultDecorator.class, new DecoratorImpl(converter, columns));
     }
 

@@ -21,6 +21,9 @@ import java.io.InputStream;
 import junit.framework.TestCase;
 
 import org.apache.tika.io.TikaInputStream;
+import org.apache.tika.metadata.DublinCore;
+import org.apache.tika.metadata.HttpHeaders;
+import org.apache.tika.metadata.MSOffice;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.metadata.XMPDM;
 import org.apache.tika.parser.AutoDetectParser;
@@ -53,11 +56,11 @@ public abstract class MP4ParserTest extends TestCase {
         }
 
         // Check core properties
-        assertEquals("audio/mp4", metadata.get(Metadata.CONTENT_TYPE));
-        assertEquals("Test Title", metadata.get(Metadata.TITLE));
-        assertEquals("Test Artist", metadata.get(Metadata.AUTHOR));
-        assertEquals("2012-01-28T18:39:18Z", metadata.get(Metadata.CREATION_DATE));
-        assertEquals("2012-01-28T18:40:25Z", metadata.get(Metadata.MODIFIED));
+        assertEquals("audio/mp4", metadata.get(HttpHeaders.CONTENT_TYPE));
+        assertEquals("Test Title", metadata.get(DublinCore.TITLE));
+        assertEquals("Test Artist", metadata.get(MSOffice.AUTHOR));
+        assertEquals("2012-01-28T18:39:18Z", metadata.get(MSOffice.CREATION_DATE));
+        assertEquals("2012-01-28T18:40:25Z", metadata.get(DublinCore.MODIFIED));
 
         // Check the textual contents
         String content = handler.toString();

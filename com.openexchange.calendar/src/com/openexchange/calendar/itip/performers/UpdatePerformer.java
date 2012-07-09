@@ -67,6 +67,7 @@ import com.openexchange.calendar.itip.sender.MailSenderService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.Change;
 import com.openexchange.groupware.container.ConfirmationChange;
 import com.openexchange.groupware.container.Difference;
@@ -140,7 +141,7 @@ public class UpdatePerformer extends AbstrakterDingeMacher {
         List<FieldUpdate> updates = appointmentDiff.getUpdates();
         boolean write = false;
         for (FieldUpdate fieldUpdate : updates) {
-            if (fieldUpdate.getFieldNumber() != Appointment.CONFIRMATIONS) {
+            if (fieldUpdate.getFieldNumber() != CalendarObject.CONFIRMATIONS) {
                 update.set(fieldUpdate.getFieldNumber(), fieldUpdate.getNewValue());
                 write = true;
             }
@@ -197,11 +198,11 @@ public class UpdatePerformer extends AbstrakterDingeMacher {
 
     
     private void ensureParticipant(CalendarDataObject appointment, ITipAction action, int owner) {
-        int confirm = CalendarDataObject.NONE;
+        int confirm = CalendarObject.NONE;
         switch (action) {
-        case ACCEPT: case ACCEPT_AND_IGNORE_CONFLICTS: case CREATE: case UPDATE: confirm = CalendarDataObject.ACCEPT; break;
-        case DECLINE: confirm = CalendarDataObject.DECLINE; break;
-        case TENTATIVE: confirm = CalendarDataObject.TENTATIVE; break;
+        case ACCEPT: case ACCEPT_AND_IGNORE_CONFLICTS: case CREATE: case UPDATE: confirm = CalendarObject.ACCEPT; break;
+        case DECLINE: confirm = CalendarObject.DECLINE; break;
+        case TENTATIVE: confirm = CalendarObject.TENTATIVE; break;
         default: confirm = -1;
         }
         Participant[] participants = appointment.getParticipants();

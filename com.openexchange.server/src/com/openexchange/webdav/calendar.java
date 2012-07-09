@@ -188,7 +188,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
         }
         // For removing the sequence information we need to tell the server that the appointment no longer has a recurrence type.
         if (!appointmentobject.containsRecurrenceType()) {
-            appointmentobject.setRecurrenceType(CalendarDataObject.NO_RECURRENCE);
+            appointmentobject.setRecurrenceType(CalendarObject.NO_RECURRENCE);
         }
     }
 

@@ -57,6 +57,7 @@ import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.contexts.Context;
 
 /**
@@ -71,7 +72,7 @@ public final class Uid<T extends CalendarComponent, U extends CalendarObject> ex
 
     @Override
     public boolean isSet(final U calendar) {
-        return isSet(calendar, CalendarObject.UID) && calendar.getUid().length() != 0;
+        return isSet(calendar, CommonObject.UID) && calendar.getUid().length() != 0;
     }
 
     @Override
