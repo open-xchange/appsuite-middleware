@@ -42,8 +42,7 @@ public abstract class ColumnFamilyTemplate<K, N> extends AbstractColumnFamilyTem
 
   // Just so method chaining will return this type instead of the parent class
   // for operations down the chain
-  @Override
-public ColumnFamilyTemplate<K, N> setBatched(boolean batched) {
+  public ColumnFamilyTemplate<K, N> setBatched(boolean batched) {
     super.setBatched(batched);
     return this;
   }

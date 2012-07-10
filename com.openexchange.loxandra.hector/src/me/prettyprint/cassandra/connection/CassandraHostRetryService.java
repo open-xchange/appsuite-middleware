@@ -30,7 +30,7 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
 
   private final HClientFactory clientFactory;
   private final LinkedBlockingQueue<CassandraHost> downedHostQueue;
-  private final ConnectionManagerListenersHandler listenerHandler;
+  private ConnectionManagerListenersHandler listenerHandler;
 
   public CassandraHostRetryService(HConnectionManager connectionManager, HClientFactory clientFactory,
       CassandraHostConfigurator cassandraHostConfigurator, ConnectionManagerListenersHandler listenerHandler) {
@@ -181,7 +181,7 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
           if (!keyspaceDefinition.getName().equals(Keyspace.KEYSPACE_SYSTEM)) {
             List<TokenRange> tokenRanges = cluster.describeRing(keyspaceDefinition.getName());
             for (TokenRange tokenRange : tokenRanges) {
-              for (String host : tokenRange.getEndpoints()) {
+              for (String host : tokenRange.getRpc_endpoints()) {
                 CassandraHost aHost = new CassandraHost(host, cassandraHostConfigurator.getPort());
                 if (!ringInfo.contains(aHost) ) {
                   ringInfo.add(aHost);

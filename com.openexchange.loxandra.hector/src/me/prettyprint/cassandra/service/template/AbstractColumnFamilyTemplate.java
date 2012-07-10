@@ -135,8 +135,7 @@ public class AbstractColumnFamilyTemplate<K, N> {
    * implementation as needed. 
    * @param clock
    */
-  @Deprecated
-public void setClock(Long clock) {
+  public void setClock(Long clock) {
     this.clock = clock;
   }
 
@@ -144,8 +143,7 @@ public void setClock(Long clock) {
    * @deprecated does the same thing as getClock() will be removed in a future release
    * @return
    */
-  @Deprecated
-public long getEffectiveClock() {
+  public long getEffectiveClock() {
     return keyspace.createClock();
   }  
 

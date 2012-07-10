@@ -51,44 +51,36 @@ public abstract class AbstractResultWrapper<K, N> implements ColumnFamilyResult<
 
   public abstract ByteBuffer getColumnValue(N columnName);
 
-  @Override
-public UUID getUUID(N columnName) {
+  public UUID getUUID(N columnName) {
     return UUIDSerializer.get().fromByteBuffer(getColumnValue(columnName));
   }
 
-  @Override
-public String getString(N columnName) {
+  public String getString(N columnName) {
     return StringSerializer.get().fromByteBuffer(getColumnValue(columnName));
   }
 
-  @Override
-public Long getLong(N columnName) {
+  public Long getLong(N columnName) {
     return LongSerializer.get().fromByteBuffer(getColumnValue(columnName));
   }
 
-  @Override
-public Integer getInteger(N columnName) {
+  public Integer getInteger(N columnName) {
     return IntegerSerializer.get().fromByteBuffer(getColumnValue(columnName));
   }
   
-  @Override
-public Double getDouble(N columnName) {
+  public Double getDouble(N columnName) {
     return DoubleSerializer.get().fromByteBuffer(getColumnValue(columnName));
   }
 
-  @Override
-public Boolean getBoolean(N columnName) {
+  public Boolean getBoolean(N columnName) {
     return BooleanSerializer.get().fromByteBuffer(getColumnValue(columnName));
   }
 
-  @Override
-public byte[] getByteArray(N columnName) {
+  public byte[] getByteArray(N columnName) {
     return BytesArraySerializer.get()
         .fromByteBuffer(getColumnValue(columnName));
   }
 
-  @Override
-public Date getDate(N columnName) {
+  public Date getDate(N columnName) {
     return DateSerializer.get().fromByteBuffer(getColumnValue(columnName));
   }
   
