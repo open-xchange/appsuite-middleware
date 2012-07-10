@@ -6,7 +6,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class DaemonThreadPoolFactory implements ThreadFactory {
 
-  private final ConcurrentHashMap<String, AtomicInteger> counters = 
+  private ConcurrentHashMap<String, AtomicInteger> counters = 
       new ConcurrentHashMap<String, AtomicInteger>();
   
   private final String name;
