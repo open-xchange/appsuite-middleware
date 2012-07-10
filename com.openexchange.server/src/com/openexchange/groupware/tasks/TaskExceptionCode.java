@@ -175,7 +175,11 @@ public enum TaskExceptionCode implements OXExceptionCode {
 			Category.CATEGORY_USER_INPUT, 52),
 	/** UID of tasks can not be changed. */
 	NO_UID_CHANGE(TaskExceptionMessage.NO_UID_CHANGE_MSG,
-			Category.CATEGORY_USER_INPUT, 53);
+			Category.CATEGORY_USER_INPUT, 53),
+	/** SQL problem while deleting task: %s. */
+    DELETE_FAILED_RETRY(TaskExceptionMessage.DELETE_FAILED_MSG,
+            Category.CATEGORY_TRY_AGAIN, 54),
+		            ;
 
 	private final String message;
 
@@ -254,7 +258,7 @@ public enum TaskExceptionCode implements OXExceptionCode {
 				args));
 	}
 
-	private OXException specials(OXException exc) {
+	private OXException specials(final OXException exc) {
 		switch(this) {
 		case TASK_NOT_FOUND: 
 			exc.setGeneric(Generic.NOT_FOUND);

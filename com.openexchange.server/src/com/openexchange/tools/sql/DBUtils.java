@@ -526,6 +526,21 @@ public final class DBUtils {
             }
             return false;
         }
+
+        /**
+         * Check for a failed transaction roll-back.
+         * 
+         * @param e The exception to check for a failed transaction roll-back
+         * @return <code>true</code> a failed transaction roll-back; otherwise <code>false</code>
+         */
+        public boolean isFailedTransactionRollback(final Exception e) {
+            final SQLException sqle = extractSqlException(e);
+            if (null != sqle && isTransactionRollbackException(sqle)) {
+                transactionRollbackException = sqle;
+                return true;
+            }
+            return false;
+        }
         
         /**
          * Gets the recently checked <tt>SQLException</tt> reference that indicates a failed transaction roll-back.

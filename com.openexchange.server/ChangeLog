@@ -1,3 +1,7 @@
+* 2012-07-10 - thorben.betten@open-xchange.com
+
+ - Fix for bug 15326: Special handling for "transaction roll-back error" and responding with try-again error code TSK-0054
+
 * 2012-07-06 - thorben.betten@open-xchange.com
 
  - Fix for bug 22489: Dealing with failed auto-save
