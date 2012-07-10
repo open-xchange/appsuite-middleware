@@ -102,6 +102,7 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
             LOG.info("------------ Started Coyote socket handler ------------");
         } else {
             socketHandler = new AJPv13SocketHandler();
+            LOG.warn("\n\tOutdated AJP socket handler configured. Please consider to set \"AJP_COYOTE_SOCKET_HANDLER\" property to \"TRUE\".\n");
             LOG.info("------------ Started AJP socket handler ------------");
         }
     }
