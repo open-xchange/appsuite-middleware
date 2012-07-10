@@ -5273,6 +5273,11 @@ msgid ""
 "remove duplicate participant and retry."
 msgstr ""
 
+#. Appointment is not a recurring appointment.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:389
+msgid "Appointment is not a recurring appointment."
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:61
 msgid ""
 "Found a user contact outside global address book in folder %1$d in context "
