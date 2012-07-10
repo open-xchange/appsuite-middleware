@@ -628,6 +628,12 @@ public class Login extends AJAXServlet {
                     }
 
                     final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+                    if (null == sessiondService) {
+                        final OXException se = ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
+                        LOG.error(se.getMessage(), se);
+                        resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                        return;
+                    }
                     String secret = null;
                     final String hash = HashCalculator.getHash(req);
                     final String sessionCookieName = SESSION_PREFIX + hash;

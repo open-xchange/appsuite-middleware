@@ -68,11 +68,11 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class DummyPresenceService implements PresenceService {
 	
-	private ServiceLookup services;
-	private IDMap<PresenceStatus> statusMap = new IDMap<PresenceStatus>();
+	private final ServiceLookup services;
+	private final IDMap<PresenceStatus> statusMap = new IDMap<PresenceStatus>();
 	
 	
-	private IDMap<List<ID>> subscriptions = new IDMap<List<ID>>();
+	private final IDMap<List<ID>> subscriptions = new IDMap<List<ID>>();
 	
 	public DummyPresenceService(ServiceLookup services) {
 		super();

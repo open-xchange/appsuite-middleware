@@ -53,10 +53,12 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.IDNA;
@@ -271,7 +273,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
         for(final User user : users) {
             final UserParticipant up = new UserParticipant(user.getId());
             ICalParticipant icalP = null;
-            for (final String alias: user.getAliases()) {
+            for (final String alias: getPossibleAddresses(user)) {
             	String toRemove = null;
             	for(final String mail: mails.keySet()){
             		if(mail.equalsIgnoreCase(alias)){
@@ -287,17 +289,18 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             }
             if (icalP == null) {
                 LOG.warn("Should not be possible to find a user ("+user.getMail()+") by their alias and then be unable to remove that alias  from list");
-            }
-            if (icalP.message != null) {
-                up.setConfirmMessage(icalP.message);
-            }
-            if (icalP.status != -1) {
-                up.setConfirm(icalP.status);
+            } else {
+                if (icalP.message != null) {
+                    up.setConfirmMessage(icalP.message);
+                }
+                if (icalP.status != -1) {
+                    up.setConfirm(icalP.status);
+                }
             }
 
             cObj.addParticipant(up);
         }
-
+        
         final List<ConfirmableParticipant> confirmableParticipants = new ArrayList<ConfirmableParticipant>();
         for(final String mail : mails.keySet()) {
             final ExternalUserParticipant external = new ExternalUserParticipant(mail);
@@ -348,6 +351,20 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
                 Code.CANT_RESOLVE_RESOURCE, resourceName);
             warnings.add(warning);
         }
+    }
+
+    
+    private static Set<String> getPossibleAddresses(User user) {
+        Set<String> possibleAddresses = new HashSet<String>();
+        if (null != user.getMail()) {
+            possibleAddresses.add((user.getMail()));
+        }
+        if (null != user.getAliases()) {
+            for (String alias : user.getAliases()) {
+                possibleAddresses.add(alias);
+            }
+        }
+        return possibleAddresses;
     }
 
     /**

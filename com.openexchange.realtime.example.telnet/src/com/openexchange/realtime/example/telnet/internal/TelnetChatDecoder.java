@@ -85,12 +85,12 @@ public class TelnetChatDecoder extends SimpleChannelUpstreamHandler implements T
 		INITIAL, HEADERS_DONE, CONTENT_DONE;
 	}
 
-	private Map<String, String> headers = new HashMap<String, String>();
-	private StringBuilder payload = new StringBuilder();
-	private TelnetChannel channel;
+	private final Map<String, String> headers = new HashMap<String, String>();
+	private final StringBuilder payload = new StringBuilder();
+	private final TelnetChannel channel;
 
 	private State state = State.INITIAL;
-	private ExtensibleTelnetMessageHandler messageHandler;
+	private final ExtensibleTelnetMessageHandler messageHandler;
 	private ServerSession session;
 	private ID id;
 	private ChannelHandlerContext ctx;
@@ -172,47 +172,58 @@ public class TelnetChatDecoder extends SimpleChannelUpstreamHandler implements T
 		LoginResult result = LoginPerformer.getInstance().doLogin(
 				new LoginRequest() {
 
-					public String getLogin() {
+					@Override
+                    public String getLogin() {
 						return user;
 					}
 
-					public String getPassword() {
+					@Override
+                    public String getPassword() {
 						return password;
 					}
 
-					public String getClientIP() {
+					@Override
+                    public String getClientIP() {
 						return "";
 					}
 
-					public String getUserAgent() {
+					@Override
+                    public String getUserAgent() {
 						return "chat";
 					}
 
-					public String getAuthId() {
+					@Override
+                    public String getAuthId() {
 						return UUIDs.getUnformattedString(UUID.randomUUID());
 					}
 
-					public String getClient() {
+					@Override
+                    public String getClient() {
 						return "chat";
 					}
 
-					public String getVersion() {
+					@Override
+                    public String getVersion() {
 						return "";
 					}
 
-					public String getHash() {
+					@Override
+                    public String getHash() {
 						return "";
 					}
 
-					public Interface getInterface() {
+					@Override
+                    public Interface getInterface() {
 						return Interface.HTTP_JSON;
 					}
 
-					public Map<String, List<String>> getHeaders() {
+					@Override
+                    public Map<String, List<String>> getHeaders() {
 						return Collections.emptyMap();
 					}
 
-					public Cookie[] getCookies() {
+					@Override
+                    public Cookie[] getCookies() {
 						return new Cookie[0];
 					}
 

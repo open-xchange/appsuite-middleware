@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.example.telnet.TelnetChatPlugin;
@@ -61,7 +60,6 @@ import com.openexchange.realtime.example.telnet.TelnetMessageDelivery;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.util.IDMap;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -71,9 +69,9 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class TelnetChannel implements Channel {
 
-	private List<TelnetChatPlugin> plugins = new ArrayList<TelnetChatPlugin>();
+	private final List<TelnetChatPlugin> plugins = new ArrayList<TelnetChatPlugin>();
 	
-	private IDMap<TelnetMessageDelivery> deliverers = new IDMap<TelnetMessageDelivery>();
+	private final IDMap<TelnetMessageDelivery> deliverers = new IDMap<TelnetMessageDelivery>();
 	
 	@Override
 	public String getProtocol() {

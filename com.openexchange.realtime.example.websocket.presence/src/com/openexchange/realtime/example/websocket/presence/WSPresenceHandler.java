@@ -62,14 +62,15 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class WSPresenceHandler extends ConversionWSHandler {
-	private ServiceLookup services;
+	private final ServiceLookup services;
 	
 	public WSPresenceHandler(ServiceLookup services) {
 		super("presence", "presenceStatus");
 		this.services = services;
 	}
 	
-	public void incoming(Stanza stanza, ServerSession session) throws com.openexchange.exception.OXException {
+	@Override
+    public void incoming(Stanza stanza, ServerSession session) throws com.openexchange.exception.OXException {
 		
 		PresenceStatus status = (PresenceStatus) stanza.getPayload().to("presenceStatus", session).getData();
 		

@@ -64,8 +64,8 @@ import org.jboss.netty.handler.codec.string.StringEncoder;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class TelnetChatServerPipelineFactory implements ChannelPipelineFactory {
-	private ExtensibleTelnetMessageHandler handler;
-	private TelnetChannel channel;
+	private final ExtensibleTelnetMessageHandler handler;
+	private final TelnetChannel channel;
 	
 	public TelnetChatServerPipelineFactory(ExtensibleTelnetMessageHandler handler, TelnetChannel channel) {
 		this.handler = handler;

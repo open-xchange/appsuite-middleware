@@ -65,9 +65,9 @@ import com.openexchange.server.ServiceLookup;
  */
 public class WebSocketServerPipelineFactory implements ChannelPipelineFactory {
 
-	private HandlerLibrary conversionLibrary;
-	private ServiceLookup services;
-	private WSChannel channel;
+	private final HandlerLibrary conversionLibrary;
+	private final ServiceLookup services;
+	private final WSChannel channel;
 
 	
 	

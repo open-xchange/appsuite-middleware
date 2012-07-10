@@ -41,9 +41,6 @@ public class XmlPullParserFactory {
         referenceContextClass = f.getClass();
     }
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory
-			.getLog(XmlPullParserFactory.class);
-
     /** Name of the system or midlet property that should be used for
      a system property containing a comma separated list of factory
      or parser class names (value:
@@ -332,7 +329,7 @@ public class XmlPullParserFactory {
                 instance = candidate.newInstance ();
             }
             catch (final Exception e) {
-            	LOG.error(e.getMessage(), e);
+                throw new XmlPullParserException(e.getMessage(), null, e);
             }
 
             if (candidate != null) {

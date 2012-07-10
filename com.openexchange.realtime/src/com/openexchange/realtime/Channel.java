@@ -49,8 +49,6 @@
 
 package com.openexchange.realtime;
 
-import java.util.Set;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;

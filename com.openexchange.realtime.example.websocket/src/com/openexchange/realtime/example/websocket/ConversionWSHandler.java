@@ -64,8 +64,8 @@ public class ConversionWSHandler implements WSHandler {
 	
 	public static ServiceLookup services;
 	
-	private String namespace;
-	private String format;
+	private final String namespace;
+	private final String format;
 	
 	public ConversionWSHandler(String namespace, String format) {
 		this.namespace = namespace;

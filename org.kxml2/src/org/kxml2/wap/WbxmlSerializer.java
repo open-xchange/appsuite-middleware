@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import org.xmlpull.v1.XmlSerializer;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 // TODO: make some of the "direct" WBXML token writing methods public??
 
@@ -48,8 +47,8 @@ public class WbxmlSerializer implements XmlSerializer {
 
     OutputStream out;
 
-    ByteArrayOutputStream buf = new UnsynchronizedByteArrayOutputStream();
-    ByteArrayOutputStream stringTableBuf = new UnsynchronizedByteArrayOutputStream();
+    ByteArrayOutputStream buf = new ByteArrayOutputStream();
+    ByteArrayOutputStream stringTableBuf = new ByteArrayOutputStream();
 
     String pending;
     int depth;
@@ -262,8 +261,8 @@ public class WbxmlSerializer implements XmlSerializer {
 
         this.out = out;
 
-        buf = new UnsynchronizedByteArrayOutputStream();
-        stringTableBuf = new UnsynchronizedByteArrayOutputStream();
+        buf = new ByteArrayOutputStream();
+        stringTableBuf = new ByteArrayOutputStream();
 
         // ok, write header
     }

@@ -52,7 +52,6 @@ package com.openexchange.realtime.example.telnet.chat;
 import java.util.Arrays;
 import java.util.List;
 
-import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.example.chat.ChatMessage;
 import com.openexchange.realtime.example.telnet.TelnetChatMessage;

@@ -65,8 +65,8 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class WSChannel implements Channel {
 	
-	private IDMap<WebSocketServerHandler> handlerMap = new IDMap<WebSocketServerHandler>();
-	private HandlerLibrary library;
+	private final IDMap<WebSocketServerHandler> handlerMap = new IDMap<WebSocketServerHandler>();
+	private final HandlerLibrary library;
 	
 	public WSChannel(HandlerLibrary library) {
 		this.library = library;
