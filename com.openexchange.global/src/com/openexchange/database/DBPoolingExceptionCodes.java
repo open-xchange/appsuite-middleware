@@ -207,7 +207,10 @@ public enum DBPoolingExceptionCodes {
         return create(null, logArguments);
     }
 
-    private static final String PREFIX = "CAC";
+    /**
+     * The prefix code.
+     */
+    public static final String PREFIX = "DBP";
 
     /**
      * Creates an {@link OXException} instance using this error code.
