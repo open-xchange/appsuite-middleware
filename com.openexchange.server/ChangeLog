@@ -159,6 +159,7 @@
  - Fix for bug 22276: Proper handling of possible NumberFormatException
  - Fix for bug 22281: Setting proper account identifier in MailMessage instance
  - Fix for bug 22256: Try to resolve request's data to a JSON array
+ - Fix for bug 22281: Setting proper account identifier in MailMessage instance
 
 * 2012-06-07 - thorben.betten@open-xchange.com
 
@@ -1970,6 +1971,10 @@
  - Bugfix #18643: Fixed old mail accounts without transport server for IPv6 support.
  - Bugfix #18681: Removed caching of user contacts and corrected SQL query to load them when context has more than 1000 users.
 
+* 2011-03-16 - choeger@open-xchange.com
+
+ - Bugfix #18662 - Mobile configuration packages can not be installed on debian squeeze
+
 * 2011-03-16 - marcus.klein@open-xchange.com
 
  - Bugfix #18643: Fixed mail accounts without transport server for IPv6 support.
@@ -2901,6 +2906,10 @@
  - Bugfix #16351: Complain louder about missing property in templating service.
  - Bugfix #15302: Make subscription parser more resilient.
 
+* 2010-07-29 - benjamin.otterbach@open-xchange.com
+
+ - Fixed Bug #16587 : Autoconfig: No device selection possible
+
 * 2010-07-29 - thorben.betten@open-xchange.com
 
  - Bugfix #16557: And additional > after a link as produced by the Mulberry mail client is not included in the link
@@ -2930,6 +2939,11 @@
 
  - Bugfix #16577: Fixed ClassCastException in FolderCache due to newly introduced conditional loading of folder objects.
  - Bugfix #16582: Fixed a NullPointerException if a task notification should be sent and the task does not have an end date.
+
+* 2010-07-26 - benjamin.otterbach@open-xchange.com
+
+ - Added UI activator file for server
+ - Disabled configurations for optional mobile device descriptions (S60, BB)
 
 * 2010-07-26 - marcus.klein@open-xchange.com
 
@@ -3118,6 +3132,10 @@
  - Bugfix #16346: Added appropriate error message when authentication to SMTP server fails
  - Bugfix #16385: i18n for global address book folder
  - Bugfix #15874: Showing available content on invalid credentials to access a mail system
+
+* 2010-06-26 - manuel.kraft@open-xchange.com
+
+ - adding SMS implementation and fixed libs in build file
 
 * 2010-06-25 - steffen.templin@open-xchange.com
 
