@@ -1104,10 +1104,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             if (this == obj) {
                 return true;
             }
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
+            if (!(obj instanceof LoginAndPass)) {
                 return false;
             }
             final LoginAndPass other = (LoginAndPass) obj;
