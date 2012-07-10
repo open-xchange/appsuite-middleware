@@ -1,0 +1,5 @@
+open-xchange-report-client (6.21.0-1) unstable; urgency=low
+
+  * Initial release
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 10 Jul 2012 08:34:39 +0100
