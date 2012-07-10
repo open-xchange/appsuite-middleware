@@ -1,0 +1,6 @@
+opt/open-xchange/etc/eas-provisioning.properties
+opt/open-xchange/etc/eas-provisioning-mail.properties
+opt/open-xchange/etc/settings/eas-provisioning-ui.properties
+opt/open-xchange/templates/iPhoneTemplate.tmpl
+opt/open-xchange/templates/mobile.configuration.generator.properties
+opt/open-xchange/templates/winMobileTemplate.tmpl
