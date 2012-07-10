@@ -232,9 +232,9 @@ public final class DBUtils {
     }
 
     /**
-     * Rolls a transaction of a connection back.
+     * Performs a roll-back for a started transaction.
      *
-     * @param con connection to roll back.
+     * @param con The connection to roll back.
      */
     public static void rollback(final Connection con) {
         if (null == con) {
