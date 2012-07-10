@@ -73,6 +73,7 @@ import com.openexchange.folderstorage.internal.StorageParametersImpl;
 import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -130,7 +131,10 @@ public abstract class AbstractPerformer {
         this.folderStorageDiscoverer = folderStorageDiscoverer;
         this.session = session;
         // Pre-Initialize session
-        session.getUserConfiguration().isMultipleMailAccounts();
+        final UserConfiguration userConfiguration = session.getUserConfiguration();
+        if (null != userConfiguration) {
+            userConfiguration.isMultipleMailAccounts();
+        }
         user = session.getUser();
         context = session.getContext();
         storageParameters = new StorageParametersImpl(session);
