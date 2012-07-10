@@ -3,6 +3,7 @@
  - Fix for bug 15326: Special handling for "transaction roll-back error" and responding with try-again error code TSK-0054
  - Fix for bug 22099: Special handling for "transaction roll-back error" and responding with try-again error code APP-0108
  - Fix for bug 22491: Dropped annoying System.out.println() invocations
+ - Fix for bug 22487: Re-initialize SessionPOP3StorageUIDLMap is timer elapsed in the meantime
 
 * 2012-07-06 - thorben.betten@open-xchange.com
 
