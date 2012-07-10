@@ -630,7 +630,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     LOG.error(e.getMessage(), e);
                 }
             }
-            final boolean certainPassword = false; // ("imap.googlemail.com".equals(config.getServer()) && 17 == session.getUserId());
+            final boolean certainPassword = false; //("devel-mail.netline.de".equals(config.getServer()) && 17 == session.getUserId());
             if (certainPassword) {
                 tmpPass = "secret";
             }
@@ -835,11 +835,22 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         return imapStore;
     }
 
-    private static void checkFailedAuths(final LoginAndPass loginAndPass) throws AuthenticationFailedException {
+    private void checkFailedAuths(final LoginAndPass loginAndPass) throws AuthenticationFailedException {
         final Map<LoginAndPass, StampAndError> map = failedAuths;
         final StampAndError sae = map.get(loginAndPass);
         if (sae != null) {
             if ((System.currentTimeMillis() - sae.stamp) <= FAILED_AUTH_TIMEOUT.get()) {
+                if (DEBUG) {
+                    final IMAPConfig config = getIMAPConfig();
+                    final StringBuilder sb = new StringBuilder(128);
+                    sb.append("Detected already failed authentication attempt for login \"");
+                    sb.append(loginAndPass.login);
+                    if (null != config) {
+                        sb.append("\" on server \"").append(config.getServer());
+                    }
+                    sb.append("\". Throwing cached AuthenticationFailedException instance.");
+                    LOG.debug(sb.toString());
+                }
                 throw sae.error;
             }
             map.remove(loginAndPass);
@@ -1077,7 +1088,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     private static final class LoginAndPass {
 
-        private final String login;
+        final String login;
 
         private final String pass;
 
