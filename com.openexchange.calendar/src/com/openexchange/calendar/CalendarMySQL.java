@@ -428,8 +428,8 @@ public class CalendarMySQL implements CalendarSqlImp {
     }
 
     @Override
-    public PreparedStatement getAllAppointments(Context c, Date d1, Date d2, String select, Connection readcon, int orderBy, Order orderDir) throws OXException, SQLException {
-        StringBuilder sb = new StringBuilder(64);
+    public PreparedStatement getAllAppointments(final Context c, final Date d1, final Date d2, final String select, final Connection readcon, final int orderBy, final Order orderDir) throws OXException, SQLException {
+        final StringBuilder sb = new StringBuilder(64);
         sb.append(parseSelect(select));
         sb.append(" pd JOIN prg_dates_members pdm ON pd.intfield01 = pdm.object_id AND pd.cid = pdm.cid");
 
@@ -445,7 +445,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             sb.append(forSQLCommand(orderDir));
         }
 
-        PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        final PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
         int a = 1;
 
         pst.setTimestamp(a++, new Timestamp(d2.getTime()));
@@ -2772,7 +2772,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                     // Update last-modified of master
                     updateLastModified(edao.getRecurrenceID(), ctx.getContextId(), so.getUserId(), cdao.getLastModified().getTime(), writecon);
                 }
-            } catch (OXException e) {
+            } catch (final OXException e) {
                 if (!writecon.getAutoCommit()) {
                     writecon.rollback();
                 }
@@ -4444,7 +4444,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             edao = co.loadAppointment(rs, cdao.getObjectID(), inFolder, this, readcon, so, ctx, CalendarOperation.DELETE, inFolder, checkPermissions);
             if (edao.getRecurrenceType() == CalendarObject.NO_RECURRENCE && edao.getRecurrenceID() == 0) {
                 if ((cdao.containsRecurrencePosition() && cdao.getRecurrencePosition() > 0) || (cdao.containsRecurrenceDatePosition() && cdao.getRecurrenceDatePosition() != null)) {
-                    //throw new OXCalendarException(OXCalendarException.Code.NO_RECCURENCE);  FIXME
+                    throw OXCalendarExceptionCodes.NO_RECCURENCE.create();
                 }
             }
         } catch (final SQLException sqle) {
@@ -4614,7 +4614,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                         update.setContext(ctx);
                         update.setObjectID(edao.getRecurrenceID());
                         if (deleted_exceptions != null) {
-                            List<Date> asList = Arrays.asList(deleted_exceptions);
+                            final List<Date> asList = Arrays.asList(deleted_exceptions);
                             asList.remove(calculated_exception);
                             update.setDeleteExceptions(asList);
                         } else {

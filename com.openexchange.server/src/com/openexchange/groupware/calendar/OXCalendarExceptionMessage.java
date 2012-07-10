@@ -385,4 +385,7 @@ public class OXCalendarExceptionMessage implements LocalizableStrings {
      */
     public static final String DUPLICATE_EXTERNAL_PARTICIPANT_MSG = "An external participant with email address %1$s is already contained. Please remove duplicate participant and retry.";
 
+    // Appointment is not a recurring appointment.
+    public static final String NO_RECCURENCE_MSG = "Appointment is not a recurring appointment.";
+
 }

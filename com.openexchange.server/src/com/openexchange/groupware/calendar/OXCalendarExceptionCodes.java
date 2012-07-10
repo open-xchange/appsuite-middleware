@@ -224,6 +224,14 @@ public enum OXCalendarExceptionCodes implements OXExceptionCode {
      * An external participant with email address %1$s is already contained. Please remove duplicate participant and retry.
      */
     DUPLICATE_EXTERNAL_PARTICIPANT(OXCalendarExceptionMessage.DUPLICATE_EXTERNAL_PARTICIPANT_MSG, 106, Category.CATEGORY_USER_INPUT),
+    /**
+     * Appointment is not a recurring appointment.
+     */
+    NO_RECCURENCE(OXCalendarExceptionMessage.NO_RECCURENCE_MSG, 107, Category.CATEGORY_USER_INPUT),
+    /**
+     * Unexpected SQL Error!
+     */
+    CALENDAR_SQL_ERROR_RETRY(OXCalendarExceptionMessage.CALENDAR_SQL_ERROR_MSG, 108, Category.CATEGORY_TRY_AGAIN),
 
     ;
 
