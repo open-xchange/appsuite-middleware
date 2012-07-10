@@ -839,7 +839,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         final Map<LoginAndPass, StampAndError> map = failedAuths;
         final StampAndError sae = map.get(loginAndPass);
         if (sae != null) {
-            // TODO: Put time-out to imap.properties
             if ((System.currentTimeMillis() - sae.stamp) <= FAILED_AUTH_TIMEOUT.get()) {
                 throw sae.error;
             }
