@@ -90,7 +90,7 @@ public class StreamProvider implements IStreamProvider {
 
     private final Session session;
 
-    public StreamProvider(final ServiceLookup serviceLookup, Session session) {
+    public StreamProvider(final ServiceLookup serviceLookup, final Session session) {
         super();
         this.serviceLookup = serviceLookup;
         this.session = session;
@@ -98,22 +98,22 @@ public class StreamProvider implements IStreamProvider {
 
     @Override
     public Stream createFile(final String fileName) throws XHTMLConversionException {
-        System.out.println("Create File: " + fileName);
-        Stream stream = createInternal(fileName);
+        //System.out.println("Create File: " + fileName);
+        final Stream stream = createInternal(fileName);
         return stream;
     }
 
     @Override
-    public Stream createPreviewFile(String fileName) throws XHTMLConversionException {
-        Stream stream = createInternal(fileName);
+    public Stream createPreviewFile(final String fileName) throws XHTMLConversionException {
+        final Stream stream = createInternal(fileName);
         this.image = fileName;
         return stream;
     }
 
     @Override
-    public Stream createDocumentFile(String fileName) throws XHTMLConversionException {
+    public Stream createDocumentFile(final String fileName) throws XHTMLConversionException {
         //System.out.println("Create document file: " + fileName);
-        Stream stream = createInternal(fileName);
+        final Stream stream = createInternal(fileName);
         this.document = fileName;
         return stream;
     }
@@ -143,7 +143,7 @@ public class StreamProvider implements IStreamProvider {
             managedFile.setContentDisposition("inline");
             createdFiles.put(fileName, managedFile);
 
-            Stream retval = new Stream();
+            final Stream retval = new Stream();
             retval.setStream(fos);
             retval.setUri(managedFile.constructURL(session));
             return retval;
@@ -166,7 +166,7 @@ public class StreamProvider implements IStreamProvider {
     public InputStream getPreviewImage() throws OXException {
         try {
             return new FileInputStream(createdFiles.get(image).getFile());
-        } catch (FileNotFoundException e) {
+        } catch (final FileNotFoundException e) {
             throw PreviewExceptionCodes.ERROR.create();
         }
     }
