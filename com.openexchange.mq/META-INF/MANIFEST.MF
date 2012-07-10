@@ -58,7 +58,7 @@ Export-Package: com.openexchange.mq,
  org.jnp.interfaces.java,
  org.jnp.interfaces.jnp
 Bundle-ClassPath: lib/xml-apis-1.3.03.jar,
- lib/netty-3.5.0.Final.jar,
+ lib/netty-3.5.2.Final.jar,
  lib/hornetq-bootstrap.jar,
  lib/hornetq-core.jar,
  lib/hornetq-jms.jar,
