@@ -962,8 +962,10 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         if (null == timedOutServers) {
             timedOutServers = new ConcurrentHashMap<HostAndPort, Long>();
         }
+        Map<LoginAndPass, StampAndError> failedAuths = IMAPAccess.failedAuths;
         if (null == failedAuths) {
             failedAuths = new ConcurrentHashMap<LoginAndPass, StampAndError>();
+            IMAPAccess.failedAuths = failedAuths;
         }
         if (null == cleanUpTimerTask) {
             final TimerService timerService = IMAPServiceRegistry.getService(TimerService.class);
