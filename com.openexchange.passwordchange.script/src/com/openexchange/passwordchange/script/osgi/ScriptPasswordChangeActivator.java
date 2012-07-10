@@ -71,11 +71,9 @@ public final class ScriptPasswordChangeActivator extends HousekeepingActivator {
         super();
     }
 
-    private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class, UserService.class };
-
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED_SERVICES;
+        return new Class<?>[] { ConfigurationService.class, UserService.class };
     }
 
     @Override
