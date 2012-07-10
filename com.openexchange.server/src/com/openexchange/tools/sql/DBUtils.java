@@ -325,7 +325,7 @@ public final class DBUtils {
     }
 
     /**
-     * Filters a given list of tablenames. Returns only those that also exist
+     * Filters a given list of table names. Returns only those that also exist
      * @param con The connection to the database in which to check for the tables
      * @param tablesToCheck The list of table names to check for.
      * @return A set with all the tables that exist of those to be checked for
