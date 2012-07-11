@@ -19,6 +19,7 @@ import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.osgi.DeferredActivator;
 import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.spamhandler.spamassassin.api.SpamdService;
+import com.openexchange.tools.servlet.http.HTTPServletRegistration;
 import com.openexchange.user.UserService;
 
 
@@ -29,7 +30,7 @@ public class Activator extends DeferredActivator {
     // add services which we need in our plugins later
     private static final Class<?>[] NEEDED_SERVICES = { ContextService.class,UserService.class,ConfigurationService.class,HttpService.class};
 
-    private final List<SessionServletRegistration> servletRegistrations = new ArrayList<SessionServletRegistration>(2);
+    private final List<HTTPServletRegistration> servletRegistrations = new ArrayList<HTTPServletRegistration>(2);
 
     private ParallelsOXAuthentication authentication ;
 
@@ -90,8 +91,8 @@ public class Activator extends DeferredActivator {
             if(LOG.isDebugEnabled()){
                 LOG.debug("Trying to register POA info servlet");
             }
-            servletRegistrations.add(new SessionServletRegistration(context, new com.openexchange.custom.parallels.impl.ParallelsInfoServlet(), getFromConfig("com.openexchange.custom.parallels.sso_info_servlet")));
-            servletRegistrations.add(new SessionServletRegistration(context, new com.openexchange.custom.parallels.impl.ParallelsOpenApiServlet(), getFromConfig("com.openexchange.custom.parallels.openapi_servlet")));
+            servletRegistrations.add(new HTTPServletRegistration(context, new com.openexchange.custom.parallels.impl.ParallelsInfoServlet(), getFromConfig("com.openexchange.custom.parallels.sso_info_servlet")));
+            servletRegistrations.add(new HTTPServletRegistration(context, new com.openexchange.custom.parallels.impl.ParallelsOpenApiServlet(), getFromConfig("com.openexchange.custom.parallels.openapi_servlet")));
             if(LOG.isDebugEnabled()){
                 LOG.debug("Successfully registered POA info servlet");
             }
@@ -137,8 +138,8 @@ public class Activator extends DeferredActivator {
             authentication = null;
 
             // stop info/sso servlet
-            for(final SessionServletRegistration reg : servletRegistrations) {
-                reg.remove();
+            for(final HTTPServletRegistration reg : servletRegistrations) {
+                reg.unregister();
             }
             servletRegistrations.clear();
 
