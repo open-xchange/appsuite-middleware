@@ -12,7 +12,6 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 import com.openexchange.control.console.AbstractJMXHandler;
-import com.openexchange.custom.parallels.soap.dataobjects.Bundle;
 
 
 public class JMXHelper extends AbstractJMXHandler {
@@ -34,7 +33,10 @@ public class JMXHelper extends AbstractJMXHandler {
         final Bundle[] retval = new Bundle[bundleList.size()];
         for (int a = 0; a < bundleList.size(); a++) {
             final Map<String, String> data = bundleList.get(a);
-            retval[a] = new Bundle(data.get("bundlename"), data.get("status"));
+            final Bundle bundle = new Bundle();
+            bundle.setName(data.get("bundlename"));
+            bundle.setStatus(data.get("status"));
+            retval[a] = bundle;
         }
         return retval;
     }
