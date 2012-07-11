@@ -109,7 +109,7 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
     public static final String INVALID_PARAMETER_MSG = "Invalid parameter: %1$s with type '%2$s'. Expected '%3$s'.";
 
     // File part is read-only: %1$s
-    public static final String READ_ONLY_MSG = "File part is read-only.: %1$s";
+    public static final String READ_ONLY_MSG = "File part is read-only: %1$s";
 
     // Unknown color label index: %1$s
     public static final String UNKNOWN_COLOR_LABEL_MSG = "Unknown color label index: %1$s";

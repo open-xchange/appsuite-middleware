@@ -60,9 +60,9 @@ public class UserCopyExceptionMessages implements LocalizableStrings {
 
     public static final String UNRESOLVABLE_DEPENDENCIES_MSG = "Unable to determine next copy task to execute. Enqueued: %1$s. To sort: %2$s.";
 
-    public static final String SQL_PROBLEM_MSG = "SQL Problem.";
+    public static final String SQL_PROBLEM_MSG = "SQL problem.";
 
-    public static final String UNKNOWN_PROBLEM_MSG = "Severe problem occurred.";
+    public static final String UNKNOWN_PROBLEM_MSG = "Unexpected problem occurred.";
     
     public static final String USER_SERVICE_PROBLEM_MSG = "Problem with UserService.";
     

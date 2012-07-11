@@ -30,7 +30,7 @@ public enum TaskExceptionCode implements OXExceptionCode {
 	NOT_TASK_FOLDER(TaskExceptionMessage.NOT_TASK_FOLDER_MSG,
 			Category.CATEGORY_PERMISSION_DENIED, 6),
 	/**
-	 * Edit Conflict. Your change cannot be completed because somebody else has
+	 * Edit conflict. Your change cannot be completed because somebody else has
 	 * made a conflicting change to the same item. Please refresh or synchronize
 	 * and try again.
 	 */

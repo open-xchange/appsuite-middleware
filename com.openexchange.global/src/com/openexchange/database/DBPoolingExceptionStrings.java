@@ -65,13 +65,13 @@ public class DBPoolingExceptionStrings implements LocalizableStrings {
     // It was not possible to determine the database server for a specific OX server and a context.
     // %1$d is replaced with the context identifier.
     // %2$d is replaced with the server identifier.
-    public static final String RESOLVE_FAILED_MSG = "Resolving database for context %1$d and server %2$d not possible!";
+    public static final String RESOLVE_FAILED_MSG = "Database for context %1$d and server %2$d can not be resolved";
 
     // The connection to the database could not be established.
     // %1$d is replaced with the database pool identifier.
-    public static final String NO_CONNECTION_MSG = "Cannot get connection to database %1$d.";
+    public static final String NO_CONNECTION_MSG = "No connection to database %1$d";
 
-    public static final String SCHEMA_FAILED_MSG = "Cannot set schema on database connection.";
+    public static final String SCHEMA_FAILED_MSG = "Schema can not be set on database connection";
 
     public static final String NULL_CONNECTION_MSG = "Null is returned to connection pool.";
 
@@ -84,9 +84,10 @@ public class DBPoolingExceptionStrings implements LocalizableStrings {
     // %1$s is replace with some java class name representing the JDBC driver.
     public static final String NO_DRIVER_MSG = "Driver class %1$s missing.";
 
-    // The pool gives this exception if it believes the connection does not belong to it.
+    // The pool throws this exception if it believes the connection does not belong to it.
+    // "Return" in terms of giving a previously obtained pooled connection back into connection pool
     // %1$d is replace with some database connection pool identifier.
-    public static final String RETURN_FAILED_MSG = "Cannot return connection to pool %1$d.";
+    public static final String RETURN_FAILED_MSG = "Connection to pool %1$d can not be returned";
 
     // A property defining the server name was not found in the configuration properties files.
     public static final String NO_SERVER_NAME_MSG = "Server name is not defined.";
@@ -98,7 +99,7 @@ public class DBPoolingExceptionStrings implements LocalizableStrings {
     public static final String TOO_LONG_MSG = "Connection used for %1$d milliseconds.";
 
     // %1$d is replaced with the number of statements that have not been closed before returning the connection.
-    public static final String ACTIVE_STATEMENTS_MSG = "%1$d statements aren't closed.";
+    public static final String ACTIVE_STATEMENTS_MSG = "%1$d statements are not closed.";
 
     // %1$s is replaced with the URL parameter string that is not parseable.
     public static final String PARAMETER_PROBLEM_MSG = "Parsing problem in URL parameter \"%1$s\".";

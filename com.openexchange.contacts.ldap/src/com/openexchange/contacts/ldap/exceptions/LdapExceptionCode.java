@@ -66,7 +66,7 @@ public enum LdapExceptionCode implements OXExceptionCode {
     TOO_MANY_USER_RESULTS(LdapConfigurationExceptionMessage.TOO_MANY_USER_RESULTS_MSG, Category.CATEGORY_ERROR, 11),
 
     /**
-     * The LDAP search for the user object "%s" contains no results
+     * The LDAP search for the user object "%s" gave no results
      */
     NO_USER_RESULTS(LdapConfigurationExceptionMessage.NO_USER_RESULTS_MSG, Category.CATEGORY_ERROR, 12),
 
@@ -91,7 +91,7 @@ public enum LdapExceptionCode implements OXExceptionCode {
     PRIMARY_MAIL_NULL(LdapConfigurationExceptionMessage.PRIMARY_MAIL_NULL_MSG, Category.CATEGORY_CONFIGURATION, 16),
 
     /**
-     * The mail address "%s" for distributionentry is invalid
+     * The E-Mail address "%s" for distributionentry is invalid
      */
     MAIL_ADDRESS_DISTRI_INVALID(LdapConfigurationExceptionMessage.MAIL_ADDRESS_DISTRI_INVALID_MSG, Category.CATEGORY_CONFIGURATION, 17),
 

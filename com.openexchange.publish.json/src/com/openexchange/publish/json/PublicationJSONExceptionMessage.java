@@ -69,13 +69,13 @@ public class PublicationJSONExceptionMessage implements LocalizableStrings {
 
     public final static String MISSING_PARAMETER_MSG = "Missing value for parameter %s";
 
-    public final static String UNKNOWN_ACTION_MSG = "Unknown Action: %s";
+    public final static String UNKNOWN_ACTION_MSG = "Unknown action: %s";
 
     public final static String UNKOWN_ENTITY_MODULE_MSG = "Unknown entity module: %s";
 
     public final static String UNKNOWN_COLUMN_MSG = "Unknown column: %s";
 
-    public final static String UNKNOWN_TARGET_MSG = "Unknown Target: %s";
+    public final static String UNKNOWN_TARGET_MSG = "Unknown target: %s";
 
     public final static String THROWABLE_HELP = "Please try again later.";
 

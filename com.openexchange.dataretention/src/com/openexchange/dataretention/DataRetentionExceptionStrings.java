@@ -61,8 +61,8 @@ public final class DataRetentionExceptionStrings implements LocalizableStrings {
     // Data retention failed: %1$s.
     public static final String ERROR_MSG = "Data retention failed: %1$s.";
 
-    // AN I/O error occurred: %1$s.
-    public static final String IO_MSG = "AN I/O error occurred: %1$s.";
+    // An I/O error occurred: %1$s.
+    public static final String IO_MSG = "An I/O error occurred: %1$s.";
 
     /**
      * Initializes a new {@link DataRetentionExceptionStrings}.

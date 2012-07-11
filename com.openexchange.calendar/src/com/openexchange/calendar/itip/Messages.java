@@ -64,22 +64,22 @@ public class Messages implements LocalizableStrings {
     /**
      * Example: "This appointment has attachments, please see the appointment at http://ox.superhoster.invalid/index.html#m=calendar&f=bla&i=bla to retrieve them"
      */
-    public static final String HAS_ATTACHMENTS = "This appointment has attachments, please see the appointment at %1$s to retrieve them.";
+    public static final String HAS_ATTACHMENTS = "This appointment has attachments. Click on the following link to view the appointment and to retrieve the attachments: %1$s.";
     
-    public static final String ADD_TO_UNKNOWN = "The organizer would like to create an exception for an recurring appointment that is unknown. Either ignore this update, or ask the organizer to again send you the recurrence.";
+    public static final String ADD_TO_UNKNOWN = "The organizer would like to create an exception for a  recurring appointment that could not be found. Either ignore this update, or ask the organizer to again send you the recurrence.";
     public static final String ADD_WOULD_OVERWRITE_EXISTING_EXCEPTION = "The organizer would like to change the occurrence of a recurrence on a day that already contains such a change. The server can only store one change for a series per day.";
     public static final String CANCEL_UNKNOWN_APPOINTMENT = "The organizer would like to cancel an appointment that could not be found.";
-    public static final String CHANGE_PARTICIPANT_STATE_IN_UNKNOWN_APPOINTMENT = "An attendee wanted to change his/her participant state in an appointment that could not be found. Probably the appointment was already cancelled.";
-    public static final String OLD_UPDATE = "This is an update to an appointment that already changed in the meantime. It is best to just ignore this one.";
-    public static final String COUNTER_UNKNOWN_APPOINTMENT = "An attendee wants to change an appointment that could not be found. Probably the appointment was deleted at some point, so it is best to just ignore this update.";
+    public static final String CHANGE_PARTICIPANT_STATE_IN_UNKNOWN_APPOINTMENT = "An attendee wanted to change his/her participant state in an appointment that could not be found. Probably the appointment was already canceled.";
+    public static final String OLD_UPDATE = "This is an update to an appointment that has been changed in the meantime. Best ignore it.";
+    public static final String COUNTER_UNKNOWN_APPOINTMENT = "An attendee wants to change an appointment that could not be found. Probably the appointment was deleted. Best ignore it.";
     public static final String DECLINED_COUNTER_PROPOSAL = "The organizer declined your counter proposal for the appointment.";
     public static final String DECLINED_FOR_UNKNOWN = "The organizer declined your counter proposal for an appointment that could not be found. It was probably deleted in the meantime.";
-    public static final String REFRESH_FOR_UNKNOWN = "An attendee wants to be brought up to date about an appointment that does not seem to exist. It was probably deleted at some point. It is best to just ignore this message.";
-    public static final String ALREADY_UPDATED = "This message contains appointment updates that were already accepted by another user. You do not need to do anything with this message.";
-    public static final String INTERNAL_MAIL = "This message comes from an internal user. You do not need to do anything with this message.";
+    public static final String REFRESH_FOR_UNKNOWN = "An attendee wants to be brought up to date about an appointment that could not be found. It was probably deleted at some point. Best ignore this message.";
+    public static final String ALREADY_UPDATED = "This message contains appointment updates that were already accepted by another user. Best ignore this message.";
+    public static final String INTERNAL_MAIL = "This message comes from an internal user. Best ignore it.";
     public static final String SHARED_FOLDER = "This invitation was sent to someone else, not you. This appointment would have to be created in a user's private folder to which you do not have write permissions.";
     
-    public static final String ATTACHMENTS_CHANGED = "The attachments to the appointment have changed";
+    public static final String ATTACHMENTS_CHANGED = "The appointment's attachments have been changed";
     
     public static final String FIELDS_CHANGED = "One or more other fields have been updated";
     
@@ -144,11 +144,12 @@ public class Messages implements LocalizableStrings {
 
     public static final String TENTATIVELY_ACCEPTED = "tentatively accepted";
 
+    // Used if a participant changed it status to either 'Accepted', 'Denied', or 'Tentatively accepted'
     public static final String NONE_INTRO =  "%1$s sets the status to %2$s for this appointment:";
 
-    public static final String NONE_ON_BEHALF_INTRO =  "%1$s sets the status to %2$s on behalf of %3$s for this appointment:";
+    public static final String NONE_ON_BEHALF_INTRO =  "On behalf of %3$s, %1$s sets the status for this appointment to %2$s:";
 
-    public static final String NONE_ON_YOUR_BEHALF_INTRO =  "%1$s set your status to %2$s on your behalf for this appointment:";
+    public static final String NONE_ON_YOUR_BEHALF_INTRO =  "On your behalf, %1$s sets your status for this appointment to %2$s:";
 
     public static final String NONE = "none";
 
@@ -192,7 +193,7 @@ public class Messages implements LocalizableStrings {
 
     public static final String DELETE_INTRO = "%1$s has deleted an appointment, or you have been removed as a participant:";
 
-    public static final String ASK_CHANGE_TITLE = "Please change the description to %1$s.";
+    public static final String ASK_CHANGE_TITLE = "Change the description to %1$s.";
 
     public static final String INTENTION_CHANGE_TITLE = "Change the description to %1$s.";
 
@@ -202,13 +203,13 @@ public class Messages implements LocalizableStrings {
     
 	public static final String HAS_CHANGED_TIMEZONE = "The appointment timezone was changed to: %1$s";
 
-	public static final String ASK_CHANGE_LOCATION = "Please change the location to %1$s.";
+	public static final String ASK_CHANGE_LOCATION = "Change the location to %1$s.";
 
     public static final String INTENTION_CHANGE_LOCATION = "Change the location to %1$s.";
 
     public static final String HAS_CHANGED_LOCATION = "The appointment takes place in a new location: %1$s.";
 
-    public static final String ASK_CHANGE_NOTE = "Please use the comments below.";
+    public static final String ASK_CHANGE_NOTE = "Use the comments below.";
 
     public static final String INTENTION_CHANGE_NOTE = "Use the comments below.";
 
@@ -220,7 +221,7 @@ public class Messages implements LocalizableStrings {
 
     public static final String HAS_ADDED_PARTICIPANT = "%1$s has been invited to the appointment.";
 
-    public static final String ASK_REMOVE_PARTICIPANT = "Please remove %1$s from the appointment.";
+    public static final String ASK_REMOVE_PARTICIPANT = "Remove %1$s from the appointment.";
 
     public static final String INTENTION_REMOVE_PARTICIPANT = "Remove %1$s from the appointment.";
 
@@ -239,13 +240,13 @@ public class Messages implements LocalizableStrings {
 
     public static final String TENTATIVELY_ACCEPT = "tentatively accept";
 
-    public static final String ASK_INVITE_GROUP = "Please invite the group %1$s to the appointment.";
+    public static final String ASK_INVITE_GROUP = "Invite the group %1$s to the appointment.";
 
     public static final String INTENTION_INVITE_GROUP = "Invite the group %1$s to the appointment.";
 
     public static final String HAS_INVITED_GROUP = "The group %1$s has been invited to the appointment";
 
-    public static final String ASK_REMOVE_GROUP = "Please remove the group %1$s from the appointment.";
+    public static final String ASK_REMOVE_GROUP = "Remove the group %1$s from the appointment.";
 
     public static final String INTENTION_REMOVE_GROUP = "Remove the group %1$s from the appointment.";
 
@@ -257,7 +258,7 @@ public class Messages implements LocalizableStrings {
 
     public static final String HAS_ADDED_RESOURCE = "The resource %1$s has been reserved for the appointment";
 
-    public static final String ASK_REMOVE_RESOURCE = "Please remove the resource %1$s from the appointment.";
+    public static final String ASK_REMOVE_RESOURCE = "Remove the resource %1$s from the appointment";
 
     public static final String INTENTION_REMOVE_RESOURCE = "Remove the resource %1$s from the appointment.";
 
@@ -265,7 +266,7 @@ public class Messages implements LocalizableStrings {
 
     public static final String HAS_RESCHEDULED = "The appointment was rescheduled. Original date: %1$s. New date: %2$s";
 
-    public static final String ASK_RESCHEDULE = "Please reschedule the event. Original date: %1$s. New date: %2$s";
+    public static final String ASK_RESCHEDULE = "Reschedule the event. Original date: %1$s. New date: %2$s";
 
     public static final String INTENTION_RESCHEDULE = "Reschedule the event. Original date: %1$s. New date: %2$s";
 
@@ -273,32 +274,35 @@ public class Messages implements LocalizableStrings {
 
     public static final String FULL_TIME = "The entire day";
 
-    public static final String SUBJECT_NEW_APPOINTMENT = "New Appointment: %1$s";
+    public static final String SUBJECT_NEW_APPOINTMENT = "New appointment: %1$s";
 
     public static final String SUBJECT_CHANGED_APPOINTMENT = "Appointment changed: %1$s";
 
-    public static final String SUBJECT_CANCELLED_APPOINTMENT = "Appointment cancelled: %1$s";
+    public static final String SUBJECT_CANCELLED_APPOINTMENT = "Appointment canceled: %1$s";
 
     public static final String SUBJECT_COUNTER_APPOINTMENT = "Proposed changes for appointment: %1$s";
 
+    // Used to indicate that a participant resetted his status to 'Waiting'; neither 'Accepted, 'Denied' nor 'Tentatively accepted'
     public static final String SUBJECT_NONE = "%1$s sets the status to 'none' for: %1$s";
 
     // Example: Subject: Doe, Jane accepted the invitation: My Appointment with Jane
     public static final String SUBJECT_STATE_CHANGED = "%1$s %2$s the invitation: %3$s";
 
-	public static final String SUBJECT_REFRESH = "Please resend the invitation for: %1$s";
+	public static final String SUBJECT_REFRESH = "Resend the invitation for: %1$s";
 
 	public static final String SUBJECT_DECLINECOUNTER = "Change not accepted for: %1$s";
 
 	public static final String TIMEZONE = "All times will be shown in the timezone %1$s";
 
+	// E.g. "Jane has accepted the appointment, but would like to make a counter proposal: "
 	public static final String COUNTER_REPLY_INTRO = "%1$s has %2$s the appointment, but would like to make a counter proposal: ";
 
-	public static final String PRINCIPAL_JUSTIFICATION = "You have received this mail because your are the chair for this appointment.";
+	// TODO: Mah/Cisco, please describe what is meant with the wording 'chair'
+	public static final String PRINCIPAL_JUSTIFICATION = "You have received this E-Mail because your are the chair for this appointment.";
 
-	public static final String ORGANIZER_JUSTIFICATION = "You have received this mail because your are the organizer of this appointment.";
+	public static final String ORGANIZER_JUSTIFICATION = "You have received this E-Mail because your are the organizer of this appointment.";
 
-	public static final String RESOURCE_MANAGER_JUSTIFICATION = "You have received this mail because this appointment contains the resource %1$s, that you manage.";
+	public static final String RESOURCE_MANAGER_JUSTIFICATION = "You have received this E-Mail because this appointment contains the resource %1$s which is managed by you.";
     
 }
 

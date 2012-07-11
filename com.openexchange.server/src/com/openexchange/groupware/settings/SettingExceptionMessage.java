@@ -78,7 +78,7 @@ public class SettingExceptionMessage implements LocalizableStrings {
     public final static String UNKNOWN_PATH_MSG = "Unknown setting path %1$s.";
 
     /** Setting "%1$s" is not a leaf one. */
-    public final static String NOT_LEAF_MSG = "Setting \"%1$s\" is not a leaf one.";
+    public final static String NOT_LEAF_MSG = "Setting \"%1$s\" is not a leaf.";
 
     /** Exception while parsing JSON. */
     public final static String JSON_READ_ERROR_MSG = "Exception while parsing JSON.";
@@ -102,6 +102,6 @@ public class SettingExceptionMessage implements LocalizableStrings {
     public final static String NOT_ALLOWED_MSG = "Not allowed operation.";
 
     /** Reached maximum retries writing setting %s. */
-    public final static String MAX_RETRY_MSG = "Reached maximum retries writing setting %s.";
+    public final static String MAX_RETRY_MSG = "Reached maximum retries for writing the setting %s.";
 
 }

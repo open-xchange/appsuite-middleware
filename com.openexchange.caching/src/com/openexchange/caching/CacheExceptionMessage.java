@@ -80,11 +80,11 @@ public class CacheExceptionMessage implements LocalizableStrings {
     // The default element attributes could not be retrieved.
     public final static String FAILED_ATTRIBUTE_RETRIEVAL = "The default element attributes could not be retrieved.";
 
-    // A put into the cache failed.
-    public final static String FAILED_PUT = "Put into cache failed.";
+    // 'Put' into cache failed.
+    public final static String FAILED_PUT = "'Put' into cache failed.";
 
-    // Safe put into cache failed. An object bound to given key already exists.
-    public final static String FAILED_SAFE_PUT = "Safe put into cache failed. An object bound to given key already exists.";
+    // 'Save put' into cache failed. An object bound to given key already exists.
+    public final static String FAILED_SAFE_PUT = "'Save put' into cache failed. An object bound to given key already exists.";
 
     // Remove on cache failed
     public final static String FAILED_REMOVE = "Remove on cache failed";

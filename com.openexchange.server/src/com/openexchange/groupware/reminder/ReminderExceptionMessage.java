@@ -73,7 +73,7 @@ public class ReminderExceptionMessage implements LocalizableStrings {
     /**
      * Identifier of the object is missing.
      */
-    public final static String MANDATORY_FIELD_TARGET_ID_MSG = "Identifier of the object is missing.";
+    public final static String MANDATORY_FIELD_TARGET_ID_MSG = "Object identifier is missing.";
 
     /**
      * Alarm date for the reminder is missing.
@@ -82,7 +82,7 @@ public class ReminderExceptionMessage implements LocalizableStrings {
 
     public final static String INSERT_EXCEPTION_MSG = "Unable to insert reminder";
 
-    public final static String UPDATE_EXCEPTION_MSG = "Unable to update reminder.";
+    public final static String UPDATE_EXCEPTION_MSG = "Unable to update reminder";
 
     public final static String DELETE_EXCEPTION_MSG = "Unable to delete reminder";
 
@@ -91,17 +91,17 @@ public class ReminderExceptionMessage implements LocalizableStrings {
     public final static String LIST_EXCEPTION_MSG = "Unable to list reminder";
 
     /** Can not find reminder with identifier %1$d in context %2$d. */
-    public final static String NOT_FOUND_MSG = "Can not find reminder with identifier %1$d in context %2$d.";
+    public final static String NOT_FOUND_MSG = "Reminder with identifier %1$d can not be found in context %2$d.";
 
     /**
      * Folder of the object is missing.
      */
-    public final static String MANDATORY_FIELD_FOLDER_MSG = "Folder of the object is missing.";
+    public final static String MANDATORY_FIELD_FOLDER_MSG = "Object folder is missing";
 
     /**
      * Module type of the object is missing.
      */
-    public final static String MANDATORY_FIELD_MODULE_MSG = "Module type of the object is missing.";
+    public final static String MANDATORY_FIELD_MODULE_MSG = "Object's module type is missing";
 
     /**
      * Updated too many reminders.

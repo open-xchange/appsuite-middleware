@@ -84,10 +84,9 @@ public class TaskExceptionMessage implements LocalizableStrings {
     public static final String NOT_TASK_FOLDER_MSG = "Folder %1$s (%2$d) is not a task folder.";
 
     /**
-     * Edit Conflict. Your change cannot be completed because somebody else has made a conflicting change to the same item. Please refresh
-     * or synchronize and try again.
+     * Edit conflict. Your change cannot be completed because somebody else has made a conflicting change to the same item. Please refresh or synchronize and try again.
      */
-    public static final String MODIFIED_MSG = "Edit Conflict. Your change cannot be completed because somebody else has made a conflicting change to the same item. Please refresh or synchronize and try again.";
+    public static final String MODIFIED_MSG = "Edit conflict. Your change cannot be completed because somebody else has made a conflicting change to the same item. Please refresh or synchronize and try again.";
 
     /** Cannot create private task in public/shared folder %1$d. */
     public static final String PRIVATE_FLAG_MSG = "Cannot create private task in public/shared folder %1$d.";
@@ -135,7 +134,7 @@ public class TaskExceptionMessage implements LocalizableStrings {
     public static final String NO_READ_PERMISSION_MSG = "You are not allowed to read the contents of folder %1$s (%2$d).";
 
     /** Tasks are disable for you (%d). */
-    public static final String NO_TASKS_MSG = "Tasks are disable for you (%d).";
+    public static final String NO_TASKS_MSG = "Tasks are disabled for you (%d).";
 
     /** You are not allowed to create tasks in folder %1$s (%2$d). */
     public static final String NO_CREATE_PERMISSION_MSG = "You are not allowed to create tasks in folder %1$s (%2$d).";
@@ -147,13 +146,13 @@ public class TaskExceptionMessage implements LocalizableStrings {
     public static final String FOLDER_IS_MISSING_MSG = "Missing folder id for creating task.";
 
     /** Private flagged tasks cannot be delegated. */
-    public static final String NO_PRIVATE_DELEGATE_MSG = "Private flagged tasks cannot be delegated.";
+    public static final String NO_PRIVATE_DELEGATE_MSG = "Tasks with private flag cannot be delegated.";
 
     /** Percent is %d but must be between 0 and 100. */
     public static final String INVALID_PERCENTAGE_MSG = "Percent is %d but must be between 0 and 100.";
 
     /** For tasks which are not started the percentage done must be 0 and not %d. */
-    public static final String PERCENTAGE_NOT_ZERO_MSG = "For tasks which are not started the percentage done must be 0 and not %d.";
+    public static final String PERCENTAGE_NOT_ZERO_MSG = "Tasks that have not been started yet need to have a 'Done' percentage of 0 and not %d.";
 
     /** cannot send event to event system. */
     public static final String EVENT_MSG = "Cannot send event to event system.";
@@ -174,7 +173,7 @@ public class TaskExceptionMessage implements LocalizableStrings {
     public static final String MISSING_RECURRENCE_VALUE_MSG = "Value for the recurrence is missing: %d.";
 
     /** For finished tasks the percentage must be 100 and not %d. */
-    public static final String PERCENTAGE_NOT_FULL_MSG = "For finished tasks the percentage must be 100 and not %d.";
+    public static final String PERCENTAGE_NOT_FULL_MSG = "Finished tasks need to have a percentage of 100 and not %d.";
 
     /** Invalid task state %d. */
     public static final String INVALID_TASK_STATE_MSG = "Invalid task state %d.";
@@ -189,16 +188,16 @@ public class TaskExceptionMessage implements LocalizableStrings {
     public static final String TRUNCATED_MSG = "The task could not be saved. Please shorten the %1$s and try again. Current length %3$d is more than allowed length of %2$d characters.";
 
     /** Task with private flag cannot be moved to public folder %1$s (%2$d). */
-    public static final String NO_PRIVATE_MOVE_TO_PUBLIC_MSG = "Task with private flags cannot be moved to public folder %1$s (%2$d).";
+    public static final String NO_PRIVATE_MOVE_TO_PUBLIC_MSG = "Tasks with private flag cannot be moved to a public folder %1$s (%2$d).";
 
     /** Only the task creator is allowed to set private flag. */
-    public static final String ONLY_CREATOR_PRIVATE_MSG = "Only the task creator is allowed to set private flag.";
+    public static final String ONLY_CREATOR_PRIVATE_MSG = "Only the task creator is allowed to set the private flag.";
 
     /** Cannot add external participant without email address. */
-    public static final String EXTERNAL_WITHOUT_MAIL_MSG = "Cannot add external participant without email address.";
+    public static final String EXTERNAL_WITHOUT_MAIL_MSG = "External participants without E-Mail address can not be added.";
 
     /** Problem with a thread. */
-    public static final String THREAD_ISSUE_MSG = "Problem with a thread.";
+    public static final String THREAD_ISSUE_MSG = "Unexpected error.";
 
     /** You are not allowed to see the task %1$d in folder %2$s (%3$d). */
     public static final String NO_PERMISSION_MSG = "You are not allowed to see the task %1$d in folder %2$s (%3$d).";
@@ -213,15 +212,15 @@ public class TaskExceptionMessage implements LocalizableStrings {
     public static final String UNKNOWN_PARTICIPANT_MSG = "Unknown participant type %1$d.";
 
     /** The entered value for costs is not within the allowed range. Please use a value from -130000.00 to 130000.00. */
-    public static final String COSTS_OFF_LIMIT_MSG = "The entered value for costs is not within the allowed range. Please use a value from -130000.00 to 130000.00.";
+    public static final String COSTS_OFF_LIMIT_MSG = "The value entered for costs is not within the allowed range. Please use a value from -130000.00 to 130000.00.";
 
     /** In order to accomplish the search, %1$d or more characters are required. */
     public static final String PATTERN_TOO_SHORT_MSG = "In order to accomplish the search, %1$d or more characters are required.";
 
     /** Group %1$d is empty. You can't add an empty group to a task. */
-    public static final String GROUP_IS_EMPTY_MSG = "Group %1$d is empty. You can't add an empty group to a task.";
+    public static final String GROUP_IS_EMPTY_MSG = "Group %1$d is empty. You can not add an empty group to a task.";
 
     /** UID of tasks can not be changed. */
-    public static final String NO_UID_CHANGE_MSG = "UID of tasks can not be changed.";
+    public static final String NO_UID_CHANGE_MSG = "Tasks uids can not be changed.";
 
 }

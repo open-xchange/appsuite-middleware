@@ -59,7 +59,7 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public final class UpdateExceptionMessages implements LocalizableStrings {
 
-    public static final String ONLY_REDUCE_MSG = "Current version number %1$s is already lower than or equal to desired version number %2$s.";
+    public static final String ONLY_REDUCE_MSG = "The current version number %1$s is already lower than or equal to the desired version number %2$s.";
 
     public static final String SQL_PROBLEM_MSG = "A SQL problem occurred: %1$s.";
 

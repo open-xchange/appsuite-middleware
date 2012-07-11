@@ -66,10 +66,10 @@ public final class MailExceptionStrings implements LocalizableStrings {
     }
 
     // Displayed to user if a volatile error occurred.
-    public static final String MAIL_MESSAGE_RETRY = "A messaging error occurred. Please try again again later";
+    public static final String MAIL_MESSAGE_RETRY = "A messaging error occurred. Please try again later.";
 
     // Displayed to user if a permanent mail error occurred
-    public static final String MAIL_MESSAGE = "A messaging error occurred. There is nothing you can do at the moment.";
+    public static final String MAIL_MESSAGE = "A messaging error occurred.";
 
     /**
      * Unexpected error: %1$s
@@ -154,7 +154,7 @@ public final class MailExceptionStrings implements LocalizableStrings {
     /**
      * Unsupported charset-encoding: %1$s
      */
-    public final static String ENCODING_ERROR_MSG = "Unsupported charset-encoding: %1$s";
+    public final static String ENCODING_ERROR_MSG = "Unsupported charset encoding: %1$s";
 
     /**
      * Header %1$s could not be properly parsed
@@ -174,7 +174,7 @@ public final class MailExceptionStrings implements LocalizableStrings {
     /**
      * Invalid Content-Type value: %1$s
      */
-    public final static String INVALID_CONTENT_TYPE_MSG = "Invalid Content-Type value: %1$s";
+    public final static String INVALID_CONTENT_TYPE_MSG = "Invalid content type value: %1$s";
 
     /**
      * Messaging error: %1$s. TODO: Maybe change to: Broken/Bad message
@@ -264,12 +264,12 @@ public final class MailExceptionStrings implements LocalizableStrings {
     /**
      * Mail could not be moved to trash folder. Quota exceeded
      */
-    public final static String DELETE_FAILED_OVER_QUOTA_MSG = "Mail could not be moved to trash folder. Quota exceeded";
+    public final static String DELETE_FAILED_OVER_QUOTA_MSG = "Mail could not be moved to trash folder. Quota exceeded.";
 
     /**
      * The message part with sequence ID %1$s could not be found in message %2$s in folder %3$s
      */
-    public final static String PART_NOT_FOUND_MSG = "The message part with sequence ID %1$s could not be found in message %2$s in folder %3$s";
+    public final static String PART_NOT_FOUND_MSG = "The message part with sequence ID %1$s could not be found in message %2$s in folder %3$s.";
 
     /**
      * No content available in mail part
@@ -279,12 +279,12 @@ public final class MailExceptionStrings implements LocalizableStrings {
     /**
      * Message has been successfully sent, but a copy could not be placed in your sent folder due to exceeded quota.
      */
-    public final static String COPY_TO_SENT_FOLDER_FAILED_QUOTA_MSG = "Message has been successfully sent, but a copy could not be placed in your sent folder due to exceeded quota.";
+    public final static String COPY_TO_SENT_FOLDER_FAILED_QUOTA_MSG = "Message has been successfully sent. Due to exceeded quota a copy could not be placed in your sent folder though.";
 
     /**
      * Message has been successfully sent, but a copy could not be placed in your sent folder
      */
-    public final static String COPY_TO_SENT_FOLDER_FAILED_MSG = "Message has been successfully sent, but a copy could not be placed in your sent folder.";
+    public final static String COPY_TO_SENT_FOLDER_FAILED_MSG = "Message has been successfully sent. A copy could not be placed in your sent folder though.";
 
     /**
      * No provider could be found for protocol/URL "%1$s"
@@ -330,7 +330,7 @@ public final class MailExceptionStrings implements LocalizableStrings {
      * Insufficient folder attributes: Either existence status or fullname have to be present to determine if a mail folder create or update
      * shall be performed
      */
-    public final static String INSUFFICIENT_FOLDER_ATTR_MSG = "Insufficient folder attributes: Either existence status " + "or fullname have to be present to determine if a " + "mail folder create or update shall be performed";
+    public final static String INSUFFICIENT_FOLDER_ATTR_MSG = "Insufficient folder attributes: Either existence status or full name have to be present to determine if a mail folder create or update shall be performed";
 
     /**
      * Root folder must not be modified or deleted
@@ -345,17 +345,17 @@ public final class MailExceptionStrings implements LocalizableStrings {
     /**
      * Missing mail folder fullname
      */
-    public final static String MISSING_FULLNAME_MSG = "Missing mail folder fullname";
+    public final static String MISSING_FULLNAME_MSG = "Missing mail folder full name";
 
     /**
      * Image attachment with Content-Id "%1$s" not found inside mail %2$s of mail folder %3$s
      */
-    public final static String IMAGE_ATTACHMENT_NOT_FOUND_MSG = "Image attachment with Content-Id \"%1$s\" not found inside mail %2$s of mail folder %3$s";
+    public final static String IMAGE_ATTACHMENT_NOT_FOUND_MSG = "Image attachment with content id \"%1$s\" not found inside mail %2$s of mail folder %3$s";
 
     /**
      * The specified email address %1$s is not covered by allowed email address aliases
      */
-    public final static String INVALID_SENDER_MSG = "The specified email address %1$s is not covered by allowed email address aliases";
+    public final static String INVALID_SENDER_MSG = "The specified E-Mail address %1$s is not covered by allowed E-Mail address aliases.";
 
     /**
      * Checking default folders on server %1$s for user %2$s (%3$s) in context on %4$s failed: %5$s
@@ -380,7 +380,7 @@ public final class MailExceptionStrings implements LocalizableStrings {
     /**
      * Mail folder cannot be created/rename. Name must not contain character '%1$s'
      */
-    public final static String INVALID_FOLDER_NAME_MSG = "Mail folder cannot be created/renamed. Name must not contain character '%1$s'";
+    public final static String INVALID_FOLDER_NAME_MSG = "The mail folder cannot be created/renamed. The name must not contain the character '%1$s'.";
 
     /**
      * Invalid Content-Disposition value: %1$s
@@ -460,12 +460,12 @@ public final class MailExceptionStrings implements LocalizableStrings {
     /**
      * Mail could not be found in folder %1$s for Message-Id: %2$s
      */
-    public final static String MAIL_NOT_FOUN_BY_MESSAGE_ID_MSG = "Mail could not be found in folder %1$s for Message-Id: %2$s";
+    public final static String MAIL_NOT_FOUN_BY_MESSAGE_ID_MSG = "Mail could not be found in folder %1$s for message identifier: %2$s";
 
     /**
      * Sent quota exceeded, you are only allowed to sent 1 mail in %1$s seconds.
      */
-    public final static String SENT_QUOTA_EXCEEDED_MSG = "Sent quota exceeded, you are only allowed to send 1 mail in %1$s seconds.";
+    public final static String SENT_QUOTA_EXCEEDED_MSG = "Sent quota exceeded. You are only allowed to send 1 E-Mail in %1$s seconds.";
 
     /**
      * Sent quota exceeded, you are only allowed to sent 1 mail in %1$s seconds.
@@ -516,7 +516,7 @@ public final class MailExceptionStrings implements LocalizableStrings {
      * The attachments to this mail exceeded the size limit for attachments. Instead of sending the attachment in the email, the attachment
      * was published and the link added to your email. Whoever receives the email can then download the attachment.
      */
-    public final static String USED_PUBLISHING_FEATURE_MSG = "The attachments to this mail exceeded the size limit for attachments. Instead of sending the attachment in the email, the attachment was published and the link added to your email. Whoever receives the email can then download the attachment.";
+    public final static String USED_PUBLISHING_FEATURE_MSG = "The attachments to this E-Mail exceeded the size limit for attachments. Instead of sending the attachment with the E-Mail, the attachment was  and the link added to your E-Mail. Whoever receives the E-Mail can then download the attachment.";
 
     // Draft message could not be saved
     public static final String DRAFT_FAILED_UNKNOWN_MSG = "Draft message could not be saved";

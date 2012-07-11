@@ -77,11 +77,11 @@ public class GroupExceptionMessage implements LocalizableStrings {
     // The mandatory field %1$s is not defined.
     public final static String MANDATORY_MISSING_MSG = "The mandatory field %1$s is not defined.";
 
-    // The simple name contains this not allowed characters: "%s".
-    public final static String NOT_ALLOWED_SIMPLE_NAME_MSG = "The simple name contains this not allowed " + "characters: \"%1$s\".";
+    // The simple name contains invalid characters: "%1$s".
+    public final static String NOT_ALLOWED_SIMPLE_NAME_MSG = "The simple name contains invalid characters: \"%1$s\".";
 
-    // Another group with same identifier name exists: %1$d.
-    public final static String DUPLICATE_MSG = "Another group with same identifier name exists: %1$d.";
+    // Another group with the same identifier name exists: %1$d.
+    public final static String DUPLICATE_MSG = "Another group with the same identifier name exists: %1$d.";
 
     // Group contains a not existing member %1$d.
     public final static String NOT_EXISTING_MEMBER_MSG = "Group contains a not existing member %1$d.";

@@ -83,7 +83,7 @@ public enum JSlobExceptionCodes implements OXExceptionCode {
      */
     CONFLICT(JSlobExceptionMessages.CONFLICT, CATEGORY_USER_INPUT, 5),
     /**
-     * Path doesn't exist: %1$s
+     * Path does not exist: %1$s
      */
     PATH_NOT_FOUND(JSlobExceptionMessages.PATH_NOT_FOUND, CATEGORY_USER_INPUT, 6),
     /**

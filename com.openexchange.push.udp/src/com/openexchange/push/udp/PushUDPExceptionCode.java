@@ -64,7 +64,7 @@ public enum PushUDPExceptionCode implements OXExceptionCode {
      */
     MISSING_PAYLOAD(PushUDPExceptionMessage.MISSING_PAYLOAD_MSG, 14, CATEGORY_ERROR),
     /**
-     * Missing payload in datagram package.
+     * No UDP channel is configured.
      */
     NO_CHANNEL(PushUDPExceptionMessage.NO_CHANNEL_MSG, 15, CATEGORY_ERROR);
 

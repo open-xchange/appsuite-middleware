@@ -68,7 +68,7 @@ public final class MailAccountExceptionStrings implements LocalizableStrings {
     public static final String CONFLICT_MSG = "Found two mail accounts with same identifier %1$s for user %2$s in context %3$s.";
 
     // Found two mail accounts with same email address %1$s for user %2$s in context %3$s.
-    public static final String CONFLICT_ADDR_MSG = "Found two mail accounts with same email address %1$s for user %2$s in context %3$s.";
+    public static final String CONFLICT_ADDR_MSG = "Found two mail accounts with same E-Mail address %1$s for user %2$s in context %3$s.";
 
     // A SQL error occurred: %1$s.
     public static final String SQL_ERROR_MSG = "A SQL error occurred: %1$s.";

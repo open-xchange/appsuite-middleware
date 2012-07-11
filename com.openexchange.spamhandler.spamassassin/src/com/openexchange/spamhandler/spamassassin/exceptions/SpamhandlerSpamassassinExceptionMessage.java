@@ -68,7 +68,7 @@ public class SpamhandlerSpamassassinExceptionMessage implements LocalizableStrin
     /**
      * The given value for mode "%s" is not a possible one
      */
-    public final static String MODE_TYPE_WRONG_MSG = "The given value for mode \"%s\" is not a possible one";
+    public final static String MODE_TYPE_WRONG_MSG = "The value given for mode \"%s\" is invalid.";
 
     /**
      * The parameter "%s" is not set in the property file
@@ -96,9 +96,9 @@ public class SpamhandlerSpamassassinExceptionMessage implements LocalizableStrin
     public final static String USERSOURCE_WRONG_MSG = "The given value for userSource \"%s\" is not a possible one";
 
     /**
-     * The parameter "%s" must be an long value but is "%s"
+     * The parameter "%s" must be a long value but is "%s"
      */
-    public final static String PARAMETER_NO_LONG_MSG = "The parameter \"%s\" must be an long value but is \"%s\"";
+    public final static String PARAMETER_NO_LONG_MSG = "The parameter \"%s\" must be a long value but is \"%s\"";
 
     /**
      * Spamd returned wrong exit code "%s"
@@ -118,7 +118,7 @@ public class SpamhandlerSpamassassinExceptionMessage implements LocalizableStrin
     /**
      * Can't handle spam because MailService isn't available
      */
-    public final static String MAILSERVICE_MISSING_MSG = "Can't handle spam because MailService isn't available";
+    public final static String MAILSERVICE_MISSING_MSG = "Spam cannot be handled because MailService is not available";
 
     /**
      * Error while getting spamd provider from service: "%s"

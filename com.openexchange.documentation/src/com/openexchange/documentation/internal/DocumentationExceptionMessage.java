@@ -67,10 +67,10 @@ public class DocumentationExceptionMessage implements LocalizableStrings {
     }
     
     // Module '%s' already registered.
-    public final static String MODULE_ALREADY_REGISTERED_MSG = "Module '%s' already registered.";
+    public final static String MODULE_ALREADY_REGISTERED_MSG = "Module '%s' is already registered.";
     
     // Container '%s' already registered.
-    public final static String CONTAINER_ALREADY_REGISTERED_MSG = "Container '%s' already registered.";
+    public final static String CONTAINER_ALREADY_REGISTERED_MSG = "Container '%s' is already registered.";
     
     // The module name is missing in the module description.
     public final static String MODULE_NAME_MISSING_MSG = "The module name is missing in the module description.";
