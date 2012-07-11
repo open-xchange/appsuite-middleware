@@ -49,30 +49,18 @@
 
 package com.openexchange.http.grizzly.services.atmosphere;
 
-import java.io.IOException;
-import java.net.URL;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import org.atmosphere.container.GrizzlyCometSupport;
 import org.atmosphere.cpr.AtmosphereFramework;
 import org.atmosphere.cpr.AtmosphereHandler;
-import org.atmosphere.cpr.AtmosphereResource;
-import org.atmosphere.cpr.AtmosphereResourceEvent;
 import org.atmosphere.cpr.AtmosphereServlet;
 import org.atmosphere.cpr.Broadcaster;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.grizzly.servlet.ServletRegistration;
 import org.glassfish.grizzly.servlet.WebappContext;
 import org.osgi.framework.Bundle;
-import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.NamespaceException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.http.atmosphere.AtmosphereService;
 import com.openexchange.http.grizzly.osgi.GrizzlyServiceRegistry;
-import com.openexchange.http.grizzly.services.http.HttpServiceImpl;
 import com.openexchange.log.LogFactory;
 
 
