@@ -11,3 +11,4 @@ Architecture: all
 Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
 Pre-Depends: dpkg (>= 1.15.7.2)
 Description: The Open-Xchange Password Change Database Bundle
+Conflicts: open-xchange-passwordchange-script

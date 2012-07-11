@@ -16,6 +16,7 @@ URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       The Open-Xchange Password Change Database Bundle
 Requires:      open-xchange-core >= @OXVERSION@
+Conflicts:     open-xchange-passwordchange-script
 
 %description
 The Open-Xchange Password Change Database Bundle
