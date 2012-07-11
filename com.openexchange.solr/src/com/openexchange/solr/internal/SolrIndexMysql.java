@@ -61,7 +61,7 @@ import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.impl.IDGenerator;
-import com.openexchange.server.ServiceExceptionCodes;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.solr.SolrCore;
 import com.openexchange.solr.SolrCoreIdentifier;
 import com.openexchange.solr.SolrCoreStore;
@@ -533,7 +533,7 @@ public class SolrIndexMysql {
     private DatabaseService getDbService() throws OXException {
         final DatabaseService dbService = Services.getService(DatabaseService.class);
         if (dbService == null) {
-            throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
         }
 
         return dbService;

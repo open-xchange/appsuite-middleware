@@ -62,7 +62,7 @@ import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.server.ServiceExceptionCodes;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
@@ -103,7 +103,7 @@ public abstract class ContactAction implements AJAXActionService {
         try {
             return serviceLookup.getService(ContactInterfaceDiscoveryService.class);
         } catch (final IllegalStateException e) {
-            throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(ContactInterfaceDiscoveryService.class.getName());
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ContactInterfaceDiscoveryService.class.getName());
         }
     }
 
@@ -117,7 +117,7 @@ public abstract class ContactAction implements AJAXActionService {
         try {
             return serviceLookup.getService(ContactService.class);
         } catch (final IllegalStateException e) {
-            throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(ContactService.class.getName());
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ContactService.class.getName());
         }
     }
 

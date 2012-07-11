@@ -81,7 +81,7 @@ import com.openexchange.messaging.generic.internet.MimeContentType;
 import com.openexchange.messaging.generic.internet.MimeMessagingBodyPart;
 import com.openexchange.messaging.generic.internet.MimeMultipartContent;
 import com.openexchange.messaging.smslmms.api.SMSMessage;
-import com.openexchange.server.ServiceExceptionCodes;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -505,7 +505,7 @@ public final class SMSMessagingMessage implements ParameterizedMessagingMessage,
          */
         final ManagedFileManagement managedFileManagement = SERVICE_LOOKUP.get().getService(ManagedFileManagement.class);
         if (null == managedFileManagement) {
-            throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(ManagedFileManagement.class.getName());
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ManagedFileManagement.class.getName());
         }
         addAttachment(managedFileManagement.getByID(attachmentId));
     }

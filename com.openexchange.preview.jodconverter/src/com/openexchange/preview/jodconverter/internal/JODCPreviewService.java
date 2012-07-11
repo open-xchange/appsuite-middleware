@@ -71,7 +71,7 @@ import com.openexchange.preview.PreviewDocument;
 import com.openexchange.preview.PreviewOutput;
 import com.openexchange.preview.PreviewPolicy;
 import com.openexchange.preview.Quality;
-import com.openexchange.server.ServiceExceptionCodes;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -183,7 +183,7 @@ public class JODCPreviewService implements InternalPreviewService {
     private PreviewDocument convertDocument(final DocumentContent document, final PreviewOutput output) throws OXException {
         final DocumentConverterService converterService = serviceLookup.getService(DocumentConverterService.class);
         if (converterService == null) {
-            throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(DocumentConverterService.class.getName());
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DocumentConverterService.class.getName());
         }
 
         final DocumentContent documentContent = converterService.convert(document, getOutputExtension(output));
