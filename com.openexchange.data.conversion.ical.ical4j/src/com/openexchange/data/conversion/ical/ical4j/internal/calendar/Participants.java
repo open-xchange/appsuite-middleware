@@ -68,6 +68,7 @@ import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.PropertyList;
 import net.fortuna.ical4j.model.TextList;
 import net.fortuna.ical4j.model.component.CalendarComponent;
+import net.fortuna.ical4j.model.parameter.Cn;
 import net.fortuna.ical4j.model.parameter.CuType;
 import net.fortuna.ical4j.model.parameter.PartStat;
 import net.fortuna.ical4j.model.parameter.Role;
@@ -196,6 +197,8 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             final ParameterList parameters = attendee.getParameters();
             parameters.add(Role.REQ_PARTICIPANT);
             parameters.add(CuType.INDIVIDUAL);
+            final String displayName = this.resolveUserDisplayName(index, userParticipant, ctx);
+            parameters.add(new Cn(null != displayName && 0 < displayName.length() ? displayName : address));
             switch (userParticipant.getConfirm()) {
             case CalendarObject.ACCEPT:
                 parameters.add(PartStat.ACCEPTED);
@@ -215,6 +218,18 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
         } catch (AddressException e) {
             LOG.error(e);
         }
+    }
+
+    protected String resolveUserDisplayName(int index, UserParticipant userParticipant, Context ctx) throws ConversionError {
+        String displayName = userParticipant.getDisplayName();
+        if (null == displayName || 0 == displayName.length()) {
+            try {
+                displayName = userResolver.loadUser(userParticipant.getIdentifier(), ctx).getDisplayName();
+            } catch (OXException e) {
+                throw new ConversionError(index, e);
+            }
+        }
+        return displayName;
     }
 
     protected String resolveUserMail(final int index, final UserParticipant userParticipant, final Context ctx) throws ConversionError {
