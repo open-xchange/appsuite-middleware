@@ -3,7 +3,7 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-installroot=$(CURDIR)/debian/open-xchange-eas-provisioning
+installroot=$(CURDIR)/debian/open-xchange-eas-provisioning-mail
 
 configure: configure-stamp
 configure-stamp:
@@ -28,7 +28,7 @@ install: build
 	dh_testroot
 	dh_prep
 	dh_installdirs
-	ant -lib build/lib -Dbasedir=build -DdestDir=$(installroot)-core -DpackageName=open-xchange-eas-provisioning -f build/build.xml build
+	ant -lib build/lib -Dbasedir=build -DdestDir=$(installroot) -DpackageName=open-xchange-eas-provisioning-mail -f build/build.xml build
 
 # Build architecture-independent files here.
 binary-indep: build install
