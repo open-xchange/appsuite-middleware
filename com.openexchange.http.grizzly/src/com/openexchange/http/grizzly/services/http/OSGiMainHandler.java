@@ -96,6 +96,8 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
     private final Bundle bundle;
 
     private final OSGiCleanMapper mapper;
+    
+    private final boolean isRequestWatcherEnabled;
 
     /**
      * Constructor.
@@ -106,6 +108,17 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
     public OSGiMainHandler(Bundle bundle) {
         this.bundle = bundle;
         this.mapper = new OSGiCleanMapper();
+        
+        /*
+         * Get configparams from configService and add Filters to ServletHandler.
+         */
+        ConfigurationService configService = GrizzlyServiceRegistry.getInstance().getService(ConfigurationService.class);
+        if (configService == null) {
+            throw new IllegalStateException(String.format(
+                GrizzlyExceptionMessage.NEEDED_SERVICE_MISSING_MSG,
+                ConfigurationService.class.getName()));
+        }
+        isRequestWatcherEnabled = configService.getBoolProperty("com.openexchange.http.requestwatcher.isEnabled", true);
     }
 
     /**
@@ -206,16 +219,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
             OSGiServletHandler servletHandler = findOrCreateOSGiServletHandler(servlet, context, initparams);
             servletHandler.setServletPath(alias);
 
-            /*
-             * Get configparams from configService and add Filters to ServletHandler.
-             */
-            ConfigurationService configService = GrizzlyServiceRegistry.getInstance().getService(ConfigurationService.class);
-            if (configService == null) {
-                throw new IllegalStateException(String.format(
-                    GrizzlyExceptionMessage.NEEDED_SERVICE_MISSING_MSG,
-                    ConfigurationService.class.getName()));
-            }
-            boolean isRequestWatcherEnabled = configService.getBoolProperty("com.openexchange.http.requestwatcher.isEnabled", true);
+            //Do we have to watch long running requests?
             if (isRequestWatcherEnabled) {
                 servletHandler.addFilter(
                     new RequestReportingFilter(GrizzlyServiceRegistry.getInstance()),
