@@ -13,7 +13,7 @@ Description: Meta package to install all necessary components to provision synch
 
 Package: open-xchange-eas-provisioning-core
 Architecture: all
-Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
+Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@), open-xchange-eas (>= @OXVERSION@)
 Replaces: open-xchange-mobile-configuration-generator, open-xchange-mobile-configuration-json
 Conflicts: open-xchange-mobile-configuration-generator, open-xchange-mobile-configuration-json
 Provides: open-xchange-mobile-configuration-generator, open-xchange-mobile-configuration-json
