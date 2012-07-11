@@ -344,7 +344,7 @@ public final class CSSMatcher {
                 boolean tagFound = false;
                 final String[] words = SPLIT_WORDS.split(line, 0);
                 if (1 == words.length && "body".equalsIgnoreCase(words[0])) {
-                    // Special treatment of "body" selector
+                    // Special treatment for "body" selector
                     builder.append('#').append(cssPrefix).append(' ');
                 } else {
                     for (final String word : words) {
@@ -376,7 +376,7 @@ public final class CSSMatcher {
             for (final String line : SPLIT_LINES.split(s.substring(pos), 0)) {
                 final String[] words = SPLIT_WORDS.split(line, 0);
                 if (1 == words.length && "body".equalsIgnoreCase(words[0])) {
-                    // Special treatment of "body" selector
+                    // Special treatment for "body" selector
                     builder.append('#').append(cssPrefix).append(' ');
                 } else {
                     for (final String word : words) {
