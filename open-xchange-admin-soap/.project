@@ -3,12 +3,6 @@
 	<name>open-xchange-admin-soap</name>
 	<comment></comment>
 	<projects>
-		<project>com.openexchange.admin.soap.context</project>
-		<project>com.openexchange.admin.soap.group</project>
-		<project>com.openexchange.admin.soap.resource</project>
-		<project>com.openexchange.admin.soap.taskmgmt</project>
-		<project>com.openexchange.admin.soap.user</project>
-		<project>com.openexchange.admin.soap.util</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
