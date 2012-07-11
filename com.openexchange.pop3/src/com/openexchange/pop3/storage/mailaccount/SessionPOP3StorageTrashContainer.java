@@ -58,6 +58,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.SynchronizedBasedReentrantLock;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.pop3.POP3Access;
 import com.openexchange.pop3.services.POP3ServiceRegistry;
@@ -86,34 +87,23 @@ public final class SessionPOP3StorageTrashContainer implements POP3StorageTrashC
         final Session session = pop3Access.getSession();
         final String key = SessionParameterNames.getTrashContainer(pop3Access.getAccountId());
         SessionPOP3StorageTrashContainer cached;
-        final Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
+        Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
         if (null == lock) {
-            synchronized (session) {
-                try {
-                    cached = (SessionPOP3StorageTrashContainer) session.getParameter(key);
-                } catch (final ClassCastException e) {
-                    cached = null;
-                }
-                if (null == cached) {
-                    cached = new SessionPOP3StorageTrashContainer(new RdbPOP3StorageTrashContainer(pop3Access), session, key);
-                    session.setParameter(key, cached);
-                }
-            }
-        } else {
-            lock.lock();
+            lock = new SynchronizedBasedReentrantLock(session);
+        }
+        lock.lock();
+        try {
             try {
-                try {
-                    cached = (SessionPOP3StorageTrashContainer) session.getParameter(key);
-                } catch (final ClassCastException e) {
-                    cached = null;
-                }
-                if (null == cached) {
-                    cached = new SessionPOP3StorageTrashContainer(new RdbPOP3StorageTrashContainer(pop3Access), session, key);
-                    session.setParameter(key, cached);
-                }
-            } finally {
-                lock.unlock();
+                cached = (SessionPOP3StorageTrashContainer) session.getParameter(key);
+            } catch (final ClassCastException e) {
+                cached = null;
             }
+            if (null == cached) {
+                cached = new SessionPOP3StorageTrashContainer(new RdbPOP3StorageTrashContainer(pop3Access), session, key);
+                session.setParameter(key, cached);
+            }
+        } finally {
+            lock.unlock();
         }
         return cached;
     }
