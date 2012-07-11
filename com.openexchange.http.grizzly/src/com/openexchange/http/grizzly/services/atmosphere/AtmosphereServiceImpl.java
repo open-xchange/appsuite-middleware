@@ -49,17 +49,31 @@
 
 package com.openexchange.http.grizzly.services.atmosphere;
 
+import java.io.IOException;
+import java.net.URL;
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.logging.Log;
 import org.atmosphere.container.GrizzlyCometSupport;
 import org.atmosphere.cpr.AtmosphereFramework;
 import org.atmosphere.cpr.AtmosphereHandler;
+import org.atmosphere.cpr.AtmosphereResource;
+import org.atmosphere.cpr.AtmosphereResourceEvent;
 import org.atmosphere.cpr.AtmosphereServlet;
+import org.atmosphere.cpr.Broadcaster;
+import org.glassfish.grizzly.http.server.HttpServer;
+import org.glassfish.grizzly.servlet.ServletRegistration;
+import org.glassfish.grizzly.servlet.WebappContext;
 import org.osgi.framework.Bundle;
+import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.http.atmosphere.AtmosphereService;
 import com.openexchange.http.grizzly.osgi.GrizzlyServiceRegistry;
 import com.openexchange.http.grizzly.services.http.HttpServiceImpl;
+import com.openexchange.log.LogFactory;
 
 
 /**
@@ -67,46 +81,46 @@ import com.openexchange.http.grizzly.services.http.HttpServiceImpl;
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class AtmosphereServiceImpl implements AtmosphereService {
+public class AtmosphereServiceImpl  implements AtmosphereService {
     
-    private final HttpServiceImpl httpService;
+    private final static Log LOG = LogFactory.getLog(AtmosphereServiceImpl.class);
     private final AtmosphereFramework atmosphereFramework;
     
-    public AtmosphereServiceImpl(Bundle bundle) {
-        httpService = new HttpServiceImpl(bundle);
+    public AtmosphereServiceImpl(HttpServer grizzly, Bundle bundle) {
+        
         ConfigurationService configurationService = GrizzlyServiceRegistry.getInstance().getService(ConfigurationService.class);
-        String atmospherePrefix = configurationService.getProperty("com.openexchange.http.atmosphere.alias", "/push");
+        String realtimeContextPath = configurationService.getProperty("com.openexchange.http.realtime.contextPath", "/push");
+        String atmosphereServletMapping = configurationService.getProperty("com.openexchange.http.atmosphere.servletMapping", "/*");
         
         AtmosphereServlet atmosphereServlet = new AtmosphereServlet(false, true);
         atmosphereFramework = atmosphereServlet.framework();
-        atmosphereFramework.setAsyncSupport(new GrizzlyCometSupport(null));
-        try {
-            httpService.registerServlet(atmospherePrefix, atmosphereServlet, null, null);
-        } catch (ServletException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (NamespaceException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-    }
-    
-    /* (non-Javadoc)
-     * @see com.openexchange.http.atmosphere.AtmosphereService#register(org.atmosphere.cpr.AtmosphereHandler)
-     */
-    @Override
-    public void register(AtmosphereHandler handler) {
-        atmosphereFramework.addAtmosphereHandler("", handler);
+        /* Currently there is no container specific async supportavailable for grizzly2.
+         * The devs are already working on it. Until thatis done simple blockign IO is used
+         */ 
+//       atmosphereFramework.setAsyncSupport(new GrizzlyCometSupport(null));
+        
+        WebappContext realtimeContext = new WebappContext("Realtime context", realtimeContextPath);
+        ServletRegistration atmosphereRegistration = realtimeContext.addServlet("AtmosphereServlet", atmosphereServlet);
+        atmosphereRegistration.addMapping(atmosphereServletMapping);
+        realtimeContext.deploy(grizzly);
+        
         
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.http.atmosphere.AtmosphereService#unregister(org.atmosphere.cpr.AtmosphereHandler)
-     */
     @Override
-    public void unregister(AtmosphereHandler handler) {
-        // TODO Auto-generated method stub
+    public void addAtmosphereHandler(String mapping, AtmosphereHandler handler) {
+        atmosphereFramework.addAtmosphereHandler(mapping, handler);
+    }
+
+    @Override
+    public void addAtmosphereHandler(String mapping, AtmosphereHandler handler, Broadcaster broadcaster) {
+        atmosphereFramework.addAtmosphereHandler(mapping, handler, broadcaster);
         
+    }
+
+    @Override
+    public void unregister(String mapping) {
+        atmosphereFramework.removeAtmosphereHandler(mapping);
     }
 
 }

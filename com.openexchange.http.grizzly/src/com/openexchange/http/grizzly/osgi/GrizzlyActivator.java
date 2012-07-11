@@ -61,9 +61,9 @@ import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.http.atmosphere.AtmosphereService;
 import com.openexchange.http.grizzly.GrizzlyExceptionCode;
 import com.openexchange.http.grizzly.addons.GrizzlOXAddOn;
+import com.openexchange.http.grizzly.services.atmosphere.AtmosphereServiceImpl;
 import com.openexchange.http.grizzly.services.http.HttpServiceFactory;
 import com.openexchange.http.requestwatcher.osgi.services.RequestWatcherService;
 import com.openexchange.log.Log;
@@ -86,7 +86,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { ConfigurationService.class, RequestWatcherService.class, AtmosphereService.class };
+        return new Class[] { ConfigurationService.class, RequestWatcherService.class };
     }
 
     /*
@@ -175,7 +175,6 @@ public class GrizzlyActivator extends HousekeepingActivator {
                 if (LOG.isInfoEnabled()) {
                     LOG.info("Enabling WebSockets for Grizzly server.");
                 }
-                WebSocketAddOn webSocketAddOn = new WebSocketAddOn();
                 networkListener.registerAddOn(new WebSocketAddOn());
             }
             
@@ -198,20 +197,27 @@ public class GrizzlyActivator extends HousekeepingActivator {
                     Integer.valueOf(httpPort)));
             }
             
+            
+            
+
+            /*
+             * AtmosphereServiceImpl that contains the framework to handle requests dispatched from the atmosphere servlet
+             */
+            AtmosphereServiceImpl atmosphereServiceImpl = new AtmosphereServiceImpl(grizzly, context.getBundle());
+            registerService(AtmosphereServiceImpl.class, atmosphereServiceImpl);
+            
+            
             grizzly.addListener(networkListener);
+            grizzly.start();
 
             /*
              * Servicefactory that creates instances of the HttpService interface that grizzly implements. Each distinct bundle that uses
              * getService() will get its own instance of HttpServiceImpl
              */
             serviceFactory = new HttpServiceFactory(grizzly, context.getBundle());
-
             registerService(HttpService.class.getName(), serviceFactory);
             
-//            AtmosphereServiceImpl atmosphereServiceImpl = new AtmosphereServiceImpl(context.getBundle());
-//            registerService(AtmosphereServiceImpl.class, atmosphereServiceImpl);
          
-            grizzly.start();
 
             
             
