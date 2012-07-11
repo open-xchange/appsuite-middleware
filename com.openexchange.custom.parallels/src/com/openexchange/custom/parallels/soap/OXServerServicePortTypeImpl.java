@@ -34,7 +34,7 @@ import com.openexchange.custom.parallels.soap.rmi.Credentials;
                       serviceName = "OXServerService",
                       portName = "OXServerServiceHttpsEndpoint",
                       targetNamespace = "http://soap.parallels.custom.openexchange.com",
-                      wsdlLocation = "null",
+                      // wsdlLocation = "null",
                       endpointInterface = "com.openexchange.custom.parallels.soap.OXServerServicePortType")
                       
 public class OXServerServicePortTypeImpl implements OXServerServicePortType {

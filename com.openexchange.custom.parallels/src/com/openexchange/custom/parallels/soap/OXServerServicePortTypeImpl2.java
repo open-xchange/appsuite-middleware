@@ -28,7 +28,7 @@ import javax.xml.ws.ResponseWrapper;
                       serviceName = "OXServerService",
                       portName = "OXServerServiceHttpSoap11Endpoint",
                       targetNamespace = "http://soap.parallels.custom.openexchange.com",
-                      wsdlLocation = "null",
+                      // wsdlLocation = "null",
                       endpointInterface = "com.openexchange.custom.parallels.soap.OXServerServicePortType")
                       
 public class OXServerServicePortTypeImpl2 implements OXServerServicePortType {
