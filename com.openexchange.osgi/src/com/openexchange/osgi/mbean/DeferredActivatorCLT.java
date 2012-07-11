@@ -107,13 +107,13 @@ public class DeferredActivatorCLT {
                     } catch (final NumberFormatException e) {
                         System.err.println(new StringBuilder("Port parameter is not a number: ").append(val).toString());
                         printHelp();
-                        System.exit(0);
+                        System.exit(3);
                     }
                     if (port < 1 || port > 65535) {
                         System.err.println(new StringBuilder("Port parameter is out of range: ").append(val).append(
                             ". Valid range is from 1 to 65535.").toString());
                         printHelp();
-                        System.exit(0);
+                        System.exit(3);
                     }
                 }
             }
@@ -170,7 +170,7 @@ public class DeferredActivatorCLT {
                             }
                             System.out.println();
                         }
-                        System.exit(0);
+                        System.exit(2);
                     }
                 } else {
                     final String[] signature = new String[] { String.class.getName() };
@@ -184,6 +184,7 @@ public class DeferredActivatorCLT {
                         final ArrayList<?> missing = (ArrayList<?>) result;
                         if (missing.isEmpty()) {
                             System.out.println("No services missing for bundle " + bundleName);
+                            System.exit(0);
                         } else {
                             System.out.println("Services missing for bundle " + bundleName + ":");
                             final StringBuilder sb = new StringBuilder();
@@ -192,6 +193,7 @@ public class DeferredActivatorCLT {
                             }
                             sb.deleteCharAt(sb.length() - 1);
                             System.out.println(sb.toString());
+                            System.exit(2);
                         }
                     }
                 }
@@ -201,15 +203,19 @@ public class DeferredActivatorCLT {
         } catch (final MalformedObjectNameException e) {
             // Cannot occur
             System.err.println("Invalid MBean name: " + e.getMessage());
+            System.exit(3);
         } catch (final ParseException e) {
             System.err.println("Unable to parse command line: " + e.getMessage());
             printHelp();
         } catch (final MalformedURLException e) {
             System.err.println("URL to connect to server is invalid: " + e.getMessage());
+            System.exit(3);
         } catch (final IOException e) {
             System.err.println("Unable to communicate with the server: " + e.getMessage());
+            System.exit(3);
         } catch (final InstanceNotFoundException e) {
             System.err.println("Instance is not available: " + e.getMessage());
+            System.exit(3);
         } catch (final MBeanException e) {
             final Throwable t = e.getCause();
             final String message;
@@ -228,11 +234,14 @@ public class DeferredActivatorCLT {
                 }
             }
             System.err.println(null == message ? "Unexpected error." : "Unexpected error: " + message);
+            System.exit(3);
         } catch (final ReflectionException e) {
             System.err.println("Problem with reflective type handling: " + e.getMessage());
+            System.exit(3);
         } catch (final RuntimeException e) {
             System.err.println("Problem in runtime: " + e.getMessage());
             printHelp();
+            System.exit(3);
         }
     }
 
