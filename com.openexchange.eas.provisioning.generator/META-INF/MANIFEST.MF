@@ -8,16 +8,13 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Activator: com.openexchange.mobile.configuration.generator.osgi.Activator
 Import-Package: com.openexchange.config,
  com.openexchange.exception,
- com.openexchange.groupware,
  com.openexchange.log,
  com.openexchange.osgi,
  com.openexchange.templating,
  com.openexchange.threadpool,
- com.openexchange.tools.service,
  com.openexchange.tools.servlet.http,
  javax.servlet,
  javax.servlet.http,
  org.apache.commons.logging,
  org.osgi.framework,
- org.osgi.service.http,
- org.osgi.util.tracker
+ org.osgi.service.http

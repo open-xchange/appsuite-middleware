@@ -50,10 +50,13 @@
 package com.openexchange.caldav.resources;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.GroupwareCaldavFactory;
@@ -85,7 +88,8 @@ import com.openexchange.webdav.protocol.WebdavResource;
  */
 public abstract class CalDAVFolderCollection<T extends CalendarObject> extends CommonFolderCollection<T> implements FilteringResource {
 
-    protected static final int NO_ORDER = -1; 
+    protected static final int NO_ORDER = -1;
+    private static final Pattern OBJECT_ID_PATTERN = Pattern.compile("^\\d+$");
     
     protected GroupwareCaldavFactory factory;
 
@@ -156,9 +160,31 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
 
     @Override
     protected T getObject(String resourceName) throws OXException {
-        for (T t : this.getObjects()) { 
-            if (resourceName.equals(t.getFilename()) || resourceName.equals(t.getUid())) {
-                return t;
+        Collection<T> objects = this.getObjects();
+        if (null != objects && 0 < objects.size()) {
+            /*
+             * try filename and uid properties
+             */
+            for (T t : objects) { 
+                if (resourceName.equals(t.getFilename()) || resourceName.equals(t.getUid())) {
+                    return t;
+                }
+            }
+            /*
+             * try object id as fallback to support previous implementation
+             */
+            Matcher matcher = OBJECT_ID_PATTERN.matcher(resourceName);
+            if (matcher.find()) {
+                try {
+                    int objectID = Integer.parseInt(matcher.group(1));
+                    for (T t : objects) {
+                        if (objectID == t.getObjectID()) {
+                            return t;
+                        }
+                    }
+                } catch (NumberFormatException e) {
+                    // not an ID
+                }
             }
         }
         return null;
