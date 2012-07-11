@@ -21,17 +21,14 @@ import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.openexchange.api2.OXException;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.spamexperts.osgi.MyServiceRegistry;
-import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /*
  *
@@ -93,13 +90,13 @@ public final class MyServletRequest  {
 	private final Session sessionObj;
 	private User user;	
 	private final Context ctx;
-	private ConfigurationService configservice;
+	private final ConfigurationService configservice;
 	
 	private static final HttpClient HTTPCLIENT;
 
     static {
-            MultiThreadedHttpConnectionManager manager = new MultiThreadedHttpConnectionManager();
-            HttpConnectionManagerParams params = manager.getParams();
+            final MultiThreadedHttpConnectionManager manager = new MultiThreadedHttpConnectionManager();
+            final HttpConnectionManagerParams params = manager.getParams();
             params.setMaxConnectionsPerHost(HostConfiguration.ANY_HOST_CONFIGURATION, 23);
             HTTPCLIENT = new HttpClient(manager);
     }
@@ -115,28 +112,28 @@ public final class MyServletRequest  {
 	private static final String PROPERTY_PANEL_API_ADMIN_PASSWORD = "com.openexchange.custom.spamexperts.panel.admin_password";
 	private static final String PROPERTY_PANEL_API_URL = "com.openexchange.custom.spamexperts.panel.api_interface_url";
 	private static final String PROPERTY_PANEL_API_AUTH_ATTRIBUTE = "com.openexchange.custom.spamexperts.panel.api_auth_attribute";
-	public MyServletRequest(final Session sessionObj, final Context ctx)	throws OXException, ServiceException {		
+	public MyServletRequest(final Session sessionObj, final Context ctx) throws OXException {		
 		this.sessionObj = sessionObj;
 		this.ctx = ctx;
 		try {
 			this.user = UserStorage.getInstance().getUser(sessionObj.getUserId(), ctx);
-		} catch (final LdapException e) {
+		} catch (final OXException e) {
 			LOG.error(e.getMessage(), e);
-			throw new OXException(e);
+			throw e;
 		}		
 		
 		// init config 
 		this.configservice = MyServiceRegistry.getServiceRegistry().getService(ConfigurationService.class,true); 
 	}
 	
-	public Object action(final String action, final JSONObject jsonObject) throws AbstractOXException, JSONException {
+	public Object action(final String action, final JSONObject jsonObject) throws OXException, JSONException {
 		Object retval = null;
 		
 		if(action.equalsIgnoreCase(ACTION_GET_NEW_PANEL_SESSION)){
 			// create new panel session id and return it
 			retval = actionGetNewPanelSession(jsonObject);
 		}else{
-			throw new AjaxException(AjaxException.Code.UnknownAction, action);
+			throw AjaxExceptionCodes.UNKNOWN_ACTION.create(action);
 		}
 		
 		return retval;
@@ -151,9 +148,9 @@ public final class MyServletRequest  {
 	 * @throws AbstractOXException
 	 * @throws JSONException
 	 */
-	private JSONObject actionGetNewPanelSession(JSONObject jsonObject) throws AbstractOXException, JSONException {
+	private JSONObject actionGetNewPanelSession(final JSONObject jsonObject) throws OXException, JSONException {
 		// our response object for the client
-		JSONObject jsonResponseObject = new JSONObject();
+		final JSONObject jsonResponseObject = new JSONObject();
 				
 		try {
 			
@@ -166,7 +163,7 @@ public final class MyServletRequest  {
 			
 			
 			if(sessionid==null){
-				throw new MyServletException(MyServletException.Code.SPAMEXPERTS_COMMUNICATION_ERROR, "save and cache session", "invalid data for sessionid");      
+				throw MyServletExceptionCode.SPAMEXPERTS_COMMUNICATION_ERROR.create("save and cache session", "invalid data for sessionid");      
 			}
 			
 			// add valid data to response
@@ -174,15 +171,15 @@ public final class MyServletRequest  {
 			jsonResponseObject.put("panel_session",sessionid); // send session id
 			jsonResponseObject.put("panel_web_ui_url",getFromConfig("com.openexchange.custom.spamexperts.panel.web_ui_url")); // send UI URL 
 			
-		} catch (URIException e) {
+		} catch (final URIException e) {
 			LOG.error("error creating uri object of spamexperts api interface", e);
-			throw new MyServletException(MyServletException.Code.HTTP_COMMUNICATION_ERROR, e.getMessage());      
-		} catch (HttpException e) {
+			throw MyServletExceptionCode.HTTP_COMMUNICATION_ERROR.create(e.getMessage());      
+		} catch (final HttpException e) {
 			LOG.error("http communication error detected with spamexperts api interface", e);
-			throw new MyServletException(MyServletException.Code.HTTP_COMMUNICATION_ERROR, e.getMessage());      
-		} catch (IOException e) {
+			throw MyServletExceptionCode.HTTP_COMMUNICATION_ERROR.create(e.getMessage());      
+		} catch (final IOException e) {
 			LOG.error("IO error occured while communicating with spamexperts api interface");
-			throw new MyServletException(MyServletException.Code.HTTP_COMMUNICATION_ERROR, e.getMessage());      
+			throw MyServletExceptionCode.HTTP_COMMUNICATION_ERROR.create(e.getMessage());      
 		}finally{
 			// add clean up stuff for http client here	
 		}
@@ -191,8 +188,8 @@ public final class MyServletRequest  {
 	}
 	
 	
-	private String reponse2String(HttpMethodBase httpmethod) throws IOException {
-		 Reader reader = new InputStreamReader(httpmethod.getResponseBodyAsStream(), httpmethod.getResponseCharSet());
+	private String reponse2String(final HttpMethodBase httpmethod) throws IOException {
+		 final Reader reader = new InputStreamReader(httpmethod.getResponseBodyAsStream(), httpmethod.getResponseCharSet());
 		 return IOUtils.toString(reader);
    }
 
@@ -201,7 +198,7 @@ public final class MyServletRequest  {
 	private static String AUTH_ID_IMAP_LOGIN ="imaplogin";
 	private static String AUTH_ID_USERNAME ="username";
 	
-	private String createPanelSessionID() throws ServiceException, JSONException, IOException, MyServletException{
+	private String createPanelSessionID() throws OXException, JSONException, IOException {
 		
 		String authid = null; // FALLBACK IS MAIL
 		
@@ -230,7 +227,7 @@ public final class MyServletRequest  {
 		}
 		
 		// call the API to retrieve the URL to access panel
-        GetMethod GET = new GetMethod(getPanelApiURL()+authid);
+        final GetMethod GET = new GetMethod(getPanelApiURL()+authid);
         // send request
         
         HTTPCLIENT.getState().setCredentials(
@@ -240,59 +237,59 @@ public final class MyServletRequest  {
 		
 		try {
 			
-			int statusCode = HTTPCLIENT.executeMethod(GET);
+			final int statusCode = HTTPCLIENT.executeMethod(GET);
 			
 			if (statusCode != HttpStatus.SC_OK) {
 				LOG.error("HTTP request to create new spamexperts panel session failed with status: " +GET.getStatusLine());
-				throw new MyServletException(MyServletException.Code.SPAMEXPERTS_COMMUNICATION_ERROR,"create panel authticket", GET.getStatusLine());      
+				throw MyServletExceptionCode.SPAMEXPERTS_COMMUNICATION_ERROR.create("create panel authticket", GET.getStatusLine());      
 			}
 			
-			String resp = reponse2String(GET);
+			final String resp = reponse2String(GET);
 			if(LOG.isDebugEnabled()){
 				LOG.debug("Got response for user "+getCurrentUserUsername()+" in context "+getCurrentUserContextID()+" from  panel API: \n"+resp);
 			}
 			
 			if(resp.indexOf("ERROR")!=-1){
 				// ERROR DETECTED
-				throw new MyServletException(MyServletException.Code.SPAMEXPERTS_COMMUNICATION_ERROR,"create panel authticket", resp);      
+				throw MyServletExceptionCode.SPAMEXPERTS_COMMUNICATION_ERROR.create("create panel authticket", resp);      
 			}
 			
 			return resp;	
-		} catch (IllegalArgumentException e){
+		} catch (final IllegalArgumentException e){
 			LOG.error("error in http communication", e);
 			throw e;
-		} catch (HttpException e) {
+		} catch (final HttpException e) {
 			LOG.error("error in http communication", e);
 			throw e;
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			LOG.error("IO error in http communication", e);
 			throw e;
-		}finally{
-			if(GET!=null){
-				GET.releaseConnection();
-			}
-		}
+        } finally {
+            if (GET != null) {
+                GET.releaseConnection();
+            }
+        }
         
 	}
 	
 	
-	private String getPanelApiURL() throws ServiceException{
+	private String getPanelApiURL() throws OXException{
 		return getFromConfig(PROPERTY_PANEL_API_URL);
 	}
 	
-	private String getAuthIDAttribute() throws ServiceException{
+	private String getAuthIDAttribute() throws OXException{
 		return getFromConfig(PROPERTY_PANEL_API_AUTH_ATTRIBUTE);
 	}
 	
-	private String getPanelApiAdminUser() throws ServiceException{
+	private String getPanelApiAdminUser() throws OXException{
 		return getFromConfig(PROPERTY_PANEL_API_ADMIN_USER);
 	}
 	
-	private String getPanelApiAdminPassword() throws ServiceException{
+	private String getPanelApiAdminPassword() throws OXException{
 		return getFromConfig(PROPERTY_PANEL_API_ADMIN_PASSWORD);
 	}
 
-	private String getFromConfig(String key) throws ServiceException{		
+	private String getFromConfig(final String key) throws OXException{		
 		return this.configservice.getProperty(key); 
 	}
 	

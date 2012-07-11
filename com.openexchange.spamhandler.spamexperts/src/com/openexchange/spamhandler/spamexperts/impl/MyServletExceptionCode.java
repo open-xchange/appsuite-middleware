@@ -49,7 +49,10 @@
 
 package com.openexchange.spamhandler.spamexperts.impl;
 
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCode;
+import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.groupware.EnumComponent;
 
 /**
@@ -57,87 +60,81 @@ import com.openexchange.groupware.EnumComponent;
  * 
  * 
  */
-public final class MyServletException extends AbstractOXException {
+public enum MyServletExceptionCode implements OXExceptionCode {
 
     /**
-	 * 
-	 */
-	private static final long serialVersionUID = 795504906963046646L;
+     * A spamexperts interface error occurred. action: \"%1$s\" ,response: \"%2$s\" 
+     */
+    SPAMEXPERTS_COMMUNICATION_ERROR("A spamexperts api interface error occurred. action: \"%1$s\" ,response: \"%2$s\" " , CATEGORY_ERROR, 1),
+    
+    HTTP_COMMUNICATION_ERROR("Http communication error deteced. Details: \"%1$s\"" , CATEGORY_ERROR, 1);
+    
+    public static final String PREFIX = EnumComponent.RESOURCE.getAbbreviation();
 
-	public static enum Code {
+    private final String message;
 
-        /**
-         * A spamexperts interface error occurred. action: \"%1$s\" ,response: \"%2$s\" 
-         */
-        SPAMEXPERTS_COMMUNICATION_ERROR("A spamexperts api interface error occurred. action: \"%1$s\" ,response: \"%2$s\" " , Category.CODE_ERROR, 1),
-        
-        HTTP_COMMUNICATION_ERROR("Http communication error deteced. Details: \"%1$s\"" , Category.CODE_ERROR, 1);
-        
+    private final int detailNumber;
 
-        private final String message;
+    private final Category category;
 
-        private final int detailNumber;
-
-        private final Category category;
-
-        private Code(final String message, final Category category, final int detailNumber) {
-            this.message = message;
-            this.detailNumber = detailNumber;
-            this.category = category;
-        }
-
-        public Category getCategory() {
-            return category;
-        }
-
-        public int getNumber() {
-            return detailNumber;
-        }
-
-        public String getMessage() {
-            return message;
-        }
+    private MyServletExceptionCode(final String message, final Category category, final int detailNumber) {
+        this.message = message;
+        this.detailNumber = detailNumber;
+        this.category = category;
     }
 
-    private static final Object[] EMPTY_ARGS = new Object[0];
+    @Override
+    public String getMessage() {
+        return message;
+    }
 
-    /**
-     * Initializes a new {@link MyServletException}
-     * 
-     * @param cause The cause
-     */
-    public MyServletException(final AbstractOXException cause) {
-        super(cause);
+    @Override
+    public Category getCategory() {
+        return category;
+    }
+
+    @Override
+    public int getNumber() {
+        return detailNumber;
+    }
+
+    @Override
+    public String getPrefix() {
+        return PREFIX;
+    }
+
+    @Override
+    public boolean equals(final OXException e) {
+        return OXExceptionFactory.getInstance().equals(this, e);
     }
 
     /**
-     * Initializes a new {@link MyServletException}
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      * 
-     * @param code The service error code
+     * @return The newly created {@link OXException} instance
      */
-    public MyServletException(final Code code) {
-        this(code, null, EMPTY_ARGS);
+    public OXException create() {
+        return OXExceptionFactory.getInstance().create(this, new Object[0]);
     }
 
     /**
-     * Initializes a new {@link MyServletException}
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      * 
-     * @param code The service error code
-     * @param messageArgs The message arguments
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
      */
-    public MyServletException(final Code code, final Object... messageArgs) {
-        this(code, null, messageArgs);
+    public OXException create(final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
     }
 
     /**
-     * Initializes a new {@link MyServletException}
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      * 
-     * @param code The service error code
-     * @param cause The init cause
-     * @param messageArgs The message arguments
+     * @param cause The optional initial cause
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
      */
-    public MyServletException(final Code code, final Throwable cause, final Object... messageArgs) {
-        super(EnumComponent.RESOURCE, code.getCategory(), code.getNumber(), code.getMessage(), cause);
-        super.setMessageArgs(messageArgs);
+    public OXException create(final Throwable cause, final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, cause, args);
     }
 }
