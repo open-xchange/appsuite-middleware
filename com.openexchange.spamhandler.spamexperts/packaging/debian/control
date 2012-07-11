@@ -1,0 +1,19 @@
+Source: open-xchange-spamhandler-spamexperts
+Section: unknown
+Priority: optional
+Maintainer: Manuel Kraft <manuel.kraft@open-xchange.com>
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.6.5), sun-j2sdk1.5|sun-java5-jdk|sun-java6-jdk|java6-sdk, open-xchange-server (>=@OXVERSION@), open-xchange-common (>=@OXVERSION@)
+Build-Conflicts: ecj, libecj-java-gcj, ecj-gcj, libecj-java, gcj-4.3-base, libgcj-common, libgcj9-0, libgcj-bc, libgcj9-jar, java-gcj-compat-headless, gcj-4.3, java-gcj-compat, java-gcj-compat-dev
+Standards-Version: 3.6.1
+
+Package: open-xchange-spamhandler-spamexperts
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre|sun-java6-jre|java6-runtime, open-xchange-server (>=@OXVERSION@),open-xchange-common (>=@OXVERSION@)
+Provides: 
+Description: The Open-Xchange Spamexperts Plugin
+
+
+Package: open-xchange-spamhandler-spamexperts-gui
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, apache2, open-xchange-gui (>= @OXVERSION@)
+Description: The Open-Xchange Spamexperts Plugin GUI Part
