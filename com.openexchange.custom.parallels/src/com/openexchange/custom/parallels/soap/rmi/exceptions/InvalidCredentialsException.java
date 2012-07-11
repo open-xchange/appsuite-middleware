@@ -8,7 +8,7 @@ import com.openexchange.custom.parallels.soap.Exception;
 
 
 /**
- * <p>Java-Klasse für InvalidCredentialsException complex type.
+ * <p>Java-Klasse f\u00fcr InvalidCredentialsException complex type.
  * 
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
  * 

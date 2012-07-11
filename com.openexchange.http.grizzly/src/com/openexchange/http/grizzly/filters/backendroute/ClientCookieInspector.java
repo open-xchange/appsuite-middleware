@@ -55,7 +55,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import org.glassfish.grizzly.http.Cookie;
+import org.glassfish.grizzly.http.Cookies;
 import org.glassfish.grizzly.http.HttpRequestPacket;
+import org.glassfish.grizzly.http.CookiesBuilder.ClientCookiesBuilder;
 import org.glassfish.grizzly.http.util.CookieParserUtils;
 import org.glassfish.grizzly.http.util.CookieSerializerUtils;
 import org.glassfish.grizzly.http.util.Header;
@@ -96,9 +98,9 @@ public class ClientCookieInspector extends AbstractCookieInspector {
             throw new IllegalArgumentException();
         }
         HashMap<String, Cookie> cookieMap = new HashMap<String, Cookie>(); 
-        List<Cookie> cookieList = new LinkedList<Cookie>();
-        CookieParserUtils.parseClientCookies(cookieList, headerLine, true);
-        for (Cookie cookie : cookieList) {
+        Cookies cookies = new Cookies();
+        CookieParserUtils.parseClientCookies(cookies, headerLine, true);
+      for (Cookie cookie : cookies.get()) {        
             cookieMap.put(cookie.getName(), cookie);
         }
         return cookieMap;

@@ -44,15 +44,15 @@
 
 package com.openexchange.http.grizzly.services.http;
 
-import com.openexchange.log.Log;
-import com.openexchange.log.LogFactory;
+import java.util.Dictionary;
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-import java.util.Dictionary;
+import com.openexchange.log.Log;
+import com.openexchange.log.LogFactory;
 
 /**
  * Grizzly OSGi HttpService implementation.
@@ -72,8 +72,7 @@ public class HttpServiceImpl implements HttpService {
      * @param bundle {@link org.osgi.framework.Bundle} that got this instance of {@link org.osgi.service.http.HttpService}.
      * @param logger {@link services.http.Logger} utility to be used here.
      */
-    public HttpServiceImpl(
-            Bundle bundle) {
+    public HttpServiceImpl(Bundle bundle) {
         this.bundle = bundle;
         mainHttpHandler = new OSGiMainHandler(bundle);
     }
