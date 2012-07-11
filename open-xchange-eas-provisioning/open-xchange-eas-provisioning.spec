@@ -14,15 +14,28 @@ License:       GPL-2.0
 BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
+Summary:       Meta package to install all necessary components to provision synchronization with mobile phones
+Requires:      open-xchange-eas-provisioning-core >= @OXVERSION@
+Requires:      open-xchange-eas-provisioning-action
+
+%description
+Meta package to install all necessary components to provision synchronization with mobile phones
+
+
+Authors:
+--------
+    Open-Xchange
+
+%package core
+Group:         Applications/Productivity
 Summary:       Backend extension to provision synchronization with mobile phones
 Requires:      open-xchange-core >= @OXVERSION@
-Requires:      open-xchange-eas-provisioning-action
 Provides:      open-xchange-mobile-configuration-generator = %{version}
 Obsoletes:     open-xchange-mobile-configuration-generator <= %{version}
 Provides:      open-xchange-mobile-configuration-json = %{version}
 Obsoletes:     open-xchange-mobile-configuration-json <= %{version}
 
-%description
+%description core
 Backend extension to provision synchronization with mobile phones
 
 
@@ -39,7 +52,7 @@ Authors:
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
-%post
+%post core
 if [ ${1:-0} -eq 2 ]; then
     if [ -e /opt/open-xchange/etc/groupware/mobileconfig.properties ]; then
         mv /opt/open-xchange/etc/eas-provisioning.properties /opt/open-xchange/etc/eas-provisioning.properties.rpmnew
@@ -59,6 +72,9 @@ fi
 %{__rm} -rf %{buildroot}
 
 %files
+%defattr(-,root,root)
+
+%files core
 %defattr(-,root,root)
 %dir /opt/open-xchange/bundles/
 /opt/open-xchange/bundles/*

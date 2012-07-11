@@ -1,0 +1,15 @@
+Source: open-xchange-eas-provisioning-sms
+Section: web
+Priority: optional
+Maintainer: Marcus Klein <marcus.klein@open-xchange.com>
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.7.0), ant-optional (>= 1.7.0), sun-java6-jdk|java6-sdk, open-xchange-eas-provisioning-core (>= @OXVERSION@)
+Standards-Version: 3.8.4
+Homepage: http://www.open-xchange.com
+
+Package: open-xchange-eas-provisioning-sms
+Architecture: all
+Depends: ${misc:Depends}, open-xchange-eas-provisioning-core
+Replaces: open-xchange-mobile-configuration-json-action-sms
+Conflicts: open-xchange-mobile-configuration-json-action-sms
+Provides: open-xchange-mobile-configuration-json-action-sms, open-xchange-eas-provisioning-action
+Description: EAS provisioning extension to sent provisioning to mobile phones via SMS
