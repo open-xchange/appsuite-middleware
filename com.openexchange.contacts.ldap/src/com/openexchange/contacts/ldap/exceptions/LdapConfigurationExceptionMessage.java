@@ -67,19 +67,19 @@ public class LdapConfigurationExceptionMessage implements LocalizableStrings {
     }
     
     /**
-     * The given value for authtype "%s" is not a possible one
+     * The value given for authtype "%s" is invalid
      */
-    public final static String AUTH_TYPE_WRONG_MSG = "The given value for authtype \"%s\" is not a possible one";
+    public final static String AUTH_TYPE_WRONG_MSG = "The value given for authtype \"%s\" is invalid";
 
     /**
-     * The given value for authtype "%s" is not a possible one
+     * The value given for sorting "%s" is invalid
      */
-    public final static String SORTING_WRONG_MSG = "The given value for sorting \"%s\" is not a possible one";
+    public final static String SORTING_WRONG_MSG = "The value given for sorting \"%s\" is invalid";
 
     /**
-     * The given value for searchScope "%s" is not a possible one
+     * The value given for searchScope "%s" is invalid
      */
-    public final static String SEARCH_SCOPE_WRONG_MSG = "The given value for searchScope \"%s\" is not a possible one";
+    public final static String SEARCH_SCOPE_WRONG_MSG = "The value given for searchScope \"%s\" is invalid";
 
     /**
      * The parameter "%s" is not set in the property file %s
@@ -92,9 +92,9 @@ public class LdapConfigurationExceptionMessage implements LocalizableStrings {
     public final static String NO_INTEGER_VALUE_MSG = "Value for context \"%s\" is no integer value";
 
     /**
-     * Mapping file %s not valid
+     * The configured mapping file "%1$s" is empty.
      */
-    public final static String INVALID_MAPPING_FILE_MSG = "Mapping file \"%s\" not valid";
+    public final static String INVALID_MAPPING_FILE_MSG = "The configured mapping file \"%1$s\" is empty.";
 
     /**
      * The given value for pagesize "%s" is no integer value
@@ -102,29 +102,29 @@ public class LdapConfigurationExceptionMessage implements LocalizableStrings {
     public final static String INVALID_PAGESIZE_MSG = "The given value for pagesize \"%s\" is no integer value";
 
     /**
-     * The given value for userauthtype "%s" is not a possible one
+     * The value given for userauthtype "%s" is invalid
      */
-    public final static String USER_AUTH_TYPE_WRONG_MSG = "The given value for userauthtype \"%s\" is not a possible one";
+    public final static String USER_AUTH_TYPE_WRONG_MSG = "The value given for userauthtype \"%s\" is invalid";
 
     /**
-     * The given value for userSearchScope "%s" is not a possible one
+     * The value given for userSearchScope "%s" is invalid
      */
-    public final static String USER_SEARCH_SCOPE_WRONG_MSG = "The given value for userSearchScope \"%s\" is not a possible one";
+    public final static String USER_SEARCH_SCOPE_WRONG_MSG = "The value given for userSearchScope \"%s\" is invalid";
 
     /**
-     * The given value for userLoginSource "%s" is not a possible one
+     * The value given for userLoginSource "%s" is invalid
      */
-    public final static String USER_LOGIN_SOURCE_WRONG_MSG = "The given value for userLoginSource \"%s\" is not a possible one";
+    public final static String USER_LOGIN_SOURCE_WRONG_MSG = "The value given for userLoginSource \"%s\" is invalid";
 
     /**
-     * The given value for contactTypes "%s" is not a possible one
+     * The value given for contactTypes "%s" is invalid
      */
-    public final static String CONTACT_TYPES_WRONG_MSG = "The given value for contactTypes \"%s\" is not a possible one";
+    public final static String CONTACT_TYPES_WRONG_MSG = "The value given for contactTypes \"%s\" is invalid";
 
     /**
-     * The given value for searchScope_distributionlist "%s" is not a possible one
+     * The value given for searchScope_distributionlist "%s" is invalid
      */
-    public final static String SEARCH_SCOPE_DISTRI_WRONG_MSG = "The given value for searchScope_distributionlist \"%s\" is not a possible one";
+    public final static String SEARCH_SCOPE_DISTRI_WRONG_MSG = "The given value for searchScope_distributionlist \"%s\" is invalide";
 
     /**
      * Abstract pathname "%1$s" does not denote a directory.
@@ -137,24 +137,24 @@ public class LdapConfigurationExceptionMessage implements LocalizableStrings {
     public final static String DIRECTORY_IS_NOT_A_CONTEXT_ID_MSG = "The directory \"%1$s\" is not a context identifier.";
 
     /**
-     * The given value for referrals "%s" is not a possible one
+     * The value given for referrals "%s" is not a possible one
      */
-    public final static String REFERRALS_WRONG_MSG = "The given value for referrals \"%s\" is not a possible one";
+    public final static String REFERRALS_WRONG_MSG = "The value given for referrals \"%s\" is not a possible one";
 
     /**
-     * The given value for refreshinterval "%s" is no integer value
+     * The value given for refreshinterval "%s" is no integer value
      */
-    public final static String INVALID_REFRESHINTERVAL_MSG = "The given value for refreshinterval \"%s\" is no integer value";
+    public final static String INVALID_REFRESHINTERVAL_MSG = "The value given for refreshinterval \"%s\" is no integer value";
 
     /**
-     * The given value for pooltimeout "%s" in file "%s" is no integer value
+     * The value given for pooltimeout "%s" in file "%s" is no integer value
      */
-    public final static String INVALID_POOLTIMEOUT_MSG = "The given value for pooltimeout \"%s\" in file \"%s\" is no integer value";
+    public final static String INVALID_POOLTIMEOUT_MSG = "The value given for pooltimeout \"%s\" in file \"%s\" is no integer value";
 
     /**
-     * The given value for derefAliases "%s" in file "%s" is not a possible one
+     * The value given for derefAliases "%s" in file "%s" is invalid
      */
-    public final static String DEREF_ALIASES_WRONG_MSG = "The given value for derefAliases \"%s\" in file \"%s\" is not a possible one";
+    public final static String DEREF_ALIASES_WRONG_MSG = "The value given for derefAliases \"%s\" in file \"%s\" is invalid";
     
     /**
      * LDAP contacts cannot be deleted
@@ -167,7 +167,7 @@ public class LdapConfigurationExceptionMessage implements LocalizableStrings {
     public final static String ERROR_GETTING_ATTRIBUTE_MSG = "An error occured while trying to read an LDAP attribute: %s";
 
     /**
-     * The given value "%s" is not possible for a sort field
+     * The given value \"%s\" is not possible for a sort field
      */
     public final static String SORT_FIELD_NOT_POSSIBLE_MSG = "The given value \"%s\" is not possible for a sort field";
 
@@ -179,17 +179,17 @@ public class LdapConfigurationExceptionMessage implements LocalizableStrings {
     /**
      * The folderid object is null. This is an internal error. Please notify Open-Xchange
      */
-    public final static String FOLDERID_OBJECT_NULL_MSG = "The folderid object is null. This is an internal error. Please notify Open-Xchange";
+    public final static String FOLDERID_OBJECT_NULL_MSG = "The folderid object is null. This is an internal error. Please notify Open-Xchange.";
 
     /**
      * The search object contains more than one folder id. This is not supported by this implementation
      */
-    public final static String TOO_MANY_FOLDERS_MSG = "The search object contains more than one folder id. This is not supported by this implementation";
+    public final static String TOO_MANY_FOLDERS_MSG = "The search object contains more than one folder id. This is not supported by this implementation.";
 
     /**
      * The mapping table doesn't contain the string uid %s, so it has never been accessed before
      */
-    public final static String NO_SUCH_LONG_UID_IN_MAPPING_TABLE_FOUND_MSG = "The mapping table doesn't contain the long uid %s, so it has never been accessed before";
+    public final static String NO_SUCH_LONG_UID_IN_MAPPING_TABLE_FOUND_MSG = "The mapping table does not contain the long uid %s i.e., it has never been accessed before";
 
     /**
      * Multi-values are not allowed for date attribute: %s
@@ -212,9 +212,9 @@ public class LdapConfigurationExceptionMessage implements LocalizableStrings {
     public final static String TOO_MANY_USER_RESULTS_MSG = "The LDAP search for the user contains too many results";
 
     /**
-     * The LDAP search for the user object "%s" contains no results
+     * The LDAP search for the user object \"%s\" gave no results
      */
-    public final static String NO_USER_RESULTS_MSG = "The LDAP search for the user object \"%s\" contained no results";
+    public final static String NO_USER_RESULTS_MSG = "The LDAP search for the user object \"%s\" gave no results";
 
     /**
      * An error occurred while trying to get the user object from the database
@@ -237,9 +237,9 @@ public class LdapConfigurationExceptionMessage implements LocalizableStrings {
     public final static String PRIMARY_MAIL_NULL_MSG = "The primary mail for user \"%s\" is null";
 
     /**
-     * The mail address "%s" for distributionentry is invalid
+     * The E-Mail address "%s" for distributionentry is invalid
      */
-    public final static String MAIL_ADDRESS_DISTRI_INVALID_MSG = "The mail address \"%s\" for distributionentry is invalid";
+    public final static String MAIL_ADDRESS_DISTRI_INVALID_MSG = "The E-Mail address \"%s\" for distributionentry is invalid";
 
     /**
      * The contact type "%s" is not known

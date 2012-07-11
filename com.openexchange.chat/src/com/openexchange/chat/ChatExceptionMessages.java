@@ -71,7 +71,7 @@ public final class ChatExceptionMessages implements LocalizableStrings {
     // No account found with identifier "%1$s".
     public static final String ACCOUNT_NOT_FOUND_MSG = "No account found with identifier \"%1$s\".";
 
-    // Invalid presence packet.
+    // Invalid presence packet. A presence packet provides the status as well as the status message; e.g. "Online" + "At work"
     public static final String INVALID_PRESENCE_PACKET_MSG = "Invalid presence packet.";
 
     // A chat with identifier "%1$s" already exists.
@@ -93,9 +93,9 @@ public final class ChatExceptionMessages implements LocalizableStrings {
     public static final String MEMBER_NOT_FOUND_MSG = "No member found with identifier \"%1$s\".";
 
     // Invalid conversation identifier: "%1$s"
-    public static final String INVALID_CONVERSATION_ID_MSG = "Invalid conversation identifier: \"%1$s\"";
+    public static final String INVALID_CONVERSATION_ID_MSG = "Invalid chat identifier: \"%1$s\"";
 
-    // Invalid roster identifier: "%1$s"
+    // Invalid roster identifier: "%1$s". A roster is the list of chat buddies/contacts that a chat user knows about and about whom he receives frequent updates about their presence/availability.
     public static final String INVALID_ROSTER_ID_MSG = "Invalid roster identifier: \"%1$s\"";
 
     // Posted message is too long.

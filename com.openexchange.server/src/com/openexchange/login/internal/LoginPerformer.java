@@ -70,6 +70,7 @@ import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.authentication.service.Authentication;
 import com.openexchange.authorization.Authorization;
 import com.openexchange.authorization.AuthorizationService;
+import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
@@ -260,6 +261,11 @@ public final class LoginPerformer {
             // Trigger registered login handlers
             triggerLoginHandlers(retval);
             return retval;
+        } catch (final OXException e) {
+            if (DBPoolingExceptionCodes.PREFIX.equals(e.getPrefix())) {
+                LOG.error(e.getLogMessage(), e);
+            }
+            throw e;
         } catch (final RuntimeException e) {
         	throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
         } finally {

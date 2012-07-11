@@ -62,7 +62,7 @@ public class FormStrings implements LocalizableStrings {
 
     public static final String FORM_LABEL_LINK = "URL";
 
-    public static final String FORM_LABEL_DISPLAY_NAME = "Display Name";
+    public static final String FORM_LABEL_DISPLAY_NAME = "Display name";
 
     public static final String TARGET_NAME_INFOSTORE = "Site";
 

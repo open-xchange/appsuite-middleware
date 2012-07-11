@@ -87,10 +87,10 @@ public class CryptoExceptionMessage implements LocalizableStrings {
     public final static String SECURITY_EXCEPTION_MSG = "General Security Exception occurred.";
 
     /**
-     * No salt given.
+     * Arbitrary byte sequence is missing to generate a secure key.
      */
-    public final static String NO_SALT_HELP = "Provide salt";
+    public final static String NO_SALT_HELP = "Provide arbitrary byte sequence to generate a secure key.";
 
-    public final static String NO_SALT_MSG = "No salt given.";
+    public final static String NO_SALT_MSG = "Arbitrary byte sequence is missing to generate a secure key.";
 
 }

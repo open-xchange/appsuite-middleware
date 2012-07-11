@@ -49,5 +49,13 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-spamsettings-generic"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-blackwhitelist"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-mobile-config"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-sso"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-eas-provisioning"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-eas-provisioning-mail"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-eas-provisioning-sms"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-passwordchange-database"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-passwordchange-script"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-push-imapidle"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-parallels"/>
 </provider>
 </psf>

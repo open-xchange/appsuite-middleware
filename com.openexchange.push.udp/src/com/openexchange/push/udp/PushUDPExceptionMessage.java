@@ -136,8 +136,8 @@ public class PushUDPExceptionMessage implements LocalizableStrings {
     public final static String MISSING_PAYLOAD_MSG = "Missing payload in datagram package.";
 
     /**
-     * Missing payload in datagram package.
+     * No UDP channel is configured.
      */
-    public final static String NO_CHANNEL_MSG = "No UDP channel is configured. Check for failed channel opens on server startup.";
+    public final static String NO_CHANNEL_MSG = "No UDP channel is configured.";
 
 }

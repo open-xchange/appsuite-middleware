@@ -58,7 +58,7 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public class InfostoreExceptionMessages implements LocalizableStrings {
 
-    public static final String TOO_LONG_VALUES_MSG = "Some fields have values, that are too long";
+    public static final String TOO_LONG_VALUES_MSG = "Some field values are too long.";
 
     public static final String SQL_PROBLEM_MSG = "Invalid SQL Query: %s";
 
@@ -80,7 +80,7 @@ public class InfostoreExceptionMessages implements LocalizableStrings {
 
     public static final String NOT_ALL_DELETED_MSG = "Could not delete all objects.";
 
-    public static final String NO_DELETE_PERMISSION_FOR_VERSION_MSG = "You do not have sufficient permission to delete this version.";
+    public static final String NO_DELETE_PERMISSION_FOR_VERSION_MSG = "You do not have sufficient permissions to delete this version.";
 
     public static final String ITERATE_FAILED_MSG = "Could not iterate result.";
 
@@ -92,7 +92,7 @@ public class InfostoreExceptionMessages implements LocalizableStrings {
 
     public static final String NEW_ID_FAILED_MSG = "Could not generate new ID.";
 
-    public static final String NO_SOURCE_DELETE_PERMISSION_MSG = "You are not allowed to delete objects in the source folder, so this document cannot be moved.";
+    public static final String NO_SOURCE_DELETE_PERMISSION_MSG = "You are not allowed to delete objects in the source folder. This document cannot be moved.";
 
     public static final String WRITE_PERMS_FOR_UNLOCK_MISSING_MSG = "You need write permissions to unlock a document.";
 
@@ -100,21 +100,21 @@ public class InfostoreExceptionMessages implements LocalizableStrings {
 
     public static final String FILENAME_NOT_UNIQUE_MSG = "Files attached to InfoStore items must have unique names. File name: %s. The other document with this file name is %s.";
 
-    public static final String NUMBER_OF_VERSIONS_FAILED_MSG = "Could not determine number of versions for infoitem %s in context %s. Invalid Query: %s";
+    public static final String NUMBER_OF_VERSIONS_FAILED_MSG = "Could not determine number of versions for info item %s in context %s. Invalid query: %s";
 
     public static final String NO_DELETE_PERMISSION_MSG = "You do not have the permissions to delete at least one of the info items.";
 
-    public static final String DOCUMENT_CONTAINS_NO_FILE_MSG = "Illegal argument: Document %d contains no file";
+    public static final String DOCUMENT_CONTAINS_NO_FILE_MSG = "Illegal argument: document %d contains no file";
 
     public static final String DUPLICATE_SUBFOLDER_MSG = "Folder %d has two subfolders named %s. The database for context %d is not consistent.";
 
     public static final String PATTERN_NEEDS_MORE_CHARACTERS_MSG = "In order to accomplish the search, %1$d or more characters are required.";
 
-    public static final String DELETE_FAILED_MSG = "Could not delete DocumentMetadata %d. Please try again.";
+    public static final String DELETE_FAILED_MSG = "DocumentMetadata %d could not be deleted. Please try again.";
 
     public static final String MODIFIED_CONCURRENTLY_MSG = "The document could not be updated because it was modified. Reload the view.";
 
-    public static final String UPDATED_BETWEEN_DO_AND_UNDO_MSG = "The document was updated in between do and undo. The Database is now probably inconsistent.";
+    public static final String UPDATED_BETWEEN_DO_AND_UNDO_MSG = "The document was updated in between do and undo. The database is now probably inconsistent.";
 
     public static final String NO_DOCUMENTS_IN_VIRTUAL_FOLDER_MSG = "This folder is a virtual folder. It cannot contain documents.";
 

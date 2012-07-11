@@ -122,8 +122,7 @@ public abstract class AbstractSerializer<T> implements Serializer<T> {
     return ((int) (initialSize / 0.75)) + 1;
   }
 
-  @Override
-public ComparatorType getComparatorType() {
+  public ComparatorType getComparatorType() {
     return BYTESTYPE;
   }
 }

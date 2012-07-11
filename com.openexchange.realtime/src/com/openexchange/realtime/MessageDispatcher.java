@@ -54,19 +54,20 @@ import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * The Message dispatcher chooses an appropriate Channel to push data (aka. a Stanza) to listening clients
- *  
+ * The Message dispatcher chooses an appropriate {@link Channel} to push data (aka. a Stanza) to listening clients
+ * 
  * @author francisco.laguna@open-xchange.com
- *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
 public interface MessageDispatcher {
-	
-	/**
-	 * Push a {@link Stanza} to a given recipient. A stanza is one of its subclasses, usually a Message, Presence or Iq.
-	 * @param stanza 
-	 * @param session
-	 * @throws OXException
-	 */
-	public void send(Stanza stanza, ServerSession session) throws OXException;
-	
+
+    /**
+     * Push a {@link Stanza} to a given recipient. A stanza is one of its subclasses, usually a Message, Presence or Iq.
+     * 
+     * @param stanza The stanza to send
+     * @param session The associated session
+     * @throws OXException If send operation fails for any reason
+     */
+    public void send(Stanza stanza, ServerSession session) throws OXException;
+
 }

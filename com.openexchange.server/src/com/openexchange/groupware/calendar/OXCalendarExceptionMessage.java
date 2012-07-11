@@ -65,28 +65,28 @@ public class OXCalendarExceptionMessage implements LocalizableStrings {
         super();
     }
 
-    public static final String CFO_NOT_INITIALIZIED_MSG = "CalendarFolderObject not initialized!";
+    public static final String CFO_NOT_INITIALIZIED_MSG = "CalendarFolderObject not initialized.";
 
     public static final String NOT_YET_SUPPORTED_MSG = "Not yet supported!";
 
-    public static final String NO_SHARED_FOLDER_OWNER_MSG = "Shared folder owner not given !";
+    public static final String NO_SHARED_FOLDER_OWNER_MSG = "Shared folder owner not given.";
 
-    public static final String FOLDER_TYPE_UNRESOLVEABLE_MSG = "Folder type unresolvable !";
+    public static final String FOLDER_TYPE_UNRESOLVEABLE_MSG = "Folder type unresolvable.";
 
     /**
      * Unexpected SQL Error!
      */
-    public static final String CALENDAR_SQL_ERROR_MSG = "Unexpected SQL Error!";
+    public static final String CALENDAR_SQL_ERROR_MSG = "Unexpected SQL error.";
 
     /**
      * TODO remove this exception. The AJAX interface should already check for a missing last modified.
      */
-    public static final String LAST_MODIFIED_IS_NULL_MSG = "clientLastModified IS NULL. Abort action!";
+    public static final String LAST_MODIFIED_IS_NULL_MSG = "clientLastModified IS NULL. Abort action.";
 
     /**
      * Unexpected exception %d!
      */
-    public static final String UNEXPECTED_EXCEPTION_MSG = "Unexpected exception %d!";
+    public static final String UNEXPECTED_EXCEPTION_MSG = "Unexpected exception %d.";
 
     public static final String EXTERNAL_PARTICIPANTS_MANDATORY_FIELD_MSG = "Mandatory field mail address for external participants";
 
@@ -104,11 +104,11 @@ public class OXCalendarExceptionMessage implements LocalizableStrings {
 
     public static final String UPDATE_WITHOUT_OBJECT_ID_MSG = "Update expected but no object id is given. Aborting action...";
 
-    public static final String FOLDER_DELETE_INVALID_REQUEST_MSG = "Invalid request. Folder is shared!";
+    public static final String FOLDER_DELETE_INVALID_REQUEST_MSG = "Invalid request. Folder is shared.";
 
-    public static final String FOLDER_FOREIGN_INVALID_REQUEST_MSG = "Invalid request. Folder is shared!";
+    public static final String FOLDER_FOREIGN_INVALID_REQUEST_MSG = "Invalid request. Folder is shared.";
 
-    public static final String FOLDER_IS_EMPTY_INVALID_REQUEST_MSG = "Invalid request. Folder is shared!";
+    public static final String FOLDER_IS_EMPTY_INVALID_REQUEST_MSG = "Invalid request. Folder is shared.";
 
     public static final String FREE_BUSY_UNSUPPOTED_TYPE_MSG = "Unsupported type detected : %d";
 
@@ -130,7 +130,7 @@ public class OXCalendarExceptionMessage implements LocalizableStrings {
 
     public static final String MANDATORY_FIELD_TITLE_MSG = "Required value \"Title\" was not supplied.";
 
-    public static final String UNABLE_TO_CALCULATE_RECURRING_POSITION_MSG = "Unable to create exception, recurring position can not be calculated !";
+    public static final String UNABLE_TO_CALCULATE_RECURRING_POSITION_MSG = "Unable to create exception, recurring position can not be calculated.";
 
     public static final String INTERNAL_USER_PARTICIPANT_CHECK_1_MSG = "Got an UserParticipant object with an identifier < 1 Identifier:Folder_Type = %d:%d";
 
@@ -144,16 +144,16 @@ public class OXCalendarExceptionMessage implements LocalizableStrings {
 
     public static final String CONTEXT_NOT_SET_MSG = "Calendar operation: Context not set.";
 
-    public static final String NO_PERMISSIONS_TO_ATTACH_DETACH_MSG = "Insufficient rights to attach/detach an attachment to this folder!";
+    public static final String NO_PERMISSIONS_TO_ATTACH_DETACH_MSG = "Insufficient rights to add/remove an attachment to/from this folder.";
 
-    public static final String NO_PERMISSIONS_TO_READ_MSG = "Insufficient read rights for this folder!";
+    public static final String NO_PERMISSIONS_TO_READ_MSG = "Insufficient read rights for this folder.";
 
     /**
      * Can not resolve recurrence position because we got neither the recurring position nor a recurring date position
      */
-    public static final String UNABLE_TO_CALCULATE_RECURRING_POSITION_NO_INPUT_MSG = "Can not resolve recurrence position because we got neither the recurring position nor a recurring date position";
+    public static final String UNABLE_TO_CALCULATE_RECURRING_POSITION_NO_INPUT_MSG = "Cannot resolve recurrence position because neither the recurring position nor the recurring date position is known.";
 
-    public static final String RECURRING_MISSING_START_DATE_MSG = "Missing start date, unable to calculate recurring!";
+    public static final String RECURRING_MISSING_START_DATE_MSG = "Missing start date, unable to calculate recurring.";
 
     public static final String RECURRING_MISSING_DAILY_INTERVAL_MSG = "Missing or wrong interval value: %d";
 
@@ -162,28 +162,28 @@ public class OXCalendarExceptionMessage implements LocalizableStrings {
     /**
      * Missing or wrong value DayInMonth : %d
      */
-    public static final String RECURRING_MISSING_MONTLY_INTERVAL_MSG = "Missing or wrong value DayInMonth : %d";
+    public static final String RECURRING_MISSING_MONTLY_INTERVAL_MSG = "Missing or wrong DayInMonth value: %d";
 
-    public static final String RECURRING_MISSING_MONTLY_INTERVAL_2_MSG = "Missing or wrong value Month : %d";
+    public static final String RECURRING_MISSING_MONTLY_INTERVAL_2_MSG = "Missing or wrong month value: %d";
 
-    public static final String RECURRING_MISSING_MONTLY_DAY_MSG = "Missing or wrong Day value: %d";
+    public static final String RECURRING_MISSING_MONTLY_DAY_MSG = "Missing or wrong day value: %d";
 
     /**
      * Missing or wrong DayInMonth value: %d
      */
     public static final String RECURRING_MISSING_MONTLY_DAY_2_MSG = "Missing or wrong DayInMonth value: %d";
 
-    public static final String RECURRING_MISSING_YEARLY_INTERVAL_MSG = "Missing or wrong value DayInMonth : %d";
+    public static final String RECURRING_MISSING_YEARLY_INTERVAL_MSG = "Missing or wrong DayInMonth value: %d";
 
-    public static final String RECURRING_MISSING_YEARLY_DAY_MSG = "Missing or wrong value day : %d";
+    public static final String RECURRING_MISSING_YEARLY_DAY_MSG = "Missing or wrong day value: %d";
 
     public static final String RECURRING_MISSING_YEARLY_TYPE_MSG = "Missing or wrong day_or_type : %d";
 
-    public static final String RECURRING_MISSING_YEARLY_INTERVAL_2_MSG = "Missing or wrong Interval value: %d";
+    public static final String RECURRING_MISSING_YEARLY_INTERVAL_2_MSG = "Missing or wrong interval value: %d";
 
     public static final String UNABLE_TO_REMOVE_PARTICIPANT_MSG = "Unable to remove participant %d";
 
-    public static final String UNABLE_TO_REMOVE_PARTICIPANT_2_MSG = "Unable to remove participant because this participant is the last one";
+    public static final String UNABLE_TO_REMOVE_PARTICIPANT_2_MSG = "Unable to remove participant because this participant is the last remaining";
 
     public static final String UNSUPPORTED_ACTION_TYPE_MSG = "Action type not supported : %d";
 
@@ -191,11 +191,11 @@ public class OXCalendarExceptionMessage implements LocalizableStrings {
 
     public static final String NON_CALENDAR_FOLDER_MSG = "Folder is not of type Calendar";
 
-    public static final String RECURRING_MISSING_OR_WRONG_VALUE_INTERVAL_MSG = "The required value \"interval\" is missing or wrong";
+    public static final String RECURRING_MISSING_OR_WRONG_VALUE_INTERVAL_MSG = "The required \"interval\" value is missing or wrong";
 
-    public static final String RECURRING_MISSING_OR_WRONG_VALUE_DAYS_MSG = "The required  value \"days\" is missing or wrong : %d";
+    public static final String RECURRING_MISSING_OR_WRONG_VALUE_DAYS_MSG = "The required \"days\"  value is missing or wrong: %d";
 
-    public static final String PRIVATE_MOVE_TO_PUBLIC_MSG = "Moving appointment to a public folder flaged as private is not allowed!";
+    public static final String PRIVATE_MOVE_TO_PUBLIC_MSG = "Moving appointment to a public folder flagged as private is not allowed.";
 
     public static final String LOAD_PERMISSION_EXCEPTION_1_MSG = "You do not have the appropriate permissions to modify this object.";
 
@@ -209,19 +209,19 @@ public class OXCalendarExceptionMessage implements LocalizableStrings {
 
     public static final String LOAD_PERMISSION_EXCEPTION_6_MSG = "You do not have the appropriate permissions to create an object";
 
-    public static final String RECURRING_MISSING_YEARLY_MONTH_MSG = "Missing or wrong Month value: %d";
+    public static final String RECURRING_MISSING_YEARLY_MONTH_MSG = "Missing or wrong month value: %d";
 
-    public static final String RECURRING_ALREADY_EXCEPTION_MSG = "You are trying to create a new recurring from an exception!";
+    public static final String RECURRING_ALREADY_EXCEPTION_MSG = "You are trying to create a new recurring from an exception. This is not possible.";
 
     public static final String RECURRING_EXCEPTION_MOVE_EXCEPTION_MSG = "You can not move one element of a recurring appointment into another folder.";
 
     public static final String UPDATE_EXCEPTION_MSG = "A database update exception occurred.";
 
-    public static final String MOVE_TO_SHARED_FOLDER_NOT_SUPPORTED_MSG = "Move not allowed to a shared folder if the private flag is set";
+    public static final String MOVE_TO_SHARED_FOLDER_NOT_SUPPORTED_MSG = "Move to a shared folder not allowed if the private flag is set";
 
     public static final String RECURRING_EXCEPTION_PRIVATE_FLAG_MSG = "You can not use different private flags for one element of a recurring appointment";
 
-    public static final String PIVATE_FLAG_ONLY_IN_PRIVATE_FOLDER_MSG = "You can not use the private flags in a non private folder";
+    public static final String PIVATE_FLAG_ONLY_IN_PRIVATE_FOLDER_MSG = "You can not use the private flag in a non private folder";
 
     public static final String INVALID_CHARACTER_MSG = "Bad character in field %1$s. Error: %2$s";
 
@@ -233,7 +233,7 @@ public class OXCalendarExceptionMessage implements LocalizableStrings {
     /**
      * Calendar calculation requires a proper defined time zone.
      */
-    public static final String TIMEZONE_MISSING_MSG = "Calendar calculation requires a proper defined time zone.";
+    public static final String TIMEZONE_MISSING_MSG = "Calendar calculation requires a properly defined time zone.";
 
     /**
      * Recurrence position %1$s does not exist
@@ -303,37 +303,37 @@ public class OXCalendarExceptionMessage implements LocalizableStrings {
     /**
      * Incomplete recurring information: Missing interval.
      */
-    public static final String INCOMPLETE_REC_INFOS_INTERVAL_MSG = "Incomplete recurring information: Missing interval.";
+    public static final String INCOMPLETE_REC_INFOS_INTERVAL_MSG = "Incomplete recurring information: missing interval.";
 
     /**
      * Incomplete recurring information: Missing series end date or number of occurrences.
      */
-    public static final String INCOMPLETE_REC_INFOS_UNTIL_OR_OCCUR_MSG = "Incomplete recurring information: Missing series end date or number of occurrences.";
+    public static final String INCOMPLETE_REC_INFOS_UNTIL_OR_OCCUR_MSG = "Incomplete recurring information: missing series end date or number of occurrences.";
 
     /**
      * Incomplete recurring information: Missing weekday.
      */
-    public static final String INCOMPLETE_REC_INFOS_WEEKDAY_MSG = "Incomplete recurring information: Missing weekday.";
+    public static final String INCOMPLETE_REC_INFOS_WEEKDAY_MSG = "Incomplete recurring information: missing weekday.";
 
     /**
      * Incomplete recurring information: Missing day in month.
      */
-    public static final String INCOMPLETE_REC_INFOS_MONTHDAY_MSG = "Incomplete recurring information: Missing day in month.";
+    public static final String INCOMPLETE_REC_INFOS_MONTHDAY_MSG = "Incomplete recurring information: missing day in month.";
 
     /**
      * Incomplete recurring information: Missing month.
      */
-    public static final String INCOMPLETE_REC_INFOS_MONTH_MSG = "Incomplete recurring information: Missing month.";
+    public static final String INCOMPLETE_REC_INFOS_MONTH_MSG = "Incomplete recurring information: missing month.";
 
     /**
      * Incomplete recurring information: Missing recurrence type.
      */
-    public static final String INCOMPLETE_REC_INFOS_TYPE_MSG = "Incomplete recurring information: Missing recurrence type.";
+    public static final String INCOMPLETE_REC_INFOS_TYPE_MSG = "Incomplete recurring information: missing recurrence type.";
 
     /**
      * Move of recurring appointments is not supported
      */
-    public static final String RECURRING_FOLDER_MOVE_MSG = "Move of a recurring appointment to another folder is not supported.";
+    public static final String RECURRING_FOLDER_MOVE_MSG = "Moving a recurring appointment to another folder is not supported.";
 
     /**
      * In order to accomplish the search, %1$d or more characters are required.
@@ -383,6 +383,9 @@ public class OXCalendarExceptionMessage implements LocalizableStrings {
     /**
      * An external participant with email address %1$s is already contained. Please remove duplicate participant and retry.
      */
-    public static final String DUPLICATE_EXTERNAL_PARTICIPANT_MSG = "An external participant with email address %1$s is already contained. Please remove duplicate participant and retry.";
+    public static final String DUPLICATE_EXTERNAL_PARTICIPANT_MSG = "An external participant with the E-Mail address %1$s is already included. Please remove participant duplicate and retry.";
+
+    // Appointment is not a recurring appointment.
+    public static final String NO_RECCURENCE_MSG = "Appointment is not a recurring appointment.";
 
 }

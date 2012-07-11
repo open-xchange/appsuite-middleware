@@ -105,7 +105,8 @@ public class EAVContactParser {
                 c.addFolderUUID(UUID.fromString(json.getString("folderUUID")));
             }
 			
-			c.setUUID(UUID.fromString(json.getString("uuid")));
+			if (json.has("uuid"))
+				c.setUUID(UUID.fromString(json.getString("uuid")));
 			
 			JSONObject unnamedPropsJSON = json.getJSONObject("unnamed");
 			Iterator<String> iter = unnamedPropsJSON.keys();

@@ -85,9 +85,9 @@ public class ContextExceptionMessage implements LocalizableStrings {
     public final static String CACHE_INIT_MSG = "Problem initializing the cache.";
 
     // Cannot remove object %s from cache.
-    public final static String CACHE_REMOVE_MSG = "Cannot remove object %s from cache.";
+    public final static String CACHE_REMOVE_MSG = "Object %s can not be removed from cache.";
 
     // Cannot find context "%s".
-    public final static String NO_MAPPING_MSG = "Cannot find context \"%s\".";
+    public final static String NO_MAPPING_MSG = "Context \"%s\" cannot be found.";
 
 }

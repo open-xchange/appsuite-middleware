@@ -27,9 +27,9 @@ public class JmxMonitor {
 
   private final Logger log = LoggerFactory.getLogger(getClass());
 
-  private final MBeanServer mbs;
+  private MBeanServer mbs;
   private static JmxMonitor monitorInstance;
-  private final Map<String,CassandraClientMonitor> monitors;
+  private Map<String,CassandraClientMonitor> monitors;
 
   private JmxMonitor() {
     mbs = ManagementFactory.getPlatformMBeanServer();
@@ -95,9 +95,8 @@ public class JmxMonitor {
    */
   private String getContextPath() {
     ClassLoader loader = getClass().getClassLoader();
-    if(loader == null) {
-        return null;
-    }
+    if(loader == null)
+     return null;
     URL url = loader.getResource("/");
     if (url != null) {
       String[] elements = url.toString().split("/");

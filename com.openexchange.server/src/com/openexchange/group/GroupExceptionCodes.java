@@ -26,11 +26,11 @@ public enum GroupExceptionCodes implements OXExceptionCode {
      */
     MANDATORY_MISSING(GroupExceptionMessage.MANDATORY_MISSING_MSG, Category.CATEGORY_USER_INPUT, 4),
     /**
-     * The simple name contains this not allowed characters: "%s".
+     * The simple name contains invalid characters: "%1$s".
      */
     NOT_ALLOWED_SIMPLE_NAME(GroupExceptionMessage.NOT_ALLOWED_SIMPLE_NAME_MSG, Category.CATEGORY_USER_INPUT, 5),
     /**
-     * Another group with same identifier name exists: %1$d.
+     * Another group with the same identifier name exists: %1$d.
      */
     DUPLICATE(GroupExceptionMessage.DUPLICATE_MSG, Category.CATEGORY_USER_INPUT, 6),
     /**

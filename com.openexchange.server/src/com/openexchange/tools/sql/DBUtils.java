@@ -232,9 +232,9 @@ public final class DBUtils {
     }
 
     /**
-     * Rolls a transaction of a connection back.
+     * Performs a roll-back for a started transaction.
      *
-     * @param con connection to roll back.
+     * @param con The connection to roll back.
      */
     public static void rollback(final Connection con) {
         if (null == con) {
@@ -325,7 +325,7 @@ public final class DBUtils {
     }
 
     /**
-     * Filters a given list of tablenames. Returns only those that also exist
+     * Filters a given list of table names. Returns only those that also exist
      * @param con The connection to the database in which to check for the tables
      * @param tablesToCheck The list of table names to check for.
      * @return A set with all the tables that exist of those to be checked for
@@ -522,6 +522,21 @@ public final class DBUtils {
         public boolean isFailedTransactionRollback(final SQLException e) {
             if (isTransactionRollbackException(e)) {
                 transactionRollbackException = e;
+                return true;
+            }
+            return false;
+        }
+
+        /**
+         * Check for a failed transaction roll-back.
+         * 
+         * @param e The exception to check for a failed transaction roll-back
+         * @return <code>true</code> a failed transaction roll-back; otherwise <code>false</code>
+         */
+        public boolean isFailedTransactionRollback(final Exception e) {
+            final SQLException sqle = extractSqlException(e);
+            if (null != sqle && isTransactionRollbackException(sqle)) {
+                transactionRollbackException = sqle;
                 return true;
             }
             return false;

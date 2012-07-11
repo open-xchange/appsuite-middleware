@@ -1,7 +1,0 @@
-* 2012-06-08 - thorben.betten@open-xchange.com
-
- - Fix for bug 22281: Setting proper account identifier in MailMessage instance
-
-* 2010-06-25 - benjamin.otterbach@open-xchange.com
-
-  - Initial import

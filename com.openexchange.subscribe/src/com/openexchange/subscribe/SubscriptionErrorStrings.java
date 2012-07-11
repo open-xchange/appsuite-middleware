@@ -63,7 +63,7 @@ public class SubscriptionErrorStrings implements LocalizableStrings {
     public static final String TRY_AGAIN = "Please try again later.";
 
     // A SQL Error occurred.
-    public static final String SQL_ERROR = "A SQL Error occurred.";
+    public static final String SQL_ERROR = "A SQL error occurred.";
 
     // Provide well-formed HTML.
     public static final String WELL_FORMED = "Provide well-formed HTML.";
@@ -84,7 +84,7 @@ public class SubscriptionErrorStrings implements LocalizableStrings {
     public static final String PROVIDE_VALID_ID = "Provide a valid id.";
 
     // Could not find this Subscription
-    public static final String CANT_FIND_SUBSCRIPTION = "Could not find this Subscription";
+    public static final String CANT_FIND_SUBSCRIPTION = "Could not find this subscription";
 
     // Check value to parse.
     public static final String CHECK_VALUE = "Check value to parse.";
@@ -96,7 +96,7 @@ public class SubscriptionErrorStrings implements LocalizableStrings {
     public static final String WRONG_PASSWORD = "The login or password you entered are wrong";
 
     // Make sure, that the Service is still available, and there are no major changes on the website
-    public static final String CHECK_WEBSITE =  "Make sure, that the Service is still available, and there are no major changes on the website";
+    public static final String CHECK_WEBSITE = "Make sure the service is still available and there are no major changes on the website.";
 
     // Service unavailable
     public static final String SERVICE_UNAVAILABLE = "Service unavailable";

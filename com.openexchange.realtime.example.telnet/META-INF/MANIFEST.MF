@@ -20,6 +20,6 @@ Import-Package: com.openexchange.authentication,
  com.openexchange.session,
  com.openexchange.tools.session,
  org.osgi.framework;version="1.3.0"
-Bundle-ClassPath: lib/netty-3.5.1.Final.jar,
+Bundle-ClassPath: lib/netty-3.5.2.Final.jar,
  .
 Export-Package: com.openexchange.realtime.example.telnet

@@ -1,0 +1,48 @@
+#!/usr/bin/perl
+package GetServerVersion;
+use strict;
+use Data::Dumper;
+use base qw(BasicCommandlineOptions);
+
+
+#Use the SOAP::Lite Perl module
+#use SOAP::Lite +trace => 'debug';
+use SOAP::Lite;
+
+my $test = new GetServerVersion();
+$test->doRequest();
+
+sub new {
+	my ($inPkg) = @_;
+	my $self = BasicCommandlineOptions->new();
+	
+	bless $self, $inPkg;
+    return $self;
+}
+
+sub doRequest {
+   	my $inSelf = shift;
+	$inSelf->{'serviceNs'} = "http://soap.parallels.custom.openexchange.com";
+    my $soap = SOAP::Lite->ns( $inSelf->{'serviceNs'} )->proxy( $inSelf->{'basisUrl'}."OXServerService" );
+    
+    my $pattern = SOAP::Data->value("*");
+    my $creds = SOAP::Data->type("Credentials")->value(\SOAP::Data->value(SOAP::Data->name("login" => "oxadminmaster"),SOAP::Data->name("password" => "secret")));
+    
+    my $som_entry = 
+      $soap->getServerVersion($creds);
+    
+    if ( $som_entry->fault() ) {
+        $inSelf->fault_output($som_entry);
+    } else {
+        my $fields = [ "id", "name" ];
+        
+        my @results = $som_entry->paramsall;
+#	print Dumper(@results);
+      
+      	print "Version " . @results[0] . "\n";
+    }
+
+}
+
+exit;
+

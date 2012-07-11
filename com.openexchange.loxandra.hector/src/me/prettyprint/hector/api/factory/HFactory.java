@@ -172,8 +172,7 @@ public final class HFactory {
    * @deprecated use getOrCreateCluster instead
    * 
    */
-  @Deprecated
-public static Cluster createCluster(String clusterName,
+  public static Cluster createCluster(String clusterName,
       CassandraHostConfigurator cassandraHostConfigurator) {
     return createCluster(clusterName, cassandraHostConfigurator, null);
   }
@@ -474,7 +473,11 @@ public static Cluster createCluster(String clusterName,
   }
 
 
-
+  /**
+   * This method will soon be removed. Please use
+   * {@link #createRangeSlicesQuery(Keyspace, Serializer, Serializer, Serializer)} instead.
+   */
+  @Deprecated
   public static <K, N, V> IndexedSlicesQuery<K, N, V> createIndexedSlicesQuery(
       Keyspace keyspace, Serializer<K> keySerializer,
       Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
@@ -652,7 +655,7 @@ public static Cluster createCluster(String clusterName,
    * {@link Keyspace#createClock()} should be used instead.
    */
   public static long createClock() {
-    return CassandraHostConfigurator.DEF_CLOCK_RESOLUTION.createClock();
+    return CassandraHostConfigurator.getClockResolution().createClock();
   }
 
   /**

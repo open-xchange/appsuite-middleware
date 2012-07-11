@@ -52,13 +52,17 @@ package com.openexchange.realtime;
 import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link RealtimeExceptionMessages}
- *
+ * {@link RealtimeExceptionMessages} - Translatable error messages.
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
 public class RealtimeExceptionMessages implements LocalizableStrings {
 
-	public static final String UNKNOWN_CHANNEL = "Unknown channel %1$s";
-	public static final String NO_APPROPRIATE_CHANNEL = "No appropriate channel found for recipient %1$s with payload namespace %2$s";
+    // Unknown channel %1$s
+    public static final String UNKNOWN_CHANNEL = "Unknown channel %1$s";
+
+    // No appropriate channel found for recipient %1$s with payload namespace %2$s
+    public static final String NO_APPROPRIATE_CHANNEL = "No appropriate channel found for recipient %1$s with payload namespace %2$s";
 
 }

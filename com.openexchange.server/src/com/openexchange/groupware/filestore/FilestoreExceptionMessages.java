@@ -58,13 +58,13 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public class FilestoreExceptionMessages implements LocalizableStrings {
 
-    public static final String FILESTORE_MIXUP_MSG = "Wrong filestore %1$d for context %2$d needing filestore %3$d.";
+    public static final String FILESTORE_MIXUP_MSG = "Wrong file store %1$d for context %2$d. Correct file store: %3$d.";
 
-    public static final String NO_SUCH_FILESTORE_MSG = "Cannot find filestore with id %1$d.";
+    public static final String NO_SUCH_FILESTORE_MSG = "Cannot find file store with id %1$d.";
 
     public static final String URI_CREATION_FAILED_MSG = "Cannot create URI from \"%1$s\".";
 
-    public static final String SQL_PROBLEM_MSG = "SQL Problem: \"%s\".";
+    public static final String SQL_PROBLEM_MSG = "SQL problem: \"%s\".";
 
     private FilestoreExceptionMessages() {
         super();

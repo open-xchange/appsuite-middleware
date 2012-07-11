@@ -75,8 +75,8 @@ public final class WebDAVFileStorageExceptionMessages implements LocalizableStri
     // Invalid date property: %1$s
     public static final String INVALID_DATE_PROPERTY_MSG = "Invalid date property: %1$s";
 
-    // Invalid property "%1$s". Should be "%2$s", but is not.
-    public static final String INVALID_PROPERTY_MSG = "Invalid property \"%1$s\". Should be \"%2$s\", but is not.";
+    // Invalid property "%1$s". Should be "%2$s".
+    public static final String INVALID_PROPERTY_MSG = "Invalid property \"%1$s\". Should be \"%2$s\".";
 
     // Directory "%1$s" must not be deleted.
     public static final String DELETE_DENIED_MSG = "Directory \"%1$s\" must not be deleted.";

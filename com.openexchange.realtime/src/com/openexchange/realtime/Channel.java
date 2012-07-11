@@ -55,19 +55,54 @@ import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link Channel}
+ * {@link Channel} - Represents a communication channel for transmitting messages.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
 public interface Channel {
 	
+	/**
+	 * Gets the protocol identifying this channel.
+	 * 
+	 * @return The protocol name
+	 */
 	public String getProtocol();
 	
+	/**
+	 * Checks if this channel can dispatch messages to given recipient in given name space.
+	 * 
+	 * @param namespace The name space
+	 * @param recipient The recipient
+	 * @param session The session
+	 * @return <code>true</code> if this channel can dispatch messages to given recipient; otherwise <code>false</code>
+	 * @throws OXException If check fails for any reason
+	 */
 	public boolean canHandle(String namespace, ID recipient, ServerSession session) throws OXException;
 	
+	/**
+	 * Gets the priority used for building a ranking for concurrent channels.
+	 * 
+	 * @return The priority
+	 */
 	public int getPriority();
 	
+	/**
+	 * Checks if this channel is connected to given end point identifier.
+	 * 
+	 * @param id The end point identifier
+	 * @param session The session
+	 * @return <code>true</code> if this channel is connected to given end point identifier; otherwise <code>false</code>
+	 * @throws OXException If check fails for any reason
+	 */
 	public boolean isConnected(ID id, ServerSession session) throws OXException;
 	
+	/**
+	 * Sends specified stanza.
+	 * 
+	 * @param stanza The stanza to send
+	 * @param session The session
+	 * @throws OXException If send operation fails for any reason
+	 */
 	public void send(Stanza stanza, ServerSession session) throws OXException;
 }

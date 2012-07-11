@@ -23,6 +23,6 @@
 <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xdebug&#10;-Xrunjdwp:transport=dt_socket,address=8102,server=y,suspend=n"/>
 <stringAttribute key="org.eclipse.ui.externaltools.ATTR_ANT_TARGETS" value="clean,debianSource,upload,"/>
 <stringAttribute key="org.eclipse.ui.externaltools.ATTR_LOCATION" value="${workspace_loc:/build/build.xml}"/>
-<stringAttribute key="org.eclipse.ui.externaltools.ATTR_TOOL_ARGUMENTS" value="-Dproject=backend-develop&#10;-DpackageName=open-xchange-admin"/>
+<stringAttribute key="org.eclipse.ui.externaltools.ATTR_TOOL_ARGUMENTS" value="-Dproject=backend-develop-test&#10;-DpackageName=open-xchange-eas-provisioning"/>
 <stringAttribute key="process_factory_id" value="org.eclipse.ant.ui.remoteAntProcessFactory"/>
 </launchConfiguration>

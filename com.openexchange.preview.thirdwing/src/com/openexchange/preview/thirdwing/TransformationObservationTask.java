@@ -119,7 +119,7 @@ public class TransformationObservationTask implements Observer {
 	private IContentIterator contentIterator;
 
 
-    public TransformationObservationTask(final StreamProvider streamProvider, final Session session, int pages, IConversionJob transformer, File file) {
+    public TransformationObservationTask(final StreamProvider streamProvider, final Session session, final int pages, final IConversionJob transformer, final File file) {
         super();
         this.streamProvider = streamProvider;
         this.session = session;
@@ -138,7 +138,7 @@ public class TransformationObservationTask implements Observer {
     	FileInputStream fis = null;
     	try {
         	transformer.addObserver(this);
-        	IOUnit unit = new IOUnit((fis = new FileInputStream(file)));
+        	final IOUnit unit = new IOUnit((fis = new FileInputStream(file)));
         	unit.setStreamProvider(streamProvider);
         	contentIterator = transformer.transformDocument(unit, 80, true); 
         	while (contentIterator.hasNext() && !done.get()) {
@@ -150,9 +150,9 @@ public class TransformationObservationTask implements Observer {
 				
 				
             }
-    	} catch (FileNotFoundException e) {
+    	} catch (final FileNotFoundException e) {
 			exception = PreviewExceptionCodes.ERROR.create();
-		} catch (XHTMLConversionException e) {
+		} catch (final XHTMLConversionException e) {
 			exception = PreviewExceptionCodes.ERROR.create();
 		} finally {
 		    if (contentIterator != null) {
@@ -161,7 +161,7 @@ public class TransformationObservationTask implements Observer {
     		Streams.close(fis);
     	}
 
-    	System.out.println(content);
+    	//System.out.println(content);
         return content;
     }
 
@@ -174,12 +174,12 @@ public class TransformationObservationTask implements Observer {
         final UpdateMessages message = (UpdateMessages) obj;
         final String key = message.getKey();
         //System.out.println("UpdateMessage.getKey(): " + key);
-        boolean htmlFinished = key.equals(UpdateMessages.HTML_TRANSFORMATION_FINISHED);
-		boolean pageFinished = key.equals(UpdateMessages.PAGE_TRANSFORMATION_FINISHED);
+        final boolean htmlFinished = key.equals(UpdateMessages.HTML_TRANSFORMATION_FINISHED);
+		final boolean pageFinished = key.equals(UpdateMessages.PAGE_TRANSFORMATION_FINISHED);
 		if (htmlFinished || pageFinished) {
             try {
                 //Thread.sleep(2000);
-            	String page = streamProvider.getDocumentContent();
+            	final String page = streamProvider.getDocumentContent();
             	//System.out.println(page);
             	if (htmlFinished) {
     				//this.content.set(this.content.size() - 1, page); // *shrugs* Recovery. For some reason the page before the last is reported twice

@@ -37,9 +37,7 @@ public class ThriftColumnDef implements ColumnDefinition {
   }
 
   private ColumnIndexType indexTypeFromThrift(IndexType tIndexType) {
-    if ( tIndexType == null ) {
-        return null;
-    }
+    if ( tIndexType == null ) return null;
     switch (tIndexType) {
     case KEYS:
       return ColumnIndexType.KEYS;

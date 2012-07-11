@@ -55,9 +55,10 @@ import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 
 /**
- * {@link RealtimeExceptionCodes}
+ * {@link RealtimeExceptionCodes} - Error codes for message dispatcher.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
 public enum RealtimeExceptionCodes implements OXExceptionCode {
 	/**

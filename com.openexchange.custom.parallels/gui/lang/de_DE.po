@@ -1,0 +1,42 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: NAME\n"
+"POT-Creation-Date: 2010-04-08 13:01+0100\n"
+"PO-Revision-Date: 2010-04-08 15:09+0100\n"
+"Last-Translator: \n"
+"Language-Team: NAME <EMAIL>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n!=1;\n"
+
+msgid "Antispam Settings"
+msgstr "Antispam Einstellungen"
+
+msgid "Blacklist"
+msgstr "Schwarze Liste"
+
+msgid "Whitelist"
+msgstr "Weiße Liste"
+
+msgid "Your current blacklisted addresses"
+msgstr "Ihre Adressen auf der schwarzen Liste"
+
+msgid "Email Addresses / Domains"
+msgstr "eMail Adressen / Domänen"
+
+msgid "This list has no content"
+msgstr "Diese Liste ist zur Zeit leer"
+
+msgid "List"
+msgstr "Liste"
+
+msgid "Your current whitelisted addresses"
+msgstr "Ihre Adressen auf der weissen Liste"
+
+msgid "Add new address"
+msgstr "Neue Adresse hinzufügen"
+
+msgid "Address: "
+msgstr "Adresse"
+

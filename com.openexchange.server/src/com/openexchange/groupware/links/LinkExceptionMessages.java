@@ -58,11 +58,11 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public class LinkExceptionMessages implements LocalizableStrings {
 
-    public static final String NO_LINK_ACCESS_PERMISSION_MSG = "Unable to access link between these two objects. Insufficient rights. 1. Object %1$d Folder %2$d 2. Object %3$d Folder %4$d Context %5$d";
+    public static final String NO_LINK_ACCESS_PERMISSION_MSG = "Unable to access the link between these two objects. Insufficient rights. First object %1$d folder %2$d. Second object %3$d folder %4$d context %5$d.";
 
-    public static final String ALREADY_LINKED_MSG = "Unable to create a link between these two objects. This link already exists. 1. Object %1$d Folder %2$d 2. Object %3$d Folder %4$d Context %5$d";
+    public static final String ALREADY_LINKED_MSG = "Unable to create a link between these two objects. This link already exists. First object %1$d folder %2$d. Second object %3$d folder %4$d context %5$d.";
 
-    public static final String SQL_PROBLEM_MSG = "Invalid SQL Query: %s";
+    public static final String SQL_PROBLEM_MSG = "Invalid SQL query: %s";
 
     private LinkExceptionMessages() {
         super();

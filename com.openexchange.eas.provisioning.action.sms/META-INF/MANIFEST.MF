@@ -1,0 +1,23 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Mobility Configuration SMS transport
+Bundle-SymbolicName: com.openexchange.eas.provisioning.action.sms
+Bundle-Version: 6.21.0
+Bundle-Activator: com.openexchange.mobile.configuration.json.action.sms.osgi.ActionActivator
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.config,
+ com.openexchange.exception,
+ com.openexchange.groupware.contexts,
+ com.openexchange.groupware.ldap,
+ com.openexchange.log,
+ com.openexchange.mobile.configuration.json.action,
+ com.openexchange.mobile.configuration.json.container,
+ com.openexchange.mobile.configuration.json.servlet,
+ com.openexchange.osgi,
+ org.apache.commons.logging,
+ org.osgi.framework
+Bundle-ClassPath: lib/ws-commons-util-1.0.2.jar,
+ lib/xmlrpc-client-3.1.3.jar,
+ lib/xmlrpc-common-3.1.3.jar,
+ .

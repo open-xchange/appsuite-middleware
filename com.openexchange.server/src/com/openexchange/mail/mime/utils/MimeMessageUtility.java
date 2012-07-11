@@ -351,11 +351,10 @@ public final class MimeMessageUtility {
      */
     public static boolean equalsCID(final String contentId1, final String contentId2) {
         if (null != contentId1 && null != contentId2) {
-            final String cid1 =
-                contentId1.length() > 0 && contentId1.charAt(0) == '<' ? contentId1.substring(1, contentId1.length() - 1) : contentId1;
-            final String cid2 =
-                contentId2.length() > 0 && contentId2.charAt(0) == '<' ? contentId2.substring(1, contentId2.length() - 1) : contentId2;
-            return cid1.equalsIgnoreCase(cid2);
+            final int length1 = contentId1.length();
+            final int length2 = contentId2.length();
+            final String cid1 = length1 > 0 && contentId1.charAt(0) == '<' ? contentId1.substring(1, length1 - 1) : contentId1;
+            return cid1.equalsIgnoreCase(length2 > 0 && contentId2.charAt(0) == '<' ? contentId2.substring(1, length2 - 1) : contentId2);
         }
         return false;
     }

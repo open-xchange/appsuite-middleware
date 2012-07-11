@@ -356,7 +356,7 @@ public class CalendarSql implements AppointmentSQLInterface {
     }
 
     @Override
-    public CalendarDataObject getObjectById(int oid) throws OXException, SQLException {
+    public CalendarDataObject getObjectById(final int oid) throws OXException, SQLException {
         return getObjectById(oid, 0, null, false);
     }
 
@@ -376,7 +376,7 @@ public class CalendarSql implements AppointmentSQLInterface {
      * @throws OXObjectNotFoundException
      * @throws OXPermissionException
      */
-    private CalendarDataObject getObjectById(final int oid, final int inFolder, final Connection readcon, boolean checkPermissions) throws OXException {
+    private CalendarDataObject getObjectById(final int oid, final int inFolder, final Connection readcon, final boolean checkPermissions) throws OXException {
         if (session == null) {
             throw OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL.create();
         }
@@ -514,7 +514,7 @@ public class CalendarSql implements AppointmentSQLInterface {
     }
 
     @Override
-    public CalendarDataObject[] updateAppointmentObject(final CalendarDataObject cdao, final int inFolder, final Date clientLastModified, boolean checkPermissions) throws OXException {
+    public CalendarDataObject[] updateAppointmentObject(final CalendarDataObject cdao, final int inFolder, final Date clientLastModified, final boolean checkPermissions) throws OXException {
         RecurrenceChecker.check(cdao);
         if (session == null) {
             throw OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL.create();
@@ -573,7 +573,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                     return cimp.updateAppointment(cdao, edao, writecon, session, ctx, inFolder, clientLastModified);
                 } catch(final DataTruncation dt) {
                     throwTruncationError(cdao, writecon, dt);
-                } catch(BatchUpdateException bue) {
+                } catch(final BatchUpdateException bue) {
                     if (bue.getCause() instanceof DataTruncation) {
                         throwTruncationError(cdao, writecon, (DataTruncation) bue.getCause());
                     } else {
@@ -639,7 +639,7 @@ public class CalendarSql implements AppointmentSQLInterface {
      * @throws SQLException
      * @throws OXException
      */
-    private void throwTruncationError(final CalendarDataObject cdao, Connection writecon, final DataTruncation dt) throws SQLException, OXException {
+    private void throwTruncationError(final CalendarDataObject cdao, final Connection writecon, final DataTruncation dt) throws SQLException, OXException {
         final String fields[] = DBUtils.parseTruncatedFields(dt);
         final int fid[] = new int[fields.length];
         final OXException oxe = OXCalendarExceptionCodes.TRUNCATED_SQL_ERROR.create(dt, new Object[0]);
@@ -664,37 +664,46 @@ public class CalendarSql implements AppointmentSQLInterface {
     }
 
     @Override
-    public void deleteAppointmentObject(final CalendarDataObject cdao, final int inFolder, final Date clientLastModified, boolean checkPermissions) throws OXException {
+    public void deleteAppointmentObject(final CalendarDataObject cdao, final int inFolder, final Date clientLastModified, final boolean checkPermissions) throws OXException {
         if (session == null) {
             throw OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL.create();
         }
-        final Context ctx = Tools.getContext(session);
-        final Connection writecon = DBPool.pickupWriteable(ctx);
-        try  {
-            writecon.setAutoCommit(false);
-            cimp.deleteAppointment(session.getUserId(), cdao, writecon, session, ctx, inFolder, clientLastModified);
-            writecon.commit();
-        } catch(final OXException oxc) {
-            try {
-                writecon.rollback();
-            } catch(final SQLException rb) {
-                LOG.error("Rollback failed: " + rb.getMessage(), rb);
-            }
-            throw oxc;
-        } catch(final SQLException e) {
-            try {
-                writecon.rollback();
-            } catch(final SQLException rb) {
-                LOG.error("Rollback failed: " + rb.getMessage(), rb);
+        try {
+            final DBUtils.TransactionRollbackCondition condition = new DBUtils.TransactionRollbackCondition(3);
+            do {
+                final Context ctx = Tools.getContext(session);
+                final Connection writecon = DBPool.pickupWriteable(ctx);
+                condition.resetTransactionRollbackException();
+                try  {
+                    DBUtils.startTransaction(writecon);
+                    final CalendarDataObject c = cdao.clone();
+                    cimp.deleteAppointment(session.getUserId(), c, writecon, session, ctx, inFolder, clientLastModified);
+                    writecon.commit();
+                } catch(final OXException oxc) {
+                    DBUtils.rollback(writecon);
+                    if (!condition.isFailedTransactionRollback(oxc)) {
+                        throw oxc;
+                    }
+                } catch(final SQLException e) {
+                    DBUtils.rollback(writecon);
+                    if (!condition.isFailedTransactionRollback(e)) {
+                        throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e, Integer.valueOf(28));
+                    }
+                } catch(final RuntimeException e) {
+                    DBUtils.rollback(writecon);
+                    if (!condition.isFailedTransactionRollback(e)) {
+                        throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, Integer.valueOf(1337));
+                    }
+                } finally {
+                    DBUtils.autocommit(writecon);
+                    DBPool.pushWrite(ctx, writecon);
+                }
+            } while (condition.checkRetry());
+        } catch (final SQLException e) {
+            if (DBUtils.isTransactionRollbackException(e)) {
+                throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR_RETRY.create(e, Integer.valueOf(28));
             }
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e, Integer.valueOf(28));
-        } finally {
-            try {
-                writecon.setAutoCommit(true);
-            } catch(final SQLException ac) {
-                LOG.error(ac.getMessage(), ac);
-            }
-            DBPool.pushWrite(ctx, writecon);
         }
     }
 
@@ -1224,7 +1233,7 @@ public class CalendarSql implements AppointmentSQLInterface {
     }
     
     @Override
-    public SearchIterator<Appointment> getAppointmentsBetween(Date start, Date end, int cols[], int orderBy, Order order) throws OXException, SQLException {
+    public SearchIterator<Appointment> getAppointmentsBetween(final Date start, final Date end, int cols[], final int orderBy, final Order order) throws OXException, SQLException {
         if (session == null) {
             throw OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL.create();
         }

@@ -115,10 +115,9 @@ public class UploadExceptionMessage implements LocalizableStrings {
      */
     public final static String FILE_NOT_FOUND_MSG = "Upload file with id %1$s could not be found";
 
-    /**
-     * Upload file's content type "%1$s" does not fit to given file filter "%2$s"
-     */
-    public final static String INVALID_FILE_TYPE_MSG = "Upload file's content type \"%1$s\" does not fit to given file filter \"%2$s\"";
+    // Upload file's content type \"%1$s\" does not match given file filter \"%2$s\"
+    // Thrown to indicate that currently uploaded file's MIME type does not obey a certain search criterion
+    public final static String INVALID_FILE_TYPE_MSG = "Upload file's content type \"%1$s\" does not match given file filter \"%2$s\"";
 
     /**
      * An error occurred: %1$s

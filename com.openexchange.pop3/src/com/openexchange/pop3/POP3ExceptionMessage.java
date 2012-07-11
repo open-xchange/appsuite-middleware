@@ -115,10 +115,10 @@ public class POP3ExceptionMessage implements LocalizableStrings {
      */
     public final static String FOLDER_CREATION_FAILED_MSG = "POP3 does not support mail folder creation";
     /**
-     * The composed rights could not be applied to new folder %1$s due to missing administer right in its initial rights specified by
-     * POP3 server. However, the folder has been created.
+     * The permissions set could not be applied to the new folder %1$s.
+     * Its initial permissions specified by the POP3 server do not include administer permissions. The folder has been created, though.
      */
-    public final static String NO_ADMINISTER_ACCESS_ON_INITIAL_MSG = "The composed rights could not be applied to new folder %1$s due to missing administer right in its initial rights specified by POP3 server. However, the folder has been created.";
+    public final static String NO_ADMINISTER_ACCESS_ON_INITIAL_MSG = "The permissions set could not be applied to the new folder %1$s. Its initial permissions specified by the POP3 server do not include administer permissions. The folder has been created, though.";
     /**
      * No admin permission specified for folder %1$s
      */
@@ -154,7 +154,7 @@ public class POP3ExceptionMessage implements LocalizableStrings {
     /**
      * Flag %1$s could not be changed due to following reason: %2$s
      */
-    public final static String FLAG_FAILED_MSG = "Flag %1$s could not be changed due to following reason: %2$s";
+    public final static String FLAG_FAILED_MSG = "Flag %1$s could not be changed due to the following reason: %2$s";
     /**
      * Number of search fields (%d) do not match number of search patterns (%d)
      */
@@ -162,11 +162,11 @@ public class POP3ExceptionMessage implements LocalizableStrings {
     /**
      * POP3 search failed due to following reason: %1$s. Switching to application-based search
      */
-    public final static String POP3_SEARCH_FAILED_MSG = "POP3 search failed due to following reason: %1$s. Switching to application-based search";
+    public final static String POP3_SEARCH_FAILED_MSG = "POP3 search failed due to the following reason: %1$s. Switching to application-based search";
     /**
      * POP3 sort failed due to following reason: %1$s Switching to application-based sorting
      */
-    public final static String POP3_SORT_FAILED_MSG = "POP3 sort failed due to following reason: %1$s Switching to application-based sorting";
+    public final static String POP3_SORT_FAILED_MSG = "POP3 sort failed due to the following reason: %1$s Switching to application-based sorting";
     /**
      * Unknown search field: %1$s
      */
@@ -198,7 +198,7 @@ public class POP3ExceptionMessage implements LocalizableStrings {
     /**
      * Message(s) %1$s in folder %2$s could not be deleted due to following error: %3$s
      */
-    public final static String UID_EXPUNGE_FAILED_MSG = "Message(s) %1$s in folder %2$s could not be deleted due to following error: %3$s";
+    public final static String UID_EXPUNGE_FAILED_MSG = "Message(s) %1$s in folder %2$s could not be deleted due to the following error: %3$s";
     /**
      * Not allowed to open folder %1$s due to missing read access
      */
@@ -222,7 +222,7 @@ public class POP3ExceptionMessage implements LocalizableStrings {
     /**
      * A protocol exception occurred during execution of an POP3 request: %1$s
      */
-    public final static String PROTOCOL_ERROR_MSG = "A protocol exception occurred during execution of an POP3 request: %1$s";
+    public final static String PROTOCOL_ERROR_MSG = "A protocol exception occurred during execution of a POP3 request: %1$s";
     /**
      * POP3 does not support to move folders.
      */

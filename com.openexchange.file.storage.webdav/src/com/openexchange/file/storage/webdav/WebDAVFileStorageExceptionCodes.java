@@ -79,7 +79,7 @@ public enum WebDAVFileStorageExceptionCodes implements OXExceptionCode {
      */
     NOT_A_FOLDER(WebDAVFileStorageExceptionMessages.NOT_A_FOLDER_MSG, CATEGORY_ERROR, 4),
     /**
-     * Invalid property "%1$s". Should be "%2$s", but is not.
+     * Invalid property "%1$s". Should be "%2$s".
      */
     INVALID_PROPERTY(WebDAVFileStorageExceptionMessages.INVALID_PROPERTY_MSG, CATEGORY_ERROR, 5),
     /**
