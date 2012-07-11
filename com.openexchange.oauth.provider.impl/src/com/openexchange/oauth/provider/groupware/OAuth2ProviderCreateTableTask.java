@@ -61,7 +61,7 @@ import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
 import com.openexchange.oauth.provider.internal.OAuthProviderServiceLookup;
-import com.openexchange.server.ServiceExceptionCodes;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -84,7 +84,7 @@ public class OAuth2ProviderCreateTableTask extends UpdateTaskAdapter {
     public void perform(final PerformParameters params) throws OXException {
         final DatabaseService dbService = OAuthProviderServiceLookup.getService(DatabaseService.class);
         if (dbService == null) {
-            throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
         }
         final int contextId = params.getContextId();
         final Connection writeCon = dbService.getForUpdateTask(contextId);

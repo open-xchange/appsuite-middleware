@@ -51,7 +51,7 @@ package com.openexchange.loxandra.json.action;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.exception.OXException;
 import com.openexchange.loxandra.EAVContactFactoryService;
-import com.openexchange.server.ServiceExceptionCodes;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -80,7 +80,7 @@ public abstract class AbstractAction implements AJAXActionService {
         try {
             return serviceLookup.getService(EAVContactFactoryService.class);
         } catch (final IllegalStateException e) {
-            throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(EAVContactFactoryService.class.getName());
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(EAVContactFactoryService.class.getName());
         }
     }
 

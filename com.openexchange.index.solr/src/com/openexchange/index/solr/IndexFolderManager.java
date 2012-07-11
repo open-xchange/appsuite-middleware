@@ -60,7 +60,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexExceptionCodes;
 import com.openexchange.index.solr.internal.Services;
-import com.openexchange.server.ServiceExceptionCodes;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.tools.sql.DBUtils;
 
 
@@ -478,7 +478,7 @@ public class IndexFolderManager {
     private static DatabaseService getDbService() throws OXException {
         final DatabaseService dbService = Services.getService(DatabaseService.class);
         if (dbService == null) {
-            throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
         }
 
         return dbService;

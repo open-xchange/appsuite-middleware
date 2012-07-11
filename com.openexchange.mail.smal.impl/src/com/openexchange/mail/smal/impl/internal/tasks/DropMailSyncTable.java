@@ -60,7 +60,7 @@ import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.mail.smal.impl.SmalServiceLookup;
-import com.openexchange.server.ServiceExceptionCodes;
+import com.openexchange.server.ServiceExceptionCode;
 
 
 /**
@@ -74,7 +74,7 @@ public class DropMailSyncTable extends UpdateTaskAdapter {
     public void perform(PerformParameters params) throws OXException {
         final DatabaseService dbService = SmalServiceLookup.getInstance().getService(DatabaseService.class);
         if (dbService == null) {
-            throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
         }
         final int contextId = params.getContextId();
         final Connection writeCon;
