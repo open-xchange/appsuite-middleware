@@ -49,7 +49,6 @@
 
 package com.openexchange.http.atmosphere;
 
-import javax.servlet.Servlet;
 import org.atmosphere.cpr.AtmosphereHandler;
 import org.atmosphere.cpr.Broadcaster;
 
