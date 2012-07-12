@@ -52,12 +52,11 @@ package com.openexchange.importexport.exporters;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.Date;
 import java.util.Map;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
+import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DataObject;
@@ -68,6 +67,7 @@ import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.helpers.SizedInputStream;
 import com.openexchange.importexport.osgi.ImportExportServices;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -244,8 +244,8 @@ public class VCardExporter implements Exporter {
             //final String mail = sessObj.getUserObject().getMail();
 
             //final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
-            final ContactInterface contactInterface = ImportExportServices.getContactInterfaceDiscoveryService().newContactInterface(folderId, sessObj);
-            final SearchIterator<Contact> searchIterator = contactInterface.getModifiedContactsInFolder(folderId, fieldsToBeExported, new Date(0));
+            ContactField[] fields = ContactMapper.getInstance().getFields(fieldsToBeExported, null, (ContactField[])null);
+            final SearchIterator<Contact> searchIterator = ImportExportServices.getContactService().getAllContacts(sessObj, Integer.toString(folderId), fields);
 
             try {
                 while (searchIterator.hasNext()) {
@@ -286,8 +286,10 @@ public class VCardExporter implements Exporter {
 
             final int folderId = Integer.parseInt(folder);
             //final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
-            final ContactInterface contactInterface = ImportExportServices.getContactInterfaceDiscoveryService().newContactInterface(folderId, sessObj);
-            final Contact contactObj = contactInterface.getObjectById(objectId, folderId);
+            
+            ContactField[] fields = ContactMapper.getInstance().getFields(
+                null != fieldsToBeExported ? fieldsToBeExported : _contactFields, null, (ContactField[])null);
+            final Contact contactObj = ImportExportServices.getContactService().getContact(sessObj, Integer.toString(folderId), Integer.toString(objectId), fields);
             try {
                 exportContact(oxContainerConverter, contactDef, versitWriter, contactObj);
             } finally {
