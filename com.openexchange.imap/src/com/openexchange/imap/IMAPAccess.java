@@ -185,12 +185,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     private static volatile Map<HostAndPort, Long> timedOutServers;
 
     /**
-     * Remembers failed authentication for 10 seconds. Any further login attempts with such remembered credentials will throw an appropriate
-     * exception.
-     */
-    private static volatile Map<LoginAndPass, StampAndError> failedAuths;
-
-    /**
      * The scheduled timer task to clean-up maps.
      */
     private static ScheduledTimerTask cleanUpTimerTask;
@@ -653,7 +647,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 proxyUser = login.substring(0, login.indexOf(proxyDelimiter));
                 user = login.substring(login.indexOf(proxyDelimiter) + proxyDelimiter.length(), login.length());
             }
-            checkFailedAuths(new LoginAndPass(user, tmpPass));
             /*
              * Get properties
              */
@@ -710,10 +703,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             try {
                 imapStore = new AccessedIMAPStore(this, connectIMAPStore(maxCount > 0), imapSession);
             } catch (final AuthenticationFailedException e) {
-                /*
-                 * Remember failed authentication's credentials (for a short amount of time) to quicken subsequent connect trials
-                 */
-                failedAuths.put(new LoginAndPass(user, tmpPass), new StampAndError(e, System.currentTimeMillis()));
                 throw e;
             } catch (final MessagingException e) {
                 /*
@@ -795,6 +784,13 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             imapSession.getProperties().put("mail.imap.propagate.clientipaddress", clientIp);
         }
         /*
+         * Cache failed authentication attempts
+         */
+        final long authTimeout = FAILED_AUTH_TIMEOUT.get();
+        if (authTimeout > 0) {
+            imapSession.getProperties().put("mail.imap.authTimeout", Long.toString(authTimeout));
+        }
+        /*
          * Get store...
          */
         if (fromCache && useIMAPStoreCache()) {
@@ -833,28 +829,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             LOG.debug("IMAPAccess.connectIMAPStore() took " + dur + "msec.");
         }
         return imapStore;
-    }
-
-    private void checkFailedAuths(final LoginAndPass loginAndPass) throws AuthenticationFailedException {
-        final Map<LoginAndPass, StampAndError> map = failedAuths;
-        final StampAndError sae = map.get(loginAndPass);
-        if (sae != null) {
-            if ((System.currentTimeMillis() - sae.stamp) <= FAILED_AUTH_TIMEOUT.get()) {
-                if (DEBUG) {
-                    final IMAPConfig config = getIMAPConfig();
-                    final StringBuilder sb = new StringBuilder(128);
-                    sb.append("Detected already failed authentication attempt for login \"");
-                    sb.append(loginAndPass.login);
-                    if (null != config) {
-                        sb.append("\" on server \"").append(config.getServer());
-                    }
-                    sb.append("\". Throwing cached AuthenticationFailedException instance.");
-                    LOG.debug(sb.toString());
-                }
-                throw sae.error;
-            }
-            map.remove(loginAndPass);
-        }
     }
 
     private void checkTemporaryDown(final IIMAPProperties imapConfProps) throws OXException, IMAPException {
@@ -972,16 +946,10 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         if (null == timedOutServers) {
             timedOutServers = new ConcurrentHashMap<HostAndPort, Long>();
         }
-        Map<LoginAndPass, StampAndError> failedAuths = IMAPAccess.failedAuths;
-        if (null == failedAuths) {
-            failedAuths = new ConcurrentHashMap<LoginAndPass, StampAndError>();
-            IMAPAccess.failedAuths = failedAuths;
-        }
         if (null == cleanUpTimerTask) {
             final TimerService timerService = IMAPServiceRegistry.getService(TimerService.class);
             if (null != timerService) {
                 final Map<HostAndPort, Long> map1 = timedOutServers;
-                final Map<LoginAndPass, StampAndError> map2 = failedAuths;
                 final Runnable r = new Runnable() {
 
                     @Override
@@ -998,12 +966,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                         /*
                          * Clean-up failed-login map
                          */
-                        for (final Iterator<Entry<LoginAndPass, StampAndError>> iter = map2.entrySet().iterator(); iter.hasNext();) {
-                            final Entry<LoginAndPass, StampAndError> entry = iter.next();
-                            if (System.currentTimeMillis() - entry.getValue().stamp > FAILED_AUTH_TIMEOUT.get()) {
-                                iter.remove();
-                            }
-                        }
+                        IMAPStore.cleanUpFailedAuths(FAILED_AUTH_TIMEOUT.get());
                     }
                 };
                 /*
@@ -1034,9 +997,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         }
         if (null != timedOutServers) {
             timedOutServers = null;
-        }
-        if (null != failedAuths) {
-            failedAuths = null;
         }
     }
 
