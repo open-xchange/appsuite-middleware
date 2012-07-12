@@ -52,10 +52,10 @@ package com.openexchange.contacts.ldap.storage;
 import java.util.Date;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.storage.DefaultContactStorage;
+import com.openexchange.contacts.ldap.property.FolderProperties;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.session.Session;
@@ -70,9 +70,33 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 public class LdapContactStorage extends DefaultContactStorage {
 
+    private final int adminId;
+
+    private final FolderProperties folderProperties;
+
+    private final int folderId;
+
+    private final int contextId;
+
+    /**
+     * Initializes a new {@link LdapContactStorage}.
+     *
+     * @param folderProperties The folder properties
+     * @param adminId The admin ID
+     * @param folderId The folder ID
+     * @param contextId The context ID
+     */
+    public LdapContactStorage(final FolderProperties folderProperties, final int adminId, final int folderId, final int contextId) {
+        super();
+        this.folderProperties = folderProperties;
+        this.adminId = adminId;
+        this.contextId = contextId;
+        this.folderId = folderId;
+    }
+    
     @Override
     public boolean supports(final Session session, final String folderId) throws OXException {
-        return Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID).equals(folderId);
+        return Integer.toString(this.folderId).equals(folderId) && session.getContextId() == this.contextId;
     }
 
     @Override
