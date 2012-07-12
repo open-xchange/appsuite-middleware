@@ -52,6 +52,7 @@ package com.openexchange.contacts.ldap.storage;
 import java.util.Date;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.storage.DefaultContactStorage;
+import com.openexchange.contacts.ldap.property.FolderProperties;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
@@ -69,10 +70,33 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 public class LdapContactStorage extends DefaultContactStorage {
 
+    private final int adminId;
+
+    private final FolderProperties folderProperties;
+
+    private final int folderId;
+
+    private final int contextId;
+
+    /**
+     * Initializes a new {@link LdapContactStorage}.
+     *
+     * @param folderProperties The folder properties
+     * @param adminId The admin ID
+     * @param folderId The folder ID
+     * @param contextId The context ID
+     */
+    public LdapContactStorage(FolderProperties folderProperties, int adminId, int folderId, int contextId) {
+        super();
+        this.folderProperties = folderProperties;
+        this.adminId = adminId;
+        this.contextId = contextId;
+        this.folderId = folderId;
+    }
+    
     @Override
     public boolean supports(Session session, String folderId) throws OXException {
-        // TODO Auto-generated method stub
-        return false;
+        return Integer.toString(this.folderId).equals(folderId) && session.getContextId() == this.contextId;
     }
 
     @Override
