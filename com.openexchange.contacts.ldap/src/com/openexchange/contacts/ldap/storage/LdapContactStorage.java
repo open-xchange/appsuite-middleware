@@ -51,12 +51,16 @@ package com.openexchange.contacts.ldap.storage;
 
 import java.util.Date;
 import com.openexchange.contact.SortOptions;
+import com.openexchange.contact.SortOrder;
 import com.openexchange.contact.storage.DefaultContactStorage;
-import com.openexchange.contacts.ldap.property.FolderProperties;
+import com.openexchange.contacts.json.mapping.ContactMapper;
+import com.openexchange.contacts.ldap.contacts.LdapContactInterface;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -70,13 +74,8 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 public class LdapContactStorage extends DefaultContactStorage {
 
-    private final int adminId;
-
-    private final FolderProperties folderProperties;
-
-    private final int folderId;
-
-    private final int contextId;
+    private final int contextID;
+    private final LdapContactInterface delegate;
 
     /**
      * Initializes a new {@link LdapContactStorage}.
@@ -86,59 +85,70 @@ public class LdapContactStorage extends DefaultContactStorage {
      * @param folderId The folder ID
      * @param contextId The context ID
      */
-    public LdapContactStorage(FolderProperties folderProperties, int adminId, int folderId, int contextId) {
+    public LdapContactStorage(int contextID, LdapContactInterface delegate) {
         super();
-        this.folderProperties = folderProperties;
-        this.adminId = adminId;
-        this.contextId = contextId;
-        this.folderId = folderId;
+        this.contextID = contextID;
+        this.delegate = delegate;
     }
     
     @Override
     public boolean supports(Session session, String folderId) throws OXException {
-        return Integer.toString(this.folderId).equals(folderId) && session.getContextId() == this.contextId;
+        return Integer.toString(delegate.getFolderId()).equals(folderId) && session.getContextId() == this.contextID;
     }
 
     @Override
     public Contact get(Session session, String folderId, String id, ContactField[] fields) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        return delegate.getObjectById(parse(id), parse(folderId));
     }
 
     @Override
     public SearchIterator<Contact> all(Session session, String folderId, ContactField[] fields, SortOptions sortOptions) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        int[] columnIDs = ContactMapper.getInstance().getColumnIDs(fields);
+        Order order = Order.NO_ORDER;    
+        int orderBy = 0;
+        String collation = null;
+        if (null != sortOptions) {
+            collation = sortOptions.getCollation();
+            if (null != sortOptions.getOrder() && 0 < sortOptions.getOrder().length) {
+                SortOrder sortOrder = sortOptions.getOrder()[0];
+                order = sortOrder.getOrder();            
+                orderBy = ContactMapper.getInstance().get(sortOrder.getBy()).getColumnID();
+            }
+        }
+        return delegate.getContactsInFolder(parse(folderId), 0, Integer.MAX_VALUE, orderBy, order, collation, columnIDs); 
     }
 
     @Override
     public SearchIterator<Contact> list(Session session, String folderId, String[] ids, ContactField[] fields, SortOptions sortOptions) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        int[] columnIDs = ContactMapper.getInstance().getColumnIDs(fields);
+        int[][] objectIDandFolderID = new int[1][];
+        objectIDandFolderID[0] = new int[ids.length];
+        for (int i = 0; i < ids.length; i++) {
+            objectIDandFolderID[0][i] = parse(ids[i]);
+        }
+        return delegate.getObjectsById(objectIDandFolderID, columnIDs);
     }
 
     @Override
     public SearchIterator<Contact> deleted(Session session, String folderId, Date since, ContactField[] fields) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        return deleted(session, folderId, since, fields, SortOptions.EMPTY);
     }
 
     @Override
     public SearchIterator<Contact> deleted(Session session, String folderId, Date since, ContactField[] fields, SortOptions sortOptions) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        int[] columnIDs = ContactMapper.getInstance().getColumnIDs(fields);
+        return delegate.getDeletedContactsInFolder(parse(folderId), columnIDs, since);
     }
 
     @Override
     public SearchIterator<Contact> modified(Session session, String folderId, Date since, ContactField[] fields) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        return modified(session, folderId, since, fields, SortOptions.EMPTY);
     }
 
     @Override
     public SearchIterator<Contact> modified(Session session, String folderID, Date since, ContactField[] fields, SortOptions sortOptions) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        int[] columnIDs = ContactMapper.getInstance().getColumnIDs(fields);
+        return delegate.getModifiedContactsInFolder(parse(folderID), columnIDs, since);
     }
 
     @Override
@@ -175,6 +185,22 @@ public class LdapContactStorage extends DefaultContactStorage {
     public void delete(Session session, int userID, String folderId, String id, Date lastRead) throws OXException {
         // TODO Auto-generated method stub
         
+    }
+
+    /**
+     * Parses a numerical identifier from a string, wrapping a possible 
+     * NumberFormatException into an OXException.
+     * 
+     * @param id the id string
+     * @return the parsed identifier
+     * @throws OXException
+     */
+    private static int parse(final String id) throws OXException {
+        try {
+            return Integer.parseInt(id);
+        } catch (final NumberFormatException e) {
+            throw ContactExceptionCodes.ID_PARSING_FAILED.create(e, id); 
+        }
     }
 
 }
