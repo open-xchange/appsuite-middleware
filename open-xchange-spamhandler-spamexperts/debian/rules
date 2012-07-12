@@ -1,39 +1,34 @@
 #!/usr/bin/make -f
-# Build open-xchange-spamhandler-spamexperts
 
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-oxroot=$(CURDIR)/debian/open-xchange-spamhandler-spamexperts
-instprefix=/opt/open-xchange
+installroot=$(CURDIR)/debian/open-xchange-spamhandler-spamexperts
 
 configure: configure-stamp
 configure-stamp:
 	dh_testdir
-	# Nothing to do to configure the package
 	touch configure-stamp
 
 build: build-stamp
 
-build-stamp: configure-stamp 
+build-stamp: configure-stamp
 	dh_testdir
-	ant -Dprefix=$(instprefix) compile
 	touch build-stamp
 
 clean:
 	dh_testdir
 	dh_testroot
 	rm -f build-stamp configure-stamp
-	ant clean
-	dh_clean 
+	ant -lib build/lib -Dbasedir=build -f build/build.xml clean
+	dh_clean
 
 install: build
 	dh_testdir
 	dh_testroot
-	dh_clean -k 
+	dh_prep
 	dh_installdirs
-	ant -Ddestdir=$(oxroot) -Dprefix=$(instprefix) install
-	mv $(oxroot)/var $(oxroot)-gui
+	ant -lib build/lib -Dbasedir=build -DdestDir=$(installroot) -DpackageName=open-xchange-spamhandler-spamexperts -f build/build.xml build
 
 # Build architecture-independent files here.
 binary-indep: build install
@@ -43,7 +38,7 @@ binary-indep: build install
 binary-arch: build install
 	dh_testdir
 	dh_testroot
-#	dh_installchangelogs ChangeLog
+	dh_installchangelogs
 	dh_installdocs
 	dh_installexamples
 #	dh_install
