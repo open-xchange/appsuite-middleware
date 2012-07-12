@@ -67,7 +67,7 @@ public class ConfigurationExceptionMessage implements LocalizableStrings {
     }
     
     // Filename for property file is not defined.
-    public final static String NO_FILENAME_MSG = "Filename for property file is not defined.";
+    public final static String NO_FILENAME_MSG = "File name for property file is not defined.";
     
     // File "%1$s" does not exist.
     public final static String FILE_NOT_FOUND_MSG = "File \"%1$s\" does not exist.";

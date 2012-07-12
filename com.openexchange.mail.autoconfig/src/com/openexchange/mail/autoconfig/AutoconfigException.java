@@ -65,21 +65,21 @@ public class AutoconfigException extends OXException implements LocalizableStrin
 
     private static final String PREFIX = "MAIL-AUTOCONFIG";
 
-    public static final String INVALID_MAIL = "The mail address %1$s is invalid.";
+    public static final String INVALID_MAIL = "The E-Mail address %1$s is invalid.";
 
-    public static OXException unexpected(String logMessage) {
+    public static OXException unexpected(final String logMessage) {
         return new OXException(1).setPrefix(PREFIX).setLogMessage(logMessage);
     }
 
-    public static OXException invalidMail(String mail) {
+    public static OXException invalidMail(final String mail) {
         return new OXException(2, INVALID_MAIL, mail).setPrefix(PREFIX);
     }
 
-    public static OXException xml(XmlPullParserException e) {
+    public static OXException xml(final XmlPullParserException e) {
         return new OXException(3, null, e).setPrefix(PREFIX);
     }
 
-    public static OXException io(IOException e) {
+    public static OXException io(final IOException e) {
         return new OXException(4, null, e).setPrefix(PREFIX);
     }
 

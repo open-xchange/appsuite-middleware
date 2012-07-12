@@ -4,7 +4,6 @@ BuildArch:     noarch
 #!BuildIgnore: post-build-checks
 BuildRequires: ant
 BuildRequires: ant-nodeps
-BuildRequires: open-xchange-soap-cxf
 BuildRequires: open-xchange-admin
 BuildRequires: java-devel >= 1.6.0
 Version:	@OXVERSION@

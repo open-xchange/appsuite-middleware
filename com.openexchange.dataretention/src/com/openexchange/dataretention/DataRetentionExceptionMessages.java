@@ -66,7 +66,7 @@ public enum DataRetentionExceptionMessages implements OXExceptionCode {
      */
     ERROR(DataRetentionExceptionStrings.ERROR_MSG, CATEGORY_ERROR, 1),
     /**
-     * AN I/O error occurred: %1$s.
+     * An I/O error occurred: %1$s.
      */
     IO(DataRetentionExceptionStrings.IO_MSG, CATEGORY_ERROR, 2);
 

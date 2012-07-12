@@ -98,12 +98,12 @@ public class UserExceptionMessage implements LocalizableStrings {
     /**
      * SQL Problem: \"%s\".
      */
-    public final static String SQL_ERROR_MSG = "SQL Problem: \"%s\".";
+    public final static String SQL_ERROR_MSG = "SQL problem: \"%s\".";
 
     /**
      * Hash algorithm %s isn't found.
      */
-    public final static String HASHING_MSG = "Hash algorithm %s isn't found.";
+    public final static String HASHING_MSG = "Hash algorithm %s could not be found.";
 
     /**
      * Encoding %s cannot be used.
@@ -118,7 +118,7 @@ public class UserExceptionMessage implements LocalizableStrings {
     /**
      * Found two user with same identifier %1$s in context %2$d.
      */
-    public final static String USER_CONFLICT_MSG = "Found two user with same identifier %1$s in context " + "%2$d.";
+    public final static String USER_CONFLICT_MSG = "Two users with same identifier %1$s in context %2$d found.";
 
     /**
      * Problem putting an object into the cache.
@@ -159,12 +159,12 @@ public class UserExceptionMessage implements LocalizableStrings {
     /**
      * Invalid password length. The password must be of minimum length %1$d.
      */
-    public final static String INVALID_MIN_LENGTH_MSG = "Invalid password length. The password must be of minimum length %1$d.";
+    public final static String INVALID_MIN_LENGTH_MSG = "Invalid password length. The password must have a minimum length of %1$d.";
 
     /**
      * Invalid password length. The password must be of maximum length %1$d.
      */
-    public final static String INVALID_MAX_LENGTH_MSG = "Invalid password length. The password must be of maximum length %1$d.";
+    public final static String INVALID_MAX_LENGTH_MSG = "Invalid password length. The password must have a maximum length of %1$d.";
 
     /**
      * The parameter %s for this user is missing.
@@ -179,6 +179,6 @@ public class UserExceptionMessage implements LocalizableStrings {
     /**
      * %s is not a valid time zone.
      */
-    public final static String INVALID_TIMEZONE_MSG = "%s is not a valid time zone.";
+    public final static String INVALID_TIMEZONE_MSG = "%s is not a valid timezone.";
 
 }

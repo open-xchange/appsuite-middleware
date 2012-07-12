@@ -93,7 +93,7 @@ public class LdapExceptionMessage implements LocalizableStrings {
     /**
      * SQL Problem: "%s".
      */
-    public final static String SQL_ERROR_MSG = "SQL Problem: \"%s\"";
+    public final static String SQL_ERROR_MSG = "SQL problem: \"%s\"";
 
     /**
      * Problem putting an object into the cache.
@@ -103,7 +103,7 @@ public class LdapExceptionMessage implements LocalizableStrings {
     /**
      * Hash algorithm %s isn't found.
      */
-    public final static String HASH_ALGORITHM_MSG = "Hash algorithm %s isn't found.";
+    public final static String HASH_ALGORITHM_MSG = "Hash algorithm %s could not be found.";
 
     /**
      * Encoding %s cannot be used.
@@ -133,7 +133,7 @@ public class LdapExceptionMessage implements LocalizableStrings {
     /**
      * Cannot find user with email %s.
      */
-    public final static String NO_USER_BY_MAIL_MSG = "Cannot find user with email %s.";
+    public final static String NO_USER_BY_MAIL_MSG = "Cannot find user with E-Mail %s.";
 
     /**
      * Cannot find user with identifier %1$s in context %2$d.

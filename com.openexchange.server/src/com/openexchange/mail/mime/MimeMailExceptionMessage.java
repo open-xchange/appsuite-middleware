@@ -70,7 +70,7 @@ public class MimeMailExceptionMessage implements LocalizableStrings {
      * There was an issue in authenticating your E-Mail password. This may be because of a recent password change. To continue please logout
      * now and then log back in with your most current password. (server=%1$s | user=%2$s)
      */
-    public final static String LOGIN_FAILED_MSG = "There was an issue in authenticating your E-Mail password. This may be because of a recent password change. " + "To continue please logout now and then log back in with your most current password. (server=%1$s | user=%2$s)";
+    public final static String LOGIN_FAILED_MSG = "There was an issue in authenticating your E-Mail password. This may be due to a recent password change. To continue please log out now and then log back in with your most current password. (server=%1$s | user=%2$s)";
 
     /**
      * Wrong or missing login data to access mail server %1$s. Error message from mail server: %2$s
@@ -101,13 +101,13 @@ public class MimeMailExceptionMessage implements LocalizableStrings {
      * reason. Following the exception, the Folder is reset to the "closed" state.
      * </p>
      */
-    public final static String FOLDER_CLOSED_MSG = "Folder \"%1$s\" is closed due to some reason.\nProbably your request took too long";
+    public final static String FOLDER_CLOSED_MSG = "Folder \"%1$s\" has been closed.\nProbably your request took too long.";
 
     /**
      * Folder "%1$s" has been closed on mail server %2$s with login %3$s (user=%4$s, context=%5$s) due to some reason.<br>
      * Probably your request took too long.
      */
-    public final static String FOLDER_CLOSED_EXT_MSG = "Folder \"%1$s\" has been closed on mail server %2$s with login %3$s (user=%4$s, context=%5$s) due to some reason.\nProbably your request took too long.";
+    public final static String FOLDER_CLOSED_EXT_MSG = "Folder \"%1$s\" has been closed on mail server %2$s with login %3$s (user=%4$s, context=%5$s) .\nProbably your request took too long.";
 
     /**
      * Illegal write attempt: %1$s
@@ -137,12 +137,12 @@ public class MimeMailExceptionMessage implements LocalizableStrings {
     /**
      * Session attempts to instantiate a provider that doesn't exist: %1$s
      */
-    public final static String NO_SUCH_PROVIDER_MSG = "Session attempts to instantiate a provider that doesn't exist: %1$s";
+    public final static String NO_SUCH_PROVIDER_MSG = "Session attempts to instantiate a provider that does not exist: %1$s";
 
     /**
      * Invalid email address %1$s
      */
-    public final static String INVALID_EMAIL_ADDRESS_MSG = "Invalid email address %1$s";
+    public final static String INVALID_EMAIL_ADDRESS_MSG = "Invalid E-Mail address %1$s";
 
     /**
      * Wrong message header: %1$s
@@ -284,14 +284,14 @@ public class MimeMailExceptionMessage implements LocalizableStrings {
     public final static String BAD_COMMAND_EXT_MSG = "Bad command indicated by mail server %1$s with login %2$s (user=%3$s, context=%4$s). Server response: %5$s";
 
     /**
-     * An error in mail server protocol. Error message: %1$s
+     * Error in mail server protocol. Error message: %1$s
      */
-    public final static String PROTOCOL_ERROR_MSG = "An error in mail server protocol. Error message: %1$s";
+    public final static String PROTOCOL_ERROR_MSG = "Error in mail server protocol. Error message: %1$s";
 
     /**
      * An error in protocol to mail server %1$s with login %2$s (user=%3$s, context=%4$s). Error message: %5$s
      */
-    public final static String PROTOCOL_ERROR_EXT_MSG = "An error in protocol to mail server %1$s with login %2$s (user=%3$s, context=%4$s). Error message: %5$s";
+    public final static String PROTOCOL_ERROR_EXT_MSG = "Error in protocol to mail server %1$s with login %2$s (user=%3$s, context=%4$s). Error message: %5$s";
 
     /**
      * Message could not be sent: %1$s

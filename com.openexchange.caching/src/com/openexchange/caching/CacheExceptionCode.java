@@ -33,11 +33,11 @@ public enum CacheExceptionCode implements OXExceptionCode {
      */
     FAILED_ATTRIBUTE_RETRIEVAL(CacheExceptionMessage.FAILED_ATTRIBUTE_RETRIEVAL, Category.CATEGORY_ERROR, 5),
     /**
-     * A put into the cache failed.
+     * 'Put' into cache failed.
      */
     FAILED_PUT(CacheExceptionMessage.FAILED_PUT, Category.CATEGORY_ERROR, 6),
     /**
-     * Safe put into cache failed. An object bound to given key already exists.
+     * 'Save put' into cache failed. An object bound to given key already exists.
      */
     FAILED_SAFE_PUT(CacheExceptionMessage.FAILED_SAFE_PUT, Category.CATEGORY_ERROR, 7),
     /**

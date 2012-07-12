@@ -68,7 +68,7 @@ import com.openexchange.mail.smal.impl.processor.DefaultProcessorStrategy;
 import com.openexchange.mail.smal.impl.processor.MailFolderInfo;
 import com.openexchange.mail.smal.impl.processor.Processor;
 import com.openexchange.mail.smal.impl.processor.ProcessorStrategy;
-import com.openexchange.server.ServiceExceptionCodes;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.service.indexing.IndexingJob;
 import com.openexchange.service.indexing.IndexingService;
 import com.openexchange.service.indexing.mail.MailJobInfo;
@@ -339,7 +339,7 @@ public abstract class AbstractSMALStorage {
     protected static <V> CancelableCompletionService<V> newCompletionService() throws OXException {
         final ThreadPoolService threadPool = ThreadPools.getThreadPool();
         if (null == threadPool) {
-            throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(ThreadPoolService.class.getName());
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ThreadPoolService.class.getName());
         }
         return new ThreadPoolCompletionService<V>(threadPool);
     }

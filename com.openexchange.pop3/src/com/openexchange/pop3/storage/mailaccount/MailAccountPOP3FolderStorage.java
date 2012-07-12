@@ -58,6 +58,7 @@ import java.util.concurrent.locks.Lock;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.java.SynchronizedBasedReentrantLock;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailSessionCache;
@@ -225,13 +226,10 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
     }
 
     private <V> V performSynchronized(final Callable<V> task, final Session session) throws Exception {
-        final Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
+        Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
         if (null == lock) {
-            synchronized (session) {
-                return task.call();
-            }
+            lock = new SynchronizedBasedReentrantLock(session);
         }
-        // Use Lock instance
         lock.lock();
         try {
             return task.call();

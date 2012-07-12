@@ -60,7 +60,7 @@ public class FormStrings implements LocalizableStrings {
 
     public static final String FORM_LABEL_SITE = "Site";
 
-    public static final String FORM_LABEL_TEMPLATE = "Apply a Template (optional)";
+    public static final String FORM_LABEL_TEMPLATE = "Apply a template (optional)";
 
     public static final String FORM_LABEL_PROTECTED = "Add cipher code";
 

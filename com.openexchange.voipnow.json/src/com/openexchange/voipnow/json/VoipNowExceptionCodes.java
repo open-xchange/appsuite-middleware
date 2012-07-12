@@ -98,7 +98,7 @@ public enum VoipNowExceptionCodes implements OXExceptionCode {
      */
     HTTP_ERROR(VoipNowExceptionMessages.HTTP_ERROR_MSG, CATEGORY_ERROR, 9),
     /**
-     * Unparseable HTTP response: %1$s
+     * Unparsable HTTP response: %1$s
      */
     UNPARSEABLE_HTTP_RESPONSE(VoipNowExceptionMessages.UNPARSEABLE_HTTP_RESPONSE_MSG, CATEGORY_ERROR, 10);
 

@@ -66,10 +66,10 @@ public class QuotaFileStorageExceptionMessage implements LocalizableStrings {
     }
 
     /** Couldn't reach the filestore */
-    public final static String INSTANTIATIONERROR_MSG = "Couldn't reach the filestore";
+    public final static String INSTANTIATIONERROR_MSG = "File store could not be accessed.";
 
     /** Database Query could not be realized */
-    public final static String SQLSTATEMENTERROR_MSG = "Database Query could not be realized";
+    public final static String SQLSTATEMENTERROR_MSG = "Database query failed.";
 
     /** The allowed Quota is reached. */
     public final static String STORE_FULL_MSG = "The allowed Quota is reached.";
@@ -81,6 +81,6 @@ public class QuotaFileStorageExceptionMessage implements LocalizableStrings {
     public final static String NO_USAGE_MSG = "Quota usage is missing for context %1$d.";
 
     /** Update of quota usage for context %1$d failed. */
-    public final static String UPDATE_FAILED_MSG = "Update of quota usage for context %1$d failed.";
+    public final static String UPDATE_FAILED_MSG = "Updating quota usage for context %1$d failed.";
 
 }

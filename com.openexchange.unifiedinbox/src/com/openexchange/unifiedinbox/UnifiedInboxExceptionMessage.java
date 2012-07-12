@@ -100,7 +100,7 @@ public class UnifiedInboxExceptionMessage implements LocalizableStrings {
     public final static String NOT_CONNECTED_MSG = "No connection available to access mailbox";
 
     // Unknown default folder fullname: %1$s.
-    public final static String UNKNOWN_DEFAULT_FOLDER_INDEX_MSG = "Unknown default folder fullname: %1$s.";
+    public final static String UNKNOWN_DEFAULT_FOLDER_INDEX_MSG = "Unknown default folder full name: %1$s.";
 
     // Move operation aborted. Source and destination folder are equal.
     public final static String NO_EQUAL_MOVE_MSG = "Move operation aborted. Source and destination folder are equal.";
@@ -109,6 +109,6 @@ public class UnifiedInboxExceptionMessage implements LocalizableStrings {
     public final static String TIMEOUT_MSG = "Request aborted due to timeout of %1$s %2$s.";
 
     // Invalid destination folder. Don't know where to append the mails.
-    public final static String INVALID_DESTINATION_FOLDER_MSG = "Invalid destination folder. Don't know where to append the mails.";
+    public final static String INVALID_DESTINATION_FOLDER_MSG = "Invalid destination folder. E-Mails cannot be appended.";
 
 }

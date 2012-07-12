@@ -194,7 +194,7 @@ class OSGiCleanMapper {
         if (containsAlias(alias)) {
             // should not happend, alias should be checked before.
             if(LOG.isWarnEnabled()){
-                LOG.warn("Alias already in use, this shouldn't happen");
+                LOG.warn("Alias \"" + alias + "\" already in use, this shouldn't happen");
             }
         } else {
             registerAliasHandler(alias, handler);

@@ -106,7 +106,7 @@ public class ConversionWarningMessage implements LocalizableStrings {
     public final static String CANT_RESOLVE_RESOURCE_MSG = "Can not resolve resource: %1$s";
 
     // Private Appointments can not have attendees. Removing attendees and accepting appointment anyway.
-    public final static String PRIVATE_APPOINTMENTS_HAVE_NO_PARTICIPANTS_MSG = "Private Appointments can not have attendees. Removing attendees and accepting appointment anyway.";
+    public final static String PRIVATE_APPOINTMENTS_HAVE_NO_PARTICIPANTS_MSG = "Private appointments can not have attendees. Removing attendees and accepting appointment anyway.";
 
     // Not supported recurrence pattern: BYMONTH
     public final static String BYMONTH_NOT_SUPPORTED_MSG = "Not supported recurrence pattern: BYMONTH";

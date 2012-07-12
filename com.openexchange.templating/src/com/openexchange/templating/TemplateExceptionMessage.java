@@ -77,7 +77,7 @@ public class TemplateExceptionMessage implements LocalizableStrings {
 
     public final static String TemplateNotFound_MSG = "The template %2 does not exist.";
 
-    public final static String SQLException_HELP = "An underlying system threw an SQLException";
+    public final static String SQLException_HELP = "An underlying system threw an SQL exception";
 
     public final static String SQLException_MSG = "Please try again later.";
 

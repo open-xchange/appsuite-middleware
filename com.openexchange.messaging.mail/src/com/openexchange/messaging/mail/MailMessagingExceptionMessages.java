@@ -85,10 +85,10 @@ public final class MailMessagingExceptionMessages implements LocalizableStrings 
 
     // Missing permission "%1$s" in facebook login %2$s. Please copy following URL to your browser, login as %2$s (if not done yet) and grant access: %3$s
     public static final String MISSING_PERMISSION_MSG =
-        "Missing permission \"%1$s\" in facebook login %2$s. Please copy following URL to your browser, login as %2$s (if not done yet) and grant access:\n%3$s";
+        "Missing permission \"%1$s\" in facebook login %2$s. Please copy the following url to your browser, log in as %2$s (if not done yet) and grant access:\n%3$s";
 
     // An error occurred during the processing of a script.
-    public static final String SCRIPT_ERROR_MSG = "An error occurred during the processing of a script.";
+    public static final String SCRIPT_ERROR_MSG = "An error occurred while processing a script.";
 
     // Missing permission for the application associated with configured Facebook API key: %1$s
     // Please grant access for that application in your Facebook account settings.

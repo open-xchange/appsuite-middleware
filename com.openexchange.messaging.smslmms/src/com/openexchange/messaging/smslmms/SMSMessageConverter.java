@@ -61,7 +61,7 @@ import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.MultipartContent;
 import com.openexchange.messaging.StringContent;
 import com.openexchange.messaging.smslmms.api.SMSMessage;
-import com.openexchange.server.ServiceExceptionCodes;
+import com.openexchange.server.ServiceExceptionCode;
 
 /**
  * {@link SMSMessageConverter} - Converter for SMS/MMS messages.
@@ -129,7 +129,7 @@ public class SMSMessageConverter {
         if (count > 1) {
             fileManagement = SMSMessagingMessage.getServiceLookup().getService(ManagedFileManagement.class);
             if (null == fileManagement) {
-                throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(ManagedFileManagement.class.getName());
+                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ManagedFileManagement.class.getName());
             }
             for (int i = 1; i < count; i++) {
                 final MessagingBodyPart bodyPart = multipartContent.get(i);

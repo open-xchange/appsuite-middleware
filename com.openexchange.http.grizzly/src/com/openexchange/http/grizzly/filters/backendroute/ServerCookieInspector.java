@@ -56,6 +56,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import org.glassfish.grizzly.http.Cookie;
+import org.glassfish.grizzly.http.Cookies;
 import org.glassfish.grizzly.http.HttpResponsePacket;
 import org.glassfish.grizzly.http.util.CookieParserUtils;
 import org.glassfish.grizzly.http.util.CookieSerializerUtils;
@@ -92,6 +93,7 @@ public class ServerCookieInspector extends AbstractCookieInspector {
         Iterable<String> headerLines = responseMimeHeaders.values(Header.SetCookie);
         this.cookieMap = getCookieMapFromHeaderLines(headerLines);
     }
+    
     /**
      * Convert the server Set-Cookie: header line into a map<name, cookie> of cookies.
      * @param headerLine the Set-Cookie: header line from the client http request
@@ -99,11 +101,11 @@ public class ServerCookieInspector extends AbstractCookieInspector {
      */
     private Map<String, Cookie> getCookieMapFromHeaderLines(Iterable<String> headerLines) {
         Map<String, Cookie> cookieMap = new HashMap<String, Cookie>(); 
-        List<Cookie> cookieList = new LinkedList<Cookie>();
+        Cookies cookies = new Cookies();
         for (String headerLine : headerLines) {
-            CookieParserUtils.parseServerCookies(cookieList, headerLine, true);
+            CookieParserUtils.parseServerCookies(cookies, headerLine, true);
         }
-        for (Cookie cookie : cookieList) {
+        for (Cookie cookie : cookies.get()) {
             cookieMap.put(cookie.getName(), cookie);
         }
         return cookieMap;

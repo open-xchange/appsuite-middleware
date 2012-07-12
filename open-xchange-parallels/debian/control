@@ -1,0 +1,15 @@
+Source: open-xchange-parallels
+Section: web
+Priority: optional
+Maintainer: Marcus Klein <marcus.klein@open-xchange.com>
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.7.0), ant-optional (>= 1.7.0), sun-java6-jdk|java6-sdk, open-xchange-admin (>=@OXVERSION@), open-xchange-spamhandler-spamassassin (>=@OXVERSION@)
+Standards-Version: 3.8.4
+Homepage: http://www.open-xchange.com
+
+Package: open-xchange-parallels
+Architecture: all
+Depends: ${misc:Depends}, open-xchange-spamhandler-spamassassin (>=@OXVERSION@), open-xchange-admin-soap (>= @OXVERSION@)
+Replaces: open-xchange-custom-parallels
+Conflicts: open-xchange-custom-parallels,open-xchange-authentication-database,open-xchange-authentication-ldap,open-xchange-authentication-imap,open-xchange-authentication-kerberos
+Provides: open-xchange-authentication,open-xchange-custom-parallels
+Description: The Open-Xchange Parallels Extensions. Authentication Plugin, Branding Plugin and SpamdProvider

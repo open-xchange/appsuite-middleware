@@ -60,6 +60,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.java.SynchronizedBasedReentrantLock;
 import com.openexchange.pop3.POP3Access;
 import com.openexchange.pop3.services.POP3ServiceRegistry;
 import com.openexchange.pop3.storage.FullnameUIDPair;
@@ -86,34 +87,23 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
         final Session session = pop3Access.getSession();
         final String key = SessionParameterNames.getUIDLMap(pop3Access.getAccountId());
         SessionPOP3StorageUIDLMap cached;
-        final Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
+        Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
         if (null == lock) {
-            synchronized (session) {
-                try {
-                    cached = (SessionPOP3StorageUIDLMap) session.getParameter(key);
-                } catch (final ClassCastException e) {
-                    cached = null;
-                }
-                if (null == cached) {
-                    cached = new SessionPOP3StorageUIDLMap(new RdbPOP3StorageUIDLMap(pop3Access));
-                    session.setParameter(key, cached);
-                }
-            }
-        } else {
-            lock.lock();
+            lock = new SynchronizedBasedReentrantLock(session);
+        }
+        lock.lock();
+        try {
             try {
-                try {
-                    cached = (SessionPOP3StorageUIDLMap) session.getParameter(key);
-                } catch (final ClassCastException e) {
-                    cached = null;
-                }
-                if (null == cached) {
-                    cached = new SessionPOP3StorageUIDLMap(new RdbPOP3StorageUIDLMap(pop3Access));
-                    session.setParameter(key, cached);
-                }
-            } finally {
-                lock.unlock();
+                cached = (SessionPOP3StorageUIDLMap) session.getParameter(key);
+            } catch (final ClassCastException e) {
+                cached = null;
             }
+            if (null == cached) {
+                cached = new SessionPOP3StorageUIDLMap(new RdbPOP3StorageUIDLMap(pop3Access));
+                session.setParameter(key, cached);
+            }
+        } finally {
+            lock.unlock();
         }
         return cached;
     }

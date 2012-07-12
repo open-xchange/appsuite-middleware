@@ -198,7 +198,7 @@ public class OXFolderExceptionMessage implements LocalizableStrings {
      * Folder's parent id is changed during an update operation
      * </p>
      */
-    public final static String NO_MOVE_THROUGH_UPDATE_MSG = "Not allowed to change parent id of folder %1$s through an update call. Use move method instead";
+    public final static String NO_MOVE_THROUGH_UPDATE_MSG = "Not allowed to change parent id of folder %1$s through an update call. Use move method instead.";
     /**
      * Not allowed to move default folder %1$s in context %2$s
      * <p>
@@ -282,7 +282,7 @@ public class OXFolderExceptionMessage implements LocalizableStrings {
      * User is not allowed to delete all objects contained in folder in question
      * </p>
      */
-    public final static String NOT_ALL_OBJECTS_DELETION_MSG = "User %1$s is not allowed to delete all contained objects in folder %2$s in context %3$s";
+    public final static String NOT_ALL_OBJECTS_DELETION_MSG = "User %1$s is not allowed to delete all objects in folder %2$s in context %3$s";
     /**
      * No admin user found in context %1$s
      * <p>
@@ -372,7 +372,7 @@ public class OXFolderExceptionMessage implements LocalizableStrings {
     /**
      * Folder cache (region name = %1$s) could not be initialized due to following reason: %2$s
      */
-    public final static String FOLDER_CACHE_INITIALIZATION_FAILED_MSG = "Folder cache (region name = %1$s) could not be initialized due to following reason: %2$s";
+    public final static String FOLDER_CACHE_INITIALIZATION_FAILED_MSG = "Folder cache (region name = %1$s) could not be initialized due to the following reason: %2$s";
     /**
      * Folder cache has not been enabled in config file %1$s
      */
@@ -424,7 +424,7 @@ public class OXFolderExceptionMessage implements LocalizableStrings {
     /**
      * The attribute %1$s contains too much characters. Current length %3$s is more than allowed length of %2$s characters.
      */
-    public final static String TRUNCATED_MSG = "The attribute %1$s contains too much characters. Current " + "length %3$d is more than allowed length of %2$d characters.";
+    public final static String TRUNCATED_MSG = "he attribute %1$s contains too many characters. Current length %3$d is more than allowed length of %2$d characters.";
     /**
      * Unable to map OCL permission value %1$s to a JSON permission value
      */
@@ -432,7 +432,7 @@ public class OXFolderExceptionMessage implements LocalizableStrings {
     /**
      * Folder existence cannot be checked due to insufficient folder information
      */
-    public final static String UNSUFFICIENT_FOLDER_INFORMATION_MSG = "Folder existence cannot be checked due to insufficient folder information)";
+    public final static String UNSUFFICIENT_FOLDER_INFORMATION_MSG = "Folder existence cannot be checked due to insufficient folder information";
     /**
      * A runtime error occurred in context %1$s
      */
@@ -444,12 +444,12 @@ public class OXFolderExceptionMessage implements LocalizableStrings {
     /**
      * No subfolder creation underneath shared folder %1$s in context %2$s
      */
-    public final static String NO_SUBFOLDER_BELOW_SHARED_FOLDER_MSG = "No subfolder creation underneath shared folder %1$s in context %2$s";
+    public final static String NO_SUBFOLDER_BELOW_SHARED_FOLDER_MSG = "No subfolder creation below shared folder %1$s in context %2$s";
     /**
      * User %1$s grants invalid permissions on shared folder %2$s in context %3$s. Only owner of parental shared folder %4$s may be
      * folder admin
      */
-    public final static String INVALID_SHARED_FOLDER_SUBFOLDER_PERMISSION_MSG = "User %1$s grants invalid permissions on shared folder %2$s in context %3$s." + " Only owner of parental shared folder %4$s may be folder admin";
+    public final static String INVALID_SHARED_FOLDER_SUBFOLDER_PERMISSION_MSG = "User %1$s grants invalid permissions on shared folder %2$s in context %3$s. Only the owner of parental shared folder %4$s can be the folder admin.";
     /**
      * Owner %1$s of default folder %2$s must keep the folder admin permission
      */

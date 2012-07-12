@@ -16,6 +16,7 @@ URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       Meta package to install all necessary components to provision synchronization with mobile phones
 Requires:      open-xchange-eas-provisioning-core >= @OXVERSION@
+Requires:      open-xchange-eas >= @OXVERSION@
 Requires:      open-xchange-eas-provisioning-action
 
 %description

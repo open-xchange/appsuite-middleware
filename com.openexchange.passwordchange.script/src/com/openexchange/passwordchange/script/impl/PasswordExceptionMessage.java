@@ -68,7 +68,7 @@ public class PasswordExceptionMessage implements LocalizableStrings {
     /**
      * Cannot change password for any reason.
      */
-    public final static String PASSWORD_FAILED_MSG = "Cannot change password < %s >, see logfiles for details.";
+    public final static String PASSWORD_FAILED_MSG = "Cannot change password < %s >, see log files for details.";
 
     /**
      * New password too short.

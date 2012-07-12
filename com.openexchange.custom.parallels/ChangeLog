@@ -1,0 +1,22 @@
+* 2012-02-28 - wolfgang.rosenauer@open-xchange.com
+
+  - Fixed bug #19196 : Moved configuration option into property file
+  - Marked parallels_gui.properties as config file for Debian
+
+* 2011-03-01 - marcus.klein@open-xchange.com
+
+  - Bugfix #18465: Compiling sources everywhere to Java5 compatible class files.
+
+* 2010-04-14 - manuel.kraft@open-xchange.com
+  - fixed bug #15868 - not possible to create several contexts with same branding
+    POA APS package must now send lmapping like this BRANDING||<context_id>||www.branding.com
+
+* 2010-01-25 - dennis.sieben@open-xchange.com
+
+  - fixed bug #15253 - open-xchange-custom-parallels-gui (6.14.0.0-9) package
+    contains no GUI files on debian
+    - fixed build scripts
+
+* 2009-05-21 - manuel.kraft@open-xchange.com
+
+  - Initial Import

@@ -65,7 +65,7 @@ public class GenericConfigurationStorageExceptionMessage implements LocalizableS
         super();
     }
 
-    public final static String SQL_EXCEPTION_MSG = "A SQL Error occurred: %1$s";
+    public final static String SQL_EXCEPTION_MSG = "A SQL error occurred: %1$s";
 
     public final static String UNSUPPORTED_OBJECT_TYPE_MSG = "Object type is not supported: %1$s";
 

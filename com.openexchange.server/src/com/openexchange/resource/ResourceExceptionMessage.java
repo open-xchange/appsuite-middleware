@@ -73,7 +73,7 @@ public class ResourceExceptionMessage implements LocalizableStrings {
     /**
      * SQL Problem: "%1$s".
      */
-    public final static String SQL_ERROR_MSG = "SQL Problem: \"%1$s\"";
+    public final static String SQL_ERROR_MSG = "SQL problem: \"%1$s\"";
 
     /**
      * Cannot find resource group with identifier %1$d.
@@ -123,7 +123,7 @@ public class ResourceExceptionMessage implements LocalizableStrings {
     /**
      * Invalid resource email address: %1$s
      */
-    public final static String INVALID_RESOURCE_MAIL_MSG = "Invalid resource email address: %1$s";
+    public final static String INVALID_RESOURCE_MAIL_MSG = "Invalid resource E-Mail address: %1$s";
 
     /**
      * The resource has been changed in the meantime

@@ -80,25 +80,25 @@ public class ImportExportExceptionMessages implements LocalizableStrings {
 
     public static final String CANNOT_IMPORT_MSG = "Can not import the format %2$s into folder %1$s.";
 
-    public static final String CALENDAR_DISABLED_MSG = "Module calendar not enabled for user, cannot import appointments.";
+    public static final String CALENDAR_DISABLED_MSG = "Calendar module is not enabled for the user. Appointments can not be imported.";
 
-    public static final String TASKS_DISABLED_MSG = "Module tasks not enabled for user, cannot import tasks.";
+    public static final String TASKS_DISABLED_MSG = "Tasks module is not enabled for the user. Tasks cannot be imported.";
 
     public static final String ICAL_PARSER_SERVICE_MISSING_MSG = "The necessary iCal parser service is missing.";
 
-    public static final String RESOURCE_HARD_CONFLICT_MSG = "Failed importing appointment due to hard conflicting resource.";
+    public static final String RESOURCE_HARD_CONFLICT_MSG = "Importing the appointment failed due to a conflicting resource.";
 
     public static final String WARNINGS_MSG = "Warnings when importing file: %i warnings";
 
     public static final String UNKNOWN_VCARD_FORMAT_MSG = "Could not recognize format of the following data: %s";
 
-    public static final String CONTACTS_DISABLED_MSG = "Module contacts not enabled for user, cannot import contacts.";
+    public static final String CONTACTS_DISABLED_MSG = "Contacts module is not enabled for the user. Contacts cannot be imported.";
 
-    public static final String NO_VCARD_FOUND_MSG = "No VCard to import found.";
+    public static final String NO_VCARD_FOUND_MSG = "No vCard to import found.";
 
-    public static final String VCARD_PARSING_PROBLEM_MSG = "Problem while parsing the vcard, reason: %s";
+    public static final String VCARD_PARSING_PROBLEM_MSG = "Problem while parsing the vcard. Reason: %s";
 
-    public static final String VCARD_CONVERSION_PROBLEM_MSG = "Problem while converting the vcard to a contact, reason: %s";
+    public static final String VCARD_CONVERSION_PROBLEM_MSG = "Problem while converting the vcard to a contact. Reason: %s";
 
     public static final String ONLY_ONE_FOLDER_MSG = "Can only import into one folder at a time.";
 
@@ -106,11 +106,11 @@ public class ImportExportExceptionMessages implements LocalizableStrings {
 
     public static final String NO_VALID_CSV_COLUMNS_MSG = "Could not translate a single column title. Is this a valid CSV file?";
 
-    public static final String NO_FIELD_IMPORTED_MSG = "Could not translate a single field of information, did not insert entry %s.";
+    public static final String NO_FIELD_IMPORTED_MSG = "Could not translate a single field of information. Entry %s has not been inserted.";
 
-    public static final String NO_FIELD_FOR_NAMING_MSG = "No field can be found that could be used to name contacts in this file: no name, no company nor e-mail.";
+    public static final String NO_FIELD_FOR_NAMING_MSG = "File does not contain fields for assigning contact names: no name, company or E-Mail.";
 
-    public static final String NO_FIELD_FOR_NAMING_IN_LINE_MSG = "No field was set that might give the contact in line %s a display name: no name, no company nor e-mail.";
+    public static final String NO_FIELD_FOR_NAMING_IN_LINE_MSG = "No field was set that might give the contact in line %s a display name: no name, company or E-Mail.";
 
     public static final String IOEXCEPTION_MSG = "Could not read InputStream as string";
 
