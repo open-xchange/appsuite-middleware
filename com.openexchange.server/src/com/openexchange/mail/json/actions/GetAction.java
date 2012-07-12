@@ -361,6 +361,11 @@ public final class GetAction extends AbstractMailAction {
                         "Most likely this is caused by concurrent access of multiple clients ").append(
                         "while one performed a delete on affected mail.").toString(),
                     e);
+                final Object[] args = e.getDisplayArgs();
+                final String uid = null == args || 0 == args.length ? null : args[0].toString();
+                if ("undefined".equalsIgnoreCase(uid)) {
+                    throw MailExceptionCode.PROCESSING_ERROR.create(e, new Object[0]);
+                }
             } else {
                 LOG.error(e.getMessage(), e);
             }
