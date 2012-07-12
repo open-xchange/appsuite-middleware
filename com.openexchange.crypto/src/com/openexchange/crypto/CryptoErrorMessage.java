@@ -75,6 +75,17 @@ public enum CryptoErrorMessage implements OXExceptionCode {
      */
     NoSalt(CATEGORY_USER_INPUT, 4, CryptoExceptionMessage.NO_SALT_HELP, CryptoExceptionMessage.NO_SALT_MSG);
 
+    private static final String PREFIX = "CRP";
+    
+    /**
+     * Gets the prefix.
+     * 
+     * @return The prefix
+     */
+    public static String getPrefixx() {
+        return PREFIX;
+    }
+
     private Category category;
 
     private int errorCode;
@@ -92,7 +103,7 @@ public enum CryptoErrorMessage implements OXExceptionCode {
 
     @Override
     public String getPrefix() {
-        return "CRP";
+        return PREFIX;
     }
 
     @Override

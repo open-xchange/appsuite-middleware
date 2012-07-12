@@ -51,7 +51,9 @@ package com.openexchange.messaging.twitter;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.SynchronizedBasedReentrantLock;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingAccountManager;
 import com.openexchange.messaging.twitter.services.TwitterMessagingServiceRegistry;
@@ -123,7 +125,12 @@ public abstract class AbstractTwitterMessagingAccess {
                      */
                     Integer oAuthAccountId = (Integer) configuration.get(TwitterConstants.TWITTER_OAUTH_ACCOUNT);
                     if (null == oAuthAccountId) {
-                        synchronized (getSessionLock(session)) {
+                        Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
+                        if (null == lock) {
+                            lock = new SynchronizedBasedReentrantLock(session);
+                        }
+                        lock.lock();
+                        try {
                             oAuthAccountId = (Integer) configuration.get(TwitterConstants.TWITTER_OAUTH_ACCOUNT);
                             if (null == oAuthAccountId) {
                                 final String token = (String) configuration.get(TwitterConstants.TWITTER_TOKEN);
@@ -146,6 +153,8 @@ public abstract class AbstractTwitterMessagingAccess {
                             } else {
                                 oAuthAccount = oAuthService.getAccount(oAuthAccountId.intValue(), session, userId, contextId);
                             }
+                        } finally {
+                            lock.unlock();
                         }
                     } else {
                         oAuthAccount = oAuthService.getAccount(oAuthAccountId.intValue(), session, userId, contextId);
@@ -165,11 +174,6 @@ public abstract class AbstractTwitterMessagingAccess {
             }
         }
         twitterAccess = tmp;
-    }
-
-    private static Object getSessionLock(final Session session) {
-        final Object lock = session.getParameter(Session.PARAM_LOCK);
-        return lock == null ? session : lock;
     }
 
     private boolean testOAuthTwitterAccess(final TwitterAccess newTwitterAccess) {

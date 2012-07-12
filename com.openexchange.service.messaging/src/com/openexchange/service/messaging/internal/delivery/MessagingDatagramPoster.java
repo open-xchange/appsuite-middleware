@@ -69,7 +69,7 @@ import java.util.concurrent.Callable;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.service.messaging.Message;
-import com.openexchange.service.messaging.MessagingServiceExceptionCodes;
+import com.openexchange.service.messaging.MessagingServiceExceptionCode;
 import com.openexchange.service.messaging.internal.Constants;
 import com.openexchange.service.messaging.internal.MessagingRemoteServerProvider;
 import com.openexchange.threadpool.RefusedExecutionBehavior;
@@ -106,7 +106,7 @@ public final class MessagingDatagramPoster {
         try {
             ownAddress = InetAddress.getLocalHost();
         } catch (final UnknownHostException e) {
-            throw MessagingServiceExceptionCodes.UNKNOWN_HOST.create(e, "localhost");
+            throw MessagingServiceExceptionCode.UNKNOWN_HOST.create(e, "localhost");
         }
     }
 
@@ -161,10 +161,10 @@ public final class MessagingDatagramPoster {
                 return null;
             } catch (final IOException e) {
                 LOG.error("Posting message failed.", e);
-                throw MessagingServiceExceptionCodes.IO_ERROR.create(e, e.getMessage());
+                throw MessagingServiceExceptionCode.IO_ERROR.create(e, e.getMessage());
             } catch (final RuntimeException e) {
                 LOG.error("Posting message failed.", e);
-                throw MessagingServiceExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+                throw MessagingServiceExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
         }
 
@@ -276,7 +276,7 @@ public final class MessagingDatagramPoster {
             dgrams.add(lastChunk);
             return dgrams;
         } catch (final IOException e) {
-            throw MessagingServiceExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            throw MessagingServiceExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -323,7 +323,7 @@ public final class MessagingDatagramPoster {
             return new byte[] { (byte) (Constants.REQUEST_TERMINATOR), (byte) (Constants.REQUEST_TERMINATOR) };
         }
         if (len > MAX_INT_VALUE) {
-            throw MessagingServiceExceptionCodes.INT_TOO_BIG.create(Integer.valueOf(len));
+            throw MessagingServiceExceptionCode.INT_TOO_BIG.create(Integer.valueOf(len));
         }
         final byte[] bytes = new byte[len + 2 + 1];
         int pos = 0;
@@ -345,7 +345,7 @@ public final class MessagingDatagramPoster {
 
     private static byte[] writeInt(final int i) throws OXException {
         if (i > MAX_INT_VALUE) {
-            throw MessagingServiceExceptionCodes.INT_TOO_BIG.create(Integer.valueOf(i));
+            throw MessagingServiceExceptionCode.INT_TOO_BIG.create(Integer.valueOf(i));
         }
         return new byte[] { (byte) (i >> 8), (byte) (i & (255)) };
     }

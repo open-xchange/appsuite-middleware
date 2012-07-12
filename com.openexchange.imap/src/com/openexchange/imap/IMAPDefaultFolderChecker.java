@@ -72,6 +72,7 @@ import com.openexchange.imap.cache.NamespaceFoldersCache;
 import com.openexchange.imap.cache.RootSubfolderCache;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.services.IMAPServiceRegistry;
+import com.openexchange.java.SynchronizedBasedReentrantLock;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
@@ -210,13 +211,10 @@ public class IMAPDefaultFolderChecker {
      * Performs specified {@link Callable} instance in a synchronized manner.
      */
     protected static <V> V performSynchronized(final Callable<V> task, final Session session) throws Exception {
-        final Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
+        Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
         if (null == lock) {
-            synchronized (session) {
-                return task.call();
-            }
+            lock = new SynchronizedBasedReentrantLock(session);
         }
-        // Use Lock instance
         lock.lock();
         try {
             return task.call();

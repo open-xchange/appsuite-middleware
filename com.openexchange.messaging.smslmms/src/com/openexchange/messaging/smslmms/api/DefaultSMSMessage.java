@@ -63,7 +63,7 @@ import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.messaging.CaptchaParams;
 import com.openexchange.messaging.MessagingFolder;
-import com.openexchange.server.ServiceExceptionCodes;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -282,7 +282,7 @@ public final class DefaultSMSMessage implements SMSMessage {
          */
         final ManagedFileManagement managedFileManagement = SERVICE_LOOKUP.get().getService(ManagedFileManagement.class);
         if (null == managedFileManagement) {
-            throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(ManagedFileManagement.class.getName());
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ManagedFileManagement.class.getName());
         }
         addAttachment(managedFileManagement.getByID(attachmentId));
     }

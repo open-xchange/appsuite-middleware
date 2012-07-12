@@ -155,7 +155,7 @@ public class Messages implements LocalizableStrings {
 
     public static final String COUNTER_ORGANIZER_INTRO = "%1$s would like you to change the appointment:";
 
-    public static final String COUNTER_PARTICIPANT_INTRO = "$%1$s has asked %2$s to change the event:";
+    public static final String COUNTER_PARTICIPANT_INTRO = "%1$s has asked %2$s to change the event:";
 
     public static final String CREATE_INTRO = "You have been invited to an event by %1$s:";
     

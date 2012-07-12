@@ -54,6 +54,7 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Lock;
+import com.openexchange.java.SynchronizedBasedReentrantLock;
 import com.openexchange.session.Session;
 
 /**
@@ -82,26 +83,19 @@ public final class MailSessionCache {
             session.setParameter(key, null);
         }
         if (null == mailCache) {
-            final Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
+            Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
             if (null == lock) {
-                synchronized (session) {
-                    mailCache = (MailSessionCache) session.getParameter(key);
-                    if (null == mailCache) {
-                        mailCache = new MailSessionCache();
-                        session.setParameter(key, mailCache);
-                    }
+                lock = new SynchronizedBasedReentrantLock(session);
             }
-            } else {
-                lock.lock();
-                try {
-                    mailCache = (MailSessionCache) session.getParameter(key);
-                    if (null == mailCache) {
-                        mailCache = new MailSessionCache();
-                        session.setParameter(key, mailCache);
-                    }
-                } finally {
-                    lock.unlock();
+            lock.lock();
+            try {
+                mailCache = (MailSessionCache) session.getParameter(key);
+                if (null == mailCache) {
+                    mailCache = new MailSessionCache();
+                    session.setParameter(key, mailCache);
                 }
+            } finally {
+                lock.unlock();
             }
         }
         return mailCache;
@@ -126,26 +120,19 @@ public final class MailSessionCache {
             return;
         }
         if (null != mailCache) {
-            final Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
+            Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
             if (null == lock) {
-                synchronized (session) {
-                    mailCache = (MailSessionCache) session.getParameter(key);
-                    if (null != mailCache) {
-                        mailCache.clear();
-                        session.setParameter(key, null);
-                    }
+                lock = new SynchronizedBasedReentrantLock(session);
+            }
+            lock.lock();
+            try {
+                mailCache = (MailSessionCache) session.getParameter(key);
+                if (null != mailCache) {
+                    mailCache.clear();
+                    session.setParameter(key, null);
                 }
-            } else {
-                lock.lock();
-                try {
-                    mailCache = (MailSessionCache) session.getParameter(key);
-                    if (null != mailCache) {
-                        mailCache.clear();
-                        session.setParameter(key, null);
-                    }
-                } finally {
-                    lock.unlock();
-                }
+            } finally {
+                lock.unlock();
             }
         }
     }
