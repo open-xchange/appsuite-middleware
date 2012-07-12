@@ -175,6 +175,13 @@ public final class GetForwardAction extends AbstractMailAction {
             final MailMessage mail = mailInterface.getForwardMessageForDisplay(folders, ids, usmNoSave);
             mail.setAccountId(mailInterface.getAccountID());
             return new AJAXRequestResult(mail, "mail");
+        } catch (final OXException e) {
+            final Object[] args = e.getDisplayArgs();
+            final String uid = null == args || 0 == args.length ? null : args[0].toString();
+            if (MailExceptionCode.MAIL_NOT_FOUND.equals(e) && "undefined".equalsIgnoreCase(uid)) {
+                throw MailExceptionCode.PROCESSING_ERROR.create(e, new Object[0]);
+            }
+            throw e;
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {

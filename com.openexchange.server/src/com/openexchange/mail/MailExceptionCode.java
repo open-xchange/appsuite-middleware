@@ -385,7 +385,7 @@ public enum MailExceptionCode implements OXExceptionCode {
      */
     DRAFT_FAILED_UNKNOWN(MailExceptionStrings.DRAFT_FAILED_UNKNOWN_MSG, Category.CATEGORY_USER_INPUT, 85),
     /**
-     * There was a problem processing the request. Please try again.
+     * There was a problem processing the request. Please (refresh view and) try again.
      */
     PROCESSING_ERROR(MailExceptionStrings.PROCESSING_ERROR_MSG, Category.CATEGORY_TRY_AGAIN, 86),
     
