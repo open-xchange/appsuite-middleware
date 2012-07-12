@@ -8,3 +8,4 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: com.openexchange.http.atmosphere
 Bundle-ClassPath: lib/atmosphere-runtime-0.9.7.jar,
  .
+Import-Package: javax.servlet
