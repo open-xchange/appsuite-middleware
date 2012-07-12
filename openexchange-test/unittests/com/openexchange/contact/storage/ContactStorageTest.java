@@ -6,9 +6,7 @@ package com.openexchange.contact.storage;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-
 import junit.framework.TestCase;
-
 import com.openexchange.contact.storage.registry.ContactStorageRegistry;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Init;
@@ -76,8 +74,8 @@ public class ContactStorageTest extends TestCase {
         if (null != this.rememberedContacts && 0 < rememberedContacts.size()) {
             for (final Contact contact : rememberedContacts) {
                 try {
-                    this.getStorage().delete(getContextID(), getUserID(), Integer.toString(contact.getParentFolderID()), 
-                        Integer.toString(contact.getObjectID()), new Date(0));
+                    this.getStorage().delete(getSession(), getUserID(), Integer.toString(contact.getParentFolderID()), 
+                        Integer.toString(contact.getObjectID()), new Date());
                 } catch (final Exception e) {
                     LOG.error("error cleaning up contact", e);
                 }
@@ -92,15 +90,15 @@ public class ContactStorageTest extends TestCase {
 
     protected ContactStorage getStorage() throws OXException {
         final ContactStorageRegistry registry = ServerServiceRegistry.getInstance().getService(ContactStorageRegistry.class);
-        return registry.getStorage(this.getContextID(), null);
+        return registry.getStorage(this.getSession(), null);
     }
 
     protected Contact findContact(final String uid, final String folderID) throws OXException {
-    	return findContact(uid, getStorage().all(getContextID(), folderID, ContactField.values()));
+    	return findContact(uid, getStorage().all(getSession(), folderID, ContactField.values()));
     }
     
     protected Contact findContact(final String uid, final String folderID, final Date since) throws OXException {
-    	return findContact(uid, getStorage().modified(getContextID(), folderID, since, ContactField.values()));
+    	return findContact(uid, getStorage().modified(getSession(), folderID, since, ContactField.values()));
     }
     
     protected static Contact findContact(final String uid, final SearchIterator<Contact> iter) throws OXException {

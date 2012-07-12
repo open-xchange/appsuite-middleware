@@ -1,0 +1,5 @@
+open-xchange-push-malpoll (6.21.0-1) unstable; urgency=low
+
+  * Initial release
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 12 Jul 2012 11:21:39 +0100

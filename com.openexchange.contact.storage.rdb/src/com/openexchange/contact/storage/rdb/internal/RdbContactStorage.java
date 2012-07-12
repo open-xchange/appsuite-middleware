@@ -50,7 +50,6 @@
 package com.openexchange.contact.storage.rdb.internal;
 
 import static com.openexchange.contact.storage.rdb.internal.Tools.parse;
-
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.SQLException;
@@ -59,9 +58,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.commons.logging.Log;
-
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.storage.DefaultContactStorage;
 import com.openexchange.contact.storage.rdb.fields.DistListMemberField;
@@ -79,6 +76,7 @@ import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.log.LogFactory;
 import com.openexchange.search.SearchTerm;
+import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -104,13 +102,14 @@ public class RdbContactStorage extends DefaultContactStorage {
     }
     
     @Override
-    public boolean supports(int contextID, String folderId) throws OXException {
+    public boolean supports(Session session, String folderId) throws OXException {
         return true;
     }
 
     @Override
-    public Contact get(int contextID, String folderId, String id, ContactField[] fields) throws OXException {
+    public Contact get(Session session, String folderId, String id, ContactField[] fields) throws OXException {
         int objectID = parse(id);
+        int contextID = session.getContextId();
         DatabaseService databaseService = getDatabaseService();
         Connection connection = databaseService.getReadOnly(contextID);
         try {
@@ -162,8 +161,9 @@ public class RdbContactStorage extends DefaultContactStorage {
     }
     
     @Override
-    public void create(int contextID, String folderId, Contact contact) throws OXException {
+    public void create(Session session, String folderId, Contact contact) throws OXException {
     	boolean committed = false;
+        int contextID = session.getContextId();
         DatabaseService databaseService = getDatabaseService();
         Connection connection = databaseService.getWritable(contextID);
         try {
@@ -219,8 +219,9 @@ public class RdbContactStorage extends DefaultContactStorage {
     }    
         
     @Override
-    public void delete(int contextID, int userID, String folderId, String id, Date lastRead) throws OXException {
+    public void delete(Session session, int userID, String folderId, String id, Date lastRead) throws OXException {
     	boolean committed = false;
+        int contextID = session.getContextId();
         int objectID = parse(id);
         long minLastModified = lastRead.getTime();
         DatabaseService databaseService = getDatabaseService();
@@ -278,9 +279,9 @@ public class RdbContactStorage extends DefaultContactStorage {
     }
     
     @Override
-    public void update(int contextID, String folderId, String id, Contact contact, Date lastRead) 
-    		throws OXException {
+    public void update(Session session, String folderId, String id, Contact contact, Date lastRead) throws OXException {
     	boolean committed = false;
+        int contextID = session.getContextId();
         int objectID = parse(id);
         long minLastModified = lastRead.getTime();
         DatabaseService databaseService = getDatabaseService();
@@ -377,8 +378,9 @@ public class RdbContactStorage extends DefaultContactStorage {
     }
     
     @Override
-    public void updateReferences(int contextID, Contact contact) throws OXException {
+    public void updateReferences(Session session, Contact contact) throws OXException {
     	boolean committed = false;
+        int contextID = session.getContextId();
         DatabaseService databaseService = getDatabaseService();
         Connection connection = databaseService.getWritable(contextID);
         try {
@@ -430,43 +432,43 @@ public class RdbContactStorage extends DefaultContactStorage {
     }
     
     @Override
-    public SearchIterator<Contact> deleted(int contextID, String folderId, Date since, ContactField[] fields) throws OXException {
-    	return this.getContacts(true, contextID, folderId, null, since, fields, null, null);
+    public SearchIterator<Contact> deleted(Session session, String folderId, Date since, ContactField[] fields) throws OXException {
+    	return this.getContacts(true, session, folderId, null, since, fields, null, null);
     }
 
     @Override
-    public SearchIterator<Contact> deleted(int contextID, String folderId, Date since, ContactField[] fields, SortOptions sortOptions) throws OXException {
-    	return this.getContacts(true, contextID, folderId, null, since, fields, null, sortOptions);
+    public SearchIterator<Contact> deleted(Session session, String folderId, Date since, ContactField[] fields, SortOptions sortOptions) throws OXException {
+    	return this.getContacts(true, session, folderId, null, since, fields, null, sortOptions);
     }
 
     @Override
-    public SearchIterator<Contact> modified(int contextID, String folderId, Date since, ContactField[] fields) throws OXException {
-    	return this.getContacts(false, contextID, folderId, null, since, fields, null, null);
+    public SearchIterator<Contact> modified(Session session, String folderId, Date since, ContactField[] fields) throws OXException {
+    	return this.getContacts(false, session, folderId, null, since, fields, null, null);
     }
 
     @Override
-    public SearchIterator<Contact> modified(int contextID, String folderId, Date since, ContactField[] fields, SortOptions sortOptions) throws OXException {
-    	return this.getContacts(false, contextID, folderId, null, since, fields, null, sortOptions);
+    public SearchIterator<Contact> modified(Session session, String folderId, Date since, ContactField[] fields, SortOptions sortOptions) throws OXException {
+    	return this.getContacts(false, session, folderId, null, since, fields, null, sortOptions);
     }
 
     @Override
-    public <O> SearchIterator<Contact> search(int contextID, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException {
-    	return this.getContacts(false, contextID, null, null, null, fields, term, sortOptions);
+    public <O> SearchIterator<Contact> search(Session session, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException {
+    	return this.getContacts(false, session, null, null, null, fields, term, sortOptions);
     }
     
     @Override
-    public SearchIterator<Contact> search(int contextID, ContactSearchObject contactSearch, ContactField[] fields, SortOptions sortOptions) throws OXException {
-    	return this.getContacts(contextID, contactSearch, fields, sortOptions);
+    public SearchIterator<Contact> search(Session session, ContactSearchObject contactSearch, ContactField[] fields, SortOptions sortOptions) throws OXException {
+    	return this.getContacts(session, contactSearch, fields, sortOptions);
     }
     
     @Override
-    public SearchIterator<Contact> all(int contextID, String folderId, ContactField[] fields, SortOptions sortOptions) throws OXException {
-    	return this.getContacts(false, contextID, folderId, null, null, fields, null, sortOptions);
+    public SearchIterator<Contact> all(Session session, String folderId, ContactField[] fields, SortOptions sortOptions) throws OXException {
+    	return this.getContacts(false, session, folderId, null, null, fields, null, sortOptions);
     }
     
     @Override
-    public SearchIterator<Contact> list(int contextID, String folderId, String[] ids, ContactField[] fields, SortOptions sortOptions) throws OXException {
-    	return this.getContacts(false, contextID, folderId, ids, null, fields, null, sortOptions);
+    public SearchIterator<Contact> list(Session session, String folderId, String[] ids, ContactField[] fields, SortOptions sortOptions) throws OXException {
+    	return this.getContacts(false, session, folderId, ids, null, fields, null, sortOptions);
     }
 
     /**
@@ -483,11 +485,12 @@ public class RdbContactStorage extends DefaultContactStorage {
      * @return the contacts
      * @throws OXException
      */
-    private <O> SearchIterator<Contact> getContacts(boolean deleted, int contextID, String folderID, String[] ids, Date since, 
+    private <O> SearchIterator<Contact> getContacts(boolean deleted, Session session, String folderID, String[] ids, Date since, 
     		ContactField[] fields, SearchTerm<O> term, SortOptions sortOptions) throws OXException {
         /*
          * prepare select
          */
+        int contextID = session.getContextId();
         DatabaseService databaseService = getDatabaseService();
         Connection connection = databaseService.getReadOnly(contextID);
     	long minLastModified = null != since ? since.getTime() : Long.MIN_VALUE;
@@ -536,11 +539,12 @@ public class RdbContactStorage extends DefaultContactStorage {
         }
     }
 
-    private <O> SearchIterator<Contact> getContacts(int contextID, ContactSearchObject contactSearch, ContactField[] fields, 
+    private <O> SearchIterator<Contact> getContacts(Session session, ContactSearchObject contactSearch, ContactField[] fields, 
     		SortOptions sortOptions) throws OXException {
         /*
          * prepare select
          */
+        int contextID = session.getContextId();
         DatabaseService databaseService = getDatabaseService();
         Connection connection = databaseService.getReadOnly(contextID);
         try {

@@ -52,6 +52,7 @@ package com.openexchange.contacts.ldap.osgi;
 import java.util.Hashtable;
 import java.util.Map.Entry;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.contact.storage.ContactStorage;
 import com.openexchange.contacts.ldap.contacts.LdapContactInterfaceProvider;
 import com.openexchange.contacts.ldap.folder.LdapGlobalFolderCreator;
 import com.openexchange.contacts.ldap.folder.LdapGlobalFolderCreator.FolderIDAndAdminID;
@@ -59,6 +60,7 @@ import com.openexchange.contacts.ldap.folder.LdapUserFolderCreator;
 import com.openexchange.contacts.ldap.property.ContextProperties;
 import com.openexchange.contacts.ldap.property.FolderProperties;
 import com.openexchange.contacts.ldap.property.PropertyHandler;
+import com.openexchange.contacts.ldap.storage.LdapContactStorage;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceProvider;
@@ -165,7 +167,16 @@ public final class LdapActivator extends HousekeepingActivator {
                     final LdapContactInterface ldapContactInterface = new LdapContactInterface(ctx.intValue(), createGlobalFolder.getAdminid(), folderprop, folderid);
                     context.registerService(ContactInterface.class.getName(), ldapContactInterface, getHashtableWithFolderID(stringfolderid, ctx.toString()));
                     LOG.info("Registered global LDAP folder \"" + folderprop.getFoldername() + "\" with id \"" + stringfolderid + "\" for context: " + ctx);
+                     */                    
+                    /*
+                     * register contact storage
                      */
+                    registerService(ContactStorage.class, new LdapContactStorage(folderprop,
+                        createGlobalFolder.getAdminid(),
+                        folderid,
+                        ctx.intValue()), getHashtableWithFolderID(stringfolderid, ctx.toString()));
+                    LOG.info(new StringBuilder("Registered global LDAP contact storage for folder \"").append(folderprop.getFoldername()).append(
+                        "\" with id \"").append(stringfolderid).append("\" for context: ").append(ctx).toString());
                 }
             }
         } catch (final Exception e) {

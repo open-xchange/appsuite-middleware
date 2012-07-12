@@ -57,7 +57,6 @@ import javax.mail.internet.InternetAddress;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
@@ -97,7 +96,7 @@ public final class EditAction extends AbstractMailAction {
     @Override
     protected AJAXRequestResult perform(final MailRequest req) throws OXException {
         final AJAXRequestData request = req.getRequest();
-        List<OXException> warnings = new ArrayList<OXException>();
+        final List<OXException> warnings = new ArrayList<OXException>();
         
         try {
             if (!request.hasUploads()) {
@@ -157,9 +156,16 @@ public final class EditAction extends AbstractMailAction {
             /*
              * Create JSON response object
              */
-            AJAXRequestResult result = new AJAXRequestResult(msgIdentifier, "string");
+            final AJAXRequestResult result = new AJAXRequestResult(msgIdentifier, "string");
             result.addWarnings(warnings);
             return result;
+        } catch (final OXException e) {
+            final Object[] args = e.getDisplayArgs();
+            final String uid = null == args || 0 == args.length ? null : args[0].toString();
+            if (MailExceptionCode.MAIL_NOT_FOUND.equals(e) && "undefined".equalsIgnoreCase(uid)) {
+                throw MailExceptionCode.PROCESSING_ERROR.create(e, new Object[0]);
+            }
+            throw e;
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {

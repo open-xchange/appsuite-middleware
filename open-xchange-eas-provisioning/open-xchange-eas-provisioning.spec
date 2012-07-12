@@ -16,6 +16,7 @@ URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       Meta package to install all necessary components to provision synchronization with mobile phones
 Requires:      open-xchange-eas-provisioning-core >= @OXVERSION@
+Requires:      open-xchange-eas >= @OXVERSION@
 Requires:      open-xchange-eas-provisioning-action
 
 %description
@@ -30,7 +31,6 @@ Authors:
 Group:         Applications/Productivity
 Summary:       Backend extension to provision synchronization with mobile phones
 Requires:      open-xchange-core >= @OXVERSION@
-Requires:      open-xchange-eas >= @OXVERSION@
 Provides:      open-xchange-mobile-configuration-generator = %{version}
 Obsoletes:     open-xchange-mobile-configuration-generator <= %{version}
 Provides:      open-xchange-mobile-configuration-json = %{version}

@@ -616,7 +616,7 @@ msgid "%1$s would like you to change the appointment:"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:158
-msgid "$%1$s has asked %2$s to change the event:"
+msgid "%1$s has asked %2$s to change the event:"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:160

@@ -10,6 +10,6 @@ Package: open-xchange-parallels
 Architecture: all
 Depends: ${misc:Depends}, open-xchange-spamhandler-spamassassin (>=@OXVERSION@), open-xchange-admin-soap (>= @OXVERSION@)
 Replaces: open-xchange-custom-parallels
-Conflicts: open-xchange-custom-parallels
-Provides: open-xchange-custom-parallels
+Conflicts: open-xchange-custom-parallels,open-xchange-authentication-database,open-xchange-authentication-ldap,open-xchange-authentication-imap,open-xchange-authentication-kerberos
+Provides: open-xchange-authentication,open-xchange-custom-parallels
 Description: The Open-Xchange Parallels Extensions. Authentication Plugin, Branding Plugin and SpamdProvider

@@ -44,6 +44,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-spamhandler-default"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-spamhandler-spamassassin"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-spamhandler-cloudmark"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-spamhandler-spamexperts"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-indexing"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-messaging-sms"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-spamsettings-generic"/>
@@ -57,5 +58,8 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-passwordchange-script"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-push-imapidle"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-parallels"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-push-mailnotify"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-push-malpoll"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-hostname-ldap"/>
 </provider>
 </psf>
