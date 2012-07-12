@@ -60,5 +60,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-parallels"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-push-mailnotify"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-push-malpoll"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-hostname-ldap"/>
 </provider>
 </psf>

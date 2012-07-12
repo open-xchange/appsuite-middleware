@@ -30,4 +30,4 @@ com.openexchange.hostname.ldap.bind_password =
 
 # Specify what cache configuration should be used. There is no need to modify 
 # this value in normal environments (required)
-com.openexchange.hostname.ldap.cache_config_file = /opt/open-xchange/etc/groupware/ldaphostname.ccf
+com.openexchange.hostname.ldap.cache_config_file = @confDir@/ldaphostname.ccf
