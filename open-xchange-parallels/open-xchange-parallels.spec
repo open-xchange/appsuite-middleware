@@ -1,12 +1,12 @@
 
-Name:          open-xchange-parallels
-BuildArch:     noarch
-#!BuildIgnore: post-build-checks
-BuildRequires: ant
-BuildRequires: ant-nodeps
-BuildRequires: open-xchange-admin
-BuildRequires: open-xchange-spamhandler-spamassassin
-BuildRequires: java-devel >= 1.6.0
+Name:           open-xchange-parallels
+BuildArch:      noarch
+#!BuildIgnore:  post-build-checks
+BuildRequires:  ant
+BuildRequires:  ant-nodeps
+BuildRequires:  open-xchange-admin
+BuildRequires:  open-xchange-spamhandler-spamassassin
+BuildRequires:  java-devel >= 1.6.0
 Version:	@OXVERSION@
 %define		ox_release 0
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
@@ -18,6 +18,10 @@ Source:         %{name}_%{version}.orig.tar.bz2
 Summary:        The Open-Xchange Parallels Extensions. Authentication Plugin, Branding Plugin and SpamdProvider.
 Requires:       open-xchange-admin-soap >= @OXVERSION@
 Requires:       open-xchange-spamhandler-spamassassin >= @OXVERSION@
+Provides:       open-xchange-authentication
+Provides:       open-xchange-custom-parallels = %{version}
+Obsoletes:      open-xchange-custom-parallels <= %{version}
+Conflicts:      open-xchange-authentication-database open-xchange-authentication-ldap open-xchange-authentication-imap open-xchange-authentication-kerberos
 
 %description
 The Open-Xchange Parallels Extensions. Authentication Plugin, Branding Plugin and SpamdProvider.
