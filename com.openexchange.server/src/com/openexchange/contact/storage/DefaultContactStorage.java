@@ -50,13 +50,13 @@
 package com.openexchange.contact.storage;
 
 import java.util.Collection;
-
 import com.openexchange.contact.SortOptions;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.search.SearchTerm;
+import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 
@@ -75,23 +75,23 @@ public abstract class DefaultContactStorage implements ContactStorage {
     }
     
     @Override
-    public SearchIterator<Contact> all(final int contextID, final String folderId, final ContactField[] fields) throws OXException {
-		return this.all(contextID, folderId, fields, SortOptions.EMPTY);
+    public SearchIterator<Contact> all(Session session, final String folderId, final ContactField[] fields) throws OXException {
+		return this.all(session, folderId, fields, SortOptions.EMPTY);
     }
 
     @Override
-    public SearchIterator<Contact> list(final int contextID, final String folderId, final String[] ids, final ContactField[] fields) throws OXException {
-    	return this.list(contextID, folderId, ids, fields, SortOptions.EMPTY);    	
+    public SearchIterator<Contact> list(Session session, final String folderId, final String[] ids, final ContactField[] fields) throws OXException {
+    	return this.list(session, folderId, ids, fields, SortOptions.EMPTY);    	
     }
     
 	@Override
-	public <O> SearchIterator<Contact> search(int contextID, SearchTerm<O> term, ContactField[] fields) throws OXException {
-        return this.search(contextID, term, fields, SortOptions.EMPTY);
+	public <O> SearchIterator<Contact> search(Session session, SearchTerm<O> term, ContactField[] fields) throws OXException {
+        return this.search(session, term, fields, SortOptions.EMPTY);
 	}
 
 	@Override
-	public SearchIterator<Contact> search(int contextID, ContactSearchObject contactSearch, ContactField[] fields) throws OXException {
-        return this.search(contextID, contactSearch, fields, SortOptions.EMPTY);
+	public SearchIterator<Contact> search(Session session, ContactSearchObject contactSearch, ContactField[] fields) throws OXException {
+        return this.search(session, contactSearch, fields, SortOptions.EMPTY);
 	}
 
     /**

@@ -50,9 +50,7 @@
 package com.openexchange.contact.internal;
 
 import static com.openexchange.contact.internal.Tools.parse;
-
 import java.util.Date;
-
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.internal.mapping.ContactMapper;
 import com.openexchange.contact.storage.ContactStorage;
@@ -69,6 +67,7 @@ import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SingleSearchTerm;
 import com.openexchange.search.internal.operands.ConstantOperand;
 import com.openexchange.server.impl.EffectivePermission;
+import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 
 /**
@@ -88,64 +87,64 @@ public final class Check {
 		ContactMapper.getInstance().validateAll(contact);
 	}
 	
-	public static void isNotPrivate(Contact contact, int contextID, int userID, String folderID) throws OXException {
+	public static void isNotPrivate(Contact contact, Session session, String folderID) throws OXException {
 		if (contact.containsPrivateFlag()) {
-			throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(parse(folderID), contextID, userID);
+			throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(parse(folderID), session.getContextId(), session.getUserId());
 		}
 	}
 	
-	public static void canReadOwn(EffectivePermission permission, int contextID, int userID, String folderID) throws OXException {
+	public static void canReadOwn(EffectivePermission permission, Session session, String folderID) throws OXException {
 		if (false == permission.canReadOwnObjects()) {
-			throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(parse(folderID), contextID, userID);
+			throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(parse(folderID), session.getContextId(), session.getUserId());
 		}
 	}
 	
-	public static void canWriteOwn(EffectivePermission permission, int contextID, int userID, String folderID) throws OXException {
+	public static void canWriteOwn(EffectivePermission permission, Session session, String folderID) throws OXException {
 		if (false == permission.canWriteOwnObjects()) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(folderID), contextID, userID);
+			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(folderID), session.getContextId(), session.getUserId());
 		}
 	}
 	
-	public static void canWriteAll(EffectivePermission permission, int contextID, int userID, String folderID) throws OXException {
+	public static void canWriteAll(EffectivePermission permission, Session session, String folderID) throws OXException {
 		if (false == permission.canWriteAllObjects()) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(folderID), contextID, userID);
+			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(folderID), session.getContextId(), session.getUserId());
 		}
 	}
 	
-	public static void canReadAll(EffectivePermission permission, int contextID, int userID, String folderID) throws OXException {
+	public static void canReadAll(EffectivePermission permission, Session session, String folderID) throws OXException {
 		if (false == permission.canReadAllObjects()) {
-			throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(parse(folderID), contextID, userID);
+			throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(parse(folderID), session.getContextId(), session.getUserId());
 		}
 	}
 	
-	public static void canCreateObjects(EffectivePermission permission, int contextID, int userID, String folderID) throws OXException {
+	public static void canCreateObjects(EffectivePermission permission, Session session, String folderID) throws OXException {
 		if (false == permission.canCreateObjects()) {
-			throw ContactExceptionCodes.NO_CREATE_PERMISSION.create(parse(folderID), contextID, userID);
+			throw ContactExceptionCodes.NO_CREATE_PERMISSION.create(parse(folderID), session.getContextId(), session.getUserId());
 		}
 	}
 	
-	public static void canDeleteOwn(EffectivePermission permission, int contextID, int userID, String folderID) throws OXException {
+	public static void canDeleteOwn(EffectivePermission permission, Session session, String folderID) throws OXException {
 		if (false == permission.canDeleteOwnObjects()) {
-			throw ContactExceptionCodes.NO_DELETE_PERMISSION.create(parse(folderID), contextID, userID);
+			throw ContactExceptionCodes.NO_DELETE_PERMISSION.create(parse(folderID), session.getContextId(), session.getUserId());
 		}
 	}
 	
-	public static void canDeleteAll(EffectivePermission permission, int contextID, int userID, String folderID) throws OXException {
+	public static void canDeleteAll(EffectivePermission permission, Session session, String folderID) throws OXException {
 		if (false == permission.canDeleteAllObjects()) {
-			throw ContactExceptionCodes.NO_DELETE_PERMISSION.create(parse(folderID), contextID, userID);
+			throw ContactExceptionCodes.NO_DELETE_PERMISSION.create(parse(folderID), session.getContextId(), session.getUserId());
 		}
 	}
 	
-    public static void isContactFolder(FolderObject folder, int contextID, int userID) throws OXException {
+    public static void isContactFolder(FolderObject folder, Session session) throws OXException {
 		if (FolderObject.CONTACT != folder.getModule()) {
-			throw ContactExceptionCodes.NON_CONTACT_FOLDER.create(folder.getObjectID(), contextID, userID);
+			throw ContactExceptionCodes.NON_CONTACT_FOLDER.create(folder.getObjectID(), session.getContextId(), session.getUserId());
 		}
     }    
     
-    public static void contactNotNull(Contact contact, int contextID, int userID) throws OXException {
-		if (null == contact) {
-			throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(userID, contextID);
-		}		
+    public static void contactNotNull(Contact contact, int contextID, int id) throws OXException {
+        if (null == contact) {
+            throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(id, contextID);
+        }       
     }
     
     public static void lastModifiedBefore(Contact contact, Date lastRead) throws OXException {
@@ -160,9 +159,9 @@ public final class Check {
 		}		
     }
     
-    public static void noPrivateInPublic(FolderObject folder, Contact contact, int contextID, int userID) throws OXException {
+    public static void noPrivateInPublic(FolderObject folder, Contact contact, Session session) throws OXException {
     	if (FolderObject.PUBLIC == folder.getType() && contact.getPrivateFlag()) {
-            throw ContactExceptionCodes.PFLAG_IN_PUBLIC_FOLDER.create(folder.getObjectID(), contextID, userID);
+            throw ContactExceptionCodes.PFLAG_IN_PUBLIC_FOLDER.create(folder.getObjectID(), session.getContextId(), session.getUserId());
         }
     }
     
@@ -189,7 +188,7 @@ public final class Check {
 	 * @param update the contact to be written
 	 * @throws OXException
 	 */
-	public static void canWriteInGAB(ContactStorage storage, int contextID, int userID, String folderID, Contact update) throws OXException {
+	public static void canWriteInGAB(ContactStorage storage, Session session, String folderID, Contact update) throws OXException {
 		if (FolderObject.SYSTEM_LDAP_FOLDER_ID == parse(folderID)) {
 			/*
 			 * check display name
@@ -216,9 +215,9 @@ public final class Check {
 				andTerm.addSearchTerm(objectIDTerm);
 				SearchIterator<Contact> searchIterator = null;
 				try {
-					searchIterator = storage.search(contextID, andTerm, new ContactField[] { ContactField.OBJECT_ID });
+					searchIterator = storage.search(session, andTerm, new ContactField[] { ContactField.OBJECT_ID });
 					if (searchIterator.hasNext()) {
-						throw ContactExceptionCodes.DISPLAY_NAME_IN_USE.create(contextID, update.getObjectID());
+						throw ContactExceptionCodes.DISPLAY_NAME_IN_USE.create(session, update.getObjectID());
 					}
 				} finally {
 					if (null != searchIterator) {
@@ -238,9 +237,9 @@ public final class Check {
 	         * check primary mail address
 	         */
 	        if (update.containsEmail1()) {
-	        	final Context context = Tools.getContext(contextID);
-	        	if (context.getMailadmin() != userID) {
-	        		throw ContactExceptionCodes.NO_PRIMARY_EMAIL_EDIT.create(contextID, update.getObjectID(), userID);        		
+	        	final Context context = Tools.getContext(session);
+	        	if (context.getMailadmin() != session.getUserId()) {
+	        		throw ContactExceptionCodes.NO_PRIMARY_EMAIL_EDIT.create(session.getContextId(), update.getObjectID(), session.getUserId());        		
 	        	}
 	        }
 		}

@@ -50,11 +50,8 @@
 package com.openexchange.contact.internal;
 
 import static com.openexchange.contact.internal.Tools.parse;
-
 import java.util.Date;
-
 import org.apache.commons.logging.Log;
-
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.exception.OXException;
@@ -326,8 +323,7 @@ public abstract class DefaultContactService implements ContactService {
 	@Override
     public String getOrganization(Session session) throws OXException {
 		Check.argNotNull(session, "session");
-		final int contextID = session.getContextId();
-		return this.doGetOrganization(contextID);
+		return this.doGetOrganization(session);
     }
 
 	/*
@@ -353,7 +349,7 @@ public abstract class DefaultContactService implements ContactService {
 	protected abstract SearchIterator<Contact> doSearchContacts(Session session, ContactSearchObject contactSearch, 
 			ContactField[] fields, SortOptions sortOptions) throws OXException;
 	
-	protected abstract String doGetOrganization(int contextID) throws OXException;
+	protected abstract String doGetOrganization(Session session) throws OXException;
 	
 	protected abstract <O> SearchIterator<Contact> doGetUsers(Session session, int[] userIDs, SearchTerm<O> term,
 			ContactField[] fields, SortOptions sortOptions) throws OXException;
