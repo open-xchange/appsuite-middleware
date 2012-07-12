@@ -3,19 +3,8 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Atmosphere Bundle
 Bundle-SymbolicName: com.openexchange.http.atmosphere
 Bundle-Version: 6.21.0
-Bundle-Vendor: OPENEXCHANGE
+Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.config,
- com.openexchange.exception,
- com.openexchange.i18n,
- com.openexchange.log,
- com.openexchange.osgi,
- com.openexchange.server,
- com.openexchange.timer,
- javax.servlet,
- javax.servlet.http,
- org.apache.commons.logging;version="1.0.4",
- org.osgi.framework,
- org.osgi.service.http;version="1.2.1"
-Bundle-ActivationPolicy: lazy
 Export-Package: com.openexchange.http.atmosphere
+Bundle-ClassPath: lib/atmosphere-runtime-0.9.7.jar,
+ .
