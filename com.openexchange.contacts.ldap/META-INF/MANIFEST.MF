@@ -8,6 +8,7 @@ Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.davekoelle,
  com.openexchange.ajax,
+ com.openexchange.ajax.parser,
  com.openexchange.api2,
  com.openexchange.authentication,
  com.openexchange.config,

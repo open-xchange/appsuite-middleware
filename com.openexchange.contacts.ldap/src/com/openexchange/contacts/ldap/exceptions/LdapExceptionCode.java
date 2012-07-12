@@ -118,7 +118,14 @@ public enum LdapExceptionCode implements OXExceptionCode {
     /**
      * An error occurred while trying to get the defaultNamingContext attribute
      */
-    ERROR_GETTING_DEFAULT_NAMING_CONTEXT(LdapConfigurationExceptionMessage.ERROR_GETTING_DEFAULT_NAMING_CONTEXT_MSG, Category.CATEGORY_ERROR, 22);
+    ERROR_GETTING_DEFAULT_NAMING_CONTEXT(LdapConfigurationExceptionMessage.ERROR_GETTING_DEFAULT_NAMING_CONTEXT_MSG, Category.CATEGORY_ERROR, 22),
+
+    /**
+     * The contact object with id "%s" could not be found in folder "%s"
+     */
+    CONTACT_NOT_FOUND(LdapConfigurationExceptionMessage.CONTACT_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 23),
+    
+    ;
 
 
 

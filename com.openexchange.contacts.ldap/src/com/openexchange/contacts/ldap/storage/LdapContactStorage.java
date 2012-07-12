@@ -152,37 +152,37 @@ public class LdapContactStorage extends DefaultContactStorage {
     }
 
     @Override
-    public <O> SearchIterator<Contact> search(Session session, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException {
+    public <O> SearchIterator<Contact> search(final Session session, final SearchTerm<O> term, final ContactField[] fields, final SortOptions sortOptions) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public SearchIterator<Contact> search(Session session, ContactSearchObject contactSearch, ContactField[] fields, SortOptions sortOptions) throws OXException {
+    public SearchIterator<Contact> search(final Session session, final ContactSearchObject contactSearch, final ContactField[] fields, final SortOptions sortOptions) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public void create(Session session, String folderId, Contact contact) throws OXException {
+    public void create(final Session session, final String folderId, final Contact contact) throws OXException {
         // TODO Auto-generated method stub
         
     }
 
     @Override
-    public void update(Session session, String folderId, String id, Contact contact, Date lastRead) throws OXException {
+    public void update(final Session session, final String folderId, final String id, final Contact contact, final Date lastRead) throws OXException {
         // TODO Auto-generated method stub
         
     }
 
     @Override
-    public void updateReferences(Session session, Contact contact) throws OXException {
+    public void updateReferences(final Session session, final Contact contact) throws OXException {
         // TODO Auto-generated method stub
         
     }
 
     @Override
-    public void delete(Session session, int userID, String folderId, String id, Date lastRead) throws OXException {
+    public void delete(final Session session, final int userID, final String folderId, final String id, final Date lastRead) throws OXException {
         // TODO Auto-generated method stub
         
     }
