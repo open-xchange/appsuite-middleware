@@ -1722,11 +1722,7 @@ public class MimeMessageFiller {
         {
             tmp.setLength(0);
             final int atPos = id.indexOf('@');
-            if (atPos < 0) {
-                tmp.append(PATTERN_DASHES.matcher(id).replaceAll(""));
-            } else {
-                tmp.append(PATTERN_DASHES.matcher(id.substring(0, atPos)).replaceAll(""));
-            }
+            tmp.append(PATTERN_DASHES.matcher(atPos < 0 ? id : id.substring(0, atPos)).replaceAll(""));
             tmp.append('@').append(Version.NAME);
             cid = tmp.toString();
         }
