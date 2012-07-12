@@ -1,0 +1,5 @@
+open-xchange-push-mailnotify (6.21.0-1) unstable; urgency=low
+
+  * Initial release
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 12 Jul 2012 10:52:39 +0100
