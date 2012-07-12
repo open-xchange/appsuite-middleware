@@ -51,7 +51,6 @@ package com.openexchange.groupware.tools.mappings;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.ProblematicAttribute;
 import com.openexchange.exception.OXException.Truncated;
@@ -120,7 +119,8 @@ public class MappedTruncation<O> implements Truncated {
 
 	private final int maxSize;
 	private final int length;
-	private final Mapping<?, O> mapping;	
+	private final Mapping<?, O> mapping;
+	private final String readableName;
 
 	/**
 	 * Initializes a new {@link MappedTruncation}.
@@ -129,10 +129,11 @@ public class MappedTruncation<O> implements Truncated {
 	 * @param maxSize the maximum allowed size for the property
 	 * @param length the actual length
 	 */
-	public MappedTruncation(Mapping<? extends Object, O> mapping, int maxSize, int length) {
+	public MappedTruncation(Mapping<? extends Object, O> mapping, int maxSize, int length, String readableName) {
 		this.mapping = mapping;
 		this.maxSize = maxSize;
 		this.length = length;
+		this.readableName = readableName;
 	}	
 
 	/**
@@ -177,9 +178,13 @@ public class MappedTruncation<O> implements Truncated {
 		return this.maxSize;
 	}
 
-	@Override
-	public int getLength() {
-		return this.length;
-	}	
+    @Override
+    public int getLength() {
+        return this.length;
+    }   
+
+    public String getReadableName() {
+        return this.readableName;
+    }   
 
 }
