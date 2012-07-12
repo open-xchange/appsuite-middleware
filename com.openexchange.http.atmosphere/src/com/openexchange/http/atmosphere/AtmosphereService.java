@@ -54,54 +54,48 @@ import org.atmosphere.cpr.Broadcaster;
 
 
 /**
- * {@link AtmosphereService}
+ * {@link AtmosphereService} allows other bundles in the OSGi environment to
+ * dynamically register {@link AtmosphereHandlers} into the URI namespace below
+ * the configured context/mapping of the {@link AtmosphereServlet}.
+ * <p>
+ * A bundle may later unregister its {@link AtmosphereHandlers} again.
+ * </p>
+ * <p>
+ * Handlers added to the service will handle requests at
+ * <code>
+ * com.openexchange.http.realtime.contextPath
+ * + com.openexchange.http.atmosphere.servletMapping + handlerMapping
+ * </code>
+ * </p>
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public interface AtmosphereService {
 
     /**
-     * Add an {@link AtmosphereHandler} serviced by the Atmosphere {@link Servlet}
+     * Add an {@link AtmosphereHandler} to be serviced by the
+     * {@link AtmosphereServlet}.
      *
-     * @param mapping The servlet mapping (servlet path)
-     * @param handler       implementation of an {@link AtmosphereHandler}
+     * @param handlerMapping    the mapping for this handler  
+     * @param handler           instance of {@link AtmosphereHandler}
      */
-    void addAtmosphereHandler(String mapping, AtmosphereHandler handler);
-//    {
-//        if (!mapping.startsWith("/")) {
-//            mapping = "/" + mapping;
-//        }
-//
-//        AtmosphereHandlerWrapper w = new AtmosphereHandlerWrapper(h, mapping);
-//        addMapping(mapping, w);
-//        logger.info("Installed AtmosphereHandler {} mapped to context-path: {}", h.getClass().getName(), mapping);
-//        return this;
-//    }
+    void addAtmosphereHandler(String handlerMapping, AtmosphereHandler handler);
         
     /**
-     * Add an {@link AtmosphereHandler} serviced by the {@link Servlet}
-     * This API is exposed to allow embedding an Atmosphere application.
+     * Add an {@link AtmosphereHandler} serviced by the
+     * {@link AtmosphereServlet}.
      *
-     * @param mapping     The servlet mapping (servlet path)
-     * @param h           implementation of an {@link AtmosphereHandler}
-     * @param broadcaster The {@link Broadcaster} associated with AtmosphereHandler.
+     * @param handlerMapping    the mapping for this handler
+     * @param handler           implementation of an {@link AtmosphereHandler}
+     * @param broadcaster       a {@link Broadcaster} to associate with this
+     *                           {@link AtmosphereHandler}.
      */
-    void addAtmosphereHandler(String mapping, AtmosphereHandler h, Broadcaster broadcaster);
-//    {
-//        if (!mapping.startsWith("/")) {
-//            mapping = "/" + mapping;
-//        }
-//
-//        AtmosphereHandlerWrapper w = new AtmosphereHandlerWrapper(h, broadcaster);
-//        addMapping(mapping, w);
-//        logger.info("Installed AtmosphereHandler {} mapped to context-path: {}", h.getClass().getName(), mapping);
-//        return this;
-//    }
+    void addAtmosphereHandler(String handlerMapping, AtmosphereHandler handler, Broadcaster broadcaster);
     
     /**
-     * 
-     * @param handler
+     * Unregister a previously registered {@link AtmosphereHandler}.
+     * @param handlerMapping    the mapping used while registering the handler
      */
-    void unregister(String mapping);
+    void unregister(String handlerMapping);
     
 }
