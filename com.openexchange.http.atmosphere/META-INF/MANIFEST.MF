@@ -6,5 +6,5 @@ Bundle-Version: 6.21.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: com.openexchange.http.atmosphere
-Bundle-ClassPath: lib/atmosphere-runtime-0.9.7.jar,
- .
+Bundle-ClassPath: .,
+ lib/atmosphere-runtime-1.0.0-SNAPSHOT.jar
