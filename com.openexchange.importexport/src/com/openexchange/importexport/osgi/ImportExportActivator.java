@@ -52,11 +52,11 @@ package com.openexchange.importexport.osgi;
 
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.contact.ContactService;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
-import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.importexport.actions.ExportActionFactory;
 import com.openexchange.importexport.actions.ImportActionFactory;
@@ -75,7 +75,7 @@ public class ImportExportActivator extends AJAXModuleActivator{
 	@Override
 	protected Class<?>[] getNeededServices() {
 		return new Class[]{
-			ContactInterfaceDiscoveryService.class,
+		    ContactService.class,
 			FolderUpdaterRegistry.class,
 			ICalParser.class,
 			AppointmentSqlFactoryService.class,

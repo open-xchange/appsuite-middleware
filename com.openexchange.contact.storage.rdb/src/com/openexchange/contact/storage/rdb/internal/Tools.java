@@ -52,9 +52,7 @@ package com.openexchange.contact.storage.rdb.internal;
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.SQLException;
-
 import org.apache.commons.logging.Log;
-
 import com.openexchange.contact.storage.rdb.mapping.Mappers;
 import com.openexchange.contact.storage.rdb.sql.Table;
 import com.openexchange.exception.OXException;
@@ -150,7 +148,7 @@ public final class Tools {
 			final int actualSize = null != object && String.class.isInstance(object) ? 
 					Charsets.getBytes((String) object, Charsets.UTF_8).length : 0;
 			stringBuilder.append(mapping.getReadableName());       		        		
-			truncatedAttributes[i] = new MappedTruncation<Contact>(mapping, maximumSize, actualSize);
+			truncatedAttributes[i] = new MappedTruncation<Contact>(mapping, maximumSize, actualSize, mapping.getReadableName());
         	if (i != truncatedColumns.length - 1) {
         		stringBuilder.append(", ");
         	}

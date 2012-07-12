@@ -49,7 +49,12 @@
 
 package com.openexchange.importexport.exporters;
 
-import static com.openexchange.importexport.formats.csv.CSVLibrary.*;
+import static com.openexchange.importexport.formats.csv.CSVLibrary.CELL_DELIMITER;
+import static com.openexchange.importexport.formats.csv.CSVLibrary.ROW_DELIMITER;
+import static com.openexchange.importexport.formats.csv.CSVLibrary.getFolderId;
+import static com.openexchange.importexport.formats.csv.CSVLibrary.getFolderObject;
+import static com.openexchange.importexport.formats.csv.CSVLibrary.transformIntArrayToSet;
+import static com.openexchange.importexport.formats.csv.CSVLibrary.transformSetToIntArray;
 import java.io.ByteArrayInputStream;
 import java.sql.SQLException;
 import java.util.LinkedList;
@@ -57,22 +62,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
+import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.ContactGetter;
 import com.openexchange.groupware.contact.helpers.ContactStringGetter;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.helpers.SizedInputStream;
 import com.openexchange.importexport.osgi.ImportExportServices;
 import com.openexchange.java.Charsets;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -196,12 +200,10 @@ public class CSVContactExporter implements Exporter {
             s1.retainAll(s2);
             cols = transformSetToIntArray(s1);
         }
+        ContactField[] fields = ContactMapper.getInstance().getFields(cols, null, (ContactField[])null);
         SearchIterator<Contact> conIter;
         try {
-            final ContactInterface contactInterface = ImportExportServices.getContactInterfaceDiscoveryService().newContactInterface(
-                folderId,
-                sessObj);
-            conIter = contactInterface.getContactsInFolder(folderId, 0, contactInterface.getNumberOfContacts(folderId), 0, Order.ASCENDING, null, cols);
+            conIter = ImportExportServices.getContactService().getAllContacts(sessObj, Integer.toString(folderId), fields);
         } catch (final OXException e) {
             throw ImportExportExceptionCodes.LOADING_CONTACTS_FAILED.create(e);
         }
@@ -241,12 +243,10 @@ public class CSVContactExporter implements Exporter {
         } else {
             cols = fieldsToBeExported;
         }
+        ContactField[] fields = ContactMapper.getInstance().getFields(cols, null, (ContactField[])null);
         final Contact conObj;
         try {
-            final ContactInterface contactInterface = ImportExportServices.getContactInterfaceDiscoveryService().newContactInterface(
-                folderId,
-                sessObj);
-            conObj = contactInterface.getObjectById(objectId, folderId);
+            conObj = ImportExportServices.getContactService().getContact(sessObj, Integer.toString(folderId), Integer.toString(objectId), fields);
         } catch (final OXException e) {
             throw ImportExportExceptionCodes.LOADING_CONTACTS_FAILED.create(e);
         }
