@@ -266,4 +266,7 @@ public class LdapConfigurationExceptionMessage implements LocalizableStrings {
      */
     public final static String ERROR_GETTING_DEFAULT_NAMING_CONTEXT_MSG = "An error occurred while trying to get the defaultNamingContext attribute";
 
+    // The contact object with id "%s" could not be found in folder "%s"
+    public static final String CONTACT_NOT_FOUND_MSG = "The contact object with id \"%s\" could not be found in folder \"%s\"";
+
 }
