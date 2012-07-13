@@ -15,6 +15,10 @@
  - Fix for bug 22487: Re-initialize SessionPOP3StorageUIDLMap if timer elapsed in the meantime
  - Fix for bug 22467: Fixed possible NPE in AbstractPerformer class
 
+* 2012-07-09 - choeger@open-xchange.com
+
+ - Bugfix #22482: [L3] reporter throws unneeded messages to stderr
+ 
 * 2012-07-06 - thorben.betten@open-xchange.com
 
  - Fix for bug 22489: Dealing with failed auto-save
@@ -475,6 +479,10 @@
 
  - Fix for bug 21286: Introduced sanitizing if a duplicate is detected on folder creation invoked by "USM-JSON" client
 
+* 2012-03-09 - choeger@open-xchange.com
+
+ - report client can now display accesscombinations of specified bitmask
+
 * 2012-03-09 - thorben.betten@open-xchange.com
 
  - Fix for bug 21729: Assign proper error message constant to error code
@@ -536,6 +544,11 @@
 
  - Fix for bug 21639: Checking for possibly missing account information in returned messages
 
+* 2012-02-27 - choeger@open-xchange.com
+
+ - report client can now optionally save json string in local file
+ - Bugfix #20796: report client should only report total numbers, not details
+ 
 * 2012-02-24 - jan.bauerdick@open-xchange.com
 
  - Self documenting API in config, mail, groups, resource, infostore, attachments, reminder, quota, file upload, mail account,
@@ -1015,6 +1028,11 @@
  - Fix for bug 20743: Ensure using active connection when loading folder attributes from database
  - Fix for bug 20810: Ignore field if not parseable as TIMESTAMP field
  - Fix for bug 20785: Abort gathering report data on error and properly signaling that error to caller
+
+* 2011-11-15 - choeger@open-xchange.com
+
+ - Added output of login counts
+ - fixed groupware version output
 
 * 2011-11-15 - thorben.betten@open-xchange.com
 
@@ -1690,6 +1708,10 @@
 
  - Bugfix #18983: Changed the 7zip module of the outlook updater bundle and the installer name of the OXUpdater to support installing without administrator privileges
 
+* 2011-05-24 - marcus.klein@open-xchange.com
+
+ - Bugfix #17858: Writing now a stack trace if a runtime exception occurs.
+
 * 2011-05-24 - thorben.betten@open-xchange.com
 
  - Bugfix #18846: Fixed handling of nested mail in JSON mail structure
@@ -2015,6 +2037,11 @@
 
  - Bugfix #18596: Not starting system bundle fragment to export xerces for IBM Java.
 
+* 2011-03-10 - benjamin.otterbach@open-xchange.com
+
+ - Bugfix #18588: Report client requests wrong values for OLOX2 reporting
+   - Changed request value from regex to wildcard
+
 * 2011-03-10 - thorben.betten@open-xchange.com
 
  - Bugfix #18552: Fallback to mail login/password if transport ones are missing
@@ -2293,6 +2320,10 @@
 * 2010-12-27 - thorben.betten@open-xchange.com
 
  - Bugfix #17882: Retry fetching POP3 server's capabilities if cached check indicates failure
+
+* 2010-12-21 - benjamin.otterbach@open-xchange.com
+
+  - Changes for bugfix #17859
 
 * 2010-12-21 - thorben.betten@open-xchange.com
 
@@ -3307,6 +3338,11 @@
 
  - Bugfix #15590: Moving an appointment to a shared folder doesn't cause "Unknown SQL-Exception" anymore.
 
+* 2010-05-28 - benjamin.otterbach@open-xchange.com
+
+  - Bugfix #15190: Report Server does not add a separator to multiple license keys
+    - Added missing seperator to JSON string
+
 * 2010-05-28 - thorben.betten@open-xchange.com
 
  - Bugfix #16162: Fixed subscribe mail folder dialog
@@ -3487,6 +3523,11 @@
  - Bugfix #15764: Web crawler for web.de works now with an empty address book.
  - Bugfix #15747: Using a more genering exception message if the crawler login fails.
 
+* 2010-04-01 - benjamin.otterbach@open-xchange.com
+
+  - Bugfix #15754: Report Client does not send reports with latest HEAD
+    - Added missing Apache library to report script
+
 * 2010-04-01 - karsten.will@open-xchange.com
 
  - Bugfix #15725: Yahoo crawler now gives readable exception if invalid credentials are entered.
@@ -3498,6 +3539,11 @@
 * 2010-04-01 - marcus.klein@open-xchange.com
 
  - Bugfix #15731: Proper initializing the refactored quota file storage.
+
+* 2010-03-31 - benjamin.otterbach@open-xchange.com
+
+  - Bugfix #15616: Report client does not work through a HTTP proxy which requires authentication
+    - Fixed broken HTTPS proxy handling
 
 * 2010-03-31 - karsten.will@open-xchange.com
 
@@ -3581,6 +3627,11 @@
 * 2010-03-05 - marcus.klein@open-xchange.com
 
  - Bugfix #15545: Adding users to listing appointments for calendar printing to get the folder identifier.
+
+* 2010-03-04 - benjamin.otterbach@open-xchange.com
+
+  - Bugfix #15546: Broken start script in report client package
+    - Fixed the wrong property directory value
 
 * 2010-03-04 - choeger@open-xchange.com
 
@@ -3715,6 +3766,10 @@
 
  - Bugfix #15420: Confirm status for creator.
  - Bugfix #15419: Allow null value for contact collect folder.
+
+* 2010-02-18 - benjamin.otterbach@open-xchange.com
+
+  - Added support for using a proxy server
 
 * 2010-02-18 - thorben.betten@open-xchange.com
 
@@ -3900,6 +3955,11 @@
 * 2009-12-04 - martin.herfurth@open-xchange.com
 
  - Bugfix #14929: Setting until.
+
+* 2009-12-03 - dennis.sieben@open-xchange.com
+
+  - Bugfix #15016: Open-Xchange6 report client fails with java exception
+    - Added missing jar for common-cli 
 
 * 2009-12-03 - thorben.betten@open-xchange.com
 
