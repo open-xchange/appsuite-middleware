@@ -57,7 +57,8 @@ import java.sql.SQLException;
 import com.openexchange.database.AbstractCreateTableImpl;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.rdb.services.FileStorageRdbServiceRegistry;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
+import com.openexchange.file.storage.rdb.Services;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.Schema;
@@ -146,7 +147,7 @@ public final class FileStorageRdbCreateTableTask extends AbstractCreateTableImpl
 
     private void createTable(final String tablename, final String sqlCreate, final int contextId) throws OXException {
         final DatabaseService ds = getService(DatabaseService.class);
-        final Connection writeCon = ds.getWritable(contextId);
+        final Connection writeCon = ds.getForUpdateTask(contextId);
         PreparedStatement stmt = null;
         try {
             if (tableExists(writeCon, tablename)) {
@@ -177,9 +178,9 @@ public final class FileStorageRdbCreateTableTask extends AbstractCreateTableImpl
 
     private <S> S getService(final Class<? extends S> clazz) throws OXException {
         try {
-            return FileStorageRdbServiceRegistry.getServiceRegistry().getService(clazz, true);
-        } catch (final OXException e) {
-            throw new OXException(e);
+            return Services.getService(clazz);
+        } catch (final IllegalStateException e) {
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 

@@ -70,7 +70,7 @@ import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.generic.DefaultFileStorageAccount;
-import com.openexchange.file.storage.rdb.services.FileStorageRdbServiceRegistry;
+import com.openexchange.file.storage.rdb.Services;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.secret.SecretService;
@@ -512,9 +512,9 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
 
     private static <S> S getService(final Class<? extends S> clazz) throws OXException {
         try {
-            return FileStorageRdbServiceRegistry.getServiceRegistry().getService(clazz, true);
-        } catch (final OXException e) {
-            throw new OXException(e);
+            return Services.getService(clazz);
+        } catch (final IllegalStateException e) {
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 

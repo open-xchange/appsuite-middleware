@@ -49,7 +49,6 @@
 
 package com.openexchange.file.storage.rdb.osgi;
 
-import static com.openexchange.file.storage.rdb.services.FileStorageRdbServiceRegistry.getServiceRegistry;
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -64,6 +63,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.rdb.Services;
 import com.openexchange.file.storage.rdb.groupware.FileStorageRdbCreateTableTask;
 import com.openexchange.file.storage.rdb.groupware.FileStorageRdbDeleteListener;
 import com.openexchange.file.storage.rdb.internal.CachingFileStorageAccountStorage;
@@ -74,8 +74,6 @@ import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.ServiceRegistry;
-import com.openexchange.secret.SecretService;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 import com.openexchange.secret.recovery.EncryptedItemDetectorService;
 import com.openexchange.secret.recovery.SecretMigrator;
@@ -88,9 +86,7 @@ import com.openexchange.secret.recovery.SecretMigrator;
  */
 public class FileStorageRdbActivator extends HousekeepingActivator {
 
-    private List<ServiceTracker<?,?>> trackers;
-
-    private WhiteboardSecretService secretService;
+    private volatile WhiteboardSecretService secretService;
 
     public FileStorageRdbActivator() {
         super();
@@ -104,42 +100,9 @@ public class FileStorageRdbActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FileStorageRdbActivator.class));
-        if (logger.isInfoEnabled()) {
-            logger.info("Re-available service: " + clazz.getName());
-        }
-        getServiceRegistry().addService(clazz, getService(clazz));
-    }
-
-    @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FileStorageRdbActivator.class));
-        if (logger.isWarnEnabled()) {
-            logger.warn("Absent service: " + clazz.getName());
-        }
-        getServiceRegistry().removeService(clazz);
-    }
-
-    @Override
     protected void startBundle() throws Exception {
         try {
-            /*
-             * (Re-)Initialize service registry with available services
-             */
-            {
-                final ServiceRegistry registry = getServiceRegistry();
-                registry.clearRegistry();
-                final Class<?>[] classes = getNeededServices();
-                for (final Class<?> classe : classes) {
-                    final Object service = getService(classe);
-                    if (null != service) {
-                        registry.addService(classe, service);
-                    }
-                }
-                registry.addService(SecretService.class, secretService = new WhiteboardSecretService(context));
-                secretService.open();
-            }
+            Services.setServices(this);
             /*
              * Feed cache with additional cache configuration for file storage account cache
              */
@@ -167,13 +130,8 @@ public class FileStorageRdbActivator extends HousekeepingActivator {
             /*
              * Initialize and start service trackers
              */
-
-            trackers = new ArrayList<ServiceTracker<?,?>>(2);
             final ServiceTracker<FileStorageService, FileStorageService> fileStorageServiceTracker = trackService(FileStorageService.class);
-            trackers.add(fileStorageServiceTracker);
-            for (final ServiceTracker<?,?> tracker : trackers) {
-                tracker.open();
-            }
+            openTrackers();
             /*
              * Initialize and register services
              */
@@ -224,17 +182,11 @@ public class FileStorageRdbActivator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         try {
-            if (null != trackers) {
-                while (!trackers.isEmpty()) {
-                    trackers.remove(0).close();
-                }
-                trackers = null;
-            }
             cleanUp();
             /*
              * Clear service registry
              */
-            getServiceRegistry().clearRegistry();
+            Services.setServices(null);
             secretService.close();
         } catch (final Exception e) {
             com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FileStorageRdbActivator.class)).error(e.getMessage(), e);
