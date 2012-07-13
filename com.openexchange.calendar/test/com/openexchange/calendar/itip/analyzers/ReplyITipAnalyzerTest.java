@@ -626,7 +626,7 @@ public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
         assertEquals(1, annotations.size());
         
         ITipAnnotation error = annotations.get(0);
-        assertEquals("An attendee wanted to change his/her participant state in an appointment that could not be found. Probably the appointment was already cancelled.", error.getMessage());
+        assertEquals("An attendee wanted to change his/her participant state in an appointment that could not be found. Probably the appointment was already canceled.", error.getMessage());
         
         
         integrationBuilder.assertAllWereCalled();
@@ -678,7 +678,7 @@ public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
         assertEquals(1, annotations.size());
         
         ITipAnnotation error = annotations.get(0);
-        assertEquals("An attendee wanted to change his/her participant state in an appointment that could not be found. Probably the appointment was already cancelled.", error.getMessage());
+        assertEquals("An attendee wanted to change his/her participant state in an appointment that could not be found. Probably the appointment was already canceled.", error.getMessage());
 
 
         integrationBuilder.assertAllWereCalled();
