@@ -61,19 +61,18 @@ import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.cifs.services.CIFSServiceRegistry;
 import com.openexchange.session.Session;
 
 /**
  * {@link CIFSService}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CIFSService implements FileStorageService {
 
     /**
      * Creates a new CIFS/SMB file storage service.
-     *
+     * 
      * @return A new CIFS/SMB file storage service
      * @throws OXException If creation fails
      */
@@ -102,9 +101,7 @@ public final class CIFSService implements FileStorageService {
     }
 
     private void applyAccountManager() throws OXException {
-        accountManager =
-            CIFSServiceRegistry.getServiceRegistry().getService(FileStorageAccountManagerLookupService.class, true).getAccountManagerFor(
-                this);
+        accountManager = CIFSServices.getService(FileStorageAccountManagerLookupService.class).getAccountManagerFor(this);
     }
 
     @Override

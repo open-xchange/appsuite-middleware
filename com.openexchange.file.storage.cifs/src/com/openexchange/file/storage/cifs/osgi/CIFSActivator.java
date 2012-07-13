@@ -49,33 +49,24 @@
 
 package com.openexchange.file.storage.cifs.osgi;
 
-import static com.openexchange.file.storage.cifs.services.CIFSServiceRegistry.getServiceRegistry;
-import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.List;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
-import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
-import com.openexchange.osgi.DeferredActivator;
-import com.openexchange.osgi.ServiceRegistry;
+import com.openexchange.file.storage.cifs.CIFSServices;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sessiond.SessiondService;
 
 /**
- * {@link CIFSActivator}
- *
+ * {@link CIFSActivator} - Activator for CIFS bundle.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CIFSActivator extends DeferredActivator {
+public final class CIFSActivator extends HousekeepingActivator {
 
-    private List<ServiceTracker<?,?>> trackers;
-
-    private List<ServiceRegistration<?>> registrations;
-
-    private Registerer registerer;
+    private volatile CIFSServiceRegisterer registerer;
 
     /**
      * Initializes a new {@link CIFSActivator}.
@@ -90,65 +81,25 @@ public final class CIFSActivator extends DeferredActivator {
     }
 
     @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CIFSActivator.class));
-        if (logger.isInfoEnabled()) {
-            logger.info("Re-available service: " + clazz.getName());
-        }
-        getServiceRegistry().addService(clazz, this.<Object>getService(clazz));
-    }
-
-    @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CIFSActivator.class));
-        if (logger.isWarnEnabled()) {
-            logger.warn("Absent service: " + clazz.getName());
-        }
-        getServiceRegistry().removeService(clazz);
-    }
-
-    @Override
     protected void startBundle() throws Exception {
         try {
+            CIFSServices.setServices(this);
             /*
-             * (Re-)Initialize service registry with available services
+             * Some initialization stuff
              */
-            {
-                final ServiceRegistry registry = getServiceRegistry();
-                registry.clearRegistry();
-                final Class<?>[] classes = getNeededServices();
-                for (final Class<?> classe : classes) {
-                    final Object service = getService(classe);
-                    if (null != service) {
-                        registry.addService(classe, service);
-                    }
-                }
-            }
-            /*
-             * Some init stuff
-             */
-
-            trackers = new ArrayList<ServiceTracker<?,?>>(1);
-            // trackers.add(new ServiceTracker(context, I18nService.class.getName(), new I18nCustomizer(context)));
-            for (final ServiceTracker<?,?> tracker : trackers) {
-                tracker.open();
-            }
-            /*
-             * Register services
-             */
-            registrations = new ArrayList<ServiceRegistration<?>>(2);
-            // registrations.add(context.registerService(FileStorageService.class.getName(), CIFSService.newInstance(), null));
+            // registerService(FileStorageService.class.getName(), CIFSService.newInstance());
             /*
              * Register event handler to detect removed sessions
              */
-            //final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
-            //serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
-            //registrations.add(context.registerService(EventHandler.class.getName(), null, serviceProperties));
+            // final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+            // serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
+            // registrations.add(context.registerService(EventHandler.class.getName(), null, serviceProperties));
             {
                 final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
                 dict.put(EventConstants.EVENT_TOPIC, FileStorageAccountManagerProvider.TOPIC);
-                registerer = new Registerer(context);
-                registrations.add(context.registerService(EventHandler.class, registerer, dict));
+                final CIFSServiceRegisterer registerer = new CIFSServiceRegisterer(context);
+                registerService(EventHandler.class, registerer, dict);
+                this.registerer = registerer;
             }
         } catch (final Exception e) {
             com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CIFSActivator.class)).error(e.getMessage(), e);
@@ -159,26 +110,15 @@ public final class CIFSActivator extends DeferredActivator {
     @Override
     protected void stopBundle() throws Exception {
         try {
+            final CIFSServiceRegisterer registerer = this.registerer;
             if (null != registerer) {
                 registerer.close();
-                registerer = null;
+                this.registerer = null;
             }
-            if (null != trackers) {
-                while (!trackers.isEmpty()) {
-                    trackers.remove(0).close();
-                }
-                trackers = null;
-            }
-            if (null != registrations) {
-                while (!registrations.isEmpty()) {
-                    registrations.remove(0).unregister();
-                }
-                registrations = null;
-            }
-            /*
-             * Clear service registry
-             */
-            getServiceRegistry().clearRegistry();
+            // Clean-up
+            cleanUp();
+            // Clear service registry
+            CIFSServices.setServices(null);
         } catch (final Exception e) {
             com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CIFSActivator.class)).error(e.getMessage(), e);
             throw e;
