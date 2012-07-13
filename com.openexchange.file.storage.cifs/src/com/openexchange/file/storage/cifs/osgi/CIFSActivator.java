@@ -51,12 +51,19 @@ package com.openexchange.file.storage.cifs.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+import org.apache.commons.logging.Log;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
+import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.cifs.CIFSService;
 import com.openexchange.file.storage.cifs.CIFSServices;
+import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.sessiond.SessiondService;
 
 /**
@@ -65,6 +72,8 @@ import com.openexchange.sessiond.SessiondService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CIFSActivator extends HousekeepingActivator {
+
+    volatile CIFSService cifsFileStorageService;
 
     private volatile CIFSServiceRegisterer registerer;
 
@@ -87,6 +96,31 @@ public final class CIFSActivator extends HousekeepingActivator {
             /*
              * Some initialization stuff
              */
+            final CIFSActivator activator = this;
+            track(FileStorageAccountManagerProvider.class, new SimpleRegistryListener<FileStorageAccountManagerProvider>() {
+
+                @Override
+                public void added(final ServiceReference<FileStorageAccountManagerProvider> ref, final FileStorageAccountManagerProvider service) {
+                    CIFSService cifsFileStorageService = activator.cifsFileStorageService;
+                    if (null != cifsFileStorageService) {
+                        return;
+                    }
+                    try {
+                        cifsFileStorageService = CIFSService.newInstance();
+                        activator.registerService(FileStorageService.class, cifsFileStorageService);
+                        activator.cifsFileStorageService = cifsFileStorageService;
+                    } catch (final OXException e) {
+                        final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(CIFSActivator.class));
+                        log.error(e.getMessage(), e);
+                    }
+                }
+
+                @Override
+                public void removed(final ServiceReference<FileStorageAccountManagerProvider> ref, final FileStorageAccountManagerProvider service) {
+                    // Nope
+                }
+            });
+            openTrackers();
             // registerService(FileStorageService.class.getName(), CIFSService.newInstance());
             /*
              * Register event handler to detect removed sessions
@@ -105,6 +139,11 @@ public final class CIFSActivator extends HousekeepingActivator {
             com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CIFSActivator.class)).error(e.getMessage(), e);
             throw e;
         }
+    }
+
+    @Override
+    public <S> void registerService(final Class<S> clazz, final S service) {
+        super.registerService(clazz, service);
     }
 
     @Override

@@ -92,6 +92,7 @@ public final class CIFSServiceRegisterer implements EventHandler {
                 ranking = null == rank ? 0 : rank.intValue();
             }
             synchronized (this) {
+                FileStorageService service = this.service;
                 if (null == service) {
                     /*
                      * Try to create CIFS service
@@ -100,6 +101,7 @@ public final class CIFSServiceRegisterer implements EventHandler {
                         service = CIFSService.newInstance();
                         registration = context.registerService(FileStorageService.class, service, null);
                         this.ranking = ranking;
+                        this.service = service;
                     } catch (final OXException e) {
                         LOG.warn("Registration of \"" + CIFSService.class.getName() + "\" failed.", e);
                     }
@@ -117,6 +119,7 @@ public final class CIFSServiceRegisterer implements EventHandler {
                                 service = CIFSService.newInstance();
                                 registration = context.registerService(FileStorageService.class, service, null);
                                 this.ranking = ranking;
+                                this.service = service;
                             } catch (final OXException e) {
                                 LOG.warn("Registration of \"" + CIFSService.class.getName() + "\" failed.", e);
                             }
