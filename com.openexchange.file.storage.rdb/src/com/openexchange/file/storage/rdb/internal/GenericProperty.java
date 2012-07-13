@@ -47,74 +47,38 @@
  *
  */
 
-package com.openexchange.file.storage.cifs;
+package com.openexchange.file.storage.rdb.internal;
 
-import jcifs.smb.NtlmPasswordAuthentication;
-import jcifs.smb.SmbException;
-import jcifs.smb.SmbFile;
-import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.session.Session;
 
+
 /**
- * {@link AbstractCIFSAccess}
+ * {@link GenericProperty}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AbstractCIFSAccess {
+public final class GenericProperty {
 
-    /**
-     * The string constant for <code>'/'</code> character.
-     */
-    protected static final String SLASH = "/";
+    public final int confId;
 
-    /**
-     * The root URL of CIFS/SMB server as specified through account configuration.
-     */
-    protected final String rootUrl;
+    public final String propertyName;
 
-    /**
-     * The credentials the client should use for authentication.
-     */
-    protected final NtlmPasswordAuthentication auth;
+    public final Session session;
 
-    /**
-     * The session.
-     */
-    protected final Session session;
+    public final String serviceId;
 
+    public final int id;
+    
     /**
-     * The associated file account.
+     * Initializes a new {@link GenericProperty}.
      */
-    protected final FileStorageAccount account;
-
-    /**
-     * Initializes a new {@link AbstractCIFSAccess}.
-     */
-    protected AbstractCIFSAccess(final String rootUrl, final NtlmPasswordAuthentication auth, final FileStorageAccount account, final Session session) {
+    public GenericProperty(final int confId, final String propertyName, final String serviceId, final int id, final Session session) {
         super();
-        this.rootUrl = rootUrl;
-        this.account = account;
+        this.confId = confId;
+        this.propertyName = propertyName;
         this.session = session;
-        this.auth = auth;
-    }
-
-    /**
-     * Checks for existence of specified SMB file.
-     * 
-     * @param smbFolder The CIFS/SMB file
-     * @return <code>true</code> if existent; otherwise <code>false</code>
-     * @throws SmbException If a CIFS/SMB exception occurs
-     */
-    protected boolean exists(final SmbFile smbFolder) throws SmbException {
-        try {
-            return smbFolder.exists();
-        } catch (final SmbException e) {
-            if ("The network name cannot be found.".equals(e.getMessage())) {
-                // This means that the named share was not found. 
-                return false;
-            }
-            throw e;
-        }
+        this.serviceId = serviceId;
+        this.id = id;
     }
 
 }

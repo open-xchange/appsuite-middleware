@@ -57,7 +57,6 @@ import java.util.List;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.caching.CacheService;
 import com.openexchange.context.ContextService;
-import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
@@ -74,6 +73,7 @@ import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 import com.openexchange.secret.recovery.EncryptedItemDetectorService;
 import com.openexchange.secret.recovery.SecretMigrator;
@@ -99,7 +99,7 @@ public class FileStorageRdbActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
             DatabaseService.class, GenericConfigurationStorageService.class, ContextService.class, FileStorageServiceRegistry.class,
-            CacheService.class, CryptoService.class };
+            CacheService.class, SecretEncryptionFactoryService.class };
     }
 
     @Override

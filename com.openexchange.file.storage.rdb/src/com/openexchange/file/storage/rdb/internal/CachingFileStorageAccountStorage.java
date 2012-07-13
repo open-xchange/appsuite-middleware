@@ -65,7 +65,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.rdb.Services;
-import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -173,6 +172,19 @@ public final class CachingFileStorageAccountStorage implements FileStorageAccoun
         delegatee = RdbFileStorageAccountStorage.getInstance();
         cacheLock = new ReentrantLock(true);
         serviceRegistry = Services.getServices();
+    }
+ 
+    /**
+     * Invalidates specified account.
+     *
+     * @param serviceId The service identifier
+     * @param id The account identifier
+     * @param user The user identifier
+     * @param contextId The context identifier
+     * @throws OXException If invalidation fails
+     */
+    public void invalidate(final String serviceId, final int id, final int user, final int contextId) throws OXException {
+        invalidateFileStorageAccount(serviceId, id, user, contextId);
     }
 
     private void invalidateFileStorageAccount(final String serviceId, final int id, final int user, final int cid) throws OXException {

@@ -56,7 +56,7 @@ import org.osgi.service.event.EventHandler;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.cifs.CIFSService;
+import com.openexchange.file.storage.cifs.CIFSFileStorageService;
 
 /**
  * {@link CIFSServiceRegisterer}
@@ -98,12 +98,12 @@ public final class CIFSServiceRegisterer implements EventHandler {
                      * Try to create CIFS service
                      */
                     try {
-                        service = CIFSService.newInstance((FileStorageAccountManagerProvider) event.getProperty(FileStorageAccountManagerProvider.PROPERTY_PROVIDER));
+                        service = CIFSFileStorageService.newInstance((FileStorageAccountManagerProvider) event.getProperty(FileStorageAccountManagerProvider.PROPERTY_PROVIDER));
                         registration = context.registerService(FileStorageService.class, service, null);
                         this.ranking = ranking;
                         this.service = service;
                     } catch (final OXException e) {
-                        LOG.warn("Registration of \"" + CIFSService.class.getName() + "\" failed.", e);
+                        LOG.warn("Registration of \"" + CIFSFileStorageService.class.getName() + "\" failed.", e);
                     }
                 } else {
                     /*
@@ -116,12 +116,12 @@ public final class CIFSServiceRegisterer implements EventHandler {
                             try {
                                 registration.unregister();
                                 registration = null;
-                                service = CIFSService.newInstance(provider);
+                                service = CIFSFileStorageService.newInstance(provider);
                                 registration = context.registerService(FileStorageService.class, service, null);
                                 this.ranking = ranking;
                                 this.service = service;
                             } catch (final OXException e) {
-                                LOG.warn("Registration of \"" + CIFSService.class.getName() + "\" failed.", e);
+                                LOG.warn("Registration of \"" + CIFSFileStorageService.class.getName() + "\" failed.", e);
                             }
                         }
                     }

@@ -73,7 +73,9 @@ import com.openexchange.file.storage.generic.DefaultFileStorageAccount;
 import com.openexchange.file.storage.rdb.Services;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.secret.SecretService;
+import com.openexchange.secret.SecretEncryptionFactoryService;
+import com.openexchange.secret.SecretEncryptionService;
+import com.openexchange.secret.SecretEncryptionStrategy;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.sql.DBUtils;
@@ -84,7 +86,7 @@ import com.openexchange.tools.sql.DBUtils;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18.2
  */
-public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
+public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, SecretEncryptionStrategy<GenericProperty> {
 
     /**
      * The {@link DatabaseService} class.
@@ -156,7 +158,8 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
             {
                 final GenericConfigurationStorageService genericConfStorageService = getService(CLAZZ_GEN_CONF);
                 final Map<String, Object> configuration = new HashMap<String, Object>();
-                genericConfStorageService.fill(rc, getContext(session), rs.getInt(1), configuration);
+                final int confId = rs.getInt(1);
+                genericConfStorageService.fill(rc, getContext(session), confId, configuration);
                 /*
                  * Decrypt password fields for clear-text representation in account's configuration
                  */
@@ -166,7 +169,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
                         final String toDecrypt = (String) configuration.get(passwordElementName);
                         if (null != toDecrypt) {
                             try {
-                                final String decrypted = decrypt(toDecrypt, session);
+                                final String decrypted = decrypt(toDecrypt, serviceId, id, session, confId, passwordElementName);
                                 configuration.put(passwordElementName, decrypted);
                             } catch (final OXException x) {
                                 // Must not be fatal
@@ -302,15 +305,10 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
          * Writable connection
          */
         final int contextId = session.getContextId();
-        final Connection wc;
-        try {
-            wc = databaseService.getWritable(contextId);
-            wc.setAutoCommit(false); // BEGIN
-        } catch (final SQLException e) {
-            throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        }
+        final Connection wc = databaseService.getWritable(contextId);
         PreparedStatement stmt = null;
         try {
+            DBUtils.startTransaction(wc); // BEGIN
             /*
              * Save account configuration using generic conf
              */
@@ -321,8 +319,8 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
                 /*
                  * Encrypt password fields to not having clear-text representation in database
                  */
-                final FileStorageService messagingService = getService(FileStorageServiceRegistry.class).getFileStorageService(serviceId);
-                final Set<String> secretPropNames = messagingService.getSecretProperties();
+                final FileStorageService fsService = getService(FileStorageServiceRegistry.class).getFileStorageService(serviceId);
+                final Set<String> secretPropNames = fsService.getSecretProperties();
                 if (!secretPropNames.isEmpty()) {
                     for (final String passwordElementName : secretPropNames) {
                         final String toCrypt = (String) configuration.get(passwordElementName);
@@ -354,7 +352,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
         } catch (final SQLException e) {
             DBUtils.rollback(wc); // ROLL-BACK
             throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final Exception e) {
+        } catch (final RuntimeException e) {
             DBUtils.rollback(wc); // ROLL-BACK
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
@@ -364,16 +362,29 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
         }
     }
 
-    private String encrypt(final String toCrypt, final Session session) throws OXException, OXException {
-        final CryptoService cryptoService = getService(CryptoService.class);
-        final SecretService secretService = getService(SecretService.class);
-        return cryptoService.encrypt(toCrypt, secretService.getSecret(session));
+    @Override
+    public void update(final String recrypted, final GenericProperty prop) throws OXException {
+        final HashMap<String, Object> update = new HashMap<String, Object>();
+        update.put(prop.propertyName, recrypted);
+        final GenericConfigurationStorageService genericConfStorageService = getService(CLAZZ_GEN_CONF);
+        final Session session = prop.session;
+        genericConfStorageService.update(getContext(session), prop.confId, update);
+        // Invalidate account
+        try {
+            CachingFileStorageAccountStorage.getInstance().invalidate(prop.serviceId, prop.id, session.getUserId(), session.getContextId());
+        } catch (final Exception e) {
+            // Ignore
+        }
     }
 
-    private String decrypt(final String toDecrypt, final Session session) throws OXException, OXException {
-        final CryptoService cryptoService = getService(CryptoService.class);
-        final SecretService secretService = getService(SecretService.class);
-        return cryptoService.decrypt(toDecrypt, secretService.getSecret(session));
+    private String encrypt(final String toCrypt, final Session session) throws OXException {
+        final SecretEncryptionService<GenericProperty> encryptionService = getService(SecretEncryptionFactoryService.class).createService(this);
+        return encryptionService.encrypt(session, toCrypt);
+    }
+
+    private String decrypt(final String toDecrypt, final String serviceId, final int id, final Session session, final int confId, final String propertyName) throws OXException {
+        final SecretEncryptionService<GenericProperty> encryptionService = getService(SecretEncryptionFactoryService.class).createService(this);
+        return encryptionService.decrypt(session, toDecrypt, new GenericProperty(confId, propertyName, serviceId, id, session));
     }
 
     private static final String SQL_DELETE = "DELETE FROM filestorageAccount WHERE cid = ? AND user = ? AND serviceId = ? AND account = ?";

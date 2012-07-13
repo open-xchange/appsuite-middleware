@@ -61,7 +61,7 @@ import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.cifs.CIFSService;
+import com.openexchange.file.storage.cifs.CIFSFileStorageService;
 import com.openexchange.file.storage.cifs.CIFSServices;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -75,7 +75,7 @@ import com.openexchange.sessiond.SessiondService;
  */
 public final class CIFSActivator extends HousekeepingActivator {
 
-    volatile CIFSService cifsFileStorageService;
+    volatile CIFSFileStorageService cifsFileStorageService;
 
     private volatile CIFSServiceRegisterer registerer;
 
@@ -104,12 +104,12 @@ public final class CIFSActivator extends HousekeepingActivator {
 
                 @Override
                 public void added(final ServiceReference<FileStorageAccountManagerProvider> ref, final FileStorageAccountManagerProvider service) {
-                    CIFSService cifsFileStorageService = activator.cifsFileStorageService;
+                    CIFSFileStorageService cifsFileStorageService = activator.cifsFileStorageService;
                     if (null != cifsFileStorageService) {
                         return;
                     }
                     try {
-                        cifsFileStorageService = CIFSService.newInstance(context.getService(ref));
+                        cifsFileStorageService = CIFSFileStorageService.newInstance(context.getService(ref));
                         activator.registerService(FileStorageService.class, cifsFileStorageService);
                         activator.cifsFileStorageService = cifsFileStorageService;
                     } catch (final OXException e) {

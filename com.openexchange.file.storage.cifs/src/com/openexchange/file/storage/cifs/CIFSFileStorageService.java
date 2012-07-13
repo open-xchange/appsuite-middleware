@@ -64,11 +64,11 @@ import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.session.Session;
 
 /**
- * {@link CIFSService}
+ * {@link CIFSFileStorageService}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CIFSService implements FileStorageService {
+public final class CIFSFileStorageService implements FileStorageService {
 
     /**
      * Creates a new CIFS/SMB file storage service.
@@ -77,8 +77,8 @@ public final class CIFSService implements FileStorageService {
      * @return A new CIFS/SMB file storage service
      * @throws OXException If creation fails
      */
-    public static CIFSService newInstance(final FileStorageAccountManagerProvider accountManagerProvider) throws OXException {
-        final CIFSService newInst = new CIFSService();
+    public static CIFSFileStorageService newInstance(final FileStorageAccountManagerProvider accountManagerProvider) throws OXException {
+        final CIFSFileStorageService newInst = new CIFSFileStorageService();
         newInst.applyAccountManager(accountManagerProvider);
         return newInst;
     }
@@ -90,9 +90,9 @@ public final class CIFSService implements FileStorageService {
     private FileStorageAccountManager accountManager;
 
     /**
-     * Initializes a new {@link CIFSService}.
+     * Initializes a new {@link CIFSFileStorageService}.
      */
-    private CIFSService() {
+    private CIFSFileStorageService() {
         super();
         final DynamicFormDescription tmpDescription = new DynamicFormDescription();
         tmpDescription.add(FormElement.input(CIFSConstants.CIFS_LOGIN, FormStrings.FORM_LABEL_LOGIN, true, ""));
