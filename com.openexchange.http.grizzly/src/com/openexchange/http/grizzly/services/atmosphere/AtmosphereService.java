@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.http.atmosphere;
+package com.openexchange.http.grizzly.services.atmosphere;
 
 import org.atmosphere.cpr.AtmosphereHandler;
 import org.atmosphere.cpr.Broadcaster;

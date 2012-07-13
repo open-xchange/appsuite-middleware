@@ -65,7 +65,6 @@ import org.glassfish.grizzly.servlet.ServletRegistration;
 import org.glassfish.grizzly.servlet.WebappContext;
 import org.osgi.framework.Bundle;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.http.atmosphere.AtmosphereService;
 import com.openexchange.http.grizzly.osgi.GrizzlyServiceRegistry;
 import com.openexchange.log.LogFactory;
 
@@ -87,7 +86,7 @@ public class AtmosphereServiceImpl  implements AtmosphereService {
         String realtimeContextPath = configurationService.getProperty("com.openexchange.http.realtime.contextPath", "/realtime");
         atmosphereServletMapping = configurationService.getProperty("com.openexchange.http.atmosphere.servletMapping", "/atmosphere/*");
         
-        AtmosphereServlet atmosphereServlet = new AtmosphereServlet(false, true);
+        AtmosphereServlet atmosphereServlet = new AtmosphereServlet(false, false);
         atmosphereFramework = atmosphereServlet.framework();
         atmosphereFramework.setAsyncSupport(new Grizzly2CometSupport(atmosphereFramework.getAtmosphereConfig()));
         
@@ -196,17 +195,19 @@ public class AtmosphereServiceImpl  implements AtmosphereService {
     @Override
     public void addAtmosphereHandler(String handlerMapping, AtmosphereHandler handler) {
         atmosphereFramework.addAtmosphereHandler(generateHandlerMapping(atmosphereServletMapping, handlerMapping), handler);
+        LOG.info("Added AtmosphereHandler " + handler + " with mapping " + handlerMapping);
     }
 
     @Override
     public void addAtmosphereHandler(String handlerMapping, AtmosphereHandler handler, Broadcaster broadcaster) {
         atmosphereFramework.addAtmosphereHandler(generateHandlerMapping(atmosphereServletMapping, handlerMapping), handler, broadcaster);
-        
+        LOG.info("Added AtmosphereHandler " + handler + " with mapping " + handlerMapping + " and Broadcaster " + broadcaster);
     }
 
     @Override
     public void unregister(String handlerMapping) {
         atmosphereFramework.removeAtmosphereHandler(generateHandlerMapping(atmosphereServletMapping, handlerMapping));
+        LOG.info("Removed AtmosphereHandler with mapping " + handlerMapping);
     }
 
 }
