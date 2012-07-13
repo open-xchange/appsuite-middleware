@@ -59,7 +59,7 @@ import com.openexchange.datatypes.genericonf.ReadOnlyDynamicFormDescription;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAccountManager;
-import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
+import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.session.Session;
 
@@ -73,12 +73,13 @@ public final class CIFSService implements FileStorageService {
     /**
      * Creates a new CIFS/SMB file storage service.
      * 
+     * @param accountManagerProvider The detected {@link FileStorageAccountManagerProvider} reference
      * @return A new CIFS/SMB file storage service
      * @throws OXException If creation fails
      */
-    public static CIFSService newInstance() throws OXException {
+    public static CIFSService newInstance(final FileStorageAccountManagerProvider accountManagerProvider) throws OXException {
         final CIFSService newInst = new CIFSService();
-        newInst.applyAccountManager();
+        newInst.applyAccountManager(accountManagerProvider);
         return newInst;
     }
 
@@ -100,8 +101,8 @@ public final class CIFSService implements FileStorageService {
         secretProperties = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(CIFSConstants.CIFS_PASSWORD)));
     }
 
-    private void applyAccountManager() throws OXException {
-        accountManager = CIFSServices.getService(FileStorageAccountManagerLookupService.class).getAccountManagerFor(this);
+    private void applyAccountManager(final FileStorageAccountManagerProvider accountManagerProvider) throws OXException {
+        accountManager = accountManagerProvider.getAccountManagerFor(this);
     }
 
     @Override

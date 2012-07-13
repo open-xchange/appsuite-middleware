@@ -98,7 +98,7 @@ public final class CIFSServiceRegisterer implements EventHandler {
                      * Try to create CIFS service
                      */
                     try {
-                        service = CIFSService.newInstance();
+                        service = CIFSService.newInstance((FileStorageAccountManagerProvider) event.getProperty(FileStorageAccountManagerProvider.PROPERTY_PROVIDER));
                         registration = context.registerService(FileStorageService.class, service, null);
                         this.ranking = ranking;
                         this.service = service;
@@ -116,7 +116,7 @@ public final class CIFSServiceRegisterer implements EventHandler {
                             try {
                                 registration.unregister();
                                 registration = null;
-                                service = CIFSService.newInstance();
+                                service = CIFSService.newInstance(provider);
                                 registration = context.registerService(FileStorageService.class, service, null);
                                 this.ranking = ranking;
                                 this.service = service;

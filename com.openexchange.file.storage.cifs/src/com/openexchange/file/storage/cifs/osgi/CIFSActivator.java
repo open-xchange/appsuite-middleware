@@ -52,6 +52,7 @@ package com.openexchange.file.storage.cifs.osgi;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.apache.commons.logging.Log;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
@@ -97,6 +98,7 @@ public final class CIFSActivator extends HousekeepingActivator {
             /*
              * Some initialization stuff
              */
+            final BundleContext context = this.context;
             final CIFSActivator activator = this;
             track(FileStorageAccountManagerProvider.class, new SimpleRegistryListener<FileStorageAccountManagerProvider>() {
 
@@ -107,7 +109,7 @@ public final class CIFSActivator extends HousekeepingActivator {
                         return;
                     }
                     try {
-                        cifsFileStorageService = CIFSService.newInstance();
+                        cifsFileStorageService = CIFSService.newInstance(context.getService(ref));
                         activator.registerService(FileStorageService.class, cifsFileStorageService);
                         activator.cifsFileStorageService = cifsFileStorageService;
                     } catch (final OXException e) {
@@ -125,7 +127,7 @@ public final class CIFSActivator extends HousekeepingActivator {
             });
             openTrackers();
             /*
-             * Register event handler to detect removed sessions
+             * Register event handler
              */
             if (false) {
                 final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
