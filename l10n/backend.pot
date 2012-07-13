@@ -1342,6 +1342,11 @@ msgid ""
 "An error occurred while trying to get the defaultNamingContext attribute"
 msgstr ""
 
+#. The contact object with id "%s" could not be found in folder "%s"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.ldap/src/com/openexchange/contacts/ldap/exceptions/LdapConfigurationExceptionMessage.java:270
+msgid "The contact object with id \"%s\" could not be found in folder \"%s\""
+msgstr ""
+
 #. A JSON error occurred: %1$s
 #. *
 #. * A JSON error occurred: %1$s
@@ -8091,9 +8096,11 @@ msgstr ""
 msgid "Draft message could not be saved"
 msgstr ""
 
-#. There was a problem processing the request. Please try again.
+#. There was a problem processing the request. Please (refresh view and) try again.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:525
-msgid "There was a problem processing the request. Please try again."
+msgid ""
+"There was a problem processing the request. Please (refresh view and) try "
+"again."
 msgstr ""
 
 #. *
