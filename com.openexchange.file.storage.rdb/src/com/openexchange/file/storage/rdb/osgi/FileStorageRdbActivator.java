@@ -71,7 +71,7 @@ import com.openexchange.file.storage.rdb.internal.RdbFileStorageAccountManagerPr
 import com.openexchange.file.storage.rdb.secret.RdbFileStorageSecretHandling;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.groupware.update.UpdateTask;
+import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
@@ -88,6 +88,9 @@ public class FileStorageRdbActivator extends HousekeepingActivator {
 
     private volatile WhiteboardSecretService secretService;
 
+    /**
+     * Initializes a new {@link FileStorageRdbActivator}.
+     */
     public FileStorageRdbActivator() {
         super();
     }
@@ -135,22 +138,17 @@ public class FileStorageRdbActivator extends HousekeepingActivator {
             /*
              * Initialize and register services
              */
-            registerService(FileStorageAccountManagerProvider.class, new RdbFileStorageAccountManagerProvider(), null);
+            registerService(FileStorageAccountManagerProvider.class, new RdbFileStorageAccountManagerProvider());
             /*
              * The update task/create table service
              */
             final FileStorageRdbCreateTableTask createTableTask = new FileStorageRdbCreateTableTask();
-            registerService(UpdateTaskProviderService.class, new UpdateTaskProviderService() {
-                @Override
-                public Collection<UpdateTask> getUpdateTasks() {
-                    return Collections.<UpdateTask> singletonList(createTableTask);
-                }
-            }, null);
-            registerService(CreateTableService.class, createTableTask, null);
+            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(createTableTask));
+            registerService(CreateTableService.class, createTableTask);
             /*
              * The delete listener
              */
-            registerService(DeleteListener.class, new FileStorageRdbDeleteListener(), null);
+            registerService(DeleteListener.class, new FileStorageRdbDeleteListener());
             /*
              * Secret Handling
              */
@@ -170,8 +168,8 @@ public class FileStorageRdbActivator extends HousekeepingActivator {
                         return list;
                     }
                 };
-                registerService(EncryptedItemDetectorService.class, secretHandling, null);
-                registerService(SecretMigrator.class, secretHandling, null);
+                registerService(EncryptedItemDetectorService.class, secretHandling);
+                registerService(SecretMigrator.class, secretHandling);
             }
         } catch (final Exception e) {
             com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FileStorageRdbActivator.class)).error(e.getMessage(), e);
