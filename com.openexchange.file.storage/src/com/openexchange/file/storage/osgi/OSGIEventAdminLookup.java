@@ -69,7 +69,7 @@ public class OSGIEventAdminLookup {
     /**
      * The tracker instance.
      */
-    private ServiceTracker tracker;
+    private ServiceTracker<EventAdmin,EventAdmin> tracker;
 
     /**
      * Initializes a new {@link OSGIEventAdminLookup}.
@@ -86,7 +86,7 @@ public class OSGIEventAdminLookup {
      */
     public void start(final BundleContext context) {
         if (null == tracker) {
-            tracker = new ServiceTracker(context, EventAdmin.class.getName(), new Customizer(context));
+            tracker = new ServiceTracker<EventAdmin,EventAdmin>(context, EventAdmin.class, new Customizer(context));
             tracker.open();
         }
     }
@@ -110,7 +110,7 @@ public class OSGIEventAdminLookup {
         return eventAdminRef.get();
     }
 
-    private final class Customizer implements ServiceTrackerCustomizer {
+    private final class Customizer implements ServiceTrackerCustomizer<EventAdmin,EventAdmin> {
 
         private final BundleContext context;
 
@@ -120,10 +120,10 @@ public class OSGIEventAdminLookup {
         }
 
         @Override
-        public Object addingService(final ServiceReference reference) {
-            final Object service = context.getService(reference);
-            if ((service instanceof EventAdmin)) {
-                eventAdminRef.set((EventAdmin) service);
+        public EventAdmin addingService(final ServiceReference<EventAdmin> reference) {
+            final EventAdmin service = context.getService(reference);
+            if ((service != null)) {
+                eventAdminRef.set(service);
                 return service;
             }
             /*
@@ -134,17 +134,15 @@ public class OSGIEventAdminLookup {
         }
 
         @Override
-        public void modifiedService(final ServiceReference reference, final Object service) {
+        public void modifiedService(final ServiceReference<EventAdmin> reference, final EventAdmin service) {
             // Nothing to do
         }
 
         @Override
-        public void removedService(final ServiceReference reference, final Object service) {
+        public void removedService(final ServiceReference<EventAdmin> reference, final EventAdmin service) {
             if (null != service) {
                 try {
-                    if (service instanceof EventAdmin) {
-                        eventAdminRef.set(null);
-                    }
+                    eventAdminRef.set(null);
                 } finally {
                     context.ungetService(reference);
                 }

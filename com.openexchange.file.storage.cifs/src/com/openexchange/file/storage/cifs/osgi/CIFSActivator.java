@@ -58,6 +58,7 @@ import org.osgi.service.event.EventHandler;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.cifs.CIFSService;
 import com.openexchange.file.storage.cifs.CIFSServices;
@@ -110,8 +111,10 @@ public final class CIFSActivator extends HousekeepingActivator {
                         activator.registerService(FileStorageService.class, cifsFileStorageService);
                         activator.cifsFileStorageService = cifsFileStorageService;
                     } catch (final OXException e) {
-                        final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(CIFSActivator.class));
-                        log.error(e.getMessage(), e);
+                        if (!FileStorageExceptionCodes.NO_ACCOUNT_MANAGER_FOR_SERVICE.equals(e)) {
+                            final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(CIFSActivator.class));
+                            log.error(e.getMessage(), e);
+                        }
                     }
                 }
 
@@ -121,14 +124,10 @@ public final class CIFSActivator extends HousekeepingActivator {
                 }
             });
             openTrackers();
-            // registerService(FileStorageService.class.getName(), CIFSService.newInstance());
             /*
              * Register event handler to detect removed sessions
              */
-            // final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
-            // serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
-            // registrations.add(context.registerService(EventHandler.class.getName(), null, serviceProperties));
-            {
+            if (false) {
                 final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
                 dict.put(EventConstants.EVENT_TOPIC, FileStorageAccountManagerProvider.TOPIC);
                 final CIFSServiceRegisterer registerer = new CIFSServiceRegisterer(context);
