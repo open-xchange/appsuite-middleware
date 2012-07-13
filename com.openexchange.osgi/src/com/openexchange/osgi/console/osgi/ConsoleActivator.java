@@ -124,7 +124,7 @@ public class ConsoleActivator implements BundleActivator, CommandProvider {
 
     @Override
     public String getHelp() {
-        return "\tuname - returns framework information\n";
+        return "\tuname - returns framework information\n\tfind <wild-card-expression> - looks-up services matching given search expression\n";
     }
 
     public void _uname(final CommandInterpreter ci) {
