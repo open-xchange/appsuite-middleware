@@ -1,3 +1,8 @@
+* 2012-07-12 - jan.bauerdick@open-xchange.com
+
+ - New service to store/retrieve sessions
+ - Enhanced c.o.sessiond to use SessionStorageService
+
 * 2012-07-11 - thorben.betten@open-xchange.com
 
  - Fix for bug 22501: Removed wrong '$' sign in printf-style string
