@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Open-Xchange File Storage CIFS Bundle
+Bundle-Name: Open-Xchange File Storage CIFS/SMB Bundle
 Bundle-SymbolicName: com.openexchange.file.storage.cifs
 Bundle-Version: 6.21.0
 Bundle-Vendor: Open-Xchange Inc.
@@ -27,3 +27,4 @@ Import-Package: com.openexchange.datatypes.genericonf,
  org.osgi.util.tracker
 Bundle-ClassPath: lib/jcifs-1.3.17.jar,
  .
+Bundle-Activator: com.openexchange.file.storage.cifs.osgi.CIFSActivator
