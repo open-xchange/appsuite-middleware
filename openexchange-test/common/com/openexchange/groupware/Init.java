@@ -83,6 +83,9 @@ import com.openexchange.config.ConfigurationServiceHolder;
 import com.openexchange.config.internal.ConfigurationImpl;
 import com.openexchange.config.internal.filewatcher.FileWatcher;
 import com.openexchange.configuration.ServerConfig;
+import com.openexchange.contact.ContactService;
+import com.openexchange.contact.internal.ContactServiceImpl;
+import com.openexchange.contact.internal.ContactServiceLookup;
 import com.openexchange.contact.storage.internal.DefaultContactStorageRegistry;
 import com.openexchange.contact.storage.rdb.internal.RdbContactStorage;
 import com.openexchange.contact.storage.registry.ContactStorageRegistry;
@@ -152,7 +155,6 @@ import com.openexchange.resource.internal.ResourceServiceImpl;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.I18nServices;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.SessiondInit;
 import com.openexchange.sessiond.impl.SessiondServiceImpl;
@@ -364,6 +366,7 @@ public final class Init {
         startAndInjectImportExportServices();
         startAndInjectSubscribeServices();
         startAndInjectContactStorageServices();
+        startAndInjectContactServices();
     }
 
     public static void startAndInjectConfigBundle() {
@@ -561,6 +564,23 @@ public final class Init {
                     return null;
                 }
             });                
+        }
+    }
+
+    private static void startAndInjectContactServices() {
+        if (null == TestServiceRegistry.getInstance().getService(ContactService.class)) {
+            final ContactService contactService = new ContactServiceImpl();
+            ContactServiceLookup.set(new ServiceLookup() {
+                @Override
+                public <S> S getService(final Class<? extends S> clazz) {
+                    return TestServiceRegistry.getInstance().getService(clazz);
+                }
+                @Override
+                public <S> S getOptionalService(final Class<? extends S> clazz) {
+                    return null;
+                }
+            });
+            TestServiceRegistry.getInstance().addService(ContactService.class, contactService);
         }
     }
 

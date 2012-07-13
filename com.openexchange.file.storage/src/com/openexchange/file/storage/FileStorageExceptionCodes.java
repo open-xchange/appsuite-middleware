@@ -167,6 +167,11 @@ public enum FileStorageExceptionCodes implements OXExceptionCode {
      */
     INVALID_URL(FileStorageExceptionMessages.INVALID_URL_MSG, Category.CATEGORY_USER_INPUT, 28);
 
+    /**
+     * The prefix constant.
+     */
+    public static final String PREFIX = "FILE_STORAGE";
+
     private final Category category;
 
     private final int detailNumber;
@@ -196,7 +201,7 @@ public enum FileStorageExceptionCodes implements OXExceptionCode {
 
     @Override
     public String getPrefix() {
-        return "FILE_STORAGE";
+        return PREFIX;
     }
 
     public String getHelp() {

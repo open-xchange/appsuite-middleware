@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.filter;
 
-import javax.security.auth.Subject;
 import junit.framework.Assert;
 import org.junit.After;
 import org.junit.BeforeClass;
@@ -65,8 +64,8 @@ import com.openexchange.mailfilter.services.MailFilterServletServiceRegistry;
 
 public class MailfilterActionTest extends MailfilterAction {
 
-    public MailfilterActionTest(Subject krbSubject) {
-        super(krbSubject);
+    public MailfilterActionTest() {
+        super(null);
     }
 
     @BeforeClass

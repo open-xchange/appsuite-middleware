@@ -52,9 +52,11 @@ package com.openexchange.caldav.resources;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+
 import javax.servlet.http.HttpServletResponse;
+
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.Tools;
@@ -92,7 +94,7 @@ public class TaskResource extends CalDAVResource<Task> {
     private final TaskCollection parent;
     private Task taskToSave = null;
 
-    public TaskResource(GroupwareCaldavFactory factory, TaskCollection parent, Task object, WebdavPath url) throws OXException {
+    public TaskResource(final GroupwareCaldavFactory factory, final TaskCollection parent, final Task object, final WebdavPath url) throws OXException {
         super(factory, parent, object, url);
         this.parent = parent;
     }
@@ -106,7 +108,7 @@ public class TaskResource extends CalDAVResource<Task> {
 
     @Override
     protected void saveObject() throws OXException {
-        Task originalTask = parent.load(object);
+        final Task originalTask = parent.load(object);
         this.checkForExplicitRemoves(originalTask, taskToSave);
         getTaskInterface().updateTaskObject(taskToSave, parentFolderID, object.getLastModified());
     }
@@ -124,8 +126,8 @@ public class TaskResource extends CalDAVResource<Task> {
     }
 
     @Override
-    protected void move(String targetFolderID) throws OXException {
-        Task task = new Task();
+    protected void move(final String targetFolderID) throws OXException {
+        final Task task = new Task();
         task.setObjectID(object.getObjectID());
         task.setParentFolderID(Tools.parse(targetFolderID));
         getTaskInterface().updateTaskObject(task, parentFolderID, object.getLastModified());
@@ -133,24 +135,24 @@ public class TaskResource extends CalDAVResource<Task> {
 
     @Override
     protected String generateICal() throws OXException {
-        ICalEmitter icalEmitter = factory.getIcalEmitter();
-        ICalSession session = icalEmitter.createSession();
-        Task task = parent.load(this.object);        
+        final ICalEmitter icalEmitter = factory.getIcalEmitter();
+        final ICalSession session = icalEmitter.createSession();
+        final Task task = parent.load(this.object);        
         icalEmitter.writeTask(session, task, factory.getContext(), 
-            new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>());
-        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+            new LinkedList<ConversionError>(), new LinkedList<ConversionWarning>());
+        final ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         icalEmitter.writeSession(session, bytes);
         try {
             return new String(bytes.toByteArray(), "UTF-8");
-        } catch (UnsupportedEncodingException e) {
+        } catch (final UnsupportedEncodingException e) {
             throw protocolException(e);
         }
     }
 
     @Override
-    protected void deserialize(InputStream body) throws OXException {
-        List<Task> tasks = getICalParser().parseTasks(body, getTimeZone(), factory.getContext(), 
-            new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>());
+    protected void deserialize(final InputStream body) throws OXException {
+        final List<Task> tasks = getICalParser().parseTasks(body, getTimeZone(), factory.getContext(), 
+            new LinkedList<ConversionError>(), new LinkedList<ConversionWarning>());
         if (null == tasks || 1 != tasks.size()) {
             throw protocolException(HttpServletResponse.SC_BAD_REQUEST);
         } else {
@@ -167,11 +169,11 @@ public class TaskResource extends CalDAVResource<Task> {
     }
 
     @Override
-    protected boolean trimTruncatedAttribute(Truncated truncated) {
+    protected boolean trimTruncatedAttribute(final Truncated truncated) {
         if (null != this.taskToSave) {
-            Object value = this.taskToSave.get(truncated.getId());
+            final Object value = this.taskToSave.get(truncated.getId());
             if (null != value && String.class.isInstance(value)) {
-                String stringValue = (String)value;
+                final String stringValue = (String)value;
                 if (stringValue.length() > truncated.getMaxSize()) {
                     taskToSave.set(truncated.getId(), stringValue.substring(0, truncated.getMaxSize()));
                     return true;
@@ -181,11 +183,11 @@ public class TaskResource extends CalDAVResource<Task> {
         return false;
     }
 
-    private void checkForExplicitRemoves(Task originalTask, Task updatedTask) {
+    private void checkForExplicitRemoves(final Task originalTask, final Task updatedTask) {
         /*
          * reset previously set task fields
          */
-        for (int field : CALDAV_FIELDS) {
+        for (final int field : CALDAV_FIELDS) {
             if (originalTask.contains(field) && false == updatedTask.contains(field)) {
                 if (Task.STATUS == field) {
                     // '1' is the default value for state

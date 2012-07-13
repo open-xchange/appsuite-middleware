@@ -59,17 +59,17 @@ import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
 
 /**
- * {@link WebDAVEventHandler} - The {@link EventHandler event handler} for mail push bundle to track newly created and removed sessions.
+ * {@link WebDAVSessionEventHandler} - The {@link EventHandler event handler} for WebDAV bundle to track newly created and removed sessions.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class WebDAVEventHandler implements EventHandler {
+public final class WebDAVSessionEventHandler implements EventHandler {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(WebDAVEventHandler.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(WebDAVSessionEventHandler.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
-    public WebDAVEventHandler() {
+    public WebDAVSessionEventHandler() {
         super();
     }
 

@@ -47,34 +47,53 @@
  *
  */
 
-package com.openexchange.file.storage.rdb.services;
+package com.openexchange.sessionstorage.impl.osgi;
 
-import com.openexchange.osgi.ServiceRegistry;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.sessionstorage.SessionStorageService;
+import com.openexchange.sessionstorage.impl.SessionStorageServiceImpl;
 
 /**
- * {@link FileStorageRdbServiceRegistry} - The service registry for <code>com.openexchange.file.storage.generic</code> bundle.
+ * {@link SessionStorageImplActivator}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since Open-Xchange v6.18.2
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public final class FileStorageRdbServiceRegistry {
+public class SessionStorageImplActivator extends HousekeepingActivator {
 
-    private static final ServiceRegistry SERVICE_REGISTRY = new ServiceRegistry(4);
+    private final Log log = LogFactory.getLog(SessionStorageImplActivator.class);
 
-    /**
-     * Gets the service registry.
-     *
-     * @return The service registry
-     */
-    public static ServiceRegistry getServiceRegistry() {
-        return SERVICE_REGISTRY;
+    private ConfigurationService configService = null;
+
+    private SessionStorageService service = null;
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        Class<?>[] needed = new Class<?>[] { ConfigurationService.class };
+        return needed;
     }
 
-    /**
-     * Initializes a new {@link FileStorageRdbServiceRegistry}.
-     */
-    private FileStorageRdbServiceRegistry() {
-        super();
+    @Override
+    protected void startBundle() throws Exception {
+        log.info("Starting bundle: com.openexchange.sessionstorage");
+        configService = getService(ConfigurationService.class);
+        boolean enabled = configService.getBoolProperty("sessionstorage.enabled", false);
+        if (enabled) {
+            service = new SessionStorageServiceImpl();
+            registerService(SessionStorageService.class, service);
+        }
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        log.info("Stopping bundle: com.openexchange.sessionstorage");
+        if (service != null) {
+            unregisterServices();
+        }
+        closeTrackers();
+        cleanUp();
     }
 
 }

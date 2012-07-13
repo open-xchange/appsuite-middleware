@@ -196,7 +196,7 @@ public class DeclineCounterITipAnalyzerTest extends AbstractITipAnalyzerTest {
         
         List<ITipAnnotation> annotations = analysis.getAnnotations();
         assertEquals(1, annotations.size());
-        assertEquals("This is an update to an appointment that already changed in the meantime. It is best to just ignore this one.", annotations.get(0).getMessage());
+        assertEquals("This is an update to an appointment that has been changed in the meantime. Best ignore it.", annotations.get(0).getMessage());
         
         assertActions(analysis, ITipAction.IGNORE);
     }

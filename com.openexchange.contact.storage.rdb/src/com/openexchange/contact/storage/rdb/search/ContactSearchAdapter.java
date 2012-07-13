@@ -192,7 +192,7 @@ public class ContactSearchAdapter extends DefaultSearchAdapter {
 		appendComparison(field, value);
 		stringBuilder.append(" AND ").append(folderIDsClause);
 		if (needsEMail) {
-			stringBuilder.append(" AND ").append(getEMailAutoCompleteClause());
+			stringBuilder.append(" AND (").append(getEMailAutoCompleteClause()).append(')');
 		}
 	}
 	

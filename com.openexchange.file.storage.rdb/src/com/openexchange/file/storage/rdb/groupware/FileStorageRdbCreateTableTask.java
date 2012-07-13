@@ -57,7 +57,8 @@ import java.sql.SQLException;
 import com.openexchange.database.AbstractCreateTableImpl;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.rdb.services.FileStorageRdbServiceRegistry;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
+import com.openexchange.file.storage.rdb.Services;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.Schema;
@@ -86,12 +87,11 @@ public final class FileStorageRdbCreateTableTask extends AbstractCreateTableImpl
         return "CREATE TABLE filestorageAccount (" +
         " cid INT4 unsigned NOT NULL," +
         " user INT4 unsigned NOT NULL," +
-        " serviceId VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
+        " serviceId VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
         " account INT4 unsigned NOT NULL," +
         " confId INT4 unsigned NOT NULL," +
-        " displayName VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
-        " PRIMARY KEY (cid, user, serviceId, account)," +
-        " FOREIGN KEY (cid, user) REFERENCES user (cid, id)" +
+        " displayName VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
+        " PRIMARY KEY (cid, user, serviceId, account)" + 
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
     }
 
@@ -137,7 +137,7 @@ public final class FileStorageRdbCreateTableTask extends AbstractCreateTableImpl
 
     @Override
     public String[] requiredTables() {
-        return new String[] { "user" };
+        return new String[] {};
     }
 
     @Override
@@ -147,7 +147,7 @@ public final class FileStorageRdbCreateTableTask extends AbstractCreateTableImpl
 
     private void createTable(final String tablename, final String sqlCreate, final int contextId) throws OXException {
         final DatabaseService ds = getService(DatabaseService.class);
-        final Connection writeCon = ds.getWritable(contextId);
+        final Connection writeCon = ds.getForUpdateTask(contextId);
         PreparedStatement stmt = null;
         try {
             if (tableExists(writeCon, tablename)) {
@@ -178,9 +178,9 @@ public final class FileStorageRdbCreateTableTask extends AbstractCreateTableImpl
 
     private <S> S getService(final Class<? extends S> clazz) throws OXException {
         try {
-            return FileStorageRdbServiceRegistry.getServiceRegistry().getService(clazz, true);
-        } catch (final OXException e) {
-            throw new OXException(e);
+            return Services.getService(clazz);
+        } catch (final IllegalStateException e) {
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 

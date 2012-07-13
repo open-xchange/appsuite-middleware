@@ -56,29 +56,29 @@ import org.osgi.service.event.EventHandler;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.cifs.CIFSService;
+import com.openexchange.file.storage.cifs.CIFSFileStorageService;
 
 /**
- * {@link Registerer}
+ * {@link CIFSServiceRegisterer}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class Registerer implements EventHandler {
+public final class CIFSServiceRegisterer implements EventHandler {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(Registerer.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CIFSServiceRegisterer.class));
 
     private final BundleContext context;
 
     private volatile FileStorageService service;
 
-    private volatile ServiceRegistration registration;
+    private volatile ServiceRegistration<FileStorageService> registration;
 
     private volatile int ranking;
 
     /**
-     * Initializes a new {@link Registerer}.
+     * Initializes a new {@link CIFSServiceRegisterer}.
      */
-    public Registerer(final BundleContext context) {
+    public CIFSServiceRegisterer(final BundleContext context) {
         super();
         this.context = context;
     }
@@ -92,16 +92,18 @@ public final class Registerer implements EventHandler {
                 ranking = null == rank ? 0 : rank.intValue();
             }
             synchronized (this) {
+                FileStorageService service = this.service;
                 if (null == service) {
                     /*
-                     * Try to create WebDAV service
+                     * Try to create CIFS service
                      */
                     try {
-                        service = CIFSService.newInstance();
-                        registration = context.registerService(FileStorageService.class.getName(), service, null);
+                        service = CIFSFileStorageService.newInstance((FileStorageAccountManagerProvider) event.getProperty(FileStorageAccountManagerProvider.PROPERTY_PROVIDER));
+                        registration = context.registerService(FileStorageService.class, service, null);
                         this.ranking = ranking;
+                        this.service = service;
                     } catch (final OXException e) {
-                        LOG.warn("Registration of \"" + CIFSService.class.getName() + "\" failed.", e);
+                        LOG.warn("Registration of \"" + CIFSFileStorageService.class.getName() + "\" failed.", e);
                     }
                 } else {
                     /*
@@ -114,11 +116,12 @@ public final class Registerer implements EventHandler {
                             try {
                                 registration.unregister();
                                 registration = null;
-                                service = CIFSService.newInstance();
-                                registration = context.registerService(FileStorageService.class.getName(), service, null);
+                                service = CIFSFileStorageService.newInstance(provider);
+                                registration = context.registerService(FileStorageService.class, service, null);
                                 this.ranking = ranking;
+                                this.service = service;
                             } catch (final OXException e) {
-                                LOG.warn("Registration of \"" + CIFSService.class.getName() + "\" failed.", e);
+                                LOG.warn("Registration of \"" + CIFSFileStorageService.class.getName() + "\" failed.", e);
                             }
                         }
                     }
@@ -131,7 +134,7 @@ public final class Registerer implements EventHandler {
      * Closes this registerer.
      */
     public void close() {
-        final ServiceRegistration thisReg = registration;
+        final ServiceRegistration<FileStorageService> thisReg = registration;
         if (null != thisReg) {
             thisReg.unregister();
             registration = null;
