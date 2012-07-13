@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <launchConfiguration type="org.eclipse.jdt.junit.launchconfig">
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
 <listEntry value="/open-xchange-test/src/com/openexchange/ajax/task/TaskTestSuite.java"/>
@@ -12,5 +12,4 @@
 <stringAttribute key="org.eclipse.jdt.junit.TEST_KIND" value="org.eclipse.jdt.junit.loader.junit3"/>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="com.openexchange.ajax.task.TaskTestSuite"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="open-xchange-test"/>
-<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Dtest.propfile=${workspace_loc}/open-xchange-test/conf/test.properties&#10;-Djava.util.logging.config.file=${workspace_loc:/open-xchange-development/tmp/logging.properties}"/>
 </launchConfiguration>
