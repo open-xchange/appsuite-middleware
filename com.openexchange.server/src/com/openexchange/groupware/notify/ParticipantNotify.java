@@ -56,9 +56,9 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -1198,8 +1198,8 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 app,
                 session.getContext(),
                 iTip,
-                new ArrayList<ConversionError>(),
-                new ArrayList<ConversionWarning>());
+                new LinkedList<ConversionError>(),
+                new LinkedList<ConversionWarning>());
             if (null != until) {
                 app.setEndDate(until);
             }
