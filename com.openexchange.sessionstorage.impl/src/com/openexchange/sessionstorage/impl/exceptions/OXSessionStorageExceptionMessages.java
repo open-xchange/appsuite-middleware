@@ -47,27 +47,29 @@
  *
  */
 
-package com.openexchange.report.client.impl;
+package com.openexchange.sessionstorage.impl.exceptions;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.jar.Attributes;
-import java.util.jar.Manifest;
+import com.openexchange.i18n.LocalizableStrings;
 
-public class VersionHandler {
 
-    public static String[] getServerVersion() throws IOException {
-    	String[] retval = new String[2];
+/**
+ * {@link OXSessionStorageExceptionMessages}
+ *
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ */
+public class OXSessionStorageExceptionMessages implements LocalizableStrings {
 
-        URL manifestURL = new URL("jar:file:/opt/open-xchange/bundles/com.openexchange.admin.jar!/META-INF/MANIFEST.MF");
-        Attributes attrs = new Manifest(manifestURL.openStream()).getMainAttributes();
-        retval[0] = attrs.getValue("OXVersion") + " Rev" + attrs.getValue("OXRevision");
-
-        manifestURL = new URL("file:/opt/open-xchange/bundles/com.openexchange.server/META-INF/MANIFEST.MF");
-        attrs = new Manifest(manifestURL.openStream()).getMainAttributes();
-        retval[1] = attrs.getValue("OXVersion") + " Rev" + attrs.getValue("OXRevision");
-        
-        return retval;
+    /**
+     * Initializes a new {@link OXSessionStorageExceptionMessages}.
+     */
+    private OXSessionStorageExceptionMessages() {
+        super();
     }
+    
+    public final static String SESSIONSTORAGE_START_FAILED_MSG = "Start of SessionStorageService failed.";
+    public final static String SESSIONSTORAGE_SAVE_FAILED_MSG = "Saving session with sessionId %1$s failed.";
+    public final static String SESSIONSTORAGE_LOOKUP_FAILED_MSG = "Lookup for session with sessionId %1$s failed.";
+    public final static String SESSIONSTORAGE_REMOVE_FAILED_MSG = "Removing session with sessionId %1$s failed.";
+    public final static String SESSIONSTORAGE_SESSION_NOT_FOUND_MSG = "No session with sessionId %1$s found.";
 
 }

@@ -351,6 +351,9 @@ public class ContactComparator implements Comparator<Contact> {
         case Contact.USERFIELD20:
             retval = compareString(o1.getUserField20(), o2.getUserField20());
             break;
+        case Contact.FOLDER_ID:
+            retval = intcompare(o1.getParentFolderID(), o2.getParentFolderID());
+            break;
         default:
             throw new UnsupportedOperationException("Unknown sort column value " + this.orderfield);
         }

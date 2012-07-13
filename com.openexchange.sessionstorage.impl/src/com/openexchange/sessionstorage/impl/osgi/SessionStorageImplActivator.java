@@ -47,27 +47,53 @@
  *
  */
 
-package com.openexchange.report.client.impl;
+package com.openexchange.sessionstorage.impl.osgi;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.jar.Attributes;
-import java.util.jar.Manifest;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.sessionstorage.SessionStorageService;
+import com.openexchange.sessionstorage.impl.SessionStorageServiceImpl;
 
-public class VersionHandler {
+/**
+ * {@link SessionStorageImplActivator}
+ *
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ */
+public class SessionStorageImplActivator extends HousekeepingActivator {
 
-    public static String[] getServerVersion() throws IOException {
-    	String[] retval = new String[2];
+    private final Log log = LogFactory.getLog(SessionStorageImplActivator.class);
 
-        URL manifestURL = new URL("jar:file:/opt/open-xchange/bundles/com.openexchange.admin.jar!/META-INF/MANIFEST.MF");
-        Attributes attrs = new Manifest(manifestURL.openStream()).getMainAttributes();
-        retval[0] = attrs.getValue("OXVersion") + " Rev" + attrs.getValue("OXRevision");
+    private ConfigurationService configService = null;
 
-        manifestURL = new URL("file:/opt/open-xchange/bundles/com.openexchange.server/META-INF/MANIFEST.MF");
-        attrs = new Manifest(manifestURL.openStream()).getMainAttributes();
-        retval[1] = attrs.getValue("OXVersion") + " Rev" + attrs.getValue("OXRevision");
-        
-        return retval;
+    private SessionStorageService service = null;
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        Class<?>[] needed = new Class<?>[] { ConfigurationService.class };
+        return needed;
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+        log.info("Starting bundle: com.openexchange.sessionstorage");
+        configService = getService(ConfigurationService.class);
+        boolean enabled = configService.getBoolProperty("sessionstorage.enabled", false);
+        if (enabled) {
+            service = new SessionStorageServiceImpl();
+            registerService(SessionStorageService.class, service);
+        }
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        log.info("Stopping bundle: com.openexchange.sessionstorage");
+        if (service != null) {
+            unregisterServices();
+        }
+        closeTrackers();
+        cleanUp();
     }
 
 }

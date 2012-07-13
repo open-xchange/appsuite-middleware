@@ -47,27 +47,50 @@
  *
  */
 
-package com.openexchange.report.client.impl;
+package com.openexchange.sessionstorage;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.jar.Attributes;
-import java.util.jar.Manifest;
+import java.util.List;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
-public class VersionHandler {
-
-    public static String[] getServerVersion() throws IOException {
-    	String[] retval = new String[2];
-
-        URL manifestURL = new URL("jar:file:/opt/open-xchange/bundles/com.openexchange.admin.jar!/META-INF/MANIFEST.MF");
-        Attributes attrs = new Manifest(manifestURL.openStream()).getMainAttributes();
-        retval[0] = attrs.getValue("OXVersion") + " Rev" + attrs.getValue("OXRevision");
-
-        manifestURL = new URL("file:/opt/open-xchange/bundles/com.openexchange.server/META-INF/MANIFEST.MF");
-        attrs = new Manifest(manifestURL.openStream()).getMainAttributes();
-        retval[1] = attrs.getValue("OXVersion") + " Rev" + attrs.getValue("OXRevision");
-        
-        return retval;
-    }
-
+/**
+ * {@link SessionStorageService}
+ *
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ */
+public interface SessionStorageService {
+    
+    public Session lookupSession(String sessionId) throws OXException;
+    
+    public void addSession(Session session) throws OXException;
+    
+    public void removeSession(String sessionId) throws OXException;
+    
+    public void removeUserSessions(int userId, int contextId) throws OXException;
+    
+    public void removeContextSessions(int contextId) throws OXException;
+    
+    public boolean hasForContext(int contextId) throws OXException;
+    
+    public Session[] getUserSessions(int userId, int contextId) throws OXException;
+    
+    public Session getAnyActiveSessionForUser(int userId, int contextId) throws OXException;
+    
+    public Session findFirstSessionForUser(int userId, int contextId) throws OXException;
+    
+    public List<Session> getSessions() throws OXException;
+    
+    public int getNumberOfActiveSessions() throws OXException;
+    
+    public Session getSessionByRandomToken(String randomToken, String newIP) throws OXException;
+    
+    public Session getSessionByAlternativeId(String altId) throws OXException;
+    
+    public Session getCachedSession(String sessionId) throws OXException;
+    
+    public void cleanUp() throws OXException;
+    
+    public void changePassword(String sessionId, String newPassword) throws OXException;
+    
+    
 }

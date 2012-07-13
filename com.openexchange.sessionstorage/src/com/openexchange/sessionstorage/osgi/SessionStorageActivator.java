@@ -47,27 +47,37 @@
  *
  */
 
-package com.openexchange.report.client.impl;
+package com.openexchange.sessionstorage.osgi;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.jar.Attributes;
-import java.util.jar.Manifest;
+import com.openexchange.osgi.HousekeepingActivator;
 
-public class VersionHandler {
+/**
+ * {@link SessionStorageActivator}
+ *
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ */
+public class SessionStorageActivator extends HousekeepingActivator {
 
-    public static String[] getServerVersion() throws IOException {
-    	String[] retval = new String[2];
+    /**
+     * Initializes a new {@link SessionStorageActivator}.
+     */
+    public SessionStorageActivator() {
+        super();
+    }
 
-        URL manifestURL = new URL("jar:file:/opt/open-xchange/bundles/com.openexchange.admin.jar!/META-INF/MANIFEST.MF");
-        Attributes attrs = new Manifest(manifestURL.openStream()).getMainAttributes();
-        retval[0] = attrs.getValue("OXVersion") + " Rev" + attrs.getValue("OXRevision");
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return null;
+    }
 
-        manifestURL = new URL("file:/opt/open-xchange/bundles/com.openexchange.server/META-INF/MANIFEST.MF");
-        attrs = new Manifest(manifestURL.openStream()).getMainAttributes();
-        retval[1] = attrs.getValue("OXVersion") + " Rev" + attrs.getValue("OXRevision");
-        
-        return retval;
+    @Override
+    protected void startBundle() throws Exception {
+        // nothing to do
+    }
+    
+    @Override
+    protected void stopBundle() throws Exception {
+        // nothing to do
     }
 
 }

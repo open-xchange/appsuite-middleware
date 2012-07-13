@@ -47,27 +47,48 @@
  *
  */
 
-package com.openexchange.report.client.impl;
+package com.openexchange.sessiond.osgi;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.jar.Attributes;
-import java.util.jar.Manifest;
+import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.sessionstorage.SessionStorageService;
 
-public class VersionHandler {
 
-    public static String[] getServerVersion() throws IOException {
-    	String[] retval = new String[2];
+/**
+ * {@link SessionStorageServiceTracker}
+ *
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ */
+public class SessionStorageServiceTracker implements ServiceTrackerCustomizer<SessionStorageService, SessionStorageService> {
+    
+    private final BundleContext context;
 
-        URL manifestURL = new URL("jar:file:/opt/open-xchange/bundles/com.openexchange.admin.jar!/META-INF/MANIFEST.MF");
-        Attributes attrs = new Manifest(manifestURL.openStream()).getMainAttributes();
-        retval[0] = attrs.getValue("OXVersion") + " Rev" + attrs.getValue("OXRevision");
+    /**
+     * Initializes a new {@link SessionStorageServiceTracker}.
+     */
+    public SessionStorageServiceTracker(BundleContext context) {
+        super();
+        this.context = context;
+    }
 
-        manifestURL = new URL("file:/opt/open-xchange/bundles/com.openexchange.server/META-INF/MANIFEST.MF");
-        attrs = new Manifest(manifestURL.openStream()).getMainAttributes();
-        retval[1] = attrs.getValue("OXVersion") + " Rev" + attrs.getValue("OXRevision");
-        
-        return retval;
+    @Override
+    public SessionStorageService addingService(ServiceReference<SessionStorageService> reference) {
+        SessionStorageService service = context.getService(reference);
+        getServiceRegistry().addService(SessionStorageService.class, service);
+        return service;
+    }
+
+    @Override
+    public void modifiedService(ServiceReference<SessionStorageService> reference, SessionStorageService service) {
+        // nothing to do
+    }
+
+    @Override
+    public void removedService(ServiceReference<SessionStorageService> reference, SessionStorageService service) {
+        getServiceRegistry().removeService(SessionStorageService.class);
+        context.ungetService(reference);
     }
 
 }
