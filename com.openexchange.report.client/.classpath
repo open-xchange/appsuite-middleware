@@ -5,6 +5,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.server"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.console"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.rmi"/>
-	<classpathentry kind="lib" path="lib/json.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.common"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

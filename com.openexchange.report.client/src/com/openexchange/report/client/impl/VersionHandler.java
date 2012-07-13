@@ -63,7 +63,7 @@ public class VersionHandler {
         Attributes attrs = new Manifest(manifestURL.openStream()).getMainAttributes();
         retval[0] = attrs.getValue("OXVersion") + " Rev" + attrs.getValue("OXRevision");
 
-        manifestURL = new URL("jar:file:/opt/open-xchange/bundles/com.openexchange.server.jar!/META-INF/MANIFEST.MF");
+        manifestURL = new URL("file:/opt/open-xchange/bundles/com.openexchange.server/META-INF/MANIFEST.MF");
         attrs = new Manifest(manifestURL.openStream()).getMainAttributes();
         retval[1] = attrs.getValue("OXVersion") + " Rev" + attrs.getValue("OXRevision");
         
