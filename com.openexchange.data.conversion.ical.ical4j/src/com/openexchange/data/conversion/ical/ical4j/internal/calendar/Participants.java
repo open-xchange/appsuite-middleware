@@ -226,7 +226,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             try {
                 displayName = userResolver.loadUser(userParticipant.getIdentifier(), ctx).getDisplayName();
             } catch (OXException e) {
-                throw new ConversionError(index, e);
+                LOG.warn("Error resolving displayname for user participant", e);
             }
         }
         return displayName;
