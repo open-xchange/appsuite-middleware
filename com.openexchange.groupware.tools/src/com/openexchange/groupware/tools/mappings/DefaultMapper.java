@@ -53,7 +53,6 @@ import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Set;
-
 import com.openexchange.exception.OXException;
 
 /**
@@ -67,15 +66,20 @@ public abstract class DefaultMapper<O, E extends Enum<E>> implements Mapper<O, E
 
 	@Override
 	public Mapping<? extends Object, O> get(final E field) throws OXException {
-		if (null == field) {
-			throw new IllegalArgumentException("field");
-		}
-		final Mapping<? extends Object, O> mapping = getMappings().get(field);
+		final Mapping<? extends Object, O> mapping = opt(field);
 		if (null == mapping) {
 			throw OXException.notFound(field.toString());
 		}
 		return mapping;
 	}
+
+    @Override
+    public Mapping<? extends Object, O> opt(final E field) throws OXException {
+        if (null == field) {
+            throw new IllegalArgumentException("field");
+        }
+        return getMappings().get(field);
+    }
 
 	@Override
 	public void mergeDifferences(final O original, final O update) throws OXException {

@@ -50,6 +50,7 @@
 package com.openexchange.contact.storage;
 
 import java.util.Collection;
+import java.util.Date;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -94,6 +95,16 @@ public abstract class DefaultContactStorage implements ContactStorage {
         return this.search(session, contactSearch, fields, SortOptions.EMPTY);
 	}
 
+    @Override
+    public SearchIterator<Contact> deleted(Session session, String folderId, Date since, ContactField[] fields) throws OXException {
+        return deleted(session, folderId, since, fields, SortOptions.EMPTY);
+    }
+
+    @Override
+    public SearchIterator<Contact> modified(Session session, String folderId, Date since, ContactField[] fields) throws OXException {
+        return modified(session, folderId, since, fields, SortOptions.EMPTY);
+    }
+
     /**
      * Gets all contact fields.
      * 
@@ -103,7 +114,7 @@ public abstract class DefaultContactStorage implements ContactStorage {
         return ContactField.values();
     }
     
-    protected static SearchIterator<Contact> getSearchIterator(final Collection<Contact> contacts) {
+    protected static SearchIterator<Contact> getSearchIterator(Collection<Contact> contacts) {
     	return new SearchIteratorAdapter<Contact>(contacts.iterator(), contacts.size());
     }
     

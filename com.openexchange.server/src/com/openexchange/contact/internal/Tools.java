@@ -108,26 +108,41 @@ public final class Tools {
 	 * @return the comparator
 	 */
 	public static Comparator<Contact> getComparator(final SortOptions sortOptions) {
-		final Comparator<Object> collationComparator = null == sortOptions.getCollation() ? null :
-			Collator.getInstance(SuperCollator.get(sortOptions.getCollation()).getJavaLocale());
-		return new Comparator<Contact>() {
-			
-			@Override
-			public int compare(final Contact o1, final Contact o2) {
-				for (final SortOrder order : sortOptions.getOrder()) {
-					int comparison = 0;
-					try {
-						comparison = ContactMapper.getInstance().get(order.getBy()).compare(o1, o2, collationComparator);
-					} catch (final OXException e) {
-						LOG.error("error comparing objects", e);
-					}
-					if (0 != comparison) {
-						return Order.DESCENDING.equals(order.getOrder()) ? -1 * comparison : comparison;							
-					}
-				}
-				return 0;
-			}
-		};
+	    if (null == sortOptions || SortOptions.EMPTY.equals(sortOptions) || 
+	        null == sortOptions.getOrder() || 0 == sortOptions.getOrder().length) {
+	        /*
+	         * nothing to sort
+	         */
+	        return new Comparator<Contact>() {	            
+	            @Override
+	            public int compare(Contact o1, Contact o2) {
+	                return 0;
+	            }
+            };
+	    } else {
+	        /*
+	         * sort using the mapping's comparator with collation
+	         */
+	        final Comparator<Object> collationComparator = null == sortOptions.getCollation() ? null :
+	            Collator.getInstance(SuperCollator.get(sortOptions.getCollation()).getJavaLocale());
+	        return new Comparator<Contact>() {	            
+	            @Override
+	            public int compare(Contact o1, Contact o2) {	                
+	                for (SortOrder order : sortOptions.getOrder()) {
+	                    int comparison = 0;
+	                    try {
+	                        comparison = ContactMapper.getInstance().get(order.getBy()).compare(o1, o2, collationComparator);
+	                    } catch (OXException e) {
+	                        LOG.error("error comparing objects", e);
+	                    }
+	                    if (0 != comparison) {
+	                        return Order.DESCENDING.equals(order.getOrder()) ? -1 * comparison : comparison;                            
+	                    }
+	                }
+	                return 0;
+	            }
+	        };     
+	    }
 	}
 	
 	/**

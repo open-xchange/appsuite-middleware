@@ -60,10 +60,9 @@ import com.openexchange.contacts.ldap.folder.LdapUserFolderCreator;
 import com.openexchange.contacts.ldap.property.ContextProperties;
 import com.openexchange.contacts.ldap.property.FolderProperties;
 import com.openexchange.contacts.ldap.property.PropertyHandler;
-import com.openexchange.contacts.ldap.storage.LdapContactStorage;
+import com.openexchange.contacts.ldap.storage.DelegatingLdapStorage;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contact.ContactInterface;
-import com.openexchange.groupware.contact.ContactInterfaceProvider;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -152,29 +151,12 @@ public final class LdapActivator extends HousekeepingActivator {
                     final int folderid = createGlobalFolder.getFolderid();
                     final String stringfolderid = String.valueOf(folderid);
                     /*
-                     * Register LDAP contact interface provider for current context-ID/folder-ID pair
+                     * Register LDAP contact storage provider for current context-ID/folder-ID pair
                      */
-                    registerService(ContactInterfaceProvider.class, new LdapContactInterfaceProvider(
-                        folderprop,
-                        createGlobalFolder.getAdminid(),
-                        folderid,
-                        ctx.intValue()), getHashtableWithFolderID(stringfolderid, ctx.toString()));
-                    LOG.info(new StringBuilder("Registered global LDAP contact provider for folder \"").append(folderprop.getFoldername()).append(
-                        "\" with id \"").append(stringfolderid).append("\" for context: ").append(ctx).toString());
-                    /*-
-                     *
-                     *
-                    final LdapContactInterface ldapContactInterface = new LdapContactInterface(ctx.intValue(), createGlobalFolder.getAdminid(), folderprop, folderid);
-                    context.registerService(ContactInterface.class.getName(), ldapContactInterface, getHashtableWithFolderID(stringfolderid, ctx.toString()));
-                    LOG.info("Registered global LDAP folder \"" + folderprop.getFoldername() + "\" with id \"" + stringfolderid + "\" for context: " + ctx);
-                     */                    
-                    /*
-                     * register contact storage
-                     */
-                    registerService(ContactStorage.class, new LdapContactStorage(folderprop,
-                        createGlobalFolder.getAdminid(),
-                        folderid,
-                        ctx.intValue()), getHashtableWithFolderID(stringfolderid, ctx.toString()));
+                    LdapContactInterfaceProvider provider = new LdapContactInterfaceProvider(
+                        folderprop, createGlobalFolder.getAdminid(), folderid, ctx.intValue());
+                    registerService(ContactStorage.class, new DelegatingLdapStorage(ctx.intValue(), provider), 
+                        getHashtableWithFolderID(stringfolderid, ctx.toString()));
                     LOG.info(new StringBuilder("Registered global LDAP contact storage for folder \"").append(folderprop.getFoldername()).append(
                         "\" with id \"").append(stringfolderid).append("\" for context: ").append(ctx).toString());
                 }

@@ -75,6 +75,15 @@ public interface ContactStorage {
      * @throws OXException
      */
     boolean supports(Session session, String folderId) throws OXException;
+
+    /**
+     * Gets the priority of the storage that becomes relevant when multiple
+     * storages pretend to support the same folder ID. A higher value means a 
+     * higher priority.
+     * 
+     * @return the priority
+     */
+    int getPriority();
     
     /**
      * Gets a contact with specified fields.
@@ -254,9 +263,10 @@ public interface ContactStorage {
     void update(Session session, String folderId, String id, Contact contact, Date lastRead) throws OXException;
 
     /**
-     * Updates references to the supplied contact. This method is called for 
+     * Updates references to the supplied contact. This method is called  
      * after a contact has been updated to propagate the changes throughout 
-     * all storages, e.g. to update referenced distribution list members.
+     * all storages, e.g. to update distribution lists that are holding 
+     * references to the updated contact.
      * 
      * @param session the session
      * @param contact the contact that has been updated

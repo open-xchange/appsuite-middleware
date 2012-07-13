@@ -76,12 +76,15 @@ public final class DefaultContactStorageRegistry implements ContactStorageRegist
 
     @Override
     public ContactStorage getStorage(Session session, String folderId) throws OXException {
+        ContactStorage contactStorage = null;
         for (ContactStorage storage : this.knownStorages) {
             if (storage.supports(session, folderId)) {
-                return storage;
+                if (null == contactStorage || storage.getPriority() > contactStorage.getPriority()) {
+                    contactStorage = storage;
+                }
             }
         }
-        return null;
+        return contactStorage;
     }
     
     @Override

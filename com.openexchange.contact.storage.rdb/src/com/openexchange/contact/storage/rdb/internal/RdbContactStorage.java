@@ -102,6 +102,11 @@ public class RdbContactStorage extends DefaultContactStorage {
     }
     
     @Override
+    public int getPriority() {
+        return 0;
+    }
+    
+    @Override
     public boolean supports(Session session, String folderId) throws OXException {
         return true;
     }

@@ -59,11 +59,9 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.fields.DataFields;
@@ -2461,7 +2459,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-//        mappings.put(ContactField.CONTEXTID, new IntegerMapping<Contact>(CommonFields.Types.INTEGER, 593) {
+//        mappings.put(ContactField.CONTEXTID, new IntegerMapping<Contact>(null, 593) {
 //
 //            @Override
 //            public void set(Contact contact, Integer value) { 
@@ -2480,7 +2478,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 //
 //            @Override
 //            public void remove(Contact contact) { 
-//                contact.removeContextId();
+//                contact.removeContextID();
 //            }
 //        });
 
