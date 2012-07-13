@@ -58,9 +58,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+
 import javax.servlet.http.HttpServletResponse;
+
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.Patches;
@@ -121,7 +124,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
     private List<CalendarDataObject> deleteExceptionsToSave = null;
     private CalendarDataObject appointmentToSave = null;
 
-    public AppointmentResource(GroupwareCaldavFactory factory, AppointmentCollection parent, Appointment object, WebdavPath url) throws OXException {
+    public AppointmentResource(final GroupwareCaldavFactory factory, final AppointmentCollection parent, final Appointment object, final WebdavPath url) throws OXException {
         super(factory, parent, object, url);
         this.parent = parent;
     }
@@ -138,7 +141,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
         try {
             getAppointmentInterface().deleteAppointmentObject(
                 (CalendarDataObject) this.object, object.getParentFolderID(), object.getLastModified());
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw protocolException(e);
         }
     }
@@ -149,8 +152,8 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             /*
              * get original data
              */
-            Appointment originalAppointment = parent.load(this.object, false);
-            List<Appointment> originalExceptions = parent.loadChangeExceptions(this.object.getObjectID());
+            final Appointment originalAppointment = parent.load(this.object, false);
+            final List<Appointment> originalExceptions = parent.loadChangeExceptions(this.object.getObjectID());
             Date clientLastModified = this.object.getLastModified();
             if (clientLastModified.before(originalAppointment.getLastModified())) {
                 throw super.protocolException(HttpServletResponse.SC_CONFLICT);
@@ -169,8 +172,8 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             /*
              * update change exceptions
              */
-            for (CalendarDataObject exceptionToSave : exceptionsToSave) {
-                Appointment originalException = getMatchingException(originalExceptions, exceptionToSave.getRecurrenceDatePosition());
+            for (final CalendarDataObject exceptionToSave : exceptionsToSave) {
+                final Appointment originalException = getMatchingException(originalExceptions, exceptionToSave.getRecurrenceDatePosition());
                 if (null != originalException) {
                     /*
                      * prepare exception update
@@ -200,8 +203,8 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             /*
              * update delete exceptions
              */
-            for (CalendarDataObject deleteExceptionToSave : deleteExceptionsToSave) {
-                Appointment originalException = getMatchingException(originalExceptions, deleteExceptionToSave.getRecurrenceDatePosition());
+            for (final CalendarDataObject deleteExceptionToSave : deleteExceptionsToSave) {
+                final Appointment originalException = getMatchingException(originalExceptions, deleteExceptionToSave.getRecurrenceDatePosition());
                 if (null != originalException) {
                     /*
                      * prepare delete of existing exception
@@ -216,7 +219,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                 getAppointmentInterface().deleteAppointmentObject(deleteExceptionToSave, parentFolderID, clientLastModified);
                 clientLastModified = deleteExceptionToSave.getLastModified();
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw protocolException(e);
         }
     }
@@ -234,7 +237,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             /*
              * create change exceptions
              */
-            for (CalendarDataObject exception : exceptionsToSave) {
+            for (final CalendarDataObject exception : exceptionsToSave) {
                 exception.removeObjectID(); // in case it's already assigned due to retry operations
                 exception.setObjectID(appointmentToSave.getObjectID());
                 getAppointmentInterface().updateAppointmentObject(exception, parentFolderID, clientLastModified);
@@ -243,18 +246,18 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             /*
              * create delete exceptions
              */
-            for (CalendarDataObject exception : deleteExceptionsToSave) {
+            for (final CalendarDataObject exception : deleteExceptionsToSave) {
                 exception.setObjectID(appointmentToSave.getObjectID());
                 getAppointmentInterface().deleteAppointmentObject(exception, parentFolderID, clientLastModified);
                 clientLastModified = exception.getLastModified();
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw protocolException(e);
         }
     }
     
     @Override
-    protected void move(String targetFolderID) throws OXException {
+    protected void move(final String targetFolderID) throws OXException {
         this.appointmentToSave = new CalendarDataObject();
         appointmentToSave.setObjectID(object.getObjectID());
         appointmentToSave.setParentFolderID(Tools.parse(targetFolderID));
@@ -264,10 +267,10 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
 
     @Override
     protected String generateICal() throws OXException {
-        ICalEmitter icalEmitter = factory.getIcalEmitter();
-        ICalSession session = icalEmitter.createSession();
-        List<ConversionError> conversionErrors = new ArrayList<ConversionError>();
-        List<ConversionWarning> conversionWarnings = new ArrayList<ConversionWarning>();
+        final ICalEmitter icalEmitter = factory.getIcalEmitter();
+        final ICalSession session = icalEmitter.createSession();
+        final List<ConversionError> conversionErrors = new LinkedList<ConversionError>();
+        final List<ConversionWarning> conversionWarnings = new LinkedList<ConversionWarning>();
         try {
             /*
              * write appointment
@@ -275,18 +278,18 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             icalEmitter.writeAppointment(session, parent.load(object, true), 
                 factory.getContext(), conversionErrors, conversionWarnings);
             if (0 < object.getRecurrenceID()) {
-                List<Appointment> changeExceptions = parent.getChangeExceptions(object.getObjectID());
+                final List<Appointment> changeExceptions = parent.getChangeExceptions(object.getObjectID());
                 if (null != changeExceptions && 0 < changeExceptions.size()) {
                     /*
                      * write exceptions
                      */
-                    for (Appointment changeException : changeExceptions) {
+                    for (final Appointment changeException : changeExceptions) {
                         icalEmitter.writeAppointment(session, parent.load(changeException, true), 
                             factory.getContext(), conversionErrors, conversionWarnings);
                     }
                 }
             }
-            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+            final ByteArrayOutputStream bytes = new ByteArrayOutputStream();
             icalEmitter.writeSession(session, bytes);
             /*
              * apply patches
@@ -294,18 +297,18 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             String iCal = new String(bytes.toByteArray(), "UTF-8");
             iCal = Patches.Outgoing.removeEmptyRDates(iCal);
             return iCal;
-        } catch (UnsupportedEncodingException e) {
+        } catch (final UnsupportedEncodingException e) {
             throw protocolException(e);
         }
     }
     
     @Override
-    protected void deserialize(InputStream body) throws OXException, IOException {
-        List<CalendarDataObject> appointments = this.parse(body);
+    protected void deserialize(final InputStream body) throws OXException, IOException {
+        final List<CalendarDataObject> appointments = this.parse(body);
         if (null != appointments && 0 < appointments.size()) {
             this.deleteExceptionsToSave = new ArrayList<CalendarDataObject>();
             this.exceptionsToSave = new ArrayList<CalendarDataObject>();            
-            for (CalendarDataObject cdo : appointments) {
+            for (final CalendarDataObject cdo : appointments) {
                 cdo.setContext(factory.getContext());
                 cdo.removeLastModified();
                 cdo.setIgnoreConflicts(true);
@@ -327,18 +330,18 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             /*
              * store filename when different from uid
              */
-            String resourceName = super.extractResourceName();
+            final String resourceName = super.extractResourceName();
             if (null != resourceName && false == resourceName.equals(appointmentToSave.getUid())) {
                 appointmentToSave.setFilename(resourceName);
             }
         }
     }
     
-    private List<CalendarDataObject> parse(InputStream body) throws IOException, ConversionError {
+    private List<CalendarDataObject> parse(final InputStream body) throws IOException, ConversionError {
         UnsynchronizedByteArrayOutputStream baos = null;
         try {
-            int buflen = 2048;
-            byte[] buf = new byte[buflen];
+            final int buflen = 2048;
+            final byte[] buf = new byte[buflen];
             baos = new UnsynchronizedByteArrayOutputStream(8192);
             for (int read = body.read(buf, 0, buflen); read > 0; read = body.read(buf, 0, buflen)) {
                 baos.write(buf, 0, read);
@@ -350,11 +353,11 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
         }
     }
 
-    private List<CalendarDataObject> parse(String iCal) throws ConversionError {
+    private List<CalendarDataObject> parse(final String iCal) throws ConversionError {
         /*
          * apply patches
          */
-        String patchedICal = iCal;
+        final String patchedICal = iCal;
         
         //XXX to make the UserResolver do it's job correctly
         //patchedICal = patchedICal.replace("424242669@devel-mail.netline.de", "@premium");
@@ -365,11 +368,11 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                 patchedICal, getTimeZone(), factory.getContext(), new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>());
     }
     
-    private void checkForExplicitRemoves(Appointment oldAppointment, CalendarDataObject cdo) {
+    private void checkForExplicitRemoves(final Appointment oldAppointment, final CalendarDataObject cdo) {
         /*
          * reset previously set appointment fields
          */
-        for (int field : CALDAV_FIELDS) {
+        for (final int field : CALDAV_FIELDS) {
             if (oldAppointment.contains(field) && false == cdo.contains(field)) {
                 if (CalendarObject.ALARM == field) {
                     // -1 resets alarm
@@ -384,7 +387,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
          */
         if (CalendarObject.NO_RECURRENCE != oldAppointment.getRecurrenceType() && 
                 CalendarObject.NO_RECURRENCE != cdo.getRecurrenceType()) {
-            for (int field : RECURRENCE_FIELDS) {
+            for (final int field : RECURRENCE_FIELDS) {
                 if (oldAppointment.contains(field) && false == cdo.contains(field)) {
                     cdo.set(field, CalendarObject.UNTIL == field ? null : cdo.get(field)); // getUntil returns 'max until date' if not set 
                 }
@@ -392,24 +395,24 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
         } 
     }
     
-    private void createNewDeleteExceptions(Appointment oldAppointment, CalendarDataObject cdo) throws OXException {
-        Date[] wantedDeleteExceptions = cdo.getDeleteException();
+    private void createNewDeleteExceptions(final Appointment oldAppointment, final CalendarDataObject cdo) throws OXException {
+        final Date[] wantedDeleteExceptions = cdo.getDeleteException();
         if (wantedDeleteExceptions == null || wantedDeleteExceptions.length == 0) {
             return;
         }
         // Normalize the wanted DelEx to midnight, and add them to our set.
-        Set<Date> wantedSet = new HashSet<Date>(Arrays.asList(wantedDeleteExceptions));
+        final Set<Date> wantedSet = new HashSet<Date>(Arrays.asList(wantedDeleteExceptions));
 
         Date[] knownDeleteExceptions = oldAppointment.getDeleteException();
         if (knownDeleteExceptions == null) {
             knownDeleteExceptions = new Date[0];
         }
-        for (Date date : knownDeleteExceptions) {
+        for (final Date date : knownDeleteExceptions) {
             wantedSet.remove(date);
         }
 
-        for (Date date : wantedSet) {
-            CalendarDataObject deleteException = new CalendarDataObject();
+        for (final Date date : wantedSet) {
+            final CalendarDataObject deleteException = new CalendarDataObject();
             deleteException.setRecurrenceDatePosition(date);
             deleteException.setContext(factory.getContext());
             deleteException.setParentFolderID(parentFolderID);
@@ -420,23 +423,23 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
     }
 
     @Override
-    protected boolean trimTruncatedAttribute(Truncated truncated) {
+    protected boolean trimTruncatedAttribute(final Truncated truncated) {
         boolean hasTrimmed = false;
         if (null != this.appointmentToSave) {
             hasTrimmed |= trimTruncatedAttribute(truncated, appointmentToSave);
         }
         if (null != this.exceptionsToSave && 0 < this.exceptionsToSave.size()) {
-            for (CalendarDataObject calendarObject : exceptionsToSave) {
+            for (final CalendarDataObject calendarObject : exceptionsToSave) {
                 hasTrimmed |= trimTruncatedAttribute(truncated, calendarObject);
             }
         }
         return hasTrimmed;
     }
     
-    private static boolean trimTruncatedAttribute(Truncated truncated, CalendarDataObject calendarObject) {
-        Object value = calendarObject.get(truncated.getId());
+    private static boolean trimTruncatedAttribute(final Truncated truncated, final CalendarDataObject calendarObject) {
+        final Object value = calendarObject.get(truncated.getId());
         if (null != value && String.class.isInstance(value)) {
-            String stringValue = (String)value;
+            final String stringValue = (String)value;
             if (stringValue.length() > truncated.getMaxSize()) {
                 calendarObject.set(truncated.getId(), stringValue.substring(0, truncated.getMaxSize()));
                 return true;
@@ -445,13 +448,13 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
         return false;
     }
 
-    private static boolean looksLikeMaster(CalendarDataObject cdo) {
+    private static boolean looksLikeMaster(final CalendarDataObject cdo) {
         return cdo.containsRecurrenceType() && CalendarObject.NO_RECURRENCE != cdo.getRecurrenceType();
     }
 
-    private static Appointment getMatchingException(List<Appointment> changeExceptions, Date recurrenceDatePosition) {
+    private static Appointment getMatchingException(final List<Appointment> changeExceptions, final Date recurrenceDatePosition) {
         if (null != changeExceptions) {
-            for (Appointment existingException : changeExceptions) {
+            for (final Appointment existingException : changeExceptions) {
                 if (existingException.getRecurrenceDatePosition().equals(recurrenceDatePosition)) {
                     return existingException;
                 }
