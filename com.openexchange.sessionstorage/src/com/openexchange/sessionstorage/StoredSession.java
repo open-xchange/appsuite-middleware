@@ -49,8 +49,8 @@
 
 package com.openexchange.sessionstorage;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.session.Session;
 
 /**
@@ -91,25 +91,40 @@ public class StoredSession implements Session {
     /**
      * Initializes a new {@link StoredSession}.
      */
-    public StoredSession(Session session) {
-       this.authId = session.getAuthId();
-       this.client = session.getClient();
-       this.contextId = session.getContextId();
-       this.hash = session.getHash();
-       this.localIp = session.getLocalIp();
-       this.login = session.getLogin();
-       this.loginName = session.getLoginName();
-       this.parameters = new HashMap<String, Object>();
-       this.parameters.put(Session.PARAM_LOCK, session.getParameter(Session.PARAM_LOCK));
-       this.parameters.put(Session.PARAM_COUNTER, session.getParameter(Session.PARAM_COUNTER));
-       this.parameters.put(Session.PARAM_ALTERNATIVE_ID, session.getParameter(Session.PARAM_ALTERNATIVE_ID));
-       this.parameters.put(Session.PARAM_CAPABILITIES, session.getParameter(Session.PARAM_CAPABILITIES));
-       this.password = session.getPassword();
-       this.randomToken = session.getRandomToken();
-       this.secret = session.getSecret();
-       this.sessionId = session.getSessionID();
-       this.userId = session.getUserId();
-       this.userLogin = session.getUserlogin();
+    public StoredSession(final Session session) {
+        this.authId = session.getAuthId();
+        this.client = session.getClient();
+        this.contextId = session.getContextId();
+        this.hash = session.getHash();
+        this.localIp = session.getLocalIp();
+        this.login = session.getLogin();
+        this.loginName = session.getLoginName();
+        this.parameters = new ConcurrentHashMap<String, Object>();
+        // Assign parameters (if not null)
+        {
+            Object parameter = session.getParameter(Session.PARAM_LOCK);
+            if (null != parameter) {
+                this.parameters.put(Session.PARAM_LOCK, parameter);
+            }
+            parameter = session.getParameter(Session.PARAM_COUNTER);
+            if (null != parameter) {
+                this.parameters.put(Session.PARAM_COUNTER, parameter);
+            }
+            parameter = session.getParameter(Session.PARAM_ALTERNATIVE_ID);
+            if (null != parameter) {
+                this.parameters.put(Session.PARAM_ALTERNATIVE_ID, parameter);
+            }
+            parameter = session.getParameter(Session.PARAM_CAPABILITIES);
+            if (null != parameter) {
+                this.parameters.put(Session.PARAM_CAPABILITIES, parameter);
+            }
+        }
+        this.password = session.getPassword();
+        this.randomToken = session.getRandomToken();
+        this.secret = session.getSecret();
+        this.sessionId = session.getSessionID();
+        this.userId = session.getUserId();
+        this.userLogin = session.getUserlogin();
     }
 
     @Override
@@ -117,7 +132,7 @@ public class StoredSession implements Session {
         return loginName;
     }
 
-    public void setLoginName(String loginName) {
+    public void setLoginName(final String loginName) {
         this.loginName = loginName;
     }
 
@@ -126,7 +141,7 @@ public class StoredSession implements Session {
         return password;
     }
 
-    public void setPassword(String password) {
+    public void setPassword(final String password) {
         this.password = password;
     }
 
@@ -135,7 +150,7 @@ public class StoredSession implements Session {
         return contextId;
     }
 
-    public void setContextId(int contextId) {
+    public void setContextId(final int contextId) {
         this.contextId = contextId;
     }
 
@@ -144,7 +159,7 @@ public class StoredSession implements Session {
         return userId;
     }
 
-    public void setUserId(int userId) {
+    public void setUserId(final int userId) {
         this.userId = userId;
     }
 
@@ -152,7 +167,7 @@ public class StoredSession implements Session {
         return sessionId;
     }
 
-    public void setSessionId(String sessionId) {
+    public void setSessionId(final String sessionId) {
         this.sessionId = sessionId;
     }
 
@@ -161,7 +176,7 @@ public class StoredSession implements Session {
         return secret;
     }
 
-    public void setSecret(String secret) {
+    public void setSecret(final String secret) {
         this.secret = secret;
     }
 
@@ -170,7 +185,7 @@ public class StoredSession implements Session {
         return login;
     }
 
-    public void setLogin(String login) {
+    public void setLogin(final String login) {
         this.login = login;
     }
 
@@ -179,7 +194,7 @@ public class StoredSession implements Session {
         return randomToken;
     }
 
-    public void setRandomToken(String randomToken) {
+    public void setRandomToken(final String randomToken) {
         this.randomToken = randomToken;
     }
 
@@ -189,7 +204,7 @@ public class StoredSession implements Session {
     }
 
     @Override
-    public void setLocalIp(String localIp) {
+    public void setLocalIp(final String localIp) {
         this.localIp = localIp;
     }
 
@@ -198,7 +213,7 @@ public class StoredSession implements Session {
         return authId;
     }
 
-    public void setAuthId(String authId) {
+    public void setAuthId(final String authId) {
         this.authId = authId;
     }
 
@@ -208,7 +223,7 @@ public class StoredSession implements Session {
     }
 
     @Override
-    public void setHash(String hash) {
+    public void setHash(final String hash) {
         this.hash = hash;
     }
 
@@ -218,7 +233,7 @@ public class StoredSession implements Session {
     }
 
     @Override
-    public void setClient(String client) {
+    public void setClient(final String client) {
         this.client = client;
     }
     
@@ -226,7 +241,7 @@ public class StoredSession implements Session {
         return userLogin;
     }
     
-    public void setUserLogin(String userLogin) {
+    public void setUserLogin(final String userLogin) {
         this.userLogin = userLogin;
     }
 
@@ -234,18 +249,18 @@ public class StoredSession implements Session {
         return parameters;
     }
 
-    public void setParameters(Map<String, Object> parameters) {
+    public void setParameters(final Map<String, Object> parameters) {
         this.parameters = parameters;
     }
 
     @Override
-    public boolean containsParameter(String name) {
-        Object value = parameters.get(name);
+    public boolean containsParameter(final String name) {
+        final Object value = parameters.get(name);
         return value == null;
     }
 
     @Override
-    public Object getParameter(String name) {
+    public Object getParameter(final String name) {
         return parameters.get(name);
     }
 
@@ -260,7 +275,7 @@ public class StoredSession implements Session {
     }
 
     @Override
-    public void setParameter(String name, Object value) {
+    public void setParameter(final String name, final Object value) {
         if (parameters.containsKey(name)) {
             parameters.remove(name);
         }
