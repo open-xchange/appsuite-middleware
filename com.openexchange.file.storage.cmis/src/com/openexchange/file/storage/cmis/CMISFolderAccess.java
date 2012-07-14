@@ -52,6 +52,9 @@ package com.openexchange.file.storage.cmis;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.chemistry.opencmis.client.api.CmisObject;
+import org.apache.chemistry.opencmis.client.api.Folder;
+import org.apache.chemistry.opencmis.client.api.ObjectType;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -81,25 +84,17 @@ public final class CMISFolderAccess extends AbstractCMISAccess implements FileSt
             /*
              * Check
              */
-            final String fid = checkFolderId(folderId, rootUrl);
-            final SmbFile smbFolder = new SmbFile(fid, auth);
-            if (!exists(smbFolder)) {
+            final CmisObject object = cmisSession.getObject(folderId);
+            if (null == object) {
                 return false;
             }
-            if (!smbFolder.isDirectory()) {
-                /*
-                 * Not a directory
-                 */
-                throw CIFSExceptionCodes.NOT_A_FOLDER.create(folderId);
+            if (!ObjectType.FOLDER_BASETYPE_ID.equals(object.getType())) {
+                throw CMISExceptionCodes.NOT_A_FOLDER.create(folderId);
             }
             return true;
         } catch (final OXException e) {
             throw e;
-        } catch (final SmbException e) {
-            throw CIFSExceptionCodes.SMB_ERROR.create(e, e.getMessage());
-        } catch (final IOException e) {
-            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (final Exception e) {
+        } catch (final RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
