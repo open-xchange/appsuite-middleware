@@ -49,11 +49,9 @@
 
 package com.openexchange.file.storage.cmis;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -505,15 +503,38 @@ public final class CMISFolderAccess extends AbstractCMISAccess implements FileSt
 
     @Override
     public FileStorageFolder[] getPath2DefaultFolder(final String folderId) throws OXException {
-        final List<FileStorageFolder> list = new ArrayList<FileStorageFolder>();
-        final String fid = checkFolderId(folderId, rootUrl);
-        FileStorageFolder f = getFolder(fid);
-        do {
-            list.add(f);
-            f = getFolder(f.getParentId());
-        } while (!FileStorageFolder.ROOT_FULLNAME.equals(f.getParentId()));
+        if (FileStorageFolder.ROOT_FULLNAME.equals(folderId)) {
+            return new FileStorageFolder[0];
+        }
+        try {
+            final ObjectId folderObjectId;
+            final CmisObject object;
+            if (FileStorageFolder.ROOT_FULLNAME.equals(folderId)) {
+                object = cmisSession.getRootFolder();
+                folderObjectId = cmisSession.createObjectId(object.getId());
+            } else {
+                folderObjectId = cmisSession.createObjectId(folderId);
+                object = cmisSession.getObject(folderObjectId);
+            }
+            if (null == object) {
+                throw CMISExceptionCodes.NOT_FOUND.create(folderId);
+            }
+            if (!ObjectType.FOLDER_BASETYPE_ID.equals(object.getType())) {
+                throw CMISExceptionCodes.NOT_A_FOLDER.create(folderId);
+            }
+            final List<FileStorageFolder> list = new ArrayList<FileStorageFolder>();
+            FileStorageFolder f = convertFolder(folderObjectId, (Folder) object);
+            do {
+                list.add(f);
+                f = getFolder(f.getParentId());
+            } while (!FileStorageFolder.ROOT_FULLNAME.equals(f.getParentId()));
 
-        return list.toArray(new FileStorageFolder[list.size()]);
+            return list.toArray(new FileStorageFolder[list.size()]);
+        } catch (final CmisRuntimeException e) {
+            throw CMISExceptionCodes.CMIS_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
     @Override

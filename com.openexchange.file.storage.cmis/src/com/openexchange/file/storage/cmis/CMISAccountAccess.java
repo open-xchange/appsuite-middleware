@@ -283,7 +283,7 @@ public final class CMISAccountAccess implements FileStorageAccountAccess {
             synchronized (this) {
                 tmp = fileAccess;
                 if (null == tmp) {
-                    fileAccess = tmp = new CIFSFileAccess(rootUrl, auth, account, session, this);
+                    fileAccess = tmp = new CMISFileAccess(rootUrl, auth, account, session, this);
                 }
             }
         }
