@@ -51,9 +51,12 @@ package com.openexchange.file.storage.cmis;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import org.apache.chemistry.opencmis.client.api.CmisObject;
 import org.apache.chemistry.opencmis.client.api.Folder;
+import org.apache.chemistry.opencmis.client.api.ItemIterable;
+import org.apache.chemistry.opencmis.client.api.ObjectId;
 import org.apache.chemistry.opencmis.client.api.ObjectType;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
@@ -80,20 +83,21 @@ public final class CMISFolderAccess extends AbstractCMISAccess implements FileSt
 
     @Override
     public boolean exists(final String folderId) throws OXException {
+        if (FileStorageFolder.ROOT_FULLNAME.equals(folderId)) {
+            return true;
+        }
         try {
             /*
              * Check
              */
-            final CmisObject object = cmisSession.getObject(folderId);
+            final CmisObject object = cmisSession.getObject(cmisSession.createObjectId(folderId));
             if (null == object) {
                 return false;
             }
             if (!ObjectType.FOLDER_BASETYPE_ID.equals(object.getType())) {
-                throw CMISExceptionCodes.NOT_A_FOLDER.create(folderId);
+                return false;
             }
             return true;
-        } catch (final OXException e) {
-            throw e;
         } catch (final RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -105,57 +109,55 @@ public final class CMISFolderAccess extends AbstractCMISAccess implements FileSt
             /*
              * Check
              */
-            final String fid = checkFolderId(folderId, rootUrl);
-            final SmbFile smbFolder = new SmbFile(fid, auth);
-            if (!exists(smbFolder)) {
-                throw CIFSExceptionCodes.NOT_FOUND.create(folderId);
+            final ObjectId folderObjectId;
+            final CmisObject object;
+            if (FileStorageFolder.ROOT_FULLNAME.equals(folderId)) {
+                object = cmisSession.getRootFolder();
+                folderObjectId = cmisSession.createObjectId(object.getId());
+            } else {
+                folderObjectId = cmisSession.createObjectId(folderId);
+                object = cmisSession.getObject(folderObjectId);
             }
-            if (!smbFolder.isDirectory()) {
-                throw CIFSExceptionCodes.NOT_A_FOLDER.create(folderId);
+            if (null == object) {
+                throw CMISExceptionCodes.NOT_FOUND.create(folderId);
             }
-            /*
-             * Check sub resources
-             */
-            SmbFile[] subFiles;
-            try {
-                subFiles = smbFolder.canRead() ? smbFolder.listFiles() : new SmbFile[0];
-            } catch (final SmbException e) {
-                final String message = e.getMessage();
-                if (!message.startsWith("Invalid operation") && !message.equals("Access is denied.")) {
-                    throw e;
-                }
-                subFiles = new SmbFile[0];
+            if (!ObjectType.FOLDER_BASETYPE_ID.equals(object.getType())) {
+                throw CMISExceptionCodes.NOT_A_FOLDER.create(folderId);
             }
-            boolean hasSubdir = false;
-            int fileCount = 0;
-            for (final SmbFile sub : subFiles) {
-                if (sub.isDirectory()) {
-                    hasSubdir = true;
-                } else if (sub.isFile()) {
-                    fileCount++;
-                }
-            }
-            /*
-             * Convert to a folder
-             */
-            final CIFSFolder cifsFolder = new CIFSFolder(session.getUserId());
-            cifsFolder.parseSmbFolder(smbFolder);
-            cifsFolder.setFileCount(fileCount);
-            cifsFolder.setSubfolders(hasSubdir);
-            cifsFolder.setSubscribedSubfolders(hasSubdir);
-            /*
-             * TODO: Set capabilities
-             */
-            return cifsFolder;
-        } catch (final OXException e) {
-            throw e;
-        } catch (final SmbException e) {
-            throw CIFSExceptionCodes.SMB_ERROR.create(e, e.getMessage());
-        } catch (final IOException e) {
-            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (final Exception e) {
+            return convertFolder(folderObjectId, (Folder) object);
+        } catch (final RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private FileStorageFolder convertFolder(final ObjectId folderObjectId, final Folder folder) throws OXException {
+        /*
+         * Check sub resources
+         */
+        final ItemIterable<CmisObject> children = folder.getChildren();
+        boolean hasSubdir = false;
+        int fileCount = 0;
+        for (final CmisObject sub : children) {
+            if (ObjectType.FOLDER_BASETYPE_ID.equals(sub.getType())) {
+                hasSubdir = true;
+            } else if (ObjectType.DOCUMENT_BASETYPE_ID.equals(sub.getType())) {
+                fileCount++;
+            }
+        }
+        cmisSession.getAcl(folderObjectId, true);
+        //cmisSession.get
+        /*
+         * Convert to a folder
+         */
+        final CMISFolder cmisFolder = new CMISFolder(session.getUserId());
+        cmisFolder.parseSmbFolder(folder);
+        cmisFolder.setFileCount(fileCount);
+        cmisFolder.setSubfolders(hasSubdir);
+        cmisFolder.setSubscribedSubfolders(hasSubdir);
+        /*
+         * TODO: Set capabilities
+         */
+        return cmisFolder;
     }
 
     @Override
@@ -164,49 +166,36 @@ public final class CMISFolderAccess extends AbstractCMISAccess implements FileSt
             /*
              * Check
              */
-            final String fid = checkFolderId(parentId, rootUrl);
-            final SmbFile smbFolder = new SmbFile(fid, auth);
-            if (!exists(smbFolder)) {
-                throw CIFSExceptionCodes.NOT_FOUND.create(parentId);
+            final ObjectId folderObjectId;
+            final CmisObject object;
+            if (FileStorageFolder.ROOT_FULLNAME.equals(parentId)) {
+                object = cmisSession.getRootFolder();
+                folderObjectId = cmisSession.createObjectId(object.getId());
+            } else {
+                folderObjectId = cmisSession.createObjectId(parentId);
+                object = cmisSession.getObject(folderObjectId);
             }
-            if (!smbFolder.isDirectory()) {
-                throw CIFSExceptionCodes.NOT_A_FOLDER.create(parentId);
+            if (null == object) {
+                throw CMISExceptionCodes.NOT_FOUND.create(parentId);
             }
+            if (!ObjectType.FOLDER_BASETYPE_ID.equals(object.getType())) {
+                throw CMISExceptionCodes.NOT_A_FOLDER.create(parentId);
+            }
+            final Folder folder = (Folder) object;
             /*
              * Check sub resources
              */
-            SmbFile[] subFiles;
-            try {
-                subFiles = smbFolder.canRead() ? smbFolder.listFiles() : new SmbFile[0];
-            } catch (final SmbException e) {
-                final String message = e.getMessage();
-                if (!message.startsWith("Invalid operation") && !message.equals("Access is denied.")) {
-                    throw e;
-                }
-                subFiles = new SmbFile[0];
-            }
-            final List<FileStorageFolder> list = new ArrayList<FileStorageFolder>(subFiles.length);
-            for (final SmbFile sub : subFiles) {
-                if (sub.isDirectory()) {
-                    try {
-                        list.add(getFolder(sub.getPath()));
-                    } catch (final OXException e) {
-                        if (!CIFSExceptionCodes.NOT_FOUND.equals(e)) {
-                            throw e;
-                        }
-                    }
+            final ItemIterable<CmisObject> children = folder.getChildren();
+            final List<FileStorageFolder> subs = new LinkedList<FileStorageFolder>();
+            for (final CmisObject sub : children) {
+                if (ObjectType.FOLDER_BASETYPE_ID.equals(sub.getType())) {
+                    subs.add(convertFolder(cmisSession.createObjectId(sub.getId()), (Folder) sub));
                 }
             }
             /*
              * Return
              */
-            return list.toArray(new FileStorageFolder[list.size()]);
-        } catch (final OXException e) {
-            throw e;
-        } catch (final SmbException e) {
-            throw CIFSExceptionCodes.SMB_ERROR.create(e, e.getMessage());
-        } catch (final IOException e) {
-            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            return subs.toArray(new FileStorageFolder[subs.size()]);
         } catch (final Exception e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }

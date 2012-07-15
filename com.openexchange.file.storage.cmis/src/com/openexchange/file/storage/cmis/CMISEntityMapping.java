@@ -49,50 +49,34 @@
 
 package com.openexchange.file.storage.cmis;
 
-import com.openexchange.file.storage.FileStorageAccount;
-import com.openexchange.session.Session;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * {@link AbstractCMISAccess}
- *
+ * {@link CMISEntityMapping} - Maps CMIS entities to Open-Xchange users and vice versa.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AbstractCMISAccess {
+public interface CMISEntityMapping {
 
     /**
-     * The string constant for <code>'/'</code> character.
+     * The default reference.
      */
-    protected static final String SLASH = "/";
+    public static final AtomicReference<CMISEntityMapping> DEFAULT = new AtomicReference<CMISEntityMapping>();
 
     /**
-     * The root URL of CMIS server as specified through account configuration.
+     * Gets the identifier of the associated CMIS user.
+     * 
+     * @param userId The user identifier
+     * @return The CMIS identifier or <code>null</code> if user cannot be resolved
      */
-    protected final String rootUrl;
+    String getCmisId(int userId);
 
     /**
-     * The connected CMIS session.
+     * Gets the identifier of the associated user.
+     * 
+     * @param cmisId The CMIS identifier
+     * @return The user identifier or <code>-1</code> if user cannot be resolved
      */
-    protected final org.apache.chemistry.opencmis.client.api.Session cmisSession;
-
-    /**
-     * The session.
-     */
-    protected final Session session;
-
-    /**
-     * The associated file account.
-     */
-    protected final FileStorageAccount account;
-
-    /**
-     * Initializes a new {@link AbstractCMISAccess}.
-     */
-    protected AbstractCMISAccess(final String rootUrl, final org.apache.chemistry.opencmis.client.api.Session cmisSession, final FileStorageAccount account, final Session session) {
-        super();
-        this.rootUrl = rootUrl;
-        this.account = account;
-        this.session = session;
-        this.cmisSession = cmisSession;
-    }
+    int getUserId(String cmisId);
 
 }
