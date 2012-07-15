@@ -120,6 +120,7 @@ public final class CMISFolder extends DefaultFileStorageFolder {
                                     permission.setReadPermission(FileStoragePermission.READ_ALL_OBJECTS);
                                 } else if ("write".equalsIgnoreCase(perm) || "cmis:write".equalsIgnoreCase(perm)) {
                                     permission.setWritePermission(FileStoragePermission.READ_ALL_OBJECTS);
+                                    permission.setDeletePermission(FileStoragePermission.DELETE_ALL_OBJECTS);
                                     permission.setFolderPermission(FileStoragePermission.CREATE_SUB_FOLDERS);
                                 } else if ("all".equalsIgnoreCase(perm) || "cmis:all".equalsIgnoreCase(perm)) {
                                     permission.setMaxPermissions();
