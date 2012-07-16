@@ -76,6 +76,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 public class DelegatingLdapStorage extends DefaultContactStorage {
 
     private final int contextID;
+    private final int priority;
     private final LdapContactInterfaceProvider provider;
     
     /**
@@ -83,11 +84,13 @@ public class DelegatingLdapStorage extends DefaultContactStorage {
      *
      * @param contextID the context ID
      * @param provider the ldap contact interface provider
+     * @param priority the storage priority
      */
-    public DelegatingLdapStorage(int contextID, LdapContactInterfaceProvider provider) {
+    public DelegatingLdapStorage(int contextID, LdapContactInterfaceProvider provider, int priority) {
         super();
         this.contextID = contextID;
         this.provider = provider;
+        this.priority = priority;
     }
     
     @Override
@@ -97,7 +100,7 @@ public class DelegatingLdapStorage extends DefaultContactStorage {
 
     @Override
     public int getPriority() {
-        return 17;
+        return this.priority;
     }    
 
     @Override

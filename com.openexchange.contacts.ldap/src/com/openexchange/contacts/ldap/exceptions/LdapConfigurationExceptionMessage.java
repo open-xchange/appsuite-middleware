@@ -269,4 +269,9 @@ public class LdapConfigurationExceptionMessage implements LocalizableStrings {
     // The contact object with id "%s" could not be found in folder "%s"
     public static final String CONTACT_NOT_FOUND_MSG = "The contact object with id \"%s\" could not be found in folder \"%s\"";
 
+    /**
+     * The value given for storagePriority "%s" in file "%s" is no integer value
+     */
+    public static final String INVALID_STORAGE_PRIORITY = "The value given for storagePriority \"%s\" in file \"%s\" is no integer value";
+
 }

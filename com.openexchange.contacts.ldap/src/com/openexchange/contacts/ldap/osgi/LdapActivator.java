@@ -155,7 +155,7 @@ public final class LdapActivator extends HousekeepingActivator {
                      */
                     LdapContactInterfaceProvider provider = new LdapContactInterfaceProvider(
                         folderprop, createGlobalFolder.getAdminid(), folderid, ctx.intValue());
-                    registerService(ContactStorage.class, new DelegatingLdapStorage(ctx.intValue(), provider), 
+                    registerService(ContactStorage.class, new DelegatingLdapStorage(ctx.intValue(), provider, folderprop.getStoragePriority()), 
                         getHashtableWithFolderID(stringfolderid, ctx.toString()));
                     LOG.info(new StringBuilder("Registered global LDAP contact storage for folder \"").append(folderprop.getFoldername()).append(
                         "\" with id \"").append(stringfolderid).append("\" for context: ").append(ctx).toString());

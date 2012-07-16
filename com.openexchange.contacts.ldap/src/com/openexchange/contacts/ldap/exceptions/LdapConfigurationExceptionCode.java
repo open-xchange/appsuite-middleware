@@ -98,7 +98,12 @@ public enum LdapConfigurationExceptionCode implements OXExceptionCode {
     /**
      * The value given for derefAliases "%s" in file "%s" is not a possible one
      */
-    DEREF_ALIASES_WRONG(LdapConfigurationExceptionMessage.DEREF_ALIASES_WRONG_MSG, Category.CATEGORY_CONFIGURATION, 18);
+    DEREF_ALIASES_WRONG(LdapConfigurationExceptionMessage.DEREF_ALIASES_WRONG_MSG, Category.CATEGORY_CONFIGURATION, 18),
+
+    /**
+     * The value given for storagePriority "%s" in file "%s" is no integer value
+     */
+    INVALID_STORAGE_PRIORITY( LdapConfigurationExceptionMessage.INVALID_STORAGE_PRIORITY, Category.CATEGORY_CONFIGURATION, 19);
 
 
     /**

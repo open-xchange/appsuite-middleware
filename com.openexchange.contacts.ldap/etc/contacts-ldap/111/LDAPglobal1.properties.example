@@ -130,3 +130,8 @@ com.openexchange.contacts.ldap.context111.LDAPglobal1.pooltimeout=
 # Please see http://java.sun.com/products/jndi/tutorial/ldap/misc/aliases.html
 # for details
 com.openexchange.contacts.ldap.context111.LDAPglobal1.derefAliases=
+
+# Specify the priority of the contact storages that are being registered in
+# the server. Any integer > 0 should be okay to override the default storage
+# when requesting the exposed ldap folders.
+com.openexchange.contacts.ldap.context111.LDAPglobal1.storagePriority=17
