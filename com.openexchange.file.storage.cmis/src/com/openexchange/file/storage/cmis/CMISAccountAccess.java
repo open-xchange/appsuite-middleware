@@ -164,8 +164,8 @@ public final class CMISAccountAccess implements FileStorageAccountAccess {
             /*
              * User credentials
              */
-            parameters.put(SessionParameter.USER, "Otto");
-            parameters.put(SessionParameter.PASSWORD, "****");
+            parameters.put(SessionParameter.USER, username);
+            parameters.put(SessionParameter.PASSWORD, password);
             /*
              * Connection settings
              */
