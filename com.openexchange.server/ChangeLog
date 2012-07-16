@@ -1,3 +1,7 @@
+* 2012-07-16 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22564: Ignore possibly wrong message reference on reply
+
 * 2012-07-12 - jan.bauerdick@open-xchange.com
 
  - New service to store/retrieve sessions

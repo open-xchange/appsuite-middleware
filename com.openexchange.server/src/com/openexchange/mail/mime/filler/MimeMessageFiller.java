@@ -1616,7 +1616,7 @@ public class MimeMessageFiller {
                         try {
                             imageProvider = new ImageDataImageProvider(dataSource, imageLocation, session);
                         } catch (final OXException e) {
-                            if (MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND.equals(e)) {
+                            if (MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND.equals(e) || MailExceptionCode.MAIL_NOT_FOUND.equals(e)) {
                                 tmp.setLength(0);
                                 m.appendLiteralReplacement(sb, imageTag);
                                 continue;
