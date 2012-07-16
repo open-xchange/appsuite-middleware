@@ -1,3 +1,9 @@
+open-xchange-config-cascade-hostname (6.20.6.0-3) unstable; urgency=low
+
+  * Third candidate for 6.20.6 release
+
+ -- Markus Wagner <markus.wagner@open-xchange.com>  Mon, 16 Jul 2012 15:48:06 +0000
+
 open-xchange-config-cascade-hostname (6.20.6.0-2) unstable; urgency=low
 
   * Second candidate for 6.20.6 release
