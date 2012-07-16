@@ -8,6 +8,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-core"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-soap-cxf"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-ajp"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-grizzly"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-authentication-database"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-authentication-ldap"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-authentication-ucs"/>
@@ -21,10 +22,13 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-l10n"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-calendar-printing"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-chat"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-manage-group-resource"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-halo"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-dataretrieval"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-mailfilter"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-pop3"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-preview"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-publish"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-messaging"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-subscribe"/>
@@ -41,6 +45,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-spamhandler-spamassassin"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-spamhandler-cloudmark"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-spamhandler-spamexperts"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-indexing"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-messaging-sms"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-spamsettings-generic"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-blackwhitelist"/>

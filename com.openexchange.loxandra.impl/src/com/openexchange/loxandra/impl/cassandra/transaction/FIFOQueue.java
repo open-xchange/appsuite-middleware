@@ -46,95 +46,78 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.loxandra.impl.osgi;
+package com.openexchange.loxandra.impl.cassandra.transaction;
 
-import java.io.File;
-
-import me.prettyprint.hector.testutils.EmbeddedServerHelper;
-
-import org.apache.cassandra.thrift.CassandraDaemon;
-import org.apache.commons.logging.Log;
-
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.log.LogFactory;
-import com.openexchange.loxandra.EAVContactFactoryService;
-import com.openexchange.loxandra.impl.cassandra.CassandraEAVContactFactoryServiceImpl;
-import com.openexchange.loxandra.impl.core.EmbeddedCassandraService;
-import com.openexchange.loxandra.impl.core.LoxandraServiceLookUp;
-import com.openexchange.osgi.HousekeepingActivator;
+import java.util.AbstractQueue;
+import java.util.Iterator;
+import java.util.LinkedList;
 
 /**
+ * Simple FIFO Queue implementation
+ * 
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- *
  */
-public final class LoxandraActivator extends HousekeepingActivator {
+public class FIFOQueue<E> extends AbstractQueue<E> {
 	
-	private static Log log = LogFactory.getLog(LoxandraActivator.class);
+	private LinkedList<E> list;
 	
-	private EmbeddedCassandraService cassandra;
-	private Thread cassandraThread;
-	private EmbeddedServerHelper srv;
-
-	private CassandraDaemon cassandraDaemon;
-
 	/**
-	 * Default Constructor 
+	 * Default constructor
 	 */
-	public LoxandraActivator() {
+	public FIFOQueue() {
 		super();
+		list = new LinkedList<E>();
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
+	 * @see java.util.Queue#offer(java.lang.Object)
 	 */
 	@Override
-	protected Class<?>[] getNeededServices() {
-		
-		return new Class[]{ConfigurationService.class};
+	public boolean offer(E e) {
+		list.addLast(e);
+		return true;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * @see com.openexchange.osgi.DeferredActivator#startBundle()
+	 * @see java.util.Queue#poll()
 	 */
 	@Override
-	protected void startBundle() throws Exception {
-		log.info("starting bundle: com.openexchange.loxandra");
-		
-		LoxandraServiceLookUp.set(this);
-		
-		ConfigurationService config = LoxandraServiceLookUp.getService(ConfigurationService.class);
-		
-		System.setProperty("cassandra.config", new File(config.getProperty("CONFIGPATH") + "/cassandra.yaml").toURI().toString());
-		System.setProperty("loxandra.config", new File(config.getProperty("CONFIGPATH") + "/loxandra.properties").getAbsolutePath().toString());
-		
-		// start embedded cassandra node
-		cassandra = new EmbeddedCassandraService();
-        cassandra.init();
-    	cassandra.start();
-
-		// register eavcontactservice
-    	registerService(EAVContactFactoryService.class, new CassandraEAVContactFactoryServiceImpl());
-        registerService(EmbeddedCassandraService.class, cassandra);
-        openTrackers();
-        
-        log.info("Loxandra Service started successfully.");
-        
+	public E poll() {
+		if (list.isEmpty())
+			return null;
+		else
+			return list.removeFirst();
 	}
-	
+
 	/*
 	 * (non-Javadoc)
-	 * @see com.openexchange.osgi.HousekeepingActivator#stopBundle()
+	 * @see java.util.Queue#peek()
 	 */
 	@Override
-	protected void stopBundle() throws Exception {
-		log.info("stoping bundle: com.openexchange.loxandra");
-		
-		cassandra.stop();
-		cassandra = null;
-		
-		LoxandraServiceLookUp.set(null);
-		cleanUp();
+	public E peek() {
+		if (list.isEmpty())
+			return null;
+		else
+			return list.getFirst();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see java.util.AbstractCollection#iterator()
+	 */
+	@Override
+	public Iterator<E> iterator() {
+		return list.iterator();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see java.util.AbstractCollection#size()
+	 */
+	@Override
+	public int size() {
+		return list.size();
 	}
 }
