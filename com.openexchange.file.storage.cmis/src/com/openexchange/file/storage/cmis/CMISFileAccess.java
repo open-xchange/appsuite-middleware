@@ -61,6 +61,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 import org.apache.chemistry.opencmis.client.api.CmisObject;
 import org.apache.chemistry.opencmis.client.api.Document;
 import org.apache.chemistry.opencmis.client.api.Folder;
@@ -72,6 +73,7 @@ import org.apache.chemistry.opencmis.commons.data.ContentStream;
 import org.apache.chemistry.opencmis.commons.enums.VersioningState;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisBaseException;
 import org.apache.chemistry.opencmis.commons.impl.dataobjects.ContentStreamImpl;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
@@ -82,13 +84,16 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileTimedResult;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.Streams;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tx.TransactionException;
+import com.openexchange.user.UserService;
 
 /**
  * {@link CMISFileAccess}
@@ -606,7 +611,20 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
              * Update
              */
             final Map<String, Object> properties = new HashMap<String, Object>(1);
-            final Calendar calendar = Calendar.getInstance();
+            final Calendar calendar;
+            if (session instanceof ServerSession) {
+                final User user = ((ServerSession) session).getUser();
+                calendar = Calendar.getInstance(TimeZone.getTimeZone(user.getTimeZone()), user.getLocale());
+            } else {
+                final UserService userService = CMISServices.getService(UserService.class);
+                final ContextService contextService = CMISServices.getService(ContextService.class);
+                if (null == userService || null == contextService) {
+                    calendar = Calendar.getInstance();
+                } else {
+                    final User user = userService.getUser(session.getUserId(), contextService.getContext(session.getContextId()));
+                    calendar = Calendar.getInstance(TimeZone.getTimeZone(user.getTimeZone()), user.getLocale());
+                }
+            }
             calendar.setTimeInMillis(System.currentTimeMillis());
             properties.put(PropertyIds.LAST_MODIFICATION_DATE, calendar);
             document.updateProperties(properties);

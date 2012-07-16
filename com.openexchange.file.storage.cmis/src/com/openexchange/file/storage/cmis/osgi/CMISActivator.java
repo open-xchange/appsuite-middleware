@@ -56,6 +56,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
@@ -67,6 +68,7 @@ import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.user.UserService;
 
 /**
  * {@link CMISActivator} - Activator for CMIS bundle.
@@ -88,7 +90,7 @@ public final class CMISActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { FileStorageAccountManagerLookupService.class, SessiondService.class };
+        return new Class<?>[] { FileStorageAccountManagerLookupService.class, SessiondService.class, UserService.class, ContextService.class };
     }
 
     @Override
