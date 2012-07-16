@@ -565,16 +565,12 @@ public final class SessionHandler {
         }
         SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
         if (storageService != null) {
-            try {
-                List<Session> list = storageService.getSessions();
-                List<SessionControl> result = new ArrayList<SessionControl>();
-                for (Session s : list) {
-                    result.add(sessionToSessionControl(s));
-                }
-                return result;
-            } catch (OXException e) {
-                LOG.error(e.getMessage(), e);
+            List<Session> list = storageService.getSessions();
+            List<SessionControl> result = new ArrayList<SessionControl>();
+            for (Session s : list) {
+                result.add(sessionToSessionControl(s));
             }
+            return result;
         }
         return sessionData.getShortTermSessions();
     }
@@ -641,11 +637,7 @@ public final class SessionHandler {
     public static int getNumberOfActiveSessions() {
         SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
         if (storageService != null) {
-            try {
-                return storageService.getNumberOfActiveSessions();
-            } catch (OXException e) {
-                LOG.error(e.getMessage(), e);
-            }
+            return storageService.getNumberOfActiveSessions();
         }
         return sessionData.countSessions();
     }
@@ -773,10 +765,22 @@ public final class SessionHandler {
         }
         sessionData.removeTimerService();
     }
-    
+
     private static SessionControl sessionToSessionControl(Session session) {
-        SessionImpl impl = new SessionImpl(session.getUserId(), session.getLoginName(), session.getPassword(), session.getContextId(), session.getSessionID(), session.getSecret(), session.getRandomToken(), session.getLocalIp(), session.getLogin(), session.getAuthId(), session.getHash(), session.getClient());
-        SessionControl control = new SessionControl(impl); 
+        SessionImpl impl = new SessionImpl(
+            session.getUserId(),
+            session.getLoginName(),
+            session.getPassword(),
+            session.getContextId(),
+            session.getSessionID(),
+            session.getSecret(),
+            session.getRandomToken(),
+            session.getLocalIp(),
+            session.getLogin(),
+            session.getAuthId(),
+            session.getHash(),
+            session.getClient());
+        SessionControl control = new SessionControl(impl);
         return control;
     }
 }
