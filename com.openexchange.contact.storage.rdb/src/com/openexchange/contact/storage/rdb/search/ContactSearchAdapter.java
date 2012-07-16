@@ -53,6 +53,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.storage.rdb.internal.Tools;
 import com.openexchange.contact.storage.rdb.mapping.Mappers;
 import com.openexchange.contact.storage.rdb.sql.Table;
@@ -77,22 +78,22 @@ public class ContactSearchAdapter extends DefaultSearchAdapter {
 	
 	private final StringBuilder stringBuilder;
 
-	public ContactSearchAdapter(ContactSearchObject contactSearch, int contextID, ContactField[] fields, String charset) throws OXException {
-		super(charset);
+	public ContactSearchAdapter(ContactSearchObject contactSearch, int contextID, ContactField[] fields, SortOptions sortOptions) throws OXException {
+		super(Tools.getCharset(sortOptions));
 		this.stringBuilder = new StringBuilder();
 		if (null != contactSearch.getPattern()) {
-			appendSearch(contactSearch, contextID, fields);
+			appendSearch(contactSearch, contextID, fields, sortOptions);
 		} else {
-			appendSearchAlternative(contactSearch, contextID, fields);
+			appendSearchAlternative(contactSearch, contextID, fields, sortOptions);
 		}
 	}
 
 	@Override
 	public String getClause() {
-		return stringBuilder.toString();
+		return stringBuilder.toString().trim();
 	}
 	
-	private void appendSearch(ContactSearchObject contactSearch, int contextID, ContactField[] fields) throws OXException {
+	private void appendSearch(ContactSearchObject contactSearch, int contextID, ContactField[] fields, SortOptions sortOptions) throws OXException {
 		stringBuilder.append(getSelectClause(fields)).append(" WHERE ").append(getContextIDClause(contextID)).append(" AND ");
 		/*
 		 * prefer startletter search if possible
@@ -108,27 +109,32 @@ public class ContactSearchAdapter extends DefaultSearchAdapter {
 		 * append folders
 		 */
 		stringBuilder.append(" AND ").append(getFolderIDsClause(contactSearch.getFolders()));
+		/*
+		 * append order and limit 
+		 */
+		stringBuilder.append(" ").append(getOrderByAndLimit(sortOptions));
 	}
 	
-	private void appendSearchAlternative(ContactSearchObject contactSearch, int contextID, ContactField[] fields) throws OXException {
+	private void appendSearchAlternative(ContactSearchObject contactSearch, int contextID, ContactField[] fields, SortOptions sortOptions) throws OXException {
 		Map<ContactField, Object> comparisons = extractComparisons(contactSearch);
 		String contextIDClause = getContextIDClause(contextID);
 		String folderIDsClause = getFolderIDsClause(contactSearch.getFolders());
 		String selectClause = getSelectClause(fields);
+        String orderByClause = Tools.getOrderClause(sortOptions);
 		if (contactSearch.isOrSearch() || contactSearch.isEmailAutoComplete()) {
 			/*
 			 * construct clause using UNION SELECTs
 			 */
-			Iterator<Entry<ContactField, Object>> iterator = comparisons.entrySet().iterator();
+		    Iterator<Entry<ContactField, Object>> iterator = comparisons.entrySet().iterator();
 			if (iterator.hasNext()) {
 				Entry<ContactField, Object> entry = iterator.next();
-				appendComparison(contextIDClause, folderIDsClause, selectClause, entry.getKey(), entry.getValue(), 
+				appendComparison(contextIDClause, folderIDsClause, selectClause, orderByClause, entry.getKey(), entry.getValue(), 
 						contactSearch.isEmailAutoComplete());
 			}
 			while (iterator.hasNext()) {
 				stringBuilder.append(" UNION ");
 				Entry<ContactField, Object> entry = iterator.next();
-				appendComparison(contextIDClause, folderIDsClause, selectClause, entry.getKey(), entry.getValue(), 
+				appendComparison(contextIDClause, folderIDsClause, selectClause, orderByClause, entry.getKey(), entry.getValue(), 
 						contactSearch.isEmailAutoComplete());
 			}
 		} else {
@@ -149,7 +155,15 @@ public class ContactSearchAdapter extends DefaultSearchAdapter {
 			    // no comparison, just use folders and context id			    
 	             stringBuilder.append(selectClause).append(" WHERE ").append(contextIDClause).append(" AND ").append(folderIDsClause);
 			}
+	        /*
+	         * append order
+	         */
+	        stringBuilder.append(" ").append(orderByClause);
 		}
+        /*
+         * append limit
+         */
+        stringBuilder.append(" ").append(Tools.getLimitClause(sortOptions));
 	}
 
 	private boolean appendStartLetterComparison(String pattern) throws OXException {
@@ -186,14 +200,15 @@ public class ContactSearchAdapter extends DefaultSearchAdapter {
 		}
 	}
 	
-	private void appendComparison(String contextIDClause, String folderIDsClause, String selectClause, ContactField field, Object value, 
+	private void appendComparison(String contextIDClause, String folderIDsClause, String selectClause, String orderByClause, ContactField field, Object value, 
 			boolean needsEMail) throws OXException {
-		stringBuilder.append(selectClause).append(" WHERE ").append(contextIDClause).append(" AND ");
+		stringBuilder.append('(').append(selectClause).append(" WHERE ").append(contextIDClause).append(" AND ");
 		appendComparison(field, value);
 		stringBuilder.append(" AND ").append(folderIDsClause);
 		if (needsEMail) {
 			stringBuilder.append(" AND (").append(getEMailAutoCompleteClause()).append(')');
 		}
+		stringBuilder.append(orderByClause).append(')');
 	}
 	
 	private static Map<ContactField, Object> extractComparisons(ContactSearchObject contactSearch) {
@@ -294,6 +309,17 @@ public class ContactSearchAdapter extends DefaultSearchAdapter {
 		}
 	}
 
+    private static String getOrderByAndLimit(SortOptions sortOptions) throws OXException {
+        StringBuilder stringBuilder = new StringBuilder();
+        if (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions)) {
+            stringBuilder.append(' ').append(Tools.getOrderClause(sortOptions));
+            if (0 < sortOptions.getLimit()) {
+                stringBuilder.append(' ').append(Tools.getLimitClause(sortOptions));
+            }
+        }
+        return stringBuilder.toString();
+    }
+    
 	private static String getEMailAutoCompleteClause() throws OXException {
 		if (null == eMailAutomCompleteClause) {
 			StringBuilder stringBuilder = new StringBuilder();

@@ -53,6 +53,8 @@ import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.SQLException;
 import org.apache.commons.logging.Log;
+import com.openexchange.contact.SortOptions;
+import com.openexchange.contact.SortOrder;
 import com.openexchange.contact.storage.rdb.mapping.Mappers;
 import com.openexchange.contact.storage.rdb.sql.Table;
 import com.openexchange.exception.OXException;
@@ -60,9 +62,11 @@ import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.tools.mappings.MappedTruncation;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
 import com.openexchange.java.Charsets;
+import com.openexchange.l10n.SuperCollator;
 import com.openexchange.log.LogFactory;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -271,4 +275,84 @@ public final class Tools {
     	return wasUpdated;
     }
     
+    /**
+     * Gets the charset from the sort options' collation.
+     * 
+     * @param sortOptions the sort options
+     * @return the charset, if defined, <code>false</code>, otherwise
+     */
+    public static String getCharset(final SortOptions sortOptions) {
+        if (null != sortOptions) {
+            final SuperCollator collator = SuperCollator.get(sortOptions.getCollation());
+            if (null != collator && false == SuperCollator.DEFAULT.equals(collator)) {
+                final String charset = collator.getSqlCharset();
+                if (null != charset && false == charset.equals(SuperCollator.DEFAULT.getSqlCharset())) {
+                    return charset;
+                }
+            }
+        }
+        return null; // no charset
+    }
+    
+    /**
+     * Gets the ORDER BY clause from the sort options.
+     * 
+     * @param sortOptions the sort options
+     * @return the ORDER BY clause, or an empty String if not specified 
+     * @throws OXException
+     */
+    public static String getOrderClause(final SortOptions sortOptions) throws OXException {
+        final StringBuilder stringBuilder = new StringBuilder();
+        if (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions)) {
+            final SortOrder[] order = sortOptions.getOrder();
+            if (null != order && 0 < order.length) {
+                stringBuilder.append("ORDER BY ");
+                final SuperCollator collator = SuperCollator.get(sortOptions.getCollation());
+                stringBuilder.append(getOrderClause(order[0], collator));
+                for (int i = 1; i < order.length; i++) {
+                    stringBuilder.append(' ').append(getOrderClause(order[i], collator));
+                }
+            }
+        }
+        return stringBuilder.toString();
+    }
+    
+    /**
+     * Gets the LIMIT clause from the sort options.
+     * 
+     * @param sortOptions the sort options
+     * @return the LIMIT clause, or an empty String if not specified 
+     * @throws OXException
+     */
+    public static String getLimitClause(final SortOptions sortOptions) throws OXException {
+        final StringBuilder stringBuilder = new StringBuilder();
+        if (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions)) {
+            if (0 < sortOptions.getLimit()) {
+                stringBuilder.append("LIMIT ");
+                if (0 < sortOptions.getRangeStart()) {
+                    stringBuilder.append(sortOptions.getRangeStart()).append(',');
+                }
+                stringBuilder.append(sortOptions.getLimit());
+            }
+        }
+        return stringBuilder.toString();
+    }
+    
+    private static String getOrderClause(final SortOrder order, final SuperCollator collator) throws OXException {
+        final StringBuilder stringBuilder = new StringBuilder();
+        if (null == collator || SuperCollator.DEFAULT.equals(collator)) {
+            stringBuilder.append(Mappers.CONTACT.get(order.getBy()).getColumnLabel());
+        } else {
+            stringBuilder.append("CONVERT (").append(Mappers.CONTACT.get(order.getBy()).getColumnLabel()).append(" USING '")
+                .append(collator.getSqlCharset()).append("') COLLATE '").append(collator.getSqlCollation()).append('\'');
+        }
+        if (Order.ASCENDING.equals(order.getOrder())) {
+            stringBuilder.append(" ASC");
+        } else if (Order.DESCENDING.equals(order.getOrder())) {
+            stringBuilder.append(" DESC");
+        }
+        return stringBuilder.toString();
+    }
+    
+
 }
