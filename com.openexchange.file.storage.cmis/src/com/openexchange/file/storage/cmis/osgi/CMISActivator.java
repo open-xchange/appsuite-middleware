@@ -69,7 +69,7 @@ import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.sessiond.SessiondService;
 
 /**
- * {@link CMISActivator} - Activator for CIFS bundle.
+ * {@link CMISActivator} - Activator for CMIS bundle.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
