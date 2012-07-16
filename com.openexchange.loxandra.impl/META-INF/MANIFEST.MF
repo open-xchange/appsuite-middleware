@@ -32,6 +32,7 @@ Import-Package: com.openexchange.ajax.fields,
  org.apache.cassandra.utils,
  org.apache.commons.logging,
  org.apache.log4j,
+ org.json,
  org.osgi.framework
 Require-Bundle: com.openexchange.global
 Bundle-Activator: com.openexchange.loxandra.impl.osgi.LoxandraActivator
