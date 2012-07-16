@@ -55,10 +55,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.java.SynchronizedBasedReentrantLock;
 import com.openexchange.pop3.POP3Access;
@@ -108,6 +108,10 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
         return cached;
     }
 
+    static enum Mode {
+        NONE,RE_INIT,START_TIMER;
+    }
+
     /*-
      * Member section
      */
@@ -120,7 +124,7 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
 
     private final ReadWriteLock rwLock;
 
-    private final AtomicInteger mode;
+    private final AtomicReference<Mode> mode;
 
     private SessionPOP3StorageUIDLMap(final POP3StorageUIDLMap delegatee) throws OXException {
         super();
@@ -128,7 +132,7 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
         this.delegatee = delegatee;
         pair2uidl = new ConcurrentHashMap<FullnameUIDPair, String>();
         uidl2pair = new ConcurrentHashMap<String, FullnameUIDPair>();
-        mode = new AtomicInteger(1);
+        mode = new AtomicReference<Mode>(Mode.RE_INIT);
         initTimerTask();
         init();
     }
@@ -142,7 +146,7 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
                 SessionCacheProperties.SCHEDULED_TASK_INITIAL_DELAY,
                 SessionCacheProperties.SCHEDULED_TASK_DELAY);
         cmr.setTimerTask(timerTask);
-        mode.set(1);
+        mode.set(Mode.RE_INIT);
     }
 
     private void init() throws OXException {
@@ -154,15 +158,15 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
             pair2uidl.put(entry.getValue(), entry.getKey());
             uidl2pair.put(entry.getKey(), entry.getValue());
         }
-        mode.set(0);
+        mode.set(Mode.NONE);
     }
 
     private void checkInit(final Lock obtainedReadLock) throws OXException {
-        final int m = mode.get();
-        if (-1 == m) {
+        final Mode m = mode.get();
+        if (Mode.START_TIMER == m) {
             initTimerTask();
         }
-        if (1 == m) {
+        if (Mode.RE_INIT == m) {
             /*
              * Upgrade lock: unlock first to acquire write lock
              */
@@ -318,13 +322,13 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
 
         private final ReadWriteLock trwLock;
 
-        private final AtomicInteger tmode;
+        private final AtomicReference<Mode> tmode;
 
         private volatile ScheduledTimerTask timerTask;
 
         private int countEmptyRuns;
 
-        public ClearMapsRunnable(final Map<String, FullnameUIDPair> tuidl2pair, final Map<FullnameUIDPair, String> tpair2uidl, final ReadWriteLock trwLock, final AtomicInteger tmode) {
+        public ClearMapsRunnable(final Map<String, FullnameUIDPair> tuidl2pair, final Map<FullnameUIDPair, String> tpair2uidl, final ReadWriteLock trwLock, final AtomicReference<Mode> tmode) {
             super();
             this.trwLock = trwLock;
             this.tuidl2pair = tuidl2pair;
