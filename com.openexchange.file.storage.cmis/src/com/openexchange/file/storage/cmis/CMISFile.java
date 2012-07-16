@@ -125,6 +125,19 @@ public final class CMISFile extends DefaultFile {
                 if (set.contains(Field.LAST_MODIFIED) || set.contains(Field.LAST_MODIFIED_UTC)) {
                     setLastModified(new Date(document.getLastModificationDate().getTimeInMillis()));
                 }
+                {
+                    final CMISEntityMapping mapping = CMISEntityMapping.DEFAULT.get();
+                    if (null != mapping) {
+                        final int creator = mapping.getUserId(document.getCreatedBy());
+                        if (creator > 0) {
+                            setCreatedBy(creator);
+                        }
+                        final int modifier = mapping.getUserId(document.getLastModifiedBy());
+                        if (modifier > 0) {
+                            setModifiedBy(modifier);
+                        }
+                    }
+                }
                 if (set.contains(Field.TITLE)) {
                     setTitle(document.getName());
                 }

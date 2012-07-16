@@ -49,17 +49,14 @@
 
 package com.openexchange.file.storage.cmis;
 
-import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.apache.chemistry.opencmis.client.api.Folder;
 import org.apache.chemistry.opencmis.client.api.SessionFactory;
 import org.apache.chemistry.opencmis.client.runtime.SessionFactoryImpl;
 import org.apache.chemistry.opencmis.commons.SessionParameter;
 import org.apache.chemistry.opencmis.commons.enums.BindingType;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisBaseException;
-import org.apache.chemistry.opencmis.commons.impl.jaxb.CmisException;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
@@ -283,7 +280,7 @@ public final class CMISAccountAccess implements FileStorageAccountAccess {
             synchronized (this) {
                 tmp = fileAccess;
                 if (null == tmp) {
-                    fileAccess = tmp = new CMISFileAccess(rootUrl, auth, account, session, this);
+                    fileAccess = tmp = new CMISFileAccess(rootUrl, cmisSession, account, session, this);
                 }
             }
         }

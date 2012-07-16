@@ -67,6 +67,9 @@ import com.openexchange.tx.TransactionAware;
  */
 public interface FileStorageFileAccess extends TransactionAware {
 
+    /**
+     * A tuple for a folder and file identifier.
+     */
     public static class IDTuple {
 
         private String folder;
