@@ -1,3 +1,7 @@
+* 2012-07-16 - marcus.klein@open-xchange.com
+
+ - Fix for bug 22563: Restored previous java runtime dependencies that selects a supported JVM on each RPM distribution.
+
 * 2012-07-16 - thorben.betten@open-xchange.com
 
  - Fix for bug 22564: Ignore possibly wrong message reference on reply
