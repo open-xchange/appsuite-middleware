@@ -24,7 +24,7 @@ database storage, chat logic and HTTP/JSON chat interface for clients.
 Authors:
 --------
     Open-Xchange
-    
+
 %prep
 %setup -q
 
