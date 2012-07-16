@@ -237,8 +237,8 @@ public final class CMISAccountAccess implements FileStorageAccountAccess {
             final SessionFactory factory = SessionFactoryImpl.newInstance();
             final Map<String, String> parameters = new HashMap<String, String>(6);
             // user credentials
-            parameters.put(SessionParameter.USER, "Otto");
-            parameters.put(SessionParameter.PASSWORD, "****");
+            parameters.put(SessionParameter.USER, username);
+            parameters.put(SessionParameter.PASSWORD, password);
             // connection settings
             parameters.put(SessionParameter.ATOMPUB_URL, rootUrl);
             parameters.put(SessionParameter.BINDING_TYPE, BindingType.ATOMPUB.value());
