@@ -54,7 +54,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -348,7 +347,7 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
                         if (null != timerTask) {
                             timerTask.cancel();
                         }
-                        tmode.set(-1);
+                        tmode.set(Mode.START_TIMER);
                         // synchronized (tsession) {
                         // tsession.setParameter(tkey, null);
                         // tmode[0] = -1;
@@ -360,7 +359,7 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
                 countEmptyRuns = 0;
                 tuidl2pair.clear();
                 tpair2uidl.clear();
-                tmode.set(1);
+                tmode.set(Mode.RE_INIT);
             } finally {
                 writeLock.unlock();
             }
