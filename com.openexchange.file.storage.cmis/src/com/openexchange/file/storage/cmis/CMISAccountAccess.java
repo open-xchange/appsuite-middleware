@@ -119,9 +119,9 @@ public final class CMISAccountAccess implements FileStorageAccountAccess {
     }
 
     /**
-     * Gets the name of the CIFS/SMB user.
+     * Gets the name of the CMIS user.
      *
-     * @return The name of the CIFS/SMB user
+     * @return The name of the CMIS user
      */
     public String getUser() {
         return username;
