@@ -15,7 +15,22 @@ URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       OSGi bundles commonly used by all Open-Xchange packages
 PreReq:        /usr/sbin/useradd
-Requires:	java >= 1.6.0
+%if 0%{?sles_version} >= 11
+# SLES11
+Requires:  java-1_6_0-ibm
+%endif
+%if 0%{?fedora_version}
+%if %{?fedora_version} > 8
+Requires:  java-1.6.0-openjdk
+%endif
+%if %{?fedora_version} <= 8
+Requires:  java-icedtea
+%endif
+%endif
+%if 0%{?rhel_version}
+# RHEL5 removed sun-java5, but some might still use it, so just depend on sun-java
+Requires:  java-sun
+%endif
 Provides:       open-xchange-common = %{version}
 Obsoletes:      open-xchange-common <= %{version}
 Provides:       open-xchange-activation = %{version}
