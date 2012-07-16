@@ -57,6 +57,7 @@ import org.apache.chemistry.opencmis.client.runtime.SessionFactoryImpl;
 import org.apache.chemistry.opencmis.commons.SessionParameter;
 import org.apache.chemistry.opencmis.commons.enums.BindingType;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisBaseException;
+import org.apache.chemistry.opencmis.commons.spi.CmisBinding;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
@@ -190,7 +191,15 @@ public final class CMISAccountAccess implements FileStorageAccountAccess {
     public void close() {
         if (connected.compareAndSet(true, false)) {
             rootUrl = null;
-            cmisSession = null;
+            final org.apache.chemistry.opencmis.client.api.Session cmisSession = this.cmisSession;
+            if (null != cmisSession) {
+                final CmisBinding binding = cmisSession.getBinding();
+                if (null != binding) {
+                    binding.close();
+                }
+                cmisSession.clear();
+                this.cmisSession = null;
+            }
             fileAccess = null;
             folderAccess = null;
         } else {
