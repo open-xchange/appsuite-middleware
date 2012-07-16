@@ -195,6 +195,7 @@ public final class CMISAccountAccess implements FileStorageAccountAccess {
             if (null != cmisSession) {
                 final CmisBinding binding = cmisSession.getBinding();
                 if (null != binding) {
+                    binding.clearAllCaches();
                     binding.close();
                 }
                 cmisSession.clear();
