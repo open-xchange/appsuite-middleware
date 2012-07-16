@@ -178,7 +178,7 @@ public final class CMISAccountAccess implements FileStorageAccountAccess {
              */
             cmisSession = factory.createSession(parameters);
         } else {
-            LOG.debug("CIFS account access already connected.");
+            LOG.debug("CMIS account access already connected.");
         }
     }
 
@@ -203,7 +203,7 @@ public final class CMISAccountAccess implements FileStorageAccountAccess {
             fileAccess = null;
             folderAccess = null;
         } else {
-            LOG.debug("CIFS account access already closed.");
+            LOG.debug("CMIS account access already closed.");
         }
     }
 
