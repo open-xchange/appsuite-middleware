@@ -142,7 +142,7 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
         final ScheduledTimerTask timerTask =
             timerService.scheduleWithFixedDelay(
                 cmr,
-                SessionCacheProperties.SCHEDULED_TASK_INITIAL_DELAY,
+                SessionCacheProperties.SCHEDULED_TASK_DELAY,
                 SessionCacheProperties.SCHEDULED_TASK_DELAY);
         cmr.setTimerTask(timerTask);
         mode.set(Mode.RE_INIT);
