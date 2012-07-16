@@ -1,6 +1,7 @@
 * 2012-07-16 - thorben.betten@open-xchange.com
 
  - Fix for bug 22564: Ignore possibly wrong message reference on reply
+ - Fix for bug 22551: Don't consider module when checking for duplicate folder
 
 * 2012-07-12 - jan.bauerdick@open-xchange.com
 
