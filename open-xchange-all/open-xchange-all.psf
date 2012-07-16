@@ -57,5 +57,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-push-malpoll"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-hostname-ldap"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-report-client"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-contacts-ldap"/>
 </provider>
 </psf>

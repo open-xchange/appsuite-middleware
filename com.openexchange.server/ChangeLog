@@ -1792,6 +1792,10 @@
 
  - Bugfix #19195: Fixed NPE when exporting iCal.
 
+* 2011-05-10 - marcus.klein@open-xchange.com
+
+ - Bugfix #19149: Fixed exception if no sort order is given.
+
 * 2011-05-10 - martin.herfurth@open-xchange.com
 
  - Bugfix #18558: Appointments which are visible through several folders contain correct folder id.
@@ -1923,6 +1927,10 @@
 * 2011-04-08 - marcus.klein@open-xchange.com, martin.herfurth@open-xchange.com
 
  - Bugfix #18912: Using enumeration to pass order directory for data everywhere. Not showing failing SQL statements to the end user.
+
+* 2011-04-07 - dennis.sieben@open-xchange.com
+
+ - Bugfix #18894 - Contacts-ldap sometimes sends (null=*) filters to the ldap server
 
 * 2011-04-07 - marcus.klein@open-xchange.com
 
@@ -2114,6 +2122,10 @@
 * 2011-03-02 - marcus.klein@open-xchange.com
 
  - Bugfix #18487: Adding all necessary information to a task when triggering the event for accepting, declining etc.
+
+* 2011-03-01 - marcus.klein@open-xchange.com
+
+ - Bugfix #18465: Compiling sources everywhere to Java5 compatible class files.
 
 * 2011-03-01 - choeger@open-xchange.com
 
@@ -2817,6 +2829,12 @@
 
  - Bugfix #16835: post install of crawler bundle is now able to deal with filenames containing a white space character.
 
+* 2010-09-07 - dennis.sieben@open-xchange.com
+
+ - Bugfix #16784 - contacts-ldap does not work out of the box with openldap
+   - Fixed corresponding entries in the example mapping file
+   - Fixed fallback value for creation and lastmodified date in code
+
 * 2010-09-07 - choeger@open-xchange.com
 
  - Bugfix #16815: activation and jcharset packages to use OX versioning
@@ -2929,6 +2947,11 @@
 * 2010-08-11 - steffen.templin@open-xchange.com
 
  - Bugfix #16643: Wrong series information in notification mails
+
+* 2010-08-09 - choeger@open-xchange.com
+
+ - Bugfix #16663 - [L3] contacts-ldap does not query ad for creation date but
+   complains it is not there
 
 * 2010-08-06 - thorben.betten@open-xchange.com
 
@@ -3072,6 +3095,13 @@
 
  - Bugfix #16422: Changed log level to WARN if collecting an invalid address fails
  - Bugfix #16483: Removed unknown import
+
+* 2010-07-14 - dennis.sieben@open-xchange.com
+
+ - Bugfix #16049 - [L3] Distribution list not available after update
+   - Added fallback to creation date if modified date is not available
+   - Added missing mapping for creation date in ADS
+   - Added two more properties: pooltimeout and derefAliases
 
 * 2010-07-14 - tobias.prinz@open-xchange.com
 
@@ -3483,6 +3513,11 @@
 
  - Bugfix #15897: Prefering task identifier in URL on confirm requests.
 
+* 2010-04-20 - dennis.sieben@open-xchange.com
+
+ - Bugfix #15899 - Global addressbook doesn't return results via EAS once contacts-ldap is installed
+   - Add new check for null values
+
 * 2010-04-20 - karsten.will@open-xchange.com
 
  - Bugfix #15842: yahoo crawler auto generates the address class on import
@@ -3494,6 +3529,10 @@
 * 2010-04-19 - marcus.klein@open-xchange.com
 
  - Bugfix #15900: Corrected class loading problem due to annotation based exception framework.
+
+* 2010-04-15 - marcus.klein@open-xchange.com
+
+ - Bugfix #15891: Do not check global address book folder permissions if user edits his own contact through user interface.
 
 * 2010-04-14 - marcus.klein@open-xchange.com
 
@@ -3517,10 +3556,6 @@
 
  - Bugfix #15794: Empty Yahoo-Addressbooks work now
  - Bugfix #15789: Removed reflection from the crawler bundle
-
-* 2010-04-15 - marcus.klein@open-xchange.com
-
- - Bugfix #15891: Do not check global address book folder permissions if user edits his own contact through user interface.
 
 * 2010-04-06 - marcus.klein@open-xchange.com
 
@@ -4006,6 +4041,10 @@
 
  - Bugfix #14890: Fixed display of a mail containing multiple inline text/* parts
 
+* 2009-11-25 - choeger@open-xchange.com
+
+ - Bugfix #14479 -  Contacts LDAP bundles does not start (SLES11, IBM JAVA)
+
 * 2009-11-25 - martin.herfurth@open-xchange.com
 
  - Bugfix #14984: SQL-Syntax error with special folder rights fixed.
@@ -4059,6 +4098,11 @@
 
  - Bugfix #14723: Always putting a complete table into the print view.
 
+* 2009-11-10 - dennis.sieben@open-xchange.com
+
+ - Fix for UNAVAIL_EXTENSION error
+ - Reduced fetching of attributes for the distributionlist members to needed ones only
+
 * 2009-11-10 - marcus.klein@open-xchange.com
 
  - Bugfix #14810: Correctly setting displayStart and displayEnd if range is greater than a day.
@@ -4082,6 +4126,10 @@
 * 2009-11-03 - marcus.klein@open-xchange.com
 
  - Bugfix #14505: Correctly handling null values when comparing InfoStore objects.
+
+* 2009-11-02 - dennis.sieben@open-xchange.com
+
+ - Added ability to disable PagedResults (e.g. for Fedora DS) by setting pagesize to 0
 
 * 2009-11-02 - marcus.klein@open-xchange.com
 
@@ -4423,6 +4471,12 @@
 
  - Update Task #58: Repair bad null value in in recurrence pattern.
 
+* 2009-07-13 - dennis.sieben@open-xchange.com
+
+  - Bugfix #14151 Contacts-ldap currently concatenates multi-value attributes
+    this must be changed
+    - Removed concatenation - now taking the first value
+
 * 2009-07-13 - thorben.betten@open-xchange.com
 
  - Bugfix #14152: Added support for Dovecot ACL identifiers
@@ -4432,11 +4486,23 @@
  - Bugfix #12509: Participant creates change exception of an appointment
                   which is not located in the creators default folder.
 
+* 2009-07-10 - dennis.sieben@open-xchange.com
+
+  - Bugfix #14148 contact list is not sorted by name in contacts-ldap
+    - Distributionlist now have a sur_name
+
 * 2009-07-10 - francisco.laguna@open-xchange.com
 
  - Bugfix #14143: Force connection close after a subscription has been loaded.
  - Bugfix #14075: Don't recreate the collected addresses folder if the feature has been disabled explicitely.
  - Bugfix #14135: Don't share string builder instance among threads.
+
+* 2009-07-09 - dennis.sieben@open-xchange.com
+
+  - Bugfix #14137 contacts-ldap must provide an option to deal with referrals
+    - Added new property value to set referrals behaviour
+  - Bugfix #14138 Fix for groups without members on ADS with contacts-ldap
+    - Added catch to ignore this exceptions
 
 * 2009-07-09 - francisco.laguna@open-xchange.com
 
@@ -4587,6 +4653,11 @@
 
  - Bugfix #13852: Adding OSGi services for creating and removing genconf, publish and subscribe tables to admin.
 
+* 2009-06-22 - dennis.sieben@open-xchange.com
+
+  - Bugfix #13920 Unable to get public LDAP folders to Outlook
+    - Now returning a SearchIterator in getDeletedContactsInFolder
+  
 * 2009-06-22 - choeger@open-xchange.com
 
  - Bugfix #13928: Update SP5 -> 6.10 does not work
@@ -4614,6 +4685,12 @@
  - API Change: Changed ajax confirm request to fulfil api documentation.
  - Bugfix #13828: Change confirm status of other users (Server side).
 
+* 2009-06-18 - dennis.sieben@open-xchange.com
+
+  - Bugfix #13926 gal bundle: java.lang.Exception: The given value for authtype
+    "%s" is not a possible one
+    - Changed text to "The directory "%s" is not a context identifier."
+  
 * 2009-06-18 - thorben.betten@open-xchange.com
 
  - Bugfix #13891: Fixed NPE on control bundle stop
@@ -4625,9 +4702,19 @@
 
  - Bugfix #13903: Delivering empty content on "No content" error while showing message source
 
+* 2009-06-16 - dennis.sieben@open-xchange.com
+
+  - Bugfix #13909 NPE when contacts-ldap is enabled to access distribution
+    lists (ADS)
+    - Surrounded code segment with if
+    
 * 2009-06-16 - martin.herfurth@open-xchange.com
 
  - Bugfix #13501: Change a daily sequence into a weekly sequence.
+  - Bugfix #13892 contacts-ldap bundle contains documentation as odt format at
+   the sources
+   - Removed documentation as it is now contained in the Installation and
+     Administrator documentation
 
 * 2009-06-16 - choeger@open-xchange.com
 
@@ -4757,6 +4844,10 @@
 
  - Bugfix #13604: SWitching to strict detection whether a mail part's disposition is "INLINE" or not when generating forward mail
 
+* 2009-05-11 - dennis.sieben@open-xchange.com
+
+  - Implemented distributionlist
+
 * 2009-05-11 - francisco.laguna@open-xchange.com
 
  - Bugfix 13482: Content-Length of 0 means there is no body. Don't use the XML parser on that.
@@ -4781,6 +4872,10 @@
 
  - Bugfix #13553: Using a specified charset name when encrypting/decrypting passwords
  - Bugfix #13549: Detecting proper account when replying/forwarding an email to load possibly referenced parts from right account
+
+* 2009-04-23 - dennis.sieben@open-xchange.com
+
+  - Bugfix #13539 Search field in global LDAP contact folder does not work
 
 * 2009-04-16 - marcus.klein@open-xchange.com
 
