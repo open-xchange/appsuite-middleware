@@ -60,36 +60,127 @@ import com.openexchange.session.Session;
  */
 public interface SessionStorageService {
     
+    /**
+     * Gets the session associated with given session Id
+     * @param sessionId The session Id
+     * @return The session associated with given session Id
+     * @throws OXException If no session with given session Id found
+     */
     public Session lookupSession(String sessionId) throws OXException;
     
+    /**
+     * Adds a new session to session storage
+     * @param session The session
+     * @throws OXException If adding session failed, e.g. duplicate session
+     */
     public void addSession(Session session) throws OXException;
     
+    /**
+     * Remove the session with given session Id from session storage
+     * @param sessionId The session Id
+     * @throws OXException If no session with given session Id found
+     */
     public void removeSession(String sessionId) throws OXException;
     
+    /**
+     * Remove all sessions for user with given user Id and context Id from session storage
+     * @param userId The user Id
+     * @param contextId The context Id
+     * @throws OXException If remove of user sessions failed
+     */
     public void removeUserSessions(int userId, int contextId) throws OXException;
     
+    /**
+     * Remove all sessions from context with given context Id
+     * @param contextId The context Id
+     * @throws OXException If remove of context sessions failed
+     */
     public void removeContextSessions(int contextId) throws OXException;
     
+    /**
+     * Check for active sessions in context with given context Id
+     * @param contextId The context Id
+     * @return <code>true</code> if context has active sessions, otherwise <code>false</code>
+     * @throws OXException
+     */
     public boolean hasForContext(int contextId) throws OXException;
     
+    /**
+     * Get all sessions from user with given user Id and context Id
+     * @param userId The user Id
+     * @param contextId The context Id
+     * @return Array of all user sessions
+     * @throws OXException If there are no sessions from this user
+     */
     public Session[] getUserSessions(int userId, int contextId) throws OXException;
     
+    /**
+     * Get an active session from user with given user Id and context Id
+     * @param userId The user Id
+     * @param contextId The context Id
+     * @return An active session from the user
+     * @throws OXException If there are no sessions from this user
+     */
     public Session getAnyActiveSessionForUser(int userId, int contextId) throws OXException;
     
+    /**
+     * Get the first found session from user with given user Id and context Id
+     * @param userId The user Id
+     * @param contextId The context Id
+     * @return The user session
+     * @throws OXException If there are no sessions from this user
+     */
     public Session findFirstSessionForUser(int userId, int contextId) throws OXException;
     
-    public List<Session> getSessions() throws OXException;
+    /**
+     * Get a list of all stored sessions
+     * @return A list of all stored sessions
+     */
+    public List<Session> getSessions();
     
-    public int getNumberOfActiveSessions() throws OXException;
+    /**
+     * Get the number of active sessions in session storage
+     * @return The number of active sessions
+     */
+    public int getNumberOfActiveSessions();
     
+    /**
+     * Get session identified by given random token
+     * @param randomToken The random token
+     * @param newIP New IP of client
+     * @return The session identified by given random token
+     * @throws OXException If no session with given random token found
+     */
     public Session getSessionByRandomToken(String randomToken, String newIP) throws OXException;
     
+    /**
+     * Get session identified by given alternative Id
+     * @param altId The alternative Id
+     * @return The session identified by given alternative Id
+     * @throws OXException If no session with given alternative Id found
+     */
     public Session getSessionByAlternativeId(String altId) throws OXException;
     
+    /**
+     * Gets the session associated with given session Id
+     * @param sessionId The session Id
+     * @return The session associated with given session Id
+     * @throws OXException If no session with given session Id found
+     */
     public Session getCachedSession(String sessionId) throws OXException;
     
+    /**
+     * Clean up session storage
+     * @throws OXException If an error occurs during cleanup
+     */
     public void cleanUp() throws OXException;
     
+    /**
+     * Change password in session with given session Id
+     * @param sessionId The session Id
+     * @param newPassword The new password
+     * @throws OXException If changing password failed
+     */
     public void changePassword(String sessionId, String newPassword) throws OXException;
     
     
