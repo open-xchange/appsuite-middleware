@@ -60,7 +60,11 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 
 /**
- * {@link ContactStorage} - Basic methods for storing and accessing {@link Contact}s.
+ * {@link ContactStorage}
+ * 
+ * Basic methods for storing and accessing {@link Contact}s.<p/>
+ * As a convention, all passed and returned object references are assumed to 
+ * be non-<code>null</code> unless otherwise specified.  
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
