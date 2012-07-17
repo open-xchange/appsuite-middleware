@@ -58,21 +58,21 @@ import com.openexchange.mq.queue.MQQueueListener;
 import com.openexchange.service.indexing.IndexingJob;
 
 /**
- * {@link IndexingServiceQueueListener} - The {@link MQQueueListener listener} that delegates incoming messages to
+ * {@link IndexingQueueListener} - The {@link MQQueueListener listener} that delegates incoming messages to
  * {@link IndexingJobExecutor executor}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class IndexingServiceQueueListener implements MQQueueListener {
+public final class IndexingQueueListener implements MQQueueListener {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(IndexingServiceQueueListener.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(IndexingQueueListener.class));
 
     private final IndexingJobExecutor jobExecutor;
 
     /**
-     * Initializes a new {@link IndexingServiceQueueListener}.
+     * Initializes a new {@link IndexingQueueListener}.
      */
-    public IndexingServiceQueueListener(final IndexingJobExecutor executor) {
+    public IndexingQueueListener(final IndexingJobExecutor executor) {
         super();
         jobExecutor = executor;
     }

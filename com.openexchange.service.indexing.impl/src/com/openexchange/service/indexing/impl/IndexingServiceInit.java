@@ -129,7 +129,7 @@ public final class IndexingServiceInit {
              */
             final ThreadPoolService threadPool = services.getService(ThreadPoolService.class);
             final IndexingJobExecutor executor = new IndexingJobExecutor(maxConcurrentJobs, threadPool).start();
-            final IndexingServiceQueueListener listener = new IndexingServiceQueueListener(executor);
+            final IndexingQueueListener listener = new IndexingQueueListener(executor);
             receiver = new IndexingQueueAsyncReceiver(listener);
         }
     }
