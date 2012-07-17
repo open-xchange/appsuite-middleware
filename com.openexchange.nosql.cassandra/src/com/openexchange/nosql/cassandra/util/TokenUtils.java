@@ -1,4 +1,4 @@
-package com.openexchange.loxandra.util;
+package com.openexchange.nosql.cassandra.util;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
