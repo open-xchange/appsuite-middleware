@@ -196,7 +196,12 @@ public interface IndexingJob extends Serializable {
     void afterExecute(Throwable t);
 
     /**
-     * Gets the modifiable properties associated with this job.
+     * Gets the modifiable properties associated with this job. <div
+     * style="margin-left: 0.1in; margin-right: 0.5in; background-color:#FFDDDD;">
+     * <p>
+     * Prefer to store only primitive data types (including Strings) to avoid data serialization issues short and long-term.
+     * </p>
+     * </div>
      * 
      * @return The properties
      */
