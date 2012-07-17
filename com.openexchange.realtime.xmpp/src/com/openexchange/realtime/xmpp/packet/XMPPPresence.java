@@ -47,66 +47,99 @@
  *
  */
 
-package com.openexchange.realtime.example.telnet.chat;
+package com.openexchange.realtime.xmpp.packet;
 
-import java.util.Arrays;
-import java.util.List;
-
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.example.chat.ChatMessage;
-import com.openexchange.realtime.example.telnet.TelnetChatMessage;
-import com.openexchange.realtime.example.telnet.TransformingTelnetChatPlugin;
-import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.Message;
-import com.openexchange.realtime.packet.Message.Type;
-import com.openexchange.realtime.packet.Payload;
-import com.openexchange.realtime.packet.Stanza;
+import org.joox.JOOX;
+import org.joox.Match;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ChatTransformer}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link XMPPPresence}
+ * 
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class ChatTransformer extends TransformingTelnetChatPlugin {
+public class XMPPPresence extends XMPPStanza {
 
-	@Override
-	public String getServiceName() {
-		return "chat";
-	}
+    public static enum Type {
+        none, error, probe, subscribe, subscribed, unavailable, unsubscribe, unsubscribed;
+    }
 
-	@Override
-	public List<Stanza> transform(TelnetChatMessage message) {
-		Message msg = new Message();
-		msg.setType(Type.chat);
-		ChatMessage chatMessage = new ChatMessage(message.getPayload());
-		
-		String header = message.getHeader("priority");
-		if (header != null) {
-			chatMessage.setPriority(Integer.parseInt(header));
-		}
-		
-		msg.setPayload(new Payload(chatMessage, "chatMessage"));
-		msg.setNamespace(getServiceName());
-		
-		return Arrays.asList((Stanza)msg);
-	}
-	@Override
-	public boolean canHandleOutgoing(String namespace) throws OXException {
-		return namespace.equals(getServiceName());
-	}
+    public static enum Show {
+        available, away, chat, dnd, xa;
+    }
 
-	@Override
-	public List<TelnetChatMessage> transform(Stanza stanza, ID to, ServerSession session) throws OXException {
-		ChatMessage chatMessage = (ChatMessage) stanza.getPayload().getData();
-		
-		TelnetChatMessage message = new TelnetChatMessage(chatMessage.getMessage(), stanza.getFrom(), session);
-		if (chatMessage.getPriority() != ChatMessage.NO_PRIORITY) {
-			message.setHeader("priority", ""+chatMessage.getPriority());
-		}
-		return Arrays.asList(message);
-	}
+    private Type type;
 
-	
+    private Show show = Show.available;
+
+    private String status;
+
+    private int priority = -129;
+
+    public XMPPPresence(Type type, ServerSession session) {
+        super(session);
+        this.type = type;
+    }
+
+    public XMPPPresence(ServerSession session) {
+        this(Type.none, session);
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
+    }
+
+    public Show getShow() {
+        return show;
+    }
+
+    public void setShow(Show show) {
+        this.show = show;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public int getPriority() {
+        return priority;
+    }
+
+    public void setPriority(int priority) {
+        if (priority < -128 || priority > 127) {
+            throw new IllegalArgumentException("Priority must be between -128 and 127.");
+        }
+        this.priority = priority;
+    }
+
+    @Override
+    public String toXML(ServerSession session) {
+        Match document = JOOX.$("presence");
+
+        addAttributesAndElements(document);
+
+        if (type != null) {
+            document.attr("type", getType().toString());
+        }
+        if (show != null) {
+            document.append(JOOX.$("show", show.toString()));
+        }
+        if (status != null) {
+            document.append(JOOX.$("status", status));
+        }
+        if (priority != -129) {
+            document.append(JOOX.$("priority", Integer.toString(priority)));
+        }
+
+        return document.toString();
+    }
 
 }

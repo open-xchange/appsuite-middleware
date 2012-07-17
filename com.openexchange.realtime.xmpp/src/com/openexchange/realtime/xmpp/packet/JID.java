@@ -47,66 +47,106 @@
  *
  */
 
-package com.openexchange.realtime.example.telnet.chat;
+package com.openexchange.realtime.xmpp.packet;
 
-import java.util.Arrays;
-import java.util.List;
-
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.example.chat.ChatMessage;
-import com.openexchange.realtime.example.telnet.TelnetChatMessage;
-import com.openexchange.realtime.example.telnet.TransformingTelnetChatPlugin;
-import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.Message;
-import com.openexchange.realtime.packet.Message.Type;
-import com.openexchange.realtime.packet.Payload;
-import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.tools.session.ServerSession;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
- * {@link ChatTransformer}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link JID}
+ * 
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class ChatTransformer extends TransformingTelnetChatPlugin {
+public class JID {
 
-	@Override
-	public String getServiceName() {
-		return "chat";
-	}
+    private String user;
 
-	@Override
-	public List<Stanza> transform(TelnetChatMessage message) {
-		Message msg = new Message();
-		msg.setType(Type.chat);
-		ChatMessage chatMessage = new ChatMessage(message.getPayload());
-		
-		String header = message.getHeader("priority");
-		if (header != null) {
-			chatMessage.setPriority(Integer.parseInt(header));
-		}
-		
-		msg.setPayload(new Payload(chatMessage, "chatMessage"));
-		msg.setNamespace(getServiceName());
-		
-		return Arrays.asList((Stanza)msg);
-	}
-	@Override
-	public boolean canHandleOutgoing(String namespace) throws OXException {
-		return namespace.equals(getServiceName());
-	}
+    private String domain;
 
-	@Override
-	public List<TelnetChatMessage> transform(Stanza stanza, ID to, ServerSession session) throws OXException {
-		ChatMessage chatMessage = (ChatMessage) stanza.getPayload().getData();
-		
-		TelnetChatMessage message = new TelnetChatMessage(chatMessage.getMessage(), stanza.getFrom(), session);
-		if (chatMessage.getPriority() != ChatMessage.NO_PRIORITY) {
-			message.setHeader("priority", ""+chatMessage.getPriority());
-		}
-		return Arrays.asList(message);
-	}
+    private String resource;
 
-	
+    private static final Pattern PATTERN = Pattern.compile("([^@]+)@([^/]+)/?(.*)");
+
+    public JID(String jid) {
+        final Matcher matcher = PATTERN.matcher(jid);
+        if (!matcher.matches()) {
+            throw new IllegalArgumentException("Could not parse " + jid);
+        }
+
+        setUser(matcher.group(1));
+        setDomain(matcher.group(2));
+        setResource(matcher.group(3));
+
+    }
+
+    public JID(String user, String domain, String resource) {
+        setUser(user);
+        setDomain(domain);
+        setResource(resource);
+    }
+
+    public String getUser() {
+        return user;
+    }
+
+    public void setUser(String user) {
+        if (user == null || user.trim().equals("")) {
+            throw new IllegalArgumentException("Invalid User: " + user);
+        }
+        this.user = sanitize(user);
+    }
+
+    public String getDomain() {
+        return domain;
+    }
+
+    public void setDomain(String domain) {
+        if (domain == null || domain.trim().equals("")) {
+            throw new IllegalArgumentException("Invalid Domain:" + domain);
+        }
+        this.domain = sanitize(domain);
+    }
+
+    public String getResource() {
+        return resource;
+    }
+
+    public void setResource(String resource) {
+        this.resource = resource;
+    }
+
+    public boolean isBare() {
+        return resource == null;
+    }
+
+    public boolean isFull() {
+        return !isBare();
+    }
+
+    public String toString() {
+        return toBareString() + (isBare() ? "" : "/" + resource);
+    }
+
+    public String toBareString() {
+        return user + "@" + domain;
+    }
+
+    public JID getBare() {
+        return new JID(user, domain, null);
+    }
+
+    private String sanitize(String string) {
+        if (string == null) {
+            return null;
+        }
+
+        String tmp = string.toLowerCase().trim();
+
+        if (tmp.equals("")) {
+            return null;
+        }
+
+        return tmp;
+    }
 
 }

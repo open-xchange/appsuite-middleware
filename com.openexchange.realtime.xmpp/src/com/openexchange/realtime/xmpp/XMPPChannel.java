@@ -47,66 +47,81 @@
  *
  */
 
-package com.openexchange.realtime.example.telnet.chat;
+package com.openexchange.realtime.xmpp;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
-
+import java.util.Map.Entry;
+import java.util.Set;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.example.chat.ChatMessage;
-import com.openexchange.realtime.example.telnet.TelnetChatMessage;
-import com.openexchange.realtime.example.telnet.TransformingTelnetChatPlugin;
+import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.Message;
-import com.openexchange.realtime.packet.Message.Type;
-import com.openexchange.realtime.packet.Payload;
 import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.util.IDMap;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ChatTransformer}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link XMPPChannel}
+ * 
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class ChatTransformer extends TransformingTelnetChatPlugin {
+public class XMPPChannel implements Channel {
 
-	@Override
-	public String getServiceName() {
-		return "chat";
-	}
+    private IDMap<XMPPDelivery> connections = new IDMap<XMPPDelivery>();
 
-	@Override
-	public List<Stanza> transform(TelnetChatMessage message) {
-		Message msg = new Message();
-		msg.setType(Type.chat);
-		ChatMessage chatMessage = new ChatMessage(message.getPayload());
-		
-		String header = message.getHeader("priority");
-		if (header != null) {
-			chatMessage.setPriority(Integer.parseInt(header));
-		}
-		
-		msg.setPayload(new Payload(chatMessage, "chatMessage"));
-		msg.setNamespace(getServiceName());
-		
-		return Arrays.asList((Stanza)msg);
-	}
-	@Override
-	public boolean canHandleOutgoing(String namespace) throws OXException {
-		return namespace.equals(getServiceName());
-	}
+    private List<XMPPExtension> extensions = new ArrayList<XMPPExtension>();
 
-	@Override
-	public List<TelnetChatMessage> transform(Stanza stanza, ID to, ServerSession session) throws OXException {
-		ChatMessage chatMessage = (ChatMessage) stanza.getPayload().getData();
-		
-		TelnetChatMessage message = new TelnetChatMessage(chatMessage.getMessage(), stanza.getFrom(), session);
-		if (chatMessage.getPriority() != ChatMessage.NO_PRIORITY) {
-			message.setHeader("priority", ""+chatMessage.getPriority());
-		}
-		return Arrays.asList(message);
-	}
+    @Override
+    public String getProtocol() {
+        return "xmpp";
+    }
 
-	
+    @Override
+    public int getPriority() {
+        return 100;
+    }
+
+    @Override
+    public boolean canHandle(String namespace, ID recipient, ServerSession session) throws OXException {
+        return true;
+    }
+
+    @Override
+    public boolean isConnected(ID id, ServerSession session) throws OXException {
+        return connections.containsKey(id);
+    }
+
+    @Override
+    public void send(Stanza stanza, ServerSession session) throws OXException {
+        XMPPDelivery recipient = connections.get(stanza.getTo());
+        for (XMPPExtension extension : extensions) {
+            if (extension.canHandle(stanza)) {
+                if (recipient == null) {
+                    Set<Entry<ID, XMPPDelivery>> equivalents = connections.getEquivalents(stanza.getTo());
+                    for (Entry<ID, XMPPDelivery> entry : equivalents) {
+                        extension.handleOutgoing(stanza, entry.getValue(), session);
+                    }
+                } else {
+                    extension.handleOutgoing(stanza, recipient, session);
+                }
+            }
+        }
+    }
+
+    public void addExtension(XMPPExtension extension) {
+        extensions.add(extension);
+    }
+
+    public void removeExtension(XMPPExtension extension) {
+        extensions.remove(extension);
+    }
+
+    public void addDelivery(ID id, XMPPDelivery delivery) {
+        connections.put(id, delivery);
+    }
+
+    public void removeDelivery(ID id) {
+        connections.remove(id);
+    }
 
 }

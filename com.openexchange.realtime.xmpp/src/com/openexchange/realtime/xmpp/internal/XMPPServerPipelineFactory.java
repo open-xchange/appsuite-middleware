@@ -47,66 +47,40 @@
  *
  */
 
-package com.openexchange.realtime.example.telnet.chat;
+package com.openexchange.realtime.xmpp.internal;
 
-import java.util.Arrays;
-import java.util.List;
-
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.example.chat.ChatMessage;
-import com.openexchange.realtime.example.telnet.TelnetChatMessage;
-import com.openexchange.realtime.example.telnet.TransformingTelnetChatPlugin;
-import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.Message;
-import com.openexchange.realtime.packet.Message.Type;
-import com.openexchange.realtime.packet.Payload;
-import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.tools.session.ServerSession;
+import org.jboss.netty.channel.ChannelPipeline;
+import org.jboss.netty.channel.ChannelPipelineFactory;
+import org.jboss.netty.channel.Channels;
+import org.jboss.netty.handler.codec.string.StringDecoder;
+import org.jboss.netty.handler.codec.string.StringEncoder;
+import com.openexchange.realtime.xmpp.XMPPChannel;
 
 /**
- * {@link ChatTransformer}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link XMPPServerPipelineFactory}
+ * 
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class ChatTransformer extends TransformingTelnetChatPlugin {
+public class XMPPServerPipelineFactory implements ChannelPipelineFactory {
 
-	@Override
-	public String getServiceName() {
-		return "chat";
-	}
+    private XMPPChannel channel;
 
-	@Override
-	public List<Stanza> transform(TelnetChatMessage message) {
-		Message msg = new Message();
-		msg.setType(Type.chat);
-		ChatMessage chatMessage = new ChatMessage(message.getPayload());
-		
-		String header = message.getHeader("priority");
-		if (header != null) {
-			chatMessage.setPriority(Integer.parseInt(header));
-		}
-		
-		msg.setPayload(new Payload(chatMessage, "chatMessage"));
-		msg.setNamespace(getServiceName());
-		
-		return Arrays.asList((Stanza)msg);
-	}
-	@Override
-	public boolean canHandleOutgoing(String namespace) throws OXException {
-		return namespace.equals(getServiceName());
-	}
+    private XMPPHandler handler;
 
-	@Override
-	public List<TelnetChatMessage> transform(Stanza stanza, ID to, ServerSession session) throws OXException {
-		ChatMessage chatMessage = (ChatMessage) stanza.getPayload().getData();
-		
-		TelnetChatMessage message = new TelnetChatMessage(chatMessage.getMessage(), stanza.getFrom(), session);
-		if (chatMessage.getPriority() != ChatMessage.NO_PRIORITY) {
-			message.setHeader("priority", ""+chatMessage.getPriority());
-		}
-		return Arrays.asList(message);
-	}
+    public XMPPServerPipelineFactory(XMPPChannel channel, XMPPHandler handler) {
+        this.channel = channel;
+        this.handler = handler;
+    }
 
-	
+    @Override
+    public ChannelPipeline getPipeline() throws Exception {
+        ChannelPipeline pipeline = Channels.pipeline();
+
+        pipeline.addLast("decoder", new StringDecoder());
+        pipeline.addLast("encoder", new StringEncoder());
+        pipeline.addLast("xmpp", new XMPPChatDelivery(channel, handler));
+
+        return pipeline;
+    }
 
 }

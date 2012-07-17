@@ -47,66 +47,19 @@
  *
  */
 
-package com.openexchange.realtime.example.telnet.chat;
-
-import java.util.Arrays;
-import java.util.List;
+package com.openexchange.realtime.xmpp;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.example.chat.ChatMessage;
-import com.openexchange.realtime.example.telnet.TelnetChatMessage;
-import com.openexchange.realtime.example.telnet.TransformingTelnetChatPlugin;
-import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.Message;
-import com.openexchange.realtime.packet.Message.Type;
-import com.openexchange.realtime.packet.Payload;
-import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.xmpp.packet.XMPPStanza;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ChatTransformer}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link XMPPDelivery}
+ * 
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class ChatTransformer extends TransformingTelnetChatPlugin {
+public interface XMPPDelivery {
 
-	@Override
-	public String getServiceName() {
-		return "chat";
-	}
-
-	@Override
-	public List<Stanza> transform(TelnetChatMessage message) {
-		Message msg = new Message();
-		msg.setType(Type.chat);
-		ChatMessage chatMessage = new ChatMessage(message.getPayload());
-		
-		String header = message.getHeader("priority");
-		if (header != null) {
-			chatMessage.setPriority(Integer.parseInt(header));
-		}
-		
-		msg.setPayload(new Payload(chatMessage, "chatMessage"));
-		msg.setNamespace(getServiceName());
-		
-		return Arrays.asList((Stanza)msg);
-	}
-	@Override
-	public boolean canHandleOutgoing(String namespace) throws OXException {
-		return namespace.equals(getServiceName());
-	}
-
-	@Override
-	public List<TelnetChatMessage> transform(Stanza stanza, ID to, ServerSession session) throws OXException {
-		ChatMessage chatMessage = (ChatMessage) stanza.getPayload().getData();
-		
-		TelnetChatMessage message = new TelnetChatMessage(chatMessage.getMessage(), stanza.getFrom(), session);
-		if (chatMessage.getPriority() != ChatMessage.NO_PRIORITY) {
-			message.setHeader("priority", ""+chatMessage.getPriority());
-		}
-		return Arrays.asList(message);
-	}
-
-	
+    public void deliver(XMPPStanza stanza, ServerSession session) throws OXException;
 
 }

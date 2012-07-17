@@ -47,66 +47,45 @@
  *
  */
 
-package com.openexchange.realtime.example.telnet.chat;
+package com.openexchange.realtime.xmpp.internal;
 
-import java.util.Arrays;
-import java.util.List;
-
+import java.util.HashMap;
+import java.util.Map;
+import org.joox.JOOX;
+import org.joox.Match;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.example.chat.ChatMessage;
-import com.openexchange.realtime.example.telnet.TelnetChatMessage;
-import com.openexchange.realtime.example.telnet.TransformingTelnetChatPlugin;
-import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.Message;
-import com.openexchange.realtime.packet.Message.Type;
-import com.openexchange.realtime.packet.Payload;
-import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.realtime.xmpp.XMPPExtension;
+import com.openexchange.realtime.xmpp.packet.XMPPMessage;
 
 /**
- * {@link ChatTransformer}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link XMPPHandler}
+ * 
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class ChatTransformer extends TransformingTelnetChatPlugin {
+public class XMPPHandler {
 
-	@Override
-	public String getServiceName() {
-		return "chat";
-	}
+    private Map<String, XMPPExtension> extensions = new HashMap<String, XMPPExtension>();
 
-	@Override
-	public List<Stanza> transform(TelnetChatMessage message) {
-		Message msg = new Message();
-		msg.setType(Type.chat);
-		ChatMessage chatMessage = new ChatMessage(message.getPayload());
-		
-		String header = message.getHeader("priority");
-		if (header != null) {
-			chatMessage.setPriority(Integer.parseInt(header));
-		}
-		
-		msg.setPayload(new Payload(chatMessage, "chatMessage"));
-		msg.setNamespace(getServiceName());
-		
-		return Arrays.asList((Stanza)msg);
-	}
-	@Override
-	public boolean canHandleOutgoing(String namespace) throws OXException {
-		return namespace.equals(getServiceName());
-	}
+    public void handle(XMPPContainer container) throws OXException {
+        Match match = JOOX.$(container.getXml());
+        String namespace = match.attrs("xmlns").get(0);
+        String service = null;
+        if (namespace != null) {
+            service = namespace;
+        } else if (match.tag().equals("message")) {
+            service = "chat";
+        } else if (match.tag().equals("presence")) {
+            service = "presence";
+        }
+        extensions.get(service).handleIncoming(new XMPPMessage(match, container.getSession()), container.getSession());
+    }
 
-	@Override
-	public List<TelnetChatMessage> transform(Stanza stanza, ID to, ServerSession session) throws OXException {
-		ChatMessage chatMessage = (ChatMessage) stanza.getPayload().getData();
-		
-		TelnetChatMessage message = new TelnetChatMessage(chatMessage.getMessage(), stanza.getFrom(), session);
-		if (chatMessage.getPriority() != ChatMessage.NO_PRIORITY) {
-			message.setHeader("priority", ""+chatMessage.getPriority());
-		}
-		return Arrays.asList(message);
-	}
+    public void addExtension(XMPPExtension extension) {
+        this.extensions.put(extension.getServiceName(), extension);
+    }
 
-	
+    public void removeExtension(XMPPExtension extension) {
+        this.extensions.remove(extension.getServiceName());
+    }
 
 }
