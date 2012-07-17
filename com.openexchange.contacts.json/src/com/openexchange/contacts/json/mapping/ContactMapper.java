@@ -127,11 +127,9 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 				ContactField field = entry.getKey();
 				setFields.add(field);
 				if (ContactField.IMAGE1.equals(field)) {
-					// assume virtual IMAGE1_URL is set, too
-					setFields.add(ContactField.IMAGE1_URL);
+					setFields.add(ContactField.IMAGE1_URL); // assume virtual IMAGE1_URL is set, too
 				} else if (ContactField.LAST_MODIFIED.equals(field)) {
-					// assume virtual LAST_MODIFIED_UTC is set, too
-					setFields.add(ContactField.LAST_MODIFIED_UTC);
+					setFields.add(ContactField.LAST_MODIFIED_UTC); // assume virtual LAST_MODIFIED_UTC is set, too
 				}
 			}
 		}
@@ -152,14 +150,9 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 			if (null != field && (null == illegalFields || false == illegalFields.contains(field))) {
                 fields.add(field);
             } else if (Contact.IMAGE1_URL == columnID) {
-            	// query NUMBER_OF_IMAGES to set image URL afterwards
-            	fields.add(ContactField.NUMBER_OF_IMAGES);
-            	// also query IMAGE_LAST_MODIFIED, since old implementation didn't reset NUMBER_OF_IMAGES on image removal, so that 
-            	// there may be contacts with NUMBER_OF_IMAGES = 1, but actually without image data.
-            	fields.add(ContactField.IMAGE_LAST_MODIFIED);
+            	fields.add(ContactField.NUMBER_OF_IMAGES); // query NUMBER_OF_IMAGES to set image URL afterwards
             } else if (DataObject.LAST_MODIFIED_UTC == columnID) {
-            	// query LAST_MODIFIED to set last modified utc afterwards
-            	fields.add(ContactField.LAST_MODIFIED);
+            	fields.add(ContactField.LAST_MODIFIED); // query LAST_MODIFIED to set last modified utc afterwards
             } else {
             	throw OXException.notFound("No mapping for column ID: " + Integer.toString(columnID));
             }
@@ -2718,41 +2711,6 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 			}
         });
         
-//        mappings.put(ContactField.IMAGE1, new StringMapping<Contact>(ContactFields.IMAGE1_URL, Contact.IMAGE1) {
-//
-//            @Override
-//            public void set(Contact contact, String value) { 
-//                throw new UnsupportedOperationException();
-//            }
-//
-//            @Override
-//            public boolean isSet(Contact contact) {
-//            	return contact.containsImage1();
-//            }
-//
-//            @Override
-//        	public Object serialize(Contact from, TimeZone timeZone, Session session) throws JSONException {
-//            	/*
-//            	 * override serialization here, and serialize as "image1_url" instead of byte array
-//            	 */
-//            	try {
-//					return ContactMapper.getInstance().get(ContactField.IMAGE1_URL).serialize(from, timeZone, session);
-//				} catch (OXException e) {
-//					throw new JSONException(e);
-//				}
-//        	}
-//        
-//            @Override
-//            public String get(Contact contact) {
-//            	return null;
-//            }
-//
-//            @Override
-//            public void remove(Contact contact) { 
-//                throw new UnsupportedOperationException();
-//            }
-//        });
-        
         mappings.put(ContactField.IMAGE1_URL, new StringMapping<Contact>(ContactFields.IMAGE1_URL, Contact.IMAGE1_URL) {
 
             @Override
@@ -2767,28 +2725,17 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             
             @Override
         	public Object serialize(Contact from, TimeZone timeZone, Session session) throws JSONException {
-            	if (reallyHasImage(from)) {
-    				ImageLocation imageLocation = new ImageLocation.Builder().folder(String.valueOf(from.getParentFolderID())).id(
-    						String.valueOf(from.getObjectID())).build();
-					try {
-						return ContactImageDataSource.getInstance().generateUrl(imageLocation, session);
-					} catch (OXException e) {
-						throw new JSONException(e);
-					}
-            	}
+                if (0 < from.getNumberOfImages() || from.containsImage1() && null != from.getImage1()) {
+                    ImageLocation imageLocation = new ImageLocation.Builder().folder(String.valueOf(from.getParentFolderID())).id(
+                        String.valueOf(from.getObjectID())).build();
+                    try {
+                        return ContactImageDataSource.getInstance().generateUrl(imageLocation, session);
+                    } catch (OXException e) {
+                        throw new JSONException(e);
+                    }
+                }
     			return JSONObject.NULL;
         	}
-            
-            /**
-             * Checks whether the supplied contact contains an image. 
-             * 
-             * @param contact the contact
-             * @return <code>true</code>, if the contact has an image, <code>false</code>, otherwise
-             */
-            private boolean reallyHasImage(Contact contact) {
-            	return contact.containsImage1() && null != contact.getImage1() ||
-            			0 < contact.getNumberOfImages() && contact.containsImageLastModified() && null != contact.getImageLastModified();
-            }
 
             @Override
             public String get(Contact contact) {
@@ -3116,10 +3063,6 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 
             @Override
             public Integer get(Contact contact) {
-            	// correcting the image count here if there is no image data present
-            	if (0 < contact.getNumberOfImages() && null == contact.getImageLastModified()) {
-            		return 0;
-            	}            	
                 return contact.getNumberOfImages();
             }
 
