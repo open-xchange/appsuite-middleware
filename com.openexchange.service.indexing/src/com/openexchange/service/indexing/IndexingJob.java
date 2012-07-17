@@ -50,6 +50,7 @@
 package com.openexchange.service.indexing;
 
 import java.io.Serializable;
+import java.util.Map;
 import com.openexchange.exception.OXException;
 
 /**
@@ -193,5 +194,12 @@ public interface IndexingJob extends Serializable {
      * @param t The exception that caused termination, or <code>null</code> if execution completed normally
      */
     void afterExecute(Throwable t);
+
+    /**
+     * Gets the modifiable properties associated with this job.
+     * 
+     * @return The properties
+     */
+    Map<String, ?> getProperties();
 
 }

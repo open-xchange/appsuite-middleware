@@ -49,6 +49,10 @@
 
 package com.openexchange.service.indexing;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
 /**
  * {@link StandardIndexingJob} - The standard <code style="color: red;">abstract</code> {@link IndexingJob} to extend from.
  * 
@@ -81,10 +85,16 @@ public abstract class StandardIndexingJob implements IndexingJob {
     protected final long timeStamp;
 
     /**
+     * The properties.
+     */
+    protected final ConcurrentMap<String, ?> properties;
+
+    /**
      * Initializes a new {@link StandardIndexingJob}.
      */
     protected StandardIndexingJob() {
         super();
+        properties = new ConcurrentHashMap<String, Object>();
         timeStamp = System.currentTimeMillis();
         priority = DEFAULT_PRIORITY;
         behavior = DEFAULT_BEHAVIOR;
@@ -94,6 +104,11 @@ public abstract class StandardIndexingJob implements IndexingJob {
     @Override
     public Class<?>[] getNeededServices() {
         return EMPTY_CLASSES;
+    }
+
+    @Override
+    public Map<String, ?> getProperties() {
+        return properties;
     }
 
     @Override

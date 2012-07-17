@@ -49,6 +49,8 @@
 
 package com.openexchange.service.indexing;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.exception.OXException;
 
 /**
@@ -98,11 +100,19 @@ public final class Jobs {
 
         private int priority;
 
+        private final Map<String, ?> props;
+
         protected RunnableJob(final Runnable task, final int priority) {
             super();
+            props = new ConcurrentHashMap<String, Object>();
             this.task = task;
             this.priority = priority;
             timeStamp = System.currentTimeMillis();
+        }
+
+        @Override
+        public Map<String, ?> getProperties() {
+            return props;
         }
 
         @Override
