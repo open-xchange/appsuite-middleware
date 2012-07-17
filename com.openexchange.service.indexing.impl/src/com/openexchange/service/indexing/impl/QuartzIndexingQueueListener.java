@@ -51,8 +51,10 @@ package com.openexchange.service.indexing.impl;
 
 import static org.quartz.CronScheduleBuilder.cronSchedule;
 import static org.quartz.JobBuilder.newJob;
+import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
 import static org.quartz.TriggerBuilder.newTrigger;
 import java.io.IOException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
@@ -114,23 +116,15 @@ public final class QuartzIndexingQueueListener implements MQQueueListener {
             final IndexingJob indexingJob = (IndexingJob) objectMessage.getObject();
             final Map<String, Object> map = new HashMap<String, Object>(1);
             map.put("indexingJob", indexingJob);
-            final String name = Long.toString(counter.incrementAndGet());
+            final String sCount = Long.toString(counter.incrementAndGet());
             /*
              * Define the job and tie it to our WrapperJob class
              */
-            final JobDetail job =
-                newJob(WrapperJob.class).withIdentity("job"+name, GROUP).usingJobData(new JobDataMap(map)).build();
+            final JobDetail job = newJob(WrapperJob.class).withIdentity("job" + sCount, GROUP).usingJobData(new JobDataMap(map)).build();
             /*
              * Trigger the job
              */
-            final TriggerBuilder<Trigger> triggerBuilder = newTrigger().withIdentity("trigger"+name, GROUP);
-            final String cronDesc = (String) indexingJob.getProperties().get(QuartzService.PROPERTY_CRON_EXPRESSION);
-            if (null == cronDesc) {
-                triggerBuilder.startNow();
-            } else {
-                triggerBuilder.withSchedule(cronSchedule(cronDesc));
-            }
-            final Trigger trigger = triggerBuilder.build();
+            final Trigger trigger = buildTrigger(indexingJob, sCount);
             /*
              * Tell quartz to schedule the job using our trigger
              */
@@ -150,23 +144,15 @@ public final class QuartzIndexingQueueListener implements MQQueueListener {
             final IndexingJob indexingJob = SerializableHelper.<IndexingJob> readObject(bytes);
             final Map<String, Object> map = new HashMap<String, Object>(1);
             map.put("indexingJob", indexingJob);
-            final String name = Long.toString(counter.incrementAndGet());
+            final String sCount = Long.toString(counter.incrementAndGet());
             /*
              * Define the job and tie it to our WrapperJob class
              */
-            final JobDetail job =
-                newJob(WrapperJob.class).withIdentity("job"+name, GROUP).usingJobData(new JobDataMap(map)).build();
+            final JobDetail job = newJob(WrapperJob.class).withIdentity("job" + sCount, GROUP).usingJobData(new JobDataMap(map)).build();
             /*
              * Trigger the job to run now
              */
-            final TriggerBuilder<Trigger> triggerBuilder = newTrigger().withIdentity("trigger"+name, GROUP);
-            final String cronDesc = (String) indexingJob.getProperties().get(QuartzService.PROPERTY_CRON_EXPRESSION);
-            if (null == cronDesc) {
-                triggerBuilder.startNow();
-            } else {
-                triggerBuilder.withSchedule(cronSchedule(cronDesc));
-            }
-            final Trigger trigger = triggerBuilder.build();
+            final Trigger trigger = buildTrigger(indexingJob, sCount);
             /*
              * Tell quartz to schedule the job using our trigger
              */
@@ -182,7 +168,65 @@ public final class QuartzIndexingQueueListener implements MQQueueListener {
         }
     }
 
-    private static final class WrapperJob implements Job {
+    private Trigger buildTrigger(final IndexingJob indexingJob, final String sCount) {
+        final TriggerBuilder<Trigger> triggerBuilder = newTrigger().withIdentity("trigger" + sCount, GROUP);
+        final Map<String, ?> properties = indexingJob.getProperties();
+        final String cronDesc = (String) properties.get(QuartzService.PROPERTY_CRON_EXPRESSION);
+        if (null == cronDesc) {
+            /*
+             * A one-time or repeated job, starting either now or at a given start time.
+             */
+            Object tmp = properties.get(QuartzService.PROPERTY_START_TIME);
+            if (null == tmp) {
+                triggerBuilder.startNow();
+            } else {
+                final long startTime = longFrom(tmp);
+                triggerBuilder.startAt(new Date(startTime));
+            }
+            tmp = properties.get(QuartzService.PROPERTY_REPEAT_COUNT);
+            if (null != tmp) {
+                final int repeatCount = intFrom(tmp);
+                tmp = properties.get(QuartzService.PROPERTY_REPEAT_INTERVAL);
+                if (null == tmp) {
+                    /*
+                     * Forever...
+                     */
+                    triggerBuilder.withSchedule(simpleSchedule().withRepeatCount(repeatCount).withIntervalInSeconds(30));
+                } else {
+                    /*
+                     * Interval
+                     */
+                    final long interval = longFrom(tmp);
+                    triggerBuilder.withSchedule(simpleSchedule().withRepeatCount(repeatCount).withIntervalInMilliseconds(interval));
+                }
+            } else {
+                tmp = properties.get(QuartzService.PROPERTY_REPEAT_INTERVAL);
+                if (null != tmp) {
+                    final long interval = longFrom(tmp);
+                    triggerBuilder.withSchedule(simpleSchedule().repeatForever().withIntervalInMilliseconds(interval));
+                }
+            }
+        } else {
+            /*
+             * A Cron job
+             */
+            triggerBuilder.withSchedule(cronSchedule(cronDesc));
+        }
+        return triggerBuilder.build();
+    }
+
+    private int intFrom(final Object tmp) {
+        return tmp instanceof Integer ? ((Integer) tmp).intValue() : Integer.parseInt(tmp.toString().trim());
+    }
+
+    private long longFrom(final Object tmp) {
+        return tmp instanceof Long ? ((Long) tmp).longValue() : Long.parseLong(tmp.toString().trim());
+    }
+
+    /**
+     * A wrapper for an {@link IndexingJob} instance.
+     */
+    public static final class WrapperJob implements Job {
 
         public WrapperJob() {
             super();

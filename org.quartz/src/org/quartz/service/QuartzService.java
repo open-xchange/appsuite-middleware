@@ -50,6 +50,7 @@
 package org.quartz.service;
 
 import org.quartz.CronScheduleBuilder;
+import org.quartz.DateBuilder;
 import org.quartz.Scheduler;
 
 /**
@@ -98,6 +99,28 @@ public interface QuartzService {
      * </table>
      */
     public static final String PROPERTY_CRON_EXPRESSION = "quartz.cronExpression";
+
+    /**
+     * Specifies the job's start time; the number of milliseconds since January 1, 1970, 00:00:00 GMT.
+     * <p>
+     * Utility class {@link DateBuilder} provides many useful methods:
+     * 
+     * <pre>
+     * get a &quot;nice round&quot; time a few seconds in the future...
+     * Date startTime = DateBuilder.nextGivenSecondDate(null, 15);
+     * </pre>
+     */
+    public static final String PROPERTY_START_TIME = "quartz.startTime";
+
+    /**
+     * The repeat count (in addition to first run).
+     */
+    public static final String PROPERTY_REPEAT_COUNT = "quartz.repeatCount";
+
+    /**
+     * The delay between repeated runs in milliseconds.
+     */
+    public static final String PROPERTY_REPEAT_INTERVAL = "quartz.repeatInterval";
 
     /**
      * Gets the main scheduler started on bundle start-up.
