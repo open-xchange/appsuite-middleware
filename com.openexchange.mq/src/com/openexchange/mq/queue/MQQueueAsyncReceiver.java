@@ -58,7 +58,7 @@ import com.openexchange.mq.queue.impl.MQQueueResource;
 import com.openexchange.mq.queue.internal.WrappingMessageListener;
 
 /**
- * {@link MQQueueAsyncReceiver} - An asynchronous topic subscriber intended to be re-used. It subscribes specified {@link MQQueueListener
+ * {@link MQQueueAsyncReceiver} - An asynchronous queue receiver intended to be re-used. It subscribes specified {@link MQQueueListener
  * listener} to given topic.
  * <p>
  * Invoke {@link #close()} method when done.
