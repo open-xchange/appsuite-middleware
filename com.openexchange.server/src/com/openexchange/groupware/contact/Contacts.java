@@ -7292,10 +7292,10 @@ public final class Contacts {
 
             @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
-                if (co.containsImage1()) {
+                if (null != co.getImage1()) {
                     ps.setInt(pos, 1);
                 } else {
-                    ps.setInt(pos, 0);
+                    ps.setNull(pos, java.sql.Types.INTEGER);
                 }
             }
 
