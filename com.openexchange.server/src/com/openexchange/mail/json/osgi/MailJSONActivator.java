@@ -109,8 +109,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
         registerService(ResultConverter.class, converter);
         registerService(ResultConverter.class, new MailJSONConverter(converter));
 
-        final ContactField[] fields = new ContactField[] { ContactField.OBJECT_ID, ContactField.FOLDER_ID, 
-            ContactField.NUMBER_OF_IMAGES, ContactField.IMAGE_LAST_MODIFIED };
+        final ContactField[] fields = new ContactField[] { ContactField.OBJECT_ID, ContactField.FOLDER_ID, ContactField.NUMBER_OF_IMAGES };
         registerService(AJAXResultDecorator.class, new DecoratorImpl(converter, fields));
     }
 
@@ -174,12 +173,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
                     final JSONObject jObject = (JSONObject) result.getResultObject();
                     final JSONArray jArray = new JSONArray();
                     for (final Contact contact : contacts) {
-                        // also check IMAGE_LAST_MODIFIED, since old implementation didn't reset NUMBER_OF_IMAGES on image removal, 
-                        // so that there may be contacts with NUMBER_OF_IMAGES = 1, but actually without image data.
-                        // TODO: fix that in the old implementation, then write an update task to correct the NUMBER_OF_IMAGES in 
-                        // the database 
-                        if (0 < contact.getNumberOfImages() && 
-                            contact.containsImageLastModified() && null != contact.getImageLastModified()) {
+                        if (0 < contact.getNumberOfImages() || contact.containsImage1() && null != contact.getImage1()) {
                             try {
                                 final ContactImageDataSource imgSource = ContactImageDataSource.getInstance();
                                 final ImageLocation imageLocation =
