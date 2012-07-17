@@ -131,7 +131,7 @@ public class ContactServiceImpl extends DefaultContactService {
             	contact.setNumberOfImages(1);
         	} else {
             	contact.setNumberOfImages(0);
-            	contact.setImageContentType(null);        		
+            	contact.setImageContentType(null);
         	}
         }        
 		if (false == contact.containsUid() || Tools.isEmpty(contact.getUid())) {
@@ -221,7 +221,7 @@ public class ContactServiceImpl extends DefaultContactService {
         		delta.setNumberOfImages(1);
         	} else {
         		delta.setNumberOfImages(0);
-        		delta.setImageContentType(null);        		
+        		delta.setImageContentType(null);
         	}
         }
         Tools.invalidateAddressesIfNeeded(delta);
@@ -390,9 +390,8 @@ public class ContactServiceImpl extends DefaultContactService {
 	}
 	
 	@Override
-    protected <O> SearchIterator<Contact> doGetContacts(boolean deleted, Session session, final String folderID, 
-			final String[] ids, final ContactField[] fields, final SortOptions sortOptions, 
-			final Date since) throws OXException {
+    protected <O> SearchIterator<Contact> doGetContacts(boolean deleted, Session session, String folderID, String[] ids, 
+        ContactField[] fields, SortOptions sortOptions, Date since) throws OXException {
 		int userID = session.getUserId();
 		int contextID = session.getContextId();
 		/*
@@ -406,9 +405,12 @@ public class ContactServiceImpl extends DefaultContactService {
 		final EffectivePermission permission = Tools.getPermission(contextID, folderID, userID);
 		Check.canReadOwn(permission, session, folderID);
 		/*
-		 * prepare fields
+		 * prepare fields and sort options
 		 */
-		final QueryFields queryFields = new QueryFields(fields);		
+		QueryFields queryFields = new QueryFields(fields);
+		if (null == sortOptions) {
+		    sortOptions = SortOptions.EMPTY;
+		}
 		/*
 		 * get contacts from storage
 		 */		
@@ -448,10 +450,13 @@ public class ContactServiceImpl extends DefaultContactService {
 		if (null == queriedStorages || 0 == queriedStorages.size()) {
 			throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create("No contact storage found for queried folder IDs");
 		}
-		/*
-		 * prepare fields
-		 */
-		final QueryFields queryFields = new QueryFields(fields);
+        /*
+         * prepare fields and sort options
+         */
+        QueryFields queryFields = new QueryFields(fields);
+        if (null == sortOptions) {
+            sortOptions = SortOptions.EMPTY;
+        }
 		/*
 		 * perform searches
 		 */
@@ -500,10 +505,13 @@ public class ContactServiceImpl extends DefaultContactService {
 		if (null == queriedStorages || 0 == queriedStorages.size()) {
 			throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create("No contact storage found for queried folder IDs");
 		}
-		/*
-		 * prepare fields
-		 */
-		QueryFields queryFields = new QueryFields(fields);
+        /*
+         * prepare fields and sort options
+         */
+        QueryFields queryFields = new QueryFields(fields);
+        if (null == sortOptions) {
+            sortOptions = SortOptions.EMPTY;
+        }
 		/*
 		 * perform searches
 		 */
@@ -556,6 +564,9 @@ public class ContactServiceImpl extends DefaultContactService {
 			// restrict queried fields
 			queryFields = new QueryFields(fields, LIMITED_USER_FIELDS);
 		}
+        if (null == sortOptions) {
+            sortOptions = SortOptions.EMPTY;
+        }
 		/*
 		 * prepare search term for users
 		 */
@@ -618,6 +629,9 @@ public class ContactServiceImpl extends DefaultContactService {
 			// restrict queried fields
 			queryFields = new QueryFields(fields, LIMITED_USER_FIELDS);
 		}
+        if (null == sortOptions) {
+            sortOptions = SortOptions.EMPTY;
+        }
 		/*
 		 * get user contacts from storage
 		 */
