@@ -51,6 +51,7 @@ package com.openexchange.mail.json.parser;
 
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.parseAddressList;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.quotePersonal;
+import static com.openexchange.mail.mime.utils.MimeMessageUtility.shouldRetry;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -830,7 +831,17 @@ public final class MessageParser {
             new MailMessageParser().parseMailMessage(referencedMail, handler);
             for (final Map.Entry<String, MailPart> e : handler.getMailParts().entrySet()) {
                 final String seqId = e.getKey();
-                retval.put(seqId, provider.getNewReferencedPart(e.getValue(), session));
+                try {
+                    retval.put(seqId, provider.getNewReferencedPart(e.getValue(), session));
+                } catch (final OXException oe) {
+                    if (!shouldRetry(oe)) {
+                        throw oe;
+                    }
+                    access.close(false);
+                    access = MailAccess.getInstance(session, parentMsgRef.getAccountId());
+                    access.connect();
+                    retval.put(seqId, provider.getNewReferencedPart(e.getValue(), session));
+                }
                 remaining.remove(seqId);
             }
             if (!remaining.isEmpty()) {
