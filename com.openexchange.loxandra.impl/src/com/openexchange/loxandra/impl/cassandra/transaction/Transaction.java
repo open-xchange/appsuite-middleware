@@ -152,8 +152,7 @@ public class Transaction {
 		
 		try {
 			executeOperations();
-			if (DO_CLEAN)
-				cleanupTransactionLog();
+			cleanupTransactionLog();
 		} catch (OXException e) {
 			e.printStackTrace();
 		}
@@ -426,7 +425,8 @@ public class Transaction {
 	private void cleanupTransactionLog() {
 		Mutator<UUID> m = HFactory.createMutator(keyspace, us);
 		m.addDeletion(txKey, CF_TRANSACTION_LOG);
-		m.execute();
+		if (DO_CLEAN)
+			m.execute();
 	}
 	
 	

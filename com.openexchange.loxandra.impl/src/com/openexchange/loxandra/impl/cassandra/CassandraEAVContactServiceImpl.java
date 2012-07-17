@@ -441,9 +441,9 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 		Composite end = new Composite();
 		end.addComponent(0, "folder", Composite.ComponentEquality.GREATER_THAN_EQUAL);
 		
-		SliceQuery<UUID, Composite, UUID> folderSliceQuery = HFactory.createSliceQuery(keyspace, us, cs, us);
+		SliceQuery<UUID, Composite, String> folderSliceQuery = HFactory.createSliceQuery(keyspace, us, cs, ss);
 		folderSliceQuery.setColumnFamily(CF_PERSON).setKey(uuid);
-		ColumnSliceIterator<UUID, Composite, UUID> folderIterator = new ColumnSliceIterator<UUID, Composite, UUID>(folderSliceQuery, start, end, false);
+		ColumnSliceIterator<UUID, Composite, String> folderIterator = new ColumnSliceIterator<UUID, Composite, String>(folderSliceQuery, start, end, false);
 		
 		/*while (folderIterator.hasNext()) {
 			HColumn<Composite, UUID> h = folderIterator.next();
@@ -458,10 +458,10 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 		Transaction t = new Transaction();
 		int opsCounter = 0;
 		while (folderIterator.hasNext()) {
-			HColumn<Composite, UUID> h = folderIterator.next();
+			HColumn<Composite, String> h = folderIterator.next();
 			EAVContact c = getContact(uuid, true);
 			
-			if (existsContactInFolder(c, h.getValue())) {
+			if (existsContactInFolder(c, UUID.fromString(h.getValue()))) {
 				
 				Operation o = new Operation(CF_PERSON_FOLDER, OperationAction.DELETE, ++opsCounter, h.getValue().toString());
 			    o.addOperationData(c.getDisplayName() + ":" + c.getTimeUUID(), uuid.toString());
@@ -769,11 +769,11 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 		Composite start = new Composite();
 	 	start.addComponent(0, c.getDisplayName(), Composite.ComponentEquality.EQUAL);
 	 	start.addComponent(1, c.getTimeUUID().toString(), Composite.ComponentEquality.EQUAL);
-	 		
+	 	
 	 	Composite end = new Composite();
 	 	end.addComponent(0, c.getDisplayName(), Composite.ComponentEquality.EQUAL);
 	 	end.addComponent(1, c.getTimeUUID().toString(), Composite.ComponentEquality.EQUAL);
-	 		
+	 	
 	 	SliceQuery<UUID, Composite, ByteBuffer> sliceQuery = HFactory.createSliceQuery(keyspace, us, cs, bbs);
 	 	ColumnSlice<Composite, ByteBuffer> slice = sliceQuery.setColumnFamily(CF_PERSON_FOLDER)
 	 														.setKey(folderUUID)
