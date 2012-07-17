@@ -60,21 +60,27 @@ import com.openexchange.osgi.HousekeepingActivator;
 
 /**
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- *
  */
 public class SnappyActivator extends HousekeepingActivator {
 	private static Log log = LogFactory.getLog(SnappyActivator.class);
-	private static String snappyPathProp = "com.openexchange.loxandra.common.snappyjava.nativelibs";
+	private static String snappyPathProp = "com.openexchange.nosql.cassandra.snappyjava.nativelibs";
 
+	/*
+	 * (non-Javadoc)
+	 * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
+	 */
 	@Override
 	protected Class<?>[] getNeededServices() {
-		// TODO Auto-generated method stub
 		return new Class[]{ConfigurationService.class};
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see com.openexchange.osgi.DeferredActivator#startBundle()
+	 */
 	@Override
 	protected void startBundle() throws Exception {
-		log.info("starting snappy bundle");
+		log.info("starting com.openexchange.nosql.cassandra.snappyjava bundle");
 		SnappyServiceLookUp.set(this);
 		
 		ConfigurationService config = SnappyServiceLookUp.getService(ConfigurationService.class);
@@ -104,8 +110,5 @@ public class SnappyActivator extends HousekeepingActivator {
 
 		String path = snappyNativePath + "/native/" + osName + "/" + osArch + "/libsnappyjava" + postfix;
     	System.load(path);
-    	//System.load("/home/isole/git/backend/com.openexchange.loxandra.common.snappyjava/lib/" + "native"  + fileSeparator + osName + fileSeparator + osArch + fileSeparator + "libsnappyjava.so");		
 	}
-
 }
-

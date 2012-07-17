@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Loxandra Hector Bundle
-Bundle-SymbolicName: com.openexchange.loxandra.hector
+Bundle-SymbolicName: com.openexchange.nosql.cassandra.hector
 Bundle-Version: 6.21.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
