@@ -244,6 +244,10 @@ public final class QuartzIndexingQueueListener implements MQQueueListener {
         public void execute(final JobExecutionContext context) throws JobExecutionException {
             final JobDataMap jobDataMap = context.getJobDetail().getJobDataMap();
             final IndexingJob indexingJob = (IndexingJob) jobDataMap.get("indexingJob");
+            if (null == indexingJob) {
+                // Huh?
+                return;
+            }
             boolean ran = false;
             indexingJob.beforeExecute();
             try {
