@@ -120,7 +120,11 @@ public final class QuartzIndexingQueueListener implements MQQueueListener {
             /*
              * Define the job and tie it to our WrapperJob class
              */
-            final JobDetail job = newJob(WrapperJob.class).withIdentity("job" + sCount, GROUP).usingJobData(new JobDataMap(map)).build();
+            String jobKey = (String) indexingJob.getProperties().get(QuartzService.PROPERTY_JOB_KEY);
+            if (null == jobKey) {
+                jobKey = "job" + sCount;
+            }
+            final JobDetail job = newJob(WrapperJob.class).withIdentity(jobKey, GROUP).usingJobData(new JobDataMap(map)).build();
             /*
              * Trigger the job
              */
@@ -148,7 +152,11 @@ public final class QuartzIndexingQueueListener implements MQQueueListener {
             /*
              * Define the job and tie it to our WrapperJob class
              */
-            final JobDetail job = newJob(WrapperJob.class).withIdentity("job" + sCount, GROUP).usingJobData(new JobDataMap(map)).build();
+            String jobKey = (String) indexingJob.getProperties().get(QuartzService.PROPERTY_JOB_KEY);
+            if (null == jobKey) {
+                jobKey = "job" + sCount;
+            }
+            final JobDetail job = newJob(WrapperJob.class).withIdentity(jobKey, GROUP).usingJobData(new JobDataMap(map)).build();
             /*
              * Trigger the job to run now
              */

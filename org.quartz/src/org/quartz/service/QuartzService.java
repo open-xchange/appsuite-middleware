@@ -123,6 +123,11 @@ public interface QuartzService {
     public static final String PROPERTY_REPEAT_INTERVAL = "quartz.repeatInterval";
 
     /**
+     * The job key identifier.
+     */
+    public static final String PROPERTY_JOB_KEY = "quartz.jobKey";
+
+    /**
      * Gets the main scheduler started on bundle start-up.
      * 
      * @return The main scheduler
