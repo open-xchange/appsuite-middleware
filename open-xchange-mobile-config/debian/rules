@@ -3,7 +3,8 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-installroot=$(CURDIR)/debian/open-xchange-mobile-config
+pkgname=open-xchange-mobile-config
+installroot=$(CURDIR)/debian/$(pkgname)
 
 configure: configure-stamp
 configure-stamp:
@@ -12,7 +13,7 @@ configure-stamp:
 
 build: build-stamp
 
-build-stamp: configure-stamp 
+build-stamp: configure-stamp
 	dh_testdir
 	touch build-stamp
 
@@ -26,9 +27,9 @@ clean:
 install: build
 	dh_testdir
 	dh_testroot
-	dh_clean -k 
+	dh_prep
 	dh_installdirs
-	ant -lib build/lib -Dbasedir=build -DdestDir=$(installroot) -DpackageName=open-xchange-mobile-config -DbuildType=installConf -f build/build.xml build
+	ant -lib build/lib -Dbasedir=build -DdestDir=$(installroot) -DpackageName=$(pkgname) -f build/build.xml build
 
 # Build architecture-independent files here.
 binary-indep: build install
@@ -43,7 +44,7 @@ binary-arch: build install
 	dh_installexamples
 #	dh_install
 #	dh_installmenu
-#	dh_installdebconf	
+#	dh_installdebconf
 #	dh_installlogrotate
 #	dh_installemacsen
 #	dh_installpam
