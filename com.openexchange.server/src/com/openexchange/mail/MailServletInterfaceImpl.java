@@ -2025,7 +2025,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     @Override
     public String saveDraft(final ComposedMailMessage draftMail, final boolean autosave, final int accountId) throws OXException {
         if (autosave) {
-            return autosaveDraft(draftMail, accountId);
+            final String retval = autosaveDraft(draftMail, accountId);
+            // Forced close
+            close(false);
+            return retval;
         }
         initConnection(accountId);
         final String draftFullname = mailAccess.getFolderStorage().getDraftsFolder();
@@ -2035,6 +2038,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
         final String retval = draftMessage.getMailPath().toString();
         postEvent(accountId, draftFullname, true);
+        // Forced close
+        close(false);
         return retval;
     }
 
