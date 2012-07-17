@@ -49,6 +49,7 @@
 
 package com.openexchange.service.indexing.impl;
 
+import static org.quartz.CronScheduleBuilder.cronSchedule;
 import static org.quartz.JobBuilder.newJob;
 import static org.quartz.TriggerBuilder.newTrigger;
 import java.io.IOException;
@@ -65,6 +66,7 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
+import org.quartz.TriggerBuilder;
 import org.quartz.service.QuartzService;
 import com.openexchange.log.LogFactory;
 import com.openexchange.mq.queue.MQQueueListener;
@@ -109,8 +111,9 @@ public final class QuartzIndexingQueueListener implements MQQueueListener {
     @Override
     public void onObjectMessage(final ObjectMessage objectMessage) {
         try {
+            final IndexingJob indexingJob = (IndexingJob) objectMessage.getObject();
             final Map<String, Object> map = new HashMap<String, Object>(1);
-            map.put("indexingJob", objectMessage.getObject());
+            map.put("indexingJob", indexingJob);
             final String name = Long.toString(counter.incrementAndGet());
             /*
              * Define the job and tie it to our WrapperJob class
@@ -118,9 +121,16 @@ public final class QuartzIndexingQueueListener implements MQQueueListener {
             final JobDetail job =
                 newJob(WrapperJob.class).withIdentity("job"+name, GROUP).usingJobData(new JobDataMap(map)).build();
             /*
-             * Trigger the job to run now
+             * Trigger the job
              */
-            final Trigger trigger = newTrigger().withIdentity("trigger"+name, GROUP).startNow().build();
+            final TriggerBuilder<Trigger> triggerBuilder = newTrigger().withIdentity("trigger"+name, GROUP);
+            final String cronDesc = (String) indexingJob.getProperties().get(QuartzService.PROPERTY_CRON_EXPRESSION);
+            if (null == cronDesc) {
+                triggerBuilder.startNow();
+            } else {
+                triggerBuilder.withSchedule(cronSchedule(cronDesc));
+            }
+            final Trigger trigger = triggerBuilder.build();
             /*
              * Tell quartz to schedule the job using our trigger
              */
@@ -137,8 +147,9 @@ public final class QuartzIndexingQueueListener implements MQQueueListener {
     @Override
     public void onBytes(final byte[] bytes) {
         try {
+            final IndexingJob indexingJob = SerializableHelper.<IndexingJob> readObject(bytes);
             final Map<String, Object> map = new HashMap<String, Object>(1);
-            map.put("indexingJob", SerializableHelper.<IndexingJob> readObject(bytes));
+            map.put("indexingJob", indexingJob);
             final String name = Long.toString(counter.incrementAndGet());
             /*
              * Define the job and tie it to our WrapperJob class
@@ -148,7 +159,14 @@ public final class QuartzIndexingQueueListener implements MQQueueListener {
             /*
              * Trigger the job to run now
              */
-            final Trigger trigger = newTrigger().withIdentity("trigger"+name, GROUP).startNow().build();
+            final TriggerBuilder<Trigger> triggerBuilder = newTrigger().withIdentity("trigger"+name, GROUP);
+            final String cronDesc = (String) indexingJob.getProperties().get(QuartzService.PROPERTY_CRON_EXPRESSION);
+            if (null == cronDesc) {
+                triggerBuilder.startNow();
+            } else {
+                triggerBuilder.withSchedule(cronSchedule(cronDesc));
+            }
+            final Trigger trigger = triggerBuilder.build();
             /*
              * Tell quartz to schedule the job using our trigger
              */

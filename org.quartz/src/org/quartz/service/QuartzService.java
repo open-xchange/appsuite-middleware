@@ -49,15 +49,55 @@
 
 package org.quartz.service;
 
+import org.quartz.CronScheduleBuilder;
 import org.quartz.Scheduler;
-
 
 /**
  * {@link QuartzService} - An OSGi service wrapped around <a href="http://quartz-scheduler.org/">Quartz</a> scheduler.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface QuartzService {
+
+    /**
+     * The property name for a Cron expression ({@link CronScheduleBuilder#cronSchedule(String)}).
+     * <p>
+     * <table border="0" cellpadding="1" cellspacing="0">
+     * <tr align="left">
+     * <th bgcolor="#CCCCFF" align="left" id="construct">Example</th>
+     * <th bgcolor="#CCCCFF" align="left" id="matches">Description</th>
+     * </tr>
+     * <tr>
+     * <td valign="top"><tt>"0/20 * * * * ?"</tt></td>
+     * <td headers="matches">Run every 20 seconds</td>
+     * </tr>
+     * <tr>
+     * <td valign="top"><tt>"15 0/2 * * * ?"</tt></td>
+     * <td headers="matches">Run every other minute (at 15 seconds past the minute)</td>
+     * </tr>
+     * <tr>
+     * <td valign="top"><tt>"0 0/2 8-17 * * ?"</tt></td>
+     * <td headers="matches">Run every other minute but only between 8am and 5pm</td>
+     * </tr>
+     * <tr>
+     * <td valign="top"><tt>"0 0/3 17-23 * * ?"</tt></td>
+     * <td headers="matches">Run every three minutes but only between 5pm and 11pm</td>
+     * </tr>
+     * <tr>
+     * <td valign="top"><tt>"0 0 10am 1,15 * ?"</tt></td>
+     * <td headers="matches">Run at 10am on the 1st and 15th days of the month</td>
+     * </tr>
+     * <tr>
+     * <td valign="top"><tt>"0,30 * * ? * MON-FRI"</tt></td>
+     * <td headers="matches">Run every 30 seconds but only on Weekdays (Monday through Friday)</td>
+     * </tr>
+     * <tr>
+     * <td valign="top"><tt>"0,30 * * ? * SAT,SUN"</tt></td>
+     * <td headers="matches">Run every 30 seconds but only on Weekends (Saturday and Sunday)</td>
+     * </tr>
+     * </table>
+     */
+    public static final String PROPERTY_CRON_EXPRESSION = "quartz.cronExpression";
 
     /**
      * Gets the main scheduler started on bundle start-up.
