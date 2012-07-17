@@ -159,7 +159,7 @@ public final class CMISFolder extends DefaultFileStorageFolder {
                     for (final Property<?> entry : properties) {
                         final List<String> values = entry.getValue();
                         if (null != values && 1 == values.size()) {
-                            props.put(entry.getLocalName(), values.get(0));
+                            props.put(entry.getId(), values.get(0));
                         }
                     }
                     if (!props.isEmpty()) {

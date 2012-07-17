@@ -138,7 +138,7 @@ public class RefreshITipAnalyzerTest extends AbstractITipAnalyzerTest {
         
         final List<ITipAnnotation> annotations = analysis.getAnnotations();
         assertEquals(1, annotations.size());
-        assertEquals("An attendee wants to change an appointment that could not be found. Probably the appointment was deleted. Best ignore it.", annotations.get(0).getMessage());
+        assertEquals("An attendee wants to be brought up to date about an appointment that could not be found. It was probably deleted at some point. Best ignore this message.", annotations.get(0).getMessage());
         
         assertActions(analysis, ITipAction.IGNORE);
     }
@@ -165,7 +165,7 @@ public class RefreshITipAnalyzerTest extends AbstractITipAnalyzerTest {
         
         final List<ITipAnnotation> annotations = analysis.getAnnotations();
         assertEquals(1, annotations.size());
-        assertEquals("An attendee wants to change an appointment that could not be found. Probably the appointment was deleted. Best ignore it.", annotations.get(0).getMessage());
+        assertEquals("An attendee wants to be brought up to date about an appointment that could not be found. It was probably deleted at some point. Best ignore this message.", annotations.get(0).getMessage());
         
         assertActions(analysis, ITipAction.IGNORE);
     }

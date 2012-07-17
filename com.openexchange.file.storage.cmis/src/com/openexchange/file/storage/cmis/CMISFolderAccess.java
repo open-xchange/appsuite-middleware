@@ -67,7 +67,7 @@ import org.apache.chemistry.opencmis.commons.data.Ace;
 import org.apache.chemistry.opencmis.commons.data.Acl;
 import org.apache.chemistry.opencmis.commons.enums.AclPropagation;
 import org.apache.chemistry.opencmis.commons.enums.UnfileObject;
-import org.apache.chemistry.opencmis.commons.exceptions.CmisRuntimeException;
+import org.apache.chemistry.opencmis.commons.exceptions.CmisBaseException;
 import org.apache.chemistry.opencmis.commons.impl.dataobjects.AccessControlEntryImpl;
 import org.apache.chemistry.opencmis.commons.impl.dataobjects.AccessControlPrincipalDataImpl;
 import com.openexchange.exception.OXException;
@@ -111,7 +111,7 @@ public final class CMISFolderAccess extends AbstractCMISAccess implements FileSt
                 return false;
             }
             return true;
-        } catch (final CmisRuntimeException e) {
+        } catch (final CmisBaseException e) {
             throw CMISExceptionCodes.CMIS_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -140,7 +140,7 @@ public final class CMISFolderAccess extends AbstractCMISAccess implements FileSt
                 throw CMISExceptionCodes.NOT_A_FOLDER.create(folderId);
             }
             return convertFolder(folderObjectId, (Folder) object);
-        } catch (final CmisRuntimeException e) {
+        } catch (final CmisBaseException e) {
             throw CMISExceptionCodes.CMIS_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -213,7 +213,7 @@ public final class CMISFolderAccess extends AbstractCMISAccess implements FileSt
              * Return
              */
             return subs.toArray(new FileStorageFolder[subs.size()]);
-        } catch (final CmisRuntimeException e) {
+        } catch (final CmisBaseException e) {
             throw CMISExceptionCodes.CMIS_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -252,14 +252,14 @@ public final class CMISFolderAccess extends AbstractCMISAccess implements FileSt
                             final AccessControlEntryImpl ace = new AccessControlEntryImpl();
                             ace.setPrincipal(new AccessControlPrincipalDataImpl(cmisId));
                             if (permission.isAdmin()) {
-                                ace.setPermissions(Collections.singletonList("all"));
+                                ace.setPermissions(Collections.singletonList("cmis:all"));
                             } else {
                                 final List<String> rights = new LinkedList<String>();
                                 if (permission.getReadPermission() > FileStoragePermission.NO_PERMISSIONS) {
-                                    rights.add("read");
+                                    rights.add("cmis:read");
                                 }
                                 if (permission.getWritePermission() > FileStoragePermission.NO_PERMISSIONS) {
-                                    rights.add("write");
+                                    rights.add("cmis:write");
                                 }
                             }
                             aces.add(ace);
@@ -268,7 +268,7 @@ public final class CMISFolderAccess extends AbstractCMISAccess implements FileSt
                 }
             }
             return cmisSession.createFolder(toCreate.getProperties(), folderObjectId, Collections.<Policy> emptyList(), aces, Collections.<Ace> emptyList()).getId();
-        } catch (final CmisRuntimeException e) {
+        } catch (final CmisBaseException e) {
             throw CMISExceptionCodes.CMIS_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -319,14 +319,14 @@ public final class CMISFolderAccess extends AbstractCMISAccess implements FileSt
                             final AccessControlEntryImpl ace = new AccessControlEntryImpl();
                             ace.setPrincipal(new AccessControlPrincipalDataImpl(cmisId));
                             if (permission.isAdmin()) {
-                                ace.setPermissions(Collections.singletonList("all"));
+                                ace.setPermissions(Collections.singletonList("cmis:all"));
                             } else {
                                 final List<String> rights = new LinkedList<String>();
                                 if (permission.getReadPermission() > FileStoragePermission.NO_PERMISSIONS) {
-                                    rights.add("read");
+                                    rights.add("cmis:read");
                                 }
                                 if (permission.getWritePermission() > FileStoragePermission.NO_PERMISSIONS) {
-                                    rights.add("write");
+                                    rights.add("cmis:write");
                                 }
                             }
                             aces.add(ace);
@@ -336,7 +336,7 @@ public final class CMISFolderAccess extends AbstractCMISAccess implements FileSt
                 }
             }
             return folderId;
-        } catch (final CmisRuntimeException e) {
+        } catch (final CmisBaseException e) {
             throw CMISExceptionCodes.CMIS_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -374,7 +374,7 @@ public final class CMISFolderAccess extends AbstractCMISAccess implements FileSt
             final Folder folder = (Folder) object;
             final FileableCmisObject result = folder.move(cmisSession.createObjectId(folder.getParentId()), newParentObjectId);
             return result.getId();
-        } catch (final CmisRuntimeException e) {
+        } catch (final CmisBaseException e) {
             throw CMISExceptionCodes.CMIS_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -408,7 +408,7 @@ public final class CMISFolderAccess extends AbstractCMISAccess implements FileSt
             newNameProps.put(PropertyIds.NAME, newName);
             final CmisObject updated = folder.updateProperties(newNameProps);
             return updated.getId();
-        } catch (final CmisRuntimeException e) {
+        } catch (final CmisBaseException e) {
             throw CMISExceptionCodes.CMIS_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -450,7 +450,7 @@ public final class CMISFolderAccess extends AbstractCMISAccess implements FileSt
              * Return
              */
             return folderId;
-        } catch (final CmisRuntimeException e) {
+        } catch (final CmisBaseException e) {
             throw CMISExceptionCodes.CMIS_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -494,7 +494,7 @@ public final class CMISFolderAccess extends AbstractCMISAccess implements FileSt
                     sub.delete(true);
                 }
             }
-        } catch (final CmisRuntimeException e) {
+        } catch (final CmisBaseException e) {
             throw CMISExceptionCodes.CMIS_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -530,7 +530,7 @@ public final class CMISFolderAccess extends AbstractCMISAccess implements FileSt
             } while (!FileStorageFolder.ROOT_FULLNAME.equals(f.getParentId()));
 
             return list.toArray(new FileStorageFolder[list.size()]);
-        } catch (final CmisRuntimeException e) {
+        } catch (final CmisBaseException e) {
             throw CMISExceptionCodes.CMIS_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());

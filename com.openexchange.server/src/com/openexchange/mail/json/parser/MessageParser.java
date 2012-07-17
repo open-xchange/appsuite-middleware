@@ -433,7 +433,11 @@ public final class MessageParser {
                     final JSONObject tmp = attachmentArray.getJSONObject(0);
                     final String sContent = tmp.getString(MailJSONField.CONTENT.getKey());
                     final TextBodyMailPart part = provider.getNewTextBodyPart(sContent);
-                    part.setContentType(parseContentType(tmp.getString(MailJSONField.CONTENT_TYPE.getKey())));
+                    final String contentType = parseContentType(tmp.getString(MailJSONField.CONTENT_TYPE.getKey()));
+                    part.setContentType(contentType);
+                    if (contentType.startsWith("text/plain") && tmp.hasAndNotNull("raw") && tmp.getBoolean("raw")) {
+                        part.setPlainText(sContent);
+                    }
                     transportMail.setContentType(part.getContentType());
                     // Add text part
                     attachmentHandler.setTextPart(part);

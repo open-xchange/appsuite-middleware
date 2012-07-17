@@ -49,17 +49,15 @@
 
 package com.openexchange.file.storage.cmis;
 
-import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.apache.chemistry.opencmis.client.api.Folder;
 import org.apache.chemistry.opencmis.client.api.SessionFactory;
 import org.apache.chemistry.opencmis.client.runtime.SessionFactoryImpl;
 import org.apache.chemistry.opencmis.commons.SessionParameter;
 import org.apache.chemistry.opencmis.commons.enums.BindingType;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisBaseException;
-import org.apache.chemistry.opencmis.commons.impl.jaxb.CmisException;
+import org.apache.chemistry.opencmis.commons.spi.CmisBinding;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
@@ -121,9 +119,9 @@ public final class CMISAccountAccess implements FileStorageAccountAccess {
     }
 
     /**
-     * Gets the name of the CIFS/SMB user.
+     * Gets the name of the CMIS user.
      *
-     * @return The name of the CIFS/SMB user
+     * @return The name of the CMIS user
      */
     public String getUser() {
         return username;
@@ -167,8 +165,8 @@ public final class CMISAccountAccess implements FileStorageAccountAccess {
             /*
              * User credentials
              */
-            parameters.put(SessionParameter.USER, "Otto");
-            parameters.put(SessionParameter.PASSWORD, "****");
+            parameters.put(SessionParameter.USER, username);
+            parameters.put(SessionParameter.PASSWORD, password);
             /*
              * Connection settings
              */
@@ -180,7 +178,7 @@ public final class CMISAccountAccess implements FileStorageAccountAccess {
              */
             cmisSession = factory.createSession(parameters);
         } else {
-            LOG.debug("CIFS account access already connected.");
+            LOG.debug("CMIS account access already connected.");
         }
     }
 
@@ -193,11 +191,20 @@ public final class CMISAccountAccess implements FileStorageAccountAccess {
     public void close() {
         if (connected.compareAndSet(true, false)) {
             rootUrl = null;
-            cmisSession = null;
+            final org.apache.chemistry.opencmis.client.api.Session cmisSession = this.cmisSession;
+            if (null != cmisSession) {
+                final CmisBinding binding = cmisSession.getBinding();
+                if (null != binding) {
+                    binding.clearAllCaches();
+                    binding.close();
+                }
+                cmisSession.clear();
+                this.cmisSession = null;
+            }
             fileAccess = null;
             folderAccess = null;
         } else {
-            LOG.debug("CIFS account access already closed.");
+            LOG.debug("CMIS account access already closed.");
         }
     }
 
@@ -231,8 +238,8 @@ public final class CMISAccountAccess implements FileStorageAccountAccess {
             final SessionFactory factory = SessionFactoryImpl.newInstance();
             final Map<String, String> parameters = new HashMap<String, String>(6);
             // user credentials
-            parameters.put(SessionParameter.USER, "Otto");
-            parameters.put(SessionParameter.PASSWORD, "****");
+            parameters.put(SessionParameter.USER, username);
+            parameters.put(SessionParameter.PASSWORD, password);
             // connection settings
             parameters.put(SessionParameter.ATOMPUB_URL, rootUrl);
             parameters.put(SessionParameter.BINDING_TYPE, BindingType.ATOMPUB.value());
@@ -283,7 +290,7 @@ public final class CMISAccountAccess implements FileStorageAccountAccess {
             synchronized (this) {
                 tmp = fileAccess;
                 if (null == tmp) {
-                    fileAccess = tmp = new CMISFileAccess(rootUrl, auth, account, session, this);
+                    fileAccess = tmp = new CMISFileAccess(rootUrl, cmisSession, account, session, this);
                 }
             }
         }
