@@ -49,12 +49,10 @@
 
 package com.openexchange.mail.conversion;
 
-import java.io.IOException;
+import static com.openexchange.mail.mime.utils.MimeMessageUtility.shouldRetry;
 import java.io.InputStream;
-import java.util.Locale;
 import com.openexchange.conversion.DataSource;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.session.Session;
@@ -92,15 +90,12 @@ public abstract class MailPartDataSource implements DataSource {
             mailAccess.connect();
             return loadPart(fullname, mailId, sequenceId, mailAccess);
         } catch (final OXException e) {
-            if ((null != mailAccess) && (MailExceptionCode.IO_ERROR.equals(e))) {
-                final Throwable cause = e.getCause();
-                if ((cause instanceof IOException) && "no content".equals(cause.getMessage().toLowerCase(Locale.ENGLISH))) {
-                    // Re-connect
-                    mailAccess.close(false);
-                    mailAccess = MailAccess.getInstance(session, accountId);
-                    mailAccess.connect();
-                    return loadPart(fullname, mailId, sequenceId, mailAccess);
-                }
+            if ((null != mailAccess) && shouldRetry(e)) {
+                // Re-connect
+                mailAccess.close(false);
+                mailAccess = MailAccess.getInstance(session, accountId);
+                mailAccess.connect();
+                return loadPart(fullname, mailId, sequenceId, mailAccess);
             }
             throw e;
         } finally {

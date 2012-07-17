@@ -118,6 +118,7 @@ import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.HeaderName;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
@@ -168,6 +169,27 @@ public final class MimeMessageUtility {
      */
     private MimeMessageUtility() {
         super();
+    }
+
+    /**
+     * Checks whether another attempt to load content of a message and/or part should be performed.
+     * 
+     * @param e The exception to check
+     * @return <code>true</code> to retry; otherwise <code>false</code>
+     */
+    public static boolean shouldRetry(final OXException e) {
+        if (MailExceptionCode.MAIL_NOT_FOUND.equals(e)) {
+            return true;
+        }
+        if (MailExceptionCode.IO_ERROR.equals(e)) {
+            final Throwable cause = e.getCause();
+            return (cause instanceof IOException) && "no content".equals(cause.getMessage().toLowerCase(Locale.ENGLISH));
+        }
+        if (MimeMailExceptionCode.MESSAGING_ERROR.equals(e)) {
+            final Throwable cause = e.getCause();
+            return (cause instanceof MessagingException) && "failed to fetch headers".equals(cause.getMessage().toLowerCase(Locale.ENGLISH));
+        }
+        return false;
     }
 
     /**
