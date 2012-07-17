@@ -128,7 +128,7 @@ public final class IndexingServiceInit {
             /*
              * Create async. queue receiver
              */
-            QuartzService quartzService = services.getOptionalService(QuartzService.class);
+            final QuartzService quartzService = services.getOptionalService(QuartzService.class);
             if (null == quartzService) {
                 final ThreadPoolService threadPool = services.getService(ThreadPoolService.class);
                 final IndexingJobExecutor executor = new IndexingJobExecutor(maxConcurrentJobs, threadPool).start();
