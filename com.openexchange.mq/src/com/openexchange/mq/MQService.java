@@ -74,6 +74,9 @@ import com.openexchange.mq.example.MQJmsTopicExample;
  * this, your application will perform very poorly. This is discussed further in the section on performance tuning <a
  * title="Chapter 46. Performance Tuning" href="perf-tuning.html">Chapter 46, <i>Performance Tuning</i></a>.
  * </p>
+ * <p>
+ * Prefer to store only primitive data types (including Strings) to avoid data serialization issues short and long-term.
+ * </p>
  * </div>
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
