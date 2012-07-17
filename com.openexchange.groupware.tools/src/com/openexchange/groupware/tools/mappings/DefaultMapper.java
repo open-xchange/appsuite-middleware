@@ -74,7 +74,7 @@ public abstract class DefaultMapper<O, E extends Enum<E>> implements Mapper<O, E
 	}
 
     @Override
-    public Mapping<? extends Object, O> opt(final E field) throws OXException {
+    public Mapping<? extends Object, O> opt(final E field) {
         if (null == field) {
             throw new IllegalArgumentException("field");
         }
