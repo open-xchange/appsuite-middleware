@@ -139,21 +139,21 @@ public class TelnetChatDecoder extends SimpleChannelUpstreamHandler implements T
 
 		if (state == State.CONTENT_DONE) {
 			// Do something with the message;
-			// This is a good breakpoint to see how a message is handled
-			TelnetChatMessage message = new TelnetChatMessage(payload.toString(),
-					headers, id, session);
+            // This is a good breakpoint to see how a message is handled
+            try {
+                TelnetChatMessage message = new TelnetChatMessage(payload.toString(), headers, id, session);
 
-			if (isInternalMessage(message)) {
-				handleInternally(message, ctx);
+                if (isInternalMessage(message)) {
+                    handleInternally(message, ctx);
 
-			} else {
-				messageHandler.handle(message);
-			}
-
-			headers.clear();
-			payload.setLength(0);
-			state = State.INITIAL;
-
+                } else {
+                    messageHandler.handle(message);
+                }
+            } finally {
+                headers.clear();
+                payload.setLength(0);
+                state = State.INITIAL;
+            }
 		}
 	}
 
