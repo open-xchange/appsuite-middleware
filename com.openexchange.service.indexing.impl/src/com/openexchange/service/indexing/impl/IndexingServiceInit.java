@@ -51,6 +51,7 @@ package com.openexchange.service.indexing.impl;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.quartz.service.QuartzService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mq.MQConstants;
 import com.openexchange.mq.MQService;
@@ -127,10 +128,16 @@ public final class IndexingServiceInit {
             /*
              * Create async. queue receiver
              */
-            final ThreadPoolService threadPool = services.getService(ThreadPoolService.class);
-            final IndexingJobExecutor executor = new IndexingJobExecutor(maxConcurrentJobs, threadPool).start();
-            final IndexingServiceQueueListener listener = new IndexingServiceQueueListener(executor);
-            receiver = new IndexingQueueAsyncReceiver(listener);
+            final QuartzService quartzService = services.getOptionalService(QuartzService.class);
+            if (null == quartzService) {
+                final ThreadPoolService threadPool = services.getService(ThreadPoolService.class);
+                final IndexingJobExecutor executor = new IndexingJobExecutor(maxConcurrentJobs, threadPool).start();
+                final IndexingQueueListener listener = new IndexingQueueListener(executor);
+                receiver = new IndexingQueueAsyncReceiver(listener);
+            } else {
+                final QuartzIndexingQueueListener listener = new QuartzIndexingQueueListener(quartzService);
+                receiver = new IndexingQueueAsyncReceiver(listener);
+            }
         }
     }
 

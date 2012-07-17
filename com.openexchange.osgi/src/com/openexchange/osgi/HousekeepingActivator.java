@@ -182,6 +182,17 @@ public abstract class HousekeepingActivator extends DeferredActivator {
     }
 
     @Override
+    public void start(BundleContext context) throws Exception {
+        super.start(context);
+        /*
+         * Invoking ServiceTracker.open() more than once is a no-op, therefore it can be safely called from here.
+         */
+        if (!serviceTrackers.isEmpty()) {
+            openTrackers();
+        }
+    }
+
+    @Override
     protected void stopBundle() throws Exception {
         cleanUp();
     }

@@ -230,8 +230,8 @@ public class ResultIterator implements SearchIterator<Contact> {
 		for (Entry<String, List<String>> entry : folderAndObjectIDs.entrySet()) {
 			SearchIterator<Contact> searchIterator = null;
 			try {
-				ContactStorage storage = Tools.getStorage(session.getContextId(), entry.getKey());
-				searchIterator = storage.list(session.getContextId(), "0".equals(entry.getKey()) ? null : entry.getKey(), 
+				ContactStorage storage = Tools.getStorage(session, entry.getKey());
+				searchIterator = storage.list(session, "0".equals(entry.getKey()) ? null : entry.getKey(), 
 						entry.getValue().toArray(new String[entry.getValue().size()]), DLISTMEMBER_FIELDS);
 				while (searchIterator.hasNext()) {
 					Contact contact = searchIterator.next();

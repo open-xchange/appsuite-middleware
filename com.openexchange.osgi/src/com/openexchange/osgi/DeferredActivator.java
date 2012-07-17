@@ -198,7 +198,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
     /**
      * The initialized service trackers for needed services.
      */
-    private ServiceTracker<?, ?>[] serviceTrackers;
+    private ServiceTracker<?, ?>[] neededServiceTrackers;
 
     /**
      * The available service instances.
@@ -249,7 +249,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
         final Class<?>[] classes = getNeededServices();
         if (null == classes) {
             services = new ConcurrentHashMap<Class<?>, ServiceProvider<?>>(1);
-            serviceTrackers = new ServiceTracker[0];
+            neededServiceTrackers = new ServiceTracker[0];
             availability = allAvailable = 0;
             startBundle();
         } else {
@@ -258,7 +258,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
                 throw new IllegalArgumentException("Duplicate class/interface provided through getNeededServices()");
             }
             services = new ConcurrentHashMap<Class<?>, ServiceProvider<?>>(len);
-            serviceTrackers = new ServiceTracker[len];
+            neededServiceTrackers = new ServiceTracker[len];
             availability = 0;
             allAvailable = (1 << len) - 1;
             /*
@@ -268,7 +268,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
                 final Class<? extends Object> clazz = classes[i];
                 final DeferredServiceTracker<? extends Object> tracker = newDeferredTracker(context, clazz, i);
                 tracker.open();
-                serviceTrackers[i] = tracker;
+                neededServiceTrackers[i] = tracker;
             }
             if (len == 0) {
                 startBundle();
@@ -280,15 +280,15 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
      * Resets this deferred activator's members.
      */
     private final void reset() {
-        if (null != serviceTrackers) {
-            for (int i = 0; i < serviceTrackers.length; i++) {
-                final ServiceTracker<?, ?> tracker = serviceTrackers[i];
+        if (null != neededServiceTrackers) {
+            for (int i = 0; i < neededServiceTrackers.length; i++) {
+                final ServiceTracker<?, ?> tracker = neededServiceTrackers[i];
                 if (tracker != null) {
                     tracker.close();
-                    serviceTrackers[i] = null;
+                    neededServiceTrackers[i] = null;
                 }
             }
-            serviceTrackers = null;
+            neededServiceTrackers = null;
         }
         availability = 0;
         allAvailable = -1;
@@ -424,7 +424,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
     }
 
     @Override
-    public final void start(final BundleContext context) throws Exception {
+    public void start(final BundleContext context) throws Exception {
         try {
             this.context = context;
             init();
@@ -447,7 +447,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
     protected abstract void startBundle() throws Exception;
 
     @Override
-    public final void stop(final BundleContext context) throws Exception {
+    public void stop(final BundleContext context) throws Exception {
         try {
             stopBundle();
             started.set(false);

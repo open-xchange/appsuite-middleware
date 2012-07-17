@@ -92,8 +92,8 @@ public interface IndexingServiceMBean {
      * 
      * @param contextId The context id.
      * @param userId The user id.
-     * @param fullName The mail folders full name.
-     * @throws MBeanException
+     * @param fullName The mail folder's full name.
+     * @throws MBeanException If enqueue operation fails
      */
     public void queueIndexingJob(int contextId, int userId, String fullName) throws MBeanException;
 

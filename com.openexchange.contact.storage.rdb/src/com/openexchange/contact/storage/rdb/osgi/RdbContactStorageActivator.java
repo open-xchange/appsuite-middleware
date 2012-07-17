@@ -50,11 +50,11 @@
 package com.openexchange.contact.storage.rdb.osgi;
 
 import org.apache.commons.logging.Log;
-
 import com.openexchange.contact.storage.ContactStorage;
 import com.openexchange.contact.storage.rdb.internal.RdbContactStorage;
 import com.openexchange.contact.storage.rdb.internal.RdbServiceLookup;
 import com.openexchange.contact.storage.rdb.sql.AddFilenameColumnTask;
+import com.openexchange.contact.storage.rdb.sql.CorrectNumberOfImagesTask;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
@@ -90,7 +90,10 @@ public class RdbContactStorageActivator extends HousekeepingActivator {
             RdbServiceLookup.set(this);
             registerService(ContactStorage.class, new RdbContactStorage());
             DatabaseService dbService = getService(DatabaseService.class);
-            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new AddFilenameColumnTask(dbService)));
+            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(
+                new AddFilenameColumnTask(dbService), 
+                new CorrectNumberOfImagesTask(dbService)
+            ));
         } catch (Exception e) {
             LOG.error("error starting \"com.openexchange.contact.storage.rdb\"", e);
             throw e;            

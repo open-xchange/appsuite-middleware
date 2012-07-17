@@ -50,7 +50,9 @@
 package com.openexchange.service.indexing.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
@@ -92,6 +94,11 @@ public final class IndexingJobExecutor implements Callable<Void> {
         @Override
         public void performJob() throws OXException {
             // Nothing to do
+        }
+
+        @Override
+        public java.util.Map<String,?> getProperties() {
+            return Collections.emptyMap();
         }
 
         @Override
@@ -327,6 +334,11 @@ public final class IndexingJobExecutor implements Callable<Void> {
         public IndexingJobWrapper(final IndexingJob job) {
             super();
             this.job = job;
+        }
+
+        @Override
+        public Map<String, ?> getProperties() {
+            return job.getProperties();
         }
 
         @Override

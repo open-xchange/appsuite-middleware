@@ -50,9 +50,7 @@
 package com.openexchange.contact.storage;
 
 import java.util.UUID;
-
 import org.junit.Test;
-
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.search.SingleSearchTerm;
@@ -80,7 +78,7 @@ public class SearchTest extends ContactStorageTest {
         contact.setSurName("Horstensen");
         contact.setEmail1("horst.horstensen@example.com");
         contact.setUid(UUID.randomUUID().toString());
-        getStorage().create(getContextID(), folderId, contact);
+        getStorage().create(getSession(), folderId, contact);
         super.rememberForCleanUp(contact);
         /*
          * search contact
@@ -88,7 +86,7 @@ public class SearchTest extends ContactStorageTest {
 		final SingleSearchTerm term = new SingleSearchTerm(SingleSearchTerm.SingleOperation.EQUALS);
 		term.addOperand(new ColumnOperand("uid"));
 		term.addOperand(new ConstantOperand<String>(contact.getUid()));
-		final SearchIterator<Contact> result = getStorage().search(getContextID(), term, ContactField.values());
+		final SearchIterator<Contact> result = getStorage().search(getSession(), term, ContactField.values());
 		/*
 		 * verify search result
 		 */

@@ -37,7 +37,7 @@
 		<mkdir dir="${patchSbinDir}" />
 		<copy todir="${patchSbinDir}" overwrite="true">
 			<fileset dir="${sbinDir}" />
-			<mapper type="glob" from="*.in" to="*" />
+			<mapper type="glob" from="*.in" to="*"/>
 		</copy>
 		<antcall target="patchScripts" />
 	</target>

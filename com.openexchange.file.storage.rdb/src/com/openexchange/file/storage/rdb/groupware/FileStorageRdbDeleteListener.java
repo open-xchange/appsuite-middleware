@@ -56,10 +56,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.rdb.services.FileStorageRdbServiceRegistry;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
+import com.openexchange.file.storage.rdb.Services;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
@@ -85,7 +85,7 @@ public final class FileStorageRdbDeleteListener implements DeleteListener {
         if (DeleteEvent.TYPE_USER != event.getType()) {
             return;
         }
-        final DatabaseService databaseService = getService(DatabaseService.class);
+        // final DatabaseService databaseService = getService(DatabaseService.class);
         /*
          * Writable connection
          */
@@ -145,11 +145,9 @@ public final class FileStorageRdbDeleteListener implements DeleteListener {
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
             stmt.executeUpdate();
-        } catch (final OXException e) {
-            throw new OXException(e);
         } catch (final SQLException e) {
             throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final Exception e) {
+        } catch (final RuntimeException e) {
             throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(stmt);
@@ -158,9 +156,9 @@ public final class FileStorageRdbDeleteListener implements DeleteListener {
 
     private <S> S getService(final Class<? extends S> clazz) throws OXException {
         try {
-            return FileStorageRdbServiceRegistry.getServiceRegistry().getService(clazz, true);
-        } catch (final OXException e) {
-            throw new OXException(e);
+            return Services.getService(clazz);
+        } catch (final IllegalStateException e) {
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 

@@ -15,20 +15,20 @@ URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       OSGi bundles commonly used by all Open-Xchange packages
 PreReq:        /usr/sbin/useradd
-Provides:       open-xchange-common = %{version}
-Obsoletes:      open-xchange-common <= %{version}
-Provides:       open-xchange-activation = %{version}
-Obsoletes:      open-xchange-activation <= %{version}
+Provides:      open-xchange-common = %{version}
+Obsoletes:     open-xchange-common <= %{version}
+Provides:      open-xchange-activation = %{version}
+Obsoletes:     open-xchange-activation <= %{version}
 %if 0%{?rhel_version} && 0%{?rhel_version} <= 599
 # rhel needs special handling because on rhel5 supplementary bea java will be installed by default
 # bug id #22563
-Requires:       java-sun
+Requires:      java-sun
 %else
-Requires:       java >= 1.6.0
+Requires:      java >= 1.6.0
 %endif
 %if 0%{?rhel_version} >= 600
 # ibm java only on sles11, please
-Conflicts:      java-ibm
+Conflicts:     java-ibm
 %endif
 
 

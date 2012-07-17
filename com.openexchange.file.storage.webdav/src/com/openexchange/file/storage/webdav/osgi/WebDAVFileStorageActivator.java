@@ -62,7 +62,7 @@ import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.webdav.WebDAVFileStorageService;
-import com.openexchange.file.storage.webdav.session.WebDAVEventHandler;
+import com.openexchange.file.storage.webdav.session.WebDAVSessionEventHandler;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.osgi.SimpleRegistryListener;
@@ -76,9 +76,9 @@ import com.openexchange.sessiond.SessiondService;
  */
 public final class WebDAVFileStorageActivator extends HousekeepingActivator {
 
-    WebDAVFileStorageService webdavFileStorageService;
+    volatile WebDAVFileStorageService webdavFileStorageService;
 
-    private Registerer registerer;
+    private volatile Registerer registerer;
 
     /**
      * Initializes a new {@link WebDAVFileStorageActivator}.
@@ -133,16 +133,19 @@ public final class WebDAVFileStorageActivator extends HousekeepingActivator {
             // FacebookConstants.init();
             // FacebookConfiguration.getInstance().configure(getService(ConfigurationService.class));
 
+            final WebDAVFileStorageActivator activator = this;
             track(FileStorageAccountManagerProvider.class, new SimpleRegistryListener<FileStorageAccountManagerProvider>() {
 
                 @Override
                 public void added(final ServiceReference<FileStorageAccountManagerProvider> ref, final FileStorageAccountManagerProvider service) {
+                    WebDAVFileStorageService webdavFileStorageService = activator.webdavFileStorageService;
                     if (null != webdavFileStorageService) {
                         return;
                     }
                     try {
                         webdavFileStorageService = WebDAVFileStorageService.newInstance();
-                        registerService(FileStorageService.class, webdavFileStorageService);
+                        activator.registerService(FileStorageService.class, webdavFileStorageService);
+                        activator.webdavFileStorageService = webdavFileStorageService;
                     } catch (final OXException e) {
                         final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(WebDAVFileStorageActivator.class));
                         log.error(e.getMessage(), e);
@@ -154,20 +157,22 @@ public final class WebDAVFileStorageActivator extends HousekeepingActivator {
                     // Nope
                 }
             });
+            openTrackers();
             /*
              * Register event handler to detect removed sessions
              */
             {
                 final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
                 dict.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
-                registerService(EventHandler.class, new WebDAVEventHandler(), dict);
+                registerService(EventHandler.class, new WebDAVSessionEventHandler(), dict);
             }
 
             {
                 final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
                 dict.put(EventConstants.EVENT_TOPIC, FileStorageAccountManagerProvider.TOPIC);
-                registerer = new Registerer(context);
+                final Registerer registerer = new Registerer(context);
                 registerService(EventHandler.class, registerer, dict);
+                this.registerer = registerer;
             }
         } catch (final Exception e) {
             com.openexchange.log.Log.valueOf(LogFactory.getLog(WebDAVFileStorageActivator.class)).error(e.getMessage(), e);
@@ -176,14 +181,18 @@ public final class WebDAVFileStorageActivator extends HousekeepingActivator {
     }
 
     @Override
+    public <S> void registerService(final Class<S> clazz, final S service) {
+        super.registerService(clazz, service);
+    }
+
+    @Override
     protected void stopBundle() throws Exception {
         try {
-//            if (null != trackers) {
-//                while (!trackers.isEmpty()) {
-//                    trackers.remove(0).close();
-//                }
-//                trackers = null;
-//            }
+            final Registerer registerer = this.registerer;
+            if (null != registerer) {
+                registerer.close();
+                this.registerer = null;
+            }
             cleanUp();
             /*
              * Clear service registry

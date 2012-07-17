@@ -58,6 +58,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.loxandra.EAVContactFactoryService;
 import com.openexchange.loxandra.EAVContactService;
+import com.openexchange.loxandra.impl.cassandra.transaction.TransactionManager;
 
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.Keyspace;
@@ -75,12 +76,16 @@ public final class CassandraEAVContactFactoryServiceImpl implements EAVContactFa
 	private final static String DEFAULT_CONFIGURATION = "loxandra.properties";
 	
 	private static Cluster cluster;
-	private static Keyspace keyspace;
+	private static volatile Keyspace keyspace;
 	private static String node;
 	private static String keyspaceName;
 	
+	private static volatile TransactionManager txManagerInstance;
+	
 	public CassandraEAVContactFactoryServiceImpl() {
 		readProperties();
+		txManagerInstance = TransactionManager.getInstance();
+		txManagerInstance.checkAndReplay();
 	}
 	
 	/**
@@ -135,5 +140,21 @@ public final class CassandraEAVContactFactoryServiceImpl implements EAVContactFa
 	@Override
 	public final EAVContactService getEAVContactService() {
 		return new CassandraEAVContactServiceImpl();
+	}
+
+	/**
+	 * Get an instance of the transaction manager. Once created it can be reused
+	 * 
+	 * @return instance of the TransactionManager
+	 */
+	public final static TransactionManager getTransactionManager() {
+		//ISSUE: BAD BAD BAD DESIGN -.-
+		/*if (txManagerInstance == null) {
+			txManagerInstance = new TransactionManager();
+			System.out.println("CREATING NEW MANAGER");
+		} else {
+			System.out.println("USING EXISTING MANAGER");
+		}*/
+		return txManagerInstance;
 	}
 }

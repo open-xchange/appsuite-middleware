@@ -433,7 +433,11 @@ public final class MessageParser {
                     final JSONObject tmp = attachmentArray.getJSONObject(0);
                     final String sContent = tmp.getString(MailJSONField.CONTENT.getKey());
                     final TextBodyMailPart part = provider.getNewTextBodyPart(sContent);
-                    part.setContentType(parseContentType(tmp.getString(MailJSONField.CONTENT_TYPE.getKey())));
+                    final String contentType = parseContentType(tmp.getString(MailJSONField.CONTENT_TYPE.getKey()));
+                    part.setContentType(contentType);
+                    if (contentType.startsWith("text/plain") && tmp.hasAndNotNull("raw") && tmp.getBoolean("raw")) {
+                        part.setPlainText(sContent);
+                    }
                     transportMail.setContentType(part.getContentType());
                     // Add text part
                     attachmentHandler.setTextPart(part);
@@ -669,7 +673,7 @@ public final class MessageParser {
          * Group referenced parts by referenced mails' paths
          */
         final Map<String, ReferencedMailPart> groupedReferencedParts =
-            groupReferencedParts(provider, session, transportMailMsgref, attachmentArray);
+            groupReferencedParts(provider, session, transportMailMsgref, attachmentArray, contentIds);
         /*
          * Iterate attachments array
          */
@@ -780,12 +784,12 @@ public final class MessageParser {
         }
     }
 
-    private static Map<String, ReferencedMailPart> groupReferencedParts(final TransportProvider provider, final Session session, final MailPath parentMsgRef, final JSONArray attachmentArray) throws OXException, JSONException {
+    private static Map<String, ReferencedMailPart> groupReferencedParts(final TransportProvider provider, final Session session, final MailPath parentMsgRef, final JSONArray attachmentArray, final Set<String> contentIds) throws OXException, JSONException {
         if (null == parentMsgRef) {
             return Collections.emptyMap();
         }
         final int len = attachmentArray.length();
-        final Set<String> groupedSeqIDs = new HashSet<String>(len);
+        final Map<String, String> groupedSeqIDs = new HashMap<String, String>(len);
         NextAttachment: for (int i = 1; i < len; i++) {
             final JSONObject attachment = attachmentArray.getJSONObject(i);
             final String seqId =
@@ -800,7 +804,8 @@ public final class MessageParser {
              * If MSGREF is defined in attachment itself, the MSGREF's mail is meant to be attached and not a nested attachment
              */
             if (!attachment.hasAndNotNull(MailJSONField.MSGREF.getKey())) {
-                groupedSeqIDs.add(seqId);
+                final Object cid = attachment.opt(MailJSONField.CID.getKey());
+                groupedSeqIDs.put(seqId, null == cid ? "" : cid.toString());
             }
         }
         /*
@@ -820,11 +825,20 @@ public final class MessageParser {
                 throw MailExceptionCode.REFERENCED_MAIL_NOT_FOUND.create(parentMsgRef.getMailID(), parentMsgRef.getFolder());
             }
             // Get attachments out of referenced mail
-            final MultipleMailPartHandler handler = new MultipleMailPartHandler(groupedSeqIDs, true);
+            final Set<String> remaining = new HashSet<String>(groupedSeqIDs.keySet());
+            final MultipleMailPartHandler handler = new MultipleMailPartHandler(groupedSeqIDs.keySet(), false);
             new MailMessageParser().parseMailMessage(referencedMail, handler);
-            final Set<Map.Entry<String, MailPart>> results = handler.getMailParts().entrySet();
-            for (final Map.Entry<String, MailPart> e : results) {
-                retval.put(e.getKey(), provider.getNewReferencedPart(e.getValue(), session));
+            for (final Map.Entry<String, MailPart> e : handler.getMailParts().entrySet()) {
+                final String seqId = e.getKey();
+                retval.put(seqId, provider.getNewReferencedPart(e.getValue(), session));
+                remaining.remove(seqId);
+            }
+            if (!remaining.isEmpty()) {
+                for (final String seqId : remaining) {
+                    if (!contentIds.contains(seqId)) {
+                        throw MailExceptionCode.ATTACHMENT_NOT_FOUND.create(seqId, Long.valueOf(referencedMail.getMailId()), referencedMail.getFolder());
+                    }
+                }
             }
         } finally {
             if (null != access) {

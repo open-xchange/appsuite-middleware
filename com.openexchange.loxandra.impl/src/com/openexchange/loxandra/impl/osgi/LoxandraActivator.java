@@ -59,7 +59,6 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.log.LogFactory;
 import com.openexchange.loxandra.EAVContactFactoryService;
 import com.openexchange.loxandra.impl.cassandra.CassandraEAVContactFactoryServiceImpl;
-import com.openexchange.loxandra.impl.core.EmbeddedCassandraService;
 import com.openexchange.loxandra.impl.core.LoxandraServiceLookUp;
 import com.openexchange.osgi.HousekeepingActivator;
 
@@ -71,8 +70,6 @@ public final class LoxandraActivator extends HousekeepingActivator {
 	
 	private static Log log = LogFactory.getLog(LoxandraActivator.class);
 	
-	private EmbeddedCassandraService cassandra;
-	private Thread cassandraThread;
 	private EmbeddedServerHelper srv;
 
 	private CassandraDaemon cassandraDaemon;
@@ -106,30 +103,10 @@ public final class LoxandraActivator extends HousekeepingActivator {
 		
 		ConfigurationService config = LoxandraServiceLookUp.getService(ConfigurationService.class);
 		
-		System.setProperty("cassandra.config", new File(config.getProperty("CONFIGPATH") + "/cassandra.yaml").toURI().toString());
 		System.setProperty("loxandra.config", new File(config.getProperty("CONFIGPATH") + "/loxandra.properties").getAbsolutePath().toString());
 		
-		//System.load("/home/isole/git/backend/com.openexchange.loxandra.impl/src/com/openexchange/loxandra/impl/osgi/libsnappyjava.so");
-		
-		// start embedded cassandra node
-		cassandra = new EmbeddedCassandraService();
-        cassandra.init();
-    	cassandra.start();
-
-        /*cassandraThread = new Thread(cassandra);
-        cassandraThread.setDaemon(true);
-        cassandraThread.start();*/
-		/*srv = new EmbeddedServerHelper();
-		srv.setup();*/
-        
-        /*cassandraDaemon = new CassandraDaemon();
-        cassandraDaemon.activate();*/
-        
 		// register eavcontactservice
-
-    	
     	registerService(EAVContactFactoryService.class, new CassandraEAVContactFactoryServiceImpl());
-        registerService(EmbeddedCassandraService.class, cassandra);
         openTrackers();
         
         log.info("Loxandra Service started successfully.");
@@ -144,13 +121,6 @@ public final class LoxandraActivator extends HousekeepingActivator {
 	protected void stopBundle() throws Exception {
 		log.info("stoping bundle: com.openexchange.loxandra");
 		
-		//cassandraDaemon.deactivate();
-		//cassandraDaemon = null;
-
-		cassandra.stop();
-		cassandra = null;
-		//cassandraThread = null;
-		//srv.teardown();
 		LoxandraServiceLookUp.set(null);
 		cleanUp();
 	}

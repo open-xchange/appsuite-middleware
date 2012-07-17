@@ -50,7 +50,10 @@
 package com.openexchange.mail.conversion;
 
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
+import java.io.IOException;
 import java.io.InputStream;
+import java.util.Locale;
+import javax.mail.MessagingException;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
@@ -63,9 +66,11 @@ import com.openexchange.image.ImageDataSource;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.image.ImageUtility;
 import com.openexchange.mail.FullnameArgument;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.session.Session;
@@ -111,22 +116,46 @@ public final class InlineImageDataSource implements ImageDataSource {
     }
 
     private MailPart getImagePart(final int accountId, final String fullname, final String mailId, final String cid, final Session session) throws OXException {
-        final MailAccess<?, ?> mailAccess;
+        MailAccess<?, ?> mailAccess = null;
         try {
             mailAccess = MailAccess.getInstance(session, accountId);
             mailAccess.connect();
+            return loadImagePart(fullname, mailId, cid, mailAccess);
         } catch (final OXException e) {
-            throw new OXException(e);
-        }
-        try {
-            final MailPart imagePart = mailAccess.getMessageStorage().getImageAttachment(fullname, mailId, cid);
-            imagePart.loadContent();
-            return imagePart;
-        } catch (final OXException e) {
-            throw new OXException(e);
+            if ((null != mailAccess) && shouldRetry(e)) {
+                // Re-connect
+                mailAccess.close(false);
+                mailAccess = MailAccess.getInstance(session, accountId);
+                mailAccess.connect();
+                return loadImagePart(fullname, mailId, cid, mailAccess);
+            }
+            throw e;
         } finally {
-            mailAccess.close(true);
+            if (null != mailAccess) {
+                mailAccess.close(true);
+            }
         }
+    }
+
+    private MailPart loadImagePart(final String fullname, final String mailId, final String cid, final MailAccess<?, ?> mailAccess) throws OXException {
+        final MailPart imagePart = mailAccess.getMessageStorage().getImageAttachment(fullname, mailId, cid);
+        imagePart.loadContent();
+        return imagePart;
+    }
+
+    private static boolean shouldRetry(OXException e) {
+        if (MailExceptionCode.MAIL_NOT_FOUND.equals(e)) {
+            return true;
+        }
+        if (MailExceptionCode.IO_ERROR.equals(e)) {
+            final Throwable cause = e.getCause();
+            return (cause instanceof IOException) && "no content".equals(cause.getMessage().toLowerCase(Locale.ENGLISH));
+        }
+        if (MimeMailExceptionCode.MESSAGING_ERROR.equals(e)) {
+            final Throwable cause = e.getCause();
+            return (cause instanceof MessagingException) && "failed to fetch headers".equals(cause.getMessage().toLowerCase(Locale.ENGLISH));
+        }
+        return false;
     }
 
     @Override

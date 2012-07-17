@@ -250,17 +250,11 @@ public abstract class AbstractMailJob extends StandardIndexingJob {
     protected boolean shouldSync(final String fullName, final long now, final long span, final long[] box) throws OXException {
         if (!IndexFolderManager.isLocked(contextId, userId, Types.EMAIL, String.valueOf(accountId), fullName)) {
             if (IndexFolderManager.isIndexed(contextId, userId, Types.EMAIL, String.valueOf(accountId), fullName)) {
-                long timestamp = IndexFolderManager.getTimestamp(contextId, userId, Types.EMAIL, String.valueOf(accountId), fullName);
-                if ((now - timestamp) > span) {
-                    return true;
-                } else {                
-                    return false;
-                }
-            } else {            
-                return true;
+                final long timestamp = IndexFolderManager.getTimestamp(contextId, userId, Types.EMAIL, String.valueOf(accountId), fullName);
+                return ((now - timestamp) > span);
             }
+            return true;
         }
-        
         return false;
 //        
 //        final DatabaseService databaseService = Services.getService(DatabaseService.class);

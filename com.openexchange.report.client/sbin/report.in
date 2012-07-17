@@ -52,7 +52,7 @@ OXFUNCTIONS=@oxfunctions@
 OXCONFIG=@oxscriptconf@
 OXPREFIX=@oxprefix@
 OXBUNDLES=$OXPREFIX/bundles
-BUNDLELIBPATH=@oxcommonbundlelib@
+BUNDLELIBPATH=@libDir@
 
 
 test -f $OXFUNCTIONS || {
@@ -70,10 +70,9 @@ test -z "$JAVA_XTRAOPTS" && JAVA_XTRAOPTS="-Xms20M -Xmx280M"
 
 JAVA_OPTS="${JAVA_XTRAOPTS} \
 -Djava.awt.headless=true \
--Dopenexchange.propdir=$PROPERTIESDIR \
--Dopenexchange.propdir2=$COMMONPROPERTIESDIR"
+-Dopenexchange.propdir=$PROPERTIESDIR"
 
-CLASSPATH="-classpath $BUNDLELIBPATH/json.jar:$OXBUNDLES/com.openexchange.server.jar:$OXBUNDLES/com.openexchange.admin.jar:$OXBUNDLES/open_xchange_admin_plugin_hosting.jar:$OXBUNDLES/com.openexchange.report.client.jar:$OXBUNDLES/org.apache.commons.cli_1.2.0.v201105210650.jar:$OXBUNDLES/com.openexchange.common/lib/commons-codec-1.4.jar:$OXBUNDLES/org.apache.commons.logging_1.0.4.v200706111724.jar:$OXBUNDLES/com.openexchange.global.jar"
+CLASSPATH="-classpath @classpath@"
 
 umask 066
 exec $JAVA_BIN $JAVA_OPTS $CLASSPATH com.openexchange.report.client.impl.ReportClient $@

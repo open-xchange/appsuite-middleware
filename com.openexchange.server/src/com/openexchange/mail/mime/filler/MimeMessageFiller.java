@@ -1616,7 +1616,7 @@ public class MimeMessageFiller {
                         try {
                             imageProvider = new ImageDataImageProvider(dataSource, imageLocation, session);
                         } catch (final OXException e) {
-                            if (MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND.equals(e)) {
+                            if (MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND.equals(e) || MailExceptionCode.MAIL_NOT_FOUND.equals(e)) {
                                 tmp.setLength(0);
                                 m.appendLiteralReplacement(sb, imageTag);
                                 continue;
@@ -1719,12 +1719,12 @@ public class MimeMessageFiller {
          * ... and cid
          */
         final String cid;
-        if (id.indexOf('@') < 0) {
+        {
             tmp.setLength(0);
-            tmp.append(PATTERN_DASHES.matcher(id).replaceAll("")).append('@').append(Version.NAME);
+            final int atPos = id.indexOf('@');
+            tmp.append(PATTERN_DASHES.matcher(atPos < 0 ? id : id.substring(0, atPos)).replaceAll(""));
+            tmp.append('@').append(Version.NAME);
             cid = tmp.toString();
-        } else {
-            cid = PATTERN_DASHES.matcher(id).replaceAll("");
         }
         if (appendBodyPart) {
             boolean found = false;

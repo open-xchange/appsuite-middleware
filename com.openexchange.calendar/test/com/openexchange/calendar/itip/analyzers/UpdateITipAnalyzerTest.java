@@ -1018,7 +1018,7 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
         assertEquals(1, annotations.size());
         
         ITipAnnotation error = annotations.get(0);
-        assertEquals("This is an update to an appointment that already changed in the meantime. It is best to just ignore this one.", error.getMessage());
+        assertEquals("This is an update to an appointment that has been changed in the meantime. Best ignore it.", error.getMessage());
         
         assertActions(analysis, ITipAction.IGNORE);
     }
@@ -1049,7 +1049,7 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
         assertEquals(1, annotations.size());
         
         ITipAnnotation error = annotations.get(0);
-        assertEquals("An attendee wants to change an appointment that could not be found. Probably the appointment was deleted at some point, so it is best to just ignore this update.", error.getMessage());
+        assertEquals("An attendee wants to change an appointment that could not be found. Probably the appointment was deleted. Best ignore it.", error.getMessage());
 
         assertActions(analysis, ITipAction.IGNORE);
         

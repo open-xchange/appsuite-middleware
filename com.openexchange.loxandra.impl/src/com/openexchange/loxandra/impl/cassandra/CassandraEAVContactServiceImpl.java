@@ -88,11 +88,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.ajax.fields.ContactFields;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.loxandra.EAVContactService;
 import com.openexchange.loxandra.dto.EAVContact;
 import com.openexchange.loxandra.helpers.EAVContactHelper;
+import com.openexchange.loxandra.impl.cassandra.transaction.Operation;
+import com.openexchange.loxandra.impl.cassandra.transaction.OperationAction;
+import com.openexchange.loxandra.impl.cassandra.transaction.Transaction;
 
 /**
  * Cassandra Contact Data Access Object
@@ -104,6 +108,8 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 	private static String CF_PERSON = "Person";
 	private static String CF_PERSON_FOLDER = "PersonFolder";
 	private static String CF_COUNTERS = "Counters";
+	
+	private static String PERSONS_IN_FOLDER_ROW_KEY = "PersonsInFolder";
 	
 	private static final Log log = LogFactory.getLog(CassandraEAVContactServiceImpl.class);
 	
@@ -150,16 +156,16 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 		ClockResolution clock = new MicrosecondsClockResolution();
 		c.setTimeUUID(TimeUUIDUtils.getTimeUUID(clock.createClock()));
 		
-		ColumnFamilyUpdater<UUID, Composite> personUpdater = personTemplate.createUpdater(c.getUUID()); //get Key and create updater object
+		/*ColumnFamilyUpdater<UUID, Composite> personUpdater = personTemplate.createUpdater(c.getUUID()); //get Key and create updater object
 	    populateUpdater(c, personUpdater);
 	    
 	    personUpdater.setUUID(new Composite(cf_named_prop_prefix, "timeuuid"), c.getTimeUUID());
 	    personUpdater.setUUID(new Composite("folder", c.getFolderUUIDs().get(0)), c.getFolderUUIDs().get(0));
 	    
 	    ColumnFamilyUpdater<UUID, Composite> personFolderUpdater = personFolderTemplate.createUpdater(c.getFolderUUIDs().get(0)); //get Key and create updater object
-	    personFolderUpdater.setUUID(new Composite(c.getDisplayName(), c.getTimeUUID()), c.getUUID());
+	    personFolderUpdater.setUUID(new Composite(c.getDisplayName(), c.getTimeUUID().toString()), c.getUUID());
 	    
-		try {
+		try {*/
 	        /* ISSUE: Possible race condition issue. 
 	         * If the contact that is inserted into the 'Person' CF gets deleted 
 	         * BEFORE inserted into the 'PersonFolder' CF, we end up with stale data in the later CF.
@@ -168,13 +174,62 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 	         * in order to ensure consistency. If the row in 'Person' does not exist, then roll back.
 	         * Dunno about that though... Looks like another race condition...
 	         */
-			personTemplate.update(personUpdater); 				// INSERT into Person
-	        personFolderTemplate.update(personFolderUpdater);	// INSERT into PersonFolder
+			/*personTemplate.update(personUpdater); 				// INSERT into Person
+	        personFolderTemplate.update(personFolderUpdater);		// INSERT into PersonFolder
 	        Mutator<String> m = HFactory.createMutator(keyspace, ss);
-	        m.incrementCounter("PersonsInFolder", CF_COUNTERS, c.getFolderUUIDs().get(0), 1L);
+	        m.incrementCounter(PERSONS_IN_FOLDER_ROW_KEY, CF_COUNTERS, c.getFolderUUIDs().get(0), 1L);
 	    } catch (HectorException e) {
 	        e.printStackTrace();
-	    }
+	    }*/
+		
+		//NOTE: OPERATION TEST
+		Transaction t = new Transaction();
+		
+		Operation o = new Operation(CF_PERSON, OperationAction.INSERT, 1, c.getUUID().toString());
+		populateOperation(c, o);
+		o.addOperationData(cf_named_prop_prefix + ":timeuuid", c.getTimeUUID().toString());
+		o.addOperationData("folder:" + c.getFolderUUIDs().get(0), c.getFolderUUIDs().get(0).toString());
+		t.addOperation(o);
+		
+		o = new Operation(CF_PERSON_FOLDER, OperationAction.INSERT, 2, c.getFolderUUIDs().get(0).toString());
+		o.addOperationData(c.getDisplayName() + ":" + c.getTimeUUID(), c.getUUID().toString());
+		t.addOperation(o);
+		
+		o = new Operation(CF_COUNTERS, OperationAction.INCREMENT, 3, PERSONS_IN_FOLDER_ROW_KEY);
+		o.addOperationData(c.getFolderUUIDs().get(0).toString(), "1");
+		t.addOperation(o);
+		
+		try {
+			t.commit();
+		} catch (OXException e) {
+			e.printStackTrace();
+			t.rollback();
+		}
+	}
+	
+	private void populateOperation(EAVContact c, Operation o) {
+		for (final int column : Contact.JSON_COLUMNS) {
+			
+			final ContactField field = ContactField.getByValue(column);
+			if (field != null && field.isDBField()) {
+				
+				final String key = field.getAjaxName();
+				if (c.contains(column)) {
+					if (EAVContactHelper.isNonString(column)) {
+                        o.addOperationData(new String(cf_named_prop_prefix + ":" + key), Long.toString(((Date) c.get(column)).getTime()));
+                    } else {
+                        o.addOperationData(new String(cf_named_prop_prefix + ":" + key), (String) c.get(column));
+                    }
+				}
+			}
+		}
+		
+		Iterator<String> iterator  = c.getKeysIterator();
+		while (iterator.hasNext()) {
+			String key = iterator.next();
+			o.addOperationData(new String("unnamed:" + key), c.getUnnamedProperty(key));
+			log.info("UNNAMED PROPERTIES : " + key);
+		}
 	}
 	
 	/**
@@ -283,7 +338,7 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 		
 		//TODO: complete...
 		
-		contact.setTimeUUID(TimeUUIDUtils.uuid(contact.getNamedProperty("timeuuid")));
+		contact.setTimeUUID(UUID.fromString(ByteBufferUtil.string(contact.getNamedProperty("timeuuid"))));
 		
 		log.info("EAV CONTACT: " + contact.getGivenName());
 		
@@ -327,13 +382,14 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 		if (contact.containsNamedProperty(ContactFields.FIRST_NAME)) {
             contact.setGivenName(ByteBufferUtil.string(contact.getNamedProperty(ContactFields.FIRST_NAME)));
         }
-		if (contact.containsNamedProperty(ContactFields.LAST_NAME))
-         {
+		if (contact.containsNamedProperty(ContactFields.LAST_NAME)) {
             contact.setSurName(ByteBufferUtil.string(contact.getNamedProperty(ContactFields.LAST_NAME)));
 		//TODO: complete...
         }
+		if (contact.containsNamedProperty(ContactFields.BIRTHDAY)) {
+		}
 		
-		contact.setTimeUUID(TimeUUIDUtils.uuid(contact.getNamedProperty("timeuuid")));
+		contact.setTimeUUID(UUID.fromString(ByteBufferUtil.string(contact.getNamedProperty("timeuuid"))));
 		
 		contact.clearNamedProperties();
 		
@@ -361,14 +417,14 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 		end = new Composite();
 		end.addComponent(0, "folder", Composite.ComponentEquality.GREATER_THAN_EQUAL);
 		
-		SliceQuery<UUID, Composite, UUID> folderSliceQuery = HFactory.createSliceQuery(keyspace, us, cs, us);
+		SliceQuery<UUID, Composite, String> folderSliceQuery = HFactory.createSliceQuery(keyspace, us, cs, ss);
 		folderSliceQuery.setColumnFamily(CF_PERSON).setKey(contact.getUUID());
-		ColumnSliceIterator<UUID, Composite, UUID> folderIterator = new ColumnSliceIterator<UUID, Composite, UUID>(folderSliceQuery, start, end, false);
+		ColumnSliceIterator<UUID, Composite, String> folderIterator = new ColumnSliceIterator<UUID, Composite, String>(folderSliceQuery, start, end, false);
 		
 		// setters
 		while (folderIterator.hasNext()) {
-			HColumn<Composite, UUID> h = folderIterator.next();
-			contact.addFolderUUID(h.getValue());
+			HColumn<Composite, String> h = folderIterator.next();
+			contact.addFolderUUID(UUID.fromString(h.getValue()));
 		}
 	}
 	
@@ -385,18 +441,46 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 		Composite end = new Composite();
 		end.addComponent(0, "folder", Composite.ComponentEquality.GREATER_THAN_EQUAL);
 		
-		SliceQuery<UUID, Composite, UUID> folderSliceQuery = HFactory.createSliceQuery(keyspace, us, cs, us);
+		SliceQuery<UUID, Composite, String> folderSliceQuery = HFactory.createSliceQuery(keyspace, us, cs, ss);
 		folderSliceQuery.setColumnFamily(CF_PERSON).setKey(uuid);
-		ColumnSliceIterator<UUID, Composite, UUID> folderIterator = new ColumnSliceIterator<UUID, Composite, UUID>(folderSliceQuery, start, end, false);
+		ColumnSliceIterator<UUID, Composite, String> folderIterator = new ColumnSliceIterator<UUID, Composite, String>(folderSliceQuery, start, end, false);
 		
-		// setters
-		while (folderIterator.hasNext()) {
+		/*while (folderIterator.hasNext()) {
 			HColumn<Composite, UUID> h = folderIterator.next();
 			removeContactFromFolder(getContact(uuid, true), h.getValue());
 		}
 		
 		Mutator<UUID> m = HFactory.createMutator(keyspace, us);
-		m.delete(uuid, CF_PERSON, null, ss);
+		m.delete(uuid, CF_PERSON, null, ss);*/
+		
+		//NOTE: Operations
+		
+		Transaction t = new Transaction();
+		int opsCounter = 0;
+		while (folderIterator.hasNext()) {
+			HColumn<Composite, String> h = folderIterator.next();
+			EAVContact c = getContact(uuid, true);
+			
+			if (existsContactInFolder(c, UUID.fromString(h.getValue()))) {
+				
+				Operation o = new Operation(CF_PERSON_FOLDER, OperationAction.DELETE, ++opsCounter, h.getValue().toString());
+			    o.addOperationData(c.getDisplayName() + ":" + c.getTimeUUID(), uuid.toString());
+			    t.addOperation(o);
+			    
+			    o = new Operation(CF_COUNTERS, OperationAction.DECREMENT, ++opsCounter, PERSONS_IN_FOLDER_ROW_KEY);
+			    o.addOperationData(h.getValue().toString(), "1");
+			    t.addOperation(o);
+			}
+		}
+		
+		Operation o = new Operation(CF_PERSON, OperationAction.DELETE, ++opsCounter, uuid.toString());
+		t.addOperation(o);
+		
+		try {
+			t.commit();
+		} catch (OXException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/*
@@ -406,14 +490,26 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 	@Override
 	public void updateContact(EAVContact c) {
 		//insertContact(c);
-		ColumnFamilyUpdater<UUID, Composite> personUpdater = personTemplate.createUpdater(c.getUUID()); //get Key and create updater object
+		/*ColumnFamilyUpdater<UUID, Composite> personUpdater = personTemplate.createUpdater(c.getUUID()); //get Key and create updater object
 	    populateUpdater(c, personUpdater);
 	    
 	    try {
 			personTemplate.update(personUpdater);
 	    } catch (HectorException e) {
 	        e.printStackTrace();
-	    }
+	    }*/
+	    
+	    //NOTE: Operations
+	    Operation o = new Operation(CF_PERSON, OperationAction.INSERT, 1, c.getUUID().toString());
+		populateOperation(c, o);
+		
+		Transaction t = new Transaction(o);
+		
+		try {
+			t.commit();
+		} catch (OXException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/*
@@ -422,9 +518,19 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 	 */
 	@Override
 	public void deleteProperties(UUID uuid, String... prop) {
-		Mutator<UUID> m = HFactory.createMutator(keyspace, us);
+		Operation o = new Operation(CF_PERSON, OperationAction.DELETE, 1, uuid.toString());
+		//Mutator<UUID> m = HFactory.createMutator(keyspace, us);
 		for (String s : prop) { 
-			 m.delete(uuid, CF_PERSON, new Composite("unnamed", s), cs);
+			o.addOperationData("unnamed:"+s, s);
+			 //m.addDeletion(uuid, CF_PERSON, new Composite("unnamed", s), cs);
+		}
+		//m.execute();
+		
+		Transaction t  = new Transaction(o);
+		try {
+			t.commit();
+		} catch (OXException e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -512,7 +618,7 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 	@Override
 	public void copyContactToFolder(EAVContact c, UUID newFolderUUID) {
 	 	if (!existsContactInFolder(c, newFolderUUID)) {
-	 		ColumnFamilyUpdater<UUID, Composite> personFolderUpdater = personFolderTemplate.createUpdater(newFolderUUID); //get Key and create updater object
+	 		/*ColumnFamilyUpdater<UUID, Composite> personFolderUpdater = personFolderTemplate.createUpdater(newFolderUUID); //get Key and create updater object
 		    personFolderUpdater.setUUID(new Composite(c.getDisplayName(), c.getTimeUUID()), c.getUUID());
 		    personFolderTemplate.update(personFolderUpdater);
 		    
@@ -521,7 +627,29 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 		    mInsert.insert(c.getUUID(), CF_PERSON, HFactory.createColumn(compo, newFolderUUID));
 		    
 	 		Mutator<String> m = HFactory.createMutator(keyspace, ss);
-	    	m.incrementCounter("PersonsInFolder", CF_COUNTERS, newFolderUUID, 1L);
+	    	m.incrementCounter(PERSONS_IN_FOLDER_ROW_KEY, CF_COUNTERS, newFolderUUID, 1L);*/
+	    	
+	    	//NOTE: Operations
+	 		Transaction t = new Transaction();
+	 		
+	 		Operation o = new Operation(CF_PERSON_FOLDER, OperationAction.INSERT, 1, newFolderUUID.toString());
+	 		o.addOperationData(c.getDisplayName() + ":" + c.getTimeUUID(), c.getUUID().toString());
+	 		t.addOperation(o);
+	 		
+	 		o = new Operation(CF_PERSON, OperationAction.INSERT, 2, c.getUUID().toString());
+	 		o.addOperationData("folder:" + newFolderUUID, newFolderUUID.toString());
+	 		t.addOperation(o);
+	 		
+	 		o = new Operation(CF_COUNTERS, OperationAction.INCREMENT, 3, PERSONS_IN_FOLDER_ROW_KEY);
+	 		o.addOperationData(newFolderUUID.toString(), "1");
+	 		t.addOperation(o);
+	 		
+	 		try {
+	 			t.commit();
+	 		} catch (OXException e) {
+	 			e.printStackTrace();
+	 			t.rollback();
+	 		}
 	 	}
 	}
 	
@@ -532,8 +660,8 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 	@Override
 	public void removeContactFromFolder(EAVContact c, UUID folderUUID) {
 		if (existsContactInFolder(c, folderUUID)) {
-			Mutator<String> decrementMutator = HFactory.createMutator(keyspace, ss);
-			decrementMutator.decrementCounter("PersonsInFolder", CF_COUNTERS, folderUUID, 1L);
+			/*Mutator<String> decrementMutator = HFactory.createMutator(keyspace, ss);
+			decrementMutator.decrementCounter(PERSONS_IN_FOLDER_ROW_KEY, CF_COUNTERS, folderUUID, 1L);
 			
 			// Delete the person's uuid from the PersonFolder CF
 			Composite delCompoPersonFolder = new Composite(c.getDisplayName(), c.getTimeUUID());
@@ -543,7 +671,29 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 			// Delete the uuid of the folder from the Person CF
 			Composite delCompoPerson = new Composite("folder", folderUUID);
 		    Mutator<UUID> mDelete = HFactory.createMutator(keyspace, us);
-		    mDelete.delete(c.getUUID(), CF_PERSON, delCompoPerson, cs);
+		    mDelete.delete(c.getUUID(), CF_PERSON, delCompoPerson, cs);*/
+		    
+		    //NOTE: Operations
+			Transaction t = new Transaction();
+			
+			Operation o = new Operation(CF_PERSON_FOLDER, OperationAction.DELETE, 1, folderUUID.toString());
+		    o.addOperationData(c.getDisplayName() + ":" + c.getTimeUUID(), c.getUUID().toString());
+		    t.addOperation(o);
+		    
+		    o = new Operation(CF_PERSON, OperationAction.DELETE, 2, c.getUUID().toString());
+		    o.addOperationData("folder:" + folderUUID.toString(), folderUUID.toString());
+		    t.addOperation(o);
+		    
+		    o = new Operation(CF_COUNTERS, OperationAction.DECREMENT, 3, PERSONS_IN_FOLDER_ROW_KEY);
+		    o.addOperationData(folderUUID.toString(), "1");
+		    t.addOperation(o);
+		    
+		    try {
+				t.commit();
+			} catch (OXException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -553,8 +703,46 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 	 */
 	@Override
 	public void moveContactToFolder(EAVContact c, UUID oldFolderUUID, UUID newFolderUUID) {
-		copyContactToFolder(c, newFolderUUID);
-		removeContactFromFolder(c, oldFolderUUID);
+		/*copyContactToFolder(c, newFolderUUID);
+		removeContactFromFolder(c, oldFolderUUID);*/
+		
+		//NOTE: Operations
+		Transaction t = new Transaction();
+		
+		if (!existsContactInFolder(c, newFolderUUID)) {
+			Operation o = new Operation(CF_PERSON_FOLDER, OperationAction.INSERT, 1, newFolderUUID.toString());
+			o.addOperationData(c.getDisplayName() + ":" + c.getTimeUUID(), c.getUUID().toString());
+			t.addOperation(o);
+	 		
+			o = new Operation(CF_PERSON, OperationAction.INSERT, 2, c.getUUID().toString());
+			o.addOperationData("folder:" + newFolderUUID, newFolderUUID.toString());
+			t.addOperation(o);
+	 		
+			o = new Operation(CF_COUNTERS, OperationAction.INCREMENT, 3, PERSONS_IN_FOLDER_ROW_KEY);
+			o.addOperationData(newFolderUUID.toString(), "1");
+			t.addOperation(o);
+		}
+		
+		if (existsContactInFolder(c, oldFolderUUID)) {
+			Operation o = new Operation(CF_PERSON_FOLDER, OperationAction.DELETE, 4, oldFolderUUID.toString());
+			o.addOperationData(c.getDisplayName() + ":" + c.getTimeUUID(), c.getUUID().toString());
+			t.addOperation(o);
+		    
+			o = new Operation(CF_PERSON, OperationAction.DELETE, 5, c.getUUID().toString());
+			o.addOperationData("folder:" + oldFolderUUID.toString(), oldFolderUUID.toString());
+			t.addOperation(o);
+		    
+			o = new Operation(CF_COUNTERS, OperationAction.DECREMENT, 6, PERSONS_IN_FOLDER_ROW_KEY);
+			o.addOperationData(oldFolderUUID.toString(), "1");
+			t.addOperation(o);
+		}
+		
+		try {
+ 			t.commit();
+ 		} catch (OXException e) {
+ 			e.printStackTrace();
+ 			t.rollback();
+ 		}
 	}
 
 	/*
@@ -564,7 +752,7 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 	@Override
 	public int getNumberOfContactsInFolder(UUID folderUUID) {
 		CounterQuery<String, UUID> query = HFactory.createCounterColumnQuery(keyspace, ss, us);
-		query.setColumnFamily(CF_COUNTERS).setKey("PersonsInFolder").setName(folderUUID);
+		query.setColumnFamily(CF_COUNTERS).setKey(PERSONS_IN_FOLDER_ROW_KEY).setName(folderUUID);
 		long counter = query.execute().get().getValue();
 		
 		return (int)counter;
@@ -580,12 +768,12 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 	private boolean existsContactInFolder(EAVContact c, UUID folderUUID) {
 		Composite start = new Composite();
 	 	start.addComponent(0, c.getDisplayName(), Composite.ComponentEquality.EQUAL);
-	 	start.addComponent(1, c.getTimeUUID(), Composite.ComponentEquality.EQUAL);
-	 		
+	 	start.addComponent(1, c.getTimeUUID().toString(), Composite.ComponentEquality.EQUAL);
+	 	
 	 	Composite end = new Composite();
 	 	end.addComponent(0, c.getDisplayName(), Composite.ComponentEquality.EQUAL);
-	 	end.addComponent(1, c.getTimeUUID(), Composite.ComponentEquality.EQUAL);
-	 		
+	 	end.addComponent(1, c.getTimeUUID().toString(), Composite.ComponentEquality.EQUAL);
+	 	
 	 	SliceQuery<UUID, Composite, ByteBuffer> sliceQuery = HFactory.createSliceQuery(keyspace, us, cs, bbs);
 	 	ColumnSlice<Composite, ByteBuffer> slice = sliceQuery.setColumnFamily(CF_PERSON_FOLDER)
 	 														.setKey(folderUUID)

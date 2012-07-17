@@ -75,6 +75,7 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.MockUserLookup;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.Task;
@@ -288,11 +289,11 @@ public class ICalEmitterTest extends TestCase {
     }
 
     public void testAppRecurrenceId() throws IOException {
-        Appointment appointment = getDefault();
+        final Appointment appointment = getDefault();
         appointment.setRecurrenceID(12);
         appointment.setRecurrenceDatePosition(D("26/06/2011 00:00"));
 
-        ICalFile ical = serialize(appointment);
+        final ICalFile ical = serialize(appointment);
 
         assertProperty(ical, "RECURRENCE-ID", "20110626");
     }
@@ -452,28 +453,28 @@ public class ICalEmitterTest extends TestCase {
     }
 
     public void testAppUid() throws IOException {
-        Appointment appointment = getDefault();
+        final Appointment appointment = getDefault();
         appointment.setUid("nexn787n478478onzwo87nwiuhi");
 
-        ICalFile ical = serialize(appointment);
+        final ICalFile ical = serialize(appointment);
 
         assertProperty(ical, "UID", "nexn787n478478onzwo87nwiuhi");
     }
 
     public void testAppOrganizer() throws IOException {
-        Appointment appointment = getDefault();
+        final Appointment appointment = getDefault();
         appointment.setOrganizer("organizer");
 
-        ICalFile ical = serialize(appointment);
+        final ICalFile ical = serialize(appointment);
 
         assertProperty(ical, "ORGANIZER", "mailto:organizer");
     }
 
     public void testAppSequence() throws IOException {
-        Appointment appointment = getDefault();
+        final Appointment appointment = getDefault();
         appointment.setSequence(5);
 
-        ICalFile ical = serialize(appointment);
+        final ICalFile ical = serialize(appointment);
 
         assertProperty(ical, "SEQUENCE", "5");
     }
@@ -544,27 +545,27 @@ public class ICalEmitterTest extends TestCase {
     }
 
     public void testTaskUid() throws IOException {
-        Task task = new Task();
+        final Task task = new Task();
         task.setUid("nexn787n478478onzwo87nwiuhi");
 
-        ICalFile ical = serialize(task);
+        final ICalFile ical = serialize(task);
 
         assertProperty(ical, "UID", "nexn787n478478onzwo87nwiuhi");
     }
 
     public void testShouldNotUseDTENDasEndForIndividualAppointmentsInASeries() throws IOException{
-        int occurences = 4;
+        final int occurences = 4;
 
-        Calendar cal = Calendar.getInstance();
+        final Calendar cal = Calendar.getInstance();
         cal.setTime(new Date());
         cal.add(Calendar.DAY_OF_MONTH, 1);
         cal.set(Calendar.HOUR_OF_DAY, 8);
-        Date start = cal.getTime();
+        final Date start = cal.getTime();
 
         cal.add(Calendar.HOUR, 1);
-        Date end = cal.getTime();
+        final Date end = cal.getTime();
 
-        Appointment app = new Appointment();
+        final Appointment app = new Appointment();
         app.setStartDate(start);
         app.setEndDate(end);
         app.setRecurrenceType(Appointment.DAILY);
@@ -572,17 +573,17 @@ public class ICalEmitterTest extends TestCase {
         app.setInterval(1);
         app.setDays(127);
 
-        ICalFile ical = serialize(app);
-        String dtend = ical.getValue("DTEND");
+        final ICalFile ical = serialize(app);
+        final String dtend = ical.getValue("DTEND");
         assertEquals("Recurrence rule should be 'daily, for four days, every day'.", "FREQ=DAILY;COUNT=4;INTERVAL=1", ical.getValue("RRULE"));
         assertTrue("Reccurence rule should point to the next day, not the end of the recurences", dtend.startsWith(new SimpleDateFormat("yyyyMMdd").format(end)));
     }
 
     public void no_testTaskOrganizer() throws IOException {
-        Task task = new Task();
+        final Task task = new Task();
         task.setOrganizer("organizer");
 
-        ICalFile ical = serialize(task);
+        final ICalFile ical = serialize(task);
 
         assertProperty(ical, "ORGANIZER", "mailto:organizer");
     }
@@ -624,7 +625,7 @@ public class ICalEmitterTest extends TestCase {
 
 
     private ICalFile serialize(final Appointment app) throws IOException {
-        final String icalText = emitter.writeAppointments(Arrays.asList(app), null, new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>());
+        final String icalText = emitter.writeAppointments(Arrays.asList(app), new ContextImpl(1), new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>());
         return new ICalFile(new StringReader(icalText));
     }
 

@@ -70,7 +70,8 @@ import javax.naming.ldap.PagedResultsControl;
 import javax.naming.ldap.PagedResultsResponseControl;
 import javax.naming.ldap.SortControl;
 import javax.naming.ldap.SortKey;
-import com.openexchange.contacts.ldap.contacts.LdapContactInterface.SortInfo;
+
+import com.openexchange.contacts.ldap.contacts.SortInfo;
 import com.openexchange.contacts.ldap.exceptions.LdapExceptionCode;
 import com.openexchange.contacts.ldap.property.FolderProperties;
 import com.openexchange.contacts.ldap.property.FolderProperties.DerefAliases;

@@ -88,7 +88,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
              */
             final String fid = checkFolderId(folderId, rootUrl);
             final SmbFile smbFolder = new SmbFile(fid, auth);
-            if (!smbFolder.exists()) {
+            if (!exists(smbFolder)) {
                 return false;
             }
             if (!smbFolder.isDirectory()) {
@@ -117,7 +117,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
              */
             final String fid = checkFolderId(folderId, rootUrl);
             final SmbFile smbFolder = new SmbFile(fid, auth);
-            if (!smbFolder.exists()) {
+            if (!exists(smbFolder)) {
                 throw CIFSExceptionCodes.NOT_FOUND.create(folderId);
             }
             if (!smbFolder.isDirectory()) {
@@ -126,7 +126,16 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
             /*
              * Check sub resources
              */
-            final SmbFile[] subFiles = smbFolder.listFiles();
+            SmbFile[] subFiles;
+            try {
+                subFiles = smbFolder.canRead() ? smbFolder.listFiles() : new SmbFile[0];
+            } catch (final SmbException e) {
+                final String message = e.getMessage();
+                if (!message.startsWith("Invalid operation") && !message.equals("Access is denied.")) {
+                    throw e;
+                }
+                subFiles = new SmbFile[0];
+            }
             boolean hasSubdir = false;
             int fileCount = 0;
             for (final SmbFile sub : subFiles) {
@@ -167,7 +176,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
              */
             final String fid = checkFolderId(parentId, rootUrl);
             final SmbFile smbFolder = new SmbFile(fid, auth);
-            if (!smbFolder.exists()) {
+            if (!exists(smbFolder)) {
                 throw CIFSExceptionCodes.NOT_FOUND.create(parentId);
             }
             if (!smbFolder.isDirectory()) {
@@ -176,11 +185,26 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
             /*
              * Check sub resources
              */
-            final SmbFile[] subFiles = smbFolder.listFiles();
+            SmbFile[] subFiles;
+            try {
+                subFiles = smbFolder.canRead() ? smbFolder.listFiles() : new SmbFile[0];
+            } catch (final SmbException e) {
+                final String message = e.getMessage();
+                if (!message.startsWith("Invalid operation") && !message.equals("Access is denied.")) {
+                    throw e;
+                }
+                subFiles = new SmbFile[0];
+            }
             final List<FileStorageFolder> list = new ArrayList<FileStorageFolder>(subFiles.length);
             for (final SmbFile sub : subFiles) {
                 if (sub.isDirectory()) {
-                    list.add(getFolder(sub.getPath()));
+                    try {
+                        list.add(getFolder(sub.getPath()));
+                    } catch (final OXException e) {
+                        if (!CIFSExceptionCodes.NOT_FOUND.equals(e)) {
+                            throw e;
+                        }
+                    }
                 }
             }
             /*
@@ -209,7 +233,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
             final String parentId = toCreate.getParentId();
             final String pid = checkFolderId(parentId, rootUrl);
             final SmbFile smbFolder = new SmbFile(pid, auth);
-            if (!smbFolder.exists()) {
+            if (!exists(smbFolder)) {
                 throw CIFSExceptionCodes.NOT_FOUND.create(parentId);
             }
             if (!smbFolder.isDirectory()) {
@@ -283,7 +307,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
              * Check validity
              */
             final SmbFile copyMe = new SmbFile(fid, auth);
-            if (!copyMe.exists()) {
+            if (!exists(copyMe)) {
                 throw CIFSExceptionCodes.NOT_FOUND.create(folderId);
             }
             if (!copyMe.isDirectory()) {
@@ -338,7 +362,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
              * Check validity
              */
             final SmbFile renameMe = new SmbFile(fid, auth);
-            if (!renameMe.exists()) {
+            if (!exists(renameMe)) {
                 throw CIFSExceptionCodes.NOT_FOUND.create(folderId);
             }
             if (!renameMe.isDirectory()) {
@@ -384,7 +408,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
              * Check validity
              */
             final SmbFile deleteMe = new SmbFile(fid, auth);
-            if (!deleteMe.exists()) {
+            if (!exists(deleteMe)) {
                 throw CIFSExceptionCodes.NOT_FOUND.create(folderId);
             }
             if (!deleteMe.isDirectory()) {
@@ -429,7 +453,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
              * Check validity
              */
             final SmbFile smbFolder = new SmbFile(fid, auth);
-            if (!smbFolder.exists()) {
+            if (!exists(smbFolder)) {
                 throw CIFSExceptionCodes.NOT_FOUND.create(folderId);
             }
             if (!smbFolder.isDirectory()) {

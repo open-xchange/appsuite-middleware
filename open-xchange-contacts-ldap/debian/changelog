@@ -1,0 +1,5 @@
+open-xchange-contacts-ldap (6.21.0-0) unstable; urgency=low
+
+  * Initial release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 16 Jul 2012 17:46:32 +0200
