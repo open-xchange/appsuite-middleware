@@ -49,6 +49,8 @@
 
 package org.quartz.service.osgi;
 
+import java.io.StringReader;
+import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleActivator;
@@ -85,11 +87,33 @@ public final class QuartzActivator implements BundleActivator {
         log.info("Starting bundle: org.quartz");
         try {
             System.setProperty("org.terracotta.quartz.skipUpdateCheck", "true");
+            // Specify properties
+            final Properties properties;
+            {
+                final String sProps = "" +
+                		"# Default Properties file for use by StdSchedulerFactory\n" + 
+                		"# to create a Quartz Scheduler Instance, if a different\n" + 
+                		"# properties file is not explicitly specified.\n" + 
+                		"\n" + 
+                		"org.quartz.scheduler.instanceName: DefaultQuartzScheduler\n" + 
+                		"org.quartz.scheduler.rmi.export: false\n" + 
+                		"org.quartz.scheduler.rmi.proxy: false\n" + 
+                		"org.quartz.scheduler.wrapJobExecutionInUserTransaction: false\n" + 
+                		"\n" + 
+                		"org.quartz.threadPool.class: org.quartz.simpl.SimpleThreadPool\n" + 
+                		"org.quartz.threadPool.threadCount: 10\n" + 
+                		"org.quartz.threadPool.threadPriority: 5\n" + 
+                		"org.quartz.threadPool.threadsInheritContextClassLoaderOfInitializingThread: true\n" + 
+                		"\n" + 
+                		"org.quartz.jobStore.misfireThreshold: 60000\n" + 
+                		"\n" + 
+                		"org.quartz.jobStore.class: org.quartz.simpl.RAMJobStore";
+                properties = new Properties();
+                properties.load(new StringReader(sProps));
+            }
             // Create scheduler
-            final SchedulerFactory sf = new StdSchedulerFactory();
+            final SchedulerFactory sf = new StdSchedulerFactory(properties);
             final Scheduler scheduler = sf.getScheduler();
-            // Configure scheduler
-            
             // Start scheduler
             scheduler.start();
             this.scheduler = scheduler;

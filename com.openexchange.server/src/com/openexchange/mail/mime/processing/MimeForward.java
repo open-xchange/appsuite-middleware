@@ -638,17 +638,16 @@ public final class MimeForward {
                     mr.appendLiteralReplacement(
                         replaceBuffer,
                         new StringBuilder(forwardPrefix.length() + 16).append(linebreak).append(m.group()).append(forwardPrefix).append(
-                            linebreak).append(linebreak).toString());
+                            linebreak).toString());
                 } else {
-                    replaceBuffer.append(linebreak).append(forwardPrefix).append(linebreak).append(linebreak);
+                    replaceBuffer.append(linebreak).append(forwardPrefix).append(linebreak);
                 }
                 replaceBuffer.append("<div style=\"position:relative\">");
                 mr.appendTail(replaceBuffer);
                 replaceBuffer.append("</div>");
                 return replaceBuffer.toString();
             }
-            return new StringBuilder(firstSeenText.length() + 256).append(linebreak).append(forwardPrefix).append(linebreak).append(
-                linebreak).append(firstSeenText).toString();
+            return new StringBuilder(firstSeenText.length() + 256).append(linebreak).append(forwardPrefix).append(linebreak).append(firstSeenText).toString();
         }
         /*
          * Surround with quotes
