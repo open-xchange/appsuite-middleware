@@ -815,48 +815,52 @@ public final class MessageParser {
         if (groupedSeqIDs.isEmpty()) {
             return Collections.emptyMap();
         }
-        final Map<String, ReferencedMailPart> retval = new HashMap<String, ReferencedMailPart>(len);
+        Map<String, ReferencedMailPart> retval = null;
         MailAccess<?, ?> access = null;
         try {
             access = MailAccess.getInstance(session, parentMsgRef.getAccountId());
             access.connect();
-            final MailMessage referencedMail =
-                access.getMessageStorage().getMessage(parentMsgRef.getFolder(), parentMsgRef.getMailID(), false);
-            if (null == referencedMail) {
-                throw MailExceptionCode.REFERENCED_MAIL_NOT_FOUND.create(parentMsgRef.getMailID(), parentMsgRef.getFolder());
+            retval = new HashMap<String, ReferencedMailPart>(len);
+            handleMultipleRefs(provider, session, parentMsgRef, contentIds, prepare4Transport, groupedSeqIDs, retval, access);
+        } catch (final OXException oe) {
+            if (null == access || !shouldRetry(oe)) {
+                throw oe;
             }
-            // Get attachments out of referenced mail
-            final Set<String> remaining = new HashSet<String>(groupedSeqIDs.keySet());
-            final MultipleMailPartHandler handler = new MultipleMailPartHandler(groupedSeqIDs.keySet(), false);
-            new MailMessageParser().parseMailMessage(referencedMail, handler);
-            for (final Map.Entry<String, MailPart> e : handler.getMailParts().entrySet()) {
-                final String seqId = e.getKey();
-                try {
-                    retval.put(seqId, provider.getNewReferencedPart(e.getValue(), session));
-                } catch (final OXException oe) {
-                    if (!shouldRetry(oe)) {
-                        throw oe;
-                    }
-                    access.close(false);
-                    access = MailAccess.getInstance(session, parentMsgRef.getAccountId());
-                    access.connect();
-                    retval.put(seqId, provider.getNewReferencedPart(e.getValue(), session));
-                }
-                remaining.remove(seqId);
-            }
-            if (prepare4Transport && !remaining.isEmpty()) {
-                for (final String seqId : remaining) {
-                    if (!contentIds.contains(seqId)) {
-                        throw MailExceptionCode.ATTACHMENT_NOT_FOUND.create(seqId, Long.valueOf(referencedMail.getMailId()), referencedMail.getFolder());
-                    }
-                }
-            }
+            access.close(false);
+            access = MailAccess.getInstance(session, parentMsgRef.getAccountId());
+            access.connect();
+            retval = new HashMap<String, ReferencedMailPart>(len);
+            handleMultipleRefs(provider, session, parentMsgRef, contentIds, prepare4Transport, groupedSeqIDs, retval, access);
         } finally {
             if (null != access) {
                 access.close(true);
             }
         }
         return retval;
+    }
+
+    private static void handleMultipleRefs(final TransportProvider provider, final Session session, final MailPath parentMsgRef, final Set<String> contentIds, final boolean prepare4Transport, final Map<String, String> groupedSeqIDs, final Map<String, ReferencedMailPart> retval, MailAccess<?, ?> access) throws OXException {
+        final MailMessage referencedMail =
+            access.getMessageStorage().getMessage(parentMsgRef.getFolder(), parentMsgRef.getMailID(), false);
+        if (null == referencedMail) {
+            throw MailExceptionCode.REFERENCED_MAIL_NOT_FOUND.create(parentMsgRef.getMailID(), parentMsgRef.getFolder());
+        }
+        // Get attachments out of referenced mail
+        final Set<String> remaining = new HashSet<String>(groupedSeqIDs.keySet());
+        final MultipleMailPartHandler handler = new MultipleMailPartHandler(groupedSeqIDs.keySet(), false);
+        new MailMessageParser().parseMailMessage(referencedMail, handler);
+        for (final Map.Entry<String, MailPart> e : handler.getMailParts().entrySet()) {
+            final String seqId = e.getKey();
+            retval.put(seqId, provider.getNewReferencedPart(e.getValue(), session));
+            remaining.remove(seqId);
+        }
+        if (prepare4Transport && !remaining.isEmpty()) {
+            for (final String seqId : remaining) {
+                if (!contentIds.contains(seqId)) {
+                    throw MailExceptionCode.ATTACHMENT_NOT_FOUND.create(seqId, Long.valueOf(referencedMail.getMailId()), referencedMail.getFolder());
+                }
+            }
+        }
     }
 
     private static void processReferencedUploadFile(final TransportProvider provider, final ManagedFileManagement management, final String seqId, final IAttachmentHandler attachmentHandler) throws OXException {
