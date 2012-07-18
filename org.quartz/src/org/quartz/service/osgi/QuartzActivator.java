@@ -85,9 +85,12 @@ public final class QuartzActivator implements BundleActivator {
         log.info("Starting bundle: org.quartz");
         try {
             System.setProperty("org.terracotta.quartz.skipUpdateCheck", "true");
-            // Create & start scheduler
+            // Create scheduler
             final SchedulerFactory sf = new StdSchedulerFactory();
             final Scheduler scheduler = sf.getScheduler();
+            // Configure scheduler
+            
+            // Start scheduler
             scheduler.start();
             this.scheduler = scheduler;
             // Initialize appropriate service
