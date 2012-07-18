@@ -63,7 +63,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import javax.jms.JMSException;
 import javax.jms.ObjectMessage;
 import org.apache.commons.logging.Log;
-import org.quartz.CronTrigger;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
@@ -72,7 +71,6 @@ import org.quartz.JobExecutionException;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
-import org.quartz.SimpleTrigger;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.quartz.service.QuartzService;
@@ -98,10 +96,12 @@ public final class QuartzIndexingQueueListener implements MQQueueListener {
     static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(QuartzIndexingQueueListener.class));
 
     /**
-     *  Simple container class.
+     * Simple container class.
      */
     static final class JobResc {
+
         final JobDetail job;
+
         final Trigger trigger;
 
         protected JobResc(final JobDetail job, final Trigger trigger) {
@@ -141,8 +141,7 @@ public final class QuartzIndexingQueueListener implements MQQueueListener {
         jobExecutor = executor;
         THRESHOLD.set(maxConcurrentJobs);
         // The special job used for re-scheduling Quartz indexing jobs
-        final JobDetail job =
-            newJob(ReschedulerJob.class).withIdentity("rescheduler", GROUP).withDescription("The rescheduling job.").build();
+        final JobDetail job = newJob(ReschedulerJob.class).withIdentity("rescheduler", GROUP).withDescription("The rescheduling job.").build();
         // Periodic execution; forever for every minute
         final TriggerBuilder<Trigger> triggerBuilder = newTrigger().withIdentity("rescheduler", GROUP).forJob(job.getKey());
         triggerBuilder.startNow().withSchedule(simpleSchedule().repeatForever().withIntervalInSeconds(15));
@@ -307,20 +306,28 @@ public final class QuartzIndexingQueueListener implements MQQueueListener {
                 return;
             }
             final JobResc delayedJob = RESCHEDULE_JOBS.poll();
-            if (null == delayedJob) {
-                return;
-            }
-            try {
-                final Trigger trigger = delayedJob.trigger;
-                if (trigger instanceof CronTrigger) {
-                    // A Cron job
+            if (null != delayedJob) {
+                try {
+                    final Trigger trigger = delayedJob.trigger;
+
+                    /*-
+                     * 
+                    if (trigger instanceof CronTrigger) {
+                        // A Cron job
+                        scheduler.rescheduleJob(trigger.getKey(), trigger);
+                    } else if (trigger instanceof SimpleTrigger) {
+                        // Simple job
+                        scheduler.rescheduleJob(trigger.getKey(), trigger);
+                    } else {
+                        // Any other job
+                        scheduler.rescheduleJob(trigger.getKey(), trigger);
+                    }
+                     */
+
                     scheduler.rescheduleJob(trigger.getKey(), trigger);
-                } else if (trigger instanceof SimpleTrigger) {
-                    // Simple job
-                    scheduler.rescheduleJob(trigger.getKey(), trigger);
+                } catch (final SchedulerException e) {
+                    throw new JobExecutionException(e);
                 }
-            } catch (final SchedulerException e) {
-                throw new JobExecutionException(e);
             }
         }
 
