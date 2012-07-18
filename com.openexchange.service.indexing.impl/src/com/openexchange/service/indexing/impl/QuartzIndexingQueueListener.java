@@ -146,7 +146,7 @@ public final class QuartzIndexingQueueListener implements MQQueueListener {
         // The special job used for re-scheduling Quartz indexing jobs
         final JobDetail job = newJob(ReschedulerJob.class).withIdentity("rescheduler", GROUP).withDescription("The rescheduling job.").build();
         // Periodic execution; forever for every minute
-        final TriggerBuilder<Trigger> triggerBuilder = newTrigger().withIdentity("rescheduler", GROUP).forJob(job.getKey());
+        final TriggerBuilder<Trigger> triggerBuilder = newTrigger().withIdentity("rescheduler", GROUP).withDescription("The rescheduling trigger.").forJob(job.getKey());
         triggerBuilder.startNow().withSchedule(simpleSchedule().repeatForever().withIntervalInSeconds(15));
         // Schedule
         jobExecutor.getScheduler().scheduleJob(job, triggerBuilder.build());
@@ -247,7 +247,19 @@ public final class QuartzIndexingQueueListener implements MQQueueListener {
                 triggerBuilder.startAt(new Date(startTime));
             }
             tmp = properties.get(QuartzService.PROPERTY_REPEAT_COUNT);
-            if (null != tmp) {
+            if (null == tmp) {
+                /*
+                 * No repeat count... forever?
+                 */
+                tmp = properties.get(QuartzService.PROPERTY_REPEAT_INTERVAL);
+                if (null != tmp) {
+                    /*
+                     * Forever...
+                     */
+                    final long interval = longFrom(tmp);
+                    triggerBuilder.withSchedule(simpleSchedule().repeatForever().withIntervalInMilliseconds(interval));
+                }
+            } else {
                 final int repeatCount = intFrom(tmp);
                 tmp = properties.get(QuartzService.PROPERTY_REPEAT_INTERVAL);
                 if (null == tmp) {
@@ -261,15 +273,6 @@ public final class QuartzIndexingQueueListener implements MQQueueListener {
                      */
                     final long interval = longFrom(tmp);
                     triggerBuilder.withSchedule(simpleSchedule().withRepeatCount(repeatCount).withIntervalInMilliseconds(interval));
-                }
-            } else {
-                tmp = properties.get(QuartzService.PROPERTY_REPEAT_INTERVAL);
-                if (null != tmp) {
-                    /*
-                     * Forever...
-                     */
-                    final long interval = longFrom(tmp);
-                    triggerBuilder.withSchedule(simpleSchedule().repeatForever().withIntervalInMilliseconds(interval));
                 }
             }
         } else {
