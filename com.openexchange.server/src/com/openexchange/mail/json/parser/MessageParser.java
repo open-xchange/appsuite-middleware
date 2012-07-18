@@ -764,7 +764,7 @@ public final class MessageParser {
                         referencedMailPart = provider.getNewReferencedMail(referencedMail, session);
                     } else {
                         ReferencedMailPart tmp = groupedReferencedParts.get(seqId);
-                        if (tmp.containsContentId()) {
+                        if (null != tmp && tmp.containsContentId()) {
                             final String contentId = tmp.getContentId();
                             if (null != contentId && contentIds.contains('<' == contentId.charAt(0) ? contentId.substring(1, contentId.length()-1) : contentId)) {
                                 tmp = null;
