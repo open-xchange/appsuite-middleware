@@ -57,19 +57,25 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.jms.JMSException;
 import javax.jms.ObjectMessage;
 import org.apache.commons.logging.Log;
+import org.quartz.CronTrigger;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.quartz.JobKey;
+import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
+import org.quartz.SimpleTrigger;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.quartz.service.QuartzService;
+import com.openexchange.java.Java7ConcurrentLinkedQueue;
 import com.openexchange.log.LogFactory;
 import com.openexchange.mq.queue.MQQueueListener;
 import com.openexchange.service.indexing.IndexingJob;
@@ -85,7 +91,39 @@ public final class QuartzIndexingQueueListener implements MQQueueListener {
 
     private static final String GROUP = Constants.MAIL_JOB_SCHEDULER_GROUP_ID;
 
+    /**
+     * The logger
+     */
     static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(QuartzIndexingQueueListener.class));
+
+    /**
+     *  Simple container class.
+     */
+    static final class JobResc {
+        final JobDetail job;
+        final Trigger trigger;
+
+        protected JobResc(final JobDetail job, final Trigger trigger) {
+            super();
+            this.job = job;
+            this.trigger = trigger;
+        }
+    }
+
+    /**
+     * Tracks number of concurrently executed <tt>QuartzIndexingJob</tt>s.
+     */
+    static final AtomicLong EXECUTION_TRACKER = new AtomicLong();
+
+    /**
+     * The threshold.
+     */
+    static final long THRESHOLD = 100;
+
+    /**
+     * The queue used for re-scheduling jobs.
+     */
+    static final Queue<JobResc> RESCHEDULE_JOBS = new Java7ConcurrentLinkedQueue<JobResc>();
 
     private final AtomicLong counter;
 
@@ -93,11 +131,21 @@ public final class QuartzIndexingQueueListener implements MQQueueListener {
 
     /**
      * Initializes a new {@link QuartzIndexingQueueListener}.
+     * 
+     * @throws SchedulerException If initialization fails
      */
-    public QuartzIndexingQueueListener(final QuartzService executor) {
+    public QuartzIndexingQueueListener(final QuartzService executor) throws SchedulerException {
         super();
         counter = new AtomicLong();
         jobExecutor = executor;
+        // The special job used for re-scheduling Quartz indexing jobs
+        final JobDetail job =
+            newJob(ReschedulerJob.class).withIdentity("rescheduler", GROUP).withDescription("The rescheduling job.").build();
+        // Periodic execution; forever for every minute
+        final TriggerBuilder<Trigger> triggerBuilder = newTrigger().withIdentity("rescheduler", GROUP).forJob(job.getKey());
+        triggerBuilder.startNow().withSchedule(simpleSchedule().repeatForever().withIntervalInSeconds(15));
+        // Schedule
+        jobExecutor.getScheduler().scheduleJob(job, triggerBuilder.build());
     }
 
     @Override
@@ -124,11 +172,11 @@ public final class QuartzIndexingQueueListener implements MQQueueListener {
             if (null == jobKey) {
                 jobKey = "job" + sCount;
             }
-            final JobDetail job = newJob(WrapperJob.class).withIdentity(jobKey, GROUP).usingJobData(new JobDataMap(map)).build();
+            final JobDetail job = newJob(QuartzIndexingJob.class).withIdentity(jobKey, GROUP).usingJobData(new JobDataMap(map)).build();
             /*
              * Trigger the job
              */
-            final Trigger trigger = buildTrigger(indexingJob, sCount);
+            final Trigger trigger = buildTrigger(indexingJob, job.getKey(), sCount);
             /*
              * Tell quartz to schedule the job using our trigger
              */
@@ -156,11 +204,11 @@ public final class QuartzIndexingQueueListener implements MQQueueListener {
             if (null == jobKey) {
                 jobKey = "job" + sCount;
             }
-            final JobDetail job = newJob(WrapperJob.class).withIdentity(jobKey, GROUP).usingJobData(new JobDataMap(map)).build();
+            final JobDetail job = newJob(QuartzIndexingJob.class).withIdentity(jobKey, GROUP).usingJobData(new JobDataMap(map)).build();
             /*
              * Trigger the job to run now
              */
-            final Trigger trigger = buildTrigger(indexingJob, sCount);
+            final Trigger trigger = buildTrigger(indexingJob, job.getKey(), sCount);
             /*
              * Tell quartz to schedule the job using our trigger
              */
@@ -176,8 +224,11 @@ public final class QuartzIndexingQueueListener implements MQQueueListener {
         }
     }
 
-    private Trigger buildTrigger(final IndexingJob indexingJob, final String sCount) {
+    private Trigger buildTrigger(final IndexingJob indexingJob, final JobKey jobKey, final String sCount) {
         final TriggerBuilder<Trigger> triggerBuilder = newTrigger().withIdentity("trigger" + sCount, GROUP);
+        if (null != jobKey) {
+            triggerBuilder.forJob(jobKey);
+        }
         final Map<String, ?> properties = indexingJob.getProperties();
         final String cronDesc = (String) properties.get(QuartzService.PROPERTY_CRON_EXPRESSION);
         if (null == cronDesc) {
@@ -197,9 +248,9 @@ public final class QuartzIndexingQueueListener implements MQQueueListener {
                 tmp = properties.get(QuartzService.PROPERTY_REPEAT_INTERVAL);
                 if (null == tmp) {
                     /*
-                     * Forever...
+                     * With default interval (5 minutes)
                      */
-                    triggerBuilder.withSchedule(simpleSchedule().withRepeatCount(repeatCount).withIntervalInSeconds(30));
+                    triggerBuilder.withSchedule(simpleSchedule().withRepeatCount(repeatCount).withIntervalInMinutes(5));
                 } else {
                     /*
                      * Interval
@@ -210,6 +261,9 @@ public final class QuartzIndexingQueueListener implements MQQueueListener {
             } else {
                 tmp = properties.get(QuartzService.PROPERTY_REPEAT_INTERVAL);
                 if (null != tmp) {
+                    /*
+                     * Forever...
+                     */
                     final long interval = longFrom(tmp);
                     triggerBuilder.withSchedule(simpleSchedule().repeatForever().withIntervalInMilliseconds(interval));
                 }
@@ -231,12 +285,53 @@ public final class QuartzIndexingQueueListener implements MQQueueListener {
         return tmp instanceof Long ? ((Long) tmp).longValue() : Long.parseLong(tmp.toString().trim());
     }
 
+    static final class ReschedulerJob implements Job {
+
+        private final Scheduler scheduler;
+
+        /**
+         * Initializes a new {@link ReschedulerJob}.
+         */
+        public ReschedulerJob(final Scheduler scheduler) {
+            super();
+            this.scheduler = scheduler;
+        }
+
+        @Override
+        public void execute(final JobExecutionContext context) throws JobExecutionException {
+            final long current = EXECUTION_TRACKER.get();
+            if (current > THRESHOLD) {
+                return;
+            }
+            final JobResc delayedJob = RESCHEDULE_JOBS.poll();
+            if (null == delayedJob) {
+                return;
+            }
+            try {
+                final Trigger trigger = delayedJob.trigger;
+                if (trigger instanceof CronTrigger) {
+                    // A Cron job
+                    scheduler.rescheduleJob(trigger.getKey(), trigger);
+                } else if (trigger instanceof SimpleTrigger) {
+                    // Simple job
+                    scheduler.rescheduleJob(trigger.getKey(), trigger);
+                }
+            } catch (final SchedulerException e) {
+                throw new JobExecutionException(e);
+            }
+        }
+
+    }
+
     /**
      * A wrapper for an {@link IndexingJob} instance.
      */
-    public static final class WrapperJob implements Job {
+    static final class QuartzIndexingJob implements Job {
 
-        public WrapperJob() {
+        /**
+         * Initializes a new {@link QuartzIndexingJob}.
+         */
+        public QuartzIndexingJob() {
             super();
         }
 
@@ -248,6 +343,19 @@ public final class QuartzIndexingQueueListener implements MQQueueListener {
                 // Huh?
                 return;
             }
+            final long current = EXECUTION_TRACKER.incrementAndGet();
+            try {
+                if (current > THRESHOLD) {
+                    RESCHEDULE_JOBS.offer(new JobResc(context.getJobDetail(), context.getTrigger()));
+                } else {
+                    performJob(indexingJob);
+                }
+            } finally {
+                EXECUTION_TRACKER.decrementAndGet();
+            }
+        }
+
+        private void performJob(final IndexingJob indexingJob) throws JobExecutionException {
             boolean ran = false;
             indexingJob.beforeExecute();
             try {

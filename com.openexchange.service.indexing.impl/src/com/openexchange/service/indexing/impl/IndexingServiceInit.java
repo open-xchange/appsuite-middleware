@@ -54,6 +54,7 @@ import java.util.Map;
 import org.quartz.service.QuartzService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mq.MQConstants;
+import com.openexchange.mq.MQExceptionCodes;
 import com.openexchange.mq.MQService;
 import com.openexchange.mq.queue.MQQueueAsyncReceiver;
 import com.openexchange.mq.queue.MQQueueSender;
@@ -135,8 +136,12 @@ public final class IndexingServiceInit {
                 final IndexingQueueListener listener = new IndexingQueueListener(executor);
                 receiver = new IndexingQueueAsyncReceiver(listener);
             } else {
-                final QuartzIndexingQueueListener listener = new QuartzIndexingQueueListener(quartzService);
-                receiver = new IndexingQueueAsyncReceiver(listener);
+                try {
+                    final QuartzIndexingQueueListener listener = new QuartzIndexingQueueListener(quartzService);
+                    receiver = new IndexingQueueAsyncReceiver(listener);
+                } catch (final Exception e) {
+                    throw MQExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+                }
             }
         }
     }

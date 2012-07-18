@@ -88,8 +88,9 @@ public final class QuartzActivator implements BundleActivator {
             // Create scheduler
             final SchedulerFactory sf = new StdSchedulerFactory();
             final Scheduler scheduler = sf.getScheduler();
-            // Configure scheduler
-            
+            // TODO: Configure scheduler: new StdSchedulerFactory(properties);
+
+
             // Start scheduler
             scheduler.start();
             this.scheduler = scheduler;
