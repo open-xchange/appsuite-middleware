@@ -46,39 +46,24 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.nosql.cassandra.osgi;
+package org.xerial.snappy;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
-import org.xerial.snappy.SnappyServiceLookUp;
 
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.log.LogFactory;
-import com.openexchange.nosql.cassandra.CassandraServiceLookUp;
-import com.openexchange.nosql.cassandra.EmbeddedCassandraService;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- *
  */
-public final class CassandraActivator extends HousekeepingActivator {
-	
-	private static Log log = LogFactory.getLog(CassandraActivator.class);
-	
+public class SnappyActivator extends HousekeepingActivator {
+	private static Log log = LogFactory.getLog(SnappyActivator.class);
 	private static String snappyPathProp = "com.openexchange.nosql.cassandra.snappyjava.nativelibs";
-	
-	private EmbeddedCassandraService cassandra;
-
-	/**
-	 * Default Constructor 
-	 */
-	public CassandraActivator() {
-		super();
-	}
 
 	/*
 	 * (non-Javadoc)
@@ -86,7 +71,6 @@ public final class CassandraActivator extends HousekeepingActivator {
 	 */
 	@Override
 	protected Class<?>[] getNeededServices() {
-		
 		return new Class[]{ConfigurationService.class};
 	}
 
@@ -96,14 +80,11 @@ public final class CassandraActivator extends HousekeepingActivator {
 	 */
 	@Override
 	protected void startBundle() throws Exception {
-		log.info("starting bundle: com.openexchange.nosql.cassandra");
-		
-		//-------------- INIT SNAPPYJAVA ----------------//
-		
+		log.info("starting com.openexchange.nosql.cassandra.snappyjava bundle");
 		SnappyServiceLookUp.set(this);
 		
-		ConfigurationService configSnappy = SnappyServiceLookUp.getService(ConfigurationService.class);
-		System.setProperty("snappy.config", new File(configSnappy.getProperty("CONFIGPATH") + "/snappy.properties").getAbsolutePath().toString());
+		ConfigurationService config = SnappyServiceLookUp.getService(ConfigurationService.class);
+		System.setProperty("snappy.config", new File(config.getProperty("CONFIGPATH") + "/snappy.properties").getAbsolutePath().toString());
 		
 		Properties prop = new Properties();
 		String configUrl = System.getProperty("snappy.config");
@@ -113,7 +94,7 @@ public final class CassandraActivator extends HousekeepingActivator {
 		
     	String osName = System.getProperty("os.name");
     	String osArch = System.getProperty("os.arch");
-    	//String fileSeparator = System.getProperty("file.separator");
+    	String fileSeparator = System.getProperty("file.separator");
     	log.info(osName + " " + osArch);
     	
     	String postfix = null;
@@ -129,39 +110,5 @@ public final class CassandraActivator extends HousekeepingActivator {
 
 		String path = snappyNativePath + "/native/" + osName + "/" + osArch + "/libsnappyjava" + postfix;
     	System.load(path);
-		
-		//----------------- INIT CASSANDRA -------------//
-		
-		CassandraServiceLookUp.set(this);
-		
-		ConfigurationService config = CassandraServiceLookUp.getService(ConfigurationService.class);
-		
-		System.setProperty("cassandra.config", new File(config.getProperty("CONFIGPATH") + "/cassandra.yaml").toURI().toString());
-		
-		//start embedded cassandra node
-		cassandra = new EmbeddedCassandraService();
-		cassandra.init();
-		cassandra.start();
-		
-		registerService(EmbeddedCassandraService.class, cassandra);
-        openTrackers();
-        
-        log.info("Cassandra Service started successfully.");
-	}
-	
-	/*
-	 * (non-Javadoc)
-	 * @see com.openexchange.osgi.HousekeepingActivator#stopBundle()
-	 */
-	@Override
-	protected void stopBundle() throws Exception {
-		log.info("stopping bundle: com.openexchange.nosql.cassandra");
-		cassandra.stop();
-		cassandra = null;
-		
-		CassandraServiceLookUp.set(null);
-		cleanUp();
-		
-		log.info("stopped bundle: com.openexchange.nosql.cassandra");
 	}
 }

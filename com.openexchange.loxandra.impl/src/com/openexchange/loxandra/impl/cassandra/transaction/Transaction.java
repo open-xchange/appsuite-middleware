@@ -101,8 +101,6 @@ public class Transaction {
 	private static final CompositeSerializer cs = CompositeSerializer.get();
 	private static final StringSerializer ss = StringSerializer.get();
 	
-	private final TransactionManager txManager;
-	
 	private static final UUID STATUS_ROW = new UUID(Long.MAX_VALUE, Long.MAX_VALUE);
 	
 	/** sleep threshold in msec */
@@ -118,8 +116,6 @@ public class Transaction {
 		
 		keyspace = CassandraEAVContactFactoryServiceImpl.getKeyspace();
 		transactionTemplate = new ThriftColumnFamilyTemplate<UUID, Composite>(keyspace, CF_TRANSACTION_LOG, us, cs);
-		
-		txManager = CassandraEAVContactFactoryServiceImpl.getTransactionManager();
 	}
 	
 	/**
@@ -190,7 +186,7 @@ public class Transaction {
 		boolean lockAcquired = false;
 		int attemps = 0;
 		
-		while (!(lockAcquired = txManager.acquireLock(this)) && attemps <= attempsToAcquireLock)  {
+		while (!(lockAcquired = TransactionManager.getInstance().acquireLock(this)) && attemps <= attempsToAcquireLock)  {
 			attemps++;
 			try {
 				System.out.println("WAITING - Attemps: " + attemps);
@@ -211,7 +207,7 @@ public class Transaction {
 			executeOperations();
 			if (DO_CLEAN)
 				cleanupTransactionLog();
-			txManager.releaseLock(this);
+			TransactionManager.getInstance().releaseLock(this);
 		} catch (HectorException e) {
 			e.printStackTrace();
 		}
