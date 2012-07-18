@@ -95,19 +95,19 @@ public final class QuartzActivator implements BundleActivator {
                 		"# to create a Quartz Scheduler Instance, if a different\n" + 
                 		"# properties file is not explicitly specified.\n" + 
                 		"\n" + 
-                		"org.quartz.scheduler.instanceName: DefaultQuartzScheduler\n" + 
-                		"org.quartz.scheduler.rmi.export: false\n" + 
-                		"org.quartz.scheduler.rmi.proxy: false\n" + 
-                		"org.quartz.scheduler.wrapJobExecutionInUserTransaction: false\n" + 
+                		"org.quartz.scheduler.instanceName=OpenXchangeQuartzScheduler\n" + 
+                		"org.quartz.scheduler.rmi.export=false\n" + 
+                		"org.quartz.scheduler.rmi.proxy=false\n" + 
+                		"org.quartz.scheduler.wrapJobExecutionInUserTransaction=false\n" + 
                 		"\n" + 
-                		"org.quartz.threadPool.class: org.quartz.simpl.SimpleThreadPool\n" + 
-                		"org.quartz.threadPool.threadCount: 10\n" + 
-                		"org.quartz.threadPool.threadPriority: 5\n" + 
-                		"org.quartz.threadPool.threadsInheritContextClassLoaderOfInitializingThread: true\n" + 
+                		"org.quartz.threadPool.class=org.quartz.simpl.SimpleThreadPool\n" + 
+                		"org.quartz.threadPool.threadCount=10\n" + 
+                		"org.quartz.threadPool.threadPriority=5\n" + 
+                		"org.quartz.threadPool.threadsInheritContextClassLoaderOfInitializingThread=true\n" + 
                 		"\n" + 
-                		"org.quartz.jobStore.misfireThreshold: 60000\n" + 
+                		"org.quartz.jobStore.misfireThreshold=60000\n" + 
                 		"\n" + 
-                		"org.quartz.jobStore.class: org.quartz.simpl.RAMJobStore";
+                		"org.quartz.jobStore.class=org.quartz.simpl.RAMJobStore";
                 properties = new Properties();
                 properties.load(new StringReader(sProps));
             }
