@@ -8,5 +8,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.service.indexing"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.service.indexing.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.solr"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,org.quartz"/>
 </provider>
 </psf>
