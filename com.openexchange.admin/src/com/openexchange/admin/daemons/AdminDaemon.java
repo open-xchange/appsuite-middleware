@@ -131,6 +131,7 @@ public class AdminDaemon {
     public void registerBundleListener(final BundleContext context) {
         final BundleListener bl = new BundleListener() {
 
+            @Override
             public void bundleChanged(final BundleEvent event) {
                 if (event.getType() == BundleEvent.STARTED) {
                     bundlelist.add(event.getBundle());
