@@ -62,8 +62,8 @@ import com.openexchange.nosql.cassandra.EmbeddedCassandraService;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
+ * Activates an embedded Cassandra instance along with its dependencies (i.e. snappy-java)
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- *
  */
 public final class CassandraActivator extends HousekeepingActivator {
 	
