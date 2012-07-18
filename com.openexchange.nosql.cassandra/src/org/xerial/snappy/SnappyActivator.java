@@ -60,6 +60,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 
 /**
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @deprecated For OX use {@link com.openexchange.nosql.cassandra.osgi.CassandraActivator}
  */
 public class SnappyActivator extends HousekeepingActivator {
 	private static Log log = LogFactory.getLog(SnappyActivator.class);

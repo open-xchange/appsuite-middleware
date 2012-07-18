@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry exported="true" kind="lib" path="lib/antlr-3.2.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/apache-cassandra-1.1.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/apache-cassandra-1.1.0.jar" sourcepath="source/apache-cassandra-1.1.0-src.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/apache-cassandra-clientutil-1.1.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/apache-cassandra-thrift-1.1.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/avro-1.4.0-fixes.jar"/>

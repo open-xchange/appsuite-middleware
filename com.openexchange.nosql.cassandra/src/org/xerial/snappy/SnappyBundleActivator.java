@@ -58,7 +58,7 @@ import com.openexchange.log.LogFactory;
  * OSGi bundle entry point
  * 
  * @author Ioannis Chouklis
- * 
+ * @deprecated For OX use {@link com.openexchange.nosql.cassandra.osgi.CassandraActivator}
  */
 public class SnappyBundleActivator implements BundleActivator {
 	
