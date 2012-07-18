@@ -22,4 +22,4 @@ CREATE COLUMNFAMILY TransactionLog (KEY uuid PRIMARY KEY) with comparator = 'Com
 // Persons who exist within a specific context, CONTEXT is the UUID of the context
 //CREATE COLUMNFAMILY PersonContext (KEY uuid PRIMARY KEY);
 
-CREATE COLUMNFAMILY session (KEY varchar PRIMARY KEY) WITH comparator = varchar AND default_validation = BytesType;
+CREATE COLUMNFAMILY session (KEY varchar PRIMARY KEY) WITH comparator = varchar AND default_validation = BytesType AND gc_grace_seconds = 300;
