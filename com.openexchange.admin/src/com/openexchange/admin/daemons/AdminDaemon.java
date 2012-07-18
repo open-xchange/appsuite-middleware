@@ -54,6 +54,7 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import org.apache.commons.logging.Log;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -90,7 +91,7 @@ public class AdminDaemon {
      * Write changes to this list cannot happen at the same time as the BundleListener delivers events in order and not concurrently. So
      * there's no need to deal with concurrency here
      */
-    static ArrayList<Bundle> bundlelist = new ArrayList<Bundle>();
+    static List<Bundle> bundlelist = new CopyOnWriteArrayList<Bundle>();
 
     private static com.openexchange.admin.rmi.impl.OXUser oxuser_v2 = null;
 
@@ -130,6 +131,7 @@ public class AdminDaemon {
     public void registerBundleListener(final BundleContext context) {
         final BundleListener bl = new BundleListener() {
 
+            @Override
             public void bundleChanged(final BundleEvent event) {
                 if (event.getType() == BundleEvent.STARTED) {
                     bundlelist.add(event.getBundle());
@@ -210,7 +212,7 @@ public class AdminDaemon {
         return prop;
     }
 
-    public static final ArrayList<Bundle> getBundlelist() {
+    public static final List<Bundle> getBundlelist() {
         return bundlelist;
     }
 

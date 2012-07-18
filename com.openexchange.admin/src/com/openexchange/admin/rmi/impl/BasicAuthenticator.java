@@ -121,7 +121,7 @@ public class BasicAuthenticator extends OXCommonImpl {
         // only let other plugins authenticate, when we have the BundleContext
         // AND when
         if( this.context != null && doPluginAuth) {
-            final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
+            final java.util.List<Bundle> bundles = AdminDaemon.getBundlelist();
             for (final Bundle bundle : bundles) {
                 final String bundlename = bundle.getSymbolicName();
                 if (Bundle.ACTIVE == bundle.getState()) {

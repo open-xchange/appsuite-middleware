@@ -187,7 +187,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
 
         oxRes.change(ctx, res);
         
-        final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
+        final java.util.List<Bundle> bundles = AdminDaemon.getBundlelist();
         for (final Bundle bundle : bundles) {
             final String bundlename = bundle.getSymbolicName();
             if (Bundle.ACTIVE==bundle.getState()) {
@@ -275,7 +275,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
        res.setId(retval);
        final ArrayList<OXResourcePluginInterface> interfacelist = new ArrayList<OXResourcePluginInterface>();
 
-       final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
+       final java.util.List<Bundle> bundles = AdminDaemon.getBundlelist();
        for (final Bundle bundle : bundles) {
            final String bundlename = bundle.getSymbolicName();
            if (Bundle.ACTIVE==bundle.getState()) {
@@ -358,8 +358,8 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
         }
         final ArrayList<OXResourcePluginInterface> interfacelist = new ArrayList<OXResourcePluginInterface>();
 
-        final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
-        final ArrayList<Bundle> revbundles = new ArrayList<Bundle>();
+        final java.util.List<Bundle> bundles = AdminDaemon.getBundlelist();
+        final java.util.List<Bundle> revbundles = new ArrayList<Bundle>();
         for (int i = bundles.size() - 1; i >= 0; i--) {
             revbundles.add(bundles.get(i));
         }
@@ -423,7 +423,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
         
         Resource retres = oxRes.getData(ctx, res);
 
-        final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
+        final java.util.List<Bundle> bundles = AdminDaemon.getBundlelist();
         for (final Bundle bundle : bundles) {
             final String bundlename = bundle.getSymbolicName();
             if (Bundle.ACTIVE==bundle.getState()) {
@@ -497,7 +497,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
             retval.add(tmp);
         }        
             
-        final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
+        final java.util.List<Bundle> bundles = AdminDaemon.getBundlelist();
         for (final Bundle bundle : bundles) {
             final String bundlename = bundle.getSymbolicName();
             if (Bundle.ACTIVE==bundle.getState()) {
