@@ -448,7 +448,7 @@ public final class MessageParser {
                     final int len = attachmentArray.length();
                     if (len > 1) {
                         final Set<String> contentIds = extractContentIds(sContent);
-                        parseReferencedParts(provider, session, accountId, transportMail.getMsgref(), attachmentHandler, attachmentArray, contentIds);
+                        parseReferencedParts(provider, session, accountId, transportMail.getMsgref(), attachmentHandler, attachmentArray, contentIds, prepare4Transport);
                     }
                 } else {
                     final TextBodyMailPart part = provider.getNewTextBodyPart("");
@@ -668,13 +668,13 @@ public final class MessageParser {
 
     private static final String FILE_PREFIX = "file://";
 
-    private static void parseReferencedParts(final TransportProvider provider, final Session session, final int accountId, final MailPath transportMailMsgref, final IAttachmentHandler attachmentHandler, final JSONArray attachmentArray, final Set<String> contentIds) throws OXException, JSONException {
+    private static void parseReferencedParts(final TransportProvider provider, final Session session, final int accountId, final MailPath transportMailMsgref, final IAttachmentHandler attachmentHandler, final JSONArray attachmentArray, final Set<String> contentIds, final boolean prepare4Transport) throws OXException, JSONException {
         final int len = attachmentArray.length();
         /*
          * Group referenced parts by referenced mails' paths
          */
         final Map<String, ReferencedMailPart> groupedReferencedParts =
-            groupReferencedParts(provider, session, transportMailMsgref, attachmentArray, contentIds);
+            groupReferencedParts(provider, session, transportMailMsgref, attachmentArray, contentIds, prepare4Transport);
         /*
          * Iterate attachments array
          */
@@ -785,7 +785,7 @@ public final class MessageParser {
         }
     }
 
-    private static Map<String, ReferencedMailPart> groupReferencedParts(final TransportProvider provider, final Session session, final MailPath parentMsgRef, final JSONArray attachmentArray, final Set<String> contentIds) throws OXException, JSONException {
+    private static Map<String, ReferencedMailPart> groupReferencedParts(final TransportProvider provider, final Session session, final MailPath parentMsgRef, final JSONArray attachmentArray, final Set<String> contentIds, final boolean prepare4Transport) throws OXException, JSONException {
         if (null == parentMsgRef) {
             return Collections.emptyMap();
         }
@@ -844,7 +844,7 @@ public final class MessageParser {
                 }
                 remaining.remove(seqId);
             }
-            if (!remaining.isEmpty()) {
+            if (prepare4Transport && !remaining.isEmpty()) {
                 for (final String seqId : remaining) {
                     if (!contentIds.contains(seqId)) {
                         throw MailExceptionCode.ATTACHMENT_NOT_FOUND.create(seqId, Long.valueOf(referencedMail.getMailId()), referencedMail.getFolder());
