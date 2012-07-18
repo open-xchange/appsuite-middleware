@@ -216,6 +216,8 @@ public final class IndexingJobExecutor implements Callable<Void> {
                              * return null;
                              */
                             Thread.interrupted(); // clear interrupt status
+                        } finally {
+                            latch.countDown();
                         }
                     }
                 }
