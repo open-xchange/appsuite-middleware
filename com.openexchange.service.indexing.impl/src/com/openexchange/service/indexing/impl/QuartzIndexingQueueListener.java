@@ -58,6 +58,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.jms.JMSException;
 import javax.jms.ObjectMessage;
@@ -118,7 +119,7 @@ public final class QuartzIndexingQueueListener implements MQQueueListener {
     /**
      * The threshold.
      */
-    static final long THRESHOLD = 100;
+    static final AtomicInteger THRESHOLD = new AtomicInteger(-1);
 
     /**
      * The queue used for re-scheduling jobs.
@@ -134,10 +135,11 @@ public final class QuartzIndexingQueueListener implements MQQueueListener {
      * 
      * @throws SchedulerException If initialization fails
      */
-    public QuartzIndexingQueueListener(final QuartzService executor) throws SchedulerException {
+    public QuartzIndexingQueueListener(final int maxConcurrentJobs, final QuartzService executor) throws SchedulerException {
         super();
         counter = new AtomicLong();
         jobExecutor = executor;
+        THRESHOLD.set(maxConcurrentJobs);
         // The special job used for re-scheduling Quartz indexing jobs
         final JobDetail job =
             newJob(ReschedulerJob.class).withIdentity("rescheduler", GROUP).withDescription("The rescheduling job.").build();
@@ -300,7 +302,8 @@ public final class QuartzIndexingQueueListener implements MQQueueListener {
         @Override
         public void execute(final JobExecutionContext context) throws JobExecutionException {
             final long current = EXECUTION_TRACKER.get();
-            if (current > THRESHOLD) {
+            final int max = THRESHOLD.get();
+            if (max > 0 && current > max) {
                 return;
             }
             final JobResc delayedJob = RESCHEDULE_JOBS.poll();
@@ -345,7 +348,8 @@ public final class QuartzIndexingQueueListener implements MQQueueListener {
             }
             final long current = EXECUTION_TRACKER.incrementAndGet();
             try {
-                if (current > THRESHOLD) {
+                final int max = THRESHOLD.get();
+                if (max > 0 && current > max) {
                     RESCHEDULE_JOBS.offer(new JobResc(context.getJobDetail(), context.getTrigger()));
                 } else {
                     performJob(indexingJob);

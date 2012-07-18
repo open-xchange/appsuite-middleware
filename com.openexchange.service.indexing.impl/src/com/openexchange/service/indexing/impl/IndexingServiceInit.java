@@ -137,7 +137,7 @@ public final class IndexingServiceInit {
                 receiver = new IndexingQueueAsyncReceiver(listener);
             } else {
                 try {
-                    final QuartzIndexingQueueListener listener = new QuartzIndexingQueueListener(quartzService);
+                    final QuartzIndexingQueueListener listener = new QuartzIndexingQueueListener(maxConcurrentJobs, quartzService);
                     receiver = new IndexingQueueAsyncReceiver(listener);
                 } catch (final Exception e) {
                     throw MQExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
