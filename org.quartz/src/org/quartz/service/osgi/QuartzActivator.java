@@ -80,27 +80,27 @@ public final class QuartzActivator implements BundleActivator {
     }
 
     @Override
-    public void start(BundleContext context) throws Exception {
+    public void start(final BundleContext context) throws Exception {
         final Log log = LogFactory.getLog(QuartzActivator.class);
         log.info("Starting bundle: org.quartz");
         try {
             System.setProperty("org.terracotta.quartz.skipUpdateCheck", "true");
             // Create & start scheduler
-            SchedulerFactory sf = new StdSchedulerFactory();
-            Scheduler scheduler = sf.getScheduler();
+            final SchedulerFactory sf = new StdSchedulerFactory();
+            final Scheduler scheduler = sf.getScheduler();
             scheduler.start();
             this.scheduler = scheduler;
             // Initialize appropriate service
             quartzServiceRegistration = context.registerService(QuartzService.class, new QuartzServiceImpl(scheduler), null);
             log.info("Bundle successfully started: org.quartz");
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.error("Failed starting bundle: org.quartz", e);
             throw e;
         }
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
+    public void stop(final BundleContext context) throws Exception {
         final Log log = LogFactory.getLog(QuartzActivator.class);
         log.info("Stopping bundle: org.quartz");
         try {
@@ -115,7 +115,7 @@ public final class QuartzActivator implements BundleActivator {
                 this.quartzServiceRegistration = null;
             }
             log.info("Bundle successfully stopped: org.quartz");
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.error("Failed stopping bundle: org.quartz", e);
             throw e;
         }
