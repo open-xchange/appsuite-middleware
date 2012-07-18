@@ -115,7 +115,7 @@ public class OXLogin extends OXCommonImpl implements OXLoginInterface {
 
         User[] retusers = oxu.getData(ctx, new User[] { retval });
 
-        final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
+        final java.util.List<Bundle> bundles = AdminDaemon.getBundlelist();
         for (final Bundle bundle : bundles) {
             final String bundlename = bundle.getSymbolicName();
             if (Bundle.ACTIVE == bundle.getState()) {
