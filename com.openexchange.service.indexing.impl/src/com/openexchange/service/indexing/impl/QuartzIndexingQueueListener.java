@@ -349,9 +349,7 @@ public final class QuartzIndexingQueueListener implements MQQueueListener {
             final long current = EXECUTION_TRACKER.incrementAndGet();
             try {
                 final int max = THRESHOLD.get();
-                if (max > 0 && current > max) {
-                    RESCHEDULE_JOBS.offer(new JobResc(context.getJobDetail(), context.getTrigger()));
-                } else {
+                if (max <= 0 || current <= max || !RESCHEDULE_JOBS.offer(new JobResc(context.getJobDetail(), context.getTrigger()))) {
                     performJob(indexingJob);
                 }
             } finally {
