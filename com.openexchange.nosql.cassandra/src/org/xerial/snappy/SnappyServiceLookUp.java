@@ -46,90 +46,58 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.loxandra.impl.osgi;
+package org.xerial.snappy;
 
-import java.io.File;
+import java.util.concurrent.atomic.AtomicReference;
 
-import me.prettyprint.hector.testutils.EmbeddedServerHelper;
-
-import org.apache.cassandra.thrift.CassandraDaemon;
-import org.apache.commons.logging.Log;
-
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.log.LogFactory;
-import com.openexchange.loxandra.EAVContactFactoryService;
-import com.openexchange.loxandra.impl.cassandra.CassandraEAVContactFactoryServiceImpl;
-import com.openexchange.loxandra.impl.cassandra.transaction.TransactionManager;
-import com.openexchange.loxandra.impl.core.LoxandraServiceLookUp;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.server.ServiceLookup;
 
 /**
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- *
  */
-public final class LoxandraActivator extends HousekeepingActivator {
-	
-	private static Log log = LogFactory.getLog(LoxandraActivator.class);
-	
-	private EmbeddedServerHelper srv;
-
-	private CassandraDaemon cassandraDaemon;
+public final class SnappyServiceLookUp {
 
 	/**
-	 * Default Constructor 
+	 * Initializes a new {@link SnappyServiceLookUp}.
 	 */
-	public LoxandraActivator() {
+	private SnappyServiceLookUp() {
 		super();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
+	private static final AtomicReference<ServiceLookup> ref = new AtomicReference<ServiceLookup>();
+
+	/**
+	 * Gets the service look-up
+	 * 
+	 * @return The service look-up or <code>null</code>
 	 */
-	@Override
-	protected Class<?>[] getNeededServices() {
-		
-		return new Class[]{ConfigurationService.class};
+	public static ServiceLookup get() {
+		return ref.get();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see com.openexchange.osgi.DeferredActivator#startBundle()
+	/**
+	 * Gets the service of specified type
+	 * 
+	 * @param clazz
+	 *            The service's class
+	 * @return The service or <code>null</code> is absent
+	 * @throws IllegalStateException
+	 *             If an error occurs while returning the demanded service
 	 */
-	@Override
-	protected void startBundle() throws Exception {
-		log.info("starting bundle: com.openexchange.loxandra");
-		
-		LoxandraServiceLookUp.set(this);
-		
-		ConfigurationService config = LoxandraServiceLookUp.getService(ConfigurationService.class);
-		
-		System.setProperty("loxandra.config", new File(config.getProperty("CONFIGPATH") + "/loxandra.properties").getAbsolutePath().toString());
-		
-		// register eavcontactservice
-    	registerService(EAVContactFactoryService.class, new CassandraEAVContactFactoryServiceImpl());
-    	
-    	//must be registered AFTER EAVContactFactoryService
-    	TransactionManager txInstance = TransactionManager.getInstance();
-    	txInstance.checkAndReplay();
-    	
-    	registerService(TransactionManager.class, txInstance); 
-        
-    	openTrackers();
-        
-        log.info("Loxandra Service started successfully.");
-        
+	public static <S extends Object> S getService(final Class<? extends S> clazz) {
+		final ServiceLookup serviceLookup = ref.get();
+		return null == serviceLookup ? null : serviceLookup.getService(clazz);
 	}
-	
-	/*
-	 * (non-Javadoc)
-	 * @see com.openexchange.osgi.HousekeepingActivator#stopBundle()
+
+	/**
+	 * Sets the service look-up
+	 * 
+	 * @param serviceLookup
+	 *            The service look-up or <code>null</code>
 	 */
-	@Override
-	protected void stopBundle() throws Exception {
-		log.info("stoping bundle: com.openexchange.loxandra");
-		
-		LoxandraServiceLookUp.set(null);
-		cleanUp();
+	public static void set(final ServiceLookup serviceLookup) {
+		ref.set(serviceLookup);
 	}
 }

@@ -46,8 +46,7 @@ Import-Package: com.openexchange.config,
  org.apache.commons.lang.time,
  org.apache.commons.logging,
  org.apache.log4j,
- org.osgi.framework,
- org.xerial.snappy
+ org.osgi.framework
 Export-Package: antlr,
  antlr.ASdebug,
  antlr.actions.cpp,
