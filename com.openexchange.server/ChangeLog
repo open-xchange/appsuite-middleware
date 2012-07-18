@@ -1,3 +1,7 @@
+* 2012-07-18 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22582: Proper "filename" parameter in "Content-Disposition" header
+
 * 2012-07-17 - thorben.betten@open-xchange.com
 
  - Fix for bug 22548: Handle special "No content" I/O error thrown by JavaMail if IMAP session is in an inconsistent state
