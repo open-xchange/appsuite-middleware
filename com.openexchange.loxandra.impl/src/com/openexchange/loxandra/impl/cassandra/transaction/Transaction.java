@@ -428,6 +428,7 @@ public class Transaction {
 	
 	/**
 	 * Rollback the Transaction
+	 * @throws UnsupportedOperationException
 	 */
 	public void rollback() {
 		throw new UnsupportedOperationException();

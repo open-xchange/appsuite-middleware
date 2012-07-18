@@ -50,9 +50,6 @@ package com.openexchange.loxandra.impl.osgi;
 
 import java.io.File;
 
-import me.prettyprint.hector.testutils.EmbeddedServerHelper;
-
-import org.apache.cassandra.thrift.CassandraDaemon;
 import org.apache.commons.logging.Log;
 
 import com.openexchange.config.ConfigurationService;
@@ -71,10 +68,6 @@ public final class LoxandraActivator extends HousekeepingActivator {
 	
 	private static Log log = LogFactory.getLog(LoxandraActivator.class);
 	
-	private EmbeddedServerHelper srv;
-
-	private CassandraDaemon cassandraDaemon;
-
 	/**
 	 * Default Constructor 
 	 */
@@ -106,13 +99,14 @@ public final class LoxandraActivator extends HousekeepingActivator {
 		
 		System.setProperty("loxandra.config", new File(config.getProperty("CONFIGPATH") + "/loxandra.properties").getAbsolutePath().toString());
 		
-		// register eavcontactservice
-    	registerService(EAVContactFactoryService.class, new CassandraEAVContactFactoryServiceImpl());
+		// Initialize and register the EAVContactService
+		EAVContactFactoryService eavService = new CassandraEAVContactFactoryServiceImpl();
+		registerService(EAVContactFactoryService.class, eavService);
     	
-    	//must be registered AFTER EAVContactFactoryService
+    	// The EAVContactFactoryService must be initialized BEFORE the TransactionManager, 
+    	// since the later one uses the EAVContactFactoryService to get access to Cassandra.
     	TransactionManager txInstance = TransactionManager.getInstance();
     	txInstance.checkAndReplay();
-    	
     	registerService(TransactionManager.class, txInstance); 
         
     	openTrackers();

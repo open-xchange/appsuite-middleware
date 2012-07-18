@@ -96,7 +96,7 @@ public class TransactionManager {
 	
 	private static String CF_TRANSACTION_LOG = "TransactionLog";
 	
-	private static Keyspace keyspace;
+	private static final Keyspace keyspace = CassandraEAVContactFactoryServiceImpl.getKeyspace();
 	
 	private static final UUID LOCK_ROW = new UUID(0,0);
 	private static final UUID STATUS_ROW = new UUID(Long.MAX_VALUE, Long.MAX_VALUE);
@@ -105,7 +105,8 @@ public class TransactionManager {
 	private static final CompositeSerializer cs = CompositeSerializer.get();
 	private static final ByteBufferSerializer bbs = ByteBufferSerializer.get();
 	
-	/** column's TTL in seconds */
+	/** Locked column's TTL in seconds. A lock shouldn't be acquired more than 10 seconds,
+	 * meaning that an operation at that particular column shouldn't exceed this time limit. */
 	private static final int columnTTL = 10;
 	
 	private static TransactionManager instance;
@@ -118,10 +119,9 @@ public class TransactionManager {
 	}
 	
 	/**
-	 * Check if there are uncommited changes into the commitlog and if true, then replay
+	 * Check if there are uncommited changes into the 'TransactionLog' CF and if true, then replay
 	 */
 	public void checkAndReplay() {
-		keyspace = CassandraEAVContactFactoryServiceImpl.getKeyspace();
 		
 		long timeStart = System.currentTimeMillis();
 		
@@ -217,7 +217,7 @@ public class TransactionManager {
 					while(it.hasNext()) {
 						Composite c = it.next();
 						String status = res.getString(c);
-						if (status.equals(OperationState.SUCCEEDED.toString())) {
+						if (status.equals(OperationState.PENDING.toString())) {
 							String data = res.getString(it.next());
 							System.out.println("Data pending: " + data);
 							try {
