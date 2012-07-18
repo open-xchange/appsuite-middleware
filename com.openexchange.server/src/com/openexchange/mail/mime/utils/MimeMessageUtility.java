@@ -178,7 +178,7 @@ public final class MimeMessageUtility {
      * @return <code>true</code> to retry; otherwise <code>false</code>
      */
     public static boolean shouldRetry(final OXException e) {
-        if (MailExceptionCode.MAIL_NOT_FOUND.equals(e)) {
+        if (MailExceptionCode.MAIL_NOT_FOUND.equals(e) || MimeMailExceptionCode.FOLDER_CLOSED.equals(e)) {
             return true;
         }
         if (MailExceptionCode.IO_ERROR.equals(e)) {
