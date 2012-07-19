@@ -236,7 +236,7 @@ public class AdminDaemon {
      * @return <code>true</code> if specified bundle is <b>not</b> a fragment bundle <small><b>AND</b></small> its state is <code>ACTIVE</code>; else <code>false</code>
      */
     public static boolean isNoFragmentAndActive(final Bundle bundle) {
-        return (null == bundle.getHeaders().get(Constants.FRAGMENT_HOST) && (bundle.getState() == Bundle.ACTIVE));
+        return (null == bundle.getHeaders().get(Constants.FRAGMENT_HOST) && (Bundle.ACTIVE == bundle.getState()));
     }
 
     /**
@@ -246,7 +246,7 @@ public class AdminDaemon {
      * 
      * @param context
      */
-    public void getCurrentBundleStatus(BundleContext context) {
+    public void getCurrentBundleStatus(final BundleContext context) {
         for (final Bundle bundle : context.getBundles()) {
             if (checkSimple()) {
                 if (isNoFragmentAndActive(bundle)) {
