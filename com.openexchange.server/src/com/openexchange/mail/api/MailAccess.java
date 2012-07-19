@@ -338,7 +338,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
             setParam = (null == tmp || toBool(tmp));
         }
         if (setParam) {
-            session.setParameter(name, "false");
+            session.setParameter(name, Boolean.FALSE);
         }
         try {
             return getInstance(session, accountId);
