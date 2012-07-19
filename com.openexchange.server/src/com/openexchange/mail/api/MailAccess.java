@@ -305,7 +305,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
          * Occupy free slot
          */
         final Object sLookup = session.getParameter("com.openexchange.mail.lookupMailAccessCache");
-        if (null == sLookup || Boolean.parseBoolean(sLookup.toString())) {
+        if (null == sLookup || toBool(sLookup)) {
             final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = getMailAccessCache().removeMailAccess(session, accountId);
             if (mailAccess != null) {
                 return mailAccess;
@@ -313,6 +313,30 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
         }
         final MailProvider mailProvider = MailProviderRegistry.getMailProviderBySession(session, accountId);
         return mailProvider.createNewMailAccess(session, accountId).setProvider(mailProvider);
+    }
+
+    private static boolean toBool(final Object obj) {
+        if (obj instanceof Boolean) {
+            return ((Boolean) obj).booleanValue();
+        }
+        return Boolean.parseBoolean(obj.toString().trim());
+    }
+
+    /**
+     * Gets a new, un-cached {@link MailAccess} instance that is initially not connected. 
+     * 
+     * @param session The associated session
+     * @param accountId The account identifier
+     * @return The new, un-cached {@link MailAccess} instance
+     * @throws OXException If a new, un-cached {@link MailAccess} instance cannot be returned
+     */
+    public static final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getNewInstance(final Session session, final int accountId) throws OXException {
+        session.setParameter("com.openexchange.mail.lookupMailAccessCache", "false");
+        try {
+            return getInstance(session, accountId);
+        } finally {
+            session.setParameter("com.openexchange.mail.lookupMailAccessCache", null);
+        }
     }
 
     /**
