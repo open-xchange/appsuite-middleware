@@ -367,7 +367,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
         // A new instance, freshly initialized
         final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> newAccess = MailAccess.getNewInstance(session, accountId);
         newAccess.connect();
-        return mailAccess;
+        return newAccess;
     }
 
     /**
