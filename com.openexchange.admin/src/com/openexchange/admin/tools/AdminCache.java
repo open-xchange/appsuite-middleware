@@ -52,9 +52,8 @@ package com.openexchange.admin.tools;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -82,13 +81,14 @@ import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.PasswordMechObject;
-import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.DatabaseLockedException;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolDBPool;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterface;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.log.LogFactory;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -292,23 +292,7 @@ public class AdminCache {
     private Properties loadAccessCombinations() {
         // Load properties from file , if does not exists use fallback
         // properties!
-        final String access_prop_file = this.prop.getProp("ACCESS_COMBINATIONS_FILE", "/opt/open-xchange/etc/admindaemon/ModuleAccessDefinitions.properties");
-
-        Properties access_props = new Properties();
-
-        try {
-            // Load all defined combinations from file
-            access_props.load(new FileInputStream(access_prop_file));
-        } catch (FileNotFoundException e) {
-            log.error("Access combinations file \"" + access_prop_file + "\" could not be found!!!", e);
-            // If no combinations were found, init defaults
-            access_props = getFallbackAccessCombinations();
-        } catch (IOException e) {
-            log.error("IO Error occured while processing access combinations file \"" + access_prop_file + "\"");
-            // If no combinations were found, init defaults
-            access_props = getFallbackAccessCombinations();
-        }
-        return access_props;
+        return AdminServiceRegistry.getInstance().getService(ConfigurationService.class).getFile("ModuleAccessDefinitions.properties");
     }
 
     private Properties getFallbackAccessCombinations() {
@@ -620,26 +604,13 @@ public class AdminCache {
     }
 
     private void readMasterCredentials() throws OXGenericException {
-        // TODO Reading the property 
-        final String masterfile = this.prop.getProp("MASTER_AUTH_FILE", "/opt/open-xchange/etc/mpasswd");
-        final File tmp = new File(masterfile);
-        if (!tmp.exists()) {
-            throw new OXGenericException("Fatal! Master auth file does not exists: " + masterfile);
-        }
-        if (!tmp.canRead()) {
-            throw new OXGenericException("Cannot read master auth file " + masterfile + "!");
-        }
-        final BufferedReader bf;
-        try {
-            bf = new BufferedReader(new FileReader(tmp));
-        } catch (FileNotFoundException e) {
-            throw new OXGenericException("File with master credentials ca not be read: " + masterfile, e);
-        }
+        final ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
+        final BufferedReader bf = new BufferedReader(new StringReader(service.getText("mpasswd")));
         try {
             String line = null;
             while ((line = bf.readLine()) != null) {
                 if (!line.startsWith("#")) {
-                    if (line.indexOf(":") != -1) {
+                    if (line.indexOf(':') >= 0) {
                         // ok seems to be a line with user:pass entry
                         final String[] user_pass_combination = line.split(":");
                         if (user_pass_combination.length > 0) {
@@ -650,7 +621,7 @@ public class AdminCache {
                 }
             }
         } catch (IOException e) {
-            throw new OXGenericException("Error processing master auth file: " + masterfile, e);
+            throw new OXGenericException("Error processing master auth file: mpasswd", e);
         } finally {
             try {
                 bf.close();

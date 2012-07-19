@@ -50,10 +50,6 @@
 package com.openexchange.admin.rmi.impl;
 
 import static com.openexchange.java.Autoboxing.i;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.rmi.RemoteException;
 import java.security.NoSuchAlgorithmException;
@@ -62,7 +58,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import javax.mail.internet.IDNA;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -558,6 +553,8 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         final ArrayList<OXUserPluginInterface> interfacelist = new ArrayList<OXUserPluginInterface>();
 
         // homedirectory
+        /*-
+         * 
         final String homedir = this.prop.getUserProp(AdminProperties.User.HOME_DIR_ROOT, "/home") + "/" + usr.getName();
         if (this.prop.getUserProp(AdminProperties.User.CREATE_HOMEDIRECTORY, false) && !tool.isContextAdmin(ctx, usr.getId().intValue())) {
             if (!new File(homedir).mkdir()) {
@@ -583,6 +580,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 log.error("Unable to chown homedirectory: " + homedir, e);
             }
         }
+        */
 
         final java.util.List<Bundle> bundles = AdminDaemon.getBundlelist();
         for (final Bundle bundle : bundles) {
@@ -753,6 +751,8 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
         }
 
+        /*-
+         * 
         if (this.prop.getUserProp(AdminProperties.User.CREATE_HOMEDIRECTORY, false)) {
             for(final User usr : users) {
                 // homedirectory
@@ -766,6 +766,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 }
             }
         }
+        */
 
         oxu.delete(ctx, users);
 
