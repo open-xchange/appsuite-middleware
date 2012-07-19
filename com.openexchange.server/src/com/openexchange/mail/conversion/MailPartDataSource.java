@@ -92,9 +92,7 @@ public abstract class MailPartDataSource implements DataSource {
         } catch (final OXException e) {
             if ((null != mailAccess) && shouldRetry(e)) {
                 // Re-connect
-                mailAccess.close(false);
-                mailAccess = MailAccess.getInstance(session, accountId);
-                mailAccess.connect();
+                mailAccess = MailAccess.reconnect(mailAccess);
                 return loadPart(fullname, mailId, sequenceId, mailAccess);
             }
             throw e;

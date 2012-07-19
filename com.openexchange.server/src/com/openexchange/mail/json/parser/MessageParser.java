@@ -826,9 +826,7 @@ public final class MessageParser {
             if (null == access || !shouldRetry(oe)) {
                 throw oe;
             }
-            access.close(false);
-            access = MailAccess.getInstance(session, parentMsgRef.getAccountId());
-            access.connect();
+            access = MailAccess.reconnect(access);
             retval = new HashMap<String, ReferencedMailPart>(len);
             handleMultipleRefs(provider, session, parentMsgRef, contentIds, prepare4Transport, groupedSeqIDs, retval, access);
         } finally {

@@ -120,9 +120,7 @@ public final class InlineImageDataSource implements ImageDataSource {
         } catch (final OXException e) {
             if ((null != mailAccess) && shouldRetry(e)) {
                 // Re-connect
-                mailAccess.close(false);
-                mailAccess = MailAccess.getInstance(session, accountId);
-                mailAccess.connect();
+                mailAccess = MailAccess.reconnect(mailAccess);
                 return loadImagePart(fullname, mailId, cid, mailAccess);
             }
             throw e;
