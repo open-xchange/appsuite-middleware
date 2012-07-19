@@ -3,6 +3,7 @@ Name:           open-xchange-mobile-config
 BuildArch: 	noarch
 #!BuildIgnore: post-build-checks
 BuildRequires:  ant
+BuildRequires:  ant-nodeps
 BuildRequires:  java-devel >= 1.6.0
 # TODO: version not hardcoded in spec file
 Version:	@OXVERSION@
