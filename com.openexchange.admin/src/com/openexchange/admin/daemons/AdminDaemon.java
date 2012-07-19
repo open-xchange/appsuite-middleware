@@ -230,13 +230,23 @@ public class AdminDaemon {
     }
 
     /**
+     * Checks if specified bundle is <b>not</b> a fragment bundle.
+     * 
+     * @param bundle The bundle to check
+     * @return <code>true</code> if specified bundle is <b>not</b> a fragment bundle; else <code>false</code>
+     */
+    public static boolean isNoFragment(final Bundle bundle) {
+        return (null == bundle.getHeaders().get(Constants.FRAGMENT_HOST));
+    }
+
+    /**
      * Checks if specified bundle is <b>not</b> a fragment bundle <small><b>AND</b></small> its state is <code>ACTIVE</code>.
      * 
      * @param bundle The bundle to check
      * @return <code>true</code> if specified bundle is <b>not</b> a fragment bundle <small><b>AND</b></small> its state is <code>ACTIVE</code>; else <code>false</code>
      */
     public static boolean isNoFragmentAndActive(final Bundle bundle) {
-        return (null == bundle.getHeaders().get(Constants.FRAGMENT_HOST) && (Bundle.ACTIVE == bundle.getState()));
+        return (isNoFragment(bundle) && (Bundle.ACTIVE == bundle.getState()));
     }
 
     /**
@@ -280,7 +290,7 @@ public class AdminDaemon {
 
             @Override
             public void bundleChanged(final BundleEvent event) {
-                if (event.getType() == BundleEvent.STARTED && (checkSimple() ? isNoFragmentAndActive(event.getBundle()) : isAllowdBundle(event.getBundle()))) {
+                if (event.getType() == BundleEvent.STARTED && (checkSimple() ? isNoFragment(event.getBundle()) : isAllowdBundle(event.getBundle()))) {
                     bundlelist.add(event.getBundle());
                 } else if (event.getType() == BundleEvent.STOPPED) {
                     bundlelist.remove(event.getBundle());
