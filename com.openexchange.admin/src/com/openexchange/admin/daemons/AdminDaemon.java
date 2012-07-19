@@ -219,6 +219,27 @@ public class AdminDaemon {
     private static OXTaskMgmtImpl oxtaskmgmt = null;
 
     /**
+     * Checks if a simple check shall be performed in order to determine if a bundle is needed for admin to work:
+     * <p>
+     * Bundle is <b>not</b> a fragment bundle <small><b>AND</b></small> its state is <code>ACTIVE</code>.
+     * 
+     * @return <code>true</code> if a simple check is sufficient; otherwise <code>false</code>
+     */
+    static boolean checkSimple() {
+        return true;
+    }
+
+    /**
+     * Checks if specified bundle is <b>not</b> a fragment bundle <small><b>AND</b></small> its state is <code>ACTIVE</code>.
+     * 
+     * @param bundle The bundle to check
+     * @return <code>true</code> if specified bundle is <b>not</b> a fragment bundle <small><b>AND</b></small> its state is <code>ACTIVE</code>; else <code>false</code>
+     */
+    public static boolean isNoFragmentAndActive(final Bundle bundle) {
+        return (null == bundle.getHeaders().get(Constants.FRAGMENT_HOST) && (bundle.getState() == Bundle.ACTIVE));
+    }
+
+    /**
      * This method is used for initialization of the list of current running bundles. The problem is that the listener itself will not get
      * any events before this bundle is started, so if any bundles are started beforehand you won't notice this here. The consequence is
      * that we have to build an initial list on startup
@@ -227,18 +248,27 @@ public class AdminDaemon {
      */
     public void getCurrentBundleStatus(BundleContext context) {
         for (final Bundle bundle : context.getBundles()) {
-            if (bundle.getState() == Bundle.ACTIVE) {
-                if (isAllowdBundle(bundle)) {
+            if (checkSimple()) {
+                if (isNoFragmentAndActive(bundle)) {
                     bundlelist.add(bundle);
                     if (LOG.isInfoEnabled()) {
                         LOG.info(bundle.getSymbolicName() + " already started before admin.");
                     }
                 }
-            } else if (bundle.getState() == Bundle.RESOLVED && null != bundle.getHeaders().get(Constants.FRAGMENT_HOST)) {
-                if (isAllowdBundle(bundle)) {
-                    bundlelist.add(bundle);
-                    if (LOG.isInfoEnabled()) {
-                        LOG.info("fragment " + bundle.getSymbolicName() + " already started before admin.");
+            } else {
+                if (bundle.getState() == Bundle.ACTIVE) {
+                    if (isAllowdBundle(bundle)) {
+                        bundlelist.add(bundle);
+                        if (LOG.isInfoEnabled()) {
+                            LOG.info(bundle.getSymbolicName() + " already started before admin.");
+                        }
+                    }
+                } else if (bundle.getState() == Bundle.RESOLVED && null != bundle.getHeaders().get(Constants.FRAGMENT_HOST)) {
+                    if (isAllowdBundle(bundle)) {
+                        bundlelist.add(bundle);
+                        if (LOG.isInfoEnabled()) {
+                            LOG.info("fragment " + bundle.getSymbolicName() + " already started before admin.");
+                        }
                     }
                 }
             }
@@ -250,7 +280,7 @@ public class AdminDaemon {
 
             @Override
             public void bundleChanged(final BundleEvent event) {
-                if (event.getType() == BundleEvent.STARTED && isAllowdBundle(event.getBundle())) {
+                if (event.getType() == BundleEvent.STARTED && (checkSimple() ? isNoFragmentAndActive(event.getBundle()) : isAllowdBundle(event.getBundle()))) {
                     bundlelist.add(event.getBundle());
                 } else if (event.getType() == BundleEvent.STOPPED) {
                     bundlelist.remove(event.getBundle());
