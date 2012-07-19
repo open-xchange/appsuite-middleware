@@ -170,7 +170,7 @@ public final class MyServletRequest  {
         final String request_src_hostname = http_request.getServerName();
 
         if(action.equalsIgnoreCase(ACTION_GET_CONFIGURED_METHOD)){
-            // return configur�ed upsell method
+            // return configur\ufffded upsell method
             retval = actionGetUpsellMethod(jsonObject);
         }else if(action.equalsIgnoreCase(ACTION_GET_STATIC_REDIRECT_URL_METHOD)){
             // return static redirect URL containing all needed parameters
