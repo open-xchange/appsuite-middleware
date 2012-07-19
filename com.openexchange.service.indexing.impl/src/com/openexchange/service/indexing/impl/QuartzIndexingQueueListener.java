@@ -75,6 +75,7 @@ import org.quartz.SchedulerException;
 import org.quartz.SimpleTrigger;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
+import org.quartz.TriggerKey;
 import org.quartz.service.QuartzService;
 import com.openexchange.java.Java7ConcurrentLinkedQueue;
 import com.openexchange.log.LogFactory;
@@ -98,10 +99,12 @@ public final class QuartzIndexingQueueListener implements MQQueueListener {
     static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(QuartzIndexingQueueListener.class));
 
     /**
-     *  Simple container class.
+     * Simple container class.
      */
     static final class JobResc {
+
         final JobDetail job;
+
         final Trigger trigger;
 
         protected JobResc(final JobDetail job, final Trigger trigger) {
@@ -141,10 +144,9 @@ public final class QuartzIndexingQueueListener implements MQQueueListener {
         jobExecutor = executor;
         THRESHOLD.set(maxConcurrentJobs);
         // The special job used for re-scheduling Quartz indexing jobs
-        final JobDetail job =
-            newJob(ReschedulerJob.class).withIdentity("rescheduler", GROUP).withDescription("The rescheduling job.").build();
+        final JobDetail job = newJob(ReschedulerJob.class).withIdentity("rescheduler", GROUP).withDescription("The rescheduling job.").build();
         // Periodic execution; forever for every minute
-        final TriggerBuilder<Trigger> triggerBuilder = newTrigger().withIdentity("rescheduler", GROUP).forJob(job.getKey());
+        final TriggerBuilder<Trigger> triggerBuilder = newTrigger().withIdentity("rescheduler", GROUP).withDescription("The rescheduling trigger.").forJob(job.getKey());
         triggerBuilder.startNow().withSchedule(simpleSchedule().repeatForever().withIntervalInSeconds(15));
         // Schedule
         jobExecutor.getScheduler().scheduleJob(job, triggerBuilder.build());
@@ -245,7 +247,19 @@ public final class QuartzIndexingQueueListener implements MQQueueListener {
                 triggerBuilder.startAt(new Date(startTime));
             }
             tmp = properties.get(QuartzService.PROPERTY_REPEAT_COUNT);
-            if (null != tmp) {
+            if (null == tmp) {
+                /*
+                 * No repeat count... forever?
+                 */
+                tmp = properties.get(QuartzService.PROPERTY_REPEAT_INTERVAL);
+                if (null != tmp) {
+                    /*
+                     * Forever...
+                     */
+                    final long interval = longFrom(tmp);
+                    triggerBuilder.withSchedule(simpleSchedule().repeatForever().withIntervalInMilliseconds(interval));
+                }
+            } else {
                 final int repeatCount = intFrom(tmp);
                 tmp = properties.get(QuartzService.PROPERTY_REPEAT_INTERVAL);
                 if (null == tmp) {
@@ -259,15 +273,6 @@ public final class QuartzIndexingQueueListener implements MQQueueListener {
                      */
                     final long interval = longFrom(tmp);
                     triggerBuilder.withSchedule(simpleSchedule().withRepeatCount(repeatCount).withIntervalInMilliseconds(interval));
-                }
-            } else {
-                tmp = properties.get(QuartzService.PROPERTY_REPEAT_INTERVAL);
-                if (null != tmp) {
-                    /*
-                     * Forever...
-                     */
-                    final long interval = longFrom(tmp);
-                    triggerBuilder.withSchedule(simpleSchedule().repeatForever().withIntervalInMilliseconds(interval));
                 }
             }
         } else {
@@ -307,20 +312,28 @@ public final class QuartzIndexingQueueListener implements MQQueueListener {
                 return;
             }
             final JobResc delayedJob = RESCHEDULE_JOBS.poll();
-            if (null == delayedJob) {
-                return;
-            }
-            try {
-                final Trigger trigger = delayedJob.trigger;
-                if (trigger instanceof CronTrigger) {
-                    // A Cron job
+            if (null != delayedJob) {
+                try {
+                    final Trigger trigger = delayedJob.trigger;
+
+                    /*-
+                     * 
+                    if (trigger instanceof CronTrigger) {
+                        // A Cron job
+                        scheduler.rescheduleJob(trigger.getKey(), trigger);
+                    } else if (trigger instanceof SimpleTrigger) {
+                        // Simple job
+                        scheduler.rescheduleJob(trigger.getKey(), trigger);
+                    } else {
+                        // Any other job
+                        scheduler.rescheduleJob(trigger.getKey(), trigger);
+                    }
+                     */
+
                     scheduler.rescheduleJob(trigger.getKey(), trigger);
-                } else if (trigger instanceof SimpleTrigger) {
-                    // Simple job
-                    scheduler.rescheduleJob(trigger.getKey(), trigger);
+                } catch (final SchedulerException e) {
+                    throw new JobExecutionException(e);
                 }
-            } catch (final SchedulerException e) {
-                throw new JobExecutionException(e);
             }
         }
 
@@ -349,13 +362,57 @@ public final class QuartzIndexingQueueListener implements MQQueueListener {
             final long current = EXECUTION_TRACKER.incrementAndGet();
             try {
                 final int max = THRESHOLD.get();
-                if (max > 0 && current > max) {
-                    RESCHEDULE_JOBS.offer(new JobResc(context.getJobDetail(), context.getTrigger()));
-                } else {
+                if (max <= 0 || current <= max || !reschedulable(context)) {
+                    // Either no threshold specified, within threshold boundary or not reschedule-able (queue full, etc.)
                     performJob(indexingJob);
                 }
             } finally {
                 EXECUTION_TRACKER.decrementAndGet();
+            }
+        }
+
+        private boolean reschedulable(final JobExecutionContext context) {
+            final Trigger trigger = context.getTrigger();
+            final JobDetail jobDetail = context.getJobDetail();
+            if (trigger instanceof CronTrigger) {
+                // A Cron job cannot be re-scheduled as-is
+                final TriggerKey key = trigger.getKey();
+                String triggerName = key.getName();
+                if (!triggerName.startsWith("re-")) {
+                    triggerName = "re-" + triggerName;
+                }
+                final TriggerBuilder<Trigger> triggerBuilder = newTrigger().withIdentity(triggerName, key.getGroup());
+                triggerBuilder.forJob(jobDetail.getKey());
+                triggerBuilder.startNow(); // Immediate start as soon as triggered
+                return RESCHEDULE_JOBS.offer(new JobResc(jobDetail, triggerBuilder.build()));
+            } else if (trigger instanceof SimpleTrigger) {
+                // Simple job
+                final SimpleTrigger simpleTrigger = (SimpleTrigger) trigger;
+                if (simpleTrigger.getRepeatCount() > 0) {
+                    // A repeated job cannot be re-scheduled as-is
+                    final TriggerKey key = trigger.getKey();
+                    String triggerName = key.getName();
+                    if (!triggerName.startsWith("re-")) {
+                        triggerName = "re-" + triggerName;
+                    }
+                    final TriggerBuilder<Trigger> triggerBuilder = newTrigger().withIdentity(triggerName, key.getGroup());
+                    triggerBuilder.forJob(jobDetail.getKey());
+                    triggerBuilder.startNow(); // Immediate start as soon as triggered
+                    return RESCHEDULE_JOBS.offer(new JobResc(jobDetail, triggerBuilder.build()));
+                }
+                // Can be re-scheduled as-is
+                return RESCHEDULE_JOBS.offer(new JobResc(jobDetail, trigger));
+            } else {
+                // Any other job... re-schedule as one-time execution for the sake of safety
+                final TriggerKey key = trigger.getKey();
+                String triggerName = key.getName();
+                if (!triggerName.startsWith("re-")) {
+                    triggerName = "re-" + triggerName;
+                }
+                final TriggerBuilder<Trigger> triggerBuilder = newTrigger().withIdentity(triggerName, key.getGroup());
+                triggerBuilder.forJob(jobDetail.getKey());
+                triggerBuilder.startNow(); // Immediate start as soon as triggered
+                return RESCHEDULE_JOBS.offer(new JobResc(jobDetail, triggerBuilder.build()));
             }
         }
 
