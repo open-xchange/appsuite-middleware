@@ -115,6 +115,7 @@ public class Activator extends HousekeepingActivator {
 
         // The listener which is called if a new plugin is registered
         final ServiceListener sl = new ServiceListener() {
+            @Override
             public void serviceChanged(final ServiceEvent ev) {
                 if (log.isInfoEnabled()) {
                     log.info("Service: " + ev.getServiceReference().getBundle().getSymbolicName() + ", " + ev.getType());

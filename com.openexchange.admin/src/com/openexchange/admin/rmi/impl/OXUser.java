@@ -142,6 +142,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         return this.cache.getProperties().getUserProp(AdminProperties.User.USERNAME_CHANGEABLE, false);
     }
 
+    @Override
     public void change(final Context ctx, final User usrdata, Credentials auth) throws StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         auth = auth == null ? new Credentials("","") : auth;
         try {
@@ -281,6 +282,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
     }
 
+    @Override
     public void changeModuleAccess(final Context ctx, final User user, final UserModuleAccess moduleAccess, Credentials auth) throws StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         auth = auth == null ? new Credentials("","") : auth;
         try {
@@ -333,6 +335,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         // END OF JCS
     }
 
+    @Override
     public void changeModuleAccess(final Context ctx, final User user,final String access_combination_name, Credentials auth)
             throws StorageException,InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {
 
@@ -408,11 +411,13 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
     }
 
+    @Override
     public User create(final Context ctx, final User usr, final UserModuleAccess access, final Credentials auth) throws StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
         // Call common create method directly because we already have out access module
         return createUserCommon(ctx, usr, access, auth);
     }
 
+    @Override
     public User create(final Context ctx, final User usrdata, final String access_combination_name, Credentials auth) throws StorageException,InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
         // Resolve the access rights by the specified combination name. If combination name does not exists, throw error as it is described
         // in the spec!
@@ -451,6 +456,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     }
 
 
+    @Override
     public User create(final Context ctx, final User usrdata, Credentials auth)    throws StorageException,InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
 
         /*
@@ -488,6 +494,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         return createUserCommon(ctx, usrdata, access, auth);
     }
 
+    @Override
     public User getContextAdmin(final Context ctx, Credentials auth) throws InvalidCredentialsException, StorageException, InvalidDataException {
         auth = auth == null ? new Credentials("","") : auth;
         
@@ -495,6 +502,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         return (oxu.getData(ctx, new User[]{ new User(tool.getAdminForContext(ctx))} ))[0];
     }
 
+    @Override
     public UserModuleAccess getContextAdminUserModuleAccess(final Context ctx, Credentials auth)  throws StorageException,InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
         auth = auth == null ? new Credentials("","") : auth;
         basicauth.doAuthentication(auth, ctx);
@@ -641,10 +649,12 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         return usr;
     }
 
+    @Override
     public void delete(final Context ctx, final User user, final Credentials auth) throws StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         delete(ctx, new User[]{user}, auth);
     }
 
+    @Override
     public void delete(final Context ctx, final User[] users, Credentials auth) throws StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         auth = auth == null ? new Credentials("","") : auth;
 
@@ -798,10 +808,12 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
     }
 
+    @Override
     public User getData(final Context ctx, final User user, final Credentials auth) throws StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException {
         return getData(ctx, new User[]{user}, auth)[0];
     }
 
+    @Override
     public User[] getData(final Context ctx, final User[] users, Credentials auth) throws StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException {
         auth = auth == null ? new Credentials("","") : auth;
         try {
@@ -931,6 +943,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         return retusers;
     }
 
+    @Override
     public UserModuleAccess getModuleAccess(final Context ctx, final User user, Credentials auth) throws StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         auth = auth == null ? new Credentials("","") : auth;
         try {
@@ -973,6 +986,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
     }
 
+    @Override
     public String getAccessCombinationName(final Context ctx, final User user, Credentials auth) throws StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         auth = auth == null ? new Credentials("","") : auth;
 
@@ -1020,6 +1034,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         
     }
 
+    @Override
     public User[] list(final Context ctx, final String search_pattern, Credentials auth) throws StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
         auth = auth == null ? new Credentials("","") : auth;
         try {
@@ -1042,6 +1057,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         return retval;
     }
 
+    @Override
     public User[] listCaseInsensitive(final Context ctx, final String search_pattern, Credentials auth) throws StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
         auth = auth == null ? new Credentials("","") : auth;
         try {
@@ -1064,6 +1080,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         return retval;
     }
 
+    @Override
     public User[] listAll(final Context ctx, final Credentials auth) throws StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
         return list(ctx, "*", auth);
     }
@@ -1260,6 +1277,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     /* (non-Javadoc)
      * @see com.openexchange.admin.rmi.OXUserInterface#changeModuleAccessGlobal(java.lang.String, com.openexchange.admin.rmi.dataobjects.UserModuleAccess, com.openexchange.admin.rmi.dataobjects.UserModuleAccess, com.openexchange.admin.rmi.dataobjects.Credentials)
      */
+    @Override
     public void changeModuleAccessGlobal(final String filter, final UserModuleAccess addAccess, final UserModuleAccess removeAccess, Credentials auth) throws RemoteException, InvalidCredentialsException, StorageException, InvalidDataException {
         auth = auth == null ? new Credentials("","") : auth;
         try {
@@ -1309,6 +1327,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
     }
 
+    @Override
     public boolean exists(final Context ctx, final User user, Credentials auth) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, DatabaseUpdateException, NoSuchContextException {
         auth = auth == null ? new Credentials("","") : auth;
         try {
