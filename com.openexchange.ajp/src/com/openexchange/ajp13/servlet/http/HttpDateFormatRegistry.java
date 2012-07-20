@@ -55,6 +55,8 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import com.openexchange.ajp13.AJPv13ServiceRegistry;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.tools.TimeZoneUtils;
 
 /**
@@ -156,6 +158,24 @@ public final class HttpDateFormatRegistry {
         appendNetscapeCookieMaxAge(maxAgeSecs, composer);
     }
 
+    private static volatile Long zeroMaxAgeSecs;
+
+    private static long zeroMaxAgeSecs() {
+        Long tmp = zeroMaxAgeSecs;
+        if (null == tmp) {
+            synchronized (HttpDateFormatRegistry.class) {
+                tmp = zeroMaxAgeSecs;
+                if (null == tmp) {
+                    final ConfigurationService service = AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    final boolean b = service.getBoolProperty("com.openexchange.ajp.cookie.enableExactZeroMaxAge", true);
+                    tmp = Long.valueOf(b ? 0L : 10000); // 10sec after 01/01/1970
+                    zeroMaxAgeSecs = tmp;
+                }
+            }
+        }
+        return tmp.longValue();
+    }
+
     /**
      * Appends expiry according to Netscape specification; e.g. <code>"expires=Thu, 26-Apr-2012 18:35:06 GMT"</code>.
      *
@@ -167,7 +187,7 @@ public final class HttpDateFormatRegistry {
             /*
              * expires=Sat, 01-Jan-2000 00:00:00 GMT
              */
-            final long millis = maxAgeSecs == 0 ? 10000L /*10sec after 01/01/1970*/: System.currentTimeMillis() + (maxAgeSecs * 1000L);
+            final long millis = maxAgeSecs == 0 ? zeroMaxAgeSecs() : System.currentTimeMillis() + (maxAgeSecs * 1000L);
             composer.append("; expires=").append(netscapeDateFormat.format(new Date(millis)));
         }
     }
