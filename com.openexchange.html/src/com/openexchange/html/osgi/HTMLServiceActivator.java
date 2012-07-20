@@ -155,14 +155,6 @@ public class HTMLServiceActivator extends HousekeepingActivator {
     private void apply(final ConfigurationService configurationService) {
         ServiceRegistry.getInstance().addService(ConfigurationService.class, configurationService);
         /*
-         * Set resource bundle for messages
-         */
-        Report.setResourceBundleFrom(getTidyMessages(configurationService.getProperty("TidyMessages")));
-        /*
-         * Initialize properties
-         */
-        final Properties properties = getTidyConfiguration(configurationService.getProperty("TidyConfiguration"));
-        /*
          * Initialize maps
          */
         final Map<Character, String> htmlCharMap;
@@ -180,7 +172,7 @@ public class HTMLServiceActivator extends HousekeepingActivator {
         /*
          * Register HTML service
          */
-        registerService(HtmlService.class, new HtmlServiceImpl(properties, htmlCharMap, htmlEntityMap), null);
+        registerService(HtmlService.class, new HtmlServiceImpl(htmlCharMap, htmlEntityMap), null);
     }
 
     public static Object[] getHTMLEntityMaps(final File htmlEntityFile) {

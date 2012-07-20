@@ -28,15 +28,6 @@ Cache=true
 
 CalendarSQL=com.openexchange.groupware.calendar.CalendarMySQL
 
-# Location of the configuration file for mail caches
-MailCacheConfig:@oxgroupwaresysconfdir@/mailcache.ccf
-
-# Location of tidy messages configuration file
-TidyMessages=@oxgroupwaresysconfdir@/TidyMessages.properties
-
-# Location of tidy configuration file
-TidyConfiguration=@oxgroupwaresysconfdir@/TidyConfiguration.properties
-
 # Location of white list for both HTML tags/attributes and CSS key-value-pairs
 Whitelist=@oxgroupwaresysconfdir@/whitelist.properties
 

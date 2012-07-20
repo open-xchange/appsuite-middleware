@@ -193,27 +193,7 @@ public final class SystemConfig extends AbstractConfig implements Initialization
         /**
          * Mime type file name; <code>mime.types</code>
          */
-        MimeTypeFileName("MimeTypeFileName"),
-        /**
-         * Mail cache configuration file.
-         */
-        MailCacheConfig("MailCacheConfig"),
-        /**
-         * push component configuration file name.
-         */
-        PUSH_NAME("push.properties"),
-        /**
-         * TidyMessages.properties
-         */
-        TidyMessages("TidyMessages"),
-        /**
-         * TidyConfiguration.properties
-         */
-        TidyConfiguration("TidyConfiguration"),
-        /**
-         * White list for both HTML tags/attributes and CSS key-value-pairs
-         */
-        Whitelist("Whitelist");
+        MimeTypeFileName("MimeTypeFileName");
 
         /**
          * Name of the property in the server.properties file.
