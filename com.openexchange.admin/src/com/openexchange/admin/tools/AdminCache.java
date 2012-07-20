@@ -89,6 +89,7 @@ import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolDBPool;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterface;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.java.Streams;
 import com.openexchange.log.LogFactory;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -482,36 +483,38 @@ public class AdminCache {
         if (null == service) {
             throw new IllegalStateException("Absent service: " + ConfigurationService.class.getName());
         }
-        ArrayList<String> al = new ArrayList<String>();
-
+        final ArrayList<String> al = new ArrayList<String>(sql_files_order.length);
+        final Pattern p = Pattern.compile("(" + PATTERN_REGEX_FUNCTION + "|" + PATTERN_REGEX_NORMAL + ")", Pattern.DOTALL + Pattern.CASE_INSENSITIVE);
         for (int a = 0; a < sql_files_order.length; a++) {
-            String text = service.getText(sql_files_order[a]);
-
-            try {
-                FileInputStream fis = new FileInputStream(tmp);
-                byte[] b = new byte[(int) tmp.length()];
-                fis.read(b);
-                fis.close();
-                String data = new String(b);
-                Pattern p = Pattern.compile("(" + PATTERN_REGEX_FUNCTION + "|" + PATTERN_REGEX_NORMAL + ")", Pattern.DOTALL + Pattern.CASE_INSENSITIVE);
-                Matcher matchy = p.matcher(data);
-                while (matchy.find()) {
-                    String exec = matchy.group(0).replaceAll("END\\s*//", "END");
-                    al.add(exec);
+            final File tmp = service.getFileByName(sql_files_order[a]);
+            if (null != tmp) {
+                FileInputStream fis = null;
+                try {
+                    fis = new FileInputStream(tmp);
+                    final byte[] b = new byte[(int) tmp.length()];
+                    fis.read(b);
+                    fis.close();
+                    final String data = new String(b);
+                    final Matcher matchy = p.matcher(data);
+                    while (matchy.find()) {
+                        final String exec = matchy.group(0).replaceAll("END\\s*//", "END");
+                        al.add(exec);
+                        if (log_parsed_sql_queries) {
+                            log.info(exec);
+                        }
+                    }
                     if (log_parsed_sql_queries) {
-                        log.info(exec);
+                        if (log.isInfoEnabled()) {
+                            log.info(tmp + " PARSED!");
+                        }
                     }
+                } catch (final Exception exp) {
+                    log.fatal("Parse/Read error on " + tmp, exp);
+                    return null;
+                } finally {
+                    Streams.close(fis);
                 }
-                if (log_parsed_sql_queries) {
-                    if (log.isInfoEnabled()) {
-                        log.info(tmp + " PARSED!");
-                    }
-                }
-            } catch (Exception exp) {
-                log.fatal("Parse/Read error on " + tmp, exp);
-                al = null;
             }
-
         }
         return al;
     }
