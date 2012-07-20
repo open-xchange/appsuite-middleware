@@ -16,6 +16,10 @@ URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       The Open-Xchange backend HTTP/JSON group and resource management interfaces
 Requires:      open-xchange-core >= @OXVERSION@
+Provides:      open-xchange-group-managerequest = %{version}
+Obsoletes:     open-xchange-group-managerequest <= %{version}
+Provides:      open-xchange-resource-managerequest = %{version}
+Obsoletes:     open-xchange-resource-managerequest <= %{version}
 
 %description
 This package needs to be installed if users should be allowed to manage groups and resources through the web interface.
