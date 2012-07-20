@@ -39,8 +39,6 @@ opt/open-xchange/etc/sessioncache.ccf
 opt/open-xchange/etc/sessiond.properties
 opt/open-xchange/etc/sql.properties
 opt/open-xchange/etc/system.properties
-opt/open-xchange/etc/TidyConfiguration.properties
-opt/open-xchange/etc/TidyMessages.properties
 opt/open-xchange/etc/transport.properties
 opt/open-xchange/etc/user.properties
 opt/open-xchange/etc/whitelist.properties
