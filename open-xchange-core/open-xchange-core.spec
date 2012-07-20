@@ -134,6 +134,8 @@ Provides:      open-xchange-user-json = %{version}
 Obsoletes:     open-xchange-user-json <= %{version}
 Provides:      open-xchange-xml = %{version}
 Obsoletes:     open-xchange-xml <= %{version}
+Provides:      open-xchange-passwordchange-servlet = %{version}
+Obsoletes:     open-xchange-passwordchange-servlet <= %{version}
 
 
 %description
