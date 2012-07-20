@@ -85,7 +85,7 @@ public class Activator extends HousekeepingActivator {
         track(PipesAndFiltersService.class, new RegistryServiceTrackerCustomizer<PipesAndFiltersService>(context, AdminServiceRegistry.getInstance(), PipesAndFiltersService.class));
         track(ContextService.class, new RegistryServiceTrackerCustomizer<ContextService>(context, AdminServiceRegistry.getInstance(), ContextService.class));
         track(MailAccountStorageService.class, new RegistryServiceTrackerCustomizer<MailAccountStorageService>(context, AdminServiceRegistry.getInstance(), MailAccountStorageService.class));
-        track(ConfigurationService.class, new RegistryServiceTrackerCustomizer<ConfigurationService>(context, AdminServiceRegistry.getInstance(), ConfigurationService.class));
+        AdminServiceRegistry.getInstance().addService(ConfigurationService.class, getService(ConfigurationService.class));
         track(CreateTableService.class, new CreateTableCustomizer(context));
         openTrackers();
 
@@ -158,7 +158,6 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        // TODO Auto-generated method stub
-        return null;
+        return new Class<?>[] { ConfigurationService.class };
     }
 }

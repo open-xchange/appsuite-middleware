@@ -103,7 +103,10 @@ public final class CassandraActivator extends HousekeepingActivator {
 		SnappyServiceLookUp.set(this);
 		
 		ConfigurationService configSnappy = SnappyServiceLookUp.getService(ConfigurationService.class);
-		System.setProperty("snappy.config", new File(configSnappy.getProperty("CONFIGPATH") + "/snappy.properties").getAbsolutePath().toString());
+		final File snappyFile = configSnappy.getFileByName("snappy.properties");
+		if (null != snappyFile) {
+            System.setProperty("snappy.config", snappyFile.getAbsolutePath().toString());
+        }
 		
 		Properties prop = new Properties();
 		String configUrl = System.getProperty("snappy.config");
@@ -135,8 +138,11 @@ public final class CassandraActivator extends HousekeepingActivator {
 		CassandraServiceLookUp.set(this);
 		
 		ConfigurationService config = CassandraServiceLookUp.getService(ConfigurationService.class);
-		
-		System.setProperty("cassandra.config", new File(config.getProperty("CONFIGPATH") + "/cassandra.yaml").toURI().toString());
+
+		final File file = config.getFileByName("cassandra.yaml");
+		if (null != file) {
+            System.setProperty("cassandra.config", file.toURI().toString());
+        }
 		
 		//start embedded cassandra node
 		cassandra = new EmbeddedCassandraService();

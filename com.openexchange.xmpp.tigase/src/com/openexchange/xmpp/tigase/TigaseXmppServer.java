@@ -86,7 +86,7 @@ public final class TigaseXmppServer implements XmppServer {
             final ConfiguratorAbstract config = new Configurator();
             {
                 final ConfigurationService service = TigaseServiceLookup.getService(ConfigurationService.class);
-                final String configPath = service.getProperty("CONFIGPATH", "");
+                final String configPath = System.getProperty("openexchange.propdir");
                 config.init(new String[] {
                     "config-type","--gen-config-def",
                     "--admins","admin@devel.tigase.org,admin@test-d",

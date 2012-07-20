@@ -84,7 +84,10 @@ public class SnappyActivator extends HousekeepingActivator {
 		SnappyServiceLookUp.set(this);
 		
 		ConfigurationService config = SnappyServiceLookUp.getService(ConfigurationService.class);
-		System.setProperty("snappy.config", new File(config.getProperty("CONFIGPATH") + "/snappy.properties").getAbsolutePath().toString());
+		final File f = config.getFileByName("snappy.properties");
+		if (null != f) {
+            System.setProperty("snappy.config", f.getAbsolutePath().toString());
+        }
 		
 		Properties prop = new Properties();
 		String configUrl = System.getProperty("snappy.config");
