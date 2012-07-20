@@ -167,8 +167,8 @@ public final class HttpDateFormatRegistry {
             /*
              * expires=Sat, 01-Jan-2000 00:00:00 GMT
              */
-            composer.append("; expires=").append(
-                netscapeDateFormat.format((maxAgeSecs == 0 ? new Date(10000L) /*10sec after 01/01/1970*/: new Date(System.currentTimeMillis() + (maxAgeSecs * 1000L)))));
+            final long millis = maxAgeSecs == 0 ? 10000L /*10sec after 01/01/1970*/: System.currentTimeMillis() + (maxAgeSecs * 1000L);
+            composer.append("; expires=").append(netscapeDateFormat.format(new Date(millis)));
         }
     }
 
