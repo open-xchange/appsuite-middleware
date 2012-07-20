@@ -56,7 +56,6 @@ import com.openexchange.contact.storage.DefaultContactStorage;
 import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.contacts.ldap.contacts.LdapContactInterfaceProvider;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
@@ -199,23 +198,7 @@ public class DelegatingLdapStorage extends DefaultContactStorage {
     private ContactInterface delegate(Session session) throws OXException {
         return provider.newContactInterface(session);
     }
-    
-    /**
-     * Parses a numerical identifier from a string, wrapping a possible 
-     * NumberFormatException into an OXException.
-     * 
-     * @param id the id string
-     * @return the parsed identifier
-     * @throws OXException
-     */
-    private static int parse(String id) throws OXException {
-        try {
-            return Integer.parseInt(id);
-        } catch (NumberFormatException e) {
-            throw ContactExceptionCodes.ID_PARSING_FAILED.create(e, id); 
-        }
-    }
-    
+   
     /**
      * Gets the column IDs representing the supplied contact fields.
      * 

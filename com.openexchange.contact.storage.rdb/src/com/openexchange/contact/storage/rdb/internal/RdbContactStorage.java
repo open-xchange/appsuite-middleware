@@ -49,7 +49,6 @@
 
 package com.openexchange.contact.storage.rdb.internal;
 
-import static com.openexchange.contact.storage.rdb.internal.Tools.parse;
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.SQLException;

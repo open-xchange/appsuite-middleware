@@ -160,4 +160,24 @@ public abstract class DefaultContactStorage implements ContactStorage {
         }
     }
 
+    /**
+     * Parses an array of numerical identifiers from a string, wrapping a 
+     * possible NumberFormatException into an OXException.
+     * 
+     * @param id the id string
+     * @return the parsed identifier
+     * @throws OXException
+     */
+    protected static int[] parse(String[] ids) throws OXException {
+        try {
+            int[] intIDs = new int[ids.length];
+            for (int i = 0; i < intIDs.length; i++) {
+                intIDs[i] = Integer.parseInt(ids[i]);
+            }
+            return intIDs;
+        } catch (NumberFormatException e) {
+            throw ContactExceptionCodes.ID_PARSING_FAILED.create(e, null != ids ? ids.toString() : null); 
+        }
+    }
+    
 }
