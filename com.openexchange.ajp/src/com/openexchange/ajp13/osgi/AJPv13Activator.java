@@ -49,11 +49,11 @@
 
 package com.openexchange.ajp13.osgi;
 
-import static com.openexchange.ajp13.AJPv13ServiceRegistry.getServiceRegistry;
 import java.util.ArrayList;
 import java.util.List;
 import org.osgi.service.http.HttpService;
 import com.openexchange.ajp13.AJPv13Config;
+import com.openexchange.ajp13.AJPv13ServiceRegistry;
 import com.openexchange.ajp13.AbstractAJPv13Request;
 import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.ajp13.servlet.http.HttpSessionWrapper;
@@ -62,7 +62,6 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.server.Initialization;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
@@ -95,24 +94,13 @@ public final class AJPv13Activator extends HousekeepingActivator {
     }
 
     @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        final org.apache.commons.logging.Log logger =
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AJPv13Activator.class));
-        if (logger.isInfoEnabled()) {
-            logger.info("Re-available service: " + clazz.getName());
-        }
-        final Object service = getService(clazz);
-        getServiceRegistry().addService(clazz, service);
+    public <S> boolean addService(Class<S> clazz, S service) {
+        return super.addService(clazz, service);
     }
 
     @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        final org.apache.commons.logging.Log logger =
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AJPv13Activator.class));
-        if (logger.isWarnEnabled()) {
-            logger.warn("Absent service: " + clazz.getName());
-        }
-        getServiceRegistry().removeService(clazz);
+    public <S> boolean removeService(Class<? extends S> clazz) {
+        return super.removeService(clazz);
     }
 
     @Override
@@ -121,17 +109,7 @@ public final class AJPv13Activator extends HousekeepingActivator {
             /*
              * (Re-)Initialize service registry with available services
              */
-            {
-                final ServiceRegistry registry = getServiceRegistry();
-                registry.clearRegistry();
-                final Class<?>[] classes = getNeededServices();
-                for (final Class<?> classe : classes) {
-                    final Object service = getService(classe);
-                    if (null != service) {
-                        registry.addService(classe, service);
-                    }
-                }
-            }
+            AJPv13ServiceRegistry.SERVICE_LOOKUP.set(this);
             inits = new ArrayList<Initialization>(3);
             /*
              * Set starter dependent on mode
@@ -215,7 +193,7 @@ public final class AJPv13Activator extends HousekeepingActivator {
             /*
              * Clear service registry
              */
-            getServiceRegistry().clearRegistry();
+            AJPv13ServiceRegistry.SERVICE_LOOKUP.set(null);
         } catch (final Exception e) {
             com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AJPv13Activator.class)).error(e.getMessage(), e);
             throw e;

@@ -49,7 +49,8 @@
 
 package com.openexchange.ajp13;
 
-import com.openexchange.osgi.ServiceRegistry;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link AJPv13ServiceRegistry} - Container class for the service registry of <i>com.openexchange.ajp13</i> bundle.
@@ -58,15 +59,15 @@ import com.openexchange.osgi.ServiceRegistry;
  */
 public final class AJPv13ServiceRegistry {
 
-    private static final ServiceRegistry SERVICE_REGISTRY = new ServiceRegistry(8);
+    public static final AtomicReference<ServiceLookup> SERVICE_LOOKUP = new AtomicReference<ServiceLookup>();
 
     /**
      * Gets the service registry of <i>com.openexchange.ajp13</i> bundle.
      *
      * @return The service registry
      */
-    public static ServiceRegistry getInstance() {
-        return SERVICE_REGISTRY;
+    public static ServiceLookup getInstance() {
+        return SERVICE_LOOKUP.get();
     }
 
     /**
@@ -74,8 +75,8 @@ public final class AJPv13ServiceRegistry {
      *
      * @return The service registry
      */
-    public static ServiceRegistry getServiceRegistry() {
-        return SERVICE_REGISTRY;
+    public static ServiceLookup getServiceRegistry() {
+        return SERVICE_LOOKUP.get();
     }
 
     /**
