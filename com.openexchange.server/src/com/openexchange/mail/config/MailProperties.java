@@ -53,11 +53,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
+import com.openexchange.java.Streams;
 import com.openexchange.log.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
@@ -601,15 +603,13 @@ public final class MailProperties implements IMailProperties {
             String javaMailPropertiesStr = configuration.getProperty("com.openexchange.mail.JavaMailProperties");
             if (null != javaMailPropertiesStr) {
                 javaMailPropertiesStr = javaMailPropertiesStr.trim();
-                if (javaMailPropertiesStr.indexOf("@oxgroupwaresysconfdir@") >= 0) {
-                    final String configPath = System.getProperty("openexchange.propdir");
-                    if (null == configPath) {
-                        throw MailConfigException.create("Missing property \"openexchange.propdir\" in system.properties");
+                final File javaMailPropsFile = configuration.getFileByName(javaMailPropertiesStr);
+                try {
+                    javaMailProperties = readPropertiesFromFile(new FileInputStream(javaMailPropsFile));
+                    if (javaMailProperties.size() == 0) {
+                        javaMailProperties = null;
                     }
-                    javaMailPropertiesStr = javaMailPropertiesStr.replaceFirst("@oxgroupwaresysconfdir@", configPath);
-                }
-                javaMailProperties = readPropertiesFromFile(javaMailPropertiesStr);
-                if (javaMailProperties.size() == 0) {
+                } catch (FileNotFoundException e) {
                     javaMailProperties = null;
                 }
             }
@@ -663,6 +663,25 @@ public final class MailProperties implements IMailProperties {
             } catch (final IOException e) {
                 LOG.error(e.getMessage(), e);
             }
+        }
+    }
+
+    /**
+     * Reads the properties from specified property file and returns an appropriate instance of {@link Properties}
+     *
+     * @param in The property stream
+     * @return The appropriate instance of {@link Properties}
+     * @throws OXException If reading property file fails
+     */
+    protected static Properties readPropertiesFromFile(final InputStream in) throws OXException {
+        final Properties properties = new Properties();
+        try {
+            properties.load(in);
+            return properties;
+        } catch (final IOException e) {
+            throw MailConfigException.create(new StringBuilder(256).append("I/O error: ").append(e.getMessage()).toString(), e);
+        } finally {
+            Streams.close(in);
         }
     }
 
