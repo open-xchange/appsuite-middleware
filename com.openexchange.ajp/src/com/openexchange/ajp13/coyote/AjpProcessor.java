@@ -1852,18 +1852,21 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         final int numCookies;
         {
             sink.reset();
-            final String[][] formattedCookies = response.getFormatedCookies();
-            if (formattedCookies.length > 0) {
-                for (int j = 0; j < formattedCookies[0].length; j++) {
-                    writeHeaderSafe(STR_SET_COOKIE, formattedCookies[0][j], sink);
+            final List<List<String>> formattedCookies = response.getFormatedCookies();
+            final int length = formattedCookies.size();
+            if (length > 0) {
+                List<String> list = formattedCookies.get(0);
+                for (final String sCookie : list) {
+                    writeHeaderSafe(STR_SET_COOKIE, sCookie, sink);
                 }
-                if (formattedCookies.length > 1) {
+                if (length > 1) {
                     final StringBuilder sb = new StringBuilder(STR_SET_COOKIE.length() + 1);
-                    for (int i = 1; i < formattedCookies.length; i++) {
+                    for (int i = 1; i < length; i++) {
                         sb.setLength(0);
                         final String hdrName = sb.append(STR_SET_COOKIE).append(i + 1).toString();
-                        for (int j = 0; j < formattedCookies[i].length; j++) {
-                            writeHeaderSafe(hdrName, formattedCookies[i][j], sink);
+                        list = formattedCookies.get(i);
+                        for (final String sCookie : list) {
+                            writeHeaderSafe(hdrName, sCookie, sink);
                         }
                     }
                 }
@@ -1899,10 +1902,10 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         lastWriteAccess = System.currentTimeMillis();
     }
 
-    private static final int getNumOfCookieHeader(final String[][] formattedCookies) {
+    private static final int getNumOfCookieHeader(final List<List<String>> formattedCookies) {
         int retval = 0;
-        for (final String[] formattedCookie : formattedCookies) {
-            retval += formattedCookie.length;
+        for (final List<String> formattedCookie : formattedCookies) {
+            retval += formattedCookie.size();
         }
         return retval;
     }
