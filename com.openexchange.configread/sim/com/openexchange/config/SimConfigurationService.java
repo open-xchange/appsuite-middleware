@@ -69,7 +69,7 @@ public class SimConfigurationService implements ConfigurationService {
     }
 
     @Override
-    public Properties getFile(final String filename) {
+    public Properties getFile(final String fileName) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -127,13 +127,19 @@ public class SimConfigurationService implements ConfigurationService {
     }
 
     @Override
+    public File getFileByName(String fileName) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
     public File getDirectory(String directoryName) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public String getText(final String filename) {
+    public String getText(final String fileName) {
         // TODO Auto-generated method stub
         return null;
     }

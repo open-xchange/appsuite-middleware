@@ -77,7 +77,13 @@ public class MockConfigurationService implements ConfigurationService {
      * @see com.openexchange.config.ConfigurationService#getFile(java.lang.String)
      */
     @Override
-    public Properties getFile(String filename) {
+    public Properties getFile(String fileName) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public File getFileByName(String fileName) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -146,7 +152,7 @@ public class MockConfigurationService implements ConfigurationService {
      * @see com.openexchange.config.ConfigurationService#getText(java.lang.String)
      */
     @Override
-    public String getText(String filename) {
+    public String getText(String fileName) {
         // TODO Auto-generated method stub
         return null;
     }

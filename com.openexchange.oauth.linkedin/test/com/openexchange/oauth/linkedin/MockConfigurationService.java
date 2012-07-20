@@ -105,14 +105,20 @@ public class MockConfigurationService implements ConfigurationService {
         return null;
     }
 
+    @Override
+    public File getFileByName(String fileName) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 	@Override
-	public Properties getFile(String filename) {
+	public Properties getFile(String fileName) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public String getText(String filename) {
+	public String getText(String fileName) {
 		// TODO Auto-generated method stub
 		return null;
 	}

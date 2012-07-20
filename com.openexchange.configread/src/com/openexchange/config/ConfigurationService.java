@@ -120,10 +120,10 @@ public interface ConfigurationService {
      * Returns all properties defined in a specific properties file. The filename of the properties file must not contains any path
      * segments. If no such property file has been read empty properties will be returned.
      * 
-     * @param filename The file name of the properties file.
+     * @param fileName The file name of the properties file.
      * @return the properties from that file or an empty properties if that file was not read.
      */
-    public Properties getFile(String filename);
+    public Properties getFile(String fileName);
 
     /**
      * Gets the directory denoted by given directory name.
@@ -134,12 +134,20 @@ public interface ConfigurationService {
     File getDirectory(String directoryName);
 
     /**
+     * Gets the file denoted by given file name.
+     * 
+     * @param fileName The file name
+     * @return The directory or <code>null</code>
+     */
+    File getFileByName(String fileName);
+
+    /**
      * If no property format is used for configuration data, the text content of a file can be retrieved with this call.
      * 
-     * @param filename The logical file name of the file to be retrieved.
+     * @param fileName The logical file name of the file to be retrieved.
      * @return The text content of the configuration
      */
-    public String getText(String filename);
+    public String getText(String fileName);
 
     /**
      * Returns all properties defined in a specific properties file. The filename of the properties file must not contains any path

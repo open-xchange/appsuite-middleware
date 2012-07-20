@@ -335,8 +335,8 @@ public final class ConfigurationImpl implements ConfigurationService {
      * {@inheritDoc}
      */
     @Override
-    public Properties getFile(final String filename) {
-        return getFile(filename, null);
+    public Properties getFile(final String fileName) {
+        return getFile(fileName, null);
     }
 
     /**
@@ -433,6 +433,40 @@ public final class ConfigurationImpl implements ConfigurationService {
     }
 
     @Override
+    public File getFileByName(String fileName) {
+        for (final String dir : getDirectories()) {
+            final File f = traverseForFile(new File(dir), fileName);
+            if (f != null) {
+                return f;
+            }
+        }
+        return null;
+    }
+
+    private File traverseForFile(final File file, final String fileName) {
+        if (null == file) {
+            return null;
+        }
+        if (file.isFile()) {
+            if (fileName.equals(file.getName())) {
+                // Found
+                return file;
+            }
+            return null;
+        }
+        final File[] subs = file.listFiles();
+        if (subs != null) {
+            for (final File sub : subs) {
+                final File f = traverseForFile(sub, fileName);
+                if (f != null) {
+                    return f;
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
     public File getDirectory(final String directoryName) {
         for (final String dir : getDirectories()) {
             final File fdir = traverseForDir(new File(dir), directoryName);
@@ -470,16 +504,16 @@ public final class ConfigurationImpl implements ConfigurationService {
     }
 
     @Override
-    public String getText(final String filename) {
-        final String text = texts.get(filename);
+    public String getText(final String fileName) {
+        final String text = texts.get(fileName);
         if (text != null) {
             return text;
         }
 
         for (final String dir : getDirectories()) {
-            final String s = traverse(new File(dir), filename);
+            final String s = traverse(new File(dir), fileName);
             if (s != null) {
-                texts.put(filename, s);
+                texts.put(fileName, s);
                 return s;
             }
         }

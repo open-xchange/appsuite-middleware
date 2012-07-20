@@ -467,10 +467,6 @@ public class AdminCache {
         }
     }
 
-    private String getInitialOXDBSqlDir() {
-        return prop.getSqlProp("INITIAL_OX_SQL_DIR", "/opt/open-xchange/etc/mysql");
-    }
-
     private void cacheSqlScripts() {
 
         if (prop.getSqlProp("LOG_PARSED_QUERIES", "false").equalsIgnoreCase("true")) {
@@ -478,14 +474,18 @@ public class AdminCache {
         }
 
         // ox
-        ox_queries_initial = convertData2Objects(getInitialOXDBSqlDir(), getInitialOXDBOrder());
+        ox_queries_initial = convertData2Objects(getInitialOXDBOrder());
     }
 
-    private ArrayList<String> convertData2Objects(String sql_path, String[] sql_files_order) {
+    private ArrayList<String> convertData2Objects(String[] sql_files_order) {
+        final ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
+        if (null == service) {
+            throw new IllegalStateException("Absent service: " + ConfigurationService.class.getName());
+        }
         ArrayList<String> al = new ArrayList<String>();
 
         for (int a = 0; a < sql_files_order.length; a++) {
-            File tmp = new File(sql_path + File.separatorChar + sql_files_order[a]);
+            String text = service.getText(sql_files_order[a]);
 
             try {
                 FileInputStream fis = new FileInputStream(tmp);
