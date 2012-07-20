@@ -49,8 +49,9 @@
 
 package com.openexchange.contactcollector.osgi;
 
+import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleActivator;
-
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.contactcollector.folder.ContactCollectorFolderCreator;
@@ -86,6 +87,14 @@ public class ContactCollectorActivator extends HousekeepingActivator {
 
     @Override
     public void startBundle() throws Exception {
+        {
+            ConfigurationService cService = getService(ConfigurationService.class);
+            if (!cService.getBoolProperty("com.openexchange.contactcollector.enabled", true)) {
+                final Log log = com.openexchange.log.Log.loggerFor(ContactCollectorActivator.class);
+                log.info("Canceled start-up of bundle: com.openexchange.contactcollector. Disabled by configuration setting \"com.openexchange.contactcollector.enabled=false\"");
+                return;
+            }
+        }
         /*
          * (Re-)Initialize service registry with available services
          */
@@ -137,7 +146,7 @@ public class ContactCollectorActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
             ContextService.class, UserService.class, UserConfigurationService.class, ContactService.class,
-            ThreadPoolService.class, DatabaseService.class };
+            ThreadPoolService.class, DatabaseService.class, ConfigurationService.class };
     }
 
     @Override
