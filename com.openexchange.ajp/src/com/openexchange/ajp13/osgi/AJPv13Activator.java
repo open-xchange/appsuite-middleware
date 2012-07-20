@@ -153,7 +153,7 @@ public final class AJPv13Activator extends HousekeepingActivator {
             /*
              * Start trackers
              */
-            track(ManagementService.class, new ManagementServiceTracker(context));
+            track(ManagementService.class, new ManagementServiceTracker(context, this));
             openTrackers();
             /*
              * Register services
