@@ -88,7 +88,7 @@ public class ContactCollectorActivator extends HousekeepingActivator {
     @Override
     public void startBundle() throws Exception {
         {
-            ConfigurationService cService = getService(ConfigurationService.class);
+            final ConfigurationService cService = getService(ConfigurationService.class);
             if (!cService.getBoolProperty("com.openexchange.contactcollector.enabled", true)) {
                 final Log log = com.openexchange.log.Log.loggerFor(ContactCollectorActivator.class);
                 log.info("Canceled start-up of bundle: com.openexchange.contactcollector. Disabled by configuration setting \"com.openexchange.contactcollector.enabled=false\"");
