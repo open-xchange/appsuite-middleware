@@ -62,6 +62,7 @@ import com.openexchange.osgi.HousekeepingActivator;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @deprecated For OX use {@link com.openexchange.nosql.cassandra.osgi.CassandraActivator}
  */
+@Deprecated
 public class SnappyActivator extends HousekeepingActivator {
 	private static Log log = LogFactory.getLog(SnappyActivator.class);
 	private static String snappyPathProp = "com.openexchange.nosql.cassandra.snappyjava.nativelibs";
@@ -85,7 +86,10 @@ public class SnappyActivator extends HousekeepingActivator {
 		SnappyServiceLookUp.set(this);
 		
 		ConfigurationService config = SnappyServiceLookUp.getService(ConfigurationService.class);
-		System.setProperty("snappy.config", new File(config.getProperty("CONFIGPATH") + "/snappy.properties").getAbsolutePath().toString());
+		File snappyProps = config.getFileByName("snappy.properties");
+		if (null != snappyProps) {
+            System.setProperty("snappy.config", snappyProps.getAbsolutePath().toString());
+        }
 		
 		Properties prop = new Properties();
 		String configUrl = System.getProperty("snappy.config");

@@ -64,7 +64,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.SystemConfig;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link MimeType2ExtMap} - Maps MIME types to file extensions and vice versa.
@@ -76,7 +78,7 @@ import com.openexchange.configuration.SystemConfig;
  * <li>The file <i>&lt;java.home&gt;/lib/mime.types</i>.</li>
  * <li>The file or resources named <i>META-INF/mime.types</i>.</li>
  * <li>The file or resource named <i>META-INF/mimetypes.default</i>.</li>
- * <li>The file or resource denoted by property <i>MimeTypeFile</i>.</li>
+ * <li>The file or resource denoted by property <i>MimeTypeFileName</i>.</li>
  * </ol>
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -174,9 +176,10 @@ public final class MimeType2ExtMap {
                         }
                     }
                     {
-                        String mimeTypesFile = SystemConfig.getProperty(SystemConfig.Property.MimeTypeFile);
-                        if ((mimeTypesFile != null) && ((mimeTypesFile = mimeTypesFile.trim()).length() > 0)) {
-                            final File file = new File(mimeTypesFile);
+                        String mimeTypesFileName = SystemConfig.getProperty(SystemConfig.Property.MimeTypeFileName);
+                        if ((mimeTypesFileName != null) && ((mimeTypesFileName = mimeTypesFileName.trim()).length() > 0)) {
+                            final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                            final File file = service.getFileByName(mimeTypesFileName);
                             if (file.exists()) {
                                 if (LOG.isInfoEnabled()) {
                                     sb.setLength(0);

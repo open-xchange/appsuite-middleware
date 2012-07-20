@@ -13,8 +13,8 @@ serviceUsageInspection=false
 # effect if property 'serviceUsageInspection' is set to 'true'.
 serviceUsageTimeout=10000
 
-# Location of the MIME type file
-MimeTypeFile=@oxgroupwaresysconfdir@/mime.types
+# Name of the MIME type file
+MimeTypeFileName=mime.types
 
 # Name of the class implementing the UserConfigurationStorage.
 # Currently known aliases: Caching, DB
@@ -23,10 +23,6 @@ UserConfigurationStorage=Caching
 # Switch for enabling caching in the groupware. Normally this should be set to
 # true or the database will get a lot more load.
 Cache=true
-
-# Location of the calendar.properties configuration file. This file configures
-# the calendar subsystem.
-Calendar=@oxgroupwaresysconfdir@/calendar.properties
 
 # Location of the infostore.properties configuration file. This file configures
 # the infostore subsystem.
@@ -43,14 +39,7 @@ Notification=@oxgroupwaresysconfdir@/notification.properties
 # Directory in which all property files for servlet mapping are kept
 ServletMappingDir=@oxgroupwaresysconfdir@/servletmappings
 
-CONFIGPATH:@oxgroupwaresysconfdir@
-AJPPROPERTIES:@oxgroupwaresysconfdir@/ajp.properties
-IMPORTEREXPORTER:@oxgroupwaresysconfdir@/importerExporter.xml
-LDAPPROPERTIES:@oxgroupwaresysconfdir@/ldap.properties
-EVENTPROPERTIES:@oxgroupwaresysconfdir@/event.properties
-PUSHPROPERTIES:@oxgroupwaresysconfdir@/push.properties
-
-UPDATETASKSCFG=@oxgroupwaresysconfdir@/updatetasks.cfg
+# IMPORTEREXPORTER:@oxgroupwaresysconfdir@/importerExporter.xml
 
 CalendarSQL=com.openexchange.groupware.calendar.CalendarMySQL
 

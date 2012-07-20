@@ -215,17 +215,17 @@ public final class SystemConfig extends AbstractConfig implements Initialization
          */
         HTMLEntities("HTMLEntities"),
         /**
-         * Mime type file.
+         * Mime type file name; <code>mime.types</code>
          */
-        MimeTypeFile("MimeTypeFile"),
+        MimeTypeFileName("MimeTypeFileName"),
         /**
          * Mail cache configuration file.
          */
         MailCacheConfig("MailCacheConfig"),
         /**
-         * push component configuration file.
+         * push component configuration file name.
          */
-        PUSH("PUSHPROPERTIES"),
+        PUSH_NAME("push.properties"),
         /**
          * TidyMessages.properties
          */

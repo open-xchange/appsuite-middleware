@@ -49,7 +49,6 @@
 package com.openexchange.loxandra.impl.osgi;
 
 import java.io.File;
-
 import org.apache.commons.logging.Log;
 
 import com.openexchange.config.ConfigurationService;
@@ -75,20 +74,12 @@ public final class LoxandraActivator extends HousekeepingActivator {
 		super();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
-	 */
 	@Override
 	protected Class<?>[] getNeededServices() {
 		
 		return new Class[]{ConfigurationService.class};
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see com.openexchange.osgi.DeferredActivator#startBundle()
-	 */
 	@Override
 	protected void startBundle() throws Exception {
 		log.info("starting bundle: com.openexchange.loxandra");
@@ -97,7 +88,10 @@ public final class LoxandraActivator extends HousekeepingActivator {
 		
 		ConfigurationService config = LoxandraServiceLookUp.getService(ConfigurationService.class);
 		
-		System.setProperty("loxandra.config", new File(config.getProperty("CONFIGPATH") + "/loxandra.properties").getAbsolutePath().toString());
+		final File file = config.getFileByName("loxandra.properties");
+		if (null != file) {
+            System.setProperty("loxandra.config", file.getAbsolutePath().toString());
+        }
 		
 		// Initialize and register the EAVContactService
 		EAVContactFactoryService eavService = new CassandraEAVContactFactoryServiceImpl();
@@ -114,11 +108,7 @@ public final class LoxandraActivator extends HousekeepingActivator {
         log.info("Loxandra Service started successfully.");
         
 	}
-	
-	/*
-	 * (non-Javadoc)
-	 * @see com.openexchange.osgi.HousekeepingActivator#stopBundle()
-	 */
+
 	@Override
 	protected void stopBundle() throws Exception {
 		log.info("stoping bundle: com.openexchange.loxandra");
