@@ -95,7 +95,7 @@ public class LangDetectActivator extends HousekeepingActivator {
                             if (null == languageCodesFile) {
                                 throw LanguageDetectionExceptionCodes.UNEXPECTED_ERROR.create("Missing property: " + propName);
                             }
-                            languageDetectionService.loadLanguageCodes(languageCodesFile);
+                            languageDetectionService.loadLanguageCodes(service.getFileByName("language-codes.properties"));
                         } catch (final OXException e) {
                             logger.error(e.getMessage(), e);
                             return null;
@@ -109,7 +109,7 @@ public class LangDetectActivator extends HousekeepingActivator {
                             if (null == languageModelsDir) {
                                 throw LanguageDetectionExceptionCodes.UNEXPECTED_ERROR.create("Missing property: " + propName);
                             }
-                            languageDetectionService.setLanguageModelsDir(languageModelsDir);
+                            languageDetectionService.setLanguageModelsDir(service.getDirectory(languageModelsDir));
                         } catch (final OXException e) {
                             logger.error(e.getMessage(), e);
                             return null;

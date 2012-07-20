@@ -1,7 +1,0 @@
-# The properties file for language detection
-
-# The path to the directory containing the language models
-com.openexchange.langdetect.languageModelsDir=@oxgroupwaresysconfdir@/models
-
-# Maps language to their code
-com.openexchange.langdetect.languageCodesFile=@oxgroupwaresysconfdir@/language-codes.properties
