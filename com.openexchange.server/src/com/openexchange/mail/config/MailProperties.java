@@ -602,9 +602,9 @@ public final class MailProperties implements IMailProperties {
             if (null != javaMailPropertiesStr) {
                 javaMailPropertiesStr = javaMailPropertiesStr.trim();
                 if (javaMailPropertiesStr.indexOf("@oxgroupwaresysconfdir@") >= 0) {
-                    final String configPath = configuration.getProperty("CONFIGPATH");
+                    final String configPath = System.getProperty("openexchange.propdir");
                     if (null == configPath) {
-                        throw MailConfigException.create("Missing property \"CONFIGPATH\" in system.properties");
+                        throw MailConfigException.create("Missing property \"openexchange.propdir\" in system.properties");
                     }
                     javaMailPropertiesStr = javaMailPropertiesStr.replaceFirst("@oxgroupwaresysconfdir@", configPath);
                 }

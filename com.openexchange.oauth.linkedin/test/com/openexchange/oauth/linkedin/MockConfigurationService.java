@@ -48,6 +48,7 @@
  */
 package com.openexchange.oauth.linkedin;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -99,13 +100,25 @@ public class MockConfigurationService implements ConfigurationService {
 	}
 
 	@Override
-	public Properties getFile(String filename) {
+    public File getDirectory(String directoryName) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public File getFileByName(String fileName) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+	@Override
+	public Properties getFile(String fileName) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public String getText(String filename) {
+	public String getText(String fileName) {
 		// TODO Auto-generated method stub
 		return null;
 	}

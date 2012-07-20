@@ -14,7 +14,7 @@ public class Common {
     public static void prepare(String passwordSource, String masterPassword) {
         simConfigurationService = new SimConfigurationService() {
             @Override
-            public Properties getFile(String filename) {
+            public Properties getFile(String fileName) {
                 final Properties properties = new Properties();
                 properties.putAll(stringProperties);
                 return properties;

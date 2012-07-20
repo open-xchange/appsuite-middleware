@@ -73,7 +73,7 @@ public final class AJPv13Config implements Initialization {
     // Final static fields
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AJPv13Config.class));
 
-    private static final String AJP_PROP_FILE = "AJPPROPERTIES";
+    private static final String AJP_PROP_FILE_NAME = "ajp.properties";
 
     private static final AJPv13Config instance = new AJPv13Config();
 
@@ -178,15 +178,10 @@ public final class AJPv13Config implements Initialization {
             LOG.warn("Missing configuration service.", new Throwable());
             return;
         }
-        final String ajpPropFile = configurationService.getProperty(AJP_PROP_FILE);
-        if (ajpPropFile == null) {
-            LOG.warn("Missing configuration property: " + AJP_PROP_FILE);
-            return;
-        }
         try {
             FileInputStream fis = null;
             try {
-                fis = new FileInputStream(new File(ajpPropFile));
+                fis = new FileInputStream(configurationService.getFileByName(AJP_PROP_FILE_NAME));
                 ajpProperties.load(fis);
             } finally {
                 if (fis != null) {
@@ -329,10 +324,10 @@ public final class AJPv13Config implements Initialization {
              */
             servletConfigs = ajpProperties.getProperty("AJP_SERVLET_CONFIG_DIR");
             if (servletConfigs == null || "null".equalsIgnoreCase((servletConfigs = servletConfigs.trim()))) {
-                servletConfigs = configurationService.getProperty("CONFIGPATH") + "/servletConfig";
+                servletConfigs = "servletConfig";
             }
-            final File servletConfigsFile = new File(servletConfigs);
-            if ((!servletConfigsFile.exists() || !servletConfigsFile.isDirectory()) && LOG.isTraceEnabled()) {
+            final File servletConfigsFile = configurationService.getDirectory(servletConfigs);
+            if (LOG.isTraceEnabled() && (!servletConfigsFile.exists() || !servletConfigsFile.isDirectory())) {
                 LOG.trace(servletConfigsFile + " does not exist or is not a directory");
             }
             /*
@@ -349,7 +344,7 @@ public final class AJPv13Config implements Initialization {
              */
             logInfo();
         } catch (final FileNotFoundException e) {
-            throw new AJPv13Exception(AJPv13Exception.AJPCode.FILE_NOT_FOUND, true, e, ajpPropFile);
+            throw new AJPv13Exception(AJPv13Exception.AJPCode.FILE_NOT_FOUND, true, e, AJP_PROP_FILE_NAME);
         } catch (final IOException e) {
             throw new AJPv13Exception(AJPv13Exception.AJPCode.IO_ERROR, true, e, e.getMessage());
         }

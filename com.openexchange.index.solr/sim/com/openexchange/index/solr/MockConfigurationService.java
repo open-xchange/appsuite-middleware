@@ -49,6 +49,7 @@
 
 package com.openexchange.index.solr;
 
+import java.io.File;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
@@ -94,12 +95,24 @@ public class MockConfigurationService implements ConfigurationService {
     }
 
     @Override
-    public Properties getFile(final String filename) {
+    public File getDirectory(String directoryName) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public File getFileByName(String fileName) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Properties getFile(final String fileName) {
         return new Properties();
     }
 
     @Override
-    public String getText(final String filename) {
+    public String getText(final String fileName) {
         // TODO Auto-generated method stub
         return null;
     }
