@@ -49,6 +49,7 @@
 
 package com.openexchange.config;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -125,27 +126,24 @@ public class SimConfigurationService implements ConfigurationService {
         return 0;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.config.ConfigurationService#getText(java.lang.String)
-     */
+    @Override
+    public File getDirectory(String directoryName) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
     @Override
     public String getText(final String filename) {
         // TODO Auto-generated method stub
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.config.ConfigurationService#getYaml(java.lang.String)
-     */
     @Override
     public Object getYaml(String filename) {
         // TODO Auto-generated method stub
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.config.ConfigurationService#getYamlInDirectory(java.lang.String)
-     */
     @Override
     public Map<String, Object> getYamlInFolder(String dirName) {
         // TODO Auto-generated method stub

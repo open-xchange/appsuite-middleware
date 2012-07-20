@@ -49,6 +49,7 @@
 
 package com.openexchange.oauth.facebook;
 
+import java.io.File;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
@@ -131,6 +132,12 @@ public class MockConfigurationService implements ConfigurationService {
      */
     @Override
     public String getProperty(String name, String defaultValue, PropertyListener listener) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public File getDirectory(String directoryName) {
         // TODO Auto-generated method stub
         return null;
     }

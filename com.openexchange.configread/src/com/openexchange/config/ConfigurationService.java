@@ -49,13 +49,14 @@
 
 package com.openexchange.config;
 
+import java.io.File;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
 /**
  * {@link ConfigurationService}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface ConfigurationService {
@@ -63,7 +64,7 @@ public interface ConfigurationService {
     /**
      * Searches for the property with the specified name in this property list. If the name is not found in this property list, the default
      * property list, and its defaults, recursively, are then checked. The method returns <code>null</code> if the property is not found.
-     *
+     * 
      * @param name The property name.
      * @return The value in this property list with the specified key value or <code>null</code>.
      */
@@ -73,7 +74,7 @@ public interface ConfigurationService {
      * Searches for the property with the specified name in this property list. If the name is not found in this property list, the default
      * property list, and its defaults, recursively, are then checked. The method returns the default value argument if the property is not
      * found.
-     *
+     * 
      * @param name The property name.
      * @param defaultValue The default value
      * @return The value in this property list with the specified key value or given default value argument.
@@ -85,7 +86,7 @@ public interface ConfigurationService {
      * property list, and its defaults, recursively, are then checked. The method returns <code>null</code> if the property is not found.
      * <p>
      * Furthermore the specified listener will be notified if any changes are noticed on specified property
-     *
+     * 
      * @param name The property name.
      * @param listener The property listener which is notified on property changes
      * @return The value in this property list with the specified key value or <code>null</code>.
@@ -98,7 +99,7 @@ public interface ConfigurationService {
      * found.
      * <p>
      * Furthermore the specified listener will be notified if any changes are noticed on specified property
-     *
+     * 
      * @param name The property name.
      * @param defaultValue The default value
      * @param listener The property listener which is notified on property changes
@@ -109,7 +110,7 @@ public interface ConfigurationService {
     /**
      * Removes specified property listener previously set by {@link #getProperty(String, PropertyListener)} or
      * {@link #getProperty(String, String, PropertyListener)}.
-     *
+     * 
      * @param name The property name.
      * @param listener The property listener to remove
      */
@@ -118,15 +119,24 @@ public interface ConfigurationService {
     /**
      * Returns all properties defined in a specific properties file. The filename of the properties file must not contains any path
      * segments. If no such property file has been read empty properties will be returned.
-     *
-     * @param filename The filename of the properties file.
+     * 
+     * @param filename The file name of the properties file.
      * @return the properties from that file or an empty properties if that file was not read.
      */
     public Properties getFile(String filename);
 
     /**
+     * Gets the directory denoted by given directory name.
+     * 
+     * @param directoryName The directory name
+     * @return The directory or <code>null</code>
+     */
+    File getDirectory(String directoryName);
+
+    /**
      * If no property format is used for configuration data, the text content of a file can be retrieved with this call.
-     * @param filename The logical filename of the file to be retrieved.
+     * 
+     * @param filename The logical file name of the file to be retrieved.
      * @return The text content of the configuration
      */
     public String getText(String filename);
@@ -136,7 +146,7 @@ public interface ConfigurationService {
      * segments. If no such property file has been read empty properties will be returned.
      * <p>
      * Furthermore the specified listener will be notified if any changes are noticed on properties of that properties file.
-     *
+     * 
      * @param filename The filename of the properties file.
      * @param listener This property listener is notified on changes on properties of that file.
      * @return the properties from that file or an empty properties if that file was not read.
@@ -145,7 +155,7 @@ public interface ConfigurationService {
     /**
      * Retrieves and merges all properties files in below the given folder name and its subfolders (recursively). All properties discovered
      * this way are aggregated in the returned properties object.
-     *
+     * 
      * @param folderName
      * @return Aggregated properties of all properties files below this folder.
      */
@@ -157,7 +167,7 @@ public interface ConfigurationService {
      * <p>
      * The <code>boolean</code> returned represents the value <code>true</code> if the property is not <code>null</code> and is equal,
      * ignoring case, to the string {@code "true"}.
-     *
+     * 
      * @param name The property name.
      * @param defaultValue The default value
      * @return The boolean value in this property list with the specified key value or given default value argument.
@@ -170,7 +180,7 @@ public interface ConfigurationService {
      * <p>
      * Parses the property as a signed decimal integer. The characters in the property must all be decimal digits, except that the first
      * character may be an ASCII minus sign <code>'-'</code> (<code>'&#92;u002D'</code>) to indicate a negative value.
-     *
+     * 
      * @param name The property name.
      * @param defaultValue The default value
      * @return The integer value in this property list with the specified key value or given default value argument.
@@ -179,29 +189,31 @@ public interface ConfigurationService {
 
     /**
      * Returns an iterator of all the keys in this property list.
-     *
+     * 
      * @return The iterator of all the keys in this property list.
      */
     public Iterator<String> propertyNames();
 
     /**
      * Returns the number of properties in this property list.
-     *
+     * 
      * @return The number of properties in this property list.
      */
     public int size();
 
     /**
-     * Loads a file and parses it with a YAML parser. The type of object returned depends on the layout of the yaml file
-     * and should be known to clients of this service.
+     * Loads a file and parses it with a YAML parser. The type of object returned depends on the layout of the yaml file and should be known
+     * to clients of this service.
+     * 
      * @param filename
      * @return The parsed data
      */
     public Object getYaml(String filename);
 
     /**
-     * Loads all files in a directory and parses them with a YAML parser. The type of the objects returned depends on the layout
-     * of the yaml files.
+     * Loads all files in a directory and parses them with a YAML parser. The type of the objects returned depends on the layout of the yaml
+     * files.
+     * 
      * @param dirName
      * @return A map mapping filename to the object that was parsed.
      */
