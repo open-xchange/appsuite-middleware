@@ -49,12 +49,14 @@ case "$1" in
     ;;
 esac
 
-CONFFILES="AdminDaemon.properties Group.properties ModuleAccessDefinitions.properties mpasswd Resource.properties Sql.properties User.properties"
+CONFFILES="AdminDaemon.properties Group.properties ModuleAccessDefinitions.properties mpasswd Resource.properties Sql.properties"
 
 for FILE in $CONFFILES; do
     dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/admindaemon/$FILE \
         /opt/open-xchange/etc/$FILE 6.20.99 -- "$@"
 done
+dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/admindaemon/User.properties \
+        /opt/open-xchange/etc/AdminUser.properties 6.20.99 -- "$@"
 
 dpkg-maintscript-helper rm_conffile /opt/open-xchange/etc/admindaemon/RMI.properties 6.20.99 -- "$@"
 
