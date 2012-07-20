@@ -52,6 +52,7 @@ package com.openexchange.contact.storage;
 import java.util.Collection;
 import java.util.Date;
 import com.openexchange.contact.SortOptions;
+import com.openexchange.contact.storage.internal.SearchAdapter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
@@ -103,6 +104,15 @@ public abstract class DefaultContactStorage implements ContactStorage {
     @Override
     public SearchIterator<Contact> modified(Session session, String folderId, Date since, ContactField[] fields) throws OXException {
         return modified(session, folderId, since, fields, SortOptions.EMPTY);
+    }
+
+    /**
+     * Default implementation converting the {@link ContactSearchObject} 
+     * to a {@link SearchTerm}. Override if applicable for storage.
+     */
+    @Override
+    public SearchIterator<Contact> search(Session session, ContactSearchObject contactSearch, ContactField[] fields, SortOptions sortOptions) throws OXException {
+        return search(session, new SearchAdapter(contactSearch).getSearchTerm(), fields, sortOptions);
     }
 
     /**
