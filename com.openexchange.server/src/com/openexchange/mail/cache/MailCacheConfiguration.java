@@ -49,12 +49,15 @@
 
 package com.openexchange.mail.cache;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
-import com.openexchange.configuration.SystemConfig;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.services.ServerServiceRegistry;
 
@@ -89,20 +92,15 @@ public final class MailCacheConfiguration implements Initialization {
     }
 
     private void configure() throws OXException {
-        String cacheConfigFile = SystemConfig.getProperty(SystemConfig.Property.MailCacheConfig);
+        final File cacheConfigFile = ServerServiceRegistry.getInstance().getService(ConfigurationService.class).getFileByName("mailcache.ccf");
         if (cacheConfigFile == null) {
-            /*
-             * Not found via system config, try configuration service
-             */
-            cacheConfigFile = ServerServiceRegistry.getInstance().getService(ConfigurationService.class).getProperty(
-                SystemConfig.Property.MailCacheConfig.getPropertyName());
-            if (cacheConfigFile == null) {
-                throw
-                    ConfigurationExceptionCodes.PROPERTY_MISSING.create(
-                    SystemConfig.Property.MailCacheConfig.getPropertyName());
-            }
+            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create("mailcache.ccf");
         }
-        ServerServiceRegistry.getInstance().getService(CacheService.class).loadConfiguration(cacheConfigFile.trim());
+        try {
+            ServerServiceRegistry.getInstance().getService(CacheService.class).loadConfiguration(new FileInputStream(cacheConfigFile));
+        } catch (final FileNotFoundException e) {
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        }
     }
 
     @Override

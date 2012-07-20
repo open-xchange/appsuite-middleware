@@ -58,7 +58,6 @@ import java.net.URL;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Properties;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -101,11 +100,9 @@ public final class HtmlServiceImpl implements HtmlService {
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
-    private static final String CHARSET_US_ASCII = "US-ASCII";
-
     private static final String CHARSET_UTF_8 = "UTF-8";
 
-    private static final Pattern PAT_META_CT = Pattern.compile("<meta[^>]*?http-equiv=\"?content-type\"?[^>]*?>", Pattern.CASE_INSENSITIVE);
+    // private static final Pattern PAT_META_CT = Pattern.compile("<meta[^>]*?http-equiv=\"?content-type\"?[^>]*?>", Pattern.CASE_INSENSITIVE);
 
     private static final String TAG_E_HEAD = "</head>";
 
@@ -114,8 +111,6 @@ public final class HtmlServiceImpl implements HtmlService {
     /*-
      * Member stuff
      */
-
-    private final Properties tidyConfiguration;
 
     private final Map<Character, String> htmlCharMap;
 
@@ -128,9 +123,8 @@ public final class HtmlServiceImpl implements HtmlService {
      * @param htmlCharMap The HTML entity to string map
      * @param htmlEntityMap The string to HTML entity map
      */
-    public HtmlServiceImpl(final Properties tidyConfiguration, final Map<Character, String> htmlCharMap, final Map<String, Character> htmlEntityMap) {
+    public HtmlServiceImpl(final Map<Character, String> htmlCharMap, final Map<String, Character> htmlEntityMap) {
         super();
-        this.tidyConfiguration = tidyConfiguration;
         this.htmlCharMap = htmlCharMap;
         this.htmlEntityMap = htmlEntityMap;
     }
