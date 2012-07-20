@@ -50,10 +50,13 @@
 package com.openexchange.contact.storage;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.storage.internal.SearchAdapter;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
@@ -63,7 +66,9 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 
 /**
- * {@link DefaultContactStorage} - Abstract {@link ContactStorage} implementation.
+ * {@link DefaultContactStorage}
+ * 
+ * Abstract {@link ContactStorage} implementation.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
@@ -124,8 +129,35 @@ public abstract class DefaultContactStorage implements ContactStorage {
         return ContactField.values();
     }
     
+    /**
+     * Creates a new {@link SearchIterator} for the supplied contact collection.
+     * 
+     * @param contacts the contacts, or <code>null</code> to create an empty iterator
+     * @return the contact search iterator
+     */
     protected static SearchIterator<Contact> getSearchIterator(Collection<Contact> contacts) {
-    	return new SearchIteratorAdapter<Contact>(contacts.iterator(), contacts.size());
+        if (null == contacts) {
+            List<Contact> emptyList = Collections.emptyList(); 
+            return new SearchIteratorAdapter<Contact>(emptyList.iterator(), 0);
+        } else {
+            return new SearchIteratorAdapter<Contact>(contacts.iterator(), contacts.size());
+        }
     }
     
+    /**
+     * Parses a numerical identifier from a string, wrapping a possible 
+     * NumberFormatException into an OXException.
+     * 
+     * @param id the id string
+     * @return the parsed identifier
+     * @throws OXException
+     */
+    protected static int parse(String id) throws OXException {
+        try {
+            return Integer.parseInt(id);
+        } catch (NumberFormatException e) {
+            throw ContactExceptionCodes.ID_PARSING_FAILED.create(e, id); 
+        }
+    }
+
 }

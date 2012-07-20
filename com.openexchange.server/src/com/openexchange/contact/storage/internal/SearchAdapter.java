@@ -63,7 +63,6 @@ import com.openexchange.search.SingleSearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.search.internal.operands.ColumnOperand;
 import com.openexchange.search.internal.operands.ConstantOperand;
-import com.openexchange.tools.StringCollection;
 
 /**
  * {@link SearchAdapter}
@@ -265,27 +264,27 @@ public class SearchAdapter {
             CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
             SingleSearchTerm lessThanTerm = new SingleSearchTerm(SingleOperation.LESS_THAN);
             lessThanTerm.addOperand(new ColumnOperand(field));
-            lessThanTerm.addOperand(new ConstantOperand<String>("0%"));
+            lessThanTerm.addOperand(new ConstantOperand<String>("0*"));
             orTerm.addSearchTerm(lessThanTerm);
             SingleSearchTerm greaterThanTerm = new SingleSearchTerm(SingleOperation.GREATER_THAN);
             greaterThanTerm.addOperand(new ColumnOperand(field));
-            greaterThanTerm.addOperand(new ConstantOperand<String>("z%"));
+            greaterThanTerm.addOperand(new ConstantOperand<String>("z*"));
             orTerm.addSearchTerm(greaterThanTerm);
             andTerm.addSearchTerm(orTerm);
             SingleSearchTerm notEqualsTerm = new SingleSearchTerm(SingleOperation.NOT_EQUALS);
             notEqualsTerm.addOperand(new ColumnOperand(field));
-            notEqualsTerm.addOperand(new ConstantOperand<String>("z%"));
+            notEqualsTerm.addOperand(new ConstantOperand<String>("z*"));
             andTerm.addSearchTerm(notEqualsTerm);
             return andTerm;
         } else if (pattern.matches("\\d")) {
             CompositeSearchTerm andTerm = new CompositeSearchTerm(CompositeOperation.AND);
             SingleSearchTerm greaterThanTerm = new SingleSearchTerm(SingleOperation.GREATER_THAN);
             greaterThanTerm.addOperand(new ColumnOperand(field));
-            greaterThanTerm.addOperand(new ConstantOperand<String>("0%"));
+            greaterThanTerm.addOperand(new ConstantOperand<String>("0*"));
             andTerm.addSearchTerm(greaterThanTerm);
             SingleSearchTerm lessThanTerm = new SingleSearchTerm(SingleOperation.LESS_THAN);
             lessThanTerm.addOperand(new ColumnOperand(field));
-            lessThanTerm.addOperand(new ConstantOperand<String>("a%"));
+            lessThanTerm.addOperand(new ConstantOperand<String>("a*"));
             andTerm.addSearchTerm(lessThanTerm);
             return andTerm;
         } else if (false == "all".equals(pattern)) {
@@ -307,7 +306,7 @@ public class SearchAdapter {
             /*
              * <field> LIKE '<pattern>%'
              */
-            String preparedPattern = StringCollection.prepareForSearch(pattern, false, true, true);
+            String preparedPattern = prepareForSearch(pattern, false, true);
             SingleSearchTerm equalsTerm = new SingleSearchTerm(SingleOperation.EQUALS);
             equalsTerm.addOperand(new ColumnOperand(field));
             equalsTerm.addOperand(new ConstantOperand<String>(preparedPattern));
@@ -360,8 +359,18 @@ public class SearchAdapter {
         SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
         term.addOperand(new ContactFieldOperand(field));
         Search.checkPatternLength(pattern);
-        term.addOperand(new ConstantOperand<String>(StringCollection.prepareForSearch(pattern, prependWildcard, appendWildcard, true)));
+        term.addOperand(new ConstantOperand<String>(prepareForSearch(pattern, prependWildcard, appendWildcard)));
         return term;
+    }
+    
+    private static String prepareForSearch(String pattern, boolean prependWildcard, boolean appendWildcard) {
+        if (prependWildcard && false == pattern.startsWith("*")) {
+            pattern = "*" + pattern;
+        }
+        if (prependWildcard && false == pattern.endsWith("*")) {
+            pattern = pattern + "*";
+        }
+        return pattern;
     }
 
 }
