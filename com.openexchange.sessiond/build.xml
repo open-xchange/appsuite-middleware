@@ -19,19 +19,6 @@
         <copy todir="${patchConfDir}" overwrite="true">
             <fileset dir="${confDir}"/>
         </copy>
-        <antcall target="patchConfigFiles"/>
-    </target>
-
-    <target name="patchConfigFiles">
-        <antcall target="patchPathInProperties"/>
-    </target>
-
-    <target name="patchPathInProperties">
-        <move tofile="${patchConfDir}/sessiond.properties" file="${patchConfDir}/sessiond.properties.in" overwrite="true"/>
-
-        <replace dir="${patchConfDir}" includes="sessiond.properties">
-            <replacefilter token="@oxgroupwaresysconfdir@" value="${confInstallDir}"/>
-        </replace>
-    </target>    
+    </target> 
 
 </project>
