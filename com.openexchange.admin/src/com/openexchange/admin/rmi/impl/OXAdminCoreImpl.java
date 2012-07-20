@@ -70,6 +70,7 @@ public class OXAdminCoreImpl implements OXAdminCoreInterface {
         this.context = context;
     }
 
+    @Override
     public boolean allPluginsLoaded() {
         final java.util.List<Bundle> bundlelist = AdminDaemon.getBundlelist();
         final Bundle[] bundles = context.getBundles();

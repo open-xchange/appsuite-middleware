@@ -1021,7 +1021,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
                 stmt.setInt(12, contactId);
 
-                String homedir = prop.getUserProp(AdminProperties.User.HOME_DIR_ROOT, "/home");
+                String homedir = "/home"; //prop.getUserProp(AdminProperties.User.HOME_DIR_ROOT, "/home");
                 homedir += "/" + usrdata.getName();
                 stmt.setString(13, homedir);
 

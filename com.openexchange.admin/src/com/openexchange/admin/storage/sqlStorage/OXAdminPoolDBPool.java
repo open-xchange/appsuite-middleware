@@ -67,10 +67,12 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
         super();
     }
 
+    @Override
     public void setService(DatabaseService service) {
         this.service = service;
     }
 
+    @Override
     public void removeService() {
         setService(null);
     }
@@ -82,6 +84,7 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
         return service;
     }
 
+    @Override
     public Connection getConnectionForConfigDB() throws PoolException {
         final Connection con;
         try {
@@ -93,6 +96,7 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
         return con;
     }
 
+    @Override
     public Connection getConnectionForContext(int contextId) throws PoolException {
         final Connection con;
         try {
@@ -104,6 +108,7 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
         return con;
     }
 
+    @Override
     public Connection getConnectionForContextNoTimeout(int contextId) throws PoolException {
         final Connection con;
         try {
@@ -115,6 +120,7 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
         return con;
     }
 
+    @Override
     public boolean pushConnectionForConfigDB(Connection con) throws PoolException {
         try {
             if (con != null && !con.getAutoCommit() && !con.isClosed()) {
@@ -129,6 +135,7 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
         return true;
     }
 
+    @Override
     public boolean pushConnectionForContext(int contextId, Connection con) throws PoolException {
         try {
             if (con != null && !con.getAutoCommit() && !con.isClosed()) {
@@ -143,6 +150,7 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
         return true;
     }
 
+    @Override
     public boolean pushConnectionForContextNoTimeout(int contextId, Connection con) throws PoolException {
         try {
             if (null != con && !con.getAutoCommit() && !con.isClosed()) {
@@ -157,6 +165,7 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
         return true;
     }
 
+    @Override
     public int getServerId() throws PoolException {
         final int serverId;
         try {
@@ -168,6 +177,7 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
         return serverId;
     }
 
+    @Override
     public void writeAssignment(Connection con, Assignment assign) throws PoolException {
         try {
             service.writeAssignment(con, assign);

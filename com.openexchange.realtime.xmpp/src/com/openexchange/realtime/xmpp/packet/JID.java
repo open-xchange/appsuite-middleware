@@ -123,6 +123,7 @@ public class JID {
         return !isBare();
     }
 
+    @Override
     public String toString() {
         return toBareString() + (isBare() ? "" : "/" + resource);
     }

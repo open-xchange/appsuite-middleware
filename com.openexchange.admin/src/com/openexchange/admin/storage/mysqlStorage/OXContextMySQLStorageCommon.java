@@ -434,18 +434,23 @@ public class OXContextMySQLStorageCommon {
         try {
             final int serverId = ClientAdminThread.cache.getServerId();
             ClientAdminThread.cache.getPool().writeAssignment(con, new Assignment() {
+                @Override
                 public int getContextId() {
                     return i(ctx.getId());
                 }
+                @Override
                 public int getServerId() {
                     return serverId;
                 }
+                @Override
                 public int getReadPoolId() {
                     return i(db.getRead_id());
                 }
+                @Override
                 public int getWritePoolId() {
                     return i(db.getId());
                 }
+                @Override
                 public String getSchema() {
                     return db.getScheme();
                 }

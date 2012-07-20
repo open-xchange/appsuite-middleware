@@ -219,7 +219,7 @@ public class Transaction {
 	private void log() {
 		Iterator<Operation> it = operations.iterator();
 		while (it.hasNext()) {
-			Operation o = (Operation) it.next();
+			Operation o = it.next();
 			
 			ColumnFamilyUpdater<UUID, Composite> transactionUpdater = transactionTemplate.createUpdater(txKey);
 			
@@ -286,7 +286,7 @@ public class Transaction {
 		
 		while (operationsIterator.hasNext()) {
 			
-			Operation o = (Operation) operationsIterator.next();
+			Operation o = operationsIterator.next();
 			Iterator<String> itColumnNames = o.getColumnNamesIterator();
 			
 			log.info("Executing " + o.getAction() + " in " + o.getColumnFamilyName() + " with ROW KEY: " + o.getLockedObject()); 
@@ -299,7 +299,7 @@ public class Transaction {
 				Mutator<UUID> m = HFactory.createMutator(keyspace, us);						
 					
 				while (itColumnNames.hasNext()) {
-					String columnName = (String) itColumnNames.next();
+					String columnName = itColumnNames.next();
 					Composite compo = createComposite(columnName);
 					m.addInsertion(UUID.fromString(o.getObjectRowKey()), o.getColumnFamilyName(), HFactory.createColumn(compo, o.getData(columnName)));
 				}
@@ -326,7 +326,7 @@ public class Transaction {
 				} else {
 				
 					while (itColumnNames.hasNext()) {
-						String columnName = (String) itColumnNames.next();
+						String columnName = itColumnNames.next();
 						Composite compo = createComposite(columnName);
 						m.addDeletion(UUID.fromString(o.getObjectRowKey()), o.getColumnFamilyName(), compo, cs);	
 					}
@@ -350,7 +350,7 @@ public class Transaction {
 					UUID cn = UUID.fromString(key);
 					try {
 						Mutator<String> mu = HFactory.createMutator(keyspace, ss);
-						mu.incrementCounter((String)o.getObjectRowKey(), o.getColumnFamilyName(), cn, Long.parseLong((String)o.getData(key)));
+						mu.incrementCounter(o.getObjectRowKey(), o.getColumnFamilyName(), cn, Long.parseLong(o.getData(key)));
 						//transactionUpdater.setString(new Composite(o.getSequenceNumber(), o.getColumnFamilyName(), o.getAction().toString()), OperationState.SUCCEEDED.toString());
 						transactionUpdater.setString(new Composite(o.getSequenceNumber(), "Status"), OperationState.SUCCEEDED.toString());
 						transactionTemplate.update(transactionUpdater);
@@ -369,7 +369,7 @@ public class Transaction {
 					UUID cn = UUID.fromString(key);
 					try {
 						Mutator<String> mu = HFactory.createMutator(keyspace, ss);
-						mu.decrementCounter((String)o.getObjectRowKey(), o.getColumnFamilyName(), cn, Long.parseLong((String)o.getData(key)));
+						mu.decrementCounter(o.getObjectRowKey(), o.getColumnFamilyName(), cn, Long.parseLong(o.getData(key)));
 						//transactionUpdater.setString(new Composite(o.getSequenceNumber(), o.getColumnFamilyName(), o.getAction().toString()), OperationState.SUCCEEDED.toString());
 						transactionUpdater.setString(new Composite(o.getSequenceNumber(), "Status"), OperationState.SUCCEEDED.toString());
 						transactionTemplate.update(transactionUpdater);

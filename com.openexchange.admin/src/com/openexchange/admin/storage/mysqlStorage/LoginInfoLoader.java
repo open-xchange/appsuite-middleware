@@ -84,6 +84,7 @@ public class LoginInfoLoader implements Filter<Context, Context> {
         this.cache = cache;
     }
 
+    @Override
     public Context[] filter(final Collection<Context> input) throws PipesAndFiltersException {
         final Map<Integer, Context> contexts = new HashMap<Integer, Context>(input.size());
         for (final Context context : input) {

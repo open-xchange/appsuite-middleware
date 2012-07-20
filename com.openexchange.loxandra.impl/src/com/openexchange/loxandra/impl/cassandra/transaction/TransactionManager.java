@@ -138,7 +138,7 @@ public class TransactionManager {
 			ColumnSliceIterator<UUID, Composite, ByteBuffer> itTransactions = new ColumnSliceIterator<UUID, Composite, ByteBuffer>(sliceQuery, start, end, false);
 		 	
 		 	while (itTransactions.hasNext()) {
-				HColumn<Composite, ByteBuffer> hColumn = (HColumn<Composite, ByteBuffer>) itTransactions.next();
+				HColumn<Composite, ByteBuffer> hColumn = itTransactions.next();
 				
 				try {
 					UUID txKey = UUID.fromString(ByteBufferUtil.string((ByteBuffer)hColumn.getName().get(1)));
@@ -286,7 +286,7 @@ public class TransactionManager {
 		Iterator<Operation> iter = tx.getOperations().iterator();
 		
 		while (iter.hasNext()) {
-			Operation type = (Operation) iter.next();
+			Operation type = iter.next();
 			
 			String rowKey = type.getObjectRowKey().toString();
 			
@@ -349,7 +349,7 @@ public class TransactionManager {
 		List<Queue<Transaction>> lq = new ArrayList<Queue<Transaction>>();
 		
 		while (it.hasNext()) {
-			Operation operation = (Operation) it.next();
+			Operation operation = it.next();
 			m.addDeletion(LOCK_ROW, CF_TRANSACTION_LOG, operation.getLockedObject(), cs);
 			Queue<Transaction> q = queue.get(operation.getColumnFamilyName() + "-" + operation.getObjectRowKey());
 			if (q != null)
@@ -360,7 +360,7 @@ public class TransactionManager {
 		
 		Iterator<Queue<Transaction>> itQ = lq.iterator();
 		while (itQ.hasNext()) {
-			Queue<Transaction> queue = (Queue<Transaction>) itQ.next();
+			Queue<Transaction> queue = itQ.next();
 			Transaction txQ = queue.poll();
 			synchronized (txQ) {
 				txQ.notify();

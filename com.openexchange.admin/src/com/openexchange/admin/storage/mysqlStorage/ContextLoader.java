@@ -92,6 +92,7 @@ public class ContextLoader implements Filter<Integer, Context> {
         this.failOnMissing = failOnMissing;
     }
 
+    @Override
     public Context[] filter(final Collection<Integer> input) throws PipesAndFiltersException {
         List<Context> contexts;
         try {

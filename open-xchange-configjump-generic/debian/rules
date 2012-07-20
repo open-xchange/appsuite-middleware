@@ -3,7 +3,7 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-name=open-xchange-mailfilter
+name=open-xchange-configjump-generic
 installroot=$(CURDIR)/debian/$(name)
 
 configure: configure-stamp
