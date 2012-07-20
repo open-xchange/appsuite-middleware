@@ -150,7 +150,7 @@ public class ImageGetAction implements AJAXActionService {
             if (DEBUG) {
                 LOG.debug("Writing image data failed.", e);
             }
-            throw AjaxExceptionCodes.BAD_REQUEST.create();
+            throw AjaxExceptionCodes.BAD_REQUEST.create(e, new Object[0]);
         }
         return requestResult;
     }
