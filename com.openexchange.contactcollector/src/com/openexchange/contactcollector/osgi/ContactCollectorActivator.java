@@ -96,19 +96,9 @@ public class ContactCollectorActivator extends HousekeepingActivator {
             }
         }
         /*
-         * (Re-)Initialize service registry with available services
+         * Initialize service registry with available services
          */
-        {
-            final CCServiceRegistry registry = CCServiceRegistry.getInstance();
-            registry.clearRegistry();
-            final Class<?>[] classes = getNeededServices();
-            for (final Class<?> classe : classes) {
-                final Object service = getService(classe);
-                if (null != service) {
-                    registry.addService(classe, service);
-                }
-            }
-        }
+        CCServiceRegistry.REFERENCE.set(this);
         /*
          * Initialize service
          */
@@ -139,7 +129,7 @@ public class ContactCollectorActivator extends HousekeepingActivator {
         /*
          * Clear service registry
          */
-        CCServiceRegistry.getInstance().clearRegistry();
+        CCServiceRegistry.REFERENCE.set(null);
     }
 
     @Override
@@ -147,16 +137,6 @@ public class ContactCollectorActivator extends HousekeepingActivator {
         return new Class<?>[] {
             ContextService.class, UserService.class, UserConfigurationService.class, ContactService.class,
             ThreadPoolService.class, DatabaseService.class, ConfigurationService.class };
-    }
-
-    @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        CCServiceRegistry.getInstance().addService(clazz, getService(clazz));
-    }
-
-    @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        CCServiceRegistry.getInstance().removeService(clazz);
     }
 
 }
