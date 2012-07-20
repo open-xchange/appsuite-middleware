@@ -22,19 +22,6 @@
         <copy todir="${patchConfDir}" overwrite="true">
             <fileset dir="${confDir}" includes="crawler.properties.in"/>
         </copy>
-        <antcall target="patchConfigFiles"/>
-    </target>
-
-    <target name="patchConfigFiles">
-        <antcall target="patchPathInProperties"/>
-    </target>
-
-    <target name="patchPathInProperties">
-        <move tofile="${patchConfDir}/crawler.properties" file="${patchConfDir}/crawler.properties.in" overwrite="true"/>
-
-        <replace dir="${patchConfDir}" includes="crawler.properties">
-            <replacefilter token="@confDir@" value="${confInstallDir}"/>
-        </replace>
     </target>
 
     <target name="postClean">
