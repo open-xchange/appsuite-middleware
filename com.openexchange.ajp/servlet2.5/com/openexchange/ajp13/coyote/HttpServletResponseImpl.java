@@ -698,7 +698,7 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
             final Iterator<Cookie> iter = checkedCookies.values().iterator();
             final StringBuilder strBuilder = new StringBuilder(32);
             list.add(getFormattedCookie(iter.next(), userAgent, strBuilder, httpOnly));
-            for (int i = 1; i < cookiesSize; i++) {
+            while (iter.hasNext()) {
                 strBuilder.setLength(0);
                 list.add(getFormattedCookie(iter.next(), userAgent, strBuilder, httpOnly));
             }
