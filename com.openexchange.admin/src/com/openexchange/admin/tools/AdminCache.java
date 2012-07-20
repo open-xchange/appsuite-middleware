@@ -293,7 +293,11 @@ public class AdminCache {
     private Properties loadAccessCombinations() {
         // Load properties from file , if does not exists use fallback
         // properties!
-        return AdminServiceRegistry.getInstance().getService(ConfigurationService.class).getFile("ModuleAccessDefinitions.properties");
+        final ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
+        if (null == service) {
+            throw new IllegalStateException("Absent service: " + ConfigurationService.class.getName());
+        }
+        return service.getFile("ModuleAccessDefinitions.properties");
     }
 
     private Properties getFallbackAccessCombinations() {
