@@ -104,7 +104,7 @@ public class CalendarConfig extends AbstractConfig implements Initialization {
      */
     @Override
     protected String getPropertyFileName() throws OXException {
-        File file = ServerServiceRegistry.getInstance().getService(ConfigurationService.class).getFileByName("calendar.properties");
+        final File file = ServerServiceRegistry.getInstance().getService(ConfigurationService.class).getFileByName("calendar.properties");
         final String filename = null == file ? null : file.getPath();
         if (null == filename) {
             throw ConfigurationExceptionCodes.PROPERTY_MISSING.create("calendar.properties");

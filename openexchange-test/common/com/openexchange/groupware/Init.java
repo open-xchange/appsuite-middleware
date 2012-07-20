@@ -435,7 +435,7 @@ public final class Init {
             com.openexchange.html.services.ServiceRegistry.getInstance().addService(ConfigurationService.class, configService);
             Report.setResourceBundleFrom(HTMLServiceActivator.getTidyMessages(configService.getProperty("TidyMessages")));
             final Properties properties = HTMLServiceActivator.getTidyConfiguration(configService.getProperty("TidyConfiguration"));
-            final Object[] maps = HTMLServiceActivator.getHTMLEntityMaps(configService.getProperty("HTMLEntities"));
+            final Object[] maps = HTMLServiceActivator.getHTMLEntityMaps(configService.getFileByName("HTMLEntities.properties"));
             @SuppressWarnings("unchecked")
             final Map<String, Character> htmlEntityMap = (Map<String, Character>) maps[1];
             htmlEntityMap.put("apos", Character.valueOf('\''));

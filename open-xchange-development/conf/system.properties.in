@@ -24,28 +24,9 @@ UserConfigurationStorage=Caching
 # true or the database will get a lot more load.
 Cache=true
 
-# Location of the infostore.properties configuration file. This file configures
-# the infostore subsystem.
-Infostore=@oxgroupwaresysconfdir@/infostore.properties
-
-# Location of the attachment.properties configuration file. This file configures
-# the attachment subsystem.
-Attachment=@oxgroupwaresysconfdir@/attachment.properties
-
-# Location of the notification.properties configuration file. This file 
-# configures certain assumptions about sending notifications
-Notification=@oxgroupwaresysconfdir@/notification.properties
-
-# Directory in which all property files for servlet mapping are kept
-ServletMappingDir=@oxgroupwaresysconfdir@/servletmappings
-
 # IMPORTEREXPORTER:@oxgroupwaresysconfdir@/importerExporter.xml
 
 CalendarSQL=com.openexchange.groupware.calendar.CalendarMySQL
-
-# Location of the HTMLEntities.properties configuration file. This file
-# contains the most HTML entities and maps them to their character value
-HTMLEntities=@oxgroupwaresysconfdir@/HTMLEntities.properties
 
 # Location of the configuration file for mail caches
 MailCacheConfig:@oxgroupwaresysconfdir@/mailcache.ccf
