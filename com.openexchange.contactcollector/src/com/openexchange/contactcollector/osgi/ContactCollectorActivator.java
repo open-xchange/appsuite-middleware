@@ -65,6 +65,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
@@ -86,6 +87,16 @@ public class ContactCollectorActivator extends HousekeepingActivator {
     }
 
     @Override
+    public <S> boolean addServiceAlt(Class<? extends S> clazz, S service) {
+        return super.addServiceAlt(clazz, service);
+    }
+
+    @Override
+    public <S> boolean removeService(Class<? extends S> clazz) {
+        return super.removeService(clazz);
+    }
+
+    @Override
     public void startBundle() throws Exception {
         {
             final ConfigurationService cService = getService(ConfigurationService.class);
@@ -98,7 +109,30 @@ public class ContactCollectorActivator extends HousekeepingActivator {
         /*
          * Initialize service registry with available services
          */
-        CCServiceRegistry.REFERENCE.set(this);
+        final ContactCollectorActivator activator = this;
+        final ServiceRegistry serviceRegistry = new ServiceRegistry() {
+
+            @Override
+            public <S> S getOptionalService(final Class<? extends S> clazz) {
+                return activator.getOptionalService(clazz);
+            }
+
+            @Override
+            public <S> S getService(final Class<? extends S> clazz) {
+                return activator.getService(clazz);
+            }
+
+            @Override
+            public <S> void addService(final Class<? extends S> clazz, final S service) {
+                activator.addServiceAlt(clazz, service);
+            }
+
+            @Override
+            public void removeService(final Class<?> clazz) {
+                activator.removeService(clazz);
+            }
+        };
+        CCServiceRegistry.SERVICE_REGISTRY.set(serviceRegistry);
         /*
          * Initialize service
          */
@@ -129,7 +163,7 @@ public class ContactCollectorActivator extends HousekeepingActivator {
         /*
          * Clear service registry
          */
-        CCServiceRegistry.REFERENCE.set(null);
+        CCServiceRegistry.SERVICE_REGISTRY.set(null);
     }
 
     @Override

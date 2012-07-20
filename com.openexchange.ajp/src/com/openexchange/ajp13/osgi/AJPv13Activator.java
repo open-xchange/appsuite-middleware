@@ -62,13 +62,14 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.server.Initialization;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 
 /**
  * {@link AJPv13Activator}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AJPv13Activator extends HousekeepingActivator {
@@ -76,8 +77,7 @@ public final class AJPv13Activator extends HousekeepingActivator {
     /**
      * The logger.
      */
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AJPv13Activator.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AJPv13Activator.class));
 
     private List<Initialization> inits;
 
@@ -94,8 +94,8 @@ public final class AJPv13Activator extends HousekeepingActivator {
     }
 
     @Override
-    public <S> boolean addService(Class<S> clazz, S service) {
-        return super.addService(clazz, service);
+    public <S> boolean addServiceAlt(Class<? extends S> clazz, S service) {
+        return super.addServiceAlt(clazz, service);
     }
 
     @Override
@@ -109,7 +109,30 @@ public final class AJPv13Activator extends HousekeepingActivator {
             /*
              * (Re-)Initialize service registry with available services
              */
-            AJPv13ServiceRegistry.SERVICE_LOOKUP.set(this);
+            final AJPv13Activator activator = this;
+            final ServiceRegistry serviceRegistry = new ServiceRegistry() {
+
+                @Override
+                public <S> S getOptionalService(final Class<? extends S> clazz) {
+                    return activator.getOptionalService(clazz);
+                }
+
+                @Override
+                public <S> S getService(final Class<? extends S> clazz) {
+                    return activator.getService(clazz);
+                }
+
+                @Override
+                public <S> void addService(final Class<? extends S> clazz, final S service) {
+                    activator.addServiceAlt(clazz, service);
+                }
+
+                @Override
+                public void removeService(final Class<?> clazz) {
+                    activator.removeService(clazz);
+                }
+            };
+            AJPv13ServiceRegistry.SERVICE_REGISTRY.set(serviceRegistry);
             inits = new ArrayList<Initialization>(3);
             /*
              * Set starter dependent on mode
@@ -193,7 +216,7 @@ public final class AJPv13Activator extends HousekeepingActivator {
             /*
              * Clear service registry
              */
-            AJPv13ServiceRegistry.SERVICE_LOOKUP.set(null);
+            AJPv13ServiceRegistry.SERVICE_REGISTRY.set(null);
         } catch (final Exception e) {
             com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AJPv13Activator.class)).error(e.getMessage(), e);
             throw e;

@@ -148,6 +148,7 @@ import com.openexchange.mail.transport.config.TransportPropertiesInit;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.internal.MailAccountStorageInit;
+import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.push.udp.registry.PushServiceRegistry;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.internal.ResourceServiceImpl;
@@ -679,7 +680,7 @@ public final class Init {
     }
 
     private static void startAndInjectContactCollector() throws Exception {
-        final CCServiceRegistry reg = CCServiceRegistry.getInstance();
+        final ServiceRegistry reg = CCServiceRegistry.getInstance();
         if (null == reg.getService(TimerService.class)) {
             reg.addService(TimerService.class, services.get(TimerService.class));
             reg.addService(ThreadPoolService.class, services.get(ThreadPoolService.class));

@@ -83,7 +83,7 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
         /*
          * Add management service to server's service registry
          */
-        activator.addService(ManagementService.class, managementService);
+        activator.addServiceAlt(ManagementService.class, managementService);
         try {
             /*
              * Add all MBeans since management service is now available
