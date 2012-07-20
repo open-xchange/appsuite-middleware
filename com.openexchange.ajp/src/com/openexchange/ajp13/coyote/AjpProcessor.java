@@ -1872,7 +1872,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 }
             }
             cookies = sink.toByteArray();
-            numCookies = getNumOfCookieHeader(formattedCookies);
+            numCookies = length > 0 ? getNumOfCookieHeader(formattedCookies) : 0;
         }
         /*
          * Calculate data length
