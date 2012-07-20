@@ -4,6 +4,7 @@ opt/open-xchange/etc/cache.ccf
 opt/open-xchange/etc/calendar.properties
 opt/open-xchange/etc/configdb.properties
 opt/open-xchange/etc/contact.properties
+opt/open-xchange/etc/contactcollector.properties
 opt/open-xchange/etc/event.properties
 opt/open-xchange/etc/excludedupdatetasks.properties
 opt/open-xchange/etc/file-logging.properties
