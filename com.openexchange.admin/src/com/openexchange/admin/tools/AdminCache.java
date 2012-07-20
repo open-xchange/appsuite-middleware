@@ -608,6 +608,9 @@ public class AdminCache {
 
     private void readMasterCredentials() throws OXGenericException {
         final ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
+        if (null == service) {
+            throw new IllegalStateException("Absent service: " + ConfigurationService.class.getName());
+        }
         final BufferedReader bf = new BufferedReader(new StringReader(service.getText("mpasswd")));
         try {
             String line = null;
