@@ -10,22 +10,19 @@
     <!-- Constants -->
     <property name="patchConfDir" value="${tmpDir}/${confDir}"/>
 
-    <target name="installConf" depends="patchConfig">
+    <target name="installConf">
         <copy todir="${destDir}/${confInstallDir}">
-            <fileset dir="${patchConfDir}"/>
             <fileset dir="${confDir}" includes="crawlers/**"/>
         </copy>
     </target>
 
-    <target name="patchConfig">
-        <mkdir dir="${patchConfDir}"/>
-        <copy todir="${patchConfDir}" overwrite="true">
-            <fileset dir="${confDir}" includes="crawler.properties.in"/>
-        </copy>
-    </target>
-
     <target name="postClean">
-        <delete dir="${tmpDir}"/>
+    	<if>
+            <available file="${tmpDir}" type="dir"/>
+            <then>
+            	<delete dir="${tmpDir}"/>
+            </then>
+        </if>
     </target>
 
 </project>
