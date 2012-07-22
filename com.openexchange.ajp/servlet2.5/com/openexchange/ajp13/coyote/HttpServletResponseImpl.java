@@ -62,6 +62,7 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -663,7 +664,6 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
      * @return A two dimensional array of {@link String} containing the <tt>Set-Cookie</tt>/<tt>Set-Cookie2</tt> headers
      */
     public List<List<String>> getFormatedCookies() {
-        final List<List<String>> retval = new ArrayList<List<String>>(1);
         final int cookiesSize = cookies.size();
         if (cookiesSize <= 0) {
             return EMPTY_COOKIES;
@@ -671,10 +671,8 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
         // Write cookies
         final List<String> list = new ArrayList<String>(cookiesSize);
         {
-            final HttpServletRequestImpl request = ajpProcessor.getRequest();
-            final String userAgent = request.getHeader("User-Agent");
             // Check for duplicate cookies
-            final Map<String, Cookie> checkedCookies = new HashMap<String, Cookie>(cookiesSize);
+            final Map<String, Cookie> checkedCookies = new LinkedHashMap<String, Cookie>(cookiesSize);
             for (final Cookie cookie : cookies) {
                 /*final Cookie prev = */checkedCookies.put(cookie.getName(), cookie);
                 // Already existing; decide which one to keep or to merge
@@ -695,14 +693,14 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
                 }
                 */
             }
-            final Iterator<Cookie> iter = checkedCookies.values().iterator();
+            // Write to list
+            final String userAgent = ajpProcessor.getRequest().getHeader("User-Agent");
             final StringBuilder strBuilder = new StringBuilder(32);
-            list.add(getFormattedCookie(iter.next(), userAgent, strBuilder, httpOnly));
-            while (iter.hasNext()) {
-                strBuilder.setLength(0);
-                list.add(getFormattedCookie(iter.next(), userAgent, strBuilder, httpOnly));
+            for (final Cookie cookie : checkedCookies.values()) {
+                list.add(getFormattedCookie(cookie, userAgent, strBuilder, httpOnly));
             }
         }
+        final List<List<String>> retval = new ArrayList<List<String>>(1);
         retval.add(list);
         return retval;
     }
@@ -717,6 +715,7 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
      * @return A string representing the HTTP header format
      */
     private static final String getFormattedCookie(final Cookie cookie, final String userAgent, final StringBuilder strBuilder, final boolean httpOnly) {
+        strBuilder.setLength(0);
         strBuilder.append(cookie.getName()).append('=');
         strBuilder.append(cookie.getValue());
         final int maxAge = cookie.getMaxAge();
