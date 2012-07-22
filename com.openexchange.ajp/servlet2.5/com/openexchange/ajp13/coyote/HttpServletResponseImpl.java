@@ -75,6 +75,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import org.apache.commons.logging.Log;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajp13.AJPv13Config;
@@ -98,8 +99,9 @@ import com.openexchange.tools.regex.MatcherReplacer;
  */
 public final class HttpServletResponseImpl implements HttpServletResponse {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ServletResponseWrapper.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(HttpServletResponseImpl.class);
+
+    private static final boolean DEBUG = LOG.isDebugEnabled();
 
     public static final int OUTPUT_NOT_SELECTED = -1;
 
@@ -748,6 +750,9 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
          */
         if (httpOnly /* && maxAge > 0 */) {
             strBuilder.append("; HttpOnly");
+        }
+        if (DEBUG) {
+            LOG.debug("Cookie: " + strBuilder.toString());
         }
         return strBuilder.toString();
     }
