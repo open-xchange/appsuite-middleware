@@ -771,13 +771,13 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
 
     @Override
     public void addHeader(final String name, final String value) {
-        final List<String> prevValues = headers.get(name);
         if (SINGLE_VALUE_HEADERS.contains(name)) {
             headers.put(name, Collections.singletonList(value));
         } else {
             /*
              * Header may carry multiple values
              */
+            final List<String> prevValues = headers.get(name);
             if (null == prevValues) {
                 headers.put(name, newLinkedList(value));
             } else {
