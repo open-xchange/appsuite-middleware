@@ -52,8 +52,8 @@ package com.openexchange.admin.tools;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
-import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -149,7 +149,7 @@ public class AdminCache {
         this.prop = new PropertyHandler(System.getProperties());
         cacheSqlScripts(service);
         configureAuthentication(); // disabling authentication mechs
-        readMasterCredentials();
+        readMasterCredentials(service);
         this.log.info("Init Cache");
         initPool();
         this.adminCredentialsCache = new Hashtable<Integer, Credentials>();
@@ -606,13 +606,10 @@ public class AdminCache {
         log.debug("ContextAuthentication mechanism disabled: " + contextAuthenticationDisabled);
     }
 
-    private void readMasterCredentials() throws OXGenericException {
-        final ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
-        if (null == service) {
-            throw new IllegalStateException("Absent service: " + ConfigurationService.class.getName());
-        }
-        final BufferedReader bf = new BufferedReader(new StringReader(service.getText("mpasswd")));
+    private void readMasterCredentials(final ConfigurationService service) throws OXGenericException {
+        BufferedReader bf = null;
         try {
+            bf = new BufferedReader(new FileReader(service.getFileByName("mpasswd")), 2048);
             String line = null;
             while ((line = bf.readLine()) != null) {
                 if (!line.startsWith("#")) {
@@ -629,10 +626,12 @@ public class AdminCache {
         } catch (IOException e) {
             throw new OXGenericException("Error processing master auth file: mpasswd", e);
         } finally {
-            try {
-                bf.close();
-            } catch (IOException e) {
-                log.error(e.getMessage(), e);
+            if (null != bf) {
+                try {
+                    bf.close();
+                } catch (IOException e) {
+                    log.error(e.getMessage(), e);
+                }
             }
         }
         if (masterCredentials == null) {
