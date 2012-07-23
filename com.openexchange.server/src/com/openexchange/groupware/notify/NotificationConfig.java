@@ -49,13 +49,14 @@
 
 package com.openexchange.groupware.notify;
 
+import java.io.File;
 import org.apache.commons.logging.Log;
 import com.openexchange.log.LogFactory;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
-import com.openexchange.configuration.SystemConfig;
-import com.openexchange.configuration.SystemConfig.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.Initialization;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.conf.AbstractConfig;
 
 /**
@@ -64,8 +65,6 @@ import com.openexchange.tools.conf.AbstractConfig;
 public class NotificationConfig extends AbstractConfig implements Initialization {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(NotificationConfig.class));
-
-    private static final Property KEY = Property.NOTIFICATION;
 
     public enum NotificationProperty{
 
@@ -95,10 +94,10 @@ public class NotificationConfig extends AbstractConfig implements Initialization
 
     @Override
     protected String getPropertyFileName() throws OXException {
-        final String filename = SystemConfig.getProperty(KEY);
+        final File file = ServerServiceRegistry.getInstance().getService(ConfigurationService.class).getFileByName("notification.properties");
+        final String filename = null == file ? null : file.getPath();
         if (null == filename) {
-            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(
-                KEY.getPropertyName());
+            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create("notification.properties");
         }
         return filename;
     }

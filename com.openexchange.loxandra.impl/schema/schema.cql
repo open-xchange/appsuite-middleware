@@ -1,4 +1,4 @@
-CREATE KEYSPACE OX WITH strategy_class = 'SimpleStrategy' AND strategy_options:replication_factor = 1;
+CREATE KEYSPACE OX WITH strategy_class = 'SimpleStrategy' AND strategy_options:replication_factor = 3;
 
 USE OX;
 
@@ -22,4 +22,4 @@ CREATE COLUMNFAMILY TransactionLog (KEY uuid PRIMARY KEY) with comparator = 'Com
 // Persons who exist within a specific context, CONTEXT is the UUID of the context
 //CREATE COLUMNFAMILY PersonContext (KEY uuid PRIMARY KEY);
 
-CREATE COLUMNFAMILY Session (KEY varchar PRIMARY KEY) WITH comparator = varchar AND default_validation = BytesType;
+CREATE COLUMNFAMILY session (KEY varchar PRIMARY KEY) WITH comparator = varchar AND default_validation = BytesType AND gc_grace_seconds = 300;

@@ -79,11 +79,11 @@ public class AdminProperties {
 	    public static final String ADMINDAEMON_LOGLEVEL             = "LOG_LEVEL";
 	    public static final String ADMINDAEMON_LOGFILE              = "LOG";
 	    
-	    public static final String PROPERTIES_SQL_FILE              = "SQL_PROP";
-	    public static final String PROPERTIES_USER_FILE             = "USER_PROP";
-	    public static final String PROPERTIES_GROUP_FILE            = "GROUP_PROP";
-	    public static final String PROPERTIES_RESOURCE_FILE         = "RESOURE_PROP";
-	    public static final String PROPERTIES_RMI_FILE              = "RMI_PROP";
+	    // public static final String PROPERTIES_SQL_FILE              = "SQL_PROP";
+	    // public static final String PROPERTIES_USER_FILE             = "USER_PROP";
+	    // public static final String PROPERTIES_GROUP_FILE            = "GROUP_PROP";
+	    // public static final String PROPERTIES_RESOURCE_FILE         = "RESOURE_PROP";
+	    // public static final String PROPERTIES_RMI_FILE              = "RMI_PROP";
 	}
 	
 	/**
@@ -118,8 +118,8 @@ public class AdminProperties {
 	    public static final String AUTO_LOWERCASE             = "AUTO_TO_LOWERCASE_UID";
 	    public static final String CHECK_NOT_ALLOWED_NAMES    = "CHECK_USER_UID_FOR_NOT_ALLOWED_NAMES";
 	    public static final String NOT_ALLOWED_NAMES          = "NOT_ALLOWED_USER_UID_NAMES";
-            public static final String CREATE_HOMEDIRECTORY       = "CREATE_HOMEDIRECTORY";
-            public static final String HOME_DIR_ROOT              = "HOME_DIR_ROOT";
+            //public static final String CREATE_HOMEDIRECTORY       = "CREATE_HOMEDIRECTORY";
+            //public static final String HOME_DIR_ROOT              = "HOME_DIR_ROOT";
             public static final String PRIMARY_MAIL_UNCHANGEABLE  = "PRIMARY_MAIL_UNCHANGEABLE";
             public static final String USERNAME_CHANGEABLE        = "USERNAME_CHANGEABLE";
             public static final String DEFAULT_PASSWORD_MECHANISM = "DEFAULT_PASSWORD_MECHANISM";

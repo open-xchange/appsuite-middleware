@@ -130,6 +130,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         basicauth = new BasicAuthenticator();
     }
 
+    @Override
     public void addMember(final Context ctx, final Group grp, final User[] members, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException, NoSuchGroupException {
         auth = auth == null ? new Credentials("","") : auth;
         try {
@@ -194,6 +195,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         // END OF JCS
     }
 
+    @Override
     public void change(final Context ctx, final Group grp, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchGroupException, NoSuchUserException {
         auth = auth == null ? new Credentials("","") : auth;
         try {
@@ -303,7 +305,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             throw e;
         }
 
-        final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
+        final java.util.List<Bundle> bundles = AdminDaemon.getBundlelist();
         for (final Bundle bundle : bundles) {
             final String bundlename = bundle.getSymbolicName();
             if (Bundle.ACTIVE == bundle.getState()) {
@@ -329,6 +331,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         }
     }
 
+    @Override
     public Group create(final Context ctx, final Group grp,
             Credentials auth) throws RemoteException, StorageException,
             InvalidCredentialsException, NoSuchContextException,
@@ -393,7 +396,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         grp.setId(retval);
         final ArrayList<OXGroupPluginInterface> interfacelist = new ArrayList<OXGroupPluginInterface>();
 
-        final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
+        final java.util.List<Bundle> bundles = AdminDaemon.getBundlelist();
         for (final Bundle bundle : bundles) {
             final String bundlename = bundle.getSymbolicName();
             if (Bundle.ACTIVE == bundle.getState()) {
@@ -493,6 +496,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         // MonitoringInfos.incrementNumberOfCreateGroupCalled();
     }
 
+    @Override
     public void delete(final Context ctx, final Group grp,
             Credentials auth) throws RemoteException,
             InvalidCredentialsException, NoSuchContextException,
@@ -509,6 +513,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         delete(ctx, new Group[] { grp }, auth);
     }
 
+    @Override
     public void delete(final Context ctx, final Group[] grp,
             Credentials auth) throws RemoteException, StorageException,
             InvalidCredentialsException, NoSuchContextException,
@@ -564,8 +569,8 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
 
         final ArrayList<OXGroupPluginInterface> interfacelist = new ArrayList<OXGroupPluginInterface>();
 
-        final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
-        final ArrayList<Bundle> revbundles = new ArrayList<Bundle>();
+        final java.util.List<Bundle> bundles = AdminDaemon.getBundlelist();
+        final java.util.List<Bundle> revbundles = new ArrayList<Bundle>();
         for (int n = bundles.size() - 1; n >= 0; n--) {
             revbundles.add(bundles.get(n));
         }
@@ -639,6 +644,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
 
     }
 
+    @Override
     public Group getData(final Context ctx, final Group grp,
             Credentials auth) throws RemoteException, StorageException,
             InvalidCredentialsException, NoSuchContextException,
@@ -673,7 +679,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
 
         Group retgrp = oxGroup.get(ctx, grp);
 
-        final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
+        final java.util.List<Bundle> bundles = AdminDaemon.getBundlelist();
         for (final Bundle bundle : bundles) {
             final String bundlename = bundle.getSymbolicName();
             if (Bundle.ACTIVE == bundle.getState()) {
@@ -702,6 +708,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         return retgrp;
     }
 
+    @Override
     public Group[] getData(final Context ctx, final Group[] groups,
             Credentials auth) throws RemoteException, StorageException,
             InvalidCredentialsException, NoSuchContextException,
@@ -760,7 +767,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             retval.add(oxGroup.get(ctx, group));
         }
 
-        final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
+        final java.util.List<Bundle> bundles = AdminDaemon.getBundlelist();
         for (final Bundle bundle : bundles) {
             final String bundlename = bundle.getSymbolicName();
             if (Bundle.ACTIVE == bundle.getState()) {
@@ -790,6 +797,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         return retval.toArray(new Group[retval.size()]);
     }
 
+    @Override
     public Group getDefaultGroup(final Context ctx, Credentials auth)
             throws RemoteException, StorageException,
             InvalidCredentialsException, NoSuchContextException,
@@ -810,6 +818,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         }
     }
 
+    @Override
     public User[] getMembers(final Context ctx, final Group grp,
             Credentials auth) throws RemoteException, StorageException,
             InvalidCredentialsException, NoSuchContextException,
@@ -846,6 +855,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         return oxGroup.getMembers(ctx, grp_id);
     }
 
+    @Override
     public Group[] list(final Context ctx, final String pattern,
             Credentials auth) throws RemoteException, StorageException,
             InvalidCredentialsException, NoSuchContextException,
@@ -874,6 +884,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         return oxGroup.list(ctx, pattern);
     }
 
+    @Override
     public Group[] listAll(final Context ctx, final Credentials auth)
             throws RemoteException, InvalidCredentialsException,
             NoSuchContextException, StorageException, InvalidDataException,
@@ -881,6 +892,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         return list(ctx, "*", auth);
     }
 
+    @Override
     public Group[] listGroupsForUser(final Context ctx, final User usr,
             Credentials auth) throws RemoteException,
             InvalidCredentialsException, NoSuchContextException,
@@ -915,6 +927,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         return oxGroup.getGroupsForUser(ctx, usr);
     }
 
+    @Override
     public void removeMember(final Context ctx, final Group grp,
             final User[] members, Credentials auth)
             throws RemoteException, StorageException,

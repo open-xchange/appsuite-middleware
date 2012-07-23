@@ -49,6 +49,8 @@
 
 package org.quartz.service.osgi;
 
+import java.io.StringReader;
+import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleActivator;
@@ -80,26 +82,52 @@ public final class QuartzActivator implements BundleActivator {
     }
 
     @Override
-    public void start(BundleContext context) throws Exception {
+    public void start(final BundleContext context) throws Exception {
         final Log log = LogFactory.getLog(QuartzActivator.class);
         log.info("Starting bundle: org.quartz");
         try {
-            // Create & start scheduler
-            SchedulerFactory sf = new StdSchedulerFactory();
-            Scheduler scheduler = sf.getScheduler();
+            System.setProperty("org.terracotta.quartz.skipUpdateCheck", "true");
+            // Specify properties
+            final Properties properties;
+            {
+                final String sProps = "" +
+                		"# Default Properties file for use by StdSchedulerFactory\n" + 
+                		"# to create a Quartz Scheduler Instance, if a different\n" + 
+                		"# properties file is not explicitly specified.\n" + 
+                		"\n" + 
+                		"org.quartz.scheduler.instanceName=OpenXchangeQuartzScheduler\n" + 
+                		"org.quartz.scheduler.rmi.export=false\n" + 
+                		"org.quartz.scheduler.rmi.proxy=false\n" + 
+                		"org.quartz.scheduler.wrapJobExecutionInUserTransaction=false\n" + 
+                		"\n" + 
+                		"org.quartz.threadPool.class=org.quartz.simpl.SimpleThreadPool\n" + 
+                		"org.quartz.threadPool.threadCount=10\n" + 
+                		"org.quartz.threadPool.threadPriority=5\n" + 
+                		"org.quartz.threadPool.threadsInheritContextClassLoaderOfInitializingThread=true\n" + 
+                		"\n" + 
+                		"org.quartz.jobStore.misfireThreshold=60000\n" + 
+                		"\n" + 
+                		"org.quartz.jobStore.class=org.quartz.simpl.RAMJobStore";
+                properties = new Properties();
+                properties.load(new StringReader(sProps));
+            }
+            // Create scheduler
+            final SchedulerFactory sf = new StdSchedulerFactory(properties);
+            final Scheduler scheduler = sf.getScheduler();
+            // Start scheduler
             scheduler.start();
             this.scheduler = scheduler;
             // Initialize appropriate service
             quartzServiceRegistration = context.registerService(QuartzService.class, new QuartzServiceImpl(scheduler), null);
             log.info("Bundle successfully started: org.quartz");
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.error("Failed starting bundle: org.quartz", e);
             throw e;
         }
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
+    public void stop(final BundleContext context) throws Exception {
         final Log log = LogFactory.getLog(QuartzActivator.class);
         log.info("Stopping bundle: org.quartz");
         try {
@@ -114,7 +142,7 @@ public final class QuartzActivator implements BundleActivator {
                 this.quartzServiceRegistration = null;
             }
             log.info("Bundle successfully stopped: org.quartz");
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.error("Failed stopping bundle: org.quartz", e);
             throw e;
         }

@@ -317,7 +317,7 @@ public final class StorageAccess implements Serializable {
             fullName,
             IndexRange.NULL,
             MailSortField.RECEIVED_DATE,
-            OrderDirection.ASC,
+            OrderDirection.DESC,
             null,
             mailFields == null ? FIELDS : mailFields));
     }

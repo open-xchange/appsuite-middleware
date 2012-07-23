@@ -54,6 +54,7 @@ import static com.openexchange.html.internal.HtmlServiceImpl.PATTERN_URL_SOLE;
 import static com.openexchange.html.internal.css.CSSMatcher.checkCSS;
 import static com.openexchange.html.internal.css.CSSMatcher.containsCSSElement;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
@@ -1027,7 +1028,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                 String mapStr = null;
                 {
                     final ConfigurationService service = ServiceRegistry.getInstance().getService(ConfigurationService.class);
-                    final String whitelist = null == service ? null : service.getProperty("Whitelist");
+                    final File whitelist = null == service ? null : service.getFileByName("whitelist.properties");
                     if (null == whitelist) {
                         if (LOG.isWarnEnabled()) {
                             LOG.warn("Using default white list");

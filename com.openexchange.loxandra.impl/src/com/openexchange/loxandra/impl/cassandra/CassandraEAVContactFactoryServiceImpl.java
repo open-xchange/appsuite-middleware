@@ -50,6 +50,8 @@ package com.openexchange.loxandra.impl.cassandra;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.cassandra.db.KeyspaceNotDefinedException;
@@ -58,9 +60,10 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.loxandra.EAVContactFactoryService;
 import com.openexchange.loxandra.EAVContactService;
-import com.openexchange.loxandra.impl.cassandra.transaction.TransactionManager;
 
+import me.prettyprint.cassandra.model.ConfigurableConsistencyLevel;
 import me.prettyprint.hector.api.Cluster;
+import me.prettyprint.hector.api.HConsistencyLevel;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
 import me.prettyprint.hector.api.factory.HFactory;
@@ -80,12 +83,10 @@ public final class CassandraEAVContactFactoryServiceImpl implements EAVContactFa
 	private static String node;
 	private static String keyspaceName;
 	
-	private static volatile TransactionManager txManagerInstance;
+	private static volatile ConfigurableConsistencyLevel configurableConsistencyLevel;
 	
 	public CassandraEAVContactFactoryServiceImpl() {
 		readProperties();
-		txManagerInstance = TransactionManager.getInstance();
-		txManagerInstance.checkAndReplay();
 	}
 	
 	/**
@@ -117,6 +118,7 @@ public final class CassandraEAVContactFactoryServiceImpl implements EAVContactFa
 	 * KeyspaceNotDefinedException will be thrown if the keyspace does not exist
 	 */
 	public final static Keyspace getKeyspace() {
+		
 		if (cluster == null) {
             cluster = HFactory.getOrCreateCluster("Local Cluster", node);
         }
@@ -127,10 +129,43 @@ public final class CassandraEAVContactFactoryServiceImpl implements EAVContactFa
 			log.fatal("Keyspace '" + keyspaceName + "' does not exist. Use the 'schema.cql' file to create a schema.", new KeyspaceNotDefinedException("'" + keyspaceName + "' does not exist." ));
 			return null;
 		}
-		
-		keyspace = HFactory.createKeyspace(keyspaceName, cluster);
+
+		defineConsistencyLevels();
+		keyspace = HFactory.createKeyspace(keyspaceName, cluster, configurableConsistencyLevel);
 		
 		return keyspace;
+	}
+	
+	/**
+	 * Define consistency levels for each column family.
+	 * 
+	 * <li><b>ANY</b>: Wait until some replica has responded.</li>
+	 * <li><b>ONE</b>: Wait until one replica has responded.
+	 * <li><b>TWO</b>: Wait until two replicas have responded.
+	 * <li><b>THREE</b>: Wait until three replicas have responded.
+	 * <li><b>LOCAL_QUORUM</b>: Wait for quorum on the datacenter the connection was stablished.
+	 * <li><b>EACH_QUORUM</b>: Wait for quorum on each datacenter.
+	 * <li><b>QUORUM</b>: Wait for a quorum of replicas (no matter which datacenter).
+	 * <li><b>ALL</b>: Blocks for all the replicas before returning to the client.
+	 */
+	private final static void defineConsistencyLevels() {
+		configurableConsistencyLevel = new ConfigurableConsistencyLevel();
+		
+		Map<String, HConsistencyLevel> readCLMap = new HashMap<String, HConsistencyLevel>();
+		Map<String, HConsistencyLevel> writeCLMap = new HashMap<String, HConsistencyLevel>();
+		
+		readCLMap.put("Person", HConsistencyLevel.ONE);
+		readCLMap.put("PersonFolder", HConsistencyLevel.ONE);
+		readCLMap.put("Counters", HConsistencyLevel.ONE);
+		readCLMap.put("TransactionLog", HConsistencyLevel.QUORUM);
+		
+		writeCLMap.put("Person", HConsistencyLevel.ONE);
+		writeCLMap.put("PersonFolder", HConsistencyLevel.ONE);
+		writeCLMap.put("Counters", HConsistencyLevel.ONE);
+		writeCLMap.put("TransactionLog", HConsistencyLevel.QUORUM);
+		
+		configurableConsistencyLevel.setReadCfConsistencyLevels(readCLMap);
+		configurableConsistencyLevel.setWriteCfConsistencyLevels(writeCLMap);
 	}
 	
 	/*
@@ -140,21 +175,5 @@ public final class CassandraEAVContactFactoryServiceImpl implements EAVContactFa
 	@Override
 	public final EAVContactService getEAVContactService() {
 		return new CassandraEAVContactServiceImpl();
-	}
-
-	/**
-	 * Get an instance of the transaction manager. Once created it can be reused
-	 * 
-	 * @return instance of the TransactionManager
-	 */
-	public final static TransactionManager getTransactionManager() {
-		//ISSUE: BAD BAD BAD DESIGN -.-
-		/*if (txManagerInstance == null) {
-			txManagerInstance = new TransactionManager();
-			System.out.println("CREATING NEW MANAGER");
-		} else {
-			System.out.println("USING EXISTING MANAGER");
-		}*/
-		return txManagerInstance;
 	}
 }

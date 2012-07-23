@@ -37,6 +37,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-admin-soap"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-admin-soap-reseller"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-admin-soap-usercopy"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-admin-contextrestore"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-spamhandler-default"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-spamhandler-spamassassin"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-spamhandler-cloudmark"/>
@@ -58,5 +59,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-hostname-ldap"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-report-client"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-contacts-ldap"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-upsell-multiple"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-configjump-generic"/>
 </provider>
 </psf>

@@ -1,3 +1,17 @@
+* 2012-07-18 - marcus.klein@open-xchange.com
+
+ - PT 32897389: Removed outdated oxreport CLT
+
+* 2012-07-18 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22582: Proper "filename" parameter in "Content-Disposition" header
+ - Fix for bug 22537: Removed line breaks
+
+* 2012-07-17 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22548: Handle special "No content" I/O error thrown by JavaMail if IMAP session is in an inconsistent state
+ - Fix for bug 22584: Stick to JavaMail's Multipart implementation
+
 * 2012-07-16 - marcus.klein@open-xchange.com
 
  - Fix for bug 22563: Restored previous java runtime dependencies that selects a supported JVM on each RPM distribution.

@@ -75,9 +75,8 @@ import me.prettyprint.hector.api.beans.Composite;
 import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.beans.OrderedRows;
 import me.prettyprint.hector.api.beans.Row;
-import me.prettyprint.hector.api.exceptions.HectorException;
+import me.prettyprint.hector.api.exceptions.HTimedOutException;
 import me.prettyprint.hector.api.factory.HFactory;
-import me.prettyprint.hector.api.mutation.Mutator;
 import me.prettyprint.hector.api.query.QueryResult;
 import me.prettyprint.hector.api.query.RangeSlicesQuery;
 import me.prettyprint.hector.api.query.SliceQuery;
@@ -278,14 +277,9 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 			if (null == res || !res.hasResults()) {
 				log.error("No result");
 			} else {
-				if (limited) {
-                    populateDTOLimited(c);
-                } else {
-                    populateDTO(c);
-                }
+				populateDTO(c, limited);
 			}
-
-		} catch (HectorException e) {
+		} catch (HTimedOutException e) {
 			e.printStackTrace();
 		} catch (CharacterCodingException e) {
 			e.printStackTrace();
@@ -295,11 +289,16 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 	}
 	
 	/**
-	 * Populate the limited details of a contact, ie. Name, Surname, DisplayName, email, timeUUID, telephone
+	 * Populate the DTO with data from the query result.<br/><br/>
+	 * Since the named properties could be Strings, Integers, 
+	 * Floats etc., are stored as ByteBuffers, in contrast with the unnamed
+	 * which are stores as Strings.
+	 * 
 	 * @param contact
+	 * @param limited
 	 * @throws CharacterCodingException 
 	 */
-	private void populateDTOLimited(EAVContact contact) throws CharacterCodingException {
+	private void populateDTO(EAVContact contact, boolean limited) throws CharacterCodingException {
 		// get named props
 		Composite start = new Composite();
 		start.addComponent(0, "named", Composite.ComponentEquality.EQUAL);
@@ -336,96 +335,49 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 			contact.addFolderUUID(UUID.fromString(ByteBufferUtil.string(contact.getNamedProperty("folderUUID"))));
 		}
 		
-		//TODO: complete...
-		
 		contact.setTimeUUID(UUID.fromString(ByteBufferUtil.string(contact.getNamedProperty("timeuuid"))));
 		
-		log.info("EAV CONTACT: " + contact.getGivenName());
+		if (!limited) {
+			//TODO: complete...
+			if (contact.containsNamedProperty(ContactFields.BIRTHDAY)) {
+			}
+			
+			// get unnamed props
+			start = new Composite();
+			start.addComponent(0, "unnamed", Composite.ComponentEquality.EQUAL);
+			
+			end = new Composite();
+			end.addComponent(0, "unnamed", Composite.ComponentEquality.GREATER_THAN_EQUAL);
+			
+			SliceQuery<UUID, Composite, String> unnamedSliceQuery = HFactory.createSliceQuery(keyspace, us, cs, ss);
+			unnamedSliceQuery.setColumnFamily(CF_PERSON).setKey(contact.getUUID());
+			ColumnSliceIterator<UUID, Composite, String> unnamedIterator = new ColumnSliceIterator<UUID, Composite, String>(unnamedSliceQuery, start, end, false);
+			
+			// setters
+			while (unnamedIterator.hasNext()) {
+				HColumn<Composite, String> h = unnamedIterator.next();
+				contact.addUnnamedProperty(ByteBufferUtil.string((ByteBuffer)h.getName().get(1)), h.getValue());
+			}
+			
+			// get folders
+			start = new Composite();
+			start.addComponent(0, "folder", Composite.ComponentEquality.EQUAL);
+			
+			end = new Composite();
+			end.addComponent(0, "folder", Composite.ComponentEquality.GREATER_THAN_EQUAL);
+			
+			SliceQuery<UUID, Composite, String> folderSliceQuery = HFactory.createSliceQuery(keyspace, us, cs, ss);
+			folderSliceQuery.setColumnFamily(CF_PERSON).setKey(contact.getUUID());
+			ColumnSliceIterator<UUID, Composite, String> folderIterator = new ColumnSliceIterator<UUID, Composite, String>(folderSliceQuery, start, end, false);
+			
+			// setters
+			while (folderIterator.hasNext()) {
+				HColumn<Composite, String> h = folderIterator.next();
+				contact.addFolderUUID(UUID.fromString(h.getValue()));
+			}
+		}
 		
 		contact.clearNamedProperties();
-	}
-	
-	/**
-	 * Populate the DTO with data from the query result.<br/><br/>
-	 * Since the named properties could be Strings, Integers, 
-	 * Floats etc., are stored as ByteBuffers, in contrast with the unnamed
-	 * which are stores as Strings.
-	 * 
-	 * @param contact
-	 * @param res
-	 * @throws CharacterCodingException 
-	 */
-	private void populateDTO(EAVContact contact) throws CharacterCodingException {
-		// get named props
-		Composite start = new Composite();
-		start.addComponent(0, "named", Composite.ComponentEquality.EQUAL);
-		
-		Composite end = new Composite();
-		end.addComponent(0, "named", Composite.ComponentEquality.GREATER_THAN_EQUAL);
-		
-		SliceQuery<UUID, Composite, ByteBuffer> namedSliceQuery = HFactory.createSliceQuery(keyspace, us, cs, bbs);
-		namedSliceQuery.setColumnFamily(CF_PERSON).setKey(contact.getUUID());
-		ColumnSliceIterator<UUID, Composite, ByteBuffer> namedIterator = new ColumnSliceIterator<UUID, Composite, ByteBuffer>(namedSliceQuery, start, end, false);
-		
-		while (namedIterator.hasNext()) {
-			HColumn<Composite, ByteBuffer> h = namedIterator.next();
-			contact.addNamedProperty(ByteBufferUtil.string((ByteBuffer)h.getName().get(1)), h.getValue());
-		}
-		
-		// setters
-		if (contact.containsNamedProperty(ContactFields.NICKNAME)) {
-            contact.setNickname(ByteBufferUtil.string(contact.getNamedProperty(ContactFields.NICKNAME)));
-        }
-		if (contact.containsNamedProperty(ContactFields.DISPLAY_NAME)) {
-            contact.setDisplayName(ByteBufferUtil.string(contact.getNamedProperty(ContactFields.DISPLAY_NAME)));
-        }
-		if (contact.containsNamedProperty(ContactFields.FIRST_NAME)) {
-            contact.setGivenName(ByteBufferUtil.string(contact.getNamedProperty(ContactFields.FIRST_NAME)));
-        }
-		if (contact.containsNamedProperty(ContactFields.LAST_NAME)) {
-            contact.setSurName(ByteBufferUtil.string(contact.getNamedProperty(ContactFields.LAST_NAME)));
-		//TODO: complete...
-        }
-		if (contact.containsNamedProperty(ContactFields.BIRTHDAY)) {
-		}
-		
-		contact.setTimeUUID(UUID.fromString(ByteBufferUtil.string(contact.getNamedProperty("timeuuid"))));
-		
-		contact.clearNamedProperties();
-		
-		// get unnamed props
-		start = new Composite();
-		start.addComponent(0, "unnamed", Composite.ComponentEquality.EQUAL);
-		
-		end = new Composite();
-		end.addComponent(0, "unnamed", Composite.ComponentEquality.GREATER_THAN_EQUAL);
-		
-		SliceQuery<UUID, Composite, String> unnamedSliceQuery = HFactory.createSliceQuery(keyspace, us, cs, ss);
-		unnamedSliceQuery.setColumnFamily(CF_PERSON).setKey(contact.getUUID());
-		ColumnSliceIterator<UUID, Composite, String> unnamedIterator = new ColumnSliceIterator<UUID, Composite, String>(unnamedSliceQuery, start, end, false);
-		
-		// setters
-		while (unnamedIterator.hasNext()) {
-			HColumn<Composite, String> h = unnamedIterator.next();
-			contact.addUnnamedProperty(ByteBufferUtil.string((ByteBuffer)h.getName().get(1)), h.getValue());
-		}
-		
-		// get folders
-		start = new Composite();
-		start.addComponent(0, "folder", Composite.ComponentEquality.EQUAL);
-		
-		end = new Composite();
-		end.addComponent(0, "folder", Composite.ComponentEquality.GREATER_THAN_EQUAL);
-		
-		SliceQuery<UUID, Composite, String> folderSliceQuery = HFactory.createSliceQuery(keyspace, us, cs, ss);
-		folderSliceQuery.setColumnFamily(CF_PERSON).setKey(contact.getUUID());
-		ColumnSliceIterator<UUID, Composite, String> folderIterator = new ColumnSliceIterator<UUID, Composite, String>(folderSliceQuery, start, end, false);
-		
-		// setters
-		while (folderIterator.hasNext()) {
-			HColumn<Composite, String> h = folderIterator.next();
-			contact.addFolderUUID(UUID.fromString(h.getValue()));
-		}
 	}
 	
 	/*

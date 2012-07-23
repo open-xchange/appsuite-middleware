@@ -83,7 +83,7 @@ public class Activator implements BundleActivator {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
 
-    public static final String PATH_PROPERTY = "com.openexchange.subscribe.crawler.path";
+    public static final String DIR_NAME_PROPERTY = "com.openexchange.subscribe.crawler.path";
 
     public static final String UPDATE_INTERVAL = "com.openexchange.subscribe.crawler.updateinterval";
 
@@ -134,12 +134,11 @@ public class Activator implements BundleActivator {
 
     public ArrayList<CrawlerDescription> getCrawlersFromFilesystem(final ConfigurationService config) {
         final ArrayList<CrawlerDescription> crawlers = new ArrayList<CrawlerDescription>();
-        final String path = config.getProperty(PATH_PROPERTY);
-        if (path == null) {
-            LOG.warn(PATH_PROPERTY + " not set. Skipping crawler initialisation");
+        final File directory = config.getDirectory(DIR_NAME_PROPERTY);
+        if (directory == null) {
+            LOG.warn(DIR_NAME_PROPERTY + " not set. Skipping crawler initialisation");
             return crawlers;
         }
-        final File directory = new File(path);
         final File[] files = directory.listFiles();
         if (files == null) {
             LOG.warn("Could not find crawler descriptions in " + directory + ". Skipping crawler initialisation.");
@@ -159,9 +158,9 @@ public class Activator implements BundleActivator {
     }
 
     public boolean removeCrawlerFromFilesystem(final ConfigurationService config, final String crawlerIdToDelete) {
-        final String path = config.getProperty(PATH_PROPERTY);
-        if (path != null) {
-            final File directory = new File(path);
+        final String dirName = config.getProperty(DIR_NAME_PROPERTY);
+        if (dirName != null) {
+            final File directory = config.getDirectory(dirName);
             final File[] files = directory.listFiles();
             if (files != null) {
                 for (final File file : files) {

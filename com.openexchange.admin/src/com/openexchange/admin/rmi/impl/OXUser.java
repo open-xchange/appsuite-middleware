@@ -50,10 +50,6 @@
 package com.openexchange.admin.rmi.impl;
 
 import static com.openexchange.java.Autoboxing.i;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.rmi.RemoteException;
 import java.security.NoSuchAlgorithmException;
@@ -62,7 +58,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import javax.mail.internet.IDNA;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -142,6 +137,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         return this.cache.getProperties().getUserProp(AdminProperties.User.USERNAME_CHANGEABLE, false);
     }
 
+    @Override
     public void change(final Context ctx, final User usrdata, Credentials auth) throws StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         auth = auth == null ? new Credentials("","") : auth;
         try {
@@ -208,7 +204,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
         oxu.change(ctx, usrdata);
 
-        final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
+        final java.util.List<Bundle> bundles = AdminDaemon.getBundlelist();
         for (final Bundle bundle : bundles) {
             final String bundlename = bundle.getSymbolicName();
             if (Bundle.ACTIVE==bundle.getState()) {
@@ -281,6 +277,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
     }
 
+    @Override
     public void changeModuleAccess(final Context ctx, final User user, final UserModuleAccess moduleAccess, Credentials auth) throws StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         auth = auth == null ? new Credentials("","") : auth;
         try {
@@ -333,6 +330,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         // END OF JCS
     }
 
+    @Override
     public void changeModuleAccess(final Context ctx, final User user,final String access_combination_name, Credentials auth)
             throws StorageException,InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {
 
@@ -408,11 +406,13 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
     }
 
+    @Override
     public User create(final Context ctx, final User usr, final UserModuleAccess access, final Credentials auth) throws StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
         // Call common create method directly because we already have out access module
         return createUserCommon(ctx, usr, access, auth);
     }
 
+    @Override
     public User create(final Context ctx, final User usrdata, final String access_combination_name, Credentials auth) throws StorageException,InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
         // Resolve the access rights by the specified combination name. If combination name does not exists, throw error as it is described
         // in the spec!
@@ -451,6 +451,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     }
 
 
+    @Override
     public User create(final Context ctx, final User usrdata, Credentials auth)    throws StorageException,InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
 
         /*
@@ -488,6 +489,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         return createUserCommon(ctx, usrdata, access, auth);
     }
 
+    @Override
     public User getContextAdmin(final Context ctx, Credentials auth) throws InvalidCredentialsException, StorageException, InvalidDataException {
         auth = auth == null ? new Credentials("","") : auth;
         
@@ -495,6 +497,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         return (oxu.getData(ctx, new User[]{ new User(tool.getAdminForContext(ctx))} ))[0];
     }
 
+    @Override
     public UserModuleAccess getContextAdminUserModuleAccess(final Context ctx, Credentials auth)  throws StorageException,InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
         auth = auth == null ? new Credentials("","") : auth;
         basicauth.doAuthentication(auth, ctx);
@@ -550,6 +553,8 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         final ArrayList<OXUserPluginInterface> interfacelist = new ArrayList<OXUserPluginInterface>();
 
         // homedirectory
+        /*-
+         * 
         final String homedir = this.prop.getUserProp(AdminProperties.User.HOME_DIR_ROOT, "/home") + "/" + usr.getName();
         if (this.prop.getUserProp(AdminProperties.User.CREATE_HOMEDIRECTORY, false) && !tool.isContextAdmin(ctx, usr.getId().intValue())) {
             if (!new File(homedir).mkdir()) {
@@ -575,8 +580,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 log.error("Unable to chown homedirectory: " + homedir, e);
             }
         }
+        */
 
-        final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
+        final java.util.List<Bundle> bundles = AdminDaemon.getBundlelist();
         for (final Bundle bundle : bundles) {
             final String bundlename = bundle.getSymbolicName();
             if (Bundle.ACTIVE==bundle.getState()) {
@@ -641,10 +647,12 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         return usr;
     }
 
+    @Override
     public void delete(final Context ctx, final User user, final Credentials auth) throws StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         delete(ctx, new User[]{user}, auth);
     }
 
+    @Override
     public void delete(final Context ctx, final User[] users, Credentials auth) throws StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         auth = auth == null ? new Credentials("","") : auth;
 
@@ -703,8 +711,8 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         // By this we are able to throw all exceptions to the client while concurrently processing all plugins
         final ArrayList<Exception> exceptionlist = new ArrayList<Exception>();
 
-        final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
-        final ArrayList<Bundle> revbundles = new ArrayList<Bundle>();
+        final java.util.List<Bundle> bundles = AdminDaemon.getBundlelist();
+        final java.util.List<Bundle> revbundles = new ArrayList<Bundle>();
         for (int i = bundles.size() - 1; i >= 0; i--) {
             revbundles.add(bundles.get(i));
         }
@@ -743,6 +751,8 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
         }
 
+        /*-
+         * 
         if (this.prop.getUserProp(AdminProperties.User.CREATE_HOMEDIRECTORY, false)) {
             for(final User usr : users) {
                 // homedirectory
@@ -756,6 +766,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 }
             }
         }
+        */
 
         oxu.delete(ctx, users);
 
@@ -798,10 +809,12 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
     }
 
+    @Override
     public User getData(final Context ctx, final User user, final Credentials auth) throws StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException {
         return getData(ctx, new User[]{user}, auth)[0];
     }
 
+    @Override
     public User[] getData(final Context ctx, final User[] users, Credentials auth) throws StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException {
         auth = auth == null ? new Credentials("","") : auth;
         try {
@@ -907,7 +920,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
         User[] retusers = oxu.getData(ctx, users);
 
-        final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
+        final java.util.List<Bundle> bundles = AdminDaemon.getBundlelist();
         for (final Bundle bundle : bundles) {
             final String bundlename = bundle.getSymbolicName();
             if (Bundle.ACTIVE==bundle.getState()) {
@@ -931,6 +944,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         return retusers;
     }
 
+    @Override
     public UserModuleAccess getModuleAccess(final Context ctx, final User user, Credentials auth) throws StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         auth = auth == null ? new Credentials("","") : auth;
         try {
@@ -973,6 +987,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
     }
 
+    @Override
     public String getAccessCombinationName(final Context ctx, final User user, Credentials auth) throws StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         auth = auth == null ? new Credentials("","") : auth;
 
@@ -1020,6 +1035,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         
     }
 
+    @Override
     public User[] list(final Context ctx, final String search_pattern, Credentials auth) throws StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
         auth = auth == null ? new Credentials("","") : auth;
         try {
@@ -1042,6 +1058,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         return retval;
     }
 
+    @Override
     public User[] listCaseInsensitive(final Context ctx, final String search_pattern, Credentials auth) throws StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
         auth = auth == null ? new Credentials("","") : auth;
         try {
@@ -1064,6 +1081,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         return retval;
     }
 
+    @Override
     public User[] listAll(final Context ctx, final Credentials auth) throws StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
         return list(ctx, "*", auth);
     }
@@ -1260,6 +1278,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     /* (non-Javadoc)
      * @see com.openexchange.admin.rmi.OXUserInterface#changeModuleAccessGlobal(java.lang.String, com.openexchange.admin.rmi.dataobjects.UserModuleAccess, com.openexchange.admin.rmi.dataobjects.UserModuleAccess, com.openexchange.admin.rmi.dataobjects.Credentials)
      */
+    @Override
     public void changeModuleAccessGlobal(final String filter, final UserModuleAccess addAccess, final UserModuleAccess removeAccess, Credentials auth) throws RemoteException, InvalidCredentialsException, StorageException, InvalidDataException {
         auth = auth == null ? new Credentials("","") : auth;
         try {
@@ -1309,6 +1328,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
     }
 
+    @Override
     public boolean exists(final Context ctx, final User user, Credentials auth) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, DatabaseUpdateException, NoSuchContextException {
         auth = auth == null ? new Credentials("","") : auth;
         try {

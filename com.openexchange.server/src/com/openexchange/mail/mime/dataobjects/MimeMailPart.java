@@ -64,16 +64,18 @@ import javax.mail.Part;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeTypes;
-import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
@@ -93,6 +95,23 @@ public final class MimeMailPart extends MailPart implements MimeRawSource {
      */
     // TODO: Make configurable
     private static final int MAX_INMEMORY_SIZE = 131072; // 128KB
+
+    private static volatile Boolean useMimeMultipartMailPart;
+
+    private static boolean useMimeMultipartMailPart() {
+        Boolean tmp = useMimeMultipartMailPart;
+        if (null == tmp) {
+            synchronized (MimeMailPart.class) {
+                tmp = useMimeMultipartMailPart;
+                if (null == tmp) {
+                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    tmp = Boolean.valueOf(null != service && service.getBoolProperty("com.openexchange.mail.mime.useMimeMultipartMailPart", false));
+                    useMimeMultipartMailPart = tmp;
+                }
+            }
+        }
+        return tmp.booleanValue();
+    }
 
     private static final String ERR_NULL_PART = "Underlying part is null";
 
@@ -733,7 +752,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource {
         if (null == multipart) {
             try {
                 final int size = part.getSize();
-                if (size > 0 && size <= MAX_INMEMORY_SIZE) {
+                if (useMimeMultipartMailPart() && (size > 0) && (size <= MAX_INMEMORY_SIZE)) {
                     /*
                      * If size is less than or equal to 1MB, use the in-memory implementation
                      */

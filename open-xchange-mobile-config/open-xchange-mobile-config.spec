@@ -1,10 +1,9 @@
 
-# norootforbuild
-
 Name:           open-xchange-mobile-config
 BuildArch: 	noarch
 #!BuildIgnore: post-build-checks
 BuildRequires:  ant
+BuildRequires:  ant-nodeps
 BuildRequires:  java-devel >= 1.6.0
 # TODO: version not hardcoded in spec file
 Version:	@OXVERSION@
@@ -13,9 +12,10 @@ Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        Creative Commons Attribution-Noncommercial-Share Alike 2.5 Generic
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
-#URL:            
+URL:            http://www.open-xchange.com/
 Source:         %{name}_%{version}.orig.tar.bz2
 Summary:        Config files for the Open-Xchange Mobile UI
+Requires:       open-xchange-core >= @OXVERSION@
 
 %description
  This package needs to be installed on the backend hosts of a cluster installation. It adds configuration files to the backend allowing the
@@ -26,17 +26,14 @@ Authors:
 --------
     Open-Xchange
 
-
-
 %prep
 %setup -q
 
 %build
 
-
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
-ant -lib build/lib -Dbasedir=build -Dhtdoc=%{docroot} -DdestDir=%{buildroot} -DpackageName=open-xchange-mobile-config -DbuildType=installConf -f build/build.xml build
+ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
 %clean
 %{__rm} -rf %{buildroot}

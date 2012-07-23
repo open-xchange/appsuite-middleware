@@ -61,7 +61,6 @@ import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.osgi.service.event.EventAdmin;
-import org.w3c.tidy.Report;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.ajp13.AJPv13ServiceRegistry;
@@ -149,6 +148,7 @@ import com.openexchange.mail.transport.config.TransportPropertiesInit;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.internal.MailAccountStorageInit;
+import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.push.udp.registry.PushServiceRegistry;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.internal.ResourceServiceImpl;
@@ -433,16 +433,14 @@ public final class Init {
         if (null == TestServiceRegistry.getInstance().getService(HtmlService.class)) {
             final ConfigurationService configService = (ConfigurationService) services.get(ConfigurationService.class);
             com.openexchange.html.services.ServiceRegistry.getInstance().addService(ConfigurationService.class, configService);
-            Report.setResourceBundleFrom(HTMLServiceActivator.getTidyMessages(configService.getProperty("TidyMessages")));
-            final Properties properties = HTMLServiceActivator.getTidyConfiguration(configService.getProperty("TidyConfiguration"));
-            final Object[] maps = HTMLServiceActivator.getHTMLEntityMaps(configService.getProperty("HTMLEntities"));
+            final Object[] maps = HTMLServiceActivator.getHTMLEntityMaps(configService.getFileByName("HTMLEntities.properties"));
             @SuppressWarnings("unchecked")
             final Map<String, Character> htmlEntityMap = (Map<String, Character>) maps[1];
             htmlEntityMap.put("apos", Character.valueOf('\''));
             @SuppressWarnings("unchecked")
             final Map<Character, String> htmlCharMap = (Map<Character, String>) maps[0];
             htmlCharMap.put(Character.valueOf('\''), "apos");
-            final HtmlService service = new HtmlServiceImpl(properties, htmlCharMap, htmlEntityMap);
+            final HtmlService service = new HtmlServiceImpl(htmlCharMap, htmlEntityMap);
             services.put(HtmlService.class, service);
             TestServiceRegistry.getInstance().addService(HtmlService.class, service);
         }
@@ -682,7 +680,7 @@ public final class Init {
     }
 
     private static void startAndInjectContactCollector() throws Exception {
-        final CCServiceRegistry reg = CCServiceRegistry.getInstance();
+        final ServiceRegistry reg = CCServiceRegistry.getInstance();
         if (null == reg.getService(TimerService.class)) {
             reg.addService(TimerService.class, services.get(TimerService.class));
             reg.addService(ThreadPoolService.class, services.get(ThreadPoolService.class));

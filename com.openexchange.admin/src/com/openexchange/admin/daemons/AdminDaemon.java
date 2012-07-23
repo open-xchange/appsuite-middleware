@@ -53,7 +53,12 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -84,13 +89,122 @@ public class AdminDaemon {
 
     private static AdminCache cache = null;
 
+    private static final Set<Pattern> ALLOWED_BUNDLE_NAMES;
+
+    static {
+        class RegexHelper {
+            Pattern wildcardPattern(final String wildcard) {
+                final StringBuilder s = new StringBuilder(wildcard.length());
+                s.append('^');
+                final int len = wildcard.length();
+                for (int i = 0; i < len; i++) {
+                    final char c = wildcard.charAt(i);
+                    if (c == '*') {
+                        s.append(".*");
+                    } else if (c == '?') {
+                        s.append(".");
+                    } else if (c == '(' || c == ')' || c == '[' || c == ']' || c == '$' || c == '^' || c == '.' || c == '{' || c == '}' || c == '|' || c == '\\') {
+                        s.append('\\');
+                        s.append(c);
+                    } else {
+                        s.append(c);
+                    }
+                }
+                s.append('$');
+                return Pattern.compile(s.toString());
+            }
+
+            Pattern literalPattern(final String literal) {
+                return Pattern.compile(Pattern.quote(literal));
+            }
+        }
+        final RegexHelper regexHelper = new RegexHelper();
+        // Initialize set
+        final Set<Pattern> set = new HashSet<Pattern>(64);
+        set.add(regexHelper.literalPattern("com.openexchange.admin"));
+        set.add(regexHelper.wildcardPattern("com.openexchange.admin.*"));
+        set.add(regexHelper.wildcardPattern("org.osgi.*"));
+        set.add(regexHelper.wildcardPattern("org.eclipse.equinox.*"));
+        set.add(regexHelper.wildcardPattern("org.eclipse.osgi.*"));
+        set.add(regexHelper.wildcardPattern("java.*"));
+        set.add(regexHelper.wildcardPattern("javax.*"));
+        // Others
+        set.add(regexHelper.literalPattern("com.openexchange.caching"));
+        set.add(regexHelper.literalPattern("com.openexchange.calendar"));
+        set.add(regexHelper.literalPattern("com.openexchange.common"));
+        set.add(regexHelper.literalPattern("com.openexchange.config.cascade"));
+        set.add(regexHelper.literalPattern("com.openexchange.configread"));
+        set.add(regexHelper.literalPattern("com.openexchange.control"));
+        set.add(regexHelper.literalPattern("com.openexchange.conversion"));
+        set.add(regexHelper.literalPattern("com.openexchange.crypto"));
+        set.add(regexHelper.literalPattern("com.openexchange.dataretention"));
+        set.add(regexHelper.literalPattern("com.openexchange.datatypes.genericonf.storage"));
+        set.add(regexHelper.literalPattern("com.openexchange.datatypes.genericonf"));
+        set.add(regexHelper.literalPattern("com.openexchange.file.storage.composition"));
+        set.add(regexHelper.literalPattern("com.openexchange.file.storage"));
+        set.add(regexHelper.literalPattern("com.openexchange.global"));
+        set.add(regexHelper.literalPattern("com.openexchange.html"));
+        set.add(regexHelper.literalPattern("com.openexchange.i18n"));
+        set.add(regexHelper.literalPattern("com.openexchange.management"));
+        set.add(regexHelper.literalPattern("com.openexchange.messaging.facebook"));
+        set.add(regexHelper.literalPattern("com.openexchange.messaging.generic"));
+        set.add(regexHelper.literalPattern("com.openexchange.messaging"));
+        set.add(regexHelper.literalPattern("com.openexchange.monitoring"));
+        set.add(regexHelper.literalPattern("com.openexchange.oauth"));
+        set.add(regexHelper.literalPattern("com.openexchange.proxy"));
+        set.add(regexHelper.literalPattern("com.openexchange.publish.basic"));
+        set.add(regexHelper.literalPattern("com.openexchange.publish"));
+        set.add(regexHelper.literalPattern("com.openexchange.push"));
+        set.add(regexHelper.literalPattern("com.openexchange.secret.recovery"));
+        set.add(regexHelper.literalPattern("com.openexchange.secret"));
+        set.add(regexHelper.literalPattern("com.openexchange.server"));
+        set.add(regexHelper.literalPattern("com.openexchange.sql"));
+        set.add(regexHelper.literalPattern("com.openexchange.subscribe"));
+        set.add(regexHelper.literalPattern("com.openexchange.threadpool"));
+        set.add(regexHelper.literalPattern("com.openexchange.tx"));
+        set.add(regexHelper.literalPattern("com.openexchange.user.copy"));
+        set.add(regexHelper.literalPattern("com.openexchange.usm.api"));
+        set.add(regexHelper.literalPattern("com.openexchange.usm.database.ox"));
+        set.add(regexHelper.literalPattern("com.openexchange.usm.journal.impl"));
+        set.add(regexHelper.literalPattern("com.openexchange.usm.journal"));
+        set.add(regexHelper.literalPattern("com.openexchange.usm.util"));
+        set.add(regexHelper.literalPattern("com.openexchange.xerces.sun"));
+        set.add(regexHelper.literalPattern("com.openexchange.xml"));
+        ALLOWED_BUNDLE_NAMES = Collections.unmodifiableSet(set);
+    }
+
+    /**
+     * Checks if specified bundle is contained in list of allowed bundles.
+     * 
+     * @param bundle The bundle to check
+     * @return <code>true</code> if allowed; otherwise <code>false</code>
+     */
+    public static boolean isAllowdBundle(final Bundle bundle) {
+        return isAllowdBundle(bundle.getSymbolicName());
+    }
+
+    /**
+     * Checks if specified symbolic name is contained in list of allowed bundles.
+     * 
+     * @param symbolicName The symbolic name to check
+     * @return <code>true</code> if allowed; otherwise <code>false</code>
+     */
+    public static boolean isAllowdBundle(final String symbolicName) {
+        for (final Pattern p : ALLOWED_BUNDLE_NAMES) {
+            if (p.matcher(symbolicName).matches()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private final List<ServiceRegistration<Remote>> services = new ArrayList<ServiceRegistration<Remote>>();
 
     /*
      * Write changes to this list cannot happen at the same time as the BundleListener delivers events in order and not concurrently. So
      * there's no need to deal with concurrency here
      */
-    static ArrayList<Bundle> bundlelist = new ArrayList<Bundle>();
+    static List<Bundle> bundlelist = new CopyOnWriteArrayList<Bundle>();
 
     private static com.openexchange.admin.rmi.impl.OXUser oxuser_v2 = null;
 
@@ -105,23 +219,67 @@ public class AdminDaemon {
     private static OXTaskMgmtImpl oxtaskmgmt = null;
 
     /**
+     * Checks if a simple check shall be performed in order to determine if a bundle is needed for admin to work:
+     * <p>
+     * Bundle is <b>not</b> a fragment bundle <small><b>AND</b></small> its state is <code>ACTIVE</code>.
+     * 
+     * @return <code>true</code> if a simple check is sufficient; otherwise <code>false</code>
+     */
+    static boolean checkSimple() {
+        return true;
+    }
+
+    /**
+     * Checks if specified bundle is <b>not</b> a fragment bundle.
+     * 
+     * @param bundle The bundle to check
+     * @return <code>true</code> if specified bundle is <b>not</b> a fragment bundle; else <code>false</code>
+     */
+    public static boolean isNoFragment(final Bundle bundle) {
+        return (null == bundle.getHeaders().get(Constants.FRAGMENT_HOST));
+    }
+
+    /**
+     * Checks if specified bundle is <b>not</b> a fragment bundle <small><b>AND</b></small> its state is <code>ACTIVE</code>.
+     * 
+     * @param bundle The bundle to check
+     * @return <code>true</code> if specified bundle is <b>not</b> a fragment bundle <small><b>AND</b></small> its state is <code>ACTIVE</code>; else <code>false</code>
+     */
+    public static boolean isNoFragmentAndActive(final Bundle bundle) {
+        return (isNoFragment(bundle) && (Bundle.ACTIVE == bundle.getState()));
+    }
+
+    /**
      * This method is used for initialization of the list of current running bundles. The problem is that the listener itself will not get
      * any events before this bundle is started, so if any bundles are started beforehand you won't notice this here. The consequence is
      * that we have to build an initial list on startup
      * 
      * @param context
      */
-    public void getCurrentBundleStatus(BundleContext context) {
+    public void getCurrentBundleStatus(final BundleContext context) {
         for (final Bundle bundle : context.getBundles()) {
-            if (bundle.getState() == Bundle.ACTIVE) {
-                bundlelist.add(bundle);
-                if (LOG.isInfoEnabled()) {
-                    LOG.info(bundle.getSymbolicName() + " already started before admin.");
+            if (checkSimple()) {
+                if (isNoFragmentAndActive(bundle)) {
+                    bundlelist.add(bundle);
+                    if (LOG.isInfoEnabled()) {
+                        LOG.info(bundle.getSymbolicName() + " already started before admin.");
+                    }
                 }
-            } else if (bundle.getState() == Bundle.RESOLVED && null != bundle.getHeaders().get(Constants.FRAGMENT_HOST)) {
-                bundlelist.add(bundle);
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("fragment " + bundle.getSymbolicName() + " already started before admin.");
+            } else {
+                if (bundle.getState() == Bundle.ACTIVE) {
+                    if (isAllowdBundle(bundle)) {
+                        bundlelist.add(bundle);
+                        if (LOG.isInfoEnabled()) {
+                            LOG.info(bundle.getSymbolicName() + " already started before admin.");
+                        }
+                    }
+                } else if (bundle.getState() == Bundle.RESOLVED && null != bundle.getHeaders().get(Constants.FRAGMENT_HOST)) {
+                    if (isAllowdBundle(bundle)) {
+                        bundlelist.add(bundle);
+                        if (LOG.isInfoEnabled()) {
+                            LOG.info("fragment " + bundle.getSymbolicName() + " already started before admin.");
+                        }
+                    }
                 }
             }
         }
@@ -130,8 +288,9 @@ public class AdminDaemon {
     public void registerBundleListener(final BundleContext context) {
         final BundleListener bl = new BundleListener() {
 
+            @Override
             public void bundleChanged(final BundleEvent event) {
-                if (event.getType() == BundleEvent.STARTED) {
+                if (event.getType() == BundleEvent.STARTED && (checkSimple() ? isNoFragment(event.getBundle()) : isAllowdBundle(event.getBundle()))) {
                     bundlelist.add(event.getBundle());
                 } else if (event.getType() == BundleEvent.STOPPED) {
                     bundlelist.remove(event.getBundle());
@@ -210,7 +369,7 @@ public class AdminDaemon {
         return prop;
     }
 
-    public static final ArrayList<Bundle> getBundlelist() {
+    public static final List<Bundle> getBundlelist() {
         return bundlelist;
     }
 

@@ -51,6 +51,8 @@ package com.openexchange.image;
 
 import java.io.InputStream;
 import java.util.Map.Entry;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -74,6 +76,10 @@ import com.openexchange.tools.session.ServerSession;
 @DispatcherNotes(defaultFormat = "file", allowPublicSession = true)
 public class ImageGetAction implements AJAXActionService {
 
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ImageGetAction.class));
+
+    private static final boolean DEBUG = LOG.isDebugEnabled();
+
     /**
      * Initializes a new {@link ImageGetAction}.
      * 
@@ -83,38 +89,43 @@ public class ImageGetAction implements AJAXActionService {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.ajax.requesthandler.AJAXActionService#perform(com.openexchange.ajax.requesthandler.AJAXRequestData,
-     * com.openexchange.tools.session.ServerSession)
-     */
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         // Check registration name
         String registrationName = null;
-        for (Entry<String, String> entry : ImageActionFactory.alias2regName.entrySet()) {
-            String alias = entry.getKey();
-            if (requestData.getSerlvetRequestURI().contains(alias)) {
-                registrationName = entry.getValue();
-                break;
+        {
+            final String serlvetRequestURI = requestData.getSerlvetRequestURI();
+            for (Entry<String, String> entry : ImageActionFactory.alias2regName.entrySet()) {
+                String alias = entry.getKey();
+                if (serlvetRequestURI.contains(alias)) {
+                    registrationName = entry.getValue();
+                    break;
+                }
+            }
+            if (registrationName == null) {
+                if (DEBUG) {
+                    LOG.debug("Request URI cannot be resolved to an image location: " + serlvetRequestURI);
+                }
+                throw AjaxExceptionCodes.BAD_REQUEST.create("Unknown image location.");
             }
         }
-        if (registrationName == null) {
-            throw AjaxExceptionCodes.BAD_REQUEST.create("Unknown image location.");
-        }
-        
         // Parse path
         ImageDataSource dataSource = null;
         try {
             ConversionService conversionService = ServerServiceRegistry.getInstance().getService(ConversionService.class, true);
             dataSource = (ImageDataSource) conversionService.getDataSource(registrationName);
         } catch (OXException e) {
+            if (DEBUG) {
+                LOG.debug("Missing ConversionService reference.", e);
+            }
             throw AjaxExceptionCodes.BAD_REQUEST.create();
         }
         if (dataSource == null) {
+            if (DEBUG) {
+                LOG.debug("Data source cannot be found for: " + registrationName);
+            }
             throw AjaxExceptionCodes.BAD_REQUEST.create("Invalid image location.");
         }
-        
         ImageLocation imageLocation = dataSource.parseRequest(requestData);
 
         /*
@@ -136,7 +147,10 @@ public class ImageGetAction implements AJAXActionService {
             requestResult = new AJAXRequestResult();
             outputImageData(dataSource, imageLocation, session, requestResult);
         } catch (OXException e) {
-            throw AjaxExceptionCodes.BAD_REQUEST.create();
+            if (DEBUG) {
+                LOG.debug("Writing image data failed.", e);
+            }
+            throw AjaxExceptionCodes.BAD_REQUEST.create(e, new Object[0]);
         }
         return requestResult;
     }

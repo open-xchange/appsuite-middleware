@@ -149,11 +149,11 @@ public final class Processor {
     protected static final MailField[] FIELDS_LOW_COST = MailField.FIELDS_LOW_COST;
     
     public void processFolderAsync(final MailFolderInfo folderInfo, final int accountId, final Session session, final Map<String, Object> params) throws OXException {
-        Performer performer = new Performer(folderInfo, accountId, session, params, strategy);
+        final Performer performer = new Performer(folderInfo, accountId, session, params, strategy);
         ThreadPools.getThreadPool().submit(ThreadPools.task(performer), DiscardBehavior.getInstance());
     }
     
-    public void processFolderAsync(MailFolder mailFolder, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, Map<String, Object> params) throws OXException {
+    public void processFolderAsync(final MailFolder mailFolder, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, final Map<String, Object> params) throws OXException {
         if (mailFolder.isHoldsMessages() && mailFolder.getMessageCount() < 0) {
             final IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
             if (folderStorage instanceof IMailFolderStorageEnhanced) {
@@ -183,7 +183,7 @@ public final class Processor {
         private final ProcessorStrategy strategy;
                
 
-        public Performer(MailFolderInfo folderInfo, int accountId, Session session, Map<String, Object> params, ProcessorStrategy strategy) {
+        public Performer(final MailFolderInfo folderInfo, final int accountId, final Session session, final Map<String, Object> params, final ProcessorStrategy strategy) {
             super();
             this.folderInfo = folderInfo;
             this.accountId = accountId;
@@ -194,12 +194,12 @@ public final class Processor {
 
         @Override
         public void run() {
-            int messageCount = folderInfo.getMessageCount();
+            final int messageCount = folderInfo.getMessageCount();
             if (messageCount <= 0) {
                 return;
             }
             
-            IndexFacadeService facade = SmalServiceLookup.getServiceStatic(IndexFacadeService.class);
+            final IndexFacadeService facade = SmalServiceLookup.getServiceStatic(IndexFacadeService.class);
             if (null == facade) {
                 return;
             }
@@ -215,7 +215,7 @@ public final class Processor {
                 } else {
                     submitJob(mailAccess);
                 }                
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 LOG.error(e.getMessage(), e);
             } finally {
                 SmalMailAccess.closeUnwrappedInstance(mailAccess);
@@ -223,70 +223,70 @@ public final class Processor {
             }
         }
         
-        private void process(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, IndexAccess<MailMessage> indexAccess) throws OXException {
-            int accountId = mailAccess.getAccountId();
-            int messageCount = folderInfo.getMessageCount();
+        private void process(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, final IndexAccess<MailMessage> indexAccess) throws OXException {
+            final int accountId = mailAccess.getAccountId();
+            final int messageCount = folderInfo.getMessageCount();
             if (strategy.addFull(messageCount, folderInfo)) { // headers, content + attachments
-                MailMessage[] messages =
+                final MailMessage[] messages =
                     mailAccess.getMessageStorage().getAllMessages(
                         folderInfo.getFullName(),
                         IndexRange.NULL,
                         MailSortField.RECEIVED_DATE,
                         OrderDirection.DESC,
                         FIELDS_FULL);
-                List<IndexDocument<MailMessage>> documents = new ArrayList<IndexDocument<MailMessage>>(messages.length);
-                for (MailMessage message : messages) {
+                final List<IndexDocument<MailMessage>> documents = new ArrayList<IndexDocument<MailMessage>>(messages.length);
+                for (final MailMessage message : messages) {
                     documents.add(IndexDocumentHelper.documentFor(message, accountId));
                 }
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Starting addAttachments() for " + documents.size() + " documents from \"" + folderInfo.getFullName() + "\" " + new DebugInfo(mailAccess));
-                    long st = System.currentTimeMillis();
+                    final long st = System.currentTimeMillis();
                     indexAccess.addAttachments(documents, true);
-                    long dur = System.currentTimeMillis() - st;
+                    final long dur = System.currentTimeMillis() - st;
                     LOG.debug("Performed addAttachments() for " + documents.size() + " documents from \"" + folderInfo.getFullName() + "\" in " + dur + "msec. " + new DebugInfo(
                         mailAccess));
                 } else {
                     indexAccess.addAttachments(documents, true);
                 }
             } else if (strategy.addHeadersAndContent(messageCount, folderInfo)) { // headers + content
-                MailMessage[] messages =
+                final MailMessage[] messages =
                     mailAccess.getMessageStorage().getAllMessages(
                         folderInfo.getFullName(),
                         IndexRange.NULL,
                         MailSortField.RECEIVED_DATE,
                         OrderDirection.DESC,
                         FIELDS_FULL);
-                List<IndexDocument<MailMessage>> documents = new ArrayList<IndexDocument<MailMessage>>(messages.length);
-                for (MailMessage message : messages) {
+                final List<IndexDocument<MailMessage>> documents = new ArrayList<IndexDocument<MailMessage>>(messages.length);
+                for (final MailMessage message : messages) {
                     documents.add(IndexDocumentHelper.documentFor(message, accountId));
                 }
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Starting addContent() for " + documents.size() + " documents from \"" + folderInfo.getFullName() + "\" " + new DebugInfo(mailAccess));
-                    long st = System.currentTimeMillis();
+                    final long st = System.currentTimeMillis();
                     indexAccess.addContent(documents, true);
-                    long dur = System.currentTimeMillis() - st;
+                    final long dur = System.currentTimeMillis() - st;
                     LOG.debug("Performed addContent() for " + documents.size() + " documents from \"" + folderInfo.getFullName() + "\" in " + dur + "msec. " + new DebugInfo(
                         mailAccess));
                 } else {
                     indexAccess.addContent(documents, true);
                 }
             } else if (strategy.addHeadersOnly(messageCount, folderInfo)) { // headers only
-                MailMessage[] messages =
+                final MailMessage[] messages =
                     mailAccess.getMessageStorage().getAllMessages(
                         folderInfo.getFullName(),
                         null,
                         MailSortField.RECEIVED_DATE,
                         OrderDirection.DESC,
                         FIELDS_LOW_COST);
-                List<IndexDocument<MailMessage>> documents = new ArrayList<IndexDocument<MailMessage>>(messages.length);
-                for (MailMessage message : messages) {
+                final List<IndexDocument<MailMessage>> documents = new ArrayList<IndexDocument<MailMessage>>(messages.length);
+                for (final MailMessage message : messages) {
                     documents.add(IndexDocumentHelper.documentFor(message, accountId));
                 }
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Starting addEnvelopeData() for " + documents.size() + " documents from \"" + folderInfo.getFullName() + "\" " + new DebugInfo(mailAccess));
-                    long st = System.currentTimeMillis();
+                    final long st = System.currentTimeMillis();
                     indexAccess.addEnvelopeData(documents);
-                    long dur = System.currentTimeMillis() - st;
+                    final long dur = System.currentTimeMillis() - st;
                     LOG.debug("Performed addEnvelopeData() for " + documents.size() + " documents from \"" + folderInfo.getFullName() + "\" in " + dur + "msec. " + new DebugInfo(
                         mailAccess));
                 } else {
@@ -297,21 +297,20 @@ public final class Processor {
             }
         }
         
-        private void submitJob(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
-            Collection<MailMessage> storageMails = getParameter("processor.storageMails", params);
-            Collection<MailMessage> indexMails = getParameter("processor.indexMails", params);
-            IndexingService indexingService = SmalServiceLookup.getServiceStatic(IndexingService.class);
+        private void submitJob(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
+            final Collection<MailMessage> storageMails = getParameter("processor.storageMails", params);
+            final Collection<MailMessage> indexMails = getParameter("processor.indexMails", params);
+            final IndexingService indexingService = SmalServiceLookup.getServiceStatic(IndexingService.class);
             if (null == indexingService) {
                 return;
             }
-            
-            Session session = mailAccess.getSession();
-            MailConfig mailConfig = mailAccess.getMailConfig();
-            Builder jobInfoBuilder =
+            final Session session = mailAccess.getSession();
+            final MailConfig mailConfig = mailAccess.getMailConfig();
+            final Builder jobInfoBuilder =
                 new MailJobInfo.Builder(session.getUserId(), session.getContextId()).accountId(mailAccess.getAccountId()).login(
                     mailConfig.getLogin()).password(mailConfig.getPassword()).server(mailConfig.getServer()).port(mailConfig.getPort()).secure(
                     mailConfig.isSecure()).primaryPassword(session.getPassword());
-            FolderJob folderJob = new FolderJob(folderInfo.getFullName(), jobInfoBuilder.build());
+            final FolderJob folderJob = new FolderJob(folderInfo.getFullName(), jobInfoBuilder.build());
             folderJob.setIndexMails(null == indexMails ? null : new ArrayList<MailMessage>(indexMails));
             folderJob.setStorageMails(null == storageMails ? null : new ArrayList<MailMessage>(storageMails));
             indexingService.addJob(folderJob);

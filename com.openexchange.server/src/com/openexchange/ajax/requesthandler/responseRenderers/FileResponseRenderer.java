@@ -55,7 +55,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
 import javax.activation.FileTypeMap;
-import javax.activation.MimetypesFileTypeMap;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -147,7 +146,13 @@ public class FileResponseRenderer implements ResponseRenderer {
             documentData = new BufferedInputStream(file.getStream());
             final String userAgent = req.getHeader("user-agent");
             if (SAVE_AS_TYPE.equals(contentType) || (delivery != null && delivery.equalsIgnoreCase(DOWNLOAD))) {
-                Tools.setHeaderForFileDownload(userAgent, resp, file.getName(), contentDisposition);
+                if (null == contentDisposition) {
+                    final StringBuilder sb = new StringBuilder(32).append("attachment");
+                    DownloadUtility.appendFilenameParameter(file.getName(), SAVE_AS_TYPE, userAgent, sb);
+                    resp.setHeader("Content-Disposition", sb.toString());
+                } else {
+                    Tools.setHeaderForFileDownload(userAgent, resp, file.getName(), contentDisposition);
+                }
                 resp.setContentType(contentType);
             } else {
                 final CheckedDownload checkedDownload = DownloadUtility.checkInlineDownload(documentData, file.getName(), file.getContentType(), contentDisposition, userAgent);

@@ -185,7 +185,11 @@ public class FileStorageRdbActivator extends HousekeepingActivator {
              * Clear service registry
              */
             Services.setServices(null);
-            secretService.close();
+            final WhiteboardSecretService secretService = this.secretService;
+            if (null != secretService) {
+                secretService.close();
+                this.secretService = null;
+            }
         } catch (final Exception e) {
             com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FileStorageRdbActivator.class)).error(e.getMessage(), e);
             throw e;

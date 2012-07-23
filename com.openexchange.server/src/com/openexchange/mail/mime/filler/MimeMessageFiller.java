@@ -841,13 +841,21 @@ public class MimeMessageFiller {
                      */
                     for (int i = 0; i < size; i++) {
                         if (null == contentIds) {
-                            addMessageBodyPart(primaryMultipart, mail.getEnclosedMailPart(i), false);
+                            final MailPart mailPart = mail.getEnclosedMailPart(i);
+                            if (mailPart.getContentType().startsWith("image/")) {
+                                if (null == mailPart.getContentId()) {
+                                    // A regular file-attachment image
+                                    addMessageBodyPart(primaryMultipart, mailPart, false);
+                                }
+                            } else {
+                                addMessageBodyPart(primaryMultipart, mailPart, false);
+                            }
                         } else {
                             final MailPart mailPart = mail.getEnclosedMailPart(i);
                             boolean add = true;
                             if (mailPart.getContentType().startsWith("image/")) {
                                 final String contentId = mailPart.getContentId();
-                                if (null != contentId && contentIds.contains(contentId)) {
+                                if (null != contentId /*&& contentIds.contains(contentId)*/) {
                                     // Ignore
                                     add = false;
                                 }

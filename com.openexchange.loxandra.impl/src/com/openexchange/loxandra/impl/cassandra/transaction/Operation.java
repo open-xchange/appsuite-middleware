@@ -181,7 +181,7 @@ public class Operation {
 	public void addOperationData(JSONObject data) {
 		Iterator<String> it = data.keys();
 		while (it.hasNext()) {
-			String string = (String) it.next();
+			String string = it.next();
 			try {
 				opData.put(string, data.getString(string));
 			} catch (JSONException e) {

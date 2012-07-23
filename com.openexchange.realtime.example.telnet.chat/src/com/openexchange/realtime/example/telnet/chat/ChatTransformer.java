@@ -78,7 +78,7 @@ public class ChatTransformer extends TransformingTelnetChatPlugin {
 	@Override
 	public List<Stanza> transform(TelnetChatMessage message) {
 		Message msg = new Message();
-		msg.setType(Type.normal);
+		msg.setType(Type.chat);
 		ChatMessage chatMessage = new ChatMessage(message.getPayload());
 		
 		String header = message.getHeader("priority");

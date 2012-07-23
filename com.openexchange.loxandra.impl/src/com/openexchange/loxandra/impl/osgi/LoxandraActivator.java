@@ -49,16 +49,13 @@
 package com.openexchange.loxandra.impl.osgi;
 
 import java.io.File;
-
-import me.prettyprint.hector.testutils.EmbeddedServerHelper;
-
-import org.apache.cassandra.thrift.CassandraDaemon;
 import org.apache.commons.logging.Log;
 
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.log.LogFactory;
 import com.openexchange.loxandra.EAVContactFactoryService;
 import com.openexchange.loxandra.impl.cassandra.CassandraEAVContactFactoryServiceImpl;
+import com.openexchange.loxandra.impl.cassandra.transaction.TransactionManager;
 import com.openexchange.loxandra.impl.core.LoxandraServiceLookUp;
 import com.openexchange.osgi.HousekeepingActivator;
 
@@ -70,10 +67,6 @@ public final class LoxandraActivator extends HousekeepingActivator {
 	
 	private static Log log = LogFactory.getLog(LoxandraActivator.class);
 	
-	private EmbeddedServerHelper srv;
-
-	private CassandraDaemon cassandraDaemon;
-
 	/**
 	 * Default Constructor 
 	 */
@@ -81,20 +74,12 @@ public final class LoxandraActivator extends HousekeepingActivator {
 		super();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
-	 */
 	@Override
 	protected Class<?>[] getNeededServices() {
 		
 		return new Class[]{ConfigurationService.class};
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see com.openexchange.osgi.DeferredActivator#startBundle()
-	 */
 	@Override
 	protected void startBundle() throws Exception {
 		log.info("starting bundle: com.openexchange.loxandra");
@@ -103,20 +88,27 @@ public final class LoxandraActivator extends HousekeepingActivator {
 		
 		ConfigurationService config = LoxandraServiceLookUp.getService(ConfigurationService.class);
 		
-		System.setProperty("loxandra.config", new File(config.getProperty("CONFIGPATH") + "/loxandra.properties").getAbsolutePath().toString());
+		final File file = config.getFileByName("loxandra.properties");
+		if (null != file) {
+            System.setProperty("loxandra.config", file.getAbsolutePath().toString());
+        }
 		
-		// register eavcontactservice
-    	registerService(EAVContactFactoryService.class, new CassandraEAVContactFactoryServiceImpl());
-        openTrackers();
+		// Initialize and register the EAVContactService
+		EAVContactFactoryService eavService = new CassandraEAVContactFactoryServiceImpl();
+		registerService(EAVContactFactoryService.class, eavService);
+    	
+    	// The EAVContactFactoryService must be initialized BEFORE the TransactionManager, 
+    	// since the later one uses the EAVContactFactoryService to get access to Cassandra.
+    	TransactionManager txInstance = TransactionManager.getInstance();
+    	txInstance.checkAndReplay();
+    	registerService(TransactionManager.class, txInstance); 
+        
+    	openTrackers();
         
         log.info("Loxandra Service started successfully.");
         
 	}
-	
-	/*
-	 * (non-Javadoc)
-	 * @see com.openexchange.osgi.HousekeepingActivator#stopBundle()
-	 */
+
 	@Override
 	protected void stopBundle() throws Exception {
 		log.info("stoping bundle: com.openexchange.loxandra");

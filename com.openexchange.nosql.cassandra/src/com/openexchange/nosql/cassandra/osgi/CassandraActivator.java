@@ -49,8 +49,11 @@
 package com.openexchange.nosql.cassandra.osgi;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.util.Properties;
 
 import org.apache.commons.logging.Log;
+import org.xerial.snappy.SnappyServiceLookUp;
 
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.log.LogFactory;
@@ -59,12 +62,14 @@ import com.openexchange.nosql.cassandra.EmbeddedCassandraService;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
+ * Activates an embedded Cassandra instance along with its dependencies (i.e. snappy-java)
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- *
  */
 public final class CassandraActivator extends HousekeepingActivator {
 	
 	private static Log log = LogFactory.getLog(CassandraActivator.class);
+	
+	private static String snappyPathProp = "com.openexchange.nosql.cassandra.snappyjava.nativelibs";
 	
 	private EmbeddedCassandraService cassandra;
 
@@ -93,11 +98,51 @@ public final class CassandraActivator extends HousekeepingActivator {
 	protected void startBundle() throws Exception {
 		log.info("starting bundle: com.openexchange.nosql.cassandra");
 		
+		//-------------- INIT SNAPPYJAVA ----------------//
+		
+		SnappyServiceLookUp.set(this);
+		
+		ConfigurationService configSnappy = SnappyServiceLookUp.getService(ConfigurationService.class);
+		final File snappyFile = configSnappy.getFileByName("snappy.properties");
+		if (null != snappyFile) {
+            System.setProperty("snappy.config", snappyFile.getAbsolutePath().toString());
+        }
+		
+		Properties prop = new Properties();
+		String configUrl = System.getProperty("snappy.config");
+		prop.load(new FileInputStream(configUrl));
+		
+		String snappyNativePath = prop.getProperty(snappyPathProp);
+		
+    	String osName = System.getProperty("os.name");
+    	String osArch = System.getProperty("os.arch");
+    	//String fileSeparator = System.getProperty("file.separator");
+    	log.info(osName + " " + osArch);
+    	
+    	String postfix = null;
+    	if (osName.equals("Linux")) {
+    		postfix = ".so";
+    	} else if (osName.equals("Windows")) {
+    		postfix = ".dll";
+    	} else if (osName.equals("Mac")) {
+    		postfix = ".jnilib";
+    	} else {
+    		log.error("Unsupported system");
+    	}
+
+		String path = snappyNativePath + "/native/" + osName + "/" + osArch + "/libsnappyjava" + postfix;
+    	System.load(path);
+		
+		//----------------- INIT CASSANDRA -------------//
+		
 		CassandraServiceLookUp.set(this);
 		
 		ConfigurationService config = CassandraServiceLookUp.getService(ConfigurationService.class);
-		
-		System.setProperty("cassandra.config", new File(config.getProperty("CONFIGPATH") + "/cassandra.yaml").toURI().toString());
+
+		final File file = config.getFileByName("cassandra.yaml");
+		if (null != file) {
+            System.setProperty("cassandra.config", file.toURI().toString());
+        }
 		
 		//start embedded cassandra node
 		cassandra = new EmbeddedCassandraService();

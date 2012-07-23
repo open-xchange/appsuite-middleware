@@ -868,6 +868,13 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 if (MimeMessageUtility.equalsCID(contentId, partContentId)) {
                     return part;
                 }
+                /*
+                 * Compare with file name
+                 */
+                final String realFilename = getRealFilename(part);
+                if (MimeMessageUtility.equalsCID(contentId, realFilename)) {
+                    return part;
+                }
             } else if (ct.startsWith("multipart/")) {
                 final Multipart m = (Multipart) part.getContent();
                 final int count = m.getCount();

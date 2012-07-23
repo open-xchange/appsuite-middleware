@@ -70,8 +70,9 @@ public class OXAdminCoreImpl implements OXAdminCoreInterface {
         this.context = context;
     }
 
+    @Override
     public boolean allPluginsLoaded() {
-        final ArrayList<Bundle> bundlelist = AdminDaemon.getBundlelist();
+        final java.util.List<Bundle> bundlelist = AdminDaemon.getBundlelist();
         final Bundle[] bundles = context.getBundles();
         final List<Bundle> allbundlelist = Arrays.asList(bundles);
         // First one is the system bundle, which is always loaded, so we ignore it here. As we cannot remove
@@ -83,7 +84,7 @@ public class OXAdminCoreImpl implements OXAdminCoreInterface {
             return true;
         }
         // We have to introduce a new list because a sublist can't be modified
-        final ArrayList<Bundle> arrayList = new ArrayList<Bundle>(subList);
+        final java.util.List<Bundle> arrayList = new ArrayList<Bundle>(subList);
         arrayList.removeAll(bundlelist);
         log.error("The following bundles aren't started: " + arrayList);
         return false;

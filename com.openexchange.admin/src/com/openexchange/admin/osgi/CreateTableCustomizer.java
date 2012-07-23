@@ -69,16 +69,19 @@ public class CreateTableCustomizer implements ServiceTrackerCustomizer<CreateTab
 
     }
 
+    @Override
     public CreateTableService addingService(final ServiceReference<CreateTableService> reference) {
         final CreateTableService service = context.getService(reference);
         CreateTableRegistry.getInstance().addCreateTable(service);
         return service;
     }
 
+    @Override
     public void modifiedService(final ServiceReference<CreateTableService> reference, final CreateTableService service) {
         // Nothing to do.
     }
 
+    @Override
     public void removedService(final ServiceReference<CreateTableService> reference, final CreateTableService service) {
         CreateTableRegistry.getInstance().removeCreateTable(service);
         context.ungetService(reference);

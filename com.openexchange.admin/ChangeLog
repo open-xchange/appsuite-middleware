@@ -1,3 +1,7 @@
+* 2012-07-18 - choeger@open-xchange.com
+
+ - Fix for bug 22581: oxinstaller memory parsing should be more fault-tolerant
+
 * 2012-07-03 - thorben.betten@open-xchange.com
 
  - Fix for bug 21743: Retry on detected MySQL deadlock

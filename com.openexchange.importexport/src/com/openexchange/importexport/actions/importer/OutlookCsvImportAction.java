@@ -85,15 +85,15 @@ public class OutlookCsvImportAction extends AbstractImportAction {
         final OutlookCSVContactImporter outlook = new OutlookCSVContactImporter();
         try {
             final ConfigurationService conf = ImportExportServices.getConfigurationService();
-            final String path = conf.getProperty("com.openexchange.import.mapper.path");
-            if (path == null) {
-                LOG.error("Reading the property 'com.openexchange.import.mapper.path' did not give path to mappers. Defaulting to deprecated mappers as fallback.");
+            final String dirName = conf.getProperty("com.openexchange.import.mapper.path");
+            if (dirName == null) {
+                LOG.error("Reading the property 'com.openexchange.import.mapper.path' did not give directory name for mappers. Defaulting to deprecated mappers as fallback.");
                 return outlook;
             }
 
-            final File dir = new File(path);
+            final File dir = conf.getDirectory(dirName);
             if (!dir.isDirectory()) {
-                LOG.error("Directory " + path + " supposedly containing import mappers information wasn't actually a directory, defaulting to deprecated mappers as fallback.");
+                LOG.error("Directory " + dir.getPath() + " supposedly containing import mappers information wasn't actually a directory, defaulting to deprecated mappers as fallback.");
                 return outlook;
             }
             final File[] files = dir.listFiles();

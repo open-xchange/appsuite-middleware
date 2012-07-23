@@ -91,16 +91,19 @@ public class OXLogin extends OXCommonImpl implements OXLoginInterface {
         }
     }
 
+    @Override
     public void login(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException,DatabaseUpdateException {        
         new BasicAuthenticator().doUserAuthentication(auth, ctx);
         triggerUpdateProcess(ctx);
     }
 
+    @Override
     public void login(final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         doNullCheck(auth);
         new BasicAuthenticator().doAuthentication(auth);
     }
 
+    @Override
     public User login2User(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
         new BasicAuthenticator().doUserAuthentication(auth, ctx);
         
@@ -115,7 +118,7 @@ public class OXLogin extends OXCommonImpl implements OXLoginInterface {
 
         User[] retusers = oxu.getData(ctx, new User[] { retval });
 
-        final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
+        final java.util.List<Bundle> bundles = AdminDaemon.getBundlelist();
         for (final Bundle bundle : bundles) {
             final String bundlename = bundle.getSymbolicName();
             if (Bundle.ACTIVE == bundle.getState()) {

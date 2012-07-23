@@ -750,6 +750,11 @@ public final class FolderJob extends AbstractMailJob {
         }
 
         @Override
+        public Map<String, ?> getProperties() {
+            return delegate.getProperties();
+        }
+
+        @Override
         public Class<?>[] getNeededServices() {
             return delegate.getNeededServices();
         }

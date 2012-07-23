@@ -53,6 +53,7 @@ import it.unimi.dsi.fastutil.bytes.ByteArrayList;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -104,7 +105,7 @@ public class Lc4jLanguageDetectionService implements LanguageDetectionService {
 
     private final LanguageCategorization defaultLanguageCategorization;
 
-    private final AtomicReference<String> languageModelsDir;
+    private final AtomicReference<File> languageModelsDir;
 
     private final ConcurrentMap<String, Locale> languageCodes;
 
@@ -120,7 +121,7 @@ public class Lc4jLanguageDetectionService implements LanguageDetectionService {
         warnAboutUnknownModel = false;
         defaultLocale = DEFAULT_LOCALE;
         languageCodes = new ConcurrentHashMap<String, Locale>(64);
-        languageModelsDir = new AtomicReference<String>();
+        languageModelsDir = new AtomicReference<File>();
         defaultLanguageCategorization = new LanguageCategorization();
         defaultLanguageCategorization.setMaxLanguages(10);
         defaultLanguageCategorization.setNumCharsToExamine(1000);
@@ -143,7 +144,7 @@ public class Lc4jLanguageDetectionService implements LanguageDetectionService {
      * @param languageCodesFile The file name
      * @throws OXException If loading file fails
      */
-    public void loadLanguageCodes(final String languageCodesFile) throws OXException {
+    public void loadLanguageCodes(final File languageCodesFile) throws OXException {
         BufferedInputStream inputStream = null;
         try {
             inputStream = new BufferedInputStream(new FileInputStream(languageCodesFile));
@@ -167,9 +168,9 @@ public class Lc4jLanguageDetectionService implements LanguageDetectionService {
      *
      * @param languageModelsDir The directory path
      */
-    public void setLanguageModelsDir(final String languageModelsDir) {
+    public void setLanguageModelsDir(final File languageModelsDir) {
         this.languageModelsDir.set(languageModelsDir);
-        defaultLanguageCategorization.setLanguageModelsDir(languageModelsDir);
+        defaultLanguageCategorization.setLanguageModelsDir(languageModelsDir.getPath());
         // Initialize
         defaultLanguageCategorization.findLanguage(new ByteArrayList("Hello world!".getBytes()));
     }
