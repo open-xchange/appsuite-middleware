@@ -163,17 +163,15 @@ public final class HttpDateFormatRegistry {
     private String zeroMaxAgeExpires() {
         String tmp = zeroMaxAgeExpires;
         if (null == tmp) {
-            synchronized (HttpDateFormatRegistry.class) {
+            synchronized (netscapeDateFormat) {
                 tmp = zeroMaxAgeExpires;
                 if (null == tmp) {
                     final ConfigurationService service = AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class);
                     final boolean b = service.getBoolProperty("com.openexchange.ajp.cookie.enableExactZeroMaxAge", true);
-                    synchronized (netscapeDateFormat) {
-                        /*
-                         * expires=Sat, 01-Jan-2000 00:00:00 GMT
-                         */
-                        tmp = netscapeDateFormat.format(new Date(b ? 0L : 10000L));
-                    }
+                    /*
+                     * expires=Sat, 01-Jan-2000 00:00:00 GMT
+                     */
+                    tmp = netscapeDateFormat.format(new Date(b ? 0L : 10000L));
                     zeroMaxAgeExpires = tmp;
                 }
             }
