@@ -57,11 +57,13 @@ import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
 import com.openexchange.loxandra.json.action.AbstractAction;
+import com.openexchange.loxandra.json.action.AddPropertiesAction;
 import com.openexchange.loxandra.json.action.CopyAction;
 import com.openexchange.loxandra.json.action.DeleteAction;
 import com.openexchange.loxandra.json.action.DeletePropertiesAction;
 import com.openexchange.loxandra.json.action.GetAction;
 import com.openexchange.loxandra.json.action.GetAllAction;
+import com.openexchange.loxandra.json.action.GetPropertiesAction;
 import com.openexchange.loxandra.json.action.MoveAction;
 import com.openexchange.loxandra.json.action.NewAction;
 import com.openexchange.loxandra.json.action.RemoveAction;
@@ -74,7 +76,7 @@ import com.openexchange.server.ServiceLookup;
 @Module(name = "eavcontact", description = "Provides access to eav contact information.")
 public class EAVContactActionFactory implements AJAXActionServiceFactory {
 	
-	private static final Map<String, AbstractAction> actions = new ConcurrentHashMap<String, AbstractAction>(8);
+	private static final Map<String, AbstractAction> actions = new ConcurrentHashMap<String, AbstractAction>(10);
 
 	/**
 	 * Constructor
@@ -91,6 +93,8 @@ public class EAVContactActionFactory implements AJAXActionServiceFactory {
         actions.put("move", new MoveAction(serviceLookup));
         actions.put("delete", new DeleteAction(serviceLookup));
         actions.put("deleteProperties", new DeletePropertiesAction(serviceLookup));
+        actions.put("getProperties", new GetPropertiesAction(serviceLookup));
+        actions.put("addProperties", new AddPropertiesAction(serviceLookup));
     }
 
 	/*
