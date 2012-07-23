@@ -479,7 +479,7 @@ done
 SQL_URL="jdbc:mysql://\$SQLHOST:\$SQLPORT/\$SQLDB"
 SQLDB=$CONFIGDB_DBNAME
 SQLOPTS=$SQLOPTS
-LICENSEFILE="/opt/open-xchange/etc/common/licensekeys.properties"
+LICENSEFILE="/opt/open-xchange/etc/licensekeys.properties"
 
 
 setup() 
