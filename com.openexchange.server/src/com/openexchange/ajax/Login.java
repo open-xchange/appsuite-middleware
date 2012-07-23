@@ -1037,19 +1037,33 @@ public class Login extends AJAXServlet {
              */
             cookie.setMaxAge(conf.cookieExpiry);
         }
-        final String sn = null == serverName ? LogProperties.<String> getLogProperty("com.openexchange.ajp13.serverName") : serverName;
-        if (null != sn) {
-            if (sn.startsWith("www.")) {
-                cookie.setDomain(sn.substring(3));
-            } else if ("localhost".equalsIgnoreCase(sn)) {
-                cookie.setDomain(sn);
+        final String domain = getDomainValue(null == serverName ? LogProperties.<String> getLogProperty("com.openexchange.ajp13.serverName") : serverName, false);
+        if (null != domain) {
+            cookie.setDomain(domain);
+        }
+    }
+
+    private static String getDomainValue(final String serverName, final boolean prefixWithDot) {
+        if (null == serverName) {
+            return null;
+        }
+        if (prefixWithDot) {
+            if (serverName.startsWith("www.")) {
+                return serverName.substring(3);
+            } else if ("localhost".equalsIgnoreCase(serverName)) {
+                return serverName;
             } else {
                 // Not an IP address
-                if (null == IPAddressUtil.textToNumericFormatV4(sn) && (null == IPAddressUtil.textToNumericFormatV6(sn))) {
-                    cookie.setDomain(new StringBuilder(sn.length() + 1).append('.').append(sn).toString());
+                if (null == IPAddressUtil.textToNumericFormatV4(serverName) && (null == IPAddressUtil.textToNumericFormatV6(serverName))) {
+                    return new StringBuilder(serverName.length() + 1).append('.').append(serverName).toString();
                 }
             }
+        } else {
+            if ((null == IPAddressUtil.textToNumericFormatV4(serverName)) && (null == IPAddressUtil.textToNumericFormatV6(serverName))) {
+                return serverName;
+            }
         }
+        return null;
     }
 
     protected boolean doAutoLogin(final HttpServletRequest req, final HttpServletResponse resp) throws IOException, OXException {

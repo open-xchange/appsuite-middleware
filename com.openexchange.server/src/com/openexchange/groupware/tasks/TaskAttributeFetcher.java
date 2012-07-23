@@ -463,6 +463,14 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
             }
         });
 
+        m.put(CommonFields.EXTENDED_PROPERTIES, new AttributeGetter() {
+
+            @Override
+            public Object getObject(final Task candidate) {
+                return candidate.getExtendedProperties();
+            }
+        });
+
         GETTERS = Collections.unmodifiableMap(m);
     }
 
