@@ -1,3 +1,7 @@
+* 2012-07-23 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22632: Deliver IDN address via user JSON interface
+
 * 2012-07-18 - marcus.klein@open-xchange.com
 
  - PT 32897389: Removed outdated oxreport CLT

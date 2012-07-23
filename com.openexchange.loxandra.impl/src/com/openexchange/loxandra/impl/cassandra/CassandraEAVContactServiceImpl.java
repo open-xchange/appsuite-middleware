@@ -53,6 +53,7 @@ import java.nio.charset.CharacterCodingException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -316,20 +317,20 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 		}
 		
 		// setters
-		if (contact.containsNamedProperty(ContactFields.DISPLAY_NAME)) {
-            contact.setDisplayName(ByteBufferUtil.string(contact.getNamedProperty(ContactFields.DISPLAY_NAME)));
+		if (contact.containsNamedProperty(ContactField.DISPLAY_NAME.getAjaxName())) {
+            contact.setDisplayName(ByteBufferUtil.string(contact.getNamedProperty(ContactField.DISPLAY_NAME.getAjaxName())));
         }
-		if (contact.containsNamedProperty(ContactFields.FIRST_NAME)) {
-            contact.setGivenName(ByteBufferUtil.string(contact.getNamedProperty(ContactFields.FIRST_NAME)));
+		if (contact.containsNamedProperty(ContactField.GIVEN_NAME.getAjaxName())) {
+            contact.setGivenName(ByteBufferUtil.string(contact.getNamedProperty(ContactField.GIVEN_NAME.getAjaxName())));
         }
-		if (contact.containsNamedProperty(ContactFields.LAST_NAME)) {
-            contact.setSurName(ByteBufferUtil.string(contact.getNamedProperty(ContactFields.LAST_NAME)));
+		if (contact.containsNamedProperty(ContactField.SUR_NAME.getAjaxName())) {
+            contact.setSurName(ByteBufferUtil.string(contact.getNamedProperty(ContactField.SUR_NAME.getAjaxName())));
         }
-		if (contact.containsNamedProperty(ContactFields.EMAIL1)) {
-            contact.setEmail1(ByteBufferUtil.string(contact.getNamedProperty(ContactFields.EMAIL1)));
+		if (contact.containsNamedProperty(ContactField.EMAIL1.getAjaxName())) {
+            contact.setEmail1(ByteBufferUtil.string(contact.getNamedProperty(ContactField.EMAIL1.getAjaxName())));
         }
-		if (contact.containsNamedProperty(ContactFields.ADDRESS_BUSINESS)) {
-            contact.setAddressBusiness(ByteBufferUtil.string(contact.getNamedProperty(ContactFields.ADDRESS_BUSINESS)));
+		if (contact.containsNamedProperty(ContactField.BUSINESS_ADDRESS.getAjaxName())) {
+            contact.setAddressBusiness(ByteBufferUtil.string(contact.getNamedProperty(ContactField.BUSINESS_ADDRESS.getAjaxName())));
         }
 		if (contact.containsNamedProperty("folderUUID")) {
 			contact.addFolderUUID(UUID.fromString(ByteBufferUtil.string(contact.getNamedProperty("folderUUID"))));
@@ -338,8 +339,18 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 		contact.setTimeUUID(UUID.fromString(ByteBufferUtil.string(contact.getNamedProperty("timeuuid"))));
 		
 		if (!limited) {
-			//TODO: complete...
-			if (contact.containsNamedProperty(ContactFields.BIRTHDAY)) {
+			for (final int column : Contact.JSON_COLUMNS) {
+			
+				final ContactField field = ContactField.getByValue(column);
+				if (field != null && field.isDBField()) {
+					if (contact.containsNamedProperty(ContactField.getByValue(column).getAjaxName())) {
+						if (EAVContactHelper.isNonString(column)) {
+							contact.set(column, new Date(ByteBufferUtil.toLong(contact.getNamedProperty(field.getAjaxName()))));
+						} else {
+							contact.set(column, ByteBufferUtil.string(contact.getNamedProperty(field.getAjaxName())));
+						}
+					}
+				}
 			}
 			
 			// get unnamed props
@@ -374,6 +385,7 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 			while (folderIterator.hasNext()) {
 				HColumn<Composite, String> h = folderIterator.next();
 				contact.addFolderUUID(UUID.fromString(h.getValue()));
+				System.out.println(UUID.fromString(h.getValue()));
 			}
 		}
 		
@@ -462,6 +474,69 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 		} catch (OXException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see com.openexchange.loxandra.EAVContactService#addProperties(java.util.UUID, java.util.HashMap)
+	 */
+	@Override
+	public void addProperties(UUID uuid, HashMap<String, String> props) {
+		ColumnFamilyUpdater<UUID, Composite> personUpdater = personTemplate.createUpdater(uuid);
+		
+		Iterator<String> it = props.keySet().iterator();
+		while (it.hasNext()) {
+			String key = (String) it.next();
+			personUpdater.setString(new Composite("unnamed", key), props.get(key));
+		}
+		
+		personTemplate.update(personUpdater);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.openexchange.loxandra.EAVContactService#getProperties(java.util.UUID, java.lang.String[])
+	 */
+	@Override
+	public String getProperties(UUID uuid, String... props) {
+		HashMap<String, String> p = new HashMap<String, String>();
+		HashMap<String, String> pRet = new HashMap<String, String>();
+		
+		ColumnFamilyResult<UUID, Composite> res = personTemplate.queryColumns(uuid);
+		
+		if (null == res || !res.hasResults()) {
+			log.error("No result");
+		} else {
+			Composite start = new Composite();
+			start.addComponent(0, "unnamed", Composite.ComponentEquality.EQUAL);
+			
+			Composite end = new Composite();
+			end.addComponent(0, "unnamed", Composite.ComponentEquality.GREATER_THAN_EQUAL);
+			
+			SliceQuery<UUID, Composite, String> unnamedSliceQuery = HFactory.createSliceQuery(keyspace, us, cs, ss);
+			unnamedSliceQuery.setColumnFamily(CF_PERSON).setKey(uuid);
+			ColumnSliceIterator<UUID, Composite, String> unnamedIterator = new ColumnSliceIterator<UUID, Composite, String>(unnamedSliceQuery, start, end, false);
+			
+			// setters
+			while (unnamedIterator.hasNext()) {
+				HColumn<Composite, String> h = unnamedIterator.next();
+				
+				try {
+					String key = ByteBufferUtil.string((ByteBuffer)h.getName().get(1));
+					p.put(key, h.getValue());
+				} catch (CharacterCodingException e) {
+					e.printStackTrace();
+				}
+			}
+			
+			for (String s: props) {
+				if (p.containsKey(s)) {
+					pRet.put(s, p.get(s));
+				}
+			}
+		}
+		
+		return pRet.toString();
 	}
 
 	/*

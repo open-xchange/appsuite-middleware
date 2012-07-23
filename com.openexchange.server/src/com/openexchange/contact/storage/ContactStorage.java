@@ -52,6 +52,7 @@ package com.openexchange.contact.storage;
 import java.util.Date;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
@@ -62,10 +63,57 @@ import com.openexchange.tools.iterator.SearchIterator;
 /**
  * {@link ContactStorage}
  * 
- * Basic methods for storing and accessing {@link Contact}s.<p/>
- * As a convention, all passed and returned object references are assumed to 
- * be non-<code>null</code> unless otherwise specified.  
- *
+ * Basic methods for storing and accessing {@link Contact}s.
+ * <p/>
+ * <b>Remarks for custom implementations:</b>
+ * <ul><li>
+ * To add a custom {@link ContactStorage} implementation, extend the abstract 
+ * class {@link DefaultContactStorage} and implement the needed methods. Then,
+ * register an instance as a <code>ContactStorage.class</code> service during
+ * activation to make the storage known to the contact service during runtime.
+ * </li><li>
+ * Before accessing the storage, the service will always query the storage if 
+ * it supports the folder ID, so the storage needs to know whether it is 
+ * responsible for a specific folder ID or not. A storage can be responsible
+ * for multiple folder IDs.   
+ * </li><li>
+ * To abstract from the column IDs as used by the HTTP API, the contact 
+ * storage uses the {@link ContactField} enumeration exclusively to indicate
+ * which contact properties are queried from the storage. Therefore, a storage-
+ * internal mapping of contact properties to the storage-representation 
+ * might be useful. As a starting point, base classes for mapping operations 
+ * can be found in the package <code>com.openexchange.groupware.tools.mappings
+ * </code>. 
+ * </li><li>
+ * While the interface uses {@link String} values for identifiers, the 
+ * {@link Contact} class still expects them to be in a numerical format for 
+ * legacy reasons. Therefore, extensive parsing of identifiers may be necessary
+ * for now. A convenience <code>parse</code>-method for handling numerical 
+ * identifiers is available in {@link DefaultContactStorage}.
+ * </li><li>
+ * The contact storage does not need to check permissions when accessing the 
+ * storage, since the contact service already takes care of checking the 
+ * current user's access rights to the folder and it's contents. However, the
+ * current session is still passed down to the storage for possible 
+ * authentication requirements.
+ * </li><li>
+ * It's up to the storage to provide a history of deleted objects. While it is 
+ * not used to actually 'restore' deleted objects, these information are needed
+ * for synchronization purposes ("get objects deleted since..."). Therefore, at 
+ * least the properties that identify an object are required here (i.e. 
+ * timestamps and different identifiers). 
+ * </li><li>
+ * Possible exceptions thrown in the storage must extend the 
+ * {@link OXException} base class. A storage might either define it's own 
+ * exceptions and/or use the pre-defined ones found at 
+ * {@link ContactExceptionCodes}.  
+ * </li><li>
+ * As a general convention, all passed and returned object references are 
+ * assumed to be non-<code>null</code> unless otherwise specified. 
+ * </li></ul>
+ * 
+ * @see DefaultContactStorage
+ * @see ContactField
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public interface ContactStorage {
@@ -282,12 +330,11 @@ public interface ContactStorage {
      * Deletes a contact.
      * 
      * @param session the session
-     * @param userID the ID of the user performing the operation (to allow storing the id in 'modified by')
      * @param folderId the ID of the parent folder
      * @param id the object ID
      * @param lastRead the time the object was last read from the storage
      * @throws OXException
      */
-    void delete(Session session, int userID, String folderId, String id, Date lastRead) throws OXException;
+    void delete(Session session, String folderId, String id, Date lastRead) throws OXException;
     
 }

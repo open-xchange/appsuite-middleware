@@ -62,6 +62,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.IDNA;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -69,7 +71,9 @@ import com.openexchange.ajax.Login;
 import com.openexchange.ajax.helper.BrowserDetector;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
+import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.systemname.SystemNameService;
 import com.openexchange.tools.encoding.Helper;
@@ -145,6 +149,43 @@ public final class Tools {
      */
     private Tools() {
         super();
+    }
+
+    /**
+     * Converts a unicode representation of an internet address to ASCII using the procedure in RFC3490 section 4.1. Unassigned characters
+     * are not allowed and STD3 ASCII rules are enforced.
+     * <p>
+     * This implementation already supports EsZett character. Thanks to <a
+     * href="http://blog.http.net/code/gnu-libidn-eszett-hotfix/">http.net</a>!
+     * <p>
+     * <code>"someone@m&uuml;ller.de"</code> is converted to <code>"someone@xn--mller-kva.de"</code>
+     * 
+     * @param idnAddress The unicode representation of an internet address
+     * @return The ASCII-encoded (punycode) of given internet address or <code>null</code> if argument is <code>null</code>
+     * @throws OXException If ASCII representation of given internet address cannot be created
+     */
+    public static String toACE(final String idnAddress) throws OXException {
+        try {
+            return IDNA.toACE(idnAddress);
+        } catch (final AddressException e) {
+            throw MimeMailException.handleMessagingException(e);
+        }
+    }
+
+    /**
+     * Converts an ASCII-encoded address to its unicode representation. Unassigned characters are not allowed and STD3 hostnames are
+     * enforced.
+     * <p>
+     * This implementation already supports EsZett character. Thanks to <a
+     * href="http://blog.http.net/code/gnu-libidn-eszett-hotfix/">http.net</a>!
+     * <p>
+     * <code>"someone@xn--mller-kva.de"</code> is converted to <code>"someone@m&uuml;ller.de"</code>
+     * 
+     * @param aceAddress The ASCII-encoded (punycode) address
+     * @return The unicode representation of given internet address or <code>null</code> if argument is <code>null</code>
+     */
+    public static String toIDN(final String aceAddress) {
+        return IDNA.toIDN(aceAddress);
     }
 
     /**

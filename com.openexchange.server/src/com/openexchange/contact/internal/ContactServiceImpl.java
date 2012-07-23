@@ -242,11 +242,11 @@ public class ContactServiceImpl extends DefaultContactService {
 			ContactMapper.getInstance().mergeDifferences(storedContact, delta); 
 			targetStorage.create(session, targetFolderId, storedContact);
 			try {
-				sourceStorage.delete(session, userID, sourceFolderId, objectID, lastRead);
+				sourceStorage.delete(session, sourceFolderId, objectID, lastRead);
 			} catch (final OXException e) {
 				LOG.warn("error deleting contact from source folder, rolling back move operation", e);
 				// TODO: simple rollback for now
-				targetStorage.delete(session, userID, targetFolderId, Integer.toString(storedContact.getObjectID()), 
+				targetStorage.delete(session, targetFolderId, Integer.toString(storedContact.getObjectID()), 
 						storedContact.getLastModified());
 				throw e;
 			}
@@ -379,7 +379,7 @@ public class ContactServiceImpl extends DefaultContactService {
 		/*
 		 * delete contact from storage
 		 */
-		storage.delete(session, userID, folderID, objectID, lastRead);
+		storage.delete(session, folderID, objectID, lastRead);
 		/*
 		 * broadcast event
 		 */

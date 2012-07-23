@@ -46,35 +46,64 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package com.openexchange.loxandra.json.action;
 
-package com.openexchange.contactcollector.osgi;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.UUID;
 
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.osgi.ServiceRegistry;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link CCServiceRegistry} - The service registry for contact collector.
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CCServiceRegistry {
+@Action(method = RequestMethod.PUT, name = "addProperties", description = "Add unnamed properties to an already existing EAV Contact.", parameters = { 
+		@Parameter(name = "uuid"), 
+		@Parameter(name = "props", description = "JSONObject with unnamed properties to add to the EAV Contact" )})
+public class AddPropertiesAction extends AbstractAction {
 
-    static final AtomicReference<ServiceRegistry> SERVICE_REGISTRY = new AtomicReference<ServiceRegistry>();
+	public AddPropertiesAction(ServiceLookup serviceLookup) {
+		super(serviceLookup);
+	}
 
-    /**
-     * Gets the service registry instance.
-     *
-     * @return The service registry instance.
-     */
-    public static ServiceRegistry getInstance() {
-        return SERVICE_REGISTRY.get();
-    }
+	/* (non-Javadoc)
+	 * @see com.openexchange.ajax.requesthandler.AJAXActionService#perform(com.openexchange.ajax.requesthandler.AJAXRequestData, com.openexchange.tools.session.ServerSession)
+	 */
+	@Override
+	public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+		JSONObject json = (JSONObject) requestData.getData();
+		UUID uuid = null;
+		JSONObject jsonProps = null;
+		HashMap<String, String> props = null;
+		try {
 
-    /**
-     * Initializes a new {@link CCServiceRegistry}.
-     */
-    private CCServiceRegistry() {
-        super();
-    }
-
-}
+			uuid = UUID.fromString(json.getString("uuid"));
+			jsonProps = json.getJSONObject("props");
+			Iterator<String> iter = jsonProps.keys();
+			
+			props = new HashMap<String, String>();
+			
+			while (iter.hasNext()) {
+				String key = iter.next();
+				props.put(key, jsonProps.getString(key));
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		
+		getContactService().getEAVContactService().addProperties(uuid, props);
+		return new AJAXRequestResult();
+	}
+} 

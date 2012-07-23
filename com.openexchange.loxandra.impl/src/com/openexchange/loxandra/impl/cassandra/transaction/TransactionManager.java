@@ -217,7 +217,7 @@ public class TransactionManager {
 					while(it.hasNext()) {
 						Composite c = it.next();
 						String status = res.getString(c);
-						if (status.equals(OperationState.PENDING.toString())) {
+						if (!status.equals(OperationState.SUCCEEDED.toString())) {
 							String data = res.getString(it.next());
 							System.out.println("Data pending: " + data);
 							try {
@@ -314,7 +314,7 @@ public class TransactionManager {
 		 		q.add(tx);
 		 		queue.put(key, q);
 		 		
-		 		log.debug("waiting for lock " + key + " to be released");
+		 		log.info("waiting for lock " + key + " to be released");
 		 		
 		 		return lockAcquired;
 		 	}

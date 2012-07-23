@@ -248,6 +248,12 @@ public abstract class HousekeepingActivator extends DeferredActivator {
 
     /**
      * Adds specified service tracker to this activator. Thus it is automatically closed and removed by {@link #cleanUp()}.
+     * <br>
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; background-color:#FFDDDD;">
+     * <p>
+     * <b>NOTE</b>: Please {@link #openTrackers() open} trackers.
+     * </p>
+     * </div>
      *
      * @param tracker The service tracker
      */
@@ -257,6 +263,12 @@ public abstract class HousekeepingActivator extends DeferredActivator {
 
     /**
      * Removes specified service tracker from this activator.
+     * <br>
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; background-color:#FFDDDD;">
+     * <p>
+     * <b>NOTE</b>: Please {@link ServiceTracker#close() close} tracker if it has already been started.
+     * </p>
+     * </div>
      *
      * @param tracker The service tracker
      */

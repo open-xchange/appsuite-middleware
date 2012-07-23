@@ -89,7 +89,7 @@ public class Transaction {
 	
 	private static String CF_TRANSACTION_LOG = "TransactionLog";
 	
-	private static final int attempsToAcquireLock = 200;
+	private static final int attempsToAcquireLock = 10;
 	
 	private final ColumnFamilyTemplate<UUID, Composite> transactionTemplate;
 	

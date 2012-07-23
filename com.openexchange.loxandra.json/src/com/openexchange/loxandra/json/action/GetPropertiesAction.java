@@ -46,35 +46,57 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package com.openexchange.loxandra.json.action;
 
-package com.openexchange.contactcollector.osgi;
+import java.util.UUID;
 
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.osgi.ServiceRegistry;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link CCServiceRegistry} - The service registry for contact collector.
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CCServiceRegistry {
+@Action(method = RequestMethod.PUT, name = "getProperties", description = "Get unnamed properties from an EAV Contact.", parameters = { 
+		@Parameter(name = "uuid"), 
+		@Parameter(name = "props", description = "JSONArray with unnamed properties to get from the EAV Contact" )})
+public class GetPropertiesAction extends AbstractAction {
 
-    static final AtomicReference<ServiceRegistry> SERVICE_REGISTRY = new AtomicReference<ServiceRegistry>();
+	public GetPropertiesAction(ServiceLookup serviceLookup) {
+		super(serviceLookup);
+	}
 
-    /**
-     * Gets the service registry instance.
-     *
-     * @return The service registry instance.
-     */
-    public static ServiceRegistry getInstance() {
-        return SERVICE_REGISTRY.get();
-    }
-
-    /**
-     * Initializes a new {@link CCServiceRegistry}.
-     */
-    private CCServiceRegistry() {
-        super();
-    }
-
-}
+	/* (non-Javadoc)
+	 * @see com.openexchange.ajax.requesthandler.AJAXActionService#perform(com.openexchange.ajax.requesthandler.AJAXRequestData, com.openexchange.tools.session.ServerSession)
+	 */
+	@Override
+	public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+		JSONObject json = (JSONObject) requestData.getData();
+		UUID uuid = null;
+		JSONArray jsonProps = null;
+		String[] prop = null;
+		try {
+			uuid = UUID.fromString(json.getString("uuid"));
+			jsonProps = json.getJSONArray("props");
+			prop = new String[jsonProps.length()];
+			for (int i = 0; i < jsonProps.length(); i++) {
+				prop[i] = jsonProps.getString(i);
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		
+		String s = getContactService().getEAVContactService().getProperties(uuid, prop);
+		return new AJAXRequestResult(s);
+	}
+} 

@@ -293,7 +293,11 @@ public class AdminCache {
     private Properties loadAccessCombinations() {
         // Load properties from file , if does not exists use fallback
         // properties!
-        return AdminServiceRegistry.getInstance().getService(ConfigurationService.class).getFile("ModuleAccessDefinitions.properties");
+        final ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
+        if (null == service) {
+            throw new IllegalStateException("Absent service: " + ConfigurationService.class.getName());
+        }
+        return service.getFile("ModuleAccessDefinitions.properties");
     }
 
     private Properties getFallbackAccessCombinations() {
@@ -608,6 +612,9 @@ public class AdminCache {
 
     private void readMasterCredentials() throws OXGenericException {
         final ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
+        if (null == service) {
+            throw new IllegalStateException("Absent service: " + ConfigurationService.class.getName());
+        }
         final BufferedReader bf = new BufferedReader(new StringReader(service.getText("mpasswd")));
         try {
             String line = null;

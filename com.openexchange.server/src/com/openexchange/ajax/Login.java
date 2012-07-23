@@ -120,6 +120,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.sessiond.impl.IPAddressUtil;
 import com.openexchange.sessiond.impl.IPRange;
 import com.openexchange.tools.io.IOTools;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -433,7 +434,7 @@ public class Login extends AJAXServlet {
                     hash = HashCalculator.getHash(req, client);
                     session.setHash(hash);
                 }
-                writeSecretCookie(resp, session, hash, req.isSecure());
+                writeSecretCookie(resp, session, hash, req.isSecure(), req.getServerName());
 
                 resp.sendRedirect(generateRedirectURL(
                     req.getParameter(LoginFields.UI_WEB_PATH_PARAM),
@@ -591,7 +592,7 @@ public class Login extends AJAXServlet {
                     hash = HashCalculator.getHash(req, client);
                     session.setHash(hash);
                 }
-                writeSecretCookie(resp, session, hash, req.isSecure());
+                writeSecretCookie(resp, session, hash, req.isSecure(), req.getServerName());
 
                 try {
                     final JSONObject json = new JSONObject();
@@ -904,9 +905,9 @@ public class Login extends AJAXServlet {
         try {
             SessionServlet.checkIP(conf.ipCheck, conf.ranges, session, req.getRemoteAddr(), conf.ipCheckWhitelist);
             if (type == CookieType.SESSION) {
-                writeSessionCookie(resp, session, session.getHash(), req.isSecure());
+                writeSessionCookie(resp, session, session.getHash(), req.isSecure(), req.getServerName());
             } else {
-                writeSecretCookie(resp, session, session.getHash(), req.isSecure());
+                writeSecretCookie(resp, session, session.getHash(), req.isSecure(), req.getServerName());
             }
             // Refresh HTTP session, too
             req.getSession();
@@ -954,32 +955,76 @@ public class Login extends AJAXServlet {
     }
 
     /**
-     * Writes the (groupware's) session cookie to specified HTTP servlet response whose name is composed by cookie prefix
-     * <code>"open-xchange-session-"</code> and a secret cookie identifier.
+     * Writes the (groupware's) secret cookie to specified HTTP servlet response whose name is composed by cookie prefix
+     * <code>"open-xchange-secret-"</code> and a secret cookie identifier.
+     *
+     * @param resp The HTTP servlet response
+     * @param session The session providing the secret cookie identifier
+     * @param hash The hash string used for composing cookie name
+     * @param secure <code>true</code> to set cookie's secure flag; otherwise <code>false</code>
+     * @deprecated Use {@link #writeSecretCookie(HttpServletResponse, Session, String, boolean, String)}
+     */
+    @Deprecated
+    protected void writeSecretCookie(final HttpServletResponse resp, final Session session, final String hash, final boolean secure) {
+        writeSecretCookie(resp, session, hash, secure, null);
+    }
+
+    /**
+     * Writes the (groupware's) secret cookie to specified HTTP servlet response whose name is composed by cookie prefix
+     * <code>"open-xchange-secret-"</code> and a secret cookie identifier.
      * 
      * @param resp The HTTP servlet response
      * @param session The session providing the secret cookie identifier
+     * @param hash The hash string used for composing cookie name
+     * @param secure <code>true</code> to set cookie's secure flag; otherwise <code>false</code>
+     * @param serverName The HTTP request's server name
      */
-    protected void writeSecretCookie(final HttpServletResponse resp, final Session session, final String hash, final boolean secure) {
+    protected void writeSecretCookie(final HttpServletResponse resp, final Session session, final String hash, final boolean secure, final String serverName) {
         Cookie cookie = new Cookie(SECRET_PREFIX + hash, session.getSecret());
-        configureCookie(cookie, secure);
+        configureCookie(cookie, secure, serverName);
         resp.addCookie(cookie);
 
         final String altId = (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID);
         if (null != altId) {
             cookie = new Cookie(PUBLIC_SESSION_NAME, altId);
-            configureCookie(cookie, secure);
+            configureCookie(cookie, secure, serverName);
             resp.addCookie(cookie);
         }
     }
 
+    /**
+     * Writes the (groupware's) session cookie to specified HTTP servlet response whose name is composed by cookie prefix
+     * <code>"open-xchange-session-"</code> and a secret cookie identifier.
+     * 
+     * @param resp The HTTP servlet response
+     * @param session The session providing the secret cookie identifier
+     * @param hash The hash string used for composing cookie name
+     * @param secure <code>true</code> to set cookie's secure flag; otherwise <code>false</code>
+     * @param serverName The HTTP request's server name
+     * @deprecated Use {@link #writeSessionCookie(HttpServletResponse, Session, String, boolean, String)}
+     */
+    @Deprecated
     protected void writeSessionCookie(final HttpServletResponse resp, final Session session, final String hash, final boolean secure) {
+        writeSessionCookie(resp, session, hash, secure, null);
+    }
+
+    /**
+     * Writes the (groupware's) session cookie to specified HTTP servlet response whose name is composed by cookie prefix
+     * <code>"open-xchange-session-"</code> and a secret cookie identifier.
+     * 
+     * @param resp The HTTP servlet response
+     * @param session The session providing the secret cookie identifier
+     * @param hash The hash string used for composing cookie name
+     * @param secure <code>true</code> to set cookie's secure flag; otherwise <code>false</code>
+     * @param serverName The HTTP request's server name
+     */
+    protected void writeSessionCookie(final HttpServletResponse resp, final Session session, final String hash, final boolean secure, final String serverName) {
         final Cookie cookie = new Cookie(SESSION_PREFIX + hash, session.getSessionID());
-        configureCookie(cookie, secure);
+        configureCookie(cookie, secure, serverName);
         resp.addCookie(cookie);
     }
 
-    private void configureCookie(final Cookie cookie, final boolean secure) {
+    private void configureCookie(final Cookie cookie, final boolean secure, final String serverName) {
         cookie.setPath("/");
         final LoginConfiguration conf = confReference.get();
         if (conf.cookieForceHTTPS || secure) {
@@ -991,6 +1036,19 @@ public class Login extends AJAXServlet {
              * value causes the cookie to be deleted.
              */
             cookie.setMaxAge(conf.cookieExpiry);
+        }
+        final String sn = null == serverName ? LogProperties.<String> getLogProperty("com.openexchange.ajp13.serverName") : serverName;
+        if (null != sn) {
+            if (sn.startsWith("www.")) {
+                cookie.setDomain(sn.substring(3));
+            } else if ("localhost".equalsIgnoreCase(sn)) {
+                cookie.setDomain(sn);
+            } else {
+                // Not an IP address
+                if (null == IPAddressUtil.textToNumericFormatV4(sn) && (null == IPAddressUtil.textToNumericFormatV6(sn))) {
+                    cookie.setDomain(new StringBuilder(sn.length() + 1).append('.').append(sn).toString());
+                }
+            }
         }
     }
 
@@ -1120,7 +1178,7 @@ public class Login extends AJAXServlet {
             final Session session = result.getSession();
             // Store associated session
             SessionServlet.rememberSession(req, new ServerSessionAdapter(session, result.getContext(), result.getUser()));
-            writeSecretCookie(resp, session, session.getHash(), req.isSecure());
+            writeSecretCookie(resp, session, session.getHash(), req.isSecure(), req.getServerName());
             // Login response is unfortunately not conform to default responses.
             if (req.getParameter("callback") != null && req.getParameter("action").equals(ACTION_LOGIN)) {
                 APIResponseRenderer.writeResponse(response, ACTION_LOGIN, req, resp);
@@ -1406,7 +1464,7 @@ public class Login extends AJAXServlet {
         final Session session = result.getSession();
 
         Tools.disableCaching(resp);
-        writeSecretCookie(resp, session, session.getHash(), req.isSecure());
+        writeSecretCookie(resp, session, session.getHash(), req.isSecure(), req.getServerName());
         resp.sendRedirect(generateRedirectURL(
             req.getParameter(LoginFields.UI_WEB_PATH_PARAM),
             req.getParameter(LoginFields.AUTOLOGIN_PARAM),
@@ -1505,7 +1563,7 @@ public class Login extends AJAXServlet {
         final LoginResult result = LoginPerformer.getInstance().doLogin(request, properties);
         final Session session = result.getSession();
         Tools.disableCaching(resp);
-        writeSecretCookie(resp, session, session.getHash(), req.isSecure());
+        writeSecretCookie(resp, session, session.getHash(), req.isSecure(), req.getServerName());
         addHeadersAndCookies(result, resp);
         resp.sendRedirect(generateRedirectURL(null, conf.httpAuthAutoLogin, session.getSessionID()));
     }

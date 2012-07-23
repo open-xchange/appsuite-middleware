@@ -50,6 +50,9 @@
 package com.openexchange.sessiond.cache;
 
 import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
@@ -89,26 +92,18 @@ public final class SessionCacheConfiguration implements Initialization {
         if (null == configurationService) {
             throw SessionExceptionCodes.SESSIOND_CONFIG_EXCEPTION.create();
         }
-        final String cacheConfigFile = configurationService.getProperty("com.openexchange.sessiond.sessionCacheConfig");
-        if (cacheConfigFile == null) {
-            /*
-             * Not found
-             */
-            final OXException e = SessionExceptionCodes.MISSING_PROPERTY.create("com.openexchange.sessiond.sessionCacheConfig");
-            if (LOG.isWarnEnabled()) {
-                LOG.warn(new StringBuilder(128).append("Cannot setup lateral session cache: ").append(e.getMessage()).toString(), e);
-            }
-            return;
-        }
+        final File file = configurationService.getFileByName("sessioncache.ccf");
         if (LOG.isInfoEnabled()) {
-            LOG.info(new StringBuilder("Sessiond property: com.openexchange.sessiond.sessionCacheConfig=").append(cacheConfigFile).toString());
+            LOG.info(new StringBuilder("Sessiond property: com.openexchange.sessiond.sessionCacheConfig=").append(file.getPath()).toString());
         }
         final CacheService cacheService = getServiceRegistry().getService(CacheService.class);
         if (null != cacheService) {
             try {
-                cacheService.loadConfiguration(cacheConfigFile.trim());
+                cacheService.loadConfiguration(new FileInputStream(file));
             } catch (final OXException e) {
                 throw e;
+            } catch (final FileNotFoundException e) {
+                throw SessionExceptionCodes.SESSIOND_EXCEPTION.create(e, new Object[0]);
             }
         }
     }

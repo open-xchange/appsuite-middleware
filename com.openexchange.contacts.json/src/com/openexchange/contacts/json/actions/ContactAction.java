@@ -53,7 +53,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
-
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -130,7 +129,7 @@ public abstract class ContactAction implements AJAXActionService {
      */
     protected static Date getLatestModified(final Date lastModified, final Contact contact) {
     	final Date contactLastModified = contact.getLastModified();
-    	return lastModified.after(contactLastModified) ? lastModified : contactLastModified;
+    	return null == contactLastModified || lastModified.after(contactLastModified) ? lastModified : contactLastModified;
     }
     
     protected static Date getCorrectedTime(final Date date, final TimeZone timeZone) {

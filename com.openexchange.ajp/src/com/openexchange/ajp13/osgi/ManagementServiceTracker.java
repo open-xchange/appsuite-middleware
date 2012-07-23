@@ -54,7 +54,6 @@ import javax.management.MalformedObjectNameException;
 import org.apache.commons.logging.Log;
 import com.openexchange.log.LogFactory;
 import org.osgi.framework.BundleContext;
-import com.openexchange.ajp13.AJPv13ServiceRegistry;
 import com.openexchange.ajp13.monitoring.AJPv13Monitors;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.BundleServiceTracker;
@@ -67,14 +66,16 @@ import com.openexchange.osgi.BundleServiceTracker;
 public final class ManagementServiceTracker extends BundleServiceTracker<ManagementService> {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ManagementServiceTracker.class));
+    private final AJPv13Activator activator;
 
     /**
      * Initializes a new {@link ManagementServiceTracker}
      *
      * @param context The bundle context
      */
-    public ManagementServiceTracker(final BundleContext context) {
+    public ManagementServiceTracker(final BundleContext context, AJPv13Activator activator) {
         super(context, ManagementService.class);
+        this.activator = activator;
     }
 
     @Override
@@ -82,7 +83,7 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
         /*
          * Add management service to server's service registry
          */
-        AJPv13ServiceRegistry.getInstance().addService(ManagementService.class, managementService);
+        activator.addServiceAlt(ManagementService.class, managementService);
         try {
             /*
              * Add all MBeans since management service is now available
@@ -110,7 +111,7 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
              */
             managementService.unregisterMBean(getObjectName(AJPv13Monitors.getListenerMonitor().getClass().getName(), true));
             managementService.unregisterMBean(getObjectName(AJPv13Monitors.AJP_MONITOR_SERVER_THREADS.getClass().getName(), true));
-            AJPv13ServiceRegistry.getInstance().removeService(ManagementService.class);
+            activator.removeService(ManagementService.class);
         } catch (final MalformedObjectNameException e) {
             LOG.error(e.getMessage(), e);
         } catch (final NullPointerException e) {

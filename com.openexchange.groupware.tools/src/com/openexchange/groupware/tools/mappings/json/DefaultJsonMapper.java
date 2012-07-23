@@ -209,7 +209,7 @@ public abstract class DefaultJsonMapper<O, E extends Enum<E>> extends DefaultMap
     }
     
     @Override
-    public JsonMapping<? extends Object, O> opt(final E field) throws OXException {
+    public JsonMapping<? extends Object, O> opt(final E field) {
         if (null == field) {
             throw new IllegalArgumentException("field");
         }
