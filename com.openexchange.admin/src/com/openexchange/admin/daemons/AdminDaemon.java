@@ -308,6 +308,8 @@ public class AdminDaemon {
             ClientAdminThread.cache = cache;
             prop = cache.getProperties();
             LOG.info("Cache and Pools initialized!");
+        } else if (ClientAdminThread.cache == null) {
+            ClientAdminThread.cache = cache;
         }
     }
     
