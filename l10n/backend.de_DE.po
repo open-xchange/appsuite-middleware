@@ -33,7 +33,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2006-11-13 15:15+0100\n"
-"PO-Revision-Date: 2012-07-12 16:41+0200\n"
+"PO-Revision-Date: 2012-07-23 16:49+0200\n"
 "Last-Translator: Antje Faber\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "MIME-Version: 1.0\n"
@@ -49,9 +49,8 @@ msgstr ""
 #. The client send a ticket within the browser request and the verification of this ticket failed.
 #. %1$s will be replaced with a detailed exception message.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:63
-#, fuzzy
 msgid "Verification of client ticket failed: %1$s"
-msgstr "Die Validierung des Kalenders ist fehlgeschlagen."
+msgstr "Die Validierung des Client-Tickets ist fehlgeschlagen: %1$s"
 
 #. If the problem could not be specified in some more detailed way this message can be used.
 #. %1$s is replaced by some own message that will not be translated.
@@ -62,29 +61,27 @@ msgstr "Unbekanntes Problem: \"%1$s\"."
 #. The Kerberos ticket granting service denied to issue a delegate ticket for the client.
 #. %1$s will be replaced with the Kerberos name of the client.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:71
-#, fuzzy
 msgid "Failed to get a delegate ticket for %1$s."
-msgstr "Der Ordner konnte nicht angelegt werden. Bitte erneut versuchen."
+msgstr "Kein Delegierungs-Ticket für %1$s erhalten."
 
 #. Some problem occurred while talking to Kerberos server.
 #. %1$s will be replaced with the message from the underlying exception.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:75
-#, fuzzy
 msgid "Communication to Kerberos server failed: %1$s"
-msgstr "Fehler bei der Kommunikation mit dem Facebook-Service: %1$s"
+msgstr "Communication to Kerberos server failed: %1$s"
 
 #. Initial login of this service on the Kerberos server failed.
 #. %1$s will be replaced with the detailed not translated message from the underlying implementation.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:79
 msgid "Authenticating this service against the Kerberos server failed: %1$s"
 msgstr ""
+"Authentifizierung des Dienstes am Kerberos-Server ist fehlgeschlagen: %1$s"
 
 #. When shutting down this service the termination of the service ticket failed.
 #. %1$s will be replaced with the detailed not translated message from the underlying implementation.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:83
-#, fuzzy
 msgid "Problem while terminating service ticket: %1$s"
-msgstr "Problem beim Analysieren der vcard, Grund: %s"
+msgstr "Problem beim Schließen des Diensttickets: %1$s"
 
 #. Written to the log file if the session contains a Kerberos subject that does not contain any ticket that needs a renewal.
 #. %1$s is replaced with the subjects principal name.
@@ -157,13 +154,11 @@ msgstr "Die Standard-Elementattribute konnten nicht abgerufen werden"
 
 #. 'Put' into cache failed.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caching/src/com/openexchange/caching/CacheExceptionMessage.java:84
-#, fuzzy
 msgid "'Put' into cache failed."
-msgstr "Legen in Cache fehlgeschlagen"
+msgstr "'Put' in Cache fehlgeschlagen"
 
 #. 'Save put' into cache failed. An object bound to given key already exists.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caching/src/com/openexchange/caching/CacheExceptionMessage.java:87
-#, fuzzy
 msgid ""
 "'Save put' into cache failed. An object bound to given key already exists."
 msgstr ""
@@ -444,7 +439,6 @@ msgid "Until %1$s"
 msgstr "Bis %1$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:137
-#, fuzzy
 msgid "No end"
 msgstr "Kein Enddatum"
 
@@ -469,6 +463,9 @@ msgid ""
 "that could not be found. Either ignore this update, or ask the organizer to "
 "again send you the recurrence."
 msgstr ""
+"Der Organisator möchte eine Ausnahme für eine unbekannte Terminserie "
+"erstellen. Ignorieren Sie diese Aktualisierung oder bitten Sie den "
+"Organisator, Ihnen die Serie erneut zu senden."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:70
 msgid ""
@@ -490,19 +487,25 @@ msgid ""
 "An attendee wanted to change his/her participant state in an appointment "
 "that could not be found. Probably the appointment was already canceled."
 msgstr ""
+"Ein Teilnehmer möchte seinen Teilnahmestatus für einen unbekannten Termin "
+"ändern. Wahrscheinlich wurde der Termin bereits verworfen."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:73
-#, fuzzy
 msgid ""
 "This is an update to an appointment that has been changed in the meantime. "
 "Best ignore it."
-msgstr "Das Objekt hat sich mittlerweile geändert."
+msgstr ""
+"Dies ist eine Aktualisierung eines Termins, der zwischenzeitlich geändert "
+"wurde. Am besten, Sie ignorieren diese. "
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:74
 msgid ""
 "An attendee wants to change an appointment that could not be found. Probably "
 "the appointment was deleted. Best ignore it."
 msgstr ""
+"Ein Teilnehmer möchte einen Termin ändern, der nicht vorhanden ist. "
+"Möglicherweise wurde der Termin zwischenzeitlich gelöscht. Am besten, Sie "
+"ignorieren diese Aktualisierung."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:75
 msgid "The organizer declined your counter proposal for the appointment."
@@ -523,16 +526,23 @@ msgid ""
 "not be found. It was probably deleted at some point. Best ignore this "
 "message."
 msgstr ""
+"Ein Teilnehmer möchte über den neuesten Stand eines Termins informiert "
+"werden, der anscheinend nicht existiert. Er wurde möglicherweise "
+"zwischenzeitlich gelöscht. Am besten, Sie ignorieren diese Meldung. "
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:78
 msgid ""
 "This message contains appointment updates that were already accepted by "
 "another user. Best ignore this message."
 msgstr ""
+"Diese Nachricht enthält Terminaktualisierungen, die bereits von einem "
+"anderen Benutzer akzeptiert wurden. Sie können diese Nachricht ignorieren."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:79
 msgid "This message comes from an internal user. Best ignore it."
 msgstr ""
+"Diese Nachricht stammt von einem internen Benutzer. Sie können die Nachricht "
+"ignorieren."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:80
 msgid ""
@@ -548,16 +558,15 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:82
 msgid "The appointment's attachments have been changed"
-msgstr ""
+msgstr "Die Anhänge zu dem Termin wurden geändert."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:84
 msgid "One or more other fields have been updated"
 msgstr "Ein oder mehrere andere Felder wurden aktualisiert"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:86
-#, fuzzy
 msgid "Reserved"
-msgstr "Entfernt"
+msgstr "Gebucht"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:88
 msgid "Temporary"
@@ -648,16 +657,16 @@ msgstr "%1$s setzt den Status für diesen Termin auf %2$s:"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:150
 msgid "On behalf of %3$s, %1$s sets the status for this appointment to %2$s:"
-msgstr ""
+msgstr "%1$s setzt im Auftrag von %3$s den Status für diesen Termin auf %2$s:"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:152
 msgid "On your behalf, %1$s sets your status for this appointment to %2$s:"
 msgstr ""
+"%1$s hat Ihren Status für diesen Termin in Ihrem Namen auf %2$s gesetzt:"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:154
-#, fuzzy
 msgid "none"
-msgstr "Erledigt"
+msgstr "Keine"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:156
 msgid "%1$s would like you to change the appointment:"
@@ -665,7 +674,7 @@ msgstr "%1$s möchte, dass Sie den Termin ändern:"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:158
 msgid "%1$s has asked %2$s to change the event:"
-msgstr ""
+msgstr "%1$s hat %2$s gebeten, das Ereignis zu ändern:"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:160
 msgid "You have been invited to an event by %1$s:"
@@ -872,7 +881,7 @@ msgstr "Die Ressource %1$s wurde für den Termin gebucht"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:261
 msgid "Remove the resource %1$s from the appointment"
-msgstr ""
+msgstr "Entfernen Sie die Ressource %1$s aus dem Termin."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:263
 msgid "Remove the resource %1$s from the appointment."
@@ -902,18 +911,16 @@ msgid "The entire day"
 msgstr "Der gesamte Tag."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:277
-#, fuzzy
 msgid "New appointment: %1$s"
-msgstr "Neuer Termin"
+msgstr "Neuer Termin: %1$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:279
 msgid "Appointment changed: %1$s"
 msgstr "Termin geändert: %1$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:281
-#, fuzzy
 msgid "Appointment canceled: %1$s"
-msgstr "Termin geändert"
+msgstr "Termin verworfen: %1$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:283
 msgid "Proposed changes for appointment: %1$s"
@@ -931,7 +938,7 @@ msgstr "%1$s hat folgende Einladung %2$s: %3$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:291
 msgid "Resend the invitation for: %1$s"
-msgstr ""
+msgstr "Senden Sie die Einladung erneut für: %1$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:293
 msgid "Change not accepted for: %1$s"
@@ -952,19 +959,21 @@ msgstr "%1$s hat den Termin %2$s, möchte jedoch einen Gegenvorschlag machen: "
 msgid ""
 "You have received this E-Mail because your are the chair for this "
 "appointment."
-msgstr ""
+msgstr "Sie erhalten diese E-Mail, da Sie der Leiter für diesen Termin sind."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:303
 msgid ""
 "You have received this E-Mail because your are the organizer of this "
 "appointment."
-msgstr ""
+msgstr "Sie erhalten diese E-Mail, da Sie der Organisator dieses Termins sind."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:305
 msgid ""
 "You have received this E-Mail because this appointment contains the resource "
 "%1$s which is managed by you."
 msgstr ""
+"Sie erhalten diese E-Mail, da der Termin die Ressource %1$s enthält, "
+"die Sie verwalten."
 
 #. An error occurred: %1$s
 #. *
@@ -1016,9 +1025,8 @@ msgstr "Es trat ein Fehler auf: %1$s"
 
 #. Method is not supported.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chat/src/com/openexchange/chat/ChatExceptionMessages.java:69
-#, fuzzy
 msgid "Method is not supported."
-msgstr "Methode nicht unterstützt: %1$s"
+msgstr "Methode ist nicht unterstützt."
 
 #. No account found with identifier "%1$s".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chat/src/com/openexchange/chat/ChatExceptionMessages.java:72
@@ -1034,35 +1042,28 @@ msgstr "Ungültiges Nachrichten-Paket"
 
 #. A chat with identifier "%1$s" already exists.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chat/src/com/openexchange/chat/ChatExceptionMessages.java:78
-#, fuzzy
 msgid "A chat with identifier \"%1$s\" already exists."
-msgstr "Die Datei \"%1$s\" ist bereits vorhanden."
+msgstr "Ein Chat mit der ID \"%1$s\" ist bereits vorhanden."
 
 #. Chat member "%1$s" already exists in chat "%2$s".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chat/src/com/openexchange/chat/ChatExceptionMessages.java:81
-#, fuzzy
 msgid "Chat member \"%1$s\" already exists in chat \"%2$s\"."
 msgstr ""
-"Ein Ordnerduplikat namens \"%1$s\" ist bereits unterhalb des übergeordneten "
-"Ordners \"%2$s\" vorhanden."
 
 #. No chat found with identifier "%1$s".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chat/src/com/openexchange/chat/ChatExceptionMessages.java:84
-#, fuzzy
 msgid "No chat found with identifier \"%1$s\"."
-msgstr "Baum mit ID \"%1$s\" nicht vorhanden"
+msgstr ""
 
 #. Unknown chat service: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chat/src/com/openexchange/chat/ChatExceptionMessages.java:87
-#, fuzzy
 msgid "Unknown chat service: %1$s"
-msgstr "Unbekannter Messaging-Dienst: %1$s"
+msgstr "Unbekannter Chat-Dienst: %1$s"
 
 #. No message found with identifier "%1$s" in chat "%2$s".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chat/src/com/openexchange/chat/ChatExceptionMessages.java:90
-#, fuzzy
 msgid "No message found with identifier \"%1$s\" in chat \"%2$s\"."
-msgstr "Benutzer mit ID %1$s konnte nicht im Kontext %2$d gefunden werden."
+msgstr ""
 
 #. No member found with identifier "%1$s".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chat/src/com/openexchange/chat/ChatExceptionMessages.java:93
@@ -1072,9 +1073,8 @@ msgstr "Baum mit ID \"%1$s\" nicht vorhanden"
 
 #. Invalid conversation identifier: "%1$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chat/src/com/openexchange/chat/ChatExceptionMessages.java:96
-#, fuzzy
 msgid "Invalid chat identifier: \"%1$s\""
-msgstr "Ungültige Datei-ID: %1$s."
+msgstr "Ungültige Chat-ID: %1$s."
 
 #. Invalid roster identifier: "%1$s". A roster is the list of chat buddies/contacts that a chat user knows about and about whom he receives frequent updates about their presence/availability.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chat/src/com/openexchange/chat/ChatExceptionMessages.java:99
@@ -1090,17 +1090,17 @@ msgstr ""
 #. Subject is too long and is therefore truncated.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chat/src/com/openexchange/chat/ChatExceptionMessages.java:105
 msgid "Subject is too long and is therefore truncated."
-msgstr ""
+msgstr "Der Betreff ist zu lang und wird daher abgeschnitten."
 
 #. The chat system message when a user left a chat.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chat/src/com/openexchange/chat/ChatStrings.java:69
 msgid "%1$s has left the chat"
-msgstr ""
+msgstr "%1$s hat den Chat verlassen"
 
 #. The chat system message when a user joined a chat.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chat/src/com/openexchange/chat/ChatStrings.java:72
 msgid "%1$s has joined the chat"
-msgstr ""
+msgstr "%1$s ist dem Chat beigetreten"
 
 #. Could not coerce value %1$s into class %2$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.config.cascade/src/com/openexchange/config/cascade/ConfigCascadeExceptionMessages.java:66
@@ -1152,14 +1152,15 @@ msgstr "Der für userSource \"%s\" angegebene Wert wird nicht unterstützt."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.ldap/src/com/openexchange/contacts/ldap/exceptions/LdapConfigurationExceptionMessage.java:87
 #, fuzzy
 msgid "The parameter \"%s\" is not set in property file \"%s\""
-msgstr "Der Parameter \"%s\" ist nicht in der Property-Datei festgelegt."
+msgstr ""
+"Der Parameter \"%s\" ist nicht in der Property-Datei \"%s\" festgelegt."
 
 #. *
 #. * Value for context "%s" is no integer value
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.ldap/src/com/openexchange/contacts/ldap/exceptions/LdapConfigurationExceptionMessage.java:92
 msgid "Value for context \"%s\" is no integer value"
-msgstr ""
+msgstr "Der Wert für den Kontext \"%s\" ist keine Ganzzahl"
 
 #. *
 #. * The configured mapping file "%1$s" is empty.
@@ -1172,9 +1173,8 @@ msgstr ""
 #. * The given value for pagesize "%s" is no integer value
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.ldap/src/com/openexchange/contacts/ldap/exceptions/LdapConfigurationExceptionMessage.java:102
-#, fuzzy
 msgid "The given value for pagesize \"%s\" is no integer value"
-msgstr "Der angegebene Typ für den Modus \"%s\" wird nicht unterstützt."
+msgstr "Der angegebene Wert für pagesize \"%s\" ist keine Ganzzahl"
 
 #. *
 #. * The value given for userauthtype "%s" is invalid
@@ -1220,23 +1220,21 @@ msgstr "Der für userSource \"%s\" angegebene Wert wird nicht unterstützt."
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.ldap/src/com/openexchange/contacts/ldap/exceptions/LdapConfigurationExceptionMessage.java:132
 msgid "Abstract pathname \"%1$s\" does not denote a directory."
-msgstr ""
+msgstr "Der abstrakte Pfadname  \"%1$s\" bezeichnet kein Verzeichnis."
 
 #. *
 #. * The directory "%1$s" is not a context identifier.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.ldap/src/com/openexchange/contacts/ldap/exceptions/LdapConfigurationExceptionMessage.java:137
-#, fuzzy
 msgid "The directory \"%1$s\" is not a context identifier."
-msgstr "Das Verzeichnis \"%1$s\" darf nicht gelöscht werden."
+msgstr "Das Verzeichnis \"%1$s\" ist keine Kontext-ID."
 
 #. *
 #. * The value given for referrals "%s" is not a possible one
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.ldap/src/com/openexchange/contacts/ldap/exceptions/LdapConfigurationExceptionMessage.java:142
-#, fuzzy
 msgid "The value given for referrals \"%s\" is not a possible one"
-msgstr "Der angegebene Typ für den Modus \"%s\" wird nicht unterstützt."
+msgstr ""
 
 #. *
 #. * The value given for refreshinterval "%s" is no integer value
@@ -1264,33 +1262,29 @@ msgstr ""
 #. * LDAP contacts cannot be deleted
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.ldap/src/com/openexchange/contacts/ldap/exceptions/LdapConfigurationExceptionMessage.java:162
-#, fuzzy
 msgid "LDAP contacts cannot be deleted"
-msgstr "Benutzerkontakte können nicht gelöscht werden."
+msgstr "LDAP-Kontakte können nicht gelöscht werden."
 
 #. *
 #. * An error occured while trying to read an LDAP attribute: %s
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.ldap/src/com/openexchange/contacts/ldap/exceptions/LdapConfigurationExceptionMessage.java:167
-#, fuzzy
 msgid "An error occured while trying to read an LDAP attribute: %s"
-msgstr "Fehler beim Verarbeiten der Suche in der Datenbank."
+msgstr "Fehler beim Lesen eines LDAP-Attributs: %s"
 
 #. *
 #. * The given value \"%s\" is not possible for a sort field
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.ldap/src/com/openexchange/contacts/ldap/exceptions/LdapConfigurationExceptionMessage.java:172
-#, fuzzy
 msgid "The given value \"%s\" is not possible for a sort field"
-msgstr "Der angegebene Typ für den Modus \"%s\" wird nicht unterstützt."
+msgstr "Der angegebene Wert \"%s\" wird für ein Sortierfeld nicht unterstützt."
 
 #. *
 #. * Contacts cannot be inserted in LDAP
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.ldap/src/com/openexchange/contacts/ldap/exceptions/LdapConfigurationExceptionMessage.java:177
-#, fuzzy
 msgid "Contacts cannot be inserted in LDAP"
-msgstr "Benutzerkontakte können nicht gelöscht werden."
+msgstr "Kontakte können nicht in LDAP eingefügt werden"
 
 #. *
 #. * The folderid object is null. This is an internal error. Please notify Open-Xchange
@@ -1300,6 +1294,8 @@ msgid ""
 "The folderid object is null. This is an internal error. Please notify Open-"
 "Xchange."
 msgstr ""
+"Das Ordner-ID-Objekt leer. Dies ist ein interner Fehler. "
+"Bitte benachrichtigen Sie Open-Xchange."
 
 #. *
 #. * The search object contains more than one folder id. This is not supported by this implementation
@@ -1309,6 +1305,8 @@ msgid ""
 "The search object contains more than one folder id. This is not supported by "
 "this implementation."
 msgstr ""
+"Das Suchobjekt enthält mehr als eine Ordner-ID. Dies wird von dieser "
+"Implementation nicht unterstützt."
 
 #. *
 #. * The mapping table doesn't contain the string uid %s, so it has never been accessed before
@@ -1318,120 +1316,114 @@ msgid ""
 "The mapping table does not contain the long uid %s i.e., it has never been "
 "accessed before"
 msgstr ""
+"Die Zuordnungstabelle enthält nicht die lange UID %s, d.h. es wurde noch nie "
+"darauf zugegriffen."
 
 #. *
 #. * Multi-values are not allowed for date attribute: %s
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.ldap/src/com/openexchange/contacts/ldap/exceptions/LdapConfigurationExceptionMessage.java:197
-#, fuzzy
 msgid "Multi-values are not allowed for date attribute: %s"
-msgstr "Sie haben keine Berechtigung zum Aktualisieren des Objekts"
+msgstr "Keine multiplen Werte erlaubt für Datumsattribut: %s"
 
 #. *
 #. * Multi-values are not allowed for int attribute: %s
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.ldap/src/com/openexchange/contacts/ldap/exceptions/LdapConfigurationExceptionMessage.java:202
 msgid "Multi-values are not allowed for int attribute: %s"
-msgstr ""
+msgstr "Keine multiplen Werte erlaubt für int-Attribut: %s"
 
 #. *
 #. * Error while trying to create connection to LDAP server: %s
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.ldap/src/com/openexchange/contacts/ldap/exceptions/LdapConfigurationExceptionMessage.java:207
-#, fuzzy
 msgid "Error while trying to create connection to LDAP server: %s"
-msgstr ""
-"E/A-Fehler beim Erstellen der Socket-Verbindung zum IMAP-Server (%1$s): %2$s"
+msgstr "Fehler beim Erstellen der Verbindung zum LDAP-Server: %s"
 
 #. *
 #. * The LDAP search for the user contains too many results
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.ldap/src/com/openexchange/contacts/ldap/exceptions/LdapConfigurationExceptionMessage.java:212
 msgid "The LDAP search for the user contains too many results"
-msgstr ""
+msgstr "Die LDAP-Suche für den Benutzer enthält zu viele Ergebnisse"
 
 #. *
 #. * The LDAP search for the user object \"%s\" gave no results
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.ldap/src/com/openexchange/contacts/ldap/exceptions/LdapConfigurationExceptionMessage.java:217
 msgid "The LDAP search for the user object \"%s\" gave no results"
-msgstr ""
+msgstr "Die LDAP-Suche für das Benutzerobjekt  \"%s\" ergab keinen Treffer"
 
 #. *
 #. * An error occurred while trying to get the user object from the database
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.ldap/src/com/openexchange/contacts/ldap/exceptions/LdapConfigurationExceptionMessage.java:222
-#, fuzzy
 msgid "An error occurred while trying to get the user object from the database"
-msgstr "Fehler beim Verarbeiten der Suche in der Datenbank."
+msgstr "Fehler beim Abrufen des Benutzerobjekts von der Datenbank"
 
 #. *
 #. * The given userLoginSource is not possible: %s
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.ldap/src/com/openexchange/contacts/ldap/exceptions/LdapConfigurationExceptionMessage.java:227
-#, fuzzy
 msgid "The given userLoginSource is not possible: %s"
-msgstr "Der für userSource \"%s\" angegebene Wert wird nicht unterstützt."
+msgstr "Der für userLoginSource angegebene Wert wird nicht unterstützt: %s"
 
 #. *
 #. * The imap login for user "%s" is null
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.ldap/src/com/openexchange/contacts/ldap/exceptions/LdapConfigurationExceptionMessage.java:232
 msgid "The imap login for user \"%s\" is null"
-msgstr ""
+msgstr "Das IMAP-Login für den Benutzer \"%s\" ist leer"
 
 #. *
 #. * The primary mail for user "%s" is null
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.ldap/src/com/openexchange/contacts/ldap/exceptions/LdapConfigurationExceptionMessage.java:237
 msgid "The primary mail for user \"%s\" is null"
-msgstr ""
+msgstr "Die primäre E-Mail für den Benutzer \"%s\" ist leer"
 
 #. *
 #. * The E-Mail address "%s" for distributionentry is invalid
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.ldap/src/com/openexchange/contacts/ldap/exceptions/LdapConfigurationExceptionMessage.java:242
 msgid "The E-Mail address \"%s\" for distributionentry is invalid"
-msgstr ""
+msgstr "Die E-Mail-Adresse \"%s\" für distributionentry ist ungültig"
 
 #. *
 #. * The contact type "%s" is not known
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.ldap/src/com/openexchange/contacts/ldap/exceptions/LdapConfigurationExceptionMessage.java:247
-#, fuzzy
 msgid "The contact type \"%s\" is not known"
-msgstr "Die Aktion %s ist unbekannt."
+msgstr "Der Kontakttyp \"%s\" ist unbekannt."
 
 #. *
 #. * The attribute "%s" is missing for object "%s"
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.ldap/src/com/openexchange/contacts/ldap/exceptions/LdapConfigurationExceptionMessage.java:252
-#, fuzzy
 msgid "The attribute \"%s\" is missing for object \"%s\""
-msgstr "Erforderlicher Wert \"Tage\" fehlt oder ist ungültig: %d"
+msgstr "Das Attribut \"%s\" für das Objekt \"%s\" ist nicht vorhanden"
 
 #. *
 #. * No values mapping table found
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.ldap/src/com/openexchange/contacts/ldap/exceptions/LdapConfigurationExceptionMessage.java:257
 msgid "No values mapping table found"
-msgstr ""
+msgstr "Keine Zuordnungstabelle für Werte gefunden"
 
 #. *
 #. * No keys mapping table found
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.ldap/src/com/openexchange/contacts/ldap/exceptions/LdapConfigurationExceptionMessage.java:262
 msgid "No keys mapping table found"
-msgstr ""
+msgstr "Keine Zuordnungstabelle für Verschlüsselungen gefunden"
 
 #. *
 #. * An error occurred while trying to get the defaultNamingContext attribute
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.ldap/src/com/openexchange/contacts/ldap/exceptions/LdapConfigurationExceptionMessage.java:267
-#, fuzzy
 msgid ""
 "An error occurred while trying to get the defaultNamingContext attribute"
-msgstr "Fehler beim Verarbeiten der Suche in der Datenbank."
+msgstr "Fehler beim Abrufen des defaultNamingContext-Attributs"
 
 #. A JSON error occurred: %1$s
 #. *
@@ -1469,15 +1461,13 @@ msgstr "Fehlender Parameter %1$s"
 
 #. Unsupported value in parameter %1$s: %2$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.conversion.servlet/src/com/openexchange/conversion/servlet/ConversionServletExceptionMessage.java:76
-#, fuzzy
 msgid "Unsupported value in parameter %1$s: %2$s"
-msgstr "Ungültiger Parameter \"%1$s\": %2$s"
+msgstr "Ungültiger Wert in Parameter %1$s: %2$s"
 
 #. Unsupported method %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.conversion.servlet/src/com/openexchange/conversion/servlet/ConversionServletExceptionMessage.java:79
-#, fuzzy
 msgid "Unsupported method %1$s"
-msgstr "Nicht unterstützte Kodierung: %1$s"
+msgstr "Nicht unterstützte Methode %1$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.conversion/src/com/openexchange/conversion/DataExceptionMessages.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.document.converter/src/com/openexchange/document/converter/DocumentConverterExceptionMessages.java:62
@@ -1533,9 +1523,8 @@ msgid "Provide correct password."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.crypto/src/com/openexchange/crypto/CryptoExceptionMessage.java:73
-#, fuzzy
 msgid "Wrong Password."
-msgstr "Passwort"
+msgstr "Falsches Passwort"
 
 #. *
 #. * Encoding error.
@@ -1580,7 +1569,6 @@ msgstr "Datenerhaltung fehlgeschlagen: %1$s."
 
 #. An I/O error occurred: %1$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.dataretention/src/com/openexchange/dataretention/DataRetentionExceptionStrings.java:65
-#, fuzzy
 msgid "An I/O error occurred: %1$s."
 msgstr "Es trat ein E/A-Fehler auf: %1$s"
 
@@ -1605,15 +1593,13 @@ msgid "A SQL error occurred: %1$s"
 msgstr "Es trat ein SQL-Fehler auf: %1$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.datatypes.genericonf.storage/src/com/openexchange/datatypes/genericonf/storage/GenericConfigurationStorageExceptionMessage.java:70
-#, fuzzy
 msgid "Object type is not supported: %1$s"
-msgstr "Aktionstyp wird nicht unterstützt : %d"
+msgstr "Objekttyp wird nicht unterstützt : %1$s"
 
 #. An OpenOffice error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.document.converter/src/com/openexchange/document/converter/DocumentConverterExceptionMessages.java:84
-#, fuzzy
 msgid "An OpenOffice error occurred: %1$s"
-msgstr "Es trat ein Dateifehler auf: %1$s"
+msgstr "Es trat ein OpenOffice-Fehler auf: %1$s"
 
 #. Module '%s' already registered.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.documentation/src/com/openexchange/documentation/internal/DocumentationExceptionMessage.java:70
@@ -1670,9 +1656,8 @@ msgstr ""
 #. The default name for a newly created list of favorite folders
 #. #NUM# is replaced with the list identifier to obtain a unique name
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.favfolder/src/com/openexchange/favfolder/internal/FavFolderStrings.java:71
-#, fuzzy
 msgid "My favorite folders #NUM#"
-msgstr "Persönliche Ordner"
+msgstr "Meine Ordner-Favoriten #NUM#"
 
 #. A CIFS/SMB error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:66
@@ -1760,7 +1745,6 @@ msgstr "Ungültige Dateneigenschaft: %1$s"
 
 #. Invalid property "%1$s". Should be "%2$s".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/WebDAVFileStorageExceptionMessages.java:79
-#, fuzzy
 msgid "Invalid property \"%1$s\". Should be \"%2$s\"."
 msgstr "Ungültige Eigenschaft \"%1$s\". Sollte \"%2$s\" sein."
 
@@ -1864,13 +1848,11 @@ msgstr "Fehlender Parameter: %1$s"
 
 #. Invalid parameter: %1$s with type '%2$s'. Expected '%3$s'.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:109
-#, fuzzy
 msgid "Invalid parameter: %1$s with type '%2$s'. Expected '%3$s'."
-msgstr "Ungültiger Parameter: %1$s mit Wert '%2$s'."
+msgstr "Ungültiger Parameter: %1$s mit Typ '%2$s'. Erwartet '%3$s'."
 
 #. File part is read-only: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:112
-#, fuzzy
 msgid "File part is read-only: %1$s"
 msgstr "Datei-Teil ist nur lesbar: %1$s"
 
@@ -1958,6 +1940,8 @@ msgid ""
 "Account \"%1$s\" is currently being created. This can take a while. Please "
 "try again later."
 msgstr ""
+"Der Account \"%1$s\" wird gerade angelegt. Dies kann eine Weile dauern. "
+"Bitte versuchen Sie es später erneut."
 
 #. If the problem could not be specified in some more detailed way this message can be used.
 #. %s is replaced by some own message that will not be translated.
@@ -2032,13 +2016,12 @@ msgstr "Fehlende Ordner-ID."
 #. all translations or remove it from the PO file.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:114
 msgid "%1$s"
-msgstr ""
+msgstr "%1$s"
 
 #. Used to indicate that session for autologin can not be found.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:117
-#, fuzzy
 msgid "No session found."
-msgstr "Keine Berechtigung für das Modul: %s."
+msgstr "Keine Sitzung gefunden."
 
 #. Thrown when an AuthenticationService implementation does not support the auto login method.
 #. %s is replaced with the implementations name.
@@ -2125,19 +2108,16 @@ msgstr "Kein Verbindung zur config DB"
 #. %1$d is replaced with the context identifier.
 #. %2$d is replaced with the server identifier.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:68
-#, fuzzy
 msgid "Database for context %1$d and server %2$d can not be resolved"
-msgstr "Auflösen der Datenbank nicht möglich für Kontext %1$d und Server %2$d"
+msgstr "Auflösen der Datenbank für Kontext %1$d und Server %2$d  nicht möglich"
 
 #. The connection to the database could not be established.
 #. %1$d is replaced with the database pool identifier.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:72
-#, fuzzy
 msgid "No connection to database %1$d"
 msgstr "Verbindung zur Datenbank %1$d kann nicht hergestellt werden."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:74
-#, fuzzy
 msgid "Schema can not be set on database connection"
 msgstr "Setzen des Schemas in Datenbankverbindung fehlgeschlagen"
 
@@ -2164,9 +2144,8 @@ msgstr "Fehlende Treiberklasse %1$s"
 #. "Return" in terms of giving a previously obtained pooled connection back into connection pool
 #. %1$d is replace with some database connection pool identifier.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:90
-#, fuzzy
 msgid "Connection to pool %1$d can not be returned"
-msgstr "Standardordner %1$s kann nicht gelöscht werden"
+msgstr ""
 
 #. A property defining the server name was not found in the configuration properties files.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:93
@@ -2185,7 +2164,6 @@ msgstr "Verbindung verwendet für %1$d Millisekunden."
 
 #. %1$d is replaced with the number of statements that have not been closed before returning the connection.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:102
-#, fuzzy
 msgid "%1$d statements are not closed."
 msgstr "%1$d Statements sind nicht geschlossen."
 
@@ -2239,19 +2217,17 @@ msgstr "Auflösen der Datenbank nicht möglich für Kontext %1$d und Server %2$d
 #. Text displayed to user if there is no message.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:63
 msgid "[Not available]"
-msgstr ""
+msgstr "[Nicht verfügbar]"
 
 #. The default message displayed to user.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:66
-#, fuzzy
 msgid "A severe error occurred."
-msgstr "Es trat ein WebDAV-Fehler auf."
+msgstr "Es trat ein schwerer Fehler auf."
 
 #. The default message displayed to user.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:69
-#, fuzzy
 msgid "An error occurred. Please try again later."
-msgstr "Bitte später erneut versuchen."
+msgstr "Es trat ein Fehler auf. Bitte später erneut versuchen."
 
 #. The general message for a conflicting update operation.
 #. The object has been changed in the meantime.
@@ -2262,17 +2238,15 @@ msgstr "Das Objekt hat sich mittlerweile geändert."
 
 #. The general message for a missing object.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:75
-#, fuzzy
 msgid "Object not found. %1$s"
-msgstr "Objekt nicht gefunden. %s"
+msgstr "Objekt nicht gefunden. %1$s"
 
 #. The general message if a user has no access to a certain module (e.g. calendar)
 #. No permission for module: %1$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:78
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:116
-#, fuzzy
 msgid "No permission for module: %1$s."
-msgstr "Keine Berechtigung für das Modul: %s."
+msgstr "Keine Berechtigung für das Modul: %1$s."
 
 #. The general message if a user has no permission to access a certain folder.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:81
@@ -2281,9 +2255,8 @@ msgstr "Keine Ordnerberechtigung"
 
 #. The general message for a missing field.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:84
-#, fuzzy
 msgid "Missing field: %s"
-msgstr "Fehlendes Feld %1$s"
+msgstr "Fehlendes Feld: %s"
 
 #. *
 #. * File not found: %1$s
@@ -2338,7 +2311,6 @@ msgid "Service initialization failed"
 msgstr "Initialisieren des Dienstes fehlgeschlagen"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/sessiond/SessionExceptionMessages.java:61
-#, fuzzy
 msgid "Sessiond exception"
 msgstr "Sessiond-Ausnahme"
 
@@ -2364,12 +2336,11 @@ msgid "Password could not be changed"
 msgstr "Das Passwort konnte nicht geändert werden."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/sessiond/SessionExceptionMessages.java:74
-#, fuzzy
 msgid "Max. number of sessions exceeded for user %1$s in context %2$s"
-msgstr "Max. Session-Größe für Benutzer %1$s im Kontext %2$s überstiegen"
+msgstr ""
+"Max. Session-Anzahl für Benutzer %1$s im Kontext %2$s wurde überschritten"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/sessiond/SessionExceptionMessages.java:76
-#, fuzzy
 msgid ""
 "Authentication identifier duplicate found. Existing session login: %1$s. "
 "Current denied login request: %2$s."
@@ -2435,16 +2406,16 @@ msgstr ""
 "sich geändert. Bitte erneut versuchen."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/sessiond/SessionExceptionMessages.java:103
-#, fuzzy
 msgid "Your session was invalidated. Please try again."
-msgstr "Vorgang wurde unterbrochen. Bitte erneut versuchen."
+msgstr "Ihre Sitzung ist abgelaufen. Bitte erneut versuchen."
 
 #. Max. number of sessions exceeded for client %1$s of user %2$s in context %3$s exceeded
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/sessiond/SessionExceptionMessages.java:106
-#, fuzzy
 msgid ""
 "Max. number of sessions exceeded for client %1$s of user %2$s in context %3$s"
-msgstr "Max. Session-Größe für Benutzer %1$s im Kontext %2$s überstiegen"
+msgstr ""
+"Max. Session-Anzahl für Client %1$s des Benutzers %1$s im Kontext %3$s wurde "
+"überschritten"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/tools/iterator/SearchIteratorExceptionMessages.java:63
 msgid "A DBPool error occurred: 1$%s"
@@ -2509,26 +2480,23 @@ msgid "Some generic exception was thrown: %1"
 msgstr "Löschausnahme: %1$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.client/src/com/openexchange/http/client/exceptions/OxHttpClientExceptionMessages.java:10
-#, fuzzy
 msgid "An IO error occurred: %1"
-msgstr "Es trat ein E/A-Fehler auf: %s"
+msgstr "Es trat ein E/A-Fehler auf: %1"
 
 #. * The grizzly server could not be started
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.grizzly/src/com/openexchange/http/grizzly/GrizzlyExceptionMessage.java:62
-#, fuzzy
 msgid "The grizzly server could not be started"
-msgstr "Versit-Objekt (vCard) konnte nicht gespeichert werden"
+msgstr "Der grizzly-Server konnte nicht gestartet werden"
 
 #. * The following needed service is missing: \"%1$s\"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.grizzly/src/com/openexchange/http/grizzly/GrizzlyExceptionMessage.java:64
-#, fuzzy
 msgid "The following needed service is missing: \"%1$s\""
-msgstr "Folgende(s) Feld(er) sind zu lang: %1$s"
+msgstr "Folgender Dienst wird benötigt, fehlt jedoch: \"%1$s\""
 
 #. * "Maximum number of HTTP sessions (%1$n) exceeded
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.grizzly/src/com/openexchange/http/grizzly/GrizzlyExceptionMessage.java:66
 msgid "The maximum number of HTTP sessions (%1$n) is exceeded."
-msgstr ""
+msgstr "Die maximale Anzahl von HTTP-Sitzunngen (%1$n) wurde überschritten."
 
 #. * Error while trying to interrupt Request processing
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.requestwatcher/src/com/openexchange/http/requestwatcher/RequestWatcherExceptionMessage.java:62
@@ -2553,7 +2521,6 @@ msgstr "%s erhalten, erwartet wurde jedoch eine Zahl in der .po-Datei %s:%s."
 #. The first argument will contain the letter found in the file, the second argument will contain the letter that was expected. The
 #. third argument will contain the file name and the fourth the line number.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.i18n/src/com/openexchange/i18n/parsing/I18NErrorStrings.java:71
-#, fuzzy
 msgid ""
 "Malformed or unsupported token. Got %s but expected %s in .po file %s:%s."
 msgstr ""
@@ -2666,16 +2633,14 @@ msgid "Can not import the format %2$s into folder %1$s."
 msgstr "Kein Importier-Tool für Ordner %1$s in das Format %2$s gefunden"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:83
-#, fuzzy
 msgid ""
 "Calendar module is not enabled for the user. Appointments can not be "
 "imported."
 msgstr ""
-"Das Aufgaben-Modul ist für den Benutzer nicht aktiviert. Aufgaben können "
+"Das Kalender-Modul ist für den Benutzer nicht aktiviert. Termine können "
 "nicht importiert werden."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:85
-#, fuzzy
 msgid "Tasks module is not enabled for the user. Tasks cannot be imported."
 msgstr ""
 "Das Aufgaben-Modul ist für den Benutzer nicht aktiviert. Aufgaben können "
@@ -2686,7 +2651,6 @@ msgid "The necessary iCal parser service is missing."
 msgstr "Der benötigte iCal-Analysedienst fehlt."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:89
-#, fuzzy
 msgid "Importing the appointment failed due to a conflicting resource."
 msgstr ""
 "Aufgrund eines Ressourcenkonflikts ist das Importieren des Termins "
@@ -2701,27 +2665,23 @@ msgid "Could not recognize format of the following data: %s"
 msgstr "Format folgender Daten wurde nicht erkannt: %s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:95
-#, fuzzy
 msgid ""
 "Contacts module is not enabled for the user. Contacts cannot be imported."
 msgstr ""
-"Das Aufgaben-Modul ist für den Benutzer nicht aktiviert. Aufgaben können "
+"Das Kontakte-Modul ist für den Benutzer nicht aktiviert. Aufgaben können "
 "nicht importiert werden."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:97
-#, fuzzy
 msgid "No vCard to import found."
-msgstr "Keine VCard zum Importieren gefunden"
+msgstr "Keine vCard zum Importieren gefunden"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:99
-#, fuzzy
 msgid "Problem while parsing the vcard. Reason: %s"
-msgstr "Problem beim Analysieren der vcard, Grund: %s"
+msgstr "Problem beim Analysieren der vCard, Grund: %s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:101
-#, fuzzy
 msgid "Problem while converting the vcard to a contact. Reason: %s"
-msgstr "Probleme beim Konvertieren der vcard in einen Kontakt, Grund: %s"
+msgstr "Probleme beim Konvertieren der vCard in einen Kontakt, Grund: %s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:103
 msgid "Can only import into one folder at a time."
@@ -2738,7 +2698,6 @@ msgstr ""
 "gültige CSV-Datei?"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:109
-#, fuzzy
 msgid ""
 "Could not translate a single field of information. Entry %s has not been "
 "inserted."
@@ -2751,6 +2710,9 @@ msgid ""
 "File does not contain fields for assigning contact names: no name, company "
 "or E-Mail."
 msgstr ""
+"Die Datei enthält keine Felder für die Zuordnung von Kontaktnamen: kein "
+"Name, "
+"keine Firma, keine E-Mail"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:113
 #, fuzzy
@@ -2814,9 +2776,8 @@ msgid "Ignoring invalid value for field \"%1$s\": %2$s"
 msgstr "Ungültiger Wert für das Feld \"%1$s\" wird ignoriert: %2$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:141
-#, fuzzy
 msgid "No file was uploaded"
-msgstr "Leere Datei hochgeladen"
+msgstr "Es wurde keine Datei hochgeladen"
 
 #. Truncation error: Not using the standard one, because we cannot map between field name in .ics/.vcd/.csv file and OX field.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:144
@@ -2824,12 +2785,13 @@ msgid ""
 "Could not import an entry because one or more fields are too big for the "
 "database: %s"
 msgstr ""
+"Eintrag konnte nicht importiert werden, da ein oder mehrere Felder zu groß "
+"für die Datenbank sind: %s"
 
 #. Pretty generic: Could not one element in an import
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:147
-#, fuzzy
 msgid "Could not create the following element: %s"
-msgstr "Folgende Felder konnten nicht gefunden werden %s"
+msgstr "Folgendes Element konnte nicht erstellt werden %s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:149
 msgid "Could not find the temp file needed for the conversion."
@@ -2851,7 +2813,6 @@ msgstr ""
 
 #. An I/O Error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.index.solr/src/com/openexchange/index/solr/SolrIndexExceptionMessages.java:73
-#, fuzzy
 msgid "An I/O Error occurred: %1$s"
 msgstr "Es trat ein E/A-Fehler auf: %1$s"
 
@@ -2863,9 +2824,8 @@ msgstr "Aktion für Ordner %1$s im Kontext %2$s nicht ausführbar"
 
 #. Index-based search is not supported for module: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.indexedSearch.json/src/com/openexchange/indexedSearch/json/IndexedSearchExceptionMessages.java:68
-#, fuzzy
 msgid "Index-based search is not supported for module: %1$s"
-msgstr "Kein Zieldienst eingetragen für das Modul %1$d."
+msgstr "Keine Unterstützung der indexbasierten Suche für Modul: %1$s"
 
 #. No JSlob storage found for identifier: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jslob/src/com/openexchange/jslob/JSlobExceptionMessages.java:68
@@ -2886,15 +2846,13 @@ msgstr ""
 
 #. Path does not exist: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jslob/src/com/openexchange/jslob/JSlobExceptionMessages.java:77
-#, fuzzy
 msgid "Path doesn't exist: %1$s"
-msgstr "Die CIFS/SMB-Ressource ist nicht vorhanden: %1$s"
+msgstr "Pfad ist nicht vorhanden: %1$s"
 
 #. Invalid path: %1$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jslob/src/com/openexchange/jslob/JSlobExceptionMessages.java:80
-#, fuzzy
 msgid "Invalid path: %1$s."
-msgstr "Ungültiger Typ %1$s."
+msgstr "Ungültiger Pfad: %1$s."
 
 #. Referenced JSlob %1$s must not be set for service %2$s. Nothing will be done.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jslob/src/com/openexchange/jslob/JSlobExceptionMessages.java:83
@@ -2905,7 +2863,6 @@ msgstr ""
 #. A configuration error: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.loxandra/src/com/openexchange/loxandra/LoxandraExceptionMessages.java:70
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xmpp/src/com/openexchange/xmpp/XmppExceptionMessages.java:69
-#, fuzzy
 msgid "A configuration error: %1$s"
 msgstr "Konfigurationsfehler: %1$s"
 
@@ -2915,7 +2872,7 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:68
 msgid "The E-Mail address %1$s is invalid."
-msgstr ""
+msgstr "Die E-Mail-Adresse %1$s ist ungültig."
 
 #. Missing property: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.smal.impl/src/com/openexchange/mail/smal/impl/SmalExceptionMessages.java:65
@@ -2937,16 +2894,13 @@ msgstr "Ungültiger Eigenschafts-Wert in Eigenschaft \"%1$s\": %2$s"
 
 #. HTTP request to server %1$s failed. Status line: %2$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.smal.impl/src/com/openexchange/mail/smal/impl/SmalExceptionMessages.java:74
-#, fuzzy
 msgid "HTTP request to server \"%1$s\" failed. Status line: %2$s"
-msgstr ""
-"HTTP-Anfrage an VoipNow-Server \"%1$s\" fehlgeschlagen. Statuszeile: %2$s"
+msgstr "HTTP-Anfrage an Server \"%1$s\" fehlgeschlagen. Statuszeile: %2$s"
 
 #. JSON request failed. Error code: %1$s. Error message: %2$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.smal.impl/src/com/openexchange/mail/smal/impl/SmalExceptionMessages.java:77
-#, fuzzy
 msgid "JSON request failed. Error code: %1$s. Error message: %2$s"
-msgstr "VoipNow-Anfrage fehlgeschlagen. Fehlercode: %1$s. Fehlermeldung: %2$s"
+msgstr "JSON-Anfrage fehlgeschlagen. Fehlercode: %1$s. Fehlermeldung: %2$s"
 
 #. A remote error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.smal.impl/src/com/openexchange/mail/smal/impl/SmalExceptionMessages.java:80
@@ -2956,9 +2910,8 @@ msgstr "Es trat ein entfernter Fehler auf: %1$s"
 
 #. An index fault occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.smal.impl/src/com/openexchange/mail/smal/impl/SmalExceptionMessages.java:83
-#, fuzzy
 msgid "An index fault occurred: %1$s"
-msgstr "Es trat ein SOAP-Fehler auf: %1$s"
+msgstr "Es trat ein Index-Fehler auf: %1$s"
 
 #. Unparseable HTTP response: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.smal.impl/src/com/openexchange/mail/smal/impl/SmalExceptionMessages.java:89
@@ -2976,9 +2929,8 @@ msgstr ""
 #. * Malformed object name: %1$s
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.management/src/com/openexchange/management/ManagementExceptionMessage.java:76
-#, fuzzy
 msgid "Malformed object name: %1$s"
-msgstr "Inkorrekte URL: %1$s"
+msgstr ""
 
 #. *
 #. * Not compliant MBean: %1$s
@@ -3000,17 +2952,15 @@ msgstr "Konfigurationsfehler: %1$s"
 #. * MBean already exists: %1$s.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.management/src/com/openexchange/management/ManagementExceptionMessage.java:91
-#, fuzzy
 msgid "MBean already exists: %1$s"
-msgstr "Eine solche Ressource ist bereits vorhanden: %1$s."
+msgstr "MBean ist bereits vorhanden: %1$s."
 
 #. *
 #. * MBean not found: %1$s.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.management/src/com/openexchange/management/ManagementExceptionMessage.java:96
-#, fuzzy
 msgid "MBean not found: %1$s"
-msgstr "Datei nicht gefunden. %1$s"
+msgstr "MBean nicht gefunden. %1$s"
 
 #. *
 #. * Malformed URL: %1$s
@@ -3302,7 +3252,6 @@ msgid "Unified mail enabled"
 msgstr "Unified Mail aktiviert"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/MailMessagingExceptionMessages.java:88
-#, fuzzy
 msgid ""
 "Missing permission \"%1$s\" in facebook login %2$s. Please copy the "
 "following url to your browser, log in as %2$s (if not done yet) and grant "
@@ -3435,9 +3384,8 @@ msgstr "Es trat ein JSON-Fehler auf: %1$s"
 
 #. Illegal state: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mq/src/com/openexchange/mq/MQExceptionMessages.java:82
-#, fuzzy
 msgid "Illegal state: %1$s"
-msgstr "Unzulässiger Schreibversuch: %1$s"
+msgstr "Unzulässiger Status: %1$s"
 
 #. A filter expression has not been validated.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mq/src/com/openexchange/mq/MQExceptionMessages.java:85
@@ -3454,9 +3402,8 @@ msgstr "Der Benutzer-Konfigurations-Cache konnte nicht gelöscht werden: %1$s"
 
 #. A security problem occurred (authentication issues, permission issues,...)
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mq/src/com/openexchange/mq/MQExceptionMessages.java:92
-#, fuzzy
 msgid "A security problem occurred: %1$s"
-msgstr "Es trat ein SQL-Problem auf: %1$s."
+msgstr "Es trat ein Sicherheitsproblem auf: %1$s"
 
 #. Response is not of type: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/OAuthProviderExceptionMessages.java:72
