@@ -120,6 +120,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.sessiond.impl.IPAddressUtil;
 import com.openexchange.sessiond.impl.IPRange;
 import com.openexchange.tools.io.IOTools;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -991,6 +992,19 @@ public class Login extends AJAXServlet {
              * value causes the cookie to be deleted.
              */
             cookie.setMaxAge(conf.cookieExpiry);
+        }
+        final String serverName = LogProperties.<String> getLogProperty("com.openexchange.ajp13.serverName");
+        if (null != serverName) {
+            if (serverName.startsWith("www.")) {
+                cookie.setDomain(serverName.substring(3));
+            } else if ("localhost".equalsIgnoreCase(serverName)) {
+                cookie.setDomain(serverName);
+            } else {
+                // Not an IP address
+                if (null == IPAddressUtil.textToNumericFormatV4(serverName) && (null == IPAddressUtil.textToNumericFormatV6(serverName))) {
+                    cookie.setDomain(new StringBuilder(serverName.length() + 1).append('.').append(serverName).toString());
+                }
+            }
         }
     }
 
