@@ -86,9 +86,10 @@ import com.openexchange.tools.iterator.SearchIterator;
  * </code>. 
  * </li><li>
  * While the interface uses {@link String} values for identifiers, the 
- * {@link Contact} object still expects them to be in a numerical format for 
+ * {@link Contact} class still expects them to be in a numerical format for 
  * legacy reasons. Therefore, extensive parsing of identifiers may be necessary
- * for now. A convenience method is available in {@link DefaultContactStorage}.
+ * for now. A convenience <code>parse</code>-method for handling numerical 
+ * identifiers is available in {@link DefaultContactStorage}.
  * </li><li>
  * The contact storage does not need to check permissions when accessing the 
  * storage, since the contact service already takes care of checking the 
@@ -329,12 +330,11 @@ public interface ContactStorage {
      * Deletes a contact.
      * 
      * @param session the session
-     * @param userID the ID of the user performing the operation (to allow storing the id in 'modified by')
      * @param folderId the ID of the parent folder
      * @param id the object ID
      * @param lastRead the time the object was last read from the storage
      * @throws OXException
      */
-    void delete(Session session, int userID, String folderId, String id, Date lastRead) throws OXException;
+    void delete(Session session, String folderId, String id, Date lastRead) throws OXException;
     
 }

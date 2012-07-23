@@ -191,7 +191,7 @@ public class DelegatingLdapStorage extends DefaultContactStorage {
     }
 
     @Override
-    public void delete(Session session, int userID, String folderId, String id, Date lastRead) throws OXException {
+    public void delete(Session session, String folderId, String id, Date lastRead) throws OXException {
         delegate(session).deleteContactObject(parse(id), parse(folderId), lastRead);    
     }
 
