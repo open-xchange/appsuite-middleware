@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Hyperic SIGAR Bundle
+Bundle-SymbolicName: org.hyperic.sigar
+Bundle-Version: 1.6.4.0
+Bundle-Vendor: Hyperic, Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.config,
+ com.openexchange.log,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ org.apache.commons.logging,
+ org.osgi.framework,
+ org.osgi.util.tracker
+Bundle-ClassPath: lib/sigar.jar,
+ lib/org.apache.log4j_1.2.13.v200806030600.jar,
+ .
+Bundle-Activator: org.hyperic.sigar.osgi.SigarActivator

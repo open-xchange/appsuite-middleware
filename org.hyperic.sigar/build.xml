@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="com.openexchange.langdetect overrides" basedir=".">
+<project name="org.hyperic.sigar overrides" basedir=".">
 
     <description>
         This build file overrides the installConf target to patch a configuration file path before installing them.
@@ -8,16 +8,16 @@
     <import file="build-project.xml"/>
 
 	<!-- Constants -->
-    <property name="modelsDir" value="languageModels"/>
+    <property name="sigarBinDir" value="sigar-bin"/>
 
     <target name="postInstall" description="Install several additional files that are necessary for the backend.">
         <antcall target="installLanguageModels"/>
     </target>
 
     <target name="installLanguageModels" description="Installs configuration files for language detection.">
-        <mkdir dir="${destDir}/${prefix}/${modelsDir}"/>
-        <copy todir="${destDir}/${prefix}/${modelsDir}" overwrite="true">
-            <fileset dir="${modelsDir}"/>
+        <mkdir dir="${destDir}/${prefix}/${sigarBinDir}"/>
+        <copy todir="${destDir}/${prefix}/${sigarBinDir}" overwrite="true">
+            <fileset dir="${sigarBinDir}"/>
         </copy>
     </target>
 

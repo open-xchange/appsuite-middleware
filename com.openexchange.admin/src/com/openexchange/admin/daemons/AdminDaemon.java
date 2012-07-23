@@ -82,6 +82,7 @@ import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.log.LogFactory;
+import com.openexchange.log.LogProperties;
 
 public class AdminDaemon {
 
@@ -320,7 +321,11 @@ public class AdminDaemon {
     
     public static AdminCache getCache() throws OXGenericException {
         if (cache == null) {
-            initCache(AdminServiceRegistry.getInstance().getService(ConfigurationService.class));
+            ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
+            if (null == service) {
+                service = LogProperties.getLogProperty("__configurationService");
+            }
+            initCache(service);
         }
         return cache;
     }

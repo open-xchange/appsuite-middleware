@@ -69,6 +69,7 @@ import com.openexchange.admin.tools.AdminCacheExtended;
 import com.openexchange.admin.tools.PropertyHandlerExtended;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.log.LogFactory;
+import com.openexchange.log.LogProperties;
 
 public class PluginStarter {
 
@@ -93,6 +94,8 @@ public class PluginStarter {
             this.context = context;
             initCache(service);
 
+            LogProperties.putLogProperty("__configurationService", service);
+
             // Create all OLD Objects and bind export them
             oxctx_v2 = new com.openexchange.admin.rmi.impl.OXContext(context);
             final OXContextInterface oxctx_stub_v2 = (OXContextInterface) UnicastRemoteObject.exportObject(oxctx_v2, 0);
@@ -116,6 +119,8 @@ public class PluginStarter {
         } catch (final StorageException e) {
             LOG.fatal("Error while creating one instance for RMI interface", e);
             throw e;
+        } finally {
+            LogProperties.putLogProperty("__configurationService", null);
         }
     }
 
