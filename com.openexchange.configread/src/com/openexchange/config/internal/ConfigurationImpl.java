@@ -440,6 +440,7 @@ public final class ConfigurationImpl implements ConfigurationService {
                 return f;
             }
         }
+        LOG.warn("No such file: " + fileName);
         return null;
     }
 
@@ -474,6 +475,7 @@ public final class ConfigurationImpl implements ConfigurationService {
                 return fdir;
             }
         }
+        LOG.warn("No such directory: " + directoryName);
         return null;
     }
 

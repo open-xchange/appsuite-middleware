@@ -145,9 +145,9 @@ public class AdminCache {
         super();
     }
 
-    public void initCache() throws OXGenericException {
+    public void initCache(final ConfigurationService service) throws OXGenericException {
         this.prop = new PropertyHandler(System.getProperties());
-        cacheSqlScripts();
+        cacheSqlScripts(service);
         configureAuthentication(); // disabling authentication mechs
         readMasterCredentials();
         this.log.info("Init Cache");
@@ -472,21 +472,17 @@ public class AdminCache {
         }
     }
 
-    private void cacheSqlScripts() {
+    private void cacheSqlScripts(final ConfigurationService service) {
 
         if (prop.getSqlProp("LOG_PARSED_QUERIES", "false").equalsIgnoreCase("true")) {
             log_parsed_sql_queries = true;
         }
 
         // ox
-        ox_queries_initial = convertData2Objects(getInitialOXDBOrder());
+        ox_queries_initial = convertData2Objects(getInitialOXDBOrder(), service);
     }
 
-    private ArrayList<String> convertData2Objects(String[] sql_files_order) {
-        final ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
-        if (null == service) {
-            throw new IllegalStateException("Absent service: " + ConfigurationService.class.getName());
-        }
+    private ArrayList<String> convertData2Objects(String[] sql_files_order, final ConfigurationService service) {
         final ArrayList<String> al = new ArrayList<String>(sql_files_order.length);
         final Pattern p = Pattern.compile("(" + PATTERN_REGEX_FUNCTION + "|" + PATTERN_REGEX_NORMAL + ")", Pattern.DOTALL + Pattern.CASE_INSENSITIVE);
         for (int a = 0; a < sql_files_order.length; a++) {
