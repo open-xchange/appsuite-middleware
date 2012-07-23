@@ -171,12 +171,14 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
     // GET METHODS
 
     /**
-     * Gets the extended properties
+     * Gets the extended properties.
+     * <p>
+     * <b>Note</b>: A clone is returned.
      * 
      * @return The extended properties
      */
     public Map<String, Object> getExtendedProperties() {
-        return extendedProperties;
+        return extendedProperties == null ? null : new HashMap<String, Object>(extendedProperties);
     }
 
     public String getCategories() {
@@ -230,7 +232,7 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
      * 
      * @param extendedProperties The extended properties to set
      */
-    public void setExtendedProperties(Map<String, Object> extendedProperties) {
+    public void setExtendedProperties(final Map<String, Object> extendedProperties) {
         if (null == extendedProperties) {
             this.extendedProperties = null;
         } else {
@@ -244,12 +246,13 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
      * 
      * @param extendedProperties The extended properties to add
      */
-    public void addExtendedProperties(Map<String, Object> extendedProperties) {
+    public void addExtendedProperties(final Map<String, Object> extendedProperties) {
         if (null != extendedProperties) {
-            if (null == this.extendedProperties) {
+            final Map<String, Object> thisProps = this.extendedProperties;
+            if (null == thisProps) {
                 this.extendedProperties = new HashMap<String, Object>(extendedProperties);
             } else {
-                this.extendedProperties.putAll(extendedProperties);
+                thisProps.putAll(extendedProperties);
             }
         }
         b_extendedProperties = true;
