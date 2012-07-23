@@ -63,4 +63,6 @@ public interface CommonFields extends FolderChildFields {
 
     public static final String UID = "uid";
 
+    public static final String EXTENDED_PROPERTIES = "extended_properties";
+
 }
