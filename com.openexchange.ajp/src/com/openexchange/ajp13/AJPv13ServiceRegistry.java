@@ -49,33 +49,37 @@
 
 package com.openexchange.ajp13;
 
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * {@link AJPv13ServiceRegistry} - Container class for the service registry of <i>com.openexchange.ajp13</i> bundle.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AJPv13ServiceRegistry {
 
-    private static final ServiceRegistry SERVICE_REGISTRY = new ServiceRegistry(8);
+    /**
+     * The atomic reference to <tt>ServiceRegistry</tt> instance
+     */
+    public static final AtomicReference<ServiceRegistry> SERVICE_REGISTRY = new AtomicReference<ServiceRegistry>();
 
     /**
      * Gets the service registry of <i>com.openexchange.ajp13</i> bundle.
-     *
+     * 
      * @return The service registry
      */
     public static ServiceRegistry getInstance() {
-        return SERVICE_REGISTRY;
+        return SERVICE_REGISTRY.get();
     }
 
     /**
      * Gets the service registry of <i>com.openexchange.ajp13</i> bundle.
-     *
+     * 
      * @return The service registry
      */
     public static ServiceRegistry getServiceRegistry() {
-        return SERVICE_REGISTRY;
+        return SERVICE_REGISTRY.get();
     }
 
     /**

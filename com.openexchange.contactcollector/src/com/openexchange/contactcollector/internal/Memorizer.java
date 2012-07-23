@@ -90,6 +90,7 @@ import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SingleSearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.search.internal.operands.ConstantOperand;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -143,7 +144,7 @@ public class Memorizer implements Runnable {
         final Set<InternetAddress> aliases;
         final UserConfiguration userConfig;
         try {
-            final CCServiceRegistry serviceRegistry = CCServiceRegistry.getInstance();
+            final ServiceLookup serviceRegistry = CCServiceRegistry.getInstance();
             final ContextService contextService = serviceRegistry.getService(ContextService.class);
             if (null == contextService) {
                 LOG.warn("Contact collector run aborted: missing context service");

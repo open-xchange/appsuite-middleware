@@ -53,7 +53,9 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.search.Order;
 
 /**
- * {@link SortOrder} - The sort order 
+ * {@link SortOrder}
+ * 
+ * Defines a single sort order for contacts.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
@@ -62,7 +64,13 @@ public final class SortOrder {
 	private final ContactField by;
 	private final Order order;
 	
-	public SortOrder(final ContactField by, final Order order) {
+	/**
+	 * Initializes a new {@link SortOrder}.
+	 * 
+	 * @param by the contact field
+	 * @param order the order
+	 */
+	public SortOrder(ContactField by, Order order) {
 		this.by = by;
 		this.order = order;
 	}

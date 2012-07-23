@@ -49,29 +49,32 @@
 
 package com.openexchange.contactcollector.osgi;
 
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.osgi.ServiceRegistry;
+
 /**
  * {@link CCServiceRegistry} - The service registry for contact collector.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CCServiceRegistry extends com.openexchange.osgi.ServiceRegistry {
+public final class CCServiceRegistry {
 
-    private static final CCServiceRegistry instance = new CCServiceRegistry();
+    static final AtomicReference<ServiceRegistry> SERVICE_REGISTRY = new AtomicReference<ServiceRegistry>();
 
     /**
      * Gets the service registry instance.
      *
      * @return The service registry instance.
      */
-    public static CCServiceRegistry getInstance() {
-        return instance;
+    public static ServiceRegistry getInstance() {
+        return SERVICE_REGISTRY.get();
     }
 
     /**
      * Initializes a new {@link CCServiceRegistry}.
      */
     private CCServiceRegistry() {
-        super(6);
+        super();
     }
 
 }

@@ -49,7 +49,6 @@
 
 package com.openexchange.contact.storage.rdb.internal;
 
-import static com.openexchange.contact.storage.rdb.internal.Tools.parse;
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.SQLException;
@@ -224,9 +223,10 @@ public class RdbContactStorage extends DefaultContactStorage {
     }    
         
     @Override
-    public void delete(Session session, int userID, String folderId, String id, Date lastRead) throws OXException {
+    public void delete(Session session, String folderId, String id, Date lastRead) throws OXException {
     	boolean committed = false;
         int contextID = session.getContextId();
+        int userID = session.getUserId();
         int objectID = parse(id);
         long minLastModified = lastRead.getTime();
         DatabaseService databaseService = getDatabaseService();
