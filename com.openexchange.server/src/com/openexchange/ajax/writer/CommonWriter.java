@@ -51,12 +51,15 @@ package com.openexchange.ajax.writer;
 
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import java.util.Map;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONValue;
 import org.json.JSONWriter;
 import com.openexchange.ajax.fields.CommonFields;
+import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.groupware.container.CommonObject;
 
 /**
@@ -181,6 +184,19 @@ public class CommonWriter extends FolderChildWriter {
             // This value is nowhere written to a JSON object.
         }
     };
+
+    private static final FieldWriter<CommonObject> EXTENDED_PROPERTIES_WRITER = new FieldWriter<CommonObject>() {
+        @Override
+        public void write(final CommonObject obj, final TimeZone timeZone, final JSONArray json) throws JSONException {
+            final Map<String, Object> extendedProperties = obj.getExtendedProperties();
+            writeValue(null == extendedProperties ? null : (JSONValue) JSONCoercion.coerceToJSON(extendedProperties), json, obj.containsExtendedProperties());
+        }
+        @Override
+        public void write(final CommonObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
+            final Map<String, Object> extendedProperties = obj.getExtendedProperties();
+            writeParameter(CommonFields.EXTENDED_PROPERTIES,null == extendedProperties ? null : (JSONValue) JSONCoercion.coerceToJSON(extendedProperties), json, obj.containsExtendedProperties());
+        }
+    };
     static {
         final TIntObjectMap<FieldWriter<CommonObject>> m = new TIntObjectHashMap<FieldWriter<CommonObject>>(6, 1);
         m.put(CommonObject.CATEGORIES, CATEGORIES_WRITER);
@@ -189,6 +205,7 @@ public class CommonWriter extends FolderChildWriter {
         m.put(CommonObject.NUMBER_OF_ATTACHMENTS, NUMBER_OF_ATTACHMENTS_WRITER);
         m.put(CommonObject.LAST_MODIFIED_OF_NEWEST_ATTACHMENT, LAST_MODIFIED_OF_NEWEST_ATTACHMENT_UTC_WRITER);
         m.put(CommonObject.NUMBER_OF_LINKS, NUMBER_OF_LINKS_WRITER);
+        m.put(CommonObject.EXTENDED_PROPERTIES, EXTENDED_PROPERTIES_WRITER);
         WRITER_MAP = m;
     }
 

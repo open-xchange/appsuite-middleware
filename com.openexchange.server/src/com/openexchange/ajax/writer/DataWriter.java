@@ -59,6 +59,7 @@ import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONValue;
 import org.json.JSONWriter;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.groupware.container.DataObject;
@@ -134,6 +135,35 @@ public class DataWriter {
     public static void writeParameter(final String name, final String value, final JSONObject json, final boolean condition) throws JSONException {
         if (condition) {
             writeParameter(name, value, json);
+        }
+    }
+
+    /**
+     * Puts given <code>JSONValue</code>'s time value into specified JSON array
+     *
+     * @param name The name to which the value is bound
+     * @param value The <code>JSON</code> value
+     * @param jsonArray The JSON array to put into
+     * @throws JSONException If a JSON error occurs
+     */
+    public static void writeParameter(final String name, final JSONValue value, final JSONObject json) throws JSONException {
+        if (value != null) {
+            json.put(name, value);
+        }
+    }
+
+    /**
+     * Conditionally puts given <code>JSONValue</code> value into specified JSON array
+     *
+     * @param name The name to which the value is bound
+     * @param value The <code>JSON</code> value
+     * @param jsonArray The JSON array to put into
+     * @param condition <code>true</code> to put; otherwise <code>false</code> to put {@link JSONObject#NULL}
+     * @throws JSONException If a JSON error occurs
+     */
+    public static void writeParameter(final String name, final JSONValue value, final JSONObject json, final boolean condition) throws JSONException {
+        if (condition) {
+            json.put(name, value);
         }
     }
 
@@ -443,6 +473,35 @@ public class DataWriter {
     public static void writeValue(final Date value, final JSONArray json, final boolean condition) {
         if (condition) {
             json.put(value.getTime());
+        } else {
+            json.put(JSONObject.NULL);
+        }
+    }
+
+    /**
+     * Puts given <code>JSONValue</code>'s time value into specified JSON array
+     *
+     * @param value The <code>JSON</code> value
+     * @param jsonArray The JSON array to put into
+     */
+    public static void writeValue(final JSONValue value, final JSONArray jsonArray) {
+        if (value == null) {
+            jsonArray.put(JSONObject.NULL);
+        } else {
+            jsonArray.put(value);
+        }
+    }
+
+    /**
+     * Conditionally puts given <code>JSONValue</code> value into specified JSON array
+     *
+     * @param value The <code>JSON</code> value
+     * @param jsonArray The JSON array to put into
+     * @param condition <code>true</code> to put; otherwise <code>false</code> to put {@link JSONObject#NULL}
+     */
+    public static void writeValue(final JSONValue value, final JSONArray json, final boolean condition) {
+        if (condition) {
+            json.put(value);
         } else {
             json.put(JSONObject.NULL);
         }

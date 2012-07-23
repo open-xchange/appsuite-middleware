@@ -51,17 +51,18 @@ package com.openexchange.groupware.container;
 
 import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
-
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 /**
  * CommonObject
- *
+ * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 
-public abstract class CommonObject extends FolderChildObject implements Cloneable{
+public abstract class CommonObject extends FolderChildObject implements Cloneable {
 
     /**
      * The available markers for a {@link CommonObject}.
@@ -74,8 +75,7 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
         /**
          * A id-only object.
          */
-        ID_ONLY,
-        ;
+        ID_ONLY, ;
     }
 
     public static final int LABEL_NONE = 0;
@@ -111,8 +111,10 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
     public static final int NUMBER_OF_ATTACHMENTS = 104;
 
     public static final int LAST_MODIFIED_OF_NEWEST_ATTACHMENT = 105;
-    
+
     public static final int FILENAME = 106;
+
+    public static final int EXTENDED_PROPERTIES = 107;
 
     public static final int UID = 223;
 
@@ -132,10 +134,12 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
 
     protected int label;
 
-	protected String uid;
+    protected String uid;
 
-	protected String filename;
-	
+    protected String filename;
+
+    protected Map<String, Object> extendedProperties;
+
     protected boolean b_personal_folder_id;
 
     protected boolean b_number_of_attachments;
@@ -150,9 +154,11 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
 
     protected boolean bLabel;
 
-	protected boolean b_uid;
+    protected boolean b_uid;
 
-	protected boolean b_filename;
+    protected boolean b_filename;
+
+    protected boolean b_extendedProperties;
 
     /**
      * Initializes a new {@link CommonObject}.
@@ -163,13 +169,25 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
     }
 
     // GET METHODS
+
+    /**
+     * Gets the extended properties.
+     * <p>
+     * <b>Note</b>: A clone is returned.
+     * 
+     * @return The extended properties
+     */
+    public Map<String, Object> getExtendedProperties() {
+        return extendedProperties == null ? null : new HashMap<String, Object>(extendedProperties);
+    }
+
     public String getCategories() {
         return categories;
     }
 
     /**
      * Gets the marker
-     *
+     * 
      * @return The marker
      */
     public Marker getMarker() {
@@ -209,6 +227,37 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
     }
 
     // SET METHODS
+    /**
+     * Sets extended properties.
+     * 
+     * @param extendedProperties The extended properties to set
+     */
+    public void setExtendedProperties(final Map<String, Object> extendedProperties) {
+        if (null == extendedProperties) {
+            this.extendedProperties = null;
+        } else {
+            this.extendedProperties = new HashMap<String, Object>(extendedProperties);
+        }
+        b_extendedProperties = true;
+    }
+
+    /**
+     * Adds extended properties. Existing key-value-pairs are replaced.
+     * 
+     * @param extendedProperties The extended properties to add
+     */
+    public void addExtendedProperties(final Map<String, Object> extendedProperties) {
+        if (null != extendedProperties) {
+            final Map<String, Object> thisProps = this.extendedProperties;
+            if (null == thisProps) {
+                this.extendedProperties = new HashMap<String, Object>(extendedProperties);
+            } else {
+                thisProps.putAll(extendedProperties);
+            }
+        }
+        b_extendedProperties = true;
+    }
+
     public void setCategories(final String categories) {
         this.categories = categories;
         b_categories = true;
@@ -216,7 +265,7 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
 
     /**
      * Sets the marker
-     *
+     * 
      * @param marker The marker to set
      */
     public void setMarker(final Marker marker) {
@@ -253,17 +302,22 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
         bLabel = true;
     }
 
-	public void setUid(String uid) {
-		this.uid = uid;
-		b_uid = true;
-	}
+    public void setUid(String uid) {
+        this.uid = uid;
+        b_uid = true;
+    }
 
-	public void setFilename(String filename) {
-		this.filename = filename;
-		b_filename = true;
-	}
+    public void setFilename(String filename) {
+        this.filename = filename;
+        b_filename = true;
+    }
 
     // REMOVE METHODS
+    public void removeExtendedProperties() {
+        extendedProperties = null;
+        b_extendedProperties = false;
+    }
+
     public void removeCategories() {
         categories = null;
         b_categories = false;
@@ -310,6 +364,10 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
     }
 
     // CONTAINS METHODS
+    public boolean containsExtendedProperties() {
+        return b_extendedProperties;
+    }
+
     public boolean containsCategories() {
         return b_categories;
     }
@@ -358,6 +416,7 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
         label = 0;
         uid = null;
         filename = null;
+        extendedProperties = null;
 
         b_personal_folder_id = false;
         b_number_of_attachments = false;
@@ -367,6 +426,7 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
         bLabel = false;
         b_uid = false;
         b_filename = false;
+        b_extendedProperties = false;
     }
 
     @Override
@@ -443,6 +503,13 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
         case FILENAME:
             setFilename((String) value);
             break;
+        case EXTENDED_PROPERTIES:
+            {
+                @SuppressWarnings("unchecked")
+                final Map<String, Object> properties = (Map<String, Object>) value;
+                setExtendedProperties(properties);
+            }
+            break;
         default:
             super.set(field, value);
 
@@ -468,6 +535,8 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
             return getUid();
         case FILENAME:
             return getFilename();
+        case EXTENDED_PROPERTIES:
+            return getExtendedProperties();
         default:
             return super.get(field);
 
@@ -493,6 +562,8 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
             return containsUid();
         case FILENAME:
             return containsFilename();
+        case EXTENDED_PROPERTIES:
+            return containsExtendedProperties();
         default:
             return super.contains(field);
 
@@ -525,6 +596,9 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
             break;
         case FILENAME:
             removeFilename();
+            break;
+        case EXTENDED_PROPERTIES:
+            removeExtendedProperties();
             break;
         default:
             super.remove(field);
