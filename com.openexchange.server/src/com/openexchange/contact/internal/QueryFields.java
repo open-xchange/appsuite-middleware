@@ -51,7 +51,6 @@ package com.openexchange.contact.internal;
 
 import java.util.HashSet;
 import java.util.Set;
-
 import com.openexchange.groupware.contact.helpers.ContactField;
 
 /**
@@ -99,8 +98,9 @@ public class QueryFields {
 		        // always add permission specific fields
 		        preparedFields.add(ContactField.CREATED_BY);
 		        preparedFields.add(ContactField.PRIVATE_FLAG);
-		        preparedFields.add(ContactField.FOLDER_ID);
-		        preparedFields.add(ContactField.CONTEXTID);
+                preparedFields.add(ContactField.FOLDER_ID);
+                preparedFields.add(ContactField.OBJECT_ID);
+                preparedFields.add(ContactField.CONTEXTID);
 	        }
 	        // add requested fields if allowed
 	        for (final ContactField field : fields) {

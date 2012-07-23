@@ -74,7 +74,7 @@ public class ContactStorageTest extends TestCase {
         if (null != this.rememberedContacts && 0 < rememberedContacts.size()) {
             for (final Contact contact : rememberedContacts) {
                 try {
-                    this.getStorage().delete(getSession(), getUserID(), Integer.toString(contact.getParentFolderID()), 
+                    this.getStorage().delete(getSession(), Integer.toString(contact.getParentFolderID()), 
                         Integer.toString(contact.getObjectID()), new Date());
                 } catch (final Exception e) {
                     LOG.error("error cleaning up contact", e);
