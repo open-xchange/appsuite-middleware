@@ -158,22 +158,27 @@ public final class HttpDateFormatRegistry {
         appendNetscapeCookieMaxAge(maxAgeSecs, composer);
     }
 
-    private static volatile Long zeroMaxAgeSecs;
+    private volatile String zeroMaxAgeExpires;
 
-    private static long zeroMaxAgeSecs() {
-        Long tmp = zeroMaxAgeSecs;
+    private String zeroMaxAgeExpires() {
+        String tmp = zeroMaxAgeExpires;
         if (null == tmp) {
             synchronized (HttpDateFormatRegistry.class) {
-                tmp = zeroMaxAgeSecs;
+                tmp = zeroMaxAgeExpires;
                 if (null == tmp) {
                     final ConfigurationService service = AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class);
                     final boolean b = service.getBoolProperty("com.openexchange.ajp.cookie.enableExactZeroMaxAge", true);
-                    tmp = Long.valueOf(b ? 0L : 10000); // 10sec after 01/01/1970
-                    zeroMaxAgeSecs = tmp;
+                    synchronized (netscapeDateFormat) {
+                        /*
+                         * expires=Sat, 01-Jan-2000 00:00:00 GMT
+                         */
+                        tmp = netscapeDateFormat.format(new Date(b ? 0L : 10000L));
+                    }
+                    zeroMaxAgeExpires = tmp;
                 }
             }
         }
-        return tmp.longValue();
+        return tmp;
     }
 
     /**
@@ -183,12 +188,16 @@ public final class HttpDateFormatRegistry {
      * @param composer The composing string builder
      */
     private void appendNetscapeCookieMaxAge(final int maxAgeSecs, final StringBuilder composer) {
-        synchronized (netscapeDateFormat) {
-            /*
-             * expires=Sat, 01-Jan-2000 00:00:00 GMT
-             */
-            final long millis = maxAgeSecs == 0 ? zeroMaxAgeSecs() : System.currentTimeMillis() + (maxAgeSecs * 1000L);
-            composer.append("; expires=").append(netscapeDateFormat.format(new Date(millis)));
+        if (maxAgeSecs == 0) {
+            composer.append("; expires=").append(zeroMaxAgeExpires());
+        } else {
+            synchronized (netscapeDateFormat) {
+                /*
+                 * expires=Sat, 01-Jan-2000 00:00:00 GMT
+                 */
+                final long millis = System.currentTimeMillis() + (maxAgeSecs * 1000L);
+                composer.append("; expires=").append(netscapeDateFormat.format(new Date(millis)));
+            }
         }
     }
 
