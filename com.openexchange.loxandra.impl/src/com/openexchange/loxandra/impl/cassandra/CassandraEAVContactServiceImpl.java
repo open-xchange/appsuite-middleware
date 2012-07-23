@@ -317,20 +317,20 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 		}
 		
 		// setters
-		if (contact.containsNamedProperty(ContactFields.DISPLAY_NAME)) {
-            contact.setDisplayName(ByteBufferUtil.string(contact.getNamedProperty(ContactFields.DISPLAY_NAME)));
+		if (contact.containsNamedProperty(ContactField.DISPLAY_NAME.getAjaxName())) {
+            contact.setDisplayName(ByteBufferUtil.string(contact.getNamedProperty(ContactField.DISPLAY_NAME.getAjaxName())));
         }
-		if (contact.containsNamedProperty(ContactFields.FIRST_NAME)) {
-            contact.setGivenName(ByteBufferUtil.string(contact.getNamedProperty(ContactFields.FIRST_NAME)));
+		if (contact.containsNamedProperty(ContactField.GIVEN_NAME.getAjaxName())) {
+            contact.setGivenName(ByteBufferUtil.string(contact.getNamedProperty(ContactField.GIVEN_NAME.getAjaxName())));
         }
-		if (contact.containsNamedProperty(ContactFields.LAST_NAME)) {
-            contact.setSurName(ByteBufferUtil.string(contact.getNamedProperty(ContactFields.LAST_NAME)));
+		if (contact.containsNamedProperty(ContactField.SUR_NAME.getAjaxName())) {
+            contact.setSurName(ByteBufferUtil.string(contact.getNamedProperty(ContactField.SUR_NAME.getAjaxName())));
         }
-		if (contact.containsNamedProperty(ContactFields.EMAIL1)) {
-            contact.setEmail1(ByteBufferUtil.string(contact.getNamedProperty(ContactFields.EMAIL1)));
+		if (contact.containsNamedProperty(ContactField.EMAIL1.getAjaxName())) {
+            contact.setEmail1(ByteBufferUtil.string(contact.getNamedProperty(ContactField.EMAIL1.getAjaxName())));
         }
-		if (contact.containsNamedProperty(ContactFields.ADDRESS_BUSINESS)) {
-            contact.setAddressBusiness(ByteBufferUtil.string(contact.getNamedProperty(ContactFields.ADDRESS_BUSINESS)));
+		if (contact.containsNamedProperty(ContactField.BUSINESS_ADDRESS.getAjaxName())) {
+            contact.setAddressBusiness(ByteBufferUtil.string(contact.getNamedProperty(ContactField.BUSINESS_ADDRESS.getAjaxName())));
         }
 		if (contact.containsNamedProperty("folderUUID")) {
 			contact.addFolderUUID(UUID.fromString(ByteBufferUtil.string(contact.getNamedProperty("folderUUID"))));
@@ -339,8 +339,18 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 		contact.setTimeUUID(UUID.fromString(ByteBufferUtil.string(contact.getNamedProperty("timeuuid"))));
 		
 		if (!limited) {
-			//TODO: complete...
-			if (contact.containsNamedProperty(ContactFields.BIRTHDAY)) {
+			for (final int column : Contact.JSON_COLUMNS) {
+			
+				final ContactField field = ContactField.getByValue(column);
+				if (field != null && field.isDBField()) {
+					if (contact.containsNamedProperty(ContactField.getByValue(column).getAjaxName())) {
+						if (EAVContactHelper.isNonString(column)) {
+							contact.set(column, new Date(ByteBufferUtil.toLong(contact.getNamedProperty(field.getAjaxName()))));
+						} else {
+							contact.set(column, ByteBufferUtil.string(contact.getNamedProperty(field.getAjaxName())));
+						}
+					}
+				}
 			}
 			
 			// get unnamed props
@@ -375,6 +385,7 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 			while (folderIterator.hasNext()) {
 				HColumn<Composite, String> h = folderIterator.next();
 				contact.addFolderUUID(UUID.fromString(h.getValue()));
+				System.out.println(UUID.fromString(h.getValue()));
 			}
 		}
 		
