@@ -1,3 +1,9 @@
+open-xchange-config-cascade-hostname (6.20.7.0-0) unstable; urgency=low
+
+  * prepare for 6.20.7
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 23 Jul 2012 13:31:20 +0000
+
 open-xchange-config-cascade-hostname (6.20.6.0-3) unstable; urgency=low
 
   * Third candidate for 6.20.6 release
