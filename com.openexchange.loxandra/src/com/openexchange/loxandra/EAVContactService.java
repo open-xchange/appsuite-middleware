@@ -48,6 +48,7 @@
  */
 package com.openexchange.loxandra;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -106,6 +107,23 @@ public interface EAVContactService {
 	 * @param o
 	 */
 	public void deleteProperties(UUID uuid, String... prop);
+	
+	/**
+	 * Add one or more unnamed properties
+	 * 
+	 * @param uuid
+	 * @param props
+	 */
+	public void addProperties(UUID uuid, HashMap<String, String> props);
+	
+	/**
+	 * Get one or more unnamed properties
+	 * 
+	 * @param uuid
+	 * @param props
+	 * @return props
+	 */
+	public String getProperties(UUID uuid, String... props);
 	
 	/**
 	 * Get a contact

@@ -53,6 +53,7 @@ import java.nio.charset.CharacterCodingException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -462,6 +463,69 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 		} catch (OXException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see com.openexchange.loxandra.EAVContactService#addProperties(java.util.UUID, java.util.HashMap)
+	 */
+	@Override
+	public void addProperties(UUID uuid, HashMap<String, String> props) {
+		ColumnFamilyUpdater<UUID, Composite> personUpdater = personTemplate.createUpdater(uuid);
+		
+		Iterator<String> it = props.keySet().iterator();
+		while (it.hasNext()) {
+			String key = (String) it.next();
+			personUpdater.setString(new Composite("unnamed", key), props.get(key));
+		}
+		
+		personTemplate.update(personUpdater);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.openexchange.loxandra.EAVContactService#getProperties(java.util.UUID, java.lang.String[])
+	 */
+	@Override
+	public String getProperties(UUID uuid, String... props) {
+		HashMap<String, String> p = new HashMap<String, String>();
+		HashMap<String, String> pRet = new HashMap<String, String>();
+		
+		ColumnFamilyResult<UUID, Composite> res = personTemplate.queryColumns(uuid);
+		
+		if (null == res || !res.hasResults()) {
+			log.error("No result");
+		} else {
+			Composite start = new Composite();
+			start.addComponent(0, "unnamed", Composite.ComponentEquality.EQUAL);
+			
+			Composite end = new Composite();
+			end.addComponent(0, "unnamed", Composite.ComponentEquality.GREATER_THAN_EQUAL);
+			
+			SliceQuery<UUID, Composite, String> unnamedSliceQuery = HFactory.createSliceQuery(keyspace, us, cs, ss);
+			unnamedSliceQuery.setColumnFamily(CF_PERSON).setKey(uuid);
+			ColumnSliceIterator<UUID, Composite, String> unnamedIterator = new ColumnSliceIterator<UUID, Composite, String>(unnamedSliceQuery, start, end, false);
+			
+			// setters
+			while (unnamedIterator.hasNext()) {
+				HColumn<Composite, String> h = unnamedIterator.next();
+				
+				try {
+					String key = ByteBufferUtil.string((ByteBuffer)h.getName().get(1));
+					p.put(key, h.getValue());
+				} catch (CharacterCodingException e) {
+					e.printStackTrace();
+				}
+			}
+			
+			for (String s: props) {
+				if (p.containsKey(s)) {
+					pRet.put(s, p.get(s));
+				}
+			}
+		}
+		
+		return pRet.toString();
 	}
 
 	/*
