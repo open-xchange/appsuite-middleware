@@ -456,7 +456,10 @@ public final class InternalList {
         new com.openexchange.groupware.update.tasks.AppointmentAddFilenameColumnTask(),
 
         // Add 'filename' column to task tables.
-        new com.openexchange.groupware.update.tasks.TasksAddFilenameColumnTask()
+        new com.openexchange.groupware.update.tasks.TasksAddFilenameColumnTask(),
+
+        // Another attempt: Adds 'organizerId', 'principal' and 'principalId' to prg_dates and del_dates
+        new com.openexchange.groupware.update.tasks.AppointmentAddOrganizerIdPrincipalPrincipalIdColumnsTask2(),
 
     };
 }

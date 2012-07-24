@@ -77,9 +77,12 @@ import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.impl.OXAdminCoreImpl;
 import com.openexchange.admin.rmi.impl.OXTaskMgmtImpl;
+import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.log.LogFactory;
+import com.openexchange.log.LogProperties;
 
 public class AdminDaemon {
 
@@ -301,10 +304,13 @@ public class AdminDaemon {
         context.addBundleListener(bl);
     }
 
-    public static void initCache() throws OXGenericException {
+    public static void initCache(final ConfigurationService service) throws OXGenericException {
         if (cache == null) {
+            if (null == service) {
+                throw new OXGenericException("Absent service: " + ConfigurationService.class.getName());
+            }
             cache = new AdminCache();
-            cache.initCache();
+            cache.initCache(service);
             ClientAdminThread.cache = cache;
             prop = cache.getProperties();
             LOG.info("Cache and Pools initialized!");
@@ -315,7 +321,11 @@ public class AdminDaemon {
     
     public static AdminCache getCache() throws OXGenericException {
         if (cache == null) {
-            initCache();
+            ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
+            if (null == service) {
+                service = LogProperties.getLogProperty("__configurationService");
+            }
+            initCache(service);
         }
         return cache;
     }

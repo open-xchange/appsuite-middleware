@@ -85,7 +85,8 @@ public class Activator extends HousekeepingActivator {
         track(PipesAndFiltersService.class, new RegistryServiceTrackerCustomizer<PipesAndFiltersService>(context, AdminServiceRegistry.getInstance(), PipesAndFiltersService.class));
         track(ContextService.class, new RegistryServiceTrackerCustomizer<ContextService>(context, AdminServiceRegistry.getInstance(), ContextService.class));
         track(MailAccountStorageService.class, new RegistryServiceTrackerCustomizer<MailAccountStorageService>(context, AdminServiceRegistry.getInstance(), MailAccountStorageService.class));
-        AdminServiceRegistry.getInstance().addService(ConfigurationService.class, getService(ConfigurationService.class));
+        final ConfigurationService configurationService = getService(ConfigurationService.class);
+        AdminServiceRegistry.getInstance().addService(ConfigurationService.class, configurationService);
         track(CreateTableService.class, new CreateTableCustomizer(context));
         openTrackers();
 
@@ -94,7 +95,7 @@ public class Activator extends HousekeepingActivator {
         this.daemon.getCurrentBundleStatus(context);
         this.daemon.registerBundleListener(context);
         try {
-            AdminDaemon.initCache();
+            AdminDaemon.initCache(configurationService);
             this.daemon.initAccessCombinationsInCache();
         } catch (final OXGenericException e) {
             log.fatal(e.getMessage(), e);

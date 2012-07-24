@@ -66,6 +66,7 @@ import com.openexchange.admin.reseller.rmi.impl.OXResellerUserImpl;
 import com.openexchange.admin.reseller.rmi.impl.ResellerAuth;
 import com.openexchange.admin.reseller.tools.AdminCacheExtended;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.osgi.HousekeepingActivator;
 
@@ -83,7 +84,7 @@ public class Activator extends HousekeepingActivator {
     @Override
     public void startBundle() throws Exception {
         try {
-            initCache();
+            initCache(getService(ConfigurationService.class));
 
             final OXReseller reseller = new OXReseller();
             OXResellerInterface reseller_stub = (OXResellerInterface) UnicastRemoteObject.exportObject(reseller, 0);
@@ -126,9 +127,9 @@ public class Activator extends HousekeepingActivator {
         unregisterServices();
     }
 
-    private void initCache() throws OXGenericException {
+    private void initCache(final ConfigurationService service) throws OXGenericException {
         final AdminCacheExtended cache = new AdminCacheExtended();
-        cache.initCache();
+        cache.initCache(service);
         cache.initCacheExtended();
         ClientAdminThreadExtended.cache = cache;
         LOG.info("ResellerBundle: Cache and Pools initialized!");
@@ -136,6 +137,6 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return null;
+        return new Class<?>[] { ConfigurationService.class };
     }
 }

@@ -433,13 +433,34 @@ public final class ConfigurationImpl implements ConfigurationService {
     }
 
     @Override
-    public File getFileByName(String fileName) {
+    public File getFileByName(final String fileName) {
+        if (null == fileName) {
+            return null;
+        }
         for (final String dir : getDirectories()) {
             final File f = traverseForFile(new File(dir), fileName);
             if (f != null) {
                 return f;
             }
         }
+        /*
+         * Try guessing the filename separator
+         */
+        String fn;
+        int pos;
+        if ((pos = fileName.lastIndexOf('/')) >= 0 || (pos = fileName.lastIndexOf('\\')) >= 0) {
+            fn = fileName.substring(pos + 1);
+        } else {
+            LOG.warn("No such file: " + fileName);
+            return null;
+        }
+        for (final String dir : getDirectories()) {
+            final File f = traverseForFile(new File(dir), fn);
+            if (f != null) {
+                return f;
+            }
+        }
+        LOG.warn("No such file: " + fileName);
         return null;
     }
 
@@ -468,12 +489,16 @@ public final class ConfigurationImpl implements ConfigurationService {
 
     @Override
     public File getDirectory(final String directoryName) {
+        if (null == directoryName) {
+            return null;
+        }
         for (final String dir : getDirectories()) {
             final File fdir = traverseForDir(new File(dir), directoryName);
             if (fdir != null) {
                 return fdir;
             }
         }
+        LOG.warn("No such directory: " + directoryName);
         return null;
     }
 

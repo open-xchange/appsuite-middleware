@@ -102,7 +102,8 @@ public class NewTikaTextXtractService extends AbstractTextXtractService {
         		throw new IllegalStateException("Property " + TextXtractionProperties.TIKA_CONFIG_FILE_NAME + " must not be null.");
         	}
         	
-            final TikaConfig config = new TikaConfig(service.getFileByName(tikaConfigPathFileName));
+            final File tikaConfigFile = service.getFileByName(tikaConfigPathFileName);
+            final TikaConfig config = null == tikaConfigFile ? new TikaConfig() : new TikaConfig(tikaConfigFile);
             tika = new Tika(config);        
         } catch (TikaException e) {
             LOG.error(e.getMessage(), e);

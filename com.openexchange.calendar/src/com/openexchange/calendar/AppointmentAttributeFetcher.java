@@ -391,6 +391,14 @@ public class AppointmentAttributeFetcher implements SearchAttributeFetcher<Appoi
             }
         });
 
+        m.put(CommonFields.EXTENDED_PROPERTIES, new AttributeGetter() {
+
+            @Override
+            public Object getObject(final Appointment candidate) {
+                return candidate.getExtendedProperties();
+            }
+        });
+
         GETTERS = Collections.unmodifiableMap(m);
     }
 

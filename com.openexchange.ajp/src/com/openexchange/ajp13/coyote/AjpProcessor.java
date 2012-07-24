@@ -1795,19 +1795,34 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     private Cookie newJsessionIdCookie(final String jsessionId, final String serverName) {
         final Cookie jsessionIDCookie = new Cookie(JSESSIONID_COOKIE, jsessionId);
-        if (null != serverName) {
+        final String domain = getDomainValue(serverName, false);
+        if (null != domain) {
+            jsessionIDCookie.setDomain(domain);
+        }
+        return jsessionIDCookie;
+    }
+
+    private static String getDomainValue(final String serverName, final boolean prefixWithDot) {
+        if (null == serverName) {
+            return null;
+        }
+        if (prefixWithDot) {
             if (serverName.startsWith("www.")) {
-                jsessionIDCookie.setDomain(serverName.substring(3));
+                return serverName.substring(3);
             } else if ("localhost".equalsIgnoreCase(serverName)) {
-                jsessionIDCookie.setDomain(serverName);
+                return serverName;
             } else {
                 // Not an IP address
                 if (null == IPAddressUtil.textToNumericFormatV4(serverName) && (null == IPAddressUtil.textToNumericFormatV6(serverName))) {
-                    jsessionIDCookie.setDomain(new StringBuilder(serverName.length() + 1).append('.').append(serverName).toString());
+                    return new StringBuilder(serverName.length() + 1).append('.').append(serverName).toString();
                 }
             }
+        } else {
+            if ((null == IPAddressUtil.textToNumericFormatV4(serverName)) && (null == IPAddressUtil.textToNumericFormatV6(serverName))) {
+                return serverName;
+            }
         }
-        return jsessionIDCookie;
+        return null;
     }
 
     private static final String STR_SET_COOKIE = "Set-Cookie";
