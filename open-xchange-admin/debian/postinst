@@ -84,12 +84,12 @@ setConfigFilePermissions() {
 
 case "$1" in
     configure)
-	setConfigFilePermissions
         test -n "$2" && {
 	    update622 "$@"
             # we are in update mode, run postFix to apply fixes
             postFix "$2"
         }
+	setConfigFilePermissions
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
