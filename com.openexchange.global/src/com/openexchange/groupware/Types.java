@@ -49,6 +49,49 @@
 
 package com.openexchange.groupware;
 
+/**
+ * Provides constants for Open-Xchange modules:
+ * <p>
+ * <table border="0" cellpadding="1" cellspacing="0">
+ * <tr align="left">
+ * <th bgcolor="#CCCCFF" align="left" id="construct">Name</th>
+ * <th bgcolor="#CCCCFF" align="left" id="matches">Constant</th>
+ * </tr>
+ * <tr>
+ * <td valign="top"><tt>APPOINTMENT</tt></td>
+ * <td headers="matches">1</td>
+ * </tr>
+ * <tr>
+ * <td valign="top"><tt>TASK</tt></td>
+ * <td headers="matches">4</td>
+ * </tr>
+ * <tr>
+ * <td valign="top"><tt>CONTACT</tt></td>
+ * <td headers="matches">7</td>
+ * </tr>
+ * <tr>
+ * <td valign="top"><tt>EMAIL</tt></td>
+ * <td headers="matches">19</td>
+ * </tr>
+ * <tr>
+ * <td valign="top"><tt>FOLDER</tt></td>
+ * <td headers="matches">20</td>
+ * </tr>
+ * <tr>
+ * <td valign="top"><tt>USER_SETTING</tt></td>
+ * <td headers="matches">31</td>
+ * </tr>
+ * <tr>
+ * <td valign="top"><tt>REMINDER</tt></td>
+ * <td headers="matches">55</td>
+ * </tr>
+ * <tr>
+ * <td valign="top" colspan="2">...</td>
+ * </tr>
+ * </table>
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
 public interface Types {
 
     public static final int APPOINTMENT = 1;
