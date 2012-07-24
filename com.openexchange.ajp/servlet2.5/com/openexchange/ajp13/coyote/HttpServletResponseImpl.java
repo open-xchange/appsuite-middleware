@@ -57,6 +57,7 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
@@ -657,6 +658,23 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
 
     private static final List<List<String>> EMPTY_COOKIES = Collections.emptyList();
 
+    private static volatile Boolean filterByName;
+
+    private static boolean filterByName() {
+        Boolean tmp = filterByName;
+        if (null == tmp) {
+            synchronized (AjpProcessor.class) {
+                tmp = filterByName;
+                if (null == tmp) {
+                    final ConfigurationService service = AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    tmp = Boolean.valueOf(null != service && service.getBoolProperty("com.openexchange.cookie.filterByName", false));
+                    filterByName = tmp;
+                }
+            }
+        }
+        return tmp.booleanValue();
+    }
+
     /**
      * Generates a two dimensional array of {@link String} containing the <tt>Set-Cookie</tt>/<tt>Set-Cookie2</tt> headers of this HTTP
      * response's cookies.
@@ -671,9 +689,9 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
             return EMPTY_COOKIES;
         }
         // Write cookies
-        final List<String> list = new ArrayList<String>(cookiesSize);
-        {
-            // Check for duplicate cookies
+        final Collection<Cookie> iterateMe;
+        if (filterByName()) {
+            // Check for duplicate named cookies
             final Map<String, Cookie> checkedCookies = new LinkedHashMap<String, Cookie>(cookiesSize);
             for (final Cookie cookie : cookies) {
                 /*final Cookie prev = */checkedCookies.put(cookie.getName(), cookie);
@@ -695,12 +713,17 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
                 }
                 */
             }
+            iterateMe = checkedCookies.values();
+        } else {
             // Write to list
-            final String userAgent = ajpProcessor.getRequest().getHeader("User-Agent");
-            final StringBuilder strBuilder = new StringBuilder(32);
-            for (final Cookie cookie : checkedCookies.values()) {
-                list.add(getFormattedCookie(cookie, userAgent, strBuilder, httpOnly));
-            }
+            iterateMe = cookies;
+        }
+        // Write to list
+        final List<String> list = new ArrayList<String>(cookiesSize);
+        final String userAgent = ajpProcessor.getRequest().getHeader("User-Agent");
+        final StringBuilder strBuilder = new StringBuilder(32);
+        for (final Cookie cookie : iterateMe) {
+            list.add(getFormattedCookie(cookie, userAgent, strBuilder, httpOnly));
         }
         final List<List<String>> retval = new ArrayList<List<String>>(1);
         retval.add(list);
