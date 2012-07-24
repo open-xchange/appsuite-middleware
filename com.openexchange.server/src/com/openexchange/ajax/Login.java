@@ -1037,10 +1037,27 @@ public class Login extends AJAXServlet {
              */
             cookie.setMaxAge(conf.cookieExpiry);
         }
-        final String domain = getDomainValue(null == serverName ? LogProperties.<String> getLogProperty("com.openexchange.ajp13.serverName") : serverName, false);
+        final String domain = getDomainValue(null == serverName ? LogProperties.<String> getLogProperty("com.openexchange.ajp13.serverName") : serverName, prefixWithDot());
         if (null != domain) {
             cookie.setDomain(domain);
         }
+    }
+
+    private static volatile Boolean prefixWithDot;
+
+    private static boolean prefixWithDot() {
+        Boolean tmp = prefixWithDot;
+        if (null == tmp) {
+            synchronized (Login.class) {
+                tmp = prefixWithDot;
+                if (null == tmp) {
+                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    tmp = Boolean.valueOf(null == service || service.getBoolProperty("com.openexchange.cookie.domain.prefixWithDot", true));
+                    prefixWithDot = tmp;
+                }
+            }
+        }
+        return tmp.booleanValue();
     }
 
     private static String getDomainValue(final String serverName, final boolean prefixWithDot) {

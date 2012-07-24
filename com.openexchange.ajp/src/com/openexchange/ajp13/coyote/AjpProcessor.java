@@ -90,6 +90,7 @@ import com.openexchange.ajp13.najp.AJPv13TaskMonitor;
 import com.openexchange.ajp13.servlet.http.HttpErrorServlet;
 import com.openexchange.ajp13.servlet.http.HttpServletManager;
 import com.openexchange.ajp13.servlet.http.HttpSessionManagement;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.java.Charsets;
@@ -1795,11 +1796,28 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     private Cookie newJsessionIdCookie(final String jsessionId, final String serverName) {
         final Cookie jsessionIDCookie = new Cookie(JSESSIONID_COOKIE, jsessionId);
-        final String domain = getDomainValue(serverName, false);
+        final String domain = getDomainValue(serverName, prefixWithDot());
         if (null != domain) {
             jsessionIDCookie.setDomain(domain);
         }
         return jsessionIDCookie;
+    }
+
+    private static volatile Boolean prefixWithDot;
+
+    private static boolean prefixWithDot() {
+        Boolean tmp = prefixWithDot;
+        if (null == tmp) {
+            synchronized (AjpProcessor.class) {
+                tmp = prefixWithDot;
+                if (null == tmp) {
+                    final ConfigurationService service = AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    tmp = Boolean.valueOf(null == service || service.getBoolProperty("com.openexchange.cookie.domain.prefixWithDot", true));
+                    prefixWithDot = tmp;
+                }
+            }
+        }
+        return tmp.booleanValue();
     }
 
     private static String getDomainValue(final String serverName, final boolean prefixWithDot) {
