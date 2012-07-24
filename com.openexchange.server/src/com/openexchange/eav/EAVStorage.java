@@ -96,19 +96,21 @@ public interface EAVStorage {
      * 
      * @param contextID the context ID
      * @param folderID the folder ID
+     * @param module Refers to {@link Types} constants
      * @param objectID the object ID
      * @return A map representing all attribute-values for all objects in the 
      * folder that have stored attributes. Each objects' ID is mapped to the 
      * corresponding extended properties. 
      * @throws OXException
      */
-    Map<Integer, Map<String, Object>> getAttributes(int contextID, String folderID) throws OXException;
+    Map<Integer, Map<String, Object>> getAttributes(int contextID, String folderID, int module) throws OXException;
     
     /**
      * Gets the specified extended attributes for all objects in a folder. 
      * 
      * @param contextID the context ID
      * @param folderID the folder ID
+     * @param module Refers to {@link Types} constants
      * @param objectID the object ID
      * @return A map representing the specified attribute-values for all 
      * objects in the folder that have at least one of the requested 
@@ -117,20 +119,21 @@ public interface EAVStorage {
      * treated as not set.  
      * @throws OXException
      */
-    Map<Integer, Map<String, Object>> getAttributes(int contextID, String folderID, String...attributes) throws OXException;
+    Map<Integer, Map<String, Object>> getAttributes(int contextID, String folderID, int module, String...attributes) throws OXException;
     
     /**
      * Gets all extended attributes for a list of objects in a folder. 
      * 
      * @param contextID the context ID
      * @param folderID the folder ID
+     * @param module Refers to {@link Types} constants
      * @param objectIDs the object IDs
      * @return A map representing all attribute-values for all objects in the 
      * queried objects in the folder that have stored attributes. Each objects'
      * ID is mapped to the corresponding extended properties. 
      * @throws OXException
      */
-    Map<Integer, Map<String, Object>> getAttributes(int contextID, String folderID, int[] objectIDs) throws OXException;
+    Map<Integer, Map<String, Object>> getAttributes(int contextID, String folderID, int module, int[] objectIDs) throws OXException;
     
     /**
      * Gets the specified extended attributes for a list of objects in a folder. 
@@ -138,6 +141,7 @@ public interface EAVStorage {
      * @param contextID the context ID
      * @param folderID the folder ID
      * @param objectIDs the object IDs
+     * @param module Refers to {@link Types} constants
      * @return A map representing the specified attribute-values for the 
      * queried objects in the folder that have at least one of the requested 
      * attributes. Each objects' ID is mapped to the corresponding extended 
@@ -145,7 +149,7 @@ public interface EAVStorage {
      * treated as not set. 
      * @throws OXException
      */
-    Map<Integer, Map<String, Object>> getAttributes(int contextID, String folderID, int[] objectIDs, String...attributes) throws OXException;
+    Map<Integer, Map<String, Object>> getAttributes(int contextID, String folderID, int[] objectIDs, int module, String...attributes) throws OXException;
     
     /**
      * Gets a value indicating whether the storage contains extended properties
@@ -154,11 +158,12 @@ public interface EAVStorage {
      * @param contextID the context ID
      * @param folderID the folder ID
      * @param objectID the object ID
+     * @param module Refers to {@link Types} constants
      * @return <code>true</code>, if there are any extended properties, 
      * <code>false</code>, otherwise
      * @throws OXException
      */
-    boolean hasAttributes(int contextID, String folderID, int objectID) throws OXException;
+    boolean hasAttributes(int contextID, String folderID, int objectID, int module) throws OXException;
     
     /**
      * Deletes all extended properties for an object.
@@ -166,9 +171,10 @@ public interface EAVStorage {
      * @param contextID the context ID
      * @param folderID the folder ID
      * @param objectID the object ID
+     * @param module TODO
      * @throws OXException
      */
-    void deleteAttributes(int contextID, String folderID, int objectID) throws OXException;
+    void deleteAttributes(int contextID, String folderID, int objectID, int module) throws OXException;
 
     /**
      * Sets extended properties for an object. For each mapped attribute, this 
@@ -180,8 +186,9 @@ public interface EAVStorage {
      * @param folderID the folder ID
      * @param objectID the object ID
      * @param attributes the attributes to set
+     * @param module Refers to {@link Types} constants
      * @throws OXException
      */
-    void setAttributes(int contextID, String folderID, int objectID, Map<String, Object> attributes) throws OXException;  
+    void setAttributes(int contextID, String folderID, int objectID, Map<String, Object> attributes, int module) throws OXException;  
     
 }
