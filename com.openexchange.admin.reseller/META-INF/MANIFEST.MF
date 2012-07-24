@@ -4,7 +4,7 @@ Bundle-Name: Reseller Plug-in
 Bundle-SymbolicName: com.openexchange.admin.reseller
 Bundle-Version: 6.21.0
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Activator: com.openexchange.admin.reseller.osgi.Activator
 Import-Package: com.openexchange.admin.console,
  com.openexchange.admin.console.context.extensioninterfaces,
