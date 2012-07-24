@@ -104,9 +104,13 @@ public abstract class OXServlet extends WebDavServlet {
 
         private final String pass;
 
+        private final String client;
+
         private final Interface interfaze;
 
         public LoginRequestImpl(final String login, final String pass, final Interface interfaze, final HttpServletRequest req) {
+            super();
+            this.client = req.getParameter("client");
             this.login = login;
             this.req = req;
             this.pass = pass;
@@ -145,7 +149,7 @@ public abstract class OXServlet extends WebDavServlet {
 
         @Override
         public String getClient() {
-            return null;
+            return client;
         }
 
         @Override
