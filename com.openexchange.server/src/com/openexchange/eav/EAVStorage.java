@@ -51,6 +51,7 @@ package com.openexchange.eav;
 
 import java.util.Map;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.Types;
 
 /**
  * {@link EAVStorage}
@@ -67,11 +68,12 @@ public interface EAVStorage {
      * @param contextID the context ID
      * @param folderID the folder ID
      * @param objectID the object ID
+     * @param module Refers to {@link Types} constants
      * @return a map containing all attribute-values, or <code>null</code> if
      * no extended properties are stored
      * @throws OXException
      */
-    Map<String, Object> getAttributes(int contextID, String folderID, int objectID) throws OXException;
+    Map<String, Object> getAttributes(int contextID, String folderID, int objectID, int module) throws OXException;
 
     /**
      * Gets the specified extended attributes for an object.
@@ -79,6 +81,7 @@ public interface EAVStorage {
      * @param contextID the context ID
      * @param folderID the folder ID
      * @param objectID the object ID
+     * @param module Refers to {@link Types} constants
      * @param attributes the attribute names
      * @return A map containing the requested attribute-values, or 
      * <code>null</code> if none of the requested extended properties are 
@@ -86,7 +89,7 @@ public interface EAVStorage {
      * as not set.  
      * @throws OXException
      */
-    Map<String, Object> getAttributes(int contextID, String folderID, int objectID, String...attributes) throws OXException;
+    Map<String, Object> getAttributes(int contextID, String folderID, int objectID, int module, String...attributes) throws OXException;
     
     /**
      * Gets all extended attributes for all objects in a folder. 
