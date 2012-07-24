@@ -590,7 +590,7 @@ public class AdminCache {
     }
 
     private String[] getInitialOXDBOrder() {
-        return getOrdered(prop.getSqlProp("INITIAL_OX_SQL_ORDER", "sequences.sql,ldap2sql.sql,oxfolder.sql,settings.sql" + ",calendar.sql,contacts.sql,tasks.sql,projects.sql,infostore.sql,attachment.sql,forum.sql,pinboard.sql," + "misc.sql,ical_vcard.sql"));
+        return getOrdered(prop.getSqlProp("INITIAL_OX_SQL_ORDER", "sequences.sql,ldap2sql.sql,oxfolder.sql,virtualfolder.sql,settings.sql,calendar.sql,contacts.sql,tasks.sql,infostore.sql,attachment.sql,misc.sql,ical_vcard.sql"));
     }
 
     private void configureAuthentication() {
