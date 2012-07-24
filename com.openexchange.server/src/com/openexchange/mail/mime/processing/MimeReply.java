@@ -644,6 +644,7 @@ public final class MimeReply {
                     replyTextBody = quoteHtml(textBuilder.toString());
                 } else {
                     textBuilder.insert(0, replyPrefix);
+                    textBuilder.insert(replyPrefix.length(), '\n');
                     replyTextBody = quoteText(textBuilder.toString());
                 }
                 textBuilder.setLength(0);
