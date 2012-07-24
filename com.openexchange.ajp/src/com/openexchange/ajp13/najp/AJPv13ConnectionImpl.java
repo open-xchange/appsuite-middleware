@@ -619,9 +619,6 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
     }
 
     private static boolean checkMagicBytes(final int[] magic) {
-        if (AJPv13Config.getCheckMagicBytesStrict()) {
-            return (magic[0] == AJPv13RequestHandler.MAGIC1_SERVER_TO_CONTAINER && magic[1] == AJPv13RequestHandler.MAGIC2_SERVER_TO_CONTAINER);
-        }
-        return (magic[0] == AJPv13RequestHandler.MAGIC1_SERVER_TO_CONTAINER || magic[1] == AJPv13RequestHandler.MAGIC2_SERVER_TO_CONTAINER);
+        return (magic[0] == AJPv13RequestHandler.MAGIC1_SERVER_TO_CONTAINER && magic[1] == AJPv13RequestHandler.MAGIC2_SERVER_TO_CONTAINER);
     }
 }
