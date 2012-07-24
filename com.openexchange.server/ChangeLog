@@ -1,3 +1,7 @@
+* 2012-07-24 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22630 and 22629: Introduced possibility to pass "client" URL parameter which is then accepted as client identifier
+
 * 2012-07-23 - thorben.betten@open-xchange.com
 
  - Fix for bug 22632: Deliver IDN address via user JSON interface
