@@ -49,7 +49,17 @@ export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
 %post
+
 if [ ${1:-0} -eq 2 ]; then
+    # only when updating
+    . /opt/open-xchange/lib/oxfunctions.sh
+
+    # prevent bash from expanding, see bug 13316
+    GLOBIGNORE='*'
+
+    ##
+    ## start update from < 6.21
+    ##
     CONFFILES="AdminDaemon.properties Group.properties ModuleAccessDefinitions.properties RMI.properties Resource.properties Sql.properties mpasswd plugin/hosting.properties"
     for FILE in ${CONFFILES}; do
         if [ -e /opt/open-xchange/etc/admindaemon/${FILE} ]; then
@@ -61,6 +71,44 @@ if [ ${1:-0} -eq 2 ]; then
         mv /opt/open-xchange/etc/AdminUser.properties /opt/open-xchange/etc/AdminUser.properties.rpmnew
         mv /opt/open-xchange/etc/admindaemon/User.properties /opt/open-xchange/etc/AdminUser.properties
     fi
+
+    ofile=/opt/open-xchange/etc/AdminDaemon.properties
+    pfile=/opt/open-xchange/etc/rmi.properties
+    if ox_exists_property BIND_ADDRESS $ofile; then
+	oval=$(ox_read_property BIND_ADDRESS $ofile)
+	if [ -n "$oval" ]; then
+	   ox_set_property com.openexchange.rmi.host $oval $pfile
+	fi
+	ox_remove_property BIND_ADDRESS $ofile
+    fi
+    ofile=/opt/open-xchange/etc/RMI.properties
+    if [ -e $ofile ]; then
+	oval=$(ox_read_property RMI_PORT $ofile)
+	if [ -n "$oval" ]; then
+	   ox_set_property com.openexchange.rmi.port $oval $pfile
+	fi
+	rm -f $ofile
+    fi
+
+    # SoftwareChange_Request-1091
+    # -----------------------------------------------------------------------
+    pfile=/opt/open-xchange/etc/AdminUser.properties
+    ox_remove_property CREATE_HOMEDIRECTORY $pfile
+    ox_remove_property HOME_DIR_ROOT $pfile
+    pfile=/opt/open-xchange/etc/AdminDaemon.properties
+    ox_remove_property USER_PROP $pfile
+    ox_remove_property GROUP_PROP $pfile
+    ox_remove_property RESOURCE_PROP $pfile
+    ox_remove_property RMI_PROP $pfile
+    ox_remove_property SQL_PROP $pfile
+    ox_remove_property MASTER_AUTH_FILE $pfile
+    ox_remove_property ACCESS_COMBINATIONS_FILE $pfile
+
+    ##
+    ## end update from < 6.21
+    ##
+
+    ox_update_permissions "/opt/open-xchange/etc/mpasswd" open-xchange:root 600
 fi
 
 %clean
@@ -75,7 +123,7 @@ fi
 %dir /opt/open-xchange/etc/plugin
 %config(noreplace) /opt/open-xchange/etc/plugin/*
 %config(noreplace) /opt/open-xchange/etc/*.properties
-%config(noreplace) %attr(750,open-xchange,root) /opt/open-xchange/etc/mpasswd
+%config(noreplace) %attr(600,open-xchange,root) /opt/open-xchange/etc/mpasswd
 %dir /opt/open-xchange/lib/
 /opt/open-xchange/lib/*
 %dir /opt/open-xchange/osgi/bundle.d/
@@ -84,5 +132,3 @@ fi
 /opt/open-xchange/sbin/*
 
 %changelog
-* Tue Apr 17 2012 Sonja Krause-Harder  <sonja.krause-harder@open-xchange.com>
-Internal release build for EDP drop #1
