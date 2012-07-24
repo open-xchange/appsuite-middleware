@@ -86,7 +86,7 @@
 	</target>
 	
 	<target name="patchCrawlerProperties">
-        <move tofile="${patchConfDir}/crawler.properties" file="${patchConfDir}/crawler.properties.in" overwrite="true"/>
+        <move tofile="${patchConfDir}/crawler.properties" file="${patchConfDir}/crawler.properties" overwrite="true"/>
         <replace file="${patchConfDir}/crawler.properties">
             <replacefilter token="@oxgroupwaresysconfdir@" value="${basedir.unix}"/>
         </replace>
