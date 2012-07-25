@@ -49,6 +49,8 @@
 package com.openexchange.loxandra.impl.osgi;
 
 import java.io.File;
+
+import org.apache.cassandra.service.EmbeddedCassandraService;
 import org.apache.commons.logging.Log;
 
 import com.openexchange.config.ConfigurationService;
@@ -77,7 +79,7 @@ public final class LoxandraActivator extends HousekeepingActivator {
 	@Override
 	protected Class<?>[] getNeededServices() {
 		
-		return new Class[]{ConfigurationService.class};
+		return new Class[]{EmbeddedCassandraService.class, ConfigurationService.class};
 	}
 
 	@Override
