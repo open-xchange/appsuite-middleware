@@ -282,7 +282,7 @@ public final class HttpDateFormatRegistry {
                     /*
                      * expires=Sat, 01-Jan-2000 00:00:00 GMT
                      */
-                    tmp = netscapeDateFormat.format(new Date(b ? 0L : 10000L));
+                    tmp = msieDateFormat.format(new Date(b ? 0L : 10000L));
                     msie8ZeroMaxAgeExpires = tmp;
                 }
             }
