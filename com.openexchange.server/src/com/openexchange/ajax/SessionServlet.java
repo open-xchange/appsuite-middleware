@@ -95,6 +95,7 @@ import com.openexchange.session.Session;
 import com.openexchange.session.SessionThreadCounter;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.sessiond.impl.IPAddressUtil;
 import com.openexchange.sessiond.impl.IPRange;
 import com.openexchange.sessiond.impl.SubnetMask;
 import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
@@ -682,6 +683,46 @@ public abstract class SessionServlet extends AJAXServlet {
         session.setParameter("JSESSIONID", req.getSession().getId());	
     }
 
+    private static volatile Boolean prefixWithDot;
+
+    private static boolean prefixWithDot() {
+        Boolean tmp = prefixWithDot;
+        if (null == tmp) {
+            synchronized (Login.class) {
+                tmp = prefixWithDot;
+                if (null == tmp) {
+                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    tmp = Boolean.valueOf(null == service || service.getBoolProperty("com.openexchange.cookie.domain.prefixWithDot", true));
+                    prefixWithDot = tmp;
+                }
+            }
+        }
+        return tmp.booleanValue();
+    }
+
+    private static String getDomainValue(final String serverName, final boolean prefixWithDot) {
+        if (null == serverName) {
+            return null;
+        }
+        if (prefixWithDot) {
+            if (serverName.startsWith("www.")) {
+                return serverName.substring(3);
+            } else if ("localhost".equalsIgnoreCase(serverName)) {
+                return serverName;
+            } else {
+                // Not an IP address
+                if (null == IPAddressUtil.textToNumericFormatV4(serverName) && (null == IPAddressUtil.textToNumericFormatV6(serverName))) {
+                    return new StringBuilder(serverName.length() + 1).append('.').append(serverName).toString();
+                }
+            }
+        } else {
+            if ((null == IPAddressUtil.textToNumericFormatV4(serverName)) && (null == IPAddressUtil.textToNumericFormatV6(serverName))) {
+                return serverName;
+            }
+        }
+        return null;
+    }
+
     /**
      * Removes the Open-Xchange cookies belonging to specified hash string.
      *
@@ -702,6 +743,10 @@ public abstract class SessionServlet extends AJAXServlet {
                 if (name.startsWith(string)) {
                     final Cookie respCookie = new Cookie(name, cookie.getValue());
                     respCookie.setPath("/");
+                    final String domain = getDomainValue(req.getServerName(), prefixWithDot());
+                    if (null != domain) {
+                        respCookie.setDomain(domain);
+                    }
                     respCookie.setMaxAge(0); // delete
                     resp.addCookie(respCookie);
                 }
@@ -719,6 +764,10 @@ public abstract class SessionServlet extends AJAXServlet {
             if (Tools.JSESSIONID_COOKIE.equals(name)) {
                 final Cookie respCookie = new Cookie(name, cookie.getValue());
                 respCookie.setPath("/");
+                final String domain = getDomainValue(req.getServerName(), prefixWithDot());
+                if (null != domain) {
+                    respCookie.setDomain(domain);
+                }
                 respCookie.setMaxAge(0); // delete
                 resp.addCookie(respCookie);
             }
