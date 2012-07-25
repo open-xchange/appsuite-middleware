@@ -215,3 +215,4 @@ openexchange-test/local
 openexchange-test/local/test.properties
 com.openexchange.loxandra.hector/build
 com.openexchange.nosql.cassandra/build
+/com.openexchange.eav.storage.cassandra

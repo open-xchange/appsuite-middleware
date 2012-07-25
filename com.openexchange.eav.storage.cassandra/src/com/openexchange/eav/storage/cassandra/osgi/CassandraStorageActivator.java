@@ -54,6 +54,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.eav.EAVStorage;
 import com.openexchange.eav.storage.cassandra.CassandraEAVStorageImpl;
 import com.openexchange.log.LogFactory;
+import com.openexchange.nosql.cassandra.EmbeddedCassandraService;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -70,7 +71,7 @@ public class CassandraStorageActivator extends HousekeepingActivator {
 	 */
 	@Override
 	protected Class<?>[] getNeededServices() {
-		return new Class[]{ConfigurationService.class};
+		return new Class[]{EmbeddedCassandraService.class, ConfigurationService.class};
 	}
 
 	/*
