@@ -56,7 +56,7 @@ if [ ${1:-0} -eq 2 ]; then
 	fi
     done
 
-    GWCONFFILES="ajp.properties attachment.properties cache.ccf calendar.properties configdb.properties contact.properties event.properties file-logging.properties HTMLEntities.properties imap.properties importerExporter.xml import.properties infostore.properties javamail.properties ldap.properties login.properties mailcache.ccf mailjsoncache.properties mail.properties mime.types noipcheck.cnf notification.properties ox-scriptconf.sh participant.properties passwordchange.properties server.properties sessioncache.ccf sessiond.properties smtp.properties system.properties TidyConfiguration.properties TidyMessages.properties user.properties whitelist.properties"
+    GWCONFFILES="ajp.properties attachment.properties cache.ccf calendar.properties configdb.properties contact.properties event.properties file-logging.properties HTMLEntities.properties imap.properties importerExporter.xml import.properties infostore.properties javamail.properties ldap.properties login.properties mailcache.ccf mail.properties mime.types noipcheck.cnf notification.properties ox-scriptconf.sh participant.properties passwordchange.properties server.properties sessioncache.ccf sessiond.properties smtp.properties system.properties TidyConfiguration.properties TidyMessages.properties user.properties whitelist.properties"
     for FILE in ${GWCONFFILES}; do
 	if [ -e /opt/open-xchange/etc/groupware/${FILE} ]; then
 	    mv /opt/open-xchange/etc/${FILE} /opt/open-xchange/etc/${FILE}.rpmnew

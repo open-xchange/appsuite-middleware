@@ -29,6 +29,11 @@ max_hint_window_in_ms: 3600000 # one hour
 # Sleep this long after delivering each hint
 hinted_handoff_throttle_delay_in_ms: 1
 
+# The following setting populates the page cache on memtable flush and compaction
+# WARNING: Enable this setting only when the whole node's data fits in memory.
+# Defaults to: false
+# populate_io_cache_on_flush: false
+
 # authentication backend, implementing IAuthenticator; used to identify users
 authenticator: org.apache.cassandra.auth.AllowAllAuthenticator
 
@@ -149,6 +154,14 @@ saved_caches_directory: /home/isole/bin/cassandra/var/lib/saved_caches
 # milliseconds.
 commitlog_sync: periodic
 commitlog_sync_period_in_ms: 10000
+
+# Configure  the Size of the individual Commitlog file. The 
+# default is 128 MB, which is almost always fine, but if you are
+# archiving commitlog segments (see commitlog_archiving.properties),
+# then you probably want a finer granularity of archiving; 16 MB
+# is reasonable.
+#
+# commitlog_segment_size_in_mb: 128
 
 # any class that implements the SeedProvider interface and has a
 # constructor that takes a Map<String, String> of parameters will do.
@@ -424,6 +437,11 @@ rpc_timeout_in_ms: 10000
 #  - PropertyFileSnitch:
 #    Proximity is determined by rack and data center, which are
 #    explicitly configured in cassandra-topology.properties.
+#  - GossipingPropertyFileSnitch
+#    The rack and datacenter for the local node are defined in
+#    cassandra-rackdc.properties and propagated to other nodes via gossip.  If
+#    cassandra-topology.properties exists, it is used as a fallback, allowing
+#    migration from the PropertyFileSnitch.
 #  - RackInferringSnitch:
 #    Proximity is determined by rack and data center, which are
 #    assumed to correspond to the 3rd and 2nd octet of each node's

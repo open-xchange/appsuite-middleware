@@ -20,7 +20,6 @@ opt/open-xchange/etc/javamail.properties
 opt/open-xchange/etc/ldap.properties
 opt/open-xchange/etc/login.properties
 opt/open-xchange/etc/mailcache.ccf
-opt/open-xchange/etc/mailjsoncache.properties
 opt/open-xchange/etc/mail.properties
 opt/open-xchange/etc/mail-push.properties
 opt/open-xchange/etc/management.properties
