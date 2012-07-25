@@ -774,6 +774,12 @@ public abstract class SessionServlet extends AJAXServlet {
         }
     }
 
+    /**
+     * Removes all JSESSIONID cookies found in given HTTP Servlet request.
+     * 
+     * @param req The HTTP Servlet request
+     * @param resp The HTTP Servlet response
+     */
     public static void removeJSESSIONID(final HttpServletRequest req, final HttpServletResponse resp) {
         final Cookie[] cookies = req.getCookies();
         if (cookies == null) {
