@@ -95,6 +95,7 @@ import com.openexchange.session.Session;
 import com.openexchange.session.SessionThreadCounter;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.sessiond.impl.IPAddressUtil;
 import com.openexchange.sessiond.impl.IPRange;
 import com.openexchange.sessiond.impl.SubnetMask;
 import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
@@ -680,6 +681,46 @@ public abstract class SessionServlet extends AJAXServlet {
     public static void rememberPublicSession(final HttpServletRequest req, final ServerSession session) {
     	req.setAttribute(PUBLIC_SESSION_KEY, session);
         session.setParameter("JSESSIONID", req.getSession().getId());	
+    }
+
+    private static volatile Boolean prefixWithDot;
+
+    private static boolean prefixWithDot() {
+        Boolean tmp = prefixWithDot;
+        if (null == tmp) {
+            synchronized (Login.class) {
+                tmp = prefixWithDot;
+                if (null == tmp) {
+                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    tmp = Boolean.valueOf(null == service || service.getBoolProperty("com.openexchange.cookie.domain.prefixWithDot", true));
+                    prefixWithDot = tmp;
+                }
+            }
+        }
+        return tmp.booleanValue();
+    }
+
+    private static String getDomainValue(final String serverName, final boolean prefixWithDot) {
+        if (null == serverName) {
+            return null;
+        }
+        if (prefixWithDot) {
+            if (serverName.startsWith("www.")) {
+                return serverName.substring(3);
+            } else if ("localhost".equalsIgnoreCase(serverName)) {
+                return serverName;
+            } else {
+                // Not an IP address
+                if (null == IPAddressUtil.textToNumericFormatV4(serverName) && (null == IPAddressUtil.textToNumericFormatV6(serverName))) {
+                    return new StringBuilder(serverName.length() + 1).append('.').append(serverName).toString();
+                }
+            }
+        } else {
+            if ((null == IPAddressUtil.textToNumericFormatV4(serverName)) && (null == IPAddressUtil.textToNumericFormatV6(serverName))) {
+                return serverName;
+            }
+        }
+        return null;
     }
 
     /**
