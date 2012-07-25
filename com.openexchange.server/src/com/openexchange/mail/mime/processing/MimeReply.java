@@ -721,20 +721,46 @@ public final class MimeReply {
     }
 
     private static boolean getTextContent(final boolean preferHTML, final MailPart multipartPart, final int count, final ContentType partContentType, final ParameterContainer pc) throws OXException, MessagingException, IOException {
+        if (preferHTML) {
+            boolean found = false;
+            for (int i = 0; !found && i < count; i++) {
+                final MailPart part = multipartPart.getEnclosedMailPart(i);
+                partContentType.setContentType(part.getContentType());
+                if (partContentType.startsWith(TEXT_HTM) && MimeProcessingUtility.isInline(part, partContentType) && !MimeProcessingUtility.isSpecial(partContentType.getBaseType())) {
+                    if (pc.retvalContentType.getPrimaryType() == null) {
+                        pc.retvalContentType.setContentType(partContentType);
+                        final String charset = MessageUtility.checkCharset(part, partContentType);
+                        pc.retvalContentType.setCharsetParameter(charset);
+                        final String text = MimeProcessingUtility.readContent(part, charset);
+                        pc.textBuilder.append(text);
+                    } else {
+                        final String charset = MessageUtility.checkCharset(part, partContentType);
+                        partContentType.setCharsetParameter(charset);
+                        final String text =
+                            MimeProcessingUtility.handleInlineTextPart(part, partContentType, pc.usm.isDisplayHtmlInlineContent());
+                        MimeProcessingUtility.appendRightVersion(pc.retvalContentType, partContentType, text, pc.textBuilder);
+                    }
+                    found = true;
+                } else if (partContentType.startsWith(MULTIPART)) {
+                    found |= gatherAllTextContents(part, partContentType, pc);
+                }
+            }
+            return found;
+        }
+        /*
+         * Any text/* part
+         */
         boolean found = false;
-        for (int i = 0; !found && i < count; i++) {
+        for (int i = 0; i < count; i++) {
             final MailPart part = multipartPart.getEnclosedMailPart(i);
             partContentType.setContentType(part.getContentType());
-            if (partContentType.startsWith(preferHTML ? TEXT_HTM : TEXT) && MimeProcessingUtility.isInline(part, partContentType) && !MimeProcessingUtility.isSpecial(partContentType.getBaseType())) {
+            if (partContentType.startsWith(TEXT) && MimeProcessingUtility.isInline(part, partContentType) && !MimeProcessingUtility.isSpecial(partContentType.getBaseType())) {
                 if (pc.retvalContentType.getPrimaryType() == null) {
                     pc.retvalContentType.setContentType(partContentType);
                     final String charset = MessageUtility.checkCharset(part, partContentType);
                     pc.retvalContentType.setCharsetParameter(charset);
                     final String text =
-                        preferHTML ? MimeProcessingUtility.readContent(part, charset) : MimeProcessingUtility.handleInlineTextPart(
-                            part,
-                            pc.retvalContentType,
-                            pc.usm.isDisplayHtmlInlineContent());
+                        MimeProcessingUtility.handleInlineTextPart(part, pc.retvalContentType, pc.usm.isDisplayHtmlInlineContent());
                     pc.textBuilder.append(text);
                 } else {
                     final String charset = MessageUtility.checkCharset(part, partContentType);
