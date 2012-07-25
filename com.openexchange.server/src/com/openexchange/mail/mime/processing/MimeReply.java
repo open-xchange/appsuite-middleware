@@ -601,13 +601,13 @@ public final class MimeReply {
                         from == null || from.length == 0 ? "" : quoteReplacement(from[0].toUnicodeString()));
             }
             {
-                //final char nextLine = '\n';
+                final char nextLine = '\n';
                 if (isHtml) {
                     replyPrefix =
-                        HtmlProcessing.htmlFormat(new StringBuilder(replyPrefix.length() + 1).append(replyPrefix).toString());
+                        HtmlProcessing.htmlFormat(new StringBuilder(replyPrefix.length() + 1).append(replyPrefix).append(nextLine).toString());
                 } else {
                     replyPrefix =
-                        new StringBuilder(replyPrefix.length() + 1).append(replyPrefix).toString();
+                        new StringBuilder(replyPrefix.length() + 1).append(replyPrefix).append(nextLine).toString();
                 }
             }
             /*-
