@@ -1650,6 +1650,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     private void checkJSessionIDCookie(final String serverName) {
         final Cookie[] cookies = request.getCookies();
         Cookie jsessionIDCookie = null;
+        boolean deleteAttempt = false;
         if (cookies != null) {
             NextCookie: for (int i = 0; (i < cookies.length) && (jsessionIDCookie == null); i++) {
                 final Cookie current = cookies[i];
@@ -1676,6 +1677,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                             current.setMaxAge(0); // delete
                             current.setSecure(forceHttps || request.isSecure());
                             response.addCookie(current);
+                            deleteAttempt = true;
                             continue NextCookie;
                         }
                         /*
@@ -1696,6 +1698,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                             current.setMaxAge(0); // delete
                             current.setSecure(forceHttps || request.isSecure());
                             response.addCookie(current);
+                            deleteAttempt = true;
                             continue NextCookie;
                         }
                         jsessionIDCookie = current;
@@ -1722,6 +1725,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                             current.setMaxAge(0); // delete
                             current.setSecure(forceHttps || request.isSecure());
                             response.addCookie(current);
+                            deleteAttempt = true;
                             continue NextCookie;
                         }
                         /*
@@ -1742,6 +1746,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                             current.setMaxAge(0); // delete
                             current.setSecure(forceHttps || request.isSecure());
                             response.addCookie(current);
+                            deleteAttempt = true;
                             continue NextCookie;
                         }
                         jsessionIDCookie = current;
@@ -1755,6 +1760,15 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         }
         if (jsessionIDCookie == null) {
             createJSessionIDCookie(serverName);
+        } else if (deleteAttempt) {
+            final Cookie reApply = new Cookie(JSESSIONID_COOKIE, jsessionIDCookie.getValue());
+            reApply.setPath("/");
+            final String domain = getDomainValue(serverName, prefixWithDot());
+            if (null != domain) {
+                reApply.setDomain(domain);
+            }
+            HttpServletRequestImpl.configureCookie(reApply);
+            response.addCookie(reApply);
         }
     }
 
@@ -1813,9 +1827,11 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         request.getSession(true);
     }
 
+    private static final String DEFAULT_PATH = "/";
+
     private Cookie newJsessionIdCookie(final String jsessionId, final String domain) {
         final Cookie jsessionIDCookie = new Cookie(JSESSIONID_COOKIE, jsessionId);
-        jsessionIDCookie.setPath("/");
+        jsessionIDCookie.setPath(DEFAULT_PATH);
         if (null != domain) {
             jsessionIDCookie.setDomain(domain);
         }
