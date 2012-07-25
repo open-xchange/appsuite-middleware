@@ -1780,7 +1780,10 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         final String jvmRoute = AJPv13Config.getJvmRoute();
         final String domain = getDomainValue(serverName, prefixWithDot());
         if ((jvmRoute != null) && (jvmRoute.length() > 0)) {
-            jsessionIDVal.append('-').append(urlEncode(domain)).append('.').append(jvmRoute);
+            if (null != domain) {
+                jsessionIDVal.append('-').append(urlEncode(domain));
+            }
+            jsessionIDVal.append('.').append(jvmRoute);
         }
         final String id = jsessionIDVal.toString();
         final Cookie jsessionIDCookie = newJsessionIdCookie(id, domain);
@@ -1811,7 +1814,10 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             final StringBuilder jsessionIDVal = new StringBuilder(HttpSessionManagement.getNewUniqueId());
             final String jvmRoute = AJPv13Config.getJvmRoute();
             if ((jvmRoute != null) && (jvmRoute.length() > 0)) {
-                jsessionIDVal.append('-').append(urlEncode(domain)).append('.').append(jvmRoute);
+                if (null != domain) {
+                    jsessionIDVal.append('-').append(urlEncode(domain));
+                }
+                jsessionIDVal.append('.').append(jvmRoute);
             }
             jsessionIdVal = jsessionIDVal.toString();
             join = false;
