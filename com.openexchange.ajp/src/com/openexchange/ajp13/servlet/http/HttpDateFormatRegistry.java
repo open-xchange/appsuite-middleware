@@ -165,12 +165,10 @@ public final class HttpDateFormatRegistry {
             }
         }
         final Helper helper = new Helper();
-        String pattern = helper.getPattern("com.openexchange.cookie.expires.netscapePattern", "EEE, dd-MMM-yyyy HH:mm:ss z");
-        netscapeDateFormat = new SimpleDateFormat(pattern, Locale.US);
+        netscapeDateFormat = new SimpleDateFormat(helper.getPattern("com.openexchange.cookie.expires.netscapePattern", "EEE, dd-MMM-yyyy HH:mm:ss z"), Locale.US);
         netscapeDateFormat.setTimeZone(gmtTimeZone);
 
-        pattern = helper.getPattern("com.openexchange.cookie.expires.msie8Pattern", "EEE, dd MMM yyyy HH:mm:ss zzz");
-        msieDateFormat = new SimpleDateFormat(pattern, Locale.US);
+        msieDateFormat = new SimpleDateFormat(helper.getPattern("com.openexchange.cookie.expires.msie8Pattern", "EEE, dd MMM yyyy HH:mm:ss zzz"), Locale.US);
         msieDateFormat.setTimeZone(gmtTimeZone);
     }
 
@@ -284,7 +282,7 @@ public final class HttpDateFormatRegistry {
                     /*
                      * expires=Sat, 01-Jan-2000 00:00:00 GMT
                      */
-                    tmp = msieDateFormat.format(new Date(b ? 0L : 10000L));
+                    tmp = netscapeDateFormat.format(new Date(b ? 0L : 10000L));
                     msie8ZeroMaxAgeExpires = tmp;
                 }
             }

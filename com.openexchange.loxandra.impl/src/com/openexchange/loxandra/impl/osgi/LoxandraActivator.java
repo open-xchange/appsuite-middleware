@@ -49,6 +49,8 @@
 package com.openexchange.loxandra.impl.osgi;
 
 import java.io.File;
+
+import org.apache.cassandra.service.EmbeddedCassandraService;
 import org.apache.commons.logging.Log;
 
 import com.openexchange.config.ConfigurationService;
