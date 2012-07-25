@@ -730,7 +730,47 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
         return retval;
     }
 
-    private static final String[] COOKIE_PARAMS = { "; expires=", "; version=", "; path=", "; domain=", "; secure" };
+    private static volatile String[] cookieParams;
+
+    private static String[] cookieParams() {
+        String[] tmp = cookieParams;
+        if (null == tmp) {
+            synchronized (HttpServletResponseImpl.class) {
+                tmp = cookieParams;
+                if (null == tmp) {
+                    final ConfigurationService service = AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    if (null == service) {
+                        tmp = new String[] { "; expires=", "; version=", "; path=", "; domain=", "; secure" };
+                    } else {
+                        tmp = new String[5];
+                        final StringBuilder sb = new StringBuilder(16).append("; ");
+                        int pos = 0;
+
+                        String name = service.getProperty("com.openexchange.cookie.expires.name", "expires");
+                        tmp[pos++] = sb.append(name).append('=').toString();
+
+                        name = service.getProperty("com.openexchange.cookie.version.name", "version");
+                        sb.setLength(2);
+                        tmp[pos++] = sb.append(name).append('=').toString();
+
+                        name = service.getProperty("com.openexchange.cookie.path.name", "path");
+                        sb.setLength(2);
+                        tmp[pos++] = sb.append(name).append('=').toString();
+
+                        name = service.getProperty("com.openexchange.cookie.domain.name", "domain");
+                        sb.setLength(2);
+                        tmp[pos++] = sb.append(name).append('=').toString();
+
+                        name = service.getProperty("com.openexchange.cookie.secure.name", "secure");
+                        sb.setLength(2);
+                        tmp[pos++] = sb.append(name).toString();
+                    }
+                    cookieParams = tmp;
+                }
+            }
+        }
+        return tmp;
+    }
 
     /**
      * Gets the HTTP header format for specified instance of {@link Cookie}
@@ -747,23 +787,24 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
         if (maxAge >= 0) {
             HttpDateFormatRegistry.getInstance().appendCookieMaxAge(maxAge, userAgent, strBuilder);
         }
+        final String[] cookieParams = cookieParams();
         if (cookie.getVersion() > 0) {
-            strBuilder.append(COOKIE_PARAMS[1]).append(cookie.getVersion());
+            strBuilder.append(cookieParams[1]).append(cookie.getVersion());
         }
         {
             final String path = cookie.getPath();
             if (!isEmpty(path)) {
-                strBuilder.append(COOKIE_PARAMS[2]).append(path);
+                strBuilder.append(cookieParams[2]).append(path);
             }
         }
         {
             final String domain = cookie.getDomain();
             if (!isEmpty(domain)) {
-                strBuilder.append(COOKIE_PARAMS[3]).append(domain);
+                strBuilder.append(cookieParams[3]).append(domain);
             }
         }
         if (cookie.getSecure()) {
-            strBuilder.append(COOKIE_PARAMS[4]);
+            strBuilder.append(cookieParams[4]);
         }
         /*-
          * TODO: HttpOnly currently cannot be set in Cookie class, thus we do it hard-coded here.
