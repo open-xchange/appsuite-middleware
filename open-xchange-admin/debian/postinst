@@ -25,22 +25,12 @@ postFix() {
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
 
-    # SoftwareChange_Request-1091
-    # -----------------------------------------------------------------------
-    pfile=/opt/open-xchange/etc/AdminUser.properties
-    ox_remove_property CREATE_HOMEDIRECTORY $pfile
-    ox_remove_property HOME_DIR_ROOT $pfile
-    pfile=/opt/open-xchange/etc/AdminDaemon.properties
-    ox_remove_property USER_PROP $pfile
-    ox_remove_property GROUP_PROP $pfile
-    ox_remove_property RESOURCE_PROP $pfile
-    ox_remove_property RMI_PROP $pfile
-    ox_remove_property SQL_PROP $pfile
-    ox_remove_property MASTER_AUTH_FILE $pfile
-    ox_remove_property ACCESS_COMBINATIONS_FILE $pfile
 }
 
 update622() {
+    local version=${1%-*}
+    version=${version//[-.]/}
+
     CONFFILES="AdminDaemon.properties Group.properties ModuleAccessDefinitions.properties mpasswd Resource.properties Sql.properties"
     
     for FILE in $CONFFILES; do
@@ -76,6 +66,20 @@ update622() {
         fi
         ox_remove_property BIND_ADDRESS $ofile
     fi
+
+    # SoftwareChange_Request-1091
+    # -----------------------------------------------------------------------
+    pfile=/opt/open-xchange/etc/AdminUser.properties
+    ox_remove_property CREATE_HOMEDIRECTORY $pfile
+    ox_remove_property HOME_DIR_ROOT $pfile
+    pfile=/opt/open-xchange/etc/AdminDaemon.properties
+    ox_remove_property USER_PROP $pfile
+    ox_remove_property GROUP_PROP $pfile
+    ox_remove_property RESOURCE_PROP $pfile
+    ox_remove_property RMI_PROP $pfile
+    ox_remove_property SQL_PROP $pfile
+    ox_remove_property MASTER_AUTH_FILE $pfile
+    ox_remove_property ACCESS_COMBINATIONS_FILE $pfile
 }
 
 setConfigFilePermissions() {
