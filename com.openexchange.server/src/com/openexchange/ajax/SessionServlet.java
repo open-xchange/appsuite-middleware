@@ -743,10 +743,6 @@ public abstract class SessionServlet extends AJAXServlet {
                 if (name.startsWith(string)) {
                     final Cookie respCookie = new Cookie(name, cookie.getValue());
                     respCookie.setPath("/");
-                    final String domain = getDomainValue(req.getServerName(), prefixWithDot());
-                    if (null != domain) {
-                        respCookie.setDomain(domain);
-                    }
                     respCookie.setMaxAge(0); // delete
                     resp.addCookie(respCookie);
                 }
@@ -764,10 +760,6 @@ public abstract class SessionServlet extends AJAXServlet {
             if (Tools.JSESSIONID_COOKIE.equals(name)) {
                 final Cookie respCookie = new Cookie(name, cookie.getValue());
                 respCookie.setPath("/");
-                final String domain = getDomainValue(req.getServerName(), prefixWithDot());
-                if (null != domain) {
-                    respCookie.setDomain(domain);
-                }
                 respCookie.setMaxAge(0); // delete
                 resp.addCookie(respCookie);
             }

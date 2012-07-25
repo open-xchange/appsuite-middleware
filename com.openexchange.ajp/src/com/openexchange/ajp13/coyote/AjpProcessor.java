@@ -1668,10 +1668,6 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                                 LOG.debug(new StringBuilder("\n\tDifferent JVM route detected. Removing JSESSIONID cookie: ").append(id));
                             }
                             current.setPath("/");
-                            final String domain = getDomainValue(serverName, prefixWithDot());
-                            if (null != domain) {
-                                current.setDomain(domain);
-                            }
                             current.setMaxAge(0); // delete
                             current.setSecure(forceHttps || request.isSecure());
                             response.addCookie(current);
@@ -1688,10 +1684,6 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                                 LOG.debug(new StringBuilder("\n\tExpired or invalid cookie -> Removing JSESSIONID cookie: ").append(current.getValue()));
                             }
                             current.setPath("/");
-                            final String domain = getDomainValue(serverName, prefixWithDot());
-                            if (null != domain) {
-                                current.setDomain(domain);
-                            }
                             current.setMaxAge(0); // delete
                             current.setSecure(forceHttps || request.isSecure());
                             response.addCookie(current);
@@ -1714,10 +1706,6 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                                 LOG.debug(new StringBuilder("\n\tMissing JVM route in JESSIONID cookie").append(current.getValue()));
                             }
                             current.setPath("/");
-                            final String domain = getDomainValue(serverName, prefixWithDot());
-                            if (null != domain) {
-                                current.setDomain(domain);
-                            }
                             current.setMaxAge(0); // delete
                             current.setSecure(forceHttps || request.isSecure());
                             response.addCookie(current);
@@ -1734,10 +1722,6 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                                 LOG.debug(new StringBuilder("\n\tExpired or invalid cookie -> Removing JSESSIONID cookie: ").append(current.getValue()));
                             }
                             current.setPath("/");
-                            final String domain = getDomainValue(serverName, prefixWithDot());
-                            if (null != domain) {
-                                current.setDomain(domain);
-                            }
                             current.setMaxAge(0); // delete
                             current.setSecure(forceHttps || request.isSecure());
                             response.addCookie(current);
