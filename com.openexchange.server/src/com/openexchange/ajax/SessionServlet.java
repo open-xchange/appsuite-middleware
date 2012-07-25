@@ -52,7 +52,9 @@ package com.openexchange.ajax;
 import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.UndeclaredThrowableException;
+import java.net.URLDecoder;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
@@ -723,6 +725,28 @@ public abstract class SessionServlet extends AJAXServlet {
         return null;
     }
 
+    private static String extractDomainValue(final String id) {
+        if (null == id) {
+            return null;
+        }
+        int start = id.indexOf('-');
+        if (start > 0) {
+            int end = id.lastIndexOf('.');
+            if (end > start) {
+                return urlDecode(id.substring(start+1, end));
+            }
+        }
+        return null;
+    }
+
+    private static String urlDecode(final String text) {
+        try {
+            return URLDecoder.decode(text, "iso-8859-1");
+        } catch (final UnsupportedEncodingException e) {
+            return text;
+        }
+    }
+
     /**
      * Removes the Open-Xchange cookies belonging to specified hash string.
      *
@@ -760,6 +784,10 @@ public abstract class SessionServlet extends AJAXServlet {
             if (Tools.JSESSIONID_COOKIE.equals(name)) {
                 final Cookie respCookie = new Cookie(name, cookie.getValue());
                 respCookie.setPath("/");
+                final String domain = extractDomainValue(cookie.getValue());
+                if (null != domain) {
+                    respCookie.setDomain(domain);
+                }
                 respCookie.setMaxAge(0); // delete
                 resp.addCookie(respCookie);
             }
