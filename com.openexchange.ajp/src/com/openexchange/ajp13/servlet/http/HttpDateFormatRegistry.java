@@ -66,6 +66,29 @@ import com.openexchange.tools.TimeZoneUtils;
  */
 public final class HttpDateFormatRegistry {
 
+    private static final String PATTERN_RFC1123 = "EEE, dd MMM yyyy HH:mm:ss zzz";
+
+    private static final String PATTERN_RFC1036 = "EEEE, dd-MMM-yy HH:mm:ss zzz";
+
+    private static final String PATTERN_ASCTIME = "EEE MMM d HH:mm:ss yyyy";
+
+    private static final String[] DEFAULT_DATE_PATTERNS = new String[] {
+                 PATTERN_RFC1123,
+                 PATTERN_RFC1036,
+                 PATTERN_ASCTIME,
+                 "EEE, dd-MMM-yyyy HH:mm:ss z",
+                 "EEE, dd-MMM-yyyy HH-mm-ss z",
+                 "EEE, dd MMM yy HH:mm:ss z",
+                 "EEE dd-MMM-yyyy HH:mm:ss z",
+                 "EEE dd MMM yyyy HH:mm:ss z",
+                 "EEE dd-MMM-yyyy HH-mm-ss z",
+                 "EEE dd-MMM-yy HH:mm:ss z",
+                 "EEE dd MMM yy HH:mm:ss z",
+                 "EEE,dd-MMM-yy HH:mm:ss z",
+                 "EEE,dd-MMM-yyyy HH:mm:ss z",
+                 "EEE, dd-MM-yyyy HH:mm:ss z",
+             };
+
     private static final HttpDateFormatRegistry singleton = new HttpDateFormatRegistry();
 
     /**

@@ -2,6 +2,8 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="test"/>
+	<classpathentry exported="true" kind="lib" path="lib/org.apache.httpcomponents.httpclient_4.1.2.v201203221030.jar" sourcepath="source/org.apache.httpcomponents.httpclient.source_4.1.2.v201203221030.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/org.apache.httpcomponents.httpcore_4.1.4.v201203221030.jar" sourcepath="source/org.apache.httpcomponents.httpcore.source_4.1.4.v201203221030.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jboss-jms-api.jar" sourcepath="source/jboss-jms-api-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/mail-1.4.5.jar" sourcepath="lib/mail-1.4.5.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/apache-mime4j-core-0.7.2.jar" sourcepath="source/apache-mime4j-core-0.7.2-sources.jar"/>
