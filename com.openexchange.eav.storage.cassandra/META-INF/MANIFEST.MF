@@ -1,0 +1,30 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange EAV Storage Cassandra Bundle
+Bundle-SymbolicName: com.openexchange.eav.storage.cassandra
+Bundle-Version: 6.21.0
+Bundle-Vendor: Open-Xchange Inc..
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.config,
+ com.openexchange.eav,
+ com.openexchange.exception,
+ com.openexchange.groupware,
+ com.openexchange.log,
+ com.openexchange.nosql.cassandra,
+ com.openexchange.osgi,
+ me.prettyprint.cassandra.model,
+ me.prettyprint.cassandra.serializers,
+ me.prettyprint.cassandra.service.template,
+ me.prettyprint.hector.api,
+ me.prettyprint.hector.api.beans,
+ me.prettyprint.hector.api.ddl,
+ me.prettyprint.hector.api.exceptions,
+ me.prettyprint.hector.api.factory,
+ me.prettyprint.hector.api.mutation,
+ me.prettyprint.hector.api.query,
+ me.prettyprint.hector.testutils,
+ org.apache.cassandra.db,
+ org.apache.cassandra.utils,
+ org.apache.commons.logging;version="1.1.1",
+ org.osgi.framework
+Bundle-Activator: com.openexchange.eav.storage.cassandra.osgi.CassandraStorageActivator
