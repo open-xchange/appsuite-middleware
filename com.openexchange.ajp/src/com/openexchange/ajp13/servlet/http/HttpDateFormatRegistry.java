@@ -165,10 +165,12 @@ public final class HttpDateFormatRegistry {
             }
         }
         final Helper helper = new Helper();
-        netscapeDateFormat = new SimpleDateFormat(helper.getPattern("com.openexchange.cookie.expires.netscapePattern", "EEE, dd-MMM-yyyy HH:mm:ss z"), Locale.US);
+        String pattern = helper.getPattern("com.openexchange.cookie.expires.netscapePattern", "EEE, dd-MMM-yyyy HH:mm:ss z");
+        netscapeDateFormat = new SimpleDateFormat(pattern, Locale.US);
         netscapeDateFormat.setTimeZone(gmtTimeZone);
 
-        msieDateFormat = new SimpleDateFormat(helper.getPattern("com.openexchange.cookie.expires.msie8Pattern", "EEE, dd MMM yyyy HH:mm:ss zzz"), Locale.US);
+        pattern = helper.getPattern("com.openexchange.cookie.expires.msie8Pattern", "EEE, dd MMM yyyy HH:mm:ss zzz");
+        msieDateFormat = new SimpleDateFormat(pattern, Locale.US);
         msieDateFormat.setTimeZone(gmtTimeZone);
     }
 
