@@ -50,13 +50,21 @@ package com.openexchange.eav.storage.cassandra;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.CharacterCodingException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 
+import me.prettyprint.cassandra.model.BasicColumnDefinition;
+import me.prettyprint.cassandra.model.BasicColumnFamilyDefinition;
 import me.prettyprint.cassandra.model.ConfigurableConsistencyLevel;
+import me.prettyprint.cassandra.serializers.BooleanSerializer;
 import me.prettyprint.cassandra.serializers.ByteBufferSerializer;
+import me.prettyprint.cassandra.serializers.DoubleSerializer;
+import me.prettyprint.cassandra.serializers.FloatSerializer;
+import me.prettyprint.cassandra.serializers.IntegerSerializer;
+import me.prettyprint.cassandra.serializers.LongSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.serializers.UUIDSerializer;
 import me.prettyprint.cassandra.service.template.ColumnFamilyResult;
@@ -66,14 +74,18 @@ import me.prettyprint.cassandra.service.template.ThriftColumnFamilyTemplate;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.HConsistencyLevel;
 import me.prettyprint.hector.api.Keyspace;
+import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.ColumnSlice;
 import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.beans.Row;
+import me.prettyprint.hector.api.ddl.ColumnDefinition;
+import me.prettyprint.hector.api.ddl.ColumnFamilyDefinition;
+import me.prettyprint.hector.api.ddl.ComparatorType;
 import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
+import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hector.api.mutation.Mutator;
 import me.prettyprint.hector.api.query.RangeSlicesQuery;
-import me.prettyprint.hector.api.query.SliceQuery;
 
 import org.apache.cassandra.db.KeyspaceNotDefinedException;
 import org.apache.cassandra.utils.ByteBufferUtil;
@@ -236,13 +248,30 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 			while (sliceIter.hasNext()) {
 				HColumn<String, ByteBuffer> column = sliceIter.next();
 				try {
+					/*Serializer<?> s = column.getValueSerializer();
+					if (s instanceof StringSerializer) {
+						attr.put(column.getName(), column.getValue());	
+					} else if (s instanceof LongSerializer) {
+						attr.put(column.getName(), ByteBufferUtil.toLong(column.getValue()));
+					} else if (s instanceof DoubleSerializer) {
+						attr.put(column.getName(), ByteBufferUtil.toDouble(column.getValue()));
+					} else if (s instanceof BooleanSerializer) {
+						attr.put(column.getName(), ByteBufferUtil.string(column.getValue()));
+					} else if (s instanceof FloatSerializer) {
+						attr.put(column.getName(), ByteBufferUtil.toFloat(column.getValue()));
+					} else if (s instanceof IntegerSerializer) {
+						attr.put(column.getName(), column.getValue());
+					} else {
+						throw new OXException(666, "Unsupported attribute type. Data: " + column.getValue());
+					}*/
 					attr.put(column.getName(), ByteBufferUtil.string(column.getValue()));
-				} catch (CharacterCodingException e) {
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
 		}
 		
+		//Use for UUIDs
 		/*ColumnFamilyResult<UUID, String> result = xtPropsTemplate.queryColumns(encodeUUID(contextID, objectID));
 		if (result == null || !result.hasResults()) {
 			log.error("No result");
@@ -405,8 +434,6 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 	 */
 	@Override
 	public void setAttributes(int contextID, String folderID, int objectID, Map<String, Object> attributes, int module) throws OXException {
-		//long startTime = System.currentTimeMillis();
-		
 		RangeSliceWrapper rs = new RangeSliceWrapper(contextID, folderID, objectID, module);
 		RangeSlicesQuery<UUID, String, ByteBuffer> slice = createRangeSlicesQuery(rs);
 		
@@ -421,7 +448,34 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 		Iterator<String> it = attributes.keySet().iterator();
 		while (it.hasNext()) {
 			String columnName = (String) it.next();
-			updater.setString(columnName, (String)attributes.get(columnName));
+			Object o = attributes.get(columnName);
+			
+			if (o == null) {
+				updater.deleteColumn(columnName);
+			} else {
+				
+				if (o instanceof String) {
+					updater.setString(columnName, (String)o);
+				} else if (o instanceof Integer) {
+					updater.setString(columnName, String.valueOf((Integer)o));
+					//updater.setInteger(columnName, (Integer)o);
+				} else if (o instanceof Long)
+					updater.setString(columnName, String.valueOf((Long)o));
+					//updater.setLong(columnName, (Long)o);
+				else if (o instanceof Double)
+					updater.setString(columnName, String.valueOf((Double)o));
+					//updater.setDouble(columnName, (Double)o);
+				else if (o instanceof Boolean)
+					updater.setString(columnName, String.valueOf((Boolean)o));
+				else if (o instanceof Float)
+					updater.setString(columnName, String.valueOf((Float)o));
+					//updater.setFloat(columnName, (Float)o);
+				else if (o instanceof Date)
+					updater.setString(columnName, String.valueOf(((Date) o).getTime()));
+					//updater.setLong(columnName, ((Date) o).getTime());
+				else
+					throw new OXException(666, "Unsupported attribute type. Data: " + o);
+			}
 		}
 		
 		updater.setInteger("contextID", contextID);
@@ -429,10 +483,11 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 		updater.setInteger("objectID", objectID);
 		updater.setInteger("moduleID", module);
 		
-		xtPropsTemplate.update(updater);
-		
-		//long endTime = System.currentTimeMillis();
-		//System.out.println("runtime: " + (endTime - startTime) + " msec.");
+		try {
+			xtPropsTemplate.update(updater);
+		} catch (HectorException h) {
+			h.printStackTrace();
+		}
 	}
 	
 	private class RangeSliceWrapper {
