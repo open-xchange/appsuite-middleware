@@ -52,7 +52,9 @@ package com.openexchange.ajax;
 import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.UndeclaredThrowableException;
+import java.net.URLDecoder;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
@@ -95,6 +97,7 @@ import com.openexchange.session.Session;
 import com.openexchange.session.SessionThreadCounter;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.sessiond.impl.IPAddressUtil;
 import com.openexchange.sessiond.impl.IPRange;
 import com.openexchange.sessiond.impl.SubnetMask;
 import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
@@ -682,6 +685,68 @@ public abstract class SessionServlet extends AJAXServlet {
         session.setParameter("JSESSIONID", req.getSession().getId());	
     }
 
+    private static volatile Boolean prefixWithDot;
+
+    private static boolean prefixWithDot() {
+        Boolean tmp = prefixWithDot;
+        if (null == tmp) {
+            synchronized (Login.class) {
+                tmp = prefixWithDot;
+                if (null == tmp) {
+                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    tmp = Boolean.valueOf(null == service || service.getBoolProperty("com.openexchange.cookie.domain.prefixWithDot", true));
+                    prefixWithDot = tmp;
+                }
+            }
+        }
+        return tmp.booleanValue();
+    }
+
+    private static String getDomainValue(final String serverName, final boolean prefixWithDot) {
+        if (null == serverName) {
+            return null;
+        }
+        if (prefixWithDot) {
+            if (serverName.startsWith("www.")) {
+                return serverName.substring(3);
+            } else if ("localhost".equalsIgnoreCase(serverName)) {
+                return serverName;
+            } else {
+                // Not an IP address
+                if (null == IPAddressUtil.textToNumericFormatV4(serverName) && (null == IPAddressUtil.textToNumericFormatV6(serverName))) {
+                    return new StringBuilder(serverName.length() + 1).append('.').append(serverName).toString();
+                }
+            }
+        } else {
+            if ((null == IPAddressUtil.textToNumericFormatV4(serverName)) && (null == IPAddressUtil.textToNumericFormatV6(serverName))) {
+                return serverName;
+            }
+        }
+        return null;
+    }
+
+    private static String extractDomainValue(final String id) {
+        if (null == id) {
+            return null;
+        }
+        int start = id.indexOf('-');
+        if (start > 0) {
+            int end = id.lastIndexOf('.');
+            if (end > start) {
+                return urlDecode(id.substring(start+1, end));
+            }
+        }
+        return null;
+    }
+
+    private static String urlDecode(final String text) {
+        try {
+            return URLDecoder.decode(text, "iso-8859-1");
+        } catch (final UnsupportedEncodingException e) {
+            return text;
+        }
+    }
+
     /**
      * Removes the Open-Xchange cookies belonging to specified hash string.
      *
@@ -709,6 +774,12 @@ public abstract class SessionServlet extends AJAXServlet {
         }
     }
 
+    /**
+     * Removes all JSESSIONID cookies found in given HTTP Servlet request.
+     * 
+     * @param req The HTTP Servlet request
+     * @param resp The HTTP Servlet response
+     */
     public static void removeJSESSIONID(final HttpServletRequest req, final HttpServletResponse resp) {
         final Cookie[] cookies = req.getCookies();
         if (cookies == null) {
@@ -719,6 +790,10 @@ public abstract class SessionServlet extends AJAXServlet {
             if (Tools.JSESSIONID_COOKIE.equals(name)) {
                 final Cookie respCookie = new Cookie(name, cookie.getValue());
                 respCookie.setPath("/");
+                final String domain = extractDomainValue(cookie.getValue());
+                if (null != domain) {
+                    respCookie.setDomain(domain);
+                }
                 respCookie.setMaxAge(0); // delete
                 resp.addCookie(respCookie);
             }

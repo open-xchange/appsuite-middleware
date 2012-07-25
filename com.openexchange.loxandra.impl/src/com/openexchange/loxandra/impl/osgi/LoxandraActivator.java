@@ -79,7 +79,7 @@ public final class LoxandraActivator extends HousekeepingActivator {
 	@Override
 	protected Class<?>[] getNeededServices() {
 		
-		return new Class[]{EmbeddedCassandraService.class, ConfigurationService.class};
+		return new Class[]{ConfigurationService.class};
 	}
 
 	@Override

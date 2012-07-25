@@ -50,6 +50,7 @@
 package com.openexchange.ajp13.coyote;
 
 import static com.openexchange.ajp13.AJPv13Response.writeHeaderSafe;
+import static com.openexchange.ajp13.AJPv13Utility.urlEncode;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -1649,6 +1650,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     private void checkJSessionIDCookie(final String serverName) {
         final Cookie[] cookies = request.getCookies();
         Cookie jsessionIDCookie = null;
+        boolean deleteAttempt = false;
         if (cookies != null) {
             NextCookie: for (int i = 0; (i < cookies.length) && (jsessionIDCookie == null); i++) {
                 final Cookie current = cookies[i];
@@ -1668,9 +1670,14 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                                 LOG.debug(new StringBuilder("\n\tDifferent JVM route detected. Removing JSESSIONID cookie: ").append(id));
                             }
                             current.setPath("/");
+                            final String domain = extractDomainValue(id);
+                            if (null != domain) {
+                                current.setDomain(domain);
+                            }
                             current.setMaxAge(0); // delete
                             current.setSecure(forceHttps || request.isSecure());
                             response.addCookie(current);
+                            deleteAttempt = true;
                             continue NextCookie;
                         }
                         /*
@@ -1684,9 +1691,14 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                                 LOG.debug(new StringBuilder("\n\tExpired or invalid cookie -> Removing JSESSIONID cookie: ").append(current.getValue()));
                             }
                             current.setPath("/");
+                            final String domain = extractDomainValue(id);
+                            if (null != domain) {
+                                current.setDomain(domain);
+                            }
                             current.setMaxAge(0); // delete
                             current.setSecure(forceHttps || request.isSecure());
                             response.addCookie(current);
+                            deleteAttempt = true;
                             continue NextCookie;
                         }
                         jsessionIDCookie = current;
@@ -1706,9 +1718,14 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                                 LOG.debug(new StringBuilder("\n\tMissing JVM route in JESSIONID cookie").append(current.getValue()));
                             }
                             current.setPath("/");
+                            final String domain = extractDomainValue(id);
+                            if (null != domain) {
+                                current.setDomain(domain);
+                            }
                             current.setMaxAge(0); // delete
                             current.setSecure(forceHttps || request.isSecure());
                             response.addCookie(current);
+                            deleteAttempt = true;
                             continue NextCookie;
                         }
                         /*
@@ -1722,9 +1739,14 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                                 LOG.debug(new StringBuilder("\n\tExpired or invalid cookie -> Removing JSESSIONID cookie: ").append(current.getValue()));
                             }
                             current.setPath("/");
+                            final String domain = extractDomainValue(id);
+                            if (null != domain) {
+                                current.setDomain(domain);
+                            }
                             current.setMaxAge(0); // delete
                             current.setSecure(forceHttps || request.isSecure());
                             response.addCookie(current);
+                            deleteAttempt = true;
                             continue NextCookie;
                         }
                         jsessionIDCookie = current;
@@ -1738,6 +1760,15 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         }
         if (jsessionIDCookie == null) {
             createJSessionIDCookie(serverName);
+        } else if (deleteAttempt) {
+            final Cookie reApply = new Cookie(JSESSIONID_COOKIE, jsessionIDCookie.getValue());
+            reApply.setPath("/");
+            final String domain = getDomainValue(serverName, prefixWithDot());
+            if (null != domain) {
+                reApply.setDomain(domain);
+            }
+            HttpServletRequestImpl.configureCookie(reApply);
+            response.addCookie(reApply);
         }
     }
 
@@ -1747,11 +1778,12 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
          */
         final StringBuilder jsessionIDVal = new StringBuilder(HttpSessionManagement.getNewUniqueId());
         final String jvmRoute = AJPv13Config.getJvmRoute();
+        final String domain = getDomainValue(serverName, prefixWithDot());
         if ((jvmRoute != null) && (jvmRoute.length() > 0)) {
-            jsessionIDVal.append('.').append(jvmRoute);
+            jsessionIDVal.append('-').append(urlEncode(domain)).append('.').append(jvmRoute);
         }
         final String id = jsessionIDVal.toString();
-        final Cookie jsessionIDCookie = newJsessionIdCookie(id, serverName);
+        final Cookie jsessionIDCookie = newJsessionIdCookie(id, domain);
         LogProperties.putLogProperty("com.openexchange.ajp13.httpSession", id);
         jsessionIDCookie.setSecure(forceHttps || request.isSecure());
         httpSessionCookie = jsessionIDCookie;
@@ -1763,6 +1795,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     }
 
     private void addJSessionIDCookie(final String id, final String serverName) {
+        final String domain = getDomainValue(serverName, prefixWithDot());
         final String jsessionIdVal;
         final boolean join;
         /*
@@ -1778,12 +1811,12 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             final StringBuilder jsessionIDVal = new StringBuilder(HttpSessionManagement.getNewUniqueId());
             final String jvmRoute = AJPv13Config.getJvmRoute();
             if ((jvmRoute != null) && (jvmRoute.length() > 0)) {
-                jsessionIDVal.append('.').append(jvmRoute);
+                jsessionIDVal.append('-').append(urlEncode(domain)).append('.').append(jvmRoute);
             }
             jsessionIdVal = jsessionIDVal.toString();
             join = false;
         }
-        final Cookie jsessionIDCookie = newJsessionIdCookie(jsessionIdVal, serverName);
+        final Cookie jsessionIDCookie = newJsessionIdCookie(jsessionIdVal, domain);
         LogProperties.putLogProperty("com.openexchange.ajp13.httpSession", jsessionIdVal);
         jsessionIDCookie.setSecure(forceHttps || request.isSecure());
         httpSessionCookie = jsessionIDCookie;
@@ -1794,9 +1827,11 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         request.getSession(true);
     }
 
-    private Cookie newJsessionIdCookie(final String jsessionId, final String serverName) {
+    private static final String DEFAULT_PATH = "/";
+
+    private Cookie newJsessionIdCookie(final String jsessionId, final String domain) {
         final Cookie jsessionIDCookie = new Cookie(JSESSIONID_COOKIE, jsessionId);
-        final String domain = getDomainValue(serverName, prefixWithDot());
+        jsessionIDCookie.setPath(DEFAULT_PATH);
         if (null != domain) {
             jsessionIDCookie.setDomain(domain);
         }
@@ -1838,6 +1873,20 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         } else {
             if ((null == IPAddressUtil.textToNumericFormatV4(serverName)) && (null == IPAddressUtil.textToNumericFormatV6(serverName))) {
                 return serverName;
+            }
+        }
+        return null;
+    }
+
+    private static String extractDomainValue(final String id) {
+        if (null == id) {
+            return null;
+        }
+        int start = id.indexOf('-');
+        if (start > 0) {
+            int end = id.lastIndexOf('.');
+            if (end > start) {
+                return AJPv13Utility.urlDecode(id.substring(start+1, end));
             }
         }
         return null;
