@@ -1,3 +1,4 @@
+%define	       configfiles     configfiles.list
 
 Name:          open-xchange-core
 BuildArch:     noarch
@@ -153,6 +154,13 @@ Authors:
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
+rm -f %{configfiles}
+find %{buildroot}/opt/open-xchange/etc \
+     %{buildroot}/opt/open-xchange/importCSV \
+        -type f \
+        -printf "%%%config(noreplace) %p\n" > %{configfiles}
+perl -pi -e 's;%{buildroot};;' %{configfiles}
+perl -pi -e 's;(^.*?)\s+(.*/(mail|configdb|server)\.properties)$;$1 %%%attr(640,root,open-xchange) $2;' %{configfiles}
 
 %post
 if [ ${1:-0} -eq 2 ]; then
@@ -175,15 +183,14 @@ fi
 %clean
 %{__rm} -rf %{buildroot}
 
-%files
+
+%files -f %{configfiles}
 %defattr(-,root,root)
 %dir /opt/open-xchange/bundles/
 /opt/open-xchange/bundles/*
 %dir /opt/open-xchange/etc/
-%config(noreplace) /opt/open-xchange/etc/*
 %dir /opt/open-xchange/i18n/
 %dir /opt/open-xchange/importCSV/
-/opt/open-xchange/importCSV/*
 %dir /opt/open-xchange/lib/
 /opt/open-xchange/lib/oxfunctions.sh
 %dir /opt/open-xchange/osgi/bundle.d/
