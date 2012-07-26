@@ -1071,12 +1071,12 @@ public class Login extends AJAXServlet {
                 return serverName;
             } else {
                 // Not an IP address
-                if (!"localhost".equalsIgnoreCase(serverName) && null == IPAddressUtil.textToNumericFormatV4(serverName) && (null == IPAddressUtil.textToNumericFormatV6(serverName))) {
+                if (null == IPAddressUtil.textToNumericFormatV4(serverName) && (null == IPAddressUtil.textToNumericFormatV6(serverName))) {
                     return new StringBuilder(serverName.length() + 1).append('.').append(serverName).toString();
                 }
             }
         } else {
-            if ((null == IPAddressUtil.textToNumericFormatV4(serverName)) && (null == IPAddressUtil.textToNumericFormatV6(serverName))) {
+            if (!"localhost".equalsIgnoreCase(serverName) && (null == IPAddressUtil.textToNumericFormatV4(serverName)) && (null == IPAddressUtil.textToNumericFormatV6(serverName))) {
                 return serverName;
             }
         }
