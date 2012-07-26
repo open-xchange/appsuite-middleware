@@ -80,7 +80,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 public final class ManagedMimeMessage extends MimeMessage {
 
     /**
-     * Creates a file-backed clones of passed <tt>MailMessage</tt> instances.
+     * Creates file-backed clones of passed <tt>MailMessage</tt> instances.
      * 
      * @param originals The <tt>MailMessage</tt> instances to clone
      * @return The file-backed clones of passed <tt>MailMessage</tt>} instances
