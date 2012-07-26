@@ -83,7 +83,7 @@ public final class ManagedMimeMessage extends MimeMessage {
      * Creates file-backed clones of passed <tt>MailMessage</tt> instances.
      * 
      * @param originals The <tt>MailMessage</tt> instances to clone
-     * @return The file-backed clones of passed <tt>MailMessage</tt>} instances
+     * @return The file-backed clones of passed <tt>MailMessage</tt> instances
      * @throws OXException If an error occurs
      */
     public static MailMessage[] clone(final MailMessage[] originals) throws OXException {
@@ -105,7 +105,7 @@ public final class ManagedMimeMessage extends MimeMessage {
      * Creates a file-backed clone of passed <tt>MailMessage</tt> instance.
      * 
      * @param original The <tt>MailMessage</tt> instance to clone
-     * @return The file-backed clone of passed <tt>MailMessage</tt>} instance
+     * @return The file-backed clone of passed <tt>MailMessage</tt> instance
      * @throws OXException If an error occurs
      */
     public static MailMessage clone(final MailMessage original) throws OXException {
