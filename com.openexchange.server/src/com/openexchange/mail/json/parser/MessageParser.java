@@ -108,6 +108,7 @@ import com.openexchange.mail.dataobjects.compose.ReferencedMailPart;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
 import com.openexchange.mail.dataobjects.compose.UploadFileMailPart;
 import com.openexchange.mail.mime.HeaderCollection;
+import com.openexchange.mail.mime.ManagedMimeMessage;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.QuotedInternetAddress;
@@ -759,8 +760,13 @@ public final class MessageParser {
                             access = MailAccess.getInstance(session, msgref.getAccountId());
                             access.connect();
                         }
-                        final MailMessage referencedMail =
+                        MailMessage referencedMail =
                             access.getMessageStorage().getMessage(msgref.getFolder(), msgref.getMailID(), false);
+                        if (null == referencedMail) {
+                            throw MailExceptionCode.REFERENCED_MAIL_NOT_FOUND.create(msgref.getMailID(), msgref.getFolder());
+                        }
+                        referencedMail.setAccountId(access.getAccountId());
+                        referencedMail = ManagedMimeMessage.clone(referencedMail);
                         referencedMailPart = provider.getNewReferencedMail(referencedMail, session);
                     } else {
                         ReferencedMailPart tmp = groupedReferencedParts.get(seqId);
@@ -838,11 +844,13 @@ public final class MessageParser {
     }
 
     private static void handleMultipleRefs(final TransportProvider provider, final Session session, final MailPath parentMsgRef, final Set<String> contentIds, final boolean prepare4Transport, final Map<String, String> groupedSeqIDs, final Map<String, ReferencedMailPart> retval, final MailAccess<?, ?> access) throws OXException {
-        final MailMessage referencedMail =
+        MailMessage referencedMail =
             access.getMessageStorage().getMessage(parentMsgRef.getFolder(), parentMsgRef.getMailID(), false);
         if (null == referencedMail) {
             throw MailExceptionCode.REFERENCED_MAIL_NOT_FOUND.create(parentMsgRef.getMailID(), parentMsgRef.getFolder());
         }
+        referencedMail.setAccountId(access.getAccountId());
+        referencedMail = ManagedMimeMessage.clone(referencedMail);
         // Get attachments out of referenced mail
         final Set<String> remaining = new HashSet<String>(groupedSeqIDs.keySet());
         final MultipleMailPartHandler handler = new MultipleMailPartHandler(groupedSeqIDs.keySet(), false);

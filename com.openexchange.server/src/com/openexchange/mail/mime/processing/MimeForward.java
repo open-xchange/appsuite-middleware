@@ -84,6 +84,7 @@ import com.openexchange.mail.dataobjects.CompositeMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.ManagedMimeMessage;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
@@ -206,6 +207,10 @@ public final class MimeForward {
     private static MailMessage getFowardMail0(final MailMessage[] originalMsgs, final Session session, final UserSettingMail userSettingMail) throws OXException {
         try {
             /*
+             * Clone them to ensure consistent data
+             */
+            final MailMessage[] origMsgs = ManagedMimeMessage.clone(originalMsgs);
+            /*
              * New MIME message with a dummy session
              */
             final Context ctx = ContextStorage.getStorageContext(session.getContextId());
@@ -217,7 +222,7 @@ public final class MimeForward {
                  * Set its headers. Start with subject constructed from first message.
                  */
                 final String subjectPrefix = PREFIX_FWD;
-                String origSubject = MimeMessageUtility.checkNonAscii(originalMsgs[0].getHeader(MessageHeaders.HDR_SUBJECT, null));
+                String origSubject = MimeMessageUtility.checkNonAscii(origMsgs[0].getHeader(MessageHeaders.HDR_SUBJECT, null));
                 if (origSubject == null) {
                     forwardMsg.setSubject(subjectPrefix, MailProperties.getInstance().getDefaultMimeCharset());
                 } else {
@@ -239,16 +244,16 @@ public final class MimeForward {
             if (usm.getSendAddr() != null) {
                 forwardMsg.setFrom(new QuotedInternetAddress(usm.getSendAddr(), true));
             }
-            if (usm.isForwardAsAttachment() || originalMsgs.length > 1) {
+            if (usm.isForwardAsAttachment() || origMsgs.length > 1) {
                 /*
                  * Attachment-Forward
                  */
-                return asAttachmentForward(originalMsgs, forwardMsg);
+                return asAttachmentForward(origMsgs, forwardMsg);
             }
             /*
              * Inline-Forward
              */
-            return asInlineForward(originalMsgs[0], session, ctx, usm, forwardMsg);
+            return asInlineForward(origMsgs[0], session, ctx, usm, forwardMsg);
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         } catch (final IOException e) {
