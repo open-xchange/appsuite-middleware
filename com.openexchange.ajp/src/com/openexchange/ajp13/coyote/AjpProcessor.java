@@ -1853,7 +1853,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 tmp = prefixWithDot;
                 if (null == tmp) {
                     final ConfigurationService service = AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class);
-                    tmp = Boolean.valueOf(null == service || service.getBoolProperty("com.openexchange.cookie.domain.prefixWithDot", true));
+                    tmp = Boolean.valueOf(null != service && service.getBoolProperty("com.openexchange.cookie.domain.prefixWithDot", false));
                     prefixWithDot = tmp;
                 }
             }

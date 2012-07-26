@@ -694,7 +694,7 @@ public abstract class SessionServlet extends AJAXServlet {
                 tmp = prefixWithDot;
                 if (null == tmp) {
                     final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                    tmp = Boolean.valueOf(null == service || service.getBoolProperty("com.openexchange.cookie.domain.prefixWithDot", true));
+                    tmp = Boolean.valueOf(null != service && service.getBoolProperty("com.openexchange.cookie.domain.prefixWithDot", false));
                     prefixWithDot = tmp;
                 }
             }
