@@ -77,6 +77,7 @@ import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.ColumnSlice;
 import me.prettyprint.hector.api.beans.HColumn;
+import me.prettyprint.hector.api.beans.OrderedRows;
 import me.prettyprint.hector.api.beans.Row;
 import me.prettyprint.hector.api.ddl.ColumnDefinition;
 import me.prettyprint.hector.api.ddl.ColumnFamilyDefinition;
@@ -224,7 +225,7 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 			rangeSlice.addEqualsExpression("moduleID", ByteBufferUtil.bytes(rangeSliceWrapper.getModuleID()));
 
 		rangeSlice.setColumnFamily(typesMap.get(rangeSliceWrapper.getModuleID()));
-		rangeSlice.setRange(null, null, false, Integer.MAX_VALUE);
+		rangeSlice.setRange(null, null, false, rangeSliceWrapper.getCount());
 		
 		return rangeSlice;
 	}
@@ -237,7 +238,7 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 	public Map<String, Object> getAttributes(int contextID, String folderID, int objectID, int module) throws OXException {
 		Map<String, Object> attr = new HashMap<String, Object>();
 		
-		RangeSliceWrapper rs = new RangeSliceWrapper(contextID, folderID, objectID, module);
+		RangeSliceWrapper rs = new RangeSliceWrapper(contextID, folderID, objectID, module, Integer.MAX_VALUE);
 		RangeSlicesQuery<UUID, String, ByteBuffer> slice = createRangeSlicesQuery(rs);
 		
 		Iterator<Row<UUID, String, ByteBuffer>> it = slice.execute().get().iterator();
@@ -322,7 +323,7 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 	public Map<Integer, Map<String, Object>> getAttributes(int contextID, String folderID, int module) throws OXException {
 		Map<Integer, Map<String, Object>> attr = new HashMap<Integer, Map<String, Object>>();
 		
-		RangeSliceWrapper rs = new RangeSliceWrapper(contextID, folderID, 0, module);
+		RangeSliceWrapper rs = new RangeSliceWrapper(contextID, folderID, 0, module, Integer.MAX_VALUE);
 		RangeSlicesQuery<UUID, String, ByteBuffer> slice = createRangeSlicesQuery(rs);
 		
 		Iterator<Row<UUID, String, ByteBuffer>> it = slice.execute().get().iterator();
@@ -402,7 +403,7 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 	 */
 	@Override
 	public boolean hasAttributes(int contextID, String folderID, int objectID, int module) throws OXException {
-		RangeSliceWrapper rs = new RangeSliceWrapper(contextID, folderID, objectID, module);
+		RangeSliceWrapper rs = new RangeSliceWrapper(contextID, folderID, objectID, module, 1);
 		RangeSlicesQuery<UUID, String, ByteBuffer> slice = createRangeSlicesQuery(rs);
 
 		slice.setRange(null, null, false, 1);
@@ -416,7 +417,7 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 	 */
 	@Override
 	public void deleteAttributes(int contextID, String folderID, int objectID, int module) throws OXException {
-		RangeSliceWrapper rs = new RangeSliceWrapper(contextID, folderID, objectID, module);
+		RangeSliceWrapper rs = new RangeSliceWrapper(contextID, folderID, objectID, module, 1);
 		RangeSlicesQuery<UUID, String, ByteBuffer> slice = createRangeSlicesQuery(rs);
 		Row<UUID, String, ByteBuffer> r = slice.execute().get().getList().get(0);
 		UUID key = r.getKey();
@@ -434,14 +435,16 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 	 */
 	@Override
 	public void setAttributes(int contextID, String folderID, int objectID, Map<String, Object> attributes, int module) throws OXException {
-		RangeSliceWrapper rs = new RangeSliceWrapper(contextID, folderID, objectID, module);
+		RangeSliceWrapper rs = new RangeSliceWrapper(contextID, folderID, objectID, module, 1);
 		RangeSlicesQuery<UUID, String, ByteBuffer> slice = createRangeSlicesQuery(rs);
 		
+		Row<UUID, String, ByteBuffer> r = slice.execute().get().peekLast();
+		
 		UUID key;
-		if (slice.execute().get().peekLast() == null)
+		if (r == null)
 			key = UUID.randomUUID();
 		else
-			key = slice.execute().get().peekLast().getKey();
+			key = r.getKey();
 		
 		ColumnFamilyUpdater<UUID, String> updater = xtPropsTemplate.createUpdater(key);
 		
@@ -495,13 +498,14 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 		private int objectID;
 		private int moduleID;
 		private String folderID;
+		private int count;
 		
 		private boolean hasContextID;
 		private boolean hasObjectID;
 		private boolean hasModuleID;
 		private boolean hasFolderID;
 		
-		protected RangeSliceWrapper(int contextID, String folderID, int objectID, int moduleID) {
+		protected RangeSliceWrapper(int contextID, String folderID, int objectID, int moduleID, int count) {
 			if (contextID != 0)
 				setContextID(contextID);
 			if (folderID != null)
@@ -510,6 +514,7 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 				setObjectID(objectID);
 			if (moduleID != 0)
 				setModuleID(moduleID);
+			this.count = count;
 		}
 		
 		/**
@@ -563,6 +568,10 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 		public void setFolderID(String folderID) {
 			this.folderID = folderID;
 			hasFolderID = true;
+		}
+		
+		public int getCount() {
+			return count;
 		}
 	}
 }

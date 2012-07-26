@@ -164,6 +164,15 @@ perl -pi -e 's;(^.*?)\s+(.*/(mail|configdb|server)\.properties)$;$1 %%%attr(640,
 
 %post
 if [ ${1:-0} -eq 2 ]; then
+    # only when updating
+    . /opt/open-xchange/lib/oxfunctions.sh
+
+    # prevent bash from expanding, see bug 13316
+    GLOBIGNORE='*'
+
+    ##
+    ## start update from < 6.21
+    ##
     GWCONFFILES="filestorage.properties folderjson.properties mail-push.properties messaging.properties publications.properties push.properties secret.properties secrets threadpool.properties meta/ui.yml settings/themes.properties settings/ui.properties"
     COCONFFILES="i18n.properties"
     for FILE in ${GWCONFFILES}; do
@@ -178,6 +187,36 @@ if [ ${1:-0} -eq 2 ]; then
             mv /opt/open-xchange/etc/common/${FILE} /opt/open-xchange/etc/${FILE}
         fi
     done
+
+    # SoftwareChange_Request-1024
+    pfile=/opt/open-xchange/etc/server.properties
+    if ! ox_exists_property com.openexchange.IPMaskV4 $pfile; then
+        ox_set_property com.openexchange.IPMaskV4 "" $pfile
+    fi
+    if ! ox_exists_property com.openexchange.IPMaskV6 $pfile; then
+        ox_set_property com.openexchange.IPMaskV6 "" $pfile
+    fi
+
+    # SoftwareChange_Request-1027
+    pfile=/opt/open-xchange/etc/server.properties
+    if ! ox_exists_property com.openexchange.dispatcher.prefix $pfile; then
+        ox_set_property com.openexchange.dispatcher.prefix "/ajax/" $pfile
+    fi
+
+    # SoftwareChange_Request-1028
+    pfile=/opt/open-xchange/etc/contact.properties
+    if ! ox_exists_property com.openexchange.carddav.tree $pfile; then
+        ox_set_property com.openexchange.carddav.tree "0" $pfile
+    fi
+    if ! ox_exists_property com.openexchange.carddav.combinedRequestTimeout $pfile; then
+        ox_set_property com.openexchange.carddav.combinedRequestTimeout "20000" $pfile
+    fi
+    if ! ox_exists_property com.openexchange.carddav.exposedCollections $pfile; then
+        ox_set_property com.openexchange.carddav.exposedCollections "0" $pfile
+    fi
+    ##
+    ## end update from < 6.21
+    ##
 fi
 
 %clean
