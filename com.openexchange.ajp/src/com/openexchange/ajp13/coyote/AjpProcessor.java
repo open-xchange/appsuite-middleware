@@ -1872,7 +1872,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 return serverName;
             } else {
                 // Not an IP address
-                if (null == IPAddressUtil.textToNumericFormatV4(serverName) && (null == IPAddressUtil.textToNumericFormatV6(serverName))) {
+                if (!"localhost".equalsIgnoreCase(serverName) && null == IPAddressUtil.textToNumericFormatV4(serverName) && (null == IPAddressUtil.textToNumericFormatV6(serverName))) {
                     return new StringBuilder(serverName.length() + 1).append('.').append(serverName).toString();
                 }
             }
