@@ -49,8 +49,10 @@
 
 package com.openexchange.mail.mime;
 
+import java.io.BufferedOutputStream;
 import java.io.Closeable;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -58,23 +60,89 @@ import java.util.List;
 import javax.mail.Flags;
 import javax.mail.MessagingException;
 import javax.mail.Session;
-import javax.mail.internet.InternetHeaders;
 import javax.mail.internet.MimeMessage;
 import javax.mail.util.SharedFileInputStream;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
+import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
  * {@link ManagedMimeMessage} - A {@link MimeMessage} backed by an array or file dependent on provided byte array's size.
  * <p>
  * Invoke {@link #cleanUp()} to release used resources immediately; otherwise they will be released if a specific idle time has elapsed.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ManagedMimeMessage extends MimeMessage {
+
+    /**
+     * Creates a file-backed clones of passed <tt>MailMessage</tt> instances.
+     * 
+     * @param originals The <tt>MailMessage</tt> instances to clone
+     * @return The file-backed clones of passed <tt>MailMessage</tt>} instances
+     * @throws OXException If an error occurs
+     */
+    public static MailMessage[] clone(final MailMessage[] originals) throws OXException {
+        if (null == originals) {
+            return null;
+        }
+        final int length = originals.length;
+        if (length <= 0) {
+            return new MailMessage[0];
+        }
+        final MailMessage[] ret = new MailMessage[length];
+        for (int i = 0; i < length; i++) {
+            ret[i] = clone(originals[i]);
+        }
+        return ret;
+    }
+
+    /**
+     * Creates a file-backed clone of passed <tt>MailMessage</tt> instance.
+     * 
+     * @param original The <tt>MailMessage</tt> instance to clone
+     * @return The file-backed clone of passed <tt>MailMessage</tt>} instance
+     * @throws OXException If an error occurs
+     */
+    public static MailMessage clone(final MailMessage original) throws OXException {
+        if (null == original) {
+            return null;
+        }
+        try {
+            final MimeMessage mimeMessage = new ManagedMimeMessage(original);
+            // Apply flags to MIME message
+            {
+                MimeMessageConverter.parseMimeFlags(original.getFlags(), mimeMessage);
+                Flags flags = null;
+                if (original.containsColorLabel()) {
+                    flags = new Flags();
+                    flags.add(MailMessage.getColorLabelStringValue(original.getColorLabel()));
+                }
+                if (original.containsUserFlags()) {
+                    if (null == flags) {
+                        flags = new Flags();
+                    }
+                    final String[] userFlags = original.getUserFlags();
+                    for (final String userFlag : userFlags) {
+                        flags.add(userFlag);
+                    }
+                }
+                if (null != flags) {
+                    mimeMessage.setFlags(flags, true);
+                }
+            }
+            // Convert to MailMessage instance
+            return MimeMessageConverter.convertMessage(mimeMessage, false);
+        } catch (final MessagingException e) {
+            throw MimeMailException.handleMessagingException(e);
+        } catch (final IOException e) {
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        }
+    }
 
     private static final int DEFAULT_MAX_INMEMORY_SIZE = 131072; // 128KB
 
@@ -85,80 +153,27 @@ public final class ManagedMimeMessage extends MimeMessage {
     private volatile File file;
 
     /**
-     * Initializes a new {@link ManagedMimeMessage} with default in-memory size of 128KB.
-     *
+     * Initializes a new {@link ManagedMimeMessage}.
+     * 
      * @param session The session
-     * @param sourceBytes The RFC822 source bytes
+     * @param file The RFC822 source file
      * @throws MessagingException If a messaging error occurs
+     * @throws OXException If a messaging error occurs
      * @throws IOException If an I/O error occurs
      */
-    public ManagedMimeMessage(final Session session, final byte[] sourceBytes) throws MessagingException, IOException {
-        this(session, sourceBytes, DEFAULT_MAX_INMEMORY_SIZE);
+    private ManagedMimeMessage(final MailMessage original) throws MessagingException, OXException, IOException {
+        super(MimeDefaultSession.getDefaultSession());
+        final InputStream in = getInputStreamFor(original);
+        parse(in);
+        closeables = new ArrayList<Closeable>(1);
+        closeables.add(in);
+        this.managedFile = null;
+        this.file = file;
     }
 
     /**
      * Initializes a new {@link ManagedMimeMessage}.
-     *
-     * @param session The session
-     * @param sourceBytes The RFC822 source bytes
-     * @param maxInMemorySize The max. in-memory size in bytes
-     * @throws MessagingException If a messaging error occurs
-     * @throws IOException If an I/O error occurs
-     */
-    public ManagedMimeMessage(final Session session, final byte[] sourceBytes, final int maxInMemorySize) throws MessagingException, IOException {
-        super(session);
-        if (0 > maxInMemorySize) {
-            throw new IllegalArgumentException("maxInMemorySize is less than zero.");
-        }
-        closeables = new ArrayList<Closeable>(2);
-        flags = new Flags(); // empty Flags object
-        final byte[][] splitted = split(sourceBytes);
-        headers =
-            splitted[0].length == 0 ? new InternetHeaders() : new InternetHeaders(new UnsynchronizedByteArrayInputStream(splitted[0]));
-        final byte[] contentBytes = splitted[1];
-        if (contentBytes.length > maxInMemorySize) {
-            final ManagedFileManagement management = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
-            if (null == management) {
-                content = contentBytes;
-            } else {
-                try {
-                    managedFile = management.createManagedFile(contentBytes);
-                    contentStream = new SharedFileInputStream(managedFile.getFile(), maxInMemorySize);
-                } catch (final OXException e) {
-                    throw new MessagingException(e.getMessage(), e);
-                }
-            }
-        } else {
-            content = contentBytes;
-        }
-        modified = false;
-        saved = true;
-    }
-
-    /**
-     * Initializes a new {@link ManagedMimeMessage}.
-     *
-     * @param session The session
-     * @param managedFile The RFC822 managed file
-     * @throws MessagingException If a messaging error occurs
-     * @throws IOException If an I/O error occurs
-     */
-    public ManagedMimeMessage(final Session session, final ManagedFile managedFile) throws MessagingException, IOException {
-        super(session);
-        closeables = new ArrayList<Closeable>(2);
-        this.file = null;
-        this.managedFile = managedFile;
-        final SharedFileInputStream sis = new SharedFileInputStream(managedFile.getFile(), DEFAULT_MAX_INMEMORY_SIZE);
-        flags = new Flags(); // empty Flags object
-        headers = createInternetHeaders(sis);
-        contentStream = sis.newStream(sis.getPosition(), -1);
-        modified = false;
-        saved = true;
-    }
-
-    /**
-     * Initializes a new {@link ManagedMimeMessage}.
-     *
+     * 
      * @param session The session
      * @param file The RFC822 source file
      * @throws MessagingException If a messaging error occurs
@@ -182,6 +197,7 @@ public final class ManagedMimeMessage extends MimeMessage {
      * @return The file
      */
     public File getFile() {
+        final File file = this.file;
         return null == file ? managedFile.getFile() : file;
     }
 
@@ -202,9 +218,10 @@ public final class ManagedMimeMessage extends MimeMessage {
                 // Ignore
             }
         }
+        final ManagedFile managedFile = this.managedFile;
         if (null != managedFile) {
             try {
-                final ManagedFileManagement management = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
+                final ManagedFileManagement management = getFileManagement();
                 if (null != management) {
                     try {
                         management.removeByID(managedFile.getID());
@@ -213,16 +230,17 @@ public final class ManagedMimeMessage extends MimeMessage {
                     }
                 }
             } finally {
-                managedFile = null;
+                this.managedFile = null;
             }
         }
+        final File file = this.file;
         if (null != file) {
             try {
                 file.delete();
             } catch (final Exception e) {
                 // Ignore
             } finally {
-                file = null;
+                this.file = null;
             }
         }
     }
@@ -230,6 +248,30 @@ public final class ManagedMimeMessage extends MimeMessage {
     /*-
      * ######################################## Helpers ########################################
      */
+
+    private static ManagedFileManagement getFileManagement() {
+        return ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
+    }
+
+    private static InputStream getInputStreamFor(final MailMessage mail) throws OXException, IOException {
+        final ManagedFileManagement service = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class, true);
+        final File file = service.newTempFile();
+        BufferedOutputStream out = null;
+        try {
+            out = new BufferedOutputStream(new FileOutputStream(file));
+            mail.writeTo(out);
+            out.flush();
+        } finally {
+            if (null != out) {
+                try {
+                    out.close();
+                } catch (final IOException e) {
+                    // Ignore
+                }
+            }
+        }
+        return new SharedFileInputStream(file, DEFAULT_MAX_INMEMORY_SIZE);
+    }
 
     private static final byte[] DOUBLE_CRLF = { '\r', '\n', '\r', '\n' };
 
@@ -274,7 +316,7 @@ public final class ManagedMimeMessage extends MimeMessage {
         int pos = indexOf(sourceBytes, pattern, 0, COMPUTED_FAILURE_DOUBLE_CRLF);
         if (pos >= 0) {
             /*
-             *  Double CRLF found
+             * Double CRLF found
              */
             final byte[] a = new byte[pos];
             final int endPos = pos + DOUBLE_CRLF.length;
@@ -297,7 +339,7 @@ public final class ManagedMimeMessage extends MimeMessage {
             return new byte[][] { a, b };
         }
         /*
-         *  Neither double CRLF nor double LF found
+         * Neither double CRLF nor double LF found
          */
         return new byte[][] { new byte[] {}, sourceBytes };
     }
