@@ -144,8 +144,9 @@ public final class ManagedMimeMessage extends MimeMessage implements MimeCleanUp
             if (original.containsFolder()) {
                 retval.setFolder(original.getFolder());
             }
-            if (original.getMailId() != null) {
-                retval.setMailId(original.getMailId());
+            final String mailId = original.getMailId();
+            if (mailId != null) {
+                retval.setMailId(mailId);
             }
             if (original.containsMsgref()) {
                 retval.setMsgref(original.getMsgref());
