@@ -77,6 +77,8 @@ if [ ${1:-0} -eq 2 ]; then
     # -----------------------------------------------------------------------
     rm -f /opt/open-xchange/etc/groupware/TidyConfiguration.properties
     rm -f /opt/open-xchange/etc/groupware/TidyMessages.properties
+    pfile=/opt/open-xchange/etc/configdb.properties
+    ox_remove_property useSeparateWrite $pfile
     pfile=/opt/open-xchange/etc/contact.properties
     ox_remove_property contactldap.configuration.path $pfile
     pfile=/opt/open-xchange/etc/import.properties
