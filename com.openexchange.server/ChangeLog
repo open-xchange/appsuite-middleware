@@ -1,6 +1,7 @@
 * 2012-07-25 - thorben.betten@open-xchange.com
 
  - Fix for bug 22674: Deal with image-surrounding plain text
+ - Fix for bug 22612: Proper "Set-Cookie" handling for IE <= v8.0
 
 * 2012-07-24 - thorben.betten@open-xchange.com
 

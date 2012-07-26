@@ -68,7 +68,9 @@ public final class AJPv13Utility {
         super();
     }
 
-    private static final Pattern P = Pattern.compile("\\.");
+    private static final Pattern P_DOT = Pattern.compile("\\.");
+
+    private static final Pattern P_MINUS = Pattern.compile("-");
 
     /**
      * Generates URL-encoding of specified text.
@@ -78,7 +80,7 @@ public final class AJPv13Utility {
      */
     public static String urlEncode(final String text) {
         try {
-            return P.matcher(URLEncoder.encode(text, "iso-8859-1")).replaceAll("%2E");
+            return P_MINUS.matcher(P_DOT.matcher(URLEncoder.encode(text, "iso-8859-1")).replaceAll("%2E")).replaceAll("%2D");
         } catch (final UnsupportedEncodingException e) {
             return text;
         }
