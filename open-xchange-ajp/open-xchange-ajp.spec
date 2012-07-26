@@ -38,10 +38,36 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 
 %post
 if [ ${1:-0} -eq 2 ]; then
+    # only when updating
+    . /opt/open-xchange/lib/oxfunctions.sh
+
+    # prevent bash from expanding, see bug 13316
+    GLOBIGNORE='*'
+
+    ##
+    ## start update from < 6.21
+    ##
     if [ -e /opt/open-xchange/etc/groupware/ajp.properties ]; then
         mv /opt/open-xchange/etc/ajp.properties /opt/open-xchange/etc/ajp.properties.rpmnew
         mv /opt/open-xchange/etc/groupware/ajp.properties /opt/open-xchange/etc/ajp.properties
     fi
+
+    # SoftwareChange_Request-1081
+    pfile=/opt/open-xchange/etc/ajp.properties
+    ox_remove_property AJP_COYOTE_SOCKET_HANDLER $pfile
+
+    # SoftwareChange_Request-1093
+    pfile=/opt/open-xchange/etc/ajp.properties
+    ox_remove_property AJP_CONNECTION_POOL $pfile
+    ox_remove_property AJP_CONNECTION_POOL_SIZE $pfile
+    ox_remove_property AJP_REQUEST_HANDLER_POOL $pfile
+    ox_remove_property AJP_REQUEST_HANDLER_POOL_SIZE $pfile
+    ox_remove_property AJP_MOD_JK $pfile
+    ox_remove_property AJP_MAX_NUM_OF_SOCKETS $pfile
+    ox_remove_property AJP_CHECK_MAGIC_BYTES_STRICT $pfile
+    ##
+    ## end update from < 6.21
+    ##
 fi
 
 %clean
