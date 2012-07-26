@@ -766,16 +766,16 @@ public abstract class SessionServlet extends AJAXServlet {
             for (final String string : cookieNames) {
                 if (name.startsWith(string)) {
                     final String value = cookie.getValue();
-                    Cookie respCookie = new Cookie(name, value);
+                    final Cookie respCookie = new Cookie(name, value);
                     respCookie.setPath("/");
                     final String domain = getDomainValue(req.getServerName(), prefixWithDot());
                     if (null != domain) {
                         respCookie.setDomain(domain);
                         // Once again without domain parameter
-                        respCookie = new Cookie(name, value);
-                        respCookie.setPath("/");
-                        respCookie.setMaxAge(0); // delete
-                        resp.addCookie(respCookie);
+                        final Cookie respCookie2 = new Cookie(name, value);
+                        respCookie2.setPath("/");
+                        respCookie2.setMaxAge(0); // delete
+                        resp.addCookie(respCookie2);
                     }
                     respCookie.setMaxAge(0); // delete
                     resp.addCookie(respCookie);
