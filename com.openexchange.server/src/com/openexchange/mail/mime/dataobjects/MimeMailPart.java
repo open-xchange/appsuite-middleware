@@ -69,7 +69,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.ManagedMimeMessage;
 import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.MimeCleanUp;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeTypes;
@@ -84,7 +86,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MimeMailPart extends MailPart implements MimeRawSource {
+public final class MimeMailPart extends MailPart implements MimeRawSource, MimeCleanUp {
 
     private static final long serialVersionUID = -1142595512657302179L;
 
@@ -242,6 +244,17 @@ public final class MimeMailPart extends MailPart implements MimeRawSource {
      */
     public Part getPart() {
         return part;
+    }
+
+    @Override
+    public void cleanUp() {
+        if (part instanceof ManagedMimeMessage) {
+            try {
+                ((ManagedMimeMessage) part).cleanUp();
+            } catch (final Exception e) {
+                com.openexchange.log.Log.loggerFor(MimeMailPart.class).warn("Couldn't clean-up MIME resource.", e);
+            }
+        }
     }
 
     @Override

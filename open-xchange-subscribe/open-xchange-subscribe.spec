@@ -54,6 +54,15 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 
 %post
 if [ ${1:-0} -eq 2 ]; then
+    # only when updating
+    . /opt/open-xchange/lib/oxfunctions.sh
+
+    # prevent bash from expanding, see bug 13316
+    GLOBIGNORE='*'
+
+    ##
+    ## start update from < 6.21
+    ##
     CONFFILES="crawlers/gmx.com.yml crawlers/gmx.de.yml crawlers/GoogleCalendar.yml crawlers/GoogleMail.yml 'crawlers/Sun Calendar.yml' 'crawlers/Sun Contacts.yml' 'crawlers/Sun Tasks.yml' crawlers/t-online.de.yml crawlers/web.de.yml crawlers/XING.yml crawlers/yahoo.com.yml crawler.properties facebooksubscribe.properties linkedinsubscribe.properties microformatSubscription.properties msnsubscribe.properties yahoosubscribe.properties"
     for FILE in ${CONFFILES}; do
         if [ -e "/opt/open-xchange/etc/groupware/${FILE}" ]; then
@@ -61,6 +70,15 @@ if [ ${1:-0} -eq 2 ]; then
             mv "/opt/open-xchange/etc/groupware/${FILE}" "/opt/open-xchange/etc/${FILE}"
         fi
     done
+
+    #SoftwareChange_Request-1091
+    pfile=/opt/open-xchange/etc/crawler.properties
+    if grep -E '^com.openexchange.subscribe.crawler.path.*/' $pfile >/dev/null; then
+        ox_set_property com.openexchange.subscribe.crawler.path crawlers $pfile
+    fi    
+    ##
+    ## end update from < 6.21
+    ##
 fi
 
 %clean

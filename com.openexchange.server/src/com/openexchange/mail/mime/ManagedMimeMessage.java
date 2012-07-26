@@ -77,7 +77,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ManagedMimeMessage extends MimeMessage {
+public final class ManagedMimeMessage extends MimeMessage implements MimeCleanUp {
 
     /**
      * Creates file-backed clones of passed <tt>MailMessage</tt> instances.
@@ -113,7 +113,7 @@ public final class ManagedMimeMessage extends MimeMessage {
             return null;
         }
         try {
-            final MimeMessage mimeMessage = new ManagedMimeMessage(original);
+            final ManagedMimeMessage mimeMessage = new ManagedMimeMessage(original);
             // Apply flags to MIME message
             {
                 MimeMessageConverter.parseMimeFlags(original.getFlags(), mimeMessage);
@@ -210,6 +210,7 @@ public final class ManagedMimeMessage extends MimeMessage {
     /**
      * Cleans up this managed MIME message.
      */
+    @Override
     public void cleanUp() {
         while (!closeables.isEmpty()) {
             try {
