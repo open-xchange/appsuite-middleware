@@ -771,12 +771,12 @@ public abstract class SessionServlet extends AJAXServlet {
                     final String domain = getDomainValue(req.getServerName(), prefixWithDot());
                     if (null != domain) {
                         respCookie.setDomain(domain);
+                        // Once again without domain parameter
+                        respCookie = new Cookie(name, value);
+                        respCookie.setPath("/");
+                        respCookie.setMaxAge(0); // delete
+                        resp.addCookie(respCookie);
                     }
-                    respCookie.setMaxAge(0); // delete
-                    resp.addCookie(respCookie);
-                    // Once again without domain parameter
-                    respCookie = new Cookie(name, value);
-                    respCookie.setPath("/");
                     respCookie.setMaxAge(0); // delete
                     resp.addCookie(respCookie);
                 }
