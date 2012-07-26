@@ -80,6 +80,7 @@ import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailSessionCache;
@@ -709,15 +710,26 @@ public final class MimeReply {
                  * Create message from input stream
                  */
                 final InputStream is = part.getInputStream();
-                final ByteArrayOutputStream tmp = new UnsynchronizedByteArrayOutputStream(8192);
-                final byte[] buf = new byte[4096];
-                int read = -1;
-                while ((read = is.read(buf, 0, buf.length)) != -1) {
-                    tmp.write(buf, 0, read);
+                try {
+                    final ByteArrayOutputStream tmp = new UnsynchronizedByteArrayOutputStream(8192);
+                    final byte[] buf = new byte[4096];
+                    int read = -1;
+                    while ((read = is.read(buf, 0, buf.length)) != -1) {
+                        tmp.write(buf, 0, read);
+                    }
+                    final MailMessage attachedMsg = MimeMessageConverter.convertMessage(tmp.toByteArray());// MimeMessage(mailSession,
+                    // part.getInputStream());
+                    found |= generateReplyText(
+                        attachedMsg,
+                        pc.retvalContentType,
+                        pc.strHelper,
+                        pc.ltz,
+                        pc.usm,
+                        pc.mailSession,
+                        pc.replyTexts);
+                } finally {
+                    Streams.close(is);
                 }
-                final MailMessage attachedMsg = MimeMessageConverter.convertMessage(tmp.toByteArray());// MimeMessage(mailSession,
-                // part.getInputStream());
-                found |= generateReplyText(attachedMsg, pc.retvalContentType, pc.strHelper, pc.ltz, pc.usm, pc.mailSession, pc.replyTexts);
             }
         }
         return found;
