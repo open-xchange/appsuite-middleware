@@ -68,6 +68,33 @@ update622() {
   dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/settings/ui.properties \
 	/opt/open-xchange/etc/settings/ui.properties 6.20.99 open-xchange-settings-extensions \
 	-- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange-settings-extensions)
+
+  # SoftwareChange_Request-1024
+  pfile=/opt/open-xchange/etc/server.properties
+  if ! ox_exists_property com.openexchange.IPMaskV4 $pfile; then
+      ox_set_property com.openexchange.IPMaskV4 "" $pfile
+  fi
+  if ! ox_exists_property com.openexchange.IPMaskV6 $pfile; then
+      ox_set_property com.openexchange.IPMaskV6 "" $pfile
+  fi
+
+  # SoftwareChange_Request-1027
+  pfile=/opt/open-xchange/etc/server.properties
+  if ! ox_exists_property com.openexchange.dispatcher.prefix $pfile; then
+      ox_set_property com.openexchange.dispatcher.prefix "/ajax/" $pfile
+  fi
+
+  # SoftwareChange_Request-1028
+  pfile=/opt/open-xchange/etc/contact.properties
+  if ! ox_exists_property com.openexchange.carddav.tree $pfile; then
+      ox_set_property com.openexchange.carddav.tree "0" $pfile
+  fi
+  if ! ox_exists_property com.openexchange.carddav.combinedRequestTimeout $pfile; then
+      ox_set_property com.openexchange.carddav.combinedRequestTimeout "20000" $pfile
+  fi
+  if ! ox_exists_property com.openexchange.carddav.exposedCollections $pfile; then
+      ox_set_property com.openexchange.carddav.exposedCollections "0" $pfile
+  fi
 }
 
 setConfigFilePermissions() {
