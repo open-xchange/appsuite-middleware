@@ -626,8 +626,8 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
             @SuppressWarnings("unchecked")
             final Queue<MimeCleanUp> cleanUps = (Queue<MimeCleanUp>) properties.get(KEY_CLEAN_UPS);
             if (null != cleanUps) {
-                for (final MimeCleanUp mimeCleanUp : cleanUps) {
-                    mimeCleanUp.cleanUp();
+                while (!cleanUps.isEmpty()) {
+                    cleanUps.remove().cleanUp();
                 }
             }
         }
