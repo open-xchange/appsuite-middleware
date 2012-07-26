@@ -112,6 +112,9 @@ if [ ${1:-0} -eq 2 ]; then
         ox_set_property MimeTypeFileName mime.types $pfile
         ox_remove_property MimeTypeFile $pfile
     fi
+    # SoftwareChange_Request-1094
+    # -----------------------------------------------------------------------
+    rm -f /opt/open-xchange/etc/groupware/mailjsoncache.properties
     ##
     ## end update from < 6.21
     ##

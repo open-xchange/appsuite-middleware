@@ -84,6 +84,11 @@ update622() {
         ox_set_property MimeTypeFileName mime.types $pfile
         ox_remove_property MimeTypeFile $pfile
     fi
+
+    # SoftwareChange_Request-1094
+    # -----------------------------------------------------------------------
+    dpkg-maintscript-helper rm_conffile \
+        /opt/open-xchange/etc/groupware/mailjsoncache.properties -- "$@"
 }
 
 setConfigFilePermissions() {
