@@ -53,6 +53,7 @@ import static com.openexchange.sessiond.impl.IPAddressUtil.textToNumericFormatV4
 import static com.openexchange.sessiond.impl.IPAddressUtil.textToNumericFormatV6;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.Locale;
 import javax.servlet.http.Cookie;
 import com.openexchange.ajax.Login;
 import com.openexchange.config.ConfigurationService;
@@ -131,7 +132,7 @@ public final class Cookies {
             }
         } else {
             if (!"localhost".equalsIgnoreCase(serverName) && (null == textToNumericFormatV4(serverName)) && (null == textToNumericFormatV6(serverName))) {
-                return serverName;
+                return serverName.toLowerCase(Locale.US).startsWith("www.") ? serverName.substring(4) : serverName;
             }
         }
         return null;
