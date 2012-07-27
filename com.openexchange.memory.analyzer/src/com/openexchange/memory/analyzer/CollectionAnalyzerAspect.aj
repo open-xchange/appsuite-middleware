@@ -12,7 +12,7 @@ import com.openexchange.memory.analyzer.WeakIdentityHashMap;
 
 public privileged aspect CollectionAnalyzerAspect {
 
-    static final transient Log LOG = LogFactory.getLog(CollectionAnalyzerAspect.class);
+//    static final transient Log LOG = LogFactory.getLog(CollectionAnalyzerAspect.class);
     
     // After this time in minutes, the collection will be checked
     private int STARTUP_DELAY = Integer.parseInt(System.getProperty("ox.ma.startup.delay", "2"));
