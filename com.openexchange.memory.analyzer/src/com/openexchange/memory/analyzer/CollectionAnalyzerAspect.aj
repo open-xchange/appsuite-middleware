@@ -5,16 +5,21 @@ import java.lang.ref.WeakReference;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
+import org.apache.commons.logging.Log;
 import org.aspectj.lang.JoinPoint;
+import com.openexchange.log.LogFactory;
 import com.openexchange.memory.analyzer.WeakIdentityHashMap;
 
 public privileged aspect CollectionAnalyzerAspect {
 
+    static final transient Log LOG = LogFactory.getLog(CollectionAnalyzerAspect.class);
+    
     // After this time in minutes, the collection will be checked
     private int STARTUP_DELAY = Integer.parseInt(System.getProperty("ox.ma.startup.delay", "2"));
     {
         if (STARTUP_DELAY < 0){
-            System.out.println("ma.period.startup.delay has to be at least 0 or more");
+            LOG.info("ox.ma.startup.delay.delay has to be at least 0 or more");
+//            System.out.println("ma.period.startup.delay has to be at least 0 or more");
             STARTUP_DELAY = 0;
         }
     }
@@ -24,23 +29,30 @@ public privileged aspect CollectionAnalyzerAspect {
     private int SUSPECT_PERIOD = Integer.parseInt(System.getProperty("ox.ma.suspect.period", "10"));
     {
         if (SUSPECT_PERIOD < 1){
-            System.out.println("ma.period.suspect has to be at least 1 or more");
+            LOG.info("ox.ma.period.suspect has to be at least 1 or more");
             SUSPECT_PERIOD = 1;
         }
     }
     // Interval in seconds, the overwatch thread will iterate through the changed collections.
-    private int CHECK_INTERVAL = Integer.parseInt(System.getProperty("ox.ma.check.interval", "5"));
+    int CHECKCHANGED_INTERVAL = Integer.parseInt(System.getProperty("ox.ma.checkchanged.interval", "5"));
     {
-        if (CHECK_INTERVAL < 1){
-            System.out.println("ma.check.interval has to be at least 1 or more");
-            CHECK_INTERVAL = 1;
+        if (CHECKCHANGED_INTERVAL < 1){
+            LOG.info("ox.ma.check.interval has to be at least 1 or more");
+            CHECKCHANGED_INTERVAL = 1;
+        }
+    }
+    int CHECKTIME_INTERVAL = Integer.parseInt(System.getProperty("ox.ma.checktime.interval", "1"));
+    {
+        if (CHECKCHANGED_INTERVAL < 1){
+            LOG.info("ox.ma.check.interval has to be at least 1 or more");
+            CHECKCHANGED_INTERVAL = 1;
         }
     }
     // Time in hours, a collection will be marked as long-living.
     private int TIMEOUT_PERIOD = Integer.parseInt(System.getProperty("ox.ma.timeout.period", "24"));
     {
         if (TIMEOUT_PERIOD < 1){
-            System.out.println("ma.timeout.period has to be at least 1 or more");
+            LOG.info("ox.ma.timeout.period has to be at least 1 or more");
             TIMEOUT_PERIOD = 1;
         }
     }
@@ -48,15 +60,15 @@ public privileged aspect CollectionAnalyzerAspect {
     private float INCREASING_PERCENTAGE = Float.parseFloat(System.getProperty("ox.ma.increasing.percentage", "0.75"));
     {
         if (INCREASING_PERCENTAGE > 1) {
-            System.out.println("ma.increasing.percentage has to be between 0.5 and 1. To get less false-positives, a value of 0.75 is prefered");
+            LOG.info("ox.ma.increasing.percentage has to be between 0.5 and 1. To get less false-positives, a value of 0.75 is prefered");
             INCREASING_PERCENTAGE = 1;
         } else if (INCREASING_PERCENTAGE < 0.5) {
-            System.out.println("ma.increasing.percentage has to be between 0.5 and 1. To get less false-positives, a value of 0.75 is prefered");
+            LOG.info("ox.ma.increasing.percentage has to be between 0.5 and 1. To get less false-positives, a value of 0.75 is prefered");
             INCREASING_PERCENTAGE = 0.5F;
         }
     }
 
-    private final int SIZE_FOR_COLLECTIONS = SUSPECT_PERIOD * 60 / CHECK_INTERVAL;
+    private final int SIZE_FOR_COLLECTIONS = SUSPECT_PERIOD * 60 / CHECKCHANGED_INTERVAL;
 
     protected WeakIdentityHashMap<Object, CollectionStatistics> statistics = new WeakIdentityHashMap<Object, CollectionStatistics>();
 
@@ -240,10 +252,6 @@ public privileged aspect CollectionAnalyzerAspect {
         return thisJoinPoint.getStaticPart().getSourceLocation().toString();
     }
 
-    public int getCHECK_INTERVAL() {
-        return CHECK_INTERVAL;
-    }
-
     private static class CollectionAnalyzerThread extends Thread {
 
         private CollectionAnalyzerAspect asp;
@@ -257,18 +265,27 @@ public privileged aspect CollectionAnalyzerAspect {
         @Override
         public void run() {
             try {
-                System.out.println("******************************\n" + "*      OX-MemoryAnalyzer     *\n" + "*           started          *\n" + "******************************");
+                long lastCheckChanged = System.currentTimeMillis();
+                long lastCheckTime = System.currentTimeMillis();
+                
+                LOG.info("******************************\n*      OX-MemoryAnalyzer     *\n*           started          *\n******************************");
                 while (true) {
-                    asp.evaluateChanged();
-                    asp.evaluateTime();
+                    if (lastCheckChanged + asp.CHECKCHANGED_INTERVAL * 1000 < System.currentTimeMillis()) {
+                        asp.evaluateChanged();
+                        lastCheckChanged = System.currentTimeMillis();
+                    }
+                    if (lastCheckTime + asp.CHECKTIME_INTERVAL * 60000 < System.currentTimeMillis()) {
+                        asp.evaluateTime();
+                        lastCheckTime = System.currentTimeMillis();
+                    }
                     try {
-                        Thread.sleep(asp.getCHECK_INTERVAL() * 1000);
+                        Thread.sleep(500);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                 }
             } finally {
-                System.out.println("******************************\n" + "*           Analyzer         *\n" + "*           finished         *\n" + "******************************");
+                LOG.info("******************************\n*      OX-MemoryAnalyzer     *\n*           finished         *\n******************************");
                 asp = null;
             }
 
