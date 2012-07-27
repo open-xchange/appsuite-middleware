@@ -58,6 +58,17 @@ import javax.servlet.http.Cookie;
  */
 public final class CookieWrapper {
 
+    /**
+     * Creates a new {@link CookieWrapper} for specified cookie.
+     * 
+     * @param cookie The cookie
+     * @return The new wrapper
+     * @throws IllegalArgumentException If passed {@link Cookie} instance is <code>null</code>
+     */
+    public static CookieWrapper wrapper(final Cookie cookie) {
+        return new CookieWrapper(cookie);
+    }
+
     private final Cookie cookie;
 
     private final int hash;

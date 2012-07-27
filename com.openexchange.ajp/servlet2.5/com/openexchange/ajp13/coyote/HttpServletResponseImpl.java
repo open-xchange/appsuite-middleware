@@ -49,6 +49,7 @@
 
 package com.openexchange.ajp13.coyote;
 
+import static com.openexchange.ajp13.coyote.CookieWrapper.wrapper;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import java.io.IOException;
@@ -197,7 +198,7 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
      */
     private static final Set<String> SINGLE_VALUE_HEADERS = Constants.SINGLE_VALUE_HEADERS;
 
-    private final Set<Cookie> cookies;
+    private final Set<CookieWrapper> cookies;
 
     private String statusMsg;
 
@@ -236,7 +237,7 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
         super();
         headers = new HashMap<String, List<String>>(16);
         outputSelection = OUTPUT_NOT_SELECTED;
-        cookies = new LinkedHashSet<Cookie>();
+        cookies = new LinkedHashSet<CookieWrapper>(8);
         status = HttpServletResponse.SC_OK;
         statusMsg = "OK";
         this.ajpProcessor = ajpProcessor;
@@ -644,7 +645,7 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
 
     @Override
     public void addCookie(final Cookie cookie) {
-        cookies.add(cookie);
+        cookies.add(wrapper(cookie));
     }
 
     /**
@@ -689,12 +690,13 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
             return EMPTY_COOKIES;
         }
         // Write cookies
-        final Collection<Cookie> iterateMe;
+        final Collection<CookieWrapper> iterateMe;
         if (filterByName()) {
             // Check for duplicate named cookies
-            final Map<String, Cookie> checkedCookies = new LinkedHashMap<String, Cookie>(cookiesSize);
-            for (final Cookie cookie : cookies) {
-                /*final Cookie prev = */checkedCookies.put(cookie.getName(), cookie);
+            final Map<String, CookieWrapper> checkedCookies = new LinkedHashMap<String, CookieWrapper>(cookiesSize);
+            for (final CookieWrapper wrapper : cookies) {
+                final Cookie cookie = wrapper.getCookie();
+                /*final Cookie prev = */checkedCookies.put(cookie.getName(), wrapper);
                 // Already existing; decide which one to keep or to merge
                 // By now: Keep the newer one (cookies is a LinkedHashSet that keeps order)
                 /*-
@@ -722,8 +724,8 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
         final List<String> list = new ArrayList<String>(cookiesSize);
         final String userAgent = ajpProcessor.getRequest().getHeader("User-Agent");
         final StringBuilder strBuilder = new StringBuilder(32);
-        for (final Cookie cookie : iterateMe) {
-            list.add(getFormattedCookie(cookie, userAgent, strBuilder, httpOnly));
+        for (final CookieWrapper wrapper : iterateMe) {
+            list.add(getFormattedCookie(wrapper.getCookie(), userAgent, strBuilder, httpOnly));
         }
         final List<List<String>> retval = new ArrayList<List<String>>(1);
         retval.add(list);
