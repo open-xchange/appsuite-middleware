@@ -61,7 +61,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
-import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -91,7 +90,6 @@ import com.openexchange.imap.notify.internal.IMAPNotifierRegistry;
 import com.openexchange.imap.ping.IMAPCapabilityAndGreetingCache;
 import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.java.Charsets;
-import com.openexchange.java.Java7ConcurrentLinkedQueue;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.Protocol;
 import com.openexchange.mail.api.IMailProperties;
@@ -271,11 +269,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     private volatile IMAPConfig imapConfig;
 
     /**
-     * A map for arbitrary properties.
-     */
-    protected final ConcurrentMap<String, Object> properties;
-
-    /**
      * A simple cache for max. count values per server.
      */
     private static volatile ConcurrentMap<String, Integer> maxCountCache;
@@ -287,7 +280,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      */
     protected IMAPAccess(final Session session) {
         super(session);
-        properties = new ConcurrentHashMap<String, Object>(4);
         setMailProperties((Properties) System.getProperties().clone());
         maxCount = -1;
         protocol = IMAPProvider.PROTOCOL_IMAP;
@@ -301,7 +293,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      */
     protected IMAPAccess(final Session session, final int accountId) {
         super(session, accountId);
-        properties = new ConcurrentHashMap<String, Object>(4);
         setMailProperties((Properties) System.getProperties().clone());
         maxCount = -1;
         protocol = IMAPProvider.PROTOCOL_IMAP;
@@ -435,9 +426,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     ic.dropImapStore();
                 }
                 imapStore = null;
-            }
-            if (doClearIMAPStoreContainer()) {
-                clearIMAPStoreContainer();
             }
         } finally {
             reset();
@@ -755,41 +743,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              * Add server's capabilities
              */
             config.initializeCapabilities(imapStore, session);
-            rememberThisInstance();
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e, config, session);
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private void rememberThisInstance() {
-        final Session session = this.session;
-        if (null == session) {
-            return;
-        }
-        final String key = "com.openexchange.imap.openedAccesses";
-        Queue<IMAPAccess> queue = (Queue<IMAPAccess>) session.getParameter(key);
-        if (null == queue) {
-            synchronized (session) {
-                queue = (Queue<IMAPAccess>) session.getParameter(key);
-                if (null == queue) {
-                    queue = new Java7ConcurrentLinkedQueue<IMAPAccess>();
-                    session.setParameter(key, queue);
-                }
-            }
-        }
-        queue.offer(this);
-    }
-
-    @SuppressWarnings("unchecked")
-    private void forgetThisInstance() {
-        final Session session = this.session;
-        if (null == session) {
-            return;
-        }
-        final Queue<IMAPAccess> queue = (Queue<IMAPAccess>) session.getParameter("com.openexchange.imap.openedAccesses");
-        if (null != queue) {
-            queue.remove(this);
         }
     }
 
@@ -816,22 +771,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      */
     public IMAPStore connectIMAPStore(final boolean fromCache) throws MessagingException, OXException {
         return connectIMAPStore(fromCache, imapSession, server, port, login, password, clientIp);
-    }
-
-    private boolean hasClearIMAPStoreContainer() {
-        final Boolean b;
-        return ((b = (Boolean) properties.get("__clearIMAPStoreContainer")) != null && b.booleanValue());
-    }
-
-    private boolean doClearIMAPStoreContainer() {
-        final String key = "__clearIMAPStoreContainer";
-        Boolean b;
-        while ((b = (Boolean) properties.get(key)) != null && b.booleanValue()) {
-            if (b == properties.remove(key)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
@@ -980,10 +919,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         if (useIMAPStoreCache()) {
             return false;
         }
-        if (hasClearIMAPStoreContainer()) {
-            return false;
-        }
-        forgetThisInstance();
         return true;
     }
 
