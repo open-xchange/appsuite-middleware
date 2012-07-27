@@ -289,6 +289,21 @@ public final class IMAPStoreCache {
     }
 
     /**
+     * Gets (optionally) associated IMAP store container.
+     * 
+     * @param server The server name
+     * @param port The port
+     * @param login The login
+     * @return The container or <code>null</code>
+     */
+    public IMAPStoreContainer optContainer(final String server, final int port, final String login) {
+        /*
+         * Get container
+         */
+        return map.get(newKey(server, port, login));
+    }
+
+    /**
      * Gets a connected IMAP store for specified arguments.
      * 
      * @param accountId The account identifier

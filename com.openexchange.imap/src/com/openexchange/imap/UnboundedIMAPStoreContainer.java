@@ -170,10 +170,9 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
         if (null == queue) {
             return;
         }
-        for (final Iterator<IMAPStoreWrapper> iter = queue.iterator(); iter.hasNext();) {
-            final IMAPStoreWrapper imapStoreWrapper = iter.next();
-            iter.remove();
-            closeSafe(imapStoreWrapper.imapStore);
+        IMAPStoreWrapper wrapper;
+        while ((wrapper = queue.poll()) != null) {
+            closeSafe(wrapper.imapStore);
         }
     }
 

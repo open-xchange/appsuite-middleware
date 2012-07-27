@@ -2523,6 +2523,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     }
                 }
             }
+            imapAccess.properties.putIfAbsent("__clearIMAPStoreContainer", Boolean.TRUE);
         }
     }
 
