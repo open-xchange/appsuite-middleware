@@ -1,0 +1,28 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange Cassandra NoSQL sessionstorage
+Bundle-SymbolicName: com.openexchange.sessionstorage.nosql
+Bundle-Version: 6.21.0
+Bundle-Activator: com.openexchange.sessionstorage.nosql.osgi.NoSQLSessionStorageActivator
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.config,
+ com.openexchange.exception,
+ com.openexchange.log,
+ com.openexchange.nosql.cassandra,
+ com.openexchange.osgi,
+ com.openexchange.session,
+ com.openexchange.sessionstorage,
+ me.prettyprint.cassandra.model,
+ me.prettyprint.cassandra.serializers,
+ me.prettyprint.cassandra.service,
+ me.prettyprint.cassandra.service.template,
+ me.prettyprint.hector.api,
+ me.prettyprint.hector.api.beans,
+ me.prettyprint.hector.api.ddl,
+ me.prettyprint.hector.api.factory,
+ me.prettyprint.hector.api.mutation,
+ me.prettyprint.hector.api.query,
+ org.apache.cassandra.db,
+ org.apache.commons.logging;version="1.0.4",
+ org.osgi.framework;version="1.3.0"
