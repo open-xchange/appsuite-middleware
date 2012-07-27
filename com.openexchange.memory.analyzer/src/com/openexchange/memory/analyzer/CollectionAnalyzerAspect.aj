@@ -268,7 +268,7 @@ public privileged aspect CollectionAnalyzerAspect {
                 long lastCheckChanged = System.currentTimeMillis();
                 long lastCheckTime = System.currentTimeMillis();
                 
-                LOG.info("******************************\n*      OX-MemoryAnalyzer     *\n*           started          *\n******************************");
+                LOG.info("OX-MemoryAnalyzer started");
                 while (true) {
                     if (lastCheckChanged + asp.CHECKCHANGED_INTERVAL * 1000 < System.currentTimeMillis()) {
                         asp.evaluateChanged();
@@ -285,7 +285,7 @@ public privileged aspect CollectionAnalyzerAspect {
                     }
                 }
             } finally {
-                LOG.info("******************************\n*      OX-MemoryAnalyzer     *\n*           finished         *\n******************************");
+                LOG.info("OX-MemoryAnalyzer finished");
                 asp = null;
             }
 
