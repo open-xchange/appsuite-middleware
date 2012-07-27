@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.tools.mappings;
 
+import java.util.Comparator;
+import java.util.Locale;
 import com.openexchange.exception.OXException;
 
 /**
@@ -58,7 +60,7 @@ import com.openexchange.exception.OXException;
  * @param <O> the type of the object
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public interface Mapping<T, O> {
+public interface Mapping<T, O> extends Comparator<O> {
 	
 	/**
 	 * Gets a value indicating whether the mapped property is set in the 
@@ -125,4 +127,18 @@ public interface Mapping<T, O> {
 	 */
 	void copy(O from, O to) throws OXException;
 	
+	/**
+     * Compares the supplied objects for order, respecting the given locale
+     * when defined. Returns a negative integer, zero, or a positive integer 
+     * as the first argument is less than, equal to, or greater than the 
+     * second.
+	 * 
+	 * @param o1 the first object for comparison
+	 * @param o2 the second object for comparison
+	 * @param locale the Java locale, or <code>null</code> if not defined
+     * @return a negative integer, zero, or a positive integer as the
+     *         first argument is less than, equal to, or greater than the
+     *         second.
+	 */
+    int compare(O o1, O o2, Locale locale);
 }
