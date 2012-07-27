@@ -52,7 +52,7 @@ package com.openexchange.ajp13.coyote;
 import javax.servlet.http.Cookie;
 
 /**
- * {@link CookieWrapper}
+ * {@link CookieWrapper} - {@link Set}-capable CookieWrapper
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
