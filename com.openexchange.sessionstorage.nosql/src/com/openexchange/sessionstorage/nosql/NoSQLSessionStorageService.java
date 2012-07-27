@@ -53,7 +53,6 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import me.prettyprint.cassandra.model.IndexedSlicesQuery;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 import me.prettyprint.cassandra.service.ThriftCluster;
@@ -68,9 +67,9 @@ import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
 import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hector.api.mutation.Mutator;
 import me.prettyprint.hector.api.query.QueryResult;
+import me.prettyprint.hector.api.query.RangeSlicesQuery;
 import me.prettyprint.hector.api.query.SliceQuery;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.sessionstorage.StoredSession;
@@ -94,6 +93,8 @@ public class NoSQLSessionStorageService implements SessionStorageService {
     private final String CF_NAME;
 
     private boolean CF_EXISTS;
+    
+    private final String[] COLUMN_NAMES = new String[] {"loginName", "password", "contextId", "userId", "secret", "login", "randomToken", "localIp", "authId", "hash", "client", "altId"};
 
     private final Keyspace keyspace;
 
@@ -138,9 +139,9 @@ public class NoSQLSessionStorageService implements SessionStorageService {
     }
 
     @Override
-    public Session lookupSession(String sessionId) throws OXException {
+    public Session lookupSession(String sessionId) {
         SliceQuery<String, String, String> query = HFactory.createSliceQuery(keyspace, serializer, serializer, serializer);
-        query.setColumnFamily(CF_NAME).setKey(sessionId).setColumnNames("loginName", "password", "contextId", "userId", "secret", "login", "randomToken", "localIP", "authId", "hash", "client");
+        query.setColumnFamily(CF_NAME).setKey(sessionId).setColumnNames(COLUMN_NAMES);
         QueryResult<ColumnSlice<String, String>> result = query.execute();
         ColumnSlice<String, String> slice = result.get();
         String loginName = slice.getColumnByName("loginName").getValue();
@@ -159,34 +160,35 @@ public class NoSQLSessionStorageService implements SessionStorageService {
     }
 
     @Override
-    public void addSession(Session session) throws OXException {
+    public void addSession(Session session) {
         Mutator<String> mutator = HFactory.createMutator(keyspace, serializer);
-        mutator.insert(session.getSessionID(), CF_NAME, HFactory.createStringColumn("loginName", session.getLoginName()));
-        mutator.insert(session.getSessionID(), CF_NAME, HFactory.createStringColumn("password", session.getPassword()));
-        mutator.insert(session.getSessionID(), CF_NAME, HFactory.createStringColumn("contextId", String.valueOf(session.getContextId())));
-        mutator.insert(session.getSessionID(), CF_NAME, HFactory.createStringColumn("userId", String.valueOf(session.getUserId())));
-        mutator.insert(session.getSessionID(), CF_NAME, HFactory.createStringColumn("secret", session.getSecret()));
-        mutator.insert(session.getSessionID(), CF_NAME, HFactory.createStringColumn("login", session.getLogin()));
-        mutator.insert(session.getSessionID(), CF_NAME, HFactory.createStringColumn("randomToken", session.getRandomToken()));
-        mutator.insert(session.getSessionID(), CF_NAME, HFactory.createStringColumn("localIP", session.getLocalIp()));
-        mutator.insert(session.getSessionID(), CF_NAME, HFactory.createStringColumn("authId", session.getAuthId()));
-        mutator.insert(session.getSessionID(), CF_NAME, HFactory.createStringColumn("hash", session.getHash()));
-        mutator.insert(session.getSessionID(), CF_NAME, HFactory.createStringColumn("client", session.getClient()));
+        mutator.addInsertion(session.getSessionID(), CF_NAME, HFactory.createStringColumn("loginName", session.getLoginName()));
+        mutator.addInsertion(session.getSessionID(), CF_NAME, HFactory.createStringColumn("password", session.getPassword()));
+        mutator.addInsertion(session.getSessionID(), CF_NAME, HFactory.createColumn("contextId", session.getContextId()));
+        mutator.addInsertion(session.getSessionID(), CF_NAME, HFactory.createColumn("userId", session.getUserId()));
+        mutator.addInsertion(session.getSessionID(), CF_NAME, HFactory.createStringColumn("secret", session.getSecret()));
+        mutator.addInsertion(session.getSessionID(), CF_NAME, HFactory.createStringColumn("login", session.getLogin()));
+        mutator.addInsertion(session.getSessionID(), CF_NAME, HFactory.createStringColumn("randomToken", session.getRandomToken()));
+        mutator.addInsertion(session.getSessionID(), CF_NAME, HFactory.createStringColumn("localIP", session.getLocalIp()));
+        mutator.addInsertion(session.getSessionID(), CF_NAME, HFactory.createStringColumn("authId", session.getAuthId()));
+        mutator.addInsertion(session.getSessionID(), CF_NAME, HFactory.createStringColumn("hash", session.getHash()));
+        mutator.addInsertion(session.getSessionID(), CF_NAME, HFactory.createStringColumn("client", session.getClient()));
         mutator.execute();
     }
 
     @Override
-    public void removeSession(String sessionId) throws OXException {
+    public void removeSession(String sessionId) {
         Mutator<String> mutator = HFactory.createMutator(keyspace, serializer);
-        mutator.delete(sessionId, CF_NAME, null, serializer);
+        mutator.addDeletion(sessionId, CF_NAME, null, serializer);
         mutator.execute();
     }
 
     @Override
-    public Session[] removeUserSessions(int userId, int contextId) throws OXException {
+    public Session[] removeUserSessions(int userId, int contextId) {
         List<Session> list = new LinkedList<Session>();
-        IndexedSlicesQuery<String, String, String> query = HFactory.createIndexedSlicesQuery(keyspace, serializer, serializer, serializer);
+        RangeSlicesQuery<String, String, String> query = HFactory.createRangeSlicesQuery(keyspace, serializer, serializer, serializer);
         query.setColumnFamily(CF_NAME);
+        query.setColumnNames(COLUMN_NAMES);
         query.addEqualsExpression("contextId", String.valueOf(contextId)).addEqualsExpression("userId", String.valueOf(userId));
         QueryResult<OrderedRows<String, String, String>> result = query.execute();
         OrderedRows<String, String, String> rows = result.get();
@@ -215,9 +217,10 @@ public class NoSQLSessionStorageService implements SessionStorageService {
     }
 
     @Override
-    public void removeContextSessions(int contextId) throws OXException {
-        IndexedSlicesQuery<String, String, String> query = HFactory.createIndexedSlicesQuery(keyspace, serializer, serializer, serializer);
+    public void removeContextSessions(int contextId) {
+        RangeSlicesQuery<String, String, String> query = HFactory.createRangeSlicesQuery(keyspace, serializer, serializer, serializer);
         query.setColumnFamily(CF_NAME);
+        query.setColumnNames(COLUMN_NAMES);
         query.addEqualsExpression("contextId", String.valueOf(contextId));
         QueryResult<OrderedRows<String, String, String>> result = query.execute();
         OrderedRows<String, String, String> rows = result.get();
@@ -232,9 +235,10 @@ public class NoSQLSessionStorageService implements SessionStorageService {
     }
 
     @Override
-    public boolean hasForContext(int contextId) throws OXException {
-        IndexedSlicesQuery<String, String, String> query = HFactory.createIndexedSlicesQuery(keyspace, serializer, serializer, serializer);
+    public boolean hasForContext(int contextId) {
+        RangeSlicesQuery<String, String, String> query = HFactory.createRangeSlicesQuery(keyspace, serializer, serializer, serializer);
         query.setColumnFamily(CF_NAME);
+        query.setColumnNames(COLUMN_NAMES);
         query.addEqualsExpression("contextId", String.valueOf(contextId));
         QueryResult<OrderedRows<String, String, String>> result = query.execute();
         OrderedRows<String, String, String> rows = result.get();
@@ -243,40 +247,44 @@ public class NoSQLSessionStorageService implements SessionStorageService {
     }
 
     @Override
-    public Session[] getUserSessions(int userId, int contextId) throws OXException {
-        List<Session> list = new LinkedList<Session>();
-        IndexedSlicesQuery<String, String, String> query = HFactory.createIndexedSlicesQuery(keyspace, serializer, serializer, serializer);
-        query.setColumnFamily(CF_NAME);
-        query.addEqualsExpression("contextId", String.valueOf(contextId)).addEqualsExpression("userId", String.valueOf(userId));
-        QueryResult<OrderedRows<String, String, String>> result = query.execute();
-        OrderedRows<String, String, String> rows = result.get();
-        List<Row<String, String, String>> rowsList = rows.getList();
-        Iterator<Row<String, String, String>> rowIterator = rowsList.iterator();
-        while (rowIterator.hasNext()) {
-            Row<String, String, String> row = rowIterator.next();
-            ColumnSlice<String, String> slice = row.getColumnSlice();
-            String sessionId = slice.getColumnByName("sessionId").getValue();
-            String loginName = slice.getColumnByName("loginName").getValue();
-            String password = slice.getColumnByName("password").getValue();
-            int contextId2 = Integer.parseInt(slice.getColumnByName("contextId").getValue());
-            int userId2 = Integer.parseInt(slice.getColumnByName("userId").getValue());
-            String secret = slice.getColumnByName("secret").getValue();
-            String login = slice.getColumnByName("login").getValue();
-            String randomToken = slice.getColumnByName("randomToken").getValue();
-            String localIP = slice.getColumnByName("localIP").getValue();
-            String authId = slice.getColumnByName("authId").getValue();
-            String hash = slice.getColumnByName("hash").getValue();
-            String client = slice.getColumnByName("client").getValue();
-            Session session = new StoredSession(sessionId, loginName, password, contextId2, userId2, secret, login, randomToken, localIP, authId, hash, client, null);
-            list.add(session);
-        }
-        return (Session[]) list.toArray();
+    public Session[] getUserSessions(int userId, int contextId) {
+//        List<Session> list = new LinkedList<Session>();
+//        RangeSlicesQuery<String, String, String> query = HFactory.createRangeSlicesQuery(keyspace, serializer, serializer, serializer);
+//        query.setColumnFamily(CF_NAME);
+//        query.setColumnNames("loginName", "password", "contextId", "userId", "secret", "login", "randomToken", "localIP", "authId", "hash", "client");
+//        query.addEqualsExpression("contextId", String.valueOf(contextId)).addEqualsExpression("userId", String.valueOf(userId));
+//        QueryResult<OrderedRows<String, String, String>> result = query.execute();
+//        OrderedRows<String, String, String> rows = result.get();
+//        List<Row<String, String, String>> rowsList = rows.getList();
+//        Iterator<Row<String, String, String>> rowIterator = rowsList.iterator();
+//        while (rowIterator.hasNext()) {
+//            Row<String, String, String> row = rowIterator.next();
+//            ColumnSlice<String, String> slice = row.getColumnSlice();
+//            String sessionId = slice.getColumnByName("sessionId").getValue();
+//            String loginName = slice.getColumnByName("loginName").getValue();
+//            String password = slice.getColumnByName("password").getValue();
+//            int contextId2 = Integer.parseInt(slice.getColumnByName("contextId").getValue());
+//            int userId2 = Integer.parseInt(slice.getColumnByName("userId").getValue());
+//            String secret = slice.getColumnByName("secret").getValue();
+//            String login = slice.getColumnByName("login").getValue();
+//            String randomToken = slice.getColumnByName("randomToken").getValue();
+//            String localIP = slice.getColumnByName("localIP").getValue();
+//            String authId = slice.getColumnByName("authId").getValue();
+//            String hash = slice.getColumnByName("hash").getValue();
+//            String client = slice.getColumnByName("client").getValue();
+//            Session session = new StoredSession(sessionId, loginName, password, contextId2, userId2, secret, login, randomToken, localIP, authId, hash, client, null);
+//            list.add(session);
+//        }
+//        return (Session[]) list.toArray();
+        return new Session[]{};
+
     }
 
     @Override
-    public Session getAnyActiveSessionForUser(int userId, int contextId) throws OXException {
-        IndexedSlicesQuery<String, String, String> query = HFactory.createIndexedSlicesQuery(keyspace, serializer, serializer, serializer);
+    public Session getAnyActiveSessionForUser(int userId, int contextId) {
+        RangeSlicesQuery<String, String, String> query = HFactory.createRangeSlicesQuery(keyspace, serializer, serializer, serializer);
         query.setColumnFamily(CF_NAME);
+        query.setColumnNames(COLUMN_NAMES);
         query.addEqualsExpression("contextId", String.valueOf(contextId)).addEqualsExpression("userId", String.valueOf(userId));
         QueryResult<OrderedRows<String, String, String>> result = query.execute();
         OrderedRows<String, String, String> rows = result.get();
@@ -304,15 +312,16 @@ public class NoSQLSessionStorageService implements SessionStorageService {
     }
 
     @Override
-    public Session findFirstSessionForUser(int userId, int contextId) throws OXException {
+    public Session findFirstSessionForUser(int userId, int contextId) {
         return getAnyActiveSessionForUser(userId, contextId);
     }
 
     @Override
     public List<Session> getSessions() {
         List<Session> list = new LinkedList<Session>();
-        IndexedSlicesQuery<String, String, String> query = HFactory.createIndexedSlicesQuery(keyspace, serializer, serializer, serializer);
+        RangeSlicesQuery<String, String, String> query = HFactory.createRangeSlicesQuery(keyspace, serializer, serializer, serializer);
         query.setColumnFamily(CF_NAME);
+        query.setColumnNames(COLUMN_NAMES);
         QueryResult<OrderedRows<String, String, String>> result = query.execute();
         OrderedRows<String, String, String> rows = result.get();
         List<Row<String, String, String>> rowsList = rows.getList();
@@ -344,9 +353,10 @@ public class NoSQLSessionStorageService implements SessionStorageService {
     }
 
     @Override
-    public Session getSessionByRandomToken(String randomToken, String newIP) throws OXException {
-        IndexedSlicesQuery<String, String, String> query = HFactory.createIndexedSlicesQuery(keyspace, serializer, serializer, serializer);
+    public Session getSessionByRandomToken(String randomToken, String newIP) {
+        RangeSlicesQuery<String, String, String> query = HFactory.createRangeSlicesQuery(keyspace, serializer, serializer, serializer);
         query.setColumnFamily(CF_NAME);
+        query.setColumnNames(COLUMN_NAMES);
         query.addEqualsExpression("randomToken", randomToken);
         QueryResult<OrderedRows<String, String, String>> result = query.execute();
         OrderedRows<String, String, String> rows = result.get();
@@ -374,26 +384,27 @@ public class NoSQLSessionStorageService implements SessionStorageService {
     }
 
     @Override
-    public Session getSessionByAlternativeId(String altId) throws OXException {
+    public Session getSessionByAlternativeId(String altId) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Session getCachedSession(String sessionId) throws OXException {
+    public Session getCachedSession(String sessionId) {
         return lookupSession(sessionId);
     }
 
     @Override
-    public void cleanUp() throws OXException {
+    public void cleanUp() {
         Mutator<String> mutator = HFactory.createMutator(keyspace, serializer);
-        mutator.delete("*", CF_NAME, null, serializer);
+        mutator.addDeletion("*", CF_NAME, null, serializer);
+        mutator.execute();
     }
 
     @Override
-    public void changePassword(String sessionId, String newPassword) throws OXException {
+    public void changePassword(String sessionId, String newPassword) {
         SliceQuery<String, String, String> query = HFactory.createSliceQuery(keyspace, serializer, serializer, serializer);
-        query.setColumnFamily(CF_NAME).setKey(sessionId).setColumnNames("loginName", "password", "contextId", "userId", "secret", "login", "randomToken", "localIP", "authId", "hash", "client");
+        query.setColumnFamily(CF_NAME).setKey(sessionId).setColumnNames(COLUMN_NAMES);
         QueryResult<ColumnSlice<String, String>> result = query.execute();
         ColumnSlice<String, String> slice = result.get();
         String loginName = slice.getColumnByName("loginName").getValue();
@@ -412,7 +423,7 @@ public class NoSQLSessionStorageService implements SessionStorageService {
     }
 
     @Override
-    public void checkAuthId(String login, String authId) throws OXException {
+    public void checkAuthId(String login, String authId) {
         // TODO Auto-generated method stub
 
     }
