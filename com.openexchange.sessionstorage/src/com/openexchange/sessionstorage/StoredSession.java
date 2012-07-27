@@ -87,6 +87,42 @@ public class StoredSession implements Session {
     private String userLogin;
 
     private Map<String, Object> parameters;
+    
+    public StoredSession(String sessionId, String loginName, String password, int contextId, int userId, String secret, String login, String randomToken, String localIP, String authId, String hash, String client, Map<String, Object> parameters) {
+        this.sessionId = sessionId;
+        this.loginName = loginName;
+        this.password = password;
+        this.contextId = contextId;
+        this.userId = userId;
+        this.secret = secret;
+        this.login = login;
+        this.randomToken = randomToken;
+        this.localIp = localIP;
+        this.authId = authId;
+        this.hash = hash;
+        this.client = client;
+        this.userLogin = "";
+        this.parameters = new ConcurrentHashMap<String, Object>();
+        // Assign parameters (if not null)
+        if (parameters != null){
+            Object parameter = parameters.get(Session.PARAM_LOCK);
+            if (null != parameter) {
+                this.parameters.put(Session.PARAM_LOCK, parameter);
+            }
+            parameter = parameters.get(Session.PARAM_COUNTER);
+            if (null != parameter) {
+                this.parameters.put(Session.PARAM_COUNTER, parameter);
+            }
+            parameter = parameters.get(Session.PARAM_ALTERNATIVE_ID);
+            if (null != parameter) {
+                this.parameters.put(Session.PARAM_ALTERNATIVE_ID, parameter);
+            }
+            parameter = parameters.get(Session.PARAM_CAPABILITIES);
+            if (null != parameter) {
+                this.parameters.put(Session.PARAM_CAPABILITIES, parameter);
+            }
+        }
+    }
 
     /**
      * Initializes a new {@link StoredSession}.

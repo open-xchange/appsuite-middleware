@@ -3,12 +3,16 @@ package com.openexchange.memory.analyzer;
 
 import java.util.HashSet;
 import java.util.Set;
+import org.apache.commons.logging.Log;
+import com.openexchange.log.LogFactory;
 
 /**
  * Keeps track of code interaction with a specific collection. The flag stop is used to turn statistics off.
  */
 public abstract class CollectionStatistics {
 
+    static final transient Log LOG = LogFactory.getLog(CollectionStatistics.class);
+    
     protected int minElements;
 
     protected final String className;
@@ -141,16 +145,17 @@ public abstract class CollectionStatistics {
         }
 
         if (isALeak) {
-            System.out.printf("Information for Collection %s (id: %d)\n", className, id);
-            System.out.printf(" * Collection is very long (%d)!\n", size);
+            
+            StringBuilder sb = new StringBuilder();
+            sb.append("Information for Collection ").append(className).append(" (id: ").append(id).append(")\n");
+            sb.append(" * Collection is very long (").append(size).append("!\n");
 
-            printStatistics();
+            printStatistics(sb);
+            printInteractionCode(sb);
 
-            printInteractionCode();
+            sb.append("Warned about Collection ").append(className).append(" (id: ").append(id).append("). For performance reasons not warning about it anymore.\n");
 
-            System.out.printf("Warned about Collection %s (id: %d). For performance reasons not warning about it anymore.\n", className, id);
-
-            System.out.println();
+            LOG.error(sb.toString());
 
             // at least somehow reduce our impact on CPU and memory
             stop = true;
@@ -166,17 +171,17 @@ public abstract class CollectionStatistics {
             return;
         }
         if ((System.currentTimeMillis() - lastAccess) > timeoutPeriod * 3600000 /* hour -> millisec */) {
-            System.out.printf("Information for Collection %s (id: %d)\n", className, id);
-            System.out.printf(" * Collection size (%d)!\n", size);
-            System.out.printf(" * Collection has been idle since (%d) hours!\n", timeoutPeriod);
+            StringBuilder sb = new StringBuilder();
+            sb.append("Information for Collection ").append(className).append(" (id: ").append(id).append(")\n");
+            sb.append(" * Collection size (").append(size).append("!\n");
+            sb.append(" * Collection has been idle since (").append(timeoutPeriod).append(" hours!\n");
 
-            printStatistics();
+            printStatistics(sb);
+            printInteractionCode(sb);
 
-            printInteractionCode();
+            sb.append("Warned about Collection ").append(className).append(" (id: ").append(id).append("). For performance reasons not warning about it anymore.\n");
 
-            System.out.printf("Warned about Collection %s (id: %d). For performance reasons not warning about it anymore.\n", className, id);
-
-            System.out.println();
+            LOG.error(sb.toString());
 
             // at least somehow reduce our impact on CPU and memory
             stop = true;
@@ -185,30 +190,30 @@ public abstract class CollectionStatistics {
         }
     }
 
-    private void printStatistics() {
+    private void printStatistics(StringBuilder sb) {
         if (interactingCodeRead.size() == 0) {
-            System.out.printf(" * Collection was never read!\n");
+            sb.append(" * Collection was never read!\n");
         }
 
         if (interactingCodeDelete.size() == 0) {
-            System.out.printf(" * Collection was never reduced!\n");
+            sb.append(" * Collection was never reduced!\n");
         }
     }
 
-    private void printInteractionCode() {
+    private void printInteractionCode(StringBuilder sb) {
         if (creationStackTrace != null) {
-            System.out.printf("Recorded creation stacktrace:\n");
-            System.out.println(creationStackTrace);
+            sb.append("Recorded creation stacktrace:\n");
+            sb.append(creationStackTrace);
         }
-        System.out.printf("Recorded usage for this Collection:\n");
+        sb.append("Recorded usage for this Collection:\n");
         for (String code : interactingCodeWrite) {
-            System.out.printf(" * write:  %s\n", code);
+            sb.append(" * write:  ").append(code).append(")\n");
         }
         for (String code : interactingCodeRead) {
-            System.out.printf(" * read:   %s\n", code);
+            sb.append(" * read:   ").append(code).append(")\n");
         }
         for (String code : interactingCodeDelete) {
-            System.out.printf(" * delete: %s\n", code);
+            sb.append(" * delete: ").append(code).append(")\n");
         }
     }
 

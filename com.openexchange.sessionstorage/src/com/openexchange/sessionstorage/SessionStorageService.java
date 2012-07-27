@@ -88,7 +88,7 @@ public interface SessionStorageService {
      * @param contextId The context Id
      * @throws OXException If remove of user sessions failed
      */
-    public void removeUserSessions(int userId, int contextId) throws OXException;
+    public Session[] removeUserSessions(int userId, int contextId) throws OXException;
     
     /**
      * Remove all sessions from context with given context Id
@@ -183,5 +183,12 @@ public interface SessionStorageService {
      */
     public void changePassword(String sessionId, String newPassword) throws OXException;
     
+    /**
+     * Check authId for duplicates
+     * @param login Login name to check
+     * @param authId AuthId to check
+     * @throws OXException If duplicate found
+     */
+    public void checkAuthId(String login, String authId) throws OXException;
     
 }
