@@ -562,6 +562,9 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 }
                 imapStore = null;
             }
+            if (!checkValidity()) {
+                clearIMAPStoreContainer();
+            }
         } finally {
             reset();
         }
