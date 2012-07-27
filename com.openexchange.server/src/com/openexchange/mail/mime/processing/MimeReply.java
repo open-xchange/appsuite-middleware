@@ -80,6 +80,7 @@ import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailSessionCache;
@@ -91,6 +92,7 @@ import com.openexchange.mail.dataobjects.CompositeMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.ManagedMimeMessage;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
@@ -208,6 +210,8 @@ public final class MimeReply {
      */
     private static MailMessage getReplyMail(final MailMessage originalMsg, final MailPath msgref, final boolean replyAll, final boolean preferToAsRecipient, final Session session, final int accountId, final javax.mail.Session mailSession, final UserSettingMail userSettingMail) throws OXException {
         try {
+            originalMsg.setAccountId(accountId);
+            final MailMessage origMsg = ManagedMimeMessage.clone(originalMsg);
             final Context ctx = ContextStorage.getStorageContext(session.getContextId());
             final UserSettingMail usm =
                 userSettingMail == null ? UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx) : userSettingMail;
@@ -219,7 +223,7 @@ public final class MimeReply {
              * Set headers of reply message
              */
             final String subjectPrefix = PREFIX_RE;
-            String subjectHdrValue = MimeMessageUtility.checkNonAscii(originalMsg.getHeader(MessageHeaders.HDR_SUBJECT, null));
+            String subjectHdrValue = MimeMessageUtility.checkNonAscii(origMsg.getHeader(MessageHeaders.HDR_SUBJECT, null));
             if (subjectHdrValue == null) {
                 subjectHdrValue = "";
             }
@@ -237,7 +241,7 @@ public final class MimeReply {
              */
             final InternetAddress[] recipientAddrs;
             if (preferToAsRecipient) {
-                final String hdrVal = originalMsg.getHeader(MessageHeaders.HDR_TO, MessageHeaders.HDR_ADDR_DELIM);
+                final String hdrVal = origMsg.getHeader(MessageHeaders.HDR_TO, MessageHeaders.HDR_ADDR_DELIM);
                 if (null == hdrVal) {
                     recipientAddrs = new InternetAddress[0];
                 } else {
@@ -247,12 +251,12 @@ public final class MimeReply {
                 final Set<InternetAddress> tmpSet = new LinkedHashSet<InternetAddress>(4);
                 final boolean fromAdded;
                 {
-                    final String[] replyTo = originalMsg.getHeader(MessageHeaders.HDR_REPLY_TO);
+                    final String[] replyTo = origMsg.getHeader(MessageHeaders.HDR_REPLY_TO);
                     if (MimeMessageUtility.isEmptyHeader(replyTo)) {
                         /*
                          * Set from as recipient
                          */
-                        tmpSet.addAll(Arrays.asList(originalMsg.getFrom()));
+                        tmpSet.addAll(Arrays.asList(origMsg.getFrom()));
                         fromAdded = true;
                     } else {
                         /*
@@ -273,7 +277,7 @@ public final class MimeReply {
                      * 
                      */
                     if (!fromAdded) {
-                        tmpSet.addAll(Arrays.asList(originalMsg.getFrom()));
+                        tmpSet.addAll(Arrays.asList(origMsg.getFrom()));
                     }
                 }
                 recipientAddrs = tmpSet.toArray(new InternetAddress[tmpSet.size()]);
@@ -319,7 +323,7 @@ public final class MimeReply {
                 /*
                  * Add filtered recipients from 'To' field
                  */
-                String hdrVal = originalMsg.getHeader(MessageHeaders.HDR_TO, MessageHeaders.HDR_ADDR_DELIM);
+                String hdrVal = origMsg.getHeader(MessageHeaders.HDR_TO, MessageHeaders.HDR_ADDR_DELIM);
                 InternetAddress[] toAddrs = null;
                 if (hdrVal != null) {
                     filteredAddrs.addAll(filter(filter, (toAddrs = parseAddressList(hdrVal, true))));
@@ -352,7 +356,7 @@ public final class MimeReply {
                  * Filter recipients from 'Cc' field
                  */
                 filteredAddrs.clear();
-                hdrVal = originalMsg.getHeader(MessageHeaders.HDR_CC, MessageHeaders.HDR_ADDR_DELIM);
+                hdrVal = origMsg.getHeader(MessageHeaders.HDR_CC, MessageHeaders.HDR_ADDR_DELIM);
                 if (hdrVal != null) {
                     filteredAddrs.addAll(filter(filter, parseAddressList(unfold(hdrVal), true)));
                 }
@@ -363,7 +367,7 @@ public final class MimeReply {
                  * Filter recipients from 'Bcc' field
                  */
                 filteredAddrs.clear();
-                hdrVal = originalMsg.getHeader(MessageHeaders.HDR_BCC, MessageHeaders.HDR_ADDR_DELIM);
+                hdrVal = origMsg.getHeader(MessageHeaders.HDR_BCC, MessageHeaders.HDR_ADDR_DELIM);
                 if (hdrVal != null) {
                     filteredAddrs.addAll(filter(filter, parseAddressList(unfold(hdrVal), true)));
                 }
@@ -405,7 +409,7 @@ public final class MimeReply {
                     final User user = UserStorage.getStorageUser(session.getUserId(), ctx);
                     final Locale locale = user.getLocale();
                     final LocaleAndTimeZone ltz = new LocaleAndTimeZone(locale, user.getTimeZone());
-                    generateReplyText(originalMsg, retvalContentType, StringHelper.valueOf(locale), ltz, usm, mailSession, list);
+                    generateReplyText(origMsg, retvalContentType, StringHelper.valueOf(locale), ltz, usm, mailSession, list);
                 }
                 final StringBuilder replyTextBuilder = new StringBuilder(8192 << 1);
                 for (int i = list.size() - 1; i >= 0; i--) {
@@ -463,7 +467,7 @@ public final class MimeReply {
             replyMsg.saveChanges();
             // Remove generated Message-Id for template message
             replyMsg.removeHeader(MessageHeaders.HDR_MESSAGE_ID);
-            setReplyHeaders(originalMsg, replyMsg);
+            setReplyHeaders(origMsg, replyMsg);
             replyMail = MimeMessageConverter.convertMessage(replyMsg);
             if (null != msgref) {
                 replyMail.setMsgref(msgref);
@@ -706,15 +710,26 @@ public final class MimeReply {
                  * Create message from input stream
                  */
                 final InputStream is = part.getInputStream();
-                final ByteArrayOutputStream tmp = new UnsynchronizedByteArrayOutputStream(8192);
-                final byte[] buf = new byte[4096];
-                int read = -1;
-                while ((read = is.read(buf, 0, buf.length)) != -1) {
-                    tmp.write(buf, 0, read);
+                try {
+                    final ByteArrayOutputStream tmp = new UnsynchronizedByteArrayOutputStream(8192);
+                    final byte[] buf = new byte[4096];
+                    int read = -1;
+                    while ((read = is.read(buf, 0, buf.length)) != -1) {
+                        tmp.write(buf, 0, read);
+                    }
+                    final MailMessage attachedMsg = MimeMessageConverter.convertMessage(tmp.toByteArray());// MimeMessage(mailSession,
+                    // part.getInputStream());
+                    found |= generateReplyText(
+                        attachedMsg,
+                        pc.retvalContentType,
+                        pc.strHelper,
+                        pc.ltz,
+                        pc.usm,
+                        pc.mailSession,
+                        pc.replyTexts);
+                } finally {
+                    Streams.close(is);
                 }
-                final MailMessage attachedMsg = MimeMessageConverter.convertMessage(tmp.toByteArray());// MimeMessage(mailSession,
-                // part.getInputStream());
-                found |= generateReplyText(attachedMsg, pc.retvalContentType, pc.strHelper, pc.ltz, pc.usm, pc.mailSession, pc.replyTexts);
             }
         }
         return found;

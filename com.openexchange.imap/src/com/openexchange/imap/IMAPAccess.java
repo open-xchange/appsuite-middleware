@@ -783,6 +783,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         if (clientIp != null) {
             imapSession.getProperties().put("mail.imap.propagate.clientipaddress", clientIp);
         }
+        imapSession.getProperties().put("mail.imap.failOnNOFetch", "true");
         /*
          * Cache failed authentication attempts
          */

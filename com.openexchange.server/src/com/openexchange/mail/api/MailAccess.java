@@ -55,12 +55,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Properties;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.java.Java7ConcurrentLinkedQueue;
-import com.openexchange.log.LogProperties;
-import com.openexchange.log.Props;
 import com.openexchange.mail.MailAccessWatcher;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailInitialization;
@@ -611,28 +609,6 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
         return getFolderStorage().getFolder(fullname).getUnreadMessageCount();
     }
 
-    private static final String KEY_CLEAN_UPS = "com.openexchange.mail.cleanUps";
-
-    private static void putCleanUpsIfAbsent() {
-        final Props properties = LogProperties.getLogProperties();
-        if (!properties.contains(KEY_CLEAN_UPS)) {
-            properties.put(KEY_CLEAN_UPS, new Java7ConcurrentLinkedQueue<MimeCleanUp>());
-        }
-    }
-
-    private static void checkCleanUps() {
-        final Props properties = LogProperties.optLogProperties();
-        if (null != properties) {
-            @SuppressWarnings("unchecked")
-            final Queue<MimeCleanUp> cleanUps = (Queue<MimeCleanUp>) properties.get(KEY_CLEAN_UPS);
-            if (null != cleanUps) {
-                while (!cleanUps.isEmpty()) {
-                    cleanUps.remove().cleanUp();
-                }
-            }
-        }
-    }
-
     private final void connect0(final boolean checkDefaultFolder) throws OXException {
         applyNewThread();
         if (isConnected()) {
@@ -647,7 +623,6 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
             }
         }
         MailAccessWatcher.addMailAccess(this);
-        putCleanUpsIfAbsent();
     }
 
     private void checkDefaultFolderOnConnect() throws OXException {
@@ -727,7 +702,34 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
              * Remove from watcher no matter if cached or closed
              */
             MailAccessWatcher.removeMailAccess(this);
-            checkCleanUps();
+            cleanUp();
+        }
+    }
+
+    private static ThreadLocal<Queue<MimeCleanUp>> CLEAN_UPS = new ThreadLocal<Queue<MimeCleanUp>>() {
+        @Override
+        protected Queue<MimeCleanUp> initialValue() {
+            return new ConcurrentLinkedQueue<MimeCleanUp>();
+        }
+    };
+
+    /**
+     * Remembers specified {@link MimeCleanUp} instance.
+     * 
+     * @param mimeCleanUp The {@link MimeCleanUp} instance
+     */
+    public static void rememberMimeCleanUp(final MimeCleanUp mimeCleanUp) {
+        if (null == mimeCleanUp) {
+            return;
+        }
+        CLEAN_UPS.get().offer(mimeCleanUp);
+    }
+
+    private static void cleanUp() {
+        final Queue<MimeCleanUp> queue = CLEAN_UPS.get();
+        MimeCleanUp mimeCleanUp;
+        while ((mimeCleanUp = queue.poll()) != null) {
+            mimeCleanUp.cleanUp();
         }
     }
 

@@ -1,3 +1,11 @@
+* 2012-07-27 - jan.bauerdick@open-xchange.com
+
+ - New implementation of sessionstorageservice, storing sessions with cassandra
+
+* 2012-07-26 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 22686: Set content-type in PROPPATCH multistatus responses 
+
 * 2012-07-25 - thorben.betten@open-xchange.com
 
  - Fix for bug 22674: Deal with image-surrounding plain text

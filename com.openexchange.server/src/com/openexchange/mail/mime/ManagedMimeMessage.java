@@ -50,25 +50,29 @@
 package com.openexchange.mail.mime;
 
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Queue;
 import javax.mail.Flags;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
+import javax.mail.util.SharedByteArrayInputStream;
 import javax.mail.util.SharedFileInputStream;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
+import com.openexchange.java.Java7ConcurrentLinkedQueue;
 import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link ManagedMimeMessage} - A {@link MimeMessage} backed by an array or file dependent on provided byte array's size.
@@ -136,7 +140,22 @@ public final class ManagedMimeMessage extends MimeMessage implements MimeCleanUp
                 }
             }
             // Convert to MailMessage instance
-            return MimeMessageConverter.convertMessage(mimeMessage, false);
+            final MailMessage retval = MimeMessageConverter.convertMessage(mimeMessage, false);
+            if (original.containsFolder()) {
+                retval.setFolder(original.getFolder());
+            }
+            final String mailId = original.getMailId();
+            if (mailId != null) {
+                retval.setMailId(mailId);
+            }
+            if (original.containsMsgref()) {
+                retval.setMsgref(original.getMsgref());
+            }
+            // Remember ManagedMimeMessage for clean-up
+            if (null != mimeMessage.file) {
+                MailAccess.rememberMimeCleanUp(mimeMessage);
+            }
+            return retval;
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         } catch (final IOException e) {
@@ -144,9 +163,11 @@ public final class ManagedMimeMessage extends MimeMessage implements MimeCleanUp
         }
     }
 
-    private static final int DEFAULT_MAX_INMEMORY_SIZE = 131072; // 128KB
+    private static final int DEFAULT_MAX_INMEMORY_SIZE = 1048576; // 1MB
 
-    private final List<Closeable> closeables;
+    private static final int DEFAULT_BUFFER_SIZE = 131072; // 128KB
+
+    private final Queue<Closeable> closeables;
 
     private volatile ManagedFile managedFile;
 
@@ -163,12 +184,13 @@ public final class ManagedMimeMessage extends MimeMessage implements MimeCleanUp
      */
     private ManagedMimeMessage(final MailMessage original) throws MessagingException, OXException, IOException {
         super(MimeDefaultSession.getDefaultSession());
-        final InputStream in = getInputStreamFor(original);
+        final File[] files = new File[1];
+        final InputStream in = getInputStreamFor(original, files);
         parse(in);
-        closeables = new ArrayList<Closeable>(1);
+        closeables = new Java7ConcurrentLinkedQueue<Closeable>();
         closeables.add(in);
         this.managedFile = null;
-        this.file = file;
+        this.file = files[0];
     }
 
     /**
@@ -180,12 +202,12 @@ public final class ManagedMimeMessage extends MimeMessage implements MimeCleanUp
      * @throws IOException If an I/O error occurs
      */
     public ManagedMimeMessage(final Session session, final File file) throws MessagingException, IOException {
-        this(session, file, new SharedFileInputStream(file, DEFAULT_MAX_INMEMORY_SIZE));
+        this(session, file, new SharedFileInputStream(file, DEFAULT_BUFFER_SIZE));
     }
 
     private ManagedMimeMessage(final Session session, final File file, final InputStream in) throws MessagingException {
         super(session, in);
-        closeables = new ArrayList<Closeable>(2);
+        closeables = new Java7ConcurrentLinkedQueue<Closeable>();
         closeables.add(in);
         this.managedFile = null;
         this.file = file;
@@ -212,11 +234,14 @@ public final class ManagedMimeMessage extends MimeMessage implements MimeCleanUp
      */
     @Override
     public void cleanUp() {
-        while (!closeables.isEmpty()) {
-            try {
-                closeables.remove(0).close();
-            } catch (final Exception e) {
-                // Ignore
+        {
+            Closeable closeable;
+            while ((closeable = closeables.poll()) != null) {
+                try {
+                    closeable.close();
+                } catch (final Exception e) {
+                    // Ignore
+                }
             }
         }
         final ManagedFile managedFile = this.managedFile;
@@ -254,9 +279,19 @@ public final class ManagedMimeMessage extends MimeMessage implements MimeCleanUp
         return ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
     }
 
-    private static InputStream getInputStreamFor(final MailMessage mail) throws OXException, IOException {
+    private static InputStream getInputStreamFor(final MailMessage mail, final File[] files) throws OXException, IOException {
+        final long size = mail.getSize();
+        if (size > 0 && size <= DEFAULT_MAX_INMEMORY_SIZE) {
+            final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_BUFFER_SIZE);
+            mail.writeTo(out);
+            out.flush();
+            files[0] = null;
+            return new SharedByteArrayInputStream(out.toByteArray());
+        }
+        // Unknown size or exceeds max. in-memory limit
         final ManagedFileManagement service = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class, true);
         final File file = service.newTempFile();
+        files[0] = file;
         BufferedOutputStream out = null;
         try {
             out = new BufferedOutputStream(new FileOutputStream(file));
@@ -271,7 +306,7 @@ public final class ManagedMimeMessage extends MimeMessage implements MimeCleanUp
                 }
             }
         }
-        return new SharedFileInputStream(file, DEFAULT_MAX_INMEMORY_SIZE);
+        return new SharedFileInputStream(file, DEFAULT_BUFFER_SIZE);
     }
 
     private static final byte[] DOUBLE_CRLF = { '\r', '\n', '\r', '\n' };
