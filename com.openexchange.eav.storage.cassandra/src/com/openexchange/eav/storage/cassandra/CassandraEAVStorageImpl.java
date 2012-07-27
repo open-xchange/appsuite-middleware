@@ -50,21 +50,18 @@ package com.openexchange.eav.storage.cassandra;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.CharacterCodingException;
+import java.nio.charset.MalformedInputException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import me.prettyprint.cassandra.model.BasicColumnDefinition;
-import me.prettyprint.cassandra.model.BasicColumnFamilyDefinition;
 import me.prettyprint.cassandra.model.ConfigurableConsistencyLevel;
-import me.prettyprint.cassandra.serializers.BooleanSerializer;
 import me.prettyprint.cassandra.serializers.ByteBufferSerializer;
-import me.prettyprint.cassandra.serializers.DoubleSerializer;
-import me.prettyprint.cassandra.serializers.FloatSerializer;
-import me.prettyprint.cassandra.serializers.IntegerSerializer;
-import me.prettyprint.cassandra.serializers.LongSerializer;
+import me.prettyprint.cassandra.serializers.CompositeSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.serializers.UUIDSerializer;
 import me.prettyprint.cassandra.service.template.ColumnFamilyResult;
@@ -74,19 +71,14 @@ import me.prettyprint.cassandra.service.template.ThriftColumnFamilyTemplate;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.HConsistencyLevel;
 import me.prettyprint.hector.api.Keyspace;
-import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.ColumnSlice;
+import me.prettyprint.hector.api.beans.Composite;
 import me.prettyprint.hector.api.beans.HColumn;
-import me.prettyprint.hector.api.beans.OrderedRows;
-import me.prettyprint.hector.api.beans.Row;
-import me.prettyprint.hector.api.ddl.ColumnDefinition;
-import me.prettyprint.hector.api.ddl.ColumnFamilyDefinition;
-import me.prettyprint.hector.api.ddl.ComparatorType;
 import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hector.api.mutation.Mutator;
-import me.prettyprint.hector.api.query.RangeSlicesQuery;
+import me.prettyprint.hector.api.query.SliceQuery;
 
 import org.apache.cassandra.db.KeyspaceNotDefinedException;
 import org.apache.cassandra.utils.ByteBufferUtil;
@@ -95,7 +87,6 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.eav.EAVStorage;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.Types;
 
 /**
  * Generic {@link EAVStorage} implementation based on Cassandra.
@@ -109,26 +100,24 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 	private static volatile Keyspace keyspace;
 	private static String node = "192.168.33.37";
 	private static String keyspaceName = "OX";
-	
-	private static final Map<Integer, String> typesMap;
-	
-	static {
-		typesMap = new HashMap<Integer, String>();
-		typesMap.put(Types.CONTACT, "ExtendedProperties");
-	}
+	private static final String CF_XT_PROPS = "ExtendedProperties";
+	private static final String CF_CONTEXT = "Context";
 	
 	private final ColumnFamilyTemplate<UUID, String> xtPropsTemplate;
+	private final ColumnFamilyTemplate<UUID, Composite> contextTemplate;
 	
 	private static final StringSerializer ss = StringSerializer.get();
 	private static final UUIDSerializer us = UUIDSerializer.get();
 	private static final ByteBufferSerializer bbs = ByteBufferSerializer.get();
+	private static final CompositeSerializer cs	= CompositeSerializer.get();
 
 	private static ConfigurableConsistencyLevel configurableConsistencyLevel;
 	
 	public CassandraEAVStorageImpl() {
 		initKeyspace();
 		
-		xtPropsTemplate = new ThriftColumnFamilyTemplate<UUID, String>(keyspace, typesMap.get(Types.CONTACT), us, ss);
+		xtPropsTemplate = new ThriftColumnFamilyTemplate<UUID, String>(keyspace, CF_XT_PROPS, us, ss);
+		contextTemplate = new ThriftColumnFamilyTemplate<UUID, Composite>(keyspace, CF_CONTEXT, us, cs);
 	}
 	
 	/**
@@ -171,126 +160,119 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 		Map<String, HConsistencyLevel> readCLMap = new HashMap<String, HConsistencyLevel>();
 		Map<String, HConsistencyLevel> writeCLMap = new HashMap<String, HConsistencyLevel>();
 		
-		readCLMap.put("ExtendedProperties", HConsistencyLevel.ONE);
+		readCLMap.put(CF_XT_PROPS, HConsistencyLevel.ONE);
+		readCLMap.put(CF_CONTEXT, HConsistencyLevel.ONE);
 		
-		writeCLMap.put("ExtendedProperties", HConsistencyLevel.ONE);
+		writeCLMap.put(CF_XT_PROPS, HConsistencyLevel.ONE);
+		writeCLMap.put(CF_CONTEXT, HConsistencyLevel.ONE);
 		
 		configurableConsistencyLevel.setReadCfConsistencyLevels(readCLMap);
 		configurableConsistencyLevel.setWriteCfConsistencyLevels(writeCLMap);
 	}
 	
 	/**
-	 * Decode the given uuid. The context ID is stored as the most significant bit.
-	 * @param uuid to decode.
-	 * @return the Context ID
-	 */
-	private int getContextIDFromUUID(UUID uuid) {
-		return (int)uuid.getMostSignificantBits();
-	}
-	
-	/**
-	 * Decode the given uuid. The object ID is stored as the least significant bit.
-	 * @param uuid to decode.
-	 * @return the object ID
-	 */
-	private int getObjectIDFromUUID(UUID uuid) {
-		return (int)uuid.getLeastSignificantBits();
-	}
-	
-	/**
-	 * Encode a UUID from the given contextID and objectID
-	 * @param contextID is the most significant bit
-	 * @param objectID is the least significant bit
+	 * Encode a UUID from the given contextID
+	 * 
+	 * @param contextID
 	 * @return the encoded UUID
 	 */
-	private UUID encodeUUID(int contextID, int objectID) {
-		return new UUID(contextID, objectID);
+	private UUID encodeUUID(int contextID) {
+        return new UUID(contextID, 0);
+	}
+	
+	private UUID getObjectUUID(int contextID, String folderID, int objectID, int module) {
+		UUID contextUUID = encodeUUID(contextID);
+		UUID objectUUID = null;
+		
+		Composite columnName = new Composite(folderID, Integer.toString(module), Integer.toString(objectID));
+		
+		/*Composite end = new Composite();
+		end.addComponent(0, folderID, Composite.ComponentEquality.EQUAL);
+		end.addComponent(1, module, Composite.ComponentEquality.EQUAL);
+		end.addComponent(2, objectID, Composite.ComponentEquality.GREATER_THAN_EQUAL);*/
+		System.out.println(contextUUID + " - " + columnName);
+		SliceQuery<UUID, Composite, ByteBuffer> sliceQuery = HFactory.createSliceQuery(keyspace, us, cs, bbs);
+		sliceQuery.setColumnFamily(CF_CONTEXT).setKey(contextUUID).setColumnNames(columnName);
+		//sliceQuery.setRange(start, end, false, 1);
+		ColumnSlice<Composite, ByteBuffer> slice = sliceQuery.execute().get();
+		
+		try {
+			if (slice.getColumns().size() > 0) {
+				objectUUID = UUID.fromString(ByteBufferUtil.string(slice.getColumns().get(0).getValue()));
+			}
+		} catch (CharacterCodingException e) {
+			e.printStackTrace();
+		}
+		
+		return objectUUID;
 	}
 	
 	/**
-	 * Creates a {@link RangeSlicesQuery},
-	 * @param rangeSliceWrapper
+	 * Returns a map with UUID-ObjectIDs for a specific folder
+	 * @param contextID
+	 * @param folderID
+	 * @param module
 	 * @return
 	 */
-	private RangeSlicesQuery<UUID, String, ByteBuffer> createRangeSlicesQuery(RangeSliceWrapper rangeSliceWrapper) {
-		RangeSlicesQuery<UUID, String, ByteBuffer> rangeSlice = HFactory.createRangeSlicesQuery(keyspace, us, ss, bbs);
+	private Map<UUID, Integer> getObjectUUIDs(int contextID, String folderID, int module) {
+		UUID contextUUID = encodeUUID(contextID);
+		Map<UUID, Integer> map = new HashMap<UUID, Integer>();
 		
-		if (rangeSliceWrapper.hasContextID)
-			rangeSlice.addEqualsExpression("contextID", ByteBufferUtil.bytes(rangeSliceWrapper.getContextID()));
-		if (rangeSliceWrapper.hasFolderID)
-			rangeSlice.addEqualsExpression("folderID", ByteBufferUtil.bytes(rangeSliceWrapper.getFolderID()));
-		if (rangeSliceWrapper.hasObjectID)
-			rangeSlice.addEqualsExpression("objectID", ByteBufferUtil.bytes(rangeSliceWrapper.getObjectID()));
-		if (rangeSliceWrapper.hasModuleID)
-			rangeSlice.addEqualsExpression("moduleID", ByteBufferUtil.bytes(rangeSliceWrapper.getModuleID()));
-
-		rangeSlice.setColumnFamily(typesMap.get(rangeSliceWrapper.getModuleID()));
-		rangeSlice.setRange(null, null, false, rangeSliceWrapper.getCount());
+		Composite start = new Composite();
+		start.addComponent(0, folderID, Composite.ComponentEquality.EQUAL);
+		start.addComponent(1, Integer.toString(module), Composite.ComponentEquality.EQUAL);
 		
-		return rangeSlice;
+		Composite end = new Composite();
+		end.addComponent(0, folderID, Composite.ComponentEquality.EQUAL);
+		end.addComponent(1, Integer.toString(module), Composite.ComponentEquality.GREATER_THAN_EQUAL);
+		
+		SliceQuery<UUID, Composite, ByteBuffer> sliceQuery = HFactory.createSliceQuery(keyspace, us, cs, bbs);
+		sliceQuery.setColumnFamily(CF_CONTEXT).setKey(contextUUID);
+		sliceQuery.setRange(start, end, false, Integer.MAX_VALUE);
+		Iterator<HColumn<Composite, ByteBuffer>> it = sliceQuery.execute().get().getColumns().iterator();
+		
+		while (it.hasNext()) {
+			HColumn<Composite, ByteBuffer> hColumn = (HColumn<Composite, ByteBuffer>) it.next();
+			try {
+				String s = ByteBufferUtil.string(((ByteBuffer) hColumn.getName().get(2)));
+				int objid = Integer.parseInt(s);
+				UUID uuid = UUID.fromString(ByteBufferUtil.string(hColumn.getValue()));
+				map.put(uuid, objid);
+			} catch (CharacterCodingException e) {
+				e.printStackTrace();
+				System.out.println(((ByteBuffer) hColumn.getName().get(2)));
+			}
+		}
+		
+		return map;
 	}
-
+	
 	/*
 	 * (non-Javadoc)
 	 * @see com.openexchange.eav.EAVStorage#getAttributes(int, java.lang.String, int)
 	 */
 	@Override
 	public Map<String, Object> getAttributes(int contextID, String folderID, int objectID, int module) throws OXException {
-		Map<String, Object> attr = new HashMap<String, Object>();
-		
-		RangeSliceWrapper rs = new RangeSliceWrapper(contextID, folderID, objectID, module, Integer.MAX_VALUE);
-		RangeSlicesQuery<UUID, String, ByteBuffer> slice = createRangeSlicesQuery(rs);
-		
-		Iterator<Row<UUID, String, ByteBuffer>> it = slice.execute().get().iterator();
-		
-		while(it.hasNext()) {
-			Iterator<HColumn<String, ByteBuffer>> sliceIter = it.next().getColumnSlice().getColumns().iterator();
+		Map<String, Object> attr = null;
+		try {
+			UUID xtPropsKey = getObjectUUID(contextID, folderID, objectID, module);
 			
-			while (sliceIter.hasNext()) {
-				HColumn<String, ByteBuffer> column = sliceIter.next();
-				try {
-					/*Serializer<?> s = column.getValueSerializer();
-					if (s instanceof StringSerializer) {
-						attr.put(column.getName(), column.getValue());	
-					} else if (s instanceof LongSerializer) {
-						attr.put(column.getName(), ByteBufferUtil.toLong(column.getValue()));
-					} else if (s instanceof DoubleSerializer) {
-						attr.put(column.getName(), ByteBufferUtil.toDouble(column.getValue()));
-					} else if (s instanceof BooleanSerializer) {
-						attr.put(column.getName(), ByteBufferUtil.string(column.getValue()));
-					} else if (s instanceof FloatSerializer) {
-						attr.put(column.getName(), ByteBufferUtil.toFloat(column.getValue()));
-					} else if (s instanceof IntegerSerializer) {
-						attr.put(column.getName(), column.getValue());
-					} else {
-						throw new OXException(666, "Unsupported attribute type. Data: " + column.getValue());
-					}*/
-					attr.put(column.getName(), ByteBufferUtil.string(column.getValue()));
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}
-		
-		//Use for UUIDs
-		/*ColumnFamilyResult<UUID, String> result = xtPropsTemplate.queryColumns(encodeUUID(contextID, objectID));
-		if (result == null || !result.hasResults()) {
-			log.error("No result");
-		} else {
-			attr = new HashMap<String, Object>();
-			
-			Iterator<String> it = result.getColumnNames().iterator();
-			while (it.hasNext()) {
-				String columnName = (String) it.next();
-				ByteBuffer value = result.getColumn(columnName).getValue();
+			ColumnFamilyResult<UUID, String> result = xtPropsTemplate.queryColumns(xtPropsKey);
+			if (result == null || !result.hasResults()) {
+				log.error("No result");
+			} else {
+				attr = new HashMap<String, Object>();
 				
-				try {
+				Iterator<String> it = result.getColumnNames().iterator();
+				while (it.hasNext()) {
+					String columnName = (String) it.next();
+					ByteBuffer value = result.getColumn(columnName).getValue();
 					attr.put(columnName, ByteBufferUtil.string(value));
-				} catch (CharacterCodingException e) {
-					e.printStackTrace();
 				}
 			}
-		}*/
+		} catch (CharacterCodingException e) {
+			e.printStackTrace();
+		}
 		
 		return attr;
 	}
@@ -323,20 +305,18 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 	public Map<Integer, Map<String, Object>> getAttributes(int contextID, String folderID, int module) throws OXException {
 		Map<Integer, Map<String, Object>> attr = new HashMap<Integer, Map<String, Object>>();
 		
-		RangeSliceWrapper rs = new RangeSliceWrapper(contextID, folderID, 0, module, Integer.MAX_VALUE);
-		RangeSlicesQuery<UUID, String, ByteBuffer> slice = createRangeSlicesQuery(rs);
+		Map<UUID, Integer> map = getObjectUUIDs(contextID, folderID, module);
+		Iterator<UUID> it = map.keySet().iterator();
 		
-		Iterator<Row<UUID, String, ByteBuffer>> it = slice.execute().get().iterator();
 		while (it.hasNext()) {
-			Row<UUID, String, ByteBuffer> row = (Row<UUID, String, ByteBuffer>) it.next();
-			ColumnSlice<String, ByteBuffer> columnSlice = row.getColumnSlice();
+			UUID u = (UUID) it.next();
 			
 			Map<String, Object> singleObjectAttr = new HashMap<String, Object>();
 			
-			int objectID = ByteBufferUtil.toInt(columnSlice.getColumnByName("objectID").getValue());
+			int objectID = map.get(u);
 			singleObjectAttr = getAttributes(contextID, folderID, objectID, module);
 			
-			attr.put(ByteBufferUtil.toInt(columnSlice.getColumnByName("objectID").getValue()), singleObjectAttr);
+			attr.put(objectID, singleObjectAttr);
 		}
 		
 		return attr;
@@ -403,12 +383,7 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 	 */
 	@Override
 	public boolean hasAttributes(int contextID, String folderID, int objectID, int module) throws OXException {
-		RangeSliceWrapper rs = new RangeSliceWrapper(contextID, folderID, objectID, module, 1);
-		RangeSlicesQuery<UUID, String, ByteBuffer> slice = createRangeSlicesQuery(rs);
-
-		slice.setRange(null, null, false, 1);
-		
-		return !(slice.execute().get().peekLast() == null);
+		return !(getObjectUUID(contextID, folderID, objectID, module) == null);
 	}
 
 	/*
@@ -417,14 +392,12 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 	 */
 	@Override
 	public void deleteAttributes(int contextID, String folderID, int objectID, int module) throws OXException {
-		RangeSliceWrapper rs = new RangeSliceWrapper(contextID, folderID, objectID, module, 1);
-		RangeSlicesQuery<UUID, String, ByteBuffer> slice = createRangeSlicesQuery(rs);
-		Row<UUID, String, ByteBuffer> r = slice.execute().get().getList().get(0);
-		UUID key = r.getKey();
-		
-		if (key != null) {
+		UUID xtPropsKey = getObjectUUID(contextID, folderID, objectID, module);
+		//TODO: delete entry from CF_CONTEXT
+		if (xtPropsKey != null) {
 			Mutator<UUID> m = HFactory.createMutator(keyspace, us);
-			m.addDeletion(key, typesMap.get(module));
+			m.addDeletion(xtPropsKey, CF_XT_PROPS);
+			m.addDeletion(encodeUUID(contextID), CF_CONTEXT, new Composite(folderID, Integer.toString(module), Integer.toString(objectID)), cs);
 			m.execute();
 		}
 	}
@@ -435,18 +408,18 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 	 */
 	@Override
 	public void setAttributes(int contextID, String folderID, int objectID, Map<String, Object> attributes, int module) throws OXException {
-		RangeSliceWrapper rs = new RangeSliceWrapper(contextID, folderID, objectID, module, 1);
-		RangeSlicesQuery<UUID, String, ByteBuffer> slice = createRangeSlicesQuery(rs);
+		UUID xtPropsKey = getObjectUUID(contextID, folderID, objectID, module);
+		boolean exists = true;
+		ColumnFamilyUpdater<UUID, Composite> contextUpdater = null;
 		
-		Row<UUID, String, ByteBuffer> r = slice.execute().get().peekLast();
+		if (xtPropsKey == null) {
+			xtPropsKey = UUID.randomUUID();
+			exists = false;
+			contextUpdater = contextTemplate.createUpdater(encodeUUID(contextID));
+			contextUpdater.setString(new Composite(folderID, Integer.toString(module), Integer.toString(objectID)), xtPropsKey.toString());
+		}
 		
-		UUID key;
-		if (r == null)
-			key = UUID.randomUUID();
-		else
-			key = r.getKey();
-		
-		ColumnFamilyUpdater<UUID, String> updater = xtPropsTemplate.createUpdater(key);
+		ColumnFamilyUpdater<UUID, String> xtPropsUpdater = xtPropsTemplate.createUpdater(xtPropsKey);
 		
 		Iterator<String> it = attributes.keySet().iterator();
 		while (it.hasNext()) {
@@ -454,124 +427,39 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 			Object o = attributes.get(columnName);
 			
 			if (o == null) {
-				updater.deleteColumn(columnName);
+				xtPropsUpdater.deleteColumn(columnName);
 			} else {
 				
 				if (o instanceof String) {
-					updater.setString(columnName, (String)o);
+					xtPropsUpdater.setString(columnName, (String)o);
 				} else if (o instanceof Integer) {
-					updater.setString(columnName, String.valueOf((Integer)o));
+					xtPropsUpdater.setString(columnName, String.valueOf((Integer)o));
 					//updater.setInteger(columnName, (Integer)o);
 				} else if (o instanceof Long)
-					updater.setString(columnName, String.valueOf((Long)o));
+					xtPropsUpdater.setString(columnName, String.valueOf((Long)o));
 					//updater.setLong(columnName, (Long)o);
 				else if (o instanceof Double)
-					updater.setString(columnName, String.valueOf((Double)o));
+					xtPropsUpdater.setString(columnName, String.valueOf((Double)o));
 					//updater.setDouble(columnName, (Double)o);
 				else if (o instanceof Boolean)
-					updater.setString(columnName, String.valueOf((Boolean)o));
+					xtPropsUpdater.setString(columnName, String.valueOf((Boolean)o));
 				else if (o instanceof Float)
-					updater.setString(columnName, String.valueOf((Float)o));
+					xtPropsUpdater.setString(columnName, String.valueOf((Float)o));
 					//updater.setFloat(columnName, (Float)o);
 				else if (o instanceof Date)
-					updater.setString(columnName, String.valueOf(((Date) o).getTime()));
+					xtPropsUpdater.setString(columnName, String.valueOf(((Date) o).getTime()));
 					//updater.setLong(columnName, ((Date) o).getTime());
 				else
 					throw new OXException(666, "Unsupported attribute type. Data: " + o);
 			}
 		}
 		
-		updater.setInteger("contextID", contextID);
-		updater.setString("folderID", folderID);
-		updater.setInteger("objectID", objectID);
-		updater.setInteger("moduleID", module);
-		
 		try {
-			xtPropsTemplate.update(updater);
+			xtPropsTemplate.update(xtPropsUpdater);
+			if (!exists)
+				contextTemplate.update(contextUpdater);
 		} catch (HectorException h) {
 			h.printStackTrace();
-		}
-	}
-	
-	private class RangeSliceWrapper {
-		private int contextID;
-		private int objectID;
-		private int moduleID;
-		private String folderID;
-		private int count;
-		
-		private boolean hasContextID;
-		private boolean hasObjectID;
-		private boolean hasModuleID;
-		private boolean hasFolderID;
-		
-		protected RangeSliceWrapper(int contextID, String folderID, int objectID, int moduleID, int count) {
-			if (contextID != 0)
-				setContextID(contextID);
-			if (folderID != null)
-				setFolderID(folderID);
-			if (objectID != 0)
-				setObjectID(objectID);
-			if (moduleID != 0)
-				setModuleID(moduleID);
-			this.count = count;
-		}
-		
-		/**
-		 * @return the contextID
-		 */
-		public int getContextID() {
-			return contextID;
-		}
-		/**
-		 * @param contextID the contextID to set
-		 */
-		public void setContextID(int contextID) {
-			this.contextID = contextID;
-			hasContextID = true;
-		}
-		/**
-		 * @return the objectID
-		 */
-		public int getObjectID() {
-			return objectID;
-		}
-		/**
-		 * @param objectID the objectID to set
-		 */
-		public void setObjectID(int objectID) {
-			this.objectID = objectID;
-			hasObjectID = true;
-		}
-		/**
-		 * @return the moduleID
-		 */
-		public int getModuleID() {
-			return moduleID;
-		}
-		/**
-		 * @param moduleID the moduleID to set
-		 */
-		public void setModuleID(int moduleID) {
-			this.moduleID = moduleID;
-			hasModuleID = true;
-		}
-		/**
-		 * @return the folderID
-		 */
-		public String getFolderID() {
-			return folderID;
-		}
-		/**
-		 * @param folderID the folderID to set
-		 */
-		public void setFolderID(String folderID) {
-			this.folderID = folderID;
-			hasFolderID = true;
-		}
-		
-		public int getCount() {
-			return count;
 		}
 	}
 }
