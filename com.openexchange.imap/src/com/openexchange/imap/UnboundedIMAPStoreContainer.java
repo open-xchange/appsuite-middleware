@@ -82,8 +82,8 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
     /**
      * Initializes a new {@link UnboundedIMAPStoreContainer}.
      */
-    public UnboundedIMAPStoreContainer(final String server, final int port, final String login, final String pw) {
-        super();
+    public UnboundedIMAPStoreContainer(final String server, final int port, final String login, final String pw, final IMAPValidity validity) {
+        super(validity);
         queue = new InheritedPriorityBlockingQueue();
         this.login = login;
         this.port = port;
@@ -95,7 +95,7 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
      * Initializes an empty {@link UnboundedIMAPStoreContainer}.
      */
     protected UnboundedIMAPStoreContainer() {
-        super();
+        super(null);
         queue = null;
         this.login = null;
         this.port = 0;
@@ -132,7 +132,8 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
 
     @Override
     public void backStore(final IMAPStore imapStore) {
-        if (!queue.offer(new IMAPStoreWrapper(imapStore))) {
+        final long currentValidity = validity.getCurrentValidity();
+        if ((currentValidity > 0 && imapStore.getValidity() < currentValidity) || !queue.offer(new IMAPStoreWrapper(imapStore))) {
             closeSafe(imapStore);
         } else if (DEBUG) {
             LOG.debug("IMAPStoreContainer.backStore(): Added IMAPStore instance to cache.");

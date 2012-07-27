@@ -134,8 +134,8 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
 
         private volatile ScheduledTimerTask timerTask;
 
-        protected ReentrantSemaphoredBoundedIMAPStoreContainer(final String server, final int port, final String login, final String pw, final int maxCount) {
-            super(server, port, login, pw);
+        protected ReentrantSemaphoredBoundedIMAPStoreContainer(final String server, final int port, final String login, final String pw, final int maxCount, final IMAPValidity validity) {
+            super(server, port, login, pw, validity);
             semaphore = new Semaphore(maxCount, true);
             stores = new ConcurrentHashMap<Thread, CountedIMAPStore>(maxCount);
             final ConfigurationService configurationService = IMAPServiceRegistry.getService(ConfigurationService.class);
@@ -238,7 +238,12 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
                 stores.remove(thread);
             }
             // Release IMAPStore instance orderly
-            super.backStore(imapStore);
+            final long currentValidity = validity.getCurrentValidity();
+            if (currentValidity > 0 && imapStore.getValidity() < currentValidity) {
+                closeSafe(imapStore);
+            } else {
+                super.backStore(imapStore);
+            }
             semaphore.release();
         }
     }
@@ -255,8 +260,8 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
 
         private int count;
 
-        protected SynchronizedBoundedIMAPStoreContainer(final String server, final int port, final String login, final String pw, final int maxCount) {
-            super(server, port, login, pw);
+        protected SynchronizedBoundedIMAPStoreContainer(final String server, final int port, final String login, final String pw, final int maxCount, final IMAPValidity validity) {
+            super(server, port, login, pw, validity);
             mutex = new Object();
             this.maxCount = maxCount;
             stores = new HashMap<Thread, CountedIMAPStore>(maxCount);
@@ -314,7 +319,12 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
                     stores.remove(thread);
                 }
                 // Release IMAPStore instance orderly
-                super.backStore(imapStore);
+                final long currentValidity = validity.getCurrentValidity();
+                if (currentValidity > 0 && imapStore.getValidity() < currentValidity) {
+                    closeSafe(imapStore);
+                } else {
+                    super.backStore(imapStore);
+                }
                 count--;
                 mutex.notify();
             }
@@ -326,14 +336,14 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
     /**
      * Initializes a new {@link BoundedIMAPStoreContainer}.
      */
-    public BoundedIMAPStoreContainer(final String server, final int port, final String login, final String pw, final int maxCount, final ImplType implType) {
+    public BoundedIMAPStoreContainer(final String server, final int port, final String login, final String pw, final int maxCount, final IMAPValidity validity, final ImplType implType) {
         super();
         switch (implType) {
         case SEMAPHORE:
-            impl = new ReentrantSemaphoredBoundedIMAPStoreContainer(server, port, login, pw, maxCount);
+            impl = new ReentrantSemaphoredBoundedIMAPStoreContainer(server, port, login, pw, maxCount, validity);
             break;
         default:
-            impl = new SynchronizedBoundedIMAPStoreContainer(server, port, login, pw, maxCount);
+            impl = new SynchronizedBoundedIMAPStoreContainer(server, port, login, pw, maxCount, validity);
             break;
         }
     }

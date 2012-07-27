@@ -252,7 +252,7 @@ public final class IMAPStoreCache {
         }
     }
 
-    private IMAPStoreContainer getContainer(final int accountId, final String server, final int port, final String login, final String pw, final Session session) throws OXException {
+    private IMAPStoreContainer getContainer(final int accountId, final String server, final int port, final String login, final String pw, final Session session, final IMAPValidity validity) throws OXException {
         /*
          * Check for a cached one
          */
@@ -265,9 +265,9 @@ public final class IMAPStoreCache {
             final int maxCount = protocol.getMaxCount(server, MailAccount.DEFAULT_ID == accountId);
             final IMAPStoreContainer newContainer;
             if (maxCount > 0) {
-                newContainer = new BoundedIMAPStoreContainer(server, port, login, pw, maxCount, implType);
+                newContainer = new BoundedIMAPStoreContainer(server, port, login, pw, maxCount, validity, implType);
             } else {
-                newContainer = new UnboundedIMAPStoreContainer(server, port, login, pw);
+                newContainer = new UnboundedIMAPStoreContainer(server, port, login, pw, validity);
             }
             container = map.putIfAbsent(key, newContainer);
             if (null == container) {
@@ -316,16 +316,16 @@ public final class IMAPStoreCache {
      * @throws MessagingException If connecting IMAP store fails
      * @throws OXException If a mail error occurs
      */
-    public IMAPStore borrowIMAPStore(final int accountId, final javax.mail.Session imapSession, final String server, final int port, final String login, final String pw, final Session session) throws MessagingException, OXException {
+    public IMAPStore borrowIMAPStore(final int accountId, final javax.mail.Session imapSession, final String server, final int port, final String login, final String pw, final Session session, final IMAPValidity validity) throws MessagingException, OXException {
         /*
          * Return connected IMAP store
          */
         try {
             if (!DEBUG) {
-                return getContainer(accountId, server, port, login, pw, session).getStore(imapSession);
+                return getContainer(accountId, server, port, login, pw, session, validity).getStore(imapSession);
             }
             final long st = System.currentTimeMillis();
-            final IMAPStore store = getContainer(accountId, server, port, login, pw, session).getStore(imapSession);
+            final IMAPStore store = getContainer(accountId, server, port, login, pw, session, validity).getStore(imapSession);
             final long dur = System.currentTimeMillis() - st;
             LOG.debug("IMAPStoreCache.borrowIMAPStore() took " + dur + "msec.");
             return store;

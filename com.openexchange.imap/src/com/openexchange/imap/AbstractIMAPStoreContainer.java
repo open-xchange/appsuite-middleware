@@ -69,12 +69,15 @@ public abstract class AbstractIMAPStoreContainer implements IMAPStoreContainer {
 
     protected final String name;
 
+    protected final IMAPValidity validity;
+
     /**
      * Initializes a new {@link AbstractIMAPStoreContainer}.
      */
-    protected AbstractIMAPStoreContainer() {
+    protected AbstractIMAPStoreContainer(final IMAPValidity validity) {
         super();
         name = PROTOCOL_NAME;
+        this.validity = validity;
     }
 
     /**
