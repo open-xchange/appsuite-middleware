@@ -985,6 +985,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 // .toString());
                 return null;
             }
+            msg.setUID(msgUID);
             msg.setPeek(!markSeen);
             final MailMessage mail;
             try {
