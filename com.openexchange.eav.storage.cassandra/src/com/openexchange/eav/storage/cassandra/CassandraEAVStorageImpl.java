@@ -50,14 +50,11 @@ package com.openexchange.eav.storage.cassandra;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.CharacterCodingException;
-import java.nio.charset.MalformedInputException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import me.prettyprint.cassandra.model.ConfigurableConsistencyLevel;
 import me.prettyprint.cassandra.serializers.ByteBufferSerializer;
@@ -66,7 +63,6 @@ import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.serializers.UUIDSerializer;
 import me.prettyprint.cassandra.service.template.ColumnFamilyResult;
 import me.prettyprint.cassandra.service.template.ColumnFamilyTemplate;
-import me.prettyprint.cassandra.service.template.ColumnFamilyUpdater;
 import me.prettyprint.cassandra.service.template.ThriftColumnFamilyTemplate;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.HConsistencyLevel;
@@ -101,10 +97,8 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 	private static String node = "192.168.33.37";
 	private static String keyspaceName = "OX";
 	private static final String CF_XT_PROPS = "ExtendedProperties";
-	private static final String CF_CONTEXT = "Context";
 	
-	private final ColumnFamilyTemplate<UUID, String> xtPropsTemplate;
-	private final ColumnFamilyTemplate<UUID, Composite> contextTemplate;
+	private final ColumnFamilyTemplate<UUID, Composite> xtPropsTemplate;
 	
 	private static final StringSerializer ss = StringSerializer.get();
 	private static final UUIDSerializer us = UUIDSerializer.get();
@@ -116,8 +110,7 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 	public CassandraEAVStorageImpl() {
 		initKeyspace();
 		
-		xtPropsTemplate = new ThriftColumnFamilyTemplate<UUID, String>(keyspace, CF_XT_PROPS, us, ss);
-		contextTemplate = new ThriftColumnFamilyTemplate<UUID, Composite>(keyspace, CF_CONTEXT, us, cs);
+		xtPropsTemplate = new ThriftColumnFamilyTemplate<UUID, Composite>(keyspace, CF_XT_PROPS, us, cs);
 	}
 	
 	/**
@@ -161,10 +154,8 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 		Map<String, HConsistencyLevel> writeCLMap = new HashMap<String, HConsistencyLevel>();
 		
 		readCLMap.put(CF_XT_PROPS, HConsistencyLevel.ONE);
-		readCLMap.put(CF_CONTEXT, HConsistencyLevel.ONE);
 		
 		writeCLMap.put(CF_XT_PROPS, HConsistencyLevel.ONE);
-		writeCLMap.put(CF_CONTEXT, HConsistencyLevel.ONE);
 		
 		configurableConsistencyLevel.setReadCfConsistencyLevels(readCLMap);
 		configurableConsistencyLevel.setWriteCfConsistencyLevels(writeCLMap);
@@ -185,15 +176,8 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 		UUID objectUUID = null;
 		
 		Composite columnName = new Composite(folderID, Integer.toString(module), Integer.toString(objectID));
-		
-		/*Composite end = new Composite();
-		end.addComponent(0, folderID, Composite.ComponentEquality.EQUAL);
-		end.addComponent(1, module, Composite.ComponentEquality.EQUAL);
-		end.addComponent(2, objectID, Composite.ComponentEquality.GREATER_THAN_EQUAL);*/
-		System.out.println(contextUUID + " - " + columnName);
 		SliceQuery<UUID, Composite, ByteBuffer> sliceQuery = HFactory.createSliceQuery(keyspace, us, cs, bbs);
-		sliceQuery.setColumnFamily(CF_CONTEXT).setKey(contextUUID).setColumnNames(columnName);
-		//sliceQuery.setRange(start, end, false, 1);
+		sliceQuery.setColumnFamily(CF_XT_PROPS).setKey(contextUUID).setColumnNames(columnName);
 		ColumnSlice<Composite, ByteBuffer> slice = sliceQuery.execute().get();
 		
 		try {
@@ -227,7 +211,7 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 		end.addComponent(1, Integer.toString(module), Composite.ComponentEquality.GREATER_THAN_EQUAL);
 		
 		SliceQuery<UUID, Composite, ByteBuffer> sliceQuery = HFactory.createSliceQuery(keyspace, us, cs, bbs);
-		sliceQuery.setColumnFamily(CF_CONTEXT).setKey(contextUUID);
+		sliceQuery.setColumnFamily(CF_XT_PROPS).setKey(contextUUID);
 		sliceQuery.setRange(start, end, false, Integer.MAX_VALUE);
 		Iterator<HColumn<Composite, ByteBuffer>> it = sliceQuery.execute().get().getColumns().iterator();
 		
@@ -240,7 +224,6 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 				map.put(uuid, objid);
 			} catch (CharacterCodingException e) {
 				e.printStackTrace();
-				System.out.println(((ByteBuffer) hColumn.getName().get(2)));
 			}
 		}
 		
@@ -257,17 +240,21 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 		try {
 			UUID xtPropsKey = getObjectUUID(contextID, folderID, objectID, module);
 			
-			ColumnFamilyResult<UUID, String> result = xtPropsTemplate.queryColumns(xtPropsKey);
+			if (xtPropsKey == null) {
+				throw new OXException(666, "nothing found for: contextID:" + contextID + ", folderID:" + folderID + ", objectID: " + objectID + ", module: " + module);
+			}
+			
+			ColumnFamilyResult<UUID, Composite> result = xtPropsTemplate.queryColumns(xtPropsKey);
 			if (result == null || !result.hasResults()) {
 				log.error("No result");
 			} else {
 				attr = new HashMap<String, Object>();
 				
-				Iterator<String> it = result.getColumnNames().iterator();
+				Iterator<Composite> it = result.getColumnNames().iterator();
 				while (it.hasNext()) {
-					String columnName = (String) it.next();
+					Composite columnName = (Composite) it.next();
 					ByteBuffer value = result.getColumn(columnName).getValue();
-					attr.put(columnName, ByteBufferUtil.string(value));
+					attr.put(ByteBufferUtil.string((ByteBuffer)columnName.get(0)), ByteBufferUtil.string(value));
 				}
 			}
 		} catch (CharacterCodingException e) {
@@ -393,11 +380,11 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 	@Override
 	public void deleteAttributes(int contextID, String folderID, int objectID, int module) throws OXException {
 		UUID xtPropsKey = getObjectUUID(contextID, folderID, objectID, module);
-		//TODO: delete entry from CF_CONTEXT
+		
 		if (xtPropsKey != null) {
 			Mutator<UUID> m = HFactory.createMutator(keyspace, us);
 			m.addDeletion(xtPropsKey, CF_XT_PROPS);
-			m.addDeletion(encodeUUID(contextID), CF_CONTEXT, new Composite(folderID, Integer.toString(module), Integer.toString(objectID)), cs);
+			m.addDeletion(encodeUUID(contextID), CF_XT_PROPS, new Composite(folderID, Integer.toString(module), Integer.toString(objectID)), cs);
 			m.execute();
 		}
 	}
@@ -410,54 +397,46 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 	public void setAttributes(int contextID, String folderID, int objectID, Map<String, Object> attributes, int module) throws OXException {
 		UUID xtPropsKey = getObjectUUID(contextID, folderID, objectID, module);
 		boolean exists = true;
-		ColumnFamilyUpdater<UUID, Composite> contextUpdater = null;
-		
 		if (xtPropsKey == null) {
-			xtPropsKey = UUID.randomUUID();
 			exists = false;
-			contextUpdater = contextTemplate.createUpdater(encodeUUID(contextID));
-			contextUpdater.setString(new Composite(folderID, Integer.toString(module), Integer.toString(objectID)), xtPropsKey.toString());
+			xtPropsKey = UUID.randomUUID();
 		}
 		
-		ColumnFamilyUpdater<UUID, String> xtPropsUpdater = xtPropsTemplate.createUpdater(xtPropsKey);
+		Mutator<UUID> m = HFactory.createMutator(keyspace, us);
+		
+		if (!exists)
+			m.addInsertion(encodeUUID(contextID), CF_XT_PROPS, HFactory.createColumn(new Composite(folderID, Integer.toString(module), Integer.toString(objectID)), xtPropsKey.toString(), cs, ss));
 		
 		Iterator<String> it = attributes.keySet().iterator();
 		while (it.hasNext()) {
 			String columnName = (String) it.next();
 			Object o = attributes.get(columnName);
-			
+			Composite compoColumnName = new Composite(columnName);
 			if (o == null) {
-				xtPropsUpdater.deleteColumn(columnName);
+				m.addDeletion(xtPropsKey, CF_XT_PROPS, compoColumnName, cs);
 			} else {
 				
 				if (o instanceof String) {
-					xtPropsUpdater.setString(columnName, (String)o);
+					m.addInsertion(xtPropsKey, CF_XT_PROPS, HFactory.createColumn(compoColumnName, (String)o));
 				} else if (o instanceof Integer) {
-					xtPropsUpdater.setString(columnName, String.valueOf((Integer)o));
-					//updater.setInteger(columnName, (Integer)o);
+					m.addInsertion(xtPropsKey, CF_XT_PROPS, HFactory.createColumn(compoColumnName, String.valueOf((Integer)o)));
 				} else if (o instanceof Long)
-					xtPropsUpdater.setString(columnName, String.valueOf((Long)o));
-					//updater.setLong(columnName, (Long)o);
+					m.addInsertion(xtPropsKey, CF_XT_PROPS, HFactory.createColumn(compoColumnName, String.valueOf((Long)o)));
 				else if (o instanceof Double)
-					xtPropsUpdater.setString(columnName, String.valueOf((Double)o));
-					//updater.setDouble(columnName, (Double)o);
+					m.addInsertion(xtPropsKey, CF_XT_PROPS, HFactory.createColumn(compoColumnName, String.valueOf((Double)o)));
 				else if (o instanceof Boolean)
-					xtPropsUpdater.setString(columnName, String.valueOf((Boolean)o));
+					m.addInsertion(xtPropsKey, CF_XT_PROPS, HFactory.createColumn(compoColumnName, String.valueOf((Boolean)o)));
 				else if (o instanceof Float)
-					xtPropsUpdater.setString(columnName, String.valueOf((Float)o));
-					//updater.setFloat(columnName, (Float)o);
+					m.addInsertion(xtPropsKey, CF_XT_PROPS, HFactory.createColumn(compoColumnName, String.valueOf((Float)o)));
 				else if (o instanceof Date)
-					xtPropsUpdater.setString(columnName, String.valueOf(((Date) o).getTime()));
-					//updater.setLong(columnName, ((Date) o).getTime());
+					m.addInsertion(xtPropsKey, CF_XT_PROPS, HFactory.createColumn(compoColumnName, String.valueOf(((Date) o).getTime())));
 				else
 					throw new OXException(666, "Unsupported attribute type. Data: " + o);
 			}
 		}
 		
 		try {
-			xtPropsTemplate.update(xtPropsUpdater);
-			if (!exists)
-				contextTemplate.update(contextUpdater);
+			m.execute();
 		} catch (HectorException h) {
 			h.printStackTrace();
 		}
