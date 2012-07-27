@@ -53,6 +53,7 @@ import static com.openexchange.ajax.ConfigMenu.convert2JS;
 import static com.openexchange.ajax.SessionServlet.removeJSESSIONID;
 import static com.openexchange.ajax.SessionServlet.removeOXCookies;
 import static com.openexchange.login.Interface.HTTP_JSON;
+import static com.openexchange.tools.servlet.http.Cookies.getDomainValue;
 import static com.openexchange.tools.servlet.http.Tools.copyHeaders;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -120,7 +121,6 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.sessiond.impl.IPAddressUtil;
 import com.openexchange.sessiond.impl.IPRange;
 import com.openexchange.tools.io.IOTools;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -1037,50 +1037,10 @@ public class Login extends AJAXServlet {
              */
             cookie.setMaxAge(conf.cookieExpiry);
         }
-        final String domain = getDomainValue(null == serverName ? LogProperties.<String> getLogProperty("com.openexchange.ajp13.serverName") : serverName, prefixWithDot());
+        final String domain = getDomainValue(null == serverName ? LogProperties.<String> getLogProperty("com.openexchange.ajp13.serverName") : serverName);
         if (null != domain) {
             cookie.setDomain(domain);
         }
-    }
-
-    private static volatile Boolean prefixWithDot;
-
-    private static boolean prefixWithDot() {
-        Boolean tmp = prefixWithDot;
-        if (null == tmp) {
-            synchronized (Login.class) {
-                tmp = prefixWithDot;
-                if (null == tmp) {
-                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                    tmp = Boolean.valueOf(null != service && service.getBoolProperty("com.openexchange.cookie.domain.prefixWithDot", false));
-                    prefixWithDot = tmp;
-                }
-            }
-        }
-        return tmp.booleanValue();
-    }
-
-    private static String getDomainValue(final String serverName, final boolean prefixWithDot) {
-        if (null == serverName) {
-            return null;
-        }
-        if (prefixWithDot) {
-            if (serverName.startsWith("www.")) {
-                return serverName.substring(3);
-            } else if ("localhost".equalsIgnoreCase(serverName)) {
-                return serverName;
-            } else {
-                // Not an IP address
-                if (null == IPAddressUtil.textToNumericFormatV4(serverName) && (null == IPAddressUtil.textToNumericFormatV6(serverName))) {
-                    return new StringBuilder(serverName.length() + 1).append('.').append(serverName).toString();
-                }
-            }
-        } else {
-            if (!"localhost".equalsIgnoreCase(serverName) && (null == IPAddressUtil.textToNumericFormatV4(serverName)) && (null == IPAddressUtil.textToNumericFormatV6(serverName))) {
-                return serverName;
-            }
-        }
-        return null;
     }
 
     protected boolean doAutoLogin(final HttpServletRequest req, final HttpServletResponse resp) throws IOException, OXException {

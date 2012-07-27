@@ -50,11 +50,11 @@
 package com.openexchange.ajax;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.tools.servlet.http.Cookies.extractDomainValue;
+import static com.openexchange.tools.servlet.http.Cookies.getDomainValue;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.UndeclaredThrowableException;
-import java.net.URLDecoder;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
@@ -70,7 +70,6 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.login.HashCalculator;
@@ -89,6 +88,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.java.Java7ConcurrentLinkedQueue;
+import com.openexchange.log.LogFactory;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.server.ServiceExceptionCode;
@@ -97,7 +97,6 @@ import com.openexchange.session.Session;
 import com.openexchange.session.SessionThreadCounter;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.sessiond.impl.IPAddressUtil;
 import com.openexchange.sessiond.impl.IPRange;
 import com.openexchange.sessiond.impl.SubnetMask;
 import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
@@ -126,7 +125,6 @@ public abstract class SessionServlet extends AJAXServlet {
     public static final String SESSION_KEY = "sessionObject";
     
     public static final String PUBLIC_SESSION_KEY = "publicSessionObject";
-    
 
     public static final String SESSION_WHITELIST_FILE = "noipcheck.cnf";
 
@@ -685,68 +683,6 @@ public abstract class SessionServlet extends AJAXServlet {
         session.setParameter("JSESSIONID", req.getSession().getId());	
     }
 
-    private static volatile Boolean prefixWithDot;
-
-    private static boolean prefixWithDot() {
-        Boolean tmp = prefixWithDot;
-        if (null == tmp) {
-            synchronized (Login.class) {
-                tmp = prefixWithDot;
-                if (null == tmp) {
-                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                    tmp = Boolean.valueOf(null != service && service.getBoolProperty("com.openexchange.cookie.domain.prefixWithDot", false));
-                    prefixWithDot = tmp;
-                }
-            }
-        }
-        return tmp.booleanValue();
-    }
-
-    private static String getDomainValue(final String serverName, final boolean prefixWithDot) {
-        if (null == serverName) {
-            return null;
-        }
-        if (prefixWithDot) {
-            if (serverName.startsWith("www.")) {
-                return serverName.substring(3);
-            } else if ("localhost".equalsIgnoreCase(serverName)) {
-                return serverName;
-            } else {
-                // Not an IP address
-                if (null == IPAddressUtil.textToNumericFormatV4(serverName) && (null == IPAddressUtil.textToNumericFormatV6(serverName))) {
-                    return new StringBuilder(serverName.length() + 1).append('.').append(serverName).toString();
-                }
-            }
-        } else {
-            if (!"localhost".equalsIgnoreCase(serverName) && (null == IPAddressUtil.textToNumericFormatV4(serverName)) && (null == IPAddressUtil.textToNumericFormatV6(serverName))) {
-                return serverName;
-            }
-        }
-        return null;
-    }
-
-    private static String extractDomainValue(final String id) {
-        if (null == id) {
-            return null;
-        }
-        int start = id.indexOf('-');
-        if (start > 0) {
-            int end = id.lastIndexOf('.');
-            if (end > start) {
-                return urlDecode(id.substring(start+1, end));
-            }
-        }
-        return null;
-    }
-
-    private static String urlDecode(final String text) {
-        try {
-            return URLDecoder.decode(text, "iso-8859-1");
-        } catch (final UnsupportedEncodingException e) {
-            return text;
-        }
-    }
-
     /**
      * Removes the Open-Xchange cookies belonging to specified hash string.
      *
@@ -768,7 +704,7 @@ public abstract class SessionServlet extends AJAXServlet {
                     final String value = cookie.getValue();
                     final Cookie respCookie = new Cookie(name, value);
                     respCookie.setPath("/");
-                    final String domain = getDomainValue(req.getServerName(), prefixWithDot());
+                    final String domain = getDomainValue(req.getServerName());
                     if (null != domain) {
                         respCookie.setDomain(domain);
                         // Once again without domain parameter
@@ -798,11 +734,17 @@ public abstract class SessionServlet extends AJAXServlet {
         for (final Cookie cookie : cookies) {
             final String name = cookie.getName();
             if (Tools.JSESSIONID_COOKIE.equals(name)) {
-                final Cookie respCookie = new Cookie(name, cookie.getValue());
+                final String value = cookie.getValue();
+                final Cookie respCookie = new Cookie(name, value);
                 respCookie.setPath("/");
-                final String domain = extractDomainValue(cookie.getValue());
+                final String domain = extractDomainValue(value);
                 if (null != domain) {
                     respCookie.setDomain(domain);
+                    // Once again without domain parameter
+                    final Cookie respCookie2 = new Cookie(name, value);
+                    respCookie2.setPath("/");
+                    respCookie2.setMaxAge(0); // delete
+                    resp.addCookie(respCookie2);
                 }
                 respCookie.setMaxAge(0); // delete
                 resp.addCookie(respCookie);
@@ -812,9 +754,9 @@ public abstract class SessionServlet extends AJAXServlet {
 
     /**
      * Returns the remembered session.
-     * 
-     * @param req The Servlet request
-     * @return The remembered session
+     *
+     * @param req The Servlet request.
+     * @return The remembered session.
      */
     protected static ServerSession getSessionObject(final ServletRequest req) {
         return getSessionObject(req, false);
