@@ -220,7 +220,17 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     private static final ConcurrentMap<Key, ConcurrentTIntObjectHashMap<DefaultIMAPValidity>> VALIDITY_MAP = new ConcurrentHashMap<IMAPAccess.Key, ConcurrentTIntObjectHashMap<DefaultIMAPValidity>>();
 
     /**
-     * Gets the current validity
+     * Drops the user-associated validity.
+     * 
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     */
+    public static void dropValidity(final int userId, final int contextId) {
+        VALIDITY_MAP.remove(new Key(userId, contextId));
+    }
+
+    /**
+     * Gets the current validity value.
      * 
      * @param accountId The account identifier
      * @param session The associated session
@@ -236,7 +246,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     }
 
     /**
-     * Gets the IMAP validity
+     * Gets the IMAP validity.
      * 
      * @param accountId The account identifier
      * @param session The associated session
@@ -929,6 +939,9 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         } catch (final Exception e) {
             // Ignore
         }
+        
+        
+        System.out.println("IMAPAccess is not valid => Cleared connection caches!");
     }
 
     private static final String PROTOCOL = IMAPProvider.PROTOCOL_IMAP.getName();
@@ -1065,6 +1078,9 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     @Override
     public boolean isCacheable() {
         if (!checkValidity()) {
+            
+            System.out.println("IMAPAccess is not valid => Not cachable!");
+            
             return false;
         }
         if (useIMAPStoreCache()) {
