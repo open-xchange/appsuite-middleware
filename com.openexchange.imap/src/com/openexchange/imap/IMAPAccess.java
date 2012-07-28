@@ -399,7 +399,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     /**
      * The validity counter.
      */
-    private final long validity;
+    private long validity;
 
     /**
      * A simple cache for max. count values per server.
@@ -850,7 +850,9 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             maxCount = getMaxCount();
             try {
                 imapStore = new AccessedIMAPStore(this, connectIMAPStore(maxCount > 0), imapSession);
-                imapStore.setValidity(getCurrentValidity(accountId, session));
+                final long currentValidity = getCurrentValidity(accountId, session);
+                imapStore.setValidity(currentValidity);
+                validity = currentValidity;
             } catch (final AuthenticationFailedException e) {
                 throw e;
             } catch (final MessagingException e) {
