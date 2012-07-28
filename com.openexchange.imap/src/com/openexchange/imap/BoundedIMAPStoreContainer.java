@@ -237,14 +237,17 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
                 }
                 stores.remove(thread);
             }
-            // Release IMAPStore instance orderly
-            final long currentValidity = validity.getCurrentValidity();
-            if (currentValidity > 0 && imapStore.getValidity() < currentValidity) {
-                closeSafe(imapStore);
-            } else {
-                super.backStore(imapStore);
+            try {
+                // Release IMAPStore instance orderly
+                final long currentValidity = validity.getCurrentValidity();
+                if (currentValidity > 0 && imapStore.getValidity() < currentValidity) {
+                    closeSafe(imapStore);
+                } else {
+                    super.backStore(imapStore);
+                }
+            } finally {
+                semaphore.release();
             }
-            semaphore.release();
         }
     }
 
