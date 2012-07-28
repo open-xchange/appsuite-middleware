@@ -59,13 +59,15 @@ import java.util.concurrent.atomic.AtomicLong;
 public class DefaultIMAPValidity implements IMAPValidity {
 
     private final AtomicLong validity;
+    private final IMAPAccess imapAccess;
 
     /**
      * Initializes a new {@link DefaultIMAPValidity}.
      */
-    public DefaultIMAPValidity(final AtomicLong validity) {
+    public DefaultIMAPValidity(final AtomicLong validity, final IMAPAccess imapAccess) {
         super();
         this.validity = validity;
+        this.imapAccess = imapAccess;
     }
 
     /**
@@ -89,6 +91,11 @@ public class DefaultIMAPValidity implements IMAPValidity {
     @Override
     public long getCurrentValidity() {
         return validity.get();
+    }
+
+    @Override
+    public void clearCachedConnections() {
+        imapAccess.clearCachedConnections();
     }
 
 }

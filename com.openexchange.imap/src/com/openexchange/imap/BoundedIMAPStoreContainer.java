@@ -241,6 +241,7 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
                 // Release IMAPStore instance orderly
                 final long currentValidity = validity.getCurrentValidity();
                 if (currentValidity > 0 && imapStore.getValidity() < currentValidity) {
+                    validity.clearCachedConnections();
                     closeSafe(imapStore);
                 } else {
                     super.backStore(imapStore);
@@ -324,6 +325,7 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
                 // Release IMAPStore instance orderly
                 final long currentValidity = validity.getCurrentValidity();
                 if (currentValidity > 0 && imapStore.getValidity() < currentValidity) {
+                    validity.clearCachedConnections();
                     closeSafe(imapStore);
                 } else {
                     super.backStore(imapStore);

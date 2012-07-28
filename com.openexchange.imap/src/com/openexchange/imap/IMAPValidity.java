@@ -64,4 +64,9 @@ public interface IMAPValidity {
      */
     long getCurrentValidity();
 
+    /**
+     * Clears cached IMAP connections.
+     */
+    void clearCachedConnections();
+
 }

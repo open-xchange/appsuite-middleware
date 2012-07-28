@@ -217,7 +217,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     /**
      * The validity map.
      */
-    private static final ConcurrentMap<Key, ConcurrentTIntObjectHashMap<DefaultIMAPValidity>> VALIDITY_MAP = new ConcurrentHashMap<IMAPAccess.Key, ConcurrentTIntObjectHashMap<DefaultIMAPValidity>>();
+    private static final ConcurrentMap<Key, ConcurrentTIntObjectHashMap<AtomicLong>> VALIDITY_MAP = new ConcurrentHashMap<IMAPAccess.Key, ConcurrentTIntObjectHashMap<AtomicLong>>();
 
     /**
      * Drops the user-associated validity.
@@ -237,40 +237,40 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      * @return The current validity or <code>0</code> if not initialized, yet
      */
     public static long getCurrentValidity(final int accountId, final Session session) {
-        final ConcurrentTIntObjectHashMap<DefaultIMAPValidity> map = VALIDITY_MAP.get(new Key(session.getUserId(), session.getContextId()));
+        final ConcurrentTIntObjectHashMap<AtomicLong> map = VALIDITY_MAP.get(new Key(session.getUserId(), session.getContextId()));
         if (null == map) {
             return 0L;
         }
-        final DefaultIMAPValidity validity = map.get(accountId);
-        return null == validity ? 0L : validity.getCurrentValidity();
+        final AtomicLong validity = map.get(accountId);
+        return null == validity ? 0L : validity.get();
     }
 
     /**
      * Gets the IMAP validity.
      * 
-     * @param accountId The account identifier
-     * @param session The associated session
+     * @param imapAccess The IMAP access
      * @return The IMAP validity
      */
-    public static IMAPValidity getIMAPValidity(final int accountId, final Session session) {
+    private static IMAPValidity getIMAPValidity(final IMAPAccess imapAccess) {
+        final Session session = imapAccess.session;
         final Key key = new Key(session.getUserId(), session.getContextId());
-        ConcurrentTIntObjectHashMap<DefaultIMAPValidity> map = VALIDITY_MAP.get(key);
+        ConcurrentTIntObjectHashMap<AtomicLong> map = VALIDITY_MAP.get(key);
         if (null == map) {
-            final ConcurrentTIntObjectHashMap<DefaultIMAPValidity> newMap = new ConcurrentTIntObjectHashMap<DefaultIMAPValidity>(8);
+            final ConcurrentTIntObjectHashMap<AtomicLong> newMap = new ConcurrentTIntObjectHashMap<AtomicLong>(8);
             map = VALIDITY_MAP.putIfAbsent(key, newMap);
             if (null == map) {
                 map = newMap;
             }
         }
-        DefaultIMAPValidity validity = map.get(accountId);
+        AtomicLong validity = map.get(imapAccess.accountId);
         if (null == validity) {
-            final DefaultIMAPValidity al = new DefaultIMAPValidity(new AtomicLong(0L));
-            validity = map.putIfAbsent(accountId, al);
+            final AtomicLong al = new AtomicLong(0L);
+            validity = map.putIfAbsent(imapAccess.accountId, al);
             if (null == validity) {
                 validity = al;
             }
         }
-        return validity;
+        return new DefaultIMAPValidity(validity, imapAccess);
     }
 
     /**
@@ -282,17 +282,17 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      */
     public static long increaseCurrentValidity(final int accountId, final Session session) {
         final Key key = new Key(session.getUserId(), session.getContextId());
-        ConcurrentTIntObjectHashMap<DefaultIMAPValidity> map = VALIDITY_MAP.get(key);
+        ConcurrentTIntObjectHashMap<AtomicLong> map = VALIDITY_MAP.get(key);
         if (null == map) {
-            final ConcurrentTIntObjectHashMap<DefaultIMAPValidity> newMap = new ConcurrentTIntObjectHashMap<DefaultIMAPValidity>(8);
+            final ConcurrentTIntObjectHashMap<AtomicLong> newMap = new ConcurrentTIntObjectHashMap<AtomicLong>(8);
             map = VALIDITY_MAP.putIfAbsent(key, newMap);
             if (null == map) {
                 map = newMap;
             }
         }
-        DefaultIMAPValidity validity = map.get(accountId);
+        AtomicLong validity = map.get(accountId);
         if (null == validity) {
-            final DefaultIMAPValidity al = new DefaultIMAPValidity(new AtomicLong(0L));
+            final AtomicLong al = new AtomicLong(0L);
             validity = map.putIfAbsent(accountId, al);
             if (null == validity) {
                 validity = al;
@@ -559,6 +559,9 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 } else {
                     try {
                         imapStore.close();
+                        if (!checkValidity()) {
+                            clearCachedConnections();
+                        }
                     } catch (final MessagingException e) {
                         LOG.error("Error while closing IMAP store.", e);
                     } catch (final RuntimeException e) {
@@ -571,9 +574,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     ic.dropImapStore();
                 }
                 imapStore = null;
-            }
-            if (!checkValidity()) {
-                clearIMAPStoreContainer();
             }
         } finally {
             reset();
@@ -927,7 +927,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     /**
      * Clears cached IMAP connections.
      */
-    public void clearIMAPStoreContainer() {
+    protected void clearCachedConnections() {
         final IMAPStoreContainer container = IMAPStoreCache.getInstance().optContainer(server, port, login);
         if (null != container) {
             container.clear();
@@ -965,7 +965,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
          * Get store...
          */
         if (fromCache && useIMAPStoreCache()) {
-            return IMAPStoreCache.getInstance().borrowIMAPStore(accountId, imapSession, server, port, login, pw, session, getIMAPValidity(accountId, session));
+            return IMAPStoreCache.getInstance().borrowIMAPStore(accountId, imapSession, server, port, login, pw, session, getIMAPValidity(this));
         }
         /*
          * Establish a new one...
