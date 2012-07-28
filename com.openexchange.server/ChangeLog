@@ -2,6 +2,7 @@
 
  - Fix for bug 22685: Increased timeout to 10sec
  - Fix for bug 22613: Insert line-break as separator
+ - Fix for bug 22659: using proper monitor object
 
 * 2012-07-27 - jan.bauerdick@open-xchange.com
 
