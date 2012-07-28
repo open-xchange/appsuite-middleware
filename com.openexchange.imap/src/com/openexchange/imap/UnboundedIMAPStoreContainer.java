@@ -82,8 +82,8 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
     /**
      * Initializes a new {@link UnboundedIMAPStoreContainer}.
      */
-    public UnboundedIMAPStoreContainer(final String server, final int port, final String login, final String pw, final IMAPValidity validity) {
-        super(validity);
+    public UnboundedIMAPStoreContainer(final String server, final int port, final String login, final String pw) {
+        super();
         queue = new InheritedPriorityBlockingQueue();
         this.login = login;
         this.port = port;
@@ -95,7 +95,7 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
      * Initializes an empty {@link UnboundedIMAPStoreContainer}.
      */
     protected UnboundedIMAPStoreContainer() {
-        super(null);
+        super();
         queue = null;
         this.login = null;
         this.port = 0;
@@ -113,14 +113,14 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
     }
 
     @Override
-    public IMAPStore getStore(final javax.mail.Session imapSession) throws MessagingException, InterruptedException {
+    public IMAPStore getStore(final javax.mail.Session imapSession, final IMAPValidity validity) throws MessagingException, InterruptedException {
         /*
          * Retrieve and remove the head of this queue
          */
         final IMAPStoreWrapper imapStoreWrapper = queue.poll();
         IMAPStore imapStore = null == imapStoreWrapper ? null : imapStoreWrapper.imapStore;
         if (null == imapStore) {
-            imapStore = newStore(server, port, login, pw, imapSession);
+            imapStore = newStore(server, port, login, pw, imapSession, validity);
             if (DEBUG) {
                 LOG.debug("IMAPStoreContainer.getStore(): Returning newly established IMAPStore instance.");
             }
@@ -131,7 +131,7 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
     }
 
     @Override
-    public void backStore(final IMAPStore imapStore) {
+    public void backStore(final IMAPStore imapStore, final IMAPValidity validity) {
         final long currentValidity = validity.getCurrentValidity();
         if (currentValidity > 0 && imapStore.getValidity() < currentValidity) {
             validity.clearCachedConnections();

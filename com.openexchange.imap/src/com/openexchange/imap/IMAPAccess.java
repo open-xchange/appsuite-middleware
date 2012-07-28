@@ -555,7 +555,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             }
             if (imapStore != null) {
                 if (useIMAPStoreCache()) {
-                    IMAPStoreCache.getInstance().returnIMAPStore(imapStore.dropAndGetImapStore(), server, port, login);
+                    IMAPStoreCache.getInstance().returnIMAPStore(imapStore.dropAndGetImapStore(), server, port, login, getIMAPValidity(this));
                 } else {
                     try {
                         imapStore.close();

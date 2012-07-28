@@ -265,9 +265,9 @@ public final class IMAPStoreCache {
             final int maxCount = protocol.getMaxCount(server, MailAccount.DEFAULT_ID == accountId);
             final IMAPStoreContainer newContainer;
             if (maxCount > 0) {
-                newContainer = new BoundedIMAPStoreContainer(server, port, login, pw, maxCount, validity, implType);
+                newContainer = new BoundedIMAPStoreContainer(server, port, login, pw, maxCount, implType);
             } else {
-                newContainer = new UnboundedIMAPStoreContainer(server, port, login, pw, validity);
+                newContainer = new UnboundedIMAPStoreContainer(server, port, login, pw);
             }
             container = map.putIfAbsent(key, newContainer);
             if (null == container) {
@@ -322,10 +322,10 @@ public final class IMAPStoreCache {
          */
         try {
             if (!DEBUG) {
-                return getContainer(accountId, server, port, login, pw, session, validity).getStore(imapSession);
+                return getContainer(accountId, server, port, login, pw, session, validity).getStore(imapSession, validity);
             }
             final long st = System.currentTimeMillis();
-            final IMAPStore store = getContainer(accountId, server, port, login, pw, session, validity).getStore(imapSession);
+            final IMAPStore store = getContainer(accountId, server, port, login, pw, session, validity).getStore(imapSession, validity);
             final long dur = System.currentTimeMillis() - st;
             LOG.debug("IMAPStoreCache.borrowIMAPStore() took " + dur + "msec.");
             return store;
@@ -350,7 +350,7 @@ public final class IMAPStoreCache {
      * @param port The port
      * @param login The login/user name
      */
-    public void returnIMAPStore(final IMAPStore imapStore, final String server, final int port, final String login) {
+    public void returnIMAPStore(final IMAPStore imapStore, final String server, final int port, final String login, final IMAPValidity validity) {
         if (null == imapStore) {
             // Nothing to close
             return;
@@ -360,10 +360,14 @@ public final class IMAPStoreCache {
          */
         final IMAPStoreContainer container = map.get(newKey(server, port, login));
         if (null == container) {
+            final long currentValidity = validity.getCurrentValidity();
+            if (currentValidity > 0 && imapStore.getValidity() < currentValidity) {
+                validity.clearCachedConnections();
+            }
             closeSafe(imapStore);
             return;
         }
-        container.backStore(imapStore);
+        container.backStore(imapStore, validity);
     }
 
     private static void closeSafe(final IMAPStore imapStore) {
