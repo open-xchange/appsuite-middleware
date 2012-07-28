@@ -923,7 +923,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     }
 
     /**
-     * Clears associated IMAP store container.
+     * Clears cached IMAP connections.
      */
     public void clearIMAPStoreContainer() {
         final IMAPStoreContainer container = IMAPStoreCache.getInstance().optContainer(server, port, login);
