@@ -167,8 +167,8 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
             builder.append("&code=").append(code);
             final URL url = new URL(builder.toString());
             final URLConnection connection = url.openConnection();
-            connection.setConnectTimeout(2500);
-            connection.setReadTimeout(2500);
+            connection.setConnectTimeout(10000);
+            connection.setReadTimeout(10000);
             connection.connect();
             /*
              * Initialize a reader on URL connection...
