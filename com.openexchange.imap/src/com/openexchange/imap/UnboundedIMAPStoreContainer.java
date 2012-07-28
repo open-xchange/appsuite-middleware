@@ -136,7 +136,13 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
         if (currentValidity > 0 && imapStore.getValidity() < currentValidity) {
             validity.clearCachedConnections();
             closeSafe(imapStore);
-        } else if (!queue.offer(new IMAPStoreWrapper(imapStore))) {
+        } else {
+            backStoreNoValidityCheck(imapStore);
+        }
+    }
+
+    protected void backStoreNoValidityCheck(final IMAPStore imapStore) {
+        if (!queue.offer(new IMAPStoreWrapper(imapStore))) {
             closeSafe(imapStore);
         } else if (DEBUG) {
             LOG.debug("IMAPStoreContainer.backStore(): Added IMAPStore instance to cache.");

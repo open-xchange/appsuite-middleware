@@ -244,7 +244,7 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
                     validity.clearCachedConnections();
                     closeSafe(imapStore);
                 } else {
-                    super.backStore(imapStore);
+                    super.backStoreNoValidityCheck(imapStore);
                 }
             } finally {
                 semaphore.release();
@@ -328,7 +328,7 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
                     validity.clearCachedConnections();
                     closeSafe(imapStore);
                 } else {
-                    super.backStore(imapStore);
+                    super.backStoreNoValidityCheck(imapStore);
                 }
                 count--;
                 mutex.notify();
