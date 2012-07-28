@@ -217,7 +217,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     /**
      * The validity map.
      */
-    private static final ConcurrentMap<Key, ConcurrentTIntObjectHashMap<AtomicLong>> VALIDITY_MAP = new ConcurrentHashMap<IMAPAccess.Key, ConcurrentTIntObjectHashMap<AtomicLong>>();
+    private static final ConcurrentMap<Key, ConcurrentTIntObjectHashMap<DefaultIMAPValidity>> VALIDITY_MAP = new ConcurrentHashMap<IMAPAccess.Key, ConcurrentTIntObjectHashMap<DefaultIMAPValidity>>();
 
     /**
      * Gets the current validity
@@ -227,12 +227,12 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      * @return The current validity or <code>0</code> if not initialized, yet
      */
     public static long getCurrentValidity(final int accountId, final Session session) {
-        final ConcurrentTIntObjectHashMap<AtomicLong> map = VALIDITY_MAP.get(new Key(session.getUserId(), session.getContextId()));
+        final ConcurrentTIntObjectHashMap<DefaultIMAPValidity> map = VALIDITY_MAP.get(new Key(session.getUserId(), session.getContextId()));
         if (null == map) {
             return 0L;
         }
-        final AtomicLong validity = map.get(accountId);
-        return null == validity ? 0L : validity.get();
+        final DefaultIMAPValidity validity = map.get(accountId);
+        return null == validity ? 0L : validity.getCurrentValidity();
     }
 
     /**
@@ -244,23 +244,23 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      */
     public static IMAPValidity getIMAPValidity(final int accountId, final Session session) {
         final Key key = new Key(session.getUserId(), session.getContextId());
-        ConcurrentTIntObjectHashMap<AtomicLong> map = VALIDITY_MAP.get(key);
+        ConcurrentTIntObjectHashMap<DefaultIMAPValidity> map = VALIDITY_MAP.get(key);
         if (null == map) {
-            final ConcurrentTIntObjectHashMap<AtomicLong> newMap = new ConcurrentTIntObjectHashMap<AtomicLong>(8);
+            final ConcurrentTIntObjectHashMap<DefaultIMAPValidity> newMap = new ConcurrentTIntObjectHashMap<DefaultIMAPValidity>(8);
             map = VALIDITY_MAP.putIfAbsent(key, newMap);
             if (null == map) {
                 map = newMap;
             }
         }
-        AtomicLong validity = map.get(accountId);
+        DefaultIMAPValidity validity = map.get(accountId);
         if (null == validity) {
-            final AtomicLong al = new AtomicLong(0L);
+            final DefaultIMAPValidity al = new DefaultIMAPValidity(new AtomicLong(0L));
             validity = map.putIfAbsent(accountId, al);
             if (null == validity) {
                 validity = al;
             }
         }
-        return new DefaultIMAPValidity(validity);
+        return validity;
     }
 
     /**
@@ -272,17 +272,17 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      */
     public static long increaseCurrentValidity(final int accountId, final Session session) {
         final Key key = new Key(session.getUserId(), session.getContextId());
-        ConcurrentTIntObjectHashMap<AtomicLong> map = VALIDITY_MAP.get(key);
+        ConcurrentTIntObjectHashMap<DefaultIMAPValidity> map = VALIDITY_MAP.get(key);
         if (null == map) {
-            final ConcurrentTIntObjectHashMap<AtomicLong> newMap = new ConcurrentTIntObjectHashMap<AtomicLong>(8);
+            final ConcurrentTIntObjectHashMap<DefaultIMAPValidity> newMap = new ConcurrentTIntObjectHashMap<DefaultIMAPValidity>(8);
             map = VALIDITY_MAP.putIfAbsent(key, newMap);
             if (null == map) {
                 map = newMap;
             }
         }
-        AtomicLong validity = map.get(accountId);
+        DefaultIMAPValidity validity = map.get(accountId);
         if (null == validity) {
-            final AtomicLong al = new AtomicLong(0L);
+            final DefaultIMAPValidity al = new DefaultIMAPValidity(new AtomicLong(0L));
             validity = map.putIfAbsent(accountId, al);
             if (null == validity) {
                 validity = al;
