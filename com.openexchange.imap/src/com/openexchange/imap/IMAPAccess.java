@@ -939,9 +939,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         } catch (final Exception e) {
             // Ignore
         }
-        
-        
-        System.out.println("IMAPAccess is not valid => Cleared connection caches!");
     }
 
     private static final String PROTOCOL = IMAPProvider.PROTOCOL_IMAP.getName();
@@ -1078,9 +1075,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     @Override
     public boolean isCacheable() {
         if (!checkValidity()) {
-            
-            System.out.println("IMAPAccess is not valid => Not cachable!");
-            
             return false;
         }
         if (useIMAPStoreCache()) {
