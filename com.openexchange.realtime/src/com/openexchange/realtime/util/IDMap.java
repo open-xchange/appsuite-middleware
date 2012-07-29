@@ -71,7 +71,7 @@ public class IDMap<T> implements Map<ID, T> {
      * Initializes a new {@link IDMap}.
      */
     public IDMap() {
-        this(false);
+        this(true);
     }
 
     /**
