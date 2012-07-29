@@ -214,6 +214,23 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         }
     }
 
+    private static volatile Boolean validityDisabled;
+
+    private static boolean validityDisabled() {
+        Boolean tmp = validityDisabled;
+        if (null == tmp) {
+            synchronized (tmp) {
+                tmp = validityDisabled;
+                if (null == tmp) {
+                    final ConfigurationService service = IMAPServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+                    tmp = Boolean.valueOf(service != null && service.getBoolProperty("com.openexchange.imap.validityDisabled", false));
+                    validityDisabled = tmp;
+                }
+            }
+        }
+        return tmp.booleanValue();
+    }
+
     /**
      * The validity map.
      */
@@ -237,6 +254,9 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      * @return The current validity or <code>0</code> if not initialized, yet
      */
     public static long getCurrentValidity(final int accountId, final Session session) {
+        if (validityDisabled()) {
+            return 0L;
+        }
         final ConcurrentTIntObjectHashMap<AtomicLong> map = VALIDITY_MAP.get(new Key(session.getUserId(), session.getContextId()));
         if (null == map) {
             return 0L;
@@ -281,6 +301,9 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      * @return The increased validity value
      */
     public static long increaseCurrentValidity(final int accountId, final Session session) {
+        if (validityDisabled()) {
+            return 0L;
+        }
         final Key key = new Key(session.getUserId(), session.getContextId());
         ConcurrentTIntObjectHashMap<AtomicLong> map = VALIDITY_MAP.get(key);
         if (null == map) {
@@ -1158,6 +1181,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     protected void shutdown() throws OXException {
         USE_IMAP_STORE_CACHE.set(true);
         maxCountCache = null;
+        validityDisabled = null;
         Entity2ACLInit.getInstance().stop();
         ACLExtensionInit.getInstance().stop();
         IMAPCapabilityAndGreetingCache.tearDown();
