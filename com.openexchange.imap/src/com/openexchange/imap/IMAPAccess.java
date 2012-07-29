@@ -219,7 +219,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     private static boolean validityDisabled() {
         Boolean tmp = validityDisabled;
         if (null == tmp) {
-            synchronized (tmp) {
+            synchronized (IMAPAccess.class) {
                 tmp = validityDisabled;
                 if (null == tmp) {
                     final ConfigurationService service = IMAPServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);

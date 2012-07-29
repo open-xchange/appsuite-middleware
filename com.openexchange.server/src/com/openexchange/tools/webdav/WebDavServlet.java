@@ -161,7 +161,7 @@ public abstract class WebDavServlet extends HttpServlet {
     private static boolean disabled() {
         Boolean tmp = disabled;
         if (null == tmp) {
-            synchronized (tmp) {
+            synchronized (WebDavServlet.class) {
                 tmp = disabled;
                 if (null == tmp) {
                     final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
