@@ -9,6 +9,7 @@ Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Import-Package: com.openexchange.authentication,
  com.openexchange.exception,
  com.openexchange.http.grizzly.services.atmosphere,
+ com.openexchange.java,
  com.openexchange.java.util,
  com.openexchange.json,
  com.openexchange.osgi,
@@ -24,5 +25,5 @@ Import-Package: com.openexchange.authentication,
  org.atmosphere.cpr,
  org.atmosphere.handler,
  org.json,
- org.osgi.framework;version="1.3.0",
- org.osgi.util.tracker;version="1.5.0"
+ org.osgi.framework,
+ org.osgi.util.tracker

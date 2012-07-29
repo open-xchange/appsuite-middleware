@@ -54,7 +54,7 @@ import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link OXRTHandler} - Handles incoming and outgoing {@link Stanza stanzas}.
+ * {@link OXRTHandler} - Handles/transforms incoming and outgoing {@link Stanza stanzas}.
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
@@ -69,7 +69,7 @@ public interface OXRTHandler {
     public String getNamespace();
 
     /**
-     * Handles incoming stanza.
+     * Handles/transforms incoming stanza.
      * 
      * @param stanza The incoming
      * @param session The Open-Xchange session
@@ -78,7 +78,7 @@ public interface OXRTHandler {
     public void incoming(Stanza stanza, ServerSession session) throws OXException;
 
     /**
-     * Handles outgoing stanza.
+     * Handles/transforms outgoing stanza.
      * 
      * @param stanza The outgoing stanza
      * @param session The Open-Xchange session

@@ -49,34 +49,61 @@
 
 package com.openexchange.realtime.atmosphere.impl;
 
-import java.util.ArrayList;
 import java.util.List;
-
+import java.util.concurrent.CopyOnWriteArrayList;
 import com.openexchange.realtime.atmosphere.OXRTHandler;
 
-
 /**
- * {@link HandlerLibrary}
- *
+ * {@link HandlerLibrary} - Tracks registered {@link OXRTHandler handlers} and makes them accessible through {@link #getHandlerFor(String)}.
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
 public class HandlerLibrary {
-	private final List<OXRTHandler> handlers = new ArrayList<OXRTHandler>();
 
-	public OXRTHandler getHandlerFor(String namespace) {
-		for (OXRTHandler transformer : handlers) {
-			if (transformer.getNamespace().equals(namespace)) {
-				return transformer;
-			}
-		}
-		return null;
-	}
+    /**
+     * The collection for registered {@link OXRTHandler handlers}.
+     */
+    private final List<OXRTHandler> handlers;
 
-	public void add(OXRTHandler transformer) {
-		handlers.add(transformer);
-	}
+    /**
+     * Initializes a new {@link HandlerLibrary}.
+     */
+    public HandlerLibrary() {
+        super();
+        handlers = new CopyOnWriteArrayList<OXRTHandler>(); // User a concurrent collection
+    }
 
-	public void remove(OXRTHandler transformer) {
-		handlers.remove(transformer);
-	}
+    /**
+     * Gets the handler appropriate for specified namespace identifier.
+     * 
+     * @param namespace The namespace identifier
+     * @return The appropriate handler or <code>null</code> if none is applicable
+     */
+    public OXRTHandler getHandlerFor(String namespace) {
+        for (OXRTHandler transformer : handlers) {
+            if (transformer.getNamespace().equals(namespace)) {
+                return transformer;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Adds specified handler/transformer to this library.
+     * 
+     * @param transformer The handler to add
+     */
+    public void add(OXRTHandler transformer) {
+        handlers.add(transformer);
+    }
+
+    /**
+     * Removes specified handler/transformer from this library.
+     * 
+     * @param transformer The handler to remove
+     */
+    public void remove(OXRTHandler transformer) {
+        handlers.remove(transformer);
+    }
 }
