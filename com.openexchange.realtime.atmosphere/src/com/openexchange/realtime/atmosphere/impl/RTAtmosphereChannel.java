@@ -59,6 +59,7 @@ import com.openexchange.tools.session.ServerSession;
  * {@link RTAtmosphereChannel}
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
 public class RTAtmosphereChannel implements Channel {
 
@@ -66,6 +67,12 @@ public class RTAtmosphereChannel implements Channel {
 
     private final HandlerLibrary library;
 
+    /**
+     * Initializes a new {@link RTAtmosphereChannel}.
+     * 
+     * @param handler The handler to use
+     * @param library The library to use
+     */
     public RTAtmosphereChannel(RTAtmosphereHandler handler, HandlerLibrary library) {
         this.handler = handler;
         this.library = library;
