@@ -55,6 +55,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.CountingHttpServletRequest;
 
 /**
@@ -154,12 +156,33 @@ public abstract class WebDavServlet extends HttpServlet {
         resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Method \"REPORT\" is not supported by this servlet");
     }
 
+    private static volatile Boolean disabled;
+
+    private static boolean disabled() {
+        Boolean tmp = disabled;
+        if (null == tmp) {
+            synchronized (tmp) {
+                tmp = disabled;
+                if (null == tmp) {
+                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    tmp = Boolean.valueOf(service != null && !service.getBoolProperty("com.openexchange.webdav.enabled", true));
+                    disabled = tmp;
+                }
+            }
+        }
+        return tmp.booleanValue();
+    }
 
     /**
      * {@inheritDoc}
      */
     @Override
     protected void service(final HttpServletRequest request, final HttpServletResponse resp) throws ServletException, IOException {
+        if (disabled()) {
+            resp.setContentType("text/html; charset=UTF-8");
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND, "The WebDAV interface is disabled.");
+            return;
+        }
         incrementRequests();
         try {
             final HttpServletRequest req = new CountingHttpServletRequest(request);
