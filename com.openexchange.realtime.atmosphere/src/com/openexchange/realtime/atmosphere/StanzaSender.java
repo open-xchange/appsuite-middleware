@@ -53,10 +53,18 @@ import com.openexchange.exception.OXException;
 import com.openexchange.realtime.packet.Stanza;
 
 /**
- * {@link StanzaSender}
- *
+ * {@link StanzaSender} - Transports a specified stanza.
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
 public interface StanzaSender {
-	public void send(Stanza stanza) throws OXException;
+
+    /**
+     * Transports specified stanza.
+     * 
+     * @param stanza The stanza to transport
+     * @throws OXException If transport operation fails
+     */
+    public void send(Stanza stanza) throws OXException;
 }

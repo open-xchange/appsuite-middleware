@@ -57,57 +57,53 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link RTAtmosphereChannel}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class RTAtmosphereChannel implements Channel {
-	
-	private RTAtmosphereHandler handler;
-	private HandlerLibrary library;
-	
-	
 
-	public RTAtmosphereChannel(RTAtmosphereHandler handler,
-			HandlerLibrary library) {
-		this.handler = handler;
-		this.library = library;
-	}
+    private final RTAtmosphereHandler handler;
 
-	public String getProtocol() {
-		return "ox";
-	}
+    private final HandlerLibrary library;
 
-	public boolean canHandle(String namespace, ID recipient,
-			ServerSession session) throws OXException {
-		if (!isConnected(recipient, session)) {
-			return false;
-		}
-		
-		if (!hasCapability(recipient, namespace, session)) {
-			return false;
-		}
-		
-		if (library.getHandlerFor(namespace) == null) {
-			return false;
-		}
-		
-		return true;
-	}
+    public RTAtmosphereChannel(RTAtmosphereHandler handler, HandlerLibrary library) {
+        this.handler = handler;
+        this.library = library;
+    }
 
-	public boolean hasCapability(ID recipient, String namespace,
-			ServerSession session) {
-		return true; // TODO: Implement Capability Model
-	}
+    public String getProtocol() {
+        return "ox";
+    }
 
-	public int getPriority() {
-		return 10000;
-	}
+    public boolean canHandle(String namespace, ID recipient, ServerSession session) throws OXException {
+        if (!isConnected(recipient, session)) {
+            return false;
+        }
 
-	public boolean isConnected(ID id, ServerSession session) throws OXException {
-		return handler.isConnected(id);
-	}
+        if (!hasCapability(recipient, namespace, session)) {
+            return false;
+        }
 
-	public void send(Stanza stanza, ServerSession session) throws OXException {
-		handler.handleOutgoing(stanza, session);
-	}
+        if (library.getHandlerFor(namespace) == null) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public boolean hasCapability(ID recipient, String namespace, ServerSession session) {
+        return true; // TODO: Implement Capability Model
+    }
+
+    public int getPriority() {
+        return 10000;
+    }
+
+    public boolean isConnected(ID id, ServerSession session) throws OXException {
+        return handler.isConnected(id);
+    }
+
+    public void send(Stanza stanza, ServerSession session) throws OXException {
+        handler.handleOutgoing(stanza, session);
+    }
 }

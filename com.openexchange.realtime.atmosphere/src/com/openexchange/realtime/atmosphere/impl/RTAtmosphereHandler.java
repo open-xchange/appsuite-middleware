@@ -52,6 +52,7 @@ package com.openexchange.realtime.atmosphere.impl;
 import java.io.IOException;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.atmosphere.cpr.AtmosphereHandler;
 import org.atmosphere.cpr.AtmosphereRequest;
@@ -75,27 +76,36 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 /**
  * {@link RTAtmosphereHandler}
  * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco
- *         Laguna</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
 public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 	// TODO: Figure Out JSONP and Long-Polling State management. Hot-Swap the
 	// AtmosphereResource.
 	// TODO: Close connections and get rid of em
 
-	private ServiceLookup services;
+	private final ServiceLookup services;
 
-	private ConcurrentHashMap<String, RTAtmosphereState> uuid2State = new ConcurrentHashMap<String, RTAtmosphereState>();
-	private IDMap<RTAtmosphereState> id2State = new IDMap<RTAtmosphereState>();
-	private HandlerLibrary library;
+	private final ConcurrentMap<String, RTAtmosphereState> uuid2State;
+	private final IDMap<RTAtmosphereState> id2State;
+	private final HandlerLibrary library;
 
+	/**
+	 * Initializes a new {@link RTAtmosphereHandler}.
+	 * 
+	 * @param library The library to use
+	 * @param services The service-lookup providing needed services
+	 */
 	public RTAtmosphereHandler(HandlerLibrary library, ServiceLookup services) {
+	    super();
+	    uuid2State = new ConcurrentHashMap<String, RTAtmosphereState>();
+	    id2State = new IDMap<RTAtmosphereState>();
 		this.library = library;
 		this.services = services;
 	}
 
 	public void destroy() {
-
+	    // Ignore for now
 	}
 
 	public void onRequest(AtmosphereResource r) throws IOException {
