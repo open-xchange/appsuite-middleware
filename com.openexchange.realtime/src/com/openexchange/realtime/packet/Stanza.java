@@ -52,7 +52,7 @@ package com.openexchange.realtime.packet;
 import com.openexchange.realtime.Channel;
 
 /**
- * {@link Stanza} - The basic (super) class for all kind of deliverable entities that are capable of being sent through a {@link Channel
+ * {@link Stanza} - The basic (super) class for all kind of deliverable items that are capable of being sent via a {@link Channel
  * channel}.
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>

@@ -50,24 +50,65 @@
 package com.openexchange.realtime.packet;
 
 /**
- * {@link IQ}
- *
+ * {@link IQ} - Used for command exchanges.
+ * <p>
+ * Example for registering a new account:
+ * 
+ * <pre>
+ *    C: &lt;iq type='get' id='reg1'&gt;
+ *           &lt;query xmlns='jabber:iq:register'/&gt;
+ *       &lt;/iq>
+ *    S: &lt;iq type='result' id='reg1'&gt;
+ *           &lt;query xmlns='jabber:iq:register'&gt;
+ *               &lt;username/&gt;
+ *               &lt;password/&gt;
+ *           &lt;/query>
+ *       &lt;/iq>
+ *    C: &lt;iq type='set' id='reg2'&gt;
+ *           &lt;query xmlns='jabber:iq:register'&gt;
+ *               &lt;username&gt;hax0r&lt;/username&gt;
+ *               &lt;password&gt;god&lt;/password&gt;
+ *           &lt;/query&gt;
+ *       &lt;/iq&gt;
+ * </pre>
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
 public class IQ extends Stanza {
-	public static enum Type {
-		get, set, result, error
-	}
-	
-	private Type type;
 
-	public Type getType() {
-		return type;
-	}
+    /**
+     * Describes a command's type.
+     */
+    public static enum Type {
+        get, set, result, error
+    }
 
-	public void setType(Type type) {
-		this.type = type;
-	}
-	
-	
+    private Type type;
+
+    /**
+     * Initializes a new {@link IQ}.
+     */
+    public IQ() {
+        super();
+    }
+
+    /**
+     * Gets the type.
+     * 
+     * @return The type
+     */
+    public Type getType() {
+        return type;
+    }
+
+    /**
+     * Sets the type.
+     * 
+     * @param type The type
+     */
+    public void setType(final Type type) {
+        this.type = type;
+    }
+
 }
