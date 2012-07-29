@@ -62,9 +62,17 @@ import com.openexchange.realtime.packet.Stanza;
  * {@link StanzaWriter}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
 public class StanzaWriter {
 
+	/**
+	 * Writes specified stanza into its JSON representation.
+	 * 
+	 * @param stanza The stanza to write
+	 * @return The appropriate JSON representation
+	 * @throws OXException If a JSON write error occurs
+	 */
 	public static JSONObject write(Stanza stanza) throws OXException {
 		try {
 			JSONObject object = new JSONObject();

@@ -54,12 +54,36 @@ import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link OXRTHandler}
- *
+ * {@link OXRTHandler} - Handles incoming and outgoing {@link Stanza stanzas}.
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
 public interface OXRTHandler {
-	public String getNamespace();
-	public void incoming(Stanza stanza, ServerSession session) throws OXException;
-	public void outgoing(Stanza stanza, ServerSession session, StanzaSender sender) throws OXException;
+
+    /**
+     * Gets this handler's namespace identifier.
+     * 
+     * @return The namespace identifier
+     */
+    public String getNamespace();
+
+    /**
+     * Handles incoming stanza.
+     * 
+     * @param stanza The incoming
+     * @param session The Open-Xchange session
+     * @throws OXException If handling incoming stanza fails
+     */
+    public void incoming(Stanza stanza, ServerSession session) throws OXException;
+
+    /**
+     * Handles outgoing stanza.
+     * 
+     * @param stanza The outgoing stanza
+     * @param session The Open-Xchange session
+     * @param sender The stanza's sender
+     * @throws OXException If handling outgoing stanzas fails
+     */
+    public void outgoing(Stanza stanza, ServerSession session, StanzaSender sender) throws OXException;
 }

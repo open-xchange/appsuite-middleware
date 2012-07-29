@@ -59,15 +59,21 @@ import com.openexchange.realtime.MessageDispatcher;
 import com.openexchange.realtime.impl.MessageDispatcherImpl;
 import com.openexchange.realtime.packet.Payload;
 
+/**
+ * {@link RTActivator} - The activator for realtime bundle.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
 public class RTActivator extends HousekeepingActivator {
-	@Override
+
+    @Override
 	protected Class<?>[] getNeededServices() {
 		return new Class[]{SimpleConverter.class};
 	}
 
 	@Override
 	protected void startBundle() throws Exception {
-		Payload.services = this;
+		Payload.SERVICES.set(this);
 		
 		final MessageDispatcherImpl dispatcher = new MessageDispatcherImpl();
 		
@@ -87,6 +93,11 @@ public class RTActivator extends HousekeepingActivator {
 		openTrackers();
 	}
 
+	@Override
+	protected void stopBundle() throws Exception {
+	    Payload.SERVICES.set(null);
+	    super.stopBundle();
+	}
 
 
 }
