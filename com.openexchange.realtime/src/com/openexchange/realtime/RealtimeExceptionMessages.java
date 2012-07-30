@@ -65,7 +65,4 @@ public class RealtimeExceptionMessages implements LocalizableStrings {
     // No appropriate channel found for recipient %1$s with payload namespace %2$s
     public static final String NO_APPROPRIATE_CHANNEL = "No appropriate channel found for recipient %1$s with payload namespace %2$s";
 
-    // An unexpected error occurred: %1$s
-    public static final String UNEXPECTED_ERROR = "An unexpected error occurred: %1$s";
-
 }

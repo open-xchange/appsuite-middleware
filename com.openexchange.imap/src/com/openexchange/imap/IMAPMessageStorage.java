@@ -2471,7 +2471,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 /*
                  * Close affected IMAP folder to ensure consistency regarding IMAFolder's internal cache.
                  */
-                IMAPAccess.increaseCurrentValidity(accountId, session);
                 notifyIMAPFolderModification(destFullName);
                 return retval;
             }
@@ -2496,7 +2495,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             /*
              * Close affected IMAP folder to ensure consistency regarding IMAFolder's internal cache.
              */
-            IMAPAccess.increaseCurrentValidity(accountId, session);
             notifyIMAPFolderModification(destFullName);
             return retval;
         } catch (final MessagingException e) {

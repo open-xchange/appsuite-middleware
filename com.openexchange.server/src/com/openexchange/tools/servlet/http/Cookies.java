@@ -59,6 +59,7 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 import javax.servlet.http.Cookie;
+import com.google.common.net.InternetDomainName;
 import com.openexchange.ajax.Login;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -100,6 +101,28 @@ public final class Cookies {
         return tmp.booleanValue();
     }
 
+    private static volatile String configuredDomain;
+
+    /**
+     * Gets the configured domain or <code>null</code>
+     * 
+     * @return The configured domain or <code>null</code>
+     */
+    public static String configuredDomain() {
+        String tmp = configuredDomain;
+        if (null == tmp) {
+            synchronized (Login.class) {
+                tmp = configuredDomain;
+                if (null == tmp) {
+                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    tmp = null == service ? "null" : service.getProperty("com.openexchange.cookie.domain", "null");
+                    configuredDomain = tmp;
+                }
+            }
+        }
+        return "null".equalsIgnoreCase(tmp) ? null : tmp;
+    }
+
     /**
      * Gets the domain parameter for specified server name with configured default behavior whether to prefix domain with a dot (
      * <code>'.'</code>) character.
@@ -107,9 +130,10 @@ public final class Cookies {
      * @param serverName The server name
      * @return The domain parameter or <code>null</code>
      * @see #prefixWithDot()
+     * @see #configuredDomain()
      */
     public static String getDomainValue(final String serverName) {
-        return getDomainValue(serverName, prefixWithDot());
+        return getDomainValue(serverName, prefixWithDot(), configuredDomain());
     }
 
     /**
@@ -117,9 +141,14 @@ public final class Cookies {
      * 
      * @param serverName The server name
      * @param prefixWithDot Whether to prefix domain with a dot (<code>'.'</code>) character
+     * @param configuredDomain The pre-configured domain name for this host
      * @return The domain parameter or <code>null</code>
      */
-    public static String getDomainValue(final String serverName, final boolean prefixWithDot) {
+    public static String getDomainValue(final String serverName, final boolean prefixWithDot, final String configuredDomain) {
+        if (null != configuredDomain) {
+            return configuredDomain;
+        }
+        // Try by best-guessed attempt
         if (null == serverName) {
             return null;
         }
@@ -140,7 +169,8 @@ public final class Cookies {
                         return null; // Equal to server name
                     }
                     final String domain = serverName.substring(fpos);
-                    if (EXACT.contains(domain.substring(1).toLowerCase(Locale.US))) {
+                    final InternetDomainName tmp = InternetDomainName.fromLenient(domain);
+                    if (tmp.isPublicSuffix()) {
                         return null; // Equal to server name
                     }
                     return domain;

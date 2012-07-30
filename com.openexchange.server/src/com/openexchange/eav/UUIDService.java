@@ -46,44 +46,45 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package com.openexchange.eav;
 
-package com.openexchange.realtime.atmosphere;
-
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.tools.session.ServerSession;
+import java.util.UUID;
 
 /**
- * {@link OXRTHandler} - Handles/transforms incoming and outgoing {@link Stanza stanzas}.
+ * {@link UUIDService} to encode/decode the tuple contextID, moduleID, objectID into a {@link java.util.UUID} 
  * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface OXRTHandler {
-
-    /**
-     * Gets this handler's namespace identifier.
-     * 
-     * @return The namespace identifier
-     */
-    public String getNamespace();
-
-    /**
-     * Handles/transforms incoming stanza.
-     * 
-     * @param stanza The incoming
-     * @param session The Open-Xchange session
-     * @throws OXException If handling incoming stanza fails
-     */
-    public void incoming(Stanza stanza, ServerSession session) throws OXException;
-
-    /**
-     * Handles/transforms outgoing stanza.
-     * 
-     * @param stanza The outgoing stanza
-     * @param session The Open-Xchange session
-     * @param sender The stanza's sender
-     * @throws OXException If handling outgoing stanzas fails
-     */
-    public void outgoing(Stanza stanza, ServerSession session, StanzaSender sender) throws OXException;
+public interface UUIDService {
+	
+	/**
+	 * Generate a UUID for the tuple contextID, moduleID, objectID
+	 * @param contextID
+	 * @param moduleID
+	 * @param objectID
+	 * @return the encoded UUID
+	 */
+	public UUID generateUUID(long contextID, long moduleID, long objectID);
+	
+	/**
+	 * Get the contextID from the given UUID which was encoded via the {@link UUIDService}
+	 * 
+	 * @param u encoded UUID
+	 * @return contextID
+	 */
+	public long getContextID(UUID u);
+	
+	/**
+	 * Get the moduleID from the given UUID which was encoded via the {@link UUIDService}
+	 * @param u encoded UUID
+	 * @return moduleID
+	 */
+	public long getModuleID(UUID u);
+	
+	/**
+	 * Get the objectID from the given UUID which was encoded via the {@link UUIDService}
+	 * @param u encoded UUID
+	 * @return objectID
+	 */
+	public long getObjectID(UUID u);
 }

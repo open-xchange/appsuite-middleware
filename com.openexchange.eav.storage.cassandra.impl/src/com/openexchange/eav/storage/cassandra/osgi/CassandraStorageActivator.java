@@ -46,71 +46,47 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package com.openexchange.eav.storage.cassandra.osgi;
 
-package com.openexchange.realtime.atmosphere.impl;
+import org.apache.commons.logging.Log;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.Channel;
-import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.eav.EAVStorage;
+import com.openexchange.eav.storage.cassandra.impl.CassandraEAVStorageImpl;
+import com.openexchange.log.LogFactory;
+import com.openexchange.nosql.cassandra.EmbeddedCassandraService;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link RTAtmosphereChannel}
- * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ *
  */
-public class RTAtmosphereChannel implements Channel {
+public class CassandraStorageActivator extends HousekeepingActivator {
 
-    private final RTAtmosphereHandler handler;
+	private static Log log = LogFactory.getLog(CassandraStorageActivator.class);
+	
+	/*
+	 * (non-Javadoc)
+	 * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
+	 */
+	@Override
+	protected Class<?>[] getNeededServices() {
+		return new Class[]{EmbeddedCassandraService.class, ConfigurationService.class};
+	}
 
-    private final HandlerLibrary library;
-
-    /**
-     * Initializes a new {@link RTAtmosphereChannel}.
-     * 
-     * @param handler The handler to use
-     * @param library The library to use
-     */
-    public RTAtmosphereChannel(RTAtmosphereHandler handler, HandlerLibrary library) {
-        this.handler = handler;
-        this.library = library;
-    }
-
-    public String getProtocol() {
-        return "ox";
-    }
-
-    public boolean canHandle(String namespace, ID recipient, ServerSession session) throws OXException {
-        if (!isConnected(recipient, session)) {
-            return false;
-        }
-
-        if (!hasCapability(recipient, namespace, session)) {
-            return false;
-        }
-
-        if (library.getHandlerFor(namespace) == null) {
-            return false;
-        }
-
-        return true;
-    }
-
-    public boolean hasCapability(ID recipient, String namespace, ServerSession session) {
-        return true; // TODO: Implement Capability Model
-    }
-
-    public int getPriority() {
-        return 10000;
-    }
-
-    public boolean isConnected(ID id, ServerSession session) throws OXException {
-        return handler.isConnected(id);
-    }
-
-    public void send(Stanza stanza, ServerSession session) throws OXException {
-        handler.handleOutgoing(stanza, session);
-    }
+	/*
+	 * (non-Javadoc)
+	 * @see com.openexchange.osgi.DeferredActivator#startBundle()
+	 */
+	@Override
+	protected void startBundle() throws Exception {
+		log.info("Starting bundle: com.openexchange.eav.storage.cassandra");
+		
+		EAVStorage eav = new CassandraEAVStorageImpl();
+		registerService(EAVStorage.class, eav);
+		
+		openTrackers();
+		
+		log.info("Cassandra Storage Service started successfully.");
+	}
 }

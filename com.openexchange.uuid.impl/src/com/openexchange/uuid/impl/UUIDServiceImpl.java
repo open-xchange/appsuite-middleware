@@ -46,47 +46,60 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.eav.storage.cassandra.osgi;
+package com.openexchange.uuid.impl;
 
-import org.apache.commons.logging.Log;
+import java.util.UUID;
 
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.eav.EAVStorage;
-import com.openexchange.eav.storage.cassandra.CassandraEAVStorageImpl;
-import com.openexchange.log.LogFactory;
-import com.openexchange.nosql.cassandra.EmbeddedCassandraService;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.eav.UUIDService;
 
 /**
+ * Implementation of {@link UUIDService}
+ * The structure of the generated UUID is as follows:
+ * 12 bits for contextID, 4 bits for moduleID, 12bits for objectID<br/>
+ * eg.: 00000000-0002-0007-0000-00000000000a refers to contextID:2, moduleID: 7, objectID: 10  
+ * 
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- *
  */
-public class CassandraStorageActivator extends HousekeepingActivator {
-
-	private static Log log = LogFactory.getLog(CassandraStorageActivator.class);
+public class UUIDServiceImpl implements UUIDService {
 	
-	/*
-	 * (non-Javadoc)
-	 * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
+	private static final int contextShift = 16;
+
+	/* (non-Javadoc)
+	 * @see com.openexchange.eav.UUIDService#generateUUID(long, long, long)
 	 */
 	@Override
-	protected Class<?>[] getNeededServices() {
-		return new Class[]{EmbeddedCassandraService.class, ConfigurationService.class};
+	public synchronized UUID generateUUID(long contextID, long moduleID, long objectID) {
+		long lsb = objectID;
+		long msb = contextID << contextShift;
+		msb += moduleID;
+		
+		return new UUID(msb, lsb);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see com.openexchange.osgi.DeferredActivator#startBundle()
+	/* (non-Javadoc)
+	 * @see com.openexchange.eav.UUIDService#getContextID(java.util.UUID)
 	 */
 	@Override
-	protected void startBundle() throws Exception {
-		log.info("Starting bundle: com.openexchange.eav.storage.cassandra");
-		
-		EAVStorage eav = new CassandraEAVStorageImpl();
-		registerService(EAVStorage.class, eav);
-		
-		openTrackers();
-		
-		log.info("Cassandra Storage Service started successfully.");
+	public synchronized long getContextID(UUID u) {
+		long msb = u.getMostSignificantBits();
+		return msb >> contextShift;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.openexchange.eav.UUIDService#getModuleID(java.util.UUID)
+	 */
+	@Override
+	public synchronized long getModuleID(UUID u) {
+		long msb = u.getMostSignificantBits();
+		long cid = msb >> contextShift;
+		return msb - (cid << contextShift);
+	}
+
+	/* (non-Javadoc)
+	 * @see com.openexchange.eav.UUIDService#getObjectID(java.util.UUID)
+	 */
+	@Override
+	public synchronized long getObjectID(UUID u) {
+		return u.getLeastSignificantBits();
 	}
 }

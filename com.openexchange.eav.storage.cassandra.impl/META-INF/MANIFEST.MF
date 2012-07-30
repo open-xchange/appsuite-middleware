@@ -1,9 +1,9 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange EAV Storage Cassandra Bundle
-Bundle-SymbolicName: com.openexchange.eav.storage.cassandra
+Bundle-SymbolicName: com.openexchange.eav.storage.cassandra.impl
 Bundle-Version: 6.21.0
-Bundle-Vendor: Open-Xchange Inc..
+Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.config,
  com.openexchange.eav,

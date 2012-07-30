@@ -1082,16 +1082,8 @@ public final class MimeMessageUtility {
             }
         }
         try {
-            final String mimeCharset = MailProperties.getInstance().getDefaultMimeCharset();
             for (int i = 0; i < addrs.length; i++) {
-                final String personal = addrs[i].getPersonal();
-                if (null != personal) {
-                    if ("null".equalsIgnoreCase(personal) || "undefined".equalsIgnoreCase(personal)) {
-                        addrs[i].setPersonal(null);
-                    } else {
-                        addrs[i].setPersonal(personal, mimeCharset);
-                    }
-                }
+                addrs[i].setPersonal(addrs[i].getPersonal(), MailProperties.getInstance().getDefaultMimeCharset());
             }
         } catch (final UnsupportedEncodingException e) {
             /*

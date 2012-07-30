@@ -46,25 +46,44 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package com.openexchange.uuid.osgi;
 
-package com.openexchange.realtime.atmosphere;
+import org.apache.commons.logging.Log;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.eav.UUIDService;
+import com.openexchange.log.LogFactory;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.uuid.impl.UUIDServiceImpl;
 
 /**
- * {@link StanzaSender} - Transports a specified stanza.
- * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ *
  */
-public interface StanzaSender {
+public class UUIDServiceActivator extends HousekeepingActivator {
+	
+	private static Log log = LogFactory.getLog(UUIDServiceActivator.class);
 
-    /**
-     * Transports specified stanza.
-     * 
-     * @param stanza The stanza to transport
-     * @throws OXException If transport operation fails
-     */
-    public void send(Stanza stanza) throws OXException;
+	/*
+	 * (non-Javadoc)
+	 * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
+	 */
+	@Override
+	protected Class<?>[] getNeededServices() {
+		return new Class[] {ConfigurationService.class};
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.openexchange.osgi.DeferredActivator#startBundle()
+	 */
+	@Override
+	protected void startBundle() throws Exception {
+		log.info("Starting bundle: com.openexchange.uuid.impl");
+		registerService(UUIDService.class, new UUIDServiceImpl());
+		openTrackers();
+		
+		log.info("UUIDService started successfully.");
+		
+	}
 }
