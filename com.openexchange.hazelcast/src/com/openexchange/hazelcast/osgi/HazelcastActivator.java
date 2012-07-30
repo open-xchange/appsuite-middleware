@@ -83,9 +83,14 @@ public class HazelcastActivator extends HousekeepingActivator {
         }
     }
 
-    protected void init(final List<InetAddress> nodes) {
+    /**
+     * Initializes and registers a {@link HazelcastInstance} for a full TCP/IP cluster.
+     * 
+     * @param nodes The pre-known nodes
+     */
+    void init(final List<InetAddress> nodes) {
         /*
-         * Create config from XML data
+         * Create configuration from XML data
          */
         String xml = getService(ConfigurationService.class).getText("hazelcast.xml");
         final Config config = new InMemoryXmlConfig(xml);
@@ -94,7 +99,7 @@ public class HazelcastActivator extends HousekeepingActivator {
          */
         final Join join = config.getNetworkConfig().getJoin();
         /*
-         * Enable: multicase, AWS, and TCP-IP
+         * Enable: multicast, AWS, and TCP-IP
          */
         join.getMulticastConfig().setEnabled(false);
         join.getAwsConfig().setEnabled(false);
