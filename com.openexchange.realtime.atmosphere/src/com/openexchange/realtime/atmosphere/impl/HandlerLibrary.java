@@ -47,73 +47,63 @@
  *
  */
 
-package com.openexchange.groupware.tools.mappings;
+package com.openexchange.realtime.atmosphere.impl;
 
-import java.text.Collator;
-import java.util.Locale;
-import com.openexchange.exception.OXException;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import com.openexchange.realtime.atmosphere.OXRTHandler;
 
 /**
- * {@link DefaultMapping} - Abstract {@link Mapping} implementation.
- *
- * @param <T> the type of the property
- * @param <O> the type of the object
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * {@link HandlerLibrary} - Tracks registered {@link OXRTHandler handlers} and makes them accessible through {@link #getHandlerFor(String)}.
+ * 
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
-public abstract class DefaultMapping<T, O> implements Mapping<T, O> {
-
-	@Override
-	public boolean equals(final O object1, final O object2) {
-		T value1 = this.get(object1);
-		T value2 = this.get(object2);
-		return null == value1 ? null == value2 : value1.equals(value2);
-	}
-
-	@Override
-	public void copy(O from, O to) throws OXException {
-		this.set(to, this.get(from));
-	}
-	
-	/**
-	 * Default <code>truncate</code> implementation that never truncates, 
-	 * override if applicable for the mapped property.
-	 */
-	@Override
-	public boolean truncate(O object, int length) throws OXException {
-		return false;
-	}
+public class HandlerLibrary {
 
     /**
-     * Default <code>compare</code> implementation, override if applicable for 
-     * the mapped property.
+     * The collection for registered {@link OXRTHandler handlers}.
      */
-	@Override
-    public int compare(O o1, O o2) {
-	    return this.compare(o1, o2, null);
+    private final List<OXRTHandler> handlers;
+
+    /**
+     * Initializes a new {@link HandlerLibrary}.
+     */
+    public HandlerLibrary() {
+        super();
+        handlers = new CopyOnWriteArrayList<OXRTHandler>(); // User a concurrent collection
     }
 
-	/**
-	 * Default <code>compare</code> implementation, that uses locale-aware 
-	 * comparison for {@link String}s properties. Override if applicable for 
-	 * the mapped property.
-	 */
-    @Override
-	public int compare(O o1, O o2, Locale locale) {
-        T value1 = this.get(o1);
-        T value2 = this.get(o2);
-        if (value1 == value2) {
-            return 0;
-        } else if (null == value1 && null != value2) {
-            return -1;
-        } else if (null == value2) {
-            return 1;
-        } else if (null != locale && String.class.isInstance(value1)) {
-            return Collator.getInstance(locale).compare((String)value1, (String)value2);                       
-        } else if (Comparable.class.isInstance(value1)) {
-            return ((Comparable)value1).compareTo(value2);
-        } else {
-            throw new UnsupportedOperationException("Don't know how to compare two values of class " + value1.getClass().getName());
+    /**
+     * Gets the handler appropriate for specified namespace identifier.
+     * 
+     * @param namespace The namespace identifier
+     * @return The appropriate handler or <code>null</code> if none is applicable
+     */
+    public OXRTHandler getHandlerFor(String namespace) {
+        for (OXRTHandler transformer : handlers) {
+            if (transformer.getNamespace().equals(namespace)) {
+                return transformer;
+            }
         }
+        return null;
     }
-	
+
+    /**
+     * Adds specified handler/transformer to this library.
+     * 
+     * @param transformer The handler to add
+     */
+    public void add(OXRTHandler transformer) {
+        handlers.add(transformer);
+    }
+
+    /**
+     * Removes specified handler/transformer from this library.
+     * 
+     * @param transformer The handler to remove
+     */
+    public void remove(OXRTHandler transformer) {
+        handlers.remove(transformer);
+    }
 }

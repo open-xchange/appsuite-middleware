@@ -47,73 +47,34 @@
  *
  */
 
-package com.openexchange.groupware.tools.mappings;
+package com.openexchange.realtime.atmosphere.impl;
 
-import java.text.Collator;
-import java.util.Locale;
-import com.openexchange.exception.OXException;
+import java.util.concurrent.locks.ReentrantLock;
+
+import org.atmosphere.cpr.AtmosphereResource;
+
+import com.openexchange.realtime.packet.ID;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link DefaultMapping} - Abstract {@link Mapping} implementation.
+ * {@link RTAtmosphereState}
  *
- * @param <T> the type of the property
- * @param <O> the type of the object
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public abstract class DefaultMapping<T, O> implements Mapping<T, O> {
-
-	@Override
-	public boolean equals(final O object1, final O object2) {
-		T value1 = this.get(object1);
-		T value2 = this.get(object2);
-		return null == value1 ? null == value2 : value1.equals(value2);
-	}
-
-	@Override
-	public void copy(O from, O to) throws OXException {
-		this.set(to, this.get(from));
+public class RTAtmosphereState {
+	public AtmosphereResource r;
+	public ServerSession session;
+	public ID id;
+	
+	private ReentrantLock lock = new ReentrantLock();
+	public boolean handshake = true;
+	
+	public void lock() {
+		lock.lock();
 	}
 	
-	/**
-	 * Default <code>truncate</code> implementation that never truncates, 
-	 * override if applicable for the mapped property.
-	 */
-	@Override
-	public boolean truncate(O object, int length) throws OXException {
-		return false;
+	public void unlock() {
+		lock.unlock();
 	}
 
-    /**
-     * Default <code>compare</code> implementation, override if applicable for 
-     * the mapped property.
-     */
-	@Override
-    public int compare(O o1, O o2) {
-	    return this.compare(o1, o2, null);
-    }
-
-	/**
-	 * Default <code>compare</code> implementation, that uses locale-aware 
-	 * comparison for {@link String}s properties. Override if applicable for 
-	 * the mapped property.
-	 */
-    @Override
-	public int compare(O o1, O o2, Locale locale) {
-        T value1 = this.get(o1);
-        T value2 = this.get(o2);
-        if (value1 == value2) {
-            return 0;
-        } else if (null == value1 && null != value2) {
-            return -1;
-        } else if (null == value2) {
-            return 1;
-        } else if (null != locale && String.class.isInstance(value1)) {
-            return Collator.getInstance(locale).compare((String)value1, (String)value2);                       
-        } else if (Comparable.class.isInstance(value1)) {
-            return ((Comparable)value1).compareTo(value2);
-        } else {
-            throw new UnsupportedOperationException("Don't know how to compare two values of class " + value1.getClass().getName());
-        }
-    }
-	
 }

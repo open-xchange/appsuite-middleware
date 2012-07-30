@@ -47,73 +47,67 @@
  *
  */
 
-package com.openexchange.groupware.tools.mappings;
+package com.openexchange.realtime.atmosphere.impl;
 
-import java.text.Collator;
-import java.util.Locale;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.packet.IQ;
+import com.openexchange.realtime.packet.Message;
+import com.openexchange.realtime.packet.Presence;
+import com.openexchange.realtime.packet.Stanza;
 
 /**
- * {@link DefaultMapping} - Abstract {@link Mapping} implementation.
+ * {@link StanzaWriter}
  *
- * @param <T> the type of the property
- * @param <O> the type of the object
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
-public abstract class DefaultMapping<T, O> implements Mapping<T, O> {
-
-	@Override
-	public boolean equals(final O object1, final O object2) {
-		T value1 = this.get(object1);
-		T value2 = this.get(object2);
-		return null == value1 ? null == value2 : value1.equals(value2);
-	}
-
-	@Override
-	public void copy(O from, O to) throws OXException {
-		this.set(to, this.get(from));
-	}
-	
-	/**
-	 * Default <code>truncate</code> implementation that never truncates, 
-	 * override if applicable for the mapped property.
-	 */
-	@Override
-	public boolean truncate(O object, int length) throws OXException {
-		return false;
-	}
-
-    /**
-     * Default <code>compare</code> implementation, override if applicable for 
-     * the mapped property.
-     */
-	@Override
-    public int compare(O o1, O o2) {
-	    return this.compare(o1, o2, null);
-    }
+public class StanzaWriter {
 
 	/**
-	 * Default <code>compare</code> implementation, that uses locale-aware 
-	 * comparison for {@link String}s properties. Override if applicable for 
-	 * the mapped property.
+	 * Writes specified stanza into its JSON representation.
+	 * 
+	 * @param stanza The stanza to write
+	 * @return The appropriate JSON representation
+	 * @throws OXException If a JSON write error occurs
 	 */
-    @Override
-	public int compare(O o1, O o2, Locale locale) {
-        T value1 = this.get(o1);
-        T value2 = this.get(o2);
-        if (value1 == value2) {
-            return 0;
-        } else if (null == value1 && null != value2) {
-            return -1;
-        } else if (null == value2) {
-            return 1;
-        } else if (null != locale && String.class.isInstance(value1)) {
-            return Collator.getInstance(locale).compare((String)value1, (String)value2);                       
-        } else if (Comparable.class.isInstance(value1)) {
-            return ((Comparable)value1).compareTo(value2);
-        } else {
-            throw new UnsupportedOperationException("Don't know how to compare two values of class " + value1.getClass().getName());
-        }
-    }
-	
+	public static JSONObject write(Stanza stanza) throws OXException {
+		try {
+			JSONObject object = new JSONObject();
+			writeBasics(stanza, object);
+			if (stanza instanceof Message) {
+				writeMessage((Message) stanza, object);
+			} else if (stanza instanceof Presence) {
+				writePresence((Presence) stanza, object);
+			} else if (stanza instanceof IQ) {
+				writeQuery((IQ) stanza, object);
+			}
+			return object;
+		} catch (JSONException x) {
+			throw OXException.general("JSONException "+x.toString());
+		}
+	}
+
+	private static void writeQuery(IQ stanza, JSONObject object) throws JSONException {
+		object.put("kind", "iq");
+		object.put("type", stanza.getType().name().toLowerCase());
+	}
+
+	private static void writePresence(Presence stanza, JSONObject object) throws JSONException {
+		object.put("kind", "presence");
+	}
+
+	private static void writeMessage(Message stanza, JSONObject object) throws JSONException {
+		object.put("type", stanza.getType().name().toLowerCase());
+	}
+
+	private static void writeBasics(Stanza stanza, JSONObject object) throws JSONException {
+		object.put("ns", stanza.getNamespace());
+		object.put("from", stanza.getFrom().toString());
+		object.put("to", stanza.getTo().toString());
+		object.put("data", stanza.getPayload().getData());
+	}
+
 }

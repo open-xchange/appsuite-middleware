@@ -178,7 +178,7 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
         }
 
         @Override
-        public IMAPStore getStore(final javax.mail.Session imapSession) throws MessagingException, InterruptedException {
+        public IMAPStore getStore(final javax.mail.Session imapSession, final IMAPValidity validity) throws MessagingException, InterruptedException {
             if (DEBUG) {
                 LOG.debug("IMAPStoreContainer.getStore(): " + semaphore.getQueueLength() + " threads currently waiting for available IMAPStore instance.");
             }
@@ -207,15 +207,15 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
                 throw new MessagingException(e.getMessage(), e);
             }
             // Obtain new IMAPStore instance
-            final IMAPStore imapStore = getStoreErrorAware(imapSession);
+            final IMAPStore imapStore = getStoreErrorAware(imapSession, validity);
             stores.put(thread, new CountedIMAPStore(imapStore));
             return imapStore;
         }
 
-        private IMAPStore getStoreErrorAware(final javax.mail.Session imapSession) throws MessagingException, InterruptedException {
+        private IMAPStore getStoreErrorAware(final javax.mail.Session imapSession, final IMAPValidity validity) throws MessagingException, InterruptedException {
             boolean releasePermit = true;
             try {
-                final IMAPStore imapStore = super.getStore(imapSession);
+                final IMAPStore imapStore = super.getStore(imapSession, validity);
                 releasePermit = false;
                 return imapStore;
             } finally {
@@ -227,7 +227,7 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
         }
 
         @Override
-        public void backStore(final IMAPStore imapStore) {
+        public void backStore(final IMAPStore imapStore, final IMAPValidity validity) {
             final Thread thread = Thread.currentThread();
             final CountedIMAPStore cImapStore = stores.get(thread);
             if (null != cImapStore) {
@@ -237,9 +237,18 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
                 }
                 stores.remove(thread);
             }
-            // Release IMAPStore instance orderly
-            super.backStore(imapStore);
-            semaphore.release();
+            try {
+                // Release IMAPStore instance orderly
+                final long currentValidity = validity.getCurrentValidity();
+                if (currentValidity > 0 && imapStore.getValidity() < currentValidity) {
+                    validity.clearCachedConnections();
+                    closeSafe(imapStore);
+                } else {
+                    super.backStoreNoValidityCheck(imapStore);
+                }
+            } finally {
+                semaphore.release();
+            }
         }
     }
 
@@ -266,7 +275,7 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
         }
 
         @Override
-        public IMAPStore getStore(final javax.mail.Session imapSession) throws MessagingException, InterruptedException {
+        public IMAPStore getStore(final javax.mail.Session imapSession, final IMAPValidity validity) throws MessagingException, InterruptedException {
             synchronized (mutex) {
                 final Thread thread = Thread.currentThread();
                 // Reentrant thread?
@@ -294,7 +303,7 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
                         throw new MessagingException(e.getMessage(), e);
                     }
                 }
-                final IMAPStore imapStore = super.getStore(imapSession);
+                final IMAPStore imapStore = super.getStore(imapSession, validity);
                 stores.put(thread, new CountedIMAPStore(imapStore));
                 count++;
                 return imapStore;
@@ -302,7 +311,7 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
         }
 
         @Override
-        public void backStore(final IMAPStore imapStore) {
+        public void backStore(final IMAPStore imapStore, final IMAPValidity validity) {
             synchronized (mutex) {
                 final Thread thread = Thread.currentThread();
                 final CountedIMAPStore cImapStore = stores.get(thread);
@@ -314,7 +323,13 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
                     stores.remove(thread);
                 }
                 // Release IMAPStore instance orderly
-                super.backStore(imapStore);
+                final long currentValidity = validity.getCurrentValidity();
+                if (currentValidity > 0 && imapStore.getValidity() < currentValidity) {
+                    validity.clearCachedConnections();
+                    closeSafe(imapStore);
+                } else {
+                    super.backStoreNoValidityCheck(imapStore);
+                }
                 count--;
                 mutex.notify();
             }
@@ -339,13 +354,13 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
     }
 
     @Override
-    public IMAPStore getStore(final javax.mail.Session imapSession) throws MessagingException, InterruptedException {
-        return impl.getStore(imapSession);
+    public IMAPStore getStore(final javax.mail.Session imapSession, final IMAPValidity validity) throws MessagingException, InterruptedException {
+        return impl.getStore(imapSession, validity);
     }
 
     @Override
-    public void backStore(final IMAPStore imapStore) {
-        impl.backStore(imapStore);
+    public void backStore(final IMAPStore imapStore, final IMAPValidity validity) {
+        impl.backStore(imapStore, validity);
     }
 
     @Override
