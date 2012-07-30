@@ -2,6 +2,8 @@
 
  - Fix for bug 22536: Introduced custom JavaMail property "mail.imap.failOnNOFetch":
                       If an issued FETCH command is acknowledged with a "NO" response code, an appropriate CommandFailedException is thrown
+ - Fix for bug 22608: Fixed MIME structure of saved draft message
+ - Fix for bug 22579: Fixed MIME structure of saved draft message
 
 * 2012-07-30 - tobias.friedrich@open-xchange.com
 
