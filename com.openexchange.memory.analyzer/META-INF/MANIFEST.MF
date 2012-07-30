@@ -1,15 +1,15 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Memory Analyzer
-Bundle-SymbolicName: com.openexchange.memory.analyzer 
+Bundle-SymbolicName: com.openexchange.memory.analyzer
 Bundle-Version: 6.21.0
 OXVersion: 6.21.0
 OXRevision: 5
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Vendor: Open-Xchange Inc.
+Require-Bundle: org.aspectj.runtime;visibility:=reexport
+Import-Package: org.osgi.framework;visibility:=reexport,
+ org.apache.commons.logging;visibility:=reexport,
+ com.openexchange.log;visibility:=reexport 
 Export-Package: com.openexchange.memory.analyzer;aspects="CollectionAnalyzerAspect"
-Require-Bundle: org.aspectj.runtime
-Import-Package: org.osgi.framework;version="1.4.0",
- com.openexchange.log,
- org.apache.commons.logging
-Eclipse-SupplementBundle: *
+Eclipse-SupplementBundle: com.openexchange*

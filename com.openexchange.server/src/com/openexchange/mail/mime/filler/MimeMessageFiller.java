@@ -928,6 +928,12 @@ public class MimeMessageFiller {
              * Finally set multipart
              */
             if (primaryMultipart != null) {
+                if (1 == primaryMultipart.getCount()) {
+                    final Object cto = primaryMultipart.getBodyPart(0).getContent();
+                    if (cto instanceof Multipart) {
+                        primaryMultipart = (Multipart) cto;
+                    }
+                }
                 mimeMessage.setContent(primaryMultipart);
             }
             return;

@@ -1,3 +1,18 @@
+* 2012-07-30 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22536: Introduced custom JavaMail property "mail.imap.failOnNOFetch":
+                      If an issued FETCH command is acknowledged with a "NO" response code, an appropriate CommandFailedException is thrown
+
+* 2012-07-30 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 22689: Provide empty default alarms
+
+* 2012-07-28 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22685: Increased timeout to 10sec
+ - Fix for bug 22613: Insert line-break as separator
+ - Fix for bug 22659: using proper monitor object
+
 * 2012-07-27 - jan.bauerdick@open-xchange.com
 
  - New implementation of sessionstorageservice, storing sessions with cassandra

@@ -49,56 +49,60 @@
 
 package com.openexchange.realtime.packet;
 
+import com.openexchange.realtime.Channel;
+
 /**
- * {@link Stanza}
- *
- *  @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link Stanza} - The basic (super) class for all kind of deliverable items that are capable of being sent via a {@link Channel
+ * channel}.
+ * 
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
 public abstract class Stanza {
 
-	private ID to, from;
+    private ID to, from;
 
-	private String namespace;
+    private String namespace;
 
-	private Payload payload;
+    private Payload payload;
 
-	/**
-	 * Initializes a new {@link Stanza}.
-	 */
-	protected Stanza() {
-	    super();
-	}
+    /**
+     * Initializes a new {@link Stanza}.
+     */
+    protected Stanza() {
+        super();
+    }
 
-	public ID getTo() {
-		return to;
-	}
+    public ID getTo() {
+        return to;
+    }
 
-	public void setTo(final ID to) {
-		this.to = to;
-	}
+    public void setTo(final ID to) {
+        this.to = to;
+    }
 
-	public ID getFrom() {
-		return from;
-	}
+    public ID getFrom() {
+        return from;
+    }
 
-	public void setFrom(final ID from) {
-		this.from = from;
-	}
+    public void setFrom(final ID from) {
+        this.from = from;
+    }
 
-	public void setPayload(final Payload payload) {
-		this.payload = payload;
-	}
+    public void setPayload(final Payload payload) {
+        this.payload = payload;
+    }
 
-	public Payload getPayload() {
-		return payload;
-	}
+    public Payload getPayload() {
+        return payload;
+    }
 
-	public String getNamespace() {
-		return namespace;
-	}
+    public String getNamespace() {
+        return namespace;
+    }
 
-	public void setNamespace(final String namespace) {
-		this.namespace = namespace;
-	}
+    public void setNamespace(final String namespace) {
+        this.namespace = namespace;
+    }
 
 }

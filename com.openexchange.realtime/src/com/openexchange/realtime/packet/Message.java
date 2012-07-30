@@ -49,20 +49,46 @@
 
 package com.openexchange.realtime.packet;
 
+/**
+ * {@link Message} - A regular message associated with a certain {@link Type type}.
+ * 
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
+ */
 public class Message extends Stanza {
 
-	public static enum Type {
-		normal, chat, groupchat, headline, error
-	}
+    /**
+     * An enumeration of message types describing a message's purpose.
+     */
+    public static enum Type {
+        normal, chat, groupchat, headline, error
+    }
 
-	private Type type;
+    private Type type;
 
-	public Type getType() {
-		return type;
-	}
+    /**
+     * Initializes a new {@link Message}.
+     */
+    public Message() {
+        super();
+    }
 
-	public void setType(final Type type) {
-		this.type = type;
-	}
+    /**
+     * Gets the type.
+     * 
+     * @return The type
+     */
+    public Type getType() {
+        return type;
+    }
+
+    /**
+     * Sets the type.
+     * 
+     * @param type The type
+     */
+    public void setType(final Type type) {
+        this.type = type;
+    }
 
 }

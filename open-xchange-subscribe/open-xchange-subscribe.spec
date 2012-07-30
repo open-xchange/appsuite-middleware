@@ -76,6 +76,12 @@ if [ ${1:-0} -eq 2 ]; then
     if grep -E '^com.openexchange.subscribe.crawler.path.*/' $pfile >/dev/null; then
         ox_set_property com.openexchange.subscribe.crawler.path crawlers $pfile
     fi    
+
+    #SoftwareChange_Request-1099
+    pfile=/opt/open-xchange/etc/crawler.properties
+    if ! ox_exists_property com.openexchange.subscribe.crawler.gmx.com $pfile; then
+        ox_set_property com.openexchange.subscribe.crawler.gmx.com true $pfile
+    fi
     ##
     ## end update from < 6.21
     ##

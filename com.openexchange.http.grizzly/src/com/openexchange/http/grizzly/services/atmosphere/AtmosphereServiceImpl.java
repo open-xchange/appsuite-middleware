@@ -94,6 +94,14 @@ public class AtmosphereServiceImpl  implements AtmosphereService {
         ServletRegistration atmosphereRegistration = realtimeContext.addServlet("AtmosphereServlet", atmosphereServlet);
         atmosphereRegistration.addMapping(atmosphereServletMapping);
         atmosphereRegistration.setLoadOnStartup(0);
+        
+        // Add socket.io, so that it may make calls to this host directly
+        ServletRegistration socketIOServlet = realtimeContext.addServlet("SocketIO", new SocketIOServlet());
+        socketIOServlet.addMapping("/socket.io.js");
+        
+        ServletRegistration atmojsServlet = realtimeContext.addServlet("Atmosphere JS", new AtmosphereJSServlet());
+        atmojsServlet.addMapping("/jquery.atmosphere.js");
+
         realtimeContext.deploy(grizzly);
 
         addAtmosphereHandler(generateHandlerMapping(atmosphereServletMapping, "mapping1"), new AtmosphereHandler() {
