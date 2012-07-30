@@ -189,4 +189,46 @@ public class TokenUtils {
 		}
 		return buf.toString();
 	}
+	
+	/**
+	 * Test various consistency settings in a cluster. 
+	 * Calculations are based in <a href="http://www.datastax.com/docs/1.1/dml/data_consistency">Tunable Consistency for Client Requests</a>
+	 * 
+	 * @param clusterSize size of the cluster
+	 * @param replicationFactor replication factor
+	 * @param writeLevel {@link Level}
+	 * @param readLevel {@link Level}
+	 */
+	public static void calculateConsistencies(int clusterSize, int replicationFactor, Level writeLevel, Level readLevel) {
+		int r = realSize(replicationFactor, readLevel);
+		int w = realSize(replicationFactor, writeLevel);
+		
+		log.info("Reads are " + ((r + w > replicationFactor) ? "consistent." : "eventually consistent."));
+		log.info("Reading from " + ((r > 1) ? r + " nodes" : 1 + " node"));
+		log.info("Writing to " + ((w > 1) ? w + " nodes" : 1 + " node"));
+		
+		int survival = replicationFactor - Math.max(r, w);
+		
+		log.info("The cluster can survive the loss of " + 
+				((survival > 1) ? survival + " nodes" : survival == 1 ? "1 node" : "no nodes"));
+		log.info("Every node holds "
+				+ (((float) replicationFactor / (float) clusterSize) * 100)
+				+ " % of data");
+	}
+	
+	/** Simple enum mapping the Levels of R/W in Cassandra */
+	private enum Level {ONE, QUORUM, ALL};
+	
+	private static int realSize(int n, Level l) {
+		switch(l) {
+		case ONE:
+			return 1;
+		case QUORUM:
+			return (int)Math.floor(n / 2 + 1);
+		case ALL:
+			return n;
+		default:
+			return 0;
+		}
+	}
 }

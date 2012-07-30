@@ -47,62 +47,26 @@
  *
  */
 
-package com.openexchange.admin.autocontextid.osgi;
+package com.openexchange.cluster.discovery;
 
-import java.sql.SQLException;
-import java.util.Hashtable;
-import org.apache.commons.logging.Log;
-import com.openexchange.admin.autocontextid.daemons.ClientAdminThreadExtended;
-import com.openexchange.admin.autocontextid.rmi.impl.OXAutoCIDContextImpl;
-import com.openexchange.admin.autocontextid.tools.AdminCacheExtended;
-import com.openexchange.admin.exceptions.OXGenericException;
-import com.openexchange.admin.plugins.OXContextPluginInterface;
-import com.openexchange.admin.tools.AdminCache;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.log.LogFactory;
-import com.openexchange.osgi.HousekeepingActivator;
+import java.net.InetAddress;
 
-public class Activator extends HousekeepingActivator {
+/**
+ * A {@link ClusterListener} is informed by the {@link ClusterDiscoveryService} about changes to the known cluster list.
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ */
+public interface ClusterListener {
+	/**
+	 * Called when a new node joined the cluster
+	 * @param address
+	 */
+	void added(InetAddress address);
 
-    private static final Log LOG = LogFactory.getLog(Activator.class);
-
-    @Override
-    public void startBundle() throws Exception {
-        try {
-            ConfigurationService service = getService(ConfigurationService.class);
-            AdminCache.compareAndSet(null, service);
-            initCache(service);
-
-            final Hashtable<String, String> props = new Hashtable<String, String>();
-            props.put("name", "OXContext");
-            LOG.info(OXContextPluginInterface.class.getName());
-            registerService(OXContextPluginInterface.class, new OXAutoCIDContextImpl(), props);
-
-        } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
-            throw e;
-        } catch (final OXGenericException e) {
-            LOG.fatal(e.getMessage(), e);
-            throw e;
-        }
-    }
-
-    @Override
-    public void stopBundle() throws Exception {
-        unregisterServices();
-    }
-
-    private void initCache(final ConfigurationService service) throws SQLException, OXGenericException {
-        final AdminCacheExtended cache = new AdminCacheExtended();
-        cache.initCache(service);
-        cache.initCacheExtended();
-        cache.initIDGenerator();
-        ClientAdminThreadExtended.cache = cache;
-        LOG.info("AutocontextID Bundle: Cache and Pools initialized!");
-    }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
-    }
+	/**
+	 * Called when a node leaves the cluster
+	 * @param address
+	 */
+	void removed(InetAddress address);
+	
 }

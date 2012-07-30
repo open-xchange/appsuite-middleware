@@ -47,62 +47,67 @@
  *
  */
 
-package com.openexchange.admin.autocontextid.osgi;
+package com.openexchange.realtime.atmosphere.impl;
 
-import java.sql.SQLException;
-import java.util.Hashtable;
-import org.apache.commons.logging.Log;
-import com.openexchange.admin.autocontextid.daemons.ClientAdminThreadExtended;
-import com.openexchange.admin.autocontextid.rmi.impl.OXAutoCIDContextImpl;
-import com.openexchange.admin.autocontextid.tools.AdminCacheExtended;
-import com.openexchange.admin.exceptions.OXGenericException;
-import com.openexchange.admin.plugins.OXContextPluginInterface;
-import com.openexchange.admin.tools.AdminCache;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.log.LogFactory;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.exception.OXException;
+import com.openexchange.realtime.Channel;
+import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.tools.session.ServerSession;
 
-public class Activator extends HousekeepingActivator {
+/**
+ * {@link RTAtmosphereChannel}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ */
+public class RTAtmosphereChannel implements Channel {
+	
+	private RTAtmosphereHandler handler;
+	private HandlerLibrary library;
+	
+	
 
-    private static final Log LOG = LogFactory.getLog(Activator.class);
+	public RTAtmosphereChannel(RTAtmosphereHandler handler,
+			HandlerLibrary library) {
+		this.handler = handler;
+		this.library = library;
+	}
 
-    @Override
-    public void startBundle() throws Exception {
-        try {
-            ConfigurationService service = getService(ConfigurationService.class);
-            AdminCache.compareAndSet(null, service);
-            initCache(service);
+	public String getProtocol() {
+		return "ox";
+	}
 
-            final Hashtable<String, String> props = new Hashtable<String, String>();
-            props.put("name", "OXContext");
-            LOG.info(OXContextPluginInterface.class.getName());
-            registerService(OXContextPluginInterface.class, new OXAutoCIDContextImpl(), props);
+	public boolean canHandle(String namespace, ID recipient,
+			ServerSession session) throws OXException {
+		if (!isConnected(recipient, session)) {
+			return false;
+		}
+		
+		if (!hasCapability(recipient, namespace, session)) {
+			return false;
+		}
+		
+		if (library.getHandlerFor(namespace) == null) {
+			return false;
+		}
+		
+		return true;
+	}
 
-        } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
-            throw e;
-        } catch (final OXGenericException e) {
-            LOG.fatal(e.getMessage(), e);
-            throw e;
-        }
-    }
+	public boolean hasCapability(ID recipient, String namespace,
+			ServerSession session) {
+		return true; // TODO: Implement Capability Model
+	}
 
-    @Override
-    public void stopBundle() throws Exception {
-        unregisterServices();
-    }
+	public int getPriority() {
+		return 10000;
+	}
 
-    private void initCache(final ConfigurationService service) throws SQLException, OXGenericException {
-        final AdminCacheExtended cache = new AdminCacheExtended();
-        cache.initCache(service);
-        cache.initCacheExtended();
-        cache.initIDGenerator();
-        ClientAdminThreadExtended.cache = cache;
-        LOG.info("AutocontextID Bundle: Cache and Pools initialized!");
-    }
+	public boolean isConnected(ID id, ServerSession session) throws OXException {
+		return handler.isConnected(id);
+	}
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
-    }
+	public void send(Stanza stanza, ServerSession session) throws OXException {
+		handler.handleOutgoing(stanza, session);
+	}
 }

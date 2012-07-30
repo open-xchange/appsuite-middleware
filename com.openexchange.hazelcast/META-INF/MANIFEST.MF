@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Hazelcast Integration
+Bundle-SymbolicName: com.openexchange.hazelcast
+Bundle-Version: 6.22.0.0
+Bundle-Activator: com.openexchange.hazelcast.osgi.HazelcastActivator
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Import-Package: com.openexchange.cluster.discovery,
+ com.openexchange.config,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ org.osgi.framework;version="1.3.0"
+Bundle-ClassPath: lib/hazelcast-all-2.2.jar,
+ .
+Export-Package: com.hazelcast.core

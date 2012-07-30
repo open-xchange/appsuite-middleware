@@ -58,6 +58,7 @@ import com.openexchange.admin.contextrestore.rmi.impl.OXContextRestore;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.impl.OXContext;
+import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.log.LogFactory;
 import com.openexchange.log.LogProperties;
@@ -74,7 +75,8 @@ public class Activator extends HousekeepingActivator {
     @Override
     public void startBundle() throws Exception {
         try {
-            LogProperties.putLogProperty("__configurationService", getService(ConfigurationService.class));
+            ConfigurationService service = getService(ConfigurationService.class);
+            AdminCache.compareAndSet(null, service);
             ox_ctx = new OXContext(context);
             contextRestore = new OXContextRestore();
             final OXContextRestoreInterface oxctxrest_stub = (OXContextRestoreInterface) UnicastRemoteObject.exportObject(contextRestore, 0);
@@ -88,8 +90,6 @@ public class Activator extends HousekeepingActivator {
         } catch (final StorageException e) {
             log.fatal("Error while creating one instance for RMI interface", e);
             throw e;
-        } finally {
-            LogProperties.putLogProperty("__configurationService", null);
         }
     }
 

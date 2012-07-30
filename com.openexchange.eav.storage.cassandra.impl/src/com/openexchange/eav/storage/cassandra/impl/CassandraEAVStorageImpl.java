@@ -50,15 +50,18 @@ package com.openexchange.eav.storage.cassandra.impl;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.CharacterCodingException;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import me.prettyprint.cassandra.model.ConfigurableConsistencyLevel;
 import me.prettyprint.cassandra.serializers.CompositeSerializer;
 import me.prettyprint.cassandra.serializers.UUIDSerializer;
+import me.prettyprint.cassandra.service.ThriftKsDef;
 import me.prettyprint.cassandra.service.template.ColumnFamilyResult;
 import me.prettyprint.cassandra.service.template.ColumnFamilyTemplate;
 import me.prettyprint.cassandra.service.template.ThriftColumnFamilyTemplate;
@@ -66,6 +69,8 @@ import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.HConsistencyLevel;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.beans.Composite;
+import me.prettyprint.hector.api.ddl.ColumnFamilyDefinition;
+import me.prettyprint.hector.api.ddl.ComparatorType;
 import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.factory.HFactory;
@@ -88,9 +93,10 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 	
 	private static Cluster cluster;
 	private static volatile Keyspace keyspace;
-	private static String node = "192.168.33.37"; //TODO: fetch dynamic
-	private static String keyspaceName = "OX";
+	private static final String node = "192.168.33.37"; //TODO: fetch dynamic
+	private static final String keyspaceName = "OX";
 	private static final String CF_XT_PROPS = "ExtendedProperties";
+	private static final int replicationFactor = 3;
 	
 	private final ColumnFamilyTemplate<UUID, Composite> xtPropsTemplate;
 	
@@ -120,11 +126,26 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 		KeyspaceDefinition kDef = cluster.describeKeyspace(keyspaceName);
 		
 		if (kDef == null) {
-			log.fatal("Keyspace '" + keyspaceName + "' does not exist. Use the 'schema.cql' file to create a schema.", new KeyspaceNotDefinedException("'" + keyspaceName + "' does not exist." ));
+			log.fatal("Keyspace '" + keyspaceName + "' does not exist. Creating...");
+			createSchema();
+			log.info("done.");
 		}
 
 		defineConsistencyLevels();
 		keyspace = HFactory.createKeyspace(keyspaceName, cluster, configurableConsistencyLevel);
+	}
+	
+	/**
+	 * Create the schema.
+	 */
+	private final void createSchema() {
+		ColumnFamilyDefinition cfDef = HFactory.createColumnFamilyDefinition(keyspaceName, CF_XT_PROPS, ComparatorType.UTF8TYPE);
+		KeyspaceDefinition newKeyspace = HFactory.createKeyspaceDefinition(keyspaceName, ThriftKsDef.DEF_STRATEGY_CLASS, replicationFactor, Arrays.asList(cfDef));
+		try {
+			cluster.addKeyspace(newKeyspace, false);
+		} catch (HectorException h) {
+			log.fatal(h.getMessage());
+		}
 	}
 	
 	/**
@@ -209,17 +230,18 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 
 	/*
 	 * (non-Javadoc)
-	 * @see com.openexchange.eav.EAVStorageAlt#getAttributes(java.util.UUID[])
+	 * @see com.openexchange.eav.EAVStorage#getAttributes(java.util.List)
 	 */
 	@Override
-	public Map<UUID, Map<String, Object>> getAttributes(UUID[] uuids) throws OXException {
-		Map<UUID, Map<String, Object>> retAttr = new HashMap<UUID, Map<String, Object>>(uuids.length);
+	public Map<UUID, Map<String, Object>> getAttributes(List<UUID> uuids) throws OXException {
+		Map<UUID, Map<String, Object>> retAttr = new HashMap<UUID, Map<String, Object>>(uuids.size());
 		
-		int i = 0;
-		while(i < uuids.length) {
-			Map<String, Object> map = getAttributes(uuids[i]);
-			retAttr.put(uuids[i], map);
-			i++;
+		Iterator<UUID> it = uuids.iterator();
+		while (it.hasNext()) {
+			UUID uuid = (UUID) it.next();
+			Map<String, Object> map = getAttributes(uuid);
+			retAttr.put(uuid, map);
+			
 		}
 		
 		return retAttr;
@@ -227,17 +249,18 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 
 	/*
 	 * (non-Javadoc)
-	 * @see com.openexchange.eav.EAVStorageAlt#getAttributes(java.util.UUID[], java.lang.String[])
+	 * @see com.openexchange.eav.EAVStorage#getAttributes(java.util.List, java.lang.String[])
 	 */
 	@Override
-	public Map<UUID, Map<String, Object>> getAttributes(UUID[] uuids, String... attributes) throws OXException {
-		Map<UUID, Map<String, Object>> retAttr = new HashMap<UUID, Map<String, Object>>(uuids.length);
+	public Map<UUID, Map<String, Object>> getAttributes(List<UUID> uuids, String... attributes) throws OXException {
+		Map<UUID, Map<String, Object>> retAttr = new HashMap<UUID, Map<String, Object>>(uuids.size());
 		
-		int i = 0;
-		while(i < uuids.length) {
-			Map<String, Object> map = getAttributes(uuids[i], attributes);
-			retAttr.put(uuids[i], map);
-			i++;
+		Iterator<UUID> it = uuids.iterator();
+		while (it.hasNext()) {
+			UUID uuid = (UUID) it.next();
+			Map<String, Object> map = getAttributes(uuid, attributes);
+			retAttr.put(uuid, map);
+			
 		}
 		
 		return retAttr;

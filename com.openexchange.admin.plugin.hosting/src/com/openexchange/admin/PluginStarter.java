@@ -65,6 +65,7 @@ import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.AdminCacheExtended;
 import com.openexchange.admin.tools.PropertyHandlerExtended;
 import com.openexchange.config.ConfigurationService;
@@ -91,10 +92,9 @@ public class PluginStarter {
 
     public void start(final BundleContext context, final ConfigurationService service) throws RemoteException, AlreadyBoundException, StorageException, OXGenericException {
         try {
+            AdminCache.compareAndSet(null, service);
             this.context = context;
             initCache(service);
-
-            LogProperties.putLogProperty("__configurationService", service);
 
             // Create all OLD Objects and bind export them
             oxctx_v2 = new com.openexchange.admin.rmi.impl.OXContext(context);
@@ -119,8 +119,6 @@ public class PluginStarter {
         } catch (final StorageException e) {
             LOG.fatal("Error while creating one instance for RMI interface", e);
             throw e;
-        } finally {
-            LogProperties.putLogProperty("__configurationService", null);
         }
     }
 
