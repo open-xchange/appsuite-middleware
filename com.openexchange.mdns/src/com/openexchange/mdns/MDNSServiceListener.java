@@ -47,70 +47,30 @@
  *
  */
 
-package com.openexchange.cluster.discovery.mdns;
+package com.openexchange.mdns;
 
-import java.net.InetAddress;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.cluster.discovery.ClusterDiscoveryService;
-import com.openexchange.cluster.discovery.ClusterListener;
-import com.openexchange.exception.OXException;
-import com.openexchange.mdns.MDNSService;
-import com.openexchange.mdns.MDNSServiceEntry;
 
 /**
- * {@link MDNSClusterDiscoveryService}
- * 
+ * {@link MDNSServiceListener} - Listens for appearing/disappearing MDNS service entries.
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MDNSClusterDiscoveryService implements ClusterDiscoveryService {
-
-    private final String serviceId;
-
-    private final AtomicReference<MDNSService> serviceRef;
-
-    private final ClusterDiscoveryService delegate;
+public interface MDNSServiceListener {
 
     /**
-     * Initializes a new {@link MDNSClusterDiscoveryService}.
+     * Invoked if a new service has been discovered or updated.
      * 
-     * @param serviceId
+     * @param serviceId The service identifier
+     * @param entry The associated service entry
      */
-    public MDNSClusterDiscoveryService(final String serviceId, final AtomicReference<MDNSService> serviceRef, final ClusterDiscoveryService delegate) {
-        super();
-        this.serviceId = serviceId;
-        this.serviceRef = serviceRef;
-        this.delegate = delegate;
-    }
+    void onServiceAdded(String serviceId, MDNSServiceEntry entry);
 
-    @Override
-    public List<InetAddress> getNodes() {
-        final MDNSService mdnsService = serviceRef.get();
-        if (null != mdnsService) {
-            try {
-                final List<InetAddress> addrs = new LinkedList<InetAddress>();
-                for (final MDNSServiceEntry mdnsServiceEntry : mdnsService.listByService(serviceId)) {
-                    addrs.addAll(Arrays.asList(mdnsServiceEntry.getAddresses()));
-                }
-                return addrs;
-            } catch (final OXException e) {
-                com.openexchange.log.Log.loggerFor(MDNSClusterDiscoveryService.class).error(e.getMessage(), e);
-            }
-        }
-        return Collections.emptyList();
-    }
-
-    @Override
-    public void addListener(final ClusterListener listener) {
-        delegate.addListener(listener);
-    }
-
-    @Override
-    public void removeListener(final ClusterListener listener) {
-        delegate.removeListener(listener);
-    }
+    /**
+     * Invoked if an existing service disappeared.
+     * 
+     * @param serviceId The service identifier
+     * @param entry The associated service entry
+     */
+    void onServiceRemoved(String serviceId, MDNSServiceEntry entry);
 
 }
