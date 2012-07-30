@@ -88,10 +88,12 @@ public class DefaultIMAPValidity implements IMAPValidity {
         return validity.incrementAndGet();
     }
 
+    @Override
     public long getCurrentValidity() {
         return validity.get();
     }
 
+    @Override
     public void clearCachedConnections() {
         imapAccess.clearCachedConnections();
     }
