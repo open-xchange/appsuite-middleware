@@ -59,6 +59,21 @@ if [ ${1:-0} -eq 2 ]; then
 	    cp -a $prop $npropdir && rm $prop || true
 	done
     done
+
+    # SoftwareChange_Request-1080
+    # -----------------------------------------------------------------------
+    for i in $(find /opt/open-xchange/etc/contacts-ldap/ -name "[0-9]*" -type d); do
+        if [ -d $i ]; then
+            for prop in $(find $i -name "*.properties"); do
+                ctx=$(basename $i)
+                psname=$(basename $prop .properties)
+                ostr="com.openexchange.contacts.ldap.context${ctx}.${psname}.storagePriority"
+                if ! grep $ostr $prop > /dev/null; then
+                    echo -e "\n${ostr}=17" >> $prop
+                fi
+            done
+        fi
+    done    
     ##
     ## end update from < 6.21
     ##
