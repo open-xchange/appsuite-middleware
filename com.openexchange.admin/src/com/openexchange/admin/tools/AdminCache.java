@@ -73,6 +73,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.StringTokenizer;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
@@ -94,6 +95,37 @@ import com.openexchange.log.LogFactory;
 import com.openexchange.tools.sql.DBUtils;
 
 public class AdminCache {
+
+    private static final AtomicReference<ConfigurationService> CONF_SERVICE = new AtomicReference<ConfigurationService>();
+
+    /**
+     * Gets the <tt>ConfigurationService</tt>.
+     * 
+     * @return The <tt>ConfigurationService</tt> or <code>null</code>
+     */
+    public static ConfigurationService get() {
+        return CONF_SERVICE.get();
+    }
+
+    /**
+     * Atomically sets the <tt>ConfigurationService</tt> to the given updated <tt>ConfigurationService</tt> reference if the current value <tt>==</tt> the expected value.
+     * 
+     * @param expect the expected <tt>ConfigurationService</tt>
+     * @param update the new <tt>ConfigurationService</tt>
+     * @return <code>true</code> if successful. <code>false</code> return indicates that the actual <tt>ConfigurationService</tt> was not equal to the expected <tt>ConfigurationService</tt>.
+     */
+    public static boolean compareAndSet(final ConfigurationService expect, final ConfigurationService update) {
+        return CONF_SERVICE.compareAndSet(expect, update);
+    }
+
+    /**
+     * Sets the <tt>ConfigurationService</tt>.
+     * 
+     * @param service The <tt>ConfigurationService</tt> to set
+     */
+    public static void set(final ConfigurationService service) {
+        CONF_SERVICE.set(service);
+    }
 
     private static final String DATABASE_INIT_SCRIPTS_ERROR_MESSAGE = "An error occured while reading the database initialization scripts.";
 

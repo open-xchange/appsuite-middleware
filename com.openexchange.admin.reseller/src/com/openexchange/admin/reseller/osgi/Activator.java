@@ -84,7 +84,8 @@ public class Activator extends HousekeepingActivator {
     @Override
     public void startBundle() throws Exception {
         try {
-            initCache(getService(ConfigurationService.class));
+            ConfigurationService service = getService(ConfigurationService.class);
+            initCache(service);
 
             final OXReseller reseller = new OXReseller();
             OXResellerInterface reseller_stub = (OXResellerInterface) UnicastRemoteObject.exportObject(reseller, 0);

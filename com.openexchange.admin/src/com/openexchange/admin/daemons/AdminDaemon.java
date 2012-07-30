@@ -323,7 +323,7 @@ public class AdminDaemon {
         if (cache == null) {
             ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
             if (null == service) {
-                service = LogProperties.getLogProperty("__configurationService");
+                service = AdminCache.get();
             }
             initCache(service);
         }
