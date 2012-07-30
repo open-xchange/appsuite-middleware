@@ -289,6 +289,21 @@ public final class IMAPStoreCache {
     }
 
     /**
+     * Gets (optionally) associated IMAP store container.
+     * 
+     * @param server The server name
+     * @param port The port
+     * @param login The login
+     * @return The container or <code>null</code>
+     */
+    public IMAPStoreContainer optContainer(final String server, final int port, final String login) {
+        /*
+         * Get container
+         */
+        return map.get(newKey(server, port, login));
+    }
+
+    /**
      * Gets a connected IMAP store for specified arguments.
      * 
      * @param accountId The account identifier
@@ -301,16 +316,16 @@ public final class IMAPStoreCache {
      * @throws MessagingException If connecting IMAP store fails
      * @throws OXException If a mail error occurs
      */
-    public IMAPStore borrowIMAPStore(final int accountId, final javax.mail.Session imapSession, final String server, final int port, final String login, final String pw, final Session session) throws MessagingException, OXException {
+    public IMAPStore borrowIMAPStore(final int accountId, final javax.mail.Session imapSession, final String server, final int port, final String login, final String pw, final Session session, final IMAPValidity validity) throws MessagingException, OXException {
         /*
          * Return connected IMAP store
          */
         try {
             if (!DEBUG) {
-                return getContainer(accountId, server, port, login, pw, session).getStore(imapSession);
+                return getContainer(accountId, server, port, login, pw, session).getStore(imapSession, validity);
             }
             final long st = System.currentTimeMillis();
-            final IMAPStore store = getContainer(accountId, server, port, login, pw, session).getStore(imapSession);
+            final IMAPStore store = getContainer(accountId, server, port, login, pw, session).getStore(imapSession, validity);
             final long dur = System.currentTimeMillis() - st;
             LOG.debug("IMAPStoreCache.borrowIMAPStore() took " + dur + "msec.");
             return store;
@@ -335,7 +350,7 @@ public final class IMAPStoreCache {
      * @param port The port
      * @param login The login/user name
      */
-    public void returnIMAPStore(final IMAPStore imapStore, final String server, final int port, final String login) {
+    public void returnIMAPStore(final IMAPStore imapStore, final String server, final int port, final String login, final IMAPValidity validity) {
         if (null == imapStore) {
             // Nothing to close
             return;
@@ -348,7 +363,7 @@ public final class IMAPStoreCache {
             closeSafe(imapStore);
             return;
         }
-        container.backStore(imapStore);
+        container.backStore(imapStore, validity);
     }
 
     private static void closeSafe(final IMAPStore imapStore) {
