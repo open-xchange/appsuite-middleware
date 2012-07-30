@@ -1,3 +1,7 @@
+* 2012-07-30 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 22689: Provide empty default alarms
+
 * 2012-07-28 - thorben.betten@open-xchange.com
 
  - Fix for bug 22685: Increased timeout to 10sec
