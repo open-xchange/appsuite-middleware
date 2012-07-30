@@ -80,11 +80,8 @@ public final class MDNSClusterDiscoveryActivator extends HousekeepingActivator {
     private final class Listener implements MDNSServiceListener, ClusterDiscoveryService {
 
         private final List<ClusterListener> clusterListeners;
-
         private final String serviceId;
-
         private final AtomicReference<MDNSService> serviceRef;
-
         private final AtomicBoolean registered;
 
         Listener(final String serviceId, final AtomicReference<MDNSService> serviceRef) {
