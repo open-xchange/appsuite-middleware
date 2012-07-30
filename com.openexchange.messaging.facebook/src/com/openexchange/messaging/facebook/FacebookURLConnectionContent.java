@@ -164,8 +164,8 @@ public final class FacebookURLConnectionContent implements BinaryContent {
     private void init() throws OXException {
         try {
             final URLConnection urlCon = url.openConnection();
-            urlCon.setConnectTimeout(2500);
-            urlCon.setReadTimeout(2500);
+            urlCon.setConnectTimeout(10000);
+            urlCon.setReadTimeout(10000);
             urlCon.connect();
             mimeType = urlCon.getContentType();
             final InputStream in = urlCon.getInputStream();
@@ -190,8 +190,8 @@ public final class FacebookURLConnectionContent implements BinaryContent {
         if (null == tmp) {
             try {
                 final URLConnection urlCon = url.openConnection();
-                urlCon.setConnectTimeout(2500);
-                urlCon.setReadTimeout(2500);
+                urlCon.setConnectTimeout(10000);
+                urlCon.setReadTimeout(10000);
                 urlCon.connect();
                 return urlCon.getInputStream();
             } catch (final SocketTimeoutException e) {
