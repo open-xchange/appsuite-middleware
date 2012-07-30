@@ -129,9 +129,10 @@ public final class Cookies {
      * @param serverName The server name
      * @return The domain parameter or <code>null</code>
      * @see #prefixWithDot()
+     * @see #configuredDomain()
      */
     public static String getDomainValue(final String serverName) {
-        return getDomainValue(serverName, prefixWithDot());
+        return getDomainValue(serverName, prefixWithDot(), configuredDomain());
     }
 
     /**
@@ -139,10 +140,10 @@ public final class Cookies {
      * 
      * @param serverName The server name
      * @param prefixWithDot Whether to prefix domain with a dot (<code>'.'</code>) character
+     * @param configuredDomain The pre-configured domain name for this host
      * @return The domain parameter or <code>null</code>
      */
-    public static String getDomainValue(final String serverName, final boolean prefixWithDot) {
-        final String configuredDomain = configuredDomain();
+    public static String getDomainValue(final String serverName, final boolean prefixWithDot, final String configuredDomain) {
         if (null != configuredDomain) {
             return configuredDomain;
         }
