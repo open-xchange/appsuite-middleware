@@ -62,24 +62,29 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.cluster.discovery.ClusterDiscoveryService;
 import com.openexchange.cluster.discovery.ClusterListener;
 import com.openexchange.cluster.discovery.mdns.MDNSClusterDiscoveryService;
+import com.openexchange.exception.OXException;
 import com.openexchange.mdns.MDNSService;
 import com.openexchange.mdns.MDNSServiceEntry;
 import com.openexchange.mdns.MDNSServiceListener;
 import com.openexchange.osgi.HousekeepingActivator;
 
-
 /**
  * {@link MDNSClusterDiscoveryActivator}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MDNSClusterDiscoveryActivator extends HousekeepingActivator {
 
+    static final Log LOG = com.openexchange.log.Log.loggerFor(MDNSClusterDiscoveryActivator.class);
+
     private final class Listener implements MDNSServiceListener, ClusterDiscoveryService {
 
         private final List<ClusterListener> clusterListeners;
+
         private final String serviceId;
+
         private final AtomicReference<MDNSService> serviceRef;
+
         private final AtomicBoolean registered;
 
         Listener(final String serviceId, final AtomicReference<MDNSService> serviceRef) {
@@ -89,7 +94,7 @@ public final class MDNSClusterDiscoveryActivator extends HousekeepingActivator {
             this.serviceId = serviceId;
             this.serviceRef = serviceRef;
         }
-        
+
         @Override
         public void onServiceRemoved(final String serviceId, final MDNSServiceEntry entry) {
             if (this.serviceId.equals(serviceId)) {
@@ -101,9 +106,23 @@ public final class MDNSClusterDiscoveryActivator extends HousekeepingActivator {
                         listener.removed(inetAddress);
                     }
                 }
+                /*
+                 * Check
+                 */
+                final MDNSService mdnsService = serviceRef.get();
+                if (null != mdnsService) {
+                    try {
+                        final List<MDNSServiceEntry> tmp = mdnsService.listByService(serviceId);
+                        if (null == tmp || tmp.isEmpty()) {
+                            unregisterServices();
+                        }
+                    } catch (final OXException e) {
+                        LOG.error("Unregistration failed.", e);
+                    }
+                }
             }
         }
-        
+
         @Override
         public void onServiceAdded(final String serviceId, final MDNSServiceEntry entry) {
             if (this.serviceId.equals(serviceId)) {
@@ -164,7 +183,6 @@ public final class MDNSClusterDiscoveryActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        final Log log = com.openexchange.log.Log.loggerFor(MDNSClusterDiscoveryActivator.class);
         final AtomicReference<MDNSService> serviceRef = new AtomicReference<MDNSService>();
         final String cServiceId = "openexchange.service.lookup";
         final MDNSServiceListener listener = new Listener(cServiceId, serviceRef);
@@ -180,7 +198,7 @@ public final class MDNSClusterDiscoveryActivator extends HousekeepingActivator {
                     return service;
                 } catch (final Exception e) {
                     // Failure
-                    log.error("Failed registration of MDNSClusterDiscoveryService.", e);
+                    LOG.error("Failed registration of MDNSClusterDiscoveryService.", e);
                     context.ungetService(reference);
                     return null;
                 }
