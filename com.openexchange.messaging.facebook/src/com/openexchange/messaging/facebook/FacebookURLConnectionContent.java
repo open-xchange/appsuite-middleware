@@ -127,8 +127,8 @@ public final class FacebookURLConnectionContent implements BinaryContent {
                     URLConnection urlCon = null;
                     try {
                         urlCon = url.openConnection();
-                        urlCon.setConnectTimeout(2500);
-                        urlCon.setReadTimeout(2500);
+                        urlCon.setConnectTimeout(10000);
+                        urlCon.setReadTimeout(10000);
                         urlCon.connect();
                         mimeType = urlCon.getContentType();
                     } catch (final IOException e) {
