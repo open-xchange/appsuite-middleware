@@ -1,3 +1,8 @@
+* 2012-07-30 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22536: Introduced custom JavaMail property "mail.imap.failOnNOFetch":
+                      If an issued FETCH command is acknowledged with a "NO" response code, an appropriate CommandFailedException is thrown
+
 * 2012-07-30 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 22689: Provide empty default alarms
