@@ -5,6 +5,7 @@
  - Fix for bug 22608: Fixed MIME structure of saved draft message
  - Fix for bug 22579: Fixed MIME structure of saved draft message
  - Fix for bug 22548: Fixed MIME structure of saved draft message
+ - Fix for bug 21839: Fixed MIME structure of saved draft message
 
 * 2012-07-30 - tobias.friedrich@open-xchange.com
 
