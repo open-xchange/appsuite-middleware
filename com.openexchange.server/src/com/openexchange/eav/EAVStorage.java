@@ -48,6 +48,7 @@
  */
 package com.openexchange.eav;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -90,7 +91,7 @@ public interface EAVStorage {
     /**
      * Gets all extended attributes for a list of objects in a folder. 
      * 
-     * @param uuid array with objects' UUIDs which are encoded via the {@link UUIDService} 
+     * @param uuid List with objects' UUIDs which are encoded via the {@link UUIDService} 
      * 
      * @return A map representing all attribute-values for all objects in the 
      * queried objects in the folder that have stored attributes. Each objects'
@@ -98,12 +99,12 @@ public interface EAVStorage {
      * 
      * @throws OXException
      */
-    Map<UUID, Map<String, Object>> getAttributes(UUID[] uuid) throws OXException;
+    Map<UUID, Map<String, Object>> getAttributes(List<UUID> uuids) throws OXException;
     
     /**
      * Gets the specified extended attributes for a list of objects in a folder. 
      * 
-     * @param uuid array with objects' UUIDs which are encoded via the {@link UUIDService}
+     * @param uuid List with objects' UUIDs which are encoded via the {@link UUIDService}
      * 
      * @return A map representing the specified attribute-values for the 
      * queried objects in the folder that have at least one of the requested 
@@ -112,7 +113,7 @@ public interface EAVStorage {
      * treated as not set. 
      * @throws OXException
      */
-    Map<UUID, Map<String, Object>> getAttributes(UUID[] uuid, String...attributes) throws OXException;
+    Map<UUID, Map<String, Object>> getAttributes(List<UUID> uuids, String...attributes) throws OXException;
     
     /**
      * Gets a value indicating whether the storage contains extended properties
