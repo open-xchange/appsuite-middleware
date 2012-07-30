@@ -77,6 +77,8 @@ public final class MDNSClusterDiscoveryActivator extends HousekeepingActivator {
 
     static final Log LOG = com.openexchange.log.Log.loggerFor(MDNSClusterDiscoveryActivator.class);
 
+    private static final String SERVICE_ID = "openexchange.service.lookup";
+
     private final class Listener implements MDNSServiceListener, ClusterDiscoveryService {
 
         private final List<ClusterListener> clusterListeners;
@@ -181,8 +183,7 @@ public final class MDNSClusterDiscoveryActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         final AtomicReference<MDNSService> serviceRef = new AtomicReference<MDNSService>();
-        final String cServiceId = "openexchange.service.lookup";
-        final MDNSServiceListener listener = new Listener(cServiceId, serviceRef);
+        final MDNSServiceListener listener = new Listener(SERVICE_ID, serviceRef);
         final BundleContext context = this.context;
         track(MDNSService.class, new ServiceTrackerCustomizer<MDNSService, MDNSService>() {
 
