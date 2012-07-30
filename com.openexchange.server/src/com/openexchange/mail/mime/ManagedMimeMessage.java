@@ -93,7 +93,7 @@ public final class ManagedMimeMessage extends MimeMessage implements MimeCleanUp
                 tmp = managedCloneEnabled;
                 if (null == tmp) {
                     final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                    tmp = Boolean.valueOf(service != null && !service.getBoolProperty("com.openexchange.mail.mime.managedCloneEnabled", false));
+                    tmp = Boolean.valueOf(service != null && service.getBoolProperty("com.openexchange.mail.mime.managedCloneEnabled", false));
                     managedCloneEnabled = tmp;
                 }
             }
