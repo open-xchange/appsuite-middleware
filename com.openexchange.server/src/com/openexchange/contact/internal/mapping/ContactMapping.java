@@ -74,7 +74,7 @@ public abstract class ContactMapping<T> extends com.openexchange.groupware.tools
 	
 	@Override
 	public int compare(final Contact object1, final Contact object2) {
-		return this.compare(object1, object2, null);
+		return this.compare(object1, object2, (Comparator<Object>) null);
 	}
 
 	public int compare(final Contact object1, final Contact object2, final Comparator<Object> collator) {
