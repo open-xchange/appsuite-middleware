@@ -59,6 +59,7 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 import javax.servlet.http.Cookie;
+import com.google.common.net.InternetDomainName;
 import com.openexchange.ajax.Login;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -168,7 +169,8 @@ public final class Cookies {
                         return null; // Equal to server name
                     }
                     final String domain = serverName.substring(fpos);
-                    if (EXACT.contains(domain.substring(1).toLowerCase(Locale.US))) {
+                    final InternetDomainName tmp = InternetDomainName.fromLenient(domain);
+                    if (tmp.isPublicSuffix()) {
                         return null; // Equal to server name
                     }
                     return domain;
