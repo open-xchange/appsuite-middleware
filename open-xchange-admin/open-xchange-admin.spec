@@ -106,6 +106,10 @@ if [ ${1:-0} -eq 2 ]; then
     ox_remove_property MASTER_AUTH_FILE $pfile
     ox_remove_property ACCESS_COMBINATIONS_FILE $pfile
 
+    # SoftwareChange_Request-1100
+    # -----------------------------------------------------------------------
+    pfile=/opt/open-xchange/etc/AdminDaemon.properties
+    ox_remove_property SERVER_NAME $pfile
     ##
     ## end update from < 6.21
     ##
