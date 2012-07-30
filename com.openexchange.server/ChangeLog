@@ -1,3 +1,7 @@
+* 2012-07-30 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 22339: Fixed NullPointerException.
+
 * 2012-07-30 - thorben.betten@open-xchange.com
 
  - Fix for bug 22536: Introduced custom JavaMail property "mail.imap.failOnNOFetch":
