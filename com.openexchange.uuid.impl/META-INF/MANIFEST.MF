@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange UUID Service Implementation
+Bundle-SymbolicName: com.openexchange.uuid.impl
+Bundle-Version: 6.21.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.config,
+ com.openexchange.eav,
+ com.openexchange.log,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ org.apache.commons.logging,
+ org.osgi.framework
