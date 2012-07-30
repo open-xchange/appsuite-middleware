@@ -100,6 +100,28 @@ public final class Cookies {
         return tmp.booleanValue();
     }
 
+    private static volatile String configuredDomain;
+
+    /**
+     * Gets the configured domain or <code>null</code>
+     * 
+     * @return The configured domain or <code>null</code>
+     */
+    public static String configuredDomain() {
+        String tmp = configuredDomain;
+        if (null == tmp) {
+            synchronized (Login.class) {
+                tmp = configuredDomain;
+                if (null == tmp) {
+                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    tmp = null == service ? "null" : service.getProperty("com.openexchange.cookie.domain", "null");
+                    configuredDomain = tmp;
+                }
+            }
+        }
+        return "null".equalsIgnoreCase(tmp) ? null : tmp;
+    }
+
     /**
      * Gets the domain parameter for specified server name with configured default behavior whether to prefix domain with a dot (
      * <code>'.'</code>) character.
@@ -120,6 +142,11 @@ public final class Cookies {
      * @return The domain parameter or <code>null</code>
      */
     public static String getDomainValue(final String serverName, final boolean prefixWithDot) {
+        final String configuredDomain = configuredDomain();
+        if (null != configuredDomain) {
+            return configuredDomain;
+        }
+        // Try by best-guessed attempt
         if (null == serverName) {
             return null;
         }
