@@ -53,20 +53,23 @@ import java.net.InetAddress;
 
 /**
  * A {@link ClusterListener} is informed by the {@link ClusterDiscoveryService} about changes to the known cluster list.
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface ClusterListener {
-	/**
-	 * Called when a new node joined the cluster
-	 * @param address
-	 */
-	void added(InetAddress address);
 
-	/**
-	 * Called when a node leaves the cluster
-	 * @param address
-	 */
-	void removed(InetAddress address);
-	
+    /**
+     * Called when a new node joined the cluster.
+     * 
+     * @param address The address of the new node
+     */
+    void added(InetAddress address);
+
+    /**
+     * Called when a node leaves the cluster.
+     * 
+     * @param address The address of the disappearing node
+     */
+    void removed(InetAddress address);
+
 }
