@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange Discovery MDNS Bundle
+Bundle-SymbolicName: com.openexchange.cluster.discovery.mdns
+Bundle-Version: 6.21.0.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.cluster.discovery,
+ com.openexchange.exception,
+ com.openexchange.log,
+ com.openexchange.osgi,
+ org.apache.commons.logging,
+ org.osgi.framework,
+ org.osgi.util.tracker
