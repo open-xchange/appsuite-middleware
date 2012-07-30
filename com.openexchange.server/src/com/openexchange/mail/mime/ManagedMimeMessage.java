@@ -63,6 +63,7 @@ import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
 import javax.mail.util.SharedByteArrayInputStream;
 import javax.mail.util.SharedFileInputStream;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
@@ -83,6 +84,23 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  */
 public final class ManagedMimeMessage extends MimeMessage implements MimeCleanUp {
 
+    private static volatile Boolean managedCloneEnabled;
+
+    private static boolean managedCloneEnabled() {
+        Boolean tmp = managedCloneEnabled;
+        if (null == tmp) {
+            synchronized (ManagedMimeMessage.class) {
+                tmp = managedCloneEnabled;
+                if (null == tmp) {
+                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    tmp = Boolean.valueOf(service != null && !service.getBoolProperty("com.openexchange.mail.mime.managedCloneEnabled", false));
+                    managedCloneEnabled = tmp;
+                }
+            }
+        }
+        return tmp.booleanValue();
+    }
+
     /**
      * Creates file-backed clones of passed <tt>MailMessage</tt> instances.
      * 
@@ -93,6 +111,9 @@ public final class ManagedMimeMessage extends MimeMessage implements MimeCleanUp
     public static MailMessage[] clone(final MailMessage[] originals) throws OXException {
         if (null == originals) {
             return null;
+        }
+        if (!managedCloneEnabled()) {
+            return originals;
         }
         final int length = originals.length;
         if (length <= 0) {
@@ -115,6 +136,9 @@ public final class ManagedMimeMessage extends MimeMessage implements MimeCleanUp
     public static MailMessage clone(final MailMessage original) throws OXException {
         if (null == original) {
             return null;
+        }
+        if (!managedCloneEnabled()) {
+            return original;
         }
         try {
             final ManagedMimeMessage mimeMessage = new ManagedMimeMessage(original);
