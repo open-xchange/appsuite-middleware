@@ -52,7 +52,6 @@ package com.openexchange.admin.user.copy.osgi;
 import org.apache.commons.logging.Log;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.log.LogProperties;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.copy.UserCopyService;
 
