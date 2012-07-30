@@ -44,11 +44,11 @@ public class HazelcastActivator extends HousekeepingActivator {
         /*-
          * Look-up discovery service & obtain its addresses of known nodes in a cluster
          * 
-         * Configuring Hazelcast for full TCP/IP cluster
+         * Configure Hazelcast for full TCP/IP cluster
          * 
-         * If multicast is not prefered way of discovery for your environment, then you can configure Hazelcast for full TCP/IP cluster.
-         * As configuration below shows, while enable attribute of multicast is set to false, tcp-ip has to be set to true.
-         * For the none-multicast option, all or subset of cluster members' hostnames and/or ip addreses must be listed.
+         * If multicast is not preferred way of discovery for your environment, then you can configure Hazelcast for full TCP/IP cluster.
+         * As configuration below shows, while enable attribute of multicast is set to false, TCP/IP has to be set to true.
+         * For the none-multicast option, all or subset of cluster members' host names and/or IP addresses must be listed.
          * 
          * Note that all of the cluster members don't have to be listed there but at least one of them has to be active in cluster when a
          * new member joins.
