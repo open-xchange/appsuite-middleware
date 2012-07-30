@@ -50,6 +50,7 @@ package com.openexchange.eav.storage.cassandra.impl;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.CharacterCodingException;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -59,6 +60,7 @@ import java.util.UUID;
 import me.prettyprint.cassandra.model.ConfigurableConsistencyLevel;
 import me.prettyprint.cassandra.serializers.CompositeSerializer;
 import me.prettyprint.cassandra.serializers.UUIDSerializer;
+import me.prettyprint.cassandra.service.ThriftKsDef;
 import me.prettyprint.cassandra.service.template.ColumnFamilyResult;
 import me.prettyprint.cassandra.service.template.ColumnFamilyTemplate;
 import me.prettyprint.cassandra.service.template.ThriftColumnFamilyTemplate;
@@ -66,6 +68,8 @@ import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.HConsistencyLevel;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.beans.Composite;
+import me.prettyprint.hector.api.ddl.ColumnFamilyDefinition;
+import me.prettyprint.hector.api.ddl.ComparatorType;
 import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.factory.HFactory;
@@ -88,9 +92,10 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 	
 	private static Cluster cluster;
 	private static volatile Keyspace keyspace;
-	private static String node = "192.168.33.37"; //TODO: fetch dynamic
-	private static String keyspaceName = "OX";
+	private static final String node = "192.168.33.37"; //TODO: fetch dynamic
+	private static final String keyspaceName = "OX";
 	private static final String CF_XT_PROPS = "ExtendedProperties";
+	private static final int replicationFactor = 3;
 	
 	private final ColumnFamilyTemplate<UUID, Composite> xtPropsTemplate;
 	
@@ -120,11 +125,26 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 		KeyspaceDefinition kDef = cluster.describeKeyspace(keyspaceName);
 		
 		if (kDef == null) {
-			log.fatal("Keyspace '" + keyspaceName + "' does not exist. Use the 'schema.cql' file to create a schema.", new KeyspaceNotDefinedException("'" + keyspaceName + "' does not exist." ));
+			log.fatal("Keyspace '" + keyspaceName + "' does not exist. Creating...");
+			createSchema();
+			log.info("done.");
 		}
 
 		defineConsistencyLevels();
 		keyspace = HFactory.createKeyspace(keyspaceName, cluster, configurableConsistencyLevel);
+	}
+	
+	/**
+	 * Create the schema.
+	 */
+	private final void createSchema() {
+		ColumnFamilyDefinition cfDef = HFactory.createColumnFamilyDefinition(keyspaceName, CF_XT_PROPS, ComparatorType.UTF8TYPE);
+		KeyspaceDefinition newKeyspace = HFactory.createKeyspaceDefinition(keyspaceName, ThriftKsDef.DEF_STRATEGY_CLASS, replicationFactor, Arrays.asList(cfDef));
+		try {
+			cluster.addKeyspace(newKeyspace, false);
+		} catch (HectorException h) {
+			log.fatal(h.getMessage());
+		}
 	}
 	
 	/**
