@@ -5,7 +5,7 @@ Bundle-SymbolicName: com.openexchange.hazelcast
 Bundle-Version: 6.22.0.0
 Bundle-Activator: com.openexchange.hazelcast.osgi.HazelcastActivator
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.cluster.discovery,
  com.openexchange.config,
  com.openexchange.osgi,
