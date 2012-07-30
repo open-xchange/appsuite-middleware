@@ -47,6 +47,9 @@ case "$1" in
 		$(dpkg-query -W -f='${Config-Version}' open-xchange-admin-plugin-hosting)
     ;;
 
+    purge|remove|upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
+    ;;
+
     purge)
     ;;
 
