@@ -66,6 +66,7 @@ import com.openexchange.admin.reseller.rmi.impl.OXResellerUserImpl;
 import com.openexchange.admin.reseller.rmi.impl.ResellerAuth;
 import com.openexchange.admin.reseller.tools.AdminCacheExtended;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -84,8 +85,9 @@ public class Activator extends HousekeepingActivator {
     @Override
     public void startBundle() throws Exception {
         try {
-            ConfigurationService service = getService(ConfigurationService.class);
-            initCache(service);
+            ConfigurationService configurationService = getService(ConfigurationService.class);
+            AdminCache.compareAndSet(null, configurationService);
+            initCache(configurationService);
 
             final OXReseller reseller = new OXReseller();
             OXResellerInterface reseller_stub = (OXResellerInterface) UnicastRemoteObject.exportObject(reseller, 0);
