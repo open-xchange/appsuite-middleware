@@ -49,6 +49,7 @@
 
 package com.openexchange.sessionstorage.impl;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -125,13 +126,15 @@ public class SessionStorageServiceImpl implements SessionStorageService {
     }
 
     @Override
-    public void removeUserSessions(int userId, int contextId) {
+    public Session[] removeUserSessions(int userId, int contextId) {
+        List<Session> retval = new ArrayList<Session>();
         for (String sessionId : sessions.keySet()) {
             StoredSession session = sessions.get(sessionId);
             if (session.getUserId() == userId && session.getContextId() == contextId) {
-                sessions.remove(sessionId);
+                retval.add(sessions.remove(sessionId));
             }
         }
+        return (Session[]) retval.toArray();
     }
 
     @Override
@@ -265,6 +268,12 @@ public class SessionStorageServiceImpl implements SessionStorageService {
         sessions.remove(sessionId);
         s.setPassword(newPassword);
         sessions.put(sessionId, s);
+    }
+
+    @Override
+    public void checkAuthId(String login, String authId) throws OXException {
+        // TODO Auto-generated method stub
+        
     }
 
 }

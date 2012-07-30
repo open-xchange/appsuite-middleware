@@ -50,9 +50,10 @@
 package com.openexchange.realtime.packet;
 
 /**
- * {@link Presence}
+ * {@link Presence} - Exchanges presence information.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
 public class Presence extends Stanza {
 

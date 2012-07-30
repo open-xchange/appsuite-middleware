@@ -50,11 +50,30 @@
 package com.openexchange.realtime;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.IQ;
+import com.openexchange.realtime.packet.Message;
+import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * The Message dispatcher chooses an appropriate {@link Channel} to push data (aka. a Stanza) to listening clients
+ * The Message dispatcher chooses an appropriate {@link Channel} to push data (aka. a Stanza) to listening clients.
+ * <p>
+ * There are:
+ * <ol>
+ * <li> {@link IQ} - for command exchanges</li>
+ * <li> {@link Message} - to transfer messages&nbsp;;)</li>
+ * <li> {@link Presence} - to exchange presence information</li>
+ * </ol>
+ * <p>
+ * These items are able being transmitted via a {@link Channel channel}. Usually these items contain:
+ * </p>
+ * <ol>
+ * <li> {@link ID to} - where the item should be delivered (example: to='user2@server2.com' or to='service3.server4.org')</li>
+ * <li>id - as identification for this item (important for iq)</li>
+ * <li>type - in example get, set, result, error as the basic types in an {@link IQ}</li>
+ * </ol>
  * 
  * @author francisco.laguna@open-xchange.com
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc

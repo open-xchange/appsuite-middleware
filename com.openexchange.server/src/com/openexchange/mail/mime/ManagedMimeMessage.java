@@ -141,6 +141,16 @@ public final class ManagedMimeMessage extends MimeMessage implements MimeCleanUp
             }
             // Convert to MailMessage instance
             final MailMessage retval = MimeMessageConverter.convertMessage(mimeMessage, false);
+            if (original.containsFolder()) {
+                retval.setFolder(original.getFolder());
+            }
+            final String mailId = original.getMailId();
+            if (mailId != null) {
+                retval.setMailId(mailId);
+            }
+            if (original.containsMsgref()) {
+                retval.setMsgref(original.getMsgref());
+            }
             // Remember ManagedMimeMessage for clean-up
             if (null != mimeMessage.file) {
                 MailAccess.rememberMimeCleanUp(mimeMessage);

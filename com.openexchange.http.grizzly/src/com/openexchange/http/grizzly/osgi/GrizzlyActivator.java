@@ -63,6 +63,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.grizzly.GrizzlyExceptionCode;
 import com.openexchange.http.grizzly.addons.GrizzlOXAddOn;
+import com.openexchange.http.grizzly.services.atmosphere.AtmosphereService;
 import com.openexchange.http.grizzly.services.atmosphere.AtmosphereServiceImpl;
 import com.openexchange.http.grizzly.services.http.HttpServiceFactory;
 import com.openexchange.http.requestwatcher.osgi.services.RequestWatcherService;
@@ -204,7 +205,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
              * AtmosphereServiceImpl that contains the framework to handle requests dispatched from the atmosphere servlet
              */
             AtmosphereServiceImpl atmosphereServiceImpl = new AtmosphereServiceImpl(grizzly, context.getBundle());
-            registerService(AtmosphereServiceImpl.class, atmosphereServiceImpl);
+            registerService(AtmosphereService.class, atmosphereServiceImpl);
             
             
             grizzly.addListener(networkListener);

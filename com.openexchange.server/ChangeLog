@@ -1,3 +1,13 @@
+* 2012-07-28 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22685: Increased timeout to 10sec
+ - Fix for bug 22613: Insert line-break as separator
+ - Fix for bug 22659: using proper monitor object
+
+* 2012-07-27 - jan.bauerdick@open-xchange.com
+
+ - New implementation of sessionstorageservice, storing sessions with cassandra
+
 * 2012-07-26 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 22686: Set content-type in PROPPATCH multistatus responses 
