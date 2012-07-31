@@ -215,6 +215,49 @@ if [ ${1:-0} -eq 2 ]; then
         ox_set_property com.openexchange.carddav.exposedCollections "0" $pfile
     fi
 
+    # SoftwareChange_Request-1091
+    # -----------------------------------------------------------------------
+    rm -f /opt/open-xchange/etc/groupware/TidyConfiguration.properties
+    rm -f /opt/open-xchange/etc/groupware/TidyMessages.properties
+    pfile=/opt/open-xchange/etc/configdb.properties
+    ox_remove_property useSeparateWrite $pfile
+    pfile=/opt/open-xchange/etc/contact.properties
+    ox_remove_property contactldap.configuration.path $pfile
+    pfile=/opt/open-xchange/etc/import.properties
+    ox_remove_property com.openexchange.import.mapper.path $pfile
+    pfile=/opt/open-xchange/etc/mail.properties
+    ox_remove_property com.openexchange.mail.JavaMailProperties $pfile
+    pfile=/opt/open-xchange/etc/sessiond.properties
+    ox_remove_property com.openexchange.sessiond.sessionCacheConfig $pfile
+    pfile=/opt/open-xchange/etc/system.properties
+    ox_remove_property Calendar $pfile
+    ox_remove_property Infostore $pfile
+    ox_remove_property Attachment $pfile
+    ox_remove_property Notification $pfile
+    ox_remove_property ServletMappingDir $pfile
+    ox_remove_property CONFIGPATH $pfile
+    ox_remove_property AJPPROPERTIES $pfile
+    ox_remove_property IMPORTEREXPORTER $pfile
+    ox_remove_property LDAPPROPERTIES $pfile
+    ox_remove_property EVENTPROPERTIES $pfile
+    ox_remove_property PUSHPROPERTIES $pfile
+    ox_remove_property UPDATETASKSCFG $pfile
+    ox_remove_property HTMLEntities $pfile
+    ox_remove_property MailCacheConfig $pfile
+    ox_remove_property TidyMessages $pfile
+    ox_remove_property TidyConfiguration $pfile
+    ox_remove_property Whitelist $pfile
+    if grep -E '^com.openexchange.caching.configfile.*/' $pfile >/dev/null; then
+        ox_set_property com.openexchange.caching.configfile cache.ccf $pfile
+    fi
+    if ox_exists_property MimeTypeFile $pfile; then
+        ox_set_property MimeTypeFileName mime.types $pfile
+        ox_remove_property MimeTypeFile $pfile
+    fi
+    # SoftwareChange_Request-1094
+    # -----------------------------------------------------------------------
+    rm -f /opt/open-xchange/etc/groupware/mailjsoncache.properties
+
     # SoftwareChange_Request-1101
     pfile=/opt/open-xchange/etc/configdb.properties
     if ox_exists_property writeOnly $pfile; then
