@@ -55,7 +55,7 @@ import com.openexchange.eav.UUIDService;
 /**
  * Implementation of {@link UUIDService}
  * The structure of the generated UUID is as follows:
- * 12 bits for contextID, 4 bits for moduleID, 12bits for objectID<br/>
+ * 12 bytes for contextID, 4 bytes for moduleID, 12 bytes for objectID<br/>
  * eg.: 00000000-0002-0007-0000-00000000000a refers to contextID:2, moduleID: 7, objectID: 10  
  * 
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
