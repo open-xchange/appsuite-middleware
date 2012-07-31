@@ -38,10 +38,18 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 
 %post
 if [ ${1:-0} -eq 2 ]; then
+    # only when updating
+    . /opt/open-xchange/etc/oxfunctions.sh
+
+    # prevent bash from expanding, see bug 13316
+    GLOBIGNORE='*'
+
     if [ -e /opt/open-xchange/etc/groupware/ldapauth.properties ]; then
         mv /opt/open-xchange/etc/ldapauth.properties /opt/open-xchange/etc/ldapauth.properties.rpmnew
         mv /opt/open-xchange/etc/groupware/ldapauth.properties /opt/open-xchange/etc/ldapauth.properties.properties
     fi
+
+    ox_update_permissions "/opt/open-xchange/etc/ldapauth.properties" root:open-xchange 640
 fi
 
 %clean
@@ -54,7 +62,7 @@ fi
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/etc/
-%config(noreplace) /opt/open-xchange/etc/*
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/ldapauth.properties
 
 %changelog
 * Tue Apr 17 2012 Marcus Klein  <marcus.klein@open-xchange.com>
