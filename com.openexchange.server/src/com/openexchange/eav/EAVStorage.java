@@ -53,7 +53,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.Types;
 
 /**
  * {@link EAVStorage}

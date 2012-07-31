@@ -191,12 +191,13 @@ public final class MDNSClusterDiscoveryActivator extends HousekeepingActivator {
             public MDNSService addingService(final ServiceReference<MDNSService> reference) {
                 final MDNSService service = context.getService(reference);
                 try {
-                    service.addListener(listener);
                     serviceRef.set(service);
+                    service.addListener(listener);
                     return service;
                 } catch (final Exception e) {
                     // Failure
                     LOG.error("Failed registration of MDNSClusterDiscoveryService.", e);
+                    serviceRef.set(null);
                     context.ungetService(reference);
                     return null;
                 }
@@ -217,6 +218,7 @@ public final class MDNSClusterDiscoveryActivator extends HousekeepingActivator {
                 context.ungetService(reference);
             }
         });
+        openTrackers();
     }
 
 }

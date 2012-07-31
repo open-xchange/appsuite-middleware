@@ -73,8 +73,6 @@ public final class DatabaseServiceImpl implements DatabaseService {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DatabaseServiceImpl.class));
 
-    private final boolean forceWriteOnly;
-
     private final Pools pools;
 
     private final ConfigDatabaseService configDatabaseService;
@@ -84,9 +82,8 @@ public final class DatabaseServiceImpl implements DatabaseService {
     /**
      * Default constructor.
      */
-    public DatabaseServiceImpl(final boolean forceWriteOnly, final Pools pools, final ConfigDatabaseService configDatabaseService, final ContextDatabaseAssignmentService assignmentService) {
+    public DatabaseServiceImpl(Pools pools, ConfigDatabaseService configDatabaseService, ContextDatabaseAssignmentService assignmentService) {
         super();
-        this.forceWriteOnly = forceWriteOnly;
         this.pools = pools;
         this.configDatabaseService = configDatabaseService;
         this.assignmentService = assignmentService;
@@ -95,7 +92,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
     private Connection get(final int contextId, final boolean write, final boolean noTimeout) throws OXException {
         final AssignmentImpl assign = assignmentService.getAssignment(contextId);
         LogProperties.putLogProperty("com.openexchange.database.schema", ForceLog.valueOf(assign.getSchema()));
-        return ReplicationMonitor.checkActualAndFallback(pools, assign, noTimeout, write || forceWriteOnly);
+        return ReplicationMonitor.checkActualAndFallback(pools, assign, noTimeout, write);
     }
 
     private void back(final Connection con) {
