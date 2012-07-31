@@ -78,18 +78,17 @@ public class HazelcastActivator extends HousekeepingActivator {
             };
             discovery.addListener(clusterListener);
             this.clusterListener = clusterListener;
-            
-            // Timeout before we assume we are either the first or alone in the cluster
-            getService(TimerService.class).schedule(new Runnable() {
+            /*
+             * Timeout before we assume we are either the first or alone in the cluster
+             */
+            Runnable task = new Runnable() {
 
 				@Override
 				public void run() {
-					if (HazelcastActivator.this.hazelcastInstance == null) {
-						init(new LinkedList<InetAddress>());
-					}
+					init(Collections.<InetAddress> emptyList());
 				}
-            }, getDelay());
-            
+            };
+            getService(TimerService.class).schedule(task, getDelay());            
         } else {
             /*
              * We already have at least one node at start-up time
@@ -103,7 +102,7 @@ public class HazelcastActivator extends HousekeepingActivator {
 	 */
 	private long getDelay() {
 		String delay = getService(ConfigurationService.class).getProperty("com.openexchange.hazelcast.startupDelay", "20000");
-		return getService(StringParser.class).parse(delay, long.class);
+		return getService(StringParser.class).parse(delay, long.class).longValue();
 	}
 
 	/**
@@ -112,31 +111,37 @@ public class HazelcastActivator extends HousekeepingActivator {
      * @param nodes The pre-known nodes
      */
     void init(final List<InetAddress> nodes) {
-        /*
-         * Create configuration from XML data
-         */
-        String xml = getService(ConfigurationService.class).getText("hazelcast.xml");
-        final Config config = new InMemoryXmlConfig(xml);
-        /*
-         * Get reference to network join
-         */
-        final Join join = config.getNetworkConfig().getJoin();
-        /*
-         * Disable: multicast, AWS, and Enable: TCP-IP
-         */
-        join.getMulticastConfig().setEnabled(false);
-        join.getAwsConfig().setEnabled(false);
-        final TcpIpConfig tcpIpConfig = join.getTcpIpConfig();
-        tcpIpConfig.setEnabled(true);
-        for (final InetAddress address : nodes) {
-            tcpIpConfig.addAddress(new Address(address, config.getPort()));
+        synchronized (this) {
+            if (null != hazelcastInstance) {
+                // Already initialized
+                return;
+            }
+            /*
+             * Create configuration from XML data
+             */
+            String xml = getService(ConfigurationService.class).getText("hazelcast.xml");
+            final Config config = new InMemoryXmlConfig(xml);
+            /*
+             * Get reference to network join
+             */
+            final Join join = config.getNetworkConfig().getJoin();
+            /*
+             * Disable: multicast, AWS, and Enable: TCP-IP
+             */
+            join.getMulticastConfig().setEnabled(false);
+            join.getAwsConfig().setEnabled(false);
+            final TcpIpConfig tcpIpConfig = join.getTcpIpConfig();
+            tcpIpConfig.setEnabled(true);
+            for (final InetAddress address : nodes) {
+                tcpIpConfig.addAddress(new Address(address, config.getPort()));
+            }
+            /*
+             * Create appropriate Hazelcast instance from configuration
+             */
+            final HazelcastInstance hazelcastInstance = Hazelcast.newHazelcastInstance(config);
+            registerService(HazelcastInstance.class, hazelcastInstance);
+            this.hazelcastInstance = hazelcastInstance;
         }
-        /*
-         * Create appropriate Hazelcast instance from configuration
-         */
-        final HazelcastInstance hazelcastInstance = Hazelcast.newHazelcastInstance(config);
-        registerService(HazelcastInstance.class, hazelcastInstance);
-        this.hazelcastInstance = hazelcastInstance;
     }
 
     @Override
