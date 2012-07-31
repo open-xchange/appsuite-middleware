@@ -29,4 +29,6 @@ Import-Package: com.openexchange.cluster.discovery,
  org.osgi.util.tracker
 Bundle-ClassPath: lib/hazelcast-all-2.2.jar,
  .
-Export-Package: com.hazelcast.core
+Export-Package: com.hazelcast.cluster,
+ com.hazelcast.core,
+ com.openexchange.hazelcast
