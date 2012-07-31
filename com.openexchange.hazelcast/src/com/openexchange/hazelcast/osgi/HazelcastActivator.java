@@ -143,7 +143,7 @@ public class HazelcastActivator extends HousekeepingActivator {
 	 * @return
 	 */
 	long getDelay() {
-		String delay = getService(ConfigurationService.class).getProperty("com.openexchange.hazelcast.startupDelay", "20000");
+		String delay = getService(ConfigurationService.class).getProperty("com.openexchange.hazelcast.startupDelay", "60000");
 		return getService(StringParser.class).parse(delay, long.class).longValue();
 	}
 
