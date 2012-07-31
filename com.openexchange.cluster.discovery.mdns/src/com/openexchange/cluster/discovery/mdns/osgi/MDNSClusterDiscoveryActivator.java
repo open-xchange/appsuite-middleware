@@ -197,6 +197,7 @@ public final class MDNSClusterDiscoveryActivator extends HousekeepingActivator {
                 } catch (final Exception e) {
                     // Failure
                     LOG.error("Failed registration of MDNSClusterDiscoveryService.", e);
+                    serviceRef.set(null);
                     context.ungetService(reference);
                     return null;
                 }
