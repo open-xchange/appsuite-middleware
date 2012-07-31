@@ -78,9 +78,9 @@ public class XMPPChatDelivery extends SimpleChannelUpstreamHandler implements XM
 
     private ChannelHandlerContext ctx;
 
-    private XMPPChannel channel;
+    private final XMPPChannel channel;
 
-    private XMPPHandler handler;
+    private final XMPPHandler handler;
 
     private ServerSession session;
 

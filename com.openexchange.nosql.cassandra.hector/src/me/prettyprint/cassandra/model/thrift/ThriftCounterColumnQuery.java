@@ -41,12 +41,14 @@ public class ThriftCounterColumnQuery<K, N> extends AbstractBasicQuery<K, N, HCo
     super(keyspace, TypeInferringSerializer.<K> get(), TypeInferringSerializer.<N> get());
   }
   
-  public CounterQuery<K, N> setKey(K key) {
+  @Override
+public CounterQuery<K, N> setKey(K key) {
     this.key = key;
     return this;
   }
 
-  public CounterQuery<K, N> setName(N name) {
+  @Override
+public CounterQuery<K, N> setName(N name) {
     this.name = name;
     return this;
   }

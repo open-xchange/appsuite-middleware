@@ -198,6 +198,7 @@ public class ObjectHandler {
         retval.add(Arrays.asList((Object) "id", "age", "created", "admin permission", "module access combination", "users", "inactive" ));
 
         final TreeSet<Integer> sorted = new TreeSet<Integer>(new Comparator<Integer>() {
+            @Override
             public int compare(final Integer o1, final Integer o2) {
                 return o1.compareTo(o2);
             }

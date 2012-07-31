@@ -9,7 +9,7 @@ import com.openexchange.tools.session.ServerSession;
 
 public class AJAXConverterAdapter implements SimpleConverter{
 
-	private Converter converter;
+	private final Converter converter;
 
 	public AJAXConverterAdapter(Converter converter) {
 		this.converter = converter;

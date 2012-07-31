@@ -26,6 +26,7 @@ public final class ParallelsHostnameService implements HostnameService {
 
     private static final Log LOG = LogFactory.getLog(ParallelsHostnameService.class);
 
+    @Override
     public String getHostname(final int userId, final int contextId) {
         if(contextId!=-1){
             final ContextService service = ParallelsServiceRegistry.getServiceRegistry().getService(ContextService.class);

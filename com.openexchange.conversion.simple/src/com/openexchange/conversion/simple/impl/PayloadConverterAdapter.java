@@ -12,8 +12,8 @@ import com.openexchange.tools.session.ServerSession;
 
 public class PayloadConverterAdapter implements ResultConverter{
 
-	private SimplePayloadConverter converter;
-	private SimpleConverter rtConverter;
+	private final SimplePayloadConverter converter;
+	private final SimpleConverter rtConverter;
 	
 	public PayloadConverterAdapter(SimplePayloadConverter converter, SimpleConverter rtConverter) {
 		this.converter = converter;

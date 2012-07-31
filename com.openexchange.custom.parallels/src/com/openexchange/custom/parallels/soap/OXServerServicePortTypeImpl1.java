@@ -38,6 +38,7 @@ public class OXServerServicePortTypeImpl1 implements OXServerServicePortType {
     /* (non-Javadoc)
      * @see com.openexchange.custom.parallels.soap.OXServerServicePortType#getServerBundleList(com.openexchange.custom.parallels.soap.rmi.Credentials  auth )*
      */
+    @Override
     public java.util.List<com.openexchange.custom.parallels.soap.Bundle> getServerBundleList(com.openexchange.custom.parallels.soap.rmi.Credentials auth) throws InvalidCredentialsException_Exception , InvalidDataException_Exception , RemoteException_Exception , StorageException_Exception    { 
         LOG.info("Executing operation getServerBundleList");
         System.out.println(auth);
@@ -57,6 +58,7 @@ public class OXServerServicePortTypeImpl1 implements OXServerServicePortType {
     /* (non-Javadoc)
      * @see com.openexchange.custom.parallels.soap.OXServerServicePortType#getServerVersion(com.openexchange.custom.parallels.soap.rmi.Credentials  auth )*
      */
+    @Override
     public java.lang.String getServerVersion(com.openexchange.custom.parallels.soap.rmi.Credentials auth) throws InvalidCredentialsException_Exception , InvalidDataException_Exception , RemoteException_Exception , StorageException_Exception    { 
         LOG.info("Executing operation getServerVersion");
         System.out.println(auth);

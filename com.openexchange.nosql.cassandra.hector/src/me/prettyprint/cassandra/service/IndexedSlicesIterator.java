@@ -11,7 +11,7 @@ import me.prettyprint.hector.api.beans.Row;
  */
 public class IndexedSlicesIterator<K, N, V> implements Iterator<Row<K, N, V>> {
 
-	private IndexedSlicesQuery<K, N, V> query;
+	private final IndexedSlicesQuery<K, N, V> query;
 	private K startKey;
 	private Iterator<Row<K, N, V>> iterator;
 	private int rows = 0;

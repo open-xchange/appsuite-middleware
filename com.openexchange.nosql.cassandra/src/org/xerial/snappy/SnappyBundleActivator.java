@@ -60,6 +60,7 @@ import com.openexchange.log.LogFactory;
  * @author Ioannis Chouklis
  * @deprecated For OX use {@link com.openexchange.nosql.cassandra.osgi.CassandraActivator}
  */
+@Deprecated
 public class SnappyBundleActivator implements BundleActivator {
 	
 	private static Log log = LogFactory.getLog(SnappyBundleActivator.class);

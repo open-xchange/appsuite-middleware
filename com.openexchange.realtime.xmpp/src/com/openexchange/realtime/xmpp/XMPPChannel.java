@@ -67,9 +67,9 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class XMPPChannel implements Channel {
 
-    private IDMap<XMPPDelivery> connections = new IDMap<XMPPDelivery>();
+    private final IDMap<XMPPDelivery> connections = new IDMap<XMPPDelivery>();
 
-    private List<XMPPExtension> extensions = new ArrayList<XMPPExtension>();
+    private final List<XMPPExtension> extensions = new ArrayList<XMPPExtension>();
 
     @Override
     public String getProtocol() {
