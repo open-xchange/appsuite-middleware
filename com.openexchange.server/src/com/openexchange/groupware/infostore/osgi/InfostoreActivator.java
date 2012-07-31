@@ -53,16 +53,22 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.Stack;
+import java.util.LinkedList;
+import java.util.Queue;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
+import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.file.storage.FileStorageEventConstants;
+import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.groupware.impl.FolderLockManagerImpl;
+import com.openexchange.groupware.infostore.InfostoreAvailable;
+import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.database.impl.InfostoreFilenameReservationsCreateTableTask;
 import com.openexchange.groupware.infostore.webdav.EntityLockManagerImpl;
 import com.openexchange.groupware.infostore.webdav.LockCleaner;
@@ -78,7 +84,8 @@ import com.openexchange.groupware.update.UpdateTaskV2;
  */
 public class InfostoreActivator implements BundleActivator {
 
-    private final Stack<ServiceRegistration<?>> registrations = new Stack<ServiceRegistration<?>>();
+    private final Queue<ServiceRegistration<?>> registrations = new LinkedList<ServiceRegistration<?>>();
+    private volatile ServiceTracker<FileStorageServiceRegistry, FileStorageServiceRegistry> tracker;
 
     @Override
     public void start(final BundleContext context) throws Exception {
@@ -87,21 +94,62 @@ public class InfostoreActivator implements BundleActivator {
         PropertyCleaner propertyCleaner = new PropertyCleaner(new PropertyStoreImpl(new DBPoolProvider(), "oxfolder_property"), new PropertyStoreImpl(new DBPoolProvider(), "infostore_property"));
         Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
         serviceProperties.put(EventConstants.EVENT_TOPIC, FileStorageEventConstants.ALL_TOPICS);
-        registrations.push(context.registerService(CreateTableService.class.getName(), task, null));
-        registrations.push(context.registerService(UpdateTaskProviderService.class.getName(), new UpdateTaskProviderService() {
+        registrations.offer(context.registerService(CreateTableService.class.getName(), task, null));
+        registrations.offer(context.registerService(UpdateTaskProviderService.class.getName(), new UpdateTaskProviderService() {
             @Override
             public Collection<UpdateTaskV2> getUpdateTasks() {
                 return Arrays.asList(((UpdateTaskV2) task));
             }
         }, null));
-        registrations.push(context.registerService(EventHandler.class, lockCleaner, serviceProperties));
-        registrations.push(context.registerService(EventHandler.class, propertyCleaner, serviceProperties));
+        registrations.offer(context.registerService(EventHandler.class, lockCleaner, serviceProperties));
+        registrations.offer(context.registerService(EventHandler.class, propertyCleaner, serviceProperties));
+
+        final class AvailableTracker extends ServiceTracker<FileStorageServiceRegistry, FileStorageServiceRegistry> {
+
+            public AvailableTracker(BundleContext context) {
+                super(context, FileStorageServiceRegistry.class, null);
+            }
+
+            @Override
+            public FileStorageServiceRegistry addingService(ServiceReference<FileStorageServiceRegistry> reference) {
+                final FileStorageServiceRegistry registry = super.addingService(reference);
+                InfostoreFacade.INFOSTORE_FILE_STORAGE_AVAILABLE.set(new InfostoreAvailable() {
+
+                    @Override
+                    public boolean available() {
+                        return registry.containsFileStorageService("com.openexchange.infostore");
+                    }
+                });
+                return registry;
+            }
+
+            @Override
+            public void removedService(ServiceReference<FileStorageServiceRegistry> reference, FileStorageServiceRegistry service) {
+                InfostoreFacade.INFOSTORE_FILE_STORAGE_AVAILABLE.set(new InfostoreAvailable() {
+
+                    @Override
+                    public boolean available() {
+                        return false;
+                    }
+                });
+                super.removedService(reference, service);
+            }
+        }
+        final AvailableTracker tracker = new AvailableTracker(context);
+        tracker.open();
+        this.tracker = tracker;
     }
 
     @Override
     public void stop(final BundleContext context) throws Exception {
-        while (!registrations.empty()) {
-            registrations.pop().unregister();
+        final ServiceTracker<FileStorageServiceRegistry, FileStorageServiceRegistry> tracker = this.tracker;
+        if (null != tracker) {
+            tracker.close();
+            this.tracker = null;
+        }
+        ServiceRegistration<?> polled;
+        while ((polled = registrations.poll()) != null) {
+            polled.unregister();
         }
     }
 }
