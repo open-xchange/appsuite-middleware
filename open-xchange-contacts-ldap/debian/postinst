@@ -25,12 +25,6 @@ postFix() {
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
 
-}
-
-update622() {
-    local version=${1%-*}
-    version=${version//[-.]/}
-
     odir=/opt/open-xchange/etc/groupware/contacts-ldap
     ndir=/opt/open-xchange/etc/contacts-ldap
     for i in $(find $odir -maxdepth 1 -name "mapping*.properties"); do
@@ -61,6 +55,7 @@ update622() {
             done
         fi
     done
+
 }
 
 setConfigFilePermissions() {
@@ -73,7 +68,6 @@ setConfigFilePermissions() {
 case "$1" in
     configure)
         test -n "$2" && {
-            update622 "$@"
             # we are in update mode, run postFix to apply fixes
             postFix "$2"
         }
