@@ -5,7 +5,8 @@ Bundle-SymbolicName: com.openexchange.eav.storage.cassandra.impl
 Bundle-Version: 6.21.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.config,
+Import-Package: com.openexchange.ajax.tools,
+ com.openexchange.config,
  com.openexchange.eav,
  com.openexchange.exception,
  com.openexchange.groupware,
@@ -27,5 +28,6 @@ Import-Package: com.openexchange.config,
  org.apache.cassandra.db,
  org.apache.cassandra.utils,
  org.apache.commons.logging;version="1.1.1",
+ org.json,
  org.osgi.framework
 Bundle-Activator: com.openexchange.eav.storage.cassandra.osgi.CassandraStorageActivator
