@@ -51,16 +51,27 @@ package com.openexchange.groupware.infostore;
 
 
 /**
- * {@link InfostoreAvailable} - Simple interface wrapping functionality whether needed InfoStore bundle(s) is/are available.
+ * {@link InfostoreFacades} - Utility class for InfoStore.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface InfostoreAvailable {
+public final class InfostoreFacades {
+
+    /**
+     * Initializes a new {@link InfostoreFacades}.
+     */
+    private InfostoreFacades() {
+        super();
+    }
 
     /**
      * Checks if needed InfoStore bundle(s) is/are available.
      * 
      * @return <code>true</code> if available; otherwise <code>false</code>
      */
-    boolean available();
+    public static boolean isInfoStoreAvailable() {
+        final InfostoreAvailable available = InfostoreFacade.INFOSTORE_FILE_STORAGE_AVAILABLE.get();
+        return (null == available || available.available());
+    }
+
 }

@@ -54,8 +54,6 @@ import java.util.Arrays;
 import org.apache.commons.logging.Log;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.infostore.InfostoreAvailable;
-import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.log.LogFactory;
 import com.openexchange.tools.Collections.SmartIntArray;
 
@@ -451,12 +449,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      */
     public boolean hasInfostore() {
-        final boolean hasPermission = hasPermission(INFOSTORE);
-        if (!hasPermission) {
-            return false;
-        }
-        final InfostoreAvailable available = InfostoreFacade.INFOSTORE_FILE_STORAGE_AVAILABLE.get();
-        return (null == available || available.available());
+        return hasPermission(INFOSTORE);
     }
 
     /**
