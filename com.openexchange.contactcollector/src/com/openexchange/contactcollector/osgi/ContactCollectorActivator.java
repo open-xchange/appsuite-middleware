@@ -159,8 +159,11 @@ public class ContactCollectorActivator extends HousekeepingActivator {
         /*
          * Stop service
          */
-        collectorInstance.stop();
-        collectorInstance = null;
+        final ContactCollectorServiceImpl collectorInstance = this.collectorInstance;
+        if (null != collectorInstance) {
+            collectorInstance.stop();
+            this.collectorInstance = null;
+        }
         /*
          * Clear service registry
          */
