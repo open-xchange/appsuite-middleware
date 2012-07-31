@@ -39,7 +39,7 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %post
 if [ ${1:-0} -eq 2 ]; then
     # only when updating
-    . /opt/open-xchange/etc/oxfunctions.sh
+    . /opt/open-xchange/lib/oxfunctions.sh
 
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
