@@ -52,11 +52,11 @@ package com.openexchange.groupware.userconfiguration;
 import java.io.Serializable;
 import java.util.Arrays;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.InfostoreAvailable;
 import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.log.LogFactory;
 import com.openexchange.tools.Collections.SmartIntArray;
 
 /**
@@ -451,7 +451,12 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      */
     public boolean hasInfostore() {
-        return hasPermission(INFOSTORE);
+        final boolean hasPermission = hasPermission(INFOSTORE);
+        if (!hasPermission) {
+            return false;
+        }
+        final InfostoreAvailable available = InfostoreFacade.INFOSTORE_FILE_STORAGE_AVAILABLE.get();
+        return (null == available || available.available());
     }
 
     /**
@@ -738,10 +743,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
                 array.append(FolderObject.PROJECT);
             }
             if (hasInfostore()) {
-                final InfostoreAvailable available = InfostoreFacade.INFOSTORE_FILE_STORAGE_AVAILABLE.get();
-                if (null != available && available.available()) {
-                    array.append(FolderObject.INFOSTORE);
-                }
+                array.append(FolderObject.INFOSTORE);
             }
             if (hasWebMail()) {
                 array.append(FolderObject.MAIL);

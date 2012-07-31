@@ -125,13 +125,7 @@ public class InfostoreActivator implements BundleActivator {
 
             @Override
             public void removedService(ServiceReference<FileStorageServiceRegistry> reference, FileStorageServiceRegistry service) {
-                InfostoreFacade.INFOSTORE_FILE_STORAGE_AVAILABLE.set(new InfostoreAvailable() {
-
-                    @Override
-                    public boolean available() {
-                        return false;
-                    }
-                });
+                InfostoreFacade.INFOSTORE_FILE_STORAGE_AVAILABLE.set(null);
                 super.removedService(reference, service);
             }
         }

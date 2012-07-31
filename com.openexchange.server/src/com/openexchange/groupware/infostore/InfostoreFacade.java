@@ -68,13 +68,7 @@ public interface InfostoreFacade extends TransactionAware{
     /**
      * A flag that indicates whether InfoStore file storage bundle is available or not.
      */
-    public static final AtomicReference<InfostoreAvailable> INFOSTORE_FILE_STORAGE_AVAILABLE = new AtomicReference<InfostoreAvailable>(new InfostoreAvailable() {
-        
-        @Override
-        public boolean available() {
-            return false;
-        }
-    });
+    public static final AtomicReference<InfostoreAvailable> INFOSTORE_FILE_STORAGE_AVAILABLE = new AtomicReference<InfostoreAvailable>();
 
 	/**
 	 * Special Version used if you want to retrieve the latest version of an infostore document
