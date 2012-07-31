@@ -47,24 +47,70 @@
  *
  */
 
-package com.openexchange.mdns.internal;
+package com.openexchange.cluster.discovery.mdns;
 
-import java.util.UUID;
+import java.net.InetAddress;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.cluster.discovery.ClusterDiscoveryService;
+import com.openexchange.cluster.discovery.ClusterListener;
+import com.openexchange.exception.OXException;
+import com.openexchange.mdns.MDNSService;
 import com.openexchange.mdns.MDNSServiceEntry;
 
 /**
- * {@link MDNSReregisterer}
- *
+ * {@link MDNSClusterDiscoveryService}
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface MDNSReregisterer {
+public final class MDNSClusterDiscoveryService implements ClusterDiscoveryService {
 
-    void reregisterServices();
+    private final String serviceId;
 
-    boolean contains(UUID id, String serviceId);
+    private final AtomicReference<MDNSService> serviceRef;
 
-    void serviceAdded(String serviceId, MDNSServiceEntry entry);
+    private final ClusterDiscoveryService delegate;
 
-    void serviceRemoved(String serviceId, MDNSServiceEntry entry);
+    /**
+     * Initializes a new {@link MDNSClusterDiscoveryService}.
+     * 
+     * @param serviceId
+     */
+    public MDNSClusterDiscoveryService(final String serviceId, final AtomicReference<MDNSService> serviceRef, final ClusterDiscoveryService delegate) {
+        super();
+        this.serviceId = serviceId;
+        this.serviceRef = serviceRef;
+        this.delegate = delegate;
+    }
+
+    @Override
+    public List<InetAddress> getNodes() {
+        final MDNSService mdnsService = serviceRef.get();
+        if (null != mdnsService) {
+            try {
+                final List<InetAddress> addrs = new LinkedList<InetAddress>();
+                for (final MDNSServiceEntry mdnsServiceEntry : mdnsService.listByService(serviceId)) {
+                    addrs.addAll(Arrays.asList(mdnsServiceEntry.getAddresses()));
+                }
+                return addrs;
+            } catch (final OXException e) {
+                com.openexchange.log.Log.loggerFor(MDNSClusterDiscoveryService.class).error(e.getMessage(), e);
+            }
+        }
+        return Collections.emptyList();
+    }
+
+    @Override
+    public void addListener(final ClusterListener listener) {
+        delegate.addListener(listener);
+    }
+
+    @Override
+    public void removeListener(final ClusterListener listener) {
+        delegate.removeListener(listener);
+    }
 
 }

@@ -47,24 +47,30 @@
  *
  */
 
-package com.openexchange.mdns.internal;
+package com.openexchange.mdns;
 
-import java.util.UUID;
-import com.openexchange.mdns.MDNSServiceEntry;
 
 /**
- * {@link MDNSReregisterer}
+ * {@link MDNSServiceListener} - Listens for appearing/disappearing MDNS service entries.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface MDNSReregisterer {
+public interface MDNSServiceListener {
 
-    void reregisterServices();
+    /**
+     * Invoked if a new service has been discovered or updated.
+     * 
+     * @param serviceId The service identifier
+     * @param entry The associated service entry
+     */
+    void onServiceAdded(String serviceId, MDNSServiceEntry entry);
 
-    boolean contains(UUID id, String serviceId);
-
-    void serviceAdded(String serviceId, MDNSServiceEntry entry);
-
-    void serviceRemoved(String serviceId, MDNSServiceEntry entry);
+    /**
+     * Invoked if an existing service disappeared.
+     * 
+     * @param serviceId The service identifier
+     * @param entry The associated service entry
+     */
+    void onServiceRemoved(String serviceId, MDNSServiceEntry entry);
 
 }

@@ -47,24 +47,33 @@
  *
  */
 
-package com.openexchange.mdns.internal;
+package com.openexchange.cluster.discovery;
 
-import java.util.UUID;
-import com.openexchange.mdns.MDNSServiceEntry;
+import java.net.InetAddress;
+import java.util.List;
 
 /**
- * {@link MDNSReregisterer}
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * The {@link ClusterDiscoveryService} maintains a list of known nodes and informs listeners of changes to that list.
+ * 
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public interface MDNSReregisterer {
+public interface ClusterDiscoveryService {
 
-    void reregisterServices();
+    /**
+     * Retrieve a list of currently known nodes.
+     * 
+     * @return A list of currently known nodes.
+     */
+    List<InetAddress> getNodes();
 
-    boolean contains(UUID id, String serviceId);
+    /**
+     * Registers a listener to be notified of changes to the known cluster nodes.
+     */
+    void addListener(ClusterListener listener);
 
-    void serviceAdded(String serviceId, MDNSServiceEntry entry);
-
-    void serviceRemoved(String serviceId, MDNSServiceEntry entry);
+    /**
+     * Un-registers a listener.
+     */
+    void removeListener(ClusterListener listener);
 
 }

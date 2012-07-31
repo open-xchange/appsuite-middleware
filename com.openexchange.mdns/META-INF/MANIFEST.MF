@@ -17,6 +17,7 @@ Import-Package: com.openexchange.exception,
  com.openexchange.threadpool.behavior,
  org.apache.commons.logging,
  org.eclipse.osgi.framework.console,
- org.osgi.framework
+ org.osgi.framework,
+ org.osgi.util.tracker;version="1.5.1"
 Bundle-Activator: com.openexchange.mdns.osgi.MDNSActivator
 Export-Package: com.openexchange.mdns

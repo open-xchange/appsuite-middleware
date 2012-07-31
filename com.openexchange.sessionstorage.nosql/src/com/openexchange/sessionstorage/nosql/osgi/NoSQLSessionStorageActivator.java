@@ -56,6 +56,7 @@ import com.openexchange.nosql.cassandra.EmbeddedCassandraService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.sessionstorage.SessionStorageService;
+import com.openexchange.sessionstorage.nosql.NoSQLSessionStorageConfiguration;
 import com.openexchange.sessionstorage.nosql.NoSQLSessionStorageService;
 
 /**
@@ -83,7 +84,12 @@ public class NoSQLSessionStorageActivator extends HousekeepingActivator {
         registry.addService(ConfigurationService.class, configService);
         boolean enabled = configService.getBoolProperty("com.openexchange.sessionstorage.nosql.enabled", false);
         if (enabled) {
-            service = new NoSQLSessionStorageService();
+            String host = configService.getProperty("com.openexchange.sessionstorage.nosql.host", "localhost");
+            int port = configService.getIntProperty("com.openexchange.sessionstorage.nosql.port", 9160);
+            String keyspace = configService.getProperty("com.openexchange.sessionstorage.nosql.keyspace", "ox");
+            String cf_name = configService.getProperty("com.openexchange.sessionstorage.nosql.cfname", "sessionstorage");
+            NoSQLSessionStorageConfiguration config = new NoSQLSessionStorageConfiguration(host, port, keyspace, cf_name);
+            service = new NoSQLSessionStorageService(config);
             registerService(SessionStorageService.class, service);
         }
     }
@@ -96,6 +102,7 @@ public class NoSQLSessionStorageActivator extends HousekeepingActivator {
     public void stopBundle() throws Exception {
         log.info("Stopping bundle: com.openexchange.sessionstorage.loxandra");
         if (service != null) {
+            service.cleanUp();
             unregisterServices();
         }
         closeTrackers();

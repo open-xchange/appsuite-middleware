@@ -54,6 +54,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -229,17 +230,18 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 
 	/*
 	 * (non-Javadoc)
-	 * @see com.openexchange.eav.EAVStorageAlt#getAttributes(java.util.UUID[])
+	 * @see com.openexchange.eav.EAVStorage#getAttributes(java.util.List)
 	 */
 	@Override
-	public Map<UUID, Map<String, Object>> getAttributes(UUID[] uuids) throws OXException {
-		Map<UUID, Map<String, Object>> retAttr = new HashMap<UUID, Map<String, Object>>(uuids.length);
+	public Map<UUID, Map<String, Object>> getAttributes(List<UUID> uuids) throws OXException {
+		Map<UUID, Map<String, Object>> retAttr = new HashMap<UUID, Map<String, Object>>(uuids.size());
 		
-		int i = 0;
-		while(i < uuids.length) {
-			Map<String, Object> map = getAttributes(uuids[i]);
-			retAttr.put(uuids[i], map);
-			i++;
+		Iterator<UUID> it = uuids.iterator();
+		while (it.hasNext()) {
+			UUID uuid = (UUID) it.next();
+			Map<String, Object> map = getAttributes(uuid);
+			retAttr.put(uuid, map);
+			
 		}
 		
 		return retAttr;
@@ -247,17 +249,18 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 
 	/*
 	 * (non-Javadoc)
-	 * @see com.openexchange.eav.EAVStorageAlt#getAttributes(java.util.UUID[], java.lang.String[])
+	 * @see com.openexchange.eav.EAVStorage#getAttributes(java.util.List, java.lang.String[])
 	 */
 	@Override
-	public Map<UUID, Map<String, Object>> getAttributes(UUID[] uuids, String... attributes) throws OXException {
-		Map<UUID, Map<String, Object>> retAttr = new HashMap<UUID, Map<String, Object>>(uuids.length);
+	public Map<UUID, Map<String, Object>> getAttributes(List<UUID> uuids, String... attributes) throws OXException {
+		Map<UUID, Map<String, Object>> retAttr = new HashMap<UUID, Map<String, Object>>(uuids.size());
 		
-		int i = 0;
-		while(i < uuids.length) {
-			Map<String, Object> map = getAttributes(uuids[i], attributes);
-			retAttr.put(uuids[i], map);
-			i++;
+		Iterator<UUID> it = uuids.iterator();
+		while (it.hasNext()) {
+			UUID uuid = (UUID) it.next();
+			Map<String, Object> map = getAttributes(uuid, attributes);
+			retAttr.put(uuid, map);
+			
 		}
 		
 		return retAttr;

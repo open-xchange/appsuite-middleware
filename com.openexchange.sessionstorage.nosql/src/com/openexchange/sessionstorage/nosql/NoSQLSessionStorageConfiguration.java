@@ -47,24 +47,48 @@
  *
  */
 
-package com.openexchange.mdns.internal;
-
-import java.util.UUID;
-import com.openexchange.mdns.MDNSServiceEntry;
+package com.openexchange.sessionstorage.nosql;
 
 /**
- * {@link MDNSReregisterer}
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link NoSQLSessionStorageConfiguration}
+ * 
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public interface MDNSReregisterer {
+public class NoSQLSessionStorageConfiguration {
 
-    void reregisterServices();
+    private final String host;
 
-    boolean contains(UUID id, String serviceId);
+    private final int port;
 
-    void serviceAdded(String serviceId, MDNSServiceEntry entry);
+    private final String keyspace;
 
-    void serviceRemoved(String serviceId, MDNSServiceEntry entry);
+    private final String cf_name;
+
+    /**
+     * Initializes a new {@link NoSQLSessionStorageConfiguration}.
+     */
+    public NoSQLSessionStorageConfiguration(String host, int port, String keyspace, String cf_name) {
+        super();
+        this.host = host;
+        this.port = port;
+        this.keyspace = keyspace;
+        this.cf_name = cf_name;
+    }
+
+    public String getHost() {
+        return host;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public String getKeyspace() {
+        return keyspace;
+    }
+
+    public String getCf_name() {
+        return cf_name;
+    }
 
 }
