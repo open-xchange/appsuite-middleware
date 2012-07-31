@@ -68,9 +68,10 @@ public class UUIDServiceImpl implements UUIDService {
 	 * @see com.openexchange.eav.UUIDService#generateUUID(long, long, long)
 	 */
 	@Override
-	public synchronized UUID generateUUID(long contextID, long moduleID, long objectID) {
+	public synchronized UUID generateUUID(int contextID, int moduleID, int objectID) {
 		long lsb = objectID;
-		long msb = contextID << contextShift;
+		long cid = contextID;
+		long msb = cid << contextShift;
 		msb += moduleID;
 		
 		return new UUID(msb, lsb);

@@ -64,7 +64,7 @@ public interface UUIDService {
 	 * @param objectID
 	 * @return the encoded UUID
 	 */
-	public UUID generateUUID(long contextID, long moduleID, long objectID);
+	public UUID generateUUID(int contextID, int moduleID, int objectID);
 	
 	/**
 	 * Get the contextID from the given UUID which was encoded via the {@link UUIDService}
