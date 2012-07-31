@@ -96,16 +96,17 @@ public class HazelcastActivator extends HousekeepingActivator {
                     /*
                      * Timeout before we assume we are either the first or alone in the cluster
                      */
+                    final long delay = getDelay();
                     Runnable task = new Runnable() {
 
                         @Override
                         public void run() {
                             if (init(Collections.<InetAddress> emptyList())) {
-                                logger.info("Initialized Hazelcast instance via delayed one-shot task.");
+                                logger.info("Initialized Hazelcast instance via delayed one-shot task after " + delay + "msec.");
                             }
                         }
                     };
-                    //getService(TimerService.class).schedule(task, getDelay());            
+                    getService(TimerService.class).schedule(task, delay);            
                 } else {
                     /*
                      * We already have at least one node at start-up time
