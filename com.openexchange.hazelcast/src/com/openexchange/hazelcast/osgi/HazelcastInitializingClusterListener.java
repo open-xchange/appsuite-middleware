@@ -47,32 +47,43 @@
  *
  */
 
-package com.openexchange.hazelcast;
+package com.openexchange.hazelcast.osgi;
 
-import com.hazelcast.core.HazelcastInstance;
-import com.openexchange.hazelcast.osgi.HazelcastActivator;
+import java.net.InetAddress;
+import java.util.Collections;
+import org.apache.commons.logging.Log;
+import com.openexchange.cluster.discovery.ClusterListener;
 
 /**
- * {@link Hazelcasts} - Utility class for Hazelcast.
- * 
+ * {@link HazelcastInitializingClusterListener}
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class Hazelcasts {
+final class HazelcastInitializingClusterListener implements ClusterListener {
+
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(HazelcastInitializingClusterListener.class);
+
+    private final HazelcastActivator activator;
 
     /**
-     * Initializes a new {@link Hazelcasts}.
+     * Initializes a new {@link HazelcastInitializingClusterListener}.
      */
-    private Hazelcasts() {
+    HazelcastInitializingClusterListener(final HazelcastActivator activator) {
         super();
+        this.activator = activator;
     }
 
-    /**
-     * Gets registered <tt>HazelcastInstance</tt>.
-     * 
-     * @return The <tt>HazelcastInstance</tt> or <code>null</code> if not initialized, yet
-     */
-    public static HazelcastInstance getHazelcastInstance() {
-        return HazelcastActivator.REF_HAZELCAST_INSTANCE.get();
+    @Override
+    public void removed(final InetAddress address) {
+        // Nothing
     }
 
+    @Override
+    public void added(final InetAddress address) {
+        if (activator.init(Collections.<InetAddress> singletonList(address))) {
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Initialized Hazelcast instance via cluster listener notification about an appeared Open-Xchange node: " + address);
+            }
+        }
+    }
 }
