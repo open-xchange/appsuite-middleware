@@ -5,6 +5,7 @@ import java.net.InetAddress;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
@@ -32,7 +33,8 @@ import com.openexchange.tools.strings.StringParser;
  */
 public class HazelcastActivator extends HousekeepingActivator {
 
-    volatile HazelcastInstance hazelcastInstance;
+    public static final AtomicReference<HazelcastInstance> REF_HAZELCAST_INSTANCE = new AtomicReference<HazelcastInstance>();
+
     volatile ClusterListener clusterListener;
 
     /**
@@ -127,10 +129,10 @@ public class HazelcastActivator extends HousekeepingActivator {
                     getService(ClusterDiscoveryService.class).removeListener(clusterListener);
                     HazelcastActivator.this.clusterListener = null;
                 }
-                final HazelcastInstance hazelcastInstance = HazelcastActivator.this.hazelcastInstance;
+                final HazelcastInstance hazelcastInstance = REF_HAZELCAST_INSTANCE.get();
                 if (null != hazelcastInstance) {
                     hazelcastInstance.getLifecycleService().shutdown();
-                    HazelcastActivator.this.hazelcastInstance = null;
+                    REF_HAZELCAST_INSTANCE.set(null);
                 }
                 Hazelcast.shutdownAll();
                 context.ungetService(reference);
@@ -154,7 +156,7 @@ public class HazelcastActivator extends HousekeepingActivator {
      */
     boolean init(final List<InetAddress> nodes) {
         synchronized (this) {
-            if (null != hazelcastInstance) {
+            if (null != REF_HAZELCAST_INSTANCE.get()) {
                 // Already initialized
                 return false;
             }
@@ -182,7 +184,7 @@ public class HazelcastActivator extends HousekeepingActivator {
              */
             final HazelcastInstance hazelcastInstance = Hazelcast.newHazelcastInstance(config);
             registerService(HazelcastInstance.class, hazelcastInstance);
-            this.hazelcastInstance = hazelcastInstance;
+            REF_HAZELCAST_INSTANCE.set(hazelcastInstance);
             return true;
         }
     }
