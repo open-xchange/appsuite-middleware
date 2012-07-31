@@ -77,7 +77,7 @@ import com.openexchange.userconf.UserConfigurationService;
  */
 public class ContactCollectorActivator extends HousekeepingActivator {
 
-    private ContactCollectorServiceImpl collectorInstance;
+    private volatile ContactCollectorServiceImpl collectorInstance;
 
     /**
      * Initializes a new {@link ContactCollectorActivator}.
@@ -136,8 +136,9 @@ public class ContactCollectorActivator extends HousekeepingActivator {
         /*
          * Initialize service
          */
-        collectorInstance = new ContactCollectorServiceImpl();
+        final ContactCollectorServiceImpl collectorInstance = new ContactCollectorServiceImpl();
         collectorInstance.start();
+        this.collectorInstance = collectorInstance;
         /*
          * Register all
          */
