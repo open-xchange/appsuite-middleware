@@ -13,7 +13,6 @@ import com.hazelcast.config.Config;
 import com.hazelcast.config.InMemoryXmlConfig;
 import com.hazelcast.config.Join;
 import com.hazelcast.config.MapConfig;
-import com.hazelcast.config.MapStoreConfig;
 import com.hazelcast.config.NearCacheConfig;
 import com.hazelcast.config.TcpIpConfig;
 import com.hazelcast.core.Hazelcast;
@@ -184,6 +183,10 @@ public class HazelcastActivator extends HousekeepingActivator {
                  * for fail-safety. 0 means no backup.
                  */
                 mapCfg.setBackupCount(2);
+                /*
+                 * Maximum size of the map. When max size is reached, map is evicted based on the policy defined. Any integer between 0 and
+                 * Integer.MAX_VALUE. 0 means Integer.MAX_VALUE. Default is 0.
+                 */
                 mapCfg.getMaxSizeConfig().setMaxSizePolicy("cluster_wide_map_size").setSize(100000);
                 /*
                  * Maximum number of seconds for each entry to stay idle in the map. Entries that are idle(not touched) for more than
@@ -197,12 +200,36 @@ public class HazelcastActivator extends HousekeepingActivator {
                  * Integer.MAX_VALUE. 0 means infinite. Default is 0.
                  */
                 mapCfg.setTimeToLiveSeconds(300);
-                // Map store configuration
-                final MapStoreConfig mapStoreCfg = new MapStoreConfig();
-                mapStoreCfg.setClassName("com.hazelcast.examples.DummyStore").setEnabled(true);
-                mapCfg.setMapStoreConfig(mapStoreCfg);
+                /*
+                 * Valid values are: NONE (no eviction), LRU (Least Recently Used), LFU (Least Frequently Used). NONE is the default.
+                 */
+                mapCfg.setEvictionPolicy("LRU");
+                /*
+                 * When max. size is reached, specified percentage of the map will be evicted. Any integer between 0 and 100. If 25 is set
+                 * for example, 25% of the entries will get evicted.
+                 */
+                mapCfg.setEvictionPercentage(25);
+                /*-
+                 * Map store configuration
+                 * 
+                 * Hazelcast distributed map implementation is an in-memory data store but
+                 * it can be backed by any type of data store such as RDBMS, OODBMS, or simply
+                 * a file based data store.
+                 * 
+                 * IMap.put(key, value) normally stores the entry into JVM's memory. If MapStore
+                 * implementation is provided then Hazelcast can also call the MapStore
+                 * implementation to store the entry into a user defined storage such as
+                 * RDBMS or some other external storage system. It is completely up to the user
+                 * how the key-value will be stored or deleted.
+                 */
+                /*-
+                 * 
+                    final MapStoreConfig mapStoreCfg = new MapStoreConfig();
+                    mapStoreCfg.setClassName("com.hazelcast.examples.DummyStore").setEnabled(true);
+                    mapCfg.setMapStoreConfig(mapStoreCfg);
+                */
                 // Near cache configuration
-                NearCacheConfig nearCacheConfig = new NearCacheConfig();
+                final NearCacheConfig nearCacheConfig = new NearCacheConfig();
                 nearCacheConfig.setMaxSize(100000).setMaxIdleSeconds(120).setTimeToLiveSeconds(300);
                 mapCfg.setNearCacheConfig(nearCacheConfig);
                 // Finally, add to overall Hazelcast configuration
