@@ -214,6 +214,12 @@ if [ ${1:-0} -eq 2 ]; then
     if ! ox_exists_property com.openexchange.carddav.exposedCollections $pfile; then
         ox_set_property com.openexchange.carddav.exposedCollections "0" $pfile
     fi
+
+    # SoftwareChange_Request-1101
+    pfile=/opt/open-xchange/etc/configdb.properties
+    if ox_exists_property writeOnly $pfile; then
+        ox_remove_property writeOnly $pfile
+    fi
     ##
     ## end update from < 6.21
     ##

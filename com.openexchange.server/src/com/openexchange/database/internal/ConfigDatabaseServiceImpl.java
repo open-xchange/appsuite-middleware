@@ -73,15 +73,12 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ConfigDatabaseServiceImpl.class));
 
-    private final boolean forceWriteOnly;
-
     private final Pools pools;
 
     private final ConfigDatabaseAssignmentService assignmentService;
 
-    ConfigDatabaseServiceImpl(final boolean forceWriteOnly, final ConfigDatabaseAssignmentService assignmentService, final Pools pools) {
+    ConfigDatabaseServiceImpl(ConfigDatabaseAssignmentService assignmentService, Pools pools) {
         super();
-        this.forceWriteOnly = forceWriteOnly;
         this.assignmentService = assignmentService;
         this.pools = pools;
     }
@@ -89,7 +86,7 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
     private Connection get(final boolean write) throws OXException {
         final AssignmentImpl assign = assignmentService.getConfigDBAssignment();
         final int poolId;
-        if (write || forceWriteOnly) {
+        if (write) {
             poolId = assign.getWritePoolId();
         } else {
             poolId = assign.getReadPoolId();
@@ -102,14 +99,13 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
             throw DBPoolingExceptionCodes.NO_CONFIG_DB.create(e);
         }
         // TODO Enable the following if the configuration database gets a table replicationMonitor.
-        // return ReplicationMonitor.checkActualAndFallback(pools, assign, false, write || forceWriteOnly);
-
+        // return ReplicationMonitor.checkActualAndFallback(pools, assign, false, write);
     }
 
     private void back(final Connection con, final boolean write) {
         final AssignmentImpl assign = assignmentService.getConfigDBAssignment();
         final int poolId;
-        if (write || forceWriteOnly) {
+        if (write) {
             poolId = assign.getWritePoolId();
         } else {
             poolId = assign.getReadPoolId();
