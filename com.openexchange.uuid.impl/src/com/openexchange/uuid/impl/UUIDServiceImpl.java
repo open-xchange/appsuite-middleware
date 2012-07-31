@@ -54,9 +54,10 @@ import com.openexchange.eav.UUIDService;
 
 /**
  * Implementation of {@link UUIDService}
+ * 
  * The structure of the generated UUID is as follows:
  * 12 bytes for contextID, 4 bytes for moduleID, 12 bytes for objectID<br/>
- * eg.: 00000000-0002-0007-0000-00000000000a refers to contextID:2, moduleID: 7, objectID: 10  
+ * eg.: 00000000-0002-0007-0000-00000000000a refers to contextID:2, moduleID: 7, objectID: 10<br/><br/>
  * 
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
@@ -70,7 +71,7 @@ public class UUIDServiceImpl implements UUIDService {
 	@Override
 	public synchronized UUID generateUUID(int contextID, int moduleID, int objectID) {
 		long lsb = objectID;
-		long cid = contextID;
+		long cid = contextID & 0xffffffffL;;
 		long msb = cid << contextShift;
 		msb += moduleID;
 		
@@ -81,26 +82,26 @@ public class UUIDServiceImpl implements UUIDService {
 	 * @see com.openexchange.eav.UUIDService#getContextID(java.util.UUID)
 	 */
 	@Override
-	public synchronized long getContextID(UUID u) {
+	public synchronized int getContextID(UUID u) {
 		long msb = u.getMostSignificantBits();
-		return msb >> contextShift;
+		return (int)msb >> contextShift;
 	}
 
 	/* (non-Javadoc)
 	 * @see com.openexchange.eav.UUIDService#getModuleID(java.util.UUID)
 	 */
 	@Override
-	public synchronized long getModuleID(UUID u) {
+	public synchronized int getModuleID(UUID u) {
 		long msb = u.getMostSignificantBits();
 		long cid = msb >> contextShift;
-		return msb - (cid << contextShift);
+		return (int)(msb - (cid << contextShift));
 	}
 
 	/* (non-Javadoc)
 	 * @see com.openexchange.eav.UUIDService#getObjectID(java.util.UUID)
 	 */
 	@Override
-	public synchronized long getObjectID(UUID u) {
-		return u.getLeastSignificantBits();
+	public synchronized int getObjectID(UUID u) {
+		return (int)u.getLeastSignificantBits();
 	}
 }

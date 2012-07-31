@@ -51,8 +51,18 @@ package com.openexchange.eav;
 import java.util.UUID;
 
 /**
- * {@link UUIDService} to encode/decode the tuple contextID, moduleID, objectID into a {@link java.util.UUID} 
- * 
+ * {@link UUIDService} to encode/decode the tuple contextID, moduleID, objectID into a {@link java.util.UUID}
+ * <p>
+ * <u><b>Warning</b></u>: In MySQL contextID and objectID are defined as unsigned ints, thus their maximum 
+ * value would be 4.294.967.295. Java on the other hand does not support unsigned ints, resulting
+ * in a range value from -2.147.483.648 to 2.147.483.647. This means that, if at some point the contextID
+ * and/or the objectID surpass the the positive upper bound of signed int, the return value of the get methods
+ * will be negative.
+ * </p>
+ * <p>
+ * For more information see <a href="http://docs.oracle.com/javase/tutorial/java/nutsandbolts/datatypes.html">Java Primitive Data Types</a>
+ * and <a href="http://dev.mysql.com/doc/refman/5.0/en/integer-types.html">MySQL Integer Types</a>
+ * </p>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public interface UUIDService {
@@ -72,19 +82,19 @@ public interface UUIDService {
 	 * @param u encoded UUID
 	 * @return contextID
 	 */
-	public long getContextID(UUID u);
+	public int getContextID(UUID u);
 	
 	/**
 	 * Get the moduleID from the given UUID which was encoded via the {@link UUIDService}
 	 * @param u encoded UUID
 	 * @return moduleID
 	 */
-	public long getModuleID(UUID u);
+	public int getModuleID(UUID u);
 	
 	/**
 	 * Get the objectID from the given UUID which was encoded via the {@link UUIDService}
 	 * @param u encoded UUID
 	 * @return objectID
 	 */
-	public long getObjectID(UUID u);
+	public int getObjectID(UUID u);
 }
