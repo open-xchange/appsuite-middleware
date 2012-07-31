@@ -83,7 +83,7 @@ postFix() {
 }
 
 setConfigFilePermissions() {
-    ox_update_permissions "/opt/open-xchange/etc/mpasswd" open-xchange:root 600
+    ox_update_permissions "/opt/open-xchange/etc/mpasswd" root:open-xchange 640
 }
 
 case "$1" in
