@@ -12,6 +12,9 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.InMemoryXmlConfig;
 import com.hazelcast.config.Join;
+import com.hazelcast.config.MapConfig;
+import com.hazelcast.config.MapStoreConfig;
+import com.hazelcast.config.NearCacheConfig;
 import com.hazelcast.config.TcpIpConfig;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
@@ -169,6 +172,41 @@ public class HazelcastActivator extends HousekeepingActivator {
             tcpIpConfig.setEnabled(true);
             for (final InetAddress address : nodes) {
                 tcpIpConfig.addAddress(new Address(address, config.getPort()));
+            }
+            /*
+             * Example Map configuration
+             */
+            {
+                final MapConfig mapCfg = new MapConfig();
+                mapCfg.setName("testMap");
+                /*
+                 * Number of backups. If 1 is set as the backup-count for example, then all entries of the map will be copied to another JVM
+                 * for fail-safety. 0 means no backup.
+                 */
+                mapCfg.setBackupCount(2);
+                mapCfg.getMaxSizeConfig().setMaxSizePolicy("cluster_wide_map_size").setSize(100000);
+                /*
+                 * Maximum number of seconds for each entry to stay idle in the map. Entries that are idle(not touched) for more than
+                 * <max-idle-seconds> will get automatically evicted from the map. Entry is touched if get, put or containsKey is called.
+                 * Any integer between 0 and Integer.MAX_VALUE. 0 means infinite. Default is 0.
+                 */
+                mapCfg.setMaxIdleSeconds(120);
+                /*
+                 * Maximum number of seconds for each entry to stay in the map. Entries that are older than <time-to-live-seconds> and not
+                 * updated for <time-to-live-seconds> will get automatically evicted from the map. Any integer between 0 and
+                 * Integer.MAX_VALUE. 0 means infinite. Default is 0.
+                 */
+                mapCfg.setTimeToLiveSeconds(300);
+                // Map store configuration
+                final MapStoreConfig mapStoreCfg = new MapStoreConfig();
+                mapStoreCfg.setClassName("com.hazelcast.examples.DummyStore").setEnabled(true);
+                mapCfg.setMapStoreConfig(mapStoreCfg);
+                // Near cache configuration
+                NearCacheConfig nearCacheConfig = new NearCacheConfig();
+                nearCacheConfig.setMaxSize(100000).setMaxIdleSeconds(120).setTimeToLiveSeconds(300);
+                mapCfg.setNearCacheConfig(nearCacheConfig);
+                // Finally, add to overall Hazelcast configuration
+                config.addMapConfig(mapCfg);
             }
             /*
              * Create appropriate Hazelcast instance from configuration
