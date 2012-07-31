@@ -3,6 +3,7 @@ package com.openexchange.hazelcast.osgi;
 
 import java.net.InetAddress;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.InMemoryXmlConfig;
@@ -15,6 +16,8 @@ import com.openexchange.cluster.discovery.ClusterDiscoveryService;
 import com.openexchange.cluster.discovery.ClusterListener;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.timer.TimerService;
+import com.openexchange.tools.strings.StringParser;
 
 /**
  * {@link HazelcastActivator}
@@ -36,7 +39,7 @@ public class HazelcastActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { ClusterDiscoveryService.class, ConfigurationService.class };
+        return new Class[] { ClusterDiscoveryService.class, ConfigurationService.class, TimerService.class, StringParser.class };
     }
 
     @Override
@@ -65,16 +68,28 @@ public class HazelcastActivator extends HousekeepingActivator {
                 
                 @Override
                 public void removed(InetAddress address) {
-                    init(Collections.<InetAddress> singletonList(address));
+                    // Nothing
                 }
                 
                 @Override
                 public void added(InetAddress address) {
-                    // Nothing
+                    init(Collections.<InetAddress> singletonList(address));
                 }
             };
             discovery.addListener(clusterListener);
             this.clusterListener = clusterListener;
+            
+            // Timeout before we assume we are either the first or alone in the cluster
+            getService(TimerService.class).schedule(new Runnable() {
+
+				@Override
+				public void run() {
+					if (HazelcastActivator.this.hazelcastInstance == null) {
+						init(new LinkedList<InetAddress>());
+					}
+				}
+            }, getDelay());
+            
         } else {
             /*
              * We already have at least one node at start-up time
@@ -84,6 +99,14 @@ public class HazelcastActivator extends HousekeepingActivator {
     }
 
     /**
+	 * @return
+	 */
+	private long getDelay() {
+		String delay = getService(ConfigurationService.class).getProperty("com.openexchange.hazelcast.startupDelay", "20000");
+		return getService(StringParser.class).parse(delay, long.class);
+	}
+
+	/**
      * Initializes and registers a {@link HazelcastInstance} for a full TCP/IP cluster.
      * 
      * @param nodes The pre-known nodes
@@ -99,7 +122,7 @@ public class HazelcastActivator extends HousekeepingActivator {
          */
         final Join join = config.getNetworkConfig().getJoin();
         /*
-         * Enable: multicast, AWS, and TCP-IP
+         * Disable: multicast, AWS, and Enable: TCP-IP
          */
         join.getMulticastConfig().setEnabled(false);
         join.getAwsConfig().setEnabled(false);
