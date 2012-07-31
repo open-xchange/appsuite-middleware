@@ -218,6 +218,7 @@ public final class MDNSClusterDiscoveryActivator extends HousekeepingActivator {
                 context.ungetService(reference);
             }
         });
+        openTrackers();
     }
 
 }
