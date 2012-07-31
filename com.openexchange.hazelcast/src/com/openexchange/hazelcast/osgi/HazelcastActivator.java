@@ -5,6 +5,11 @@ import java.net.InetAddress;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.InMemoryXmlConfig;
 import com.hazelcast.config.Join;
@@ -27,8 +32,8 @@ import com.openexchange.tools.strings.StringParser;
  */
 public class HazelcastActivator extends HousekeepingActivator {
 
-    private volatile HazelcastInstance hazelcastInstance;
-    private volatile ClusterListener clusterListener;
+    volatile HazelcastInstance hazelcastInstance;
+    volatile ClusterListener clusterListener;
 
     /**
      * Initializes a new {@link HazelcastActivator}.
@@ -39,11 +44,12 @@ public class HazelcastActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { ClusterDiscoveryService.class, ConfigurationService.class, TimerService.class, StringParser.class };
+        return new Class[] { ConfigurationService.class, TimerService.class, StringParser.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
+        final Log logger = com.openexchange.log.Log.loggerFor(HazelcastActivator.class);
         /*-
          * Look-up discovery service & obtain its addresses of known nodes in a cluster
          * 
@@ -56,51 +62,87 @@ public class HazelcastActivator extends HousekeepingActivator {
          * Note that all of the cluster members don't have to be listed there but at least one of them has to be active in cluster when a
          * new member joins.
          */
-        final ClusterDiscoveryService discovery = getService(ClusterDiscoveryService.class);
-        final List<InetAddress> nodes = discovery.getNodes();
-        if (nodes.isEmpty()) {
-            /*-
-             * Wait for at least one via ClusterListener
-             * 
-             * Add cluster listener to manage appearing/disappearing nodes
-             */
-            final ClusterListener clusterListener = new ClusterListener() {
-                
-                @Override
-                public void removed(InetAddress address) {
-                    // Nothing
-                }
-                
-                @Override
-                public void added(InetAddress address) {
-                    init(Collections.<InetAddress> singletonList(address));
-                }
-            };
-            discovery.addListener(clusterListener);
-            this.clusterListener = clusterListener;
-            /*
-             * Timeout before we assume we are either the first or alone in the cluster
-             */
-            Runnable task = new Runnable() {
+        final BundleContext context = this.context;
+        track(ClusterDiscoveryService.class, new ServiceTrackerCustomizer<ClusterDiscoveryService, ClusterDiscoveryService>() {
 
-				@Override
-				public void run() {
-					init(Collections.<InetAddress> emptyList());
-				}
-            };
-            getService(TimerService.class).schedule(task, getDelay());            
-        } else {
-            /*
-             * We already have at least one node at start-up time
-             */
-            init(nodes);
-        }
+            @Override
+            public ClusterDiscoveryService addingService(ServiceReference<ClusterDiscoveryService> reference) {
+                final ClusterDiscoveryService discovery = context.getService(reference);
+                final List<InetAddress> nodes = discovery.getNodes();
+                if (nodes.isEmpty()) {
+                    /*-
+                     * Wait for at least one via ClusterListener
+                     * 
+                     * Add cluster listener to manage appearing/disappearing nodes
+                     */
+                    final ClusterListener clusterListener = new ClusterListener() {
+                        
+                        @Override
+                        public void removed(InetAddress address) {
+                            // Nothing
+                        }
+                        
+                        @Override
+                        public void added(InetAddress address) {
+                            if (init(Collections.<InetAddress> singletonList(address))) {
+                                logger.info("Initialized Hazelcast instance via cluster listener notification about an appeared Open-Xchange node: " + address);
+                            }
+                        }
+                    };
+                    discovery.addListener(clusterListener);
+                    HazelcastActivator.this.clusterListener = clusterListener;
+                    /*
+                     * Timeout before we assume we are either the first or alone in the cluster
+                     */
+                    Runnable task = new Runnable() {
+
+                        @Override
+                        public void run() {
+                            if (init(Collections.<InetAddress> emptyList())) {
+                                logger.info("Initialized Hazelcast instance via delayed one-shot task.");
+                            }
+                        }
+                    };
+                    //getService(TimerService.class).schedule(task, getDelay());            
+                } else {
+                    /*
+                     * We already have at least one node at start-up time
+                     */
+                    if (init(nodes)) {
+                        logger.info("Initialized Hazelcast instance via initially available Open-Xchange nodes.");
+                    }
+                }
+                return discovery;
+            }
+
+            @Override
+            public void modifiedService(ServiceReference<ClusterDiscoveryService> reference, ClusterDiscoveryService service) {
+                // nope   
+            }
+
+            @Override
+            public void removedService(ServiceReference<ClusterDiscoveryService> reference, ClusterDiscoveryService service) {
+                final ClusterListener clusterListener = HazelcastActivator.this.clusterListener;
+                if (null != clusterListener) {
+                    getService(ClusterDiscoveryService.class).removeListener(clusterListener);
+                    HazelcastActivator.this.clusterListener = null;
+                }
+                final HazelcastInstance hazelcastInstance = HazelcastActivator.this.hazelcastInstance;
+                if (null != hazelcastInstance) {
+                    hazelcastInstance.getLifecycleService().shutdown();
+                    HazelcastActivator.this.hazelcastInstance = null;
+                }
+                Hazelcast.shutdownAll();
+                context.ungetService(reference);
+            }
+        });
+        openTrackers();
     }
 
     /**
 	 * @return
 	 */
-	private long getDelay() {
+	long getDelay() {
 		String delay = getService(ConfigurationService.class).getProperty("com.openexchange.hazelcast.startupDelay", "20000");
 		return getService(StringParser.class).parse(delay, long.class).longValue();
 	}
@@ -110,11 +152,11 @@ public class HazelcastActivator extends HousekeepingActivator {
      * 
      * @param nodes The pre-known nodes
      */
-    void init(final List<InetAddress> nodes) {
+    boolean init(final List<InetAddress> nodes) {
         synchronized (this) {
             if (null != hazelcastInstance) {
                 // Already initialized
-                return;
+                return false;
             }
             /*
              * Create configuration from XML data
@@ -141,22 +183,12 @@ public class HazelcastActivator extends HousekeepingActivator {
             final HazelcastInstance hazelcastInstance = Hazelcast.newHazelcastInstance(config);
             registerService(HazelcastInstance.class, hazelcastInstance);
             this.hazelcastInstance = hazelcastInstance;
+            return true;
         }
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        final ClusterListener clusterListener = this.clusterListener;
-        if (null != clusterListener) {
-            getService(ClusterDiscoveryService.class).removeListener(clusterListener);
-            this.clusterListener = null;
-        }
-        final HazelcastInstance hazelcastInstance = this.hazelcastInstance;
-        if (null != hazelcastInstance) {
-            hazelcastInstance.getLifecycleService().shutdown();
-            this.hazelcastInstance = null;
-        }
-        Hazelcast.shutdownAll();
         super.stopBundle();
     }
 

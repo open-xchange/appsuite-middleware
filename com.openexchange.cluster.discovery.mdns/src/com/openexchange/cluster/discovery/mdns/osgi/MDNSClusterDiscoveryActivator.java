@@ -79,19 +79,43 @@ public final class MDNSClusterDiscoveryActivator extends HousekeepingActivator {
 
     private static final String SERVICE_ID = "openexchange.service.lookup";
 
-    private final class Listener implements MDNSServiceListener, ClusterDiscoveryService {
+    private abstract class AbstractRegisteringListener implements ClusterDiscoveryService, MDNSServiceListener {
+        protected final List<ClusterListener> clusterListeners;
+        protected final String serviceId;
+        protected final AtomicReference<MDNSService> serviceRef;
 
-        private final List<ClusterListener> clusterListeners;
-        private final String serviceId;
-        private final AtomicReference<MDNSService> serviceRef;
-        private final AtomicBoolean registered;
-
-        Listener(final String serviceId, final AtomicReference<MDNSService> serviceRef) {
+        AbstractRegisteringListener(final String serviceId, final AtomicReference<MDNSService> serviceRef) {
             super();
-            registered = new AtomicBoolean();
             clusterListeners = new CopyOnWriteArrayList<ClusterListener>();
             this.serviceId = serviceId;
             this.serviceRef = serviceRef;
+        }
+
+        @Override
+        public void addListener(final ClusterListener listener) {
+            clusterListeners.add(listener);
+        }
+
+        @Override
+        public void removeListener(final ClusterListener listener) {
+            clusterListeners.remove(listener);
+        }
+
+        @Override
+        public List<InetAddress> getNodes() {
+            return Collections.emptyList();
+        }
+
+        public void close() {
+            unregisterServices();
+        }
+    }
+
+    private final class ImmediateRegisteringListener extends AbstractRegisteringListener {
+
+        ImmediateRegisteringListener(final String serviceId, final AtomicReference<MDNSService> serviceRef) {
+            super(serviceId, serviceRef);
+            registerService(ClusterDiscoveryService.class, new MDNSClusterDiscoveryService(serviceId, serviceRef, this));
         }
 
         @Override
@@ -103,6 +127,53 @@ public final class MDNSClusterDiscoveryActivator extends HousekeepingActivator {
                 for (final ClusterListener listener : clusterListeners) {
                     for (final InetAddress inetAddress : entry.getAddresses()) {
                         listener.removed(inetAddress);
+                        LOG.info("Notified ClusterListener '" + listener.getClass().getName() + "' about disappeared Open-Xchange node: " + inetAddress);
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void onServiceAdded(final String serviceId, final MDNSServiceEntry entry) {
+            if (this.serviceId.equals(serviceId)) {
+                /*
+                 * Notify listeners
+                 */
+                for (final ClusterListener listener : clusterListeners) {
+                    for (final InetAddress inetAddress : entry.getAddresses()) {
+                        listener.added(inetAddress);
+                        LOG.info("Notified ClusterListener '" + listener.getClass().getName() + "' about appeared Open-Xchange node: " + inetAddress);
+                    }
+                }
+            }
+        }
+    }
+
+    private final class DelayedRegisteringListener extends AbstractRegisteringListener {
+
+        private final AtomicBoolean registered;
+
+        DelayedRegisteringListener(final String serviceId, final AtomicReference<MDNSService> serviceRef) {
+            super(serviceId, serviceRef);
+            registered = new AtomicBoolean();
+        }
+
+        @Override
+        public void close() {
+            super.close();
+            registered.set(false);
+        }
+
+        @Override
+        public void onServiceRemoved(final String serviceId, final MDNSServiceEntry entry) {
+            if (this.serviceId.equals(serviceId)) {
+                /*
+                 * Notify listeners
+                 */
+                for (final ClusterListener listener : clusterListeners) {
+                    for (final InetAddress inetAddress : entry.getAddresses()) {
+                        listener.removed(inetAddress);
+                        LOG.info("Notified ClusterListener '" + listener.getClass().getName() + "' about disappeared Open-Xchange node: " + inetAddress);
                     }
                 }
                 /*
@@ -114,6 +185,7 @@ public final class MDNSClusterDiscoveryActivator extends HousekeepingActivator {
                         final List<MDNSServiceEntry> tmp = mdnsService.listByService(serviceId);
                         if (null == tmp || tmp.isEmpty()) {
                             unregisterServices();
+                            LOG.info("Detected last Open-Xchange node disappeared. Therefore de-registered MDNS based ClusterDiscoveryService.");
                         }
                     } catch (final OXException e) {
                         LOG.error("Unregistration failed.", e);
@@ -130,6 +202,7 @@ public final class MDNSClusterDiscoveryActivator extends HousekeepingActivator {
                  */
                 if (registered.compareAndSet(false, true)) {
                     registerService(ClusterDiscoveryService.class, new MDNSClusterDiscoveryService(serviceId, serviceRef, this));
+                    LOG.info("Detected first Open-Xchange node. Therefore registered MDNS based ClusterDiscoveryService.");
                 }
                 /*
                  * Notify listeners
@@ -137,26 +210,15 @@ public final class MDNSClusterDiscoveryActivator extends HousekeepingActivator {
                 for (final ClusterListener listener : clusterListeners) {
                     for (final InetAddress inetAddress : entry.getAddresses()) {
                         listener.added(inetAddress);
+                        LOG.info("Notified ClusterListener '" + listener.getClass().getName() + "' about appeared Open-Xchange node: " + inetAddress);
                     }
                 }
             }
         }
 
-        @Override
-        public List<InetAddress> getNodes() {
-            return Collections.emptyList();
-        }
-
-        @Override
-        public void addListener(final ClusterListener listener) {
-            clusterListeners.add(listener);
-        }
-
-        @Override
-        public void removeListener(final ClusterListener listener) {
-            clusterListeners.remove(listener);
-        }
     }
+
+    volatile AbstractRegisteringListener registeringListener;
 
     /**
      * Initializes a new {@link MDNSClusterDiscoveryActivator}.
@@ -180,45 +242,104 @@ public final class MDNSClusterDiscoveryActivator extends HousekeepingActivator {
         super.unregisterServices();
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        final AtomicReference<MDNSService> serviceRef = new AtomicReference<MDNSService>();
-        final MDNSServiceListener listener = new Listener(SERVICE_ID, serviceRef);
-        final BundleContext context = this.context;
-        track(MDNSService.class, new ServiceTrackerCustomizer<MDNSService, MDNSService>() {
-
-            @Override
-            public MDNSService addingService(final ServiceReference<MDNSService> reference) {
-                final MDNSService service = context.getService(reference);
-                try {
-                    serviceRef.set(service);
-                    service.addListener(listener);
-                    return service;
-                } catch (final Exception e) {
-                    // Failure
-                    LOG.error("Failed registration of MDNSClusterDiscoveryService.", e);
-                    serviceRef.set(null);
-                    context.ungetService(reference);
-                    return null;
-                }
-            }
-
-            @Override
-            public void modifiedService(final ServiceReference<MDNSService> reference, final MDNSService service) {
-                // Ignore
-            }
-
-            @Override
-            public void removedService(final ServiceReference<MDNSService> reference, final MDNSService service) {
-                if (null == service) {
-                    return;
-                }
-                service.removeListener(listener);
-                serviceRef.set(null);
-                context.ungetService(reference);
-            }
-        });
-        openTrackers();
+    private boolean delayedRegistration() {
+        return false;
     }
 
+    @Override
+    protected void startBundle() throws Exception {
+        final BundleContext context = this.context;
+        final AtomicReference<MDNSService> serviceRef = new AtomicReference<MDNSService>();
+        if (delayedRegistration()) {
+            final DelayedRegisteringListener delayedRegisteringListener = new DelayedRegisteringListener(SERVICE_ID, serviceRef);
+            this.registeringListener = delayedRegisteringListener;
+            track(MDNSService.class, new ServiceTrackerCustomizer<MDNSService, MDNSService>() {
+
+                @Override
+                public MDNSService addingService(final ServiceReference<MDNSService> reference) {
+                    final MDNSService service = context.getService(reference);
+                    try {
+                        serviceRef.set(service);
+                        service.addListener(delayedRegisteringListener);
+                        return service;
+                    } catch (final Exception e) {
+                        // Failure
+                        LOG.error("Failed registration of MDNSClusterDiscoveryService.", e);
+                        serviceRef.set(null);
+                        context.ungetService(reference);
+                        return null;
+                    }
+                }
+
+                @Override
+                public void modifiedService(final ServiceReference<MDNSService> reference, final MDNSService service) {
+                    // Ignore
+                }
+
+                @Override
+                public void removedService(final ServiceReference<MDNSService> reference, final MDNSService service) {
+                    if (null == service) {
+                        return;
+                    }
+                    service.removeListener(delayedRegisteringListener);
+                    serviceRef.set(null);
+                    context.ungetService(reference);
+                }
+            });
+            openTrackers();
+        } else {
+            track(MDNSService.class, new ServiceTrackerCustomizer<MDNSService, MDNSService>() {
+
+                @Override
+                public MDNSService addingService(final ServiceReference<MDNSService> reference) {
+                    final MDNSService service = context.getService(reference);
+                    try {
+                        serviceRef.set(service);
+                        final ImmediateRegisteringListener registeringListener = new ImmediateRegisteringListener(SERVICE_ID, serviceRef);
+                        service.addListener(registeringListener);
+                        MDNSClusterDiscoveryActivator.this.registeringListener = registeringListener;
+                        return service;
+                    } catch (final Exception e) {
+                        // Failure
+                        LOG.error("Failed registration of MDNSClusterDiscoveryService.", e);
+                        serviceRef.set(null);
+                        context.ungetService(reference);
+                        return null;
+                    }
+                }
+
+                @Override
+                public void modifiedService(final ServiceReference<MDNSService> reference, final MDNSService service) {
+                    // Ignore
+                }
+
+                @Override
+                public void removedService(final ServiceReference<MDNSService> reference, final MDNSService service) {
+                    if (null == service) {
+                        return;
+                    }
+                    final AbstractRegisteringListener registeringListener = MDNSClusterDiscoveryActivator.this.registeringListener;
+                    if (null != registeringListener) {
+                        service.removeListener(registeringListener);
+                        registeringListener.close();
+                        MDNSClusterDiscoveryActivator.this.registeringListener = null;
+                    }
+                    serviceRef.set(null);
+                    context.ungetService(reference);
+                }
+            });
+            openTrackers();
+        }
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        final AbstractRegisteringListener registeringListener = this.registeringListener;
+        if (null != registeringListener) {
+            registeringListener.close();
+            this.registeringListener = null;
+        }
+        super.stopBundle();
+    }
+    
 }
