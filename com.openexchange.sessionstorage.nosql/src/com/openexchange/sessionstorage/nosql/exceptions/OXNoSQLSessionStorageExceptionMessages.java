@@ -66,7 +66,7 @@ public class OXNoSQLSessionStorageExceptionMessages implements LocalizableString
     public final static String NOSQL_SESSIONSTORAGE_REMOVE_FAILED_MSG = "Removing session with sessionId %1$s failed.";
     public final static String NOSQL_SESSIONSTORAGE_SESSION_NOT_FOUND_MSG = "No session with sessionId %1$s found.";
     public final static String NOSQL_SESSIONSTORAGE_DUPLICATE_AUTHID_MSG = "Authentication identifier duplicate found. Existing session login: %1$s. Current denied login request: %2$s.";
-    public final static String NOSQL_SESSIONSTORAGE_UNSUPPORTED_OPERATION_MSG = "Method %1$s not supported.";
+    public final static String NOSQL_SESSIONSTORAGE_UNSUPPORTED_OPERATION_MSG = "Operation %1$s not supported.";
 
     /**
      * Initializes a new {@link OXNoSQLSessionStorageExceptionMessages}.

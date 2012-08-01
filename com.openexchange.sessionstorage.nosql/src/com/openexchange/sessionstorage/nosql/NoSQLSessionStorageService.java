@@ -456,9 +456,10 @@ public class NoSQLSessionStorageService implements SessionStorageService {
 
     @Override
     public Session getSessionByAlternativeId(String altId) throws OXException {
-        OXException e = OXNoSQLSessionStorageExceptionCodes.NOSQL_SESSIONSTORAGE_UNSUPPORTED_OPERATION.create("getSessionsByAlternativeId");
-        log.warn(e.getMessage(), e);
-        throw e;
+        return null;
+//        OXException e = OXNoSQLSessionStorageExceptionCodes.NOSQL_SESSIONSTORAGE_UNSUPPORTED_OPERATION.create("getSessionsByAlternativeId");
+//        log.warn(e.getMessage(), e);
+//        throw e;
     }
 
     @Override
