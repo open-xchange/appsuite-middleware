@@ -50,6 +50,7 @@
 package com.openexchange.ajax.container;
 
 import java.util.Date;
+import java.util.TimeZone;
 
 /**
  * DateOrderObject
@@ -63,12 +64,33 @@ public class DateOrderObject implements Comparable<DateOrderObject> {
 
 	protected Object obj;
 
+	protected TimeZone timeZone;
+
 	public DateOrderObject(final Date orderBy, final Object obj) {
 		this.orderBy = orderBy;
 		this.obj = obj;
 	}
 
-	public Date getOrderBy() {
+    /**
+     * Gets the time zone
+     *
+     * @return The time zone or <code>null</code>
+     */
+    public TimeZone optTimeZone() {
+        return timeZone;
+    }
+
+    /**
+     * Sets the time zone
+     *
+     * @param timeZone The time zone to set
+     */
+    public DateOrderObject setTimeZone(TimeZone timeZone) {
+        this.timeZone = timeZone;
+        return this;
+    }
+
+    public Date getOrderBy() {
 		return orderBy;
 	}
 
