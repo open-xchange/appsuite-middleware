@@ -231,40 +231,40 @@ public class NoSQLSessionStorageService implements SessionStorageService {
     public void removeSession(String sessionId) throws OXException {
         try {
             SliceQuery<String, String, String> query = HFactory.createSliceQuery(keyspace, serializer, serializer, serializer);
-        query.setColumnFamily(CF_NAME).setColumnNames(COLUMN_NAMES).setKey(sessionId);
-        QueryResult<ColumnSlice<String, String>> result = query.execute();
-        ColumnSlice<String, String> slice = result.get();
-        HColumn<String, String> userIdColumn = slice.getColumnByName("userId");
-        String userId = userIdColumn.getValue();
-        HColumn<String, String> ctxIdColumn = slice.getColumnByName("contextId");
-        String ctxId = ctxIdColumn.getValue();
-        HColumn<String, String> authIdColumn = slice.getColumnByName("authId");
-        String authId = authIdColumn.getValue();
-        HColumn<String, String> randomTokenColumn = slice.getColumnByName("randomToken");
-        String randomToken = randomTokenColumn.getValue();
-        String uuidCtx = new UUID(Long.parseLong(ctxId), Long.parseLong(ctxId)).toString();
-        Mutator<String> mutator = HFactory.createMutator(keyspace, serializer);
-        mutator.addDeletion(sessionId, CF_NAME, null, serializer);
-        removeUserSessions(Integer.parseInt(userId), Integer.parseInt(ctxId));
-        SliceQuery<String, String, String> uuidCtxQuery = HFactory.createSliceQuery(keyspace, serializer, serializer, serializer);
-        uuidCtxQuery.setColumnFamily(CF_NAME).setKey(uuidCtx);
-        ColumnSliceIterator<String, String, String> iCtx = new ColumnSliceIterator<String, String, String>(
-            uuidCtxQuery,
-            null,
-            "\uFFFF",
-            false);
-        while (iCtx.hasNext()) {
-            HColumn<String, String> column = iCtx.next();
-            if (column.getValue().equals(sessionId)) {
-                mutator.addDeletion(uuidCtx, CF_NAME, column.getName(), serializer);
+            query.setColumnFamily(CF_NAME).setColumnNames(COLUMN_NAMES).setKey(sessionId);
+            QueryResult<ColumnSlice<String, String>> result = query.execute();
+            ColumnSlice<String, String> slice = result.get();
+            HColumn<String, String> userIdColumn = slice.getColumnByName("userId");
+            String userId = userIdColumn.getValue();
+            HColumn<String, String> ctxIdColumn = slice.getColumnByName("contextId");
+            String ctxId = ctxIdColumn.getValue();
+            HColumn<String, String> authIdColumn = slice.getColumnByName("authId");
+            String authId = authIdColumn.getValue();
+            HColumn<String, String> randomTokenColumn = slice.getColumnByName("randomToken");
+            String randomToken = randomTokenColumn.getValue();
+            String uuidCtx = new UUID(Long.parseLong(ctxId), Long.parseLong(ctxId)).toString();
+            Mutator<String> mutator = HFactory.createMutator(keyspace, serializer);
+            mutator.addDeletion(sessionId, CF_NAME, null, serializer);
+            removeUserSessions(Integer.parseInt(userId), Integer.parseInt(ctxId));
+            SliceQuery<String, String, String> uuidCtxQuery = HFactory.createSliceQuery(keyspace, serializer, serializer, serializer);
+            uuidCtxQuery.setColumnFamily(CF_NAME).setKey(uuidCtx);
+            ColumnSliceIterator<String, String, String> iCtx = new ColumnSliceIterator<String, String, String>(
+                uuidCtxQuery,
+                null,
+                "\uFFFF",
+                false);
+            while (iCtx.hasNext()) {
+                HColumn<String, String> column = iCtx.next();
+                if (column.getValue().equals(sessionId)) {
+                    mutator.addDeletion(uuidCtx, CF_NAME, column.getName(), serializer);
+                }
             }
-        }
-        mutator.addDeletion(authId, CF_NAME);
-        mutator.addDeletion(randomToken, CF_NAME);
-        mutator.execute();
-        if (!hasForContext(Integer.parseInt(ctxId))) {
-            removeContextSessions(Integer.parseInt(ctxId));
-        }
+            mutator.addDeletion(authId, CF_NAME);
+            mutator.addDeletion(randomToken, CF_NAME);
+            mutator.execute();
+            if (!hasForContext(Integer.parseInt(ctxId))) {
+                removeContextSessions(Integer.parseInt(ctxId));
+            }
         } catch (Exception e) {
             OXException ox = OXNoSQLSessionStorageExceptionCodes.NOSQL_SESSIONSTORAGE_REMOVE_FAILED.create(e);
             log.error(ox.getMessage(), ox);
@@ -374,33 +374,35 @@ public class NoSQLSessionStorageService implements SessionStorageService {
         while (rowIterator.hasNext()) {
             Row<String, String, String> row = rowIterator.next();
             ColumnSlice<String, String> slice = row.getColumnSlice();
-            String sessionId = slice.getColumnByName("sessionId").getValue();
-            String loginName = slice.getColumnByName("loginName").getValue();
-            String password = slice.getColumnByName("password").getValue();
-            int contextId2 = Integer.parseInt(slice.getColumnByName("contextId").getValue());
-            int userId2 = Integer.parseInt(slice.getColumnByName("userId").getValue());
-            String secret = slice.getColumnByName("secret").getValue();
-            String login = slice.getColumnByName("login").getValue();
-            String randomToken = slice.getColumnByName("randomToken").getValue();
-            String localIP = slice.getColumnByName("localIP").getValue();
-            String authId = slice.getColumnByName("authId").getValue();
-            String hash = slice.getColumnByName("hash").getValue();
-            String client = slice.getColumnByName("client").getValue();
-            Session session = new StoredSession(
-                sessionId,
-                loginName,
-                password,
-                contextId2,
-                userId2,
-                secret,
-                login,
-                randomToken,
-                localIP,
-                authId,
-                hash,
-                client,
-                null);
-            list.add(session);
+            if (slice.getColumns().size() > 0) {
+                String sessionId = row.getKey();
+                String loginName = slice.getColumnByName("loginName").getValue();
+                String password = slice.getColumnByName("password").getValue();
+                int contextId2 = Integer.parseInt(slice.getColumnByName("contextId").getValue());
+                int userId2 = Integer.parseInt(slice.getColumnByName("userId").getValue());
+                String secret = slice.getColumnByName("secret").getValue();
+                String login = slice.getColumnByName("login").getValue();
+                String randomToken = slice.getColumnByName("randomToken").getValue();
+                String localIP = slice.getColumnByName("localIp").getValue();
+                String authId = slice.getColumnByName("authId").getValue();
+                String hash = slice.getColumnByName("hash").getValue();
+                String client = slice.getColumnByName("client").getValue();
+                Session session = new StoredSession(
+                    sessionId,
+                    loginName,
+                    password,
+                    contextId2,
+                    userId2,
+                    secret,
+                    login,
+                    randomToken,
+                    localIP,
+                    authId,
+                    hash,
+                    client,
+                    null);
+                list.add(session);
+            }
         }
         return list;
     }
@@ -455,9 +457,12 @@ public class NoSQLSessionStorageService implements SessionStorageService {
     }
 
     @Override
-    public Session getSessionByAlternativeId(String altId) {
-        // TODO Auto-generated method stub
+    public Session getSessionByAlternativeId(String altId) throws OXException {
         return null;
+        // OXException e =
+        // OXNoSQLSessionStorageExceptionCodes.NOSQL_SESSIONSTORAGE_UNSUPPORTED_OPERATION.create("getSessionsByAlternativeId");
+        // log.warn(e.getMessage(), e);
+        // throw e;
     }
 
     @Override
@@ -507,9 +512,14 @@ public class NoSQLSessionStorageService implements SessionStorageService {
     }
 
     @Override
-    public void checkAuthId(String login, String authId) {
-        // TODO Auto-generated method stub
-
+    public void checkAuthId(String login, String authId) throws OXException {
+        if (null != authId) {
+            for (final Session session : getSessions()) {
+                if (authId.equals(session.getAuthId())) {
+                    throw OXNoSQLSessionStorageExceptionCodes.NOSQL_SESSIONSTORAGE_DUPLICATE_AUTHID.create(session.getLogin(), login);
+                }
+            }
+        }
     }
 
     private String crypt(String password) throws OXException {

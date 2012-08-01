@@ -9,7 +9,8 @@ Build-Conflicts: ecj, libecj-java-gcj, ecj-gcj, libecj-java, gcj-4.3-base, libgc
 
 Package: open-xchange-authentication-ucs
 Architecture: all
-Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
+Pre-Depends: open-xchange-core (>= @OXVERSION@)
+Depends: ${misc:Depends}
 Conflicts: open-xchange-authentication-database, open-xchange-authentication-imap, open-xchange-authentication-ldap
 Provides: open-xchange-authentication
 Description: The Open-Xchange Univention Corporate Server authentication bundle

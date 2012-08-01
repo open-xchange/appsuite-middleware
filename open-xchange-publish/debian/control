@@ -8,8 +8,8 @@ Homepage: http://www.open-xchange.com
 
 Package: open-xchange-publish
 Architecture: all
-Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
-Pre-Depends: dpkg (>= 1.15.7.2)
+Pre-Depends: open-xchange-core (>= @OXVERSION@)
+Depends: ${misc:Depends}
 Replaces: open-xchange-publish-json, open-xchange-publish-microformats, open-xchange-templating-json
 Conflicts: open-xchange-publish-json, open-xchange-publish-microformats, open-xchange-templating-json
 Description: The Open Xchange backend publish extension
