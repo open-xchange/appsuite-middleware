@@ -90,6 +90,16 @@ public class AJAXConfig extends AbstractConfig {
         return singleton.getPropertyInternal(key.getPropertyName());
     }
 
+    public static String getProperty(final Property key, final String fallBack) {
+        String property;
+        try {
+            property = getProperty(key);
+        } catch (final Exception e) {
+            return fallBack;
+        }
+        return property;
+    }
+
     /**
      * Enumeration of all properties in the ajax.properties file.
      */
@@ -153,7 +163,7 @@ public class AJAXConfig extends AbstractConfig {
          * Group Participant
          */
         GROUP_PARTICIPANT("group_participant"),
-        
+
         /**
          * Echo header; see property "com.openexchange.servlet.echoHeaderName" in file 'server.properties'
          */

@@ -35,10 +35,24 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 
 %post
 if [ ${1:-0} -eq 2 ]; then
+    # only when updating
+    . /opt/open-xchange/lib/oxfunctions.sh
+
+    # prevent bash from expanding, see bug 13316
+    GLOBIGNORE='*'
+
+    ##
+    ## start update from < 6.21
+    ##
     if [ -e /opt/open-xchange/etc/groupware/mailfilter.properties ]; then
         mv /opt/open-xchange/etc/mailfilter.properties /opt/open-xchange/etc/mailfilter.properties.rpmnew
         mv /opt/open-xchange/etc/groupware/mailfilter.properties /opt/open-xchange/etc/mailfilter.properties
     fi
+    ##
+    ## end update from < 6.21
+    ##
+
+    ox_update_permissions "/opt/open-xchange/etc/mailfilter.properties" root:open-xchange 640
 fi
 
 %clean
@@ -51,6 +65,6 @@ fi
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/etc/
-%config(noreplace) /opt/open-xchange/etc/*
+%config(noreplace)%attr(640,root,open-xchange) /opt/open-xchange/etc/mailfilter.properties
 
 %changelog

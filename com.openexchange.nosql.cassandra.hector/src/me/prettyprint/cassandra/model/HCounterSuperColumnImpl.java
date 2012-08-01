@@ -60,7 +60,8 @@ public final class HCounterSuperColumnImpl<SN,N> implements HCounterSuperColumn<
     this.nameSerializer = nameSerializer;
   }
 
-  public HCounterSuperColumn<SN, N> addSubCounterColumn(HCounterColumn<N> counterColumn) {
+  @Override
+public HCounterSuperColumn<SN, N> addSubCounterColumn(HCounterColumn<N> counterColumn) {
     if ( counterColumns == null )
       counterColumns = new ArrayList<HCounterColumn<N>>();
     counterColumns.add(counterColumn);
@@ -115,7 +116,8 @@ public final class HCounterSuperColumnImpl<SN,N> implements HCounterSuperColumn<
     return superNameSerializer.toByteBuffer(getName()).array();
   }
   
-  public ByteBuffer getNameByteBuffer() {
+  @Override
+public ByteBuffer getNameByteBuffer() {
     return superNameSerializer.toByteBuffer(getName());
   }
 

@@ -39,6 +39,11 @@ dpkg-maintscript-helper mv_conffile \
     open-xchange-admin-plugin-hosting -- $1 \
     $(dpkg-query -W -f='${Config-Version}' open-xchange-admin-plugin-hosting)
 
+for FILE in cache.ccf configdb.properties file-logging.properties \
+        logging.properties system.properties; do
+    dpkg-maintscript-helper rm_conffile /opt/open-xchange/etc/admindaemon/$FILE -- "$@"
+done
+
 
 case "$1" in
     install|upgrade)

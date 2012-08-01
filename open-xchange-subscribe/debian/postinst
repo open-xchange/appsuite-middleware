@@ -74,12 +74,20 @@ postFix() {
     fi
 }
 
+setConfigFilePermissions() {
+    find /opt/open-xchange/etc/crawlers -name "*.yml" -print0 | while read -d $'\0' i; do
+        ox_update_permissions "$i" open-xchange:root 644
+    done
+    ox_update_permissions "/opt/open-xchange/etc/crawlers" open-xchange:root 755
+}
+
 case "$1" in
     configure)
         test -n "$2" && {
             # we are in update mode, run postFix to apply fixes
             postFix "$2"
         }
+	setConfigFilePermissions
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)

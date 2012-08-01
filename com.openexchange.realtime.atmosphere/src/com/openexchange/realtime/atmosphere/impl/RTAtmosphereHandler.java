@@ -111,11 +111,13 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 		this.services = services;
 	}
 
-	public void destroy() {
+	@Override
+    public void destroy() {
 	    // Ignore for now
 	}
 
-	public void onRequest(AtmosphereResource r) throws IOException {
+	@Override
+    public void onRequest(AtmosphereResource r) throws IOException {
 		AtmosphereRequest req = r.getRequest();
 		RTAtmosphereState state = getState(r);
 		try {
@@ -159,7 +161,8 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 		return previous != null ? previous : state;
 	}
 
-	public void onStateChange(AtmosphereResourceEvent evt) throws IOException {
+	@Override
+    public void onStateChange(AtmosphereResourceEvent evt) throws IOException {
 
 	}
 
@@ -244,7 +247,8 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 				|| !id2State.getEquivalents(id).isEmpty();
 	}
 
-	public void send(Stanza stanza) throws OXException {
+	@Override
+    public void send(Stanza stanza) throws OXException {
 		String stanzaStr = StanzaWriter.write(stanza).toString();
 
 		RTAtmosphereState state = id2State.get(stanza.getTo());

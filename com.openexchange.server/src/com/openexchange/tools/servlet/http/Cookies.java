@@ -79,6 +79,28 @@ public final class Cookies {
         super();
     }
 
+    private static volatile Boolean domainEnabled;
+
+    /**
+     * Checks whether domain parameter is enabled
+     * 
+     * @return <code>true</code> if enabled; otherwise <code>false</code>
+     */
+    public static boolean domainEnabled() {
+        Boolean tmp = domainEnabled;
+        if (null == tmp) {
+            synchronized (Login.class) {
+                tmp = domainEnabled;
+                if (null == tmp) {
+                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    tmp = Boolean.valueOf(null != service && service.getBoolProperty("com.openexchange.cookie.domain.enabled", false));
+                    domainEnabled = tmp;
+                }
+            }
+        }
+        return tmp.booleanValue();
+    }
+
     private static volatile Boolean prefixWithDot;
 
     /**
@@ -133,7 +155,7 @@ public final class Cookies {
      * @see #configuredDomain()
      */
     public static String getDomainValue(final String serverName) {
-        return getDomainValue(serverName, prefixWithDot(), configuredDomain());
+        return getDomainValue(serverName, prefixWithDot(), configuredDomain(), domainEnabled());
     }
 
     /**
@@ -142,9 +164,13 @@ public final class Cookies {
      * @param serverName The server name
      * @param prefixWithDot Whether to prefix domain with a dot (<code>'.'</code>) character
      * @param configuredDomain The pre-configured domain name for this host
+     * @param domainEnabled Whether to write a domain parameter at all (<code>null</code> is immediately returned)
      * @return The domain parameter or <code>null</code>
      */
-    public static String getDomainValue(final String serverName, final boolean prefixWithDot, final String configuredDomain) {
+    public static String getDomainValue(final String serverName, final boolean prefixWithDot, final String configuredDomain, final boolean domainEnabled) {
+        if (!domainEnabled) {
+            return null;
+        }
         if (null != configuredDomain) {
             return configuredDomain;
         }

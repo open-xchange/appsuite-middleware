@@ -66,7 +66,7 @@ public class RTAtmosphereState {
 	public ServerSession session;
 	public ID id;
 	
-	private ReentrantLock lock = new ReentrantLock();
+	private final ReentrantLock lock = new ReentrantLock();
 	public boolean handshake = true;
 	
 	public void lock() {

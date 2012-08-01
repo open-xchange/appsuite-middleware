@@ -24,18 +24,6 @@ Authors:
 --------
     Open-Xchange
 
-%package        gui
-Group:          Applications/Productivity
-Summary:        Blackwhitelist GUI
-Requires:       open-xchange-gui
-
-%description    gui
-Blackwhitelist GUI
-
-Authors:
---------
-    Open-Xchange
-
 %prep
 %setup -q
 
@@ -51,7 +39,6 @@ export NO_BRP_CHECK_BYTECODE_VERSION=true
 %endif
 
 ant -lib build/lib -Dbasedir=build -Dhtdoc=%{docroot} -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml build
-ant -lib build/lib -Dbasedir=build -Dhtdoc=%{docroot} -DdestDir=%{buildroot} -DpackageName=%{name} -DbuildTarget=installGui -f build/build.xml build
 
 %clean
 %{__rm} -rf %{buildroot}
@@ -64,11 +51,5 @@ ant -lib build/lib -Dbasedir=build -Dhtdoc=%{docroot} -DdestDir=%{buildroot} -Dp
 /opt/open-xchange/bundles/*
 %config(noreplace) /opt/open-xchange/etc/settings/*
 
-
-%files gui
-%defattr(-,root,root)
-%dir %{docroot}/ox6/plugins/com.openexchange.blackwhitelist
-%{docroot}/ox6/plugins/com.openexchange.blackwhitelist/lang/*
-%{docroot}/ox6/plugins/com.openexchange.blackwhitelist/*.js
 
 %changelog

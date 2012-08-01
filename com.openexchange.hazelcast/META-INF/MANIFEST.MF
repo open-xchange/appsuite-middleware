@@ -8,6 +8,7 @@ Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.cluster.discovery,
  com.openexchange.config,
+ com.openexchange.log,
  com.openexchange.osgi,
  com.openexchange.server,
  com.openexchange.timer,
@@ -23,7 +24,10 @@ Import-Package: com.openexchange.cluster.discovery,
  javax.xml.transform.dom,
  javax.xml.transform.stream,
  javax.xml.xpath,
- org.osgi.framework
+ org.apache.commons.logging,
+ org.osgi.framework,
+ org.osgi.util.tracker
 Bundle-ClassPath: lib/hazelcast-all-2.2.jar,
  .
-Export-Package: com.hazelcast.core
+Export-Package: com.hazelcast.cluster,
+ com.hazelcast.core

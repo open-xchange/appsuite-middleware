@@ -5,7 +5,6 @@
 
 pkgname=open-xchange-blackwhitelist
 oxroot=$(CURDIR)/debian/$(pkgname)
-guiroot=$(CURDIR)/debian/$(pkgname)-gui
 instprefix=/opt/open-xchange
 
 configure: configure-stamp
@@ -32,7 +31,6 @@ install: build
 	dh_prep
 	dh_installdirs
 	ant -lib build/lib -Dbasedir=build -DdestDir=$(oxroot)  -DpackageName=$(pkgname) -f build/build.xml build
-	ant -lib build/lib -Dbasedir=build -DdestDir=$(guiroot) -DpackageName=$(pkgname) -DbuildTarget=installGui -f build/build.xml build
 
 # Build architecture-independent files here.
 binary-indep: build install

@@ -8,6 +8,7 @@ Homepage: http://www.open-xchange.com
 
 Package: open-xchange-preview
 Architecture: all
-Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
+Pre-Depends: open-xchange-core (>= @OXVERSION@)
+Depends: ${misc:Depends}
 Description: The Open-Xchange backend preview implementation
  This package adds the preview feature to the backend instance.

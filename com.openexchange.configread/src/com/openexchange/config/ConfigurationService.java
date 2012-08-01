@@ -62,6 +62,14 @@ import java.util.Properties;
 public interface ConfigurationService {
 
     /**
+     * Gets the filter backed by given property's value.
+     * 
+     * @param name The property name
+     * @return The filter or <code>null</code> if there is no such property
+     */
+    public Filter getFilterFromProperty(String name);
+
+    /**
      * Searches for the property with the specified name in this property list. If the name is not found in this property list, the default
      * property list, and its defaults, recursively, are then checked. The method returns <code>null</code> if the property is not found.
      * 

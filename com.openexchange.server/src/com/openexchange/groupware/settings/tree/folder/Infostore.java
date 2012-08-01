@@ -52,6 +52,7 @@ package com.openexchange.groupware.settings.tree.folder;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.infostore.InfostoreFacades;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
@@ -90,7 +91,7 @@ public class Infostore implements PreferencesItemService {
         return new ReadOnlyValue() {
             @Override
             public boolean isAvailable(final UserConfiguration userConfig) {
-                return userConfig.hasInfostore();
+                return userConfig.hasInfostore() && InfostoreFacades.isInfoStoreAvailable();
             }
             @Override
             public void getValue(final Session session, final Context ctx,

@@ -37,12 +37,14 @@ public class AtmosphereRTActivator extends HousekeepingActivator {
 		
 		track(OXRTHandler.class, new SimpleRegistryListener<OXRTHandler>() {
 
-			public void added(ServiceReference<OXRTHandler> ref,
+			@Override
+            public void added(ServiceReference<OXRTHandler> ref,
 					OXRTHandler service) {
 				handlerLibrary.add(service);
 			}
 
-			public void removed(ServiceReference<OXRTHandler> ref,
+			@Override
+            public void removed(ServiceReference<OXRTHandler> ref,
 					OXRTHandler service) {
 				handlerLibrary.remove(service);
 			}

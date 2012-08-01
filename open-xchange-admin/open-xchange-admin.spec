@@ -114,7 +114,7 @@ if [ ${1:-0} -eq 2 ]; then
     ## end update from < 6.21
     ##
 
-    ox_update_permissions "/opt/open-xchange/etc/mpasswd" open-xchange:root 600
+    ox_update_permissions "/opt/open-xchange/etc/mpasswd" root:open-xchange 640
 fi
 
 %clean
@@ -129,7 +129,7 @@ fi
 %dir /opt/open-xchange/etc/plugin
 %config(noreplace) /opt/open-xchange/etc/plugin/*
 %config(noreplace) /opt/open-xchange/etc/*.properties
-%config(noreplace) %attr(600,open-xchange,root) /opt/open-xchange/etc/mpasswd
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/mpasswd
 %dir /opt/open-xchange/lib/
 /opt/open-xchange/lib/*
 %dir /opt/open-xchange/osgi/bundle.d/

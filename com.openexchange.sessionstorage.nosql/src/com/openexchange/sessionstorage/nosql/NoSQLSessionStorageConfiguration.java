@@ -49,6 +49,8 @@
 
 package com.openexchange.sessionstorage.nosql;
 
+import com.openexchange.crypto.CryptoService;
+
 /**
  * {@link NoSQLSessionStorageConfiguration}
  * 
@@ -63,16 +65,22 @@ public class NoSQLSessionStorageConfiguration {
     private final String keyspace;
 
     private final String cf_name;
+    
+    private final String encryptionKey;
+    
+    private final CryptoService cryptoService;
 
     /**
      * Initializes a new {@link NoSQLSessionStorageConfiguration}.
      */
-    public NoSQLSessionStorageConfiguration(String host, int port, String keyspace, String cf_name) {
+    public NoSQLSessionStorageConfiguration(String host, int port, String keyspace, String cf_name, String encryptionKey, CryptoService cryptoService) {
         super();
         this.host = host;
         this.port = port;
         this.keyspace = keyspace;
         this.cf_name = cf_name;
+        this.encryptionKey = encryptionKey;
+        this.cryptoService = cryptoService;
     }
 
     public String getHost() {
@@ -89,6 +97,14 @@ public class NoSQLSessionStorageConfiguration {
 
     public String getCf_name() {
         return cf_name;
+    }
+    
+    public String getEncryptionKey() {
+        return encryptionKey;
+    }
+    
+    public CryptoService getCryptoService() {
+        return cryptoService;
     }
 
 }

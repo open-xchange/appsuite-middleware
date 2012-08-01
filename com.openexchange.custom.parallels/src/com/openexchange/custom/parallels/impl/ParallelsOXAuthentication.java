@@ -58,6 +58,7 @@ public class ParallelsOXAuthentication implements AuthenticationService {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Authenticated handleLoginInfo(final LoginInfo loginInfo) throws OXException {
 
 
@@ -175,10 +176,12 @@ public class ParallelsOXAuthentication implements AuthenticationService {
 
 
             return new Authenticated() {
+                @Override
                 public String getContextInfo() {
                     return real_context_name;
                 }
 
+                @Override
                 public String getUserInfo() {
                     return oxuser_;
                 }
@@ -204,6 +207,7 @@ public class ParallelsOXAuthentication implements AuthenticationService {
         }
     }
 
+    @Override
     public Authenticated handleAutoLoginInfo(final LoginInfo loginInfo) throws OXException {
         throw LoginExceptionCodes.NOT_SUPPORTED.create(ParallelsOXAuthentication.class.getName());
     }

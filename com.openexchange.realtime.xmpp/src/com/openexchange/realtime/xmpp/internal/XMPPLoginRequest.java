@@ -12,9 +12,9 @@ import com.openexchange.login.LoginRequest;
 
 public class XMPPLoginRequest implements LoginRequest {
 
-    private String user;
+    private final String user;
 
-    private String password;
+    private final String password;
 
     public XMPPLoginRequest(String user, String password) {
         this.user = user;

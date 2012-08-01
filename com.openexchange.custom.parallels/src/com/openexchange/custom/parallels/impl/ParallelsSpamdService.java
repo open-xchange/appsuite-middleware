@@ -42,6 +42,7 @@ public class ParallelsSpamdService implements SpamdService {
         return singleton;
     }
 
+    @Override
     public SpamdProvider getProvider(final Session session) throws OXException{
 
         /**
@@ -326,14 +327,17 @@ public class ParallelsSpamdService implements SpamdService {
     private SpamdProvider getSpamdProvider(final String hostname,final int port, final String username) {
         return new SpamdProvider() {
 
+            @Override
             public String getHostname() {
                 return hostname;
             }
 
+            @Override
             public int getPort() {
                 return port; // 783
             }
 
+            @Override
             public String getUsername() {
                 return username;
             }

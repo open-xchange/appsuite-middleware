@@ -1,3 +1,12 @@
+* 2012-08-01 - jan.bauerdick@open-xchange.com
+
+ - New implementation of sessionstorageservice, storing sessions with cassandra
+
+* 2012-01-08 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 21422: Add UIDs to appointment when missing
+ - Fix for bug 22681: Fixed SQL statement
+
 * 2012-07-31 - marcus.klein@open-xchange.com
 
  - Fix for bug 22433: Removed obsolete property writeOnly from configuration file configdb.properties.

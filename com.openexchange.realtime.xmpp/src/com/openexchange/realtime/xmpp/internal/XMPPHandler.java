@@ -64,7 +64,7 @@ import com.openexchange.realtime.xmpp.packet.XMPPMessage;
  */
 public class XMPPHandler {
 
-    private Map<String, XMPPExtension> extensions = new HashMap<String, XMPPExtension>();
+    private final Map<String, XMPPExtension> extensions = new HashMap<String, XMPPExtension>();
 
     public void handle(XMPPContainer container) throws OXException {
         Match match = JOOX.$(container.getXml());

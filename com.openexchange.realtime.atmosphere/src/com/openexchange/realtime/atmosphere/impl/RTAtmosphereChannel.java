@@ -62,8 +62,8 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class RTAtmosphereChannel implements Channel {
 	
-	private RTAtmosphereHandler handler;
-	private HandlerLibrary library;
+	private final RTAtmosphereHandler handler;
+	private final HandlerLibrary library;
 	
 	
 
@@ -73,11 +73,13 @@ public class RTAtmosphereChannel implements Channel {
 		this.library = library;
 	}
 
-	public String getProtocol() {
+	@Override
+    public String getProtocol() {
 		return "ox";
 	}
 
-	public boolean canHandle(String namespace, ID recipient,
+	@Override
+    public boolean canHandle(String namespace, ID recipient,
 			ServerSession session) throws OXException {
 		if (!isConnected(recipient, session)) {
 			return false;
@@ -99,15 +101,18 @@ public class RTAtmosphereChannel implements Channel {
 		return true; // TODO: Implement Capability Model
 	}
 
-	public int getPriority() {
+	@Override
+    public int getPriority() {
 		return 10000;
 	}
 
-	public boolean isConnected(ID id, ServerSession session) throws OXException {
+	@Override
+    public boolean isConnected(ID id, ServerSession session) throws OXException {
 		return handler.isConnected(id);
 	}
 
-	public void send(Stanza stanza, ServerSession session) throws OXException {
+	@Override
+    public void send(Stanza stanza, ServerSession session) throws OXException {
 		handler.handleOutgoing(stanza, session);
 	}
 }

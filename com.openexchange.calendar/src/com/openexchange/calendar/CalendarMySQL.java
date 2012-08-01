@@ -431,7 +431,8 @@ public class CalendarMySQL implements CalendarSqlImp {
     public PreparedStatement getAllAppointments(final Context c, final Date d1, final Date d2, final String select, final Connection readcon, final int orderBy, final Order orderDir) throws OXException, SQLException {
         final StringBuilder sb = new StringBuilder(64);
         sb.append(parseSelect(select));
-        sb.append(" pd JOIN prg_dates_members pdm ON pd.intfield01 = pdm.object_id AND pd.cid = pdm.cid");
+        sb.append(" pd JOIN prg_dates_members pdm ON pd.intfield01 = pdm.object_id AND pd.cid = pdm.cid AND pd.cid = ");
+        sb.append(c.getContextId());
 
         sb.append(WHERE);
         getRange(sb);

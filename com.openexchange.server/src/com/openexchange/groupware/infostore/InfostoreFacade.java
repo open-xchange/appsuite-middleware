@@ -51,6 +51,7 @@
 package com.openexchange.groupware.infostore;
 
 import java.io.InputStream;
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.utils.Metadata;
@@ -63,6 +64,14 @@ import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.tx.TransactionAware;
 
 public interface InfostoreFacade extends TransactionAware{
+
+    /**
+     * A flag that indicates whether InfoStore file storage bundle is available or not.
+     * 
+     * @see InfostoreFacades#isInfoStoreAvailable()
+     */
+    public static final AtomicReference<InfostoreAvailable> INFOSTORE_FILE_STORAGE_AVAILABLE = new AtomicReference<InfostoreAvailable>();
+
 	/**
 	 * Special Version used if you want to retrieve the latest version of an infostore document
 	 */
