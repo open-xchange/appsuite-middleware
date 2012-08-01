@@ -10,14 +10,3 @@ Package: open-xchange-messaging-sms
 Architecture: all
 Depends: ${misc:Depends}, open-xchange-messaging (>= @OXVERSION@)
 Description: General Messaging SMS Backend Bundle.
-
-Package: open-xchange-messaging-sms-gui
-Architecture: all
-Depends: ${misc:Depends}, open-xchange-gui, open-xchange-messaging-sms-gui-theme
-Description: General Messaging SMS GUI Bundle.
-
-Package: open-xchange-messaging-sms-gui-theme-default
-Provides: open-xchange-messaging-sms-gui-theme
-Architecture: all
-Depends: ${misc:Depends}, open-xchange-gui, open-xchange-messaging-sms-gui (>= @OXVERSION@)
-Description: General Messaging SMS GUI Themes Bundle.
