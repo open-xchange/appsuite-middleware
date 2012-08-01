@@ -71,7 +71,9 @@ import org.apache.commons.logging.Log;
 import com.openexchange.log.LogFactory;
 import org.ho.yaml.Yaml;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Filter;
 import com.openexchange.config.PropertyListener;
+import com.openexchange.config.WildcardFilter;
 import com.openexchange.config.internal.filewatcher.FileWatcher;
 
 /**
@@ -282,6 +284,15 @@ public final class ConfigurationImpl implements ConfigurationService {
                 LOG.error(e.getMessage(), e);
             }
         }
+    }
+
+    @Override
+    public Filter getFilterFromProperty(String name) {
+        final String value = properties.get(name);
+        if (null == value) {
+            return null;
+        }
+        return new WildcardFilter(value);
     }
 
     @Override

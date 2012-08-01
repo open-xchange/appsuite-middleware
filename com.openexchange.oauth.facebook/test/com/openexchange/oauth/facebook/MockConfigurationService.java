@@ -54,6 +54,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Filter;
 import com.openexchange.config.PropertyListener;
 
 
@@ -200,6 +201,15 @@ public class MockConfigurationService implements ConfigurationService {
     public int size() {
         // TODO Auto-generated method stub
         return 0;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.config.ConfigurationService#getFilterFromProperty(java.lang.String)
+     */
+    @Override
+    public Filter getFilterFromProperty(String name) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }
