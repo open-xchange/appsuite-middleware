@@ -277,6 +277,8 @@ public final class AllAction extends AppointmentAction {
                     timestamp = lastModified;
                 }
             }
+            it.close();
+            it = null;
 
             if (listOrder && !objectList.isEmpty()) {
                 final DateOrderObject[] dateOrderObjectArray = objectList.toArray(new DateOrderObject[objectList.size()]);
