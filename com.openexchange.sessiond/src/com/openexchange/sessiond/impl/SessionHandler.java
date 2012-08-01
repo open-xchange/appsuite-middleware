@@ -358,16 +358,18 @@ public final class SessionHandler {
         }
         SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
         if (storageService != null) {
-            try {
-                Session[] userSessions = storageService.getUserSessions(userId, contextId);
-                int cnt = 0;
-                for (final Session session : userSessions) {
-                    if (client.equals(session.getClient()) && ++cnt > maxSessPerClient) {
-                        throw SessionExceptionCodes.MAX_SESSION_PER_CLIENT_EXCEPTION.create(client, I(userId), I(contextId));
+            if (maxSessPerClient > 0) {
+                try {
+                    Session[] userSessions = storageService.getUserSessions(userId, contextId);
+                    int cnt = 0;
+                    for (final Session session : userSessions) {
+                        if (client.equals(session.getClient()) && ++cnt > maxSessPerClient) {
+                            throw SessionExceptionCodes.MAX_SESSION_PER_CLIENT_EXCEPTION.create(client, I(userId), I(contextId));
+                        }
                     }
+                } catch (OXException e) {
+                    LOG.error(e.getMessage(), e);
                 }
-            } catch (OXException e) {
-                LOG.error(e.getMessage(), e);
             }
         }
     }
