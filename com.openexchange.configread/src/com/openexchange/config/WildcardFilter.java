@@ -73,7 +73,7 @@ public class WildcardFilter implements Filter {
         final String[] wildcards = SPLIT.split(csvWildcards);
         final Set<Pattern> patterns = new HashSet<Pattern>(wildcards.length);
         for (final String s : wildcards) {
-            patterns.add(Pattern.compile(wildcardToRegex(s.trim())));
+            patterns.add(Pattern.compile(wildcardToRegex(s.trim()), Pattern.CASE_INSENSITIVE));
         }
         this.patterns = patterns;
     }
