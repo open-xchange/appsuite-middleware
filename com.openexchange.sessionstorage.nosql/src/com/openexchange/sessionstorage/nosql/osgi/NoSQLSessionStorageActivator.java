@@ -51,6 +51,8 @@ package com.openexchange.sessionstorage.nosql.osgi;
 
 import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.crypto.CryptoService;
+import com.openexchange.exception.OXException;
 import com.openexchange.log.LogFactory;
 import com.openexchange.nosql.cassandra.EmbeddedCassandraService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -58,6 +60,7 @@ import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.sessionstorage.nosql.NoSQLSessionStorageConfiguration;
 import com.openexchange.sessionstorage.nosql.NoSQLSessionStorageService;
+import com.openexchange.sessionstorage.nosql.exceptions.OXNoSQLSessionStorageExceptionCodes;
 
 /**
  * {@link NoSQLSessionStorageActivator}
@@ -66,9 +69,10 @@ import com.openexchange.sessionstorage.nosql.NoSQLSessionStorageService;
  */
 public class NoSQLSessionStorageActivator extends HousekeepingActivator {
 
-    private final Class<?>[] needed = { ConfigurationService.class, EmbeddedCassandraService.class };
+    private final Class<?>[] needed = { ConfigurationService.class, EmbeddedCassandraService.class, CryptoService.class };
     private NoSQLSessionStorageService service;
     private ConfigurationService configService;
+    private CryptoService cryptoService;
     private ServiceRegistry registry;
     private final Log log = LogFactory.getLog(NoSQLSessionStorageActivator.class);
 
@@ -80,15 +84,23 @@ public class NoSQLSessionStorageActivator extends HousekeepingActivator {
     public void startBundle() throws Exception {
         log.info("Starting bundle: com.openexchange.sessionstorage.loxandra");
         configService = getService(ConfigurationService.class);
+        cryptoService = getService(CryptoService.class);
         registry = NoSQLServiceRegistry.getRegistry();
         registry.addService(ConfigurationService.class, configService);
+        registry.addService(CryptoService.class, cryptoService);
         boolean enabled = configService.getBoolProperty("com.openexchange.sessionstorage.nosql.enabled", false);
         if (enabled) {
             String host = configService.getProperty("com.openexchange.sessionstorage.nosql.host", "localhost");
             int port = configService.getIntProperty("com.openexchange.sessionstorage.nosql.port", 9160);
             String keyspace = configService.getProperty("com.openexchange.sessionstorage.nosql.keyspace", "ox");
             String cf_name = configService.getProperty("com.openexchange.sessionstorage.nosql.cfname", "sessionstorage");
-            NoSQLSessionStorageConfiguration config = new NoSQLSessionStorageConfiguration(host, port, keyspace, cf_name);
+            String encryptionKey = configService.getProperty("com.openexchange.sessionstorage.nosql.encryptionKey");
+            if (encryptionKey == null) {
+                OXException e = OXNoSQLSessionStorageExceptionCodes.NOSQL_SESSIONSTORAGE_NO_ENCRYPTION_KEY.create();
+                log.error(e.getMessage(), e);
+                throw e;
+            }
+            NoSQLSessionStorageConfiguration config = new NoSQLSessionStorageConfiguration(host, port, keyspace, cf_name, encryptionKey, cryptoService);
             service = new NoSQLSessionStorageService(config);
             registerService(SessionStorageService.class, service);
         }

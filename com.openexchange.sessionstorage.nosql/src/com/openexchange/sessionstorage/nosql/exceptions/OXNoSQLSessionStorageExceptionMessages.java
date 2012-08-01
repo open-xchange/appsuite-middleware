@@ -47,64 +47,30 @@
  *
  */
 
-package com.openexchange.sessionstorage.nosql;
+package com.openexchange.sessionstorage.nosql.exceptions;
 
-import com.openexchange.crypto.CryptoService;
+import com.openexchange.i18n.LocalizableStrings;
+
 
 /**
- * {@link NoSQLSessionStorageConfiguration}
- * 
+ * {@link OXNoSQLSessionStorageExceptionMessages}
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class NoSQLSessionStorageConfiguration {
-
-    private final String host;
-
-    private final int port;
-
-    private final String keyspace;
-
-    private final String cf_name;
+public class OXNoSQLSessionStorageExceptionMessages implements LocalizableStrings {
     
-    private final String encryptionKey;
-    
-    private final CryptoService cryptoService;
+    public static final String NOSQL_SESSIONSTORAGE_NO_ENCRYPTION_KEY_MSG = "Could not find encryption key.";
+    public final static String NOSQL_SESSIONSTORAGE_START_FAILED_MSG = "Start of SessionStorageService failed.";
+    public final static String NOSQL_SESSIONSTORAGE_SAVE_FAILED_MSG = "Saving session with sessionId %1$s failed.";
+    public final static String NOSQL_SESSIONSTORAGE_LOOKUP_FAILED_MSG = "Lookup for session with sessionId %1$s failed.";
+    public final static String NOSQL_SESSIONSTORAGE_REMOVE_FAILED_MSG = "Removing session with sessionId %1$s failed.";
+    public final static String NOSQL_SESSIONSTORAGE_SESSION_NOT_FOUND_MSG = "No session with sessionId %1$s found.";
 
     /**
-     * Initializes a new {@link NoSQLSessionStorageConfiguration}.
+     * Initializes a new {@link OXNoSQLSessionStorageExceptionMessages}.
      */
-    public NoSQLSessionStorageConfiguration(String host, int port, String keyspace, String cf_name, String encryptionKey, CryptoService cryptoService) {
+    private OXNoSQLSessionStorageExceptionMessages() {
         super();
-        this.host = host;
-        this.port = port;
-        this.keyspace = keyspace;
-        this.cf_name = cf_name;
-        this.encryptionKey = encryptionKey;
-        this.cryptoService = cryptoService;
-    }
-
-    public String getHost() {
-        return host;
-    }
-
-    public int getPort() {
-        return port;
-    }
-
-    public String getKeyspace() {
-        return keyspace;
-    }
-
-    public String getCf_name() {
-        return cf_name;
-    }
-    
-    public String getEncryptionKey() {
-        return encryptionKey;
-    }
-    
-    public CryptoService getCryptoService() {
-        return cryptoService;
     }
 
 }
