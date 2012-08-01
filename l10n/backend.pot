@@ -2280,6 +2280,7 @@ msgid "Max. number of sessions exceeded for user %1$s in context %2$s"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/sessiond/SessionExceptionMessages.java:76
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.nosql/src/com/openexchange/sessionstorage/nosql/exceptions/OXNoSQLSessionStorageExceptionMessages.java:68
 msgid ""
 "Authentication identifier duplicate found. Existing session login: %1$s. "
 "Current denied login request: %2$s."
@@ -9944,6 +9945,10 @@ msgstr ""
 msgid "Could not find encryption key."
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.nosql/src/com/openexchange/sessionstorage/nosql/exceptions/OXNoSQLSessionStorageExceptionMessages.java:69
+msgid "Operation %1$s not supported."
+msgstr ""
+
 #. *
 #. * The message part with sequence ID %1$s could not be found in message %2$s in folder %3$s
 #.
@@ -9996,9 +10001,16 @@ msgstr ""
 msgid "No storage access because mail connection is not connected"
 msgstr ""
 
-#. * Unable to parse SMTP server URI "%1$s".
+#. Unable to parse SMTP server URI "%1$s".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.smtp/src/com/openexchange/smtp/SMTPExceptionMessage.java:109
 msgid "Unable to parse SMTP server URI \"%1$s\"."
+msgstr ""
+
+#. The following recipient is not allowed. Please remove associated address and try again.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.smtp/src/com/openexchange/smtp/SMTPExceptionMessage.java:112
+msgid ""
+"The following recipient is not allowed. Please remove associated address and "
+"try again."
 msgstr ""
 
 #. Could not find Apache Solr Core entry for user %1$s and module %2$s in context %3$s.
