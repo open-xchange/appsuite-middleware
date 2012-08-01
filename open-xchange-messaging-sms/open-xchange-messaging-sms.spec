@@ -24,33 +24,6 @@ Authors:
 --------
     Open-Xchange
 
-%package        gui
-Group:          Applications/Productivity
-Summary:        General Messaging SMS GUI Bundle
-Requires:       open-xchange-messaging-sms-gui-theme >= @OXVERSION@
-Requires:       open-xchange-gui
-
-%description    gui
-General Messaging SMS GUI Bundle.
-
-Authors:
---------
-    Open-Xchange
-
-%package        gui-theme-default
-Group:          Applications/Productivity
-Summary:        General Messaging SMS GUI Themes Bundle
-Requires:       open-xchange-gui
-Requires:       open-xchange-messaging-sms-gui >= @OXVERSION@
-Provides:       open-xchange-messaging-sms-gui-theme
-
-%description    gui-theme-default
-General Messaging SMS GUI Themes Bundle.
-
-Authors:
---------
-    Open-Xchange
-
 %prep
 %setup -q
 
@@ -66,8 +39,6 @@ export NO_BRP_CHECK_BYTECODE_VERSION=true
 %endif
 
 ant -lib build/lib -Dbasedir=build -Dhtdoc=%{docroot} -DdestDir=%{buildroot} -DpackageName=open-xchange-messaging-sms -f build/build.xml build
-ant -lib build/lib -Dbasedir=build -Dhtdoc=%{docroot} -DdestDir=%{buildroot} -DpackageName=open-xchange-messaging-sms -DbuildTarget=installGui -f build/build.xml build
-ant -lib build/lib -Dbasedir=build -Dhtdoc=%{docroot} -DdestDir=%{buildroot} -DpackageName=open-xchange-messaging-sms -DbuildTarget=installGuiTheme -f build/build.xml build
 
 %clean
 %{__rm} -rf %{buildroot}
@@ -77,17 +48,6 @@ ant -lib build/lib -Dbasedir=build -Dhtdoc=%{docroot} -DdestDir=%{buildroot} -Dp
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
 /opt/open-xchange/bundles/*
-
-%files gui
-%defattr(-,root,root)
-%dir %{docroot}/ox6/plugins/com.openexchange.messaging.sms
-%{docroot}/ox6/plugins/com.openexchange.messaging.sms/lang/*
-%{docroot}/ox6/plugins/com.openexchange.messaging.sms/*.js
-
-%files gui-theme-default
-%defattr(-,root,root)
-%dir %{docroot}/ox6/plugins/com.openexchange.messaging.sms/images
-%{docroot}/ox6/plugins/com.openexchange.messaging.sms/images/*
 
 %changelog
 * Wed May 09 2012 Marcus Klein  <marcus.klein@open-xchange.com>
