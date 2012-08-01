@@ -85,6 +85,10 @@ if [ ${1:-0} -eq 2 ]; then
     ##
     ## end update from < 6.21
     ##
+    find /opt/open-xchange/etc/crawlers -name "*.yml" -print0 | while read -d $'\0' i; do
+        ox_update_permissions "$i" open-xchange:root 644
+    done
+    ox_update_permissions "/opt/open-xchange/etc/crawlers" open-xchange:root 755
 fi
 
 %clean
@@ -98,8 +102,8 @@ fi
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/etc/
 %config(noreplace) /opt/open-xchange/etc/*
-%dir /opt/open-xchange/etc/crawlers/
-%config(noreplace) /opt/open-xchange/etc/crawlers/*
+%dir %attr(755,open-xchange,root) /opt/open-xchange/etc/crawlers/
+%config(noreplace) %attr(644,open-xchange,root) /opt/open-xchange/etc/crawlers/*
 %doc docs/
 
 %changelog
