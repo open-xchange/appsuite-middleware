@@ -374,33 +374,35 @@ public class NoSQLSessionStorageService implements SessionStorageService {
         while (rowIterator.hasNext()) {
             Row<String, String, String> row = rowIterator.next();
             ColumnSlice<String, String> slice = row.getColumnSlice();
-            String sessionId = slice.getColumnByName("sessionId").getValue();
-            String loginName = slice.getColumnByName("loginName").getValue();
-            String password = slice.getColumnByName("password").getValue();
-            int contextId2 = Integer.parseInt(slice.getColumnByName("contextId").getValue());
-            int userId2 = Integer.parseInt(slice.getColumnByName("userId").getValue());
-            String secret = slice.getColumnByName("secret").getValue();
-            String login = slice.getColumnByName("login").getValue();
-            String randomToken = slice.getColumnByName("randomToken").getValue();
-            String localIP = slice.getColumnByName("localIP").getValue();
-            String authId = slice.getColumnByName("authId").getValue();
-            String hash = slice.getColumnByName("hash").getValue();
-            String client = slice.getColumnByName("client").getValue();
-            Session session = new StoredSession(
-                sessionId,
-                loginName,
-                password,
-                contextId2,
-                userId2,
-                secret,
-                login,
-                randomToken,
-                localIP,
-                authId,
-                hash,
-                client,
-                null);
-            list.add(session);
+            if (slice.getColumns().size() > 0) {
+                String sessionId = row.getKey();
+                String loginName = slice.getColumnByName("loginName").getValue();
+                String password = slice.getColumnByName("password").getValue();
+                int contextId2 = Integer.parseInt(slice.getColumnByName("contextId").getValue());
+                int userId2 = Integer.parseInt(slice.getColumnByName("userId").getValue());
+                String secret = slice.getColumnByName("secret").getValue();
+                String login = slice.getColumnByName("login").getValue();
+                String randomToken = slice.getColumnByName("randomToken").getValue();
+                String localIP = slice.getColumnByName("localIp").getValue();
+                String authId = slice.getColumnByName("authId").getValue();
+                String hash = slice.getColumnByName("hash").getValue();
+                String client = slice.getColumnByName("client").getValue();
+                Session session = new StoredSession(
+                    sessionId,
+                    loginName,
+                    password,
+                    contextId2,
+                    userId2,
+                    secret,
+                    login,
+                    randomToken,
+                    localIP,
+                    authId,
+                    hash,
+                    client,
+                    null);
+                list.add(session);
+            }
         }
         return list;
     }
@@ -457,9 +459,10 @@ public class NoSQLSessionStorageService implements SessionStorageService {
     @Override
     public Session getSessionByAlternativeId(String altId) throws OXException {
         return null;
-//        OXException e = OXNoSQLSessionStorageExceptionCodes.NOSQL_SESSIONSTORAGE_UNSUPPORTED_OPERATION.create("getSessionsByAlternativeId");
-//        log.warn(e.getMessage(), e);
-//        throw e;
+        // OXException e =
+        // OXNoSQLSessionStorageExceptionCodes.NOSQL_SESSIONSTORAGE_UNSUPPORTED_OPERATION.create("getSessionsByAlternativeId");
+        // log.warn(e.getMessage(), e);
+        // throw e;
     }
 
     @Override
