@@ -52,7 +52,7 @@ package com.openexchange.calendar.json.actions;
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
@@ -281,21 +281,19 @@ public final class AllAction extends AppointmentAction {
             it = null;
 
             if (listOrder && !objectList.isEmpty()) {
-                final DateOrderObject[] dateOrderObjectArray = objectList.toArray(new DateOrderObject[objectList.size()]);
-                Arrays.sort(dateOrderObjectArray);
+                Collections.sort(objectList);
 
                 switch (orderDir) {
                 case ASCENDING:
                 case NO_ORDER:
-                    for (int a = 0; a < dateOrderObjectArray.length; a++) {
-                        final Appointment appointmentObj = (Appointment) dateOrderObjectArray[a].getObject();
-                        checkAndAddAppointment(appointmentList, appointmentObj, startUTC, endUTC, calColl);
+                    for (final DateOrderObject dateOrderObject : objectList) {
+                        checkAndAddAppointment(appointmentList, (Appointment) dateOrderObject.getObject(), startUTC, endUTC, calColl);
                     }
                     break;
                 case DESCENDING:
-                    for (int a = dateOrderObjectArray.length - 1; a >= 0; a--) {
-                        final Appointment appointmentObj = (Appointment) dateOrderObjectArray[a].getObject();
-                        checkAndAddAppointment(appointmentList, appointmentObj, startUTC, endUTC, calColl);
+                    Collections.reverse(objectList);
+                    for (final DateOrderObject dateOrderObject : objectList) {
+                        checkAndAddAppointment(appointmentList, (Appointment) dateOrderObject.getObject(), startUTC, endUTC, calColl);
                     }
                 }
             }
