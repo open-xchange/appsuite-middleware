@@ -105,7 +105,10 @@ public class SMTPExceptionMessage implements LocalizableStrings {
      */
     public final static String NOT_CONNECTED_MSG = "No storage access because mail connection is not connected";
 
-    /** Unable to parse SMTP server URI "%1$s". */
+    // Unable to parse SMTP server URI "%1$s".
     public final static String URI_PARSE_FAILED_MSG = "Unable to parse SMTP server URI \"%1$s\".";
+
+    // The following recipient is not allowed. Please remove associated address and try again.
+    public static final String RECIPIENT_NOT_ALLOWED = "The following recipient is not allowed. Please remove associated address and try again.";
 
 }

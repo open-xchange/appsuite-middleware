@@ -62,8 +62,15 @@ public enum SMTPExceptionCode implements OXExceptionCode {
      * No storage access because mail connection is not connected
      */
     NOT_CONNECTED(SMTPExceptionMessage.NOT_CONNECTED_MSG, CATEGORY_ERROR, 3012),
-    /** Unable to parse SMTP server URI "%1$s". */
-    URI_PARSE_FAILED(SMTPExceptionMessage.URI_PARSE_FAILED_MSG, CATEGORY_CONFIGURATION, 3013);
+    /**
+     * Unable to parse SMTP server URI "%1$s".
+     */
+    URI_PARSE_FAILED(SMTPExceptionMessage.URI_PARSE_FAILED_MSG, CATEGORY_CONFIGURATION, 3013),
+    /**
+     * The following recipient is not allowed. Please remove associated address and try again.
+     */
+    RECIPIENT_NOT_ALLOWED(SMTPExceptionMessage.RECIPIENT_NOT_ALLOWED, CATEGORY_USER_INPUT, 3014),
+    ;
 
     private final String message;
 
