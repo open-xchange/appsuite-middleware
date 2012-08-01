@@ -17,6 +17,10 @@ public class ID {
     private String context;
     private String resource;
 
+    /**
+     * Pattern to match IDs consisting of protocol, user, context and resource
+     * e.g. xmpp://user@context/notebook
+     * */
     private static final Pattern PATTERN = Pattern.compile("(?:(\\w+)://)?([^@]+)@([^/]+)/?(.*)");
 
     public ID(final String id) {

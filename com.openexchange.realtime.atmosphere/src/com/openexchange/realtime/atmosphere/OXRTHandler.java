@@ -57,7 +57,7 @@ import com.openexchange.tools.session.ServerSession;
  * {@link OXRTHandler} OXRTHandlers are used to handle incoming and outgoing
  * Stanzas.
  * <p>
- * Channel handlers like e.g. {@link RTAtmosphereHandler} chose an OXRTHandler
+ * Channel handlers like e.g. {@link RTAtmosphereHandler} choose an OXRTHandler
  * based on the namespace of the Stanzas and the OXRTHandler and delegate the
  * further processing and handling to them.
  * <p> 
