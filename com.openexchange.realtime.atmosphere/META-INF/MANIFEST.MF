@@ -27,3 +27,4 @@ Import-Package: com.openexchange.authentication,
  org.json,
  org.osgi.framework,
  org.osgi.util.tracker
+Export-Package: com.openexchange.realtime.atmosphere

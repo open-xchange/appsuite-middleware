@@ -7,6 +7,7 @@ import com.openexchange.http.grizzly.services.atmosphere.AtmosphereService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.realtime.Channel;
+import com.openexchange.realtime.atmosphere.OXRTConversionHandler;
 import com.openexchange.realtime.atmosphere.OXRTHandler;
 import com.openexchange.realtime.atmosphere.impl.HandlerLibrary;
 import com.openexchange.realtime.atmosphere.impl.RTAtmosphereChannel;
@@ -19,10 +20,21 @@ public class AtmosphereRTActivator extends HousekeepingActivator {
 		return new Class<?>[]{AtmosphereService.class};
 	}
 
+	/*
+	 * Start the basic atmosphere bundle, initialize a handler library and
+	 * listen for new OXRTHandler services being added. When new services are
+	 * detected add them to the library. This is important to the
+	 * AtmosphereChannel so that it can decide if it is able to process incoming
+	 * Stanzas into POJOs and back again via the RTAtmosphereHandler.
+	 */
 	@Override
 	protected void startBundle() throws Exception {
 		
+	    //Set the ServiceLookup reference directly as class variable
+	    OXRTConversionHandler.services = this;
+	    
 		final HandlerLibrary handlerLibrary = new HandlerLibrary();
+		
 		track(OXRTHandler.class, new SimpleRegistryListener<OXRTHandler>() {
 
 			public void added(ServiceReference<OXRTHandler> ref,

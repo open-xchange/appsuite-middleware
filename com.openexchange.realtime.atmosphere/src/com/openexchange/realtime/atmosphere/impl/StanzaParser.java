@@ -61,16 +61,17 @@ import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.packet.Stanza;
 
 /**
- * {@link StanzaParser}
+ * {@link StanzaParser} -  
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class StanzaParser {
 
 	/**
-	 * @param request
-	 * @return
-	 * @throws OXException
+	 * @param request the incoming request to parse into a Stanza  
+	 * @return the parsed Stanza
+	 * @throws OXException if the request String could not be parsed
 	 */
 	public static Stanza parse(String request) throws OXException {
 		try {

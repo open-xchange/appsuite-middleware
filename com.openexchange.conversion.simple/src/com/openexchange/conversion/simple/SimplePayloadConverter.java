@@ -86,7 +86,7 @@ public interface SimplePayloadConverter {
     Quality getQuality();
 
     /**
-     * Converts specified request data and result pair using given converter.
+     * Converts payload data using current session using given converter when needed.
      *
      * @param data The data to convert
      * @param session The associated server session

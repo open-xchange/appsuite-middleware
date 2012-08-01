@@ -47,69 +47,61 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.impl;
+package com.openexchange.realtime.atmosphere;
 
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-import com.openexchange.realtime.atmosphere.OXRTHandler;
+import com.openexchange.exception.OXException;
+import com.openexchange.realtime.MessageDispatcher;
+import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
+
 
 /**
- * {@link HandlerLibrary} - Tracks registered {@link OXRTHandler handlers} and
- * makes them accessible through {@link #getHandlerFor(String)}.
- * This is important to the AtmosphereChannel and associated Channel handler.
- * The Channel can decide if it is able to process incoming Stanzas into POJOs
- * and back again. The Channel handler can delegate the transformation to the
- * proper OXRTHandler.
- * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
+ * {@link OXRTConversionHandler} Handle Conversion 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class HandlerLibrary {
+public class OXRTConversionHandler implements OXRTHandler {
 
+    public static ServiceLookup services;
+    private final String namespace, format;
+    
     /**
-     * The collection for registered {@link OXRTHandler handlers}.
+     * Initializes a new {@link OXRTConversionHandler}.
+     * @param namespace the namespace of Stanzas this ConversionOXRTHandler can handle
+     * @param format the format of POJOs that incoming Stanzas should be converted to
      */
-    private final List<OXRTHandler> handlers;
-
-    /**
-     * Initializes a new {@link HandlerLibrary}.
-     */
-    public HandlerLibrary() {
-        super();
-        handlers = new CopyOnWriteArrayList<OXRTHandler>(); // Use a concurrent collection
+    public OXRTConversionHandler(String namespace, String format) {
+        this.namespace = namespace;
+        this.format = format;
+    }
+    
+    @Override
+    public String getNamespace() {
+        return namespace;
     }
 
-    /**
-     * Gets the handler appropriate for specified namespace identifier.
-     * 
-     * @param namespace The namespace identifier
-     * @return The appropriate handler or <code>null</code> if none is applicable
-     */
-    public OXRTHandler getHandlerFor(String namespace) {
-        for (OXRTHandler transformer : handlers) {
-            if (transformer.getNamespace().equals(namespace)) {
-                return transformer;
-            }
-        }
-        return null;
+    @Override
+    public void incoming(Stanza stanza, ServerSession session) throws OXException {
+        stanza.setPayload(stanza.getPayload().to(format, session));
+        send(stanza, session);
     }
 
+    @Override
+    public void outgoing(Stanza stanza, ServerSession session, StanzaSender sender) throws OXException {
+        stanza.setPayload(stanza.getPayload().to("json", session));
+        sender.send(stanza);
+    }
+    
     /**
-     * Adds specified handler/transformer to this library.
-     * 
-     * @param transformer The handler to add
+     * Send the Stanza by getting the MessageDispatcher service and letting it
+     * handle the further processing of the Stanza. 
+     * @param stanza the stanza to send
+     * @param session the associated ServerSession
+     * @throws OXException when sending the Stanza fails
      */
-    public void add(OXRTHandler transformer) {
-        handlers.add(transformer);
+    protected void send(Stanza stanza, ServerSession session) throws OXException {
+        services.getService(MessageDispatcher.class).send(stanza, session);
     }
 
-    /**
-     * Removes specified handler/transformer from this library.
-     * 
-     * @param transformer The handler to remove
-     */
-    public void remove(OXRTHandler transformer) {
-        handlers.remove(transformer);
-    }
 }

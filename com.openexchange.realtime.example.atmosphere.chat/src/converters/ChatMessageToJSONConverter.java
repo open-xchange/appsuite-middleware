@@ -47,69 +47,57 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.impl;
+package converters;
 
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-import com.openexchange.realtime.atmosphere.OXRTHandler;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.conversion.simple.SimpleConverter;
+import com.openexchange.conversion.simple.SimplePayloadConverter;
+import com.openexchange.exception.OXException;
+import com.openexchange.realtime.example.chat.ChatMessage;
+import com.openexchange.tools.session.ServerSession;
+
 
 /**
- * {@link HandlerLibrary} - Tracks registered {@link OXRTHandler handlers} and
- * makes them accessible through {@link #getHandlerFor(String)}.
- * This is important to the AtmosphereChannel and associated Channel handler.
- * The Channel can decide if it is able to process incoming Stanzas into POJOs
- * and back again. The Channel handler can delegate the transformation to the
- * proper OXRTHandler.
- * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
+ * {@link ChatMessageToJSONConverter} - Converts a Stanza Payload from a ChatMessage
+ * POJO into a JSON Object.
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class HandlerLibrary {
+public class ChatMessageToJSONConverter implements SimplePayloadConverter {
 
-    /**
-     * The collection for registered {@link OXRTHandler handlers}.
-     */
-    private final List<OXRTHandler> handlers;
-
-    /**
-     * Initializes a new {@link HandlerLibrary}.
-     */
-    public HandlerLibrary() {
-        super();
-        handlers = new CopyOnWriteArrayList<OXRTHandler>(); // Use a concurrent collection
+    @Override
+    public String getInputFormat() {
+        return "chatMessage";
     }
 
-    /**
-     * Gets the handler appropriate for specified namespace identifier.
-     * 
-     * @param namespace The namespace identifier
-     * @return The appropriate handler or <code>null</code> if none is applicable
-     */
-    public OXRTHandler getHandlerFor(String namespace) {
-        for (OXRTHandler transformer : handlers) {
-            if (transformer.getNamespace().equals(namespace)) {
-                return transformer;
-            }
+    @Override
+    public String getOutputFormat() {
+        return "json";
+    }
+
+    @Override
+    public Quality getQuality() {
+        return Quality.GOOD;
+    }
+
+    @Override
+    public Object convert(Object data, ServerSession session, SimpleConverter converter) throws OXException {
+        try {
+        ChatMessage message = (ChatMessage) data;
+        
+        JSONObject object = new JSONObject();
+        
+        object.put("message", message.getMessage());
+        if (message.getPriority() != ChatMessage.NO_PRIORITY) {
+            object.put("priority", message.getPriority());
         }
-        return null;
+        
+        return object;
+    } catch (JSONException x) {
+        throw OXException.general("Could not create json object: " + x.getMessage());
     }
+    
+}
 
-    /**
-     * Adds specified handler/transformer to this library.
-     * 
-     * @param transformer The handler to add
-     */
-    public void add(OXRTHandler transformer) {
-        handlers.add(transformer);
-    }
-
-    /**
-     * Removes specified handler/transformer from this library.
-     * 
-     * @param transformer The handler to remove
-     */
-    public void remove(OXRTHandler transformer) {
-        handlers.remove(transformer);
-    }
 }

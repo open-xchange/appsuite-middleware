@@ -74,10 +74,14 @@ import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
- * {@link RTAtmosphereHandler}
+ * {@link RTAtmosphereHandler} - Handler that gets associated with the
+ * {@link RTAtmosphereChannel} and does the main work of handling incoming and
+ * outgoing Stanzas. Transformation of Stanzas is handed over to the proper
+ * OXRTHandler 
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 	// TODO: Figure Out JSONP and Long-Polling State management. Hot-Swap the
@@ -86,14 +90,17 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 
 	private final ServiceLookup services;
 
+	// Keep track of session <-> RTAtmosphereState associations
 	private final ConcurrentMap<String, RTAtmosphereState> uuid2State;
+	
 	private final IDMap<RTAtmosphereState> id2State;
 	private final HandlerLibrary library;
 
 	/**
 	 * Initializes a new {@link RTAtmosphereHandler}.
 	 * 
-	 * @param library The library to use
+	 * @param library  The library to use for OXRTHandler lookups needed for
+	 *                  transformations of incoming and outgoing stanzas
 	 * @param services The service-lookup providing needed services
 	 */
 	public RTAtmosphereHandler(HandlerLibrary library, ServiceLookup services) {
@@ -134,6 +141,12 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 
 	}
 
+	/**
+	 * Check the AtmosphereResource for the session header/parameter, add it to
+	 * the uuid2state map that tracks 
+	 * @param r the AtmosphereResource
+	 * @return
+	 */
 	private RTAtmosphereState getState(AtmosphereResource r) {
 		RTAtmosphereState state = new RTAtmosphereState();
 		String session = r.getRequest()
@@ -141,6 +154,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 		if (session == null) {
 			session = r.getRequest().getParameter("session");
 		}
+		//TODO: missing session valid?
 		RTAtmosphereState previous = uuid2State.putIfAbsent(session, state);
 		return previous != null ? previous : state;
 	}
