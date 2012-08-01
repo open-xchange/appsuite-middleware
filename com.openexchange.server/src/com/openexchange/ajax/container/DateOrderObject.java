@@ -66,13 +66,34 @@ public class DateOrderObject implements Comparable<DateOrderObject> {
 
 	protected TimeZone timeZone;
 
-	public DateOrderObject(final Date orderBy, final Object obj) {
-		this.orderBy = orderBy;
-		this.obj = obj;
-	}
+	protected String userIdentifier;
+
+    public DateOrderObject(final Date orderBy, final Object obj) {
+        this.orderBy = orderBy;
+        this.obj = obj;
+    }
 
     /**
-     * Gets the time zone
+     * Gets the optional user identifier.
+     *
+     * @return The user identifier or <code>null</code>
+     */
+    public String getUserIdentifier() {
+        return userIdentifier;
+    }
+
+    /**
+     * Sets the user identifier.
+     *
+     * @param userIdentifier The user identifier to set
+     */
+    public DateOrderObject setUserIdentifier(String userIdentifier) {
+        this.userIdentifier = userIdentifier;
+        return this;
+    }
+
+    /**
+     * Gets the optional time zone
      *
      * @return The time zone or <code>null</code>
      */

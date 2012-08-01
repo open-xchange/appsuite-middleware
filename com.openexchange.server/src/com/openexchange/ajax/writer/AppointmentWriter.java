@@ -123,24 +123,26 @@ public class AppointmentWriter extends CalendarWriter {
         this.calColl = calColl;
     }
 
-    public void writeArray(final Appointment appointmentObj, final int cols[], final Date betweenStart,
+    public JSONArray writeArray(final Appointment appointmentObj, final int cols[], final Date betweenStart,
             final Date betweenEnd, final JSONArray jsonArray) throws JSONException {
         if (appointmentObj.getFullTime() && betweenStart != null && betweenEnd != null) {
             if (getCalendarCollectionService().inBetween(appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate()
                     .getTime(), betweenStart.getTime(), betweenEnd.getTime())) {
-                writeArray(appointmentObj, cols, jsonArray);
+                return writeArray(appointmentObj, cols, jsonArray);
             }
         } else {
-            writeArray(appointmentObj, cols, jsonArray);
+            return writeArray(appointmentObj, cols, jsonArray);
         }
+        return null;
     }
 
-    public void writeArray(final Appointment appointment, final int[] columns, final JSONArray json) throws JSONException {
+    public JSONArray writeArray(final Appointment appointment, final int[] columns, final JSONArray json) throws JSONException {
         final JSONArray array = new JSONArray();
         for (final int column : columns) {
             writeField(appointment, column, timeZone, array);
         }
         json.put(array);
+        return array;
     }
 
     public void writeAppointment(final Appointment appointmentObject, final JSONObject jsonObj) throws JSONException {
