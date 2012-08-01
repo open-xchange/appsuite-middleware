@@ -108,7 +108,7 @@ public class SMTPExceptionMessage implements LocalizableStrings {
     // Unable to parse SMTP server URI "%1$s".
     public final static String URI_PARSE_FAILED_MSG = "Unable to parse SMTP server URI \"%1$s\".";
 
-    // The following recipient is not allowed. Please remove associated address and try again.
-    public static final String RECIPIENT_NOT_ALLOWED = "The following recipient is not allowed. Please remove associated address and try again.";
+    // The following recipient is not allowed: %1$s. Please remove associated address and try again.
+    public static final String RECIPIENT_NOT_ALLOWED = "The following recipient is not allowed: %1$s. Please remove associated address and try again.";
 
 }

@@ -67,7 +67,7 @@ public enum SMTPExceptionCode implements OXExceptionCode {
      */
     URI_PARSE_FAILED(SMTPExceptionMessage.URI_PARSE_FAILED_MSG, CATEGORY_CONFIGURATION, 3013),
     /**
-     * The following recipient is not allowed. Please remove associated address and try again.
+     * The following recipient is not allowed: %1$s. Please remove associated address and try again.
      */
     RECIPIENT_NOT_ALLOWED(SMTPExceptionMessage.RECIPIENT_NOT_ALLOWED, CATEGORY_USER_INPUT, 3014),
     ;
