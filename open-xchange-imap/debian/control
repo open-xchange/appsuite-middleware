@@ -8,8 +8,7 @@ Homepage: http://www.open-xchange.com
 
 Package: open-xchange-imap
 Architecture: all
-Pre-Depends: open-xchange-core (>= @OXVERSION@)
-Depends: ${misc:Depends}
+Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
 Provides: open-xchange-mailstore
 Description: The Open-Xchange IMAP Bundle
  This package implements the IMAP connection to the mail storages for Open-Xchange.
