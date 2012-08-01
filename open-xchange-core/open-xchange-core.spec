@@ -160,7 +160,7 @@ find %{buildroot}/opt/open-xchange/etc \
         -type f \
         -printf "%%%config(noreplace) %p\n" > %{configfiles}
 perl -pi -e 's;%{buildroot};;' %{configfiles}
-perl -pi -e 's;(^.*?)\s+(.*/(mail|configdb|server)\.properties)$;$1 %%%attr(640,root,open-xchange) $2;' %{configfiles}
+perl -pi -e 's;(^.*?)\s+(.*/(mail|configdb|server|filestorage)\.properties)$;$1 %%%attr(640,root,open-xchange) $2;' %{configfiles}
 
 %post
 if [ ${1:-0} -eq 2 ]; then
@@ -266,6 +266,12 @@ if [ ${1:-0} -eq 2 ]; then
     ##
     ## end update from < 6.21
     ##
+    ox_update_permissions "/var/log/open-xchange" open-xchange:root 750
+    ox_update_permissions "/opt/open-xchange/osgi" open-xchange:root 750
+    ox_update_permissions "/opt/open-xchange/etc/mail.properties" root:open-xchange 640
+    ox_update_permissions "/opt/open-xchange/etc/configdb.properties" root:open-xchange 640
+    ox_update_permissions "/opt/open-xchange/etc/server.properties" root:open-xchange 640
+    ox_update_permissions "/opt/open-xchange/etc/filestorage.properties" root:open-xchange 640
 fi
 
 %clean

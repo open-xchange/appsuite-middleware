@@ -151,6 +151,7 @@ setConfigFilePermissions() {
     ox_update_permissions "/opt/open-xchange/etc/mail.properties" root:open-xchange 640
     ox_update_permissions "/opt/open-xchange/etc/configdb.properties" root:open-xchange 640
     ox_update_permissions "/opt/open-xchange/etc/server.properties" root:open-xchange 640
+    ox_update_permissions "/opt/open-xchange/etc/filestorage.properties" root:open-xchange 640
 }
 
 case "$1" in
