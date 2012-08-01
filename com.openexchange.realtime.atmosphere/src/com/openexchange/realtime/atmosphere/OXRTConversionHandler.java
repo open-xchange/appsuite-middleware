@@ -57,7 +57,8 @@ import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link OXRTConversionHandler} Handle Conversion 
+ * {@link OXRTConversionHandler} - Handles Conversion of Stanzas for a given
+ * namespace. 
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
@@ -68,7 +69,7 @@ public class OXRTConversionHandler implements OXRTHandler {
     
     /**
      * Initializes a new {@link OXRTConversionHandler}.
-     * @param namespace the namespace of Stanzas this ConversionOXRTHandler can handle
+     * @param namespace the namespace of Stanzas this OXRTConversionHandler can handle
      * @param format the format of POJOs that incoming Stanzas should be converted to
      */
     public OXRTConversionHandler(String namespace, String format) {
