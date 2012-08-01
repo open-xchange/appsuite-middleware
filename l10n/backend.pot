@@ -10006,11 +10006,11 @@ msgstr ""
 msgid "Unable to parse SMTP server URI \"%1$s\"."
 msgstr ""
 
-#. The following recipient is not allowed. Please remove associated address and try again.
+#. The following recipient is not allowed: %1$s. Please remove associated address and try again.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.smtp/src/com/openexchange/smtp/SMTPExceptionMessage.java:112
 msgid ""
-"The following recipient is not allowed. Please remove associated address and "
-"try again."
+"The following recipient is not allowed: %1$s. Please remove associated "
+"address and try again."
 msgstr ""
 
 #. Could not find Apache Solr Core entry for user %1$s and module %2$s in context %3$s.
