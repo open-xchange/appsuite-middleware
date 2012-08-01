@@ -9,5 +9,6 @@ Build-Conflicts: ecj, libecj-java-gcj, ecj-gcj, libecj-java, gcj-4.3-base, libgc
 
 Package: open-xchange-calendar-printing
 Architecture: all
-Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
+Pre-Depends: open-xchange-core (>= @OXVERSION@)
+Depends: ${misc:Depends}
 Description: Printing calendars via templating
