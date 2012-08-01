@@ -55,6 +55,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Filter;
 import com.openexchange.config.PropertyListener;
 
 
@@ -155,6 +156,15 @@ public class MockConfigurationService implements ConfigurationService {
 
     @Override
     public Map<String, Object> getYamlInFolder(final String dirName) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.config.ConfigurationService#getFilterFromProperty(java.lang.String)
+     */
+    @Override
+    public Filter getFilterFromProperty(String name) {
         // TODO Auto-generated method stub
         return null;
     }
