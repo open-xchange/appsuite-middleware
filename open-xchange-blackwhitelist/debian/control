@@ -11,9 +11,3 @@ Architecture: all
 Pre-Depends: open-xchange-core (>= @OXVERSION@)
 Depends: ${misc:Depends}
 Description: Blackwhitelist
-
-Package: open-xchange-blackwhitelist-gui
-Architecture: all
-Depends: ${misc:Depends}, open-xchange-gui
-Description: Blackwhitelist GUI
-
