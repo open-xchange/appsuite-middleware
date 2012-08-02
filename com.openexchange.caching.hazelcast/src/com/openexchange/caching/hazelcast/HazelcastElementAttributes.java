@@ -76,7 +76,7 @@ public final class HazelcastElementAttributes implements ElementAttributes {
      * Initializes a new {@link HazelcastElementAttributes}.
      * 
      */
-    public HazelcastElementAttributes(MapEntry<Serializable, Serializable> mapEntry, MapConfig mapConfig, IMap<Serializable, Serializable> map) {
+    public HazelcastElementAttributes(final MapEntry<Serializable, Serializable> mapEntry, final MapConfig mapConfig, final IMap<Serializable, Serializable> map) {
         super();
         this.mapEntry = mapEntry;
         this.mapConfig = mapConfig;
@@ -84,13 +84,13 @@ public final class HazelcastElementAttributes implements ElementAttributes {
     }
 
     @Override
-    public void setVersion(long version) {
+    public void setVersion(final long version) {
         // Huh?
     }
 
     @Override
-    public void setMaxLifeSeconds(long mls) {
-        throw new UnsupportedOperationException("HazelcastElementAttributes.setMaxLifeSeconds()");
+    public void setMaxLifeSeconds(final long mls) {
+        mapConfig.setTimeToLiveSeconds((int) mls);
     }
 
     @Override
@@ -99,13 +99,13 @@ public final class HazelcastElementAttributes implements ElementAttributes {
     }
 
     @Override
-    public void setIdleTime(long idle) {
-        throw new UnsupportedOperationException("HazelcastElementAttributes.setIdleTime()");
+    public void setIdleTime(final long idle) {
+        mapConfig.setMaxIdleSeconds((int) idle);
     }
 
     @Override
-    public void setSize(int size) {
-        throw new UnsupportedOperationException("HazelcastElementAttributes.setSize()");
+    public void setSize(final int size) {
+        mapConfig.getMaxSizeConfig().setSize(size);
     }
 
     @Override
@@ -156,7 +156,7 @@ public final class HazelcastElementAttributes implements ElementAttributes {
     }
 
     @Override
-    public void setIsSpool(boolean val) {
+    public void setIsSpool(final boolean val) {
         // Ignore
     }
 
@@ -166,7 +166,7 @@ public final class HazelcastElementAttributes implements ElementAttributes {
     }
 
     @Override
-    public void setIsLateral(boolean val) {
+    public void setIsLateral(final boolean val) {
         // Ignore
     }
 
@@ -176,7 +176,7 @@ public final class HazelcastElementAttributes implements ElementAttributes {
     }
 
     @Override
-    public void setIsRemote(boolean val) {
+    public void setIsRemote(final boolean val) {
         // Ignore
     }
 
@@ -186,34 +186,28 @@ public final class HazelcastElementAttributes implements ElementAttributes {
     }
 
     @Override
-    public void setIsEternal(boolean val) {
+    public void setIsEternal(final boolean val) {
         // Ignore
     }
 
     @Override
-    public void addElementEventHandler(ElementEventHandler eventHandler) {
+    public void addElementEventHandler(final ElementEventHandler eventHandler) {
         map.addEntryListener(new EntryListenerImpl(eventHandler), true);
-
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.caching.ElementAttributes#getElementEventHandlers()
-     */
     @Override
     public ArrayList<ElementEventHandler> getElementEventHandlers() {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException("HazelcastElementAttributes.getElementEventHandlers()");
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.caching.ElementAttributes#addElementEventHandlers(java.util.ArrayList)
-     */
     @Override
-    public void addElementEventHandlers(ArrayList<ElementEventHandler> eventHandlers) {
-        // TODO Auto-generated method stub
-
+    public void addElementEventHandlers(final ArrayList<ElementEventHandler> eventHandlers) {
+        if (null == eventHandlers || eventHandlers.isEmpty()) {
+            return;
+        }
+        for (final ElementEventHandler elementEventHandler : eventHandlers) {
+            addElementEventHandler(elementEventHandler);
+        }
     }
 
 }

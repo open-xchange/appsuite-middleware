@@ -59,6 +59,7 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.caching.InvalidatedMarker;
+import com.openexchange.caching.SupportsLocalOperations;
 import com.openexchange.caching.objects.CachedSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
@@ -143,7 +144,7 @@ public final class SessionCache {
     }
 
     /**
-     * Checks if cache contains invalidate marker for given context (and performs local-remove it if present).
+     * Checks if cache contains invalidate marker for given context (and performs local-remove if present).
      *
      * @param contextId The context identifier
      * @return <code>true</code> if present in cache; otherwise <code>false</code>
@@ -152,33 +153,38 @@ public final class SessionCache {
     @SuppressWarnings("unchecked")
     public boolean containsInvalidateMarker(final int contextId) throws OXException {
         final Cache cache = getCache();
-        final Lock readLock = readWriteLock.readLock();
-        readLock.lock();
-        try {
-            final Integer key = Integer.valueOf(contextId);
-            Object element = cache.get(key);
-            if ((null != element) && (element instanceof InvalidatedMarker) && (contextId == ((InvalidatedMarker<Integer>) element).getIdentifier().intValue())) {
-                final Lock writeLock = readWriteLock.writeLock();
-                readLock.unlock();
-                writeLock.lock();
-                try {
-                    element = cache.get(key);
-                    if (null != element) {
-                        cache.localRemove(key);
-                        if (LOG.isInfoEnabled()) {
-                            LOG.info("Detected & (locally) removed invalidate marker for context: " + contextId);
+        final boolean supportsLocal = (cache instanceof SupportsLocalOperations);
+        if (supportsLocal) {
+            // Proceed
+            final Lock readLock = readWriteLock.readLock();
+            readLock.lock();
+            try {
+                final Integer key = Integer.valueOf(contextId);
+                Object element = cache.get(key);
+                if ((null != element) && (element instanceof InvalidatedMarker) && (contextId == ((InvalidatedMarker<Integer>) element).getIdentifier().intValue())) {
+                    final Lock writeLock = readWriteLock.writeLock();
+                    readLock.unlock();
+                    writeLock.lock();
+                    try {
+                        element = cache.get(key);
+                        if (null != element) {
+                            cache.localRemove(key);
+                            if (LOG.isInfoEnabled()) {
+                                LOG.info("Detected & (locally) removed invalidate marker for context: " + contextId);
+                            }
                         }
+                    } finally {
+                        readLock.lock();
+                        writeLock.unlock();
                     }
-                } finally {
-                    readLock.lock();
-                    writeLock.unlock();
+                    return true;
                 }
-                return true;
+                return false;
+            } finally {
+                readLock.unlock();
             }
-            return false;
-        } finally {
-            readLock.unlock();
         }
+        return false;
     }
 
     /**

@@ -47,75 +47,19 @@
  *
  */
 
-package com.openexchange.caching.hazelcast;
-
-import java.io.InputStream;
-import java.io.Serializable;
-import com.hazelcast.core.HazelcastInstance;
-import com.openexchange.caching.Cache;
-import com.openexchange.caching.CacheKey;
-import com.openexchange.caching.CacheKeyImpl;
-import com.openexchange.caching.CacheService;
-import com.openexchange.exception.OXException;
-
+package com.openexchange.caching;
 
 /**
- * {@link HazelcastCacheService}
- *
+ * {@link SupportsLocalOperations} - Marker interface to indicate support for:
+ * <p>
+ * <ul>
+ * <li> {@link Cache#localPut(java.io.Serializable, java.io.Serializable)}<br>&nbsp;</li>
+ * <li> {@link Cache#localRemove(java.io.Serializable)}<br>&nbsp;</li>
+ * <li> {@link Cache#localRemoveFromGroup(java.io.Serializable, String)}<br>&nbsp;</li>
+ * </ul>
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class HazelcastCacheService implements CacheService {
-
-    private final HazelcastInstance hazelcastInstance;
-
-    /**
-     * Initializes a new {@link HazelcastCacheService}.
-     */
-    public HazelcastCacheService(final HazelcastInstance hazelcastInstance) {
-        super();
-        this.hazelcastInstance = hazelcastInstance;
-    }
-
-    @Override
-    public Cache getCache(String name) throws OXException {
-        return new HazelcastCache(hazelcastInstance.<Serializable, Serializable>getMap(name), hazelcastInstance);
-    }
-
-    @Override
-    public void freeCache(String name) throws OXException {
-        hazelcastInstance.getMap(name).destroy();
-    }
-
-    @Override
-    public void loadConfiguration(String cacheConfigFile) throws OXException {
-        // TODO Auto-generated method stub
-    }
-
-    @Override
-    public void loadConfiguration(InputStream inputStream) throws OXException {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void loadDefaultConfiguration() throws OXException {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public CacheKey newCacheKey(int contextId, int objectId) {
-        return new CacheKeyImpl(contextId, objectId);
-    }
-
-    @Override
-    public CacheKey newCacheKey(int contextId, Serializable obj) {
-        return new CacheKeyImpl(contextId, obj);
-    }
-
-    @Override
-    public CacheKey newCacheKey(int contextId, Serializable... objs) {
-        return new CacheKeyImpl(contextId, objs);
-    }
-
+public interface SupportsLocalOperations {
+    // Marker interface
 }

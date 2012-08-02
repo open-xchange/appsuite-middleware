@@ -59,6 +59,7 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheElement;
 import com.openexchange.caching.CacheExceptionCode;
 import com.openexchange.caching.CacheKey;
+import com.openexchange.caching.CacheKeyImpl;
 import com.openexchange.caching.CacheStatistics;
 import com.openexchange.caching.ElementAttributes;
 import com.openexchange.exception.OXException;
@@ -74,6 +75,8 @@ public final class HazelcastCache implements Cache {
 
     private final IMap<Serializable, Serializable> map;
 
+    private volatile MapConfig mapConfig;
+
     /**
      * Initializes a new {@link HazelcastCache}.
      */
@@ -81,6 +84,20 @@ public final class HazelcastCache implements Cache {
         super();
         this.map = map;
         this.hazelcastInstance = hazelcastInstance;
+    }
+
+    private MapConfig getMapConfig() {
+        MapConfig tmp = mapConfig;
+        if (null == tmp) {
+            synchronized (this) {
+                tmp = mapConfig;
+                if (null == tmp) {
+                    tmp = hazelcastInstance.getConfig().getMapConfig(map.getName());
+                    mapConfig = tmp;
+                }
+            }
+        }
+        return tmp;
     }
 
     @Override
@@ -108,14 +125,13 @@ public final class HazelcastCache implements Cache {
         cacheElement.setCacheName(map.getName());
         cacheElement.setKey(key);
         cacheElement.setVal(mapEntry.getValue());
-        final MapConfig mapConfig = hazelcastInstance.getConfig().getMapConfig(map.getName());
-        cacheElement.setElementAttributes(new HazelcastElementAttributes(mapEntry, mapConfig, map));
+        cacheElement.setElementAttributes(new HazelcastElementAttributes(mapEntry, getMapConfig(), map));
         return cacheElement;
     }
 
     @Override
     public ElementAttributes getDefaultElementAttributes() throws OXException {
-        return new HazelcastElementAttributes(null, hazelcastInstance.getConfig().getMapConfig(map.getName()), map);
+        return new HazelcastElementAttributes(null, getMapConfig(), map);
     }
 
     @Override
@@ -138,7 +154,7 @@ public final class HazelcastCache implements Cache {
 
     @Override
     public void put(final Serializable key, final Serializable obj) throws OXException {
-        map.put(key, obj);
+        put(key, obj, null);
     }
 
     @Override
@@ -165,19 +181,7 @@ public final class HazelcastCache implements Cache {
 
     @Override
     public void putInGroup(final Serializable key, final String groupName, final Serializable value) throws OXException {
-        try {
-            @SuppressWarnings("unchecked") ConcurrentHashMap<Serializable, Serializable> groupMap = (ConcurrentHashMap<Serializable, Serializable>) map.get(groupName);
-            if (null == groupMap) {
-                ConcurrentHashMap<Serializable, Serializable> ngroupMap = new ConcurrentHashMap<Serializable, Serializable>();
-                groupMap = (ConcurrentHashMap<Serializable, Serializable>) map.putIfAbsent(groupName, ngroupMap);
-                if (null == groupMap) {
-                    groupMap = ngroupMap;
-                }
-            }
-            groupMap.put(key, value);
-        } catch (final ClassCastException e) {
-            return;
-        }
+        putInGroup(key, groupName, value, null);
     }
 
     @Override
@@ -220,44 +224,48 @@ public final class HazelcastCache implements Cache {
         throw new UnsupportedOperationException("HazelcastCache.localRemoveFromGroup()");
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.caching.Cache#setDefaultElementAttributes(com.openexchange.caching.ElementAttributes)
-     */
     @Override
     public void setDefaultElementAttributes(final ElementAttributes attr) throws OXException {
-        // TODO Auto-generated method stub
-
+        final MapConfig mapConfig = getMapConfig();
+        {
+            final long l = attr.getIdleTime();
+            if (l > 0) {
+                mapConfig.setMaxIdleSeconds((int) l);
+            }
+        }
+        {
+            long l = attr.getMaxLifeSeconds();
+            if (l > 0) {
+                mapConfig.setTimeToLiveSeconds((int) l);
+            } else {
+                l = attr.getTimeToLiveSeconds();
+                if (l > 0) {
+                    mapConfig.setTimeToLiveSeconds((int) l);
+                }
+            }
+        }
+        {
+            final int i = attr.getSize();
+            if (i > 0) {
+                mapConfig.getMaxSizeConfig().setSize(i);
+            }
+        }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.caching.Cache#getStatistics()
-     */
     @Override
     public CacheStatistics getStatistics() {
-        // TODO Auto-generated method stub
+        // TODO
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.caching.Cache#newCacheKey(int, int)
-     */
     @Override
     public CacheKey newCacheKey(final int contextId, final int objectId) {
-        // TODO Auto-generated method stub
-        return null;
+        return new CacheKeyImpl(contextId, objectId);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.caching.Cache#newCacheKey(int, java.io.Serializable[])
-     */
     @Override
     public CacheKey newCacheKey(final int contextId, final Serializable... objs) {
-        // TODO Auto-generated method stub
-        return null;
+        return new CacheKeyImpl(contextId, objs);
     }
 
 }
