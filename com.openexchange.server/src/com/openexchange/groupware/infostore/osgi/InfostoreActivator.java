@@ -123,7 +123,7 @@ public class InfostoreActivator implements BundleActivator {
              */
             final class AvailableTracker extends ServiceTracker<FileStorageServiceRegistry, FileStorageServiceRegistry> {
 
-                public AvailableTracker(final BundleContext context) {
+                AvailableTracker(final BundleContext context) {
                     super(context, FileStorageServiceRegistry.class, null);
                 }
 
