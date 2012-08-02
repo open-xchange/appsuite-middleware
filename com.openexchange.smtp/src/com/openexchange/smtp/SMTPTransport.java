@@ -749,7 +749,7 @@ public final class SMTPTransport extends MailTransport {
         }
         final ConfigurationService service = SMTPServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
         if (null != service) {
-            final Filter filter = service.getFilterFromProperty("com.openexchange.debeka.forwardWhitelist");
+            final Filter filter = service.getFilterFromProperty("com.openexchange.mail.transport.redirectWhitelist");
             if (null != filter) {
                 for (final Address address : recipients) {
                     final InternetAddress internetAddress = (InternetAddress) address;
