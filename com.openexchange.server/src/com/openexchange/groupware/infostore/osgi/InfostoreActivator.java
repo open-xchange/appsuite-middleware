@@ -55,6 +55,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -68,7 +69,7 @@ import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.groupware.impl.FolderLockManagerImpl;
 import com.openexchange.groupware.infostore.InfostoreAvailable;
-import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.groupware.infostore.InfostoreFacades;
 import com.openexchange.groupware.infostore.database.impl.InfostoreFilenameReservationsCreateTableTask;
 import com.openexchange.groupware.infostore.webdav.EntityLockManagerImpl;
 import com.openexchange.groupware.infostore.webdav.LockCleaner;
@@ -83,6 +84,13 @@ import com.openexchange.groupware.update.UpdateTaskV2;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class InfostoreActivator implements BundleActivator {
+
+    /**
+     * A flag that indicates whether InfoStore file storage bundle is available or not.
+     * 
+     * @see InfostoreFacades#isInfoStoreAvailable()
+     */
+    public static final AtomicReference<InfostoreAvailable> INFOSTORE_FILE_STORAGE_AVAILABLE = new AtomicReference<InfostoreAvailable>();
 
     private final Queue<ServiceRegistration<?>> registrations = new LinkedList<ServiceRegistration<?>>();
     private volatile ServiceTracker<FileStorageServiceRegistry, FileStorageServiceRegistry> tracker;
@@ -113,7 +121,7 @@ public class InfostoreActivator implements BundleActivator {
             @Override
             public FileStorageServiceRegistry addingService(ServiceReference<FileStorageServiceRegistry> reference) {
                 final FileStorageServiceRegistry registry = super.addingService(reference);
-                InfostoreFacade.INFOSTORE_FILE_STORAGE_AVAILABLE.set(new InfostoreAvailable() {
+                INFOSTORE_FILE_STORAGE_AVAILABLE.set(new InfostoreAvailable() {
 
                     @Override
                     public boolean available() {
@@ -125,7 +133,7 @@ public class InfostoreActivator implements BundleActivator {
 
             @Override
             public void removedService(ServiceReference<FileStorageServiceRegistry> reference, FileStorageServiceRegistry service) {
-                InfostoreFacade.INFOSTORE_FILE_STORAGE_AVAILABLE.set(null);
+                INFOSTORE_FILE_STORAGE_AVAILABLE.set(null);
                 super.removedService(reference, service);
             }
         }
