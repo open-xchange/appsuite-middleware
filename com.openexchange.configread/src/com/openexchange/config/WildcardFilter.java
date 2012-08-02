@@ -105,8 +105,7 @@ public class WildcardFilter implements Filter {
             } else if (c == '?') {
                 s.append('.');
             } else if (c == '(' || c == ')' || c == '[' || c == ']' || c == '$' || c == '^' || c == '.' || c == '{' || c == '}' || c == '|' || c == '\\') {
-                s.append('\\');
-                s.append(c);
+                s.append('\\').append(c);
             } else {
                 s.append(c);
             }
