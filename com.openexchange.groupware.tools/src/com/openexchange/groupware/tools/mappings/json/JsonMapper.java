@@ -52,11 +52,9 @@ package com.openexchange.groupware.tools.mappings.json;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.TimeZone;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.Mapper;
 import com.openexchange.session.Session;
@@ -81,6 +79,14 @@ public interface JsonMapper<O, E extends Enum<E>> extends Mapper<O, E> {
 	 * @return the field, or <code>null</code> if no such field was found
 	 */
 	E getMappedField(int columnID);
+
+    /**
+     * Gets the field whose mapping denotes the supplied ajax name. 
+     * 
+     * @param ajaxName the ajax name
+     * @return the field, or <code>null</code> if no such field was found
+     */
+    E getMappedField(String ajaxName);
 
 	/**
 	 * Gets an int array of column IDs from the supplied fields.
