@@ -1,8 +1,12 @@
+* 2012-08-02 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 22723: Force reporting of deleted items in sync-collection 
+ 
 * 2012-08-01 - jan.bauerdick@open-xchange.com
 
  - New implementation of sessionstorageservice, storing sessions with cassandra
 
-* 2012-01-08 - tobias.friedrich@open-xchange.com
+* 2012-08-01 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 21422: Add UIDs to appointment when missing
  - Fix for bug 22681: Fixed SQL statement
