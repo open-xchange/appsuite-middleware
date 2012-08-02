@@ -88,7 +88,7 @@ public final class HazelcastCacheService implements CacheService {
 
     @Override
     public void loadConfiguration(String cacheConfigFile) throws OXException {
-        // TODO Auto-generated method stub
+        // TODO Transform JCS configuration into Hazelcast configuration
     }
 
     @Override
