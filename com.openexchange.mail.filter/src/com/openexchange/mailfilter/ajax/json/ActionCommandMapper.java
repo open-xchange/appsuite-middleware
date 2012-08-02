@@ -205,7 +205,7 @@ final class ActionCommandMapper implements Mapper<Rule> {
             // And finally check of that forward address is allowed
             final ConfigurationService service = MailFilterServletServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
             final Filter filter;
-            if (null != service && (null != (filter = service.getFilterFromProperty("com.openexchange.debeka.forwardWhitelist"))) && !filter.accepts(stringparam)) {
+            if (null != service && (null != (filter = service.getFilterFromProperty("com.openexchange.mail.filter.redirectWhitelist"))) && !filter.accepts(stringparam)) {
                 throw new SieveException("The Internet email address used for redirect is not allowed: " + stringparam);
             }
         }
