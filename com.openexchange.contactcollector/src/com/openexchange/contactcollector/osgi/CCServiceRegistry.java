@@ -59,7 +59,7 @@ import com.openexchange.osgi.ServiceRegistry;
  */
 public final class CCServiceRegistry {
 
-    static final AtomicReference<ServiceRegistry> SERVICE_REGISTRY = new AtomicReference<ServiceRegistry>();
+    public static final AtomicReference<ServiceRegistry> SERVICE_REGISTRY = new AtomicReference<ServiceRegistry>();
 
     /**
      * Gets the service registry instance.
