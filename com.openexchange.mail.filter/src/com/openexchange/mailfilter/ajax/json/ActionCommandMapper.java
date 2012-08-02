@@ -53,16 +53,17 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
 import org.apache.jsieve.SieveException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Filter;
 import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.ActionCommand;
 import com.openexchange.jsieve.commands.IfCommand;
 import com.openexchange.jsieve.commands.Rule;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailfilter.ajax.fields.RuleFields;
 import com.openexchange.mailfilter.ajax.json.AbstractObject2JSON2Object.Mapper;
@@ -197,9 +198,15 @@ final class ActionCommandMapper implements Mapper<Rule> {
         if (ActionCommand.Commands.REDIRECT.equals(command)) {
             // Check for valid email address here:
             try {
-                new InternetAddress(stringparam, true);
+                new QuotedInternetAddress(stringparam, true);
             } catch (final AddressException e) {
-                throw new SieveException("The parameter for redirect must be a valid email address");
+                throw new SieveException("The parameter for redirect must be a valid Internet email address");
+            }
+            // And finally check of that forward address is allowed
+            final ConfigurationService service = MailFilterServletServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+            final Filter filter;
+            if (null != service && (null != (filter = service.getFilterFromProperty("com.openexchange.debeka.forwardWhitelist"))) && !filter.accepts(stringparam)) {
+                throw new SieveException("The Internet email address used for redirect is not allowed: " + stringparam);
             }
         }
         return new ActionCommand(command, createArrayArray(stringparam));
