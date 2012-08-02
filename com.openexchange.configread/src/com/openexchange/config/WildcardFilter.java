@@ -79,7 +79,7 @@ public class WildcardFilter implements Filter {
     }
 
     @Override
-    public boolean accepts(String value) {
+    public boolean accepts(final String value) {
         for (final Pattern pattern : patterns) {
             if (pattern.matcher(value).matches()) {
                 return true;
