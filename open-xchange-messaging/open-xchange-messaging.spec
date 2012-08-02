@@ -1,3 +1,4 @@
+%define        configfiles     configfiles.list
 
 Name:           open-xchange-messaging
 BuildArch:      noarch
@@ -49,6 +50,12 @@ Authors:
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
+rm -f %{configfiles}
+find %{buildroot}/opt/open-xchange/etc \
+        -type f \
+        -printf "%%%config(noreplace) %p\n" > %{configfiles}
+perl -pi -e 's;%{buildroot};;' %{configfiles}
+perl -pi -e 's;(^.*?)\s+(.*/(twitter)\.properties)$;$1 %%%attr(640,root,open-xchange) $2;' %{configfiles}
 
 %post
 if [ ${1:-0} -eq 2 ]; then
@@ -59,21 +66,19 @@ if [ ${1:-0} -eq 2 ]; then
             mv /opt/open-xchange/etc/groupware/${FILE} /opt/open-xchange/etc/${FILE}
         fi
     done
+    ox_update_permissions "/opt/open-xchange/etc/twitter.properties" root:open-xchange 640
 fi
 
 
 %clean
 %{__rm} -rf %{buildroot}
 
-%files
+%files -f %{configfiles}
 %defattr(-,root,root)
 %dir /opt/open-xchange/bundles/
 /opt/open-xchange/bundles/*
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/etc/
-%config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
-* Tue Apr 17 2012 Sonja Krause-Harder  <sonja.krause-harder@open-xchange.com>
-Internal release build for EDP drop #1

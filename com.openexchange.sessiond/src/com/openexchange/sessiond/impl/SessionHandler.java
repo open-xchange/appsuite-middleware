@@ -478,7 +478,9 @@ public final class SessionHandler {
             SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
             if (storageService != null) {
                 try {
-                    return sessionToSessionControl(storageService.lookupSession(sessionId));
+                    Session s = storageService.lookupSession(sessionId);
+                    sessionData.addSession(new SessionImpl(s.getUserId(), s.getLoginName(), s.getPassword(), s.getContextId(), s.getSessionID(), s.getSecret(), s.getRandomToken(), s.getLocalIp(), s.getLogin(), s.getAuthId(), s.getHash(), s.getClient()), noLimit);
+                    return sessionToSessionControl(s);
                 } catch (OXException e) {
                     LOG.error(e.getMessage(), e);
                 }
