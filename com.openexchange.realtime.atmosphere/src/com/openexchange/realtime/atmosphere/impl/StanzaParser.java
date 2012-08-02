@@ -69,6 +69,8 @@ import com.openexchange.realtime.packet.Stanza;
 public class StanzaParser {
 
 	/**
+	 * Parse a JSON based Stanza String into one of the differend kind of Stanza
+	 * implementations we understand.
 	 * @param request the incoming request to parse into a Stanza  
 	 * @return the parsed Stanza
 	 * @throws OXException if the request String could not be parsed
