@@ -810,7 +810,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                      * Status code (503) indicating that the HTTP server is
                      * temporarily overloaded, and unable to handle the request.
                      */
-                    response.setStatus(503);
+                    response.setStatus(503, "HTTP server is temporarily overloaded. Try again later.");
                     error = true;
                 } catch (final Throwable t) {
                     // 400 - Bad Request
@@ -880,7 +880,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                         /*
                          * Only one per host/port!
                          */
-                        response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE, "Only one long-running request is permitted at once. Please retry later.");
+                        response.setStatus(503, "Only one long-running request is permitted at once. Please retry later.");
                         error = true;
                     } else {
                         servlet.service(request, response);
