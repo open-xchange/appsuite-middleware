@@ -60,6 +60,82 @@ import com.openexchange.hazelcast.osgi.HazelcastActivator;
 public final class Hazelcasts {
 
     /**
+     * Sets the <tt>ClassLoader</tt> of the current thread to the one obtained from specified class that is supposed to reside in target
+     * bundle. Inspired by <a href="https://groups.google.com/forum/?fromgroups#!topic/hazelcast/zJavJ1ouMnk">OSGi support of Hazelcast</a>
+     * <p>
+     * <b>Usage:</b>
+     * 
+     * <pre>
+     * // Switch current thread's class loader
+     * ClassLoaderModifier modifier = new ClassLoaderModifier();
+     * modifier.setClassLoader(this.getClass());
+     * try {
+     *     // Do Hazelcast stuff now &amp; restore afterwards
+     * } finally {
+     *     modifier.restoreClassLoader();
+     * }
+     * </pre>
+     */
+    public static final class ClassLoaderModifier {
+
+        private volatile ClassLoader classLoader;
+
+        /**
+         * Initializes a new {@link Hazelcasts.ClassLoaderModifier}.
+         */
+        public ClassLoaderModifier() {
+            super();
+        }
+
+        /**
+         * Sets the <tt>ClassLoader</tt> of the current thread to the one obtained from specified class that is supposed to reside in target
+         * bundle. Inspired by <a href="https://groups.google.com/forum/?fromgroups#!topic/hazelcast/zJavJ1ouMnk">OSGi support of
+         * Hazelcast</a>
+         * <p>
+         * <b>Usage:</b>
+         * 
+         * <pre>
+         * // Switch current thread's class loader
+         * ClassLoaderModifier modifier = new ClassLoaderModifier();
+         * modifier.setClassLoader(this.getClass());
+         * try {
+         *     // Do Hazelcast stuff now &amp; restore afterwards
+         * } finally {
+         *     modifier.restoreClassLoader();
+         * }
+         * </pre>
+         * 
+         * @param clazz A class from target bundle; e.g. the activator
+         */
+        public void setClassLoader(final Class<?> clazz) {
+            /*
+             * Cache the current context class loader.
+             */
+            final ClassLoader ccl = Thread.currentThread().getContextClassLoader();
+            /*
+             * Get the classloader of a class from inside the bundle & set it as context class loader
+             */
+            Thread.currentThread().setContextClassLoader(clazz.getClassLoader());
+            this.classLoader = ccl;
+            /*
+             * Ready for Hazelcast stuff
+             */
+        }
+
+        /**
+         * Restores the previously removed class loader in current thread.
+         */
+        public void restoreClassLoader() {
+            final ClassLoader ccl = this.classLoader;
+            if (null != ccl) {
+                // Reset the context class loader to the cached loader
+                Thread.currentThread().setContextClassLoader(ccl);
+            }
+        }
+
+    } // End of ClassLoaderModifier
+
+    /**
      * Initializes a new {@link Hazelcasts}.
      */
     private Hazelcasts() {
@@ -73,6 +149,57 @@ public final class Hazelcasts {
      */
     public static HazelcastInstance getHazelcastInstance() {
         return HazelcastActivator.REF_HAZELCAST_INSTANCE.get();
+    }
+
+    private static ThreadLocal<ClassLoaderModifier> MODIFIER = new ThreadLocal<ClassLoaderModifier>();
+
+    /**
+     * Sets the <tt>ClassLoader</tt> of the current thread to the one obtained from specified class that is supposed to reside in target
+     * bundle.
+     * <p>
+     * <b>Usage:</b>
+     * 
+     * <pre>
+     * // Switch current thread's class loader
+     * Hazelcasts.setClassLoader(this.getClass());
+     * try {
+     *     // Do Hazelcast stuff now &amp; restore afterwards
+     * } finally {
+     *     Hazelcasts.restoreClassLoader();
+     * }
+     * </pre>
+     * 
+     * @param clazz A class from target bundle; e.g. the activator
+     * @throws IllegalStateException If current thread's class loader has already been modified (and not yet {@link #restoreClassLoader()
+     *             restored})
+     * @see #restoreClassLoader()
+     * @see ClassLoaderModifier
+     */
+    public static void setClassLoader(final Class<?> bundleClass) {
+        if (null == bundleClass) {
+            return;
+        }
+        ClassLoaderModifier classLoaderModifier = MODIFIER.get();
+        if (null != classLoaderModifier) {
+            throw new IllegalStateException(
+                "Current thread's class loader has already been modified (and not yet restored): " + Thread.currentThread().getName());
+        }
+        classLoaderModifier = new ClassLoaderModifier();
+        classLoaderModifier.setClassLoader(bundleClass);
+        MODIFIER.set(classLoaderModifier);
+    }
+
+    /**
+     * Restores the previously removed class loader in current thread.
+     * 
+     * @see #setClassLoader(Class)
+     */
+    public static void restoreClassLoader() {
+        final ClassLoaderModifier classLoaderModifier = MODIFIER.get();
+        if (null != classLoaderModifier) {
+            classLoaderModifier.restoreClassLoader();
+            MODIFIER.set(null);
+        }
     }
 
 }

@@ -680,7 +680,8 @@ public final class Init {
         }
     }
 
-    private static void startAndInjectContactCollector() throws Exception {
+    private static void startAndInjectContactCollector() {
+        CCServiceRegistry.SERVICE_REGISTRY.set(new ServiceRegistry());
         final ServiceRegistry reg = CCServiceRegistry.getInstance();
         if (null == reg.getService(TimerService.class)) {
             reg.addService(TimerService.class, services.get(TimerService.class));

@@ -79,7 +79,7 @@ public class WildcardFilter implements Filter {
     }
 
     @Override
-    public boolean accepts(String value) {
+    public boolean accepts(final String value) {
         for (final Pattern pattern : patterns) {
             if (pattern.matcher(value).matches()) {
                 return true;
@@ -105,8 +105,7 @@ public class WildcardFilter implements Filter {
             } else if (c == '?') {
                 s.append('.');
             } else if (c == '(' || c == ')' || c == '[' || c == ']' || c == '$' || c == '^' || c == '.' || c == '{' || c == '}' || c == '|' || c == '\\') {
-                s.append('\\');
-                s.append(c);
+                s.append('\\').append(c);
             } else {
                 s.append(c);
             }
