@@ -30,4 +30,5 @@ Import-Package: com.openexchange.cluster.discovery,
 Bundle-ClassPath: lib/hazelcast-all-2.2.jar,
  .
 Export-Package: com.hazelcast.cluster,
+ com.hazelcast.config,
  com.hazelcast.core
