@@ -49,7 +49,6 @@
 
 package com.hazelcast.core;
 
-import org.osgi.framework.Bundle;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.hazelcast.osgi.HazelcastActivator;
 
@@ -62,8 +61,7 @@ public final class Hazelcasts {
 
     /**
      * Sets the <tt>ClassLoader</tt> of the current thread to the one obtained from specified class that is supposed to reside in target
-     * {@link Bundle bundle}. Inspired by <a href="https://groups.google.com/forum/?fromgroups#!topic/hazelcast/zJavJ1ouMnk">OSGi support of
-     * Hazelcast</a>
+     * bundle. Inspired by <a href="https://groups.google.com/forum/?fromgroups#!topic/hazelcast/zJavJ1ouMnk">OSGi support of Hazelcast</a>
      * <p>
      * <b>Usage:</b>
      * 
@@ -91,8 +89,8 @@ public final class Hazelcasts {
 
         /**
          * Sets the <tt>ClassLoader</tt> of the current thread to the one obtained from specified class that is supposed to reside in target
-         * {@link Bundle bundle}. Inspired by <a href="https://groups.google.com/forum/?fromgroups#!topic/hazelcast/zJavJ1ouMnk">OSGi
-         * support of Hazelcast</a>
+         * bundle. Inspired by <a href="https://groups.google.com/forum/?fromgroups#!topic/hazelcast/zJavJ1ouMnk">OSGi support of
+         * Hazelcast</a>
          * <p>
          * <b>Usage:</b>
          * 
@@ -157,7 +155,7 @@ public final class Hazelcasts {
 
     /**
      * Sets the <tt>ClassLoader</tt> of the current thread to the one obtained from specified class that is supposed to reside in target
-     * {@link Bundle bundle}.
+     * bundle.
      * <p>
      * <b>Usage:</b>
      * 
