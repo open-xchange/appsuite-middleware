@@ -61,9 +61,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-
 import javax.servlet.http.HttpServletResponse;
-
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.Patches;
@@ -217,7 +215,9 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                     deleteExceptionToSave.setObjectID(object.getObjectID());
                 }
                 getAppointmentInterface().deleteAppointmentObject(deleteExceptionToSave, parentFolderID, clientLastModified);
-                clientLastModified = deleteExceptionToSave.getLastModified();
+                if (null != deleteExceptionToSave.getLastModified()) {
+                    clientLastModified = deleteExceptionToSave.getLastModified();    
+                }                
             }
         } catch (final SQLException e) {
             throw protocolException(e);
