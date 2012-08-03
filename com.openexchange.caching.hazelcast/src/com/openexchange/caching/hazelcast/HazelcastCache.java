@@ -50,10 +50,11 @@
 package com.openexchange.caching.hazelcast;
 
 import java.io.Serializable;
-import java.util.concurrent.ConcurrentHashMap;
+import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
+import com.hazelcast.core.ISet;
 import com.hazelcast.core.MapEntry;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheElement;
@@ -71,19 +72,45 @@ import com.openexchange.exception.OXException;
  */
 public final class HazelcastCache implements Cache {
 
+    private final String name;
+
     private final HazelcastInstance hazelcastInstance;
 
     private final IMap<Serializable, Serializable> map;
+
+    private final ISet<String> groupNames;
 
     private volatile MapConfig mapConfig;
 
     /**
      * Initializes a new {@link HazelcastCache}.
      */
-    public HazelcastCache(final IMap<Serializable, Serializable> map, final HazelcastInstance hazelcastInstance) {
+    public HazelcastCache(final String name, final HazelcastInstance hazelcastInstance) {
         super();
-        this.map = map;
+        this.name = name;
+        this.map = hazelcastInstance.<Serializable, Serializable> getMap(name);
+        this.groupNames = hazelcastInstance.getSet(name + "?==?groupNames");
         this.hazelcastInstance = hazelcastInstance;
+    }
+
+    private IMap<Serializable, Serializable> getGroup(final String groupName) {
+        if (null == groupName) {
+            return null;
+        }
+        groupNames.add(groupName);
+        final String hazelcastKey = getGroupKey(groupName);
+        final Config config = hazelcastInstance.getConfig();
+        MapConfig mapConfig = config.getMapConfig(hazelcastKey);
+        if (null == mapConfig) {
+            mapConfig = new MapConfig(getMapConfig());
+            mapConfig.setName(hazelcastKey);
+            config.addMapConfig(mapConfig);
+        }
+        return hazelcastInstance.getMap(hazelcastKey);
+    }
+
+    private String getGroupKey(final String groupName) {
+        return new StringBuilder(name).append("?==?").append(groupName).toString();
     }
 
     private MapConfig getMapConfig() {
@@ -92,7 +119,7 @@ public final class HazelcastCache implements Cache {
             synchronized (this) {
                 tmp = mapConfig;
                 if (null == tmp) {
-                    tmp = hazelcastInstance.getConfig().getMapConfig(map.getName());
+                    tmp = hazelcastInstance.getConfig().getMapConfig(name);
                     mapConfig = tmp;
                 }
             }
@@ -112,11 +139,25 @@ public final class HazelcastCache implements Cache {
 
     @Override
     public void clear() throws OXException {
+        for (final String groupName : groupNames) {
+            final IMap<Object, Object> group = hazelcastInstance.getMap(getGroupKey(groupName));
+            if (null != group) {
+                group.clear();
+            }
+        }
+        groupNames.clear();
         map.clear();
     }
 
     @Override
     public void dispose() {
+        for (final String groupName : groupNames) {
+            final IMap<Object, Object> group = hazelcastInstance.getMap(getGroupKey(groupName));
+            if (null != group) {
+                group.destroy();
+            }
+        }
+        groupNames.destroy();
         map.destroy();
     }
 
@@ -132,7 +173,7 @@ public final class HazelcastCache implements Cache {
             return null;
         }
         final HazelcastCacheElement cacheElement = new HazelcastCacheElement();
-        cacheElement.setCacheName(map.getName());
+        cacheElement.setCacheName(name);
         cacheElement.setKey(key);
         cacheElement.setVal(mapEntry.getValue());
         cacheElement.setElementAttributes(new HazelcastElementAttributes(mapEntry, getMapConfig(), map));
@@ -145,21 +186,24 @@ public final class HazelcastCache implements Cache {
     }
 
     @Override
-    public Object getFromGroup(final Serializable key, final String group) {
+    public Object getFromGroup(final Serializable key, final String groupName) {
         try {
-            @SuppressWarnings("unchecked") final ConcurrentHashMap<Serializable, Serializable> groupMap = (ConcurrentHashMap<Serializable, Serializable>) map.get(group);
-            if (null == groupMap) {
-                return null;
+            if (groupNames.contains(groupName)) {
+                return getGroup(groupName).get(key);
             }
-            return groupMap.get(key);
         } catch (final ClassCastException e) {
-            return null;
         }
+        return null;
     }
 
     @Override
-    public void invalidateGroup(final String group) {
-        map.remove(group);
+    public void invalidateGroup(final String groupName) {
+        if (groupNames.remove(groupName)) {
+            final IMap<Object, Object> group = hazelcastInstance.getMap(getGroupKey(groupName));
+            if (null != group) {
+                group.destroy();
+            }
+        }
     }
 
     @Override
@@ -175,15 +219,7 @@ public final class HazelcastCache implements Cache {
     @Override
     public void putInGroup(final Serializable key, final String groupName, final Object value, final ElementAttributes attr) throws OXException {
         try {
-            @SuppressWarnings("unchecked") ConcurrentHashMap<Serializable, Serializable> groupMap = (ConcurrentHashMap<Serializable, Serializable>) map.get(groupName);
-            if (null == groupMap) {
-                ConcurrentHashMap<Serializable, Serializable> ngroupMap = new ConcurrentHashMap<Serializable, Serializable>();
-                groupMap = (ConcurrentHashMap<Serializable, Serializable>) map.putIfAbsent(groupName, ngroupMap);
-                if (null == groupMap) {
-                    groupMap = ngroupMap;
-                }
-            }
-            groupMap.put(key, (Serializable) value);
+            getGroup(groupName).put(key, (Serializable) value);
         } catch (final ClassCastException e) {
             return;
         }
@@ -217,13 +253,11 @@ public final class HazelcastCache implements Cache {
     }
 
     @Override
-    public void removeFromGroup(final Serializable key, final String group) {
+    public void removeFromGroup(final Serializable key, final String groupName) {
         try {
-            @SuppressWarnings("unchecked") final ConcurrentHashMap<Serializable, Serializable> groupMap = (ConcurrentHashMap<Serializable, Serializable>) map.get(group);
-            if (null == groupMap) {
-                return;
+            if (groupNames.contains(groupName)) {
+                getGroup(groupName).remove(key);
             }
-            groupMap.remove(key);
         } catch (final ClassCastException e) {
             // Ignore
         }

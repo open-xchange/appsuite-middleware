@@ -78,7 +78,7 @@ public final class HazelcastCacheService implements CacheService {
 
     @Override
     public Cache getCache(String name) throws OXException {
-        return new HazelcastCache(hazelcastInstance.<Serializable, Serializable>getMap(name), hazelcastInstance);
+        return new HazelcastCache(name, hazelcastInstance);
     }
 
     @Override
