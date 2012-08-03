@@ -62,6 +62,7 @@ import org.apache.commons.logging.Log;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.config.MaxSizeConfig;
 import com.hazelcast.config.NearCacheConfig;
+import com.openexchange.caching.hazelcast.HazelcastCacheService;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.UnsynchronizedStringReader;
@@ -74,6 +75,10 @@ import com.openexchange.java.UnsynchronizedStringReader;
 public final class ConfigurationParser {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(ConfigurationParser.class);
+
+    private static final String NAME_PREFIX = HazelcastCacheService.NAME_PREFIX;
+
+    private static final String defaultMapName = NAME_PREFIX + "default";
 
     /**
      * Initializes a new {@link ConfigurationParser}.
@@ -111,9 +116,9 @@ public final class ConfigurationParser {
                 final char c;
                 if (!isEmpty(line) && '#' != (c = line.charAt(0)) && '!' != c) {
                     if (line.startsWith("jcs.default")) {
-                        parseLine(line, "default", map);
+                        parseLine(line, defaultMapName, map);
                     } else if (line.startsWith("jcs.region.")) {
-                        final String name = line.substring(12, line.indexOf('.', 13));
+                        final String name = NAME_PREFIX + line.substring(12, line.indexOf('.', 13));
                         parseLine(line, name, map);
                     }
                 }
