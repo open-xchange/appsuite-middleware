@@ -2,6 +2,7 @@
 
  - Fix for bug 22729: Ignore HTML parts when replying to a mail in text-only mode
  - Fix for bug 22715: Properly deal with nested multipart/related part on reply/forward
+ - Fix for bug 22652: Properly register servlet path for subscription sources
 
 * 2012-08-03 - marcus.klein@open-xchange.com
 
