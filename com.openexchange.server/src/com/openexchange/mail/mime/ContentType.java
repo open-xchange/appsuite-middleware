@@ -680,6 +680,26 @@ public class ContentType extends ParameterizedHeader {
     }
 
     /**
+     * Checks if Content-Type's base type ignore-case starts with any of specified prefixes.
+     *
+     * @param prefixes The prefixes
+     * @return <code>true</code> if Content-Type's base type ignore-case starts with any of specified prefixes; otherwise <code>false</code>
+     * @throws IllegalArgumentException If specified prefixes are <code>null</code>
+     */
+    public boolean startsWithAny(final String... prefixes) {
+        if (null == prefixes) {
+            throw new IllegalArgumentException("Prefixes are null");
+        }
+        final String lowerCase = toLowerCase(getBaseType());
+        for (final String prefix : prefixes) {
+            if (null != prefix && lowerCase.startsWith(toLowerCase(prefix), 0)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Parses and prepares specified content-type string for being inserted into a MIME part's headers.
      *
      * @param contentType The content-type string to process
