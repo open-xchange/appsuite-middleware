@@ -341,7 +341,7 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                 foundUnseen = false;
                 for (final Iterator<MailMessage> tmp = list.iterator(); tmp.hasNext();) {
                     final MailMessage message = tmp.next();
-                    if (ignoreDeleted && message.isDeleted()) {
+                    if (null == message || (ignoreDeleted && message.isDeleted())) {
                         // Ignore mail marked for deletion
                         tmp.remove();
                     } else {
