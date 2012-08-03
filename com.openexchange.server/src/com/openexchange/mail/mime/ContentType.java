@@ -376,12 +376,10 @@ public class ContentType extends ParameterizedHeader {
     }
 
     private String getLowerCaseBaseType() {
-        String tmp = lcBaseType;
-        if (null == tmp) {
-            tmp = toLowerCase(getBaseType());
-            lcBaseType = tmp;
+        if (null == lcBaseType) {
+            lcBaseType = toLowerCase(getBaseType());
         }
-        return tmp;
+        return lcBaseType;
     }
 
     private void parseContentType(final String contentType) throws OXException {
