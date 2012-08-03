@@ -1,3 +1,7 @@
+* 2012-08-03 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22729: Ignore HTML parts when replying to a mail in text-only mode
+
 * 2012-08-03 - marcus.klein@open-xchange.com
 
  - Fix for bug 22384: Using buddy class loading to solve ClassNotFoundException using RMI interface with reseller bundle installed.
