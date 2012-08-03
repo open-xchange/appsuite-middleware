@@ -62,8 +62,10 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheElement;
 import com.openexchange.caching.CacheExceptionCode;
 import com.openexchange.caching.CacheKey;
+import com.openexchange.caching.CacheKeyImpl;
 import com.openexchange.caching.CacheStatistics;
 import com.openexchange.caching.ElementAttributes;
+import com.openexchange.caching.SupportsLocalOperations;
 import com.openexchange.caching.internal.cache2jcs.CacheElement2JCS;
 import com.openexchange.caching.internal.cache2jcs.CacheStatistics2JCS;
 import com.openexchange.caching.internal.cache2jcs.ElementAttributes2JCS;
@@ -75,7 +77,7 @@ import com.openexchange.exception.OXException;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class JCSCache implements Cache {
+public final class JCSCache implements Cache, SupportsLocalOperations {
 
     private final JCS cache;
 

@@ -45,6 +45,7 @@ dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/admindaemon/User.prope
         /opt/open-xchange/etc/AdminUser.properties 6.20.99 -- "$@"
 
 dpkg-maintscript-helper rm_conffile /opt/open-xchange/etc/admindaemon/RMI.properties 6.20.99 -- "$@"
+dpkg-maintscript-helper rm_conffile /opt/open-xchange/etc/admindaemon/ox-admin-scriptconf.sh 6.20.99 -- "$@"
 
 dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/admindaemon/plugin/hosting.properties \
     /opt/open-xchange/etc/plugin/hosting.properties 6.20.99 open-xchange-admin-plugin-hosting -- $1 \

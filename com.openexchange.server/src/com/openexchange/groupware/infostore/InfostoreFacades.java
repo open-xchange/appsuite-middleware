@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.infostore;
 
+import com.openexchange.groupware.infostore.osgi.InfostoreActivator;
+
 
 /**
  * {@link InfostoreFacades} - Utility class for InfoStore.
@@ -70,7 +72,7 @@ public final class InfostoreFacades {
      * @return <code>true</code> if available; otherwise <code>false</code>
      */
     public static boolean isInfoStoreAvailable() {
-        final InfostoreAvailable available = InfostoreFacade.INFOSTORE_FILE_STORAGE_AVAILABLE.get();
+        final InfostoreAvailable available = InfostoreActivator.INFOSTORE_FILE_STORAGE_AVAILABLE.get();
         return (null == available || available.available());
     }
 

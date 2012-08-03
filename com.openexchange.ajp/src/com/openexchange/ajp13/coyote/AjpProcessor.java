@@ -152,7 +152,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     /**
      * The response output buffer.
      */
-    private final OutputBuffer outputBuffer;
+    private final SocketOutputBuffer outputBuffer;
 
     /**
      * The socket timeout used when reading the first block of the request header.
@@ -2145,6 +2145,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         servletPath = null;
         servletId.setLength(0);
         lastWriteAccess = 0L;
+        outputBuffer.flag = false;
         request.recycle();
         response.recycle();
         certificates.recycle();
@@ -2202,9 +2203,19 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
         private final int chunkSize;
 
+        /**
+         * The flag whether data has been written.
+         */
+        protected boolean flag;
+
         protected SocketOutputBuffer() {
             super();
             chunkSize = Constants.MAX_SEND_SIZE + (packetSize - Constants.MAX_PACKET_SIZE);
+        }
+
+        @Override
+        public boolean isFlagged() {
+            return flag;
         }
 
         @Override
@@ -2230,6 +2241,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             if (len <= 0) {
                 return len;
             }
+            flag = true;
             // 4 - hardcoded, byte[] marshalling overhead
             // Adjust allowed size if packetSize != default (Constants.MAX_PACKET_SIZE)
             final byte[] b = chunk.getBuffer();

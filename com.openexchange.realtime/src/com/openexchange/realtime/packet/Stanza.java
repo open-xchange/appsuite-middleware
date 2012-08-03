@@ -50,9 +50,11 @@
 package com.openexchange.realtime.packet;
 
 /**
- * {@link Stanza}
+ * {@link Stanza} - Abstract information unit that can be send from one entity
+ * to another. 
  *
  *  @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *  @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public abstract class Stanza {
 
@@ -69,34 +71,68 @@ public abstract class Stanza {
 	    super();
 	}
 
+	/**
+	 * Get the {@link ID} describing the stanza's recipient.
+	 * @return the ID of the stanza's recipient
+	 */
 	public ID getTo() {
 		return to;
 	}
 
+	/**
+	 * Set the {@link ID} describing the Stanza's recipient.
+	 * @param to the ID of the stanza's recipient
+	 */
 	public void setTo(final ID to) {
 		this.to = to;
 	}
 
+	/**
+	 * Get the {@link ID} describing the Stanza's sender. 
+	 * @return the {@link ID} describing the Stanza's sender.
+	 */
 	public ID getFrom() {
 		return from;
 	}
 
+	/**
+     * Set the {@link ID} describing the Stanza's sender. 
+     * @param from the {@link ID} describing the Stanza's sender.
+     */
 	public void setFrom(final ID from) {
 		this.from = from;
 	}
 
+	/**
+	 * Set the structured information of this Stanza.
+	 * @param payload the structured information to transport. 
+	 */
 	public void setPayload(final Payload payload) {
 		this.payload = payload;
 	}
 
+	/**
+	 * Get the structured information of this Stanza.
+	 * @return the structured information of this Stanza.
+	 */
 	public Payload getPayload() {
 		return payload;
 	}
 
+	/**
+	 * Get the namespace of this Stanza.
+	 * Namespaces are used to separate data ownership and vocabularies.
+	 * @return the namespace of this Stanza
+	 */
 	public String getNamespace() {
 		return namespace;
 	}
 
+	/**
+	 * Set the namespace of this Stanza.
+     * Namespaces are used to separate data ownership and vocabularies.
+	 * @param namespace the namespace of this Stanza
+	 */
 	public void setNamespace(final String namespace) {
 		this.namespace = namespace;
 	}

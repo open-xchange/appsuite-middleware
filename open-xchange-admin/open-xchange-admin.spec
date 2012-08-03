@@ -83,6 +83,7 @@ if [ ${1:-0} -eq 2 ]; then
 	fi
 	ox_remove_property BIND_ADDRESS $ofile
     fi
+
     ofile=/opt/open-xchange/etc/RMI.properties
     if [ -e $ofile ]; then
 	oval=$(ox_read_property RMI_PORT $ofile)
@@ -91,6 +92,18 @@ if [ ${1:-0} -eq 2 ]; then
 	fi
 	rm -f $ofile
     fi
+
+    ofile=/opt/open-xchange/etc/admindaemon/ox-admin-scriptconf.sh
+    pfile=/opt/open-xchange/etc/ox-scriptconf.sh
+    grep JAVA_OXCMD_OPTS $pfile >/dev/null || {
+        oval=$(ox_read_property JAVA_OXCMD_OPTS $ofile)
+        if [ -n "$oval" ]; then
+           ox_set_property JAVA_OXCMD_OPTS "$oval" $pfile
+        else
+           ox_set_property JAVA_OXCMD_OPTS "-Djava.net.preferIPv4Stack=true" $pfile
+        fi
+	rm -f $ofile
+    }
 
     # SoftwareChange_Request-1091
     # -----------------------------------------------------------------------

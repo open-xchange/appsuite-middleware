@@ -55,6 +55,7 @@ import org.apache.jcs.JCS;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheExceptionCode;
 import com.openexchange.caching.CacheKey;
+import com.openexchange.caching.CacheKeyImpl;
 import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
 

@@ -1,0 +1,22 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange Caching Hazelcast Bundle
+Bundle-SymbolicName: com.openexchange.caching.hazelcast
+Bundle-Version: 6.21.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.hazelcast.config,
+ com.hazelcast.core,
+ com.openexchange.caching,
+ com.openexchange.config,
+ com.openexchange.exception,
+ com.openexchange.groupware,
+ com.openexchange.i18n,
+ com.openexchange.log,
+ com.openexchange.management,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ javax.management,
+ org.apache.commons.logging,
+ org.osgi.framework,
+ org.osgi.util.tracker

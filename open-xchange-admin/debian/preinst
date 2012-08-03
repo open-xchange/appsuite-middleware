@@ -33,6 +33,20 @@ if [ -e $ofile ]; then
 fi
 dpkg-maintscript-helper rm_conffile \
 	/opt/open-xchange/etc/admindaemon/RMI.properties -- "$@"
+
+ofile=/opt/open-xchange/etc/admindaemon/ox-admin-scriptconf.sh
+pfile=/opt/open-xchange/etc/ox-scriptconf.sh
+grep JAVA_OXCMD_OPTS $pfile >/dev/null || {
+     oval=$(ox_read_property JAVA_OXCMD_OPTS $ofile)
+     if [ -n "$oval" ]; then
+        ox_set_property JAVA_OXCMD_OPTS "$oval" $pfile
+     else
+        ox_set_property JAVA_OXCMD_OPTS "-Djava.net.preferIPv4Stack=true" $pfile
+     fi
+}
+dpkg-maintscript-helper rm_conffile /opt/open-xchange/etc/admindaemon/ox-admin-scriptconf.sh -- "$@"
+
+
 dpkg-maintscript-helper mv_conffile \
     /opt/open-xchange/etc/admindaemon/plugin/hosting.properties \
     /opt/open-xchange/etc/plugin/hosting.properties 6.20.99 \

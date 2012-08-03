@@ -73,6 +73,7 @@ import com.openexchange.file.storage.generic.DefaultFileStorageAccount;
 import com.openexchange.file.storage.rdb.Services;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.id.IDGeneratorService;
 import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.SecretEncryptionService;
 import com.openexchange.secret.SecretEncryptionStrategy;
@@ -307,8 +308,10 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
         final int contextId = session.getContextId();
         final Connection wc = databaseService.getWritable(contextId);
         PreparedStatement stmt = null;
+        boolean rollback = false;
         try {
             DBUtils.startTransaction(wc); // BEGIN
+            rollback = true;
             /*
              * Save account configuration using generic conf
              */
@@ -332,6 +335,19 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
                 }
                 genericConfId = genericConfStorageService.save(wc, getContext(session), configuration);
             }
+            final int accountId;
+            {
+                IDGeneratorService idGeneratorService = Services.getOptionalService(IDGeneratorService.class);
+                if (null == idGeneratorService) {
+                    accountId = genericConfId;
+                } else {
+                    int id = idGeneratorService.getId("com.openexchange.file.storage.account", contextId);
+                    while (id <= 0) {
+                        id = idGeneratorService.getId("com.openexchange.file.storage.account", contextId);
+                    }
+                    accountId = id;
+                }
+            }
             /*
              * Insert account data
              */
@@ -339,23 +355,22 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
             int pos = 1;
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, session.getUserId());
-            stmt.setInt(pos++, genericConfId);
+            stmt.setInt(pos++, accountId);
             stmt.setInt(pos++, genericConfId);
             stmt.setString(pos++, serviceId);
             stmt.setString(pos, account.getDisplayName());
             stmt.executeUpdate();
             wc.commit(); // COMMIT
-            return genericConfId;
-        } catch (final OXException e) {
-            DBUtils.rollback(wc); // ROLL-BACK
-            throw e;
+            rollback = false;
+            return accountId;
         } catch (final SQLException e) {
-            DBUtils.rollback(wc); // ROLL-BACK
             throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
-            DBUtils.rollback(wc); // ROLL-BACK
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
+            if (rollback) {
+                DBUtils.rollback(wc); // ROLL-BACK
+            }
             DBUtils.closeSQLStuff(stmt);
             DBUtils.autocommit(wc);
             databaseService.backWritable(contextId, wc);
@@ -396,17 +411,12 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
          * Writable connection
          */
         final int contextId = session.getContextId();
-        final Connection wc;
-        try {
-            wc = databaseService.getWritable(contextId);
-            wc.setAutoCommit(false); // BEGIN
-        } catch (final OXException e) {
-            throw new OXException(e);
-        } catch (final SQLException e) {
-            throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        }
+        final Connection wc = databaseService.getWritable(contextId);
         PreparedStatement stmt = null;
+        boolean rollback = false;
         try {
+            DBUtils.startTransaction(wc); // BEGIN
+            rollback = true;
             final int accountId = Integer.parseInt(account.getId());
             /*
              * Delete account configuration using generic conf
@@ -427,16 +437,15 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
             stmt.setInt(pos, accountId);
             stmt.executeUpdate();
             wc.commit(); // COMMIT
-        } catch (final OXException e) {
-            DBUtils.rollback(wc); // ROLL-BACK
-            throw e;
+            rollback = false;
         } catch (final SQLException e) {
-            DBUtils.rollback(wc); // ROLL-BACK
             throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
-            DBUtils.rollback(wc); // ROLL-BACK
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
+            if (rollback) {
+                DBUtils.rollback(wc); // ROLL-BACK
+            }
             DBUtils.closeSQLStuff(stmt);
             DBUtils.autocommit(wc);
             databaseService.backWritable(contextId, wc);
@@ -452,17 +461,12 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
          * Writable connection
          */
         final int contextId = session.getContextId();
-        final Connection wc;
-        try {
-            wc = databaseService.getWritable(contextId);
-            wc.setAutoCommit(false); // BEGIN
-        } catch (final OXException e) {
-            throw new OXException(e);
-        } catch (final SQLException e) {
-            throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        }
+        final Connection wc = databaseService.getWritable(contextId);
         PreparedStatement stmt = null;
+        boolean rollback = false;
         try {
+            DBUtils.startTransaction(wc); // BEGIN
+            rollback = true;
             final int accountId = Integer.parseInt(account.getId());
             /*
              * Update account configuration using generic conf
@@ -505,16 +509,17 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
                 stmt.executeUpdate();
             }
             wc.commit(); // COMMIT
+            rollback = false;
         } catch (final OXException e) {
-            DBUtils.rollback(wc); // ROLL-BACK
             throw e;
         } catch (final SQLException e) {
-            DBUtils.rollback(wc); // ROLL-BACK
             throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
-            DBUtils.rollback(wc); // ROLL-BACK
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
+            if (rollback) {
+                DBUtils.rollback(wc); // ROLL-BACK
+            }
             DBUtils.closeSQLStuff(stmt);
             DBUtils.autocommit(wc);
             databaseService.backWritable(contextId, wc);

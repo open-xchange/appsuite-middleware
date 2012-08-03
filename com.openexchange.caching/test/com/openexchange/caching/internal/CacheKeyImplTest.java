@@ -54,6 +54,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.Serializable;
 import org.junit.Test;
 import com.openexchange.caching.CacheKey;
+import com.openexchange.caching.CacheKeyImpl;
 
 /**
  * {@link CacheKeyImplTest}

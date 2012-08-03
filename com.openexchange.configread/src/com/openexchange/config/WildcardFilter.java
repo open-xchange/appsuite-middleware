@@ -63,29 +63,68 @@ public class WildcardFilter implements Filter {
 
     private static final Pattern SPLIT = Pattern.compile(" *, *");
 
-    private final Set<Pattern> patterns;
+    private static final Filter DUMMY = new Filter() {
+        
+        @Override
+        public boolean accepts(final String value) {
+            return true;
+        }
+    };
+
+    private static final class PatternBasedFilter implements Filter {
+        
+        private final Set<Pattern> patterns;
+
+        PatternBasedFilter(final Set<Pattern> patterns) {
+            super();
+            this.patterns = patterns;
+        }
+
+        @Override
+        public boolean accepts(final String value) {
+            for (final Pattern pattern : patterns) {
+                if (pattern.matcher(value).matches()) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
+    private final Filter delegate;
 
     /**
      * Initializes a new {@link WildcardFilter}.
      */
     public WildcardFilter(final String csvWildcards) {
         super();
-        final String[] wildcards = SPLIT.split(csvWildcards);
-        final Set<Pattern> patterns = new HashSet<Pattern>(wildcards.length);
-        for (final String s : wildcards) {
-            patterns.add(Pattern.compile(wildcardToRegex(s.trim()), Pattern.CASE_INSENSITIVE));
+        if (isEmpty(csvWildcards)) {
+            delegate = DUMMY;
+        } else {
+            final String[] wildcards = SPLIT.split(csvWildcards);
+            final Set<Pattern> patterns = new HashSet<Pattern>(wildcards.length);
+            for (final String s : wildcards) {
+                patterns.add(Pattern.compile(wildcardToRegex(s.trim()), Pattern.CASE_INSENSITIVE));
+            }
+            delegate = new PatternBasedFilter(patterns);
         }
-        this.patterns = patterns;
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
     @Override
     public boolean accepts(final String value) {
-        for (final Pattern pattern : patterns) {
-            if (pattern.matcher(value).matches()) {
-                return true;
-            }
-        }
-        return false;
+        return delegate.accepts(value);
     }
 
     /**
@@ -105,7 +144,8 @@ public class WildcardFilter implements Filter {
             } else if (c == '?') {
                 s.append('.');
             } else if (c == '(' || c == ')' || c == '[' || c == ']' || c == '$' || c == '^' || c == '.' || c == '{' || c == '}' || c == '|' || c == '\\') {
-                s.append('\\').append(c);
+                s.append('\\');
+                s.append(c);
             } else {
                 s.append(c);
             }

@@ -189,19 +189,21 @@ public interface Cache {
     public void remove(Serializable key) throws OXException;
 
     /**
-     * Removes the object from the cache which is bound to specified key without propagating that operation neither laterally nor remotely.
+     * Removes (optional operation) the object from the cache which is bound to specified key without propagating that operation neither laterally nor remotely.
      * 
      * @param key The key
      * @throws CacheException If remove operation on cache fails
+     * @see SupportsLocalOperations SupportsLocalOperations marker interface to check if supported
      */
     public void localRemove(Serializable key) throws OXException;
 
     /**
-     * Puts the object into the cache which is bound to specified key without propagating that operation neither laterally nor remotely.
+     * Puts (optional operation) the object into the cache which is bound to specified key without propagating that operation neither laterally nor remotely.
      * 
      * @param key The key
      * @param value Object to store
      * @throws OXException If put operation on cache fails
+     * @see SupportsLocalOperations SupportsLocalOperations marker interface to check if supported
      */
     public void localPut(Serializable key, Serializable value) throws OXException;
 
@@ -214,10 +216,11 @@ public interface Cache {
     public void removeFromGroup(Serializable key, String group);
 
     /**
-     * Removes the object located in specified group and bound to given key without propagating that operation neither laterally nor remotely.
+     * Removes (optional operation) the object located in specified group and bound to given key without propagating that operation neither laterally nor remotely.
      *
      * @param key The key
      * @param group The group name.
+     * @see SupportsLocalOperations SupportsLocalOperations marker interface to check if supported
      */
     public void localRemoveFromGroup(Serializable key, String group);
 

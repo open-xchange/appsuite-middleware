@@ -59,7 +59,7 @@ import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.packet.Stanza;
 
 /**
- * {@link StanzaWriter}
+ * {@link StanzaWriter} - Transforms Stanza objects into their JSON representation.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
