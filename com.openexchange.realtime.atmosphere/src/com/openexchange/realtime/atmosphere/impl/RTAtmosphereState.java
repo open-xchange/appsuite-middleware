@@ -57,7 +57,8 @@ import com.openexchange.realtime.packet.ID;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link RTAtmosphereState}
+ * {@link RTAtmosphereState} - Assembles the AtmosphereResource, Serversession and
+ * ID into a single class and make it lockable.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */

@@ -63,6 +63,7 @@ import com.openexchange.realtime.packet.Stanza;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class StanzaWriter {
 

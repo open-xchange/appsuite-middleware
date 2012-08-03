@@ -18,9 +18,9 @@ define("chat/ui", function () {
     var content = $('#content');
     var input = $('#input');
     var status = $('#status');
-    var myName = false;
+    var myName = ox.userName;
     var author = null;
-    var logged = false;
+    var logged = true;
     var socket = $.atmosphere;
 
     <!-- The following code is just here for demonstration purpose and not required -->
@@ -38,7 +38,7 @@ define("chat/ui", function () {
     $.each(transports, function (index, transport) {
         var req = new $.atmosphere.AtmosphereRequest();
 
-	req.url = "http://marens.netline.de:8080/realtime/atmosphere/chat";
+	req.url = "http://marens.netline.de/realtime/atmosphere/chat";
         req.contentType = "application/json";
         req.transport = transport;
         req.headers = { "negotiating" : "true" };
@@ -55,7 +55,7 @@ define("chat/ui", function () {
     });
     
     var request = {
-        url: "http://marens.netline.de:8080/realtime/atmosphere/chat",
+        url: "http://marens.netline.de/realtime/atmosphere/chat",
         contentType : "application/json",
         logLevel : 'debug',
         transport : 'websocket' ,
@@ -71,13 +71,13 @@ define("chat/ui", function () {
     };
 
     //For demonstration of how you can customize the fallbackTransport based on the browser
-    request.onTransportFailure = function(errorMsg, request) {
-        jQuery.atmosphere.info(errorMsg);
-        if ( window.EventSource ) {
-            request.fallbackTransport = "long-polling";
-        }
-        header.html($('<h3>', { text: 'Atmosphere Chat. Default transport is WebSocket, fallback is ' + request.fallbackTransport }));
-    };
+//    request.onTransportFailure = function(errorMsg, request) {
+//        jQuery.atmosphere.info(errorMsg);
+//        if ( window.EventSource ) {
+//            request.fallbackTransport = "long-polling";
+//        }
+//        header.html($('<h3>', { text: 'Atmosphere Chat. Default transport is WebSocket, fallback is ' + request.fallbackTransport }));
+//    };
 
     request.onReconnect = function (request, response) {
         socket.info("Reconnecting")
@@ -92,17 +92,10 @@ define("chat/ui", function () {
             return;
         }
 
-        if (!logged) {
-            logged = true;
-            status.text(myName + ': ').css('color', 'blue');
-            input.removeAttr('disabled').focus();
-        } else {
-            input.removeAttr('disabled');
+        var me = json.author == myName;
+        var date = typeof(json.time) == 'string' ? parseInt(json.time) : json.time;
+        addMessage(json.author, json.text, me ? 'blue' : 'black', new Date(date));
 
-            var me = json.author == author;
-            var date = typeof(json.time) == 'string' ? parseInt(json.time) : json.time;
-            addMessage(json.author, json.text, me ? 'blue' : 'black', new Date(date));
-        }
     };
 
     request.onClose = function(response) {
@@ -116,6 +109,9 @@ define("chat/ui", function () {
     
     
     var subSocket = socket.subscribe(request);
+    
+    subSocket.push(jQuery.stringifyJSON({author: ox.userName, message: "logged into chat"}));
+    status.css('color', 'blue');
 
     input.keydown(function(e) {
         if (e.keyCode === 13) {
@@ -123,20 +119,16 @@ define("chat/ui", function () {
 
             subSocket.push(jQuery.stringifyJSON({ author: ox.userName, message: msg }));
             $(this).val('');
-
-            //input.attr('disabled', 'disabled');
-            if (myName === false) {
-                myName = ox.userName;
-            }
         }
     });
 
     function addMessage(author, message, color, datetime) {
-      console.log(datetime);
-        content.append('<p><span style="color:' + color + '">' + author + '</span> @ ' +
-            + (datetime.getHours() < 10 ? '0' + datetime.getHours() : datetime.getHours()) + ':'
-            + (datetime.getMinutes() < 10 ? '0' + datetime.getMinutes() : datetime.getMinutes())
-            + ': ' + message + '</p>')
+    	var time =(datetime.getHours() < 10 ? '0' + datetime.getHours() : datetime.getHours()) + ':'
+          + (datetime.getMinutes() < 10 ? '0' + datetime.getMinutes() : datetime.getMinutes()) + ':'
+          + (datetime.getSeconds() < 10 ? '0' + datetime.getSeconds() : datetime.getSeconds());
+          
+        content.append('<p>' + time + ': ' + '<span style="color:' + color + '">' + author + '</span>' 
+            + ': ' + message + '</p>');
     };
     
   }; //end draw function

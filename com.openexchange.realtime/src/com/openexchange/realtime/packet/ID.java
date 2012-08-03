@@ -4,11 +4,17 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * An ID describes a valid sender or recipient of a {@link Stanza}. It consists of an optional channel, a mandatory user name and mandatory
- * context name and an optional resource. TODO: Blabla....
+ * An ID describes a valid sender or recipient of a {@link Stanza}.
+ * It consists of an optional channel, a mandatory user name and mandatory
+ * context name and an optional resource.
+ * Resources are arbitrary Strings that allow the user to specify how he is
+ * currently connected to the service (e.g. one resource per client) and by
+ * that enable multiple logins from different machines and locations.   
+ * TODO: Blabla....
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class ID {
 
@@ -23,6 +29,11 @@ public class ID {
      * */
     private static final Pattern PATTERN = Pattern.compile("(?:(\\w+)://)?([^@]+)@([^/]+)/?(.*)");
 
+    /**
+     * Initializes a new {@link ID} by a String with the syntax "xmpp://user@context/resource".
+     * @param id String with the syntax "xmpp://user@context/resource".
+     * @throws IllegalArgumentException if the id doesn't follow the syntax convention.
+     */
     public ID(final String id) {
         final Matcher matcher = PATTERN.matcher(id);
         if (!matcher.matches()) {
@@ -47,6 +58,10 @@ public class ID {
         validate();
     }
 
+    /*
+     * Check optional id components for emtpy strings and sanitize by setting
+     * to null. 
+     */
     private void sanitize() {
         if (protocol != null && isEmpty(protocol)) {
             protocol = null;
@@ -69,6 +84,9 @@ public class ID {
         return isWhitespace;
     }
 
+    /*
+     * Validate that mandatory id components exist.
+     */
     private void validate() throws IllegalArgumentException {
         if (user == null) {
             throw new IllegalArgumentException("User must not be null");

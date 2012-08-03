@@ -20,7 +20,7 @@
   require(["simpleox/bootstrap"], function (boot) {
     boot.done(function (session) {
       require(["chat/ui"], function (ui) {
-	ui.draw.call($("#content"), session);
+	    ui.draw.call($("#content"), session);
       });
     });
   });

@@ -62,6 +62,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.realtime.atmosphere.OXRTHandler;
 import com.openexchange.realtime.atmosphere.StanzaSender;
 import com.openexchange.realtime.packet.ID;
@@ -92,8 +93,10 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 
 	// Keep track of session <-> RTAtmosphereState associations
 	private final ConcurrentMap<String, RTAtmosphereState> uuid2State;
-	
+
+	// Keep track of ID <-> RTAtmosphereState associations
 	private final IDMap<RTAtmosphereState> id2State;
+	
 	private final HandlerLibrary library;
 
 	/**
@@ -115,57 +118,80 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
     public void destroy() {
 	    // Ignore for now
 	}
+	
+	@Override
+	    public void onStateChange(AtmosphereResourceEvent evt) throws IOException {
+
+	}
 
 	@Override
     public void onRequest(AtmosphereResource r) throws IOException {
 		AtmosphereRequest req = r.getRequest();
-		RTAtmosphereState state = getState(r);
+		RTAtmosphereState state = null;
 		try {
+		    state = getState(r);
 			state.lock();
 			if (req.getMethod().equalsIgnoreCase("GET")) {
 				if (state.handshake) {
 					r.getResponse().write("OK");
 					state.handshake = false;
 				} else {
+				    /*
+				     * Allow bi-directional communication by suspending:
+				     * AtmosphereResource/Client gets suspended until its
+				     * Broadcaster receives a message.
+				     */
 					r.suspend();
 					state.r = r;
 				}
 			} else {
-				handleIncoming(StanzaParser.parse(req.getReader().readLine()),
-						state);
+			    /*
+			     * Let the client send data to the server via POST without
+			     * suspending the AtmosphereResource. 
+			     */
+				handleIncoming(StanzaParser.parse(req.getReader().readLine()), state);
 			}
 
 		} catch (OXException e) {
-			// TODO
+			// TODO: report Exception to client
 		} finally {
-			state.unlock();
+		    if(state != null) {
+		        state.unlock();
+		    }
 		}
 
 	}
 
 	/**
-	 * Check the AtmosphereResource for the session header/parameter, add it to
-	 * the uuid2state map that tracks 
+	 * Check the AtmosphereResource for the session header/parameter and add it
+	 * to the uuid2state map that tracks Serversession <-> RTAtmosphereState
 	 * @param r the AtmosphereResource
-	 * @return
+	 * @return RTAtmosphereState that assembles the AtmosphereResource,
+	 * Serversession and ID
+	 * @throws OXException if the server session is missing from the
+	 * AtmosphereResource 
 	 */
-	private RTAtmosphereState getState(AtmosphereResource r) {
+	private RTAtmosphereState getState(AtmosphereResource r) throws OXException {
 		RTAtmosphereState state = new RTAtmosphereState();
-		String session = r.getRequest()
-				.getHeader("session");
+		String session = r.getRequest().getHeader("session");
 		if (session == null) {
 			session = r.getRequest().getParameter("session");
 		}
-		//TODO: missing session valid?
+		//Session neither in header nor parameter
+		if(session == null) {
+		    throw OXException.general("Missing Session");
+		}
 		RTAtmosphereState previous = uuid2State.putIfAbsent(session, state);
 		return previous != null ? previous : state;
 	}
 
-	@Override
-    public void onStateChange(AtmosphereResourceEvent evt) throws IOException {
 
-	}
-
+	/**
+	 * 
+	 * @param stanza
+	 * @param state
+	 * @throws OXException
+	 */
 	protected void handleIncoming(Stanza stanza, RTAtmosphereState state)
 			throws OXException {
 		if (isInternal(stanza)) {
@@ -242,6 +268,11 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 		transformer.outgoing(stanza, session, this);
 	}
 
+	/**
+	 * Check if an entity is connected to the associated Channel.
+	 * @param id the ID of the entity you are looking for.
+	 * @return true if the entity is connected, false otherwise
+	 */
 	public boolean isConnected(ID id) {
 		return id2State.get(id) != null
 				|| !id2State.getEquivalents(id).isEmpty();

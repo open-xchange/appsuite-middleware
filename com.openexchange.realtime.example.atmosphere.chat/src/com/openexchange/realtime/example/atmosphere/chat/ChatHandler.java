@@ -89,6 +89,9 @@ public class ChatHandler implements AtmosphereHandler {
     @Override
     public void onRequest(AtmosphereResource resource) throws IOException {
 
+        // Log all events on the console, including WebSocket events.
+        resource.addEventListener(new WebSocketEventListenerAdapter());
+        
         AtmosphereRequest request = resource.getRequest();
         String method = request.getMethod();
         AtmosphereResponse response = resource.getResponse();
@@ -100,10 +103,9 @@ public class ChatHandler implements AtmosphereHandler {
              * "negotiating" header is used to list all supported transports
              */
             
-            // Log all events on the console, including WebSocket events.
-            resource.addEventListener(new WebSocketEventListenerAdapter());
             
             if(request.getHeader("negotiating") == null) {
+                LOG.info(">>>> Going to suspend request: "+ request);
                 resource.suspend();
             } else {
                 response.getWriter().write("OK");
@@ -115,6 +117,7 @@ public class ChatHandler implements AtmosphereHandler {
              * Use POST request to synchronously send data over the server 
              */
             String message = request.getReader().readLine().trim();
+            LOG.info(">>>> Got message: "+ message);
             
             /*
              * The default Broadcaster of an AtmosphereResource is always "/*"
@@ -140,6 +143,7 @@ public class ChatHandler implements AtmosphereHandler {
         //Did we suspend the AtmosphereResource earlier?
         if(event.isSuspended()) {
             String body = event.getMessage().toString();
+            LOG.info(">>>> Going to write message body: " + body);
 
             // Simple JSON -- Use Jackson for more complex structure
             // Message looks like { "author" : "foo", "message" : "bar" }
@@ -158,6 +162,7 @@ public class ChatHandler implements AtmosphereHandler {
                     break;
             }   
         } else if (!event.isResuming()) {// remote connection got closed by proxy or browser
+            LOG.info(">>>> Event wasn't resuming.");
             Data message = new Data("Someone","say bye bye!");
             event.broadcaster().broadcast(message);
         }

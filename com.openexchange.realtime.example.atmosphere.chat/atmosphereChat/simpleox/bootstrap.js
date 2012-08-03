@@ -10,6 +10,7 @@ define("simpleox/bootstrap", ["simpleox/login"], function (login) {
         if (!$form) {
             return def;
         }
+        $form.css('margin-top', '200px');
         
         $form.append($name = $('<input type="text">'), '<br/>', $password = $('<input type="password">'), '<br/>', '<button>Login</button>');
         $form.find("button").on("click", function () {
