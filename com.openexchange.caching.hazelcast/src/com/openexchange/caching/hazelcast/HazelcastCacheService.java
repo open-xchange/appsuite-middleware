@@ -51,22 +51,29 @@ package com.openexchange.caching.hazelcast;
 
 import java.io.InputStream;
 import java.io.Serializable;
+import com.hazelcast.config.Config;
+import com.hazelcast.config.MapConfig;
+import com.hazelcast.config.NearCacheConfig;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.ISet;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheKeyImpl;
 import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
 
-
 /**
  * {@link HazelcastCacheService}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HazelcastCacheService implements CacheService {
 
+    private static final String NAME_PREFIX = "com.openexchange.caching.hazelcast.region.";
+
     private final HazelcastInstance hazelcastInstance;
+
+    private final ISet<String> regionNames;
 
     /**
      * Initializes a new {@link HazelcastCacheService}.
@@ -74,25 +81,43 @@ public final class HazelcastCacheService implements CacheService {
     public HazelcastCacheService(final HazelcastInstance hazelcastInstance) {
         super();
         this.hazelcastInstance = hazelcastInstance;
+        regionNames = hazelcastInstance.getSet("com.openexchange.caching.hazelcast.regionNames");
     }
 
     @Override
-    public Cache getCache(String name) throws OXException {
-        return new HazelcastCache(name, hazelcastInstance);
+    public Cache getCache(final String name) throws OXException {
+        final String mapName = NAME_PREFIX + name;
+        if (!regionNames.add(name)) {
+            return new HazelcastCache(mapName, hazelcastInstance);
+        }
+        final Config cfg = hazelcastInstance.getConfig();
+        final MapConfig mapCfg = new MapConfig();
+        mapCfg.setName(mapName);
+        mapCfg.setBackupCount(2);
+        mapCfg.getMaxSizeConfig().setSize(100000);
+        mapCfg.setTimeToLiveSeconds(300);
+        final NearCacheConfig nearCacheConfig = new NearCacheConfig();
+        nearCacheConfig.setMaxSize(1000).setMaxIdleSeconds(120).setTimeToLiveSeconds(300);
+        mapCfg.setNearCacheConfig(nearCacheConfig);
+        cfg.addMapConfig(mapCfg);
+        return new HazelcastCache(mapName, hazelcastInstance);
     }
 
     @Override
-    public void freeCache(String name) throws OXException {
-        hazelcastInstance.getMap(name).destroy();
+    public void freeCache(final String name) throws OXException {
+        final String mapName = NAME_PREFIX + name;
+        if (regionNames.contains(mapName)) {
+            hazelcastInstance.getMap(mapName).destroy();
+        }
     }
 
     @Override
-    public void loadConfiguration(String cacheConfigFile) throws OXException {
+    public void loadConfiguration(final String cacheConfigFile) throws OXException {
         // TODO Transform JCS configuration into Hazelcast configuration
     }
 
     @Override
-    public void loadConfiguration(InputStream inputStream) throws OXException {
+    public void loadConfiguration(final InputStream inputStream) throws OXException {
         // TODO Auto-generated method stub
 
     }
@@ -104,17 +129,17 @@ public final class HazelcastCacheService implements CacheService {
     }
 
     @Override
-    public CacheKey newCacheKey(int contextId, int objectId) {
+    public CacheKey newCacheKey(final int contextId, final int objectId) {
         return new CacheKeyImpl(contextId, objectId);
     }
 
     @Override
-    public CacheKey newCacheKey(int contextId, Serializable obj) {
+    public CacheKey newCacheKey(final int contextId, final Serializable obj) {
         return new CacheKeyImpl(contextId, obj);
     }
 
     @Override
-    public CacheKey newCacheKey(int contextId, Serializable... objs) {
+    public CacheKey newCacheKey(final int contextId, final Serializable... objs) {
         return new CacheKeyImpl(contextId, objs);
     }
 

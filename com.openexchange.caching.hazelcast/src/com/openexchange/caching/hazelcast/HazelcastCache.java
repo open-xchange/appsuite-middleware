@@ -50,6 +50,7 @@
 package com.openexchange.caching.hazelcast;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
@@ -139,10 +140,12 @@ public final class HazelcastCache implements Cache {
 
     @Override
     public void clear() throws OXException {
-        for (final String groupName : groupNames) {
-            final IMap<Object, Object> group = hazelcastInstance.getMap(getGroupKey(groupName));
-            if (null != group) {
-                group.clear();
+        for (final String groupName : new HashSet<String>(groupNames)) {
+            if (groupNames.remove(groupName)) {
+                final IMap<Object, Object> group = hazelcastInstance.getMap(getGroupKey(groupName));
+                if (null != group) {
+                    group.clear();
+                }
             }
         }
         groupNames.clear();
@@ -151,10 +154,12 @@ public final class HazelcastCache implements Cache {
 
     @Override
     public void dispose() {
-        for (final String groupName : groupNames) {
-            final IMap<Object, Object> group = hazelcastInstance.getMap(getGroupKey(groupName));
-            if (null != group) {
-                group.destroy();
+        for (final String groupName : new HashSet<String>(groupNames)) {
+            if (groupNames.remove(groupName)) {
+                final IMap<Object, Object> group = hazelcastInstance.getMap(getGroupKey(groupName));
+                if (null != group) {
+                    group.destroy();
+                }
             }
         }
         groupNames.destroy();
@@ -187,11 +192,8 @@ public final class HazelcastCache implements Cache {
 
     @Override
     public Object getFromGroup(final Serializable key, final String groupName) {
-        try {
-            if (groupNames.contains(groupName)) {
-                return getGroup(groupName).get(key);
-            }
-        } catch (final ClassCastException e) {
+        if (groupNames.contains(groupName)) {
+            return getGroup(groupName).get(key);
         }
         return null;
     }
@@ -218,11 +220,7 @@ public final class HazelcastCache implements Cache {
 
     @Override
     public void putInGroup(final Serializable key, final String groupName, final Object value, final ElementAttributes attr) throws OXException {
-        try {
-            getGroup(groupName).put(key, (Serializable) value);
-        } catch (final ClassCastException e) {
-            return;
-        }
+        getGroup(groupName).put(key, (Serializable) value);
     }
 
     @Override
