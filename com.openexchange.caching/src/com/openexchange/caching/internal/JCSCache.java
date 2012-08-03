@@ -102,6 +102,16 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
     }
 
     @Override
+    public boolean isReplicated() {
+        return true;
+    }
+
+    @Override
+    public boolean isDistributed() {
+        return false;
+    }
+
+    @Override
     public void clear() throws OXException {
         try {
             cache.clear();

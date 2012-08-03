@@ -101,6 +101,16 @@ public final class HazelcastCache implements Cache {
     }
 
     @Override
+    public boolean isReplicated() {
+        return false;
+    }
+
+    @Override
+    public boolean isDistributed() {
+        return true;
+    }
+
+    @Override
     public void clear() throws OXException {
         map.clear();
     }
