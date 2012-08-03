@@ -5,7 +5,10 @@ Bundle-SymbolicName: com.openexchange.caching.hazelcast
 Bundle-Version: 6.21.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.hazelcast.config,
+Import-Package: com.google.common.base,
+ com.google.common.base.internal,
+ com.google.common.collect,
+ com.hazelcast.config,
  com.hazelcast.core,
  com.openexchange.caching,
  com.openexchange.config,
