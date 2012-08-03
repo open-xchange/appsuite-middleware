@@ -4,6 +4,7 @@
  - Fix for bug 22715: Properly deal with nested multipart/related part on reply/forward
  - Fix for bug 22652: Properly register servlet path for subscription sources
  - Fix for bug 22623: Ignore possibly failed assignment of ACL during IMAP folder backup on deletion
+ - Fix for bug 22595: Maintain personal surrounded by brackets ([...])
 
 * 2012-08-03 - marcus.klein@open-xchange.com
 

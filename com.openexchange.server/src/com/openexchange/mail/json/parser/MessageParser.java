@@ -546,7 +546,21 @@ public final class MessageParser {
         /*
          * From Only mandatory if non-draft message
          */
-        mail.addFrom(parseAddressKey(MailJSONField.FROM.getKey(), jsonObj, prepare4Transport));
+        final String fromKey = MailJSONField.FROM.getKey();
+        if (jsonObj.hasAndNotNull(fromKey)) {
+            try {
+                String value = jsonObj.getString(fromKey);
+                final int endPos;
+                if ('[' == value.charAt(0) && (endPos = value.indexOf(']', 1)) < value.length()) {
+                    value = new StringBuilder(32).append("\"[").append(value.substring(1, endPos)).append("]\"").append(value.substring(endPos+1)).toString();
+                }
+                mail.addFrom(parseAddressList(value, true, true));
+            } catch (final AddressException e) {
+                mail.addFrom(parseAddressKey(fromKey, jsonObj, prepare4Transport));
+            }
+        } else if (prepare4Transport) {
+            throw MailExceptionCode.MISSING_FIELD.create(fromKey);
+        }
         /*
          * To Only mandatory if non-draft message
          */
