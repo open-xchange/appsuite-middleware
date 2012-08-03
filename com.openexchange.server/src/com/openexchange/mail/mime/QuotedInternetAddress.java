@@ -1213,7 +1213,8 @@ public final class QuotedInternetAddress extends InternetAddress {
                 valid = i > 1 && '\\' == phrase.charAt(i - 1);
                 i++;
             } else if (c == '\\') {
-                final char c2 = phrase.charAt(i + 1);
+                final int ni = i + 1;
+                final char c2 = ni < len ? phrase.charAt(ni) : '\0';
                 valid = (c2 == '"' || c2 == '\\');
                 i += 2;
             } else {
