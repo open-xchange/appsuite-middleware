@@ -219,19 +219,24 @@ public class RefresherTest extends TestCase {
                     throw new UnsupportedOperationException();
                 }
                 @Override
-                public void localRemove(final Serializable key) throws OXException {
-                    // TODO Auto-generated method stub
-                    
+                public void localRemove(final Serializable key) {
+                    throw new UnsupportedOperationException();
                 }
                 @Override
-                public void localRemoveFromGroup(final Serializable key, final String group) {
-                    // TODO Auto-generated method stub
-                    
+                public void localRemoveFromGroup(Serializable key, String group) {
+                    throw new UnsupportedOperationException();
                 }
                 @Override
-                public void localPut(final Serializable key, final Serializable value) throws OXException {
-                    // TODO Auto-generated method stub
-                    
+                public void localPut(Serializable key, Serializable value2) {
+                    throw new UnsupportedOperationException();
+                }
+                @Override
+                public boolean isDistributed() {
+                    throw new UnsupportedOperationException();
+                }
+                @Override
+                public boolean isReplicated() {
+                    throw new UnsupportedOperationException();
                 }
             };
             @Override
@@ -377,6 +382,9 @@ public class RefresherTest extends TestCase {
     private static class Remover implements Runnable {
         private final AtomicBoolean run = new AtomicBoolean(true);
         private Exception e;
+        public Remover() {
+            super();
+        }
         public void stop() {
             run.set(false);
         }

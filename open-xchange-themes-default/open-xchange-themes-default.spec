@@ -1,11 +1,10 @@
 
-Name:           open-xchange-mobile-config
+Name:           open-xchange-themes-default
 BuildArch: 	noarch
 #!BuildIgnore: post-build-checks
 BuildRequires:  ant
 BuildRequires:  ant-nodeps
 BuildRequires:  java-devel >= 1.6.0
-# TODO: version not hardcoded in spec file
 Version:	@OXVERSION@
 %define		ox_release 0
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
@@ -14,13 +13,12 @@ License:        Creative Commons Attribution-Noncommercial-Share Alike 2.5 Gener
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 URL:            http://www.open-xchange.com/
 Source:         %{name}_%{version}.orig.tar.bz2
-Summary:        Config files for the Open-Xchange Mobile UI
-Requires:       open-xchange-core >= @OXVERSION@
+Summary:        Enables the default themes in the UI
+Requires:	open-xchange-core
+Provides:	open-xchange-theme-default
 
 %description
- This package needs to be installed on the backend hosts of a cluster installation. It adds configuration files to the backend allowing the
- administrator to define some defaults for the mobile web app. Additionally it adds configuration paths on the backend for the Mobile Web Interface
- that allows to store end user preferences.
+Contains configuration files transfered through preferences interface to the UI. Tells the UI the installed themes.
 
 Authors:
 --------
@@ -35,16 +33,22 @@ Authors:
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
+%post
+if [ ${1:-0} -eq 0 ]; then
+	. /opt/open-xchange/lib/oxfunctions.sh
+	pfile=/opt/open-xchange/etc/settings/themes.properties
+	ox_remove_property "modules/themes/default" $pfile
+	ox_remove_property "modules/themes/light_breeze" $pfile
+fi
+
 %clean
 %{__rm} -rf %{buildroot}
 
 %files
 %defattr(-,root,root)
 %dir /opt/open-xchange/etc/settings
-%dir /opt/open-xchange/etc/meta
 %config(noreplace) /opt/open-xchange/etc/settings/*
-%config(noreplace) /opt/open-xchange/etc/meta/*
 
 %changelog
-* Thu Jun 21 2012 Marcus Klein  <marcus.klein@open-xchange.com>
+* Fri Aug 03 2012 Marcus Klein  <marcus.klein@open-xchange.com>
   - Initial package for new backend
