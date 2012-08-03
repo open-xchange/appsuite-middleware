@@ -49,17 +49,24 @@
 
 package com.openexchange.caching.hazelcast;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.util.Collection;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.config.NearCacheConfig;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.ISet;
 import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheExceptionCode;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheKeyImpl;
 import com.openexchange.caching.CacheService;
+import com.openexchange.caching.hazelcast.util.ConfigurationParser;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 
 /**
@@ -124,8 +131,18 @@ public final class HazelcastCacheService implements CacheService {
 
     @Override
     public void loadDefaultConfiguration() throws OXException {
-        // TODO Auto-generated method stub
-
+        try {
+            final File file = Services.getService(ConfigurationService.class).getFileByName("cache.ccf");
+            final Collection<MapConfig> configs = ConfigurationParser.parseConfig(new FileInputStream(file));
+            if (null != configs && !configs.isEmpty()) {
+                final Config config = hazelcastInstance.getConfig();
+                for (final MapConfig mapConfig : configs) {
+                    config.addMapConfig(mapConfig);
+                }
+            }
+        } catch (final IOException e) {
+            throw CacheExceptionCode.IO_ERROR.create(e, e.getMessage());
+        }
     }
 
     @Override

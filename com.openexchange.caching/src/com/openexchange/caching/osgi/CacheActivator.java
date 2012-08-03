@@ -55,6 +55,7 @@ import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.caching.CacheInformationMBean;
@@ -127,8 +128,9 @@ public final class CacheActivator extends HousekeepingActivator {
         /*
          * Register service
          */
-        final Dictionary<String, String> dictionary = new Hashtable<String, String>();
+        final Dictionary<String, Object> dictionary = new Hashtable<String, Object>(2);
         dictionary.put("name", "oxcache");
+        dictionary.put(Constants.SERVICE_RANKING, Integer.valueOf(10));
         final JCSCacheService jcsCacheService = JCSCacheService.getInstance();
         registerService(CacheService.class, jcsCacheService, dictionary);
         cacheService = jcsCacheService;
