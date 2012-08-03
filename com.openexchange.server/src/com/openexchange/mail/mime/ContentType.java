@@ -291,6 +291,8 @@ public class ContentType extends ParameterizedHeader {
 
     private String baseType;
 
+    private String lcBaseType;
+
     /**
      * Initializes a new {@link ContentType}
      */
@@ -318,6 +320,7 @@ public class ContentType extends ParameterizedHeader {
         primaryType = null;
         subType = null;
         baseType = null;
+        lcBaseType = null;
     }
 
     @Override
@@ -370,6 +373,15 @@ public class ContentType extends ParameterizedHeader {
             return false;
         }
         return true;
+    }
+
+    private String getLowerCaseBaseType() {
+        String tmp = lcBaseType;
+        if (null == tmp) {
+            tmp = toLowerCase(getBaseType());
+            lcBaseType = tmp;
+        }
+        return tmp;
     }
 
     private void parseContentType(final String contentType) throws OXException {
@@ -430,6 +442,7 @@ public class ContentType extends ParameterizedHeader {
                     }
                 }
                 baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
+                lcBaseType = null;
                 if (paramList) {
                     if (pos < 0) {
                         parameterList = new ParameterList();
@@ -490,6 +503,7 @@ public class ContentType extends ParameterizedHeader {
                 }
             }
             baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
+            lcBaseType = null;
             if (paramList) {
                 parameterList = new ParameterList(cts.substring(ctMatcher.end()));
             }
@@ -497,6 +511,7 @@ public class ContentType extends ParameterizedHeader {
             primaryType = "text";
             subType = "plain";
             baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
+            lcBaseType = null;
             if (paramList) {
                 parameterList = new ParameterList(pos < 0 ? cts : cts.substring(pos));
                 final String name = parameterList.getParameter("name");
@@ -510,6 +525,7 @@ public class ContentType extends ParameterizedHeader {
                             subType = DEFAULT_SUBTYPE;
                         }
                         baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
+                        lcBaseType = null;
                     }
                 }
             }
@@ -536,6 +552,7 @@ public class ContentType extends ParameterizedHeader {
         subType = contentType.getSubType();
         parameterList = (ParameterList) contentType.parameterList.clone();
         baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
+        lcBaseType = null;
     }
 
     /**
@@ -553,6 +570,7 @@ public class ContentType extends ParameterizedHeader {
     public ContentType setPrimaryType(final String primaryType) {
         this.primaryType = primaryType;
         baseType = null;
+        lcBaseType = null;
         return this;
     }
 
@@ -571,6 +589,7 @@ public class ContentType extends ParameterizedHeader {
     public ContentType setSubType(final String subType) {
         this.subType = subType;
         baseType = null;
+        lcBaseType = null;
         return this;
     }
 
@@ -676,7 +695,7 @@ public class ContentType extends ParameterizedHeader {
         if (null == prefix) {
             throw new IllegalArgumentException("Prefix is null");
         }
-        return toLowerCase(getBaseType()).startsWith(toLowerCase(prefix), 0);
+        return getLowerCaseBaseType().startsWith(toLowerCase(prefix), 0);
     }
 
     /**
@@ -684,13 +703,12 @@ public class ContentType extends ParameterizedHeader {
      *
      * @param prefixes The prefixes
      * @return <code>true</code> if Content-Type's base type ignore-case starts with any of specified prefixes; otherwise <code>false</code>
-     * @throws IllegalArgumentException If specified prefixes are <code>null</code>
      */
     public boolean startsWithAny(final String... prefixes) {
         if (null == prefixes) {
-            throw new IllegalArgumentException("Prefixes are null");
+            return false;
         }
-        final String lowerCase = toLowerCase(getBaseType());
+        final String lowerCase = getLowerCaseBaseType();
         for (final String prefix : prefixes) {
             if (null != prefix && lowerCase.startsWith(toLowerCase(prefix), 0)) {
                 return true;
