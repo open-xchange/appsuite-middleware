@@ -102,6 +102,16 @@ public final class HazelcastCacheService implements CacheService {
     }
 
     @Override
+    public boolean isDistributed() {
+        return true;
+    }
+
+    @Override
+    public boolean isReplicated() {
+        return false;
+    }
+
+    @Override
     public Cache getCache(final String name) throws OXException {
         final String mapName = NAME_PREFIX + name;
         final LocalCache localCache = localOnlyCaches.get(mapName);

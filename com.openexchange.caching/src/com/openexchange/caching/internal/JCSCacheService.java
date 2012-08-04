@@ -85,6 +85,16 @@ public final class JCSCacheService implements CacheService {
     }
 
     @Override
+    public boolean isReplicated() {
+        return true;
+    }
+
+    @Override
+    public boolean isDistributed() {
+        return false;
+    }
+
+    @Override
     public void freeCache(final String name) {
         if (JCSCacheServiceInit.getInstance().isDefaultCacheRegion(name)) {
             // No freeing of a default cache, this is done on bundle stop
