@@ -104,8 +104,9 @@ public final class HazelcastCacheService implements CacheService {
     @Override
     public Cache getCache(final String name) throws OXException {
         final String mapName = NAME_PREFIX + name;
-        if (localOnlyCaches.containsKey(mapName)) {
-            return localOnlyCaches.get(mapName);
+        final LocalCache localCache = localOnlyCaches.get(mapName);
+        if (null != localCache) {
+            return localCache;
         }
         if (!regionNames.add(name)) {
             return new HazelcastCache(mapName, hazelcastInstance);
@@ -137,7 +138,10 @@ public final class HazelcastCacheService implements CacheService {
     @Override
     public void freeCache(final String name) throws OXException {
         final String mapName = NAME_PREFIX + name;
-        if (regionNames.contains(mapName)) {
+        final LocalCache localCache = localOnlyCaches.get(mapName);
+        if (null != localCache) {
+            localCache.dispose();
+        } else if (regionNames.contains(name)) {
             hazelcastInstance.getMap(mapName).destroy();
         }
     }
