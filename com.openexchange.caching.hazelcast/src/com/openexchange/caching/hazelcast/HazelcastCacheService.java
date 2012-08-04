@@ -85,6 +85,16 @@ public final class HazelcastCacheService implements CacheService {
      */
     public static final String NAME_PREFIX = "com.openexchange.caching.hazelcast.region.";
 
+    /**
+     * Gets Hazelcast's name for specified region name.
+     * 
+     * @param name The region name
+     * @return The Hazelcast's name
+     */
+    public static String mapName(final String name) {
+        return NAME_PREFIX + name;
+    }
+
     private final HazelcastInstance hazelcastInstance;
 
     private final ConcurrentMap<String, LocalCache> localOnlyCaches;
@@ -113,7 +123,7 @@ public final class HazelcastCacheService implements CacheService {
 
     @Override
     public Cache getCache(final String name) throws OXException {
-        final String mapName = NAME_PREFIX + name;
+        final String mapName = mapName(name);
         final LocalCache localCache = localOnlyCaches.get(mapName);
         if (null != localCache) {
             return localCache;
@@ -127,7 +137,7 @@ public final class HazelcastCacheService implements CacheService {
             return new HazelcastCache(mapName, hazelcastInstance);
         }
         // Check for default map configuration
-        mapCfg = cfg.getMapConfig(NAME_PREFIX + "default");
+        mapCfg = cfg.getMapConfig(mapName("default"));
         if (null == mapCfg) {
             mapCfg = new MapConfig();
             mapCfg.setName(mapName);
@@ -147,7 +157,7 @@ public final class HazelcastCacheService implements CacheService {
 
     @Override
     public void freeCache(final String name) throws OXException {
-        final String mapName = NAME_PREFIX + name;
+        final String mapName = mapName(name);
         final LocalCache localCache = localOnlyCaches.get(mapName);
         if (null != localCache) {
             localCache.dispose();
