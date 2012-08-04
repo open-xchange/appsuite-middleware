@@ -78,8 +78,6 @@ public final class ConfigurationParser {
 
     private static final String NAME_PREFIX = HazelcastCacheService.NAME_PREFIX;
 
-    private static final String defaultMapName = NAME_PREFIX + "default";
-
     /**
      * Initializes a new {@link ConfigurationParser}.
      */
@@ -101,6 +99,16 @@ public final class ConfigurationParser {
         return parseConfig(new InputStreamReader(is, Charsets.ISO_8859_1));
     }
 
+    private static final String defaultMapName = NAME_PREFIX + "default";
+
+    private static final String PREFIX_DEFAULT = "jcs.default";
+
+    private static final int PREFIX_DEFAULT_LENGTH = PREFIX_DEFAULT.length();
+
+    private static final String PREFIX_REGION = "jcs.region.";
+
+    private static final int PREFIX_REGION_LENGTH = PREFIX_REGION.length();
+
     public static Collection<MapConfig> parseConfig(final Reader r) throws IOException {
         if (null == r) {
             return Collections.emptyList();
@@ -112,14 +120,44 @@ public final class ConfigurationParser {
                 return Collections.emptyList();
             }
             final Map<String, MapConfig> map = new HashMap<String, MapConfig>(8);
+            final Map<String, Boolean> localOnly = new HashMap<String, Boolean>(8);
             do {
                 final char c;
                 if (!isEmpty(line) && '#' != (c = line.charAt(0)) && '!' != c) {
                     if (line.startsWith("jcs.default")) {
+                        // First line of default region specification: Is auxiliary enabled?
+                        final int next = PREFIX_DEFAULT_LENGTH;
+                        final String auxiliary = next < line.length() ? line.substring(next) : null;
+                        if (isEmpty(auxiliary)) {
+                            localOnly.put(defaultMapName, Boolean.TRUE);
+                        }
+                        // Parse line
                         parseLine(line, defaultMapName, map);
-                    } else if (line.startsWith("jcs.region.")) {
-                        final String name = NAME_PREFIX + line.substring(12, line.indexOf('.', 13));
-                        parseLine(line, name, map);
+                    } else if (line.startsWith(PREFIX_REGION)) {
+                        final String name;
+                        {
+                            final int dotPos = line.indexOf('.', PREFIX_REGION_LENGTH+2);
+                            if (dotPos < 0) {
+                                final int equalPos = line.indexOf('=', PREFIX_REGION_LENGTH+2);
+                                if (equalPos < 0) {
+                                    // Huh...?
+                                    name = null;
+                                } else {
+                                    name = NAME_PREFIX + line.substring(PREFIX_REGION_LENGTH+1, equalPos);
+                                    // First line of a region specification: Is auxiliary enabled?
+                                    final int next = equalPos + 1;
+                                    final String auxiliary = next < line.length() ? line.substring(next) : null;
+                                    if (isEmpty(auxiliary)) {
+                                        localOnly.put(name, Boolean.TRUE);
+                                    }
+                                }
+                            } else {
+                                name = NAME_PREFIX + line.substring(PREFIX_REGION_LENGTH+1, dotPos);
+                            }
+                        }
+                        if (null != name) {
+                            parseLine(line, name, map);
+                        }
                     }
                 }
             } while ((line = reader.readLine()) != null);
