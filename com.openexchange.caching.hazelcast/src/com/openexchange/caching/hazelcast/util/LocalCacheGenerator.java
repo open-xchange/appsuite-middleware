@@ -87,6 +87,11 @@ public final class LocalCacheGenerator {
             cacheBuilder.expireAfterAccess(maxIdleSeconds, TimeUnit.SECONDS);
         }
 
+        final int timeToLiveSeconds = mapConfig.getTimeToLiveSeconds();
+        if (timeToLiveSeconds > 0) {
+            cacheBuilder.expireAfterWrite(timeToLiveSeconds, TimeUnit.SECONDS);
+        }
+
         return cacheBuilder.build();
     }
 
