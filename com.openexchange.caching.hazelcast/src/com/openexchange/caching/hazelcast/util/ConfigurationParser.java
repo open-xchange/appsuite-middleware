@@ -124,7 +124,7 @@ public final class ConfigurationParser {
             do {
                 final char c;
                 if (!isEmpty(line) && '#' != (c = line.charAt(0)) && '!' != c) {
-                    if (line.startsWith("jcs.default")) {
+                    if (line.startsWith(PREFIX_DEFAULT)) {
                         // First line of default region specification: Is auxiliary enabled?
                         int next = PREFIX_DEFAULT_LENGTH;
                         if ('=' == line.charAt(next) || ':' == line.charAt(next)) {
