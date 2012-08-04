@@ -126,10 +126,12 @@ public final class ConfigurationParser {
                 if (!isEmpty(line) && '#' != (c = line.charAt(0)) && '!' != c) {
                     if (line.startsWith("jcs.default")) {
                         // First line of default region specification: Is auxiliary enabled?
-                        final int next = PREFIX_DEFAULT_LENGTH;
-                        final String auxiliary = next < line.length() ? line.substring(next) : null;
-                        if (isEmpty(auxiliary)) {
-                            localOnly.put(defaultMapName, Boolean.TRUE);
+                        int next = PREFIX_DEFAULT_LENGTH;
+                        if ('=' == line.charAt(next) || ':' == line.charAt(next)) {
+                            final String auxiliary = ++next < line.length() ? line.substring(next) : null;
+                            if (isEmpty(auxiliary)) {
+                                localOnly.put(defaultMapName, Boolean.TRUE);
+                            }
                         }
                         // Parse line
                         parseLine(line, defaultMapName, map);
@@ -143,7 +145,7 @@ public final class ConfigurationParser {
                                     // Huh...?
                                     name = null;
                                 } else {
-                                    name = NAME_PREFIX + line.substring(PREFIX_REGION_LENGTH+1, equalPos);
+                                    name = NAME_PREFIX + line.substring(PREFIX_REGION_LENGTH, equalPos);
                                     // First line of a region specification: Is auxiliary enabled?
                                     final int next = equalPos + 1;
                                     final String auxiliary = next < line.length() ? line.substring(next) : null;
@@ -152,7 +154,7 @@ public final class ConfigurationParser {
                                     }
                                 }
                             } else {
-                                name = NAME_PREFIX + line.substring(PREFIX_REGION_LENGTH+1, dotPos);
+                                name = NAME_PREFIX + line.substring(PREFIX_REGION_LENGTH, dotPos);
                             }
                         }
                         if (null != name) {
