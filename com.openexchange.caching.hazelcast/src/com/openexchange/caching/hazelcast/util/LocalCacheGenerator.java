@@ -71,27 +71,30 @@ public final class LocalCacheGenerator {
     /**
      * Creates a local cache.
      * 
-     * @param mapConfig The map configuration source
+     * @param mapConfig The map configuration source (expiry etc.)
      * @return The resulting local cache
      */
-    public static Cache<Object, Object> createLocalCache(final MapConfig mapConfig) {
-        final CacheBuilder<Object, Object> cacheBuilder = CacheBuilder.newBuilder();
-
-        final int maxSize = mapConfig.getMaxSizeConfig().getSize();
-        if (maxSize > 0) {
-            cacheBuilder.maximumSize(maxSize);
+    public static <K, V> Cache<K, V> createLocalCache(final MapConfig mapConfig) {
+        @SuppressWarnings("unchecked")
+        final CacheBuilder<K, V> cacheBuilder = (CacheBuilder<K, V>) CacheBuilder.newBuilder();
+        {
+            final int maxSize = mapConfig.getMaxSizeConfig().getSize();
+            if (maxSize > 0) {
+                cacheBuilder.maximumSize(maxSize);
+            }
         }
-
-        final int maxIdleSeconds = mapConfig.getMaxIdleSeconds();
-        if (maxIdleSeconds > 0) {
-            cacheBuilder.expireAfterAccess(maxIdleSeconds, TimeUnit.SECONDS);
+        {
+            final int maxIdleSeconds = mapConfig.getMaxIdleSeconds();
+            if (maxIdleSeconds > 0) {
+                cacheBuilder.expireAfterAccess(maxIdleSeconds, TimeUnit.SECONDS);
+            }
         }
-
-        final int timeToLiveSeconds = mapConfig.getTimeToLiveSeconds();
-        if (timeToLiveSeconds > 0) {
-            cacheBuilder.expireAfterWrite(timeToLiveSeconds, TimeUnit.SECONDS);
+        {
+            final int timeToLiveSeconds = mapConfig.getTimeToLiveSeconds();
+            if (timeToLiveSeconds > 0) {
+                cacheBuilder.expireAfterWrite(timeToLiveSeconds, TimeUnit.SECONDS);
+            }
         }
-
         return cacheBuilder.build();
     }
 
