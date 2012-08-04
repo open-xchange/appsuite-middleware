@@ -54,7 +54,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.util.Collection;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.config.NearCacheConfig;
@@ -67,6 +69,7 @@ import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheKeyImpl;
 import com.openexchange.caching.CacheService;
 import com.openexchange.caching.hazelcast.util.ConfigurationParser;
+import com.openexchange.caching.hazelcast.util.LocalCacheGenerator;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 
@@ -84,6 +87,8 @@ public final class HazelcastCacheService implements CacheService {
 
     private final HazelcastInstance hazelcastInstance;
 
+    private final ConcurrentMap<String, LocalCache> localOnlyCaches;
+
     private final ISet<String> regionNames;
 
     /**
@@ -93,11 +98,15 @@ public final class HazelcastCacheService implements CacheService {
         super();
         this.hazelcastInstance = hazelcastInstance;
         regionNames = hazelcastInstance.getSet("com.openexchange.caching.hazelcast.regionNames");
+        localOnlyCaches = new ConcurrentHashMap<String, LocalCache>(16);
     }
 
     @Override
     public Cache getCache(final String name) throws OXException {
         final String mapName = NAME_PREFIX + name;
+        if (localOnlyCaches.containsKey(mapName)) {
+            return localOnlyCaches.get(mapName);
+        }
         if (!regionNames.add(name)) {
             return new HazelcastCache(mapName, hazelcastInstance);
         }
@@ -137,11 +146,17 @@ public final class HazelcastCacheService implements CacheService {
     public void loadConfiguration(final String cacheConfigFile) throws OXException {
         try {
             final File file = new File(cacheConfigFile);
-            final Collection<MapConfig> configs = ConfigurationParser.parseConfig(new FileInputStream(file));
+            final Map<MapConfig, Boolean> configs = ConfigurationParser.parseConfig(new FileInputStream(file));
             if (null != configs && !configs.isEmpty()) {
                 final Config config = hazelcastInstance.getConfig();
-                for (final MapConfig mapConfig : configs) {
-                    config.addMapConfig(mapConfig);
+                for (final Map.Entry<MapConfig, Boolean> entry : configs.entrySet()) {
+                    final MapConfig mapConfig = entry.getKey();
+                    if (entry.getValue().booleanValue()) {
+                        // Local only
+                        localOnlyCaches.put(mapConfig.getName(), new LocalCache(LocalCacheGenerator.<Serializable,Serializable> createLocalCache(mapConfig), mapConfig));
+                    } else {
+                        config.addMapConfig(mapConfig);
+                    }
                 }
             }
         } catch (final IOException e) {
@@ -152,11 +167,17 @@ public final class HazelcastCacheService implements CacheService {
     @Override
     public void loadConfiguration(final InputStream inputStream) throws OXException {
         try {
-            final Collection<MapConfig> configs = ConfigurationParser.parseConfig(inputStream);
+            final Map<MapConfig, Boolean> configs = ConfigurationParser.parseConfig(inputStream);
             if (null != configs && !configs.isEmpty()) {
                 final Config config = hazelcastInstance.getConfig();
-                for (final MapConfig mapConfig : configs) {
-                    config.addMapConfig(mapConfig);
+                for (final Map.Entry<MapConfig, Boolean> entry : configs.entrySet()) {
+                    final MapConfig mapConfig = entry.getKey();
+                    if (entry.getValue().booleanValue()) {
+                        // Local only
+                        localOnlyCaches.put(mapConfig.getName(), new LocalCache(LocalCacheGenerator.<Serializable,Serializable> createLocalCache(mapConfig), mapConfig));
+                    } else {
+                        config.addMapConfig(mapConfig);
+                    }
                 }
             }
         } catch (final IOException e) {
@@ -168,11 +189,17 @@ public final class HazelcastCacheService implements CacheService {
     public void loadDefaultConfiguration() throws OXException {
         try {
             final File file = Services.getService(ConfigurationService.class).getFileByName("cache.ccf");
-            final Collection<MapConfig> configs = ConfigurationParser.parseConfig(new FileInputStream(file));
+            final Map<MapConfig, Boolean> configs = ConfigurationParser.parseConfig(new FileInputStream(file));
             if (null != configs && !configs.isEmpty()) {
                 final Config config = hazelcastInstance.getConfig();
-                for (final MapConfig mapConfig : configs) {
-                    config.addMapConfig(mapConfig);
+                for (final Map.Entry<MapConfig, Boolean> entry : configs.entrySet()) {
+                    final MapConfig mapConfig = entry.getKey();
+                    if (entry.getValue().booleanValue()) {
+                        // Local only
+                        localOnlyCaches.put(mapConfig.getName(), new LocalCache(LocalCacheGenerator.<Serializable,Serializable> createLocalCache(mapConfig), mapConfig));
+                    } else {
+                        config.addMapConfig(mapConfig);
+                    }
                 }
             }
         } catch (final IOException e) {

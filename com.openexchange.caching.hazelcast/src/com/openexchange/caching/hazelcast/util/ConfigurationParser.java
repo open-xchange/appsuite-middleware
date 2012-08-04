@@ -85,16 +85,16 @@ public final class ConfigurationParser {
         super();
     }
 
-    public static Collection<MapConfig> parseConfig(final String sConfig) throws IOException {
+    public static Map<MapConfig, Boolean> parseConfig(final String sConfig) throws IOException {
         if (null == sConfig) {
-            return Collections.emptyList();
+            return Collections.emptyMap();
         }
         return parseConfig(new UnsynchronizedStringReader(sConfig));
     }
 
-    public static Collection<MapConfig> parseConfig(final InputStream is) throws IOException {
+    public static Map<MapConfig, Boolean> parseConfig(final InputStream is) throws IOException {
         if (null == is) {
-            return Collections.emptyList();
+            return Collections.emptyMap();
         }
         return parseConfig(new InputStreamReader(is, Charsets.ISO_8859_1));
     }
@@ -109,18 +109,19 @@ public final class ConfigurationParser {
 
     private static final int PREFIX_REGION_LENGTH = PREFIX_REGION.length();
 
-    public static Collection<MapConfig> parseConfig(final Reader r) throws IOException {
+    public static Map<MapConfig, Boolean> parseConfig(final Reader r) throws IOException {
         if (null == r) {
-            return Collections.emptyList();
+            return Collections.emptyMap();
         }
         final BufferedReader reader = r instanceof BufferedReader ? (BufferedReader) r : new BufferedReader(r);
         try {
             String line = reader.readLine();
             if (null == line) {
-                return Collections.emptyList();
+                return Collections.emptyMap();
             }
             final Map<String, MapConfig> map = new HashMap<String, MapConfig>(8);
             final Map<String, Boolean> localOnly = new HashMap<String, Boolean>(8);
+            final StringBuilder tmp = new StringBuilder(NAME_PREFIX);
             do {
                 final char c;
                 if (!isEmpty(line) && '#' != (c = line.charAt(0)) && '!' != c) {
@@ -138,14 +139,15 @@ public final class ConfigurationParser {
                     } else if (line.startsWith(PREFIX_REGION)) {
                         final String name;
                         {
-                            final int dotPos = line.indexOf('.', PREFIX_REGION_LENGTH+2);
+                            final int dotPos = line.indexOf('.', PREFIX_REGION_LENGTH);
                             if (dotPos < 0) {
-                                final int equalPos = line.indexOf('=', PREFIX_REGION_LENGTH+2);
+                                final int equalPos = line.indexOf('=', PREFIX_REGION_LENGTH);
                                 if (equalPos < 0) {
                                     // Huh...?
                                     name = null;
                                 } else {
-                                    name = NAME_PREFIX + line.substring(PREFIX_REGION_LENGTH, equalPos);
+                                    tmp.setLength(NAME_PREFIX.length());
+                                    name = tmp.append(line.substring(PREFIX_REGION_LENGTH, equalPos)).toString();
                                     // First line of a region specification: Is auxiliary enabled?
                                     final int next = equalPos + 1;
                                     final String auxiliary = next < line.length() ? line.substring(next) : null;
@@ -154,7 +156,8 @@ public final class ConfigurationParser {
                                     }
                                 }
                             } else {
-                                name = NAME_PREFIX + line.substring(PREFIX_REGION_LENGTH, dotPos);
+                                tmp.setLength(NAME_PREFIX.length());
+                                name = tmp.append(line.substring(PREFIX_REGION_LENGTH, dotPos)).toString();
                             }
                         }
                         if (null != name) {
@@ -166,6 +169,7 @@ public final class ConfigurationParser {
             /*
              * Check parsed MapConfigs
              */
+            final Map<MapConfig, Boolean> ret = new HashMap<MapConfig, Boolean>(map.size());
             final Collection<MapConfig> configs = map.values();
             for (final MapConfig mapConfig : configs) {
                 final String evictionPolicy = mapConfig.getEvictionPolicy();
@@ -181,8 +185,10 @@ public final class ConfigurationParser {
                         nearCacheConfig.setInvalidateOnChange(true);
                     }
                 }
+
+                ret.put(mapConfig, localOnly.containsKey(mapConfig.getName()) ? Boolean.TRUE : Boolean.FALSE);
             }
-            return configs;
+            return ret;
         } finally {
             Streams.close(reader);
         }
