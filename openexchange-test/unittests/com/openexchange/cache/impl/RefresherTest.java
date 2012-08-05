@@ -275,6 +275,16 @@ public class RefresherTest extends TestCase {
             public CacheKey newCacheKey(final int contextId, final Serializable... objs) {
                 throw new UnsupportedOperationException();
             }
+            @Override
+            public boolean isDistributed() {
+                // TODO Auto-generated method stub
+                return false;
+            }
+            @Override
+            public boolean isReplicated() {
+                // TODO Auto-generated method stub
+                return false;
+            }
         });
         final Refreshed refreshed = new Refreshed();
         consumer1 = new Consumer(refreshed);
