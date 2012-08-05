@@ -163,6 +163,12 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 			case LONG_POLLING:
 				r.suspend();
 			}
+			
+			switch (r.transport()) {
+			case JSONP:
+			case LONG_POLLING:
+				r.suspend();
+			}
 
 		} catch (OXException e) {
 			// TODO: report Exception to client
@@ -193,11 +199,13 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 		if(session == null) {
 		    throw OXException.general("Missing Session");
 		}
+
 		String resource = r.getRequest()
 				.getHeader("resource");
 		if (resource == null) {
 			resource = r.getRequest().getParameter("resource");
 		}
+
 		RTAtmosphereState previous = uuid2State.putIfAbsent(session, state);
 		RTAtmosphereState theState = previous != null ? previous : state;
 		
