@@ -57,6 +57,7 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import org.apache.commons.logging.Log;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.config.NearCacheConfig;
@@ -79,6 +80,8 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HazelcastCacheService implements CacheService {
+
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(HazelcastCacheService.class);
 
     /**
      * The name prefix for a {@link IMap}.
@@ -136,6 +139,7 @@ public final class HazelcastCacheService implements CacheService {
         if (null != mapCfg) {
             return new HazelcastCache(mapName, hazelcastInstance);
         }
+        LOG.warn("Missing configuration for cache region \"" + name + "\". Using default configuration.");
         // Check for default map configuration
         mapCfg = cfg.getMapConfig(mapName("default"));
         if (null == mapCfg) {
