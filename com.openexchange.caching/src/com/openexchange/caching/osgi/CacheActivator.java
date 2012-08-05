@@ -124,16 +124,19 @@ public final class CacheActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         JCSCacheServiceInit.initInstance();
-        JCSCacheServiceInit.getInstance().start(getService(ConfigurationService.class));
+        final ConfigurationService service = getService(ConfigurationService.class);
+        JCSCacheServiceInit.getInstance().start(service);
         /*
          * Register service
          */
-        final Dictionary<String, Object> dictionary = new Hashtable<String, Object>(2);
-        dictionary.put("name", "oxcache");
-        dictionary.put(Constants.SERVICE_RANKING, Integer.valueOf(10));
-        final JCSCacheService jcsCacheService = JCSCacheService.getInstance();
-        registerService(CacheService.class, jcsCacheService, dictionary);
-        cacheService = jcsCacheService;
+        if (null == service || service.getBoolProperty("com.openexchange.caching.jcs.enabled", true)) {
+            final Dictionary<String, Object> dictionary = new Hashtable<String, Object>(2);
+            dictionary.put("name", "oxcache");
+            dictionary.put(Constants.SERVICE_RANKING, Integer.valueOf(10));
+            final JCSCacheService jcsCacheService = JCSCacheService.getInstance();
+            registerService(CacheService.class, jcsCacheService, dictionary);
+            cacheService = jcsCacheService;
+        }
         final class ServiceTrackerCustomizerImpl implements ServiceTrackerCustomizer<ManagementService, ManagementService> {
 
             private final BundleContext bundleContext;
