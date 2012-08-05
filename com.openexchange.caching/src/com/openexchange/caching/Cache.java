@@ -50,7 +50,6 @@
 package com.openexchange.caching;
 
 import java.io.Serializable;
-import org.apache.jcs.access.exception.CacheException;
 import com.openexchange.exception.OXException;
 
 /**
@@ -227,7 +226,7 @@ public interface Cache {
      * laterally nor remotely.
      * 
      * @param key The key
-     * @throws CacheException If remove operation on cache fails
+     * @throws OXException If remove operation on cache fails
      * @see SupportsLocalOperations SupportsLocalOperations marker interface to check if supported
      */
     public void localRemove(Serializable key) throws OXException;
