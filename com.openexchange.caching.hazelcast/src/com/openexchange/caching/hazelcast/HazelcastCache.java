@@ -68,6 +68,7 @@ import com.openexchange.caching.CacheKeyImpl;
 import com.openexchange.caching.CacheStatistics;
 import com.openexchange.caching.ElementAttributes;
 import com.openexchange.caching.LockAware;
+import com.openexchange.caching.PutIfAbsent;
 import com.openexchange.exception.OXException;
 
 /**
@@ -75,7 +76,7 @@ import com.openexchange.exception.OXException;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class HazelcastCache implements Cache, LockAware {
+public final class HazelcastCache implements Cache, LockAware, PutIfAbsent {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(HazelcastCache.class);
 
@@ -268,6 +269,11 @@ public final class HazelcastCache implements Cache, LockAware {
         if (null != map.putIfAbsent(key, value)) {
             throw CacheExceptionCode.FAILED_SAFE_PUT.create();
         }
+    }
+
+    @Override
+    public Serializable putIfAbsent(Serializable key, Serializable value) {
+        return map.putIfAbsent(key, value);
     }
 
     @Override

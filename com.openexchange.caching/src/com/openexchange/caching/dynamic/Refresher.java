@@ -58,6 +58,7 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheExceptionCode;
 import com.openexchange.caching.CacheService;
 import com.openexchange.caching.LockAware;
+import com.openexchange.caching.PutIfAbsent;
 import com.openexchange.caching.osgi.CacheActivator;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.LogFactory;
@@ -156,6 +157,7 @@ public abstract class Refresher<T extends Serializable> {
         return refresh(regionName, getCache(regionName), factory, removeBeforePut);
     }
 
+    @SuppressWarnings("unchecked")
     public static <T extends Serializable> T refresh(final String regionName, final Cache cache, final OXObjectFactory<T> factory, final boolean removeBeforePut) throws OXException {
         if (null == cache) {
             return factory.load();
@@ -175,8 +177,40 @@ public abstract class Refresher<T extends Serializable> {
         /*
          * Lock acquired
          */
-        T retval = null;
         final Serializable key = factory.getKey();
+        T retval = null;
+        if (cache.isDistributed()) {
+            retval = (T) cache.get(key);
+            if (null == retval) {
+                try {
+                    if (cache instanceof PutIfAbsent) {
+                        final T newVal = factory.load();
+                        retval = (T) ((PutIfAbsent) cache).putIfAbsent(key, newVal);
+                        if (null == retval) {
+                            retval = newVal;
+                        }
+                    } else {
+                        try {
+                            final T newVal = factory.load();
+                            cache.putSafe(key, newVal);
+                            retval = newVal;
+                        } catch (final OXException e) {
+                            if (!CacheExceptionCode.FAILED_SAFE_PUT.equals(e)) {
+                                throw e;
+                            }
+                            // Obviously another thread put in the meantime
+                            retval = (T) cache.get(key);
+                        }
+                    }
+                } catch (final RuntimeException e) {
+                    throw CacheExceptionCode.CACHE_ERROR.create(e, e.getMessage());
+                }
+            }
+            return retval;
+        }
+        /*
+         * Lock acquired & replicated cache
+         */
         Condition cond = null;
         try {
             final Object tmp = cache.get(key);

@@ -47,35 +47,26 @@
  *
  */
 
-package com.openexchange.authentication.database.osgi;
+package com.openexchange.caching;
 
-import org.osgi.framework.Constants;
-import org.osgi.framework.Filter;
-import com.openexchange.context.ContextService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.user.UserService;
+import java.io.Serializable;
+import com.openexchange.exception.OXException;
 
-public class Activator extends HousekeepingActivator {
+/**
+ * {@link PutIfAbsent}
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public interface PutIfAbsent {
 
-    public Activator() {
-        super();
-    }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        final Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + ContextService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + UserService.class.getName() + "))");
-        track(filter, new AuthenticationRegisterer(context));
-        openTrackers();
-    }
-
-    @Override
-    public void stopBundle() {
-        closeTrackers();
-        cleanUp();
-    }
+    /**
+     * If the specified key is not already associated with a value, associate it with the given value. The action is performed atomically.
+     * 
+     * @param key The key with which the specified value is to be associated
+     * @param value The value to be associated with the specified key
+     * @return The previous value associated with the specified key, or <tt>null</tt> if there was no mapping for the key.
+     * @throws NullPointerException if the specified key or value is null, and this map does not permit null keys or values
+     * @throws OXException If a cache error occurs
+     */
+    Serializable putIfAbsent(Serializable key, Serializable value) throws OXException;
 }

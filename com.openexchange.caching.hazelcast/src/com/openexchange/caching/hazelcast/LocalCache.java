@@ -63,6 +63,7 @@ import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheKeyImpl;
 import com.openexchange.caching.CacheStatistics;
 import com.openexchange.caching.ElementAttributes;
+import com.openexchange.caching.PutIfAbsent;
 import com.openexchange.caching.SupportsLocalOperations;
 import com.openexchange.caching.hazelcast.util.LocalCacheGenerator;
 import com.openexchange.exception.OXException;
@@ -72,7 +73,7 @@ import com.openexchange.exception.OXException;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class LocalCache implements Cache, SupportsLocalOperations {
+public final class LocalCache implements Cache, SupportsLocalOperations, PutIfAbsent {
 
     private final MapConfig mapConfig;
 
@@ -203,6 +204,24 @@ public final class LocalCache implements Cache, SupportsLocalOperations {
         } catch (final ExecutionException e) {
             final Throwable cause = e.getCause();
             throw CacheExceptionCode.FAILED_SAFE_PUT.create(cause, cause.getMessage());
+        }
+    }
+
+    @Override
+    public Serializable putIfAbsent(final Serializable key, final Serializable value) throws OXException {
+        try {
+            return cache.get(key, new Callable<Serializable>() {
+
+                @Override
+                public Serializable call() throws Exception {
+                    return value;
+                }
+            });
+        } catch (final ExecutionException e) {
+            final Throwable cause = e.getCause();
+            throw CacheExceptionCode.FAILED_SAFE_PUT.create(cause, cause.getMessage());
+        } catch (final RuntimeException e) {
+            throw CacheExceptionCode.CACHE_ERROR.create(e, e.getMessage());
         }
     }
 
