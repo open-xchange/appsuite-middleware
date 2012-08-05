@@ -66,6 +66,8 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public final class HazelcastCacheActivator extends HousekeepingActivator {
 
+    private volatile HazelcastCacheService hazelcastCacheService;
+
     /**
      * Initializes a new {@link HazelcastCacheActivator}.
      */
@@ -87,10 +89,16 @@ public final class HazelcastCacheActivator extends HousekeepingActivator {
         final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
         props.put(Constants.SERVICE_RANKING, Integer.valueOf(0));
         registerService(CacheService.class, hazelcastCacheService, props);
+        this.hazelcastCacheService = hazelcastCacheService;
     }
 
     @Override
     protected void stopBundle() throws Exception {
+        final HazelcastCacheService hazelcastCacheService = this.hazelcastCacheService;
+        if (null != hazelcastCacheService) {
+            hazelcastCacheService.shutdown();
+            this.hazelcastCacheService = null;
+        }
         Services.setServiceLookup(null);
         super.stopBundle();
     }

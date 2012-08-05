@@ -50,6 +50,7 @@
 package com.openexchange.caching.hazelcast;
 
 import java.io.Serializable;
+import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -106,11 +107,20 @@ public final class LocalCache implements Cache, SupportsLocalOperations {
 
     @Override
     public void clear() throws OXException {
+        for (final Entry<String, com.google.common.cache.Cache<Serializable, Serializable>> entry : groups.entrySet()) {
+            entry.getValue().invalidateAll();
+        }
         cache.invalidateAll();
     }
 
     @Override
     public void dispose() {
+        for (final Entry<String, com.google.common.cache.Cache<Serializable, Serializable>> entry : groups.entrySet()) {
+            final com.google.common.cache.Cache<Serializable, Serializable> groupCache = entry.getValue();
+            groupCache.invalidateAll();
+            groupCache.cleanUp();
+        }
+        groups.clear();
         cache.invalidateAll();
         cache.cleanUp();
     }
@@ -180,7 +190,7 @@ public final class LocalCache implements Cache, SupportsLocalOperations {
     @Override
     public void putSafe(final Serializable key, final Serializable value) throws OXException {
         try {
-            Serializable prev = cache.get(key, new Callable<Serializable>() {
+            final Serializable prev = cache.get(key, new Callable<Serializable>() {
 
                 @Override
                 public Serializable call() throws Exception {

@@ -63,6 +63,8 @@ import com.hazelcast.config.MapConfig;
 import com.hazelcast.config.NearCacheConfig;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
+import com.hazelcast.core.Instance;
+import com.hazelcast.core.Instance.InstanceType;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheExceptionCode;
 import com.openexchange.caching.CacheKey;
@@ -113,6 +115,36 @@ public final class HazelcastCacheService implements CacheService {
         this.hazelcastInstance = hazelcastInstance;
         regionNames = new ConcurrentHashMap<String, Boolean>(16);
         localOnlyCaches = new ConcurrentHashMap<String, LocalCache>(16);
+    }
+
+    /**
+     * Performs shut-down.
+     */
+    public void shutdown() {
+        for (final LocalCache localCache : localOnlyCaches.values()) {
+            localCache.dispose();
+        }
+        localOnlyCaches.clear();
+        // Drop associated Hazelcast resources
+        final String namePrefix = NAME_PREFIX;
+        for (final Instance instance : hazelcastInstance.getInstances()) {
+            final InstanceType instanceType = instance.getInstanceType();
+            if (InstanceType.MAP.equals(instanceType) || InstanceType.SET.equals(instanceType)) {
+                if (instance.getId().toString().indexOf(namePrefix) >= 0) {
+                    instance.destroy();
+                }
+            }
+        }
+        regionNames.clear();
+    }
+
+    /**
+     * Gets the map of known local caches.
+     * 
+     * @return The local caches
+     */
+    public ConcurrentMap<String, LocalCache> getLocalOnlyCaches() {
+        return localOnlyCaches;
     }
 
     @Override
@@ -182,7 +214,9 @@ public final class HazelcastCacheService implements CacheService {
                     final MapConfig mapConfig = entry.getKey();
                     if (entry.getValue().booleanValue()) {
                         // Local only
-                        localOnlyCaches.put(mapConfig.getName(), new LocalCache(LocalCacheGenerator.<Serializable,Serializable> createLocalCache(mapConfig), mapConfig));
+                        localOnlyCaches.put(
+                            mapConfig.getName(),
+                            new LocalCache(LocalCacheGenerator.<Serializable, Serializable> createLocalCache(mapConfig), mapConfig));
                     } else {
                         config.addMapConfig(mapConfig);
                     }
@@ -203,7 +237,9 @@ public final class HazelcastCacheService implements CacheService {
                     final MapConfig mapConfig = entry.getKey();
                     if (entry.getValue().booleanValue()) {
                         // Local only
-                        localOnlyCaches.put(mapConfig.getName(), new LocalCache(LocalCacheGenerator.<Serializable,Serializable> createLocalCache(mapConfig), mapConfig));
+                        localOnlyCaches.put(
+                            mapConfig.getName(),
+                            new LocalCache(LocalCacheGenerator.<Serializable, Serializable> createLocalCache(mapConfig), mapConfig));
                     } else {
                         config.addMapConfig(mapConfig);
                     }
@@ -225,7 +261,9 @@ public final class HazelcastCacheService implements CacheService {
                     final MapConfig mapConfig = entry.getKey();
                     if (entry.getValue().booleanValue()) {
                         // Local only
-                        localOnlyCaches.put(mapConfig.getName(), new LocalCache(LocalCacheGenerator.<Serializable,Serializable> createLocalCache(mapConfig), mapConfig));
+                        localOnlyCaches.put(
+                            mapConfig.getName(),
+                            new LocalCache(LocalCacheGenerator.<Serializable, Serializable> createLocalCache(mapConfig), mapConfig));
                     } else {
                         config.addMapConfig(mapConfig);
                     }
