@@ -138,7 +138,6 @@ public final class CacheActivator extends HousekeepingActivator {
             registerService(CacheService.class, jcsCacheService, dictionary);
             cacheService = jcsCacheService;
         } else {
-            final BundleContext context = this.context;
             track(CacheService.class, new SimpleRegistryListener<CacheService>() {
 
                 @Override
