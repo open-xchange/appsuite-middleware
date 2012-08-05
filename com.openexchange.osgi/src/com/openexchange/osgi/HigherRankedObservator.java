@@ -142,6 +142,7 @@ public class HigherRankedObservator<S> implements ServiceTrackerCustomizer<S, S>
             for (HigherRankedObservatorCallback<S> callback : callbacks) {
                 callback.onFirstHigherRankedAvailable(reference, service);
             }
+            return service;
         }
         return null;
     }
