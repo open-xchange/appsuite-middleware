@@ -55,6 +55,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.apache.commons.logging.Log;
@@ -65,6 +66,7 @@ import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 import com.hazelcast.core.Instance;
 import com.hazelcast.core.Instance.InstanceType;
+import com.hazelcast.core.Member;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheExceptionCode;
 import com.openexchange.caching.CacheKey;
@@ -120,22 +122,37 @@ public final class HazelcastCacheService implements CacheService {
     /**
      * Performs shut-down.
      */
-    public void shutdown() {
+    public void shutdown(final boolean clusterWide) {
         for (final LocalCache localCache : localOnlyCaches.values()) {
             localCache.dispose();
         }
         localOnlyCaches.clear();
-        // Drop associated Hazelcast resources
-        final String namePrefix = NAME_PREFIX;
-        for (final Instance instance : hazelcastInstance.getInstances()) {
-            final InstanceType instanceType = instance.getInstanceType();
-            if (InstanceType.MAP.equals(instanceType) || InstanceType.SET.equals(instanceType)) {
-                if (instance.getId().toString().indexOf(namePrefix) >= 0) {
-                    instance.destroy();
+        if (clusterWide || imTheOnlyOne()) {
+            // Drop associated Hazelcast resources
+            final String namePrefix = NAME_PREFIX;
+            for (final Instance instance : hazelcastInstance.getInstances()) {
+                final InstanceType instanceType = instance.getInstanceType();
+                if (InstanceType.MAP.equals(instanceType) || InstanceType.SET.equals(instanceType)) {
+                    if (instance.getId().toString().indexOf(namePrefix) >= 0) {
+                        instance.destroy();
+                    }
                 }
             }
         }
         regionNames.clear();
+    }
+    
+    private boolean imTheOnlyOne() {
+        final Set<Member> members = hazelcastInstance.getCluster().getMembers();
+        if (members.size() > 1) {
+            return false;
+        }
+        for (final Member member : members) {
+            if (!member.localMember()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**

@@ -96,7 +96,7 @@ public final class HazelcastCacheActivator extends HousekeepingActivator {
     protected void stopBundle() throws Exception {
         final HazelcastCacheService hazelcastCacheService = this.hazelcastCacheService;
         if (null != hazelcastCacheService) {
-            hazelcastCacheService.shutdown();
+            hazelcastCacheService.shutdown(false);
             this.hazelcastCacheService = null;
         }
         Services.setServiceLookup(null);

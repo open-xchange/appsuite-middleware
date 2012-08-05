@@ -51,6 +51,8 @@ package com.openexchange.caching.hazelcast;
 
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.concurrent.TimeUnit;
+import org.apache.commons.logging.Log;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
@@ -72,6 +74,8 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HazelcastCache implements Cache {
+
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(HazelcastCache.class);
 
     private final String hazelcastName;
 
@@ -145,29 +149,48 @@ public final class HazelcastCache implements Cache {
 
     @Override
     public void clear() throws OXException {
-        for (final String groupName : new HashSet<String>(groupNames)) {
-            if (groupNames.remove(groupName)) {
-                final IMap<Object, Object> group = hazelcastInstance.getMap(getGroupKey(groupName));
-                if (null != group) {
-                    group.clear();
+        final int time = 10;
+        final TimeUnit timeUnit = TimeUnit.SECONDS;
+        if (!map.lockMap(time, timeUnit)) {
+            throw CacheExceptionCode.CACHE_ERROR.create("Couldn't acquire map lock within " + time + " " + timeUnit);
+        }
+        try {
+            for (final String groupName : new HashSet<String>(groupNames)) {
+                if (groupNames.remove(groupName)) {
+                    final IMap<Object, Object> group = hazelcastInstance.getMap(getGroupKey(groupName));
+                    if (null != group) {
+                        group.clear();
+                    }
                 }
             }
+            groupNames.clear();
+            map.clear();
+        } finally {
+            map.unlockMap();
         }
-        groupNames.clear();
-        map.clear();
     }
 
     @Override
     public void dispose() {
-        for (final String groupName : new HashSet<String>(groupNames)) {
-            if (groupNames.remove(groupName)) {
-                final IMap<Object, Object> group = hazelcastInstance.getMap(getGroupKey(groupName));
-                if (null != group) {
-                    group.destroy();
+        final int time = 10;
+        final TimeUnit timeUnit = TimeUnit.SECONDS;
+        if (!map.lockMap(time, timeUnit)) {
+            LOG.warn("Couldn't acquire map lock within " + time + " " + timeUnit);
+            return;
+        }
+        try {
+            for (final String groupName : new HashSet<String>(groupNames)) {
+                if (groupNames.remove(groupName)) {
+                    final IMap<Object, Object> group = hazelcastInstance.getMap(getGroupKey(groupName));
+                    if (null != group) {
+                        group.destroy();
+                    }
                 }
             }
+            groupNames.destroy();
+        } finally {
+            map.unlockMap();
         }
-        groupNames.destroy();
         map.destroy();
     }
 
