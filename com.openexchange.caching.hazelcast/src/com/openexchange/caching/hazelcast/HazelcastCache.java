@@ -52,6 +52,7 @@ package com.openexchange.caching.hazelcast;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
 import org.apache.commons.logging.Log;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
@@ -66,6 +67,7 @@ import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheKeyImpl;
 import com.openexchange.caching.CacheStatistics;
 import com.openexchange.caching.ElementAttributes;
+import com.openexchange.caching.LockAware;
 import com.openexchange.exception.OXException;
 
 /**
@@ -73,7 +75,7 @@ import com.openexchange.exception.OXException;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class HazelcastCache implements Cache {
+public final class HazelcastCache implements Cache, LockAware {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(HazelcastCache.class);
 
@@ -96,6 +98,11 @@ public final class HazelcastCache implements Cache {
         this.map = hazelcastInstance.<Serializable, Serializable> getMap(hazelcastName);
         this.groupNames = hazelcastInstance.getSet(hazelcastName + "?==?groupNames");
         this.hazelcastInstance = hazelcastInstance;
+    }
+
+    @Override
+    public Lock getLock() {
+        return hazelcastInstance.getLock(hazelcastName);
     }
 
     private IMap<Serializable, Serializable> getGroup(final String groupName) {

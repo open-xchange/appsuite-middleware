@@ -60,6 +60,7 @@ import com.openexchange.log.LogFactory;
 import com.openexchange.cache.dynamic.OXNoRefresh;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
+import com.openexchange.caching.LockAware;
 import com.openexchange.caching.dynamic.OXObjectFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -122,7 +123,7 @@ public class CachedObjectInvocationHandler<T> implements InvocationHandler {
             }
             return;
         }
-        final Lock lock = factory.getCacheLock();
+        final Lock lock = cache instanceof LockAware ? ((LockAware) cache).getLock() : factory.getCacheLock();
         Condition cond = null;
         boolean load;
         lock.lock();

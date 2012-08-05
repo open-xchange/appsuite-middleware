@@ -57,6 +57,7 @@ import org.apache.commons.logging.Log;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheExceptionCode;
 import com.openexchange.caching.CacheService;
+import com.openexchange.caching.LockAware;
 import com.openexchange.caching.osgi.CacheActivator;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.LogFactory;
@@ -121,7 +122,7 @@ public abstract class Refresher<T extends Serializable> {
 
     public static <T extends Serializable> T cache(final T obj, final Cache cache, final OXObjectFactory<T> factory) throws OXException {
         T retval = null;
-        final Lock lock = factory.getCacheLock();
+        final Lock lock = getLock(cache, factory);
         final Serializable key = factory.getKey();
         lock.lock();
         try {
@@ -144,6 +145,13 @@ public abstract class Refresher<T extends Serializable> {
         return retval;
     }
 
+    private static <T extends Serializable> Lock getLock(final Cache cache, final OXObjectFactory<T> factory) {
+        if (cache instanceof LockAware) {
+            return ((LockAware) cache).getLock();
+        }
+        return factory.getCacheLock();
+    }
+
     public static <T extends Serializable> T refresh(final String regionName, final OXObjectFactory<T> factory, final boolean removeBeforePut) throws OXException {
         return refresh(regionName, getCache(regionName), factory, removeBeforePut);
     }
@@ -152,7 +160,7 @@ public abstract class Refresher<T extends Serializable> {
         if (null == cache) {
             return factory.load();
         }
-        final Lock lock = factory.getCacheLock();
+        final Lock lock = getLock(cache, factory);
         try {
             if (!lock.tryLock(500, TimeUnit.MILLISECONDS)) {
                 return factory.load();
@@ -236,7 +244,7 @@ public abstract class Refresher<T extends Serializable> {
 
     public static Cache getCache(final String regionName) throws OXException {
         if (null == regionName) {
-            throw CacheExceptionCode.INVALID_CACHE_REGION_NAME.create(regionName);
+            throw CacheExceptionCode.INVALID_CACHE_REGION_NAME.create("null");
         }
         final CacheService service = CacheActivator.getCacheService();
         return null == service ? null : service.getCache(regionName);

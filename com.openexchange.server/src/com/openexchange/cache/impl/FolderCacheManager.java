@@ -60,7 +60,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
 import com.openexchange.log.LogFactory;
 import com.openexchange.ajax.fields.DataFields;
-import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
@@ -91,7 +90,7 @@ public final class FolderCacheManager {
 
     private static final String FOLDER_CACHE_REGION_NAME = "OXFolderCache";
 
-    private Cache folderCache;
+    private volatile Cache folderCache;
 
     private final Lock cacheLock;
 
@@ -198,11 +197,12 @@ public final class FolderCacheManager {
      * @throws OXException If clearing cache fails
      */
     public void releaseCache() throws OXException {
+        final Cache folderCache = this.folderCache;
         if (folderCache == null) {
             return;
         }
         folderCache.clear();
-        folderCache = null;
+        this.folderCache = null;
     }
 
     CacheKey getCacheKey(final int cid, final int objectId) {
@@ -251,6 +251,7 @@ public final class FolderCacheManager {
      * @throws OXException If a caching error occurs
      */
     public FolderObject getFolderObject(final int objectId, final boolean fromCache, final Context ctx, final Connection readCon) throws OXException {
+        final Cache folderCache = this.folderCache;
         if (null == folderCache) {
             throw OXFolderExceptionCode.CACHE_NOT_ENABLED.create();
         }
@@ -283,6 +284,7 @@ public final class FolderCacheManager {
      * @return The matching <code>FolderObject</code> instance else <code>null</code>
      */
     public FolderObject getFolderObject(final int objectId, final Context ctx) {
+        final Cache folderCache = this.folderCache;
         if (null == folderCache) {
             return null;
         }
@@ -313,6 +315,7 @@ public final class FolderCacheManager {
      */
     public FolderObject loadFolderObject(final int folderId, final Context ctx, final Connection readCon) throws OXException {
         final CacheKey key = getCacheKey(ctx.getContextId(), folderId);
+        final Cache folderCache = this.folderCache;
         cacheLock.lock();
         try {
             final Object tmp = folderCache.get(key);
@@ -383,6 +386,7 @@ public final class FolderCacheManager {
         final FolderObject retval;
         cacheLock.lock();
         try {
+            final Cache folderCache = this.folderCache;
             final Object tmp = folderCache.get(key);
             if (tmp instanceof FolderObject) {
                 // Already in cache
@@ -406,7 +410,7 @@ public final class FolderCacheManager {
                         }
                     }
                 }
-                if (elemAttribs == null) {
+                if (elemAttribs == null || folderCache.isDistributed()) {
                     // Put with default attributes
                     folderCache.put(key, folderProvider.getFolderObject());
                 } else {
@@ -455,6 +459,7 @@ public final class FolderCacheManager {
      * @throws OXException If a caching error occurs
      */
     public void putFolderObject(final FolderObject folderObj, final Context ctx, final boolean overwrite, final ElementAttributes elemAttribs) throws OXException {
+        final Cache folderCache = this.folderCache;
         if (null == folderCache) {
             return;
         }
@@ -503,7 +508,7 @@ public final class FolderCacheManager {
                     cond = (Condition) tmp;
                 }
             }
-            if (elemAttribs == null) {
+            if (elemAttribs == null || folderCache.isDistributed()) {
                 // Put with default attributes
                 folderCache.put(key, clone);
             } else {
@@ -525,6 +530,7 @@ public final class FolderCacheManager {
      * @throws OXException If a caching error occurs
      */
     public void removeFolderObject(final int key, final Context ctx) throws OXException {
+        final Cache folderCache = this.folderCache;
         if (null == folderCache) {
             return;
         }
@@ -562,6 +568,7 @@ public final class FolderCacheManager {
      * @throws OXException If a caching error occurs
      */
     public void removeFolderObjects(final int[] keys, final Context ctx) throws OXException {
+        final Cache folderCache = this.folderCache;
         if (null == folderCache) {
             return;
         } else if (keys == null || keys.length == 0) {
@@ -608,6 +615,7 @@ public final class FolderCacheManager {
      * @throws OXException If folder cache cannot be cleared
      */
     public void clearAll() throws OXException {
+        final Cache folderCache = this.folderCache;
         if (null == folderCache) {
             return;
         }
@@ -631,6 +639,7 @@ public final class FolderCacheManager {
      * @throws OXException If a caching error occurs
      */
     public ElementAttributes getDefaultFolderObjectAttributes() throws OXException {
+        final Cache folderCache = this.folderCache;
         if (null == folderCache) {
             return null;
         }
