@@ -62,7 +62,6 @@ import com.openexchange.caching.hazelcast.Services;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.HigherRankedObservator;
-import com.openexchange.osgi.HigherRankedObservator.HigherRankedObservatorCallback;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -70,7 +69,7 @@ import com.openexchange.osgi.HousekeepingActivator;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class HazelcastCacheActivator extends HousekeepingActivator implements HigherRankedObservatorCallback<CacheService> {
+public final class HazelcastCacheActivator extends HousekeepingActivator implements HigherRankedObservator.HigherRankedObservatorCallback<CacheService> {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(HazelcastCacheActivator.class);
 
