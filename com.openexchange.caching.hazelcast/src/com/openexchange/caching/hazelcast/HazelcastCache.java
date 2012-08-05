@@ -73,7 +73,7 @@ import com.openexchange.exception.OXException;
  */
 public final class HazelcastCache implements Cache {
 
-    private final String name;
+    private final String hazelcastName;
 
     private final HazelcastInstance hazelcastInstance;
 
@@ -86,11 +86,11 @@ public final class HazelcastCache implements Cache {
     /**
      * Initializes a new {@link HazelcastCache}.
      */
-    public HazelcastCache(final String name, final HazelcastInstance hazelcastInstance) {
+    public HazelcastCache(final String hazelcastName, final HazelcastInstance hazelcastInstance) {
         super();
-        this.name = name;
-        this.map = hazelcastInstance.<Serializable, Serializable> getMap(name);
-        this.groupNames = hazelcastInstance.getSet(name + "?==?groupNames");
+        this.hazelcastName = hazelcastName;
+        this.map = hazelcastInstance.<Serializable, Serializable> getMap(hazelcastName);
+        this.groupNames = hazelcastInstance.getSet(hazelcastName + "?==?groupNames");
         this.hazelcastInstance = hazelcastInstance;
     }
 
@@ -111,7 +111,7 @@ public final class HazelcastCache implements Cache {
     }
 
     private String getGroupKey(final String groupName) {
-        return new StringBuilder(name).append("?==?").append(groupName).toString();
+        return new StringBuilder(hazelcastName).append('.').append(groupName).toString();
     }
 
     private MapConfig getMapConfig() {
@@ -120,7 +120,7 @@ public final class HazelcastCache implements Cache {
             synchronized (this) {
                 tmp = mapConfig;
                 if (null == tmp) {
-                    tmp = hazelcastInstance.getConfig().getMapConfig(name);
+                    tmp = hazelcastInstance.getConfig().getMapConfig(hazelcastName);
                     mapConfig = tmp;
                 }
             }
@@ -183,7 +183,7 @@ public final class HazelcastCache implements Cache {
             return null;
         }
         final HazelcastCacheElement cacheElement = new HazelcastCacheElement();
-        cacheElement.setCacheName(name);
+        cacheElement.setCacheName(hazelcastName);
         cacheElement.setKey(key);
         cacheElement.setVal(mapEntry.getValue());
         cacheElement.setElementAttributes(new HazelcastElementAttributes(mapEntry, getMapConfig(), map));
