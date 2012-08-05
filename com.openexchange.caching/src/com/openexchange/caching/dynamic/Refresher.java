@@ -166,28 +166,14 @@ public abstract class Refresher<T extends Serializable> {
         if (null == cache) {
             return factory.load();
         }
-        final Lock lock = getLock(cache, factory);
-        try {
-            if (!lock.tryLock(500, TimeUnit.MILLISECONDS)) {
-                return factory.load();
-            }
-            // Lock obtained
-        } catch (final InterruptedException e) {
-            // Keep interrupted status
-            Thread.currentThread().interrupt();
-            LOG.error(e.getMessage(), e);
-            return factory.load();
-        }
-        /*
-         * Lock acquired
-         */
         final Serializable key = factory.getKey();
         T retval = null;
         /*
          * Check for distributed cache nature
          */
         if (cache.isDistributed()) {
-            retval = (T) cache.get(key);
+        	// No need for locks
+        	retval = (T) cache.get(key);
             if (null == retval) {
                 try {
                     if (cache instanceof PutIfAbsent) {
@@ -215,6 +201,18 @@ public abstract class Refresher<T extends Serializable> {
                 }
             }
             return retval;
+        }
+        final Lock lock = getLock(cache, factory);
+        try {
+            if (!lock.tryLock(500, TimeUnit.MILLISECONDS)) {
+                return factory.load();
+            }
+            // Lock obtained
+        } catch (final InterruptedException e) {
+            // Keep interrupted status
+            Thread.currentThread().interrupt();
+            LOG.error(e.getMessage(), e);
+            return factory.load();
         }
         /*
          * Lock acquired & replicated cache

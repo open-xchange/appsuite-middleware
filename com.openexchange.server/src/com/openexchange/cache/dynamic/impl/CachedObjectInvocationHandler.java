@@ -131,6 +131,44 @@ public class CachedObjectInvocationHandler<T> implements InvocationHandler {
 			}
 			return;
 		}
+		if (cache.isDistributed()) {
+			// No need for locks
+			Serializable key = factory.getKey();
+			T retval = (T) cache.get(key);
+			if (null == retval) {
+				try {
+					if (cache instanceof PutIfAbsent) {
+						final T newVal = factory.load();
+						retval = (T) ((PutIfAbsent) cache).putIfAbsent(key,
+								(Serializable) newVal);
+						if (null == retval) {
+							retval = newVal;
+						}
+					} else {
+						try {
+							final T newVal = factory.load();
+							cache.putSafe(key, (Serializable) newVal);
+							retval = newVal;
+						} catch (final OXException e) {
+							if (!CacheExceptionCode.FAILED_SAFE_PUT
+									.equals(e)) {
+								throw e;
+							}
+							// Obviously another thread put in the meantime
+							retval = (T) cache.get(key);
+						}
+					}
+				} catch (final RuntimeException e) {
+					e.printStackTrace();
+					throw CacheExceptionCode.CACHE_ERROR.create(e,
+							e.getMessage());
+				}
+			}
+			cached = retval;
+			return;
+		}
+
+		// Replicated cache
 		final Lock lock = cache instanceof LockAware ? ((LockAware) cache)
 				.getLock() : factory.getCacheLock();
 		Condition cond = null;
@@ -138,43 +176,7 @@ public class CachedObjectInvocationHandler<T> implements InvocationHandler {
 		lock.lock();
 
 		try {
-			if (cache.isDistributed()) {
-				Serializable key = factory.getKey();
-				T retval = (T) cache.get(key);
-				if (null == retval) {
-					try {
-						if (cache instanceof PutIfAbsent) {
-							final T newVal = factory.load();
-							retval = (T) ((PutIfAbsent) cache).putIfAbsent(key,
-									(Serializable) newVal);
-							if (null == retval) {
-								retval = newVal;
-							}
-						} else {
-							try {
-								final T newVal = factory.load();
-								cache.putSafe(key, (Serializable) newVal);
-								retval = newVal;
-							} catch (final OXException e) {
-								if (!CacheExceptionCode.FAILED_SAFE_PUT
-										.equals(e)) {
-									throw e;
-								}
-								// Obviously another thread put in the meantime
-								retval = (T) cache.get(key);
-							}
-						}
-					} catch (final RuntimeException e) {
-						e.printStackTrace();
-						throw CacheExceptionCode.CACHE_ERROR.create(e,
-								e.getMessage());
-					}
-				}
-				cached = retval;
-				return;
-			}
 			
-			// Replicated cache
 			final Object tmp = cache.get(factory.getKey());
 			if (null == tmp) {
 				// I am the thread to load the object. Put temporary condition
