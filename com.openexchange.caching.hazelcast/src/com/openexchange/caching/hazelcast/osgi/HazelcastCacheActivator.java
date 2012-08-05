@@ -51,6 +51,7 @@ package com.openexchange.caching.hazelcast.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
@@ -96,11 +97,12 @@ public final class HazelcastCacheActivator extends HousekeepingActivator {
         startUp();
 
         track(CacheService.class, new ServiceTrackerCustomizer<CacheService, CacheService>() {
+            final AtomicBoolean stopped = new AtomicBoolean(false);
 
             @Override
             public CacheService addingService(final ServiceReference<CacheService> reference) {
                 final Integer ranking = (Integer) reference.getProperty(Constants.SERVICE_RANKING);
-                if (null != ranking && ranking.intValue() > 0) {
+                if (null != ranking && ranking.intValue() > 0 && stopped.compareAndSet(false, true)) {
                     LOG.warn("Found higher-ranked cache service.");
                     shutdown();
                 }
@@ -115,7 +117,10 @@ public final class HazelcastCacheActivator extends HousekeepingActivator {
             @Override
             public void removedService(final ServiceReference<CacheService> reference, final CacheService service) {
                 try {
-                    startUp();
+                    final Integer ranking = (Integer) reference.getProperty(Constants.SERVICE_RANKING);
+                    if (null != ranking && ranking.intValue() > 0 && stopped.compareAndSet(true, false)) {
+                        startUp();
+                    }
                 } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
                 }
