@@ -183,8 +183,9 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
 		if (null != cacheService) {
 	        try {
 	        	final Cache cache = cacheService.getCache("User");
-	        	for (User user : members) {
-	                cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), user.getId()));
+	        	final int contextId = ctx.getId().intValue();
+	        	for (final User user : members) {
+                    cache.remove(cacheService.newCacheKey(contextId, user.getId()));
 	            }
 	        } catch (final OXException e) {
                 log.error(e.getMessage(), e);
