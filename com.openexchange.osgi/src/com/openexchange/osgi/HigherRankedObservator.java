@@ -115,7 +115,7 @@ public class HigherRankedObservator<S> implements ServiceTrackerCustomizer<S, S>
      * @param callback The callback to add
      * @return This observator with callback added
      */
-    public HigherRankedObservator<S> addCallback(HigherRankedObservatorCallback<S> callback) {
+    public HigherRankedObservator<S> addCallback(final HigherRankedObservatorCallback<S> callback) {
         if (null != callback) {
             callbacks.add(callback);
         }
@@ -128,7 +128,7 @@ public class HigherRankedObservator<S> implements ServiceTrackerCustomizer<S, S>
      * @param callback The callback to remove
      * @return This observator with callback removed
      */
-    public HigherRankedObservator<S> removeCallback(HigherRankedObservatorCallback<S> callback) {
+    public HigherRankedObservator<S> removeCallback(final HigherRankedObservatorCallback<S> callback) {
         if (null != callback) {
             callbacks.remove(callback);
         }
@@ -139,7 +139,7 @@ public class HigherRankedObservator<S> implements ServiceTrackerCustomizer<S, S>
     public S addingService(final ServiceReference<S> reference) {
         if ((getRanking(reference) > myRanking) && (1 == higherRankedCounter.incrementAndGet())) {
             final S service = context.getService(reference);
-            for (HigherRankedObservatorCallback<S> callback : callbacks) {
+            for (final HigherRankedObservatorCallback<S> callback : callbacks) {
                 callback.onFirstHigherRankedAvailable(reference, service);
             }
             return service;
@@ -159,7 +159,7 @@ public class HigherRankedObservator<S> implements ServiceTrackerCustomizer<S, S>
         }
         if ((getRanking(reference) > myRanking) && (0 == higherRankedCounter.decrementAndGet())) {
             try {
-                for (HigherRankedObservatorCallback<S> callback : callbacks) {
+                for (final HigherRankedObservatorCallback<S> callback : callbacks) {
                     callback.onLastHigherRankedDisappeared(reference, service);
                 }
             } finally {
@@ -169,7 +169,7 @@ public class HigherRankedObservator<S> implements ServiceTrackerCustomizer<S, S>
     }
 
     private int getRanking(final ServiceReference<S> reference) {
-        Object property = reference.getProperty(Constants.SERVICE_RANKING);
+        final Object property = reference.getProperty(Constants.SERVICE_RANKING);
         if (null == property) {
             return 0;
         }
