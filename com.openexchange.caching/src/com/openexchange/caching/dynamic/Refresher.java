@@ -179,6 +179,9 @@ public abstract class Refresher<T extends Serializable> {
          */
         final Serializable key = factory.getKey();
         T retval = null;
+        /*
+         * Check for distributed cache nature
+         */
         if (cache.isDistributed()) {
             retval = (T) cache.get(key);
             if (null == retval) {
