@@ -51,18 +51,18 @@ package com.openexchange.caching.hazelcast.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.caching.CacheService;
 import com.openexchange.caching.hazelcast.HazelcastCacheService;
 import com.openexchange.caching.hazelcast.Services;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.HigherRankedObservator;
+import com.openexchange.osgi.HigherRankedObservator.HigherRankedObservatorCallback;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -70,9 +70,11 @@ import com.openexchange.osgi.HousekeepingActivator;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class HazelcastCacheActivator extends HousekeepingActivator {
+public final class HazelcastCacheActivator extends HousekeepingActivator implements HigherRankedObservatorCallback<CacheService> {
 
-    protected static final Log LOG = com.openexchange.log.Log.loggerFor(HazelcastCacheActivator.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(HazelcastCacheActivator.class);
+
+    private static final int MY_RANKING = 0;
 
     private HazelcastCacheService hazelcastCacheService;
 
@@ -96,40 +98,11 @@ public final class HazelcastCacheActivator extends HousekeepingActivator {
         // Register Hazelcast cache service
         startUp();
 
-        track(CacheService.class, new ServiceTrackerCustomizer<CacheService, CacheService>() {
-            final AtomicBoolean stopped = new AtomicBoolean(false);
-
-            @Override
-            public CacheService addingService(final ServiceReference<CacheService> reference) {
-                final Integer ranking = (Integer) reference.getProperty(Constants.SERVICE_RANKING);
-                if (null != ranking && ranking.intValue() > 0 && stopped.compareAndSet(false, true)) {
-                    LOG.warn("Found higher-ranked cache service.");
-                    shutdown();
-                }
-                return null;
-            }
-
-            @Override
-            public void modifiedService(final ServiceReference<CacheService> reference, final CacheService service) {
-                // Ignore
-            }
-
-            @Override
-            public void removedService(final ServiceReference<CacheService> reference, final CacheService service) {
-                try {
-                    final Integer ranking = (Integer) reference.getProperty(Constants.SERVICE_RANKING);
-                    if (null != ranking && ranking.intValue() > 0 && stopped.compareAndSet(true, false)) {
-                        startUp();
-                    }
-                } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
-                }
-            }
-        });
+        track(CacheService.class, new HigherRankedObservator<CacheService>(MY_RANKING, context).addCallback(this));
         openTrackers();
     }
 
-    protected void startUp() throws OXException {
+    private void startUp() throws OXException {
         synchronized (this) {
             HazelcastCacheService hazelcastCacheService = this.hazelcastCacheService;
             if (null != hazelcastCacheService) {
@@ -138,7 +111,7 @@ public final class HazelcastCacheActivator extends HousekeepingActivator {
             hazelcastCacheService = new HazelcastCacheService(getService(HazelcastInstance.class));
             hazelcastCacheService.loadDefaultConfiguration();
             final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
-            props.put(Constants.SERVICE_RANKING, Integer.valueOf(0));
+            props.put(Constants.SERVICE_RANKING, Integer.valueOf(MY_RANKING));
             cacheServiceRegistration = context.registerService(CacheService.class, hazelcastCacheService, props);
             this.hazelcastCacheService = hazelcastCacheService;
         }
@@ -150,7 +123,7 @@ public final class HazelcastCacheActivator extends HousekeepingActivator {
         super.stopBundle();
     }
 
-    protected void shutdown() {
+    private void shutdown() {
         synchronized (this) {
             final ServiceRegistration<CacheService> serviceRegistration = cacheServiceRegistration;
             if (null != serviceRegistration) {
@@ -163,6 +136,20 @@ public final class HazelcastCacheActivator extends HousekeepingActivator {
                 this.hazelcastCacheService = null;
             }
             Services.setServiceLookup(null);
+        }
+    }
+
+    @Override
+    public void onFirstHigherRankedAvailable(final ServiceReference<CacheService> reference, final CacheService service) {
+        shutdown();
+    }
+
+    @Override
+    public void onLastHigherRankedDisappeared(final ServiceReference<CacheService> reference, final CacheService service) {
+        try {
+            startUp();
+        } catch (final OXException e) {
+            LOG.error(e.getMessage(), e);
         }
     }
 
