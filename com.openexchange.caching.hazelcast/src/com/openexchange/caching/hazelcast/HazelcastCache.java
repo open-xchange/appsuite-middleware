@@ -97,10 +97,14 @@ public final class HazelcastCache implements Cache, LockAware, PutIfAbsent {
      */
     public HazelcastCache(final String hazelcastName, final HazelcastInstance hazelcastInstance) {
         super();
-        this.hazelcastName = hazelcastName;
-        this.map = Hazelcasts.wrapWithClassloader(CacheService.class, IMap.class, hazelcastInstance.<Serializable, Serializable> getMap(hazelcastName));
-        this.groupNames = hazelcastInstance.getSet(hazelcastName + "?==?groupNames");
         this.hazelcastInstance = hazelcastInstance;
+        this.hazelcastName = hazelcastName;
+        this.map = wrappedIMap(hazelcastName);
+        this.groupNames = hazelcastInstance.getSet(hazelcastName + "?==?groupNames");
+    }
+
+    private <K, V> IMap<K, V> wrappedIMap(final String mapName) {
+        return Hazelcasts.wrapWithClassloader(CacheService.class, IMap.class, hazelcastInstance.<Serializable, Serializable> getMap(mapName));
     }
 
     @Override
@@ -121,7 +125,7 @@ public final class HazelcastCache implements Cache, LockAware, PutIfAbsent {
             mapConfig.setName(hazelcastKey);
             config.addMapConfig(mapConfig);
         }
-        return hazelcastInstance.getMap(hazelcastKey);
+        return wrappedIMap(hazelcastKey);
     }
 
     private String getGroupKey(final String groupName) {
@@ -167,7 +171,7 @@ public final class HazelcastCache implements Cache, LockAware, PutIfAbsent {
         try {
             for (final String groupName : new HashSet<String>(groupNames)) {
                 if (groupNames.remove(groupName)) {
-                    final IMap<Object, Object> group = hazelcastInstance.getMap(getGroupKey(groupName));
+                    final IMap<Object, Object> group = wrappedIMap(getGroupKey(groupName));
                     if (null != group) {
                         group.clear();
                     }
@@ -191,7 +195,7 @@ public final class HazelcastCache implements Cache, LockAware, PutIfAbsent {
         try {
             for (final String groupName : new HashSet<String>(groupNames)) {
                 if (groupNames.remove(groupName)) {
-                    final IMap<Object, Object> group = hazelcastInstance.getMap(getGroupKey(groupName));
+                    final IMap<Object, Object> group = wrappedIMap(getGroupKey(groupName));
                     if (null != group) {
                         group.destroy();
                     }
