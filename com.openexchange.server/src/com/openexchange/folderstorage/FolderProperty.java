@@ -49,12 +49,16 @@
 
 package com.openexchange.folderstorage;
 
+import java.io.Serializable;
+
 /**
  * {@link FolderProperty} - A folder property.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class FolderProperty {
+public final class FolderProperty implements Serializable {
+
+    private static final long serialVersionUID = 478494390312166844L;
 
     private final String name;
 

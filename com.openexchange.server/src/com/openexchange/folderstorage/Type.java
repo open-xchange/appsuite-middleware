@@ -49,12 +49,14 @@
 
 package com.openexchange.folderstorage;
 
+import java.io.Serializable;
+
 /**
  * {@link Type} - The type of a folder.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Type {
+public interface Type extends Serializable {
 
     /**
      * Gets this type's former identifier.
