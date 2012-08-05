@@ -63,7 +63,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @see HigherRankedObservatorCallback
  */
-public final class HigherRankedObservator<S> implements ServiceTrackerCustomizer<S, S> {
+public class HigherRankedObservator<S> implements ServiceTrackerCustomizer<S, S> {
 
     /**
      * The callback for {@link HigherRankedObservator observator}.
