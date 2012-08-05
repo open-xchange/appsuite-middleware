@@ -49,12 +49,14 @@
 
 package com.openexchange.folderstorage;
 
+import java.io.Serializable;
+
 /**
  * {@link ContentType} - The content type (aka the module) of a folder.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface ContentType {
+public interface ContentType extends Serializable {
 
     /**
      * Gets this content type's module identifier.
