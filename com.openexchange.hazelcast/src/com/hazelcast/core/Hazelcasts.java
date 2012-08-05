@@ -52,7 +52,6 @@ package com.hazelcast.core;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.hazelcast.osgi.HazelcastActivator;
 
@@ -115,11 +114,12 @@ public final class Hazelcasts {
             /*
              * Cache the current context class loader.
              */
-            final ClassLoader ccl = Thread.currentThread().getContextClassLoader();
+            final Thread currentThread = Thread.currentThread();
+            final ClassLoader ccl = currentThread.getContextClassLoader();
             /*
              * Get the classloader of a class from inside the bundle & set it as context class loader
              */
-            Thread.currentThread().setContextClassLoader(clazz.getClassLoader());
+            currentThread.setContextClassLoader(clazz.getClassLoader());
             this.classLoader = ccl;
             /*
              * Ready for Hazelcast stuff
@@ -206,36 +206,35 @@ public final class Hazelcasts {
         }
     }
 
-	public static <T> T wrapWithClassloader(
-			Class classLoaderSource, Class<T> type,
-			T delegate) {
-		
-		return (T) Proxy.newProxyInstance(type.getClassLoader(), new Class[]{type}, new ClassLoaderInvocationHandler(delegate, classLoaderSource));
-	}
-	
-	private static final class ClassLoaderInvocationHandler implements InvocationHandler {
+    @SuppressWarnings("unchecked")
+    public static <T> T wrapWithClassloader(final Class<?> classLoaderSource, final Class<T> type, final T delegate) {
+        return (T) Proxy.newProxyInstance(type.getClassLoader(), new Class<?>[] { type }, new ClassLoaderInvocationHandler(
+            delegate,
+            classLoaderSource));
+    }
 
-		private Object delegate;
-		private Class cl;
-		
-		public ClassLoaderInvocationHandler(Object delegate, Class cl) {
-			this.cl = cl;
-			this.delegate = delegate;
-		}
-		
-		@Override
-		public Object invoke(Object self, Method method, Object[] arguments)
-				throws Throwable {
-			
-			ClassLoaderModifier modifier = new ClassLoaderModifier();
-			try {
-				modifier.setClassLoader(cl);
-				return method.invoke(delegate, arguments);
-			} finally {
-				modifier.restoreClassLoader();
-			}
-		}
-		
-	}
+    private static final class ClassLoaderInvocationHandler implements InvocationHandler {
+
+        private final Object delegate;
+
+        private final Class<?> cl;
+
+        public ClassLoaderInvocationHandler(final Object delegate, final Class<?> cl) {
+            this.cl = cl;
+            this.delegate = delegate;
+        }
+
+        @Override
+        public Object invoke(final Object self, final Method method, final Object[] arguments) throws Throwable {
+            final ClassLoaderModifier modifier = new ClassLoaderModifier();
+            try {
+                modifier.setClassLoader(cl);
+                return method.invoke(delegate, arguments);
+            } finally {
+                modifier.restoreClassLoader();
+            }
+        }
+
+    }
 
 }

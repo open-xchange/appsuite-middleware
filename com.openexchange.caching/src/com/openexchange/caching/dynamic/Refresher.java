@@ -89,12 +89,15 @@ public abstract class Refresher<T extends Serializable> {
      */
     private boolean removeBeforePut;
     
+    /**
+     * Default constructor.
+     */
     public Refresher() {
-    	
+        super();
 	}
 
     /**
-     * Default constructor.
+     * Initializes a new {@link Refresher}.
      *
      * @throws IllegalArgumentException If provided region name is <code>null</code>
      */
@@ -196,7 +199,6 @@ public abstract class Refresher<T extends Serializable> {
                         }
                     }
                 } catch (final RuntimeException e) {
-                	e.printStackTrace();
                     throw CacheExceptionCode.CACHE_ERROR.create(e, e.getMessage());
                 }
             }
