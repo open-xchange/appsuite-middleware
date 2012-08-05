@@ -94,7 +94,6 @@ public final class HazelcastCacheActivator extends HousekeepingActivator impleme
 
     @Override
     protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
         // Register Hazelcast cache service
         startUp();
 
@@ -104,6 +103,7 @@ public final class HazelcastCacheActivator extends HousekeepingActivator impleme
 
     private void startUp() throws OXException {
         synchronized (this) {
+            Services.setServiceLookup(this);
             HazelcastCacheService hazelcastCacheService = this.hazelcastCacheService;
             if (null != hazelcastCacheService) {
                 return;
