@@ -12,12 +12,13 @@ import com.openexchange.realtime.atmosphere.OXRTHandler;
 import com.openexchange.realtime.atmosphere.impl.HandlerLibrary;
 import com.openexchange.realtime.atmosphere.impl.RTAtmosphereChannel;
 import com.openexchange.realtime.atmosphere.impl.RTAtmosphereHandler;
+import com.openexchange.sessiond.SessiondService;
 
 public class AtmosphereRTActivator extends HousekeepingActivator {
 
 	@Override
 	protected Class<?>[] getNeededServices() {
-		return new Class<?>[]{AtmosphereService.class};
+		return new Class<?>[]{AtmosphereService.class, SessiondService.class};
 	}
 
 	/*

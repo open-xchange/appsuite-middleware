@@ -129,12 +129,18 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 		AtmosphereRequest req = r.getRequest();
 		RTAtmosphereState state = null;
 		try {
-		    state = getState(r);
+			state = getState(r);
+		} catch (OXException e1) {
+			// TODO
+			return;
+		}
+		try {
 			state.lock();
 			if (req.getMethod().equalsIgnoreCase("GET")) {
 				if (state.handshake) {
 					r.getResponse().write("OK");
 					state.handshake = false;
+					return;
 				} else {
 				    /*
 				     * Allow bi-directional communication by suspending:
@@ -150,6 +156,12 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 			     * suspending the AtmosphereResource. 
 			     */
 				handleIncoming(StanzaParser.parse(req.getReader().readLine()), state);
+			}
+			
+			switch (r.transport()) {
+			case JSONP:
+			case LONG_POLLING:
+				r.suspend();
 			}
 
 		} catch (OXException e) {
@@ -181,8 +193,16 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 		if(session == null) {
 		    throw OXException.general("Missing Session");
 		}
+		String resource = r.getRequest()
+				.getHeader("resource");
+		if (resource == null) {
+			resource = r.getRequest().getParameter("resource");
+		}
 		RTAtmosphereState previous = uuid2State.putIfAbsent(session, state);
-		return previous != null ? previous : state;
+		RTAtmosphereState theState = previous != null ? previous : state;
+		
+		initSessionId(session, resource, theState);
+		return theState;
 	}
 
 
@@ -219,21 +239,29 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 			JSONObject json = (JSONObject) stanza.getPayload().getData();
 
 			String sessionId = json.getString("session");
-
-			Session session = services.getService(SessiondService.class)
-					.getSession(sessionId);
-			if (session == null) {
-				throw OXException.general("Invalid sessionId " + sessionId);
-			}
-
-			state.session = ServerSessionAdapter.valueOf(session);
-			state.id = new ID("ox", session.getLoginName(),
-					contextName(session.getLogin()), json.optString("resource"));
+			initSessionId(sessionId, json.optString("resource"), state);
 			id2State.put(state.id, state);
 		} catch (JSONException x) {
 			throw OXException.general(x.toString());
 		}
 
+	}
+
+	private void initSessionId(String sessionId, String resource, RTAtmosphereState state) throws OXException {
+		Session session = services.getService(SessiondService.class)
+				.getSession(sessionId);
+		if (session == null) {
+			throw OXException.general("Invalid sessionId " + sessionId);
+		}
+
+		state.session = ServerSessionAdapter.valueOf(session);
+		if (state.id == null || resource != null) {
+			state.id = new ID("ox", session.getLoginName(),
+					contextName(session.getLogin()), resource);
+			id2State.put(state.id, state);
+		}
+		
+		
 	}
 
 	private String contextName(String login) {
