@@ -68,6 +68,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.DeferredActivator;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.SimpleRegistryListener;
 
 /**
  * {@link CacheActivator} - The {@link DeferredActivator} implementation for cache bundle.
@@ -78,7 +79,7 @@ public final class CacheActivator extends HousekeepingActivator {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CacheActivator.class));
 
-    private static volatile CacheService cacheService;
+    static volatile CacheService cacheService;
 
     /**
      * Gets the cacheService
@@ -136,6 +137,20 @@ public final class CacheActivator extends HousekeepingActivator {
             final JCSCacheService jcsCacheService = JCSCacheService.getInstance();
             registerService(CacheService.class, jcsCacheService, dictionary);
             cacheService = jcsCacheService;
+        } else {
+            final BundleContext context = this.context;
+            track(CacheService.class, new SimpleRegistryListener<CacheService>() {
+
+                @Override
+                public void added(ServiceReference<CacheService> ref, CacheService service) {
+                    cacheService = service;
+                }
+
+                @Override
+                public void removed(ServiceReference<CacheService> ref, CacheService service) {
+                    cacheService = null;
+                }
+            });
         }
         final class ServiceTrackerCustomizerImpl implements ServiceTrackerCustomizer<ManagementService, ManagementService> {
 
