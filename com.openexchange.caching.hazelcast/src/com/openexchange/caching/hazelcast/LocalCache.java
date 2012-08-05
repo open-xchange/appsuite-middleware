@@ -176,16 +176,19 @@ public final class LocalCache implements Cache, SupportsLocalOperations {
     @Override
     public void putSafe(final Serializable key, final Serializable value) throws OXException {
         try {
-            cache.get(key, new Callable<Serializable>() {
+            Serializable prev = cache.get(key, new Callable<Serializable>() {
 
                 @Override
                 public Serializable call() throws Exception {
                     return value;
                 }
             });
+            if (prev != value) {
+                throw CacheExceptionCode.FAILED_SAFE_PUT.create();
+            }
         } catch (final ExecutionException e) {
             final Throwable cause = e.getCause();
-            throw CacheExceptionCode.CACHE_ERROR.create(cause, cause.getMessage());
+            throw CacheExceptionCode.FAILED_SAFE_PUT.create(cause, cause.getMessage());
         }
     }
 
