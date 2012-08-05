@@ -57,6 +57,7 @@ import org.apache.commons.logging.Log;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.Hazelcasts;
 import com.hazelcast.core.IMap;
 import com.hazelcast.core.ISet;
 import com.hazelcast.core.MapEntry;
@@ -65,6 +66,7 @@ import com.openexchange.caching.CacheElement;
 import com.openexchange.caching.CacheExceptionCode;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheKeyImpl;
+import com.openexchange.caching.CacheService;
 import com.openexchange.caching.CacheStatistics;
 import com.openexchange.caching.ElementAttributes;
 import com.openexchange.caching.LockAware;
@@ -96,7 +98,7 @@ public final class HazelcastCache implements Cache, LockAware, PutIfAbsent {
     public HazelcastCache(final String hazelcastName, final HazelcastInstance hazelcastInstance) {
         super();
         this.hazelcastName = hazelcastName;
-        this.map = hazelcastInstance.<Serializable, Serializable> getMap(hazelcastName);
+        this.map = Hazelcasts.wrapWithClassloader(CacheService.class, IMap.class, hazelcastInstance.<Serializable, Serializable> getMap(hazelcastName));
         this.groupNames = hazelcastInstance.getSet(hazelcastName + "?==?groupNames");
         this.hazelcastInstance = hazelcastInstance;
     }
@@ -204,7 +206,7 @@ public final class HazelcastCache implements Cache, LockAware, PutIfAbsent {
 
     @Override
     public Object get(final Serializable key) {
-        return map.get(key);
+    	return map.get(key);
     }
 
     @Override

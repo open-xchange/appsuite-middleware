@@ -77,17 +77,21 @@ public abstract class Refresher<T extends Serializable> {
     /**
      * Factory for reloading cached objects.
      */
-    private final OXObjectFactory<T> factory;
+    private OXObjectFactory<T> factory;
 
     /**
      * The cache region name.
      */
-    private final String regionName;
+    private String regionName;
 
     /**
      * Whether to issue a cache remove operation before replacing a cache element.
      */
-    private final boolean removeBeforePut;
+    private boolean removeBeforePut;
+    
+    public Refresher() {
+    	
+	}
 
     /**
      * Default constructor.
@@ -206,6 +210,7 @@ public abstract class Refresher<T extends Serializable> {
                         }
                     }
                 } catch (final RuntimeException e) {
+                	e.printStackTrace();
                     throw CacheExceptionCode.CACHE_ERROR.create(e, e.getMessage());
                 }
             }

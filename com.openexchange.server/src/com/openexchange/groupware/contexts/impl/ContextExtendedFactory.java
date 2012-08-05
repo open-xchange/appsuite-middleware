@@ -47,34 +47,77 @@
  *
  */
 
-package com.openexchange.caching.dynamic;
+package com.openexchange.groupware.contexts.impl;
+
+import static com.openexchange.java.Autoboxing.I;
 
 import java.io.Serializable;
 import java.util.concurrent.locks.Lock;
+
+import org.apache.commons.logging.Log;
+
+import com.openexchange.caching.dynamic.OXObjectFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.UpdateStatus;
+import com.openexchange.groupware.update.Updater;
+import com.openexchange.groupware.update.internal.SchemaExceptionCodes;
+import com.openexchange.log.LogFactory;
 
 /**
- * This interface must be implemented to reload objects that have been removed from the cache cause of object life timeout.
- *
- * @param <T> Type that is loaded by this object factory.
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * {@link ContextExtendedFactory}
+ * 
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco
+ *         Laguna</a>
  */
-public interface OXObjectFactory<T> extends Serializable{
+public class ContextExtendedFactory implements OXObjectFactory<ContextExtended> {
 
-    /**
-     * @return the key for identifying the cached object.
-     */
-    Serializable getKey();
+	private static final long serialVersionUID = 7796462639896914733L;
 
-    /**
-     * @return the object loaded from the database that will be put into cache if the object life timeout removed it.
-     * @throws OXException If loading the object fails
-     */
-    T load() throws OXException;
+	private static final Log LOG = LogFactory
+			.getLog(ContextExtendedFactory.class);
 
-    /**
-     * @return the single lock for the single cache object.
-     */
-    Lock getCacheLock();
+	private int contextId;
+	public static CachingContextStorage parent;
+
+	public ContextExtendedFactory(int contextId) {
+		this.contextId = contextId;
+	}
+
+	public Serializable getKey() {
+		return I(contextId);
+	}
+
+	@Override
+	public ContextExtended load() throws OXException {
+		final ContextExtended retval = parent.getPersistantImpl().loadContext(
+				contextId);
+		// TODO We should introduce a logic layer above this context storage
+		// layer. That layer should then trigger the update tasks.
+		// Nearly all accesses to the ContextStorage need then to be replaced
+		// with an access to the ContextService.
+		final Updater updater = Updater.getInstance();
+		try {
+			final UpdateStatus status = updater.getStatus(retval);
+			retval.setUpdating(status.blockingUpdatesRunning()
+					|| status.needsBlockingUpdates());
+			if ((status.needsBlockingUpdates() || status
+					.needsBackgroundUpdates())
+					&& !status.blockingUpdatesRunning()
+					&& !status.backgroundUpdatesRunning()) {
+				updater.startUpdate(retval);
+			}
+		} catch (final OXException e) {
+			if (SchemaExceptionCodes.DATABASE_DOWN.equals(e)) {
+				LOG.warn("Switching to read only mode for context " + contextId
+						+ " because master database is down.", e);
+				retval.setReadOnly(true);
+			}
+		}
+		return retval;
+	}
+
+	@Override
+	public Lock getCacheLock() {
+		return parent.getCacheLock();
+	}
 }

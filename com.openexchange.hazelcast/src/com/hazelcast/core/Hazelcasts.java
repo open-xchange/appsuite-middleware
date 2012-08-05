@@ -49,6 +49,10 @@
 
 package com.hazelcast.core;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.hazelcast.osgi.HazelcastActivator;
 
@@ -201,5 +205,37 @@ public final class Hazelcasts {
             MODIFIER.set(null);
         }
     }
+
+	public static <T> T wrapWithClassloader(
+			Class classLoaderSource, Class<T> type,
+			T delegate) {
+		
+		return (T) Proxy.newProxyInstance(type.getClassLoader(), new Class[]{type}, new ClassLoaderInvocationHandler(delegate, classLoaderSource));
+	}
+	
+	private static final class ClassLoaderInvocationHandler implements InvocationHandler {
+
+		private Object delegate;
+		private Class cl;
+		
+		public ClassLoaderInvocationHandler(Object delegate, Class cl) {
+			this.cl = cl;
+			this.delegate = delegate;
+		}
+		
+		@Override
+		public Object invoke(Object self, Method method, Object[] arguments)
+				throws Throwable {
+			
+			ClassLoaderModifier modifier = new ClassLoaderModifier();
+			try {
+				modifier.setClassLoader(cl);
+				return method.invoke(delegate, arguments);
+			} finally {
+				modifier.restoreClassLoader();
+			}
+		}
+		
+	}
 
 }

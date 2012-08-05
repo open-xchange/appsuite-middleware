@@ -5,7 +5,7 @@ Bundle-SymbolicName: com.openexchange.caching
 Bundle-Version: 6.21.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Eclipse-BuddyPolicy: registered
+Eclipse-BuddyPolicy: dependent
 Import-Package: com.openexchange.config,
  com.openexchange.exception,
  com.openexchange.groupware,
