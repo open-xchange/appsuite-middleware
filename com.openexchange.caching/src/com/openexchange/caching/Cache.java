@@ -106,6 +106,13 @@ public interface Cache {
     public boolean isReplicated();
 
     /**
+     * Checks if this cache is local-only.
+     * 
+     * @return <code>true</code> if local-only; otherwise <code>false</code>
+     */
+    public boolean isLocal();
+
+    /**
      * Removes all of the elements from cache.
      * 
      * @throws OXException If cache cannot be cleared

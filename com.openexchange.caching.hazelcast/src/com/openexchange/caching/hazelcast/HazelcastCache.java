@@ -129,6 +129,11 @@ public final class HazelcastCache implements Cache {
     }
 
     @Override
+    public boolean isLocal() {
+        return false;
+    }
+
+    @Override
     public boolean isReplicated() {
         return false;
     }

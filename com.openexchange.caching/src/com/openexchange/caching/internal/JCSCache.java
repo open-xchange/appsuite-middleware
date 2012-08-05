@@ -54,6 +54,8 @@ import java.lang.reflect.Field;
 import org.apache.jcs.JCS;
 import org.apache.jcs.access.CacheAccess;
 import org.apache.jcs.access.exception.ObjectExistsException;
+import org.apache.jcs.auxiliary.AuxiliaryCache;
+import org.apache.jcs.engine.behavior.ICache;
 import org.apache.jcs.engine.behavior.ICacheElement;
 import org.apache.jcs.engine.control.CompositeCache;
 import org.apache.jcs.engine.control.group.GroupAttrName;
@@ -83,6 +85,8 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
 
     private final CompositeCache cacheControl;
 
+    private volatile Boolean localOnly;
+
     /**
      * Initializes a new {@link JCSCache}
      */
@@ -99,6 +103,37 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
             tmp = null;
         }
         cacheControl = tmp;
+    }
+
+    @Override
+    public boolean isLocal() {
+        Boolean localOnly = this.localOnly;
+        if (null == localOnly) {
+            synchronized (this) {
+                localOnly = this.localOnly;
+                if (null == localOnly) {
+                    AuxiliaryCache[] tmp;
+                    try {
+                        final Field auxCachesField = CompositeCache.class.getDeclaredField("auxCaches");
+                        auxCachesField.setAccessible(true);
+                        tmp = (AuxiliaryCache[]) auxCachesField.get(cacheControl);
+                    } catch (final Exception e) {
+                        tmp = null;
+                    }
+                    localOnly = Boolean.TRUE;
+                    if (null != tmp) {
+                        for (AuxiliaryCache aux : tmp) {
+                            if ((aux != null) && (ICache.LATERAL_CACHE == aux.getCacheType())) {
+                                localOnly = Boolean.FALSE;
+                                break;
+                            }
+                        }
+                    }
+                    this.localOnly = localOnly;
+                }
+            }
+        }
+        return localOnly.booleanValue();
     }
 
     @Override

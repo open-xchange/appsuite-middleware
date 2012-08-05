@@ -66,10 +66,9 @@ import com.openexchange.caching.SupportsLocalOperations;
 import com.openexchange.caching.hazelcast.util.LocalCacheGenerator;
 import com.openexchange.exception.OXException;
 
-
 /**
  * {@link LocalCache}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class LocalCache implements Cache, SupportsLocalOperations {
@@ -88,6 +87,11 @@ public final class LocalCache implements Cache, SupportsLocalOperations {
         this.cache = cache;
         this.mapConfig = mapConfig;
         groups = new ConcurrentHashMap<String, com.google.common.cache.Cache<Serializable, Serializable>>(8);
+    }
+
+    @Override
+    public boolean isLocal() {
+        return true;
     }
 
     @Override
