@@ -238,6 +238,11 @@ public class RefresherTest extends TestCase {
                 public boolean isReplicated() {
                     throw new UnsupportedOperationException();
                 }
+                @Override
+                public boolean isLocal() {
+                    // TODO Auto-generated method stub
+                    return false;
+                }
             };
             @Override
             public void freeCache(final String name) {
