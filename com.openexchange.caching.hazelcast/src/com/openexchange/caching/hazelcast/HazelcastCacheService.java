@@ -63,7 +63,6 @@ import com.hazelcast.config.MapConfig;
 import com.hazelcast.config.NearCacheConfig;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
-import com.hazelcast.core.ISet;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheExceptionCode;
 import com.openexchange.caching.CacheKey;
@@ -82,6 +81,8 @@ import com.openexchange.exception.OXException;
 public final class HazelcastCacheService implements CacheService {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(HazelcastCacheService.class);
+
+    private static final Boolean PRESENT = Boolean.TRUE;
 
     /**
      * The name prefix for a {@link IMap}.
@@ -102,7 +103,7 @@ public final class HazelcastCacheService implements CacheService {
 
     private final ConcurrentMap<String, LocalCache> localOnlyCaches;
 
-    private final ISet<String> regionNames;
+    private final ConcurrentMap<String, Boolean> regionNames;
 
     /**
      * Initializes a new {@link HazelcastCacheService}.
@@ -110,7 +111,7 @@ public final class HazelcastCacheService implements CacheService {
     public HazelcastCacheService(final HazelcastInstance hazelcastInstance) {
         super();
         this.hazelcastInstance = hazelcastInstance;
-        regionNames = hazelcastInstance.getSet("com.openexchange.caching.hazelcast.regionNames");
+        regionNames = new ConcurrentHashMap<String, Boolean>(16);
         localOnlyCaches = new ConcurrentHashMap<String, LocalCache>(16);
     }
 
@@ -131,7 +132,7 @@ public final class HazelcastCacheService implements CacheService {
         if (null != localCache) {
             return localCache;
         }
-        if (!regionNames.add(name)) {
+        if (null != regionNames.putIfAbsent(name, PRESENT)) {
             return new HazelcastCache(mapName, hazelcastInstance);
         }
         final Config cfg = hazelcastInstance.getConfig();
@@ -165,7 +166,7 @@ public final class HazelcastCacheService implements CacheService {
         final LocalCache localCache = localOnlyCaches.get(mapName);
         if (null != localCache) {
             localCache.dispose();
-        } else if (regionNames.contains(name)) {
+        } else if (regionNames.containsKey(name)) {
             hazelcastInstance.getMap(mapName).destroy();
         }
     }
