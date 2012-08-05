@@ -129,9 +129,35 @@ public abstract class Refresher<T extends Serializable> {
     }
 
     public static <T extends Serializable> T cache(final T obj, final Cache cache, final OXObjectFactory<T> factory) throws OXException {
-        T retval = null;
-        final Lock lock = getLock(cache, factory);
         final Serializable key = factory.getKey();
+        T retval = null;
+        /*
+         * Check for distributed cache nature
+         */
+        if (cache.isDistributed()) {
+            try {
+                if (cache instanceof PutIfAbsent) {
+                    return (T) ((PutIfAbsent) cache).putIfAbsent(key, obj);
+                }
+                try {
+                    cache.putSafe(key, obj);
+                    return obj;
+                } catch (final OXException e) {
+                    if (!CacheExceptionCode.FAILED_SAFE_PUT.equals(e)) {
+                        throw e;
+                    }
+                    // Obviously another thread put in the meantime
+                    retval = (T) cache.get(key);
+                }
+                return retval;
+            } catch (final RuntimeException e) {
+                throw CacheExceptionCode.CACHE_ERROR.create(e, e.getMessage());
+            }
+        }
+        /*
+         * Common way...
+         */
+        final Lock lock = getLock(cache, factory);
         lock.lock();
         try {
             final Object tmp = cache.get(key);
