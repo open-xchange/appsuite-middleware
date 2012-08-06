@@ -235,7 +235,7 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
      * 
      * @param extendedProperties The extended properties to set
      */
-    public void setExtendedProperties(final Map<String, Serializable> extendedProperties) {
+    public void setExtendedProperties(final Map<? extends String, ? extends Serializable> extendedProperties) {
         if (null == extendedProperties) {
             this.extendedProperties = null;
         } else {
@@ -245,11 +245,11 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
     }
 
     /**
-     * Adds extended properties. Existing key-value-pairs are replaced.
+     * Adds extended properties. Existing mappings are replaced.
      * 
      * @param extendedProperties The extended properties to add
      */
-    public void addExtendedProperties(final Map<String, Serializable> extendedProperties) {
+    public void addExtendedProperties(final Map<? extends String, ? extends Serializable> extendedProperties) {
         if (null != extendedProperties) {
             final Map<String, Serializable> thisProps = this.extendedProperties;
             if (null == thisProps) {
@@ -257,6 +257,33 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
             } else {
                 thisProps.putAll(extendedProperties);
             }
+        }
+        b_extendedProperties = true;
+    }
+
+    /**
+     * Adds extended property. Existing mapping is replaced.
+     * 
+     * @param extendedProperty The extended property to add
+     */
+    public void addExtendedProperty(final String key, final Serializable value) {
+        putExtendedProperty(key, value);
+    }
+
+    /**
+     * Adds extended property. Existing mapping is replaced.
+     * <p>
+     * Method is equal to {@link #addExtendedProperty(String, Serializable)}
+     * 
+     * @param extendedProperty The extended property to add
+     */
+    public void putExtendedProperty(final String key, final Serializable value) {
+        if (null != key && null != value) {
+            Map<String, Serializable> thisProps = this.extendedProperties;
+            if (null == thisProps) {
+                thisProps = this.extendedProperties = new HashMap<String, Serializable>();
+            }
+            thisProps.put(key, value);
         }
         b_extendedProperties = true;
     }
