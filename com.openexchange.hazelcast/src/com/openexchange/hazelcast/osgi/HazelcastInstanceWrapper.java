@@ -117,7 +117,7 @@ public class HazelcastInstanceWrapper implements HazelcastInstance {
     @Override
     public <E> IQueue<E> getQueue(final String name) {
         if (null == config.getQueueConfig(name)) {
-            LOG.warn("No QueueConfig available for \"" + name + "\". Please provide appropriate QueueConfig prio to acquiring IQueue instance.");
+            LOG.warn("No QueueConfig available for \"" + name + "\". Please provide appropriate QueueConfig prior to acquiring IQueue instance.");
         }
         return hazelcastInstance.getQueue(name);
     }
@@ -125,7 +125,7 @@ public class HazelcastInstanceWrapper implements HazelcastInstance {
     @Override
     public <E> ITopic<E> getTopic(final String name) {
         if (null == config.getTopicConfig(name)) {
-            LOG.warn("No TopicConfig available for \"" + name + "\". Please provide appropriate TopicConfig prio to acquiring ITopic instance.");
+            LOG.warn("No TopicConfig available for \"" + name + "\". Please provide appropriate TopicConfig prior to acquiring ITopic instance.");
         }
         return hazelcastInstance.getTopic(name);
     }
@@ -143,15 +143,15 @@ public class HazelcastInstanceWrapper implements HazelcastInstance {
     @Override
     public <K, V> IMap<K, V> getMap(final String name) {
         if (null == config.getMapConfig(name)) {
-            LOG.warn("No MapConfig available for \"" + name + "\". Please provide appropriate MapConfig prio to acquiring IMap instance.");
+            LOG.warn("No MapConfig available for \"" + name + "\". Please provide appropriate MapConfig prior to acquiring IMap instance.");
         }
-        return hazelcastInstance.getMap(name);
+        return new OXMap(hazelcastInstance.getMap(name));
     }
 
     @Override
     public <K, V> MultiMap<K, V> getMultiMap(final String name) {
         if (null == config.getMultiMapConfig(name)) {
-            LOG.warn("No MultiMapConfig available for \"" + name + "\". Please provide appropriate MultiMapConfig prio to acquiring MultiMap instance.");
+            LOG.warn("No MultiMapConfig available for \"" + name + "\". Please provide appropriate MultiMapConfig prior to acquiring MultiMap instance.");
         }
         return hazelcastInstance.getMultiMap(name);
     }
@@ -174,7 +174,7 @@ public class HazelcastInstanceWrapper implements HazelcastInstance {
     @Override
     public ExecutorService getExecutorService(final String name) {
         if (null == config.getExecutorConfig(name)) {
-            LOG.warn("No ExecutorConfig available for \"" + name + "\". Please provide appropriate ExecutorConfig prio to acquiring ExecutorService instance.");
+            LOG.warn("No ExecutorConfig available for \"" + name + "\". Please provide appropriate ExecutorConfig prior to acquiring ExecutorService instance.");
         }
         return hazelcastInstance.getExecutorService(name);
     }
@@ -202,7 +202,7 @@ public class HazelcastInstanceWrapper implements HazelcastInstance {
     @Override
     public ISemaphore getSemaphore(final String name) {
         if (null == config.getSemaphoreConfig(name)) {
-            LOG.warn("No SemaphoreConfig available for \"" + name + "\". Please provide appropriate SemaphoreConfig prio to acquiring ISemaphore instance.");
+            LOG.warn("No SemaphoreConfig available for \"" + name + "\". Please provide appropriate SemaphoreConfig prior to acquiring ISemaphore instance.");
         }
         return hazelcastInstance.getSemaphore(name);
     }

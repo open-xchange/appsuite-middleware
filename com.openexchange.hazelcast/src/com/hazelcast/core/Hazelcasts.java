@@ -54,6 +54,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.hazelcast.osgi.HazelcastActivator;
+import com.openexchange.hazelcast.osgi.OXMap;
 
 /**
  * {@link Hazelcasts} - Utility class for Hazelcast.
@@ -208,7 +209,11 @@ public final class Hazelcasts {
 
     @SuppressWarnings("unchecked")
     public static <T> T wrapWithClassloader(final Class<?> classLoaderSource, final Class<T> type, final T delegate) {
-        return (T) Proxy.newProxyInstance(type.getClassLoader(), new Class<?>[] { type }, new ClassLoaderInvocationHandler(
+    	if (delegate instanceof OXMap) {
+    		((OXMap) delegate).setClassLoaderSource(classLoaderSource);
+    		return delegate;
+    	}
+    	return (T) Proxy.newProxyInstance(type.getClassLoader(), new Class<?>[] { type }, new ClassLoaderInvocationHandler(
             delegate,
             classLoaderSource));
     }
