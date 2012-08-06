@@ -50,11 +50,13 @@
 package com.openexchange.groupware.container;
 
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
  * {@link SystemObject} - The system object.
- *
+ * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public abstract class SystemObject implements Serializable {
@@ -64,13 +66,16 @@ public abstract class SystemObject implements Serializable {
     /**
      * The map with arbitrary properties.
      */
-    protected transient Map<?, ?> map;
+    protected transient Map<Object, Object> map;
+
+    private Map<Serializable, Serializable> serializableMap;
 
     /**
      * Initializes a new {@link SystemObject}.
      */
     protected SystemObject() {
         super();
+        serializableMap = null;
     }
 
     /**
@@ -78,8 +83,8 @@ public abstract class SystemObject implements Serializable {
      * 
      * @param map The properties map
      */
-    public void setMap(final Map<?, ?> map) {
-        this.map = map;
+    public void setMap(final Map<? extends Object, ? extends Object> map) {
+        this.map = null == map ? null : new HashMap<Object, Object>(map);
     }
 
     /**
@@ -88,6 +93,61 @@ public abstract class SystemObject implements Serializable {
      * @return The map or <code>null</code>
      */
     public Map<?, ?> getMap() {
-        return map;
+        return null == map ? null : Collections.unmodifiableMap(map);
+    }
+
+    /**
+     * The <tt>writeObject</tt> method is responsible for writing the state of the object for its particular class so that the corresponding
+     * <tt>readObject</tt> method can restore it. The default mechanism for saving the <tt>Object</tt>'s fields can be invoked by calling
+     * <tt>out.defaultWriteObject</tt>. The method does not need to concern itself with the state belonging to its superclasses or
+     * subclasses. State is saved by writing the individual fields to the <tt>ObjectOutputStream</tt> using the <tt>writeObject</tt> method
+     * or by using the methods for primitive data types supported by <tt>DataOutput</tt>.
+     * 
+     * @param out The object output stream
+     * @throws java.io.IOException If serialization fails
+     */
+    private void writeObject(final java.io.ObjectOutputStream out) throws java.io.IOException {
+        final Map<Object, Object> map = this.map;
+        if (null == map) {
+            this.serializableMap = null;
+        } else {
+            final Map<Serializable, Serializable> serializableMap = new HashMap<Serializable, Serializable>(map.size());
+            for (final Map.Entry<Object, Object> entry : map.entrySet()) {
+                final Object key = entry.getKey();
+                final Object value = entry.getValue();
+                if (isSerializable(key) && isSerializable(value)) {
+                    serializableMap.put((Serializable) key, (Serializable) value);
+                }
+            }
+            this.serializableMap = serializableMap;
+        }
+        out.defaultWriteObject();
+    }
+
+    /**
+     * The <tt>readObject</tt> method is responsible for reading from the stream and restoring the classes fields. It may call
+     * <tt>in.defaultReadObject</tt> to invoke the default mechanism for restoring the object's non-static and non-transient fields. The
+     * <tt>defaultReadObject</tt> method uses information in the stream to assign the fields of the object saved in the stream with the
+     * correspondingly named fields in the current object. This handles the case when the class has evolved to add new fields. The method
+     * does not need to concern itself with the state belonging to its superclasses or subclasses. State is saved by writing the individual
+     * fields to the <tt>ObjectOutputStream</tt> using the <tt>writeObject</tt> method or by using the methods for primitive data types
+     * supported by <tt>DataOutput</tt>.
+     * 
+     * @param in The object input stream
+     * @throws java.io.IOException If deserialization fails
+     * @throws ClassNotFoundException If appropriate class could not be found
+     */
+    private void readObject(final java.io.ObjectInputStream in) throws java.io.IOException, ClassNotFoundException {
+        in.readObject();
+        final Map<Serializable, Serializable> serializableMap = this.serializableMap;
+        if (null == serializableMap) {
+            this.map = null;
+        } else {
+            this.map = new HashMap<Object, Object>(serializableMap);
+        }
+    }
+
+    private static boolean isSerializable(final Object obj) {
+        return (obj instanceof Serializable);
     }
 }

@@ -56,6 +56,8 @@ package com.openexchange.groupware.container.participants;
  */
 public abstract class AbstractConfirmableParticipant implements ConfirmableParticipant {
 
+    private static final long serialVersionUID = 2232819928880304722L;
+
     private ConfirmStatus status = ConfirmStatus.NONE;
 
     private boolean bStatus = false;
