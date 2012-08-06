@@ -92,6 +92,11 @@ public abstract class JDBC3ConnectionReturner implements Connection {
     }
 
     @Override
+    public String toString() {
+        return delegate.toString();
+    }
+
+    @Override
     public void clearWarnings() throws SQLException {
         checkForAlreadyClosed();
         delegate.clearWarnings();
