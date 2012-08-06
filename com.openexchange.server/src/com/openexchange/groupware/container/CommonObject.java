@@ -264,10 +264,11 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
     /**
      * Adds extended property. Existing mapping is replaced.
      * 
-     * @param extendedProperty The extended property to add
+     * @param name The property name
+     * @param value The property value
      */
-    public void addExtendedProperty(final String key, final Serializable value) {
-        putExtendedProperty(key, value);
+    public void addExtendedProperty(final String name, final Serializable value) {
+        putExtendedProperty(name, value);
     }
 
     /**
@@ -275,15 +276,16 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
      * <p>
      * Method is equal to {@link #addExtendedProperty(String, Serializable)}
      * 
-     * @param extendedProperty The extended property to add
+     * @param name The property name
+     * @param value The property value
      */
-    public void putExtendedProperty(final String key, final Serializable value) {
-        if (null != key && null != value) {
+    public void putExtendedProperty(final String name, final Serializable value) {
+        if (null != name && null != value) {
             Map<String, Serializable> thisProps = this.extendedProperties;
             if (null == thisProps) {
                 thisProps = this.extendedProperties = new HashMap<String, Serializable>();
             }
-            thisProps.put(key, value);
+            thisProps.put(name, value);
         }
         b_extendedProperties = true;
     }
