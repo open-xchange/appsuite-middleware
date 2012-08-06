@@ -51,6 +51,7 @@ package com.openexchange.groupware.container;
 
 import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
+import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -64,10 +65,12 @@ import java.util.Set;
 
 public abstract class CommonObject extends FolderChildObject implements Cloneable {
 
+    private static final long serialVersionUID = -8226021974967602035L;
+
     /**
      * The available markers for a {@link CommonObject}.
      */
-    public static enum Marker {
+    public static enum Marker implements Serializable {
         /**
          * A common object.
          */
@@ -138,7 +141,7 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
 
     protected String filename;
 
-    protected Map<String, Object> extendedProperties;
+    protected Map<String, Serializable> extendedProperties;
 
     protected boolean b_personal_folder_id;
 
@@ -232,11 +235,11 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
      * 
      * @param extendedProperties The extended properties to set
      */
-    public void setExtendedProperties(final Map<String, Object> extendedProperties) {
+    public void setExtendedProperties(final Map<String, Serializable> extendedProperties) {
         if (null == extendedProperties) {
             this.extendedProperties = null;
         } else {
-            this.extendedProperties = new HashMap<String, Object>(extendedProperties);
+            this.extendedProperties = new HashMap<String, Serializable>(extendedProperties);
         }
         b_extendedProperties = true;
     }
@@ -246,11 +249,11 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
      * 
      * @param extendedProperties The extended properties to add
      */
-    public void addExtendedProperties(final Map<String, Object> extendedProperties) {
+    public void addExtendedProperties(final Map<String, Serializable> extendedProperties) {
         if (null != extendedProperties) {
-            final Map<String, Object> thisProps = this.extendedProperties;
+            final Map<String, Serializable> thisProps = this.extendedProperties;
             if (null == thisProps) {
-                this.extendedProperties = new HashMap<String, Object>(extendedProperties);
+                this.extendedProperties = new HashMap<String, Serializable>(extendedProperties);
             } else {
                 thisProps.putAll(extendedProperties);
             }
@@ -506,7 +509,7 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
         case EXTENDED_PROPERTIES:
             {
                 @SuppressWarnings("unchecked")
-                final Map<String, Object> properties = (Map<String, Object>) value;
+                final Map<String, Serializable> properties = (Map<String, Serializable>) value;
                 setExtendedProperties(properties);
             }
             break;

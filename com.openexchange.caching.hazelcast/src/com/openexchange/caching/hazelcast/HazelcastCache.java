@@ -103,6 +103,7 @@ public final class HazelcastCache implements Cache, LockAware, PutIfAbsent {
         this.groupNames = hazelcastInstance.getSet(hazelcastName + "?==?groupNames");
     }
 
+    @SuppressWarnings("unchecked")
     private <K, V> IMap<K, V> wrappedIMap(final String mapName) {
         return Hazelcasts.wrapWithClassloader(CacheService.class, IMap.class, hazelcastInstance.<Serializable, Serializable> getMap(mapName));
     }
@@ -210,7 +211,11 @@ public final class HazelcastCache implements Cache, LockAware, PutIfAbsent {
 
     @Override
     public Object get(final Serializable key) {
-    	return map.get(key);
+    	final Serializable val = map.get(key);
+    	if (null != val && val.getClass().toString().indexOf("FolderObject") > 0) {
+            System.out.println(val.toString());
+        }
+        return val;
     }
 
     @Override

@@ -60,8 +60,10 @@ import com.openexchange.groupware.container.Participant;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class FreeBusyInformation extends Appointment {
-	
-	private Participant attendee;
+
+    private static final long serialVersionUID = 9010547430457924153L;
+
+    private Participant attendee;
 	private List<FreeBusySlot> freeBusySlots;
 	
 	public FreeBusyInformation() {
