@@ -58,11 +58,16 @@ import org.atmosphere.cpr.AtmosphereHandler;
 import org.atmosphere.cpr.AtmosphereRequest;
 import org.atmosphere.cpr.AtmosphereResource;
 import org.atmosphere.cpr.AtmosphereResourceEvent;
+import org.atmosphere.cpr.AtmosphereResponse;
+import org.atmosphere.cpr.Broadcaster;
+import org.atmosphere.websocket.WebSocketEventListenerAdapter;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
+import com.openexchange.log.Log;
+import com.openexchange.log.LogFactory;
 import com.openexchange.realtime.atmosphere.OXRTHandler;
 import com.openexchange.realtime.atmosphere.StanzaSender;
 import com.openexchange.realtime.packet.ID;
@@ -88,6 +93,8 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 	// TODO: Figure Out JSONP and Long-Polling State management. Hot-Swap the
 	// AtmosphereResource.
 	// TODO: Close connections and get rid of em
+    
+    private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(RTAtmosphereHandler.class));
 
 	private final ServiceLookup services;
 
@@ -124,72 +131,156 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 
 	}
 
-	@Override
-    public void onRequest(AtmosphereResource r) throws IOException {
-		AtmosphereRequest req = r.getRequest();
-		RTAtmosphereState state = null;
-		try {
-		    state = getState(r);
-			state.lock();
-			if (req.getMethod().equalsIgnoreCase("GET")) {
-				if (state.handshake) {
-					r.getResponse().write("OK");
-					state.handshake = false;
-				} else {
-				    /*
-				     * Allow bi-directional communication by suspending:
-				     * AtmosphereResource/Client gets suspended until its
-				     * Broadcaster receives a message.
-				     */
-					r.suspend();
-					state.r = r;
-				}
-			} else {
-			    /*
-			     * Let the client send data to the server via POST without
-			     * suspending the AtmosphereResource. 
-			     */
-				handleIncoming(StanzaParser.parse(req.getReader().readLine()), state);
-			}
+//	@Override
+//    public void onRequest(AtmosphereResource r) throws IOException {
+//		AtmosphereRequest req = r.getRequest();
+//		RTAtmosphereState state = null;
+//		try {
+//		    state = getState(r);
+//			state.lock();
+//			if (req.getMethod().equalsIgnoreCase("GET")) {
+//				if (state.handshake) {
+//					r.getResponse().write("OK");
+//					state.handshake = false;
+//				} else {
+//				    /*
+//				     * Allow bi-directional communication by suspending:
+//				     * AtmosphereResource/Client gets suspended until its
+//				     * Broadcaster receives a message.
+//				     */
+//					r.suspend();
+//					state.r = r;
+//				}
+//			} else {
+//			    /*
+//			     * Let the client send data to the server via POST without
+//			     * suspending the AtmosphereResource. 
+//			     */
+//				handleIncoming(StanzaParser.parse(req.getReader().readLine()), state);
+//			}
+//
+//		} catch (OXException e) {
+//			// TODO: report Exception to client
+//		    LOG.error(e);
+//		} finally {
+//		    if(state != null) {
+//		        state.unlock();
+//		    }
+//		}
+//	}
+	
+    /*
+     * The AtmosphereHandler.onRequest is invoked every time a new connection 
+     * is made to an application. An application must take action and decide 
+     * what to do with the AtmosphereResource, e.g. suspend, resume or 
+     * broadcast events. You can also write String or bytes back to the client
+     * from that method.
+     */
+    @Override
+    public void onRequest(AtmosphereResource resource) throws IOException {
 
-		} catch (OXException e) {
-			// TODO: report Exception to client
-		} finally {
-		    if(state != null) {
-		        state.unlock();
-		    }
-		}
-
-	}
+        //We only accept requests from users with valid session infos
+        if(!hasValidSessionInfos(resource)) {
+            throw new IllegalStateException("No valid Session information found"); 
+        }
+        
+        // Log all events on the console, including WebSocket events for debugging
+        resource.addEventListener(new WebSocketEventListenerAdapter());
+        
+        AtmosphereRequest request = resource.getRequest();
+        String method = request.getMethod();
+        AtmosphereResponse response = resource.getResponse();
+        
+        if(method.equalsIgnoreCase("GET")) {
+            /*
+             * GET requests can be handled via Continuations. Suspend the request 
+             * and use it for bidirectional communication.
+             * "negotiating" header is used to list all supported transports
+             */
+            if(request.getHeader("negotiating") == null) {
+                LOG.info(">>>> Going to suspend request: "+ request);
+                resource.suspend();
+            } else {
+                response.getWriter().write("OK");
+            }
+        } else if (method.equalsIgnoreCase("POST")) {
+            /*
+             * Use POST request to synchronously send data over the server.
+             * First Post should contain handshake information -> getState 
+             */
+            try {
+                RTAtmosphereState state = getState(resource);
+                handleIncoming(StanzaParser.parse(request.getReader().readLine()), state);
+            } catch (OXException oxEx) {
+                LOG.error(oxEx);
+                //TODO: let the client know
+            }
+        }
+        
+    }
 
 	/**
+	 * Check the resource for valid session infos in request headers and
+	 * parameters and checks for valid session on the server. 
+     * @param resource The resource to check
+     * @return true if a valid session parameter can be found, else false
+     */
+    private boolean hasValidSessionInfos(AtmosphereResource resource) {
+        boolean isSessionValid = false;
+        AtmosphereRequest request = resource.getRequest();
+        
+        String sessionInfo = request.getHeader("session");
+        if(sessionInfo == null) {
+            sessionInfo = request.getParameter("session");
+        }
+        if(sessionInfo != null) {
+            SessiondService sessiondService = services.getService(SessiondService.class);
+            Session serverSession = sessiondService.getSession(sessionInfo);
+            if(serverSession!=null) {
+                isSessionValid=true;
+            }
+        }
+        return isSessionValid;
+    }
+
+    /**
 	 * Check the AtmosphereResource for the session header/parameter and add it
 	 * to the uuid2state map that tracks Serversession <-> RTAtmosphereState
 	 * @param r the AtmosphereResource
-	 * @return RTAtmosphereState that assembles the AtmosphereResource,
+	 * @return null if the AtmosphereResource doesn't contain session
+	 * informations or an RTAtmosphereState that assembles the AtmosphereResource,
 	 * Serversession and ID
 	 * @throws OXException if the server session is missing from the
 	 * AtmosphereResource 
 	 */
 	private RTAtmosphereState getState(AtmosphereResource r) throws OXException {
-		RTAtmosphereState state = new RTAtmosphereState();
+		RTAtmosphereState newState = new RTAtmosphereState();
+		RTAtmosphereState oldState = null;
+		
 		String session = r.getRequest().getHeader("session");
 		if (session == null) {
 			session = r.getRequest().getParameter("session");
 		}
-		//Session neither in header nor parameter
-		if(session == null) {
-		    throw OXException.general("Missing Session");
+		/*
+		 * Not all Atmosphere requests have a session parameter.
+		 * One example: transport negotiation (websocket, longpolling ...)
+		 */
+		if(session != null) {
+		    oldState = uuid2State.putIfAbsent(session, newState);
+		    return oldState != null ? oldState : newState;
+		} else {
+		    return null;
 		}
-		RTAtmosphereState previous = uuid2State.putIfAbsent(session, state);
-		return previous != null ? previous : state;
 	}
 
 
 	/**
-	 * 
-	 * @param stanza
-	 * @param state
+	 * Handle incoming Stanza and decide if they have an internal namespace
+	 * and need to be handles by the Channel/Handler or if they should be 
+	 * dispatched iow. transformed to POJOs and handed over to the
+	 * MessageDispatcher.
+	 * @param stanza The Stanza to handle
+	 * @param state The associated state
 	 * @throws OXException
 	 */
 	protected void handleIncoming(Stanza stanza, RTAtmosphereState state)
