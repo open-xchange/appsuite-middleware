@@ -88,7 +88,7 @@ public final class FolderCacheManager {
 
     private static volatile FolderCacheManager instance;
 
-    private static final String FOLDER_CACHE_REGION_NAME = "OXFolderCache";
+    private static final String REGION_NAME = "OXFolderCache";
 
     private volatile Cache folderCache;
 
@@ -169,7 +169,7 @@ public final class FolderCacheManager {
                     final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
                     if (null != cacheService) {
                         try {
-                            cacheService.freeCache(FOLDER_CACHE_REGION_NAME);
+                            cacheService.freeCache(REGION_NAME);
                         } catch (final OXException e) {
                             LOG.error(e.getMessage(), e);
                         }
@@ -188,7 +188,7 @@ public final class FolderCacheManager {
         if (folderCache != null) {
             return;
         }
-        folderCache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(FOLDER_CACHE_REGION_NAME);
+        folderCache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(REGION_NAME);
     }
 
     /**
@@ -266,7 +266,7 @@ public final class FolderCacheManager {
                 putFolderObject(loadFolderObjectInternal(objectId, ctx, readCon), ctx, true, null);
             }
             // Return refreshable object
-            return Refresher.refresh(FOLDER_CACHE_REGION_NAME, folderCache, new FolderFactory(ctx, objectId), true).clone();
+            return Refresher.refresh(REGION_NAME, folderCache, new FolderFactory(ctx, objectId), true).clone();
         } catch (final OXException e) {
             throw e;
         }
@@ -339,7 +339,7 @@ public final class FolderCacheManager {
         if (null != readCon) {
             putIfAbsent(loadFolderObjectInternal(folderId, ctx, readCon), ctx, null);
         }
-        return Refresher.refresh(FOLDER_CACHE_REGION_NAME, folderCache, new FolderFactory(ctx, folderId), true).clone();
+        return Refresher.refresh(REGION_NAME, folderCache, new FolderFactory(ctx, folderId), true).clone();
     }
 
     /**
