@@ -211,11 +211,7 @@ public final class HazelcastCache implements Cache, LockAware, PutIfAbsent {
 
     @Override
     public Object get(final Serializable key) {
-    	final Serializable val = map.get(key);
-    	if (null != val && val.getClass().toString().indexOf("FolderObject") > 0) {
-            System.out.println(val.toString());
-        }
-        return val;
+    	return map.get(key);
     }
 
     @Override
