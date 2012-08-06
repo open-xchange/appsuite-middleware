@@ -215,6 +215,8 @@ public final class FolderCacheManager {
 
     private class FolderFactory implements OXObjectFactory<FolderObject> {
 
+        private static final long serialVersionUID = -4809018496183864081L;
+
         private final Context ctx;
 
         private final int folderId;
@@ -354,7 +356,7 @@ public final class FolderCacheManager {
      */
     FolderObject loadFolderObjectInternal(final int folderId, final Context ctx, final Connection readCon) throws OXException {
         if (folderId <= 0) {
-            throw OXFolderExceptionCode.NOT_EXISTS.create(folderId, ctx.getContextId());
+            throw OXFolderExceptionCode.NOT_EXISTS.create(Integer.valueOf(folderId), Integer.valueOf(ctx.getContextId()));
         }
         return FolderObject.loadFolderObjectFromDB(folderId, ctx, readCon);
     }
