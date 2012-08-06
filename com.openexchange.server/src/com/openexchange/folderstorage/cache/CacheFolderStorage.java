@@ -161,8 +161,6 @@ public final class CacheFolderStorage implements FolderStorage {
 
     private volatile Cache globalCache;
 
-    // private Cache userCache;
-
     /**
      * Initializes a new {@link CacheFolderStorage}.
      */
@@ -198,7 +196,6 @@ public final class CacheFolderStorage implements FolderStorage {
     public void onCacheAvailable() throws OXException {
         cacheService = CacheServiceRegistry.getServiceRegistry().getService(CacheService.class, true);
         globalCache = cacheService.getCache("GlobalFolderCache");
-        // userCache = cacheService.getCache("UserFolderCache");
     }
 
     /**
@@ -219,21 +216,6 @@ public final class CacheFolderStorage implements FolderStorage {
                 globalCache = null;
             }
         }
-        /*-
-         *
-        if (userCache != null) {
-            try {
-                userCache.clear();
-                if (null != cacheService) {
-                    cacheService.freeCache("UserFolderCache");
-                }
-            } catch (final CacheException e) {
-                throw new OXException(e);
-            } finally {
-                userCache = null;
-            }
-        }
-         */
         if (service != null) {
             cacheService = null;
         }
