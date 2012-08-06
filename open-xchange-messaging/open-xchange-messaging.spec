@@ -59,6 +59,12 @@ perl -pi -e 's;(^.*?)\s+(.*/(twitter)\.properties)$;$1 %%%attr(640,root,open-xch
 
 %post
 if [ ${1:-0} -eq 2 ]; then
+    # only when updating
+    . /opt/open-xchange/lib/oxfunctions.sh
+
+    # prevent bash from expanding, see bug 13316
+    GLOBIGNORE='*'
+
     CONFFILES="facebookmessaging.properties rssmessaging.properties twittermessaging.properties twitter.properties"
     for FILE in ${CONFFILES}; do
         if [ -e /opt/open-xchange/etc/groupware/${FILE} ]; then
