@@ -198,7 +198,7 @@ public interface Category {
 
         @Override
         public LogLevel getLogLevel() {
-            return LogLevel.DEBUG;
+            return LogLevel.ERROR;
         }
 
         @Override
@@ -225,7 +225,7 @@ public interface Category {
 
         @Override
         public LogLevel getLogLevel() {
-            return LogLevel.DEBUG;
+            return LogLevel.ERROR;
         }
 
         @Override
