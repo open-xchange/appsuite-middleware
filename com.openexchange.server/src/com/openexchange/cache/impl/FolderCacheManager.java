@@ -697,7 +697,7 @@ public final class FolderCacheManager {
         @Override
         public FolderObject getFolderObject() throws OXException {
             if (folderId <= 0) {
-                throw OXFolderExceptionCode.NOT_EXISTS.create(folderId, ctx.getContextId());
+                throw OXFolderExceptionCode.NOT_EXISTS.create(I(folderId), I(ctx.getContextId()));
             }
             return FolderObject.loadFolderObjectFromDB(folderId, ctx, readCon);
         }
