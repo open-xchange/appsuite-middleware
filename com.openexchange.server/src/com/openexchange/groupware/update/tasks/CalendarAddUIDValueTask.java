@@ -66,7 +66,10 @@ import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.TaskAttributes;
+import com.openexchange.groupware.update.UpdateConcurrency;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -98,7 +101,8 @@ public final class CalendarAddUIDValueTask extends UpdateTaskAdapter {
         Connection con = dbService.getForUpdateTask(cid);
         try {
             con.setAutoCommit(false);
-            addUid("prg_dates", con);
+            addUidSingleAppoointments("prg_dates", con);
+            addUidRecurringAppoointments("prg_dates", con);
             // not needed for del_dates
             con.commit();
         } catch (SQLException e) {
@@ -113,12 +117,11 @@ public final class CalendarAddUIDValueTask extends UpdateTaskAdapter {
         }
     }
 
-    private void addUid(final String tableName, final Connection con) throws SQLException {
+    private void addUidSingleAppoointments(final String tableName, final Connection con) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet resultSet = null;
         try {
-            stmt = con.prepareStatement("SELECT intfield01,cid FROM " + tableName + 
-                " WHERE uid IS NULL AND (intfield02 IS NULL OR intfield01=intfield02)");
+            stmt = con.prepareStatement("SELECT intfield01,cid FROM " + tableName + " WHERE uid IS NULL AND intfield02 IS NULL");
             resultSet = stmt.executeQuery();
             TIntObjectMap<TIntList> map = new TIntObjectHashMap<TIntList>(1024);
             while (resultSet.next()) {
@@ -139,8 +142,7 @@ public final class CalendarAddUIDValueTask extends UpdateTaskAdapter {
                 public boolean execute(final int cid, TIntList ids) {
                     PreparedStatement innerStmt = null;
                     try {
-                        innerStmt = con.prepareStatement("UPDATE " + tableName + 
-                            " SET uid=? WHERE cid=? AND (intfield02=? OR intfield01=?)");
+                        innerStmt = con.prepareStatement("UPDATE " + tableName + " SET uid=? WHERE cid=? AND intfield01=?");
                         final PreparedStatement pStmt = innerStmt;
                         ids.forEach(new TIntProcedure() {
 
@@ -150,7 +152,6 @@ public final class CalendarAddUIDValueTask extends UpdateTaskAdapter {
                                     pStmt.setString(1, UUID.randomUUID().toString());
                                     pStmt.setInt(2, cid);
                                     pStmt.setInt(3, id);
-                                    pStmt.setInt(4, id);
                                     pStmt.addBatch();
                                     return true;
                                 } catch (SQLException e) {
@@ -180,6 +181,87 @@ public final class CalendarAddUIDValueTask extends UpdateTaskAdapter {
         } finally {
             DBUtils.closeSQLStuff(resultSet, stmt);
         }
+    }
+
+    private void addUidRecurringAppoointments(final String tableName, final Connection con) throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet resultSet = null;
+        try {
+            stmt = con.prepareStatement("SELECT intfield01,cid FROM " + tableName + " WHERE uid IS NULL AND intfield01=intfield02");
+            resultSet = stmt.executeQuery();
+            TIntObjectMap<TIntList> map = new TIntObjectHashMap<TIntList>(1024);
+            while (resultSet.next()) {
+                int cid = resultSet.getInt(2);
+                TIntList ids = map.get(cid);
+                if (null == ids) {
+                    ids = new TIntLinkedList();
+                    map.put(cid, ids);
+                }
+                ids.add(resultSet.getInt(1));
+            }
+            DBUtils.closeSQLStuff(resultSet, stmt);
+
+            final AtomicReference<SQLException> exceptionReference = new AtomicReference<SQLException>();
+            map.forEachEntry(new TIntObjectProcedure<TIntList>() {
+
+                @Override
+                public boolean execute(final int cid, TIntList ids) {
+                    PreparedStatement innerStmtMaster = null;
+                    PreparedStatement innerStmtExceptions = null;
+                    try {
+                        innerStmtMaster = con.prepareStatement("UPDATE " + tableName + " SET uid=? WHERE cid=? AND intfield01=?");
+                        innerStmtExceptions = con.prepareStatement("UPDATE " + tableName + " SET uid=? WHERE cid=? AND intfield02=?");
+                        final PreparedStatement stmtMaster = innerStmtMaster;
+                        final PreparedStatement stmtExceptions = innerStmtExceptions;
+                        ids.forEach(new TIntProcedure() {
+
+                            @Override
+                            public boolean execute(final int id) {
+                                String uuid = UUID.randomUUID().toString();
+                                try {
+                                    stmtMaster.setString(1, uuid);
+                                    stmtMaster.setInt(2, cid);
+                                    stmtMaster.setInt(3, id);
+                                    stmtMaster.addBatch();
+                                    stmtExceptions.setString(1, uuid);
+                                    stmtExceptions.setInt(2, cid);
+                                    stmtExceptions.setInt(3, id);
+                                    stmtExceptions.addBatch();
+                                    return true;
+                                } catch (SQLException e) {
+                                    exceptionReference.set(e);
+                                    return false;
+                                }
+                            }
+                        });
+                        SQLException sqlException = exceptionReference.get();
+                        if (null != sqlException) {
+                            throw sqlException;
+                        }
+                        innerStmtMaster.executeBatch();
+                        innerStmtExceptions.executeBatch();
+                        return true;
+                    } catch (SQLException e) {
+                        exceptionReference.set(e);
+                        return false;
+                    } finally {
+                        DBUtils.closeSQLStuff(innerStmtMaster);
+                        DBUtils.closeSQLStuff(innerStmtExceptions);
+                    }
+                }
+            }); // end of for-each procedure
+            SQLException sqlException = exceptionReference.get();
+            if (null != sqlException) {
+                throw sqlException;
+            }
+        } finally {
+            DBUtils.closeSQLStuff(resultSet, stmt);
+        }
+    }
+
+    @Override
+    public TaskAttributes getAttributes() {
+        return new Attributes(UpdateConcurrency.BACKGROUND);
     }
 
 }
