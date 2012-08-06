@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.container;
 
+import java.io.Serializable;
 import java.util.Map;
 
 /**
@@ -56,18 +57,36 @@ import java.util.Map;
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
-public abstract class SystemObject {
+public abstract class SystemObject implements Serializable {
 
-    protected Map<?, ?> map;
+    private static final long serialVersionUID = 5804496798486123299L;
 
+    /**
+     * The map with arbitrary properties.
+     */
+    protected transient Map<?, ?> map;
+
+    /**
+     * Initializes a new {@link SystemObject}.
+     */
     protected SystemObject() {
         super();
     }
 
+    /**
+     * Sets the map with arbitrary properties.
+     * 
+     * @param map The properties map
+     */
     public void setMap(final Map<?, ?> map) {
         this.map = map;
     }
 
+    /**
+     * Gets (optionally) the map with arbitrary properties.
+     * 
+     * @return The map or <code>null</code>
+     */
     public Map<?, ?> getMap() {
         return map;
     }

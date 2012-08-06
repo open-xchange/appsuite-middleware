@@ -60,6 +60,8 @@ import com.openexchange.groupware.calendar.Constants;
  */
 public class Appointment extends CalendarObject implements Cloneable {
 
+    private static final long serialVersionUID = 8822932551489524746L;
+
     public static final int LOCATION = 400;
 
     public static final int FULL_TIME = 401;

@@ -60,7 +60,7 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public interface OXObjectFactory<T> {
+public interface OXObjectFactory<T> extends Serializable{
 
     /**
      * @return the key for identifying the cached object.

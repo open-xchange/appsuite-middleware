@@ -49,6 +49,7 @@
 
 package com.openexchange.data.conversion.ical;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import com.openexchange.groupware.container.Appointment;
@@ -58,16 +59,28 @@ import com.openexchange.groupware.container.Appointment;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class FreeBusySlot {
-	
-	private Date start;
+public class FreeBusySlot implements Serializable {
+
+    private static final long serialVersionUID = -1812165912130637079L;
+
+    private Date start;
 	private Date end;
 	private int shownAs;
 	
+	/**
+	 * Initializes a new {@link FreeBusySlot}.
+	 */
 	public FreeBusySlot() {
 		super();
 	}
 	
+	/**
+	 * Initializes a new {@link FreeBusySlot}.
+	 * 
+	 * @param start The start date
+	 * @param end The end date
+	 * @param shownAs The "shown-as" flag
+	 */
 	public FreeBusySlot(Date start, Date end, int shownAs) {
 		super();
 		this.start = start;

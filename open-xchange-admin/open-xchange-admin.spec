@@ -149,5 +149,6 @@ fi
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/sbin/
 /opt/open-xchange/sbin/*
+%doc com.openexchange.admin.rmi/javadoc
 
 %changelog

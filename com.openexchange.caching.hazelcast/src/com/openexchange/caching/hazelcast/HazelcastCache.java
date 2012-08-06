@@ -51,9 +51,13 @@ package com.openexchange.caching.hazelcast;
 
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import org.apache.commons.logging.Log;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.Hazelcasts;
 import com.hazelcast.core.IMap;
 import com.hazelcast.core.ISet;
 import com.hazelcast.core.MapEntry;
@@ -62,8 +66,11 @@ import com.openexchange.caching.CacheElement;
 import com.openexchange.caching.CacheExceptionCode;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheKeyImpl;
+import com.openexchange.caching.CacheService;
 import com.openexchange.caching.CacheStatistics;
 import com.openexchange.caching.ElementAttributes;
+import com.openexchange.caching.LockAware;
+import com.openexchange.caching.PutIfAbsent;
 import com.openexchange.exception.OXException;
 
 /**
@@ -71,9 +78,11 @@ import com.openexchange.exception.OXException;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class HazelcastCache implements Cache {
+public final class HazelcastCache implements Cache, LockAware, PutIfAbsent {
 
-    private final String name;
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(HazelcastCache.class);
+
+    private final String hazelcastName;
 
     private final HazelcastInstance hazelcastInstance;
 
@@ -86,12 +95,22 @@ public final class HazelcastCache implements Cache {
     /**
      * Initializes a new {@link HazelcastCache}.
      */
-    public HazelcastCache(final String name, final HazelcastInstance hazelcastInstance) {
+    public HazelcastCache(final String hazelcastName, final HazelcastInstance hazelcastInstance) {
         super();
-        this.name = name;
-        this.map = hazelcastInstance.<Serializable, Serializable> getMap(name);
-        this.groupNames = hazelcastInstance.getSet(name + "?==?groupNames");
         this.hazelcastInstance = hazelcastInstance;
+        this.hazelcastName = hazelcastName;
+        this.map = wrappedIMap(hazelcastName);
+        this.groupNames = hazelcastInstance.getSet(hazelcastName + "?==?groupNames");
+    }
+
+    @SuppressWarnings("unchecked")
+    private <K, V> IMap<K, V> wrappedIMap(final String mapName) {
+        return Hazelcasts.wrapWithClassloader(CacheService.class, IMap.class, hazelcastInstance.<Serializable, Serializable> getMap(mapName));
+    }
+
+    @Override
+    public Lock getLock() {
+        return hazelcastInstance.getLock(hazelcastName);
     }
 
     private IMap<Serializable, Serializable> getGroup(final String groupName) {
@@ -107,11 +126,11 @@ public final class HazelcastCache implements Cache {
             mapConfig.setName(hazelcastKey);
             config.addMapConfig(mapConfig);
         }
-        return hazelcastInstance.getMap(hazelcastKey);
+        return wrappedIMap(hazelcastKey);
     }
 
     private String getGroupKey(final String groupName) {
-        return new StringBuilder(name).append("?==?").append(groupName).toString();
+        return new StringBuilder(hazelcastName).append('.').append(groupName).toString();
     }
 
     private MapConfig getMapConfig() {
@@ -120,12 +139,17 @@ public final class HazelcastCache implements Cache {
             synchronized (this) {
                 tmp = mapConfig;
                 if (null == tmp) {
-                    tmp = hazelcastInstance.getConfig().getMapConfig(name);
+                    tmp = hazelcastInstance.getConfig().getMapConfig(hazelcastName);
                     mapConfig = tmp;
                 }
             }
         }
         return tmp;
+    }
+
+    @Override
+    public boolean isLocal() {
+        return false;
     }
 
     @Override
@@ -140,35 +164,54 @@ public final class HazelcastCache implements Cache {
 
     @Override
     public void clear() throws OXException {
-        for (final String groupName : new HashSet<String>(groupNames)) {
-            if (groupNames.remove(groupName)) {
-                final IMap<Object, Object> group = hazelcastInstance.getMap(getGroupKey(groupName));
-                if (null != group) {
-                    group.clear();
+        final int time = 10;
+        final TimeUnit timeUnit = TimeUnit.SECONDS;
+        if (!map.lockMap(time, timeUnit)) {
+            throw CacheExceptionCode.CACHE_ERROR.create("Couldn't acquire map lock within " + time + " " + timeUnit);
+        }
+        try {
+            for (final String groupName : new HashSet<String>(groupNames)) {
+                if (groupNames.remove(groupName)) {
+                    final IMap<Object, Object> group = wrappedIMap(getGroupKey(groupName));
+                    if (null != group) {
+                        group.clear();
+                    }
                 }
             }
+            groupNames.clear();
+            map.clear();
+        } finally {
+            map.unlockMap();
         }
-        groupNames.clear();
-        map.clear();
     }
 
     @Override
     public void dispose() {
-        for (final String groupName : new HashSet<String>(groupNames)) {
-            if (groupNames.remove(groupName)) {
-                final IMap<Object, Object> group = hazelcastInstance.getMap(getGroupKey(groupName));
-                if (null != group) {
-                    group.destroy();
+        final int time = 10;
+        final TimeUnit timeUnit = TimeUnit.SECONDS;
+        if (!map.lockMap(time, timeUnit)) {
+            LOG.warn("Couldn't acquire map lock within " + time + " " + timeUnit);
+            return;
+        }
+        try {
+            for (final String groupName : new HashSet<String>(groupNames)) {
+                if (groupNames.remove(groupName)) {
+                    final IMap<Object, Object> group = wrappedIMap(getGroupKey(groupName));
+                    if (null != group) {
+                        group.destroy();
+                    }
                 }
             }
+            groupNames.destroy();
+        } finally {
+            map.unlockMap();
         }
-        groupNames.destroy();
         map.destroy();
     }
 
     @Override
     public Object get(final Serializable key) {
-        return map.get(key);
+    	return map.get(key);
     }
 
     @Override
@@ -178,7 +221,7 @@ public final class HazelcastCache implements Cache {
             return null;
         }
         final HazelcastCacheElement cacheElement = new HazelcastCacheElement();
-        cacheElement.setCacheName(name);
+        cacheElement.setCacheName(hazelcastName);
         cacheElement.setKey(key);
         cacheElement.setVal(mapEntry.getValue());
         cacheElement.setElementAttributes(new HazelcastElementAttributes(mapEntry, getMapConfig(), map));
@@ -233,6 +276,11 @@ public final class HazelcastCache implements Cache {
         if (null != map.putIfAbsent(key, value)) {
             throw CacheExceptionCode.FAILED_SAFE_PUT.create();
         }
+    }
+
+    @Override
+    public Serializable putIfAbsent(Serializable key, Serializable value) {
+        return map.putIfAbsent(key, value);
     }
 
     @Override

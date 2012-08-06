@@ -53,19 +53,15 @@ import java.io.IOException;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-
 import org.atmosphere.cpr.AtmosphereHandler;
 import org.atmosphere.cpr.AtmosphereRequest;
 import org.atmosphere.cpr.AtmosphereResource;
 import org.atmosphere.cpr.AtmosphereResourceEvent;
 import org.atmosphere.cpr.AtmosphereResponse;
-import org.atmosphere.cpr.Broadcaster;
 import org.atmosphere.websocket.WebSocketEventListenerAdapter;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;
 import com.openexchange.realtime.atmosphere.OXRTHandler;
@@ -219,6 +215,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         
     }
 
+
 	/**
 	 * Check the resource for valid session infos in request headers and
 	 * parameters and checks for valid session on the server. 
@@ -253,25 +250,29 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 	 * @throws OXException if the server session is missing from the
 	 * AtmosphereResource 
 	 */
-	private RTAtmosphereState getState(AtmosphereResource r) throws OXException {
-		RTAtmosphereState newState = new RTAtmosphereState();
-		RTAtmosphereState oldState = null;
-		
-		String session = r.getRequest().getHeader("session");
-		if (session == null) {
-			session = r.getRequest().getParameter("session");
-		}
-		/*
-		 * Not all Atmosphere requests have a session parameter.
-		 * One example: transport negotiation (websocket, longpolling ...)
-		 */
-		if(session != null) {
-		    oldState = uuid2State.putIfAbsent(session, newState);
-		    return oldState != null ? oldState : newState;
-		} else {
-		    return null;
-		}
-	}
+    private RTAtmosphereState getState(AtmosphereResource r) throws OXException {
+        RTAtmosphereState state = new RTAtmosphereState();
+        String session = r.getRequest().getHeader("session");
+        if (session == null) {
+            session = r.getRequest().getParameter("session");
+        }
+        //Session neither in header nor parameter
+        if(session == null) {
+            throw OXException.general("Missing Session");
+        }
+
+        String resource = r.getRequest()
+                .getHeader("resource");
+        if (resource == null) {
+            resource = r.getRequest().getParameter("resource");
+        }
+
+        RTAtmosphereState previous = uuid2State.putIfAbsent(session, state);
+        RTAtmosphereState theState = previous != null ? previous : state;
+        
+        initSessionId(session, resource, theState);
+        return theState;
+    }
 
 
 	/**
@@ -310,21 +311,29 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 			JSONObject json = (JSONObject) stanza.getPayload().getData();
 
 			String sessionId = json.getString("session");
-
-			Session session = services.getService(SessiondService.class)
-					.getSession(sessionId);
-			if (session == null) {
-				throw OXException.general("Invalid sessionId " + sessionId);
-			}
-
-			state.session = ServerSessionAdapter.valueOf(session);
-			state.id = new ID("ox", session.getLoginName(),
-					contextName(session.getLogin()), json.optString("resource"));
+			initSessionId(sessionId, json.optString("resource"), state);
 			id2State.put(state.id, state);
 		} catch (JSONException x) {
 			throw OXException.general(x.toString());
 		}
 
+	}
+
+	private void initSessionId(String sessionId, String resource, RTAtmosphereState state) throws OXException {
+		Session session = services.getService(SessiondService.class)
+				.getSession(sessionId);
+		if (session == null) {
+			throw OXException.general("Invalid sessionId " + sessionId);
+		}
+
+		state.session = ServerSessionAdapter.valueOf(session);
+		if (state.id == null || resource != null) {
+			state.id = new ID("ox", session.getLoginName(),
+					contextName(session.getLogin()), resource);
+			id2State.put(state.id, state);
+		}
+		
+		
 	}
 
 	private String contextName(String login) {

@@ -64,6 +64,8 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public class CalendarDataObject extends Appointment {
 
+    private static final long serialVersionUID = -1333032651882959872L;
+
     private String rec_string;
 
     private Context context;

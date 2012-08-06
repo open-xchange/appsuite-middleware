@@ -1150,7 +1150,7 @@ public class Login extends AJAXServlet {
             if (AjaxExceptionCodes.PREFIX.equals(e.getPrefix())) {
                 throw e;
             }
-            if (LoginExceptionCodes.REDIRECT.equals(e)) {
+            if (LoginExceptionCodes.REDIRECT.equals(e) || LoginExceptionCodes.NOT_SUPPORTED.equals(e)) {
                 LOG.debug(e.getMessage(), e);
             } else {
                 LOG.error(e.getMessage(), e);

@@ -7,9 +7,34 @@
 
     <import file="build-project.xml"/>    
 
+    <!-- Constants -->
+    <property name="patchConfDir" value="${tmpDir}/${confDir}"/>
+
     <target name="postInstall">
         <mkdir dir="${destDir}/${prefix}/${libDir}"/>
     	<symlink resource="${bundlesDir}/${Bundle-SymbolicName}.jar" link="${destDir}/${prefix}/${libDir}/${Bundle-SymbolicName}.jar" overwrite="true"/>
+    	<antcall target="javadoc">
+    		<reference refid="sourceDirs"/>
+		</antcall>
+    </target>
+
+    <target name="javadoc">
+        <property name="printablePath" refid="sourceDirs"/>
+        <echo message="${printablePath}"/>
+        <javadoc failonerror="true" destdir="javadoc" author="true" public="true" Windowtitle="Open-Xchange Administration Interface">
+            <Header><![CDATA[<img src="{@docRoot}/resources/OX_Logo.jpg">]]></Header>
+        	<sourcepath refid="sourceDirs"/>
+        	<sourcepath path="${mainSrcDir}"/>
+            <!-- fileset dir="src/com/openexchange/admin/rmi" defaultexcludes="yes">
+                <include name="*Interface*"/>
+                <include name="dataobjects/*"/>
+                <exclude name="*ResourceGroup*"/>
+            </fileset>
+            <fileset dir="src/com/openexchange/admin/rmi/exceptions" defaultexcludes="yes">
+            </fileset -->
+            <fileset dir="${mainSrcDir}" defaultexcludes="yes"/>
+            <link href="http://java.sun.com/j2se/1.6.0/docs/api/"/>
+        </javadoc>
     </target>
 
 </project>

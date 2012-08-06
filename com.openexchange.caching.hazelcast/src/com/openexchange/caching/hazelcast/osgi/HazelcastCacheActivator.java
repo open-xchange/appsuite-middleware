@@ -51,12 +51,17 @@ package com.openexchange.caching.hazelcast.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+import org.apache.commons.logging.Log;
 import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.caching.CacheService;
 import com.openexchange.caching.hazelcast.HazelcastCacheService;
 import com.openexchange.caching.hazelcast.Services;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.OXException;
+import com.openexchange.osgi.HigherRankedObservator;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -64,7 +69,15 @@ import com.openexchange.osgi.HousekeepingActivator;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class HazelcastCacheActivator extends HousekeepingActivator {
+public final class HazelcastCacheActivator extends HousekeepingActivator implements HigherRankedObservator.HigherRankedObservatorCallback<CacheService> {
+
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(HazelcastCacheActivator.class);
+
+    private static final int MY_RANKING = 0;
+
+    private HazelcastCacheService hazelcastCacheService;
+
+    private ServiceRegistration<CacheService> cacheServiceRegistration;
 
     /**
      * Initializes a new {@link HazelcastCacheActivator}.
@@ -80,19 +93,63 @@ public final class HazelcastCacheActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
         // Register Hazelcast cache service
-        final HazelcastCacheService hazelcastCacheService = new HazelcastCacheService(getService(HazelcastInstance.class));
-        hazelcastCacheService.loadDefaultConfiguration();
-        final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
-        props.put(Constants.SERVICE_RANKING, Integer.valueOf(0));
-        registerService(CacheService.class, hazelcastCacheService, props);
+        startUp();
+
+        track(CacheService.class, new HigherRankedObservator<CacheService>(MY_RANKING, context).addCallback(this));
+        openTrackers();
+    }
+
+    private void startUp() throws OXException {
+        synchronized (this) {
+            Services.setServiceLookup(this);
+            HazelcastCacheService hazelcastCacheService = this.hazelcastCacheService;
+            if (null != hazelcastCacheService) {
+                return;
+            }
+            hazelcastCacheService = new HazelcastCacheService(getService(HazelcastInstance.class));
+            hazelcastCacheService.loadDefaultConfiguration();
+            final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
+            props.put(Constants.SERVICE_RANKING, Integer.valueOf(MY_RANKING));
+            cacheServiceRegistration = context.registerService(CacheService.class, hazelcastCacheService, props);
+            this.hazelcastCacheService = hazelcastCacheService;
+        }
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        Services.setServiceLookup(null);
+        shutdown();
         super.stopBundle();
+    }
+
+    private void shutdown() {
+        synchronized (this) {
+            final ServiceRegistration<CacheService> serviceRegistration = cacheServiceRegistration;
+            if (null != serviceRegistration) {
+                serviceRegistration.unregister();
+                cacheServiceRegistration = null;
+            }
+            final HazelcastCacheService hazelcastCacheService = this.hazelcastCacheService;
+            if (null != hazelcastCacheService) {
+                hazelcastCacheService.shutdown(false);
+                this.hazelcastCacheService = null;
+            }
+            Services.setServiceLookup(null);
+        }
+    }
+
+    @Override
+    public void onFirstHigherRankedAvailable(final ServiceReference<CacheService> reference, final CacheService service) {
+        shutdown();
+    }
+
+    @Override
+    public void onLastHigherRankedDisappeared(final ServiceReference<CacheService> reference, final CacheService service) {
+        try {
+            startUp();
+        } catch (final OXException e) {
+            LOG.error(e.getMessage(), e);
+        }
     }
 
 }

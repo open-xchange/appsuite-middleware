@@ -238,6 +238,11 @@ public class RefresherTest extends TestCase {
                 public boolean isReplicated() {
                     throw new UnsupportedOperationException();
                 }
+                @Override
+                public boolean isLocal() {
+                    // TODO Auto-generated method stub
+                    return false;
+                }
             };
             @Override
             public void freeCache(final String name) {
@@ -274,6 +279,16 @@ public class RefresherTest extends TestCase {
             @Override
             public CacheKey newCacheKey(final int contextId, final Serializable... objs) {
                 throw new UnsupportedOperationException();
+            }
+            @Override
+            public boolean isDistributed() {
+                // TODO Auto-generated method stub
+                return false;
+            }
+            @Override
+            public boolean isReplicated() {
+                // TODO Auto-generated method stub
+                return false;
             }
         });
         final Refreshed refreshed = new Refreshed();

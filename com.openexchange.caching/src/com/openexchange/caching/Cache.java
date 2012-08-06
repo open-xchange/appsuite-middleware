@@ -50,7 +50,6 @@
 package com.openexchange.caching;
 
 import java.io.Serializable;
-import org.apache.jcs.access.exception.CacheException;
 import com.openexchange.exception.OXException;
 
 /**
@@ -65,31 +64,15 @@ public interface Cache {
     /**
      * Indicates if this cache is distributed.
      * <ul>
-     * <li>
-     * <p>
-     * Data in the cluster is almost evenly distributed (partitioned) across all nodes. So each node carries ~ (1/n
-     * <code class="literal">*</code> total-data) + backups , n being the number of nodes in the cluster.
-     * </p>
-     * </li>
-     * <li>
-     * <p>
-     * If a member goes down, its backup replica that also holds the same data, will dynamically redistribute the data including the
-     * ownership and locks on them to remaining live nodes. As a result, no data will get lost.
-     * </p>
-     * </li>
-     * <li>
-     * <p>
-     * When a new node joins the cluster, new node takes ownership(responsibility) and load of -some- of the entire data in the cluster.
+     * <li>Data in the cluster is almost evenly distributed (partitioned) across all nodes. So each node carries ~ (1/n
+     * <code class="literal">*</code> total-data) + backups , n being the number of nodes in the cluster.<br>&nbsp;</li>
+     * <li>If a member goes down, its backup replica that also holds the same data, will dynamically redistribute the data including the
+     * ownership and locks on them to remaining live nodes. As a result, no data will get lost.<br>&nbsp;</li>
+     * <li>When a new node joins the cluster, new node takes ownership(responsibility) and load of -some- of the entire data in the cluster.
      * Eventually the new node will carry almost (1/n <code class="literal">*</code> total-data) + backups and becomes the new partition
-     * reducing the load on others.
-     * </p>
-     * </li>
-     * <li>
-     * <p>
-     * There is no single cluster master or something that can cause single point of failure. Every node in the cluster has equal rights and
-     * responsibilities. No-one is superior. And no dependency on external 'server' or 'master' kind of concept.
-     * </p>
-     * </li>
+     * reducing the load on others.<br>&nbsp;</li>
+     * <li>There is no single cluster master or something that can cause single point of failure. Every node in the cluster has equal rights
+     * and responsibilities. No-one is superior. And no dependency on external 'server' or 'master' kind of concept.<br>&nbsp;</li>
      * </ul>
      * 
      * @return <code>true</code> if this cache has a distributed nature; otherwise <code>false</code> (a replicated nature)
@@ -104,6 +87,13 @@ public interface Cache {
      * @return <code>true</code> if this cache has a replicated nature; otherwise <code>false</code> (a distributed nature)
      */
     public boolean isReplicated();
+
+    /**
+     * Checks if this cache is local-only.
+     * 
+     * @return <code>true</code> if local-only; otherwise <code>false</code>
+     */
+    public boolean isLocal();
 
     /**
      * Removes all of the elements from cache.
@@ -236,7 +226,7 @@ public interface Cache {
      * laterally nor remotely.
      * 
      * @param key The key
-     * @throws CacheException If remove operation on cache fails
+     * @throws OXException If remove operation on cache fails
      * @see SupportsLocalOperations SupportsLocalOperations marker interface to check if supported
      */
     public void localRemove(Serializable key) throws OXException;

@@ -1,3 +1,9 @@
+open-xchange-mobile-config (1.1.0-9) unstable; urgency=low
+
+  * Release build for EDP drop #2
+
+ -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Tue, 03 Jul 2012 18:44:36 +0200
+
 open-xchange-mobile-config (1.1.0-8) unstable; urgency=low
 
   * Bugfixbuild

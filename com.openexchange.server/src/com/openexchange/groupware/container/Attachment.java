@@ -59,6 +59,8 @@ import java.io.InputStream;
 
 public class Attachment extends DataObject {
 
+    private static final long serialVersionUID = 8381024871307327468L;
+
     protected String filename = null;
 
     protected String mimetype = null;

@@ -61,6 +61,49 @@ import com.openexchange.exception.OXException;
 public interface CacheService {
 
     /**
+     * Indicates if this cache is distributed.
+     * <ul>
+     * <li>
+     * <p>
+     * Data in the cluster is almost evenly distributed (partitioned) across all nodes. So each node carries ~ (1/n
+     * <code class="literal">*</code> total-data) + backups , n being the number of nodes in the cluster.
+     * </p>
+     * </li>
+     * <li>
+     * <p>
+     * If a member goes down, its backup replica that also holds the same data, will dynamically redistribute the data including the
+     * ownership and locks on them to remaining live nodes. As a result, no data will get lost.
+     * </p>
+     * </li>
+     * <li>
+     * <p>
+     * When a new node joins the cluster, new node takes ownership(responsibility) and load of -some- of the entire data in the cluster.
+     * Eventually the new node will carry almost (1/n <code class="literal">*</code> total-data) + backups and becomes the new partition
+     * reducing the load on others.
+     * </p>
+     * </li>
+     * <li>
+     * <p>
+     * There is no single cluster master or something that can cause single point of failure. Every node in the cluster has equal rights and
+     * responsibilities. No-one is superior. And no dependency on external 'server' or 'master' kind of concept.
+     * </p>
+     * </li>
+     * </ul>
+     * 
+     * @return <code>true</code> if this cache has a distributed nature; otherwise <code>false</code> (a replicated nature)
+     */
+    public boolean isDistributed();
+
+    /**
+     * Indicates if this cache is replicated.
+     * <p>
+     * Data is kept redundantly on every linked node.
+     * 
+     * @return <code>true</code> if this cache has a replicated nature; otherwise <code>false</code> (a distributed nature)
+     */
+    public boolean isReplicated();
+
+    /**
      * Gets a cache which accesses the provided region.
      * <p>
      * An already initialized cache for specified region is kept in a map to avoid multiple instantiations for the same region.

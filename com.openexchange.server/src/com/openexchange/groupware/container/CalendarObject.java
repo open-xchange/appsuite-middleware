@@ -65,7 +65,9 @@ import com.openexchange.groupware.container.participants.ConfirmableParticipant;
  */
 public abstract class CalendarObject extends CommonObject {
 
-	public static final int TITLE = 200;
+    private static final long serialVersionUID = 8108851156436746900L;
+
+    public static final int TITLE = 200;
 
 	public static final int START_DATE = 201;
 

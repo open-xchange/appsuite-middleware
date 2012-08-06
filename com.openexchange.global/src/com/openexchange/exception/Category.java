@@ -62,7 +62,7 @@ public interface Category {
     public static final Category CATEGORY_ERROR = new Category() {
 
         @Override
-        public LogLevel getLogLevel() {
+        public LogLevel getLogLevel() { // The higher chosen log level is, the more likely will it be logged
             return LogLevel.ERROR;
         }
 
@@ -89,7 +89,7 @@ public interface Category {
     public static final Category CATEGORY_USER_INPUT = new Category() {
 
         @Override
-        public LogLevel getLogLevel() {
+        public LogLevel getLogLevel() { // The higher chosen log level is, the more likely will it be logged
             return LogLevel.DEBUG;
         }
 
@@ -116,7 +116,7 @@ public interface Category {
     public static final Category CATEGORY_CONFIGURATION = new Category() {
 
         @Override
-        public LogLevel getLogLevel() {
+        public LogLevel getLogLevel() { // The higher chosen log level is, the more likely will it be logged
             return LogLevel.ERROR;
         }
 
@@ -143,7 +143,7 @@ public interface Category {
     public static final Category CATEGORY_PERMISSION_DENIED = new Category() {
 
         @Override
-        public LogLevel getLogLevel() {
+        public LogLevel getLogLevel() { // The higher chosen log level is, the more likely will it be logged
             return LogLevel.DEBUG;
         }
 
@@ -170,7 +170,7 @@ public interface Category {
     public static final Category CATEGORY_TRY_AGAIN = new Category() {
 
         @Override
-        public LogLevel getLogLevel() {
+        public LogLevel getLogLevel() { // The higher chosen log level is, the more likely will it be logged
             return LogLevel.DEBUG;
         }
 
@@ -197,8 +197,8 @@ public interface Category {
     public static final Category CATEGORY_CONNECTIVITY = new Category() {
 
         @Override
-        public LogLevel getLogLevel() {
-            return LogLevel.DEBUG;
+        public LogLevel getLogLevel() { // The higher chosen log level is, the more likely will it be logged
+            return LogLevel.ERROR;
         }
 
         @Override
@@ -224,8 +224,8 @@ public interface Category {
     public static final Category CATEGORY_SERVICE_DOWN = new Category() {
 
         @Override
-        public LogLevel getLogLevel() {
-            return LogLevel.DEBUG;
+        public LogLevel getLogLevel() { // The higher chosen log level is, the more likely will it be logged
+            return LogLevel.ERROR;
         }
 
         @Override
@@ -251,7 +251,7 @@ public interface Category {
     public static final Category CATEGORY_TRUNCATED = new Category() {
 
         @Override
-        public LogLevel getLogLevel() {
+        public LogLevel getLogLevel() { // The higher chosen log level is, the more likely will it be logged
             return LogLevel.DEBUG;
         }
 
@@ -278,7 +278,7 @@ public interface Category {
     public static final Category CATEGORY_CONFLICT = new Category() {
 
         @Override
-        public LogLevel getLogLevel() {
+        public LogLevel getLogLevel() { // The higher chosen log level is, the more likely will it be logged
             return LogLevel.DEBUG;
         }
 
@@ -305,7 +305,7 @@ public interface Category {
     public static final Category CATEGORY_CAPACITY = new Category() {
 
         @Override
-        public LogLevel getLogLevel() {
+        public LogLevel getLogLevel() { // The higher chosen log level is, the more likely will it be logged
             return LogLevel.DEBUG;
         }
 
@@ -332,7 +332,7 @@ public interface Category {
     public static final Category CATEGORY_WARNING = new Category() {
 
         @Override
-        public LogLevel getLogLevel() {
+        public LogLevel getLogLevel() { // The higher chosen log level is, the more likely will it be logged
             return LogLevel.DEBUG;
         }
 
