@@ -1,3 +1,9 @@
+open-xchange-subscribe (6.21.0-7) unstable; urgency=low
+
+  * Release build for EDP drop #3
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 06 Aug 2012 17:13:43 +0200
+
 open-xchange-subscribe (6.21.0-6) unstable; urgency=low
 
   * Release build for EDP drop #2

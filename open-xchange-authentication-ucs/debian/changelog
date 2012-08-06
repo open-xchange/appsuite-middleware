@@ -1,3 +1,9 @@
+open-xchange-authentication-ucs (6.21.0-5) unstable; urgency=low
+
+  * Release build for EDP drop #3
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 06 Aug 2012 17:13:27 +0200
+
 open-xchange-authentication-ucs (6.21.0-4) unstable; urgency=low
 
   * Release build for EDP drop #2

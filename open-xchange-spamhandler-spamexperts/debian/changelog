@@ -1,3 +1,9 @@
+open-xchange-spamhandler-spamexperts (6.21.0-1) unstable; urgency=low
+
+  * Release build for EDP drop #3
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 06 Aug 2012 17:13:55 +0200
+
 open-xchange-spamhandler-spamexperts (6.21.0-0) unstable; urgency=low
 
   * Initial release

@@ -1,3 +1,9 @@
+open-xchange-authentication-kerberos (6.21.0-2) unstable; urgency=low
+
+  * Release build for EDP drop #3
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 06 Aug 2012 17:13:29 +0200
+
 open-xchange-authentication-kerberos (6.21.0-1) unstable; urgency=low
 
   * Release build for EDP drop #2

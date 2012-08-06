@@ -1,3 +1,9 @@
+open-xchange-configjump-generic (6.21.0-1) unstable; urgency=low
+
+  * Release build for EDP drop #3
+
+ -- Carsten Hoeger <choegeropen-xchange.com>  Mon, 06 Aug 2012 17:14:10 +0200
+
 open-xchange-configjump-generic (6.21.0-0) unstable; urgency=low
 
   * initial release

@@ -1,3 +1,9 @@
+open-xchange-admin-reseller (6.21.0-2) unstable; urgency=low
+
+  * Release build for EDP drop #3
+
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Mon, 06 Aug 2012 17:13:47 +0200
+
 open-xchange-admin-reseller (6.21.0-1) unstable; urgency=low
 
   * Release build for EDP drop #2
