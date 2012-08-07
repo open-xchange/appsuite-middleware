@@ -39,6 +39,21 @@ dpkg-maintscript-helper rm_conffile \
 
 . /opt/open-xchange/lib/oxfunctions.sh
 
+pfile=/opt/open-xchange/etc/ox-scriptconf.sh
+if grep COMMONPROPERTIESDIR $pfile >/dev/null; then
+    ox_remove_property COMMONPROPERTIESDIR $pfile
+    # without original values, we're lost...
+    if [ -e ${pfile}.dpkg-new ]; then
+       CHECKPROPS="LIBPATH PROPERTIESDIR LOGGINGPROPERTIES OSGIPATH"
+       grep JAVA_OXCMD_OPTS $pfile > /dev/null || CHECKPROPS="$CHECKPROPS JAVA_OXCMD_OPTS" && true
+       for prop in $CHECKPROPS; do
+           oval=$(ox_read_property $prop ${pfile}.dpkg-new)
+           if [ -n "$oval" ]; then
+              ox_set_property $prop "$oval" $pfile
+           fi
+       done
+    fi
+fi
 
 setConfigFilePermissions() {
     ox_update_permissions "/var/spool/open-xchange/uploads" open-xchange:root 750

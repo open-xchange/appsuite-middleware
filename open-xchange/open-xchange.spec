@@ -142,17 +142,21 @@ if [ ${1:-0} -eq 2 ]; then
         ox_remove_property writeOnly $pfile
     fi
 
-    ofile=/opt/open-xchange/etc/admindaemon/ox-admin-scriptconf.sh
     pfile=/opt/open-xchange/etc/ox-scriptconf.sh
-    grep JAVA_OXCMD_OPTS $pfile >/dev/null || {
-        oval=$(ox_read_property JAVA_OXCMD_OPTS $ofile)
-        if [ -n "$oval" ]; then
-           ox_set_property JAVA_OXCMD_OPTS "$oval" $pfile
-        else
-           ox_set_property JAVA_OXCMD_OPTS "-Djava.net.preferIPv4Stack=true" $pfile
-        fi
-        rm -f $ofile
-    }
+    if grep COMMONPROPERTIESDIR $pfile >/dev/null; then
+	ox_remove_property COMMONPROPERTIESDIR $pfile
+	# without original values, we're lost...
+	if [ -e ${pfile}.rpmnew ]; then
+	   CHECKPROPS="LIBPATH PROPERTIESDIR LOGGINGPROPERTIES OSGIPATH"
+	   grep JAVA_OXCMD_OPTS $pfile > /dev/null || CHECKPROPS="$CHECKPROPS JAVA_OXCMD_OPTS" && true
+	   for prop in $CHECKPROPS; do
+	       oval=$(ox_read_property $prop ${pfile}.rpmnew)
+	       if [ -n "$oval" ]; then
+		  ox_set_property $prop "$oval" $pfile
+	       fi
+	   done
+	fi
+    fi
     ##
     ## end update from < 6.21
     ##

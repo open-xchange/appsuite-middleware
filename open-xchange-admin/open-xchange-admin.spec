@@ -66,6 +66,18 @@ if [ ${1:-0} -eq 2 ]; then
     done
     ox_move_config_file /opt/open-xchange/etc/admindaemon /opt/open-xchange/etc User.properties AdminUser.properties
 
+    ofile=/opt/open-xchange/etc/admindaemon/ox-admin-scriptconf.sh
+    pfile=/opt/open-xchange/etc/ox-scriptconf.sh
+    if [ -e $ofile ]; then
+        oval=$(ox_read_property JAVA_OXCMD_OPTS $ofile)
+        if [ -n "$oval" ]; then
+           ox_set_property JAVA_OXCMD_OPTS "$oval" $pfile
+        else
+           ox_set_property JAVA_OXCMD_OPTS "-Djava.net.preferIPv4Stack=true" $pfile
+        fi
+        rm -f $ofile
+    fi
+
     ofile=/opt/open-xchange/etc/AdminDaemon.properties
     pfile=/opt/open-xchange/etc/rmi.properties
     if ox_exists_property BIND_ADDRESS $ofile; then
