@@ -484,27 +484,6 @@ die() {
     exit 1
 }
 
-# checks if admindaemon is running
-ox_isrunning() {
-    # FIXME: this check must always fail in OX EE
-    return 1
-
-    local pidfile=/var/run/open-xchange-admin.pid
-    if [ ! -f $pidfile ]; then
-        # not running
-        return 1
-    fi
-    read PID < $pidfile
-    running=$(ps $PID | grep $PID)
-    if [ -n "$running" ]; then
-        # running
-        return 0
-    else
-        # not running
-        return 1
-    fi
-}
-
 ox_update_config_init() {
     local cini=$1
     local cinitemplate=$2
@@ -540,55 +519,31 @@ ox_update_config_init() {
     echo "osgi.bundles=$(echo ${dirbundles[@]} | sed 's; ;,;g')" >> $cini
 }
 
-#
-# legacy functions (OXEE)
-#
-
-ox_add_hosts_hostip() {
-    local fqhn=$1
-    local addr=$2
-    
-    test -z "$fqhn" && die \
-	"ox_add_hosts_hostip: missing fqhn argument (arg 1)"
-    test -z "$addr" && die \
-	"ox_add_hosts_hostip: missing addr argument (arg 2)"
-
-    local hostarr=( $(echo $fqhn | sed -e 's/\./ /g') )
-    local hn=${hostarr[0]}
-
-    # workaround for Bug ID#7803 FQDN is replaced by a DHCP value after installation
-    # something's adding non fqhn to hosts, so add own entry on top
-    local htmp=/etc/hosts.$$
-    echo -e "$addr\t\t$fqhn $hn" > $htmp
-    cat /etc/hosts >> $htmp
-    mv $htmp /etc/hosts
-}
-
-ox_remove_hosts_hostip() {
-    local addr=$1
-    
-    test -z "$addr" && die \
-	"ox_remove_hosts_hostip: missing addr argument (arg 1)"
-
-    local hosttmp=/etc/hosts.$$
-    grep -v "$addr" /etc/hosts > $hosttmp
-    mv $hosttmp /etc/hosts
-}
-
-ox_remove_hosts_hostname() {
-    local name=$1
-    
-    test -z "$name" && die \
-	"ox_remove_hosts_hostname: missing name argument (arg 1)"
-
-    ox_remove_hosts_hostip $name
-}
-
 ox_save_backup() {
-	local name=$1
-	local backup_name="${name}.old"
-	if [ -e $name ]
-		then
-		mv $name $backup_name
-	fi
+    local name=$1
+    test -z "$name" && die "ox_save_backup: missing name argument (arg1)"
+
+    local backup_name="${name}.old"
+    if [ -e $name ]; then
+	mv $name $backup_name
+    fi
+}
+
+ox_move_config_file() {
+    local srcdir="$1"
+    local dstdir="$2"
+    local srcname="$3"
+    local dstname="$4"
+    test -z "$srcdir" && die "ox_move_config_file: missing srcdir argument (arg1)"
+    test -z "$dstdir" && die "ox_move_config_file: missing dstdir argument (arg2)"
+    test -z "$srcname" && die "ox_move_config_file: missing srcname argument (arg3)"
+    test -z "$dstname" && dstname=$srcname
+
+    if [ -e "${srcdir}/${srcname}" ]; then
+        if [ -e "${dstdir}/${dstname}" ] && \
+           ! cmp "${dstdir}/${dstname}" "${srcdir}/${srcname}" > /dev/null; then
+           mv "${dstdir}/${dstname}" "${dstdir}/${dstname}.rpmnew"
+        fi
+        mv "${srcdir}/${srcname}" "${dstdir}/${dstname}"
+    fi
 }
