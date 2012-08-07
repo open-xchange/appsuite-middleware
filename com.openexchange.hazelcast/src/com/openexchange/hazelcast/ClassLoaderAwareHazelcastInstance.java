@@ -76,8 +76,10 @@ import com.hazelcast.logging.LoggingService;
 import com.hazelcast.partition.PartitionService;
 
 /**
- * {@link ClassLoaderAwareHazelcastInstance} - A simple wrapper for a {@link HazelcastInstance} that {@link Log#warn(Object) logs a warning} if any
- * resource is accessed without an appropriate configuration available.
+ * {@link ClassLoaderAwareHazelcastInstance} - A simple wrapper for a {@link HazelcastInstance} that provides {@link ClassLoaderAware class
+ * loader aware} instances of <tt>IMap</tt>, <tt>MultiMap</tt>, <tt>ISet</tt>, <tt>IList</tt>, <tt>IQueue</tt>, and <tt>ITopic</tt>.
+ * <p>
+ * Furthermore it {@link Log#warn(Object) logs a warning} if any resource is accessed without an appropriate configuration available.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
