@@ -477,8 +477,6 @@ ox_update_permissions(){
     chown $owner "$pfile"
 }
 
-# common functions
-
 die() {
     test -n "$1" && echo 1>&2 "$1" || echo 1>&2 "ERROR"
     exit 1
@@ -529,6 +527,8 @@ ox_save_backup() {
     fi
 }
 
+# move configuration file from one location/package to another
+# RPM ONLY!
 ox_move_config_file() {
     local srcdir="$1"
     local dstdir="$2"
