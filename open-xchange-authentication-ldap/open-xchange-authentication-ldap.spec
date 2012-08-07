@@ -44,10 +44,7 @@ if [ ${1:-0} -eq 2 ]; then
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
 
-    if [ -e /opt/open-xchange/etc/groupware/ldapauth.properties ]; then
-        mv /opt/open-xchange/etc/ldapauth.properties /opt/open-xchange/etc/ldapauth.properties.rpmnew
-        mv /opt/open-xchange/etc/groupware/ldapauth.properties /opt/open-xchange/etc/ldapauth.properties.properties
-    fi
+    ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc ldapauth.properties
 
     ox_update_permissions "/opt/open-xchange/etc/ldapauth.properties" root:open-xchange 640
 fi
@@ -65,5 +62,3 @@ fi
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/ldapauth.properties
 
 %changelog
-* Tue Apr 17 2012 Marcus Klein  <marcus.klein@open-xchange.com>
-Internal release build for EDP drop #1

@@ -38,11 +38,6 @@ Authors:
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
-%post
-if [ ${1:-0} -eq 2 ]; then
-    CONFFILES=""
-fi
-
 %clean
 %{__rm} -rf %{buildroot}
 
@@ -58,5 +53,3 @@ fi
 /opt/open-xchange/lib/*
 
 %changelog
-* Fri Jun 15 2012 - jan.bauerdick@open-xchange.com
- - Initial packaging

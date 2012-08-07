@@ -73,5 +73,3 @@ done
 /opt/open-xchange/i18n/*fr_FR*
 
 %changelog
-* Wed Apr 25 2012 Marcus Klein  <marcus.klein@open-xchange.com>
-Initial release

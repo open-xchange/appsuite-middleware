@@ -47,10 +47,7 @@ if [ ${1:-0} -eq 2 ]; then
     ##
     ## start update from < 6.21
     ##
-    if [ -e /opt/open-xchange/etc/groupware/ajp.properties ]; then
-        mv /opt/open-xchange/etc/ajp.properties /opt/open-xchange/etc/ajp.properties.rpmnew
-        mv /opt/open-xchange/etc/groupware/ajp.properties /opt/open-xchange/etc/ajp.properties
-    fi
+    ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc ajp.properties
 
     # SoftwareChange_Request-1081
     pfile=/opt/open-xchange/etc/ajp.properties
@@ -83,5 +80,3 @@ fi
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
-* Wed Jun 20 2012 Marc Arens  <marc.arens@open-xchange.com>
-Initial packaging

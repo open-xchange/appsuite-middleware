@@ -62,17 +62,9 @@ if [ ${1:-0} -eq 2 ]; then
     ##
     CONFFILES="AdminDaemon.properties Group.properties ModuleAccessDefinitions.properties RMI.properties Resource.properties Sql.properties mpasswd plugin/hosting.properties"
     for FILE in ${CONFFILES}; do
-        if [ -e /opt/open-xchange/etc/admindaemon/${FILE} ]; then
-            if [ -e /opt/open-xchange/etc/${FILE} ]; then
-		mv /opt/open-xchange/etc/${FILE} /opt/open-xchange/etc/${FILE}.rpmnew
-	    fi
-            mv /opt/open-xchange/etc/admindaemon/${FILE} /opt/open-xchange/etc/${FILE}
-        fi
+	ox_move_config_file /opt/open-xchange/etc/admindaemon /opt/open-xchange/etc $FILE
     done
-    if [ -e /opt/open-xchange/etc/admindaemon/User.properties ]; then
-        mv /opt/open-xchange/etc/AdminUser.properties /opt/open-xchange/etc/AdminUser.properties.rpmnew
-        mv /opt/open-xchange/etc/admindaemon/User.properties /opt/open-xchange/etc/AdminUser.properties
-    fi
+    ox_move_config_file /opt/open-xchange/etc/admindaemon /opt/open-xchange/etc User.properties AdminUser.properties
 
     ofile=/opt/open-xchange/etc/AdminDaemon.properties
     pfile=/opt/open-xchange/etc/rmi.properties
@@ -92,18 +84,6 @@ if [ ${1:-0} -eq 2 ]; then
 	fi
 	rm -f $ofile
     fi
-
-    ofile=/opt/open-xchange/etc/admindaemon/ox-admin-scriptconf.sh
-    pfile=/opt/open-xchange/etc/ox-scriptconf.sh
-    grep JAVA_OXCMD_OPTS $pfile >/dev/null || {
-        oval=$(ox_read_property JAVA_OXCMD_OPTS $ofile)
-        if [ -n "$oval" ]; then
-           ox_set_property JAVA_OXCMD_OPTS "$oval" $pfile
-        else
-           ox_set_property JAVA_OXCMD_OPTS "-Djava.net.preferIPv4Stack=true" $pfile
-        fi
-	rm -f $ofile
-    }
 
     # SoftwareChange_Request-1091
     # -----------------------------------------------------------------------

@@ -46,5 +46,3 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/meta/*
 
 %changelog
-* Thu Jun 21 2012 Marcus Klein  <marcus.klein@open-xchange.com>
-  - Initial package for new backend

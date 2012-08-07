@@ -40,17 +40,11 @@ export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
 %post
-if [ ${1:-0} -eq 2 ]; then
-    CONFFILES="plugin/reseller.properties mysql/reseller.sql"
-    if [ -e /opt/open-xchange/etc/admindaemon/plugin/reseller.properties ]; then
-        mv /opt/open-xchange/etc/plugin/reseller.properties /opt/open-xchange/etc/plugin/reseller.properties.rpmnew
-        mv /opt/open-xchange/etc/admindaemon/plugin/reseller.properties /opt/open-xchange/etc/plugin/reseller.properties
-    fi
-    if [ -e /opt/open-xchange/etc/admindaemon/mysql/reseller.sql ]; then
-        mv /opt/open-xchange/etc/mysql/reseller.sql /opt/open-xchange/etc/mysql/reseller.sql.rpmnew
-        mv /opt/open-xchange/etc/admindaemon/mysql/reseller.sql /opt/open-xchange/etc/mysql/reseller.sql
-    fi
-fi
+. /opt/open-xchange/lib/oxfunctions.sh
+CONFFILES="plugin/reseller.properties mysql/reseller.sql"
+for FILE in $CONFFILES; do
+    ox_move_config_file /opt/open-xchange/etc/admindaemon /opt/open-xchange/etc $FILE
+done
 
 %clean
 %{__rm} -rf %{buildroot}
@@ -71,5 +65,3 @@ fi
 %config(noreplace) /opt/open-xchange/etc/mysql/*
 
 %changelog
-* Fri Jun 15 2012 - jan.bauerdick@open-xchange.com
- - Initial packaging

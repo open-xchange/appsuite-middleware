@@ -46,5 +46,3 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
-* Wed Apr 18 2012 Marcus Klein  <marcus.klein@open-xchange.com>
-Internal release build for EDP drop #1
