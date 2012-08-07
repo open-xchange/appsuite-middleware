@@ -1,3 +1,7 @@
+* 2012-08-07 - marcus.klein@open-xchange.com
+
+ - Fix for bug 22305: Using currents users folder for task events if the delegator has been removed from the participants list.
+
 * 2012-08-03 - thorben.betten@open-xchange.com
 
  - Fix for bug 22729: Ignore HTML parts when replying to a mail in text-only mode

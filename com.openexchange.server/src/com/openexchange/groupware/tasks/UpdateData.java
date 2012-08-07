@@ -733,6 +733,10 @@ class UpdateData {
             // Delegator not participant and participant changed task. Change parent folder of original task to delegators folder identifier
             // so we are able to use that for participant notification.
             Folder delegatorFolder = FolderStorage.extractFolderOfUser(getOrigFolder(), orig.getCreatedBy());
+            if (null == delegatorFolder) {
+                // Delegator has been removed from participant list.
+                delegatorFolder = FolderStorage.extractFolderOfUser(getOrigFolder(), getUserId());
+            }
             orig.setParentFolderID(delegatorFolder.getIdentifier());
         }
         sentEvent(session, getUpdated(), getOrigTask(), getDestFolder());
