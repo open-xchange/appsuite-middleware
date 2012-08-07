@@ -15,7 +15,21 @@ Package: open-xchange-eas-provisioning-core
 Architecture: all
 Pre-Depends: open-xchange-core (>= @OXVERSION@)
 Depends: ${misc:Depends}
-Replaces: open-xchange-mobile-configuration-generator, open-xchange-mobile-configuration-json
-Conflicts: open-xchange-mobile-configuration-generator, open-xchange-mobile-configuration-json
-Provides: open-xchange-mobile-configuration-generator, open-xchange-mobile-configuration-json
+Replaces: open-xchange-mobile-configuration-generator (<< 6.21.0-0), open-xchange-mobile-configuration-json (<< 6.21.0-0)
+Conflicts: open-xchange-mobile-configuration-generator (<< 6.21.0-0), open-xchange-mobile-configuration-json (<< 6.21.0-0)
 Description: Backend extension to provision synchronization with mobile phones
+
+###### http://wiki.debian.org/Renaming_a_Package #####
+Package: open-xchange-mobile-configuration-generator
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, open-xchange-eas-provisioning-core
+Section: oldlibs
+Description: transitional dummy package
+
+Package: open-xchange-mobile-configuration-json
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, open-xchange-eas-provisioning-core
+Section: oldlibs
+Description: transitional dummy package
+
+
