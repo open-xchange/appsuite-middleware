@@ -41,16 +41,9 @@ export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
 %post
-if [ ${1:-0} -eq 2 ]; then
-    if [ -e /opt/open-xchange/etc/groupware/parallels.properties ]; then
-        mv /opt/open-xchange/etc/parallels.properties /opt/open-xchange/etc/parallels.properties.rpmnew
-        mv /opt/open-xchange/etc/groupware/parallels.properties /opt/open-xchange/etc/parallels.properties
-    fi
-    if [ -e /opt/open-xchange/etc/groupware/settings/parallels_gui.properties ]; then
-        mv /opt/open-xchange/etc/settings/parallels-ui.properties /opt/open-xchange/etc/settings/parallels-ui.properties.rpmnew
-        mv /opt/open-xchange/etc/groupware/settings/parallels_gui.properties /opt/open-xchange/etc/settings/parallels-ui.properties
-    fi
-fi
+. /opt/open-xchange/lib/oxfunctions.sh
+ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc parallels.properties
+ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc settings/parallels_gui.properties settings/parallels-ui.properties
 
 %clean
 %{__rm} -rf %{buildroot}
@@ -67,5 +60,3 @@ fi
 %config(noreplace) /opt/open-xchange/etc/settings/parallels-ui.properties
 
 %changelog
-* Wed Jul 11 2012 - marcus.klein@open-xchange.com
- - Initial release

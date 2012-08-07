@@ -44,10 +44,7 @@ if [ ${1:-0} -eq 2 ]; then
     ##
     ## start update from < 6.21
     ##
-    if [ -e /opt/open-xchange/etc/groupware/mailfilter.properties ]; then
-        mv /opt/open-xchange/etc/mailfilter.properties /opt/open-xchange/etc/mailfilter.properties.rpmnew
-        mv /opt/open-xchange/etc/groupware/mailfilter.properties /opt/open-xchange/etc/mailfilter.properties
-    fi
+    ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc mailfilter.properties
     ##
     ## end update from < 6.21
     ##

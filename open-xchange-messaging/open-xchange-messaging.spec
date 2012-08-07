@@ -67,10 +67,7 @@ if [ ${1:-0} -eq 2 ]; then
 
     CONFFILES="facebookmessaging.properties rssmessaging.properties twittermessaging.properties twitter.properties"
     for FILE in ${CONFFILES}; do
-        if [ -e /opt/open-xchange/etc/groupware/${FILE} ]; then
-            mv /opt/open-xchange/etc/${FILE} /opt/open-xchange/etc/${FILE}.rpmnew
-            mv /opt/open-xchange/etc/groupware/${FILE} /opt/open-xchange/etc/${FILE}
-        fi
+	ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc $FILE
     done
     ox_update_permissions "/opt/open-xchange/etc/twitter.properties" root:open-xchange 640
 fi

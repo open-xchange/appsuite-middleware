@@ -17,7 +17,7 @@ set -e
 # for details, see http://www.debian.org/doc/debian-policy/ or
 # the debian-policy package
 
-CRAWLERCONFFILES="crawlers/gmx.com.yml crawlers/gmx.de.yml crawlers/GoogleCalendar.yml crawlers/GoogleMail.yml 'crawlers/Sun Calendar.yml' 'crawlers/Sun Contacts.yml' 'crawlers/Sun Tasks.yml' crawlers/t-online.de.yml crawlers/web.de.yml crawlers/XING.yml crawlers/yahoo.com.yml crawler.properties"
+CRAWLERCONFFILES="crawler.properties"
 
 for FILE in ${CRAWLERCONFFILES}; do
     dpkg-maintscript-helper mv_conffile "/opt/open-xchange/etc/groupware/${FILE}" \

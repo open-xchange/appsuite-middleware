@@ -36,12 +36,8 @@ export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
 %post
-if [ ${1:-0} -eq 2 ]; then
-    if [ -e /opt/open-xchange/etc/groupware/reportclient.properties ]; then
-        mv /opt/open-xchange/etc/reportclient.properties /opt/open-xchange/etc/reportclient.properties.rpmnew
-        mv /opt/open-xchange/etc/groupware/reportclient.properties /opt/open-xchange/etc/reportclient.properties
-    fi
-fi
+. /opt/open-xchange/lib/oxfunctions.sh
+ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc reportclient.properties
 
 %clean
 %{__rm} -rf %{buildroot}

@@ -63,12 +63,9 @@ if [ ${1:-0} -eq 2 ]; then
     ##
     ## start update from < 6.21
     ##
-    CONFFILES="crawlers/gmx.com.yml crawlers/gmx.de.yml crawlers/GoogleCalendar.yml crawlers/GoogleMail.yml 'crawlers/Sun Calendar.yml' 'crawlers/Sun Contacts.yml' 'crawlers/Sun Tasks.yml' crawlers/t-online.de.yml crawlers/web.de.yml crawlers/XING.yml crawlers/yahoo.com.yml crawler.properties facebooksubscribe.properties linkedinsubscribe.properties microformatSubscription.properties msnsubscribe.properties yahoosubscribe.properties"
+    CONFFILES="crawler.properties facebooksubscribe.properties linkedinsubscribe.properties microformatSubscription.properties msnsubscribe.properties yahoosubscribe.properties"
     for FILE in ${CONFFILES}; do
-        if [ -e "/opt/open-xchange/etc/groupware/${FILE}" ]; then
-            mv "/opt/open-xchange/etc/${FILE}" "/opt/open-xchange/etc/${FILE}.rpmnew"
-            mv "/opt/open-xchange/etc/groupware/${FILE}" "/opt/open-xchange/etc/${FILE}"
-        fi
+	ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc "$FILE"
     done
 
     #SoftwareChange_Request-1091

@@ -98,5 +98,3 @@ fi
 %attr(640,root,open-xchange) /opt/open-xchange/etc/contacts-ldap/*/*.example
 
 %changelog
-* Mon Jul 16 2012 Marcus Klein  <marcus.klein@open-xchange.com>
- - Initial release

@@ -54,20 +54,9 @@ export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
 %post core
-if [ ${1:-0} -eq 2 ]; then
-    if [ -e /opt/open-xchange/etc/groupware/mobileconfig.properties ]; then
-        mv /opt/open-xchange/etc/eas-provisioning.properties /opt/open-xchange/etc/eas-provisioning.properties.rpmnew
-        mv /opt/open-xchange/etc/groupware/mobileconfig.properties /opt/open-xchange/etc/eas-provisioning.properties
-    fi
-    if [ -e /opt/open-xchange/etc/groupware/mobilityconfiguration.properties ]; then
-        mv /opt/open-xchange/etc/eas-provisioning-mail.properties /opt/open-xchange/etc/eas-provisioning-mail.properties.rpmnew
-        mv /opt/open-xchange/etc/groupware/mobilityconfiguration.properties /opt/open-xchange/etc/eas-provisioning-mail.properties
-    fi
-    if [ -e /opt/open-xchange/etc/groupware/settings/open-xchange-mobile-configuration-gui.properties ]; then
-        mv /opt/open-xchange/etc/settings/eas-provisioning-ui.properties /opt/open-xchange/etc/settings/eas-provisioning-ui.properties.rpmnew
-        mv /opt/open-xchange/etc/groupware/settings/open-xchange-mobile-configuration-gui.properties /opt/open-xchange/etc/settings/eas-provisioning-ui.properties
-    fi
-fi
+. /opt/open-xchange/lib/oxfunctions.sh
+ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc mobileconfig.properties eas-provisioning.properties
+ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc mobilityconfiguration.properties eas-provisioning-mail.properties
 
 %clean
 %{__rm} -rf %{buildroot}

@@ -44,5 +44,3 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
-* Tue Jul 10 2012 Marcus Klein  <marcus.klein@open-xchange.com>
-Initial release

@@ -50,5 +50,3 @@ ant -lib build/lib -Dbasedir=build -Dhtdoc=%{docroot} -DdestDir=%{buildroot} -Dp
 /opt/open-xchange/bundles/*
 
 %changelog
-* Wed May 09 2012 Marcus Klein  <marcus.klein@open-xchange.com>
-Initial release
