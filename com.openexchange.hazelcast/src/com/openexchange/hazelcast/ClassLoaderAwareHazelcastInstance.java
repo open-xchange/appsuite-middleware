@@ -49,6 +49,7 @@
 
 package com.openexchange.hazelcast;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 import org.apache.commons.logging.Log;
@@ -221,7 +222,26 @@ public class ClassLoaderAwareHazelcastInstance implements HazelcastInstance {
 
     @Override
     public Collection<Instance> getInstances() {
-        return hazelcastInstance.getInstances();
+        Collection<Instance> c = hazelcastInstance.getInstances();
+        Collection<Instance> clone = new ArrayList<Instance>(c.size());
+        for (final Instance inst : c) {
+            if (inst instanceof IMap) {
+                clone.add(new ClassLoaderAwareIMap((IMap) inst));
+            } else if (inst instanceof MultiMap) {
+                clone.add(new ClassLoaderAwareMultiMap((MultiMap) inst));
+            } else if (inst instanceof IList) {
+                clone.add(new ClassLoaderAwareIList((IList) inst));
+            } else if (inst instanceof ISet) {
+                clone.add(new ClassLoaderAwareISet((ISet) inst));
+            } else if (inst instanceof ITopic) {
+                clone.add(new ClassLoaderAwareITopic((ITopic) inst));
+            } else if (inst instanceof IQueue) {
+                clone.add(new ClassLoaderAwareIQueue((IQueue) inst));
+            } else {
+                clone.add(inst);
+            }
+        }
+        return clone;
     }
 
     @Override
