@@ -28,6 +28,11 @@ Import-Package: com.openexchange.cluster.discovery,
  org.osgi.framework,
  org.osgi.util.tracker
 Bundle-ClassPath: lib/hazelcast-all-2.2.jar,
+ lib/asm-4.0.jar,
+ lib/kryo-2.19.jar,
+ lib/minlog-1.2.jar,
+ lib/objenesis-1.2.jar,
+ lib/reflectasm-1.07.jar,
  .
 Export-Package: com.hazelcast.cluster,
  com.hazelcast.config,

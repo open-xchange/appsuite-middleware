@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.hazelcast.osgi;
+package com.openexchange.hazelcast;
 
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
@@ -75,25 +75,25 @@ import com.hazelcast.logging.LoggingService;
 import com.hazelcast.partition.PartitionService;
 
 /**
- * {@link HazelcastInstanceWrapper} - A simple wrapper for a {@link HazelcastInstance} that {@link Log#warn(Object) logs a warning} if any
+ * {@link ClassLoaderAwareHazelcastInstance} - A simple wrapper for a {@link HazelcastInstance} that {@link Log#warn(Object) logs a warning} if any
  * resource is accessed without an appropriate configuration available.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class HazelcastInstanceWrapper implements HazelcastInstance {
+public class ClassLoaderAwareHazelcastInstance implements HazelcastInstance {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(HazelcastInstanceWrapper.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ClassLoaderAwareHazelcastInstance.class);
 
     private final HazelcastInstance hazelcastInstance;
 
     private final Config config;
 
     /**
-     * Initializes a new {@link HazelcastInstanceWrapper}.
+     * Initializes a new {@link ClassLoaderAwareHazelcastInstance}.
      * 
      * @param hazelcastInstance
      */
-    public HazelcastInstanceWrapper(final HazelcastInstance hazelcastInstance) {
+    public ClassLoaderAwareHazelcastInstance(final HazelcastInstance hazelcastInstance) {
         super();
         this.hazelcastInstance = hazelcastInstance;
         config = hazelcastInstance.getConfig();
@@ -119,7 +119,7 @@ public class HazelcastInstanceWrapper implements HazelcastInstance {
         if (null == config.getQueueConfig(name)) {
             LOG.warn("No QueueConfig available for \"" + name + "\". Please provide appropriate QueueConfig prior to acquiring IQueue instance.");
         }
-        return hazelcastInstance.getQueue(name);
+        return new ClassLoaderAwareIQueue(hazelcastInstance.getQueue(name));
     }
 
     @Override
@@ -127,17 +127,17 @@ public class HazelcastInstanceWrapper implements HazelcastInstance {
         if (null == config.getTopicConfig(name)) {
             LOG.warn("No TopicConfig available for \"" + name + "\". Please provide appropriate TopicConfig prior to acquiring ITopic instance.");
         }
-        return hazelcastInstance.getTopic(name);
+        return new ClassLoaderAwareITopic(hazelcastInstance.getTopic(name));
     }
 
     @Override
     public <E> ISet<E> getSet(final String name) {
-        return hazelcastInstance.getSet(name);
+        return new ClassLoaderAwareISet(hazelcastInstance.getSet(name));
     }
 
     @Override
     public <E> IList<E> getList(final String name) {
-        return hazelcastInstance.getList(name);
+        return new ClassLoaderAwareIList(hazelcastInstance.getList(name));
     }
 
     @Override
@@ -145,7 +145,7 @@ public class HazelcastInstanceWrapper implements HazelcastInstance {
         if (null == config.getMapConfig(name)) {
             LOG.warn("No MapConfig available for \"" + name + "\". Please provide appropriate MapConfig prior to acquiring IMap instance.");
         }
-        return new OXMap(hazelcastInstance.getMap(name));
+        return new ClassLoaderAwareIMap(hazelcastInstance.getMap(name));
     }
 
     @Override
@@ -153,7 +153,7 @@ public class HazelcastInstanceWrapper implements HazelcastInstance {
         if (null == config.getMultiMapConfig(name)) {
             LOG.warn("No MultiMapConfig available for \"" + name + "\". Please provide appropriate MultiMapConfig prior to acquiring MultiMap instance.");
         }
-        return hazelcastInstance.getMultiMap(name);
+        return new ClassLoaderAwareMultiMap(hazelcastInstance.getMultiMap(name));
     }
 
     @Override

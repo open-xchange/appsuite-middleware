@@ -53,8 +53,8 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import com.hazelcast.core.HazelcastInstance;
+import com.openexchange.hazelcast.ClassLoaderAware;
 import com.openexchange.hazelcast.osgi.HazelcastActivator;
-import com.openexchange.hazelcast.osgi.OXMap;
 
 /**
  * {@link Hazelcasts} - Utility class for Hazelcast.
@@ -207,13 +207,23 @@ public final class Hazelcasts {
         }
     }
 
-    @SuppressWarnings("unchecked")
+    /**
+     * Wraps a class-loading-aware proxy around passed delegate. The {@link ClassLoader class loader} is chosen from
+     * <tt>classLoaderSource</tt>.
+     * 
+     * @param classLoaderSource {@link Class#getClassLoader() The class loader source}
+     * @param type The delegatee's type
+     * @param delegate The delegate object
+     * @return The wrapped delegate
+     */
+    @SuppressWarnings({ "unchecked" })
     public static <T> T wrapWithClassloader(final Class<?> classLoaderSource, final Class<T> type, final T delegate) {
-    	if (delegate instanceof OXMap) {
-    		((OXMap) delegate).setClassLoaderSource(classLoaderSource);
-    		return delegate;
-    	}
-    	return (T) Proxy.newProxyInstance(type.getClassLoader(), new Class<?>[] { type }, new ClassLoaderInvocationHandler(
+        if (delegate instanceof ClassLoaderAware) {
+            ((ClassLoaderAware) delegate).setClassLoaderSource(classLoaderSource);
+            return delegate;
+        }
+        // Implement with dynamic proxy
+        return (T) Proxy.newProxyInstance(type.getClassLoader(), new Class<?>[] { type }, new ClassLoaderInvocationHandler(
             delegate,
             classLoaderSource));
     }
@@ -224,7 +234,8 @@ public final class Hazelcasts {
 
         private final Class<?> cl;
 
-        public ClassLoaderInvocationHandler(final Object delegate, final Class<?> cl) {
+        protected ClassLoaderInvocationHandler(final Object delegate, final Class<?> cl) {
+            super();
             this.cl = cl;
             this.delegate = delegate;
         }

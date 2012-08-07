@@ -145,6 +145,7 @@ public abstract class SystemObject implements Serializable {
         } else {
             this.map = new HashMap<Object, Object>(serializableMap);
         }
+        this.serializableMap = null;
     }
 
     private static boolean isSerializable(final Object obj) {
