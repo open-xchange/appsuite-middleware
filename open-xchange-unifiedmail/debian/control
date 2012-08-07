@@ -10,6 +10,13 @@ Package: open-xchange-unifiedmail
 Architecture: all
 Pre-Depends: open-xchange-core (>= @OXVERSION@)
 Depends: ${misc:Depends}
-Replaces: open-xchange-unifiedinbox
-Conflicts: open-xchange-unifiedinbox
+Replaces: open-xchange-unifiedinbox (<< 6.21.0-0)
+Conflicts: open-xchange-unifiedinbox (<< 6.21.0-0)
 Description: The Open-Xchange backend extension for Unified Mail
+
+###### http://wiki.debian.org/Renaming_a_Package #####
+Package: open-xchange-unifiedinbox
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, open-xchange-unifiedmail
+Section: oldlibs
+Description: transitional dummy package
