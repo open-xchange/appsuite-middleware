@@ -52,6 +52,7 @@ package com.openexchange.hazelcast;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
@@ -455,7 +456,7 @@ public class ClassLoaderAwareIMap<K extends Serializable, V extends Serializable
          * set, and vice-versa.
          */
         final Set<java.util.Map.Entry<Serializable, Serializable>> entrySet = delegate.entrySet();
-        final Set<Map.Entry<K, V>> clone = new HashSet<Map.Entry<K, V>>(entrySet.size());
+        final Set<Map.Entry<K, V>> clone = new LinkedHashSet<Map.Entry<K, V>>(entrySet.size());
         for (final Entry<Serializable, Serializable> entry : entrySet) {
             clone.add(new EntryImpl(entry));
         }
@@ -469,7 +470,7 @@ public class ClassLoaderAwareIMap<K extends Serializable, V extends Serializable
          * set, and vice-versa.
          */
         final Set<java.util.Map.Entry<Serializable, Serializable>> entrySet = delegate.entrySet(predicate);
-        final Set<Map.Entry<K, V>> clone = new HashSet<Map.Entry<K, V>>(entrySet.size());
+        final Set<Map.Entry<K, V>> clone = new LinkedHashSet<Map.Entry<K, V>>(entrySet.size());
         for (Entry<Serializable, Serializable> entry : entrySet) {
             clone.add(new EntryImpl(entry));
         }
