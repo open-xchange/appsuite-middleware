@@ -49,6 +49,7 @@
 
 package com.openexchange.messaging;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
 
@@ -58,7 +59,7 @@ import java.util.Set;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
-public interface MessagingFolder {
+public interface MessagingFolder extends Serializable {
 
     /**
      * The default folder type.

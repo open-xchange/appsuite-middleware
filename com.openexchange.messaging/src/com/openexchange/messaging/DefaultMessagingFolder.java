@@ -61,6 +61,8 @@ import java.util.Set;
  */
 public class DefaultMessagingFolder implements MessagingFolder {
 
+    private static final long serialVersionUID = -4838573824386482477L;
+
     private boolean b_defaultFolderType;
 
     private DefaultFolderType defaultFolderType;

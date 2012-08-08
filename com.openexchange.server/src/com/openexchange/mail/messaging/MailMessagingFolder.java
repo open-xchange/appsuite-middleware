@@ -62,59 +62,52 @@ import com.openexchange.messaging.MessagingPermission;
  */
 public final class MailMessagingFolder implements MessagingFolder {
 
+    private static final long serialVersionUID = 7625901999652670705L;
+
     /**
      * Initializes a new {@link MailMessagingFolder}.
      */
     public MailMessagingFolder() {
         super();
-        // TODO MailProperties.getInstance().isIgnoreSubscription()
     }
 
     @Override
     public boolean containsDefaultFolderType() {
-        // TODO Auto-generated method stub
         return false;
     }
 
     @Override
     public Set<String> getCapabilities() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public DefaultFolderType getDefaultFolderType() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public int getDeletedMessageCount() {
-        // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
     public String getId() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public int getMessageCount() {
-        // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
     public String getName() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public int getNewMessageCount() {
-        // TODO Auto-generated method stub
         return 0;
     }
 
