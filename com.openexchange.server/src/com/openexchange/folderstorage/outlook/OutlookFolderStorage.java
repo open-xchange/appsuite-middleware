@@ -132,6 +132,7 @@ import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingFolder;
 import com.openexchange.messaging.MessagingService;
+import com.openexchange.messaging.ServiceAware;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
@@ -1389,10 +1390,17 @@ public final class OutlookFolderStorage implements FolderStorage {
                             } else {
                                 Collections.sort(fsAccounts, new FileStorageAccountComparator(locale));
                                 final int sz = fsAccounts.size();
+                                final String fid = FileStorageFolder.ROOT_FULLNAME;
                                 for (int i = 0; i < sz; i++) {
                                     final FileStorageAccount fsa = fsAccounts.get(i);
-                                    final FileStorageFolderIdentifier fsfi =
-                                        new FileStorageFolderIdentifier(fsa.getFileStorageService().getId(), fsa.getId(), FileStorageFolder.ROOT_FULLNAME);
+                                    final String serviceId;
+                                    if (fsa instanceof com.openexchange.file.storage.ServiceAware) {
+                                        serviceId = ((com.openexchange.file.storage.ServiceAware) fsa).getServiceId();
+                                    } else {
+                                        final FileStorageService tmp = fsa.getFileStorageService();
+                                        serviceId = null == tmp ? null : tmp.getId();
+                                    }
+                                    final FileStorageFolderIdentifier fsfi = new FileStorageFolderIdentifier(serviceId, fsa.getId(), fid);
                                     l.add(new String[] { fsfi.toString(), fsa.getDisplayName()});
                                 }
                             }
@@ -1907,10 +1915,17 @@ public final class OutlookFolderStorage implements FolderStorage {
                     Collections.sort(messagingAccounts, new MessagingAccountComparator(locale));
                     final int sz = messagingAccounts.size();
                     messagingSubfolderIDs = new ArrayList<String>(sz);
+                    final String fullname = MessagingFolder.ROOT_FULLNAME;
                     for (int i = 0; i < sz; i++) {
                         final MessagingAccount ma = messagingAccounts.get(i);
-                        final MessagingFolderIdentifier mfi =
-                            new MessagingFolderIdentifier(ma.getMessagingService().getId(), ma.getId(), MessagingFolder.ROOT_FULLNAME);
+                        final String serviceId;
+                        if (ma instanceof ServiceAware) {
+                            serviceId = ((ServiceAware) ma).getServiceId();
+                        } else {
+                            final MessagingService tmp = ma.getMessagingService();
+                            serviceId = null == tmp ? null : tmp.getId();
+                        }
+                        final MessagingFolderIdentifier mfi = new MessagingFolderIdentifier(serviceId, ma.getId(), fullname);
                         messagingSubfolderIDs.add(mfi.toString());
                     }
                 }
