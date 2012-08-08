@@ -95,16 +95,11 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
     // TODO: investigate why grizzly's responseimls are suddenly invalidated
     
     private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(RTAtmosphereHandler.class));
-
 	private final ServiceLookup services;
-
-	// Keep track of session <-> RTAtmosphereState associations
-//	private final ConcurrentMap<String, RTAtmosphereState> uuid2State;
-
+	private final HandlerLibrary library;
 	// Keep track of ID <-> RTAtmosphereState associations
 	private final IDMap<RTAtmosphereState> id2State;
 	
-	private final HandlerLibrary library;
 
 	/**
 	 * Initializes a new {@link RTAtmosphereHandler}.
@@ -115,7 +110,6 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 	 */
 	public RTAtmosphereHandler(HandlerLibrary library, ServiceLookup services) {
 	    super();
-//	    uuid2State = new ConcurrentHashMap<String, RTAtmosphereState>();
 	    id2State = new IDMap<RTAtmosphereState>();
 		this.library = library;
 		this.services = services;
@@ -127,8 +121,26 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 	}
 	
 	@Override
-	public void onStateChange(AtmosphereResourceEvent evt) throws IOException {
-
+	public void onStateChange(AtmosphereResourceEvent event) throws IOException {
+	    AtmosphereResource resource = event.getResource();
+        AtmosphereResponse response = resource.getResponse();
+        
+        //Did we suspend the AtmosphereResource earlier?
+        if(event.isSuspended()) {
+            response.getWriter().write(event.getMessage().toString());
+            switch (resource.transport()) {
+                case JSONP:
+                case AJAX:
+                case LONG_POLLING:
+                    event.getResource().resume();
+                    break;
+                default:
+                    response.getWriter().flush();
+                    break;
+            }   
+        } else if (!event.isResuming()) {
+            LOG.info("Event wasn't resuming remote connection got closed by proxy or browser.");
+        }
 	}
 
     /*
@@ -293,13 +305,27 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
     
     @Override
     public void send(Stanza stanza) throws OXException {
-        String stanzaAsJSON = StanzaWriter.write(stanza).toString();
-        String contextAndUser = generateBroadcasterId(stanza.getTo().toGeneralForm());
-        /*
-         * Broadcast stanza to all entities matching the user@context by
-         * using a wildcard for the resource: /user@context/*
-         */
-        MetaBroadcaster.getDefault().broadcastTo(contextAndUser+"/*", stanzaAsJSON);
+        ID generalForm = stanza.getTo().toGeneralForm();
+        RTAtmosphereState rtAtmosphereState = id2State.get(generalForm);
+        try {
+            rtAtmosphereState.atmosphereResource.getResponse().getWriter().write(StanzaWriter.write(stanza).toString());
+            AtmosphereResource ar = rtAtmosphereState.atmosphereResource;
+            if(ar.isSuspended()) {
+                ar.resume();
+            }
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        
+//        String stanzaAsJSON = StanzaWriter.write(stanza).toString();
+//        String contextAndUser = generateBroadcasterId(stanza.getTo().toGeneralForm());
+//        /*
+//         * Broadcast stanza to all entities matching the user@context by
+//         * using a wildcard for the resource: /user@context/*
+//         */
+//        MetaBroadcaster.getDefault().broadcastTo(contextAndUser+"/*", stanzaAsJSON);
+        
     }
     
  /**
@@ -391,7 +417,10 @@ private String getContextName(String login) {
 		    // create new broadcaster for resource 
 		    Broadcaster broadcaster = BroadcasterFactory.getDefault().get(generateBroadcasterId(atmosphereState.id));
 			// add resource (connected client) to broadcaster
-		    broadcaster.addAtmosphereResource(atmosphereState.atmosphereResource);
+//		    broadcaster.addAtmosphereResource(atmosphereState.atmosphereResource);
+		    atmosphereState.atmosphereResource.resumeOnBroadcast(true);
+		    atmosphereState.atmosphereResource.setBroadcaster(broadcaster);
+		   
 		    //TODO: track connected user@context only basic representation for lookups, broadcast to all clients when available?
 		    id2State.put(atmosphereState.id.toGeneralForm(), atmosphereState);
 			/*

@@ -183,8 +183,14 @@ public class NotificationMailGenerator implements ITipMailGenerator {
             if (participant.hasRole(ITipRole.ON_BEHALF_OF)) {
             	this.onBehalfOf = participant;
             }
-            if (participant.getIdentifier() == user.getId()) {
-                this.actor = participant;
+            if (onBehalfOf.getId() != user.getId()) {
+                if (participant.getIdentifier() == onBehalfOf.getId()) {
+                    this.actor = participant;
+                }
+            } else {
+                if (participant.getIdentifier() == user.getId()) {
+                    this.actor = participant;
+                }
             }
         }
         if (this.actor == null) {

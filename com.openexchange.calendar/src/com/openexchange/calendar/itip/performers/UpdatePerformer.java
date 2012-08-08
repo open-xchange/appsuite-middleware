@@ -126,7 +126,7 @@ public class UpdatePerformer extends AbstrakterDingeMacher {
             if (appointment != null && !change.isException()) {
                 processed.put(appointment.getUid(), appointment);
             }
-            writeMail(action, original, appointment, session);
+            writeMail(action, original, appointment, session, owner);
             result.add(appointment);
         }
         
