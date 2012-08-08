@@ -38,10 +38,10 @@ define("chat/ui", function () {
     $.each(transports, function (index, transport) {
         var req = new $.atmosphere.AtmosphereRequest();
 
-	req.url = "http://marens.netline.de/realtime/atmosphere/chat";
+	req.url = "http://marens.netline.de/realtime/atmosphere/rt";
         req.contentType = "application/json";
         req.transport = transport;
-        req.headers = { "negotiating" : "true" };
+        req.headers = { "negotiating" : "true", session: session };
 
         req.onOpen = function(response) {
             detect.append('<p><span style="color:blue">' + transport + ' supported: '  + '</span>' + (response.transport == transport));
@@ -55,11 +55,13 @@ define("chat/ui", function () {
     });
     
     var request = {
-        url: "http://marens.netline.de/realtime/atmosphere/chat",
+        url: "http://marens.netline.de/realtime/atmosphere/rt",
         contentType : "application/json",
         logLevel : 'debug',
         transport : 'websocket' ,
-        fallbackTransport: 'long-polling'};
+        fallbackTransport: 'long-polling',
+        headers : {session: session}
+        };
 
 
     //------------------------------------------------------------------------------
@@ -110,14 +112,30 @@ define("chat/ui", function () {
     
     var subSocket = socket.subscribe(request);
     
-    subSocket.push(jQuery.stringifyJSON({author: ox.userName, message: "logged into chat"}));
+    subSocket.push(jQuery.stringifyJSON({
+    session: session,
+    ns: 'ox:handshake',
+    data: {
+      resource: 'Browser'
+    }
+    }));
+//    subSocket.push(jQuery.stringifyJSON({author: ox.userName, message: "logged into chat"}));
     status.css('color', 'blue');
 
     input.keydown(function(e) {
         if (e.keyCode === 13) {
             var msg = $(this).val();
 
-            subSocket.push(jQuery.stringifyJSON({ author: ox.userName, message: msg }));
+            //subSocket.push(jQuery.stringifyJSON({ author: ox.userName, message: msg }));
+            subSocket.push(jQuery.stringifyJSON({
+              session: session,
+              ns: 'chat',
+              to: ox.userName,
+              data: {
+                message: msg,
+                priority: 2
+              }
+            }));
             $(this).val('');
         }
     });
