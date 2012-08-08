@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage.outlook;
 
+import static com.openexchange.folderstorage.outlook.OutlookServiceRegistry.getServiceRegistry;
 import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import java.sql.Connection;
@@ -1369,8 +1370,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                                         if (SERVICE_INFOSTORE.equals(userAccount.getId())) {
                                             continue;
                                         }
-                                        final FileStorageAccountAccess accountAccess =
-                                            userAccount.getFileStorageService().getAccountAccess(userAccount.getId(), storageParameters.getSession());
+                                        final FileStorageAccountAccess accountAccess = getFSAccountAccess(storageParameters, userAccount);
                                         accountAccess.connect();
                                         try {
                                             final FileStorageFolder rootFolder = accountAccess.getFolderAccess().getRootFolder();
@@ -1430,6 +1430,18 @@ public final class OutlookFolderStorage implements FolderStorage {
             ret[i] = new OutlookId(ids[i], i, null);
         }
         return ret;
+    }
+
+    private FileStorageAccountAccess getFSAccountAccess(final StorageParameters storageParameters, final FileStorageAccount userAccount) throws OXException {
+        FileStorageService fileStorageService = userAccount.getFileStorageService();
+        if (null == fileStorageService) {
+            if (!(userAccount instanceof com.openexchange.file.storage.ServiceAware)) {
+                throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create("Missing FileStorageService instance.");
+            }
+            final String serviceId = ((com.openexchange.file.storage.ServiceAware) userAccount).getServiceId();
+            fileStorageService = getServiceRegistry().getService(FileStorageServiceRegistry.class).getFileStorageService(serviceId);
+        }
+        return fileStorageService.getAccountAccess(userAccount.getId(), storageParameters.getSession());
     }
 
     SortableId[] getSubfolders(final String id, final String treeId, final FolderStorage folderStorage, final StorageParameters storageParameters) throws OXException {
