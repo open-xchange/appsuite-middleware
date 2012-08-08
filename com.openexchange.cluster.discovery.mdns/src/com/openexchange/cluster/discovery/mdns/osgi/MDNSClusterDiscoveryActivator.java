@@ -77,7 +77,7 @@ public final class MDNSClusterDiscoveryActivator extends HousekeepingActivator {
 
     static final Log LOG = com.openexchange.log.Log.loggerFor(MDNSClusterDiscoveryActivator.class);
 
-    private static final String SERVICE_ID = "openexchange.service.lookup";
+    private static final String SERVICE_ID = "openexchange.service.hazelcast";
 
     private abstract class AbstractRegisteringListener implements ClusterDiscoveryService, MDNSServiceListener {
         protected final List<ClusterListener> clusterListeners;
