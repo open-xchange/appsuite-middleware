@@ -7,6 +7,7 @@ import com.openexchange.http.grizzly.services.atmosphere.AtmosphereService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.realtime.Channel;
+import com.openexchange.realtime.MessageDispatcher;
 import com.openexchange.realtime.atmosphere.OXRTConversionHandler;
 import com.openexchange.realtime.atmosphere.OXRTHandler;
 import com.openexchange.realtime.atmosphere.impl.HandlerLibrary;
@@ -18,7 +19,7 @@ public class AtmosphereRTActivator extends HousekeepingActivator {
 
 	@Override
 	protected Class<?>[] getNeededServices() {
-		return new Class<?>[]{SessiondService.class, AtmosphereService.class};
+		return new Class<?>[]{SessiondService.class, AtmosphereService.class, MessageDispatcher.class};
 	}
 
 	/*

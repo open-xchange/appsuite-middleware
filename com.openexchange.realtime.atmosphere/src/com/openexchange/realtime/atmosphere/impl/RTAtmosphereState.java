@@ -63,7 +63,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class RTAtmosphereState {
-	public AtmosphereResource r;
+	public AtmosphereResource atmosphereResource;
 	public ServerSession session;
 	public ID id;
 	
