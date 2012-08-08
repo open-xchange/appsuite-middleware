@@ -50,7 +50,6 @@
 package com.openexchange.hazelcast;
 
 import java.io.Serializable;
-import java.util.concurrent.atomic.AtomicReference;
 import com.hazelcast.core.ITopic;
 import com.hazelcast.core.MessageListener;
 import com.hazelcast.monitor.LocalTopicStats;
@@ -60,28 +59,16 @@ import com.hazelcast.monitor.LocalTopicStats;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ClassLoaderAwareITopic<E extends Serializable> implements ITopic<E>, ClassLoaderAware {
-
-    private static KryoWrapper wrapper(final Object obj, final Class<?> classLoaderSource) {
-        return new KryoWrapper(obj, classLoaderSource.getClassLoader());
-    }
+public final class ClassLoaderAwareITopic<E extends Serializable> extends AbstractClassLoaderAware implements ITopic<E> {
 
     private final ITopic<Serializable> delegate;
-
-    private final AtomicReference<Class<?>> classLoaderSourceRef;
 
     /**
      * Initializes a new {@link ClassLoaderAwareITopic}.
      */
-    public ClassLoaderAwareITopic(final ITopic<Serializable> delegate) {
-        super();
-        classLoaderSourceRef = new AtomicReference<Class<?>>(null);
+    public ClassLoaderAwareITopic(final ITopic<Serializable> delegate, final boolean kryorize) {
+        super(kryorize);
         this.delegate = delegate;
-    }
-
-    @Override
-    public void setClassLoaderSource(final Class<?> classLoaderSource) {
-        classLoaderSourceRef.set(classLoaderSource);
     }
 
     @Override
@@ -92,10 +79,11 @@ public final class ClassLoaderAwareITopic<E extends Serializable> implements ITo
     @Override
     public void publish(final E message) {
         final Class<?> clazz = classLoaderSourceRef.get();
-        if (null == clazz) {
-            delegate.publish(message);
-        } else {
-            delegate.publish(wrapper(message, clazz));
+        applyClassLoader(clazz);
+        try {
+            delegate.publish(wrapper(message));
+        } finally {
+            unsetClassLoader();
         }
     }
 

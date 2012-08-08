@@ -56,7 +56,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 import com.hazelcast.core.EntryListener;
 import com.hazelcast.core.MultiMap;
 
@@ -65,7 +64,7 @@ import com.hazelcast.core.MultiMap;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ClassLoaderAwareMultiMap<K extends Serializable, V extends Serializable> implements MultiMap<K, V>, ClassLoaderAware {
+public final class ClassLoaderAwareMultiMap<K extends Serializable, V extends Serializable> extends AbstractClassLoaderAware implements MultiMap<K, V> {
 
     private final class EntryImpl implements Map.Entry<K, V> {
 
@@ -94,26 +93,14 @@ public final class ClassLoaderAwareMultiMap<K extends Serializable, V extends Se
         }
     }
 
-    private static KryoWrapper wrapper(final Object obj, final Class<?> classLoaderSource) {
-        return new KryoWrapper(obj, classLoaderSource.getClassLoader());
-    }
-
     private final MultiMap<Serializable, Serializable> delegate;
-
-    private final AtomicReference<Class<?>> classLoaderSourceRef;
 
     /**
      * Initializes a new {@link ClassLoaderAwareMultiMap}.
      */
-    public ClassLoaderAwareMultiMap(final MultiMap<Serializable, Serializable> delegate) {
-        super();
-        classLoaderSourceRef = new AtomicReference<Class<?>>(null);
+    public ClassLoaderAwareMultiMap(final MultiMap<Serializable, Serializable> delegate, final boolean kryorize) {
+        super(kryorize);
         this.delegate = delegate;
-    }
-
-    @Override
-    public void setClassLoaderSource(final Class<?> classLoaderSource) {
-        classLoaderSourceRef.set(classLoaderSource);
     }
 
     @Override
@@ -124,20 +111,24 @@ public final class ClassLoaderAwareMultiMap<K extends Serializable, V extends Se
     @Override
     public boolean put(K key, V value) {
         final Class<?> clazz = classLoaderSourceRef.get();
-        if (null == clazz) {
-            return delegate.put(key, value);
+        applyClassLoader(clazz);
+        try {
+            return delegate.put(wrapper(key), wrapper(value));
+        } finally {
+            unsetClassLoader();
         }
-        return delegate.put(wrapper(key, clazz), wrapper(value, clazz));
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Collection<V> get(K key) {
         final Class<?> clazz = classLoaderSourceRef.get();
-        if (null == clazz) {
-            return (Collection<V>) delegate.get(key);
+        applyClassLoader(clazz);
+        try {
+            return (Collection<V>) delegate.get(wrapper(key));
+        } finally {
+            unsetClassLoader();
         }
-        return (Collection<V>) delegate.get(wrapper(key, clazz));
     }
 
     @Override
@@ -153,10 +144,12 @@ public final class ClassLoaderAwareMultiMap<K extends Serializable, V extends Se
     @Override
     public boolean remove(Object key, Object value) {
         final Class<?> clazz = classLoaderSourceRef.get();
-        if (null == clazz) {
-            return delegate.remove(key, value);
+        applyClassLoader(clazz);
+        try {
+            return delegate.remove(wrapper(key), wrapper(value));
+        } finally {
+            unsetClassLoader();
         }
-        return delegate.remove(wrapper(key, clazz), wrapper(value, clazz));
     }
 
     @Override
@@ -168,57 +161,100 @@ public final class ClassLoaderAwareMultiMap<K extends Serializable, V extends Se
     @Override
     public Collection<V> remove(Object key) {
         final Class<?> clazz = classLoaderSourceRef.get();
-        if (null == clazz) {
-            return (Collection<V>) delegate.remove(key);
+        applyClassLoader(clazz);
+        try {
+            return (Collection<V>) delegate.remove(wrapper(key));
+        } finally {
+            unsetClassLoader();
         }
-        return (Collection<V>) delegate.remove(wrapper(key, clazz));
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Set<K> localKeySet() {
-        return (Set<K>) delegate.localKeySet();
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return (Set<K>) delegate.localKeySet();
+        } finally {
+            unsetClassLoader();
+        }
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Set<K> keySet() {
-        return (Set<K>) delegate.keySet();
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return (Set<K>) delegate.keySet();
+        } finally {
+            unsetClassLoader();
+        }
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Collection<V> values() {
-        return (Collection<V>) delegate.values();
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return (Collection<V>) delegate.values();
+        } finally {
+            unsetClassLoader();
+        }
     }
 
     @Override
     public Set<Entry<K, V>> entrySet() {
-        /*
-         * Create a clone as per general contract of IMap: The set is NOT backed by the map, so changes to the map are NOT reflected in the
-         * set, and vice-versa.
-         */
-        final Set<java.util.Map.Entry<Serializable, Serializable>> entrySet = delegate.entrySet();
-        final Set<Map.Entry<K, V>> clone = new LinkedHashSet<Map.Entry<K, V>>(entrySet.size());
-        for (final Entry<Serializable, Serializable> entry : entrySet) {
-            clone.add(new EntryImpl(entry));
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {/*
+              * Create a clone as per general contract of IMap: The set is NOT backed by the map, so changes to the map are NOT reflected in
+              * the set, and vice-versa.
+              */
+            final Set<java.util.Map.Entry<Serializable, Serializable>> entrySet = delegate.entrySet();
+            final Set<Map.Entry<K, V>> clone = new LinkedHashSet<Map.Entry<K, V>>(entrySet.size());
+            for (final Entry<Serializable, Serializable> entry : entrySet) {
+                clone.add(new EntryImpl(entry));
+            }
+            return clone;
+        } finally {
+            unsetClassLoader();
         }
-        return clone;
     }
 
     @Override
     public boolean containsKey(K key) {
-        return delegate.containsKey(key);
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return delegate.containsKey(key);
+        } finally {
+            unsetClassLoader();
+        }
     }
 
     @Override
     public boolean containsValue(Object value) {
-        return delegate.containsValue(value);
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return delegate.containsValue(value);
+        } finally {
+            unsetClassLoader();
+        }
     }
 
     @Override
     public boolean containsEntry(K key, V value) {
-        return delegate.containsEntry(key, value);
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return delegate.containsEntry(key, value);
+        } finally {
+            unsetClassLoader();
+        }
     }
 
     @Override
@@ -233,7 +269,13 @@ public final class ClassLoaderAwareMultiMap<K extends Serializable, V extends Se
 
     @Override
     public int valueCount(Serializable key) {
-        return delegate.valueCount(key);
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return delegate.valueCount(key);
+        } finally {
+            unsetClassLoader();
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -257,37 +299,69 @@ public final class ClassLoaderAwareMultiMap<K extends Serializable, V extends Se
     @SuppressWarnings("unchecked")
     @Override
     public void addEntryListener(EntryListener<K, V> listener, K key, boolean includeValue) {
-        delegate.addEntryListener((EntryListener<Serializable, Serializable>) listener, key, includeValue);
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            delegate.addEntryListener((EntryListener<Serializable, Serializable>) listener, wrapper(key), includeValue);
+        } finally {
+            unsetClassLoader();
+        }
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public void removeEntryListener(EntryListener<K, V> listener, K key) {
         final Class<?> clazz = classLoaderSourceRef.get();
-        if (null == clazz) {
-            delegate.removeEntryListener((EntryListener<Serializable, Serializable>) listener, key);
+        applyClassLoader(clazz);
+        try {
+            delegate.removeEntryListener((EntryListener<Serializable, Serializable>) listener, wrapper(key));
+        } finally {
+            unsetClassLoader();
         }
-        delegate.removeEntryListener((EntryListener<Serializable, Serializable>) listener, wrapper(key, clazz));
     }
 
     @Override
     public void lock(Serializable key) {
-        delegate.lock(key);
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            delegate.lock(wrapper(key));
+        } finally {
+            unsetClassLoader();
+        }
     }
 
     @Override
     public boolean tryLock(Serializable key) {
-        return delegate.tryLock(key);
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return delegate.tryLock(wrapper(key));
+        } finally {
+            unsetClassLoader();
+        }
     }
 
     @Override
     public boolean tryLock(Serializable key, long time, TimeUnit timeunit) {
-        return delegate.tryLock(key, time, timeunit);
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return delegate.tryLock(wrapper(key), time, timeunit);
+        } finally {
+            unsetClassLoader();
+        }
     }
 
     @Override
     public void unlock(Serializable key) {
-        delegate.unlock(key);
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            delegate.unlock(wrapper(key));
+        } finally {
+            unsetClassLoader();
+        }
     }
 
     @Override
@@ -299,6 +373,5 @@ public final class ClassLoaderAwareMultiMap<K extends Serializable, V extends Se
     public void unlockMap() {
         delegate.unlockMap();
     }
-    
 
 }

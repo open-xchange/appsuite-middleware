@@ -53,7 +53,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.concurrent.atomic.AtomicReference;
 import com.hazelcast.core.ISet;
 import com.hazelcast.core.ItemListener;
 
@@ -62,28 +61,16 @@ import com.hazelcast.core.ItemListener;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ClassLoaderAwareISet<E extends Serializable> implements ISet<E>, ClassLoaderAware {
-
-    private static KryoWrapper wrapper(final Object obj, final Class<?> classLoaderSource) {
-        return new KryoWrapper(obj, classLoaderSource.getClassLoader());
-    }
+public final class ClassLoaderAwareISet<E extends Serializable> extends AbstractClassLoaderAware implements ISet<E> {
 
     private final ISet<Serializable> delegate;
-
-    private final AtomicReference<Class<?>> classLoaderSourceRef;
 
     /**
      * Initializes a new {@link ClassLoaderAwareISet}.
      */
-    public ClassLoaderAwareISet(final ISet<Serializable> delegate) {
-        super();
-        classLoaderSourceRef = new AtomicReference<Class<?>>();
+    public ClassLoaderAwareISet(final ISet<Serializable> delegate, final boolean kryorize) {
+        super(kryorize);
         this.delegate = delegate;
-    }
-
-    @Override
-    public void setClassLoaderSource(final Class<?> classLoaderSource) {
-        classLoaderSourceRef.set(classLoaderSource);
     }
 
     @Override
@@ -91,11 +78,13 @@ public final class ClassLoaderAwareISet<E extends Serializable> implements ISet<
         return delegate.getName();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void addItemListener(ItemListener<E> listener, boolean includeValue) {
         delegate.addItemListener((ItemListener<Serializable>) listener, includeValue);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void removeItemListener(ItemListener<E> listener) {
         delegate.removeItemListener((ItemListener<Serializable>) listener);
@@ -129,96 +118,128 @@ public final class ClassLoaderAwareISet<E extends Serializable> implements ISet<
     @Override
     public boolean contains(Object o) {
         final Class<?> clazz = classLoaderSourceRef.get();
-        if (null == clazz) {
-            return delegate.contains(o);
+        applyClassLoader(clazz);
+        try {
+            return delegate.contains(wrapper(o));
+        } finally {
+            unsetClassLoader();
         }
-        return delegate.contains(wrapper(o, clazz));
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Iterator<E> iterator() {
-        return (Iterator<E>) delegate.iterator();
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return (Iterator<E>) delegate.iterator();
+        } finally {
+            unsetClassLoader();
+        }
     }
 
     @Override
     public Object[] toArray() {
-        return delegate.toArray();
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return delegate.toArray();
+        } finally {
+            unsetClassLoader();
+        }
     }
 
     @Override
     public <T> T[] toArray(T[] a) {
-        return delegate.toArray(a);
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return delegate.toArray(a);
+        } finally {
+            unsetClassLoader();
+        }
     }
 
     @Override
     public boolean add(E e) {
         final Class<?> clazz = classLoaderSourceRef.get();
-        if (null == clazz) {
-            delegate.add(e);
+        applyClassLoader(clazz);
+        try {
+            return delegate.add(wrapper(e));
+        } finally {
+            unsetClassLoader();
         }
-        return delegate.add(wrapper(e, clazz));
     }
 
     @Override
     public boolean remove(Object o) {
         final Class<?> clazz = classLoaderSourceRef.get();
-        if (null == clazz) {
-            return delegate.remove(o);
+        applyClassLoader(clazz);
+        try {
+            return delegate.remove(wrapper(o));
+        } finally {
+            unsetClassLoader();
         }
-        return delegate.remove(wrapper(o, clazz));
     }
 
     @Override
     public boolean containsAll(Collection<?> c) {
         final Class<?> clazz = classLoaderSourceRef.get();
-        if (null == clazz) {
-            return delegate.containsAll(c);
+        applyClassLoader(clazz);
+        try {
+            final Collection<Serializable> col = new ArrayList<Serializable>(c.size());
+            for (final Object object : c) {
+                col.add(wrapper(object));
+            }
+            return delegate.containsAll(col);
+        } finally {
+            unsetClassLoader();
         }
-        final Collection<Serializable> col = new ArrayList<Serializable>(c.size());
-        for (final Object object : c) {
-            col.add(wrapper(object, clazz));
-        }
-        return delegate.containsAll(col);
     }
 
     @Override
     public boolean addAll(Collection<? extends E> c) {
         final Class<?> clazz = classLoaderSourceRef.get();
-        if (null == clazz) {
-            return delegate.addAll(c);
+        applyClassLoader(clazz);
+        try {
+            final Collection<Serializable> col = new ArrayList<Serializable>(c.size());
+            for (final Object object : c) {
+                col.add(wrapper(object));
+            }
+            return delegate.addAll(col);
+        } finally {
+            unsetClassLoader();
         }
-        final Collection<Serializable> col = new ArrayList<Serializable>(c.size());
-        for (final Object object : c) {
-            col.add(wrapper(object, clazz));
-        }
-        return delegate.addAll(col);
     }
 
     @Override
     public boolean retainAll(Collection<?> c) {
         final Class<?> clazz = classLoaderSourceRef.get();
-        if (null == clazz) {
-            return delegate.retainAll(c);
+        applyClassLoader(clazz);
+        try {
+            final Collection<Serializable> col = new ArrayList<Serializable>(c.size());
+            for (final Object object : c) {
+                col.add(wrapper(object));
+            }
+            return delegate.retainAll(col);
+        } finally {
+            unsetClassLoader();
         }
-        final Collection<Serializable> col = new ArrayList<Serializable>(c.size());
-        for (final Object object : c) {
-            col.add(wrapper(object, clazz));
-        }
-        return delegate.retainAll(col);
     }
 
     @Override
     public boolean removeAll(Collection<?> c) {
         final Class<?> clazz = classLoaderSourceRef.get();
-        if (null == clazz) {
-            return delegate.removeAll(c);
+        applyClassLoader(clazz);
+        try {
+            final Collection<Serializable> col = new ArrayList<Serializable>(c.size());
+            for (final Object object : c) {
+                col.add(wrapper(object));
+            }
+            return delegate.removeAll(col);
+        } finally {
+            unsetClassLoader();
         }
-        final Collection<Serializable> col = new ArrayList<Serializable>(c.size());
-        for (final Object object : c) {
-            col.add(wrapper(object, clazz));
-        }
-        return delegate.removeAll(col);
     }
 
     @Override

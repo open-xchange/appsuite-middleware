@@ -55,38 +55,24 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.concurrent.atomic.AtomicReference;
 import com.hazelcast.core.IList;
 import com.hazelcast.core.ItemListener;
 
-
 /**
  * {@link ClassLoaderAwareIList}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ClassLoaderAwareIList<E extends Serializable> implements IList<E>, ClassLoaderAware {
-
-    private static KryoWrapper wrapper(final Object obj, final Class<?> classLoaderSource) {
-        return new KryoWrapper(obj, classLoaderSource.getClassLoader());
-    }
+public final class ClassLoaderAwareIList<E extends Serializable> extends AbstractClassLoaderAware implements IList<E> {
 
     private final IList<Serializable> delegate;
-
-    private final AtomicReference<Class<?>> classLoaderSourceRef;
 
     /**
      * Initializes a new {@link ClassLoaderAwareIList}.
      */
-    public ClassLoaderAwareIList(final IList<Serializable> delegate) {
-        super();
-        classLoaderSourceRef = new AtomicReference<Class<?>>();
+    public ClassLoaderAwareIList(final IList<Serializable> delegate, final boolean kryorize) {
+        super(kryorize);
         this.delegate = delegate;
-    }
-
-    @Override
-    public void setClassLoaderSource(final Class<?> classLoaderSource) {
-        classLoaderSourceRef.set(classLoaderSource);
     }
 
     @Override
@@ -97,18 +83,36 @@ public final class ClassLoaderAwareIList<E extends Serializable> implements ILis
     @SuppressWarnings("unchecked")
     @Override
     public void addItemListener(final ItemListener<E> listener, final boolean includeValue) {
-        delegate.addItemListener((ItemListener<Serializable>) listener, includeValue);
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            delegate.addItemListener((ItemListener<Serializable>) listener, includeValue);
+        } finally {
+            unsetClassLoader();
+        }
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public void removeItemListener(final ItemListener<E> listener) {
-        delegate.removeItemListener((ItemListener<Serializable>) listener);
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            delegate.removeItemListener((ItemListener<Serializable>) listener);
+        } finally {
+            unsetClassLoader();
+        }
     }
 
     @Override
     public InstanceType getInstanceType() {
-        return delegate.getInstanceType();
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return delegate.getInstanceType();
+        } finally {
+            unsetClassLoader();
+        }
     }
 
     @Override
@@ -118,7 +122,13 @@ public final class ClassLoaderAwareIList<E extends Serializable> implements ILis
 
     @Override
     public Object getId() {
-        return delegate.getId();
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return delegate.getId();
+        } finally {
+            unsetClassLoader();
+        }
     }
 
     @Override
@@ -134,109 +144,143 @@ public final class ClassLoaderAwareIList<E extends Serializable> implements ILis
     @Override
     public boolean contains(final Object o) {
         final Class<?> clazz = classLoaderSourceRef.get();
-        if (null == clazz) {
-            return delegate.contains(o);
+        applyClassLoader(clazz);
+        try {
+            return delegate.contains(wrapper(o));
+        } finally {
+            unsetClassLoader();
         }
-        return delegate.contains(wrapper(o, clazz));
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Iterator<E> iterator() {
-        return (Iterator<E>) delegate.iterator();
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return (Iterator<E>) delegate.iterator();
+        } finally {
+            unsetClassLoader();
+        }
     }
 
     @Override
     public Object[] toArray() {
-        return delegate.toArray();
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return delegate.toArray();
+        } finally {
+            unsetClassLoader();
+        }
     }
 
     @Override
     public <T> T[] toArray(final T[] a) {
-        return delegate.toArray(a);
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return delegate.toArray(a);
+        } finally {
+            unsetClassLoader();
+        }
     }
 
     @Override
     public boolean add(final E e) {
         final Class<?> clazz = classLoaderSourceRef.get();
-        if (null == clazz) {
-            return delegate.add(e);
+        applyClassLoader(clazz);
+        try {
+            return delegate.add(wrapper(e));
+        } finally {
+            unsetClassLoader();
         }
-        return delegate.add(wrapper(e, clazz));
     }
 
     @Override
     public boolean remove(final Object o) {
         final Class<?> clazz = classLoaderSourceRef.get();
-        if (null == clazz) {
-            return delegate.remove(o);
+        applyClassLoader(clazz);
+        try {
+            return delegate.remove(wrapper(o));
+        } finally {
+            unsetClassLoader();
         }
-        return delegate.remove(wrapper(o, clazz));
     }
 
     @Override
     public boolean containsAll(final Collection<?> c) {
         final Class<?> clazz = classLoaderSourceRef.get();
-        if (null == clazz) {
-            return delegate.containsAll(c);
+        applyClassLoader(clazz);
+        try {
+            final Collection<Serializable> col = new ArrayList<Serializable>(c.size());
+            for (final Object object : c) {
+                col.add(wrapper(object));
+            }
+            return delegate.containsAll(col);
+        } finally {
+            unsetClassLoader();
         }
-        final Collection<Serializable> col = new ArrayList<Serializable>(c.size());
-        for (final Object object : c) {
-            col.add(wrapper(object, clazz));
-        }
-        return delegate.containsAll(col);
     }
 
     @Override
     public boolean addAll(final Collection<? extends E> c) {
         final Class<?> clazz = classLoaderSourceRef.get();
-        if (null == clazz) {
-            return delegate.addAll(c);
+        applyClassLoader(clazz);
+        try {
+            final Collection<Serializable> col = new ArrayList<Serializable>(c.size());
+            for (final Object object : c) {
+                col.add(wrapper(object));
+            }
+            return delegate.addAll(col);
+        } finally {
+            unsetClassLoader();
         }
-        final Collection<Serializable> col = new ArrayList<Serializable>(c.size());
-        for (final Object object : c) {
-            col.add(wrapper(object, clazz));
-        }
-        return delegate.addAll(col);
     }
 
     @Override
     public boolean addAll(final int index, final Collection<? extends E> c) {
         final Class<?> clazz = classLoaderSourceRef.get();
-        if (null == clazz) {
-            return delegate.addAll(index, c);
+        applyClassLoader(clazz);
+        try {
+            final Collection<Serializable> col = new ArrayList<Serializable>(c.size());
+            for (final Object object : c) {
+                col.add(wrapper(object));
+            }
+            return delegate.addAll(index, col);
+        } finally {
+            unsetClassLoader();
         }
-        final Collection<Serializable> col = new ArrayList<Serializable>(c.size());
-        for (final Object object : c) {
-            col.add(wrapper(object, clazz));
-        }
-        return delegate.addAll(index, col);
     }
 
     @Override
     public boolean removeAll(final Collection<?> c) {
         final Class<?> clazz = classLoaderSourceRef.get();
-        if (null == clazz) {
-            return delegate.removeAll(c);
+        applyClassLoader(clazz);
+        try {
+            final Collection<Serializable> col = new ArrayList<Serializable>(c.size());
+            for (final Object object : c) {
+                col.add(wrapper(object));
+            }
+            return delegate.removeAll(col);
+        } finally {
+            unsetClassLoader();
         }
-        final Collection<Serializable> col = new ArrayList<Serializable>(c.size());
-        for (final Object object : c) {
-            col.add(wrapper(object, clazz));
-        }
-        return delegate.removeAll(col);
     }
 
     @Override
     public boolean retainAll(final Collection<?> c) {
         final Class<?> clazz = classLoaderSourceRef.get();
-        if (null == clazz) {
-            return delegate.retainAll(c);
+        applyClassLoader(clazz);
+        try {
+            final Collection<Serializable> col = new ArrayList<Serializable>(c.size());
+            for (final Object object : c) {
+                col.add(wrapper(object));
+            }
+            return delegate.retainAll(col);
+        } finally {
+            unsetClassLoader();
         }
-        final Collection<Serializable> col = new ArrayList<Serializable>(c.size());
-        for (final Object object : c) {
-            col.add(wrapper(object, clazz));
-        }
-        return delegate.retainAll(col);
     }
 
     @Override
@@ -246,7 +290,13 @@ public final class ClassLoaderAwareIList<E extends Serializable> implements ILis
 
     @Override
     public boolean equals(final Object o) {
-        return delegate.equals(o);
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return delegate.equals(o);
+        } finally {
+            unsetClassLoader();
+        }
     }
 
     @Override
@@ -257,70 +307,106 @@ public final class ClassLoaderAwareIList<E extends Serializable> implements ILis
     @SuppressWarnings("unchecked")
     @Override
     public E get(final int index) {
-        return (E) delegate.get(index);
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return (E) delegate.get(index);
+        } finally {
+            unsetClassLoader();
+        }
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public E set(final int index, final E element) {
         final Class<?> clazz = classLoaderSourceRef.get();
-        if (null == clazz) {
-            return (E) delegate.set(index, element);
+        applyClassLoader(clazz);
+        try {
+            return (E) delegate.set(index, wrapper(element));
+        } finally {
+            unsetClassLoader();
         }
-        return (E) delegate.set(index, wrapper(element, clazz));
     }
 
     @Override
     public void add(final int index, final E element) {
         final Class<?> clazz = classLoaderSourceRef.get();
-        if (null == clazz) {
-            delegate.add(index, element);
-        } else {
-            delegate.add(index, wrapper(element, clazz));
+        applyClassLoader(clazz);
+        try {
+            delegate.add(index, wrapper(element));
+        } finally {
+            unsetClassLoader();
         }
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public E remove(final int index) {
-        return (E) delegate.remove(index);
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return (E) delegate.remove(index);
+        } finally {
+            unsetClassLoader();
+        }
     }
 
     @Override
     public int indexOf(final Object o) {
         final Class<?> clazz = classLoaderSourceRef.get();
-        if (null == clazz) {
-            return delegate.indexOf(o);
+        applyClassLoader(clazz);
+        try {
+            return delegate.indexOf(wrapper(o));
+        } finally {
+            unsetClassLoader();
         }
-        return delegate.indexOf(wrapper(o, clazz));
     }
 
     @Override
     public int lastIndexOf(final Object o) {
         final Class<?> clazz = classLoaderSourceRef.get();
-        if (null == clazz) {
-            return delegate.lastIndexOf(o);
+        applyClassLoader(clazz);
+        try {
+            return delegate.lastIndexOf(wrapper(o));
+        } finally {
+            unsetClassLoader();
         }
-        return delegate.lastIndexOf(wrapper(o, clazz));
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public ListIterator<E> listIterator() {
-        return (ListIterator<E>) delegate.listIterator();
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return (ListIterator<E>) delegate.listIterator();
+        } finally {
+            unsetClassLoader();
+        }
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public ListIterator<E> listIterator(final int index) {
-        return (ListIterator<E>) delegate.listIterator(index);
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return (ListIterator<E>) delegate.listIterator(index);
+        } finally {
+            unsetClassLoader();
+        }
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public List<E> subList(final int fromIndex, final int toIndex) {
-        return (List<E>) delegate.subList(fromIndex, toIndex);
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return (List<E>) delegate.subList(fromIndex, toIndex);
+        } finally {
+            unsetClassLoader();
+        }
     }
-    
 
 }

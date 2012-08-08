@@ -91,15 +91,18 @@ public class ClassLoaderAwareHazelcastInstance implements HazelcastInstance {
 
     private final Config config;
 
+    private final boolean kryorize;
+
     /**
      * Initializes a new {@link ClassLoaderAwareHazelcastInstance}.
      * 
      * @param hazelcastInstance
      */
-    public ClassLoaderAwareHazelcastInstance(final HazelcastInstance hazelcastInstance) {
+    public ClassLoaderAwareHazelcastInstance(final HazelcastInstance hazelcastInstance, final boolean kryorize) {
         super();
         this.hazelcastInstance = hazelcastInstance;
         config = hazelcastInstance.getConfig();
+        this.kryorize = kryorize;
     }
 
     @Override
@@ -122,7 +125,7 @@ public class ClassLoaderAwareHazelcastInstance implements HazelcastInstance {
         if (null == config.getQueueConfig(name)) {
             LOG.warn("No QueueConfig available for \"" + name + "\". Please provide appropriate QueueConfig prior to acquiring IQueue instance.");
         }
-        return new ClassLoaderAwareIQueue(hazelcastInstance.getQueue(name));
+        return new ClassLoaderAwareIQueue(hazelcastInstance.getQueue(name), kryorize);
     }
 
     @Override
@@ -130,17 +133,17 @@ public class ClassLoaderAwareHazelcastInstance implements HazelcastInstance {
         if (null == config.getTopicConfig(name)) {
             LOG.warn("No TopicConfig available for \"" + name + "\". Please provide appropriate TopicConfig prior to acquiring ITopic instance.");
         }
-        return new ClassLoaderAwareITopic(hazelcastInstance.getTopic(name));
+        return new ClassLoaderAwareITopic(hazelcastInstance.getTopic(name), kryorize);
     }
 
     @Override
     public <E> ISet<E> getSet(final String name) {
-        return new ClassLoaderAwareISet(hazelcastInstance.getSet(name));
+        return new ClassLoaderAwareISet(hazelcastInstance.getSet(name), kryorize);
     }
 
     @Override
     public <E> IList<E> getList(final String name) {
-        return new ClassLoaderAwareIList(hazelcastInstance.getList(name));
+        return new ClassLoaderAwareIList(hazelcastInstance.getList(name), kryorize);
     }
 
     @Override
@@ -148,7 +151,7 @@ public class ClassLoaderAwareHazelcastInstance implements HazelcastInstance {
         if (null == config.getMapConfig(name)) {
             LOG.warn("No MapConfig available for \"" + name + "\". Please provide appropriate MapConfig prior to acquiring IMap instance.");
         }
-        return new ClassLoaderAwareIMap(hazelcastInstance.getMap(name));
+        return new ClassLoaderAwareIMap(hazelcastInstance.getMap(name), kryorize);
     }
 
     @Override
@@ -156,7 +159,7 @@ public class ClassLoaderAwareHazelcastInstance implements HazelcastInstance {
         if (null == config.getMultiMapConfig(name)) {
             LOG.warn("No MultiMapConfig available for \"" + name + "\". Please provide appropriate MultiMapConfig prior to acquiring MultiMap instance.");
         }
-        return new ClassLoaderAwareMultiMap(hazelcastInstance.getMultiMap(name));
+        return new ClassLoaderAwareMultiMap(hazelcastInstance.getMultiMap(name), kryorize);
     }
 
     @Override
@@ -228,17 +231,17 @@ public class ClassLoaderAwareHazelcastInstance implements HazelcastInstance {
         Collection<Instance> clone = new ArrayList<Instance>(c.size());
         for (final Instance inst : c) {
             if (inst instanceof IMap) {
-                clone.add(new ClassLoaderAwareIMap((IMap) inst));
+                clone.add(new ClassLoaderAwareIMap((IMap) inst, kryorize));
             } else if (inst instanceof MultiMap) {
-                clone.add(new ClassLoaderAwareMultiMap((MultiMap) inst));
+                clone.add(new ClassLoaderAwareMultiMap((MultiMap) inst, kryorize));
             } else if (inst instanceof IList) {
-                clone.add(new ClassLoaderAwareIList((IList) inst));
+                clone.add(new ClassLoaderAwareIList((IList) inst, kryorize));
             } else if (inst instanceof ISet) {
-                clone.add(new ClassLoaderAwareISet((ISet) inst));
+                clone.add(new ClassLoaderAwareISet((ISet) inst, kryorize));
             } else if (inst instanceof ITopic) {
-                clone.add(new ClassLoaderAwareITopic((ITopic) inst));
+                clone.add(new ClassLoaderAwareITopic((ITopic) inst, kryorize));
             } else if (inst instanceof IQueue) {
-                clone.add(new ClassLoaderAwareIQueue((IQueue) inst));
+                clone.add(new ClassLoaderAwareIQueue((IQueue) inst, kryorize));
             } else {
                 clone.add(inst);
             }

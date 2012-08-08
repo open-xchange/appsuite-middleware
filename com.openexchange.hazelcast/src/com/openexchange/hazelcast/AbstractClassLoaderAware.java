@@ -49,72 +49,74 @@
 
 package com.openexchange.hazelcast;
 
-import java.io.ObjectStreamException;
 import java.io.Serializable;
+import java.util.concurrent.atomic.AtomicReference;
+import com.hazelcast.core.Hazelcasts;
+
 
 /**
- * {@link KryoWrapper} - Wraps any arbitrary object intend to be serialzed/deserialized using <a
- * href="http://code.google.com/p/kryo/">Kryo</a>.<br>
- * <img src="http://kryo.googlecode.com/svn/wiki/kryo-logo.jpg" width="88" height="37">
- * 
+ * {@link AbstractClassLoaderAware}
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class KryoWrapper implements Serializable {
-
-    private static final ThreadLocal<ClassLoader> CLASS_LOADER = new ThreadLocal<ClassLoader>();
+public abstract class AbstractClassLoaderAware implements ClassLoaderAware {
 
     /**
-     * Sets thread-local class loader.
-     * 
-     * @param classLoader The class loader
+     * The class loader reference.
      */
-    public static void setClassLoader(final Class<?> clazz) {
-        CLASS_LOADER.set(clazz.getClassLoader());
-    }
+    protected final AtomicReference<Class<?>> classLoaderSourceRef;
 
     /**
-     * Sets thread-local class loader.
-     * 
-     * @param classLoader The class loader
+     * Whether to use <a href="http://kryo.googlecode.com/">Kryo</a> or not.
      */
-    public static void setClassLoader(final ClassLoader classLoader) {
-        CLASS_LOADER.set(classLoader);
-    }
+    private final boolean kryorize;
 
     /**
-     * Discards previously set thread-local class loader.
+     * Initializes a new {@link AbstractClassLoaderAware}.
      */
-    public static void unsetClassLoader() {
-        CLASS_LOADER.set(null);
-    }
-
-    private static final long serialVersionUID = 8626996938143001455L;
-
-    private final byte[] bytes;
-
-    /**
-     * Initializes a new {@link KryoWrapper}.
-     * 
-     * @param target The object to serialize with Kryo
-     */
-    public KryoWrapper(final Object target) {
+    protected AbstractClassLoaderAware(final boolean kryorize) {
         super();
-        bytes = KryoSerializer.write(target, CLASS_LOADER.get());
+        classLoaderSourceRef = new AtomicReference<Class<?>>(null);
+        this.kryorize = kryorize;
+    }
+
+    @Override
+    public void setClassLoaderSource(final Class<?> classLoaderSource) {
+        classLoaderSourceRef.set(classLoaderSource);
     }
 
     /**
-     * Classes that need to designate a replacement when an instance of it is read from the stream should implement this special method with
-     * the exact signature.
-     * 
-     * <PRE>
-     * ANY-ACCESS-MODIFIER Object readResolve() throws ObjectStreamException;
-     * </PRE>
-     * 
-     * @return The deserialized object
-     * @throws ObjectStreamException If deserialization fails
+     * Unsets the class loader.
      */
-    private Object readResolve() throws ObjectStreamException {
-        return KryoSerializer.read(bytes, CLASS_LOADER.get());
+    protected void unsetClassLoader() {
+        if (kryorize) {
+            KryoWrapper.unsetClassLoader();
+        } else {
+            Hazelcasts.restoreClassLoader();
+        }
+    }
+
+    /**
+     * Applies specified class' class loader
+     * 
+     * @param classLoaderSource The class providing the class loader
+     */
+    protected void applyClassLoader(final Class<?> classLoaderSource) {
+        if (kryorize) {
+            KryoWrapper.setClassLoader(classLoaderSource == null ? getClass() : classLoaderSource);
+        } else {
+            Hazelcasts.setClassLoader(classLoaderSource);
+        }
+    }
+
+    /**
+     * Wraps specified object with a serializable container object; either based on Kryo or not.
+     * 
+     * @param obj The object to wrap
+     * @return The serializable object
+     */
+    protected Serializable wrapper(final Object obj) {
+        return kryorize ? new KryoWrapper(obj) : (Serializable) obj;
     }
 
 }

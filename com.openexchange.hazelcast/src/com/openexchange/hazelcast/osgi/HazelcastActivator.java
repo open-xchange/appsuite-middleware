@@ -174,7 +174,7 @@ public class HazelcastActivator extends HousekeepingActivator {
             /*
              * Create appropriate Hazelcast instance from configuration
              */
-            final HazelcastInstance hazelcastInstance = new ClassLoaderAwareHazelcastInstance(Hazelcast.newHazelcastInstance(config));
+            final HazelcastInstance hazelcastInstance = new ClassLoaderAwareHazelcastInstance(Hazelcast.newHazelcastInstance(config), false);
             registerService(HazelcastInstance.class, hazelcastInstance);
             REF_HAZELCAST_INSTANCE.set(hazelcastInstance);
             return true;

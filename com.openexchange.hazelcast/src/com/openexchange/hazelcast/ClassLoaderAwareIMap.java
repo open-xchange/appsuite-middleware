@@ -58,7 +58,6 @@ import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicReference;
 import com.hazelcast.core.EntryListener;
 import com.hazelcast.core.IMap;
 import com.hazelcast.core.MapEntry;
@@ -71,7 +70,7 @@ import com.hazelcast.query.Predicate;
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class ClassLoaderAwareIMap<K extends Serializable, V extends Serializable> implements IMap<K, V>, ClassLoaderAware {
+public class ClassLoaderAwareIMap<K extends Serializable, V extends Serializable> extends AbstractClassLoaderAware implements IMap<K, V> {
 
     private final class EntryImpl implements Map.Entry<K, V> {
 
@@ -102,22 +101,14 @@ public class ClassLoaderAwareIMap<K extends Serializable, V extends Serializable
 
     private final IMap<Serializable, Serializable> delegate;
 
-    private final AtomicReference<Class<?>> classLoaderSourceRef;
-
     /**
      * Initializes a new {@link ClassLoaderAwareIMap}.
      * 
      * @param delegate The {@link IMap} to delegate to
      */
-    public ClassLoaderAwareIMap(final IMap<Serializable, Serializable> delegate) {
-        super();
-        classLoaderSourceRef = new AtomicReference<Class<?>>(null);
+    public ClassLoaderAwareIMap(final IMap<Serializable, Serializable> delegate, final boolean kryorize) {
+        super(kryorize);
         this.delegate = delegate;
-    }
-
-    @Override
-    public void setClassLoaderSource(final Class<?> classLoaderSource) {
-        classLoaderSourceRef.set(classLoaderSource);
     }
 
     @Override
@@ -128,435 +119,632 @@ public class ClassLoaderAwareIMap<K extends Serializable, V extends Serializable
     @SuppressWarnings("unchecked")
     @Override
     public V get(final Object key) {
-        final Class<?> classLoaderSource = classLoaderSourceRef.get();
-        if (null == classLoaderSource) {
-            return (V) delegate.get(key);
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return (V) delegate.get(wrapper(key));
+        } finally {
+            unsetClassLoader();
         }
-        return (V) delegate.get(wrapper(key, classLoaderSource));
     }
 
     @Override
     public Object getId() {
-        return delegate.getId();
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return delegate.getId();
+        } finally {
+            unsetClassLoader();
+        }
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public V put(final K key, final V value) {
-        final Class<?> classLoaderSource = classLoaderSourceRef.get();
-        if (null == classLoaderSource) {
-            return (V) delegate.put(key, value);
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return (V) delegate.put(wrapper(key), wrapper(value));
+        } finally {
+            unsetClassLoader();
         }
-        return (V) delegate.put(wrapper(key, classLoaderSource), wrapper(value, classLoaderSource));
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public V remove(final Object key) {
-        final Class<?> classLoaderSource = classLoaderSourceRef.get();
-        if (null == classLoaderSource) {
-            return (V) delegate.remove(key);
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return (V) delegate.remove(wrapper(key));
+        } finally {
+            unsetClassLoader();
         }
-        return (V) delegate.remove(wrapper(key, classLoaderSource));
     }
 
     @Override
     public boolean remove(final Object key, final Object value) {
-        final Class<?> classLoaderSource = classLoaderSourceRef.get();
-        if (null == classLoaderSource) {
-            return delegate.remove(key, value);
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return delegate.remove(wrapper(key), wrapper(value));
+        } finally {
+            unsetClassLoader();
         }
-        return delegate.remove(wrapper(key, classLoaderSource), wrapper(value, classLoaderSource));
     }
 
     @Override
     public String getName() {
-        return delegate.getName();
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return delegate.getName();
+        } finally {
+            unsetClassLoader();
+        }
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Map<K, V> getAll(final Set<K> keys) {
-        final Class<?> classLoaderSource = classLoaderSourceRef.get();
-        if (null == classLoaderSource) {
-            return (Map<K, V>) delegate.getAll((Set<Serializable>) keys);
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            final Set<Serializable> keySet = new HashSet<Serializable>(keys.size());
+            for (final K key : keys) {
+                keySet.add(wrapper(key));
+            }
+            return (Map<K, V>) delegate.getAll(keySet);
+        } finally {
+            unsetClassLoader();
         }
-        final Set<Serializable> keySet = new HashSet<Serializable>(keys.size());
-        for (final K key : keys) {
-            keySet.add(wrapper(key, classLoaderSource));
-        }
-        return (Map<K, V>) delegate.getAll(keySet);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Future<V> getAsync(final K key) {
-        final Class<?> classLoaderSource = classLoaderSourceRef.get();
-        if (null == classLoaderSource) {
-            return (Future<V>) delegate.getAsync(key);
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return (Future<V>) delegate.getAsync(wrapper(key));
+        } finally {
+            unsetClassLoader();
         }
-        return (Future<V>) delegate.getAsync(wrapper(key, classLoaderSource));
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Future<V> putAsync(final K key, final V value) {
-        final Class<?> classLoaderSource = classLoaderSourceRef.get();
-        if (null == classLoaderSource) {
-            return (Future<V>) delegate.putAsync(key, value);
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return (Future<V>) delegate.putAsync(wrapper(key), wrapper(value));
+        } finally {
+            unsetClassLoader();
         }
-        return (Future<V>) delegate.putAsync(wrapper(key, classLoaderSource), wrapper(value, classLoaderSource));
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Future<V> removeAsync(final K key) {
-        final Class<?> classLoaderSource = classLoaderSourceRef.get();
-        if (null == classLoaderSource) {
-            return (Future<V>) delegate.removeAsync(key);
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return (Future<V>) delegate.removeAsync(wrapper(key));
+        } finally {
+            unsetClassLoader();
         }
-        return (Future<V>) delegate.removeAsync(wrapper(key, classLoaderSource));
     }
 
     @Override
     public Object tryRemove(final K key, final long timeout, final TimeUnit timeunit) throws TimeoutException {
-        final Class<?> classLoaderSource = classLoaderSourceRef.get();
-        if (null == classLoaderSource) {
-            return delegate.tryRemove(key, timeout, timeunit);
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return delegate.tryRemove(wrapper(key), timeout, timeunit);
+        } finally {
+            unsetClassLoader();
         }
-        return delegate.tryRemove(wrapper(key, classLoaderSource), timeout, timeunit);
     }
 
     @Override
     public boolean tryPut(final K key, final V value, final long timeout, final TimeUnit timeunit) {
-        final Class<?> classLoaderSource = classLoaderSourceRef.get();
-        if (null == classLoaderSource) {
-            return delegate.tryPut(key, value, timeout, timeunit);
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return delegate.tryPut(wrapper(key), wrapper(value), timeout, timeunit);
+        } finally {
+            unsetClassLoader();
         }
-        return delegate.tryPut(wrapper(key, classLoaderSource), wrapper(value, classLoaderSource), timeout, timeunit);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public V put(final K key, final V value, final long ttl, final TimeUnit timeunit) {
-        final Class<?> classLoaderSource = classLoaderSourceRef.get();
-        if (null == classLoaderSource) {
-            return (V) delegate.put(key, value, ttl, timeunit);
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return (V) delegate.put(wrapper(key), wrapper(value), ttl, timeunit);
+        } finally {
+            unsetClassLoader();
         }
-        return (V) delegate.put(wrapper(key, classLoaderSource), wrapper(value, classLoaderSource), ttl, timeunit);
     }
 
     @Override
     public void putTransient(final K key, final V value, final long ttl, final TimeUnit timeunit) {
-        final Class<?> classLoaderSource = classLoaderSourceRef.get();
-        if (null == classLoaderSource) {
-            delegate.putTransient(key, value, ttl, timeunit);
-        } else {
-            delegate.putTransient(wrapper(key, classLoaderSource), wrapper(value, classLoaderSource), ttl, timeunit);
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            delegate.putTransient(wrapper(key), wrapper(value), ttl, timeunit);
+        } finally {
+            unsetClassLoader();
         }
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public V putIfAbsent(final K key, final V value) {
-        final Class<?> classLoaderSource = classLoaderSourceRef.get();
-        if (null == classLoaderSource) {
-            return (V) delegate.putIfAbsent(key, value);
-
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return (V) delegate.putIfAbsent(wrapper(key), wrapper(value));
+        } finally {
+            unsetClassLoader();
         }
-        return (V) delegate.putIfAbsent(wrapper(key, classLoaderSource), wrapper(value, classLoaderSource));
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public V putIfAbsent(final K key, final V value, final long ttl, final TimeUnit timeunit) {
-        final Class<?> classLoaderSource = classLoaderSourceRef.get();
-        if (null == classLoaderSource) {
-            return (V) delegate.putIfAbsent(key, value, ttl, timeunit);
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return (V) delegate.putIfAbsent(wrapper(key), wrapper(value), ttl, timeunit);
+        } finally {
+            unsetClassLoader();
         }
-        return (V) delegate.putIfAbsent(wrapper(key, classLoaderSource), wrapper(value, classLoaderSource), ttl, timeunit);
     }
 
     @Override
     public boolean replace(final K key, final V oldValue, final V newValue) {
-        final Class<?> classLoaderSource = classLoaderSourceRef.get();
-        if (null == classLoaderSource) {
-            return delegate.replace(key, oldValue, newValue);
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return delegate.replace(
+                wrapper(key),
+                wrapper(oldValue),
+                wrapper(newValue));
+        } finally {
+            unsetClassLoader();
         }
-        return delegate.replace(wrapper(key, classLoaderSource), wrapper(oldValue, classLoaderSource), wrapper(newValue, classLoaderSource));
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public V replace(final K key, final V value) {
-        final Class<?> classLoaderSource = classLoaderSourceRef.get();
-        if (null == classLoaderSource) {
-            return (V) delegate.replace(key, value);
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return (V) delegate.replace(wrapper(key), wrapper(value));
+        } finally {
+            unsetClassLoader();
         }
-        return (V) delegate.replace(wrapper(key, classLoaderSource), wrapper(value, classLoaderSource));
     }
 
     @Override
     public void set(final K key, final V value, final long ttl, final TimeUnit timeunit) {
-        final Class<?> classLoaderSource = classLoaderSourceRef.get();
-        if (null == classLoaderSource) {
-            delegate.set(key, value, ttl, timeunit);
-        } else {
-            delegate.set(wrapper(key, classLoaderSource), wrapper(value, classLoaderSource), ttl, timeunit);
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            delegate.set(wrapper(key), wrapper(value), ttl, timeunit);
+        } finally {
+            unsetClassLoader();
         }
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public V tryLockAndGet(final K key, final long time, final TimeUnit timeunit) throws TimeoutException {
-        final Class<?> classLoaderSource = classLoaderSourceRef.get();
-        if (null == classLoaderSource) {
-            return (V) delegate.tryLockAndGet(key, time, timeunit);
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return (V) delegate.tryLockAndGet(wrapper(key), time, timeunit);
+        } finally {
+            unsetClassLoader();
         }
-        return (V) delegate.tryLockAndGet(wrapper(key, classLoaderSource), time, timeunit);
     }
 
     @Override
     public void lock(final K key) {
-        final Class<?> classLoaderSource = classLoaderSourceRef.get();
-        if (null == classLoaderSource) {
-            delegate.lock(key);
-        } else {
-            delegate.lock(wrapper(key, classLoaderSource));
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            delegate.lock(wrapper(key));
+        } finally {
+            unsetClassLoader();
         }
     }
 
     @Override
     public boolean tryLock(final K key) {
-        final Class<?> classLoaderSource = classLoaderSourceRef.get();
-        if (null == classLoaderSource) {
-            return delegate.tryLock(key);
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return delegate.tryLock(wrapper(key));
+        } finally {
+            unsetClassLoader();
         }
-        return delegate.tryLock(wrapper(key, classLoaderSource));
     }
 
     @Override
     public void unlock(final K key) {
-        final Class<?> classLoaderSource = classLoaderSourceRef.get();
-        if (null == classLoaderSource) {
-            delegate.unlock(key);
-        } else {
-            delegate.unlock(wrapper(key, classLoaderSource));
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            delegate.unlock(wrapper(key));
+        } finally {
+            unsetClassLoader();
         }
     }
 
     @Override
     public void forceUnlock(final K key) {
-        final Class<?> classLoaderSource = classLoaderSourceRef.get();
-        if (null == classLoaderSource) {
-            delegate.forceUnlock(key);
-        } else {
-            delegate.forceUnlock(wrapper(key, classLoaderSource));
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            delegate.forceUnlock(wrapper(key));
+        } finally {
+            unsetClassLoader();
         }
     }
 
     @Override
     public boolean lockMap(final long time, final TimeUnit timeunit) {
-        return delegate.lockMap(time, timeunit);
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return delegate.lockMap(time, timeunit);
+        } finally {
+            unsetClassLoader();
+        }
     }
 
     @Override
     public void unlockMap() {
-        delegate.unlockMap();
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            delegate.unlockMap();
+        } finally {
+            unsetClassLoader();
+        }
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public void addLocalEntryListener(final EntryListener<K, V> listener) {
-        delegate.addLocalEntryListener((EntryListener<Serializable, Serializable>) listener);
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            delegate.addLocalEntryListener((EntryListener<Serializable, Serializable>) listener);
+        } finally {
+            unsetClassLoader();
+        }
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public void addEntryListener(final EntryListener<K, V> listener, final boolean includeValue) {
-        delegate.addEntryListener((EntryListener<Serializable, Serializable>) listener, includeValue);
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            delegate.addEntryListener((EntryListener<Serializable, Serializable>) listener, includeValue);
+        } finally {
+            unsetClassLoader();
+        }
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public void removeEntryListener(final EntryListener<K, V> listener) {
-        delegate.removeEntryListener((EntryListener<Serializable, Serializable>) listener);
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            delegate.removeEntryListener((EntryListener<Serializable, Serializable>) listener);
+        } finally {
+            unsetClassLoader();
+        }
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public void addEntryListener(final EntryListener<K, V> listener, final K key, final boolean includeValue) {
-        delegate.addEntryListener((EntryListener<Serializable, Serializable>) listener, key, includeValue);
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            delegate.addEntryListener((EntryListener<Serializable, Serializable>) listener, key, includeValue);
+        } finally {
+            unsetClassLoader();
+        }
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public void removeEntryListener(final EntryListener<K, V> listener, final K key) {
-        delegate.removeEntryListener((EntryListener<Serializable, Serializable>) listener, key);
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            delegate.removeEntryListener((EntryListener<Serializable, Serializable>) listener, key);
+        } finally {
+            unsetClassLoader();
+        }
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public MapEntry<K, V> getMapEntry(final K key) {
-        final Class<?> classLoaderSource = classLoaderSourceRef.get();
-        if (null == classLoaderSource) {
-            return (MapEntry<K, V>) delegate.getMapEntry(key);
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return (MapEntry<K, V>) delegate.getMapEntry(wrapper(key));
+        } finally {
+            unsetClassLoader();
         }
-        return (MapEntry<K, V>) delegate.getMapEntry(wrapper(key, classLoaderSource));
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Set<K> localKeySet(@SuppressWarnings("rawtypes") final Predicate predicate) {
-        return (Set<K>) delegate.localKeySet(predicate); // "automatically" de-serialized
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return (Set<K>) delegate.localKeySet(predicate); // "automatically" de-serialized
+        } finally {
+            unsetClassLoader();
+        }
     }
 
     @Override
     public void addIndex(final String attribute, final boolean ordered) {
-        delegate.addIndex(attribute, ordered);
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            delegate.addIndex(attribute, ordered);
+        } finally {
+            unsetClassLoader();
+        }
     }
 
     @Override
     public void addIndex(final Expression<?> expression, final boolean ordered) {
-        delegate.addIndex(expression, ordered);
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            delegate.addIndex(expression, ordered);
+        } finally {
+            unsetClassLoader();
+        }
     }
 
     @Override
     public void clear() {
-        delegate.clear();
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            delegate.clear();
+        } finally {
+            unsetClassLoader();
+        }
     }
 
     @Override
     public boolean containsKey(final Object key) {
-        final Class<?> classLoaderSource = classLoaderSourceRef.get();
-        if (null == classLoaderSource) {
-            return delegate.containsKey(key);
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return delegate.containsKey(wrapper(key));
+        } finally {
+            unsetClassLoader();
         }
-        return delegate.containsKey(wrapper(key, classLoaderSource));
     }
 
     @Override
     public boolean containsValue(final Object value) {
-        final Class<?> classLoaderSource = classLoaderSourceRef.get();
-        if (null == classLoaderSource) {
-            return delegate.containsValue(value);
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return delegate.containsValue(wrapper(value));
+        } finally {
+            unsetClassLoader();
         }
-        return delegate.containsValue(wrapper(value, classLoaderSource));
     }
 
     @Override
     public void destroy() {
-        delegate.destroy();
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            delegate.destroy();
+        } finally {
+            unsetClassLoader();
+        }
     }
 
     @Override
     public Set<Map.Entry<K, V>> entrySet() {
-        /*
-         * Create a clone as per general contract of IMap: The set is NOT backed by the map, so changes to the map are NOT reflected in the
-         * set, and vice-versa.
-         */
-        final Set<java.util.Map.Entry<Serializable, Serializable>> entrySet = delegate.entrySet();
-        final Set<Map.Entry<K, V>> clone = new LinkedHashSet<Map.Entry<K, V>>(entrySet.size());
-        for (final Entry<Serializable, Serializable> entry : entrySet) {
-            clone.add(new EntryImpl(entry));
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            /*
+             * Create a clone as per general contract of IMap: The set is NOT backed by the map, so changes to the map are NOT reflected in
+             * the set, and vice-versa.
+             */
+            final Set<java.util.Map.Entry<Serializable, Serializable>> entrySet = delegate.entrySet();
+            final Set<Map.Entry<K, V>> clone = new LinkedHashSet<Map.Entry<K, V>>(entrySet.size());
+            for (final Entry<Serializable, Serializable> entry : entrySet) {
+                clone.add(new EntryImpl(entry));
+            }
+            return clone;
+        } finally {
+            unsetClassLoader();
         }
-        return clone;
     }
 
     @Override
     public Set<Map.Entry<K, V>> entrySet(@SuppressWarnings("rawtypes") final Predicate predicate) {
-        /*
-         * Create a clone as per general contract of IMap: The set is NOT backed by the map, so changes to the map are NOT reflected in the
-         * set, and vice-versa.
-         */
-        final Set<java.util.Map.Entry<Serializable, Serializable>> entrySet = delegate.entrySet(predicate);
-        final Set<Map.Entry<K, V>> clone = new LinkedHashSet<Map.Entry<K, V>>(entrySet.size());
-        for (Entry<Serializable, Serializable> entry : entrySet) {
-            clone.add(new EntryImpl(entry));
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            /*
+             * Create a clone as per general contract of IMap: The set is NOT backed by the map, so changes to the map are NOT reflected in
+             * the set, and vice-versa.
+             */
+            final Set<java.util.Map.Entry<Serializable, Serializable>> entrySet = delegate.entrySet(predicate);
+            final Set<Map.Entry<K, V>> clone = new LinkedHashSet<Map.Entry<K, V>>(entrySet.size());
+            for (Entry<Serializable, Serializable> entry : entrySet) {
+                clone.add(new EntryImpl(entry));
+            }
+            return clone;
+        } finally {
+            unsetClassLoader();
         }
-        return clone;
     }
 
     @Override
     public boolean equals(final Object other) {
-        return delegate.equals(other);
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return delegate.equals(other);
+        } finally {
+            unsetClassLoader();
+        }
     }
 
     @Override
     public void flush() {
-        delegate.flush();
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            delegate.flush();
+        } finally {
+            unsetClassLoader();
+        }
     }
 
     @Override
     public boolean evict(final Object key) {
-        final Class<?> classLoaderSource = classLoaderSourceRef.get();
-        if (null == classLoaderSource) {
-            return delegate.evict(key);
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return delegate.evict(wrapper(key));
+        } finally {
+            unsetClassLoader();
         }
-        return delegate.evict(wrapper(key, classLoaderSource));
     }
 
     @Override
     public LocalMapStats getLocalMapStats() {
-        return delegate.getLocalMapStats();
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return delegate.getLocalMapStats();
+        } finally {
+            unsetClassLoader();
+        }
     }
 
     @Override
     public int hashCode() {
-        return delegate.hashCode();
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return delegate.hashCode();
+        } finally {
+            unsetClassLoader();
+        }
     }
 
     @Override
     public boolean isEmpty() {
-        return delegate.isEmpty();
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return delegate.isEmpty();
+        } finally {
+            unsetClassLoader();
+        }
     }
 
     @Override
     public boolean isLocked(final K key) {
-        final Class<?> classLoaderSource = classLoaderSourceRef.get();
-        if (null == classLoaderSource) {
-            return delegate.isLocked(key);
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return delegate.isLocked(wrapper(key));
+        } finally {
+            unsetClassLoader();
         }
-        return delegate.isLocked(wrapper(key, classLoaderSource));
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Set<K> keySet() {
-        return (Set<K>) delegate.keySet(); // "automatically" de-serialized
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return (Set<K>) delegate.keySet(); // "automatically" de-serialized
+        } finally {
+            unsetClassLoader();
+        }
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Set<K> keySet(@SuppressWarnings("rawtypes") final Predicate predicate) {
-        return (Set<K>) delegate.keySet(predicate); // "automatically" de-serialized
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return (Set<K>) delegate.keySet(predicate); // "automatically" de-serialized
+        } finally {
+            unsetClassLoader();
+        }
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Set<K> localKeySet() {
-        return (Set<K>) delegate.localKeySet(); // "automatically" de-serialized
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return (Set<K>) delegate.localKeySet(); // "automatically" de-serialized
+        } finally {
+            unsetClassLoader();
+        }
     }
 
     @Override
     public void putAll(final Map<? extends K, ? extends V> map) {
-        final Class<?> classLoaderSource = classLoaderSourceRef.get();
-        if (null == classLoaderSource) {
-            delegate.putAll(map);
-        } else {
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
             for (final Map.Entry<? extends K, ? extends V> entry : map.entrySet()) {
-                delegate.put(wrapper(entry.getKey(), classLoaderSource), wrapper(entry.getValue(), classLoaderSource));
+                delegate.put(wrapper(entry.getKey()), wrapper(entry.getValue()));
             }
+        } finally {
+            unsetClassLoader();
         }
     }
 
     @Override
     public void putAndUnlock(final K key, final V value) {
-        final Class<?> classLoaderSource = classLoaderSourceRef.get();
-        if (null == classLoaderSource) {
-            delegate.putAndUnlock(key, value);
-        } else {
-            delegate.putAndUnlock(wrapper(key, classLoaderSource), wrapper(value, classLoaderSource));
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            delegate.putAndUnlock(wrapper(key), wrapper(value));
+        } finally {
+            unsetClassLoader();
         }
     }
 
@@ -567,27 +755,37 @@ public class ClassLoaderAwareIMap<K extends Serializable, V extends Serializable
 
     @Override
     public boolean tryLock(final K key, final long time, final TimeUnit timeunit) {
-        final Class<?> classLoaderSource = classLoaderSourceRef.get();
-        if (null == classLoaderSource) {
-            return delegate.tryLock(key, time, timeunit);
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return delegate.tryLock(wrapper(key), time, timeunit);
+        } finally {
+            unsetClassLoader();
         }
-        return delegate.tryLock(wrapper(key, classLoaderSource), time, timeunit);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Collection<V> values() {
-        return (Collection<V>) delegate.values(); // "automatically" de-serialized
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return (Collection<V>) delegate.values(); // "automatically" de-serialized
+        } finally {
+            unsetClassLoader();
+        }
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Collection<V> values(@SuppressWarnings("rawtypes") final Predicate predicate) {
-        return (Collection<V>) delegate.values(predicate); // "automatically" de-serialized
-    }
-
-    private static KryoWrapper wrapper(final Object obj, final Class<?> classLoaderSource) {
-        return new KryoWrapper(obj, classLoaderSource.getClassLoader());
+        final Class<?> clazz = classLoaderSourceRef.get();
+        applyClassLoader(clazz);
+        try {
+            return (Collection<V>) delegate.values(predicate); // "automatically" de-serialized
+        } finally {
+            unsetClassLoader();
+        }
     }
 
 }

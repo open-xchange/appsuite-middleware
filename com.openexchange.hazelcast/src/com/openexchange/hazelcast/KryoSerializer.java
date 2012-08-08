@@ -54,7 +54,7 @@ import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 
 /**
- * {@link KryoSerializer} - Serializes/Deserialzes any object using <img src="http://kryo.googlecode.com/svn/wiki/kryo-logo.jpg" width="88"
+ * {@link KryoSerializer} - Serializes/Deserializes any object using <img src="http://kryo.googlecode.com/svn/wiki/kryo-logo.jpg" width="88"
  * height="37">.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -73,12 +73,13 @@ public final class KryoSerializer {
      * 
      * @param obj The object to serialize
      * @param classLoader The class loader to use
-     * @return The serialzed object's byte array
+     * @return The serialized object's byte array
      */
     public static byte[] write(final Object obj, final ClassLoader classLoader) {
         final Kryo kryo = new Kryo();
         kryo.setClassLoader(classLoader);
-        final Output output = new Output(8192);
+        final Output output = new Output();
+        output.setBuffer(new byte[2048], -1);
         kryo.writeClassAndObject(output, obj);
         return output.toBytes();
     }
@@ -86,9 +87,9 @@ public final class KryoSerializer {
     /**
      * Deserializes specified object's byte array using given class loader.
      * 
-     * @param bytes The serialzed object's byte array
+     * @param bytes The serialized object's byte array
      * @param classLoader The class loader to use
-     * @return The desrialized object
+     * @return The deserialized object
      */
     public static Object read(final byte[] bytes, final ClassLoader classLoader) {
         final Kryo kryo = new Kryo();
