@@ -94,11 +94,13 @@ public final class ClassLoaderAwareIList<E extends Serializable> implements ILis
         return delegate.getName();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void addItemListener(final ItemListener<E> listener, final boolean includeValue) {
         delegate.addItemListener((ItemListener<Serializable>) listener, includeValue);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void removeItemListener(final ItemListener<E> listener) {
         delegate.removeItemListener((ItemListener<Serializable>) listener);
@@ -138,6 +140,7 @@ public final class ClassLoaderAwareIList<E extends Serializable> implements ILis
         return delegate.contains(wrapper(o, clazz));
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Iterator<E> iterator() {
         return (Iterator<E>) delegate.iterator();
@@ -251,11 +254,13 @@ public final class ClassLoaderAwareIList<E extends Serializable> implements ILis
         return delegate.hashCode();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public E get(final int index) {
         return (E) delegate.get(index);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public E set(final int index, final E element) {
         final Class<?> clazz = classLoaderSourceRef.get();
@@ -275,6 +280,7 @@ public final class ClassLoaderAwareIList<E extends Serializable> implements ILis
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public E remove(final int index) {
         return (E) delegate.remove(index);
@@ -298,16 +304,19 @@ public final class ClassLoaderAwareIList<E extends Serializable> implements ILis
         return delegate.lastIndexOf(wrapper(o, clazz));
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public ListIterator<E> listIterator() {
         return (ListIterator<E>) delegate.listIterator();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public ListIterator<E> listIterator(final int index) {
         return (ListIterator<E>) delegate.listIterator(index);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public List<E> subList(final int fromIndex, final int toIndex) {
         return (List<E>) delegate.subList(fromIndex, toIndex);
