@@ -151,4 +151,9 @@ public interface OAuthServiceMetaData {
      */
 	API getAPI();
 
+	/**
+	 * Whether to register a token based deferrer.
+	 */
+	boolean registerTokenBasedDeferrer();
+
 }

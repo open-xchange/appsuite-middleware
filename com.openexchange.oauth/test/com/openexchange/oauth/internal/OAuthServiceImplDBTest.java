@@ -127,7 +127,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
 
         });
 
-        oauth = new OAuthServiceImpl(getDBProvider(), new SimIDGenerator(), registry, new SimContextService()) {
+        oauth = new OAuthServiceImpl(getDBProvider(), new SimIDGenerator(), registry, new SimContextService(), null) {
             @Override
             protected void obtainToken(final OAuthInteractionType type, final Map<String, Object> arguments, final DefaultOAuthAccount account) {
                 account.setToken("myAccessToken");
