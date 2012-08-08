@@ -4224,6 +4224,11 @@ msgstr ""
 msgid "No UDP channel is configured."
 msgstr ""
 
+#. * The mandatory session information is missing.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:62
+msgid "The session information didn't match any ServerSession"
+msgstr ""
+
 #. Unknown channel %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeExceptionMessages.java:63
 msgid "Unknown channel %1$s"
