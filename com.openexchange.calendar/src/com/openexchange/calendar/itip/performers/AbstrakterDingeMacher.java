@@ -55,6 +55,7 @@ import java.util.Map;
 import com.openexchange.calendar.AppointmentDiff;
 import com.openexchange.calendar.AppointmentDiff.FieldUpdate;
 import com.openexchange.calendar.itip.ITipAction;
+import com.openexchange.calendar.itip.ITipAnalysis;
 import com.openexchange.calendar.itip.ITipChange;
 import com.openexchange.calendar.itip.ITipDingeMacher;
 import com.openexchange.calendar.itip.ITipIntegrationUtility;
@@ -115,16 +116,16 @@ public abstract class AbstrakterDingeMacher implements ITipDingeMacher {
         
     }
     
-    protected void writeMail(final ITipAction action, Appointment original, final Appointment appointment, final Session session) throws OXException {
+    protected void writeMail(final ITipAction action, Appointment original, final Appointment appointment, final Session session, int owner) throws OXException {
         switch (action) {
         case COUNTER:
             return;
         default: //Continue normally
         }
         final Appointment filled = fillup(original, appointment);
-        original = constructOriginalForMail(action, original, filled, session);
+        original = constructOriginalForMail(action, original, filled, session, owner);
         
-        final ITipMailGenerator generator = mailGenerators.create(original, filled, session, session.getUserId());
+        final ITipMailGenerator generator = mailGenerators.create(original, filled, session, owner);
         switch (action) {
         case CREATE: 
             if (!generator.userIsTheOrganizer()) {
@@ -188,21 +189,21 @@ public abstract class AbstrakterDingeMacher implements ITipDingeMacher {
         }
     }
     
-    private Appointment constructOriginalForMail(final ITipAction action, final Appointment original, final Appointment appointment, final Session session) {
+    private Appointment constructOriginalForMail(final ITipAction action, final Appointment original, final Appointment appointment, final Session session, int owner) {
         switch (action) {
-        case ACCEPT: case ACCEPT_AND_IGNORE_CONFLICTS: case ACCEPT_AND_REPLACE: case ACCEPT_PARTY_CRASHER: case DECLINE: case TENTATIVE: return constructFakeOriginal(appointment, session);
+        case ACCEPT: case ACCEPT_AND_IGNORE_CONFLICTS: case ACCEPT_AND_REPLACE: case ACCEPT_PARTY_CRASHER: case DECLINE: case TENTATIVE: return constructFakeOriginal(appointment, session, owner);
         default: return original;
         }
     }
 
-    private Appointment constructFakeOriginal(final Appointment appointment, final Session session) {
+    private Appointment constructFakeOriginal(final Appointment appointment, final Session session, int owner) {
         final Appointment clone = appointment.clone();
         final Participant[] participants = clone.getParticipants();
         final List<Participant> changed = new ArrayList<Participant>();
         for (final Participant participant : participants) {
             if (participant instanceof UserParticipant) {
                 UserParticipant up = (UserParticipant) participant;
-                if (up.getIdentifier() == session.getUserId()) {
+                if (up.getIdentifier() == owner) {
                     up = new UserParticipant(up.getIdentifier());
                     
                     up.setConfirm(ConfirmStatus.NONE.getId());
@@ -218,7 +219,7 @@ public abstract class AbstrakterDingeMacher implements ITipDingeMacher {
         final UserParticipant[] users = clone.getUsers();
         final List<UserParticipant> changedUsers = new ArrayList<UserParticipant>();
         for (UserParticipant up : users) {
-            if (up.getIdentifier() == session.getUserId()) {
+            if (up.getIdentifier() == owner) {
                 up = new UserParticipant(up.getIdentifier());
                 up.setConfirm(ConfirmStatus.NONE.getId());
             }
@@ -242,6 +243,16 @@ public abstract class AbstrakterDingeMacher implements ITipDingeMacher {
         }
         
         return copy;
+    }
+
+    protected int getOwner(Session session, ITipAnalysis analysis, Appointment appointment) {
+        int owner = session.getUserId();
+        if (analysis.getMessage().getOwner() > 0) {
+            owner = analysis.getMessage().getOwner();
+        } else if (appointment.getPrincipalId() > 0) {
+            owner = appointment.getPrincipalId();
+        }
+        return owner;
     }
     
 }
