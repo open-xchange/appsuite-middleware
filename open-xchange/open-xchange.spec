@@ -58,7 +58,7 @@ if [ ${1:-0} -eq 2 ]; then
     ## start update from < 6.21
     ##
     GWCONFFILES="ajp.properties attachment.properties cache.ccf calendar.properties configdb.properties contact.properties event.properties file-logging.properties HTMLEntities.properties imap.properties importerExporter.xml import.properties infostore.properties javamail.properties ldap.properties login.properties mailcache.ccf mail.properties mime.types noipcheck.cnf notification.properties ox-scriptconf.sh participant.properties passwordchange.properties server.properties sessioncache.ccf sessiond.properties smtp.properties system.properties user.properties whitelist.properties"
-    COCONFFILES="i18n.properties excludedupdatetasks.properties foldercache.properties transport.properties"
+    COCONFFILES="excludedupdatetasks.properties foldercache.properties transport.properties"
     for FILE in ${GWCONFFILES}; do
 	ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc $FILE
     done

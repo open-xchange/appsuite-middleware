@@ -179,8 +179,9 @@ if [ ${1:-0} -eq 2 ]; then
     ox_update_permissions "/opt/open-xchange/etc/filestorage.properties" root:open-xchange 640
 fi
 #
+ox_move_config_file /opt/open-xchange/etc/common /opt/open-xchange/etc i18n.properties
 ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc push.properties push-udp.properties
-CONFFILES="mail-push.properties filestorage.properties folderjson.properties messaging.properties publications.properties secret.properties secrets threadpool.properties settings/themes.properties settings/ui.properties meta/ui.yml"
+CONFFILES="management.properties templating.properties mail-push.properties filestorage.properties folderjson.properties messaging.properties publications.properties secret.properties secrets threadpool.properties settings/themes.properties settings/ui.properties meta/ui.yml"
 for FILE in $CONFFILES; do
     ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc $FILE
 done
