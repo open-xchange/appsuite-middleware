@@ -363,6 +363,23 @@ public class AppointmentNotificationPool implements
 		}
 
 
+        private void notifyInternalParticipantsAboutOverallChanges() throws OXException {
+            ITipMailGenerator generator = generatorFactory.create(original, mostRecent, session, -1);
+            if (moreThanOneUserActed()) {
+                generator.noActor();
+            }
+            List<NotificationParticipant> recipients = generator.getRecipients();
+            for (NotificationParticipant participant : recipients) {
+                if (!(participant.isExternal() || participant.isResource())) {
+                    NotificationMail mail = generator.generateUpdateMailFor(participant);
+                    if (mail != null) {
+                        notificationMailer.sendMail(mail, session);
+                    }
+                }
+            }
+        }
+
+
 		private boolean moreThanOneUserActed() {
 			int userId = session.getUserId();
 			for (Update update : updates) {
@@ -376,7 +393,7 @@ public class AppointmentNotificationPool implements
 		// TODO: What about combined state changes and detail changes? The user should send a mail about both and the state change should be omitted in the state change summary.
 		private void notifyInternalParticipantsAboutDetailChangesAsIndividualUsers() throws OXException {
 			if (!moreThanOneUserActed()) {
-				notifyAllParticipantsAboutOverallChanges();
+				notifyInternalParticipantsAboutOverallChanges();
 				return;
 			}
 			Map<PartitionIndex, Update[]> partitions = new HashMap<PartitionIndex, Update[]>();
