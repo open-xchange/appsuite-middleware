@@ -59,9 +59,8 @@ import com.hazelcast.config.MapConfig;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheElement;
 import com.openexchange.caching.CacheExceptionCode;
-import com.openexchange.caching.CacheKey;
-import com.openexchange.caching.CacheKeyImpl;
 import com.openexchange.caching.CacheStatistics;
+import com.openexchange.caching.DefaultCacheKeyService;
 import com.openexchange.caching.ElementAttributes;
 import com.openexchange.caching.PutIfAbsent;
 import com.openexchange.caching.SupportsLocalOperations;
@@ -73,7 +72,7 @@ import com.openexchange.exception.OXException;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class LocalCache implements Cache, SupportsLocalOperations, PutIfAbsent {
+public final class LocalCache extends DefaultCacheKeyService implements Cache, SupportsLocalOperations, PutIfAbsent {
 
     private final MapConfig mapConfig;
 
@@ -266,16 +265,6 @@ public final class LocalCache implements Cache, SupportsLocalOperations, PutIfAb
     public CacheStatistics getStatistics() {
         // TODO Auto-generated method stub
         return null;
-    }
-
-    @Override
-    public CacheKey newCacheKey(final int contextId, final int objectId) {
-        return new CacheKeyImpl(contextId, objectId);
-    }
-
-    @Override
-    public CacheKey newCacheKey(final int contextId, final Serializable... objs) {
-        return new CacheKeyImpl(contextId, objs);
     }
 
 }

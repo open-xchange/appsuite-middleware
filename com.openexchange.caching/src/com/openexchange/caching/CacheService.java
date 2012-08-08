@@ -50,7 +50,6 @@
 package com.openexchange.caching;
 
 import java.io.InputStream;
-import java.io.Serializable;
 import com.openexchange.exception.OXException;
 
 /**
@@ -58,7 +57,7 @@ import com.openexchange.exception.OXException;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface CacheService {
+public interface CacheService extends CacheKeyService {
 
     /**
      * Indicates if this cache is distributed.
@@ -159,32 +158,5 @@ public interface CacheService {
      * @throws OXException If configuration fails
      */
     public void loadDefaultConfiguration() throws OXException;
-
-    /**
-     * Creates a new instance of {@link CacheKey} consisting of specified context ID and object ID.
-     *
-     * @param contextId The context ID
-     * @param objectId The object ID
-     * @return The new instance of {@link CacheKey}
-     */
-    public CacheKey newCacheKey(int contextId, int objectId);
-
-    /**
-     * Creates a new instance of {@link CacheKey} consisting of specified context ID and serializable object.
-     *
-     * @param contextId The context ID
-     * @param obj The serializable object
-     * @return new instance of {@link CacheKey}
-     */
-    public CacheKey newCacheKey(int contextId, Serializable obj);
-
-    /**
-     * Creates a new instance of {@link CacheKey} consisting of specified context ID and serializable objects.
-     *
-     * @param contextId The context ID
-     * @param objs The serializable objects
-     * @return new instance of {@link CacheKey}
-     */
-    public CacheKey newCacheKey(int contextId, Serializable... objs);
 
 }

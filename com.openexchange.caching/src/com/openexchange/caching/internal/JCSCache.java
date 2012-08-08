@@ -64,7 +64,6 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheElement;
 import com.openexchange.caching.CacheExceptionCode;
 import com.openexchange.caching.CacheKey;
-import com.openexchange.caching.CacheKeyImpl;
 import com.openexchange.caching.CacheStatistics;
 import com.openexchange.caching.ElementAttributes;
 import com.openexchange.caching.SupportsLocalOperations;

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,43 +47,42 @@
  *
  */
 
-package com.openexchange.caching.internal;
+package com.openexchange.caching;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import java.io.Serializable;
-import org.junit.Test;
-import com.openexchange.caching.CacheKey;
 
 /**
- * {@link CacheKeyImplTest}
- *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * {@link CacheKeyService} - The service to provide cache keys.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class CacheKeyImplTest {
-
-    public CacheKeyImplTest() {
-        super();
-    }
+public interface CacheKeyService {
 
     /**
-     * Tests if the class generates the same hash codes even if different constructors are used.
+     * Creates a new instance of {@link CacheKey} consisting of specified context ID and object ID.
+     * 
+     * @param contextId The context ID
+     * @param objectId The object ID
+     * @return The new instance of {@link CacheKey}
      */
-    @Test
-    public final void testSameHashCode() {
-        final CacheKey key1 = new CacheKeyImpl(424242669, "teststring");
-        final CacheKey key2 = new CacheKeyImpl(424242669, new Serializable[] { "teststring" });
-        assertEquals("Generated hashes are not the same.", key1.hashCode(), key2.hashCode());
-    }
+    public CacheKey newCacheKey(int contextId, int objectId);
 
     /**
-     * Tests if the class generates the same hash codes even if different constructors are used.
+     * Creates a new instance of {@link CacheKey} consisting of specified context ID and serializable object.
+     * 
+     * @param contextId The context ID
+     * @param obj The serializable object
+     * @return new instance of {@link CacheKey}
      */
-    @Test
-    public final void testEqualsObject() {
-        final CacheKey key1 = new CacheKeyImpl(424242669, "teststring");
-        final CacheKey key2 = new CacheKeyImpl(424242669, new Serializable[] { "teststring" });
-        assertTrue("Equals failes when using different constructors.", key1.equals(key2));
-        assertTrue("Equals failes when using different constructors.", key2.equals(key1));
-    }
+    public CacheKey newCacheKey(int contextId, Serializable obj);
+
+    /**
+     * Creates a new instance of {@link CacheKey} consisting of specified context ID and serializable objects.
+     * 
+     * @param contextId The context ID
+     * @param objs The serializable objects
+     * @return new instance of {@link CacheKey}
+     */
+    public CacheKey newCacheKey(int contextId, Serializable... objs);
+
 }

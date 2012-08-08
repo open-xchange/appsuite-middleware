@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,43 +47,39 @@
  *
  */
 
-package com.openexchange.caching.internal;
+package com.openexchange.caching;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import java.io.Serializable;
-import org.junit.Test;
-import com.openexchange.caching.CacheKey;
+import com.openexchange.caching.internal.CacheKeyImpl;
+
 
 /**
- * {@link CacheKeyImplTest}
+ * {@link DefaultCacheKeyService}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class CacheKeyImplTest {
+public class DefaultCacheKeyService implements CacheKeyService {
 
-    public CacheKeyImplTest() {
+    /**
+     * Initializes a new {@link DefaultCacheKeyService}.
+     */
+    public DefaultCacheKeyService() {
         super();
     }
 
-    /**
-     * Tests if the class generates the same hash codes even if different constructors are used.
-     */
-    @Test
-    public final void testSameHashCode() {
-        final CacheKey key1 = new CacheKeyImpl(424242669, "teststring");
-        final CacheKey key2 = new CacheKeyImpl(424242669, new Serializable[] { "teststring" });
-        assertEquals("Generated hashes are not the same.", key1.hashCode(), key2.hashCode());
+    @Override
+    public CacheKey newCacheKey(final int contextId, final int objectId) {
+        return new CacheKeyImpl(contextId, objectId);
     }
 
-    /**
-     * Tests if the class generates the same hash codes even if different constructors are used.
-     */
-    @Test
-    public final void testEqualsObject() {
-        final CacheKey key1 = new CacheKeyImpl(424242669, "teststring");
-        final CacheKey key2 = new CacheKeyImpl(424242669, new Serializable[] { "teststring" });
-        assertTrue("Equals failes when using different constructors.", key1.equals(key2));
-        assertTrue("Equals failes when using different constructors.", key2.equals(key1));
+    @Override
+    public CacheKey newCacheKey(final int contextId, final Serializable obj) {
+        return new CacheKeyImpl(contextId, obj);
     }
+
+    @Override
+    public CacheKey newCacheKey(final int contextId, final Serializable... objs) {
+        return new CacheKeyImpl(contextId, objs);
+    }
+
 }
