@@ -75,10 +75,10 @@ public final class KryoSerializer {
      * @param classLoader The class loader to use
      * @return The serialzed object's byte array
      */
-    public static byte[] write(Object obj, ClassLoader classLoader) {
-        Kryo kryo = new Kryo();
+    public static byte[] write(final Object obj, final ClassLoader classLoader) {
+        final Kryo kryo = new Kryo();
         kryo.setClassLoader(classLoader);
-        Output output = new Output(8192);
+        final Output output = new Output(8192);
         kryo.writeClassAndObject(output, obj);
         return output.toBytes();
     }
@@ -90,11 +90,10 @@ public final class KryoSerializer {
      * @param classLoader The class loader to use
      * @return The desrialized object
      */
-    public static Object read(byte[] bytes, ClassLoader classLoader) {
-        Kryo kryo = new Kryo();
+    public static Object read(final byte[] bytes, final ClassLoader classLoader) {
+        final Kryo kryo = new Kryo();
         kryo.setClassLoader(classLoader);
-        Input input = new Input(bytes);
-        return kryo.readClassAndObject(input);
+        return kryo.readClassAndObject(new Input(bytes));
     }
 
 }

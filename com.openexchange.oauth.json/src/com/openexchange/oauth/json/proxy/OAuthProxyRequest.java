@@ -36,6 +36,8 @@ public class OAuthProxyRequest {
 		put(API.LINKEDIN, 	Arrays.asList(Pattern.compile("^http:\\/\\/api\\.linkedin\\.com")));
 		put(API.TWITTER,	Arrays.asList(Pattern.compile("^https?:\\/\\/(.*?\\.)?twitter.com")));
 		put(API.YAHOO, 	Arrays.asList(Pattern.compile("^https?:\\/\\/(.*?\\.)?yahoo(apis)?\\.com")));
+		put(API.TUMBLR, Arrays.asList(Pattern.compile("^https?:\\/\\/.*?\\.tumblr\\.com")));
+		put(API.FLICKR, Arrays.asList(Pattern.compile("^https?:\\/\\/.*?\\.flickr\\.com")));
 	}};
 	
 	public static enum HTTPMethod {

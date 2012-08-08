@@ -59,7 +59,9 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.caching.CacheInformationMBean;
+import com.openexchange.caching.CacheKeyService;
 import com.openexchange.caching.CacheService;
+import com.openexchange.caching.DefaultCacheKeyService;
 import com.openexchange.caching.internal.JCSCacheInformation;
 import com.openexchange.caching.internal.JCSCacheService;
 import com.openexchange.caching.internal.JCSCacheServiceInit;
@@ -127,6 +129,7 @@ public final class CacheActivator extends HousekeepingActivator {
         JCSCacheServiceInit.initInstance();
         final ConfigurationService service = getService(ConfigurationService.class);
         JCSCacheServiceInit.getInstance().start(service);
+        registerService(CacheKeyService.class, new DefaultCacheKeyService());
         /*
          * Register service
          */

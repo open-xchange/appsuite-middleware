@@ -7,7 +7,9 @@ import org.apache.commons.httpclient.util.URIUtil;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.FacebookApi;
+import org.scribe.builder.api.FlickrApi;
 import org.scribe.builder.api.LinkedInApi;
+import org.scribe.builder.api.TumblrApi;
 import org.scribe.builder.api.TwitterApi;
 import org.scribe.builder.api.YahooApi;
 import org.scribe.model.OAuthRequest;
@@ -52,6 +54,8 @@ public abstract class ScribeGenericHTTPRequestBuilder<T extends HTTPGenericReque
 		case LINKEDIN: return LinkedInApi.class;
 		case TWITTER: return TwitterApi.class;
 		case YAHOO: return YahooApi.class;
+		case TUMBLR: return TumblrApi.class;
+		case FLICKR: return FlickrApi.class;
 		}
 		throw new IllegalStateException("Unsupported API type: "+api);
 	}
@@ -101,7 +105,7 @@ public abstract class ScribeGenericHTTPRequestBuilder<T extends HTTPGenericReque
 		setHeaders(headers, request);
 		modify(request);
 		service.signRequest(getToken(), request);
-		return new OAuthHTTPRequest(request);
+		return new OAuthHTTPRequest(request, parameters);
 	}
 
 	protected void setHeaders(Map<String, String> headers, OAuthRequest request) {

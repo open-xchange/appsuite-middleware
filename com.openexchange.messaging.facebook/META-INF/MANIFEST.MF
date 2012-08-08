@@ -104,8 +104,8 @@ Bundle-ClassPath: lib/commons-collections-3.2.1.jar,
  lib/nekohtml-1.9.12.jar,
  lib/runtime-0.4.1.5.jar,
  lib/sac-1.3.jar,
- lib/scribe-1.1.0.jar,
  lib/serializer-2.7.1.jar,
  lib/xalan-2.7.1.jar,
+ lib/scribe_head.jar,
  .
 Bundle-Activator: com.openexchange.messaging.facebook.osgi.Activator

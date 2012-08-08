@@ -24,4 +24,4 @@ Import-Package: com.openexchange.config,
  org.osgi.framework
 Export-Package: com.openexchange.oauth.yahoo
 Bundle-ClassPath: .,
- lib/scribe-1.1.0.jar
+ lib/scribe_head.jar

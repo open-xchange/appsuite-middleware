@@ -164,4 +164,9 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
     public String modifyCallbackURL(String callbackUrl) {
         return callbackUrl;
     }
+
+    @Override
+    public boolean registerTokenBasedDeferrer() {
+    	return false;
+    }
 }

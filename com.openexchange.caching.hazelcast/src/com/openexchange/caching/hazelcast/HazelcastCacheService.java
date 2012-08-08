@@ -69,9 +69,8 @@ import com.hazelcast.core.Instance.InstanceType;
 import com.hazelcast.core.Member;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheExceptionCode;
-import com.openexchange.caching.CacheKey;
-import com.openexchange.caching.CacheKeyImpl;
 import com.openexchange.caching.CacheService;
+import com.openexchange.caching.DefaultCacheKeyService;
 import com.openexchange.caching.hazelcast.util.ConfigurationParser;
 import com.openexchange.caching.hazelcast.util.LocalCacheGenerator;
 import com.openexchange.config.ConfigurationService;
@@ -82,7 +81,7 @@ import com.openexchange.exception.OXException;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class HazelcastCacheService implements CacheService {
+public final class HazelcastCacheService extends DefaultCacheKeyService implements CacheService {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(HazelcastCacheService.class);
 
@@ -289,21 +288,6 @@ public final class HazelcastCacheService implements CacheService {
         } catch (final IOException e) {
             throw CacheExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
-    }
-
-    @Override
-    public CacheKey newCacheKey(final int contextId, final int objectId) {
-        return new CacheKeyImpl(contextId, objectId);
-    }
-
-    @Override
-    public CacheKey newCacheKey(final int contextId, final Serializable obj) {
-        return new CacheKeyImpl(contextId, obj);
-    }
-
-    @Override
-    public CacheKey newCacheKey(final int contextId, final Serializable... objs) {
-        return new CacheKeyImpl(contextId, objs);
     }
 
 }
