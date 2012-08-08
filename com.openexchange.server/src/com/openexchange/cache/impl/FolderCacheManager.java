@@ -318,25 +318,28 @@ public final class FolderCacheManager {
     public FolderObject loadFolderObject(final int folderId, final Context ctx, final Connection readCon) throws OXException {
         final CacheKey key = getCacheKey(ctx.getContextId(), folderId);
         final Cache folderCache = this.folderCache;
-        cacheLock.lock();
-        try {
-            final Object tmp = folderCache.get(key);
-            if (tmp instanceof FolderObject) {
-                folderCache.remove(key);
-                // Dirty hack
-                final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
-                if (null != cacheService) {
-                    try {
-                        final Cache globalCache = cacheService.getCache("GlobalFolderCache");
-                        final CacheKey cacheKey = cacheService.newCacheKey(ctx.getContextId(), FolderStorage.REAL_TREE_ID, String.valueOf(key));
-                        globalCache.remove(cacheKey);
-                    } catch (final OXException e) {
-                        LOG.warn(e.getMessage(), e);
+        if (folderCache.isReplicated()) {
+            cacheLock.lock();
+            try {
+                final Object tmp = folderCache.get(key);
+                if (tmp instanceof FolderObject) {
+                    folderCache.remove(key);
+                    // Dirty hack
+                    final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+                    if (null != cacheService) {
+                        try {
+                            final Cache globalCache = cacheService.getCache("GlobalFolderCache");
+                            final CacheKey cacheKey =
+                                cacheService.newCacheKey(ctx.getContextId(), FolderStorage.REAL_TREE_ID, String.valueOf(key));
+                            globalCache.remove(cacheKey);
+                        } catch (final OXException e) {
+                            LOG.warn(e.getMessage(), e);
+                        }
                     }
                 }
+            } finally {
+                cacheLock.unlock();
             }
-        } finally {
-            cacheLock.unlock();
         }
         if (null != readCon) {
             putIfAbsent(loadFolderObjectInternal(folderId, ctx, readCon), ctx, null);
