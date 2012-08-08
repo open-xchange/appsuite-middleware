@@ -1059,6 +1059,31 @@ public class RdbUserStorage extends UserStorage {
     }
 
     @Override
+    public User[] searchUserByMailLogin(final String login, final Context context) throws OXException {
+        String sql = "SELECT id FROM user WHERE cid=? AND imapLogin LIKE ?";
+        final Connection con = DBPool.pickup(context);
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            final String pattern = StringCollection.prepareForSearch(login, false, true);
+            stmt = con.prepareStatement(sql);
+            stmt.setInt(1, context.getContextId());
+            stmt.setString(2, pattern);
+            result = stmt.executeQuery();
+            final TIntSet userIds = new TIntHashSet();
+            while (result.next()) {
+                userIds.add(result.getInt(1));
+            }
+            return getUser(context, userIds.toArray());
+        } catch (final SQLException e) {
+            throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
+        } finally {
+            closeSQLStuff(result, stmt);
+            DBPool.closeReaderSilent(context, con);
+        }
+    }
+
+    @Override
     public int[] listModifiedUser(final Date modifiedSince, final Context context)
         throws OXException {
         Connection con = null;
