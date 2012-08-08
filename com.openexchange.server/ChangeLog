@@ -1,6 +1,7 @@
 * 2012-08-08 - martin.herfurth@open-xchange.com
 
  - Fix for bug 22541: Fixed duplicate update mails.
+ - Fix for bug 22687: Reply mails for external organizer if appointment was accepted in a shared Mail folder.
 
 * 2012-08-08 - tobias.friedrich@open-xchange.com
 
