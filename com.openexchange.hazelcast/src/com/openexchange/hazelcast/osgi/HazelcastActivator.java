@@ -25,7 +25,16 @@ import com.openexchange.timer.TimerService;
 import com.openexchange.tools.strings.StringParser;
 
 /**
- * {@link HazelcastActivator}
+ * {@link HazelcastActivator} - The activator for Hazelcast bundle (registers a {@link HazelcastInstance} for ths JVM)
+ * <p>
+ * When should you add node?<br>
+ * 1. You reached the limits of your CPU or RAM.<br>
+ * 2. You reached the limits of GC. You started seeing full-GC
+ * <p>
+ * When should you stop adding nodes? Should you have 10, 30, 50, 100, or 1000 nodes?<br>
+ * 1. You reached the limits of your network. Your switch is not able to handle the amount of data passed around.<br>
+ * 2. You reached the limits of the way application utilizing Hazelcast.<br>
+ * Adding node is not increasing your total throughput and not reducing the latency.
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
