@@ -186,6 +186,11 @@ public final class NewAction extends AbstractMailAction {
                             MessageParser.parse4Transport(jsonMailObj, uploadEvent, session, accountId, request.isSecure() ? "https://" : "http://", request.getHostname(), warnings);
                         final ComposeType sendType =
                             jsonMailObj.hasAndNotNull(Mail.PARAMETER_SEND_TYPE) ? ComposeType.getType(jsonMailObj.getInt(Mail.PARAMETER_SEND_TYPE)) : ComposeType.NEW;
+                        for (final ComposedMailMessage cm : composedMails) {
+                            if (null != cm) {
+                                cm.setSendType(sendType);
+                            }
+                        }
                         msgIdentifier = mailInterface.sendMessage(composedMails[0], sendType, accountId);
                         for (int i = 1; i < composedMails.length; i++) {
                             mailInterface.sendMessage(composedMails[i], sendType, accountId);
