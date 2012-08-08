@@ -198,6 +198,11 @@ public class ID {
         return b.toString();
     }
 
+    /**
+     * Strip protocol and resource from this id so that it only contains
+     * user@context information.
+     * @return
+     */
     public ID toGeneralForm() {
         return new ID(null, user, context, null);
     }

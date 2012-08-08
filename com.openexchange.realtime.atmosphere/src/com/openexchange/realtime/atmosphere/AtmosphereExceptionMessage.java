@@ -49,21 +49,15 @@
 
 package com.openexchange.realtime.atmosphere;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.impl.StanzaWriter;
-import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.i18n.LocalizableStrings;
+
 
 /**
- * {@link StanzaSender} - Handles sending of Stanzas to the ID specified in the
- * stanza. 
+ * {@link AtmosphereExceptionMessage}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public interface StanzaSender {
-    /**
-     * Send Stanzas to the ID specified in the Stanza. 
-     * @param stanza the Stanza to send
-     * @throws OXException when sending of the Stanza fails
-     */
-	public void send(Stanza stanza) throws OXException;
+public class AtmosphereExceptionMessage implements LocalizableStrings {
+    /** The mandatory session information is missing. */
+    public static final String SESSIONINFO_DIDNT_MATCH_SERVERSESSION_MSG = "The session information didn't match any ServerSession";
 }

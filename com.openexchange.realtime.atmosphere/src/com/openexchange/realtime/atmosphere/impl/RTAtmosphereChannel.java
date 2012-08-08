@@ -62,6 +62,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class RTAtmosphereChannel implements Channel {
 	
+    public static final String PROTOCOL = "ox";
 	private final RTAtmosphereHandler handler;
 	private final HandlerLibrary library;
 	

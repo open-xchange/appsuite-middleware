@@ -50,18 +50,19 @@
 package com.openexchange.realtime.atmosphere.impl;
 
 import java.io.IOException;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import org.atmosphere.cpr.AtmosphereHandler;
 import org.atmosphere.cpr.AtmosphereRequest;
 import org.atmosphere.cpr.AtmosphereResource;
 import org.atmosphere.cpr.AtmosphereResourceEvent;
 import org.atmosphere.cpr.AtmosphereResponse;
+import org.atmosphere.cpr.Broadcaster;
+import org.atmosphere.cpr.BroadcasterFactory;
+import org.atmosphere.cpr.MetaBroadcaster;
 import org.atmosphere.websocket.WebSocketEventListenerAdapter;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;
 import com.openexchange.realtime.atmosphere.OXRTHandler;
@@ -69,8 +70,10 @@ import com.openexchange.realtime.atmosphere.StanzaSender;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.util.IDMap;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -89,13 +92,14 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 	// TODO: Figure Out JSONP and Long-Polling State management. Hot-Swap the
 	// AtmosphereResource.
 	// TODO: Close connections and get rid of em
+    // TODO: investigate why grizzly's responseimls are suddenly invalidated
     
     private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(RTAtmosphereHandler.class));
 
 	private final ServiceLookup services;
 
 	// Keep track of session <-> RTAtmosphereState associations
-	private final ConcurrentMap<String, RTAtmosphereState> uuid2State;
+//	private final ConcurrentMap<String, RTAtmosphereState> uuid2State;
 
 	// Keep track of ID <-> RTAtmosphereState associations
 	private final IDMap<RTAtmosphereState> id2State;
@@ -111,7 +115,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 	 */
 	public RTAtmosphereHandler(HandlerLibrary library, ServiceLookup services) {
 	    super();
-	    uuid2State = new ConcurrentHashMap<String, RTAtmosphereState>();
+//	    uuid2State = new ConcurrentHashMap<String, RTAtmosphereState>();
 	    id2State = new IDMap<RTAtmosphereState>();
 		this.library = library;
 		this.services = services;
@@ -123,48 +127,10 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 	}
 	
 	@Override
-	    public void onStateChange(AtmosphereResourceEvent evt) throws IOException {
+	public void onStateChange(AtmosphereResourceEvent evt) throws IOException {
 
 	}
 
-//	@Override
-//    public void onRequest(AtmosphereResource r) throws IOException {
-//		AtmosphereRequest req = r.getRequest();
-//		RTAtmosphereState state = null;
-//		try {
-//		    state = getState(r);
-//			state.lock();
-//			if (req.getMethod().equalsIgnoreCase("GET")) {
-//				if (state.handshake) {
-//					r.getResponse().write("OK");
-//					state.handshake = false;
-//				} else {
-//				    /*
-//				     * Allow bi-directional communication by suspending:
-//				     * AtmosphereResource/Client gets suspended until its
-//				     * Broadcaster receives a message.
-//				     */
-//					r.suspend();
-//					state.r = r;
-//				}
-//			} else {
-//			    /*
-//			     * Let the client send data to the server via POST without
-//			     * suspending the AtmosphereResource. 
-//			     */
-//				handleIncoming(StanzaParser.parse(req.getReader().readLine()), state);
-//			}
-//
-//		} catch (OXException e) {
-//			// TODO: report Exception to client
-//		    LOG.error(e);
-//		} finally {
-//		    if(state != null) {
-//		        state.unlock();
-//		    }
-//		}
-//	}
-	
     /*
      * The AtmosphereHandler.onRequest is invoked every time a new connection 
      * is made to an application. An application must take action and decide 
@@ -174,242 +140,328 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
      */
     @Override
     public void onRequest(AtmosphereResource resource) throws IOException {
-
-        //We only accept requests from users with valid session infos
-        if(!hasValidSessionInfos(resource)) {
-            throw new IllegalStateException("No valid Session information found"); 
-        }
-        
         // Log all events on the console, including WebSocket events for debugging
         resource.addEventListener(new WebSocketEventListenerAdapter());
-        
         AtmosphereRequest request = resource.getRequest();
-        String method = request.getMethod();
         AtmosphereResponse response = resource.getResponse();
-        
+        String method = request.getMethod();
+        /*
+         * GET requests can be handled via Continuations. Suspend the request 
+         * and use it for bidirectional communication.
+         * "negotiating" header is used to list all supported transports
+         */
         if(method.equalsIgnoreCase("GET")) {
-            /*
-             * GET requests can be handled via Continuations. Suspend the request 
-             * and use it for bidirectional communication.
-             * "negotiating" header is used to list all supported transports
-             */
+            //check headers and params for session infos, fail fast if invalid
+            try {
+                getServerSession(getSessionFromHeader(request), getSessionFromParameters(request));
+            } catch (OXException e) {
+                LOG.error(e);
+                writeExceptionToResource(e, resource);
+                return;
+            }
             if(request.getHeader("negotiating") == null) {
-                LOG.info(">>>> Going to suspend request: "+ request);
                 resource.suspend();
             } else {
                 response.getWriter().write("OK");
             }
+        /*
+         * Use POST request to synchronously send data over the server.
+         * First Post should contain handshake information -> getState 
+         */
         } else if (method.equalsIgnoreCase("POST")) {
-            /*
-             * Use POST request to synchronously send data over the server.
-             * First Post should contain handshake information -> getState 
-             */
-            try {
-                RTAtmosphereState state = getState(resource);
-                handleIncoming(StanzaParser.parse(request.getReader().readLine()), state);
-            } catch (OXException oxEx) {
-                LOG.error(oxEx);
-                //TODO: let the client know
+            String postData = request.getReader().readLine();
+            if(postData != null) {
+                try {
+                    ServerSession serverSession = getServerSession(getSessionFromHeader(request), getSessionFromParameters(request), getSessionFromPostData(postData));
+                    RTAtmosphereState atmosphereState = getState(resource, serverSession);
+                    handleIncoming(StanzaParser.parse(postData), atmosphereState);
+                } catch (OXException e) {
+                    LOG.error(e);
+                    writeExceptionToResource(e, resource);
+                }
             }
         }
-        
+    }
+    
+    /**
+     * Write a simple JSON error to the client.
+     * @param exception the exception to send.
+     * @param resource the resource representing the client
+     * @throws IOException 
+     */
+    private void writeExceptionToResource(Exception exception, AtmosphereResource resource) throws IOException {
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("error", exception.toString());
+            resource.getResponse().getWriter().write(jsonObject.toString());
+        } catch (JSONException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
-
 	/**
-	 * Check the resource for valid session infos in request headers and
-	 * parameters and checks for valid session on the server. 
-     * @param resource The resource to check
-     * @return true if a valid session parameter can be found, else false
+	 * Convert the session info into a ServerSession Object.   
+     * @param sessionInfo The sessionInfo to convert
+     * @return The ServerSession objectmatching the session infos
+     * @throws IllegalArgumentException if the sessionInfo is null or empty 
+	 * @throws OXException if an error happens while trying to build the
+	 *                      ServerSession from the session infos  
      */
-    private boolean hasValidSessionInfos(AtmosphereResource resource) {
-        boolean isSessionValid = false;
-        AtmosphereRequest request = resource.getRequest();
+    private ServerSession getServerSessionFromInfo(String sessionInfo) throws OXException {
+        if(sessionInfo == null || sessionInfo.isEmpty()) {
+            throw new IllegalArgumentException("Invalid parameter: sessionInfo");
+        }
         
-        String sessionInfo = request.getHeader("session");
-        if(sessionInfo == null) {
-            sessionInfo = request.getParameter("session");
+        Session session = null;
+        ServerSession serverSession = null;
+
+        SessiondService sessiondService = services.getService(SessiondService.class);
+        if(sessiondService == null) {
+            throw OXExceptionFactory.getInstance().create(ServiceExceptionCode.SERVICE_UNAVAILABLE, SessiondService.class);
         }
-        if(sessionInfo != null) {
-            SessiondService sessiondService = services.getService(SessiondService.class);
-            Session serverSession = sessiondService.getSession(sessionInfo);
-            if(serverSession!=null) {
-                isSessionValid=true;
+        session = sessiondService.getSession(sessionInfo);
+        if(session == null) {
+            throw OXExceptionFactory.getInstance().create(SessionExceptionCodes.SESSION_EXPIRED, sessionInfo);
+        }
+        serverSession = new ServerSessionAdapter(session);
+        return serverSession;
+    }
+    
+    /**
+     * Inspect the request headers for session information and return it.
+     * @param request the request to inspect
+     * @return null if no session info can be found, the session info otherwise
+     */
+    private String getSessionFromHeader(AtmosphereRequest request) {
+        return request.getHeader("session");
+    }
+    
+    /**
+     * Inspect the request parameters for session information and return it.
+     * @param request the request to inspect
+     * @return null if no session info can be found, the session info otherwise
+     */
+    private String getSessionFromParameters(AtmosphereRequest request) {
+        return request.getParameter("session");
+    }
+    
+    /**
+     * Inspect the request's post data for session information and return it.
+     * @param postData the JSON String to inspect
+     * @return null if no session info can be found, the session info otherwise
+     * @throws OXException if the postData isn't valid JSON
+     */
+    private String getSessionFromPostData(String postData) throws OXException {
+        JSONObject requestData;
+        String sessionInfo = null;
+        try {
+            requestData = new JSONObject(postData);
+            sessionInfo = requestData.optString("session");
+        } catch (JSONException e) {
+            throw OXExceptionFactory.getInstance().create(SessionExceptionCodes.SESSION_PARAMETER_MISSING);
+        }
+        return sessionInfo;
+    }
+    
+    /**
+     * Get a ServerSession object from a list of session infos submitted in the request.
+     * Fails on the first non-null sessionInfo parameter that is invalid.
+     * @param sessionInfo a list of session infos, nulls are allowed
+     * @return The Serversession that matches the first given session info
+     * @throws OXException if no matching ServerSession can be found
+     */
+    private ServerSession getServerSession(String... sessionInfo) throws OXException {
+        ServerSession serverSession = null;
+            for (int i=0; serverSession == null && i < sessionInfo.length; i++) {
+                String currentSessionInfo = sessionInfo[i];
+                if( currentSessionInfo != null && !currentSessionInfo.isEmpty()) {
+                    serverSession = getServerSessionFromInfo(sessionInfo[i]);
+                }
             }
-        }
-        return isSessionValid;
+        return serverSession;
     }
 
     /**
-	 * Check the AtmosphereResource for the session header/parameter and add it
-	 * to the uuid2state map that tracks Serversession <-> RTAtmosphereState
-	 * @param r the AtmosphereResource
-	 * @return null if the AtmosphereResource doesn't contain session
-	 * informations or an RTAtmosphereState that assembles the AtmosphereResource,
-	 * Serversession and ID
-	 * @throws OXException if the server session is missing from the
-	 * AtmosphereResource 
-	 */
-    private RTAtmosphereState getState(AtmosphereResource r) throws OXException {
-        RTAtmosphereState state = new RTAtmosphereState();
-        String session = r.getRequest().getHeader("session");
-        if (session == null) {
-            session = r.getRequest().getParameter("session");
-        }
-        //Session neither in header nor parameter
-        if(session == null) {
-            throw OXException.general("Missing Session");
-        }
-
-        String resource = r.getRequest()
-                .getHeader("resource");
-        if (resource == null) {
-            resource = r.getRequest().getParameter("resource");
-        }
-
-        RTAtmosphereState previous = uuid2State.putIfAbsent(session, state);
-        RTAtmosphereState theState = previous != null ? previous : state;
-        
-        initSessionId(session, resource, theState);
-        return theState;
+     * Check if an entity is connected to the associated Channel.
+     * @param id the ID of the entity you are looking for.
+     * @return true if the entity is connected, false otherwise
+     */
+    public boolean isConnected(ID id) {
+        return id2State.containsKey(id.toGeneralForm());
     }
+    
+    @Override
+    public void send(Stanza stanza) throws OXException {
+        String stanzaAsJSON = StanzaWriter.write(stanza).toString();
+        String contextAndUser = generateBroadcasterId(stanza.getTo().toGeneralForm());
+        /*
+         * Broadcast stanza to all entities matching the user@context by
+         * using a wildcard for the resource: /user@context/*
+         */
+        MetaBroadcaster.getDefault().broadcastTo(contextAndUser+"/*", stanzaAsJSON);
+    }
+    
+ /**
+  * Check the AtmosphereResource for the session header/parameter and add it
+  * to the uuid2state map that tracks Serversession <-> RTAtmosphereState
+  * @param atmosphereResource the AtmosphereResource
+  * @return null if the AtmosphereResource doesn't contain session
+  * informations or an RTAtmosphereState that assembles the AtmosphereResource,
+  * Serversession and ID
+  * @throws OXException if the server session is missing from the
+  * AtmosphereResource 
+  */
+ private RTAtmosphereState getState(AtmosphereResource atmosphereResource, ServerSession serverSession) throws OXException {
+     RTAtmosphereState state = new RTAtmosphereState();
+     state.session = serverSession;
+     state.atmosphereResource = atmosphereResource;
+     state.id = constructId(atmosphereResource, serverSession);
+     return state;
+ }
+ 
+/**
+ * Build an {@link ID} from the infos given by the AtmosphereResource and ServerSession 
+ * @param atmosphereResource
+ * @param serverSession
+ * @return the constructed ID
+ */
+private ID constructId(AtmosphereResource atmosphereResource, ServerSession serverSession) {
+    String userLogin = serverSession.getUserlogin();
+    String contextName = getContextName(serverSession.getLogin());
+    
+    AtmosphereRequest request = atmosphereResource.getRequest();
+    String resource = request.getHeader("resource");
+    if (resource == null) {
+        resource = request.getParameter("resource");
+    }
+    //TODO: think about proper unique resources later  
+    if (resource == null) {
+        resource = serverSession.getSessionID();
+    }
+    
+    return new ID(RTAtmosphereChannel.PROTOCOL, userLogin, contextName, resource);
+}
 
-
-	/**
-	 * Handle incoming Stanza and decide if they have an internal namespace
-	 * and need to be handles by the Channel/Handler or if they should be 
-	 * dispatched iow. transformed to POJOs and handed over to the
-	 * MessageDispatcher.
-	 * @param stanza The Stanza to handle
-	 * @param state The associated state
-	 * @throws OXException
-	 */
-	protected void handleIncoming(Stanza stanza, RTAtmosphereState state)
-			throws OXException {
-		if (isInternal(stanza)) {
-			handleInternally(stanza, state);
-		} else {
-			stampStanza(stanza, state);
-			dispatchStanza(stanza, state);
-		}
-	}
-
+/**
+ * Get context string from login string 
+ * @param login the login string 
+ * @return an empty string if no context can be found, the context oterwise
+ */
+private String getContextName(String login) {
+    int index = login.indexOf('@');
+    if (index < 0) {
+        return "";
+    }
+    return login.substring(index + 1);
+}
+    
+    /**
+     * Handle incoming Stanza and decide if they have an internal namespace
+     * and need to be handles by the Channel/Handler or if they should be 
+     * dispatched iow. transformed to POJOs and handed over to the
+     * MessageDispatcher.
+     * @param stanza The Stanza to handle
+     * @param atmosphereState The associated state
+     * @throws OXException
+     */
+    protected void handleIncoming(Stanza stanza, RTAtmosphereState atmosphereState)
+            throws OXException {
+        if (isInternal(stanza)) {
+            handleInternally(stanza, atmosphereState);
+        } else {
+            stampStanza(stanza, atmosphereState);
+            dispatchStanza(stanza, atmosphereState);
+        }
+    }
+    
 	private boolean isInternal(Stanza stanza) {
 		return stanza.getNamespace().startsWith("ox:");
 	}
 
-	private void handleInternally(Stanza stanza, RTAtmosphereState state)
-			throws OXException {
+	/**
+	 * Handle the Stanza internally instead of handing it over to the message
+	 * dispatcher. Handshaking and other internal stuff happens here.
+	 * @param stanza the incoming stanza
+	 * @param serverSession the associated serverSession
+	 * @throws OXException
+	 */
+	private void handleInternally(Stanza stanza, RTAtmosphereState atmosphereState) {
 		if ("ox:handshake".equals(stanza.getNamespace())) {
-			getSession(stanza, state);
+		    // create new broadcaster for resource 
+		    Broadcaster broadcaster = BroadcasterFactory.getDefault().get(generateBroadcasterId(atmosphereState.id));
+			// add resource (connected client) to broadcaster
+		    broadcaster.addAtmosphereResource(atmosphereState.atmosphereResource);
+		    //TODO: track connected user@context only basic representation for lookups, broadcast to all clients when available?
+		    id2State.put(atmosphereState.id.toGeneralForm(), atmosphereState);
+			/*
+			 * TODO:
+			 * configure broadcaster lifetime, schedule keepalive messages etc.  
+			 */
 		}
 	}
-
-	private void getSession(Stanza stanza, RTAtmosphereState state)
-			throws OXException {
-		try {
-			JSONObject json = (JSONObject) stanza.getPayload().getData();
-
-			String sessionId = json.getString("session");
-			initSessionId(sessionId, json.optString("resource"), state);
-			id2State.put(state.id, state);
-		} catch (JSONException x) {
-			throw OXException.general(x.toString());
-		}
-
+	
+	/**
+	 * Create a broadcaster id from a given {@link ID}.
+	 *
+	 * Creates broadcaster ids like : /context/user or /context/user/resource
+	 * depending if the given ID contains a resource.
+	 * 
+	 * This way we can address:
+	 *  - single clients of a user identified by resource: /context/user/resource
+	 *  - all clients of a user: /context/user/*
+	 *  - all clients of all users in a context: /context/*
+	 *  - all clients in all contexts: /*  
+	 *
+	 * @param id the id to use for generating the broadcaster id 
+	 * @return the generated broadcaster id 
+	 */
+	private String generateBroadcasterId(ID id) {
+	    StringBuilder sb = new StringBuilder();
+        sb.append("/").append(id.getContext()).append("/").append(id.getUser());
+        if(id.getResource() != null) {
+            sb.append("/").append(id.getResource());
+        }
+	    return sb.toString();
 	}
 
-	private void initSessionId(String sessionId, String resource, RTAtmosphereState state) throws OXException {
-		Session session = services.getService(SessiondService.class)
-				.getSession(sessionId);
-		if (session == null) {
-			throw OXException.general("Invalid sessionId " + sessionId);
-		}
-
-		state.session = ServerSessionAdapter.valueOf(session);
-		if (state.id == null || resource != null) {
-			state.id = new ID("ox", session.getLoginName(),
-					contextName(session.getLogin()), resource);
-			id2State.put(state.id, state);
-		}
-		
-		
-	}
-
-	private String contextName(String login) {
-		int index = login.indexOf('@');
-		if (index < 0) {
-			return "";
-		}
-		return login.substring(index + 1);
-	}
-
+	/**
+	 * Stamp the stanza, iow. set the sender of the stanza.  
+	 * @param stanza the stanza to stamp
+	 * @param state the associated atmosphereState
+	 */
 	private void stampStanza(Stanza stanza, RTAtmosphereState state) {
-		stanza.setFrom(state.id);
+	    stanza.setFrom(state.id);
 	}
 
-	private void dispatchStanza(Stanza stanza, RTAtmosphereState state)
+	private void dispatchStanza(Stanza stanza, RTAtmosphereState atmosphereState)
 			throws OXException {
 		OXRTHandler transformer = library.getHandlerFor(stanza.getNamespace());
 		if (transformer == null) {
 			throw OXException.general("No transformer for namespace "
 					+ stanza.getNamespace());
 		}
-		transformer.incoming(stanza, state.session);
-	}
-
-	public void handleOutgoing(Stanza stanza, ServerSession session)
-			throws OXException {
-		OXRTHandler transformer = library.getHandlerFor(stanza.getNamespace());
-		if (transformer == null) {
-			throw OXException.general("No transformer for namesapce "
-					+ stanza.getNamespace());
-		}
-		transformer.outgoing(stanza, session, this);
+		transformer.incoming(stanza, atmosphereState.session);
 	}
 
 	/**
-	 * Check if an entity is connected to the associated Channel.
-	 * @param id the ID of the entity you are looking for.
-	 * @return true if the entity is connected, false otherwise
+	 * Handle outgoing Stanzas by transforming it into the proper representation
+	 * and sending it to the addressed entity. 
+	 * @param stanza the Stanza to send
+	 * @param serverSession the associated ServerSession
+	 * @throws OXException if no transformer for the given Stanza can be found
 	 */
-	public boolean isConnected(ID id) {
-		return id2State.get(id) != null
-				|| !id2State.getEquivalents(id).isEmpty();
-	}
-
-	@Override
-    public void send(Stanza stanza) throws OXException {
-		String stanzaStr = StanzaWriter.write(stanza).toString();
-
-		RTAtmosphereState state = id2State.get(stanza.getTo());
-		if (state != null) {
-			send(stanzaStr, state.r);
-		} else {
-			for (Entry<ID, RTAtmosphereState> equiState : id2State
-					.getEquivalents(stanza.getTo())) {
-				send(stanzaStr, equiState.getValue().r);
-			}
+	public void handleOutgoing(Stanza stanza, ServerSession serverSession) throws OXException {
+		OXRTHandler transformer = library.getHandlerFor(stanza.getNamespace());
+		if (transformer == null) {
+			throw OXException.general("No transformer for namespace "
+					+ stanza.getNamespace());
 		}
-
-	}
-
-	private void send(String stanzaStr, AtmosphereResource r) {
-		r.getResponse().write(stanzaStr);
-		switch (r.transport()) {
-		case JSONP:
-		case LONG_POLLING:
-			r.resume();
-			break;
-		case WEBSOCKET:
-		case STREAMING:
-			try {
-				r.getResponse().getWriter().flush();
-			} catch (IOException e) {
-				// IGNORE
-			}
-			break;
-		}
+		/*
+		 * Let the transformer handle the processing of the stanza.
+		 * hand over this as reference for sending after transforming
+		 */
+		transformer.outgoing(stanza, serverSession, this);
 	}
 
 }
