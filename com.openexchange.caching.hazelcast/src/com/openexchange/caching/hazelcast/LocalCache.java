@@ -138,14 +138,12 @@ public final class LocalCache extends DefaultCacheKeyService implements Cache, S
 
     @Override
     public CacheElement getCacheElement(final Serializable key) {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public ElementAttributes getDefaultElementAttributes() throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        throw CacheExceptionCode.UNSUPPORTED_OPERATION.create("LocalCache.getDefaultElementAttributes()");
     }
 
     @Override
