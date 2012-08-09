@@ -97,7 +97,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.tx"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.user.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.xml"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.xmpp"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,org.apache.tika"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,org.xmlpull"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,org.quartz"/>
