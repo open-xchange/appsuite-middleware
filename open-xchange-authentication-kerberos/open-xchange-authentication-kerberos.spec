@@ -16,7 +16,7 @@ BuildRequires: java-1_6_0-ibm-devel
 BuildRequires: java-1.6.0-sun-devel
 %endif
 Version:       @OXVERSION@
-%define		ox_release 0
+%define		ox_release 1
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -47,6 +47,13 @@ Authors:
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
+%post
+. /opt/open-xchange/lib/oxfunctions.sh
+CONFFILES="kerberos.properties kerberosLogin.conf krb5.conf"
+for FILE in $CONFFILES; do
+    ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc ${FILE}
+done
+
 %clean
 %{__rm} -rf %{buildroot}
 
@@ -57,8 +64,10 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/etc/
-%config(noreplace) /opt/open-xchange/etc/kerberos.properties
-%config(noreplace) /opt/open-xchange/etc/kerberosLogin.conf
-%config(noreplace) /opt/open-xchange/etc/krb5.conf
+%config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Tue Jul 03 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Release build for EDP drop #2
+* Mon Jun 25 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Initial package.

@@ -49,13 +49,17 @@
 
 package com.openexchange.groupware.container;
 
+import java.io.Serializable;
+
 /**
  * DistributionListObject
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 
-public class LinkEntryObject {
+public class LinkEntryObject implements Serializable {
+
+    private static final long serialVersionUID = -6349871414014009008L;
 
     private int contact_id;
 

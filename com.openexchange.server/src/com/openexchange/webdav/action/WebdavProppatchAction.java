@@ -52,17 +52,14 @@ package com.openexchange.webdav.action;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
-
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.Namespace;
 import org.jdom2.output.XMLOutputter;
-
+import com.openexchange.log.LogFactory;
 import com.openexchange.tools.UnsynchronizedStringWriter;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavProperty;
@@ -129,6 +126,7 @@ public class WebdavProppatchAction extends AbstractAction {
 			}
 			resource.save();
 			res.setStatus(Protocol.SC_MULTISTATUS);
+            res.setContentType("text/xml");
 			outputter.output(responseDoc, res.getOutputStream());
 
 

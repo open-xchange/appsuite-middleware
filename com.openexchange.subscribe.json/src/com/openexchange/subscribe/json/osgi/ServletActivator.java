@@ -90,8 +90,9 @@ public class ServletActivator extends AbstractSessionServletActivator {
 
     private void registerServlets() {
         try {
-            //servletRegistrations.add(new SessionServletRegistration(context, new SubscriptionSourcesServlet(), SUBSCRIPTION_SOURCES_ALIAS));
-            registerSessionServlet(getService(DispatcherPrefixService.class).getPrefix() + SUBSCRIPTION_ALIAS_APPENDIX, new SubscriptionServlet());
+            final DispatcherPrefixService dispatcherPrefixService = getService(DispatcherPrefixService.class);
+            registerSessionServlet(dispatcherPrefixService.getPrefix() + SUBSCRIPTION_SOURCES_ALIAS_APPENDIX, new SubscriptionSourcesServlet());
+            registerSessionServlet(dispatcherPrefixService.getPrefix() + SUBSCRIPTION_ALIAS_APPENDIX, new SubscriptionServlet());
             LOG.info("Registered Servlets for Subscriptions");
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);

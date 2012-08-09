@@ -291,6 +291,8 @@ public class ContentType extends ParameterizedHeader {
 
     private String baseType;
 
+    private String lcBaseType;
+
     /**
      * Initializes a new {@link ContentType}
      */
@@ -318,6 +320,7 @@ public class ContentType extends ParameterizedHeader {
         primaryType = null;
         subType = null;
         baseType = null;
+        lcBaseType = null;
     }
 
     @Override
@@ -370,6 +373,13 @@ public class ContentType extends ParameterizedHeader {
             return false;
         }
         return true;
+    }
+
+    private String getLowerCaseBaseType() {
+        if (null == lcBaseType) {
+            lcBaseType = toLowerCase(getBaseType());
+        }
+        return lcBaseType;
     }
 
     private void parseContentType(final String contentType) throws OXException {
@@ -430,11 +440,16 @@ public class ContentType extends ParameterizedHeader {
                     }
                 }
                 baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
+                lcBaseType = null;
                 if (paramList) {
-                    try {
-                        parameterList = pos < cts.length() ? new ParameterList(cts.substring(pos + 1)) : new ParameterList();
-                    } catch (final RuntimeException e) {
-                        throw MailExceptionCode.INVALID_CONTENT_TYPE.create(e, contentType);
+                    if (pos < 0) {
+                        parameterList = new ParameterList();
+                    } else {
+                        try {
+                            parameterList = pos < cts.length() ? new ParameterList(cts.substring(pos + 1)) : new ParameterList();
+                        } catch (final RuntimeException e) {
+                            throw MailExceptionCode.INVALID_CONTENT_TYPE.create(e, contentType);
+                        }
                     }
                 }
                 return;
@@ -486,6 +501,7 @@ public class ContentType extends ParameterizedHeader {
                 }
             }
             baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
+            lcBaseType = null;
             if (paramList) {
                 parameterList = new ParameterList(cts.substring(ctMatcher.end()));
             }
@@ -493,6 +509,7 @@ public class ContentType extends ParameterizedHeader {
             primaryType = "text";
             subType = "plain";
             baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
+            lcBaseType = null;
             if (paramList) {
                 parameterList = new ParameterList(pos < 0 ? cts : cts.substring(pos));
                 final String name = parameterList.getParameter("name");
@@ -506,6 +523,7 @@ public class ContentType extends ParameterizedHeader {
                             subType = DEFAULT_SUBTYPE;
                         }
                         baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
+                        lcBaseType = null;
                     }
                 }
             }
@@ -532,6 +550,7 @@ public class ContentType extends ParameterizedHeader {
         subType = contentType.getSubType();
         parameterList = (ParameterList) contentType.parameterList.clone();
         baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
+        lcBaseType = null;
     }
 
     /**
@@ -549,6 +568,7 @@ public class ContentType extends ParameterizedHeader {
     public ContentType setPrimaryType(final String primaryType) {
         this.primaryType = primaryType;
         baseType = null;
+        lcBaseType = null;
         return this;
     }
 
@@ -567,6 +587,7 @@ public class ContentType extends ParameterizedHeader {
     public ContentType setSubType(final String subType) {
         this.subType = subType;
         baseType = null;
+        lcBaseType = null;
         return this;
     }
 
@@ -672,7 +693,26 @@ public class ContentType extends ParameterizedHeader {
         if (null == prefix) {
             throw new IllegalArgumentException("Prefix is null");
         }
-        return toLowerCase(getBaseType()).startsWith(toLowerCase(prefix), 0);
+        return getLowerCaseBaseType().startsWith(toLowerCase(prefix), 0);
+    }
+
+    /**
+     * Checks if Content-Type's base type ignore-case starts with any of specified prefixes.
+     *
+     * @param prefixes The prefixes
+     * @return <code>true</code> if Content-Type's base type ignore-case starts with any of specified prefixes; otherwise <code>false</code>
+     */
+    public boolean startsWithAny(final String... prefixes) {
+        if (null == prefixes) {
+            return false;
+        }
+        final String lowerCase = getLowerCaseBaseType();
+        for (final String prefix : prefixes) {
+            if (null != prefix && lowerCase.startsWith(toLowerCase(prefix), 0)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

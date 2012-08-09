@@ -53,6 +53,7 @@ import static com.openexchange.html.internal.HtmlServiceImpl.PATTERN_URL;
 import static com.openexchange.html.internal.css.CSSMatcher.checkCSS;
 import static com.openexchange.html.internal.css.CSSMatcher.containsCSSElement;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.Collections;
@@ -536,8 +537,7 @@ public final class HtmlWhitelistFilter {
             if (null == staticHTMLMap) {
                 String mapStr = null;
                 {
-                    final String whitelist =
-                        ServiceRegistry.getInstance().getService(ConfigurationService.class).getProperty("Whitelist");
+                    final File whitelist = ServiceRegistry.getInstance().getService(ConfigurationService.class).getFileByName("whitelist.properties");
                     if (null == whitelist) {
                         if (LOG.isWarnEnabled()) {
                             LOG.warn("Using default white list");

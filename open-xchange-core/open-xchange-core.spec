@@ -1,3 +1,4 @@
+%define	       configfiles     configfiles.list
 
 Name:          open-xchange-core
 BuildArch:     noarch
@@ -8,7 +9,7 @@ BuildRequires: open-xchange-log4j
 BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 0
+%define        ox_release 6
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0 
@@ -36,6 +37,8 @@ Provides:      open-xchange-configread = %{version}
 Obsoletes:     open-xchange-configread <= %{version}
 Provides:      open-xchange-contactcollector = %{version}
 Obsoletes:     open-xchange-contactcollector <= %{version}
+Provides:      open-xchange-control = %{version}
+Obsoletes:     open-xchange-control <= %{version}
 Provides:      open-xchange-conversion = %{version}
 Obsoletes:     open-xchange-conversion <= %{version}
 Provides:      open-xchange-conversion-engine = %{version}
@@ -132,6 +135,8 @@ Provides:      open-xchange-user-json = %{version}
 Obsoletes:     open-xchange-user-json <= %{version}
 Provides:      open-xchange-xml = %{version}
 Obsoletes:     open-xchange-xml <= %{version}
+Provides:      open-xchange-passwordchange-servlet = %{version}
+Obsoletes:     open-xchange-passwordchange-servlet <= %{version}
 
 
 %description
@@ -149,37 +154,50 @@ Authors:
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
+rm -f %{configfiles}
+find %{buildroot}/opt/open-xchange/etc \
+     %{buildroot}/opt/open-xchange/importCSV \
+        -type f \
+        -printf "%%%config(noreplace) %p\n" > %{configfiles}
+perl -pi -e 's;%{buildroot};;' %{configfiles}
+perl -pi -e 's;(^.*?)\s+(.*/(mail|configdb|server|filestorage)\.properties)$;$1 %%%attr(640,root,open-xchange) $2;' %{configfiles}
+
 
 %post
+. /opt/open-xchange/lib/oxfunctions.sh
 if [ ${1:-0} -eq 2 ]; then
-    GWCONFFILES="filestorage.properties folderjson.properties mail-push.properties messaging.properties publications.properties push.properties secret.properties secrets threadpool.properties meta/ui.yml settings/themes.properties settings/ui.properties"
-    COCONFFILES="i18n.properties"
-    for FILE in ${GWCONFFILES}; do
-        if [ -e /opt/open-xchange/etc/groupware/${FILE} ]; then
-            mv /opt/open-xchange/etc/${FILE} /opt/open-xchange/etc/${FILE}.rpmnew
-            mv /opt/open-xchange/etc/groupware/${FILE} /opt/open-xchange/etc/${FILE}
-        fi
-    done
-    for FILE in ${COCONFFILES}; do
-        if [ -e /opt/open-xchange/etc/common/${FILE} ]; then
-            mv /opt/open-xchange/etc/${FILE} /opt/open-xchange/etc/${FILE}.rpmnew
-            mv /opt/open-xchange/etc/common/${FILE} /opt/open-xchange/etc/${FILE}
-        fi
-    done
+    # only when updating
+
+    # prevent bash from expanding, see bug 13316
+    GLOBIGNORE='*'
+
+    ox_update_permissions "/var/log/open-xchange" open-xchange:root 750
+    ox_update_permissions "/opt/open-xchange/osgi" open-xchange:root 750
+    ox_update_permissions "/opt/open-xchange/etc/mail.properties" root:open-xchange 640
+    ox_update_permissions "/opt/open-xchange/etc/configdb.properties" root:open-xchange 640
+    ox_update_permissions "/opt/open-xchange/etc/server.properties" root:open-xchange 640
+    ox_update_permissions "/opt/open-xchange/etc/filestorage.properties" root:open-xchange 640
 fi
+#
+ox_move_config_file /opt/open-xchange/etc/common /opt/open-xchange/etc i18n.properties
+ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc push.properties push-udp.properties
+CONFFILES="management.properties templating.properties mail-push.properties filestorage.properties folderjson.properties messaging.properties publications.properties secret.properties secrets threadpool.properties settings/themes.properties settings/ui.properties meta/ui.yml"
+for FILE in $CONFFILES; do
+    ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc $FILE
+done
+
 
 %clean
 %{__rm} -rf %{buildroot}
 
-%files
+
+%files -f %{configfiles}
 %defattr(-,root,root)
 %dir /opt/open-xchange/bundles/
 /opt/open-xchange/bundles/*
 %dir /opt/open-xchange/etc/
-%config(noreplace) /opt/open-xchange/etc/*
 %dir /opt/open-xchange/i18n/
 %dir /opt/open-xchange/importCSV/
-/opt/open-xchange/importCSV/*
 %dir /opt/open-xchange/lib/
 /opt/open-xchange/lib/oxfunctions.sh
 %dir /opt/open-xchange/osgi/bundle.d/
@@ -191,5 +209,15 @@ fi
 /opt/open-xchange/templates/*
 
 %changelog
-* Tue Apr 17 2012 Sonja Krause-Harder  <sonja.krause-harder@open-xchange.com>
+* Tue Jul 03 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Release build for EDP drop #2
+* Mon Jun 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Release build for EDP drop #2
+* Tue May 22 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Internal release build for EDP drop #2
+* Mon Apr 16 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Internal release build for EDP drop #1
+* Wed Apr 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Internal release build for EDP drop #0
+* Mon Oct 17 2011 Marcus Klein <marcus.klein@open-xchange.com>
+Initial release

@@ -69,7 +69,9 @@ import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.tools.AdminCache;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.tools.pipesnfilters.Filter;
 import com.openexchange.tools.pipesnfilters.PipesAndFiltersException;
 
@@ -92,6 +94,7 @@ public class ContextLoader implements Filter<Integer, Context> {
         this.failOnMissing = failOnMissing;
     }
 
+    @Override
     public Context[] filter(final Collection<Integer> input) throws PipesAndFiltersException {
         List<Context> contexts;
         try {
@@ -117,7 +120,8 @@ public class ContextLoader implements Filter<Integer, Context> {
         try {
             stmt = con.prepareStatement(getIN(SQL, cids.size()) + " ORDER BY context_server2db_pool.read_db_pool_id,context_server2db_pool.db_schema");
             int pos = 1;
-            stmt.setString(pos++, cache.getProperties().getProp(AdminProperties.Prop.SERVER_NAME, "local"));
+            final String serverName = AdminServiceRegistry.getInstance().getService(ConfigurationService.class).getProperty(AdminProperties.Prop.SERVER_NAME, "local");
+            stmt.setString(pos++, serverName);
             for (final Integer cid : cids) {
                 stmt.setInt(pos++, cid.intValue());
             }

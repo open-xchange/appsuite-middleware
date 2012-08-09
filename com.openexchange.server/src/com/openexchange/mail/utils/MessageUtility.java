@@ -66,7 +66,7 @@ import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.dataobjects.MimeRawSource;
+import com.openexchange.mail.mime.datasource.StreamDataSource.InputStreamProvider;
 
 /**
  * {@link MessageUtility} - Provides various helper methods for message processing.
@@ -80,6 +80,19 @@ public final class MessageUtility {
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MessageUtility.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
+
+    private static abstract class AbstractInputStreamProvider implements InputStreamProvider {
+
+        protected AbstractInputStreamProvider() {
+            super();
+        }
+
+        @Override
+        public String getName() {
+            return null;
+        }
+
+    }
 
     /**
      * No instantiation.
@@ -221,16 +234,51 @@ public final class MessageUtility {
      */
     public static String readMimePart(final Part p, final String charset) throws MessagingException {
         try {
-            return readStream(p.getInputStream(), charset);
+            final InputStreamProvider streamProvider = new AbstractInputStreamProvider() {
+                
+                @Override
+                public InputStream getInputStream() throws IOException {
+                    try {
+                        return p.getInputStream();
+                    } catch (final MessagingException e) {
+                        throw new IOException(e.getMessage(), e);
+                    }
+                }
+            };
+            return readStream(streamProvider, charset);
         } catch (final IOException e) {
+            final Throwable cause = e.getCause();
+            if (cause instanceof MessagingException) {
+                throw (MessagingException) cause;
+            }
             /*
              * Try to get data from raw input stream
              */
-            final InputStream rawIn;
+            final InputStreamProvider streamProvider;
             if (p instanceof MimeBodyPart) {
-                rawIn = ((MimeBodyPart) p).getRawInputStream();
+                streamProvider = new AbstractInputStreamProvider() {
+                    
+                    @Override
+                    public InputStream getInputStream() throws IOException {
+                        try {
+                            return ((MimeBodyPart) p).getRawInputStream();
+                        } catch (final MessagingException e) {
+                            throw new IOException(e.getMessage(), e);
+                        }
+                    }
+                };
             } else if (p instanceof MimeMessage) {
-                rawIn = ((MimeMessage) p).getRawInputStream();
+                streamProvider = new AbstractInputStreamProvider() {
+                    
+                    @Override
+                    public InputStream getInputStream() throws IOException {
+                        try {
+                            return ((MimeMessage) p).getRawInputStream();
+                        } catch (final MessagingException e) {
+                            throw new IOException(e.getMessage(), e);
+                        }
+                    }
+                };
             } else {
                 /*
                  * Neither a MimeBodyPart nor a MimeMessage
@@ -238,7 +286,7 @@ public final class MessageUtility {
                 return STR_EMPTY;
             }
             try {
-                return readStream(rawIn, charset);
+                return readStream(streamProvider, charset);
             } catch (final IOException e1) {
                 LOG.error(e1.getMessage(), e1);
                 return STR_EMPTY;
@@ -253,14 +301,25 @@ public final class MessageUtility {
      * @param charset The charset encoding used to generate a {@link String} object from raw bytes
      * @return the <code>String</code> read from mail part's stream
      * @throws IOException
-     * @throws OXException
      */
     public static String readMailPart(final MailPart mailPart, final String charset) throws IOException, OXException {
+        final InputStreamProvider streamProvider = new AbstractInputStreamProvider() {
+            
+            @Override
+            public InputStream getInputStream() throws IOException {
+                try {
+                    return mailPart.getInputStream();
+                } catch (final OXException e) {
+                    throw new IOException(e.getMessage(), e);
+                }
+            }
+        };
         try {
-            return readStream(mailPart.getInputStream(), charset);
+            return readStream(streamProvider, charset);
         } catch (final IOException e) {
-            if (mailPart instanceof MimeRawSource) {
-                return readStream(((MimeRawSource) mailPart).getRawInputStream(), charset);
+            final Throwable cause = e.getCause();
+            if (cause instanceof OXException) {
+                throw (OXException) cause;
             }
             throw e;
         }
@@ -275,7 +334,14 @@ public final class MessageUtility {
      * @throws IOException If an I/O error occurs
      */
     public static String readBytes(final byte[] bytes, final String charset) throws IOException {
-        return readStream(Streams.newByteArrayInputStream(bytes), charset);
+        final InputStreamProvider streamProvider = new AbstractInputStreamProvider() {
+
+            @Override
+            public InputStream getInputStream() throws IOException {
+                return Streams.newByteArrayInputStream(bytes);
+            }
+        };
+        return readStream(streamProvider, charset);
     }
 
     private static final int BUFSIZE = 8192; // 8K
@@ -284,6 +350,70 @@ public final class MessageUtility {
      * The unknown character: <code>'&#65533;'</code>
      */
     public static final char UNKNOWN = '\ufffd';
+
+    /**
+     * Reads a string from given input stream using direct buffering.
+     *
+     * @param streamProvider The input stream provider
+     * @param charset The charset
+     * @return The <code>String</code> read from input stream
+     * @throws IOException If an I/O error occurs
+     */
+    public static String readStream(final InputStreamProvider streamProvider, final String charset) throws IOException {
+        if (null == streamProvider) {
+            return STR_EMPTY;
+        }
+        if (isBig5(charset)) {
+            /*
+             * Special treatment for possible BIG5 encoded stream
+             */
+            return readBig5Bytes(getBytesFrom(streamProvider.getInputStream()));
+        }
+        if ("GB18030".equalsIgnoreCase(charset)) {
+            /*
+             * Special treatment for possible GB18030 encoded stream
+             */
+            return readGB18030Bytes(getBytesFrom(streamProvider.getInputStream()));
+        }
+        if (isGB2312(charset)) {
+            /*
+             * Special treatment for possible GB2312 encoded stream
+             */
+            final byte[] bytes = getBytesFrom(streamProvider.getInputStream());
+            if (bytes.length == 0) {
+                return STR_EMPTY;
+            }
+            String retval = new String(bytes, "GB2312");
+            if (retval.indexOf(UNKNOWN) < 0) {
+                return retval;
+            }
+            retval = new String(bytes, "GB18030");
+            if (retval.indexOf(UNKNOWN) < 0) {
+                return retval;
+            }
+            /*
+             * Detect the charset
+             */
+            final String detectedCharset = CharsetDetector.detectCharset(Streams.newByteArrayInputStream(bytes));
+            if (DEBUG) {
+                LOG.debug("Mapped \"GB2312\" charset to \"" + detectedCharset + "\".");
+            }
+            if (isBig5(detectedCharset)) {
+                return readBig5Bytes(bytes);
+            }
+            return new String(bytes, detectedCharset);
+        }
+        final String retval = readStream0(streamProvider.getInputStream(), charset);
+        if (retval.indexOf(UNKNOWN) < 0) {
+            return retval;
+        }
+        final byte[] bytes = getBytesFrom(streamProvider.getInputStream());
+        final String detectedCharset = CharsetDetector.detectCharset(Streams.newByteArrayInputStream(bytes));
+        if (DEBUG) {
+            LOG.debug("Mapped \"" + charset + "\" charset to \"" + detectedCharset + "\".");
+        }
+        return new String(bytes, detectedCharset);
+    }
 
     /**
      * Reads a string from given input stream using direct buffering.

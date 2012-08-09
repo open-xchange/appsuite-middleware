@@ -9,6 +9,23 @@ Build-Conflicts: ecj, libecj-java-gcj, ecj-gcj, libecj-java, gcj-4.3-base, libgc
 
 Package: open-xchange-manage-group-resource
 Architecture: all
-Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
+Pre-Depends: open-xchange-core (>= @OXVERSION@)
+Depends: ${misc:Depends}
+Replaces: open-xchange-group-managerequest (<< 6.21.0-0), open-xchange-resource-managerequest (<< 6.21.0-0)
+Conflicts: open-xchange-group-managerequest (<< 6.21.0-0), open-xchange-resource-managerequest (<< 6.21.0-0)
 Description: The Open-Xchange backend HTTP/JSON group and resource management interfaces
  This package needs to be installed if users should be allowed to manage groups and resources through the web interface.
+
+###### http://wiki.debian.org/Renaming_a_Package #####
+Package: open-xchange-resource-managerequest
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, open-xchange-manage-group-resource
+Section: oldlibs
+Description: transitional dummy package
+
+Package: open-xchange-group-managerequest
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, open-xchange-manage-group-resource
+Section: oldlibs
+Description: transitional dummy package
+

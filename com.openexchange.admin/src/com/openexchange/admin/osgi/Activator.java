@@ -61,6 +61,8 @@ import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.plugins.OXUserPluginInterface;
 import com.openexchange.admin.services.AdminServiceRegistry;
+import com.openexchange.admin.tools.AdminCache;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
@@ -84,6 +86,9 @@ public class Activator extends HousekeepingActivator {
         track(PipesAndFiltersService.class, new RegistryServiceTrackerCustomizer<PipesAndFiltersService>(context, AdminServiceRegistry.getInstance(), PipesAndFiltersService.class));
         track(ContextService.class, new RegistryServiceTrackerCustomizer<ContextService>(context, AdminServiceRegistry.getInstance(), ContextService.class));
         track(MailAccountStorageService.class, new RegistryServiceTrackerCustomizer<MailAccountStorageService>(context, AdminServiceRegistry.getInstance(), MailAccountStorageService.class));
+        final ConfigurationService configurationService = getService(ConfigurationService.class);
+        AdminCache.compareAndSet(null, configurationService);
+        AdminServiceRegistry.getInstance().addService(ConfigurationService.class, configurationService);
         track(CreateTableService.class, new CreateTableCustomizer(context));
         openTrackers();
 
@@ -92,7 +97,7 @@ public class Activator extends HousekeepingActivator {
         this.daemon.getCurrentBundleStatus(context);
         this.daemon.registerBundleListener(context);
         try {
-            AdminDaemon.initCache();
+            AdminDaemon.initCache(configurationService);
             this.daemon.initAccessCombinationsInCache();
         } catch (final OXGenericException e) {
             log.fatal(e.getMessage(), e);
@@ -115,6 +120,7 @@ public class Activator extends HousekeepingActivator {
 
         // The listener which is called if a new plugin is registered
         final ServiceListener sl = new ServiceListener() {
+            @Override
             public void serviceChanged(final ServiceEvent ev) {
                 if (log.isInfoEnabled()) {
                     log.info("Service: " + ev.getServiceReference().getBundle().getSymbolicName() + ", " + ev.getType());
@@ -155,7 +161,6 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        // TODO Auto-generated method stub
-        return null;
+        return new Class<?>[] { ConfigurationService.class };
     }
 }

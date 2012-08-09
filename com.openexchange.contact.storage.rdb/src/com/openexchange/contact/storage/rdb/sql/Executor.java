@@ -50,7 +50,6 @@
 package com.openexchange.contact.storage.rdb.sql;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -60,11 +59,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.commons.logging.Log;
-
 import com.openexchange.contact.SortOptions;
-import com.openexchange.contact.SortOrder;
 import com.openexchange.contact.storage.rdb.fields.DistListMemberField;
 import com.openexchange.contact.storage.rdb.internal.DistListMember;
 import com.openexchange.contact.storage.rdb.internal.Tools;
@@ -77,7 +73,6 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
-import com.openexchange.groupware.search.Order;
 import com.openexchange.l10n.SuperCollator;
 import com.openexchange.log.LogFactory;
 import com.openexchange.search.SearchTerm;
@@ -229,9 +224,9 @@ public class Executor {
         	stringBuilder.append(" AND ").append(adapter.getClause());	
         }
         if (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions)) {
-        	stringBuilder.append(' ').append(getOrderClause(sortOptions));
+        	stringBuilder.append(' ').append(Tools.getOrderClause(sortOptions));
         	if (0 < sortOptions.getLimit()) {
-            	stringBuilder.append(' ').append(getLimitClause(sortOptions));
+            	stringBuilder.append(' ').append(Tools.getLimitClause(sortOptions));
         	}
         }
         stringBuilder.append(';');
@@ -272,16 +267,9 @@ public class Executor {
         /*
          * construct query string
          */
-        SearchAdapter adapter = new ContactSearchAdapter(contactSearch, contextID, fields, getCharset(sortOptions));
+        SearchAdapter adapter = new ContactSearchAdapter(contactSearch, contextID, fields, sortOptions);
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(adapter.getClause());
-        if (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions)) {
-        	stringBuilder.append(' ').append(getOrderClause(sortOptions));
-        	if (0 < sortOptions.getLimit()) {
-            	stringBuilder.append(' ').append(getLimitClause(sortOptions));
-        	}
-        }
-        stringBuilder.append(';');
+        stringBuilder.append(adapter.getClause()).append(';');
         /*
          * prepare statement
          */
@@ -579,52 +567,6 @@ public class Executor {
 			}
     	}
 		return null; // no charset
-    }
-    
-    private static String getOrderClause(final SortOptions sortOptions) throws OXException {
-    	final StringBuilder stringBuilder = new StringBuilder();
-    	if (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions)) {
-    		final SortOrder[] order = sortOptions.getOrder();
-    		if (null != order && 0 < order.length) {
-    			stringBuilder.append("ORDER BY ");
-    			final SuperCollator collator = SuperCollator.get(sortOptions.getCollation());
-    			stringBuilder.append(getOrderClause(order[0], collator));
-    			for (int i = 1; i < order.length; i++) {
-    				stringBuilder.append(' ').append(getOrderClause(order[i], collator));
-    			}
-    		}
-    	}
-    	return stringBuilder.toString();
-    }
-    
-    private static String getLimitClause(final SortOptions sortOptions) throws OXException {
-    	final StringBuilder stringBuilder = new StringBuilder();
-    	if (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions)) {
-    		if (0 < sortOptions.getLimit()) {
-    			stringBuilder.append("LIMIT ");
-    			if (0 < sortOptions.getRangeStart()) {
-    				stringBuilder.append(sortOptions.getRangeStart()).append(',');
-    			}
-    			stringBuilder.append(sortOptions.getLimit());
-    		}
-    	}
-    	return stringBuilder.toString();
-    }
-    
-    private static String getOrderClause(final SortOrder order, final SuperCollator collator) throws OXException {
-    	final StringBuilder stringBuilder = new StringBuilder();
-    	if (null == collator || SuperCollator.DEFAULT.equals(collator)) {
-    		stringBuilder.append(Mappers.CONTACT.get(order.getBy()).getColumnLabel());
-    	} else {
-			stringBuilder.append("CONVERT (").append(Mappers.CONTACT.get(order.getBy()).getColumnLabel()).append(" USING '")
-				.append(collator.getSqlCharset()).append("') COLLATE '").append(collator.getSqlCollation()).append('\'');
-    	}
-		if (Order.ASCENDING.equals(order.getOrder())) {
-			stringBuilder.append(" ASC");
-		} else if (Order.DESCENDING.equals(order.getOrder())) {
-			stringBuilder.append(" DESC");
-		}
-    	return stringBuilder.toString();
     }
     
     private static ResultSet logExecuteQuery(final PreparedStatement stmt) throws SQLException {

@@ -12,9 +12,8 @@ com.openexchange.axis2/conf/axis2.properties
 com.openexchange.axis2/lib/*.jar
 com.openexchange.axis2/tmp/*
 com.openexchange.common/jars
-build/build
-build/
 build
+build/build
 build/tmp
 com.openexchange.global/jars
 com.openexchange.config.cascade/jars
@@ -214,3 +213,6 @@ com.openexchange.xerces.ibm/jars/
 com.openexchange.xmpp/jars/
 openexchange-test/local
 openexchange-test/local/test.properties
+com.openexchange.loxandra.hector/build
+com.openexchange.nosql.cassandra/build
+/com.openexchange.eav.storage.cassandra

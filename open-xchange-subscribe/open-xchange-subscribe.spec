@@ -9,7 +9,7 @@ BuildRequires: open-xchange-oauth
 BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 0
+%define        ox_release 6
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -54,13 +54,38 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 
 %post
 if [ ${1:-0} -eq 2 ]; then
-    CONFFILES="crawlers/gmx.com.yml crawlers/gmx.de.yml crawlers/GoogleCalendar.yml crawlers/GoogleMail.yml 'crawlers/Sun Calendar.yml' 'crawlers/Sun Contacts.yml' 'crawlers/Sun Tasks.yml' crawlers/t-online.de.yml crawlers/web.de.yml crawlers/XING.yml crawlers/yahoo.com.yml crawler.properties facebooksubscribe.properties linkedinsubscribe.properties microformatSubscription.properties msnsubscribe.properties yahoosubscribe.properties"
+    # only when updating
+    . /opt/open-xchange/lib/oxfunctions.sh
+
+    # prevent bash from expanding, see bug 13316
+    GLOBIGNORE='*'
+
+    ##
+    ## start update from < 6.21
+    ##
+    CONFFILES="crawler.properties facebooksubscribe.properties linkedinsubscribe.properties microformatSubscription.properties msnsubscribe.properties yahoosubscribe.properties"
     for FILE in ${CONFFILES}; do
-        if [ -e "/opt/open-xchange/etc/groupware/${FILE}" ]; then
-            mv "/opt/open-xchange/etc/${FILE}" "/opt/open-xchange/etc/${FILE}.rpmnew"
-            mv "/opt/open-xchange/etc/groupware/${FILE}" "/opt/open-xchange/etc/${FILE}"
-        fi
+	ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc "$FILE"
     done
+
+    #SoftwareChange_Request-1091
+    pfile=/opt/open-xchange/etc/crawler.properties
+    if grep -E '^com.openexchange.subscribe.crawler.path.*/' $pfile >/dev/null; then
+        ox_set_property com.openexchange.subscribe.crawler.path crawlers $pfile
+    fi    
+
+    #SoftwareChange_Request-1099
+    pfile=/opt/open-xchange/etc/crawler.properties
+    if ! ox_exists_property com.openexchange.subscribe.crawler.gmx.com $pfile; then
+        ox_set_property com.openexchange.subscribe.crawler.gmx.com true $pfile
+    fi
+    ##
+    ## end update from < 6.21
+    ##
+    find /opt/open-xchange/etc/crawlers -name "*.yml" -print0 | while read -d $'\0' i; do
+        ox_update_permissions "$i" open-xchange:root 644
+    done
+    ox_update_permissions "/opt/open-xchange/etc/crawlers" open-xchange:root 755
 fi
 
 %clean
@@ -74,9 +99,21 @@ fi
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/etc/
 %config(noreplace) /opt/open-xchange/etc/*
-%dir /opt/open-xchange/etc/crawlers/
-%config(noreplace) /opt/open-xchange/etc/crawlers/*
+%dir %attr(755,open-xchange,root) /opt/open-xchange/etc/crawlers/
+%config(noreplace) %attr(644,open-xchange,root) /opt/open-xchange/etc/crawlers/*
 %doc docs/
 
 %changelog
 
+* Tue Jul 03 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Release build for EDP drop #2
+* Mon Jun 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Release build for EDP drop #2
+* Tue May 22 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Internal release build for EDP drop #2
+* Mon Apr 16 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Internal release build for EDP drop #1
+* Wed Apr 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Internal release build for EDP drop #0
+* Wed Feb 29 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Initial release

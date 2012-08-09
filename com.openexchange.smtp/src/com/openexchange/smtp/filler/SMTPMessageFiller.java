@@ -124,18 +124,24 @@ public final class SMTPMessageFiller extends MimeMessageFiller {
      * @throws IOException If an I/O error occurs
      */
     public void fillMail(final ComposedMailMessage mail, final SMTPMessage smtpMessage, final ComposeType type) throws MessagingException, OXException, IOException {
+        if (null != type) {
+            mail.setSendType(type);
+        }
         /*
          * Check for reply
          */
         {
             final MailPath msgref;
             if (ComposeType.REPLY.equals(type) && ((msgref = mail.getMsgref()) != null)) {
-                final MailAccess<?, ?> access = MailAccess.getInstance(session, msgref.getAccountId());
-                access.connect();
+                MailAccess<?, ?> access = null;
                 try {
+                    access = MailAccess.getInstance(session, msgref.getAccountId());
+                    access.connect();
                     setReplyHeaders(access.getMessageStorage().getMessage(msgref.getFolder(), msgref.getMailID(), false), smtpMessage);
                 } finally {
-                    access.close(true);
+                    if (null != access) {
+                        access.close(true);
+                    }
                 }
             }
         }

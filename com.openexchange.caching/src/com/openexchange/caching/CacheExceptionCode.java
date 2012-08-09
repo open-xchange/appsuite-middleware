@@ -59,7 +59,12 @@ public enum CacheExceptionCode implements OXExceptionCode {
     /**
      * Invalid cache region name \"%1$s\".
      */
-    INVALID_CACHE_REGION_NAME(CacheExceptionMessage.INVALID_CACHE_REGION_NAME, Category.CATEGORY_ERROR, 12);
+    INVALID_CACHE_REGION_NAME(CacheExceptionMessage.INVALID_CACHE_REGION_NAME, Category.CATEGORY_ERROR, 12),
+    /**
+     * Method not supported.
+     */
+    UNSUPPORTED_OPERATION(CacheExceptionMessage.UNSUPPORTED_OPERATION, Category.CATEGORY_ERROR, 13)
+    ;
 
     private final String message;
 

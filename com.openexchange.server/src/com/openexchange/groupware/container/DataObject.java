@@ -61,6 +61,8 @@ import java.util.Set;
 
 public abstract class DataObject extends SystemObject {
 
+    private static final long serialVersionUID = 4792432831176202196L;
+
     public static final int OBJECT_ID = 1;
 
     public static final int CREATED_BY = 2;

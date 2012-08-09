@@ -57,6 +57,6 @@ package com.openexchange.textxtraction.internal;
  */
 public class TextXtractionProperties {
     
-    public static final String TIKA_CONFIG = "com.openexchange.textxtraction.tikaConfig";
+    public static final String TIKA_CONFIG_FILE_NAME = "com.openexchange.textxtraction.tikaConfig";
 
 }

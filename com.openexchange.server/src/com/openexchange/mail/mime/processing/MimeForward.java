@@ -84,6 +84,7 @@ import com.openexchange.mail.dataobjects.CompositeMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.ManagedMimeMessage;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
@@ -206,6 +207,10 @@ public final class MimeForward {
     private static MailMessage getFowardMail0(final MailMessage[] originalMsgs, final Session session, final UserSettingMail userSettingMail) throws OXException {
         try {
             /*
+             * Clone them to ensure consistent data
+             */
+            final MailMessage[] origMsgs = ManagedMimeMessage.clone(originalMsgs);
+            /*
              * New MIME message with a dummy session
              */
             final Context ctx = ContextStorage.getStorageContext(session.getContextId());
@@ -217,7 +222,7 @@ public final class MimeForward {
                  * Set its headers. Start with subject constructed from first message.
                  */
                 final String subjectPrefix = PREFIX_FWD;
-                String origSubject = MimeMessageUtility.checkNonAscii(originalMsgs[0].getHeader(MessageHeaders.HDR_SUBJECT, null));
+                String origSubject = MimeMessageUtility.checkNonAscii(origMsgs[0].getHeader(MessageHeaders.HDR_SUBJECT, null));
                 if (origSubject == null) {
                     forwardMsg.setSubject(subjectPrefix, MailProperties.getInstance().getDefaultMimeCharset());
                 } else {
@@ -239,16 +244,40 @@ public final class MimeForward {
             if (usm.getSendAddr() != null) {
                 forwardMsg.setFrom(new QuotedInternetAddress(usm.getSendAddr(), true));
             }
-            if (usm.isForwardAsAttachment() || originalMsgs.length > 1) {
+            if (usm.isForwardAsAttachment() || origMsgs.length > 1) {
                 /*
                  * Attachment-Forward
                  */
-                return asAttachmentForward(originalMsgs, forwardMsg);
+                if (1 == origMsgs.length) {
+                    final MailMessage originalMsg = origMsgs[0];
+                    final String owner = MimeProcessingUtility.getFolderOwnerIfShared(originalMsg.getFolder(), originalMsg.getAccountId(), session);
+                    if (null != owner) {
+                        final User[] users = UserStorage.getInstance().searchUserByMailLogin(owner, ctx);
+                        if (null != users && users.length > 0) {
+                            final InternetAddress onBehalfOf = new QuotedInternetAddress(users[0].getMail(), true);
+                            forwardMsg.setFrom(onBehalfOf);
+                            final QuotedInternetAddress sender = new QuotedInternetAddress(usm.getSendAddr(), true);
+                            forwardMsg.setSender(sender);
+                        }
+                    }
+                }
+                return asAttachmentForward(origMsgs, forwardMsg);
             }
             /*
              * Inline-Forward
              */
-            return asInlineForward(originalMsgs[0], session, ctx, usm, forwardMsg);
+            final MailMessage originalMsg = origMsgs[0];
+            final String owner = MimeProcessingUtility.getFolderOwnerIfShared(originalMsg.getFolder(), originalMsg.getAccountId(), session);
+            if (null != owner) {
+                final User[] users = UserStorage.getInstance().searchUserByMailLogin(owner, ctx);
+                if (null != users && users.length > 0) {
+                    final InternetAddress onBehalfOf = new QuotedInternetAddress(users[0].getMail(), true);
+                    forwardMsg.setFrom(onBehalfOf);
+                    final QuotedInternetAddress sender = new QuotedInternetAddress(usm.getSendAddr(), true);
+                    forwardMsg.setSender(sender);
+                }
+            }
+            return asInlineForward(originalMsg, session, ctx, usm, forwardMsg);
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         } catch (final IOException e) {
@@ -638,17 +667,16 @@ public final class MimeForward {
                     mr.appendLiteralReplacement(
                         replaceBuffer,
                         new StringBuilder(forwardPrefix.length() + 16).append(linebreak).append(m.group()).append(forwardPrefix).append(
-                            linebreak).append(linebreak).toString());
+                            linebreak).toString());
                 } else {
-                    replaceBuffer.append(linebreak).append(forwardPrefix).append(linebreak).append(linebreak);
+                    replaceBuffer.append(linebreak).append(forwardPrefix).append(linebreak);
                 }
                 replaceBuffer.append("<div style=\"position:relative\">");
                 mr.appendTail(replaceBuffer);
                 replaceBuffer.append("</div>");
                 return replaceBuffer.toString();
             }
-            return new StringBuilder(firstSeenText.length() + 256).append(linebreak).append(forwardPrefix).append(linebreak).append(
-                linebreak).append(firstSeenText).toString();
+            return new StringBuilder(firstSeenText.length() + 256).append(linebreak).append(forwardPrefix).append(linebreak).append(firstSeenText).toString();
         }
         /*
          * Surround with quotes
@@ -731,5 +759,21 @@ public final class MimeForward {
         }
     }
      */
+
+    private static User getUserFrom(Session session) {
+        try {
+            if (null == session) {
+                return null;
+            }
+            if (session instanceof ServerSession) {
+                return ((ServerSession) session).getUser();
+            }
+            final Context ctx = ContextStorage.getStorageContext(session.getContextId());
+            return UserStorage.getStorageUser(session.getUserId(), ctx);
+        } catch (final Exception e) {
+            // Ignore
+            return null;
+        }
+    }
 
 }

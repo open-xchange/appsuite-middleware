@@ -60,6 +60,11 @@ import java.util.Set;
 
 public abstract class FolderChildObject extends DataObject {
 
+    private static final long serialVersionUID = 9177795092994324456L;
+
+    /**
+     * The minimum identifier for a folder kept in database.
+     */
     public static final int FOLDER_ID = 20;
 
     protected int parentFolderId;

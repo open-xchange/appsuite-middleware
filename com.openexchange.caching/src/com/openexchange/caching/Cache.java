@@ -50,21 +50,54 @@
 package com.openexchange.caching;
 
 import java.io.Serializable;
-import org.apache.jcs.access.exception.CacheException;
 import com.openexchange.exception.OXException;
 
 /**
  * {@link Cache} - This class provides an interface for all types of access to the cache.
  * <p>
  * An instance of this class is bound to a specific cache region.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface Cache {
 
     /**
+     * Indicates if this cache is distributed.
+     * <ul>
+     * <li>Data in the cluster is almost evenly distributed (partitioned) across all nodes. So each node carries ~ (1/n
+     * <code class="literal">*</code> total-data) + backups , n being the number of nodes in the cluster.<br>&nbsp;</li>
+     * <li>If a member goes down, its backup replica that also holds the same data, will dynamically redistribute the data including the
+     * ownership and locks on them to remaining live nodes. As a result, no data will get lost.<br>&nbsp;</li>
+     * <li>When a new node joins the cluster, new node takes ownership(responsibility) and load of -some- of the entire data in the cluster.
+     * Eventually the new node will carry almost (1/n <code class="literal">*</code> total-data) + backups and becomes the new partition
+     * reducing the load on others.<br>&nbsp;</li>
+     * <li>There is no single cluster master or something that can cause single point of failure. Every node in the cluster has equal rights
+     * and responsibilities. No-one is superior. And no dependency on external 'server' or 'master' kind of concept.<br>&nbsp;</li>
+     * </ul>
+     * 
+     * @return <code>true</code> if this cache has a distributed nature; otherwise <code>false</code> (a replicated nature)
+     */
+    public boolean isDistributed();
+
+    /**
+     * Indicates if this cache is replicated.
+     * <p>
+     * Data is kept redundantly on every linked node.
+     * 
+     * @return <code>true</code> if this cache has a replicated nature; otherwise <code>false</code> (a distributed nature)
+     */
+    public boolean isReplicated();
+
+    /**
+     * Checks if this cache is local-only.
+     * 
+     * @return <code>true</code> if local-only; otherwise <code>false</code>
+     */
+    public boolean isLocal();
+
+    /**
      * Removes all of the elements from cache.
-     *
+     * 
      * @throws OXException If cache cannot be cleared
      */
     public void clear() throws OXException;
@@ -78,7 +111,7 @@ public interface Cache {
 
     /**
      * Retrieves the object from the cache which is bound to specified key.
-     *
+     * 
      * @param key The key
      * @return The cached object if found or <code>null</code>
      */
@@ -92,7 +125,7 @@ public interface Cache {
      * This method is most useful if you want to determine things such as how long the element has been in the cache.
      * <p>
      * The last access time in the element attributes should be current.
-     *
+     * 
      * @param key The key
      * @return A reference to cache element wrapper if found or <code>null</code>
      */
@@ -103,7 +136,7 @@ public interface Cache {
      * attributes.
      * <p>
      * Each time an element is added to the cache without element attributes, the default element attributes are cloned.
-     *
+     * 
      * @return The default element attributes used by this cache.
      * @throws OXException If default element attributes cannot be returned
      */
@@ -111,7 +144,7 @@ public interface Cache {
 
     /**
      * Gets an item out of the cache that is in specified group.
-     *
+     * 
      * @param key The key
      * @param group The group name.
      * @return The cached value, <code>null</code> if not found.
@@ -120,7 +153,7 @@ public interface Cache {
 
     /**
      * Invalidates a group: remove all the group members
-     *
+     * 
      * @param group The name of the group to invalidate
      */
     public void invalidateGroup(String group);
@@ -128,7 +161,7 @@ public interface Cache {
     /**
      * Place a new object in the cache, associated with key name. If there is currently an object associated with name in the cache it is
      * replaced. Names are scoped to a cache so they must be unique within the cache they are placed. ObjectExistsException
-     *
+     * 
      * @param key The key
      * @param obj Object to store
      * @exception OXException If put operation on cache fails
@@ -139,7 +172,7 @@ public interface Cache {
      * Constructs a cache element with these attributes, and puts it into the cache.
      * <p>
      * If the key or the value is null, and InvalidArgumentException is thrown.
-     *
+     * 
      * @param key The key
      * @param val The object to store
      * @param attr The object's element attributes
@@ -150,7 +183,7 @@ public interface Cache {
     /**
      * Allows the user to put an object into a group within a particular cache. This method allows the object's attributes to be
      * individually specified.
-     *
+     * 
      * @param key The key
      * @param groupName The group name.
      * @param value The object to cache
@@ -160,9 +193,9 @@ public interface Cache {
     public void putInGroup(Serializable key, String groupName, Object value, ElementAttributes attr) throws OXException;
 
     /**
-     * Allows the user to put an object into a group within a particular cache. This method sets the object's attributes to the
-     * default for the cache.
-     *
+     * Allows the user to put an object into a group within a particular cache. This method sets the object's attributes to the default for
+     * the cache.
+     * 
      * @param key The key
      * @param groupName The group name.
      * @param value The object to cache
@@ -173,7 +206,7 @@ public interface Cache {
     /**
      * Place a new object in the cache, associated with key. If there is currently an object associated with key in the cache an exception
      * is thrown. Keys are scoped to a cache so they must be unique within the cache they are placed.
-     *
+     * 
      * @param key The key
      * @param value Object to store
      * @exception OXException If the item is already in the cache.
@@ -182,42 +215,48 @@ public interface Cache {
 
     /**
      * Removes the object from the cache which is bound to specified key.
-     *
+     * 
      * @param key The key
      * @throws OXException If remove operation on cache fails
      */
     public void remove(Serializable key) throws OXException;
 
     /**
-     * Removes the object from the cache which is bound to specified key without propagating that operation neither laterally nor remotely.
+     * Removes (optional operation) the object from the cache which is bound to specified key without propagating that operation neither
+     * laterally nor remotely.
      * 
      * @param key The key
-     * @throws CacheException If remove operation on cache fails
+     * @throws OXException If remove operation on cache fails
+     * @see SupportsLocalOperations SupportsLocalOperations marker interface to check if supported
      */
     public void localRemove(Serializable key) throws OXException;
 
     /**
-     * Puts the object into the cache which is bound to specified key without propagating that operation neither laterally nor remotely.
+     * Puts (optional operation) the object into the cache which is bound to specified key without propagating that operation neither
+     * laterally nor remotely.
      * 
      * @param key The key
      * @param value Object to store
      * @throws OXException If put operation on cache fails
+     * @see SupportsLocalOperations SupportsLocalOperations marker interface to check if supported
      */
     public void localPut(Serializable key, Serializable value) throws OXException;
 
     /**
      * Removes the object located in specified group and bound to given key.
-     *
+     * 
      * @param key The key
      * @param group The group name.
      */
     public void removeFromGroup(Serializable key, String group);
 
     /**
-     * Removes the object located in specified group and bound to given key without propagating that operation neither laterally nor remotely.
-     *
+     * Removes (optional operation) the object located in specified group and bound to given key without propagating that operation neither
+     * laterally nor remotely.
+     * 
      * @param key The key
      * @param group The group name.
+     * @see SupportsLocalOperations SupportsLocalOperations marker interface to check if supported
      */
     public void localRemoveFromGroup(Serializable key, String group);
 
@@ -225,7 +264,7 @@ public interface Cache {
      * This method does not reset the attributes for items already in the cache. It could potentially do this for items in memory, and maybe
      * on disk (which would be slow) but not remote items. Rather than have unpredictable behavior, this method just sets the default
      * attributes. Items subsequently put into the cache will use these defaults if they do not specify specific attributes.
-     *
+     * 
      * @param attr The default attributes.
      * @throws OXException If default element attributes cannot be applied.
      */
@@ -235,7 +274,7 @@ public interface Cache {
      * This returns the cache statistics with information on this region and its auxiliaries.
      * <p>
      * This data can be formatted as needed.
-     *
+     * 
      * @return The cache statistics with information on this region and its auxiliaries.
      */
     public CacheStatistics getStatistics();
@@ -244,7 +283,7 @@ public interface Cache {
      * Creates a new instance of {@link CacheKey} consisting of specified context ID and object ID.
      * <p>
      * This is a convenience method that delegates to {@link CacheService#newCacheKey(int, int)}.
-     *
+     * 
      * @param contextId The context ID
      * @param objectId The object ID
      * @return The new instance of {@link CacheKey}
@@ -255,7 +294,7 @@ public interface Cache {
      * Creates a new instance of {@link CacheKey} consisting of specified context ID and serializable object.
      * <p>
      * This is a convenience method that delegates to {@link CacheService#newCacheKey(int, Serializable)}.
-     *
+     * 
      * @param contextId The context ID
      * @param objs The serializable objects for the key
      * @return new instance of {@link CacheKey}

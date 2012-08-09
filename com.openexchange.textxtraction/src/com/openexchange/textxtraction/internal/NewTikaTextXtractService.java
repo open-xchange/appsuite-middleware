@@ -97,12 +97,13 @@ public class NewTikaTextXtractService extends AbstractTextXtractService {
         super();
         delegatees = new ConcurrentHashMap<DelegateTextXtraction, Object>(4);
         try {            
-        	String tikaConfigPath = service.getProperty(TextXtractionProperties.TIKA_CONFIG);
-        	if (tikaConfigPath == null) {
-        		throw new IllegalStateException("Property " + TextXtractionProperties.TIKA_CONFIG + " must not be null.");
+        	final String tikaConfigPathFileName = service.getProperty(TextXtractionProperties.TIKA_CONFIG_FILE_NAME);
+        	if (tikaConfigPathFileName == null) {
+        		throw new IllegalStateException("Property " + TextXtractionProperties.TIKA_CONFIG_FILE_NAME + " must not be null.");
         	}
         	
-            TikaConfig config = new TikaConfig(tikaConfigPath);
+            final File tikaConfigFile = service.getFileByName(tikaConfigPathFileName);
+            final TikaConfig config = null == tikaConfigFile ? new TikaConfig() : new TikaConfig(tikaConfigFile);
             tika = new Tika(config);        
         } catch (TikaException e) {
             LOG.error(e.getMessage(), e);

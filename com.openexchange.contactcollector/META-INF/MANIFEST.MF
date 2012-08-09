@@ -9,6 +9,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.api2,
  com.openexchange.authentication,
  com.openexchange.concurrent,
+ com.openexchange.config,
  com.openexchange.contact,
  com.openexchange.contactcollector,
  com.openexchange.context,

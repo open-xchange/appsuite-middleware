@@ -49,6 +49,7 @@
 
 package com.openexchange.event.impl;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -76,7 +77,7 @@ public class EventConfigImpl extends AbstractConfigWrapper implements EventConfi
 
     }
 
-    public EventConfigImpl(final String propfile) {
+    public EventConfigImpl(final File propfile) {
         /*-
          * This if statement always yields false
          *

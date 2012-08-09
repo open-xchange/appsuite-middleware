@@ -68,6 +68,8 @@ import com.openexchange.groupware.tasks.mapping.Alarm;
  */
 public class Task extends CalendarObject {
 
+    private static final long serialVersionUID = 3292310353395679976L;
+
     public static final int STATUS = 300;
 
     public static final int PERCENT_COMPLETED = 301;

@@ -144,34 +144,34 @@ public class Executor extends Assert {
     private static final AtomicLong COUNTER = new AtomicLong(1);
 
     public static <T extends AbstractAJAXResponse> T execute(final AJAXSession session, final AJAXRequest<T> request,
-            final String protocol, final String hostname, final int sleep) throws OXException, IOException,
-            JSONException {
+        final String protocol, final String hostname, final int sleep) throws OXException, IOException,
+        JSONException {
 
         final String urlString = protocol + "://" + hostname + request.getServletPath();
         final HttpUriRequest httpRequest;
         switch (request.getMethod()) {
         case GET:
-        	httpRequest = new HttpGet(
-        			addQueryParamsToUri(urlString, getGETParameter(session, request)));
+            httpRequest = new HttpGet(
+                addQueryParamsToUri(urlString, getGETParameter(session, request)));
             break;
         case POST:
-        	final HttpPost httpPost = new HttpPost(urlString + getURLParameter(session, request, true));
-        	httpPost.setEntity( getBodyParameters(request));
-        	httpPost.getParams().setParameter("Content-Type", "application/x-www-form-urlencoded");
-        	//Kommt so nicht an, ist immer noch text/plain
-        	httpRequest = httpPost;
+            final HttpPost httpPost = new HttpPost(urlString + getURLParameter(session, request, true));
+            httpPost.setEntity( getBodyParameters(request));
+            httpPost.getParams().setParameter("Content-Type", "application/x-www-form-urlencoded");
+            //Kommt so nicht an, ist immer noch text/plain
+            httpRequest = httpPost;
             break;
         case UPLOAD:
-        	final HttpPost httpUpload = new HttpPost(urlString + getURLParameter(session, request, false)); //TODO old request used to set "mimeEncoded" = true here
-        	addUPLOADParameter(httpUpload, request);
-        	httpRequest = httpUpload;
+            final HttpPost httpUpload = new HttpPost(urlString + getURLParameter(session, request, false)); //TODO old request used to set "mimeEncoded" = true here
+            addUPLOADParameter(httpUpload, request);
+            httpRequest = httpUpload;
             break;
         case PUT:
-        	final HttpPut httpPut = new HttpPut(urlString + getURLParameter(session, request, false));
-            InputStreamEntity entity = new InputStreamEntity(createBody(request.getBody()), -1);
+            final HttpPut httpPut = new HttpPut(urlString + getURLParameter(session, request, false));
+            final InputStreamEntity entity = new InputStreamEntity(createBody(request.getBody()), -1);
             entity.setContentType("text/javascript; charset=UTF-8");
             httpPut.setEntity(entity);
-        	httpRequest = httpPut;
+            httpRequest = httpPut;
             break;
         default:
             throw AjaxExceptionCodes.IMVALID_PARAMETER.create(request.getMethod().name());
@@ -180,7 +180,7 @@ public class Executor extends Assert {
             httpRequest.addHeader(header.getName(), header.getValue());
         }
         // Test echo header
-        final String echoHeaderName = AJAXConfig.getProperty(AJAXConfig.Property.ECHO_HEADER);
+        final String echoHeaderName = AJAXConfig.getProperty(AJAXConfig.Property.ECHO_HEADER, "");
         String echoValue = null;
         if (!isEmpty(echoHeaderName)) {
             echoValue = "pingMeBack-"+COUNTER.getAndIncrement();
@@ -190,7 +190,7 @@ public class Executor extends Assert {
         final DefaultHttpClient httpClient = session.getHttpClient();
 
         final long startRequest = System.currentTimeMillis();
-    	final HttpResponse response = httpClient.execute(httpRequest);
+        final HttpResponse response = httpClient.execute(httpRequest);
         final long requestDuration = System.currentTimeMillis() - startRequest;
         if (null != echoValue) {
             final org.apache.http.Header header = response.getFirstHeader(echoHeaderName);
@@ -203,13 +203,13 @@ public class Executor extends Assert {
         syncCookies(httpClient, session.getConversation());
 
         try {
-			Thread.sleep(sleep);
-		} catch (final InterruptedException e) {
+            Thread.sleep(sleep);
+        } catch (final InterruptedException e) {
             // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
             Thread.currentThread().interrupt();
-			System.out.println("InterruptedException while sleeping between test requests. Does that help?");
-			e.printStackTrace();
-		} //emulating HttpUnit to avoid the Apache bug that mixes package up
+            System.out.println("InterruptedException while sleeping between test requests. Does that help?");
+            e.printStackTrace();
+        } //emulating HttpUnit to avoid the Apache bug that mixes package up
 
         final AbstractAJAXParser<? extends T> parser = request.getParser();
         final String responseBody = parser.checkResponse(response);
@@ -236,17 +236,17 @@ public class Executor extends Assert {
         return isWhitespace;
     }
 
-	public static void syncCookies(final WebConversation conversation, final DefaultHttpClient httpClient, final String hostname) {
-	    // workaround for tests that prepend the protocol
-	    final String domain;
-	    if (hostname.startsWith("http://")) {
-	        domain = hostname.substring(7);
-	    } else if (hostname.startsWith("https://")) {
-	        domain = hostname.substring(8);
-	    } else {
-	        domain = hostname;
-	    }
-	    final String[] cookies = conversation.getCookieNames();
+    public static void syncCookies(final WebConversation conversation, final DefaultHttpClient httpClient, final String hostname) {
+        // workaround for tests that prepend the protocol
+        final String domain;
+        if (hostname.startsWith("http://")) {
+            domain = hostname.substring(7);
+        } else if (hostname.startsWith("https://")) {
+            domain = hostname.substring(8);
+        } else {
+            domain = hostname;
+        }
+        final String[] cookies = conversation.getCookieNames();
         final CookieStore cookieStore = httpClient.getCookieStore();
         final Set<String> storedNames = new HashSet<String>();
         for (final Cookie cookie : cookieStore.getCookies()) {
@@ -260,9 +260,9 @@ public class Executor extends Assert {
                 cookieStore.addCookie(newCookie);
             }
         }
-	}
+    }
 
-	public static void syncCookies(final DefaultHttpClient httpClient, final WebConversation conversation) {
+    public static void syncCookies(final DefaultHttpClient httpClient, final WebConversation conversation) {
         final Set<String> storedNames = new HashSet<String>();
         for (final String name : conversation.getCookieNames()) {
             storedNames.add(name);
@@ -275,10 +275,10 @@ public class Executor extends Assert {
                 cookieJar.putCookie(name, cookie.getValue());
             }
         }
-	}
+    }
 
-	public static WebResponse execute4Download(final AJAXSession session, final AJAXRequest<?> request,
-            final String protocol, final String hostname) throws OXException, IOException, JSONException {
+    public static WebResponse execute4Download(final AJAXSession session, final AJAXRequest<?> request,
+        final String protocol, final String hostname) throws OXException, IOException, JSONException {
         final String urlString = protocol + "://" + hostname + request.getServletPath();
         final WebRequest req;
         switch (request.getMethod()) {
@@ -316,22 +316,22 @@ public class Executor extends Assert {
 
     private static String addQueryParamsToUri(String uri, final List<NameValuePair> queryParams){
 
-    	java.util.Collections.sort(queryParams, new Comparator<NameValuePair>(){
-			@Override
+        java.util.Collections.sort(queryParams, new Comparator<NameValuePair>(){
+            @Override
             public int compare(final NameValuePair o1, final NameValuePair o2) {
-				return (o1.getName().compareTo(o2.getName()));
-			}}); //sorting the query params alphabetically
+                return (o1.getName().compareTo(o2.getName()));
+            }}); //sorting the query params alphabetically
 
-    	if(uri.contains("?")) {
+        if(uri.contains("?")) {
             uri += "&";
         } else {
             uri += "?";
         }
-    	return uri + URLEncodedUtils.format(queryParams, "UTF-8");
+        return uri + URLEncodedUtils.format(queryParams, "UTF-8");
     }
 
     private static List<NameValuePair> getGETParameter(final AJAXSession session, final AJAXRequest<?> ajaxRequest) throws IOException, JSONException{ //new
-    	final List<NameValuePair> pairs = new LinkedList<NameValuePair>();
+        final List<NameValuePair> pairs = new LinkedList<NameValuePair>();
 
         if (session.getId() != null) {
             pairs.add( new BasicNameValuePair(AJAXServlet.PARAMETER_SESSION, session.getId()));
@@ -339,7 +339,7 @@ public class Executor extends Assert {
 
         for (final Parameter param : ajaxRequest.getParameters()) {
             if (!(param instanceof FileParameter)) {
-            	pairs.add( new BasicNameValuePair(param.getName(), param.getValue()));
+                pairs.add( new BasicNameValuePair(param.getName(), param.getValue()));
             }
         }
 
@@ -357,15 +357,15 @@ public class Executor extends Assert {
                 parts.addPart(new FormBodyPart(fparam.getFieldName(), body));
             }
             if (param instanceof FileParameter) {
-            	final FileParameter fparam = (FileParameter) param;
-            	final InputStream is = fparam.getInputStream();
-            	InputStreamBody body;
-            	if(null != fparam.getMimeType() && !"".equals(fparam.getMimeType())) {
-            	    body = new InputStreamBody(is, fparam.getMimeType(), fparam.getValue());
-            	} else {
-            	    body = new InputStreamBody(is, fparam.getValue());
-            	}
-            	parts.addPart(new FormBodyPart(fparam.getName(), body));
+                final FileParameter fparam = (FileParameter) param;
+                final InputStream is = fparam.getInputStream();
+                InputStreamBody body;
+                if(null != fparam.getMimeType() && !"".equals(fparam.getMimeType())) {
+                    body = new InputStreamBody(is, fparam.getMimeType(), fparam.getValue());
+                } else {
+                    body = new InputStreamBody(is, fparam.getValue());
+                }
+                parts.addPart(new FormBodyPart(fparam.getName(), body));
             }
         }
         postMethod.setEntity(parts);
@@ -373,7 +373,7 @@ public class Executor extends Assert {
     }
 
     private static HttpEntity getBodyParameters(final AJAXRequest<?> request) throws IOException, JSONException {
-    	final List<NameValuePair> pairs = new LinkedList<NameValuePair>();
+        final List<NameValuePair> pairs = new LinkedList<NameValuePair>();
 
         for (final Parameter param : request.getParameters()) {
             if (param instanceof FieldParameter) {

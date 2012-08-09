@@ -81,7 +81,7 @@ public class CreateTest extends ContactStorageTest {
         contact.setSurName("Maier");
         contact.setEmail1("otto.maier@example.com");
         contact.setUid(UUID.randomUUID().toString());
-        getStorage().create(getContextID(), folderId, contact);
+        getStorage().create(getSession(), folderId, contact);
         super.rememberForCleanUp(contact);
         /*
          * verify contact
@@ -109,7 +109,7 @@ public class CreateTest extends ContactStorageTest {
         contact.setUid(UUID.randomUUID().toString());
         contact.setImage1(Data.image);
         contact.setImageContentType(Data.CONTENT_TYPE);
-        getStorage().create(getContextID(), folderId, contact);
+        getStorage().create(getSession(), folderId, contact);
         super.rememberForCleanUp(contact);
         /*
          * verify contact
@@ -139,7 +139,7 @@ public class CreateTest extends ContactStorageTest {
             new DistributionListEntryObject("Klaus Otto", "klaus.otto@example.com", 0),
             new DistributionListEntryObject("Kurt Otto", "kurt.otto@example.com", 0),
         });
-        getStorage().create(getContextID(), folderId, contact);
+        getStorage().create(getSession(), folderId, contact);
         super.rememberForCleanUp(contact);
         /*
          * verify contact
@@ -166,7 +166,7 @@ public class CreateTest extends ContactStorageTest {
         contact.setSurName("M\u00fcller");
         contact.setEmail1("rene.mueller@example.com");
         contact.setUid(UUID.randomUUID().toString());
-        getStorage().create(getContextID(), folderId, contact);
+        getStorage().create(getSession(), folderId, contact);
         super.rememberForCleanUp(contact);
         /*
          * verify contact
@@ -195,7 +195,7 @@ public class CreateTest extends ContactStorageTest {
                 contact.setSurName("Test_" + j);
                 contact.setEmail1("kontakt" + i + ".test" + j + "@example.com");
                 contact.setUid(UUID.randomUUID().toString());
-                getStorage().create(getContextID(), Integer.toString(i), contact);
+                getStorage().create(getSession(), Integer.toString(i), contact);
                 contactsInFolders.get(Integer.toString(i)).add(contact);
                 super.rememberForCleanUp(contact);
             }
@@ -206,7 +206,7 @@ public class CreateTest extends ContactStorageTest {
         for (final Map.Entry<String, List<Contact>> entry : contactsInFolders.entrySet()) {
             String folderId = entry.getKey();
             for (final Contact contact : entry.getValue()) {
-                final Contact savedContact = getStorage().get(getContextID(), folderId, Integer.toString(contact.getObjectID()), ContactField.values());
+                final Contact savedContact = getStorage().get(getSession(), folderId, Integer.toString(contact.getObjectID()), ContactField.values());
                 assertNotNull("contact not found", savedContact);
                 assertEquals("uid wrong", contact.getUid(), savedContact.getUid());
             }

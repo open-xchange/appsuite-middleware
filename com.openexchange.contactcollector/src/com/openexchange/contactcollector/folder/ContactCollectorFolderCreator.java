@@ -94,7 +94,7 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
         DatabaseService databaseService = null;
         Connection con = null;
         try {
-            databaseService = CCServiceRegistry.getInstance().getService(DatabaseService.class, true);
+            databaseService = CCServiceRegistry.getInstance().getService(DatabaseService.class);
             con = databaseService.getWritable(cid);
             final String folderName = StringHelper.valueOf(login.getUser().getLocale()).getString(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME);
             create(login.getSession(), login.getContext(), folderName, con);

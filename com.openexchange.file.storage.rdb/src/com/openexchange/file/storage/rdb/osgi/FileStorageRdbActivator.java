@@ -49,7 +49,6 @@
 
 package com.openexchange.file.storage.rdb.osgi;
 
-import static com.openexchange.file.storage.rdb.services.FileStorageRdbServiceRegistry.getServiceRegistry;
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -58,12 +57,12 @@ import java.util.List;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.caching.CacheService;
 import com.openexchange.context.ContextService;
-import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.rdb.Services;
 import com.openexchange.file.storage.rdb.groupware.FileStorageRdbCreateTableTask;
 import com.openexchange.file.storage.rdb.groupware.FileStorageRdbDeleteListener;
 import com.openexchange.file.storage.rdb.internal.CachingFileStorageAccountStorage;
@@ -71,11 +70,11 @@ import com.openexchange.file.storage.rdb.internal.RdbFileStorageAccountManagerPr
 import com.openexchange.file.storage.rdb.secret.RdbFileStorageSecretHandling;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.groupware.update.UpdateTask;
+import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.id.IDGeneratorService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.ServiceRegistry;
-import com.openexchange.secret.SecretService;
+import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 import com.openexchange.secret.recovery.EncryptedItemDetectorService;
 import com.openexchange.secret.recovery.SecretMigrator;
@@ -88,10 +87,11 @@ import com.openexchange.secret.recovery.SecretMigrator;
  */
 public class FileStorageRdbActivator extends HousekeepingActivator {
 
-    private List<ServiceTracker<?,?>> trackers;
+    private volatile WhiteboardSecretService secretService;
 
-    private WhiteboardSecretService secretService;
-
+    /**
+     * Initializes a new {@link FileStorageRdbActivator}.
+     */
     public FileStorageRdbActivator() {
         super();
     }
@@ -100,46 +100,13 @@ public class FileStorageRdbActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
             DatabaseService.class, GenericConfigurationStorageService.class, ContextService.class, FileStorageServiceRegistry.class,
-            CacheService.class, CryptoService.class };
-    }
-
-    @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FileStorageRdbActivator.class));
-        if (logger.isInfoEnabled()) {
-            logger.info("Re-available service: " + clazz.getName());
-        }
-        getServiceRegistry().addService(clazz, getService(clazz));
-    }
-
-    @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FileStorageRdbActivator.class));
-        if (logger.isWarnEnabled()) {
-            logger.warn("Absent service: " + clazz.getName());
-        }
-        getServiceRegistry().removeService(clazz);
+            CacheService.class, SecretEncryptionFactoryService.class, IDGeneratorService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         try {
-            /*
-             * (Re-)Initialize service registry with available services
-             */
-            {
-                final ServiceRegistry registry = getServiceRegistry();
-                registry.clearRegistry();
-                final Class<?>[] classes = getNeededServices();
-                for (final Class<?> classe : classes) {
-                    final Object service = getService(classe);
-                    if (null != service) {
-                        registry.addService(classe, service);
-                    }
-                }
-                registry.addService(SecretService.class, secretService = new WhiteboardSecretService(context));
-                secretService.open();
-            }
+            Services.setServices(this);
             /*
              * Feed cache with additional cache configuration for file storage account cache
              */
@@ -167,32 +134,22 @@ public class FileStorageRdbActivator extends HousekeepingActivator {
             /*
              * Initialize and start service trackers
              */
-
-            trackers = new ArrayList<ServiceTracker<?,?>>(2);
             final ServiceTracker<FileStorageService, FileStorageService> fileStorageServiceTracker = trackService(FileStorageService.class);
-            trackers.add(fileStorageServiceTracker);
-            for (final ServiceTracker<?,?> tracker : trackers) {
-                tracker.open();
-            }
+            openTrackers();
             /*
              * Initialize and register services
              */
-            registerService(FileStorageAccountManagerProvider.class, new RdbFileStorageAccountManagerProvider(), null);
+            registerService(FileStorageAccountManagerProvider.class, new RdbFileStorageAccountManagerProvider());
             /*
              * The update task/create table service
              */
             final FileStorageRdbCreateTableTask createTableTask = new FileStorageRdbCreateTableTask();
-            registerService(UpdateTaskProviderService.class, new UpdateTaskProviderService() {
-                @Override
-                public Collection<UpdateTask> getUpdateTasks() {
-                    return Collections.<UpdateTask> singletonList(createTableTask);
-                }
-            }, null);
-            registerService(CreateTableService.class, createTableTask, null);
+            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(createTableTask));
+            registerService(CreateTableService.class, createTableTask);
             /*
              * The delete listener
              */
-            registerService(DeleteListener.class, new FileStorageRdbDeleteListener(), null);
+            registerService(DeleteListener.class, new FileStorageRdbDeleteListener());
             /*
              * Secret Handling
              */
@@ -212,8 +169,8 @@ public class FileStorageRdbActivator extends HousekeepingActivator {
                         return list;
                     }
                 };
-                registerService(EncryptedItemDetectorService.class, secretHandling, null);
-                registerService(SecretMigrator.class, secretHandling, null);
+                registerService(EncryptedItemDetectorService.class, secretHandling);
+                registerService(SecretMigrator.class, secretHandling);
             }
         } catch (final Exception e) {
             com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FileStorageRdbActivator.class)).error(e.getMessage(), e);
@@ -224,18 +181,16 @@ public class FileStorageRdbActivator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         try {
-            if (null != trackers) {
-                while (!trackers.isEmpty()) {
-                    trackers.remove(0).close();
-                }
-                trackers = null;
-            }
             cleanUp();
             /*
              * Clear service registry
              */
-            getServiceRegistry().clearRegistry();
-            secretService.close();
+            Services.setServices(null);
+            final WhiteboardSecretService secretService = this.secretService;
+            if (null != secretService) {
+                secretService.close();
+                this.secretService = null;
+            }
         } catch (final Exception e) {
             com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FileStorageRdbActivator.class)).error(e.getMessage(), e);
             throw e;

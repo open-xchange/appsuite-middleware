@@ -49,6 +49,7 @@
 
 package com.openexchange.imap;
 
+import gnu.trove.ConcurrentTIntObjectHashMap;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketTimeoutException;
@@ -92,10 +93,13 @@ import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.java.Charsets;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.Protocol;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailLogicTools;
+import com.openexchange.mail.cache.IMailAccessCache;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.mime.MimeMailException;
@@ -171,6 +175,153 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             is.connect(server, port, login, pw);
             return null;
         }
+    }
+
+    private static final class Key {
+        final int contextId;
+        final int userId;
+        final int hash;
+        Key(final int userId, final int contextId) {
+            super();
+            this.userId = userId;
+            this.contextId = contextId;
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + contextId;
+            result = prime * result + userId;
+            hash = result;
+        }
+        @Override
+        public int hashCode() {
+            return hash;
+        }
+        @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof Key)) {
+                return false;
+            }
+            final Key other = (Key) obj;
+            if (contextId != other.contextId) {
+                return false;
+            }
+            if (userId != other.userId) {
+                return false;
+            }
+            return true;
+        }
+    }
+
+    private static volatile Boolean validityDisabled;
+
+    private static boolean validityDisabled() {
+        Boolean tmp = validityDisabled;
+        if (null == tmp) {
+            synchronized (IMAPAccess.class) {
+                tmp = validityDisabled;
+                if (null == tmp) {
+                    final ConfigurationService service = IMAPServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+                    tmp = Boolean.valueOf(service != null && service.getBoolProperty("com.openexchange.imap.validityDisabled", false));
+                    validityDisabled = tmp;
+                }
+            }
+        }
+        return tmp.booleanValue();
+    }
+
+    /**
+     * The validity map.
+     */
+    private static final ConcurrentMap<Key, ConcurrentTIntObjectHashMap<AtomicLong>> VALIDITY_MAP = new ConcurrentHashMap<IMAPAccess.Key, ConcurrentTIntObjectHashMap<AtomicLong>>();
+
+    /**
+     * Drops the user-associated validity.
+     * 
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     */
+    public static void dropValidity(final int userId, final int contextId) {
+        VALIDITY_MAP.remove(new Key(userId, contextId));
+    }
+
+    /**
+     * Gets the current validity value.
+     * 
+     * @param accountId The account identifier
+     * @param session The associated session
+     * @return The current validity or <code>0</code> if not initialized, yet
+     */
+    public static long getCurrentValidity(final int accountId, final Session session) {
+        if (validityDisabled()) {
+            return 0L;
+        }
+        final ConcurrentTIntObjectHashMap<AtomicLong> map = VALIDITY_MAP.get(new Key(session.getUserId(), session.getContextId()));
+        if (null == map) {
+            return 0L;
+        }
+        final AtomicLong validity = map.get(accountId);
+        return null == validity ? 0L : validity.get();
+    }
+
+    /**
+     * Gets the IMAP validity.
+     * 
+     * @param imapAccess The IMAP access
+     * @return The IMAP validity
+     */
+    private static IMAPValidity getIMAPValidity(final IMAPAccess imapAccess) {
+        final Session session = imapAccess.session;
+        final Key key = new Key(session.getUserId(), session.getContextId());
+        ConcurrentTIntObjectHashMap<AtomicLong> map = VALIDITY_MAP.get(key);
+        if (null == map) {
+            final ConcurrentTIntObjectHashMap<AtomicLong> newMap = new ConcurrentTIntObjectHashMap<AtomicLong>(8);
+            map = VALIDITY_MAP.putIfAbsent(key, newMap);
+            if (null == map) {
+                map = newMap;
+            }
+        }
+        AtomicLong validity = map.get(imapAccess.accountId);
+        if (null == validity) {
+            final AtomicLong al = new AtomicLong(0L);
+            validity = map.putIfAbsent(imapAccess.accountId, al);
+            if (null == validity) {
+                validity = al;
+            }
+        }
+        return new DefaultIMAPValidity(validity, imapAccess);
+    }
+
+    /**
+     * Increases current validity by one.
+     * 
+     * @param accountId The account identifier
+     * @param session The associated session
+     * @return The increased validity value
+     */
+    public static long increaseCurrentValidity(final int accountId, final Session session) {
+        if (validityDisabled()) {
+            return 0L;
+        }
+        final Key key = new Key(session.getUserId(), session.getContextId());
+        ConcurrentTIntObjectHashMap<AtomicLong> map = VALIDITY_MAP.get(key);
+        if (null == map) {
+            final ConcurrentTIntObjectHashMap<AtomicLong> newMap = new ConcurrentTIntObjectHashMap<AtomicLong>(8);
+            map = VALIDITY_MAP.putIfAbsent(key, newMap);
+            if (null == map) {
+                map = newMap;
+            }
+        }
+        AtomicLong validity = map.get(accountId);
+        if (null == validity) {
+            final AtomicLong al = new AtomicLong(0L);
+            validity = map.putIfAbsent(accountId, al);
+            if (null == validity) {
+                validity = al;
+            }
+        }
+        return validity.incrementAndGet();
     }
 
     /**
@@ -264,9 +415,14 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     private String clientIp;
 
     /**
-     * The IMAP config.
+     * The IMAP configuration.
      */
     private volatile IMAPConfig imapConfig;
+
+    /**
+     * The validity counter.
+     */
+    private long validity;
 
     /**
      * A simple cache for max. count values per server.
@@ -280,6 +436,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      */
     protected IMAPAccess(final Session session) {
         super(session);
+        validity = 0L;
         setMailProperties((Properties) System.getProperties().clone());
         maxCount = -1;
         protocol = IMAPProvider.PROTOCOL_IMAP;
@@ -293,6 +450,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      */
     protected IMAPAccess(final Session session, final int accountId) {
         super(session, accountId);
+        validity = 0L;
         setMailProperties((Properties) System.getProperties().clone());
         maxCount = -1;
         protocol = IMAPProvider.PROTOCOL_IMAP;
@@ -312,6 +470,16 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             }
         }
         return maxCount.intValue();
+    }
+
+    /**
+     * Checks the validity for being put into cache.
+     * 
+     * @return <code>true</code> if valid; otherwise <code>false</code>
+     */
+    public boolean checkValidity() {
+        final long currentValidity = getCurrentValidity(accountId, session);
+        return currentValidity <= 0 || validity >= currentValidity;
     }
 
     /**
@@ -410,10 +578,13 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             }
             if (imapStore != null) {
                 if (useIMAPStoreCache()) {
-                    IMAPStoreCache.getInstance().returnIMAPStore(imapStore.dropAndGetImapStore(), server, port, login);
+                    IMAPStoreCache.getInstance().returnIMAPStore(imapStore.dropAndGetImapStore(), server, port, login, getIMAPValidity(this));
                 } else {
                     try {
                         imapStore.close();
+                        if (!checkValidity()) {
+                            clearCachedConnections();
+                        }
                     } catch (final MessagingException e) {
                         LOG.error("Error while closing IMAP store.", e);
                     } catch (final RuntimeException e) {
@@ -702,6 +873,9 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             maxCount = getMaxCount();
             try {
                 imapStore = new AccessedIMAPStore(this, connectIMAPStore(maxCount > 0), imapSession);
+                final long currentValidity = getCurrentValidity(accountId, session);
+                imapStore.setValidity(currentValidity);
+                validity = currentValidity;
             } catch (final AuthenticationFailedException e) {
                 throw e;
             } catch (final MessagingException e) {
@@ -773,6 +947,25 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         return connectIMAPStore(fromCache, imapSession, server, port, login, password, clientIp);
     }
 
+    /**
+     * Clears cached IMAP connections.
+     */
+    protected void clearCachedConnections() {
+        final IMAPStoreContainer container = IMAPStoreCache.getInstance().optContainer(server, port, login);
+        if (null != container) {
+            container.clear();
+        }
+        try {
+            final IMailAccessCache mailAccessCache = MailAccess.getMailAccessCache();
+            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> tmp;
+            while ((tmp = mailAccessCache.removeMailAccess(session, accountId)) != null) {
+                tmp.close(false);
+            }
+        } catch (final Exception e) {
+            // Ignore
+        }
+    }
+
     private static final String PROTOCOL = IMAPProvider.PROTOCOL_IMAP.getName();
 
     private IMAPStore connectIMAPStore(final boolean fromCache, final javax.mail.Session imapSession, final String server, final int port, final String login, final String pw, final String clientIp) throws MessagingException, OXException {
@@ -783,6 +976,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         if (clientIp != null) {
             imapSession.getProperties().put("mail.imap.propagate.clientipaddress", clientIp);
         }
+        imapSession.getProperties().put("mail.imap.failOnNOFetch", "true");
         /*
          * Cache failed authentication attempts
          */
@@ -794,7 +988,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
          * Get store...
          */
         if (fromCache && useIMAPStoreCache()) {
-            return IMAPStoreCache.getInstance().borrowIMAPStore(accountId, imapSession, server, port, login, pw, session);
+            return IMAPStoreCache.getInstance().borrowIMAPStore(accountId, imapSession, server, port, login, pw, session, getIMAPValidity(this));
         }
         /*
          * Establish a new one...
@@ -905,7 +1099,13 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     @Override
     public boolean isCacheable() {
-        return !useIMAPStoreCache();
+        if (!checkValidity()) {
+            return false;
+        }
+        if (useIMAPStoreCache()) {
+            return false;
+        }
+        return true;
     }
 
     private boolean useIMAPStoreCache() {
@@ -981,6 +1181,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     protected void shutdown() throws OXException {
         USE_IMAP_STORE_CACHE.set(true);
         maxCountCache = null;
+        validityDisabled = null;
         Entity2ACLInit.getInstance().stop();
         ACLExtensionInit.getInstance().stop();
         IMAPCapabilityAndGreetingCache.tearDown();

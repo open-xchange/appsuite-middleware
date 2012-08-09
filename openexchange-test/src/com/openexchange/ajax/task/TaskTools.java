@@ -428,4 +428,16 @@ public final class TaskTools extends Assert {
             response.getResponse(i).fillTask(tasks[i]);
         }
     }
+
+    public static Task valuesForUpdate(final Task task) {
+        return valuesForUpdate(task, task.getParentFolderID());
+    }
+
+    public static Task valuesForUpdate(Task task, int folderId) {
+        final Task retval = new Task();
+        retval.setObjectID(task.getObjectID());
+        retval.setParentFolderID(folderId);
+        retval.setLastModified(task.getLastModified());
+        return retval;
+    }
 }

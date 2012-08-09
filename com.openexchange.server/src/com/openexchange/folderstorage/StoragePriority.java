@@ -49,12 +49,14 @@
 
 package com.openexchange.folderstorage;
 
+import java.io.Serializable;
+
 /**
  * {@link StoragePriority} - The folder storage priority.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum StoragePriority {
+public enum StoragePriority implements Serializable {
 
     /**
      * Normal priority.

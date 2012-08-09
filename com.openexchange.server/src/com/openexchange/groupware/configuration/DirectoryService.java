@@ -59,6 +59,8 @@ import java.io.IOException;
 import java.util.Properties;
 import org.apache.commons.logging.Log;
 import com.openexchange.log.LogFactory;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.SystemConfig;
 
 /**
@@ -176,7 +178,7 @@ public final class DirectoryService {
                 if (null == tmp) {
                     File propfile = null;
                     try {
-                        propfile = new File(SystemConfig.getProperty("LDAPPROPERTIES"));
+                        propfile = ServerServiceRegistry.getInstance().getService(ConfigurationService.class).getFileByName("ldap.properties");
                     } catch (final NullPointerException e) {
                         LOG.fatal("Config file ldap.properties is not set in " + "ComfireConfig.");
                     }
@@ -271,7 +273,7 @@ public final class DirectoryService {
     * This method reads the configuration parameters for the directory service.
     */
    private static void loadLdapConf() {
-      final String configPath = SystemConfig.getProperty("CONFIGPATH");
+      final String configPath = SystemConfig.getProperty("openexchange.propdir");
       final File ldapConfFile = new File(configPath, LDAP_CONF_FILENAME);
       if (ldapConfFile.exists()) {
          try {
@@ -314,7 +316,7 @@ public final class DirectoryService {
     * service will be used.
     */
    private static void loadWritableLdapConf() {
-      final String configPath = SystemConfig.getProperty("CONFIGPATH");
+      final String configPath = SystemConfig.getProperty("openexchange.propdir");
       final File writableLdapConfFile = new File(configPath,
                WRITABLE_LDAP_CONF_FILENAME);
       if (writableLdapConfFile.exists()) {

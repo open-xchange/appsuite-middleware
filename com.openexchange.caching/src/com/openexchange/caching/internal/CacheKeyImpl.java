@@ -54,7 +54,7 @@ import java.util.Arrays;
 import com.openexchange.caching.CacheKey;
 
 /**
- * {@link CacheKeyImpl} - A cache key that consists of a context ID and an unique (serializable) identifier of any object.
+ * {@link CacheKeyImpl} - A cache key that consists of a context ID and an unique (serializable) identifier of any type.
  */
 public class CacheKeyImpl implements CacheKey {
 

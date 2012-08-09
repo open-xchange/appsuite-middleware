@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage.messaging;
 
+import java.io.Serializable;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.messaging.MessagingFolder;
@@ -59,7 +60,9 @@ import com.openexchange.messaging.MessagingFolder;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MessagingFolderIdentifier {
+public final class MessagingFolderIdentifier implements Serializable {
+
+    private static final long serialVersionUID = 2518247692416742487L;
 
     private static final String DELIM = "://";
 

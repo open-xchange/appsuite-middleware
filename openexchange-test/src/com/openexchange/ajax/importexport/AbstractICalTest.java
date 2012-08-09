@@ -56,12 +56,15 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
+
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
@@ -190,8 +193,8 @@ public class AbstractICalTest extends AbstractAJAXTest {
                 icalSession,
                 appointments[a],
                 null,
-                new ArrayList<ConversionError>(),
-                new ArrayList<ConversionWarning>());
+                new LinkedList<ConversionError>(),
+                new LinkedList<ConversionWarning>());
         }
         emitter.writeSession(icalSession, baos);
         final ByteArrayInputStream input = new ByteArrayInputStream(baos.toByteArray());
@@ -203,7 +206,7 @@ public class AbstractICalTest extends AbstractAJAXTest {
         final ICalEmitter emitter = new ICal4JEmitter();
         final ICalSession icalSession = emitter.createSession();
         for (int a = 0; a < tasks.length; a++) {
-            emitter.writeTask(icalSession, tasks[a], null, new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>());
+            emitter.writeTask(icalSession, tasks[a], null, new LinkedList<ConversionError>(), new LinkedList<ConversionWarning>());
         }
         emitter.writeSession(icalSession, baos);
         final ByteArrayInputStream input = new ByteArrayInputStream(baos.toByteArray());
@@ -217,15 +220,15 @@ public class AbstractICalTest extends AbstractAJAXTest {
         return iResponse.getImports();
     }
 
-    public Appointment[] exportAppointment(final WebConversation webCon, final int folderId, final TimeZone timeZone, String host, final String session, final Context ctx) throws IOException, SAXException, ConversionWarning, OXException, JSONException {
+    public Appointment[] exportAppointment(final WebConversation webCon, final int folderId, final TimeZone timeZone, final String host, final String session, final Context ctx) throws IOException, SAXException, ConversionWarning, OXException, JSONException {
         final AJAXSession aSession = new AJAXSession(webCon, host, session);
         final ICalExportRequest request = new ICalExportRequest(folderId);
         final ICalExportResponse response = Executor.execute(aSession, request);
 
         final ICalParser parser = new ICal4JParser();
-        final List<ConversionError> errors = new ArrayList<ConversionError>();
-        final List<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
-        List<CalendarDataObject> exportData = parser.parseAppointments(response.getICal(), timeZone, ctx, errors, warnings);
+        final List<ConversionError> errors = new LinkedList<ConversionError>();
+        final List<ConversionWarning> warnings = new LinkedList<ConversionWarning>();
+        final List<CalendarDataObject> exportData = parser.parseAppointments(response.getICal(), timeZone, ctx, errors, warnings);
         if (!errors.isEmpty()) {
             throw errors.get(0);
         }
@@ -252,8 +255,8 @@ public class AbstractICalTest extends AbstractAJAXTest {
         List<Task> exportData = new ArrayList<Task>();
 
         final ICalParser parser = new ICal4JParser();
-        final List<ConversionError> errors = new ArrayList<ConversionError>();
-        final List<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
+        final List<ConversionError> errors = new LinkedList<ConversionError>();
+        final List<ConversionWarning> warnings = new LinkedList<ConversionWarning>();
         exportData = parser.parseTasks(resp.getInputStream(), timeZone, ctx, errors, warnings);
 
         return exportData.toArray(new Task[exportData.size()]);

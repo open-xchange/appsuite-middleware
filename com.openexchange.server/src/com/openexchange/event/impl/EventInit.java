@@ -51,6 +51,7 @@ package com.openexchange.event.impl;
 
 import org.apache.commons.logging.Log;
 import com.openexchange.log.LogFactory;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.exception.OXException;
@@ -63,6 +64,7 @@ import com.openexchange.groupware.infostore.webdav.PropertyStoreImpl;
 import com.openexchange.groupware.links.LinksEventHandler;
 import com.openexchange.groupware.notify.ParticipantNotify;
 import com.openexchange.server.Initialization;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * EventInit
@@ -90,7 +92,7 @@ public class EventInit implements Initialization {
         if (LOG.isInfoEnabled()) {
 			LOG.info("Parse Event properties");
 		}
-		final EventConfig eventConfig = new EventConfigImpl(SystemConfig.getProperty("EVENTPROPERTIES"));
+		final EventConfig eventConfig = new EventConfigImpl(ServerServiceRegistry.getInstance().getService(ConfigurationService.class).getFileByName("event.properties"));
 		//final EventQueue eventQueue = new EventQueue(eventConfig);
 		EventQueue.init(eventConfig);
 

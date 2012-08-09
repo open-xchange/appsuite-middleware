@@ -4,7 +4,7 @@ Bundle-Name: Open-Xchange Administration
 Bundle-SymbolicName: com.openexchange.admin
 Bundle-Version: 6.21.0
 OXVersion: 6.21.0
-OXRevision: 5
+OXRevision: 6
 Bundle-Activator: com.openexchange.admin.osgi.Activator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Vendor: Open-Xchange Inc.
@@ -14,6 +14,7 @@ Import-Package: com.mysql.jdbc,
  com.openexchange.admin.rmi.exceptions,
  com.openexchange.admin.rmi.extensions,
  com.openexchange.caching,
+ com.openexchange.config,
  com.openexchange.config.cascade,
  com.openexchange.context,
  com.openexchange.database,

@@ -53,66 +53,143 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.search.Order;
 
 /**
- * {@link SortOptions} - Specifies sort options for the results of storage operations. 
+ * {@link SortOptions} 
+ * 
+ * Defines sort options for the results of storage operations. This includes
+ * the specification ranged results, a collation and multiple sort orders. 
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public final class SortOptions {
 	
+    /**
+     * Empty sort options
+     */
 	public static final SortOptions EMPTY = new SortOptions();
 	
-	private SortOrder order[];	
+	private SortOrder sortOrders[];	
 	private String collation;
 	private int rangeStart;
 	private int limit;
 	
-	public static final SortOrder Order(final ContactField by, final Order order) {
+	/**
+	 * Creates a new {@link SortOrder} instance.
+	 * 
+	 * @param by the contact field for ordering
+	 * @param order the order
+	 * @return the sort order
+	 */
+	public static final SortOrder Order(ContactField by, Order order) {
 		return new SortOrder(by, order);
 	}
 	
-	public SortOptions(final String collation, final SortOrder... order) {
+	/**
+	 * Initializes a new {@link SortOptions}.
+	 * 
+	 * @param collation the collation
+	 * @param sortOrders the sort order definitions
+	 */
+	public SortOptions(String collation, SortOrder... sortOrders) {
 		super();
 		this.collation = collation;
-		this.order = order;
+		this.sortOrders = sortOrders;
 	}
 
-	public SortOptions(final int rangeStart, final int limit) {
+	/**
+	 * Initializes a new {@link SortOptions}.
+	 * 
+	 * @param rangeStart the start index for the results 
+	 * @param limit the maximum number of results to return
+	 */
+	public SortOptions(int rangeStart, int limit) {
 		this();
 		this.limit = limit;
 		this.rangeStart = rangeStart;		
 	}
 
-	public SortOptions(final SortOrder... order) {
+	/**
+	 * Initializes a new {@link SortOptions}.
+	 * 
+	 * @param order the sort order definitions
+	 */
+	public SortOptions(SortOrder... order) {
 		this(null, order);
 	}
 
-	public SortOptions(final String collation) {
+	/**
+	 * Initializes a new {@link SortOptions}.
+	 * 
+     * @param collation the collation
+	 */
+	public SortOptions(String collation) {
 		this(collation, (SortOrder[])null);
 	}
 
+	/**
+	 * Initializes a new {@link SortOptions}.
+	 */
 	public SortOptions() {
 		this((SortOrder[])null);
 	}
 
-	public SortOptions(final String collation, final ContactField orderBy, final Order order, final int rangeStart, final int limit) {
+	/**
+	 * Initializes a new {@link SortOptions}.
+	 * 
+     * @param collation the collation
+	 * @param orderBy the field to order by
+	 * @param order the order
+     * @param rangeStart the start index for the results 
+     * @param limit the maximum number of results to return
+	 */
+	public SortOptions(String collation, ContactField orderBy, Order order, int rangeStart, int limit) {
 		this(collation, orderBy, order);
 		this.limit = limit;
 		this.rangeStart = rangeStart;		
 	}
 
-	public SortOptions(final String collation, final ContactField orderBy, final Order order) {
+	/**
+	 * Initializes a new {@link SortOptions}.
+	 * 
+     * @param collation the collation
+     * @param orderBy the field to order by
+     * @param order the order
+	 */
+	public SortOptions(String collation, ContactField orderBy, Order order) {
 		this(collation, Order(orderBy, order));
 	}
 	
-	public SortOptions(final ContactField orderBy, final Order order) {
+	/**
+	 * Initializes a new {@link SortOptions}.
+	 * 
+     * @param orderBy the field to order by
+     * @param order the order
+	 */
+	public SortOptions(ContactField orderBy, Order order) {
 		this(Order(orderBy, order));
 	}
 	
-	public SortOptions(final String collation, final ContactField orderBy1, final Order order1, final ContactField orderBy2, final Order order2) {
+	/**
+	 * Initializes a new {@link SortOptions}.
+	 * 
+     * @param collation the collation
+     * @param orderBy1 the 1st field to order by
+     * @param order1 the 1st order
+     * @param orderBy2 the 2nd field to order by
+     * @param order2 the 2nd order
+	 */
+	public SortOptions(String collation, ContactField orderBy1, Order order1, ContactField orderBy2, Order order2) {
 		this(collation, Order(orderBy1, order1), Order(orderBy2, order2));
 	}
 	
-	public SortOptions(final ContactField orderBy1, final Order order1, final ContactField orderBy2, final Order order2) {
+	/**
+	 * Initializes a new {@link SortOptions}.
+	 * 
+     * @param orderBy1 the 1st field to order by
+     * @param order1 the 1st order
+     * @param orderBy2 the 2nd field to order by
+     * @param order2 the 2nd order
+	 */
+	public SortOptions(ContactField orderBy1, Order order1, ContactField orderBy2, Order order2) {
 		this((String)null, Order(orderBy1, order1), Order(orderBy2, order2));
 	}
 	
@@ -134,14 +211,14 @@ public final class SortOptions {
 	 * @return the order
 	 */
 	public SortOrder[] getOrder() {
-		return order;
+		return sortOrders;
 	}
 
 	/**
 	 * @param order the orderBy to set
 	 */
 	public void setOrderBy(SortOrder[] order) {
-		this.order = order;
+		this.sortOrders = order;
 	}
 
 	/**

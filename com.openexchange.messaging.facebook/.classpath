@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry exported="true" kind="lib" path="lib/scribe-1.1.0.jar" sourcepath="lib/scribe-1.1.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/scribe_head.jar"/>
 	<classpathentry kind="lib" path="lib/xalan-2.7.1.jar"/>
 	<classpathentry kind="lib" path="lib/serializer-2.7.1.jar"/>
 	<classpathentry kind="lib" path="lib/nekohtml-1.9.12.jar"/>

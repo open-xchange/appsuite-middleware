@@ -51,8 +51,9 @@ package com.openexchange.realtime.impl;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
 import com.openexchange.exception.OXException;
+import com.openexchange.log.Log;
+import com.openexchange.log.LogFactory;
 import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.MessageDispatcher;
 import com.openexchange.realtime.RealtimeExceptionCodes;
@@ -67,7 +68,7 @@ import com.openexchange.tools.session.ServerSession;
  *         Laguna</a>
  */
 public class MessageDispatcherImpl implements MessageDispatcher {
-
+    private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(MessageDispatcher.class));
 	private final Map<String, Channel> channels = new ConcurrentHashMap<String, Channel>();
 
 	public void send(final Stanza stanza, final ServerSession session) throws OXException {
@@ -84,6 +85,9 @@ public class MessageDispatcherImpl implements MessageDispatcher {
 		} else {
 			channel = chooseChannel(stanza, session);
 			if (channel == null) {
+			    if(LOG.isInfoEnabled()) {
+			        LOG.info("Couldn't find appropriate channel for sending stanza");
+			    }
 				return; // Probably not online
 				//throw RealtimeExceptionCodes.NO_APPROPRIATE_CHANNEL.create(to.toString(), stanza.getNamespace());
 			}

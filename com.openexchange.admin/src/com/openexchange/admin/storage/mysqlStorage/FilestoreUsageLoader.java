@@ -89,6 +89,7 @@ public class FilestoreUsageLoader implements Filter<Context, Context> {
         this.averageSize = averageSize;
     }
 
+    @Override
     public Context[] filter(Collection<Context> contexts) throws PipesAndFiltersException {
         Map<Integer, Map<String, Map<Integer, Context>>> readIdMap = new HashMap<Integer, Map<String, Map<Integer, Context>>>();
         for (Context context : contexts) {

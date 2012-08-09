@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Locale;
 
@@ -57,7 +58,7 @@ import java.util.Locale;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AbstractFolder implements Folder {
+public abstract class AbstractFolder implements Folder, Serializable {
 
     private static final long serialVersionUID = 11110622220507954L;
 

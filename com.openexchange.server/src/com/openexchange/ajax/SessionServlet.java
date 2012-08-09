@@ -50,6 +50,8 @@
 package com.openexchange.ajax;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.tools.servlet.http.Cookies.extractDomainValue;
+import static com.openexchange.tools.servlet.http.Cookies.getDomainValue;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.UndeclaredThrowableException;
@@ -68,7 +70,6 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.login.HashCalculator;
@@ -87,6 +88,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.java.Java7ConcurrentLinkedQueue;
+import com.openexchange.log.LogFactory;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.server.ServiceExceptionCode;
@@ -123,7 +125,6 @@ public abstract class SessionServlet extends AJAXServlet {
     public static final String SESSION_KEY = "sessionObject";
     
     public static final String PUBLIC_SESSION_KEY = "publicSessionObject";
-    
 
     public static final String SESSION_WHITELIST_FILE = "noipcheck.cnf";
 
@@ -700,8 +701,18 @@ public abstract class SessionServlet extends AJAXServlet {
 
             for (final String string : cookieNames) {
                 if (name.startsWith(string)) {
-                    final Cookie respCookie = new Cookie(name, cookie.getValue());
+                    final String value = cookie.getValue();
+                    final Cookie respCookie = new Cookie(name, value);
                     respCookie.setPath("/");
+                    final String domain = getDomainValue(req.getServerName());
+                    if (null != domain) {
+                        respCookie.setDomain(domain);
+                        // Once again without domain parameter
+                        final Cookie respCookie2 = new Cookie(name, value);
+                        respCookie2.setPath("/");
+                        respCookie2.setMaxAge(0); // delete
+                        resp.addCookie(respCookie2);
+                    }
                     respCookie.setMaxAge(0); // delete
                     resp.addCookie(respCookie);
                 }
@@ -709,6 +720,12 @@ public abstract class SessionServlet extends AJAXServlet {
         }
     }
 
+    /**
+     * Removes all JSESSIONID cookies found in given HTTP Servlet request.
+     * 
+     * @param req The HTTP Servlet request
+     * @param resp The HTTP Servlet response
+     */
     public static void removeJSESSIONID(final HttpServletRequest req, final HttpServletResponse resp) {
         final Cookie[] cookies = req.getCookies();
         if (cookies == null) {
@@ -717,8 +734,18 @@ public abstract class SessionServlet extends AJAXServlet {
         for (final Cookie cookie : cookies) {
             final String name = cookie.getName();
             if (Tools.JSESSIONID_COOKIE.equals(name)) {
-                final Cookie respCookie = new Cookie(name, cookie.getValue());
+                final String value = cookie.getValue();
+                final Cookie respCookie = new Cookie(name, value);
                 respCookie.setPath("/");
+                final String domain = extractDomainValue(value);
+                if (null != domain) {
+                    respCookie.setDomain(domain);
+                    // Once again without domain parameter
+                    final Cookie respCookie2 = new Cookie(name, value);
+                    respCookie2.setPath("/");
+                    respCookie2.setMaxAge(0); // delete
+                    resp.addCookie(respCookie2);
+                }
                 respCookie.setMaxAge(0); // delete
                 resp.addCookie(respCookie);
             }
@@ -727,9 +754,9 @@ public abstract class SessionServlet extends AJAXServlet {
 
     /**
      * Returns the remembered session.
-     * 
-     * @param req The Servlet request
-     * @return The remembered session
+     *
+     * @param req The Servlet request.
+     * @return The remembered session.
      */
     protected static ServerSession getSessionObject(final ServletRequest req) {
         return getSessionObject(req, false);

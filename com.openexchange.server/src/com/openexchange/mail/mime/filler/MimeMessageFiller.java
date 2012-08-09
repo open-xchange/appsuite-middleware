@@ -112,7 +112,10 @@ import com.openexchange.java.Charsets;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.MailPath;
+import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.config.MailProperties;
+import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
@@ -363,39 +366,73 @@ public class MimeMessageFiller {
             /*
              * Get from
              */
-            final InternetAddress from = mail.getFrom()[0];
+            InternetAddress from = mail.getFrom()[0];
+            InternetAddress sender = null;
+            if (false) {
+                final MailPath msgref = mail.getMsgref();
+                if (msgref != null) {
+                    final ComposeType sendType = mail.getSendType();
+                    if (ComposeType.REPLY.equals(sendType) || ComposeType.FORWARD.equals(sendType)) {
+                        MailAccess<?, ?> access = null;
+                        try {
+                            access = MailAccess.getInstance(session, msgref.getAccountId());
+                            access.connect();
+                            final MailFolder refFolder = access.getFolderStorage().getFolder(msgref.getFolder());
+                            if (refFolder.isShared()) {
+                                final String owner = refFolder.getOwner();
+                                if (null != owner) {
+                                    final User[] users = UserStorage.getInstance().searchUserByMailLogin(owner, ctx);
+                                    if (null != users && users.length > 0) {
+                                        final InternetAddress onBehalfOf = new QuotedInternetAddress(users[0].getMail(), true);
+                                        sender = from;
+                                        from = onBehalfOf;
+                                    }
+                                }
+                            }
+                        } catch (final Exception e) {
+                            // Ignore
+                            LOG.warn("Couldn't resolve on-behalf-of address.", e);
+                        } finally {
+                            if (null != access) {
+                                access.close(true);
+                            }
+                        }
+                    }
+                }
+            }
             mimeMessage.setFrom(from);
             /*
              * Determine sender
              */
-            InternetAddress sender = null;
-            final MailAccountStorageService mass = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
-            if (null != mass) {
-                try {
-                    final int userId = session.getUserId();
-                    final int contextId = session.getContextId();
-                    int id = mass.getByPrimaryAddress(from.getAddress(), userId, contextId);
-                    if (id < 0) {
-                        id = mass.getByPrimaryAddress(IDNA.toIDN(from.getAddress()), userId, contextId);
+            if (null == sender) {
+                final MailAccountStorageService mass = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
+                if (null != mass) {
+                    try {
+                        final int userId = session.getUserId();
+                        final int contextId = session.getContextId();
+                        int id = mass.getByPrimaryAddress(from.getAddress(), userId, contextId);
                         if (id < 0) {
-                            /*
-                             * No appropriate mail account found which matches from address
-                             */
-                            final String sendAddr = usm.getSendAddr();
-                            if (sendAddr != null && sendAddr.length() > 0) {
-                                try {
-                                    sender = new QuotedInternetAddress(sendAddr, true);
-                                } catch (final AddressException e) {
-                                    LOG.error("Default send address cannot be parsed", e);
+                            id = mass.getByPrimaryAddress(IDNA.toIDN(from.getAddress()), userId, contextId);
+                            if (id < 0) {
+                                /*
+                                 * No appropriate mail account found which matches from address
+                                 */
+                                final String sendAddr = usm.getSendAddr();
+                                if (sendAddr != null && sendAddr.length() > 0) {
+                                    try {
+                                        sender = new QuotedInternetAddress(sendAddr, true);
+                                    } catch (final AddressException e) {
+                                        LOG.error("Default send address cannot be parsed", e);
+                                    }
                                 }
                             }
                         }
+                    } catch (final OXException e) {
+                        /*
+                         * Conflict during look-up
+                         */
+                        LOG.debug(e.getMessage(), e);
                     }
-                } catch (final OXException e) {
-                    /*
-                     * Conflict during look-up
-                     */
-                    LOG.debug(e.getMessage(), e);
                 }
             }
             final List<InternetAddress> aliases;
@@ -841,13 +878,21 @@ public class MimeMessageFiller {
                      */
                     for (int i = 0; i < size; i++) {
                         if (null == contentIds) {
-                            addMessageBodyPart(primaryMultipart, mail.getEnclosedMailPart(i), false);
+                            final MailPart mailPart = mail.getEnclosedMailPart(i);
+                            if (mailPart.getContentType().startsWith("image/")) {
+                                if (null == mailPart.getContentId()) {
+                                    // A regular file-attachment image
+                                    addMessageBodyPart(primaryMultipart, mailPart, false);
+                                }
+                            } else {
+                                addMessageBodyPart(primaryMultipart, mailPart, false);
+                            }
                         } else {
                             final MailPart mailPart = mail.getEnclosedMailPart(i);
                             boolean add = true;
                             if (mailPart.getContentType().startsWith("image/")) {
                                 final String contentId = mailPart.getContentId();
-                                if (null != contentId && contentIds.contains(contentId)) {
+                                if (null != contentId /*&& contentIds.contains(contentId)*/) {
                                     // Ignore
                                     add = false;
                                 }
@@ -920,6 +965,12 @@ public class MimeMessageFiller {
              * Finally set multipart
              */
             if (primaryMultipart != null) {
+                if (1 == primaryMultipart.getCount()) {
+                    final Object cto = primaryMultipart.getBodyPart(0).getContent();
+                    if (cto instanceof Multipart) {
+                        primaryMultipart = (Multipart) cto;
+                    }
+                }
                 mimeMessage.setContent(primaryMultipart);
             }
             return;
@@ -1616,7 +1667,7 @@ public class MimeMessageFiller {
                         try {
                             imageProvider = new ImageDataImageProvider(dataSource, imageLocation, session);
                         } catch (final OXException e) {
-                            if (MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND.equals(e)) {
+                            if (MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND.equals(e) || MailExceptionCode.MAIL_NOT_FOUND.equals(e)) {
                                 tmp.setLength(0);
                                 m.appendLiteralReplacement(sb, imageTag);
                                 continue;

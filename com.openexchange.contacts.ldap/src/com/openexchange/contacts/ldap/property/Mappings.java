@@ -49,9 +49,16 @@
 
 package com.openexchange.contacts.ldap.property;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
+
 import com.openexchange.contacts.ldap.exceptions.LdapConfigurationExceptionCode;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
 
 /**
  * This class contains the mapping properties, specifying what LDAP attributes
@@ -179,6 +186,8 @@ public class Mappings {
         }
     }
 
+    private final Map<ContactField, String> ox2ldap;
+
     private String anniversary;
     private String assistant_name;
     private String birthday;
@@ -278,7 +287,7 @@ public class Mappings {
     private String userfield20;
 
     public static Mappings getMappingsFromProperties(final Properties props, final String prefix, final String mappingfile) throws OXException {
-        final Mappings retval = new Mappings();
+        final Mappings retval = new Mappings(props, prefix, mappingfile);
         Parameters.setPrefix(prefix);
 
         final CheckStringPropertyParameter parameterObject = new CheckStringPropertyParameter(props, mappingfile);
@@ -296,8 +305,6 @@ public class Mappings {
         retval.setDepartment(checkStringPropertyOptional(parameterObject, Parameters.department));
 
         retval.setCompany(checkStringPropertyOptional(parameterObject, Parameters.company));
-
-        retval.setDistributionlistname(checkStringPropertyOptional(parameterObject, Parameters.distributionlistname));
 
         retval.setDistributionuid(checkStringProperty(parameterObject, Parameters.distributionuid));
 
@@ -492,7 +499,7 @@ public class Mappings {
 
         private final String m_mappingfile;
 
-        public CheckStringPropertyParameter(Properties props, String mappingfile) {
+        public CheckStringPropertyParameter(final Properties props, final String mappingfile) {
             m_props = props;
             m_mappingfile = mappingfile;
         }
@@ -527,6 +534,71 @@ public class Mappings {
         }
     }
 
+
+    private static List<String> NOT_SEARCHABLE = Arrays.asList(
+        "defaultaddress",
+        "distributionlistname",
+        "distributionuid",
+        "uniqueid",
+        "mail_folder_drafts_name",
+        "mail_folder_sent_name",
+        "mail_folder_spam_name",
+        "mail_folder_trash_name");
+
+    public Mappings(final Properties props, final String prefix, final String mappingfile) throws OXException {
+        // Initializes the mapper which is used for searching
+        ox2ldap = new HashMap<ContactField, String>();
+        final Set<Object> prefixedOxFields = props.keySet();
+        for (final Object tmp : prefixedOxFields) {
+            final String ldapName = (String) props.get(tmp);
+            if (ldapName == null) {
+                continue;
+            }
+            final String[] tmp2 = ((String) tmp).split(prefix.endsWith(".") ? prefix : prefix + ".");
+            if (tmp2.length != 2) {
+                continue;
+            }
+            final String oxname = tmp2[1];
+
+            if ("distributionlistname".equals(oxname))
+             {
+                distributionlistname = ldapName; // difference between OX and LDAP: distri lists and contacts use the same field. Needs
+            // special handling.
+            }
+
+            if (NOT_SEARCHABLE.contains(oxname)) {
+                continue;
+            }
+
+            final ContactField field = getBySimilarity(oxname);
+            if (field == null) {
+                continue;
+            }
+            ox2ldap.put(field, ldapName);
+        }
+    }
+
+    public static ContactField getBySimilarity(final String value) {
+        final String needle = value.replaceAll("[_\\. ]", "").toLowerCase();
+        for (final ContactField field : ContactField.values()) {
+            final List<String> haystack = Arrays.asList(new String[] {
+                field.getAjaxName().replaceAll("[_\\. ]", "").toLowerCase(),
+                field.getReadableName().replaceAll("[_\\. ]", "").toLowerCase(), field.getDbName().replaceAll("[_\\. ]", "").toLowerCase() });
+            if (haystack.contains(needle)) {
+                return field;
+            }
+        }
+        return null;
+    }
+
+    public final String get(final ContactField field) {
+        // displayname", "givenname", "surname", "employeetype", "lastmodified", "creationdate"
+        if (ox2ldap.containsKey(field)) {
+            return ox2ldap.get(field);
+        }
+
+        return null;
+    }
 
     public final String getAnniversary() {
         return anniversary;
@@ -1019,93 +1091,84 @@ public class Mappings {
         return userfield20;
     }
 
-    private final void setAnniversary(String anniversary) {
+    private final void setAnniversary(final String anniversary) {
         this.anniversary = anniversary;
     }
 
-    private final void setAssistant_name(String assistant_name) {
+    private final void setAssistant_name(final String assistant_name) {
         this.assistant_name = assistant_name;
     }
 
-    private final void setBirthday(String birthday) {
+    private final void setBirthday(final String birthday) {
         this.birthday = birthday;
     }
 
-    private final void setBranches(String branches) {
+    private final void setBranches(final String branches) {
         this.branches = branches;
     }
 
-    private final void setBusiness_category(String business_category) {
+    private final void setBusiness_category(final String business_category) {
         this.business_category = business_category;
     }
 
-    private final void setCategories(String categories) {
+    private final void setCategories(final String categories) {
         this.categories = categories;
     }
 
-    private final void setCellular_telephone1(String cellular_telephone1) {
+    private final void setCellular_telephone1(final String cellular_telephone1) {
         this.cellular_telephone1 = cellular_telephone1;
     }
 
-    private final void setCellular_telephone2(String cellular_telephone2) {
+    private final void setCellular_telephone2(final String cellular_telephone2) {
         this.cellular_telephone2 = cellular_telephone2;
     }
 
-    private final void setCity_business(String city_business) {
+    private final void setCity_business(final String city_business) {
         this.city_business = city_business;
     }
 
-    private final void setCity_home(String city_home) {
+    private final void setCity_home(final String city_home) {
         this.city_home = city_home;
     }
 
-    private final void setCity_other(String city_other) {
+    private final void setCity_other(final String city_other) {
         this.city_other = city_other;
     }
 
-    private final void setCommercial_register(String commercial_register) {
+    private final void setCommercial_register(final String commercial_register) {
         this.commercial_register = commercial_register;
     }
 
-    private final void setCompany(String company) {
+    private final void setCompany(final String company) {
         this.company = company;
     }
 
-    private final void setCountry_business(String country_business) {
+    private final void setCountry_business(final String country_business) {
         this.country_business = country_business;
     }
 
-    private final void setCountry_home(String country_home) {
+    private final void setCountry_home(final String country_home) {
         this.country_home = country_home;
     }
 
-    private final void setCountry_other(String country_other) {
+    private final void setCountry_other(final String country_other) {
         this.country_other = country_other;
     }
 
-    private final void setCreationdate(String creationdate) {
+    private final void setCreationdate(final String creationdate) {
         this.creationdate = creationdate;
     }
 
-    private final void setDefaultaddress(String defaultaddress) {
+    private final void setDefaultaddress(final String defaultaddress) {
         this.defaultaddress = defaultaddress;
     }
 
-    private final void setDepartment(String department) {
+    private final void setDepartment(final String department) {
         this.department = department;
     }
 
-    private final void setDisplayname(String displayname) {
+    private final void setDisplayname(final String displayname) {
         this.displayname = displayname;
-    }
-
-    /**
-     * Sets the distributionlistname
-     *
-     * @param distributionlistname The distributionlistname to set
-     */
-    private final void setDistributionlistname(String distributionlistname) {
-        this.distributionlistname = distributionlistname;
     }
 
     /**
@@ -1113,308 +1176,308 @@ public class Mappings {
      *
      * @param distributionuid The distributionuid to set
      */
-    private final void setDistributionuid(String distributionuid) {
+    private final void setDistributionuid(final String distributionuid) {
         this.distributionuid = distributionuid;
     }
 
-    private final void setEmail1(String email1) {
+    private final void setEmail1(final String email1) {
         this.email1 = email1;
     }
 
-    private final void setEmail2(String email2) {
+    private final void setEmail2(final String email2) {
         this.email2 = email2;
     }
 
-    private final void setEmail3(String email3) {
+    private final void setEmail3(final String email3) {
         this.email3 = email3;
     }
 
-    private final void setEmployeetype(String employeetype) {
+    private final void setEmployeetype(final String employeetype) {
         this.employeetype = employeetype;
     }
 
-    private final void setFax_business(String fax_business) {
+    private final void setFax_business(final String fax_business) {
         this.fax_business = fax_business;
     }
 
-    private final void setFax_home(String fax_home) {
+    private final void setFax_home(final String fax_home) {
         this.fax_home = fax_home;
     }
 
-    private final void setFax_other(String fax_other) {
+    private final void setFax_other(final String fax_other) {
         this.fax_other = fax_other;
     }
 
-    private final void setGivenname(String givenname) {
+    private final void setGivenname(final String givenname) {
         this.givenname = givenname;
     }
 
-    private final void setInfo(String info) {
+    private final void setInfo(final String info) {
         this.info = info;
     }
 
-    private final void setInstant_messenger1(String instant_messenger1) {
+    private final void setInstant_messenger1(final String instant_messenger1) {
         this.instant_messenger1 = instant_messenger1;
     }
 
-    private final void setInstant_messenger2(String instant_messenger2) {
+    private final void setInstant_messenger2(final String instant_messenger2) {
         this.instant_messenger2 = instant_messenger2;
     }
 
-    private final void setLastmodified(String lastmodified) {
+    private final void setLastmodified(final String lastmodified) {
         this.lastmodified = lastmodified;
     }
 
-    private final void setManager_name(String manager_name) {
+    private final void setManager_name(final String manager_name) {
         this.manager_name = manager_name;
     }
 
-    private final void setMarital_status(String marital_status) {
+    private final void setMarital_status(final String marital_status) {
         this.marital_status = marital_status;
     }
 
-    private final void setMiddle_name(String middle_name) {
+    private final void setMiddle_name(final String middle_name) {
         this.middle_name = middle_name;
     }
 
-    private final void setNickname(String nickname) {
+    private final void setNickname(final String nickname) {
         this.nickname = nickname;
     }
 
-    private final void setNote(String note) {
+    private final void setNote(final String note) {
         this.note = note;
     }
 
-    private final void setNumber_of_children(String number_of_children) {
+    private final void setNumber_of_children(final String number_of_children) {
         this.number_of_children = number_of_children;
     }
 
-    private final void setNumber_of_employee(String number_of_employee) {
+    private final void setNumber_of_employee(final String number_of_employee) {
         this.number_of_employee = number_of_employee;
     }
 
-    private final void setPosition(String position) {
+    private final void setPosition(final String position) {
         this.position = position;
     }
 
-    private final void setPostal_code_business(String postal_code_business) {
+    private final void setPostal_code_business(final String postal_code_business) {
         this.postal_code_business = postal_code_business;
     }
 
-    private final void setPostal_code_home(String postal_code_home) {
+    private final void setPostal_code_home(final String postal_code_home) {
         this.postal_code_home = postal_code_home;
     }
 
-    private final void setPostal_code_other(String postal_code_other) {
+    private final void setPostal_code_other(final String postal_code_other) {
         this.postal_code_other = postal_code_other;
     }
 
-    private final void setProfession(String profession) {
+    private final void setProfession(final String profession) {
         this.profession = profession;
     }
 
-    private final void setRoom_number(String room_number) {
+    private final void setRoom_number(final String room_number) {
         this.room_number = room_number;
     }
 
-    private final void setSales_volume(String sales_volume) {
+    private final void setSales_volume(final String sales_volume) {
         this.sales_volume = sales_volume;
     }
 
-    private final void setSpouse_name(String spouse_name) {
+    private final void setSpouse_name(final String spouse_name) {
         this.spouse_name = spouse_name;
     }
 
-    private final void setState_business(String state_business) {
+    private final void setState_business(final String state_business) {
         this.state_business = state_business;
     }
 
-    private final void setState_home(String state_home) {
+    private final void setState_home(final String state_home) {
         this.state_home = state_home;
     }
 
-    private final void setState_other(String state_other) {
+    private final void setState_other(final String state_other) {
         this.state_other = state_other;
     }
 
-    private final void setStreet_business(String street_business) {
+    private final void setStreet_business(final String street_business) {
         this.street_business = street_business;
     }
 
-    private final void setStreet_home(String street_home) {
+    private final void setStreet_home(final String street_home) {
         this.street_home = street_home;
     }
 
-    private final void setStreet_other(String street_other) {
+    private final void setStreet_other(final String street_other) {
         this.street_other = street_other;
     }
 
-    private final void setSuffix(String suffix) {
+    private final void setSuffix(final String suffix) {
         this.suffix = suffix;
     }
 
-    private final void setSurname(String surname) {
+    private final void setSurname(final String surname) {
         this.surname = surname;
     }
 
-    private final void setTax_id(String tax_id) {
+    private final void setTax_id(final String tax_id) {
         this.tax_id = tax_id;
     }
 
-    private final void setTelephone_assistant(String telephone_assistant) {
+    private final void setTelephone_assistant(final String telephone_assistant) {
         this.telephone_assistant = telephone_assistant;
     }
 
-    private final void setTelephone_business1(String telephone_business1) {
+    private final void setTelephone_business1(final String telephone_business1) {
         this.telephone_business1 = telephone_business1;
     }
 
-    private final void setTelephone_business2(String telephone_business2) {
+    private final void setTelephone_business2(final String telephone_business2) {
         this.telephone_business2 = telephone_business2;
     }
 
-    private final void setTelephone_callback(String telephone_callback) {
+    private final void setTelephone_callback(final String telephone_callback) {
         this.telephone_callback = telephone_callback;
     }
 
-    private final void setTelephone_car(String telephone_car) {
+    private final void setTelephone_car(final String telephone_car) {
         this.telephone_car = telephone_car;
     }
 
-    private final void setTelephone_company(String telephone_company) {
+    private final void setTelephone_company(final String telephone_company) {
         this.telephone_company = telephone_company;
     }
 
-    private final void setTelephone_home1(String telephone_home1) {
+    private final void setTelephone_home1(final String telephone_home1) {
         this.telephone_home1 = telephone_home1;
     }
 
-    private final void setTelephone_home2(String telephone_home2) {
+    private final void setTelephone_home2(final String telephone_home2) {
         this.telephone_home2 = telephone_home2;
     }
 
-    private final void setTelephone_ip(String telephone_ip) {
+    private final void setTelephone_ip(final String telephone_ip) {
         this.telephone_ip = telephone_ip;
     }
 
-    private final void setTelephone_isdn(String telephone_isdn) {
+    private final void setTelephone_isdn(final String telephone_isdn) {
         this.telephone_isdn = telephone_isdn;
     }
 
-    private final void setTelephone_other(String telephone_other) {
+    private final void setTelephone_other(final String telephone_other) {
         this.telephone_other = telephone_other;
     }
 
-    private final void setTelephone_pager(String telephone_pager) {
+    private final void setTelephone_pager(final String telephone_pager) {
         this.telephone_pager = telephone_pager;
     }
 
-    private final void setTelephone_primary(String telephone_primary) {
+    private final void setTelephone_primary(final String telephone_primary) {
         this.telephone_primary = telephone_primary;
     }
 
-    private final void setTelephone_radio(String telephone_radio) {
+    private final void setTelephone_radio(final String telephone_radio) {
         this.telephone_radio = telephone_radio;
     }
 
-    private final void setTelephone_telex(String telephone_telex) {
+    private final void setTelephone_telex(final String telephone_telex) {
         this.telephone_telex = telephone_telex;
     }
 
-    private final void setTelephone_ttytdd(String telephone_ttytdd) {
+    private final void setTelephone_ttytdd(final String telephone_ttytdd) {
         this.telephone_ttytdd = telephone_ttytdd;
     }
 
-    private final void setTitle(String title) {
+    private final void setTitle(final String title) {
         this.title = title;
     }
 
-    private final void setUniqueid(String uniqueid) {
+    private final void setUniqueid(final String uniqueid) {
         this.uniqueid = uniqueid;
     }
 
-    private final void setUrl(String url) {
+    private final void setUrl(final String url) {
         this.url = url;
     }
 
-    private final void setUserfield01(String userfield01) {
+    private final void setUserfield01(final String userfield01) {
         this.userfield01 = userfield01;
     }
 
-    private final void setUserfield02(String userfield02) {
+    private final void setUserfield02(final String userfield02) {
         this.userfield02 = userfield02;
     }
 
-    private final void setUserfield03(String userfield03) {
+    private final void setUserfield03(final String userfield03) {
         this.userfield03 = userfield03;
     }
 
-    private final void setUserfield04(String userfield04) {
+    private final void setUserfield04(final String userfield04) {
         this.userfield04 = userfield04;
     }
 
-    private final void setUserfield05(String userfield05) {
+    private final void setUserfield05(final String userfield05) {
         this.userfield05 = userfield05;
     }
 
-    private final void setUserfield06(String userfield06) {
+    private final void setUserfield06(final String userfield06) {
         this.userfield06 = userfield06;
     }
 
-    private final void setUserfield07(String userfield07) {
+    private final void setUserfield07(final String userfield07) {
         this.userfield07 = userfield07;
     }
 
-    private final void setUserfield08(String userfield08) {
+    private final void setUserfield08(final String userfield08) {
         this.userfield08 = userfield08;
     }
 
-    private final void setUserfield09(String userfield09) {
+    private final void setUserfield09(final String userfield09) {
         this.userfield09 = userfield09;
     }
 
-    private final void setUserfield10(String userfield10) {
+    private final void setUserfield10(final String userfield10) {
         this.userfield10 = userfield10;
     }
 
-    private final void setUserfield11(String userfield11) {
+    private final void setUserfield11(final String userfield11) {
         this.userfield11 = userfield11;
     }
 
-    private final void setUserfield12(String userfield12) {
+    private final void setUserfield12(final String userfield12) {
         this.userfield12 = userfield12;
     }
 
-    private final void setUserfield13(String userfield13) {
+    private final void setUserfield13(final String userfield13) {
         this.userfield13 = userfield13;
     }
 
-    private final void setUserfield14(String userfield14) {
+    private final void setUserfield14(final String userfield14) {
         this.userfield14 = userfield14;
     }
 
-    private final void setUserfield15(String userfield15) {
+    private final void setUserfield15(final String userfield15) {
         this.userfield15 = userfield15;
     }
 
-    private final void setUserfield16(String userfield16) {
+    private final void setUserfield16(final String userfield16) {
         this.userfield16 = userfield16;
     }
 
-    private final void setUserfield17(String userfield17) {
+    private final void setUserfield17(final String userfield17) {
         this.userfield17 = userfield17;
     }
 
-    private final void setUserfield18(String userfield18) {
+    private final void setUserfield18(final String userfield18) {
         this.userfield18 = userfield18;
     }
 
-    private final void setUserfield19(String userfield19) {
+    private final void setUserfield19(final String userfield19) {
         this.userfield19 = userfield19;
     }
 
 
-    private final void setUserfield20(String userfield20) {
+    private final void setUserfield20(final String userfield20) {
         this.userfield20 = userfield20;
     }
 }

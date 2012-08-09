@@ -1,3 +1,9 @@
+open-xchange-ajp (6.21.0-1) unstable; urgency=low
+
+  * Release build for EDP drop #2
+
+ -- Marc Arens <marc.arens@open-xchange.com>  Tue, 03 Jul 2012 18:44:00 +0200
+
 open-xchange-ajp (6.21.0-0) unstable; urgency=low
 
   * Initial release

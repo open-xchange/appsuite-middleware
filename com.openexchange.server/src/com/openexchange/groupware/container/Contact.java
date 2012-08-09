@@ -52,7 +52,6 @@ package com.openexchange.groupware.container;
 import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 
-import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -70,7 +69,7 @@ import com.openexchange.groupware.contact.helpers.ContactField;
  * @author <a href="mailto:ben.pahne@open-xchange.com">Benjamin Frederic Pahne</a>
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - clone, hashCode, equals, toString, display name checking
  */
-public class Contact extends CommonObject implements Serializable {
+public class Contact extends CommonObject {
 
     private static final long serialVersionUID = -1556083622176209459L;
 

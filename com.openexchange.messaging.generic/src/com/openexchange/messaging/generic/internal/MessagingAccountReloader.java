@@ -55,6 +55,7 @@ import com.openexchange.caching.dynamic.Refresher;
 import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingService;
+import com.openexchange.messaging.ServiceAware;
 
 /**
  * {@link MessagingAccountReloader}
@@ -62,7 +63,7 @@ import com.openexchange.messaging.MessagingService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
-public final class MessagingAccountReloader extends Refresher<MessagingAccount> implements MessagingAccount {
+public final class MessagingAccountReloader extends Refresher<MessagingAccount> implements MessagingAccount, ServiceAware {
 
     private static final long serialVersionUID = -522777266183406469L;
 
@@ -130,6 +131,16 @@ public final class MessagingAccountReloader extends Refresher<MessagingAccount> 
     public MessagingService getMessagingService() {
         updateDelegate();
         return delegate.getMessagingService();
+    }
+
+    @Override
+    public String getServiceId() {
+        updateDelegate();
+        if (delegate instanceof ServiceAware) {
+            return ((ServiceAware) delegate).getServiceId();
+        }
+        final MessagingService service = delegate.getMessagingService();
+        return null == service ? null : service.getId();
     }
 
 }

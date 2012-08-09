@@ -49,12 +49,16 @@
 
 package com.openexchange.groupware.container;
 
+import java.io.Serializable;
+
 /**
  * {@link LinkObject} - Represents a link.
  *
  * @author <a href="mailto:ben.pahne@open-xchange.com">Benjamin Frederic Pahne</a>
  */
-public class LinkObject {
+public class LinkObject implements Serializable {
+
+    private static final long serialVersionUID = -287785895305471105L;
 
     private int firstId;
 

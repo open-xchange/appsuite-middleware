@@ -56,9 +56,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.commons.logging.Log;
-
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.SortOrder;
@@ -89,6 +87,7 @@ import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.search.internal.operands.ConstantOperand;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.impl.EffectivePermission;
+import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
@@ -109,38 +108,53 @@ public final class Tools {
 	 * @return the comparator
 	 */
 	public static Comparator<Contact> getComparator(final SortOptions sortOptions) {
-		final Comparator<Object> collationComparator = null == sortOptions.getCollation() ? null :
-			Collator.getInstance(SuperCollator.get(sortOptions.getCollation()).getJavaLocale());
-		return new Comparator<Contact>() {
-			
-			@Override
-			public int compare(final Contact o1, final Contact o2) {
-				for (final SortOrder order : sortOptions.getOrder()) {
-					int comparison = 0;
-					try {
-						comparison = ContactMapper.getInstance().get(order.getBy()).compare(o1, o2, collationComparator);
-					} catch (final OXException e) {
-						LOG.error("error comparing objects", e);
-					}
-					if (0 != comparison) {
-						return Order.DESCENDING.equals(order.getOrder()) ? -1 * comparison : comparison;							
-					}
-				}
-				return 0;
-			}
-		};
+	    if (null == sortOptions || SortOptions.EMPTY.equals(sortOptions) || 
+	        null == sortOptions.getOrder() || 0 == sortOptions.getOrder().length) {
+	        /*
+	         * nothing to sort
+	         */
+	        return new Comparator<Contact>() {	            
+	            @Override
+	            public int compare(Contact o1, Contact o2) {
+	                return 0;
+	            }
+            };
+	    } else {
+	        /*
+	         * sort using the mapping's comparator with collation
+	         */
+	        final Comparator<Object> collationComparator = null == sortOptions.getCollation() ? null :
+	            Collator.getInstance(SuperCollator.get(sortOptions.getCollation()).getJavaLocale());
+	        return new Comparator<Contact>() {	            
+	            @Override
+	            public int compare(Contact o1, Contact o2) {	                
+	                for (SortOrder order : sortOptions.getOrder()) {
+	                    int comparison = 0;
+	                    try {
+	                        comparison = ContactMapper.getInstance().get(order.getBy()).compare(o1, o2, collationComparator);
+	                    } catch (OXException e) {
+	                        LOG.error("error comparing objects", e);
+	                    }
+	                    if (0 != comparison) {
+	                        return Order.DESCENDING.equals(order.getOrder()) ? -1 * comparison : comparison;                            
+	                    }
+	                }
+	                return 0;
+	            }
+	        };     
+	    }
 	}
 	
 	/**
 	 * Gets the contact storage. 
 	 * 
-	 * @param contextID the current context ID
+	 * @param session the session
 	 * @param folderId the folder ID
 	 * @return the contact storage
 	 * @throws OXException
 	 */
-	public static ContactStorage getStorage(int contextID, String folderID) throws OXException {
-		ContactStorage storage = ContactServiceLookup.getService(ContactStorageRegistry.class, true).getStorage(contextID, folderID);
+	public static ContactStorage getStorage(Session session, String folderID) throws OXException {
+		ContactStorage storage = ContactServiceLookup.getService(ContactStorageRegistry.class, true).getStorage(session, folderID);
         if (null == storage) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create("'Contact storage for folder " + folderID + "'");
         }
@@ -150,27 +164,27 @@ public final class Tools {
 	/**
 	 * Gets all contact storages. 
 	 * 
-	 * @param contextID the current context ID
+     * @param session the session
 	 * @return the contact storages
 	 * @throws OXException
 	 */
-	public static List<ContactStorage> getStorages(int contextID) throws OXException {
-		return ContactServiceLookup.getService(ContactStorageRegistry.class, true).getStorages(contextID);
+	public static List<ContactStorage> getStorages(Session session) throws OXException {
+		return ContactServiceLookup.getService(ContactStorageRegistry.class, true).getStorages(session);
 	}
 	
 	/**
 	 * Gets the contact storages for the supplied folders, each storage mapped 
 	 * to a list of folder IDs the respective storage is responsible for. 
 	 * 
-	 * @param contextID the current context ID
+     * @param session the session
 	 * @param folderIDs the folder IDs to get the storages for
 	 * @return the contact storages
 	 * @throws OXException
 	 */
-	public static Map<ContactStorage, List<String>> getStorages(int contextID, Collection<String> folderIDs) throws OXException {
+	public static Map<ContactStorage, List<String>> getStorages(Session session, Collection<String> folderIDs) throws OXException {
 		Map<ContactStorage, List<String>> storages = new HashMap<ContactStorage, List<String>>();
 		for (String folderID : folderIDs) {
-			ContactStorage storage = getStorage(contextID, folderID);
+			ContactStorage storage = getStorage(session, folderID);
 			if (false == storages.containsKey(storage)) {
 				storages.put(storage, new ArrayList<String>());
 			}
@@ -179,20 +193,31 @@ public final class Tools {
 		return storages;
 	}
 	
-	/**
-	 * Gets a context.
-	 * 
-	 * @param contextID the context ID
-	 * @return the context
-	 * @throws OXException
-	 */
-	public static Context getContext(final int contextID) throws OXException {
-		final Context context = ContactServiceLookup.getService(ContextService.class, true).getContext(contextID);
-		if (null == context) {
-			throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create("Unable to get context '" + contextID + "'.");
-		}
-		return context;
-	}
+    /**
+     * Gets a context.
+     * 
+     * @param contextID the context ID
+     * @return the context
+     * @throws OXException
+     */
+    public static Context getContext(final int contextID) throws OXException {
+        final Context context = ContactServiceLookup.getService(ContextService.class, true).getContext(contextID);
+        if (null == context) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create("Unable to get context '" + contextID + "'.");
+        }
+        return context;
+    }
+
+    /**
+     * Gets a context.
+     * 
+     * @param session the session
+     * @return the context
+     * @throws OXException
+     */
+    public static Context getContext(Session session) throws OXException {
+        return getContext(session.getContextId());
+    }
 
 	/**
 	 * Gets a folder.

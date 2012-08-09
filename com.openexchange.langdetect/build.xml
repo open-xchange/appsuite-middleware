@@ -9,32 +9,6 @@
 
 	<!-- Constants -->
     <property name="modelsDir" value="languageModels"/>
-    <property name="patchConfDir" value="${tmpDir}/${confDir}"/>
-
-    <target name="installConf" depends="patchConfig">
-        <copy todir="${destDir}/${confInstallDir}">
-            <fileset dir="${patchConfDir}"/>
-        </copy>
-    </target>
-
-    <target name="patchConfig">
-        <mkdir dir="${patchConfDir}"/>
-        <copy todir="${patchConfDir}" overwrite="true">
-            <fileset dir="${confDir}"/>
-        </copy>
-        <antcall target="patchConfigFiles"/>
-    </target>
-
-    <target name="patchConfigFiles">
-        <antcall target="patchPathInProperties"/>
-    </target>
-
-    <target name="patchPathInProperties">
-        <move tofile="${patchConfDir}/lang-detect.properties" file="${patchConfDir}/lang-detect.properties.in" overwrite="true"/>
-        <replace dir="${patchConfDir}" includes="lang-detect.properties">
-            <replacefilter token="@prefix@" value="${prefix}"/>
-        </replace>
-    </target>    
 
     <target name="postInstall" description="Install several additional files that are necessary for the backend.">
         <antcall target="installLanguageModels"/>

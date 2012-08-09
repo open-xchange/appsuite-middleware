@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 0
+%define        ox_release 6
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -38,10 +38,15 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 
 %post
 if [ ${1:-0} -eq 2 ]; then
-    if [ -e /opt/open-xchange/etc/groupware/ldapauth.properties ]; then
-        mv /opt/open-xchange/etc/ldapauth.properties /opt/open-xchange/etc/ldapauth.properties.rpmnew
-        mv /opt/open-xchange/etc/groupware/ldapauth.properties /opt/open-xchange/etc/ldapauth.properties.properties
-    fi
+    # only when updating
+    . /opt/open-xchange/lib/oxfunctions.sh
+
+    # prevent bash from expanding, see bug 13316
+    GLOBIGNORE='*'
+
+    ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc ldapauth.properties
+
+    ox_update_permissions "/opt/open-xchange/etc/ldapauth.properties" root:open-xchange 640
 fi
 
 %clean
@@ -54,8 +59,18 @@ fi
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/etc/
-%config(noreplace) /opt/open-xchange/etc/*
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/ldapauth.properties
 
 %changelog
-* Tue Apr 17 2012 Marcus Klein  <marcus.klein@open-xchange.com>
+* Tue Jul 03 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Release build for EDP drop #2
+* Mon Jun 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Release build for EDP drop #2
+* Tue May 22 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Internal release build for EDP drop #2
+* Mon Apr 16 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Internal release build for EDP drop #1
+* Wed Apr 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Internal release build for EDP drop #0
+* Mon Feb 27 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Initial release

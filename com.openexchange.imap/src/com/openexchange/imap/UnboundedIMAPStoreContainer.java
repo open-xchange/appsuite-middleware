@@ -113,14 +113,14 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
     }
 
     @Override
-    public IMAPStore getStore(final javax.mail.Session imapSession) throws MessagingException, InterruptedException {
+    public IMAPStore getStore(final javax.mail.Session imapSession, final IMAPValidity validity) throws MessagingException, InterruptedException {
         /*
          * Retrieve and remove the head of this queue
          */
         final IMAPStoreWrapper imapStoreWrapper = queue.poll();
         IMAPStore imapStore = null == imapStoreWrapper ? null : imapStoreWrapper.imapStore;
         if (null == imapStore) {
-            imapStore = newStore(server, port, login, pw, imapSession);
+            imapStore = newStore(server, port, login, pw, imapSession, validity);
             if (DEBUG) {
                 LOG.debug("IMAPStoreContainer.getStore(): Returning newly established IMAPStore instance.");
             }
@@ -131,7 +131,17 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
     }
 
     @Override
-    public void backStore(final IMAPStore imapStore) {
+    public void backStore(final IMAPStore imapStore, final IMAPValidity validity) {
+        final long currentValidity = validity.getCurrentValidity();
+        if (currentValidity > 0 && imapStore.getValidity() < currentValidity) {
+            validity.clearCachedConnections();
+            closeSafe(imapStore);
+        } else {
+            backStoreNoValidityCheck(imapStore);
+        }
+    }
+
+    protected void backStoreNoValidityCheck(final IMAPStore imapStore) {
         if (!queue.offer(new IMAPStoreWrapper(imapStore))) {
             closeSafe(imapStore);
         } else if (DEBUG) {
@@ -170,10 +180,9 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
         if (null == queue) {
             return;
         }
-        for (final Iterator<IMAPStoreWrapper> iter = queue.iterator(); iter.hasNext();) {
-            final IMAPStoreWrapper imapStoreWrapper = iter.next();
-            iter.remove();
-            closeSafe(imapStoreWrapper.imapStore);
+        IMAPStoreWrapper wrapper;
+        while ((wrapper = queue.poll()) != null) {
+            closeSafe(wrapper.imapStore);
         }
     }
 

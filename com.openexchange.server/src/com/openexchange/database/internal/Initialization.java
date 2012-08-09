@@ -114,7 +114,7 @@ public final class Initialization {
         final ConfigDatabaseLifeCycle configDBLifeCycle = new ConfigDatabaseLifeCycle(configuration, management, timer);
         pools.addLifeCycle(configDBLifeCycle);
         // Configuration database connection pool service.
-        configDatabaseService = new ConfigDatabaseServiceImpl(configuration.getPoolConfig().forceWriteOnly, new ConfigDatabaseAssignmentImpl(), pools);
+        configDatabaseService = new ConfigDatabaseServiceImpl(new ConfigDatabaseAssignmentImpl(), pools);
 
         // Context database assignments.
         contextAssignment = new ContextDatabaseAssignmentImpl(configDatabaseService);
@@ -133,7 +133,7 @@ public final class Initialization {
             LOG.warn("Resolving server name to an identifier failed. This is normal until a server has been registered.", e);
         }
 
-        databaseService = new DatabaseServiceImpl(configuration.getPoolConfig().forceWriteOnly, pools, configDatabaseService, contextAssignment);
+        databaseService = new DatabaseServiceImpl(pools, configDatabaseService, contextAssignment);
         return databaseService;
     }
 

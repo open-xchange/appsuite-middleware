@@ -49,48 +49,83 @@
 
 package com.openexchange.realtime.packet;
 
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link Payload}
- *
+ * {@link Payload} - Represents a stanza's payload that is any (POJO) object linked with its format identifier.
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
 public class Payload {
-	
-	public static ServiceLookup services;
-	
-	private String format;
-	private Object data;
-	
-	public Payload(Object data, String format) {
-		this.data = data;
-		this.format = format;
-	}
-	
-	public Object getData() {
-		return data;
-	}
-	
-	public void setData(Object data, String format) {
-		this.data = data;
-		this.format = format;
-	}
-	
-	public String getFormat() {
-		return format;
-	}
-	
-	public Payload to(String toFormat, ServerSession session) throws OXException {
-		if (toFormat.equals(format)) {
-			return new Payload(data, toFormat);
-		}
-		SimpleConverter converter = services.getService(SimpleConverter.class);
-		return new Payload(converter.convert(format, toFormat, data, session), toFormat);
-	}
-	
-	
+
+    /**
+     * The <tt>ServiceLookup</tt> reference.
+     */
+    public static AtomicReference<ServiceLookup> SERVICES = new AtomicReference<ServiceLookup>();
+
+    private String format;
+
+    private Object data;
+
+    /**
+     * Initializes a new {@link Payload}.
+     * 
+     * @param data The payload's data object
+     * @param format The data object's format
+     */
+    public Payload(Object data, String format) {
+        this.data = data;
+        this.format = format;
+    }
+
+    /**
+     * Gets the data object.
+     * 
+     * @return The data object
+     */
+    public Object getData() {
+        return data;
+    }
+
+    /**
+     * Sets the payload data object and its format.
+     * 
+     * @param data The data object
+     * @param format The data object's format
+     */
+    public void setData(Object data, String format) {
+        this.data = data;
+        this.format = format;
+    }
+
+    /**
+     * Gets the data object's format identifier.
+     * 
+     * @return The format identifier.
+     */
+    public String getFormat() {
+        return format;
+    }
+
+    /**
+     * Converts this payload's data object to specified format.
+     * 
+     * @param toFormat The format to convert into
+     * @param session The Open-Xchange session
+     * @return A new {@link Payload payload} with desired format
+     * @throws OXException If conversion fails
+     */
+    public Payload to(String toFormat, ServerSession session) throws OXException {
+        if (toFormat.equals(format)) {
+            return new Payload(data, toFormat);
+        }
+        SimpleConverter converter = SERVICES.get().getService(SimpleConverter.class);
+        return new Payload(converter.convert(format, toFormat, data, session), toFormat);
+    }
+
 }

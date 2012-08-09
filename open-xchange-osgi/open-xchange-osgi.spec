@@ -6,7 +6,7 @@ BuildRequires: ant
 BuildRequires: ant-nodeps
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 0
+%define        ox_release 6
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -15,11 +15,22 @@ URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       OSGi bundles commonly used by all Open-Xchange packages
 PreReq:        /usr/sbin/useradd
-Requires:	java >= 1.6.0
-Provides:       open-xchange-common = %{version}
-Obsoletes:      open-xchange-common <= %{version}
-Provides:       open-xchange-activation = %{version}
-Obsoletes:      open-xchange-activation <= %{version}
+Provides:      open-xchange-common = %{version}
+Obsoletes:     open-xchange-common <= %{version}
+Provides:      open-xchange-activation = %{version}
+Obsoletes:     open-xchange-activation <= %{version}
+%if 0%{?rhel_version} && 0%{?rhel_version} <= 599
+# rhel needs special handling because on rhel5 supplementary bea java will be installed by default
+# bug id #22563
+Requires:      java-sun
+%else
+Requires:      java >= 1.6.0
+%endif
+%if 0%{?rhel_version} >= 600
+# ibm java only on sles11, please
+Conflicts:     java-ibm
+%endif
+
 
 %description
 OSGi bundles commonly used by all Open-Xchange packages
@@ -56,3 +67,15 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Tue Jul 03 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Release build for EDP drop #2
+* Mon Jun 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Release build for EDP drop #2
+* Tue May 22 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Internal release build for EDP drop #2
+* Mon Apr 16 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Internal release build for EDP drop #1
+* Wed Apr 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Internal release build for EDP drop #0
+* Tue Oct 04 2011 Marcus Klein <marcus.klein@open-xchange.com>
+Initial release

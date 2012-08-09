@@ -54,14 +54,14 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link MDNSService} - The <a href="http://en.wikipedia.org/wiki/MDNS">mDNS</a> service.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface MDNSService {
 
     /**
      * Lists all resolved services by given service identifier.
-     *
+     * 
      * @param serviceId The service identifier; such as <code>"openexchange.messaging.service"</code>.
      * @return A list containing all resolved services matching given service identifier.
      * @throws OXException If listing fails
@@ -69,7 +69,22 @@ public interface MDNSService {
     List<MDNSServiceEntry> listByService(String serviceId) throws OXException;
 
     /**
+     * Adds a listener.
+     * 
+     * @param listener The listener to add
+     */
+    void addListener(MDNSServiceListener listener);
+
+    /**
+     * Removes a previously added listener
+     * 
+     * @param listener The listener to remove
+     */
+    void removeListener(MDNSServiceListener listener);
+
+    /**
      * Registers a new service.
+     * 
      * @param serviceId The service identifier; such as <code>"openexchange.messaging.service"</code>.
      * @param port The service port
      * @param info The service information; arbitrary text such as <code>"path=index.html"</code>
@@ -79,7 +94,7 @@ public interface MDNSService {
 
     /**
      * Unregisters the service identifier by given service information.
-     *
+     * 
      * @param serviceInfo The service information identifying the service
      * @throws OXException If service cannot be unregistered
      */

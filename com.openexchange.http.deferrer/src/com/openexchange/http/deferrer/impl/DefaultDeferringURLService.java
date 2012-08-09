@@ -83,5 +83,14 @@ public abstract class DefaultDeferringURLService implements DeferringURLService 
     }
 
     public abstract String getDeferrerURL();
+    
+    
+    public String getBasicDeferrerURL() {
+    	final String deferrerURL = getDeferrerURL();
+        if (deferrerURL == null) {
+            return PREFIX.get().getPrefix() + "defer";
+        }
+        return deferrerURL + PREFIX.get().getPrefix() + "defer";
+    }
 
 }

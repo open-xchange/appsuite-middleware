@@ -134,6 +134,8 @@ public class ParticipantParser {
 
     private static final class JSONParticipant extends AbstractConfirmableParticipant implements Comparable<Participant> {
 
+        private static final long serialVersionUID = -3063859164091177034L;
+
         private int type;
         private int identifier;
         private String emailAddress;
@@ -188,6 +190,7 @@ public class ParticipantParser {
             this.displayName = displayName;
         }
 
+        @Deprecated
         @Override
         public void setIdentifier(int id) {
             this.identifier = id;

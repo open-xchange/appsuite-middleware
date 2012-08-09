@@ -76,6 +76,8 @@ import org.scribe.builder.api.GoogleApi;
 import org.scribe.builder.api.LinkedInApi;
 import org.scribe.builder.api.TwitterApi;
 import org.scribe.builder.api.YahooApi;
+import org.scribe.builder.api.TumblrApi;
+import org.scribe.builder.api.FlickrApi;
 import org.scribe.model.Token;
 import org.scribe.model.Verifier;
 import com.openexchange.context.ContextService;
@@ -129,6 +131,8 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
     private final IDGeneratorService idGenerator;
 
     private final ContextService contexts;
+    
+    private CallbackRegistry callbackRegistry;
 
     /**
      * Initializes a new {@link OAuthServiceImpl}.
@@ -136,12 +140,13 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
      * @param provider
      * @param simIDGenerator
      */
-    public OAuthServiceImpl(final DBProvider provider, final IDGeneratorService idGenerator, final OAuthServiceMetaDataRegistry registry, final ContextService contexts) {
+    public OAuthServiceImpl(final DBProvider provider, final IDGeneratorService idGenerator, final OAuthServiceMetaDataRegistry registry, final ContextService contexts, CallbackRegistry cbRegistry) {
         super();
         this.registry = registry;
         this.provider = provider;
         this.idGenerator = idGenerator;
         this.contexts = contexts;
+        this.callbackRegistry = cbRegistry;
     }
 
     @Override
@@ -265,6 +270,11 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             /*
              * Return interaction
              */
+            
+            if (metaData.registerTokenBasedDeferrer()) {
+            	callbackRegistry.add(callbackUrl, scribeToken.getToken());
+            }
+            
             return new OAuthInteractionImpl(
                 scribeToken == null ? OAuthToken.EMPTY_TOKEN : new ScribeOAuthToken(scribeToken),
                 authURL,
@@ -711,6 +721,10 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             apiClass = FoursquareApi.class;
         } else if (serviceId.indexOf("facebook") >= 0) {
             apiClass = FacebookApi.class;
+        } else if (serviceId.indexOf("tumblr") >= 0) {
+            apiClass = TumblrApi.class;
+        } else if (serviceId.indexOf("flickr") >= 0) {
+            apiClass = FlickrApi.class;
         } else {
             throw OAuthExceptionCodes.UNSUPPORTED_SERVICE.create(serviceId);
         }

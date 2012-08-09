@@ -52,6 +52,7 @@ package com.openexchange.messaging.generic;
 import java.util.Map;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingService;
+import com.openexchange.messaging.ServiceAware;
 
 /**
  * {@link DefaultMessagingAccount} - The default {@link MessagingAccount} implementation.
@@ -59,7 +60,7 @@ import com.openexchange.messaging.MessagingService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
-public class DefaultMessagingAccount implements MessagingAccount {
+public class DefaultMessagingAccount implements MessagingAccount, ServiceAware {
 
     private static final long serialVersionUID = -8295765793020470243L;
 
@@ -68,6 +69,8 @@ public class DefaultMessagingAccount implements MessagingAccount {
     private String displayName;
 
     private int id;
+
+    private String serviceId;
 
     private int[] staticRootPermissions;
 
@@ -98,6 +101,20 @@ public class DefaultMessagingAccount implements MessagingAccount {
     @Override
     public MessagingService getMessagingService() {
         return messagingService;
+    }
+
+    @Override
+    public String getServiceId() {
+        return serviceId;
+    }
+
+    /**
+     * Sets the service identifier
+     *
+     * @param serviceId The service identifier to set
+     */
+    public void setServiceId(String serviceId) {
+        this.serviceId = serviceId;
     }
 
     /**
@@ -134,6 +151,7 @@ public class DefaultMessagingAccount implements MessagingAccount {
      */
     public void setMessagingService(final MessagingService messagingService) {
         this.messagingService = messagingService;
+        serviceId = null == messagingService ? null : messagingService.getId();
     }
 
 }

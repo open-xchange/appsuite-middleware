@@ -79,7 +79,7 @@ public class OSGIFileStorageServiceRegistry implements FileStorageServiceRegistr
     /**
      * The tracker instance.
      */
-    private ServiceTracker tracker;
+    private ServiceTracker<FileStorageService,FileStorageService> tracker;
 
     /**
      * Initializes a new {@link OSGIFileStorageServiceRegistry}.
@@ -96,7 +96,7 @@ public class OSGIFileStorageServiceRegistry implements FileStorageServiceRegistr
      */
     public void start(final BundleContext context) {
         if (null == tracker) {
-            tracker = new ServiceTracker(context, FileStorageService.class.getName(), new Customizer(context));
+            tracker = new ServiceTracker<FileStorageService,FileStorageService>(context, FileStorageService.class, new Customizer(context));
             tracker.open();
         }
     }
@@ -130,7 +130,7 @@ public class OSGIFileStorageServiceRegistry implements FileStorageServiceRegistr
         return null == id ? false : map.containsKey(id);
     }
 
-    private final class Customizer implements ServiceTrackerCustomizer {
+    private final class Customizer implements ServiceTrackerCustomizer<FileStorageService,FileStorageService> {
 
         private final BundleContext context;
 
@@ -140,10 +140,10 @@ public class OSGIFileStorageServiceRegistry implements FileStorageServiceRegistr
         }
 
         @Override
-        public Object addingService(final ServiceReference reference) {
-            final Object service = context.getService(reference);
-            if ((service instanceof FileStorageService)) {
-                final FileStorageService addMe = (FileStorageService) service;
+        public FileStorageService addingService(final ServiceReference<FileStorageService> reference) {
+            final FileStorageService service = context.getService(reference);
+            if (service != null) {
+                final FileStorageService addMe = service;
                 if (null == map.putIfAbsent(addMe.getId(), addMe)) {
                     return service;
                 }
@@ -162,18 +162,16 @@ public class OSGIFileStorageServiceRegistry implements FileStorageServiceRegistr
         }
 
         @Override
-        public void modifiedService(final ServiceReference reference, final Object service) {
+        public void modifiedService(final ServiceReference<FileStorageService> reference, final FileStorageService service) {
             // Nothing to do
         }
 
         @Override
-        public void removedService(final ServiceReference reference, final Object service) {
+        public void removedService(final ServiceReference<FileStorageService> reference, final FileStorageService service) {
             if (null != service) {
                 try {
-                    if (service instanceof FileStorageService) {
-                        final FileStorageService removeMe = (FileStorageService) service;
-                        map.remove(removeMe.getId());
-                    }
+                    final FileStorageService removeMe = service;
+                    map.remove(removeMe.getId());
                 } finally {
                     context.ungetService(reference);
                 }

@@ -65,9 +65,12 @@ import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.AdminCacheExtended;
 import com.openexchange.admin.tools.PropertyHandlerExtended;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.log.LogFactory;
+import com.openexchange.log.LogProperties;
 
 public class PluginStarter {
 
@@ -87,10 +90,11 @@ public class PluginStarter {
         super();
     }
 
-    public void start(final BundleContext context) throws RemoteException, AlreadyBoundException, StorageException, OXGenericException {
+    public void start(final BundleContext context, final ConfigurationService service) throws RemoteException, AlreadyBoundException, StorageException, OXGenericException {
         try {
+            AdminCache.compareAndSet(null, service);
             this.context = context;
-            initCache();
+            initCache(service);
 
             // Create all OLD Objects and bind export them
             oxctx_v2 = new com.openexchange.admin.rmi.impl.OXContext(context);
@@ -124,9 +128,9 @@ public class PluginStarter {
         }
     }
 
-    private void initCache() throws OXGenericException {
+    private void initCache(final ConfigurationService service) throws OXGenericException {
         final AdminCacheExtended cache = new AdminCacheExtended();
-        cache.initCache();
+        cache.initCache(service);
         cache.initCacheExtended();
         ClientAdminThreadExtended.cache = cache;
         prop = cache.getProperties();

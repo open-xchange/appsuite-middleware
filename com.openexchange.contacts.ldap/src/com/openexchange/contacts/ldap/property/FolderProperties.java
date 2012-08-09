@@ -159,7 +159,8 @@ public class FolderProperties {
         referrals("referrals"),
         refreshinterval("refreshinterval"),
         pooltimeout("pooltimeout"),
-        derefAliases("derefAliases");
+        derefAliases("derefAliases"),
+        storagePriority("storagePriority");
 
         private final String name;
 
@@ -237,6 +238,8 @@ public class FolderProperties {
     private int pooltimeout;
 
     private DerefAliases derefAliases;
+    
+    private int storagePriority;
 
     public static FolderProperties getFolderPropertiesFromProperties(final ConfigurationService configuration, final String name, final String folder, final String contextnr, final StringBuilder logBuilder) throws OXException {
         final String prefix = PropertyHandler.bundlename + "context" + contextnr + "." + folder + ".";
@@ -531,6 +534,18 @@ public class FolderProperties {
             throw LdapConfigurationExceptionCode.PARAMETER_NOT_SET.create(parameterObject.getPrefix() + Parameters.mappingfile.getName(), parameterObject.getFilename());
         }
 
+        String storagePriorityString = checkStringProperty(parameterObject, Parameters.storagePriority);
+        try {
+            if (null != storagePriorityString) {
+                retval.setStoragePriority(Integer.parseInt(storagePriorityString));
+            } else {
+                retval.setStoragePriority(17);
+            }
+            logBuilder.append("\tstoragePriority: ").append(retval.getStoragePriority()).append('\n');
+        } catch (NumberFormatException e) {
+            throw LdapConfigurationExceptionCode.INVALID_STORAGE_PRIORITY.create(storagePriorityString, parameterObject.getFilename());
+        }
+
         return retval;
     }
 
@@ -677,6 +692,15 @@ public class FolderProperties {
      */
     public SearchScope getUserSearchScope() {
         return this.userSearchScope;
+    }
+    
+    /**
+     * Gets the storage priority.
+     * 
+     * @return the priority
+     */
+    public int getStoragePriority() {
+        return this.storagePriority;
     }
 
     public boolean isAds_deletion_support() {
@@ -828,6 +852,10 @@ public class FolderProperties {
      */
     private void setUserSearchScope(final SearchScope userSearchScope) {
         this.userSearchScope = userSearchScope;
+    }
+    
+    private void setStoragePriority(int priority) {
+        this.storagePriority = priority;
     }
 
     public static class CheckStringPropertyEnumParameter {

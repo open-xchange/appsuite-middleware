@@ -50,6 +50,8 @@
 package com.openexchange.admin.user.copy.osgi;
 
 import org.apache.commons.logging.Log;
+import com.openexchange.admin.tools.AdminCache;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.copy.UserCopyService;
 
@@ -68,6 +70,8 @@ public class Activator extends HousekeepingActivator {
     public void startBundle() throws Exception {
         final Log log = com.openexchange.log.Log.loggerFor(Activator.class);
         try {
+            ConfigurationService configurationService = getService(ConfigurationService.class);
+            AdminCache.compareAndSet(null, configurationService);
             track(UserCopyService.class, new RMIUserCopyRegisterer(context));
             openTrackers();
             log.info("Started bundle: com.openexchange.admin.user.copy");
@@ -92,6 +96,6 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[0];
+        return new Class<?>[] { ConfigurationService.class };
     }
 }

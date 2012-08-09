@@ -58,5 +58,6 @@ package com.openexchange.http.deferrer;
 public interface DeferringURLService {
 
     public String getDeferredURL(String url);
-
+    
+    public String getBasicDeferrerURL();
 }

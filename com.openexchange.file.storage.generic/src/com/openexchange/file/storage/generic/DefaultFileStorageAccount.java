@@ -52,6 +52,7 @@ package com.openexchange.file.storage.generic;
 import java.util.Map;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.ServiceAware;
 
 /**
  * {@link DefaultFileStorageAccount} - The default {@link FileStorageAccount} implementation.
@@ -59,7 +60,7 @@ import com.openexchange.file.storage.FileStorageService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18.2
  */
-public class DefaultFileStorageAccount implements FileStorageAccount {
+public class DefaultFileStorageAccount implements FileStorageAccount, ServiceAware {
 
     private static final long serialVersionUID = -8295765793020470243L;
 
@@ -68,6 +69,8 @@ public class DefaultFileStorageAccount implements FileStorageAccount {
     private String displayName;
 
     private String id;
+
+    private String serviceId;
 
     private transient FileStorageService fsService;
 
@@ -96,6 +99,20 @@ public class DefaultFileStorageAccount implements FileStorageAccount {
     @Override
     public FileStorageService getFileStorageService() {
         return fsService;
+    }
+
+    @Override
+    public String getServiceId() {
+        return serviceId;
+    }
+  
+    /**
+     * Sets the service identifier
+     *
+     * @param serviceId The service identifier to set
+     */
+    public void setServiceId(String serviceId) {
+        this.serviceId = serviceId;
     }
 
     /**
@@ -132,6 +149,7 @@ public class DefaultFileStorageAccount implements FileStorageAccount {
      */
     public void setFileStorageService(final FileStorageService fsService) {
         this.fsService = fsService;
+        serviceId = null == fsService ? null : fsService.getId();
     }
 
     @Override

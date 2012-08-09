@@ -31,5 +31,5 @@ Import-Package: com.openexchange.config,
  org.w3c.dom,
  org.xml.sax
 Bundle-ClassPath: .,
- lib/scribe-1.1.0.jar
+ lib/scribe_head.jar
 Export-Package: com.openexchange.oauth.linkedin

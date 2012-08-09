@@ -62,14 +62,13 @@ import com.openexchange.ajax.requesthandler.AJAXResultDecorator;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.ajax.writer.ContactWriter;
+import com.openexchange.contact.ContactService;
+import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.storage.ContactStorage;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
-import com.openexchange.groupware.contact.ContactSearchMultiplexer;
 import com.openexchange.groupware.contact.datasource.ContactImageDataSource;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.DataObject;
-import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.image.ImageLocation;
@@ -100,7 +99,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ContactInterfaceDiscoveryService.class, ContactStorage.class };
+        return new Class<?>[] { ContactService.class, ContactStorage.class };
     }
 
     @Override
@@ -110,22 +109,22 @@ public final class MailJSONActivator extends AJAXModuleActivator {
         registerService(ResultConverter.class, converter);
         registerService(ResultConverter.class, new MailJSONConverter(converter));
 
-        final int[] columns = new int[] { DataObject.OBJECT_ID, FolderChildObject.FOLDER_ID, Contact.IMAGE1 };
-        registerService(AJAXResultDecorator.class, new DecoratorImpl(converter, columns));
+        final ContactField[] fields = new ContactField[] { ContactField.OBJECT_ID, ContactField.FOLDER_ID, ContactField.NUMBER_OF_IMAGES };
+        registerService(AJAXResultDecorator.class, new DecoratorImpl(converter, fields));
     }
 
     private final class DecoratorImpl implements AJAXResultDecorator {
-
+        
         private final MailConverter converter;
 
-        private final int[] columns;
+        private final ContactField[] fields;
 
         /**
          * Initializes a new {@link DecoratorImpl}.
          */
-        protected DecoratorImpl(final MailConverter converter, final int[] columns) {
+        protected DecoratorImpl(final MailConverter converter, final ContactField[] fields) {
             this.converter = converter;
-            this.columns = columns;
+            this.fields = fields;
         }
 
         @Override
@@ -157,12 +156,11 @@ public final class MailJSONActivator extends AJAXModuleActivator {
                         return;
                     }
                     final ContactSearchObject searchObject = createContactSearchObject(from[0]);
-                    final ContactSearchMultiplexer multiplexer =
-                        new ContactSearchMultiplexer(getService(ContactInterfaceDiscoveryService.class));
                     SearchIterator<Contact> it = null;
                     final List<Contact> contacts = new LinkedList<Contact>();
                     try {
-                        it = multiplexer.extendedSearch(session, searchObject, Contact.DISPLAY_NAME, Order.ASCENDING, "utf-8", columns);
+                        it = getService(ContactService.class).searchContacts(
+                            session, searchObject, fields, new SortOptions(ContactField.FOLDER_ID, Order.ASCENDING));
                         while (it.hasNext()) {
                             contacts.add(it.next());
                         }
@@ -175,22 +173,18 @@ public final class MailJSONActivator extends AJAXModuleActivator {
                     final JSONObject jObject = (JSONObject) result.getResultObject();
                     final JSONArray jArray = new JSONArray();
                     for (final Contact contact : contacts) {
-
-                        if (contact.containsImage1()) {
-                            final byte[] imageData = contact.getImage1();
-                            if (imageData != null) {
-                                try {
-                                    final ContactImageDataSource imgSource = ContactImageDataSource.getInstance();
-                                    final ImageLocation imageLocation =
-                                        new ImageLocation.Builder().folder(Integer.toString(contact.getParentFolderID())).id(
-                                            Integer.toString(contact.getObjectID())).build();
-                                    final String imageURL = imgSource.generateUrl(imageLocation, session);
-                                    jArray.put(imageURL);
-                                } catch (final OXException e) {
-                                    com.openexchange.log.LogFactory.getLog(ContactWriter.class).warn(
-                                        "Contact image URL could not be generated.",
-                                        e);
-                                }
+                        if (0 < contact.getNumberOfImages() || contact.containsImage1() && null != contact.getImage1()) {
+                            try {
+                                final ContactImageDataSource imgSource = ContactImageDataSource.getInstance();
+                                final ImageLocation imageLocation =
+                                    new ImageLocation.Builder().folder(Integer.toString(contact.getParentFolderID())).id(
+                                        Integer.toString(contact.getObjectID())).build();
+                                final String imageURL = imgSource.generateUrl(imageLocation, session);
+                                jArray.put(imageURL);
+                            } catch (final OXException e) {
+                                com.openexchange.log.LogFactory.getLog(ContactWriter.class).warn(
+                                    "Contact image URL could not be generated.",
+                                    e);
                             }
                         }
                     }

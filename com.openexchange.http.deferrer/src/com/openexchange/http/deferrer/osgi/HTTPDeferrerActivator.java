@@ -49,13 +49,16 @@
 
 package com.openexchange.http.deferrer.osgi;
 
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.http.deferrer.CustomRedirectURLDetermination;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.http.deferrer.impl.DefaultDeferringURLService;
 import com.openexchange.http.deferrer.servlet.DeferrerServlet;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.SimpleRegistryListener;
 
 /**
  * {@link HTTPDeferrerActivator}
@@ -82,7 +85,24 @@ public class HTTPDeferrerActivator extends HousekeepingActivator {
             }
 
         });
+        
+        track(CustomRedirectURLDetermination.class, new SimpleRegistryListener<CustomRedirectURLDetermination>() {
 
+			@Override
+			public void added(
+					ServiceReference<CustomRedirectURLDetermination> ref,
+					CustomRedirectURLDetermination service) {
+				DeferrerServlet.CUSTOM_HANDLERS.add(service);
+			}
+
+			@Override
+			public void removed(
+					ServiceReference<CustomRedirectURLDetermination> ref,
+					CustomRedirectURLDetermination service) {
+				DeferrerServlet.CUSTOM_HANDLERS.remove(service);
+			}
+		});
+        
         openTrackers();
     }
 

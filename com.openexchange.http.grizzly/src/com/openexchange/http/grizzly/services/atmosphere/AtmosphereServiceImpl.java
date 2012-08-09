@@ -49,17 +49,22 @@
 
 package com.openexchange.http.grizzly.services.atmosphere;
 
+import java.io.IOException;
 import org.apache.commons.logging.Log;
+import org.atmosphere.container.Grizzly2CometSupport;
 import org.atmosphere.cpr.AtmosphereFramework;
 import org.atmosphere.cpr.AtmosphereHandler;
+import org.atmosphere.cpr.AtmosphereRequest;
+import org.atmosphere.cpr.AtmosphereResource;
+import org.atmosphere.cpr.AtmosphereResourceEvent;
 import org.atmosphere.cpr.AtmosphereServlet;
 import org.atmosphere.cpr.Broadcaster;
+import org.atmosphere.cpr.BroadcasterFactory;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.grizzly.servlet.ServletRegistration;
 import org.glassfish.grizzly.servlet.WebappContext;
 import org.osgi.framework.Bundle;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.http.atmosphere.AtmosphereService;
 import com.openexchange.http.grizzly.osgi.GrizzlyServiceRegistry;
 import com.openexchange.log.LogFactory;
 
@@ -73,42 +78,79 @@ public class AtmosphereServiceImpl  implements AtmosphereService {
     
     private final static Log LOG = LogFactory.getLog(AtmosphereServiceImpl.class);
     private final AtmosphereFramework atmosphereFramework;
+    private final String atmosphereServletMapping;
     
     public AtmosphereServiceImpl(HttpServer grizzly, Bundle bundle) {
         
         ConfigurationService configurationService = GrizzlyServiceRegistry.getInstance().getService(ConfigurationService.class);
-        String realtimeContextPath = configurationService.getProperty("com.openexchange.http.realtime.contextPath", "/push");
-        String atmosphereServletMapping = configurationService.getProperty("com.openexchange.http.atmosphere.servletMapping", "/*");
+        String realtimeContextPath = configurationService.getProperty("com.openexchange.http.realtime.contextPath", "/realtime");
+        atmosphereServletMapping = configurationService.getProperty("com.openexchange.http.atmosphere.servletMapping", "/atmosphere/*");
         
-        AtmosphereServlet atmosphereServlet = new AtmosphereServlet(false, true);
+        AtmosphereServlet atmosphereServlet = new AtmosphereServlet(false, false);
         atmosphereFramework = atmosphereServlet.framework();
-        /* Currently there is no container specific async supportavailable for grizzly2.
-         * The devs are already working on it. Until thatis done simple blockign IO is used
-         */ 
-//       atmosphereFramework.setAsyncSupport(new GrizzlyCometSupport(null));
+        atmosphereFramework.setAsyncSupport(new Grizzly2CometSupport(atmosphereFramework.getAtmosphereConfig()));
         
         WebappContext realtimeContext = new WebappContext("Realtime context", realtimeContextPath);
         ServletRegistration atmosphereRegistration = realtimeContext.addServlet("AtmosphereServlet", atmosphereServlet);
         atmosphereRegistration.addMapping(atmosphereServletMapping);
+        atmosphereRegistration.setLoadOnStartup(0);
+        
         realtimeContext.deploy(grizzly);
-        
-        
+    }
+    
+    /**
+     * Strip the trailing "/*" characters if a path mapping is used for the
+     * registration of the {@link AtmosphereServlet}. 
+     * @param mapping the configured mapping for the {@link AtmosphereServlet} 
+     * @return the servletPath configured for the {@link AtmosphereServlet}
+     */
+    private String getServletPathFromMapping(String mapping) {
+        if(mapping == null) {
+            throw new IllegalArgumentException();
+        }
+        if (!mapping.isEmpty() && mapping.startsWith("/") && mapping.endsWith("/*")) {
+            // remove the last two characters iow. "/*" 
+            return mapping.substring(0, mapping.length()-2);
+        } else {
+            // return empty string to reach the default servlet 
+            return "";
+        }
+    }
+    
+    /**
+     * Concatenate servletPath and handlerMapping to form a mapping the Atmosphere
+     * framework can use to map Requests to AtmosphereHandlers.
+     * @param mapping the mapping the user chose for this AtmosphereHandler e.g. "/chat"
+     * @return  valid mapping that prepends the ServletPath of the
+     *           AtmosphereServlet to the chosen handlerMapping e.g.
+     *           /atmosphere/chat
+     */
+    private String generateHandlerMapping(String servletMapping, String handlerMapping) {
+        if(servletMapping == null || handlerMapping == null) {
+            throw new IllegalArgumentException();
+        }
+        if(!handlerMapping.startsWith("/")) {
+            handlerMapping = "/" + handlerMapping;
+        }
+        return getServletPathFromMapping(servletMapping) + handlerMapping;
     }
 
     @Override
-    public void addAtmosphereHandler(String mapping, AtmosphereHandler handler) {
-        atmosphereFramework.addAtmosphereHandler(mapping, handler);
+    public void addAtmosphereHandler(String handlerMapping, AtmosphereHandler handler) {
+        atmosphereFramework.addAtmosphereHandler(generateHandlerMapping(atmosphereServletMapping, handlerMapping), handler);
+        LOG.info("Added AtmosphereHandler " + handler + " with mapping " + handlerMapping);
     }
 
     @Override
-    public void addAtmosphereHandler(String mapping, AtmosphereHandler handler, Broadcaster broadcaster) {
-        atmosphereFramework.addAtmosphereHandler(mapping, handler, broadcaster);
-        
+    public void addAtmosphereHandler(String handlerMapping, AtmosphereHandler handler, Broadcaster broadcaster) {
+        atmosphereFramework.addAtmosphereHandler(generateHandlerMapping(atmosphereServletMapping, handlerMapping), handler, broadcaster);
+        LOG.info("Added AtmosphereHandler " + handler + " with mapping " + handlerMapping + " and Broadcaster " + broadcaster);
     }
 
     @Override
-    public void unregister(String mapping) {
-        atmosphereFramework.removeAtmosphereHandler(mapping);
+    public void unregister(String handlerMapping) {
+        atmosphereFramework.removeAtmosphereHandler(generateHandlerMapping(atmosphereServletMapping, handlerMapping));
+        LOG.info("Removed AtmosphereHandler with mapping " + handlerMapping);
     }
 
 }

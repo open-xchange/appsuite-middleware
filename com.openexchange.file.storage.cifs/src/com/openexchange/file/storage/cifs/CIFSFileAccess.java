@@ -148,7 +148,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
             final String fid = checkFolderId(folderId, rootUrl);
             final URI uri = new URI(fid + id, true);
             final SmbFile smbFile = new SmbFile(uri.toString(), auth);
-            if (!smbFile.exists()) {
+            if (!exists(smbFile)) {
                 return false;
             }
             if (!smbFile.isFile()) {
@@ -181,7 +181,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
             final String fid = checkFolderId(folderId, rootUrl);
             final URI uri = new URI(fid + id, true);
             final SmbFile smbFile = new SmbFile(uri.toString(), auth);
-            if (!smbFile.exists()) {
+            if (!exists(smbFile)) {
                 throw CIFSExceptionCodes.NOT_FOUND.create(uri.toString());
             }
             if (!smbFile.isFile()) {
@@ -245,7 +245,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
             /*
              * Create if non-existent
              */
-            if (!smbFile.exists()) {
+            if (!exists(smbFile)) {
                 smbFile.createNewFile();
             }
             final long now = System.currentTimeMillis();
@@ -313,7 +313,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
             final String fid = checkFolderId(folderId, rootUrl);
             final URI uri = new URI(fid + id, true);
             final SmbFile smbFile = new SmbFile(uri.toString(), auth);
-            if (!smbFile.exists()) {
+            if (!exists(smbFile)) {
                 throw CIFSExceptionCodes.NOT_FOUND.create(uri.toString());
             }
             if (!smbFile.isFile()) {
@@ -429,7 +429,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
                  * Check validity
                  */
                 final SmbFile smbFile = new SmbFile(uri.toString(), auth);
-                if (smbFile.exists()) {
+                if (exists(smbFile)) {
                     /*
                      * Check for file
                      */
@@ -478,7 +478,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
              * Check validity
              */
             final SmbFile smbFile = new SmbFile(uri.toString(), auth);
-            if (!smbFile.exists()) {
+            if (!exists(smbFile)) {
                 /*
                  * NO-OP for us
                  */
@@ -530,7 +530,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
              * Check validity
              */
             final SmbFile smbFile = new SmbFile(uri.toString(), auth);
-            if (!smbFile.exists()) {
+            if (!exists(smbFile)) {
                 throw CIFSExceptionCodes.NOT_FOUND.create(uri.toString());
             }
             if (!smbFile.isFile()) {
@@ -577,7 +577,16 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
             /*
              * List its sub-resources
              */
-            final SmbFile[] subFiles = smbFolder.listFiles();
+            SmbFile[] subFiles;
+            try {
+                subFiles = smbFolder.canRead() ? smbFolder.listFiles() : new SmbFile[0];
+            } catch (final SmbException e) {
+                final String message = e.getMessage();
+                if (!message.startsWith("Invalid operation") && !message.equals("Access is denied.")) {
+                    throw e;
+                }
+                subFiles = new SmbFile[0];
+            }
             final List<File> files = new ArrayList<File>(subFiles.length);
             for (final SmbFile subFile : subFiles) {
                 if (subFile.isFile()) {
@@ -638,7 +647,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
                 final String fid = checkFolderId(id.getFolder(), rootUrl);
                 final URI uri = new URI(fid + id.getId(), true);
                 final SmbFile smbFile = new SmbFile(uri.toString(), auth);
-                if (!smbFile.exists()) {
+                if (!exists(smbFile)) {
                     throw CIFSExceptionCodes.NOT_FOUND.create(uri.toString());
                 }
                 if (!smbFile.isFile()) {
@@ -754,7 +763,16 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
             if (!smbFolder.isDirectory()) {
                 throw CIFSExceptionCodes.NOT_A_FOLDER.create(folderId);
             }
-            final SmbFile[] subFiles = smbFolder.listFiles();
+            SmbFile[] subFiles;
+            try {
+                subFiles = smbFolder.canRead() ? smbFolder.listFiles() : new SmbFile[0];
+            } catch (final SmbException e) {
+                final String message = e.getMessage();
+                if (!message.startsWith("Invalid operation") && !message.equals("Access is denied.")) {
+                    throw e;
+                }
+                subFiles = new SmbFile[0];
+            }
             for (final SmbFile subFile : subFiles) {
                 if (subFile.isDirectory()) {
                     recursiveSearchFile(pattern, subFile.getPath(), fields, results);

@@ -76,4 +76,9 @@ public interface Constants {
      */
     public static final int MAX_CHUNKS_PER_RUN = 10;
 
+    /**
+     * The group name for mail jobs: <code>"indexing.mail"</code>
+     */
+    public static final String MAIL_JOB_SCHEDULER_GROUP_ID = "indexing.mail";
+
 }

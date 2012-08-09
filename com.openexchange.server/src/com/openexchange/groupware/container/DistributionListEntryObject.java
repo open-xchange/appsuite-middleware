@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.container;
 
+import java.io.Serializable;
 import javax.mail.internet.AddressException;
 
 import com.openexchange.exception.OXException;
@@ -61,7 +62,9 @@ import com.openexchange.mail.mime.QuotedInternetAddress;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 
-public class DistributionListEntryObject {
+public class DistributionListEntryObject implements Serializable {
+
+    private static final long serialVersionUID = 3878123169840216186L;
 
     public static final int INDEPENDENT = 0;
 

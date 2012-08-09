@@ -8,7 +8,8 @@ Homepage: http://www.open-xchange.com
 
 Package: open-xchange-chat
 Architecture: all
-Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
+Pre-Depends: open-xchange-core (>= @OXVERSION@)
+Depends: ${misc:Depends}
 Description: Backend chat extension
  Package contains the backend components for the chat feature. This includes database storage, chat logic and HTTP/JSON chat interface for
  clients.

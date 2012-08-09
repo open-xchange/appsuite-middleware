@@ -50,14 +50,14 @@
 package com.openexchange.config.internal;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -71,7 +71,9 @@ import org.apache.commons.logging.Log;
 import com.openexchange.log.LogFactory;
 import org.ho.yaml.Yaml;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Filter;
 import com.openexchange.config.PropertyListener;
+import com.openexchange.config.WildcardFilter;
 import com.openexchange.config.internal.filewatcher.FileWatcher;
 
 /**
@@ -285,6 +287,15 @@ public final class ConfigurationImpl implements ConfigurationService {
     }
 
     @Override
+    public Filter getFilterFromProperty(String name) {
+        final String value = properties.get(name);
+        if (null == value) {
+            return null;
+        }
+        return new WildcardFilter(value);
+    }
+
+    @Override
     public String getProperty(final String name) {
         return properties.get(name);
     }
@@ -335,8 +346,8 @@ public final class ConfigurationImpl implements ConfigurationService {
      * {@inheritDoc}
      */
     @Override
-    public Properties getFile(final String filename) {
-        return getFile(filename, null);
+    public Properties getFile(final String fileName) {
+        return getFile(fileName, null);
     }
 
     /**
@@ -398,10 +409,6 @@ public final class ConfigurationImpl implements ConfigurationService {
         return retval;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.config.Configuration#getProperty(java.lang.String, boolean)
-     */
     @Override
     public boolean getBoolProperty(final String name, final boolean defaultValue) {
         final String prop = properties.get(name);
@@ -411,10 +418,6 @@ public final class ConfigurationImpl implements ConfigurationService {
         return defaultValue;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.config.Configuration#getProperty(java.lang.String, int)
-     */
     @Override
     public int getIntProperty(final String name, final int defaultValue) {
         final String prop = properties.get(name);
@@ -430,36 +433,123 @@ public final class ConfigurationImpl implements ConfigurationService {
         return defaultValue;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.config.Configuration#propertyNames()
-     */
     @Override
     public Iterator<String> propertyNames() {
         return properties.keySet().iterator();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.config.Configuration#size()
-     */
     @Override
     public int size() {
         return properties.size();
     }
 
     @Override
-    public String getText(final String filename) {
-        final String text = texts.get(filename);
+    public File getFileByName(final String fileName) {
+        if (null == fileName) {
+            return null;
+        }
+        for (final String dir : getDirectories()) {
+            final File f = traverseForFile(new File(dir), fileName);
+            if (f != null) {
+                return f;
+            }
+        }
+        /*
+         * Try guessing the filename separator
+         */
+        String fn;
+        int pos;
+        if ((pos = fileName.lastIndexOf('/')) >= 0 || (pos = fileName.lastIndexOf('\\')) >= 0) {
+            fn = fileName.substring(pos + 1);
+        } else {
+            LOG.warn("No such file: " + fileName);
+            return null;
+        }
+        for (final String dir : getDirectories()) {
+            final File f = traverseForFile(new File(dir), fn);
+            if (f != null) {
+                return f;
+            }
+        }
+        LOG.warn("No such file: " + fileName);
+        return null;
+    }
+
+    private File traverseForFile(final File file, final String fileName) {
+        if (null == file) {
+            return null;
+        }
+        if (file.isFile()) {
+            if (fileName.equals(file.getName())) {
+                // Found
+                return file;
+            }
+            return null;
+        }
+        final File[] subs = file.listFiles();
+        if (subs != null) {
+            for (final File sub : subs) {
+                final File f = traverseForFile(sub, fileName);
+                if (f != null) {
+                    return f;
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public File getDirectory(final String directoryName) {
+        if (null == directoryName) {
+            return null;
+        }
+        for (final String dir : getDirectories()) {
+            final File fdir = traverseForDir(new File(dir), directoryName);
+            if (fdir != null) {
+                return fdir;
+            }
+        }
+        LOG.warn("No such directory: " + directoryName);
+        return null;
+    }
+
+    private File traverseForDir(final File file, final String directoryName) {
+        if (null == file) {
+            return null;
+        }
+        if (file.isDirectory() && directoryName.equals(file.getName())) {
+            // Found
+            return file;
+        }
+        final File[] subDirs = file.listFiles(new FileFilter() {
+            
+            @Override
+            public boolean accept(final File file) {
+                return file.isDirectory();
+            }
+        });
+        if (subDirs != null) {
+            for (final File subDir : subDirs) {
+                final File dir = traverseForDir(subDir, directoryName);
+                if (dir != null) {
+                    return dir;
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public String getText(final String fileName) {
+        final String text = texts.get(fileName);
         if (text != null) {
             return text;
         }
 
-        final String[] directories = getDirectories();
-        for (final String dir : directories) {
-            final String s = traverse(new File(dir), filename);
+        for (final String dir : getDirectories()) {
+            final String s = traverse(new File(dir), fileName);
             if (s != null) {
-                texts.put(filename, s);
+                texts.put(fileName, s);
                 return s;
             }
         }
@@ -467,28 +557,14 @@ public final class ConfigurationImpl implements ConfigurationService {
     }
 
     private String traverse(final File file, final String filename) {
-        if (file.getName().equals(filename) && file.isFile()) {
-            BufferedReader r = null;
-            try {
-                r = new BufferedReader(new FileReader(file));
-                final StringBuilder builder = new StringBuilder();
-                String s = null;
-                while ((s = r.readLine()) != null) {
-                    builder.append(s).append('\n');
-                }
-                return builder.toString();
-            } catch (final IOException x) {
-                LOG.fatal("Can't read file: " + file);
-                return null;
-            } finally {
-                if (r != null) {
-                    try {
-                        r.close();
-                    } catch (final IOException e) {
-                        LOG.error(e.getMessage(), e);
-                    }
-                }
+        if (null == file) {
+            return null;
+        }
+        if (file.isFile()) {
+            if (file.getName().equals(filename)) {
+                return readFile(file);
             }
+            return null;
         }
         final File[] files = file.listFiles();
         if (files != null) {
@@ -500,6 +576,33 @@ public final class ConfigurationImpl implements ConfigurationService {
             }
         }
         return null;
+    }
+
+    private String readFile(final File file) {
+        Reader reader = null;
+        try {
+            reader = new InputStreamReader(new FileInputStream(file));
+
+            final StringBuilder builder = new StringBuilder((int) file.length());
+            final int buflen = 8192;
+            final char[] cbuf = new char[buflen];
+
+            for (int read; (read = reader.read(cbuf, 0, buflen)) > 0;) {
+                builder.append(cbuf, 0, read);
+            }
+            return builder.toString();
+        } catch (final IOException x) {
+            LOG.fatal("Can't read file: " + file);
+            return null;
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (final IOException e) {
+                    // Ignore
+                }
+            }
+        }
     }
 
     @Override

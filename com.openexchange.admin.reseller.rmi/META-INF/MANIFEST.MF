@@ -9,4 +9,8 @@ Export-Package: com.openexchange.admin.reseller.rmi,
  com.openexchange.admin.reseller.rmi.dataobjects,
  com.openexchange.admin.reseller.rmi.exceptions,
  com.openexchange.admin.reseller.rmi.extensions
-Require-Bundle: com.openexchange.admin.rmi
+Import-Package: com.openexchange.admin.rmi.dataobjects,
+ com.openexchange.admin.rmi.exceptions,
+ com.openexchange.admin.rmi.extensions
+Require-Bundle: com.openexchange.admin.plugin.hosting;resolution:=optional
+Eclipse-RegisterBuddy: com.openexchange.admin.plugin.hosting

@@ -76,7 +76,6 @@ import com.openexchange.groupware.contact.ContactUnificationState;
 import com.openexchange.groupware.contact.helpers.SpecialAlphanumSortContactComparator;
 import com.openexchange.groupware.contact.helpers.UseCountComparator;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -89,6 +88,7 @@ import com.openexchange.timer.TimerService;
 import com.openexchange.tools.iterator.ArrayIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 
+
 /**
  * {@link LdapContactInterface}
  *
@@ -97,7 +97,7 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 public class LdapContactInterface implements ContactInterface {
 
-    protected static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(LdapContactInterface.class));
+    protected static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(LdapContactInterface.class));
 
     private class ContactLoaderTask implements Runnable {
 
@@ -133,34 +133,6 @@ public class LdapContactInterface implements ContactInterface {
     }
 
     private static final ArrayIterator<Contact> EMPTY_ARRAY_ITERATOR = new ArrayIterator<Contact>(new Contact[0]);
-
-    public static final class SortInfo {
-
-        private final int field;
-
-        private final Order sort;
-
-        /**
-         * Initializes a new {@link SortInfo}.
-         * @param field
-         * @param sort
-         */
-        protected SortInfo(final int field, final Order sort) {
-            this.field = field;
-            this.sort = sort;
-        }
-
-
-        public final int getField() {
-            return field;
-        }
-
-
-        public final Order getSort() {
-            return sort;
-        }
-
-    }
 
     private static final String MAPPING_TABLE_KEYS = "CONTACT_LDAP_MAPPING_TABLE_KEYS";
 
@@ -198,7 +170,7 @@ public class LdapContactInterface implements ContactInterface {
         return locale;
     }
 
-    private static String escapeLDAPSearchFilter(final String ldapfilter) {
+    public static String escapeLDAPSearchFilter(final String ldapfilter) {
         // According to RFC2254 section 4 we escape the following chars so that no LDAP injection can be made:
         // Character       ASCII value
         // ---------------------------
@@ -207,6 +179,9 @@ public class LdapContactInterface implements ContactInterface {
         // )               0x29
         // \               0x5c
         // NUL             0x00
+    	if(ldapfilter == null) {
+            return "";
+        }
         final StringBuilder sb = new StringBuilder();
         for (int i = 0; i < ldapfilter.length(); i++) {
             final char curChar = ldapfilter.charAt(i);
@@ -310,7 +285,7 @@ public class LdapContactInterface implements ContactInterface {
                 addFilterFor(mappings.getEmail1(), searchobject.getEmail1(), user);
                 addFilterFor(mappings.getEmail2(), searchobject.getEmail2(), user);
                 addFilterFor(mappings.getEmail3(), searchobject.getEmail3(), user);
-                user.append(')');
+                user.append(")");
             }
             if (both || ContactTypes.distributionlists.equals(contacttype)) {
                 addFilterFor(mappings.getDistributionlistname(), searchobject.getDisplayName(), distri);
@@ -384,7 +359,7 @@ public class LdapContactInterface implements ContactInterface {
         }
 
         // Get only the needed parts...
-        final List<Contact> subList = getSubList(from, to, arrayList);
+        final List<Contact> subList = from != 0 || to != 0 ? getSubList(from, to, arrayList) : arrayList;
 
         sorting(orderBy, order, subList, specialSort);
         final SearchIterator<Contact> searchIterator = new ArrayIterator<Contact>(subList.toArray(new Contact[subList.size()]));
@@ -443,8 +418,16 @@ public class LdapContactInterface implements ContactInterface {
 
     @Override
     public Contact getObjectById(final int objectId, final int inFolder) throws OXException {
-        LOG.info("Called getObjectById");
-        return null;
+        final SearchIterator<Contact> objectsById = getObjectsById(new int[][]{new int[]{objectId, inFolder}}, Contact.ALL_COLUMNS);
+        try {
+            if (null != objectsById && objectsById.hasNext()) {
+                return objectsById.next();
+            } else {
+                throw LdapExceptionCode.CONTACT_NOT_FOUND.create(objectId, inFolder);
+            }
+        } catch (final OXException e) {
+            throw e;
+        }
     }
 
     @Override
@@ -517,13 +500,13 @@ public class LdapContactInterface implements ContactInterface {
     private void addFilterFor(final String fieldname, final String searchString, final StringBuilder sb) {
         if (null != searchString && null != fieldname) {
             if ("*".equals(searchString)) {
-                sb.append('(');
+                sb.append("(");
                 sb.append(fieldname);
                 sb.append("=*)");
             } else {
-                sb.append('(');
+                sb.append("(");
                 sb.append(fieldname);
-                sb.append('=');
+                sb.append("=");
                 sb.append(escapeLDAPSearchFilter(searchString));
                 sb.append("*)");
             }
@@ -540,7 +523,7 @@ public class LdapContactInterface implements ContactInterface {
         for (final int col : cols) {
             columns.add(Autoboxing.I(col));
         }
-        columns.add(Integer.valueOf(DataObject.CREATION_DATE));
+        columns.add(Integer.valueOf(Contact.CREATION_DATE));
         return columns;
     }
 
@@ -630,7 +613,7 @@ public class LdapContactInterface implements ContactInterface {
         case mail:
             final String mail = user.getMail();
             if (null == mail) {
-                throw LdapExceptionCode.PRIMARY_MAIL_NULL.create(user.getLoginInfo());
+                throw LdapExceptionCode.PRIMARY_MAIL_NULL.create( user.getLoginInfo());
             } else {
                 return mail;
             }
@@ -840,10 +823,58 @@ public class LdapContactInterface implements ContactInterface {
         throw new UnsupportedOperationException();
     }
 
-	@Override
-    public <T> SearchIterator<Contact> getContactsByExtendedSearch(
-			final SearchTerm<T> searchterm, final int orderBy, final Order order,
-			final String collation, final int[] cols) throws OXException {
-        throw new UnsupportedOperationException();
-	}
+    @Override
+    public <T> SearchIterator<Contact> getContactsByExtendedSearch(final SearchTerm<T> searchterm, final int orderBy, final Order order, final String collation, final int[] cols) throws OXException {
+        final Mappings mappings = folderprop.getMappings();
+        final ContactTypes contacttype = folderprop.getContacttypes();
+        final boolean both = ContactTypes.both.equals(contacttype);
+        final boolean distributionlistsActive = both || ContactTypes.distributionlists.equals(contacttype);
+
+        final ContactSearchtermLdapConverter parser = new ContactSearchtermLdapConverter();
+        parser.setMappings(mappings);
+        parser.setDistributionlistActive(distributionlistsActive);
+        parser.parse(searchterm);
+
+        final Set<Integer> columns = getColumnSet(cols);
+        final int folderId;
+        {
+            final List<String> folders = parser.getFolders();
+            if (null == folders) {
+                throw LdapExceptionCode.FOLDERID_OBJECT_NULL.create();
+            }
+            if (folders.size() != 1) {
+                throw LdapExceptionCode.TOO_MANY_FOLDERS.create();
+            }
+            folderId = Integer.parseInt(folders.get(0));
+        }
+        final ArrayList<Contact> arrayList;
+
+        final boolean specialSort;
+        if (orderBy > 0 && orderBy != Contact.SPECIAL_SORTING && orderBy != Contact.USE_COUNT_GLOBAL_FIRST && !Order.NO_ORDER.equals(order)) {
+            specialSort = false;
+        } else {
+            for (final int field : new int[] {
+                Contact.YOMI_LAST_NAME, Contact.SUR_NAME, Contact.YOMI_FIRST_NAME, Contact.GIVEN_NAME, Contact.DISPLAY_NAME,
+                Contact.YOMI_COMPANY, Contact.COMPANY, Contact.EMAIL1, Contact.EMAIL2, Contact.USE_COUNT }) {
+                columns.add(Integer.valueOf(field));
+            }
+            specialSort = true;
+        }
+
+        String users = null, distributions = null;
+        if (both || ContactTypes.users.equals(contacttype)) {
+            users = parser.getQueryString();
+        }
+        if (distributionlistsActive) {
+            distributions = parser.getQueryString();
+        }
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Using following filters for users: \"" + users + "\" and distributionlists: \"" + distributions + "\"");
+        }
+        arrayList = getLDAPContacts(folderId, columns, users, distributions, null, false);
+
+        sorting(orderBy, order, arrayList, specialSort);
+        return new ArrayIterator<Contact>(arrayList.toArray(new Contact[arrayList.size()]));
+
+    }
 }

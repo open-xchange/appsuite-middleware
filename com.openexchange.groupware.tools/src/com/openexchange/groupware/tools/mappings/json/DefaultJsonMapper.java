@@ -63,11 +63,9 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.DefaultMapper;
 import com.openexchange.session.Session;
@@ -201,23 +199,40 @@ public abstract class DefaultJsonMapper<O, E extends Enum<E>> extends DefaultMap
 		return object;
 	}
 
-	@Override
-	public JsonMapping<? extends Object, O> get(final E field) throws OXException {
-		if (null == field) {
-			throw new IllegalArgumentException("field");
-		}
-		final JsonMapping<? extends Object, O> mapping = this.mappings.get(field);
-		if (null == mapping) {
-			throw OXException.notFound(field.toString());
-		}
-		return mapping;
-	}
-	
-	@Override
-	public E getMappedField(final int columnID) {
-		return this.columnMap.get(Integer.valueOf(columnID));
-	}
-	
+    @Override
+    public JsonMapping<? extends Object, O> get(final E field) throws OXException {
+        final JsonMapping<? extends Object, O> mapping = this.opt(field);
+        if (null == mapping) {
+            throw OXException.notFound(field.toString());
+        }
+        return mapping;
+    }
+    
+    @Override
+    public JsonMapping<? extends Object, O> opt(final E field) {
+        if (null == field) {
+            throw new IllegalArgumentException("field");
+        }
+        return this.mappings.get(field);
+    }
+    
+    @Override
+    public E getMappedField(final int columnID) {
+        return this.columnMap.get(Integer.valueOf(columnID));
+    }
+    
+    @Override
+    public E getMappedField(String ajaxName) {
+        if (null != ajaxName) {
+            for (Entry<E, ? extends JsonMapping<? extends Object, O>> entry: mappings.entrySet()) {
+                if (ajaxName.equals(entry.getValue().getAjaxName())) {
+                    return entry.getKey();
+                }
+            }
+        }        
+        return null;
+    }
+    
 	@Override
 	public int[] getColumnIDs(final E[] fields) throws OXException {
 		if (null == fields) {

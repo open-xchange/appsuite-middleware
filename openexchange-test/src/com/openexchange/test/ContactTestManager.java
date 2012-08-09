@@ -779,6 +779,7 @@ final class ContactMapping extends TestCase {
             put(ContactFields.MODIFIED_BY, Contact.MODIFIED_BY);
             put(ContactFields.NUMBER_OF_ATTACHMENTS, Contact.NUMBER_OF_ATTACHMENTS);
             put(ContactFields.PRIVATE_FLAG, Contact.PRIVATE_FLAG);
+            put(ContactFields.EXTENDED_PROPERTIES, Contact.EXTENDED_PROPERTIES);
 
             put(ContactFields.YOMI_COMPANY, Contact.YOMI_COMPANY);
             put(ContactFields.YOMI_FIRST_NAME, Contact.YOMI_FIRST_NAME);

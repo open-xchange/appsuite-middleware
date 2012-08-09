@@ -54,89 +54,116 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
+import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.realtime.packet.ID;
 
 /**
- * {@link IDMap}
- *
+ * {@link IDMap} - Maps {@link ID}s to arbitrary values.
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class IDMap<T> implements Map<ID, T>{
-	
-	private final Map<ID, T> delegate = new HashMap<ID, T>();
+public class IDMap<T> implements Map<ID, T> {
 
-	public int size() {
-		return delegate.size();
-	}
+    private final Map<ID, T> delegate;
 
-	public boolean isEmpty() {
-		return delegate.isEmpty();
-	}
+    /**
+     * Initializes a new {@link IDMap}.
+     */
+    public IDMap() {
+        this(true);
+    }
 
-	public boolean containsKey(Object key) {
-		return delegate.containsKey(key);
-	}
+    /**
+     * Initializes a new {@link IDMap}.
+     * 
+     * @param concurrent Whether this map should be created in a thread-safe manner or not
+     */
+    public IDMap(final boolean concurrent) {
+        super();
+        delegate = concurrent ? new ConcurrentHashMap<ID, T>() : new HashMap<ID, T>();
+    }
 
-	public boolean containsValue(Object value) {
-		return delegate.containsValue(value);
-	}
+    public int size() {
+        return delegate.size();
+    }
 
-	public T get(Object key) {
-		return delegate.get(key);
-	}
+    public boolean isEmpty() {
+        return delegate.isEmpty();
+    }
 
-	public T put(ID key, T value) {
-		return delegate.put(key, value);
-	}
+    public boolean containsKey(Object id) {
+        return delegate.containsKey(id);
+    }
 
-	public T remove(Object key) {
-		return delegate.remove(key);
-	}
+    public boolean containsValue(Object value) {
+        return delegate.containsValue(value);
+    }
 
-	public void putAll(Map<? extends ID, ? extends T> m) {
-		delegate.putAll(m);
-	}
+    public T get(Object key) {
+        return delegate.get(key);
+    }
 
-	public void clear() {
-		delegate.clear();
-	}
+    public T put(ID key, T value) {
+        return delegate.put(key, value);
+    }
 
-	public Set<ID> keySet() {
-		return delegate.keySet();
-	}
+    public T remove(Object key) {
+        return delegate.remove(key);
+    }
 
-	public Collection<T> values() {
-		return delegate.values();
-	}
+    public void putAll(Map<? extends ID, ? extends T> m) {
+        delegate.putAll(m);
+    }
 
-	public Set<java.util.Map.Entry<ID, T>> entrySet() {
-		return delegate.entrySet();
-	}
+    public void clear() {
+        delegate.clear();
+    }
 
-	@Override
+    public Set<ID> keySet() {
+        return delegate.keySet();
+    }
+
+    public Collection<T> values() {
+        return delegate.values();
+    }
+
+    public Set<java.util.Map.Entry<ID, T>> entrySet() {
+        return delegate.entrySet();
+    }
+
+    @Override
     public boolean equals(Object o) {
-		return delegate.equals(o);
-	}
+        return delegate.equals(o);
+    }
 
-	@Override
+    @Override
     public int hashCode() {
-		return delegate.hashCode();
-	}
-	
-	public Set<Map.Entry<ID, T>> getEquivalents(ID id) {
-		// Maybe make this more efficient. Linear searches are very out
-		Set<Map.Entry<ID, T>> equivalents = new HashSet<Map.Entry<ID, T>>();
-		for(Map.Entry<ID, T> entry: delegate.entrySet()) {
-			if (isEquivalent(entry.getKey(), id)) {
-				equivalents.add(entry);
-			}
-		}
-		return equivalents;
-	}
+        return delegate.hashCode();
+    }
 
-	private boolean isEquivalent(ID id1, ID id2) {
-		return id1.getUser().equals(id2.getUser()) && id1.getContext().equals(id2.getContext());
-	}
-	
+    /**
+     * Get a set of equivalent IDs. Equivalent in that way that they represent
+     * the same user@context entity. An entity may still be reachable via
+     * another channel and/or resource although the original id isn't reachable
+     * anylonger. 
+     * @param id the id of the entity we are looking for
+     * @return a Set of key-value pairs mapping ID to arbitrary value types.
+     */
+    public Set<Map.Entry<ID, T>> getEquivalents(ID id) {
+        // Maybe make this more efficient. Linear searches are very out
+        Set<Map.Entry<ID, T>> equivalents = new HashSet<Map.Entry<ID, T>>();
+        for (Map.Entry<ID, T> entry : delegate.entrySet()) {
+            if (isEquivalent(entry.getKey(), id)) {
+                equivalents.add(entry);
+            }
+        }
+        return equivalents;
+    }
+
+    private boolean isEquivalent(ID id1, ID id2) {
+        return id1.getUser().equals(id2.getUser()) && id1.getContext().equals(id2.getContext());
+    }
+
 }

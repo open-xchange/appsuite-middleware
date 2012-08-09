@@ -456,14 +456,7 @@ public class AJPv13Response {
         /*
          * No need to check against max package size cause it's a static package size of 6
          */
-        if (closeConnection) {
-            return END_RESPONSE_CLOSE;
-        } else if (AJPv13Config.isAJPModJK()) {
-            return END_RESPONSE_REUSE;
-        } else {
-            final boolean reuseConnection = AJPv13Server.getNumberOfOpenAJPSockets() <= AJPv13Config.getAJPMaxNumOfSockets();
-            return reuseConnection ? END_RESPONSE_REUSE : END_RESPONSE_CLOSE;
-        }
+        return closeConnection ? END_RESPONSE_CLOSE : END_RESPONSE_REUSE;
     }
 
     /**

@@ -61,7 +61,6 @@ import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.osgi.service.event.EventAdmin;
-import org.w3c.tidy.Report;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.ajp13.AJPv13ServiceRegistry;
@@ -83,6 +82,9 @@ import com.openexchange.config.ConfigurationServiceHolder;
 import com.openexchange.config.internal.ConfigurationImpl;
 import com.openexchange.config.internal.filewatcher.FileWatcher;
 import com.openexchange.configuration.ServerConfig;
+import com.openexchange.contact.ContactService;
+import com.openexchange.contact.internal.ContactServiceImpl;
+import com.openexchange.contact.internal.ContactServiceLookup;
 import com.openexchange.contact.storage.internal.DefaultContactStorageRegistry;
 import com.openexchange.contact.storage.rdb.internal.RdbContactStorage;
 import com.openexchange.contact.storage.registry.ContactStorageRegistry;
@@ -146,13 +148,13 @@ import com.openexchange.mail.transport.config.TransportPropertiesInit;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.internal.MailAccountStorageInit;
+import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.push.udp.registry.PushServiceRegistry;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.internal.ResourceServiceImpl;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.I18nServices;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.SessiondInit;
 import com.openexchange.sessiond.impl.SessiondServiceImpl;
@@ -364,6 +366,7 @@ public final class Init {
         startAndInjectImportExportServices();
         startAndInjectSubscribeServices();
         startAndInjectContactStorageServices();
+        startAndInjectContactServices();
     }
 
     public static void startAndInjectConfigBundle() {
@@ -373,6 +376,7 @@ public final class Init {
         final ConfigurationService config = new ConfigurationImpl();
         services.put(ConfigurationService.class, config);
         TestServiceRegistry.getInstance().addService(ConfigurationService.class, config);
+        AJPv13ServiceRegistry.SERVICE_REGISTRY.set(new ServiceRegistry());
         AJPv13ServiceRegistry.getInstance().addService(ConfigurationService.class, config);
     }
 
@@ -430,16 +434,14 @@ public final class Init {
         if (null == TestServiceRegistry.getInstance().getService(HtmlService.class)) {
             final ConfigurationService configService = (ConfigurationService) services.get(ConfigurationService.class);
             com.openexchange.html.services.ServiceRegistry.getInstance().addService(ConfigurationService.class, configService);
-            Report.setResourceBundleFrom(HTMLServiceActivator.getTidyMessages(configService.getProperty("TidyMessages")));
-            final Properties properties = HTMLServiceActivator.getTidyConfiguration(configService.getProperty("TidyConfiguration"));
-            final Object[] maps = HTMLServiceActivator.getHTMLEntityMaps(configService.getProperty("HTMLEntities"));
+            final Object[] maps = HTMLServiceActivator.getHTMLEntityMaps(configService.getFileByName("HTMLEntities.properties"));
             @SuppressWarnings("unchecked")
             final Map<String, Character> htmlEntityMap = (Map<String, Character>) maps[1];
             htmlEntityMap.put("apos", Character.valueOf('\''));
             @SuppressWarnings("unchecked")
             final Map<Character, String> htmlCharMap = (Map<Character, String>) maps[0];
             htmlCharMap.put(Character.valueOf('\''), "apos");
-            final HtmlService service = new HtmlServiceImpl(properties, htmlCharMap, htmlEntityMap);
+            final HtmlService service = new HtmlServiceImpl(htmlCharMap, htmlEntityMap);
             services.put(HtmlService.class, service);
             TestServiceRegistry.getInstance().addService(HtmlService.class, service);
         }
@@ -564,6 +566,23 @@ public final class Init {
         }
     }
 
+    private static void startAndInjectContactServices() {
+        if (null == TestServiceRegistry.getInstance().getService(ContactService.class)) {
+            final ContactService contactService = new ContactServiceImpl();
+            ContactServiceLookup.set(new ServiceLookup() {
+                @Override
+                public <S> S getService(final Class<? extends S> clazz) {
+                    return TestServiceRegistry.getInstance().getService(clazz);
+                }
+                @Override
+                public <S> S getOptionalService(final Class<? extends S> clazz) {
+                    return null;
+                }
+            });
+            TestServiceRegistry.getInstance().addService(ContactService.class, contactService);
+        }
+    }
+
     public static void startAndInjectI18NBundle() throws FileNotFoundException {
         /*
          * This one properly dropped by stopServer() method
@@ -661,8 +680,9 @@ public final class Init {
         }
     }
 
-    private static void startAndInjectContactCollector() throws Exception {
-        final CCServiceRegistry reg = CCServiceRegistry.getInstance();
+    private static void startAndInjectContactCollector() {
+        CCServiceRegistry.SERVICE_REGISTRY.set(new ServiceRegistry());
+        final ServiceRegistry reg = CCServiceRegistry.getInstance();
         if (null == reg.getService(TimerService.class)) {
             reg.addService(TimerService.class, services.get(TimerService.class));
             reg.addService(ThreadPoolService.class, services.get(ThreadPoolService.class));

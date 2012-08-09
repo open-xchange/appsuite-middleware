@@ -7,7 +7,7 @@ BuildRequires:  ant-nodeps
 BuildRequires:  open-xchange-core >= @OXVERSION@
 BuildRequires:  java-devel >= 1.6.0
 Version:        @OXVERSION@
-%define         ox_release 0
+%define         ox_release 3
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -69,3 +69,11 @@ ant -lib build/lib -Dbasedir=build -Dhtdoc=%{docroot} -DdestDir=%{buildroot} -Dp
 %dir %{docroot}/ox6/plugins/com.openexchange.spamsettings.generic
 %{docroot}/ox6/plugins/com.openexchange.spamsettings.generic/*
 
+* Tue Jul 03 2012 Carsten Hoeger <choeger@open-xchange.com>
+Release build for EDP drop #2
+* Mon Jun 04 2012 Carsten Hoeger <choeger@open-xchange.com>
+Release build for EDP drop #2
+* Tue May 22 2012 Carsten Hoeger <choeger@open-xchange.com>
+Internal release build for EDP drop #2
+* Thu May 10 2012 Carsten Hoeger <choeger@open-xchange.com>
+prepare for 6.21.0

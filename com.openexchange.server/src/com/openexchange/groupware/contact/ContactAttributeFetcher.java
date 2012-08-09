@@ -740,6 +740,14 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
             }
         });
 
+        m.put(CommonFields.EXTENDED_PROPERTIES, new AttributeGetter() {
+
+            @Override
+            public Object getObject(final Contact candidate) {
+                return candidate.getExtendedProperties();
+            }
+        });
+
         GETTERS = Collections.unmodifiableMap(m);
     }
 

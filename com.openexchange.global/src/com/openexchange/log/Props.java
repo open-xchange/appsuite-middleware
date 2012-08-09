@@ -74,6 +74,11 @@ public final class Props {
         this.map = map;
     }
 
+    @Override
+    public String toString() {
+        return map.toString();
+    }
+
     /**
      * Gets the backing map
      * 
@@ -128,9 +133,13 @@ public final class Props {
         map.remove(name);
     }
 
+	/**
+	 * Creates a shallow copy of this log properties.
+	 * 
+	 * @return The shallow copy
+	 */
 	public Props copy() {
 		return new Props(new HashMap<String, Object>(map));
 	}
-
 
 }

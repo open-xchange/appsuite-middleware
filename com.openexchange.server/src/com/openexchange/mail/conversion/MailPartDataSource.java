@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.conversion;
 
+import static com.openexchange.mail.mime.utils.MimeMessageUtility.shouldRetry;
 import java.io.InputStream;
 import com.openexchange.conversion.DataSource;
 import com.openexchange.exception.OXException;
@@ -83,22 +84,29 @@ public abstract class MailPartDataSource implements DataSource {
     }
 
     protected final MailPart getMailPart(final int accountId, final String fullname, final String mailId, final String sequenceId, final Session session) throws OXException {
-        final MailAccess<?, ?> mailAccess;
+        MailAccess<?, ?> mailAccess = null;
         try {
             mailAccess = MailAccess.getInstance(session, accountId);
             mailAccess.connect();
+            return loadPart(fullname, mailId, sequenceId, mailAccess);
         } catch (final OXException e) {
-            throw new OXException(e);
-        }
-        try {
-            final MailPart mailPart = mailAccess.getMessageStorage().getAttachment(fullname, mailId, sequenceId);
-            mailPart.loadContent();
-            return mailPart;
-        } catch (final OXException e) {
-            throw new OXException(e);
+            if ((null != mailAccess) && shouldRetry(e)) {
+                // Re-connect
+                mailAccess = MailAccess.reconnect(mailAccess);
+                return loadPart(fullname, mailId, sequenceId, mailAccess);
+            }
+            throw e;
         } finally {
-            mailAccess.close(true);
+            if (null != mailAccess) {
+                mailAccess.close(true);
+            }
         }
+    }
+
+    private MailPart loadPart(final String fullname, final String mailId, final String sequenceId, MailAccess<?, ?> mailAccess) throws OXException {
+        final MailPart mailPart = mailAccess.getMessageStorage().getAttachment(fullname, mailId, sequenceId);
+        mailPart.loadContent();
+        return mailPart;
     }
 
     @Override

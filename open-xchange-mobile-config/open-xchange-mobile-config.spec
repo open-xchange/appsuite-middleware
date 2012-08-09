@@ -1,21 +1,21 @@
 
-# norootforbuild
-
 Name:           open-xchange-mobile-config
 BuildArch: 	noarch
 #!BuildIgnore: post-build-checks
 BuildRequires:  ant
+BuildRequires:  ant-nodeps
 BuildRequires:  java-devel >= 1.6.0
 # TODO: version not hardcoded in spec file
 Version:	@OXVERSION@
-%define		ox_release 0
+%define		ox_release 9
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        Creative Commons Attribution-Noncommercial-Share Alike 2.5 Generic
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
-#URL:            
+URL:            http://www.open-xchange.com/
 Source:         %{name}_%{version}.orig.tar.bz2
 Summary:        Config files for the Open-Xchange Mobile UI
+Requires:       open-xchange-core >= @OXVERSION@
 
 %description
  This package needs to be installed on the backend hosts of a cluster installation. It adds configuration files to the backend allowing the
@@ -26,17 +26,14 @@ Authors:
 --------
     Open-Xchange
 
-
-
 %prep
 %setup -q
 
 %build
 
-
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
-ant -lib build/lib -Dbasedir=build -Dhtdoc=%{docroot} -DdestDir=%{buildroot} -DpackageName=open-xchange-mobile-config -DbuildType=installConf -f build/build.xml build
+ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
 %clean
 %{__rm} -rf %{buildroot}
@@ -49,5 +46,23 @@ ant -lib build/lib -Dbasedir=build -Dhtdoc=%{docroot} -DdestDir=%{buildroot} -Dp
 %config(noreplace) /opt/open-xchange/etc/meta/*
 
 %changelog
-* Thu Jun 21 2012 - marcus.klein@open-xchange.com
-  - Initial package for new backend
+* Tue Jul 03 2012 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Release build for EDP drop #2
+* Mon May 07 2012 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Bugfixbuild
+* Mon May 07 2012 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Bugfixbuild for ox.io
+* Tue Apr 03 2012 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Release build for 1.1.0
+* Tue Apr 03 2012 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Release build for 1.1.0
+* Tue Apr 03 2012 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Release build for 1.1.0
+* Thu Mar 29 2012 Marcus Klein <jenkins@jenkins.netline.de>
+Next test build
+* Thu Mar 29 2012 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Release build
+* Wed Mar 28 2012 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Release build
+* Thu Feb 16 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Initial 1.1 release.

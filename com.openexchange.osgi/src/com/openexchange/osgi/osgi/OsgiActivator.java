@@ -90,7 +90,7 @@ public class OsgiActivator extends HousekeepingActivator {
             consoleActivator.start(context);
             this.consoleActivator = consoleActivator;
         } catch (final Exception e) {
-            logger.error("OsgiActivator: start: "+e.getMessage(), e);
+            logger.error("OsgiActivator: start: " + e.getMessage(), e);
             throw e;
         }
     }
@@ -107,7 +107,7 @@ public class OsgiActivator extends HousekeepingActivator {
             }
             cleanUp();
         } catch (final Exception e) {
-            logger.error("OsgiActivator: stop: "+e.getMessage(), e);
+            logger.error("OsgiActivator: stop: " + e.getMessage(), e);
             throw e;
         }
     }

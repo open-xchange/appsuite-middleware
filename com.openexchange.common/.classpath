@@ -2,6 +2,10 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="test"/>
+	<classpathentry exported="true" kind="lib" path="lib/guava-13.0.jar" sourcepath="source/guava-13.0-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/org.apache.httpcomponents.httpclient_4.1.2.v201203221030.jar" sourcepath="source/org.apache.httpcomponents.httpclient.source_4.1.2.v201203221030.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/org.apache.httpcomponents.httpcore_4.1.4.v201203221030.jar" sourcepath="source/org.apache.httpcomponents.httpcore.source_4.1.4.v201203221030.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jboss-jms-api.jar" sourcepath="source/jboss-jms-api-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/mail-1.4.5.jar" sourcepath="lib/mail-1.4.5.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/apache-mime4j-core-0.7.2.jar" sourcepath="source/apache-mime4j-core-0.7.2-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/apache-mime4j-dom-0.7.2.jar" sourcepath="source/apache-mime4j-dom-0.7.2-sources.jar"/>
@@ -13,7 +17,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/rabin-hash-function-2.0.jar" sourcepath="source/rabin-hash-function-2.0-src.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/owasp-esapi-2.0.1.jar" sourcepath="lib/owasp-esapi-2.0.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-collections-3.2.1.jar" sourcepath="source/commons-collections-3.2.1-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/guava-12.0.jar" sourcepath="source/guava-12.0-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/trove-3.0.3.jar" sourcepath="source/trove-3.0.3-src.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/chardet-1.1.jar" sourcepath="source/chardet-1.1-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/tnef-1.7.0.jar" sourcepath="source/tnef-1.7.0-sources.jar"/>
@@ -22,7 +25,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/jakarta-slide-webdavlib-2.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/json.jar" sourcepath="source/json-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/libidn-1.9.jar" sourcepath="lib/libidn-1.9.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/mysql-connector-java-5.1.20-bin.jar" sourcepath="source/mysql-connector-java-5.1.20-source.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/mysql-connector-java-5.1.21-bin.jar" sourcepath="source/mysql-connector-java-5.1.21-source.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.test"/>

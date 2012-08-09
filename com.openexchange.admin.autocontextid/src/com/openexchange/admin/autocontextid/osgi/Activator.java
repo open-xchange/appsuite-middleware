@@ -57,6 +57,8 @@ import com.openexchange.admin.autocontextid.rmi.impl.OXAutoCIDContextImpl;
 import com.openexchange.admin.autocontextid.tools.AdminCacheExtended;
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.plugins.OXContextPluginInterface;
+import com.openexchange.admin.tools.AdminCache;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 
@@ -67,7 +69,9 @@ public class Activator extends HousekeepingActivator {
     @Override
     public void startBundle() throws Exception {
         try {
-            initCache();
+            ConfigurationService service = getService(ConfigurationService.class);
+            AdminCache.compareAndSet(null, service);
+            initCache(service);
 
             final Hashtable<String, String> props = new Hashtable<String, String>();
             props.put("name", "OXContext");
@@ -88,9 +92,9 @@ public class Activator extends HousekeepingActivator {
         unregisterServices();
     }
 
-    private void initCache() throws SQLException, OXGenericException {
+    private void initCache(final ConfigurationService service) throws SQLException, OXGenericException {
         final AdminCacheExtended cache = new AdminCacheExtended();
-        cache.initCache();
+        cache.initCache(service);
         cache.initCacheExtended();
         cache.initIDGenerator();
         ClientAdminThreadExtended.cache = cache;
@@ -99,6 +103,6 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return null;
+        return new Class<?>[] { ConfigurationService.class };
     }
 }

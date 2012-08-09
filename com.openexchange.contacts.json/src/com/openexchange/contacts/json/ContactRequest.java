@@ -62,8 +62,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.OrderFields;
+import com.openexchange.ajax.fields.SearchTermFields;
 import com.openexchange.ajax.parser.SearchTermParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.SortOrder;
 import com.openexchange.contacts.json.mapping.ContactMapper;
@@ -75,6 +77,8 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.upload.impl.UploadEvent;
+import com.openexchange.search.Operand;
+import com.openexchange.search.SearchExceptionMessages;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.arrays.Arrays;
@@ -123,19 +127,25 @@ public class ContactRequest {
      * @throws OXException
      */
     public SortOptions getSortOptions() throws OXException {
-    	final int leftHandLimit = this.getLeftHandLimit();
+        SortOptions sortOptions = new SortOptions();
+    	int leftHandLimit = this.getLeftHandLimit();
+    	if (0 < leftHandLimit) {
+    	    sortOptions.setRangeStart(leftHandLimit);
+    	}
     	int rightHandLimit = this.getRightHandLimit();
-        if (rightHandLimit == 0) {
-            rightHandLimit = 50000;
-        }            
-        final SortOptions sortOptions = new SortOptions(leftHandLimit,  rightHandLimit - leftHandLimit);
+    	if (0 < rightHandLimit) {
+    	    if (rightHandLimit < leftHandLimit) {
+    	        throw OXJSONExceptionCodes.INVALID_VALUE.create(rightHandLimit, "right_hand_limit");
+    	    }
+            sortOptions.setLimit(leftHandLimit);
+    	}    	
         if (false == isInternalSort()) {
        		sortOptions.setCollation(this.getCollation());
-        	final int sort = this.getSort();
+        	int sort = this.getSort();
         	if (0 < sort) {
-        		final ContactField sortField = ContactMapper.getInstance().getMappedField(sort);
+        		ContactField sortField = ContactMapper.getInstance().getMappedField(sort);
         		if (null == sortField) {
-        			throw new IllegalArgumentException("no mapped field for sort order '" + sort + "'.");
+                    throw OXJSONExceptionCodes.INVALID_VALUE.create(sort, "sort");
         		}
         		sortOptions.setOrderBy(new SortOrder[] { SortOptions.Order(sortField, getOrder()) });
         	}
@@ -206,7 +216,31 @@ public class ContactRequest {
 		if (null == jsonArray) {
 			throw OXJSONExceptionCodes.MISSING_FIELD.create("filter");
 		}
-	    return SearchTermParser.parse(jsonArray);
+	    return ContactSearchTermParser.INSTANCE.parseSearchTerm(jsonArray);
+    }
+
+    /**
+     * {@link ContactSearchTermParser}
+     *
+     * Custom {@link SearchTermParser} producing {@link ContactFieldOperand}s 
+     * from ajax names.
+     */
+    private static final class ContactSearchTermParser extends SearchTermParser {
+        
+        public static final ContactSearchTermParser INSTANCE = new ContactSearchTermParser();
+        
+        private ContactSearchTermParser() {
+            super();
+        }
+        
+        @Override
+        protected Operand<?> parseOperand(final JSONObject operand) throws OXException {
+            if (false == operand.hasAndNotNull(SearchTermFields.FIELD)) {
+                throw SearchExceptionMessages.PARSING_FAILED_MISSING_FIELD.create(SearchTermFields.FIELD);
+            }
+            ContactField field = ContactMapper.getInstance().getMappedField(operand.optString(SearchTermFields.FIELD));
+            return new ContactFieldOperand(field);
+        }
     }
 
     /**

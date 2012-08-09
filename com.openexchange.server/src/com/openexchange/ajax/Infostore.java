@@ -599,7 +599,14 @@ public class Infostore extends PermissionServlet {
 
             res.setContentLength((int) metadata.getFileSize());
             if (SAVE_AS_TYPE.equals(contentType)) {
-                Tools.setHeaderForFileDownload(userAgent, res, metadata.getFileName());
+                String contentDisposition = null;
+                if (null == contentDisposition) {
+                    final StringBuilder sb = new StringBuilder(32).append("attachment");
+                    DownloadUtility.appendFilenameParameter(metadata.getFileName(), SAVE_AS_TYPE, userAgent, sb);
+                    res.setHeader("Content-Disposition", sb.toString());
+                } else {
+                    Tools.setHeaderForFileDownload(userAgent, res, metadata.getFileName());
+                }
                 res.setContentType(contentType);
             } else {
                 final CheckedDownload checkedDownload = DownloadUtility.checkInlineDownload(
