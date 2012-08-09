@@ -95,6 +95,12 @@ public class ImageGetAction implements AJAXActionService {
         String registrationName = null;
         {
             final String serlvetRequestURI = requestData.getSerlvetRequestURI();
+            if (null == serlvetRequestURI) {
+                if (DEBUG) {
+                    LOG.debug("Missing path information in image URL.");
+                }
+                throw AjaxExceptionCodes.BAD_REQUEST.create("Unknown image location.");
+            }
             for (Entry<String, String> entry : ImageActionFactory.alias2regName.entrySet()) {
                 String alias = entry.getKey();
                 if (serlvetRequestURI.contains(alias)) {
