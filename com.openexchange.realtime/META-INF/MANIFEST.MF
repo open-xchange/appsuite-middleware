@@ -5,7 +5,7 @@ Bundle-SymbolicName: com.openexchange.realtime
 Bundle-Version: 6.22.0.0
 Bundle-Activator: com.openexchange.realtime.osgi.RTActivator
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.conversion.simple,
  com.openexchange.exception,
  com.openexchange.i18n,
