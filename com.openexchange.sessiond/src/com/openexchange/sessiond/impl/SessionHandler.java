@@ -332,7 +332,7 @@ public final class SessionHandler {
         if (storageService != null) {
             try {
                 int count = storageService.getUserSessions(userId, contextId).length;
-                if (count >= maxSessPerUser) {
+                if (maxSessPerUser > 0 && count >= maxSessPerUser) {
                     throw SessionExceptionCodes.MAX_SESSION_PER_USER_EXCEPTION.create(I(userId), I(contextId));
                 }
             } catch (OXException e) {
