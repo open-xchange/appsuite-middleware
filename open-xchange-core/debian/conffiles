@@ -12,6 +12,7 @@ opt/open-xchange/etc/file-logging.properties
 opt/open-xchange/etc/filestorage.properties
 opt/open-xchange/etc/foldercache.properties
 opt/open-xchange/etc/folderjson.properties
+opt/open-xchange/etc/folder-reserved-names
 opt/open-xchange/etc/HTMLEntities.properties
 opt/open-xchange/etc/i18n.properties
 opt/open-xchange/etc/importerExporter.xml
