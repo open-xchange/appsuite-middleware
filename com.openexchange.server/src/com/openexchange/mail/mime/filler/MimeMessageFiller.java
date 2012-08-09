@@ -368,7 +368,7 @@ public class MimeMessageFiller {
              */
             InternetAddress from = mail.getFrom()[0];
             InternetAddress sender = null;
-            {
+            if (false) {
                 final MailPath msgref = mail.getMsgref();
                 if (msgref != null) {
                     final ComposeType sendType = mail.getSendType();
@@ -386,7 +386,7 @@ public class MimeMessageFiller {
                                         final InternetAddress onBehalfOf = new QuotedInternetAddress(users[0].getMail(), true);
                                         sender = from;
                                         from = onBehalfOf;
-                                    }                                
+                                    }
                                 }
                             }
                         } catch (final Exception e) {
