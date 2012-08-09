@@ -1,0 +1,268 @@
+
+Name:           open-xchange-meta
+BuildArch:	noarch
+#!BuildIgnore: post-build-checks
+Version:	@OXVERSION@
+%define		ox_release 0
+Release:	%{ox_release}_<CI_CNT>.<B_CNT>
+Group:          Applications/Productivity
+License:        GPL-2.0
+BuildRoot:      %{_tmppath}/%{name}-%{version}-build
+URL:            http://www.open-xchange.com/
+Source:         %{name}_%{version}.orig.tar.bz2
+Summary:        Open-Xchange Meta packages
+
+%define oxcommon open-xchange, open-xchange-core, open-xchange-imap, open-xchange-pop3, open-xchange-smtp, open-xchange-calendar-printing, open-xchange-gui-wizard-plugin, open-xchange-report-client
+
+%define alllang open-xchange-gui-lang-cs-cz, open-xchange-gui-lang-es-es, open-xchange-gui-lang-hu-hu, open-xchange-gui-lang-it-it, open-xchange-gui-lang-ja-jp, open-xchange-gui-lang-lv-lv, open-xchange-gui-lang-nl-nl, open-xchange-gui-lang-pl-pl, open-xchange-gui-lang-sk-sk, open-xchange-gui-lang-zh-cn, open-xchange-gui-lang-zh-tw, open-xchange-lang-cs-cz, open-xchange-lang-es-es, open-xchange-lang-hu-hu, open-xchange-lang-it-it, open-xchange-lang-ja-jp, open-xchange-lang-lv-lv, open-xchange-lang-nl-nl, open-xchange-lang-pl-pl, open-xchange-lang-sk-sk, open-xchange-lang-zh-cn, open-xchange-lang-zh-tw, open-xchange-online-help-de-de, open-xchange-online-help-en-us, open-xchange-online-help-es-es, open-xchange-online-help-fr-fr, open-xchange-online-help-it-it, open-xchange-online-help-ja-jp, open-xchange-online-help-nl-nl, open-xchange-online-help-pl-pl, open-xchange-online-help-zh-cn, open-xchange-online-help-zh-tw
+
+# ----------------------------------------------------------------------------------------------------
+%package -n	open-xchange-meta-server
+Group:          Applications/Productivity
+Summary:	The Open-Xchange Meta package for OX Backend
+Requires:	%{oxcommon}
+Requires:       open-xchange, open-xchange-spamhandler
+
+%description -n open-xchange-meta-server
+The Open-Xchange Meta package for OX Backend
+
+Authors:
+--------
+    Open-Xchange
+
+# ----------------------------------------------------------------------------------------------------
+%package -n	open-xchange-meta-admin
+Group:          Applications/Productivity
+Summary:	The Open-Xchange Meta package for User/Group Provisioning
+Requires:	open-xchange-admin
+
+%description -n open-xchange-meta-admin
+The Open-Xchange Meta package for User/Group Provisioning
+
+Authors:
+--------
+    Open-Xchange
+
+# ----------------------------------------------------------------------------------------------------
+%package -n	open-xchange-meta-pubsub
+Group:          Applications/Productivity
+Summary:	The Open-Xchange Meta package for Publish and Subscribe
+Requires:	open-xchange-publish, open-xchange-subscribe
+
+
+%description -n open-xchange-meta-pubsub
+The Open-Xchange Meta package for Publish and Subscribe
+
+Authors:
+--------
+    Open-Xchange
+
+# ----------------------------------------------------------------------------------------------------
+%package -n	open-xchange-meta-messaging
+Group:          Applications/Productivity
+Summary:	The Open-Xchange Meta package for Messaging
+Requires:	open-xchange-unifiedmail, open-xchange-messaging
+
+
+%description -n open-xchange-meta-messaging
+The Open-Xchange Meta package for Messaging
+
+Authors:
+--------
+    Open-Xchange
+
+# ----------------------------------------------------------------------------------------------------
+%package -n	open-xchange-meta-gui
+Group:          Applications/Productivity
+Summary:	The Open-Xchange Meta package for OX GUI
+Requires:	open-xchange-gui, open-xchange-gui-wizard-plugin-gui, open-xchange-online-help-de-de, open-xchange-online-help-en-us, open-xchange-online-help-fr-fr
+
+
+%description -n open-xchange-meta-gui
+The Open-Xchange Meta package for OX Backend
+
+Authors:
+--------
+    Open-Xchange
+
+# ----------------------------------------------------------------------------------------------------
+%package -n	open-xchange-meta-singleserver
+Group:          Applications/Productivity
+Summary:	The Open-Xchange Meta package for OX on a single server
+Requires:	open-xchange-meta-server, open-xchange-meta-gui, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging
+
+
+%description -n open-xchange-meta-singleserver
+The Open-Xchange Meta package for OX on a single server
+
+Authors:
+--------
+    Open-Xchange
+
+# ----------------------------------------------------------------------------------------------------
+%package -n	open-xchange-meta-databaseonly
+Group:          Applications/Productivity
+Summary:	The Open-Xchange Meta package for OX managed via database only
+Requires:	open-xchange-passwordchange-database, open-xchange-manage-group-resource
+
+
+%description -n open-xchange-meta-databaseonly
+The Open-Xchange Meta package for OX managed via database only
+
+Authors:
+--------
+    Open-Xchange
+
+
+# ----------------------------------------------------------------------------------------------------
+%package -n	open-xchange-meta-mobility
+Group:          Applications/Productivity
+Summary:	The Open-Xchange Meta package for Business Mobility
+Requires:	open-xchange-eas, open-xchange-usm, open-xchange-help-usm-eas, open-xchange-eas-provisioning-mail, open-xchange-eas-provisioning-ui
+
+
+%description -n open-xchange-meta-mobility
+The Open-Xchange Meta package for Business Mobility
+
+Authors:
+--------
+    Open-Xchange
+
+# ----------------------------------------------------------------------------------------------------
+%package -n	open-xchange-meta-plesk
+Group:          Applications/Productivity
+Summary:	The Open-Xchange Meta package for OX into Plesk integration
+Requires:	%{oxcommon}
+Requires:	%{alllang}
+Requires:	open-xchange-spamhandler-default, open-xchange-admin-soap, open-xchange-easylogin, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging, open-xchange-meta-gui, open-xchange-upsell-generic
+
+%description -n open-xchange-meta-plesk
+The Open-Xchange Meta package for OX into Plesk integration
+
+Authors:
+--------
+    Open-Xchange
+
+
+# ----------------------------------------------------------------------------------------------------
+%package -n	open-xchange-meta-parallels
+Group:          Applications/Productivity
+Summary:	The Open-Xchange Meta package for OX into Parallels integration
+Requires:	%{oxcommon}
+Requires:	%{alllang}
+Requires:	open-xchange-custom-parallels, open-xchange-custom-parallels-gui, open-xchange-spamhandler-spamassassin, open-xchange-admin-soap, open-xchange-easylogin, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging, open-xchange-meta-gui
+Conflicts:	open-xchange-admin-plugin-autocontextid, open-xchange-admin-plugin-reseller
+
+
+%description -n open-xchange-meta-parallels
+The Open-Xchange Meta package for OX into Parallels integration
+
+Authors:
+--------
+    Open-Xchange
+
+
+# ----------------------------------------------------------------------------------------------------
+%package -n	open-xchange-meta-outlook
+Group:          Applications/Productivity
+Summary:	The Open-Xchange Meta package for Outlook OXtender
+Requires:	open-xchange-outlook-updater, open-xchange-outlook-updater-oxtender2, open-xchange-usm, open-xchange-folder-json
+
+%description -n open-xchange-meta-outlook
+The Open-Xchange Meta package for Outlook OXtender
+
+Authors:
+--------
+    Open-Xchange
+
+# ----------------------------------------------------------------------------------------------------
+%package -n	open-xchange-meta-cpanel
+Group:          Applications/Productivity
+Summary:	The Open-Xchange Meta package for OX into cPanel integration
+Requires:	%{oxcommon}
+Requires:	%{alllang}
+Requires:	open-xchange-spamhandler-spamassassin, open-xchange-admin-soap-reseller, open-xchange-authentication-imap, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging, open-xchange-meta-gui, open-xchange-manage-group-resource, open-xchange-gui-wizard-plugin
+
+
+%description -n open-xchange-meta-cpanel
+The Open-Xchange Meta package for OX into cPanel integration
+
+Authors:
+--------
+    Open-Xchange
+
+# ----------------------------------------------------------------------------------------------------
+
+
+%description
+Open-Xchange Meta packages
+
+Authors:
+--------
+    Open-Xchange
+
+%prep
+%setup -q
+
+%build
+
+
+%install
+
+%clean
+%{__rm} -rf %{buildroot}
+
+
+%files
+%defattr(-,root,root)
+%doc README.TXT
+
+%files -n open-xchange-meta-server
+%defattr(-,root,root)
+%doc README.TXT
+
+%files -n open-xchange-meta-databaseonly
+%defattr(-,root,root)
+%doc README.TXT
+
+%files -n open-xchange-meta-gui
+%defattr(-,root,root)
+%doc README.TXT
+
+%files -n open-xchange-meta-admin
+%defattr(-,root,root)
+%doc README.TXT
+
+%files -n open-xchange-meta-pubsub
+%defattr(-,root,root)
+%doc README.TXT
+
+%files -n open-xchange-meta-messaging
+%defattr(-,root,root)
+%doc README.TXT
+
+%files -n open-xchange-meta-singleserver
+%defattr(-,root,root)
+%doc README.TXT
+
+%files -n open-xchange-meta-plesk
+%defattr(-,root,root)
+%doc README.TXT
+
+%files -n open-xchange-meta-parallels
+%defattr(-,root,root)
+%doc README.TXT
+
+%files -n open-xchange-meta-mobility
+%defattr(-,root,root)
+%doc README.TXT
+
+%files -n open-xchange-meta-outlook
+%defattr(-,root,root)
+%doc README.TXT
+
+%files -n open-xchange-meta-cpanel
+%defattr(-,root,root)
+%doc README.TXT
+
+%changelog
