@@ -69,6 +69,7 @@ ant -lib build/lib -Dbasedir=build -Dhtdoc=%{docroot} -DdestDir=%{buildroot} -Dp
 %dir %{docroot}/ox6/plugins/com.openexchange.spamsettings.generic
 %{docroot}/ox6/plugins/com.openexchange.spamsettings.generic/*
 
+%changelog
 * Tue Jul 03 2012 Carsten Hoeger <choeger@open-xchange.com>
 Release build for EDP drop #2
 * Mon Jun 04 2012 Carsten Hoeger <choeger@open-xchange.com>
