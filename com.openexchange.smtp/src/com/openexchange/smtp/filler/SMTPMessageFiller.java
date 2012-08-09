@@ -124,6 +124,9 @@ public final class SMTPMessageFiller extends MimeMessageFiller {
      * @throws IOException If an I/O error occurs
      */
     public void fillMail(final ComposedMailMessage mail, final SMTPMessage smtpMessage, final ComposeType type) throws MessagingException, OXException, IOException {
+        if (null != type) {
+            mail.setSendType(type);
+        }
         /*
          * Check for reply
          */
@@ -140,7 +143,6 @@ public final class SMTPMessageFiller extends MimeMessageFiller {
                         access.close(true);
                     }
                 }
-                mail.setSendType(ComposeType.REPLY);
             }
         }
         /*
