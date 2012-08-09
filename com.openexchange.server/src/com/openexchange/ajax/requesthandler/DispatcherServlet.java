@@ -259,6 +259,10 @@ public class DispatcherServlet extends SessionServlet {
              */
             sendResponse(requestData, result, httpRequest, httpResponse);
         } catch (final OXException e) {
+            if (AjaxExceptionCodes.BAD_REQUEST.equals(e)) {
+                httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+                return;
+            }
             LOG.error(e.getMessage(), e);
             APIResponseRenderer.writeResponse(new Response().setException(e), action, httpRequest, httpResponse);
         } catch (final RuntimeException e) {
