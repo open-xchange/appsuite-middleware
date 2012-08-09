@@ -16,7 +16,7 @@ BuildRequires: java-1_6_0-ibm-devel
 BuildRequires: java-1.6.0-sun-devel
 %endif
 Version:       @OXVERSION@
-%define		ox_release 0
+%define		ox_release 1
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -67,3 +67,7 @@ done
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Tue Jul 03 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Release build for EDP drop #2
+* Mon Jun 25 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Initial package.

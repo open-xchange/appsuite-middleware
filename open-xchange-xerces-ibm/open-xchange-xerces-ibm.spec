@@ -6,7 +6,7 @@ BuildRequires:  ant
 BuildRequires:  ant-nodeps
 BuildRequires:  java-sdk-ibm >= 1.6.0
 Version:    	@OXVERSION@
-%define         ox_release 0
+%define         ox_release 3
 Release:     	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -46,3 +46,11 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Tue Jul 03 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Release build for EDP drop #2
+* Mon Jun 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Release build for EDP drop #2
+* Tue May 22 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Internal release build for EDP drop #2
+* Tue Apr 17 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Initial release

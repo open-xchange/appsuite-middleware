@@ -59,3 +59,5 @@ ox_move_config_file /opt/open-xchange/etc/admindaemon /opt/open-xchange/etc plug
 %config(noreplace) /opt/open-xchange/etc/plugin/*
 
 %changelog
+* Fri Jun 15 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Initial packaging
