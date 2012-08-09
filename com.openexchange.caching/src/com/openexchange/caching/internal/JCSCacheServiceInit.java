@@ -286,6 +286,18 @@ public final class JCSCacheServiceInit {
     }
 
     /**
+     * Loads the cache configuration from given properties.
+     *
+     * @param properties The properties
+     * @throws OXException If configuration of JCS caching system fails
+     */
+    public void loadConfiguration(final Properties properties) throws OXException {
+        initializeCompositeCacheManager(true);
+        configure(properties);
+        LOG.info("JCS caching system successfully configured with properties from property set.");
+    }
+
+    /**
      * Loads the default cache configuration file.
      *
      * @throws OXException If configuration of JCS caching system fails

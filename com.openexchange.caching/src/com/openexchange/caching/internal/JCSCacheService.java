@@ -50,6 +50,7 @@
 package com.openexchange.caching.internal;
 
 import java.io.InputStream;
+import java.util.Properties;
 import org.apache.jcs.JCS;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheExceptionCode;
@@ -137,6 +138,11 @@ public final class JCSCacheService extends DefaultCacheKeyService implements Cac
     @Override
     public void loadConfiguration(final InputStream inputStream) throws OXException {
         JCSCacheServiceInit.getInstance().loadConfiguration(inputStream);
+    }
+
+    @Override
+    public void loadConfiguration(final Properties properties) throws OXException {
+        JCSCacheServiceInit.getInstance().loadConfiguration(properties);
     }
 
     @Override
