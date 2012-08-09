@@ -58,6 +58,11 @@ import java.util.Date;
  */
 public class UserParticipant implements Participant, Comparable<Participant> {
 
+    private static final long serialVersionUID = -1585185796529773961L;
+
+    /**
+     * The constant to indicate no available participant identifier: <code>-1</code>.
+     */
     public static final int NO_PFID = -1;
 
     private int id = NO_ID;

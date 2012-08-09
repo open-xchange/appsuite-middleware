@@ -29,5 +29,5 @@ Import-Package: com.openexchange.config,
  org.osgi.util.tracker
 Bundle-Activator: com.openexchange.oauth.facebook.osgi.Activator
 Bundle-ClassPath: .,
- lib/scribe-1.1.0.jar
+ lib/scribe_head.jar
 Export-Package: com.openexchange.oauth.facebook

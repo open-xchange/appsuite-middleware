@@ -54,10 +54,16 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import com.openexchange.realtime.atmosphere.OXRTHandler;
 
 /**
- * {@link HandlerLibrary} - Tracks registered {@link OXRTHandler handlers} and makes them accessible through {@link #getHandlerFor(String)}.
+ * {@link HandlerLibrary} - Tracks registered {@link OXRTHandler handlers} and
+ * makes them accessible through {@link #getHandlerFor(String)}.
+ * This is important to the AtmosphereChannel and associated Channel handler.
+ * The Channel can decide if it is able to process incoming Stanzas into POJOs
+ * and back again. The Channel handler can delegate the transformation to the
+ * proper OXRTHandler.
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class HandlerLibrary {
 
@@ -71,7 +77,7 @@ public class HandlerLibrary {
      */
     public HandlerLibrary() {
         super();
-        handlers = new CopyOnWriteArrayList<OXRTHandler>(); // User a concurrent collection
+        handlers = new CopyOnWriteArrayList<OXRTHandler>(); // Use a concurrent collection
     }
 
     /**

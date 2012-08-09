@@ -1,5 +1,4 @@
 #!/bin/bash
-# postinst script for open-xchange-admin-reseller
 #
 # see: dh_installdeb(1)
 

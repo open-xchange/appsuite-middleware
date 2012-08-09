@@ -21,12 +21,12 @@ import me.prettyprint.hector.api.mutation.Mutator;
  * 
  */
 public class ChunkOutputStream<T> extends OutputStream {
-  private byte[] chunk;
+  private final byte[] chunk;
   private long chunkPos = 0;
-  private String cf;
-  private T key;
+  private final String cf;
+  private final T key;
   private long pos = 0;
-  private Mutator<T> mutator;
+  private final Mutator<T> mutator;
 
   public ChunkOutputStream(Keyspace keyspace, String cf, T key, Serializer<T> keySerializer, int chunkSize) {
     this.cf = cf;
@@ -41,7 +41,8 @@ public class ChunkOutputStream<T> extends OutputStream {
    * 
    * @see java.io.OutputStream#write(int)
    */
-  public void write(int b) throws IOException {
+  @Override
+public void write(int b) throws IOException {
     if (chunk.length - 1 == pos) {
       flush();
     }

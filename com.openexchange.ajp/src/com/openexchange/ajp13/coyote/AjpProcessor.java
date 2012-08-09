@@ -152,7 +152,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     /**
      * The response output buffer.
      */
-    private final OutputBuffer outputBuffer;
+    private final SocketOutputBuffer outputBuffer;
 
     /**
      * The socket timeout used when reading the first block of the request header.
@@ -810,7 +810,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                      * Status code (503) indicating that the HTTP server is
                      * temporarily overloaded, and unable to handle the request.
                      */
-                    response.setStatus(503);
+                    response.setStatus(503, "HTTP server is temporarily overloaded. Try again later.");
                     error = true;
                 } catch (final Throwable t) {
                     // 400 - Bad Request
@@ -880,7 +880,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                         /*
                          * Only one per host/port!
                          */
-                        response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE, "Only one long-running request is permitted at once. Please retry later.");
+                        response.setStatus(503, "Only one long-running request is permitted at once. Please retry later.");
                         error = true;
                     } else {
                         servlet.service(request, response);
@@ -945,6 +945,9 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     finish();
                 } catch (final Throwable t) {
                     ExceptionUtils.handleThrowable(t);
+                    final StringBuilder tmp = new StringBuilder(128).append("Error processing request: ");
+                    appendRequestInfo(tmp);
+                    LOG.error(tmp.toString(), t);
                     error = true;
                 }
             }
@@ -2142,6 +2145,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         servletPath = null;
         servletId.setLength(0);
         lastWriteAccess = 0L;
+        outputBuffer.flag = false;
         request.recycle();
         response.recycle();
         certificates.recycle();
@@ -2199,9 +2203,19 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
         private final int chunkSize;
 
+        /**
+         * The flag whether data has been written.
+         */
+        protected boolean flag;
+
         protected SocketOutputBuffer() {
             super();
             chunkSize = Constants.MAX_SEND_SIZE + (packetSize - Constants.MAX_PACKET_SIZE);
+        }
+
+        @Override
+        public boolean isFlagged() {
+            return flag;
         }
 
         @Override
@@ -2227,6 +2241,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             if (len <= 0) {
                 return len;
             }
+            flag = true;
             // 4 - hardcoded, byte[] marshalling overhead
             // Adjust allowed size if packetSize != default (Constants.MAX_PACKET_SIZE)
             final byte[] b = chunk.getBuffer();

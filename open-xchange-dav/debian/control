@@ -5,9 +5,37 @@ Maintainer: Steffen Templin <steffen.templin@open-xchange.com>
 Build-Depends: debhelper (>= 4.0.0), ant (>= 1.7.0), ant-optional (>= 1.7.0), sun-java6-jdk|java6-sdk, open-xchange-core (>= @OXVERSION@)
 Standards-Version: 3.8.4
 Homepage: http://www.open-xchange.com
-Build-Conflicts: ecj, libecj-java-gcj, ecj-gcj, libecj-java, gcj-4.3-base, libgcj-common, libgcj9-0, libgcj-bc, libgcj9-jar, java-gcj-compat-headless, gcj-4.3, java-gcj-compat, java-gcj-compat-dev
 
 Package: open-xchange-dav
 Architecture: all
-Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
+Pre-Depends: open-xchange-core (>= @OXVERSION@)
+Depends: ${misc:Depends}
 Description: The Open-Xchange CardDAV and CalDAV implementation
+Replaces: open-xchange-caldav (<< 6.21.0-0), open-xchange-carddav (<< 6.21.0-0), open-xchange-webdav-directory (<< 6.21.0-0), open-xchange-webdav-acl (<< 6.21.0-0)
+Conflicts: open-xchange-caldav (<< 6.21.0-0), open-xchange-carddav (<< 6.21.0-0), open-xchange-webdav-directory (<< 6.21.0-0), open-xchange-webdav-acl (<< 6.21.0-0)
+
+###### http://wiki.debian.org/Renaming_a_Package #####
+Package: open-xchange-caldav
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, open-xchange-dav
+Section: oldlibs
+Description: transitional dummy package
+
+Package: open-xchange-carddav
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, open-xchange-dav
+Section: oldlibs
+Description: transitional dummy package
+
+Package: open-xchange-webdav-directory
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, open-xchange-dav
+Section: oldlibs
+Description: transitional dummy package
+
+Package: open-xchange-webdav-acl
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, open-xchange-dav
+Section: oldlibs
+Description: transitional dummy package
+

@@ -2592,9 +2592,21 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                     /*
                      * Copy ACLs
                      */
-                    final ACL[] acls = toMove.getACL();
-                    for (int i = 0; i < acls.length; i++) {
-                        newFolder.addACL(acls[i]);
+                    for (final ACL acl : toMove.getACL()) {
+                        try {
+                            newFolder.addACL(acl);
+                        } catch (final MessagingException e) {
+                            final Exception next = e.getNextException();
+                            if (!(next instanceof CommandFailedException)) {
+                                throw e;
+                            }
+                            final StringBuilder tmp = new StringBuilder(128);
+                            tmp.append("\"SETACL ").append(acl.getName()).append(' ').append(acl.getRights()).append("\" failed.");
+                            tmp.append(" ACL could not be applied to from source folder '");
+                            tmp.append(moveFullname).append("' to target folder '");
+                            tmp.append(newFullname).append("': ").append(next.getMessage());
+                            LOG.warn(tmp.toString());
+                        }
                     }
                 } finally {
                     newFolder.close(false);

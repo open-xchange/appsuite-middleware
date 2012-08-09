@@ -107,6 +107,7 @@ import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.database.TableColumnObject;
 import com.openexchange.admin.tools.database.TableObject;
 import com.openexchange.admin.tools.database.TableRowObject;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -810,7 +811,8 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         try {
             con = cache.getConnectionForConfigDB();
             stmt = con.prepareStatement("SELECT context_server2db_pool.cid FROM context_server2db_pool INNER JOIN (server,db_pool) ON (context_server2db_pool.server_id=server.server_id AND db_pool.db_pool_id=context_server2db_pool.read_db_pool_id OR context_server2db_pool.write_db_pool_id=db_pool.db_pool_id) WHERE server.name=? AND db_pool.db_pool_id=?");
-            stmt.setString(1, prop.getProp(AdminProperties.Prop.SERVER_NAME, "local"));
+            final String serverName = AdminServiceRegistry.getInstance().getService(ConfigurationService.class).getProperty(AdminProperties.Prop.SERVER_NAME, "local");
+            stmt.setString(1, serverName);
             stmt.setInt(2, db_host.getId());
             final ResultSet rs = stmt.executeQuery();
             final ArrayList<Context> list = new ArrayList<Context>();
@@ -852,7 +854,8 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
             stmt = con.prepareStatement("SELECT context.cid, context.name, context.enabled, context.reason_id, context.filestore_id, context.filestore_name, context.quota_max, context_server2db_pool.write_db_pool_id, context_server2db_pool.read_db_pool_id, context_server2db_pool.db_schema FROM context LEFT JOIN ( context_server2db_pool, server ) ON ( context.cid = context_server2db_pool.cid AND context_server2db_pool.server_id = server.server_id ) WHERE server.name = ? AND context.filestore_id = ?");
             logininfo = con.prepareStatement("SELECT login_info FROM `login2context` WHERE cid=?");
-            stmt.setString(1, prop.getProp(AdminProperties.Prop.SERVER_NAME, "local"));
+            final String serverName = AdminServiceRegistry.getInstance().getService(ConfigurationService.class).getProperty(AdminProperties.Prop.SERVER_NAME, "local");
+            stmt.setString(1, serverName);
             stmt.setInt(2, filestore.getId());
             rs = stmt.executeQuery();
             final ArrayList<Context> list = new ArrayList<Context>();

@@ -56,3 +56,4 @@ Export-Package: com.openexchange.admin.rmi.impl,
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: .
 Require-Bundle: com.openexchange.admin
+Eclipse-BuddyPolicy: registered

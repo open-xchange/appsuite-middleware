@@ -3784,7 +3784,7 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
             }
         }
 
-        if(cdao.containsParticipants()) {
+        if(cdao.containsParticipants() && cdao.getParticipants() != null) {
             for(final Participant p : cdao.getParticipants()) {
                 error = Check.containsInvalidChars(p.getDisplayName());
                 if (error != null) {

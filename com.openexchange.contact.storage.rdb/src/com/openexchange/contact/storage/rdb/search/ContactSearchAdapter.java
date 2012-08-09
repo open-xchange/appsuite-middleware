@@ -208,7 +208,7 @@ public class ContactSearchAdapter extends DefaultSearchAdapter {
 		if (needsEMail) {
 			stringBuilder.append(" AND (").append(getEMailAutoCompleteClause()).append(')');
 		}
-		stringBuilder.append(orderByClause).append(')');
+		stringBuilder.append(' ').append(orderByClause).append(')');
 	}
 	
 	private static Map<ContactField, Object> extractComparisons(ContactSearchObject contactSearch) {

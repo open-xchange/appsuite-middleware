@@ -6,7 +6,7 @@ BuildRequires: ant
 BuildRequires: ant-nodeps
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 0
+%define        ox_release 6
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0 
@@ -57,21 +57,41 @@ if [ ${1:-0} -eq 2 ]; then
     ##
     ## start update from < 6.21
     ##
-    COMMONCONFFILES="excludedupdatetasks.properties foldercache.properties transport.properties"
-    for FILE in ${COMMONCONFFILES}; do
-	if [ -e /opt/open-xchange/etc/common/${FILE} ]; then
-	    mv /opt/open-xchange/etc/${FILE} /opt/open-xchange/etc/${FILE}.rpmnew
-	    mv /opt/open-xchange/etc/common/${FILE} /opt/open-xchange/etc/${FILE}
-	fi
+    GWCONFFILES="ajp.properties attachment.properties cache.ccf calendar.properties configdb.properties contact.properties event.properties file-logging.properties HTMLEntities.properties imap.properties importerExporter.xml import.properties infostore.properties javamail.properties ldap.properties login.properties mailcache.ccf mail.properties mime.types noipcheck.cnf notification.properties ox-scriptconf.sh participant.properties passwordchange.properties server.properties sessioncache.ccf sessiond.properties smtp.properties system.properties user.properties whitelist.properties folder-reserved-names"
+    COCONFFILES="excludedupdatetasks.properties foldercache.properties transport.properties"
+    for FILE in ${GWCONFFILES}; do
+	ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc $FILE
+    done
+    for FILE in ${COCONFFILES}; do
+	ox_move_config_file /opt/open-xchange/etc/common /opt/open-xchange/etc $FILE
     done
 
-    GWCONFFILES="ajp.properties attachment.properties cache.ccf calendar.properties configdb.properties contact.properties event.properties file-logging.properties HTMLEntities.properties imap.properties importerExporter.xml import.properties infostore.properties javamail.properties ldap.properties login.properties mailcache.ccf mail.properties mime.types noipcheck.cnf notification.properties ox-scriptconf.sh participant.properties passwordchange.properties server.properties sessioncache.ccf sessiond.properties smtp.properties system.properties user.properties whitelist.properties"
-    for FILE in ${GWCONFFILES}; do
-	if [ -e /opt/open-xchange/etc/groupware/${FILE} ]; then
-	    mv /opt/open-xchange/etc/${FILE} /opt/open-xchange/etc/${FILE}.rpmnew
-	    mv /opt/open-xchange/etc/groupware/${FILE} /opt/open-xchange/etc/${FILE}
-	fi
-    done
+    # SoftwareChange_Request-1024
+    pfile=/opt/open-xchange/etc/server.properties
+    if ! ox_exists_property com.openexchange.IPMaskV4 $pfile; then
+        ox_set_property com.openexchange.IPMaskV4 "" $pfile
+    fi
+    if ! ox_exists_property com.openexchange.IPMaskV6 $pfile; then
+        ox_set_property com.openexchange.IPMaskV6 "" $pfile
+    fi
+
+    # SoftwareChange_Request-1027
+    pfile=/opt/open-xchange/etc/server.properties
+    if ! ox_exists_property com.openexchange.dispatcher.prefix $pfile; then
+        ox_set_property com.openexchange.dispatcher.prefix "/ajax/" $pfile
+    fi
+
+    # SoftwareChange_Request-1028
+    pfile=/opt/open-xchange/etc/contact.properties
+    if ! ox_exists_property com.openexchange.carddav.tree $pfile; then
+        ox_set_property com.openexchange.carddav.tree "0" $pfile
+    fi
+    if ! ox_exists_property com.openexchange.carddav.combinedRequestTimeout $pfile; then
+        ox_set_property com.openexchange.carddav.combinedRequestTimeout "20000" $pfile
+    fi
+    if ! ox_exists_property com.openexchange.carddav.exposedCollections $pfile; then
+        ox_set_property com.openexchange.carddav.exposedCollections "0" $pfile
+    fi
 
     # SoftwareChange_Request-1091
     # -----------------------------------------------------------------------
@@ -115,6 +135,28 @@ if [ ${1:-0} -eq 2 ]; then
     # SoftwareChange_Request-1094
     # -----------------------------------------------------------------------
     rm -f /opt/open-xchange/etc/groupware/mailjsoncache.properties
+
+    # SoftwareChange_Request-1101
+    pfile=/opt/open-xchange/etc/configdb.properties
+    if ox_exists_property writeOnly $pfile; then
+        ox_remove_property writeOnly $pfile
+    fi
+
+    pfile=/opt/open-xchange/etc/ox-scriptconf.sh
+    if grep COMMONPROPERTIESDIR $pfile >/dev/null; then
+	ox_remove_property COMMONPROPERTIESDIR $pfile
+	# without original values, we're lost...
+	if [ -e ${pfile}.rpmnew ]; then
+	   CHECKPROPS="LIBPATH PROPERTIESDIR LOGGINGPROPERTIES OSGIPATH"
+	   grep JAVA_OXCMD_OPTS $pfile > /dev/null || CHECKPROPS="$CHECKPROPS JAVA_OXCMD_OPTS" && true
+	   for prop in $CHECKPROPS; do
+	       oval=$(ox_read_property $prop ${pfile}.rpmnew)
+	       if [ -n "$oval" ]; then
+		  ox_set_property $prop "$oval" $pfile
+	       fi
+	   done
+	fi
+    fi
     ##
     ## end update from < 6.21
     ##
@@ -131,3 +173,15 @@ fi
 /sbin/rcopen-xchange
 
 %changelog
+* Tue Jul 03 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Release build for EDP drop #2
+* Mon Jun 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Release build for EDP drop #2
+* Tue May 22 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Internal release build for EDP drop #2
+* Mon Apr 16 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Internal release build for EDP drop #1
+* Wed Apr 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Internal release build for EDP drop #0
+* Wed Feb 01 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Initial release

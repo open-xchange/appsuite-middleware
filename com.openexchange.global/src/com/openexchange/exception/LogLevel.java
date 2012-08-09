@@ -106,6 +106,9 @@ public enum LogLevel {
     /**
      * Checks if this log level implies specified category's log level; e.g. {@link LogLevel#DEBUG DEBUG} implies {@link LogLevel#ERROR
      * ERROR}.
+     * <pre>
+     * TRACE -&gt; DEBUG -&gt; INFO -&gt; WARNING -&gt; ERROR -&gt; FATAL
+     * </pre>
      *
      * @param category The category whose loglevel is possibly included
      * @return <code>true</code> if this log level implies specified category's log level; otherwise <code>false</code>
@@ -116,6 +119,9 @@ public enum LogLevel {
 
     /**
      * Checks if this log level implies specified log level; e.g. {@link LogLevel#DEBUG DEBUG} implies {@link LogLevel#ERROR ERROR}.
+     * <pre>
+     * TRACE -&gt; DEBUG -&gt; INFO -&gt; WARNING -&gt; ERROR -&gt; FATAL
+     * </pre>
      *
      * @param logLevel The log level possibly included
      * @return <code>true</code> if this log level implies specified log level; otherwise <code>false</code>

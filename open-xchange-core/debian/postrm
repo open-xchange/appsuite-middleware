@@ -28,45 +28,6 @@ case "$1" in
                 /opt/open-xchange/importCSV/${FILE}
             rm -f /opt/open-xchange/importCSV/${FILE}
         done
-  	dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/filestorage.properties \
-  	      /opt/open-xchange/etc/filestorage.properties 6.20.99 open-xchange-file-storage-config \
-  	      -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange-file-storage-config)
-  	dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/folderjson.properties \
-  	      /opt/open-xchange/etc/folderjson.properties 6.20.99 open-xchange-folder-json \
-  	      -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange-folder-json)
-  	dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/common/i18n.properties \
-  	      /opt/open-xchange/etc/i18n.properties 6.20.99 open-xchange-i18n \
-  	      -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange-i18n)
-  	dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/mail-push.properties \
-  	      /opt/open-xchange/etc/mail-push.properties 6.20.99 open-xchange-push \
-  	      -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange-push)
-  	dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/messaging.properties \
-  	      /opt/open-xchange/etc/messaging.properties 6.20.99 open-xchange-messaging \
-  	      -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange-messaging)
-  	dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/publications.properties \
-  	      /opt/open-xchange/etc/publications.properties  6.20.99 open-xchange-publish-basic \
-  	      -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange-publish-basic)
-  	dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/push.properties \
-  	      /opt/open-xchange/etc/push-udp.properties 6.20.99 open-xchange-push-udp \
-  	      -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange-push-udp)
-  	dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/secret.properties \
-  	      /opt/open-xchange/etc/secret.properties 6.20.99 open-xchange-secret \
-  	      -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange-secret)
-  	dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/secrets \
-  	      /opt/open-xchange/etc/secrets 6.20.99 open-xchange-secret \
-  	      -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange-secret)
-  	dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/threadpool.properties \
-  	      /opt/open-xchange/etc/threadpool.properties  6.20.99 open-xchange-threadpool \
-  	      -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange-threadpool)
-  	dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/meta/ui.yml \
-  	      /opt/open-xchange/etc/meta/ui.yml 6.20.99 open-xchange-settings-extensions \
-  	      -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange-settings-extensions)
-  	dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/settings/themes.properties \
-  	      /opt/open-xchange/etc/settings/themes.properties 6.20.99 open-xchange-settings-extensions \
-  	      -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange-settings-extensions)
-  	dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/settings/ui.properties \
-  	      /opt/open-xchange/etc/settings/ui.properties 6.20.99 open-xchange-settings-extensions \
-  	      -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange-settings-extensions)
     ;;
 
     upgrade|failed-upgrade|abort-upgrade)
@@ -82,6 +43,39 @@ case "$1" in
     ;;
 esac
 
+dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/filestorage.properties /opt/open-xchange/etc/filestorage.properties \
+    6.20.99 open-xchange-file-storage-config -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange-file-storage-config)
+dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/folderjson.properties /opt/open-xchange/etc/folderjson.properties \
+    6.20.99 open-xchange-folder-json -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange-folder-json)
+dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/common/i18n.properties /opt/open-xchange/etc/i18n.properties \
+    6.20.99 open-xchange-i18n -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange-i18n)
+dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/mail-push.properties /opt/open-xchange/etc/mail-push.properties \
+    6.20.99 open-xchange-push -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange-push)
+dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/messaging.properties /opt/open-xchange/etc/messaging.properties \
+    6.20.99 open-xchange-messaging -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange-messaging)
+dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/publications.properties /opt/open-xchange/etc/publications.properties \
+    6.20.99 open-xchange-publish-basic -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange-publish-basic)
+dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/push.properties /opt/open-xchange/etc/push-udp.properties \
+    6.20.99 open-xchange-push-udp -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange-push-udp)
+dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/secret.properties /opt/open-xchange/etc/secret.properties \
+    6.20.99 open-xchange-secret -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange-secret)
+dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/secrets /opt/open-xchange/etc/secrets \
+    6.20.99 open-xchange-secret -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange-secret)
+dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/threadpool.properties /opt/open-xchange/etc/threadpool.properties \
+    6.20.99 open-xchange-threadpool -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange-threadpool)
+dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/meta/ui.yml /opt/open-xchange/etc/meta/ui.yml \
+    6.20.99 open-xchange-settings-extensions -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange-settings-extensions)
+dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/settings/themes.properties \
+    /opt/open-xchange/etc/settings/themes.properties 6.20.99 open-xchange-settings-extensions -- $1 \
+    $(dpkg-query -W -f='${Config-Version}' open-xchange-settings-extensions)
+dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/settings/ui.properties /opt/open-xchange/etc/settings/ui.properties \
+    6.20.99 open-xchange-settings-extensions -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange-settings-extensions)
+dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/management.properties \
+      /opt/open-xchange/etc/management.properties 6.20.99 open-xchange-management \
+      -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange-management)
+dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/templating.properties \
+      /opt/open-xchange/etc/templating.properties 6.20.99 open-xchange-templating \
+      -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange-templating)
 
 # dh_installdeb will replace this with shell code automatically
 # generated by other debhelper scripts.

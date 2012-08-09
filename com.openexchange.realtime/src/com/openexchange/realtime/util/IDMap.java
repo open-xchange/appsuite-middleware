@@ -62,6 +62,7 @@ import com.openexchange.realtime.packet.ID;
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class IDMap<T> implements Map<ID, T> {
 
@@ -142,6 +143,14 @@ public class IDMap<T> implements Map<ID, T> {
         return delegate.hashCode();
     }
 
+    /**
+     * Get a set of equivalent IDs. Equivalent in that way that they represent
+     * the same user@context entity. An entity may still be reachable via
+     * another channel and/or resource although the original id isn't reachable
+     * anylonger. 
+     * @param id the id of the entity we are looking for
+     * @return a Set of key-value pairs mapping ID to arbitrary value types.
+     */
     public Set<Map.Entry<ID, T>> getEquivalents(ID id) {
         // Maybe make this more efficient. Linear searches are very out
         Set<Map.Entry<ID, T>> equivalents = new HashSet<Map.Entry<ID, T>>();

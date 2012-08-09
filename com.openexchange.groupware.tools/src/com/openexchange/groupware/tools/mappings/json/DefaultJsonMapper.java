@@ -216,11 +216,23 @@ public abstract class DefaultJsonMapper<O, E extends Enum<E>> extends DefaultMap
         return this.mappings.get(field);
     }
     
-	@Override
-	public E getMappedField(final int columnID) {
-		return this.columnMap.get(Integer.valueOf(columnID));
-	}
-	
+    @Override
+    public E getMappedField(final int columnID) {
+        return this.columnMap.get(Integer.valueOf(columnID));
+    }
+    
+    @Override
+    public E getMappedField(String ajaxName) {
+        if (null != ajaxName) {
+            for (Entry<E, ? extends JsonMapping<? extends Object, O>> entry: mappings.entrySet()) {
+                if (ajaxName.equals(entry.getValue().getAjaxName())) {
+                    return entry.getKey();
+                }
+            }
+        }        
+        return null;
+    }
+    
 	@Override
 	public int[] getColumnIDs(final E[] fields) throws OXException {
 		if (null == fields) {

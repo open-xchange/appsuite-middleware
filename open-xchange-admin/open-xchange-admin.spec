@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 0
+%define        ox_release 6
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -62,16 +62,20 @@ if [ ${1:-0} -eq 2 ]; then
     ##
     CONFFILES="AdminDaemon.properties Group.properties ModuleAccessDefinitions.properties RMI.properties Resource.properties Sql.properties mpasswd plugin/hosting.properties"
     for FILE in ${CONFFILES}; do
-        if [ -e /opt/open-xchange/etc/admindaemon/${FILE} ]; then
-            if [ -e /opt/open-xchange/etc/${FILE} ]; then
-		mv /opt/open-xchange/etc/${FILE} /opt/open-xchange/etc/${FILE}.rpmnew
-	    fi
-            mv /opt/open-xchange/etc/admindaemon/${FILE} /opt/open-xchange/etc/${FILE}
-        fi
+	ox_move_config_file /opt/open-xchange/etc/admindaemon /opt/open-xchange/etc $FILE
     done
-    if [ -e /opt/open-xchange/etc/admindaemon/User.properties ]; then
-        mv /opt/open-xchange/etc/AdminUser.properties /opt/open-xchange/etc/AdminUser.properties.rpmnew
-        mv /opt/open-xchange/etc/admindaemon/User.properties /opt/open-xchange/etc/AdminUser.properties
+    ox_move_config_file /opt/open-xchange/etc/admindaemon /opt/open-xchange/etc User.properties AdminUser.properties
+
+    ofile=/opt/open-xchange/etc/admindaemon/ox-admin-scriptconf.sh
+    pfile=/opt/open-xchange/etc/ox-scriptconf.sh
+    if [ -e $ofile ]; then
+        oval=$(ox_read_property JAVA_OXCMD_OPTS $ofile)
+        if [ -n "$oval" ]; then
+           ox_set_property JAVA_OXCMD_OPTS "$oval" $pfile
+        else
+           ox_set_property JAVA_OXCMD_OPTS "-Djava.net.preferIPv4Stack=true" $pfile
+        fi
+        rm -f $ofile
     fi
 
     ofile=/opt/open-xchange/etc/AdminDaemon.properties
@@ -83,6 +87,7 @@ if [ ${1:-0} -eq 2 ]; then
 	fi
 	ox_remove_property BIND_ADDRESS $ofile
     fi
+
     ofile=/opt/open-xchange/etc/RMI.properties
     if [ -e $ofile ]; then
 	oval=$(ox_read_property RMI_PORT $ofile)
@@ -106,11 +111,15 @@ if [ ${1:-0} -eq 2 ]; then
     ox_remove_property MASTER_AUTH_FILE $pfile
     ox_remove_property ACCESS_COMBINATIONS_FILE $pfile
 
+    # SoftwareChange_Request-1100
+    # -----------------------------------------------------------------------
+    pfile=/opt/open-xchange/etc/AdminDaemon.properties
+    ox_remove_property SERVER_NAME $pfile
     ##
     ## end update from < 6.21
     ##
 
-    ox_update_permissions "/opt/open-xchange/etc/mpasswd" open-xchange:root 600
+    ox_update_permissions "/opt/open-xchange/etc/mpasswd" root:open-xchange 640
 fi
 
 %clean
@@ -125,12 +134,25 @@ fi
 %dir /opt/open-xchange/etc/plugin
 %config(noreplace) /opt/open-xchange/etc/plugin/*
 %config(noreplace) /opt/open-xchange/etc/*.properties
-%config(noreplace) %attr(600,open-xchange,root) /opt/open-xchange/etc/mpasswd
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/mpasswd
 %dir /opt/open-xchange/lib/
 /opt/open-xchange/lib/*
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/sbin/
 /opt/open-xchange/sbin/*
+%doc com.openexchange.admin.rmi/javadoc
 
 %changelog
+* Tue Jul 03 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Release build for EDP drop #2
+* Mon Jun 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Release build for EDP drop #2
+* Tue May 22 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Internal release build for EDP drop #2
+* Mon Apr 16 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Internal release build for EDP drop #1
+* Wed Apr 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Internal release build for EDP drop #0
+* Thu Mar 01 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Initial release

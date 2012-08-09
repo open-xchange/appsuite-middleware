@@ -101,4 +101,7 @@ public class CacheExceptionMessage implements LocalizableStrings {
     // Invalid cache region name \"%1$s\".
     public final static String INVALID_CACHE_REGION_NAME = "Invalid cache region name \"%1$s\".";
 
+    // Method not supported.
+    public static final String UNSUPPORTED_OPERATION = "Method not supported.";
+
 }

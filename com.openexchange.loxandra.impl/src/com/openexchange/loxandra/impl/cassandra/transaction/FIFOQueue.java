@@ -59,7 +59,7 @@ import java.util.LinkedList;
  */
 public class FIFOQueue<E> extends AbstractQueue<E> {
 	
-	private LinkedList<E> list;
+	private final LinkedList<E> list;
 	
 	/**
 	 * Default constructor

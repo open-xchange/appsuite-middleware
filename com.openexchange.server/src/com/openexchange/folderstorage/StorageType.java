@@ -49,12 +49,14 @@
 
 package com.openexchange.folderstorage;
 
+import java.io.Serializable;
+
 /**
  * {@link StorageType} - Denotes the storage type.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum StorageType {
+public enum StorageType implements Serializable {
 
     /**
      * The working storage type.

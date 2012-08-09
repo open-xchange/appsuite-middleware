@@ -1,3 +1,4 @@
+%define        configfiles     configfiles.list
 
 Name:           open-xchange-messaging
 BuildArch:      noarch
@@ -9,7 +10,7 @@ BuildRequires:  open-xchange-oauth
 BuildRequires:  open-xchange-xerces
 BuildRequires:  java-devel >= 1.6.0
 Version:        @OXVERSION@
-%define         ox_release 0
+%define         ox_release 6
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -49,31 +50,50 @@ Authors:
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
+rm -f %{configfiles}
+find %{buildroot}/opt/open-xchange/etc \
+        -type f \
+        -printf "%%%config(noreplace) %p\n" > %{configfiles}
+perl -pi -e 's;%{buildroot};;' %{configfiles}
+perl -pi -e 's;(^.*?)\s+(.*/(twitter)\.properties)$;$1 %%%attr(640,root,open-xchange) $2;' %{configfiles}
 
 %post
 if [ ${1:-0} -eq 2 ]; then
+    # only when updating
+    . /opt/open-xchange/lib/oxfunctions.sh
+
+    # prevent bash from expanding, see bug 13316
+    GLOBIGNORE='*'
+
     CONFFILES="facebookmessaging.properties rssmessaging.properties twittermessaging.properties twitter.properties"
     for FILE in ${CONFFILES}; do
-        if [ -e /opt/open-xchange/etc/groupware/${FILE} ]; then
-            mv /opt/open-xchange/etc/${FILE} /opt/open-xchange/etc/${FILE}.rpmnew
-            mv /opt/open-xchange/etc/groupware/${FILE} /opt/open-xchange/etc/${FILE}
-        fi
+	ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc $FILE
     done
+    ox_update_permissions "/opt/open-xchange/etc/twitter.properties" root:open-xchange 640
 fi
 
 
 %clean
 %{__rm} -rf %{buildroot}
 
-%files
+%files -f %{configfiles}
 %defattr(-,root,root)
 %dir /opt/open-xchange/bundles/
 /opt/open-xchange/bundles/*
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/etc/
-%config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
-* Tue Apr 17 2012 Sonja Krause-Harder  <sonja.krause-harder@open-xchange.com>
+* Tue Jul 03 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Release build for EDP drop #2
+* Mon Jun 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Release build for EDP drop #2
+* Tue May 22 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Internal release build for EDP drop #2
+* Mon Apr 16 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Internal release build for EDP drop #1
+* Wed Apr 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Internal release build for EDP drop #0
+* Tue Feb 28 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Initial release

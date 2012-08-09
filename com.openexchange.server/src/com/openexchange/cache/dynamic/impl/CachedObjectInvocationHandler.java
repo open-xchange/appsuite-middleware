@@ -59,128 +59,181 @@ import org.apache.commons.logging.Log;
 import com.openexchange.log.LogFactory;
 import com.openexchange.cache.dynamic.OXNoRefresh;
 import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheExceptionCode;
 import com.openexchange.caching.CacheService;
+import com.openexchange.caching.LockAware;
+import com.openexchange.caching.PutIfAbsent;
 import com.openexchange.caching.dynamic.OXObjectFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 public class CachedObjectInvocationHandler<T> implements InvocationHandler {
 
-    /**
-     * Logger.
-     */
-    private static final Log LOG = LogFactory.getLog(CachedObjectInvocationHandler.class);
+	/**
+	 * Logger.
+	 */
+	private static final Log LOG = LogFactory
+			.getLog(CachedObjectInvocationHandler.class);
 
-    private static final Method EQUALS;
+	private static final Method EQUALS;
 
-    private T cached;
+	private T cached;
 
-    private final OXObjectFactory<T> factory;
+	private final OXObjectFactory<T> factory;
 
-    private final String regionName;
+	private final String regionName;
 
-    public CachedObjectInvocationHandler(final OXObjectFactory<T> factory, final String regionName) throws OXException {
-        this.factory = factory;
-        this.regionName = regionName;
-        refresh();
-    }
+	public CachedObjectInvocationHandler(final OXObjectFactory<T> factory,
+			final String regionName) throws OXException {
+		this.factory = factory;
+		this.regionName = regionName;
+		refresh();
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final Object invoke(final Object object, final Method method, final Object[] arguments) throws Throwable {
-        if (!method.isAnnotationPresent(OXNoRefresh.class) || null == cached) {
-            refresh();
-        }
-        if (EQUALS.equals(method)) {
-            final Object other = arguments[0];
-            return Boolean.valueOf(other.equals(cached));
-        }
-        method.setAccessible(true);
-        return method.invoke(cached, arguments);
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public final Object invoke(final Object object, final Method method,
+			final Object[] arguments) throws Throwable {
+		if (!method.isAnnotationPresent(OXNoRefresh.class) || null == cached) {
+			refresh();
+		}
+		if (EQUALS.equals(method)) {
+			final Object other = arguments[0];
+			return Boolean.valueOf(other.equals(cached));
+		}
+		method.setAccessible(true);
+		return method.invoke(cached, arguments);
+	}
 
-    private Cache getCache() throws OXException {
-        final CacheService service = ServerServiceRegistry.getInstance().getService(CacheService.class);
-        if (null == service) {
-            return null;
-        }
-        return service.getCache(regionName);
-    }
+	private Cache getCache() throws OXException {
+		final CacheService service = ServerServiceRegistry.getInstance()
+				.getService(CacheService.class);
+		if (null == service) {
+			return null;
+		}
+		return service.getCache(regionName);
+	}
 
-    /**
-     * Checks if the object was removed from the cache and must be reloaded from the database.
-     *
-     * @throws OXException if loading or putting into cache fails.
-     */
-    private void refresh() throws OXException {
-        final Cache cache = getCache();
-        if (null == cache) {
-            if (null == cached) {
-                cached = factory.load();
-            }
-            return;
-        }
-        final Lock lock = factory.getCacheLock();
-        Condition cond = null;
-        boolean load;
-        lock.lock();
-        try {
-            final Object tmp = cache.get(factory.getKey());
-            if (null == tmp) {
-                // I am the thread to load the object. Put temporary condition
-                // into cache.
-                load = true;
-                cond = lock.newCondition();
-                {
-                    cache.putSafe(factory.getKey(), (Serializable) cond);
-                }
-            } else if (tmp instanceof Condition) {
-                // I have to wait for another thread to load the object.
-                cond = (Condition) tmp;
-                if (cond.await(1, TimeUnit.SECONDS)) {
-                    // Other thread finished loading the object.
-                    load = false;
-                    cached = (T) cache.get(factory.getKey());
-                } else {
-                    // We have to load it, too.
-                    LOG.warn("Found 2 threads loading cached objects after 1 " + "second.");
-                    load = true;
-                }
-            } else {
-                // Only other option is that the cache contains the delegate
-                // object.
-                cached = (T) tmp;
-                load = false;
-            }
-        } catch (final InterruptedException e) {
-            // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
-            Thread.currentThread().interrupt();
-            load = true;
-            LOG.error(e.getMessage(), e);
-        } finally {
-            lock.unlock();
-        }
-        if (load) {
-            cached = factory.load();
-            lock.lock();
-            try {
-                cond.signalAll();
-                cache.put(factory.getKey(), (Serializable) cached);
-            } finally {
-                lock.unlock();
-            }
-        }
-    }
+	/**
+	 * Checks if the object was removed from the cache and must be reloaded from
+	 * the database.
+	 * 
+	 * @throws OXException
+	 *             if loading or putting into cache fails.
+	 */
+	private void refresh() throws OXException {
+		final Cache cache = getCache();
+		if (null == cache) {
+			if (null == cached) {
+				cached = factory.load();
+			}
+			return;
+		}
+		if (cache.isDistributed()) {
+			// No need for locks
+			Serializable key = factory.getKey();
+			T retval = (T) cache.get(key);
+			if (null == retval) {
+				try {
+					if (cache instanceof PutIfAbsent) {
+						final T newVal = factory.load();
+						retval = (T) ((PutIfAbsent) cache).putIfAbsent(key,
+								(Serializable) newVal);
+						if (null == retval) {
+							retval = newVal;
+						}
+					} else {
+						try {
+							final T newVal = factory.load();
+							cache.putSafe(key, (Serializable) newVal);
+							retval = newVal;
+						} catch (final OXException e) {
+							if (!CacheExceptionCode.FAILED_SAFE_PUT
+									.equals(e)) {
+								throw e;
+							}
+							// Obviously another thread put in the meantime
+							retval = (T) cache.get(key);
+						}
+					}
+				} catch (final RuntimeException e) {
+					e.printStackTrace();
+					throw CacheExceptionCode.CACHE_ERROR.create(e,
+							e.getMessage());
+				}
+			}
+			cached = retval;
+			return;
+		}
 
-    static {
-        try {
-            EQUALS = Object.class.getMethod("equals", new Class[] { Object.class });
-        } catch (final SecurityException e) {
-            throw new RuntimeException(e);
-        } catch (final NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
-    }
+		// Replicated cache
+		final Lock lock = cache instanceof LockAware ? ((LockAware) cache)
+				.getLock() : factory.getCacheLock();
+		Condition cond = null;
+		boolean load;
+		lock.lock();
+
+		try {
+			
+			final Object tmp = cache.get(factory.getKey());
+			if (null == tmp) {
+				// I am the thread to load the object. Put temporary condition
+				// into cache.
+				load = true;
+				cond = lock.newCondition();
+				{
+					cache.putSafe(factory.getKey(), (Serializable) cond);
+				}
+			} else if (tmp instanceof Condition) {
+				// I have to wait for another thread to load the object.
+				cond = (Condition) tmp;
+				if (cond.await(1, TimeUnit.SECONDS)) {
+					// Other thread finished loading the object.
+					load = false;
+					cached = (T) cache.get(factory.getKey());
+				} else {
+					// We have to load it, too.
+					LOG.warn("Found 2 threads loading cached objects after 1 "
+							+ "second.");
+					load = true;
+				}
+			} else {
+				// Only other option is that the cache contains the delegate
+				// object.
+				cached = (T) tmp;
+				load = false;
+			}
+		} catch (final InterruptedException e) {
+			// Restore the interrupted status; see
+			// http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
+			Thread.currentThread().interrupt();
+			load = true;
+			LOG.error(e.getMessage(), e);
+		} finally {
+			lock.unlock();
+		}
+		if (load) {
+			cached = factory.load();
+			lock.lock();
+			try {
+				cond.signalAll();
+				cache.put(factory.getKey(), (Serializable) cached);
+			} finally {
+				lock.unlock();
+			}
+		}
+	}
+
+	static {
+		try {
+			EQUALS = Object.class.getMethod("equals",
+					new Class[] { Object.class });
+		} catch (final SecurityException e) {
+			throw new RuntimeException(e);
+		} catch (final NoSuchMethodException e) {
+			throw new RuntimeException(e);
+		}
+	}
 }

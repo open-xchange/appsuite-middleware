@@ -48,7 +48,7 @@ public class HConnectionManager {
   final ExceptionsTranslator exceptionsTranslator;
   private final CassandraClientMonitor monitor;
   private HOpTimer timer;
-  private ConnectionManagerListenersHandler listenerHandler = new ConnectionManagerListenersHandler();
+  private final ConnectionManagerListenersHandler listenerHandler = new ConnectionManagerListenersHandler();
 
   public HConnectionManager(String clusterName, CassandraHostConfigurator cassandraHostConfigurator) {
 

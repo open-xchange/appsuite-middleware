@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.scribe.model.OAuthRequest;
+import org.scribe.model.ParameterList;
 import org.scribe.model.Response;
 
 import com.openexchange.exception.OXException;
@@ -13,9 +14,11 @@ import com.openexchange.http.client.builder.HTTPResponse;
 public class OAuthHTTPRequest implements HTTPRequest {
 
 	private final OAuthRequest delegate;
+	private Map<String, String> parameters;
 
-	public OAuthHTTPRequest(OAuthRequest req) {
+	public OAuthHTTPRequest(OAuthRequest req, Map<String, String> parameters) {
 		delegate = req;
+		this.parameters = parameters;
 	}
 
 	@Override
@@ -26,9 +29,6 @@ public class OAuthHTTPRequest implements HTTPRequest {
 
 	@Override
 	public Map<String, String> getParameters() {
-		Map<String, String> parameters = new TreeMap<String, String>();
-		parameters.putAll(delegate.getQueryStringParams());
-		parameters.putAll(delegate.getBodyParams());
 		return parameters;
 	}
 

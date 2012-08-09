@@ -57,6 +57,7 @@ import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.http.client.builder.HTTPResponseProcessor;
+import com.openexchange.http.deferrer.CustomRedirectURLDetermination;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.OAuthAccountInvalidationListener;
@@ -64,6 +65,7 @@ import com.openexchange.oauth.OAuthHTTPClientFactory;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
 import com.openexchange.oauth.httpclient.impl.scribe.ScribeHTTPClientFactoryImpl;
+import com.openexchange.oauth.internal.CallbackRegistry;
 import com.openexchange.oauth.internal.DeleteListenerRegistry;
 import com.openexchange.oauth.internal.InvalidationListenerRegistry;
 import com.openexchange.oauth.internal.OAuthServiceImpl;
@@ -74,6 +76,7 @@ import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.recovery.EncryptedItemDetectorService;
 import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.timer.TimerService;
 import com.openexchange.tools.session.SessionHolder;
 
 /**
@@ -96,7 +99,7 @@ public final class OAuthActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
             DatabaseService.class, SessiondService.class, EventAdmin.class, SecretEncryptionFactoryService.class, SessionHolder.class,
-            CryptoService.class, ConfigViewFactory.class };
+            CryptoService.class, ConfigViewFactory.class, TimerService.class };
     }
 
     @Override
@@ -155,6 +158,9 @@ public final class OAuthActivator extends HousekeepingActivator {
             /*
              * Register
              */
+            CallbackRegistry cbRegistry = new CallbackRegistry();
+            getService(TimerService.class).scheduleAtFixedRate(cbRegistry, 600000, 600000);
+            
             delegateServices = new OSGiDelegateServiceMap();
             delegateServices.put(DBProvider.class, new OSGiDatabaseServiceDBProvider().start(context));
             delegateServices.put(ContextService.class, new OSGiContextService().start(context));
@@ -165,7 +171,10 @@ public final class OAuthActivator extends HousekeepingActivator {
                 delegateServices.get(DBProvider.class),
                 delegateServices.get(IDGeneratorService.class),
                 registry,
-                delegateServices.get(ContextService.class));
+                delegateServices.get(ContextService.class),
+                cbRegistry);
+            
+            registerService(CustomRedirectURLDetermination.class, cbRegistry);
             registerService(OAuthService.class, oauthService, null);
             registerService(OAuthServiceMetaDataRegistry.class, registry, null);
             registerService(EncryptedItemDetectorService.class, oauthService, null);

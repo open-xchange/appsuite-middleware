@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 0
+%define        ox_release 1
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -47,10 +47,7 @@ if [ ${1:-0} -eq 2 ]; then
     ##
     ## start update from < 6.21
     ##
-    if [ -e /opt/open-xchange/etc/groupware/ajp.properties ]; then
-        mv /opt/open-xchange/etc/ajp.properties /opt/open-xchange/etc/ajp.properties.rpmnew
-        mv /opt/open-xchange/etc/groupware/ajp.properties /opt/open-xchange/etc/ajp.properties
-    fi
+    ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc ajp.properties
 
     # SoftwareChange_Request-1081
     pfile=/opt/open-xchange/etc/ajp.properties
@@ -83,5 +80,7 @@ fi
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
-* Wed Jun 20 2012 Marc Arens  <marc.arens@open-xchange.com>
-Initial packaging
+* Tue Jul 03 2012 Marc Arens <marc.arens@open-xchange.com>
+Release build for EDP drop #2
+* Wed Jun 20 2012 Marc Arens <marc.arens@open-xchange.com>
+Initial release

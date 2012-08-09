@@ -182,7 +182,7 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler impleme
 		public void sendStanza(Stanza stanza) throws OXException {
 			WSHandler transformer = library.getHandlerFor(stanza.getNamespace());
 			if (transformer == null) {
-				throw OXException.general("No transformer for namesapce "+stanza.getNamespace());
+				throw OXException.general("No transformer for namespace "+stanza.getNamespace());
 			}
 			transformer.outgoing(stanza, session, this);
 			

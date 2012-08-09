@@ -376,6 +376,7 @@ public final class Init {
         final ConfigurationService config = new ConfigurationImpl();
         services.put(ConfigurationService.class, config);
         TestServiceRegistry.getInstance().addService(ConfigurationService.class, config);
+        AJPv13ServiceRegistry.SERVICE_REGISTRY.set(new ServiceRegistry());
         AJPv13ServiceRegistry.getInstance().addService(ConfigurationService.class, config);
     }
 
@@ -679,7 +680,8 @@ public final class Init {
         }
     }
 
-    private static void startAndInjectContactCollector() throws Exception {
+    private static void startAndInjectContactCollector() {
+        CCServiceRegistry.SERVICE_REGISTRY.set(new ServiceRegistry());
         final ServiceRegistry reg = CCServiceRegistry.getInstance();
         if (null == reg.getService(TimerService.class)) {
             reg.addService(TimerService.class, services.get(TimerService.class));

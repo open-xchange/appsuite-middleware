@@ -8,7 +8,7 @@ BuildRequires: open-xchange-core
 BuildRequires: open-xchange-imap
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 0
+%define        ox_release 1
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -36,12 +36,8 @@ export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
 %post
-if [ ${1:-0} -eq 2 ]; then
-    if [ -e /opt/open-xchange/etc/groupware/malpoll.properties ]; then
-        mv /opt/open-xchange/etc/malpoll.properties /opt/open-xchange/etc/malpoll.properties.rpmnew
-        mv /opt/open-xchange/etc/groupware/malpoll.properties /opt/open-xchange/etc/malpoll.properties
-    fi
-fi
+. /opt/open-xchange/lib/oxfunctions.sh
+ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc malpoll.properties
 
 
 %clean
@@ -57,3 +53,5 @@ fi
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Thu Jul 12 2012 Carsten Hoeger <choeger@open-xchange.com>
+Initial release

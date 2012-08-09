@@ -63,7 +63,8 @@ import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.tx.TransactionAware;
 
 public interface InfostoreFacade extends TransactionAware{
-	/**
+
+    /**
 	 * Special Version used if you want to retrieve the latest version of an infostore document
 	 */
 	public static int CURRENT_VERSION = -1;

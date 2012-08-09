@@ -91,7 +91,7 @@ public abstract class ContextStorage {
                 tmp = impl;
                 if (null == tmp) {
                     try {
-                        tmp = new CachingContextStorage(new RdbContextStorage());
+                        tmp = ContextExtendedFactory.parent = new CachingContextStorage(new RdbContextStorage());
                         tmp.startUp();
                         impl = tmp;
                     } catch (final OXException e) {
@@ -201,7 +201,7 @@ public abstract class ContextStorage {
             LOG.error("Duplicate initialization of ContextStorage.");
             return;
         }
-        impl = new CachingContextStorage(new RdbContextStorage());
+        impl = ContextExtendedFactory.parent = new CachingContextStorage(new RdbContextStorage());
         impl.startUp();
         ContextStorage.impl = impl;
     }

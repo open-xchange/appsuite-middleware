@@ -59,6 +59,8 @@ import com.openexchange.groupware.container.participants.ConfirmableParticipant;
  */
 public class ExternalUserParticipant extends AbstractConfirmableParticipant implements Comparable<Participant> {
 
+    private static final long serialVersionUID = 7731174024066565165L;
+
     private int id = NO_ID;
 
     private String displayName;
@@ -77,6 +79,7 @@ public class ExternalUserParticipant extends AbstractConfirmableParticipant impl
         emailaddress = emailAddress;
     }
 
+    @Deprecated
     @Override
     public void setIdentifier(final int id) {
         this.id = id;

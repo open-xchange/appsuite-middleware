@@ -621,7 +621,6 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
         public boolean testOnDeactivate;
         public boolean testOnIdle;
         public boolean testThreads;
-        public boolean forceWriteOnly;
 
         public Config() {
             super();
@@ -636,7 +635,6 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
             testOnDeactivate = true;
             testOnIdle = false;
             testThreads = false;
-            forceWriteOnly = false;
         }
 
         @Override
@@ -674,8 +672,6 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
             sb.append(testOnIdle);
             sb.append("\n\tTest threads for bad connection usage (SLOW): ");
             sb.append(testThreads);
-            sb.append("\n\tForce the use of write connections only: ");
-            sb.append(forceWriteOnly);
             return sb.toString();
         }
     }

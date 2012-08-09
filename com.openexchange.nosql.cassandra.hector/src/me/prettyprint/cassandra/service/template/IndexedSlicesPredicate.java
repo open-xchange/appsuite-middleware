@@ -16,10 +16,10 @@ import org.apache.cassandra.thrift.IndexOperator;
  * @param <V> Column value class
  */
 public class IndexedSlicesPredicate<K,N,V> {
-  private Serializer<K> keySerializer;
-  private Serializer<N> nameSerializer;
-  private Serializer<V> valueSerializer;
-  private IndexClause indexClause = new IndexClause();
+  private final Serializer<K> keySerializer;
+  private final Serializer<N> nameSerializer;
+  private final Serializer<V> valueSerializer;
+  private final IndexClause indexClause = new IndexClause();
 
   public IndexedSlicesPredicate(Serializer<K> keySerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
     super();

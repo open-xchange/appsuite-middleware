@@ -7,7 +7,7 @@ BuildRequires:  ant-nodeps
 BuildRequires:  open-xchange-messaging >= @OXVERSION@
 BuildRequires: java-devel >= 1.6.0
 Version:        @OXVERSION@
-%define         ox_release 0
+%define         ox_release 3
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -19,33 +19,6 @@ Requires:       open-xchange-messaging >= @OXVERSION@
 
 %description
 This bundle provides a new messaging interface for SMS services
-
-Authors:
---------
-    Open-Xchange
-
-%package        gui
-Group:          Applications/Productivity
-Summary:        General Messaging SMS GUI Bundle
-Requires:       open-xchange-messaging-sms-gui-theme >= @OXVERSION@
-Requires:       open-xchange-gui
-
-%description    gui
-General Messaging SMS GUI Bundle.
-
-Authors:
---------
-    Open-Xchange
-
-%package        gui-theme-default
-Group:          Applications/Productivity
-Summary:        General Messaging SMS GUI Themes Bundle
-Requires:       open-xchange-gui
-Requires:       open-xchange-messaging-sms-gui >= @OXVERSION@
-Provides:       open-xchange-messaging-sms-gui-theme
-
-%description    gui-theme-default
-General Messaging SMS GUI Themes Bundle.
 
 Authors:
 --------
@@ -66,8 +39,6 @@ export NO_BRP_CHECK_BYTECODE_VERSION=true
 %endif
 
 ant -lib build/lib -Dbasedir=build -Dhtdoc=%{docroot} -DdestDir=%{buildroot} -DpackageName=open-xchange-messaging-sms -f build/build.xml build
-ant -lib build/lib -Dbasedir=build -Dhtdoc=%{docroot} -DdestDir=%{buildroot} -DpackageName=open-xchange-messaging-sms -DbuildTarget=installGui -f build/build.xml build
-ant -lib build/lib -Dbasedir=build -Dhtdoc=%{docroot} -DdestDir=%{buildroot} -DpackageName=open-xchange-messaging-sms -DbuildTarget=installGuiTheme -f build/build.xml build
 
 %clean
 %{__rm} -rf %{buildroot}
@@ -78,17 +49,12 @@ ant -lib build/lib -Dbasedir=build -Dhtdoc=%{docroot} -DdestDir=%{buildroot} -Dp
 /opt/open-xchange/osgi/bundle.d/*
 /opt/open-xchange/bundles/*
 
-%files gui
-%defattr(-,root,root)
-%dir %{docroot}/ox6/plugins/com.openexchange.messaging.sms
-%{docroot}/ox6/plugins/com.openexchange.messaging.sms/lang/*
-%{docroot}/ox6/plugins/com.openexchange.messaging.sms/*.js
-
-%files gui-theme-default
-%defattr(-,root,root)
-%dir %{docroot}/ox6/plugins/com.openexchange.messaging.sms/images
-%{docroot}/ox6/plugins/com.openexchange.messaging.sms/images/*
-
 %changelog
-* Wed May 09 2012 Marcus Klein  <marcus.klein@open-xchange.com>
-Initial release
+* Tue Jul 03 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Release build for EDP drop #2
+* Mon Jun 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Release build for EDP drop #2
+* Tue May 22 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Internal release build for EDP drop #2
+* Wed May 09 2012 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 6.21.0

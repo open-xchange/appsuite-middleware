@@ -1,3 +1,9 @@
+open-xchange-spamhandler-cloudmark (6.21.0-1) unstable; urgency=low
+
+  * Release build for EDP drop #2
+
+ -- Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>  Tue, 03 Jul 2012 18:44:32 +0200
+
 open-xchange-spamhandler-cloudmark (6.21.0-0) unstable; urgency=low
 
   * Initial release

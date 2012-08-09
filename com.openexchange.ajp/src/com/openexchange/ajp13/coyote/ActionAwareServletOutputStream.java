@@ -52,13 +52,14 @@ package com.openexchange.ajp13.coyote;
 import java.io.IOException;
 import javax.servlet.ServletOutputStream;
 import com.openexchange.ajp13.coyote.util.ByteChunk;
+import com.openexchange.tools.stream.Flagged;
 
 /**
  * {@link ActionAwareServletOutputStream}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ActionAwareServletOutputStream extends ServletOutputStream {
+public final class ActionAwareServletOutputStream extends ServletOutputStream implements Flagged {
 
     private final OutputBuffer outputBuffer;
 
@@ -74,6 +75,11 @@ public final class ActionAwareServletOutputStream extends ServletOutputStream {
         this.outputBuffer = outputBuffer;
         packetSize = outputBuffer.getPacketSize();
         byteChunk = new ByteChunk(packetSize);
+    }
+
+    @Override
+    public boolean isFlagged() {
+        return outputBuffer.isFlagged();
     }
 
     @Override

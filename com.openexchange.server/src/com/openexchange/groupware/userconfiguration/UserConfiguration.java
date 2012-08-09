@@ -49,13 +49,15 @@
 
 package com.openexchange.groupware.userconfiguration;
 
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 import java.io.Serializable;
 import java.util.Arrays;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.tools.Collections.SmartIntArray;
+import com.openexchange.groupware.infostore.InfostoreFacades;
+import com.openexchange.log.LogFactory;
 
 /**
  * {@link UserConfiguration} - Represents a user configuration.
@@ -722,31 +724,33 @@ public final class UserConfiguration implements Serializable, Cloneable {
             if (accessibleModulesComputed) {
                 return cloneAccessibleModules();
             }
-            final SmartIntArray array = new SmartIntArray(7);
+            final TIntList array = new TIntArrayList(10);
             if (hasTask()) {
-                array.append(FolderObject.TASK);
+                array.add(FolderObject.TASK);
             }
             if (hasCalendar()) {
-                array.append(FolderObject.CALENDAR);
+                array.add(FolderObject.CALENDAR);
             }
             if (hasContact()) {
-                array.append(FolderObject.CONTACT);
+                array.add(FolderObject.CONTACT);
             }
             if (hasProject()) {
-                array.append(FolderObject.PROJECT);
+                array.add(FolderObject.PROJECT);
             }
             if (hasInfostore()) {
-                array.append(FolderObject.INFOSTORE);
+                if (InfostoreFacades.isInfoStoreAvailable()) {
+                    array.add(FolderObject.INFOSTORE);
+                }
             }
             if (hasWebMail()) {
-                array.append(FolderObject.MAIL);
+                array.add(FolderObject.MAIL);
             }
-            array.append(FolderObject.SYSTEM_MODULE);
-            array.append(FolderObject.UNBOUND);
+            array.add(FolderObject.SYSTEM_MODULE);
+            array.add(FolderObject.UNBOUND);
             // TODO: Switcher for messaging module
-            array.append(FolderObject.MESSAGING);
+            array.add(FolderObject.MESSAGING);
             // TODO: Switcher for file storage module
-            array.append(FolderObject.FILE);
+            array.add(FolderObject.FILE);
             accessibleModules = array.toArray();
             Arrays.sort(accessibleModules);
             accessibleModulesComputed = true;

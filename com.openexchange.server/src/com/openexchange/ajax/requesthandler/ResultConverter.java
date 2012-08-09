@@ -53,9 +53,12 @@ import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ResultConverter}
+ * {@link ResultConverter} is used to convert {@link AJAXRequestData} and
+ * {@link AJAXRequestResult} data from the given input to the specified output
+ * format.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public interface ResultConverter {
 

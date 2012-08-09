@@ -49,12 +49,14 @@
 
 package com.openexchange.groupware.container;
 
+import java.io.Serializable;
+
 /**
  * {@link Participant} - Represents a participant of either a group appointment or group task.
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
-public interface Participant extends Cloneable {
+public interface Participant extends Serializable, Cloneable {
 
     static final int USER = 1;
 

@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 0
+%define        ox_release 6
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -16,7 +16,14 @@ URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       The Open-Xchange CardDAV and CalDAV implementation
 Requires:      open-xchange-core >= @OXVERSION@
-
+Provides:      open-xchange-caldav = %{version}
+Obsoletes:     open-xchange-caldav <= %{version}
+Provides:      open-xchange-carddav = %{version}
+Obsoletes:     open-xchange-carddav <= %{version}
+Provides:      open-xchange-webdav-directory = %{version}
+Obsoletes:     open-xchange-webdav-directory <= %{version}
+Provides:      open-xchange-webdav-acl = %{version}
+Obsoletes:     open-xchange-webdav-acl <= %{version}
 
 %description
 The Open-Xchange CardDAV and CalDAV implementation.
@@ -37,6 +44,13 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %clean
 %{__rm} -rf %{buildroot}
 
+%post
+. /opt/open-xchange/lib/oxfunctions.sh
+CONFFILES="caldav.properties contextSets/caldav.yml meta/caldav.yml carddav.properties contextSets/carddav.yml"
+for FILE in ${CONFFILES}; do
+    ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc $FILE
+done
+
 %files
 %defattr(-,root,root)
 %dir /opt/open-xchange/bundles/
@@ -44,6 +58,20 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/etc/
-%config(noreplace) /opt/open-xchange/etc/*
+%config(noreplace) /opt/open-xchange/etc/*.properties
+%config(noreplace) /opt/open-xchange/etc/meta/*
+%config(noreplace) /opt/open-xchange/etc/contextSets/*
 
 %changelog
+* Tue Jul 03 2012 Steffen Templin <marcus.klein@open-xchange.com>
+Release build for EDP drop #2
+* Mon Jun 04 2012 Steffen Templin <marcus.klein@open-xchange.com>
+Release build for EDP drop #2
+* Tue May 22 2012 Steffen Templin <marcus.klein@open-xchange.com>
+Internal release build for EDP drop #2
+* Mon Apr 16 2012 Steffen Templin <marcus.klein@open-xchange.com>
+Internal release build for EDP drop #1
+* Wed Apr 04 2012 Steffen Templin <marcus.klein@open-xchange.com>
+Internal release build for EDP drop #0
+* Mon Jan 30 2012 Steffen Templin <steffen.templin@open-xchange.com>
+Initial release

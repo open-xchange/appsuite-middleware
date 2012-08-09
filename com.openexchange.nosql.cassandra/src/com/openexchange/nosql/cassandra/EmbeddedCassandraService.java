@@ -59,7 +59,7 @@ import com.openexchange.log.LogFactory;
  * 
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class EmbeddedCassandraService /*implements Runnable*/ {
+public class EmbeddedCassandraService {
 	
 	private static Log log = LogFactory.getLog(EmbeddedCassandraService.class);
 
@@ -77,14 +77,9 @@ public class EmbeddedCassandraService /*implements Runnable*/ {
 		}
 	}
 	
-	/* (non-Javadoc)
-	 * @see java.lang.Runnable#run()
+	/**
+	 * start the daemon
 	 */
-	//@Override
-	public void run() {
-		cassandraDaemon.start();
-	}
-	
 	public void start() {
 		cassandraDaemon.start();
 	}

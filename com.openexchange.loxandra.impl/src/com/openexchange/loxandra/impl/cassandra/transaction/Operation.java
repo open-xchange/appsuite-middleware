@@ -62,16 +62,16 @@ import me.prettyprint.hector.api.beans.Composite;
  */
 public class Operation {
 	
-	private String columnFamilyName;
-	private OperationAction action;
+	private final String columnFamilyName;
+	private final OperationAction action;
 	private OperationState state;
-	private int sequenceNumber;
-	private String objectRowKey;
-	private Composite lockedObject;
+	private final int sequenceNumber;
+	private final String objectRowKey;
+	private final Composite lockedObject;
 	private JSONObject jsonOpData;
 	
 	/** Operation data - column name-value pairs */
-	private Map<String, String> opData;
+	private final Map<String, String> opData;
 	
 	/**
 	 * Default constructor

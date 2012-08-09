@@ -95,72 +95,7 @@ public class AtmosphereServiceImpl  implements AtmosphereService {
         atmosphereRegistration.addMapping(atmosphereServletMapping);
         atmosphereRegistration.setLoadOnStartup(0);
         
-        // Add socket.io, so that it may make calls to this host directly
-        ServletRegistration socketIOServlet = realtimeContext.addServlet("SocketIO", new SocketIOServlet());
-        socketIOServlet.addMapping("/socket.io.js");
-        
-        ServletRegistration atmojsServlet = realtimeContext.addServlet("Atmosphere JS", new AtmosphereJSServlet());
-        atmojsServlet.addMapping("/jquery.atmosphere.js");
-
         realtimeContext.deploy(grizzly);
-
-        addAtmosphereHandler(generateHandlerMapping(atmosphereServletMapping, "mapping1"), new AtmosphereHandler() {
-            
-            @Override
-            public void onStateChange(AtmosphereResourceEvent event) throws IOException {
-                // TODO Auto-generated method stub
-                
-            }
-            
-            @Override
-            public void onRequest(AtmosphereResource resource) throws IOException {
-                AtmosphereRequest req = resource.getRequest();
-
-                // First, tell Atmosphere to allow bi-directional communication by suspending.
-                if (req.getMethod().equalsIgnoreCase("GET")) {
-                    // The negotiation header is just needed by the sample to list all the supported transport.
-                    if (req.getHeader("negotiating") == null) {
-                        resource.suspend();
-                    } else {
-                        resource.getResponse().getWriter().write("OK");
-                    }
-                // Second, broadcast message to all connected users.
-                } else if (req.getMethod().equalsIgnoreCase("POST")) {
-                    resource.getBroadcaster().broadcast(req.getReader().readLine().trim());
-                }
-                
-            }
-            
-            @Override
-            public void destroy() {
-                // TODO Auto-generated method stub
-                
-            }
-        });
-        
-        addAtmosphereHandler(generateHandlerMapping(atmosphereServletMapping, "/mapping2"), new AtmosphereHandler() {
-            
-            @Override
-            public void onStateChange(AtmosphereResourceEvent event) throws IOException {
-                // TODO Auto-generated method stub
-                
-            }
-            
-            @Override
-            public void onRequest(AtmosphereResource resource) throws IOException {
-                StringBuffer requestURL = resource.getRequest().getRequestURL();
-                LOG.info("mapping2 got a request at: "+requestURL);
-                resource.getResponse().write("mapping2 got a request at: "+requestURL);
-                
-            }
-            
-            @Override
-            public void destroy() {
-                // TODO Auto-generated method stub
-                
-            }
-        });
-        
     }
     
     /**

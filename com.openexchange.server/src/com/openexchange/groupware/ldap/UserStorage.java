@@ -187,6 +187,16 @@ public abstract class UserStorage {
     public abstract User searchUser(String email, Context context) throws OXException;
 
     /**
+     * Searches user(s) by mail login.
+     * 
+     * @param login The mail login
+     * @param context The associated context
+     * @return The queried users or an empty array of none found
+     * @throws OXException If search fails
+     */
+    public abstract User[] searchUserByMailLogin(final String login, final Context context) throws OXException;
+
+    /**
      * Search for matching login name.
      */
     public static final int SEARCH_LOGIN_NAME = 1;

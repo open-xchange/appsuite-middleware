@@ -8,7 +8,7 @@ BuildRequires: open-xchange-core
 BuildRequires: open-xchange-admin
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 0
+%define        ox_release 1
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -39,17 +39,11 @@ export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
 %post
-if [ ${1:-0} -eq 2 ]; then
-    CONFFILES="plugin/autocid.properties mysql/autocid.sql"
-    if [ -e /opt/open-xchange/etc/admindaemon/plugin/autocid.properties ]; then
-        mv /opt/open-xchange/etc/plugin/autocid.properties /opt/open-xchange/etc/plugin/autocid.properties.rpmnew
-        mv /opt/open-xchange/etc/admindaemon/plugin/autocid.properties /opt/open-xchange/etc/plugin/autocid.properties
-    fi
-    if [ -e /opt/open-xchange/etc/admindaemon/mysql/autocid.sql ]; then
-        mv /opt/open-xchange/etc/mysql/autocid.sql /opt/open-xchange/etc/mysql/autocid.sql.rpmnew
-        mv /opt/open-xchange/etc/admindaemon/mysql/autocid.sql /opt/open-xchange/etc/mysql/autocid.sql
-    fi
-fi
+. /opt/open-xchange/lib/oxfunctions.sh
+CONFFILES="plugin/autocid.properties mysql/autocid.sql"
+for FILE in $CONFFILES; do
+    ox_move_config_file /opt/open-xchange/etc/admindaemon /opt/open-xchange/etc $FILE
+done
 
 %clean
 %{__rm} -rf %{buildroot}
@@ -68,5 +62,7 @@ fi
 %config(noreplace) /opt/open-xchange/etc/mysql/*
 
 %changelog
-* Fri Jun 15 2012 - jan.bauerdick@open-xchange.com
- - Initial packaging
+* Tue Jul 03 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Release build for EDP drop #2
+* Fri Jun 15 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Initial packaging

@@ -36,8 +36,8 @@ public class DynamicLoadBalancingPolicy implements LoadBalancingPolicy {
   private final ScheduledExecutorService tasks = new ScheduledThreadPoolExecutor(1, new DaemonThreadPoolFactory(getClass()));
 
   // references which is used to make the real time requests faster.
-  private Map<HClientPool, Double> scores = Maps.newConcurrentMap();
-  private List<LatencyAwareHClientPool> allPools = new CopyOnWriteArrayList<LatencyAwareHClientPool>();
+  private final Map<HClientPool, Double> scores = Maps.newConcurrentMap();
+  private final List<LatencyAwareHClientPool> allPools = new CopyOnWriteArrayList<LatencyAwareHClientPool>();
 
   // default values this can be changed by the Client.
   private int UPDATE_INTERVAL = 100;
@@ -48,7 +48,8 @@ public class DynamicLoadBalancingPolicy implements LoadBalancingPolicy {
 
     // Pre-calculate the scores so as we can compare it fast.
     Runnable updateThread = new Runnable() {
-      public void run() {
+      @Override
+    public void run() {
         try {
           updateScores();
         } catch(Exception e) {
@@ -59,7 +60,8 @@ public class DynamicLoadBalancingPolicy implements LoadBalancingPolicy {
 
     // Clear Stats.
     Runnable resetThread = new Runnable() {
-      public void run() {
+      @Override
+    public void run() {
         try {
           for (LatencyAwareHClientPool pool : allPools) {
             pool.clear();
@@ -107,6 +109,7 @@ public class DynamicLoadBalancingPolicy implements LoadBalancingPolicy {
   }
 
   private class SortByScoreComparator implements Comparator<HClientPool> {
+    @Override
     public int compare(HClientPool p1, HClientPool p2) {
       Double scored1 = scores.get(p1);
       Double scored2 = scores.get(p2);

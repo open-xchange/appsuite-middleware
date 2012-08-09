@@ -74,6 +74,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.Assignment;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.LogFactory;
@@ -115,7 +116,8 @@ public class OXContextMySQLStorageCommon {
 
             prep = configdb_con.prepareStatement("SELECT context.name, context.enabled, context.reason_id, context.filestore_id, context.filestore_name, context.quota_max, context_server2db_pool.write_db_pool_id, context_server2db_pool.read_db_pool_id, context_server2db_pool.db_schema, login2context.login_info FROM context LEFT JOIN ( login2context, context_server2db_pool, server ) ON ( context.cid = context_server2db_pool.cid AND context_server2db_pool.server_id = server.server_id AND context.cid = login2context.cid ) WHERE context.cid = ? AND server.name = ?");
             prep.setInt(1, context_id);
-            prep.setString(2, prop.getProp(AdminProperties.Prop.SERVER_NAME, "local"));
+            final String serverName = AdminServiceRegistry.getInstance().getService(ConfigurationService.class).getProperty(AdminProperties.Prop.SERVER_NAME, "local");
+            prep.setString(2, serverName);
             ResultSet rs = prep.executeQuery();
 
             final Context cs = new Context();

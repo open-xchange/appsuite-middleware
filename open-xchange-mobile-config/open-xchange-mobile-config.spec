@@ -7,7 +7,7 @@ BuildRequires:  ant-nodeps
 BuildRequires:  java-devel >= 1.6.0
 # TODO: version not hardcoded in spec file
 Version:	@OXVERSION@
-%define		ox_release 0
+%define		ox_release 9
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        Creative Commons Attribution-Noncommercial-Share Alike 2.5 Generic
@@ -46,5 +46,23 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/meta/*
 
 %changelog
-* Thu Jun 21 2012 - marcus.klein@open-xchange.com
-  - Initial package for new backend
+* Tue Jul 03 2012 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Release build for EDP drop #2
+* Mon May 07 2012 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Bugfixbuild
+* Mon May 07 2012 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Bugfixbuild for ox.io
+* Tue Apr 03 2012 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Release build for 1.1.0
+* Tue Apr 03 2012 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Release build for 1.1.0
+* Tue Apr 03 2012 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Release build for 1.1.0
+* Thu Mar 29 2012 Marcus Klein <jenkins@jenkins.netline.de>
+Next test build
+* Thu Mar 29 2012 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Release build
+* Wed Mar 28 2012 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Release build
+* Thu Feb 16 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Initial 1.1 release.

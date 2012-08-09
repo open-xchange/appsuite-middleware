@@ -7,7 +7,9 @@ Bundle-Activator: com.openexchange.sessionstorage.nosql.osgi.NoSQLSessionStorage
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.config,
+ com.openexchange.crypto,
  com.openexchange.exception,
+ com.openexchange.i18n,
  com.openexchange.log,
  com.openexchange.nosql.cassandra,
  com.openexchange.osgi,

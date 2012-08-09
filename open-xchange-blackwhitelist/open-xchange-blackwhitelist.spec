@@ -7,7 +7,7 @@ BuildRequires:  ant-nodeps
 BuildRequires:  open-xchange-core >= @OXVERSION@
 BuildRequires:  java-devel >= 1.6.0
 Version:        @OXVERSION@
-%define         ox_release 0
+%define         ox_release 3
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -19,18 +19,6 @@ Requires:       open-xchange-core >= @OXVERSION@
 
 %description
 Blackwhitelist
-
-Authors:
---------
-    Open-Xchange
-
-%package        gui
-Group:          Applications/Productivity
-Summary:        Blackwhitelist GUI
-Requires:       open-xchange-gui
-
-%description    gui
-Blackwhitelist GUI
 
 Authors:
 --------
@@ -51,7 +39,6 @@ export NO_BRP_CHECK_BYTECODE_VERSION=true
 %endif
 
 ant -lib build/lib -Dbasedir=build -Dhtdoc=%{docroot} -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml build
-ant -lib build/lib -Dbasedir=build -Dhtdoc=%{docroot} -DdestDir=%{buildroot} -DpackageName=%{name} -DbuildTarget=installGui -f build/build.xml build
 
 %clean
 %{__rm} -rf %{buildroot}
@@ -65,10 +52,12 @@ ant -lib build/lib -Dbasedir=build -Dhtdoc=%{docroot} -DdestDir=%{buildroot} -Dp
 %config(noreplace) /opt/open-xchange/etc/settings/*
 
 
-%files gui
-%defattr(-,root,root)
-%dir %{docroot}/ox6/plugins/com.openexchange.blackwhitelist
-%{docroot}/ox6/plugins/com.openexchange.blackwhitelist/lang/*
-%{docroot}/ox6/plugins/com.openexchange.blackwhitelist/*.js
-
 %changelog
+* Tue Jul 03 2012 Carsten Hoeger <choeger@open-xchange.com>
+Release build for EDP drop #2
+* Mon Jun 04 2012 Carsten Hoeger <choeger@open-xchange.com>
+Release build for EDP drop #2
+* Tue May 22 2012 Carsten Hoeger <choeger@open-xchange.com>
+Internal release build for EDP drop #2
+* Mon May 14 2012 Carsten Hoeger <choeger@open-xchange.com>
+prepare for 6.21.0

@@ -93,13 +93,14 @@ import com.openexchange.java.Charsets;
 import com.openexchange.server.impl.Version;
 import com.openexchange.session.Session;
 import com.openexchange.tools.regex.MatcherReplacer;
+import com.openexchange.tools.stream.Flagged;
 
 /**
  * {@link HttpServletResponseImpl}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class HttpServletResponseImpl implements HttpServletResponse {
+public final class HttpServletResponseImpl implements HttpServletResponse, Flagged {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(HttpServletResponseImpl.class);
 
@@ -485,6 +486,11 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
      */
     public void removeServletOutputStream() {
         servletOutputStream = null;
+    }
+
+    @Override
+    public boolean isFlagged() {
+        return servletOutputStream.isFlagged();
     }
 
     @Override

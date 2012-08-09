@@ -49,60 +49,92 @@
 
 package com.openexchange.realtime.packet;
 
-import com.openexchange.realtime.Channel;
-
 /**
- * {@link Stanza} - The basic (super) class for all kind of deliverable items that are capable of being sent via a {@link Channel
- * channel}.
- * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
+ * {@link Stanza} - Abstract information unit that can be send from one entity
+ * to another. 
+ *
+ *  @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *  @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public abstract class Stanza {
 
-    private ID to, from;
+	private ID to, from;
 
-    private String namespace;
+	private String namespace;
 
-    private Payload payload;
+	private Payload payload;
 
-    /**
-     * Initializes a new {@link Stanza}.
+	/**
+	 * Initializes a new {@link Stanza}.
+	 */
+	protected Stanza() {
+	    super();
+	}
+
+	/**
+	 * Get the {@link ID} describing the stanza's recipient.
+	 * @return the ID of the stanza's recipient
+	 */
+	public ID getTo() {
+		return to;
+	}
+
+	/**
+	 * Set the {@link ID} describing the Stanza's recipient.
+	 * @param to the ID of the stanza's recipient
+	 */
+	public void setTo(final ID to) {
+		this.to = to;
+	}
+
+	/**
+	 * Get the {@link ID} describing the Stanza's sender. 
+	 * @return the {@link ID} describing the Stanza's sender.
+	 */
+	public ID getFrom() {
+		return from;
+	}
+
+	/**
+     * Set the {@link ID} describing the Stanza's sender. 
+     * @param from the {@link ID} describing the Stanza's sender.
      */
-    protected Stanza() {
-        super();
-    }
+	public void setFrom(final ID from) {
+		this.from = from;
+	}
 
-    public ID getTo() {
-        return to;
-    }
+	/**
+	 * Set the structured information of this Stanza.
+	 * @param payload the structured information to transport. 
+	 */
+	public void setPayload(final Payload payload) {
+		this.payload = payload;
+	}
 
-    public void setTo(final ID to) {
-        this.to = to;
-    }
+	/**
+	 * Get the structured information of this Stanza.
+	 * @return the structured information of this Stanza.
+	 */
+	public Payload getPayload() {
+		return payload;
+	}
 
-    public ID getFrom() {
-        return from;
-    }
+	/**
+	 * Get the namespace of this Stanza.
+	 * Namespaces are used to separate data ownership and vocabularies.
+	 * @return the namespace of this Stanza
+	 */
+	public String getNamespace() {
+		return namespace;
+	}
 
-    public void setFrom(final ID from) {
-        this.from = from;
-    }
-
-    public void setPayload(final Payload payload) {
-        this.payload = payload;
-    }
-
-    public Payload getPayload() {
-        return payload;
-    }
-
-    public String getNamespace() {
-        return namespace;
-    }
-
-    public void setNamespace(final String namespace) {
-        this.namespace = namespace;
-    }
+	/**
+	 * Set the namespace of this Stanza.
+     * Namespaces are used to separate data ownership and vocabularies.
+	 * @param namespace the namespace of this Stanza
+	 */
+	public void setNamespace(final String namespace) {
+		this.namespace = namespace;
+	}
 
 }

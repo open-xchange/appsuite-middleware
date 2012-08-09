@@ -63,6 +63,12 @@ public class SimConfigurationService implements ConfigurationService {
     public Map<String, String> stringProperties = new HashMap<String, String>();
 
     @Override
+    public Filter getFilterFromProperty(String name) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
     public boolean getBoolProperty(final String name, final boolean defaultValue) {
         // TODO Auto-generated method stub
         return false;

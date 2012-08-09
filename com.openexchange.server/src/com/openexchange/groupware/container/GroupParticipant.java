@@ -56,6 +56,8 @@ package com.openexchange.groupware.container;
  */
 public class GroupParticipant implements Participant, Comparable<Participant> {
 
+    private static final long serialVersionUID = 246682125014920210L;
+
     private int id;
 
     private String displayName;
@@ -84,7 +86,9 @@ public class GroupParticipant implements Participant, Comparable<Participant> {
 
     /**
      * {@inheritDoc}
+     * @deprecated
      */
+    @Deprecated
     @Override
     public void setIdentifier(final int id) {
         this.id = id;

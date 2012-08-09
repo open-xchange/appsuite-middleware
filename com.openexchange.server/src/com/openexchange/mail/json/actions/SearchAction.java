@@ -113,6 +113,7 @@ public final class SearchAction extends AbstractMailAction {
             if (sort != null && order == null) {
                 throw MailExceptionCode.MISSING_PARAM.create(AJAXServlet.PARAMETER_ORDER);
             }
+            final boolean ignoreDeleted = !req.optBool("deleted", true);
             final JSONValue searchValue = (JSONValue) req.getRequest().getData();
             /*
              * Get mail interface
@@ -173,7 +174,7 @@ public final class SearchAction extends AbstractMailAction {
                             final int size = it.size();
                             for (int i = 0; i < size; i++) {
                                 final MailMessage mail = it.next();
-                                if (mail != null && !mail.isDeleted()) {
+                                if (mail != null && (!ignoreDeleted || !mail.isDeleted())) {
                                     final JSONArray arr = new JSONArray();
                                     for (final MailFieldWriter writer : writers) {
                                         writer.writeField(arr, mail, 0, false, mailInterface.getAccountID(), userId, contextId);
@@ -187,7 +188,7 @@ public final class SearchAction extends AbstractMailAction {
                             final int size = it.size();
                             for (int i = 0; i < size; i++) {
                                 final MailMessage mail = it.next();
-                                if (mail != null && !mail.isDeleted()) {
+                                if (mail != null && (!ignoreDeleted || !mail.isDeleted())) {
                                     final JSONArray arr = new JSONArray();
                                     for (final MailFieldWriter writer : writers) {
                                         writer.writeField(arr, mail, 0, false, mailInterface.getAccountID(), userId, contextId);
@@ -235,7 +236,7 @@ public final class SearchAction extends AbstractMailAction {
                 jsonWriter.array();
                 for (int i = 0; i < size; i++) {
                     final MailMessage mail = it.next();
-                    if (mail != null && !mail.isDeleted()) {
+                    if (mail != null && (!ignoreDeleted || !mail.isDeleted())) {
                         final JSONArray arr = new JSONArray();
                         for (final MailFieldWriter writer : writers) {
                             writer.writeField(arr, mail, 0, false, mailInterface.getAccountID(), userId, contextId);

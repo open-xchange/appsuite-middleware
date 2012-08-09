@@ -50,21 +50,20 @@
 package com.openexchange.realtime.atmosphere;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.atmosphere.impl.StanzaWriter;
 import com.openexchange.realtime.packet.Stanza;
 
 /**
- * {@link StanzaSender} - Transports a specified stanza.
- * 
+ * {@link StanzaSender} - Handles sending of Stanzas to the ID specified in the
+ * stanza. 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
 public interface StanzaSender {
-
     /**
-     * Transports specified stanza.
-     * 
-     * @param stanza The stanza to transport
-     * @throws OXException If transport operation fails
+     * Send Stanzas to the ID specified in the Stanza. 
+     * @param stanza the Stanza to send
+     * @throws OXException when sending of the Stanza fails
      */
-    public void send(Stanza stanza) throws OXException;
+	public void send(Stanza stanza) throws OXException;
 }

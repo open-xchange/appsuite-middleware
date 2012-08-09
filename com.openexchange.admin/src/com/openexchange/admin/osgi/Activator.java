@@ -61,6 +61,7 @@ import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.plugins.OXUserPluginInterface;
 import com.openexchange.admin.services.AdminServiceRegistry;
+import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
@@ -86,6 +87,7 @@ public class Activator extends HousekeepingActivator {
         track(ContextService.class, new RegistryServiceTrackerCustomizer<ContextService>(context, AdminServiceRegistry.getInstance(), ContextService.class));
         track(MailAccountStorageService.class, new RegistryServiceTrackerCustomizer<MailAccountStorageService>(context, AdminServiceRegistry.getInstance(), MailAccountStorageService.class));
         final ConfigurationService configurationService = getService(ConfigurationService.class);
+        AdminCache.compareAndSet(null, configurationService);
         AdminServiceRegistry.getInstance().addService(ConfigurationService.class, configurationService);
         track(CreateTableService.class, new CreateTableCustomizer(context));
         openTrackers();

@@ -1,7 +1,57 @@
+* 2012-08-08 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 22541: Fixed duplicate update mails.
+ - Fix for bug 22687: Reply mails for external organizer if appointment was accepted in a shared Mail folder.
+
+* 2012-08-08 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 22449: Check for not set limit parameters 
+ 
+* 2012-08-07 - marcus.klein@open-xchange.com
+
+ - Fix for bug 22305: Using currents users folder for task events if the delegator has been removed from the participants list.
+
+* 2012-08-03 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22729: Ignore HTML parts when replying to a mail in text-only mode
+ - Fix for bug 22715: Properly deal with nested multipart/related part on reply/forward
+ - Fix for bug 22652: Properly register servlet path for subscription sources
+ - Fix for bug 22623: Ignore possibly failed assignment of ACL during IMAP folder backup on deletion
+ - Fix for bug 22595: Maintain personal surrounded by brackets ([...])
+
+* 2012-08-03 - marcus.klein@open-xchange.com
+
+ - Fix for bug 22384: Using buddy class loading to solve ClassNotFoundException using RMI interface with reseller bundle installed.
+
+* 2012-08-02 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 22723: Force reporting of deleted items in sync-collection 
+ 
+* 2012-08-01 - jan.bauerdick@open-xchange.com
+
+ - New implementation of sessionstorageservice, storing sessions with cassandra
+
+* 2012-08-01 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 21422: Add UIDs to appointment when missing
+ - Fix for bug 22681: Fixed SQL statement
+
+* 2012-07-31 - marcus.klein@open-xchange.com
+
+ - Fix for bug 22433: Removed obsolete property writeOnly from configuration file configdb.properties.
+
+* 2012-07-30 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 22339: Fixed NullPointerException.
+
 * 2012-07-30 - thorben.betten@open-xchange.com
 
  - Fix for bug 22536: Introduced custom JavaMail property "mail.imap.failOnNOFetch":
                       If an issued FETCH command is acknowledged with a "NO" response code, an appropriate CommandFailedException is thrown
+ - Fix for bug 22608: Fixed MIME structure of saved draft message
+ - Fix for bug 22579: Fixed MIME structure of saved draft message
+ - Fix for bug 22548: Fixed MIME structure of saved draft message
+ - Fix for bug 21839: Fixed MIME structure of saved draft message
 
 * 2012-07-30 - tobias.friedrich@open-xchange.com
 

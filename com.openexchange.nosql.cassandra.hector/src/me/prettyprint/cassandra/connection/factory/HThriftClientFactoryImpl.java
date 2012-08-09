@@ -21,7 +21,8 @@ public class HThriftClientFactoryImpl implements HClientFactory {
   /**
    * {@inheritDoc}
    */
-  public HClient createClient(CassandraHost ch) {
+  @Override
+public HClient createClient(CassandraHost ch) {
     if ( log.isDebugEnabled() ) {
       log.debug("Creation of new client for host: " + ch.getIp());
     }

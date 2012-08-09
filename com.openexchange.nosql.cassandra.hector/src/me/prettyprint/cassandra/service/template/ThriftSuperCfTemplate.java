@@ -27,7 +27,8 @@ public class ThriftSuperCfTemplate<K, SN, N> extends SuperCfTemplate<K, SN, N> {
     super(keyspace, columnFamily, keySerializer, topSerializer, subSerializer);
   }
   
-  protected SuperCfResult<K,SN,N> doExecuteSlice(K key, SN sColumnName, HSlicePredicate<SN> predicate) {    
+  @Override
+protected SuperCfResult<K,SN,N> doExecuteSlice(K key, SN sColumnName, HSlicePredicate<SN> predicate) {    
     SuperCfResultWrapper<K, SN, N> wrapper = 
       new SuperCfResultWrapper<K, SN, N>(keySerializer, topSerializer, subSerializer, 
           sliceInternal(key, predicate));
@@ -37,7 +38,8 @@ public class ThriftSuperCfTemplate<K, SN, N> extends SuperCfTemplate<K, SN, N> {
     return wrapper;
   } 
   
-  protected SuperCfResult<K,SN,N> doExecuteMultigetSlice(List<K> keys, HSlicePredicate<SN> predicate) {    
+  @Override
+protected SuperCfResult<K,SN,N> doExecuteMultigetSlice(List<K> keys, HSlicePredicate<SN> predicate) {    
     SuperCfResultWrapper<K, SN, N> wrapper = 
       new SuperCfResultWrapper<K, SN, N>(keySerializer, topSerializer, subSerializer, 
           multigetSliceInternal(keys, columnParent, predicate));    

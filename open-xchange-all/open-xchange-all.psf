@@ -61,5 +61,8 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-contacts-ldap"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-upsell-multiple"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-configjump-generic"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-themes-default"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-gui-help-plugin"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-meta"/>
 </provider>
 </psf>

@@ -66,6 +66,8 @@ import com.openexchange.messaging.MessagingPermissions;
  */
 public class RSSFolder implements MessagingFolder {
 
+    private static final long serialVersionUID = -4345785692481994664L;
+
     private final MessagingPermission ownPermission;
 
     private final List<MessagingPermission> permissions;

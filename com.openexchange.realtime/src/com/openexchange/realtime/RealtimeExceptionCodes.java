@@ -61,19 +61,14 @@ import com.openexchange.exception.OXExceptionFactory;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
 public enum RealtimeExceptionCodes implements OXExceptionCode {
-
-    /**
-     * An unexpected error occurred: %1$s
-     */
-    UNEXPECTED_ERROR(RealtimeExceptionMessages.UNEXPECTED_ERROR, CATEGORY_ERROR, 9999),
 	/**
 	 * Unknown channel %1$s
 	 */
-	UNKNOWN_CHANNEL(RealtimeExceptionMessages.UNKNOWN_CHANNEL, CATEGORY_CONNECTIVITY, 1), 
+	UNKNOWN_CHANNEL(RealtimeExceptionMessages.UNKNOWN_CHANNEL, Category.EnumCategory.CONNECTIVITY, 1), 
 	/**
 	 * No appropriate channel found for recipient %1$s with payload namespace %2$s
 	 */
-	NO_APPROPRIATE_CHANNEL(RealtimeExceptionMessages.NO_APPROPRIATE_CHANNEL, CATEGORY_CONNECTIVITY, 2);
+	NO_APPROPRIATE_CHANNEL(RealtimeExceptionMessages.NO_APPROPRIATE_CHANNEL, Category.EnumCategory.CONNECTIVITY, 2);
 	
 	
 	

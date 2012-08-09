@@ -252,7 +252,7 @@ public final class IMAPStoreCache {
         }
     }
 
-    private IMAPStoreContainer getContainer(final int accountId, final String server, final int port, final String login, final String pw, final Session session, final IMAPValidity validity) throws OXException {
+    private IMAPStoreContainer getContainer(final int accountId, final String server, final int port, final String login, final String pw, final Session session) throws OXException {
         /*
          * Check for a cached one
          */
@@ -322,10 +322,10 @@ public final class IMAPStoreCache {
          */
         try {
             if (!DEBUG) {
-                return getContainer(accountId, server, port, login, pw, session, validity).getStore(imapSession, validity);
+                return getContainer(accountId, server, port, login, pw, session).getStore(imapSession, validity);
             }
             final long st = System.currentTimeMillis();
-            final IMAPStore store = getContainer(accountId, server, port, login, pw, session, validity).getStore(imapSession, validity);
+            final IMAPStore store = getContainer(accountId, server, port, login, pw, session).getStore(imapSession, validity);
             final long dur = System.currentTimeMillis() - st;
             LOG.debug("IMAPStoreCache.borrowIMAPStore() took " + dur + "msec.");
             return store;
@@ -360,10 +360,6 @@ public final class IMAPStoreCache {
          */
         final IMAPStoreContainer container = map.get(newKey(server, port, login));
         if (null == container) {
-            final long currentValidity = validity.getCurrentValidity();
-            if (currentValidity > 0 && imapStore.getValidity() < currentValidity) {
-                validity.clearCachedConnections();
-            }
             closeSafe(imapStore);
             return;
         }

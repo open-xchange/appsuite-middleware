@@ -9,7 +9,7 @@ BuildRequires: open-xchange-log4j
 BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 0
+%define        ox_release 6
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0 
@@ -160,64 +160,32 @@ find %{buildroot}/opt/open-xchange/etc \
         -type f \
         -printf "%%%config(noreplace) %p\n" > %{configfiles}
 perl -pi -e 's;%{buildroot};;' %{configfiles}
-perl -pi -e 's;(^.*?)\s+(.*/(mail|configdb|server)\.properties)$;$1 %%%attr(640,root,open-xchange) $2;' %{configfiles}
+perl -pi -e 's;(^.*?)\s+(.*/(mail|configdb|server|filestorage)\.properties)$;$1 %%%attr(640,root,open-xchange) $2;' %{configfiles}
+
 
 %post
+. /opt/open-xchange/lib/oxfunctions.sh
 if [ ${1:-0} -eq 2 ]; then
     # only when updating
-    . /opt/open-xchange/lib/oxfunctions.sh
 
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
 
-    ##
-    ## start update from < 6.21
-    ##
-    GWCONFFILES="filestorage.properties folderjson.properties mail-push.properties messaging.properties publications.properties push.properties secret.properties secrets threadpool.properties meta/ui.yml settings/themes.properties settings/ui.properties"
-    COCONFFILES="i18n.properties"
-    for FILE in ${GWCONFFILES}; do
-        if [ -e /opt/open-xchange/etc/groupware/${FILE} ]; then
-            mv /opt/open-xchange/etc/${FILE} /opt/open-xchange/etc/${FILE}.rpmnew
-            mv /opt/open-xchange/etc/groupware/${FILE} /opt/open-xchange/etc/${FILE}
-        fi
-    done
-    for FILE in ${COCONFFILES}; do
-        if [ -e /opt/open-xchange/etc/common/${FILE} ]; then
-            mv /opt/open-xchange/etc/${FILE} /opt/open-xchange/etc/${FILE}.rpmnew
-            mv /opt/open-xchange/etc/common/${FILE} /opt/open-xchange/etc/${FILE}
-        fi
-    done
-
-    # SoftwareChange_Request-1024
-    pfile=/opt/open-xchange/etc/server.properties
-    if ! ox_exists_property com.openexchange.IPMaskV4 $pfile; then
-        ox_set_property com.openexchange.IPMaskV4 "" $pfile
-    fi
-    if ! ox_exists_property com.openexchange.IPMaskV6 $pfile; then
-        ox_set_property com.openexchange.IPMaskV6 "" $pfile
-    fi
-
-    # SoftwareChange_Request-1027
-    pfile=/opt/open-xchange/etc/server.properties
-    if ! ox_exists_property com.openexchange.dispatcher.prefix $pfile; then
-        ox_set_property com.openexchange.dispatcher.prefix "/ajax/" $pfile
-    fi
-
-    # SoftwareChange_Request-1028
-    pfile=/opt/open-xchange/etc/contact.properties
-    if ! ox_exists_property com.openexchange.carddav.tree $pfile; then
-        ox_set_property com.openexchange.carddav.tree "0" $pfile
-    fi
-    if ! ox_exists_property com.openexchange.carddav.combinedRequestTimeout $pfile; then
-        ox_set_property com.openexchange.carddav.combinedRequestTimeout "20000" $pfile
-    fi
-    if ! ox_exists_property com.openexchange.carddav.exposedCollections $pfile; then
-        ox_set_property com.openexchange.carddav.exposedCollections "0" $pfile
-    fi
-    ##
-    ## end update from < 6.21
-    ##
+    ox_update_permissions "/var/log/open-xchange" open-xchange:root 750
+    ox_update_permissions "/opt/open-xchange/osgi" open-xchange:root 750
+    ox_update_permissions "/opt/open-xchange/etc/mail.properties" root:open-xchange 640
+    ox_update_permissions "/opt/open-xchange/etc/configdb.properties" root:open-xchange 640
+    ox_update_permissions "/opt/open-xchange/etc/server.properties" root:open-xchange 640
+    ox_update_permissions "/opt/open-xchange/etc/filestorage.properties" root:open-xchange 640
 fi
+#
+ox_move_config_file /opt/open-xchange/etc/common /opt/open-xchange/etc i18n.properties
+ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc push.properties push-udp.properties
+CONFFILES="management.properties templating.properties mail-push.properties filestorage.properties folderjson.properties messaging.properties publications.properties secret.properties secrets threadpool.properties settings/themes.properties settings/ui.properties meta/ui.yml"
+for FILE in $CONFFILES; do
+    ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc $FILE
+done
+
 
 %clean
 %{__rm} -rf %{buildroot}
@@ -241,5 +209,15 @@ fi
 /opt/open-xchange/templates/*
 
 %changelog
-* Tue Apr 17 2012 Sonja Krause-Harder  <sonja.krause-harder@open-xchange.com>
+* Tue Jul 03 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Release build for EDP drop #2
+* Mon Jun 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Release build for EDP drop #2
+* Tue May 22 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Internal release build for EDP drop #2
+* Mon Apr 16 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Internal release build for EDP drop #1
+* Wed Apr 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Internal release build for EDP drop #0
+* Mon Oct 17 2011 Marcus Klein <marcus.klein@open-xchange.com>
+Initial release

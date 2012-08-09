@@ -253,6 +253,16 @@ public final class MimeReply {
                 {
                     final String[] replyTo = origMsg.getHeader(MessageHeaders.HDR_REPLY_TO);
                     if (MimeMessageUtility.isEmptyHeader(replyTo)) {
+                        final String owner = MimeProcessingUtility.getFolderOwnerIfShared(msgref.getFolder(), msgref.getAccountId(), session);
+                        if (null != owner) {
+                            final User[] users = UserStorage.getInstance().searchUserByMailLogin(owner, ctx);
+                            if (null != users && users.length > 0) {
+                                final InternetAddress onBehalfOf = new QuotedInternetAddress(users[0].getMail(), true);
+                                replyMsg.setFrom(onBehalfOf);
+                                final QuotedInternetAddress sender = new QuotedInternetAddress(usm.getSendAddr(), true);
+                                replyMsg.setSender(sender);
+                            }
+                        }
                         /*
                          * Set from as recipient
                          */
@@ -679,7 +689,7 @@ public final class MimeReply {
         final int count = multipartPart.getEnclosedCount();
         final ContentType partContentType = new ContentType();
         boolean found = false;
-        if (pc.usm.isDisplayHtmlInlineContent() && mpContentType.startsWith(MimeTypes.MIME_MULTIPART_ALTERNATIVE) && count >= 2) {
+        if (pc.usm.isDisplayHtmlInlineContent() && mpContentType.startsWithAny(MimeTypes.MIME_MULTIPART_ALTERNATIVE, MimeTypes.MIME_MULTIPART_RELATED) && count >= 2) {
             /*
              * Prefer HTML content within multipart/alternative part
              */
@@ -769,7 +779,7 @@ public final class MimeReply {
         for (int i = 0; i < count; i++) {
             final MailPart part = multipartPart.getEnclosedMailPart(i);
             partContentType.setContentType(part.getContentType());
-            if (partContentType.startsWith(TEXT) && MimeProcessingUtility.isInline(part, partContentType) && !MimeProcessingUtility.isSpecial(partContentType.getBaseType())) {
+            if (partContentType.startsWith(TEXT) && !partContentType.startsWith(TEXT_HTM) && MimeProcessingUtility.isInline(part, partContentType) && !MimeProcessingUtility.isSpecial(partContentType.getBaseType())) {
                 if (pc.retvalContentType.getPrimaryType() == null) {
                     pc.retvalContentType.setContentType(partContentType);
                     final String charset = MessageUtility.checkCharset(part, partContentType);

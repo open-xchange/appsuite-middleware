@@ -115,36 +115,7 @@ public class CachingContextStorage extends ContextStorage {
     @Override
     public ContextExtended loadContext(final int contextId) throws OXException {
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
-        final OXObjectFactory<ContextExtended> factory = new OXObjectFactory<ContextExtended>() {
-            @Override
-            public Serializable getKey() {
-                return I(contextId);
-            }
-            @Override
-            public ContextExtended load() throws OXException {
-                final ContextExtended retval = getPersistantImpl().loadContext(contextId);
-                // TODO We should introduce a logic layer above this context storage layer. That layer should then trigger the update tasks.
-                // Nearly all accesses to the ContextStorage need then to be replaced with an access to the ContextService.
-                final Updater updater = Updater.getInstance();
-                try {
-                    final UpdateStatus status = updater.getStatus(retval);
-                    retval.setUpdating(status.blockingUpdatesRunning() || status.needsBlockingUpdates());
-                    if ((status.needsBlockingUpdates() || status.needsBackgroundUpdates()) && !status.blockingUpdatesRunning() && !status.backgroundUpdatesRunning()) {
-                        updater.startUpdate(retval);
-                    }
-                } catch (final OXException e) {
-                    if (SchemaExceptionCodes.DATABASE_DOWN.equals(e)) {
-                        LOG.warn("Switching to read only mode for context " + contextId + " because master database is down.", e);
-                        retval.setReadOnly(true);
-                    }
-                }
-                return retval;
-            }
-            @Override
-            public Lock getCacheLock() {
-                return CachingContextStorage.this.getCacheLock();
-            }
-        };
+        final OXObjectFactory<ContextExtended> factory = new ContextExtendedFactory(contextId);
         if (cacheService == null) {
             return factory.load();
         }

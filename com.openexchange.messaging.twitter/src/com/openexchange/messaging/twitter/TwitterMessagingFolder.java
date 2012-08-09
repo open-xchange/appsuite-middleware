@@ -65,6 +65,8 @@ import com.openexchange.messaging.MessagingPermissions;
  */
 public final class TwitterMessagingFolder implements MessagingFolder {
 
+    private static final long serialVersionUID = -7211881893894289678L;
+
     /**
      * Gets the instance.
      *

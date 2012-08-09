@@ -57,6 +57,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -691,13 +693,13 @@ public final class FacebookFQLStreamParser {
         }
         message.setSize(size);
         final String htmlContent;
-        try {
-            htmlContent =
-                FacebookMessagingServiceRegistry.getServiceRegistry().getService(HtmlService.class, true).replaceImages(
-                    messageText.toString(),
-                    session.getSessionID());
-        } catch (final OXException e) {
-            throw new OXException(e);
+        final String preparedContent;
+        {
+            String tmp = messageText.toString();
+            final HtmlService service = FacebookMessagingServiceRegistry.getServiceRegistry().getService(HtmlService.class, true);
+            htmlContent = service.replaceImages(tmp, session.getSessionID());
+            tmp = replaceImages(tmp);
+            preparedContent = service.replaceImages(tmp, session.getSessionID());
         }
         final String subject = FacebookMessagingUtility.abbreviate(htmlContent, 140);
         message.setHeader(new MimeStringMessagingHeader(MessagingHeader.KnownHeader.SUBJECT.toString(), subject));
@@ -707,10 +709,10 @@ public final class FacebookFQLStreamParser {
          */
         final MimeMultipartContent multipartContent = multipartProvider.getMultipartContent();
         if (null == multipartContent) {
-            message.setContent(createAlternative(htmlContent));
+            message.setContent(createAlternative(htmlContent, preparedContent));
         } else {
             final MimeMessagingBodyPart altBodyPart = new MimeMessagingBodyPart();
-            altBodyPart.setContent(createAlternative(htmlContent));
+            altBodyPart.setContent(createAlternative(htmlContent, preparedContent));
             multipartContent.addBodyPart(altBodyPart, 0);
             message.setContent(multipartContent);
         }
@@ -718,6 +720,64 @@ public final class FacebookFQLStreamParser {
          * Return parsed message
          */
         return message;
+    }
+
+    private static final Pattern IMG_PATTERN = Pattern.compile("<img[^>]*>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+
+    private static String replaceImages(final String content) {
+        if (null == content) {
+            return null;
+        }
+        try {
+            final Matcher imgMatcher = IMG_PATTERN.matcher(content);
+            if (imgMatcher.find()) {
+                /*
+                 * Start replacing with href
+                 */
+                final StringBuilder sb = new StringBuilder(content.length());
+                int lastMatch = 0;
+                do {
+                    sb.append(content.substring(lastMatch, imgMatcher.start()));
+                    final String imgTag = imgMatcher.group();
+                    replaceWithSrcAttribute(imgTag, sb);
+                    lastMatch = imgMatcher.end();
+                } while (imgMatcher.find());
+                sb.append(content.substring(lastMatch));
+                return sb.toString();
+            }
+
+        } catch (final Exception e) {
+            // Ignore
+        }
+        return content;
+    }
+
+    private static final Pattern SRC_PATTERN = Pattern.compile(
+        "(?:src=\"([^\"]*)\")|(?:src='([^']*)')|(?:src=[^\"']([^\\s>]*))",
+        Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+
+    private static void replaceWithSrcAttribute(final String imgTag, final StringBuilder sb) {
+        final Matcher srcMatcher = SRC_PATTERN.matcher(imgTag);
+        if (srcMatcher.find()) {
+            /*
+             * Extract URL
+             */
+            int group = 1;
+            String urlStr = srcMatcher.group(group);
+            if (urlStr == null) {
+                urlStr = srcMatcher.group(++group);
+                if (urlStr == null) {
+                    urlStr = srcMatcher.group(++group);
+                }
+            }
+            if (urlStr == null) {
+                sb.append(imgTag);
+            } else {
+                sb.append(urlStr);
+            }
+        } else {
+            sb.append(imgTag);
+        }
     }
 
     private static void checkFacebookError(final Element streamElement) throws OXException {
@@ -801,11 +861,11 @@ public final class FacebookFQLStreamParser {
 
     private static final String UTF_8 = "UTF-8";
 
-    private static MimeMultipartContent createAlternative(final String messageText) throws OXException {
+    private static MimeMultipartContent createAlternative(final String messageText, final String altText) throws OXException {
         final MimeMultipartContent alt = new MimeMultipartContent("alternative");
         {
             final MimeMessagingBodyPart text = new MimeMessagingBodyPart();
-            text.setText(Utility.textFormat(messageText), UTF_8, "plain");
+            text.setText(Utility.textFormat(null == altText ? messageText : altText), UTF_8, "plain");
             text.setHeader("MIME-Version", "1.0");
             text.setHeader("Content-Type", "text/plain; charset=UTF-8");
             alt.addBodyPart(text);

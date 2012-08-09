@@ -63,9 +63,9 @@ import com.openexchange.realtime.xmpp.XMPPChannel;
  */
 public class XMPPServerPipelineFactory implements ChannelPipelineFactory {
 
-    private XMPPChannel channel;
+    private final XMPPChannel channel;
 
-    private XMPPHandler handler;
+    private final XMPPHandler handler;
 
     public XMPPServerPipelineFactory(XMPPChannel channel, XMPPHandler handler) {
         this.channel = channel;

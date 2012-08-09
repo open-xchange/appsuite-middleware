@@ -80,6 +80,8 @@ import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
 import javax.security.auth.Subject;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Filter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -464,7 +466,9 @@ public final class SMTPTransport extends MailTransport {
             /*
              * Set to
              */
-            smtpMessage.addRecipients(RecipientType.TO, new Address[] { dispNotification });
+            final Address[] recipients = new Address[] { dispNotification };
+            checkRecipients(recipients);
+            smtpMessage.addRecipients(RecipientType.TO, recipients);
             /*
              * Set header
              */
@@ -587,9 +591,7 @@ public final class SMTPTransport extends MailTransport {
              * Check recipients
              */
             final Address[] recipients = allRecipients == null ? smtpMessage.getAllRecipients() : allRecipients;
-            if ((recipients == null) || (recipients.length == 0)) {
-                throw SMTPExceptionCode.MISSING_RECIPIENTS.create();
-            }
+            checkRecipients(recipients);
             try {
                 final long start = System.currentTimeMillis();
                 final Transport transport = getSMTPSession().getTransport(SMTPProvider.PROTOCOL_SMTP.getName());
@@ -660,10 +662,7 @@ public final class SMTPTransport extends MailTransport {
                 } else {
                     recipients = allRecipients;
                 }
-
-                if ((recipients == null) || (recipients.length == 0)) {
-                    throw SMTPExceptionCode.MISSING_RECIPIENTS.create();
-                }
+                checkRecipients(recipients);
                 smtpFiller.setSendHeaders(composedMail, smtpMessage);
                 /*
                  * Drop special "x-original-headers" header
@@ -742,6 +741,24 @@ public final class SMTPTransport extends MailTransport {
     @Override
     protected void startup() {
         SMTPCapabilityCache.init();
+    }
+
+    private static void checkRecipients(final Address[] recipients) throws OXException {
+        if ((recipients == null) || (recipients.length == 0)) {
+            throw SMTPExceptionCode.MISSING_RECIPIENTS.create();
+        }
+        final ConfigurationService service = SMTPServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+        if (null != service) {
+            final Filter filter = service.getFilterFromProperty("com.openexchange.mail.transport.redirectWhitelist");
+            if (null != filter) {
+                for (final Address address : recipients) {
+                    final InternetAddress internetAddress = (InternetAddress) address;
+                    if (!filter.accepts(internetAddress.getAddress())) {
+                        throw SMTPExceptionCode.RECIPIENT_NOT_ALLOWED.create(internetAddress.toUnicodeString());
+                    }
+                }
+            }
+        }
     }
 
     private static final class MailCleanerTask implements Runnable {

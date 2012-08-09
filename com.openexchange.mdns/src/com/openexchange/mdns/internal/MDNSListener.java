@@ -104,7 +104,10 @@ public final class MDNSListener implements javax.jmdns.ServiceListener {
         if (null == inner) {
             return;
         }
-        inner.remove(id);
+        final MDNSServiceEntry entry = inner.remove(id);
+        if (null != entry) {
+            mdnsReregisterer.serviceRemoved(serviceId, entry);
+        }
         if (inner.isEmpty()) {
             map.remove(serviceId);
         }
@@ -167,6 +170,7 @@ public final class MDNSListener implements javax.jmdns.ServiceListener {
                     prev = inner.get(id);
                     if (!prev.equals(entry)) {
                         inner.put(id, entry);
+                        mdnsReregisterer.serviceAdded(serviceId, entry);
                         if (INFO) {
                             LOG.info(new StringBuilder(64).append("Updated new service: ").append(entry).toString());
                         }
@@ -183,6 +187,7 @@ public final class MDNSListener implements javax.jmdns.ServiceListener {
              * Added a newly discovered service. Re-register own services to re-publish them.
              */
             mdnsReregisterer.reregisterServices();
+            mdnsReregisterer.serviceAdded(serviceId, entry);
         }
     }
 }

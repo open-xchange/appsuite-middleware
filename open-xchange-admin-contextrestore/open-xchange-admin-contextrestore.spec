@@ -39,13 +39,8 @@ export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
 %post
-if [ ${1:-0} -eq 2 ]; then
-    CONFFILES="plugin/contextrestore.properties"
-    if [ -e /opt/open-xchange/etc/admindaemon/plugin/contextrestore.properties ]; then
-        mv /opt/open-xchange/etc/plugin/contextrestore.properties /opt/open-xchange/etc/plugin/contextrestore.properties.rpmnew
-        mv /opt/open-xchange/etc/admindaemon/plugin/contextrestore.properties /opt/open-xchange/etc/plugin/contextrestore.properties
-    fi
-fi
+. /opt/open-xchange/lib/oxfunctions.sh
+ox_move_config_file /opt/open-xchange/etc/admindaemon /opt/open-xchange/etc plugin/contextrestore.properties
 
 %clean
 %{__rm} -rf %{buildroot}
@@ -64,5 +59,5 @@ fi
 %config(noreplace) /opt/open-xchange/etc/plugin/*
 
 %changelog
-* Fri Jun 15 2012 - jan.bauerdick@open-xchange.com
- - Initial packaging
+* Fri Jun 15 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Initial packaging

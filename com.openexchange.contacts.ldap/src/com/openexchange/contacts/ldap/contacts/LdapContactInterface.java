@@ -62,14 +62,14 @@ import com.openexchange.contact.LdapServer;
 import com.openexchange.contacts.ldap.exceptions.LdapExceptionCode;
 import com.openexchange.contacts.ldap.ldap.LdapGetter;
 import com.openexchange.contacts.ldap.ldap.LdapInterface;
-import com.openexchange.contacts.ldap.ldap.LdapJNDIImpl;
 import com.openexchange.contacts.ldap.ldap.LdapInterface.FillClosure;
+import com.openexchange.contacts.ldap.ldap.LdapJNDIImpl;
 import com.openexchange.contacts.ldap.osgi.LDAPServiceRegistry;
 import com.openexchange.contacts.ldap.property.FolderProperties;
-import com.openexchange.contacts.ldap.property.Mappings;
 import com.openexchange.contacts.ldap.property.FolderProperties.ContactTypes;
 import com.openexchange.contacts.ldap.property.FolderProperties.LoginSource;
 import com.openexchange.contacts.ldap.property.FolderProperties.Sorting;
+import com.openexchange.contacts.ldap.property.Mappings;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactUnificationState;
@@ -359,7 +359,7 @@ public class LdapContactInterface implements ContactInterface {
         }
 
         // Get only the needed parts...
-        final List<Contact> subList = getSubList(from, to, arrayList);
+        final List<Contact> subList = from != 0 || to != 0 ? getSubList(from, to, arrayList) : arrayList;
 
         sorting(orderBy, order, subList, specialSort);
         final SearchIterator<Contact> searchIterator = new ArrayIterator<Contact>(subList.toArray(new Contact[subList.size()]));

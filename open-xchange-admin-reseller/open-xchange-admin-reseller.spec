@@ -8,7 +8,7 @@ BuildRequires: open-xchange-core
 BuildRequires: open-xchange-admin
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 0
+%define        ox_release 1
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -40,17 +40,11 @@ export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
 %post
-if [ ${1:-0} -eq 2 ]; then
-    CONFFILES="plugin/reseller.properties mysql/reseller.sql"
-    if [ -e /opt/open-xchange/etc/admindaemon/plugin/reseller.properties ]; then
-        mv /opt/open-xchange/etc/plugin/reseller.properties /opt/open-xchange/etc/plugin/reseller.properties.rpmnew
-        mv /opt/open-xchange/etc/admindaemon/plugin/reseller.properties /opt/open-xchange/etc/plugin/reseller.properties
-    fi
-    if [ -e /opt/open-xchange/etc/admindaemon/mysql/reseller.sql ]; then
-        mv /opt/open-xchange/etc/mysql/reseller.sql /opt/open-xchange/etc/mysql/reseller.sql.rpmnew
-        mv /opt/open-xchange/etc/admindaemon/mysql/reseller.sql /opt/open-xchange/etc/mysql/reseller.sql
-    fi
-fi
+. /opt/open-xchange/lib/oxfunctions.sh
+CONFFILES="plugin/reseller.properties mysql/reseller.sql"
+for FILE in $CONFFILES; do
+    ox_move_config_file /opt/open-xchange/etc/admindaemon /opt/open-xchange/etc $FILE
+done
 
 %clean
 %{__rm} -rf %{buildroot}
@@ -69,7 +63,10 @@ fi
 %config(noreplace) /opt/open-xchange/etc/plugin/*
 %dir /opt/open-xchange/etc/mysql
 %config(noreplace) /opt/open-xchange/etc/mysql/*
+%doc com.openexchange.admin.reseller.rmi/javadoc
 
 %changelog
-* Fri Jun 15 2012 - jan.bauerdick@open-xchange.com
- - Initial packaging
+* Tue Jul 03 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Release build for EDP drop #2
+* Fri Jun 15 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Initial packaging

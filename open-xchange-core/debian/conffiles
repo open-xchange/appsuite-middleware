@@ -1,6 +1,7 @@
 opt/open-xchange/etc/attachment.properties
 opt/open-xchange/etc/autoconfig.properties
 opt/open-xchange/etc/cache.ccf
+opt/open-xchange/etc/cache.properties
 opt/open-xchange/etc/calendar.properties
 opt/open-xchange/etc/configdb.properties
 opt/open-xchange/etc/contact.properties
@@ -11,6 +12,7 @@ opt/open-xchange/etc/file-logging.properties
 opt/open-xchange/etc/filestorage.properties
 opt/open-xchange/etc/foldercache.properties
 opt/open-xchange/etc/folderjson.properties
+opt/open-xchange/etc/folder-reserved-names
 opt/open-xchange/etc/HTMLEntities.properties
 opt/open-xchange/etc/i18n.properties
 opt/open-xchange/etc/importerExporter.xml
@@ -39,6 +41,7 @@ opt/open-xchange/etc/sessioncache.ccf
 opt/open-xchange/etc/sessiond.properties
 opt/open-xchange/etc/sql.properties
 opt/open-xchange/etc/system.properties
+opt/open-xchange/etc/templating.properties
 opt/open-xchange/etc/transport.properties
 opt/open-xchange/etc/user.properties
 opt/open-xchange/etc/whitelist.properties

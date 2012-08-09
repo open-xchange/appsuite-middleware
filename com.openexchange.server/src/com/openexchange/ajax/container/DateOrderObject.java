@@ -50,6 +50,7 @@
 package com.openexchange.ajax.container;
 
 import java.util.Date;
+import java.util.TimeZone;
 
 /**
  * DateOrderObject
@@ -63,12 +64,54 @@ public class DateOrderObject implements Comparable<DateOrderObject> {
 
 	protected Object obj;
 
-	public DateOrderObject(final Date orderBy, final Object obj) {
-		this.orderBy = orderBy;
-		this.obj = obj;
-	}
+	protected TimeZone timeZone;
 
-	public Date getOrderBy() {
+	protected String userIdentifier;
+
+    public DateOrderObject(final Date orderBy, final Object obj) {
+        this.orderBy = orderBy;
+        this.obj = obj;
+    }
+
+    /**
+     * Gets the optional user identifier.
+     *
+     * @return The user identifier or <code>null</code>
+     */
+    public String getUserIdentifier() {
+        return userIdentifier;
+    }
+
+    /**
+     * Sets the user identifier.
+     *
+     * @param userIdentifier The user identifier to set
+     */
+    public DateOrderObject setUserIdentifier(String userIdentifier) {
+        this.userIdentifier = userIdentifier;
+        return this;
+    }
+
+    /**
+     * Gets the optional time zone
+     *
+     * @return The time zone or <code>null</code>
+     */
+    public TimeZone optTimeZone() {
+        return timeZone;
+    }
+
+    /**
+     * Sets the time zone
+     *
+     * @param timeZone The time zone to set
+     */
+    public DateOrderObject setTimeZone(TimeZone timeZone) {
+        this.timeZone = timeZone;
+        return this;
+    }
+
+    public Date getOrderBy() {
 		return orderBy;
 	}
 

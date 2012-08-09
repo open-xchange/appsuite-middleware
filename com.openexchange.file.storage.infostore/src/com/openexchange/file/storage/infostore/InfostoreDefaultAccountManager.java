@@ -58,6 +58,7 @@ import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.ServiceAware;
 import com.openexchange.session.Session;
 
 
@@ -68,8 +69,19 @@ import com.openexchange.session.Session;
  */
 public class InfostoreDefaultAccountManager implements FileStorageAccountManager {
 
-    public static final String DEFAULT_ID = "infostore";
-    private static final FileStorageAccount DEFAULT_ACCOUNT = new FileStorageAccount() {
+    /**
+     * {@link FileStorageAccountImplementation}
+     *
+     * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+     */
+    private static final class FileStorageAccountImpl implements FileStorageAccount, ServiceAware {
+
+        /**
+         * Initializes a new {@link InfostoreDefaultAccountManager.FileStorageAccountImpl}.
+         */
+        protected FileStorageAccountImpl() {
+            super();
+        }
 
         @Override
         public Map<String, Object> getConfiguration() {
@@ -91,7 +103,15 @@ public class InfostoreDefaultAccountManager implements FileStorageAccountManager
             return DEFAULT_ID;
         }
 
-    };
+        @Override
+        public String getServiceId() {
+            return "com.openexchange.infostore";
+        }
+    }
+
+    public static final String DEFAULT_ID = "infostore";
+
+    private static final FileStorageAccount DEFAULT_ACCOUNT = new FileStorageAccountImpl();
 
 
     @Override

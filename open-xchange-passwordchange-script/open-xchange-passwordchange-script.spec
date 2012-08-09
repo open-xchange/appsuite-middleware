@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 0
+%define        ox_release 1
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -35,12 +35,8 @@ export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
 %post
-if [ ${1:-0} -eq 2 ]; then
-    if [ -e /opt/open-xchange/etc/groupware/change_pwd_script.properties ]; then
-        mv /opt/open-xchange/etc/change_pwd_script.properties /opt/open-xchange/etc/change_pwd_script.properties.rpmnew
-        mv /opt/open-xchange/etc/groupware/change_pwd_script.properties /opt/open-xchange/etc/change_pwd_script.properties
-    fi
-fi
+. /opt/open-xchange/lib/oxfunctions.sh
+ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc change_pwd_script.properties
 
 %clean
 %{__rm} -rf %{buildroot}
@@ -55,3 +51,5 @@ fi
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Wed Jul 11 2012 Carsten Hoeger <choeger@open-xchange.com>
+Initial release

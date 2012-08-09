@@ -58,6 +58,8 @@ import com.openexchange.resource.Resource;
  */
 public class ResourceParticipant implements Participant, Comparable<Participant> {
 
+    private static final long serialVersionUID = 4133897083017380091L;
+
     private int id = NO_ID;
 
     private String displayName;
@@ -97,7 +99,9 @@ public class ResourceParticipant implements Participant, Comparable<Participant>
 
     /**
      * {@inheritDoc}
+     * @deprecated
      */
+    @Deprecated
     @Override
     public void setIdentifier(final int id) {
         this.id = id;

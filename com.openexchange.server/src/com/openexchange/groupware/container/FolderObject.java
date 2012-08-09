@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.container;
 
-import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -83,7 +82,7 @@ import com.openexchange.tools.oxfolder.OXFolderSQL;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a> - generic methods
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - added fields to generic methods
  */
-public class FolderObject extends FolderChildObject implements Cloneable, Serializable {
+public class FolderObject extends FolderChildObject implements Cloneable {
 
     private static final long serialVersionUID = 1019652520335292041L;
 
@@ -1216,7 +1215,9 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
         final StringBuilder sb = new StringBuilder();
         sb.append(super.toString()).append('\n');
         if (containsObjectID()) {
-            sb.append(" ObjectID=").append(getObjectID());
+            sb.append("ObjectID=").append(getObjectID());
+        } else {
+            sb.append("<no-object-id>");
         }
         if (containsFullName()) {
             sb.append(" Full Name=").append(getFullName());
