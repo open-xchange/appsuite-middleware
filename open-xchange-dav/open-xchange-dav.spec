@@ -16,7 +16,14 @@ URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       The Open-Xchange CardDAV and CalDAV implementation
 Requires:      open-xchange-core >= @OXVERSION@
-
+Provides:      open-xchange-caldav = %{version}
+Obsoletes:     open-xchange-caldav <= %{version}
+Provides:      open-xchange-carddav = %{version}
+Obsoletes:     open-xchange-carddav <= %{version}
+Provides:      open-xchange-webdav-directory = %{version}
+Obsoletes:     open-xchange-webdav-directory <= %{version}
+Provides:      open-xchange-webdav-acl = %{version}
+Obsoletes:     open-xchange-webdav-acl <= %{version}
 
 %description
 The Open-Xchange CardDAV and CalDAV implementation.
@@ -37,6 +44,13 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %clean
 %{__rm} -rf %{buildroot}
 
+%post
+. /opt/open-xchange/lib/oxfunctions.sh
+CONFFILES="caldav.properties contextSets/caldav.yml meta/caldav.yml carddav.properties contextSets/carddav.yml"
+for FILE in ${CONFFILES}; do
+    ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc $FILE
+done
+
 %files
 %defattr(-,root,root)
 %dir /opt/open-xchange/bundles/
@@ -44,7 +58,9 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/etc/
-%config(noreplace) /opt/open-xchange/etc/*
+%config(noreplace) /opt/open-xchange/etc/*.properties
+%config(noreplace) /opt/open-xchange/etc/meta/*
+%config(noreplace) /opt/open-xchange/etc/contextSets/*
 
 %changelog
 * Tue Jul 03 2012 Steffen Templin <marcus.klein@open-xchange.com>
