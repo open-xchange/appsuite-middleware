@@ -93,38 +93,38 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
-	// TODO: Figure Out JSONP and Long-Polling State management. Hot-Swap the
-	// AtmosphereResource.
-	// TODO: Close connections and get rid of em
+    // TODO: Figure Out JSONP and Long-Polling State management. Hot-Swap the
+    // AtmosphereResource.
+    // TODO: Close connections and get rid of em
     
     private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(RTAtmosphereHandler.class));
-	private final ServiceLookup services;
-	private final HandlerLibrary library;
-	// Keep track of sessionID -> RTAtmosphereState to uniquely identify connected clients  
-	private ConcurrentHashMap<String, RTAtmosphereState> sessionIdToState;
-	// Keep track of user@context -> {context/user/resource1, context/user/resource2, ...} for canHandle/isConnected
-	private final Map<String, Set<String>> userToBroadcasterIDs;
+    private final ServiceLookup services;
+    private final HandlerLibrary library;
+    // Keep track of sessionID -> RTAtmosphereState to uniquely identify connected clients  
+    private ConcurrentHashMap<String, RTAtmosphereState> sessionIdToState;
+    // Keep track of user@context -> {context/user/resource1, context/user/resource2, ...} for canHandle/isConnected
+    private final Map<String, Set<String>> userToBroadcasterIDs;
 
-	/**
-	 * Initializes a new {@link RTAtmosphereHandler}.
-	 * 
-	 * @param library  The library to use for OXRTHandler lookups needed for
-	 *                  transformations of incoming and outgoing stanzas
-	 * @param services The service-lookup providing needed services
-	 */
-	public RTAtmosphereHandler(HandlerLibrary library, ServiceLookup services) {
-	    super();
-	    sessionIdToState = new ConcurrentHashMap<String, RTAtmosphereState>();
-	    userToBroadcasterIDs = new ConcurrentHashMap<String, Set<String>>();
-		this.library = library;
-		this.services = services;
-	}
+    /**
+     * Initializes a new {@link RTAtmosphereHandler}.
+     * 
+     * @param library  The library to use for OXRTHandler lookups needed for
+     *                  transformations of incoming and outgoing stanzas
+     * @param services The service-lookup providing needed services
+     */
+    public RTAtmosphereHandler(HandlerLibrary library, ServiceLookup services) {
+        super();
+        sessionIdToState = new ConcurrentHashMap<String, RTAtmosphereState>();
+        userToBroadcasterIDs = new ConcurrentHashMap<String, Set<String>>();
+        this.library = library;
+        this.services = services;
+    }
 
-	@Override
+    @Override
     public void destroy() {
-	    // Ignore for now
-	}
-	
+        // Ignore for now
+    }
+    
 
 
     /*
@@ -290,13 +290,13 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         }
     }
 
-	/**
-	 * Convert the session info into a ServerSession Object.   
+    /**
+     * Convert the session info into a ServerSession Object.   
      * @param sessionInfo The sessionInfo to convert
      * @return The ServerSession objectmatching the session infos
      * @throws IllegalArgumentException if the sessionInfo is null or empty 
-	 * @throws OXException if an error happens while trying to build the
-	 *                      ServerSession from the session infos  
+     * @throws OXException if an error happens while trying to build the
+     *                      ServerSession from the session infos  
      */
     private ServerSession getServerSessionFromInfo(String sessionInfo) throws OXException {
         if(sessionInfo == null || sessionInfo.isEmpty()) {
@@ -478,82 +478,82 @@ private String getContextName(String login) {
         }
     }
     
-	private boolean isInternal(Stanza stanza) {
-		return stanza.getNamespace().startsWith("ox:");
-	}
+    private boolean isInternal(Stanza stanza) {
+        return stanza.getNamespace().startsWith("ox:");
+    }
 
-	/**
-	 * Handle the Stanza internally instead of handing it over to the message
-	 * dispatcher. Handshaking and other internal stuff happens here.
-	 * @param stanza the incoming stanza
-	 * @param serverSession the associated serverSession
-	 * @throws OXException
-	 */
-	private void handleInternally(Stanza stanza, RTAtmosphereState atmosphereState) {
-		LOG.info("Handle internally: " + stanza);
-	}
-	
-	/**
-	 * Create a broadcaster id from a given {@link ID}.
-	 *
-	 * Creates broadcaster ids like : /context/user or /context/user/resource
-	 * depending if the given ID contains a resource.
-	 * 
-	 * This way we can address:
-	 *  - single clients of a user identified by resource: /context/user/resource
-	 *  - all clients of a user: /context/user/*
-	 *  - all clients of all users in a context: /context/*
-	 *  - all clients in all contexts: /*  
-	 *
-	 * @param id the id to use for generating the broadcaster id 
-	 * @return the generated broadcaster id 
-	 */
-	private String generateBroadcasterId(ID id) {
-	    StringBuilder sb = new StringBuilder();
+    /**
+     * Handle the Stanza internally instead of handing it over to the message
+     * dispatcher. Handshaking and other internal stuff happens here.
+     * @param stanza the incoming stanza
+     * @param serverSession the associated serverSession
+     * @throws OXException
+     */
+    private void handleInternally(Stanza stanza, RTAtmosphereState atmosphereState) {
+        LOG.info("Handle internally: " + stanza);
+    }
+    
+    /**
+     * Create a broadcaster id from a given {@link ID}.
+     *
+     * Creates broadcaster ids like : /context/user or /context/user/resource
+     * depending if the given ID contains a resource.
+     * 
+     * This way we can address:
+     *  - single clients of a user identified by resource: /context/user/resource
+     *  - all clients of a user: /context/user/*
+     *  - all clients of all users in a context: /context/*
+     *  - all clients in all contexts: /*  
+     *
+     * @param id the id to use for generating the broadcaster id 
+     * @return the generated broadcaster id 
+     */
+    private String generateBroadcasterId(ID id) {
+        StringBuilder sb = new StringBuilder();
         sb.append("/").append(id.getContext()).append("/").append(id.getUser());
         if(id.getResource() != null) {
             sb.append("/").append(id.getResource());
         }
-	    return sb.toString();
-	}
+        return sb.toString();
+    }
 
-	/**
-	 * Stamp the stanza, iow. set the sender of the stanza.  
-	 * @param stanza the stanza to stamp
-	 * @param state the associated atmosphereState
-	 */
-	private void stampStanza(Stanza stanza, RTAtmosphereState state) {
-	    stanza.setFrom(state.id);
-	}
+    /**
+     * Stamp the stanza, iow. set the sender of the stanza.  
+     * @param stanza the stanza to stamp
+     * @param state the associated atmosphereState
+     */
+    private void stampStanza(Stanza stanza, RTAtmosphereState state) {
+        stanza.setFrom(state.id);
+    }
 
-	private void dispatchStanza(Stanza stanza, RTAtmosphereState atmosphereState)
-			throws OXException {
-		OXRTHandler transformer = library.getHandlerFor(stanza.getNamespace());
-		if (transformer == null) {
-			throw OXException.general("No transformer for namespace "
-					+ stanza.getNamespace());
-		}
-		transformer.incoming(stanza, atmosphereState.session);
-	}
+    private void dispatchStanza(Stanza stanza, RTAtmosphereState atmosphereState)
+            throws OXException {
+        OXRTHandler transformer = library.getHandlerFor(stanza.getNamespace());
+        if (transformer == null) {
+            throw OXException.general("No transformer for namespace "
+                    + stanza.getNamespace());
+        }
+        transformer.incoming(stanza, atmosphereState.session);
+    }
 
-	/**
-	 * Handle outgoing Stanzas by transforming it into the proper representation
-	 * and sending it to the addressed entity. 
-	 * @param stanza the Stanza to send
-	 * @param serverSession the associated ServerSession
-	 * @throws OXException if no transformer for the given Stanza can be found
-	 */
-	public void handleOutgoing(Stanza stanza, ServerSession serverSession) throws OXException {
-		OXRTHandler transformer = library.getHandlerFor(stanza.getNamespace());
-		if (transformer == null) {
-			throw OXException.general("No transformer for namespace "
-					+ stanza.getNamespace());
-		}
-		/*
-		 * Let the transformer handle the processing of the stanza.
-		 * hand over this as reference for sending after transforming
-		 */
-		transformer.outgoing(stanza, serverSession, this);
-	}
+    /**
+     * Handle outgoing Stanzas by transforming it into the proper representation
+     * and sending it to the addressed entity. 
+     * @param stanza the Stanza to send
+     * @param serverSession the associated ServerSession
+     * @throws OXException if no transformer for the given Stanza can be found
+     */
+    public void handleOutgoing(Stanza stanza, ServerSession serverSession) throws OXException {
+        OXRTHandler transformer = library.getHandlerFor(stanza.getNamespace());
+        if (transformer == null) {
+            throw OXException.general("No transformer for namespace "
+                    + stanza.getNamespace());
+        }
+        /*
+         * Let the transformer handle the processing of the stanza.
+         * hand over this as reference for sending after transforming
+         */
+        transformer.outgoing(stanza, serverSession, this);
+    }
 
 }
