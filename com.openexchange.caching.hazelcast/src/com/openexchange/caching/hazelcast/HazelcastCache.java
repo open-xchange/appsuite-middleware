@@ -50,6 +50,7 @@
 package com.openexchange.caching.hazelcast;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
@@ -110,6 +111,11 @@ public final class HazelcastCache extends DefaultCacheKeyService implements Cach
     @Override
     public Lock getLock() {
         return hazelcastInstance.getLock(hazelcastName);
+    }
+
+    @Override
+    public Collection<Serializable> values() {
+        return map.values();
     }
 
     private IMap<Serializable, Serializable> getGroup(final String groupName) {

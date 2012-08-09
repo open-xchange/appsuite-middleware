@@ -50,6 +50,7 @@
 package com.openexchange.caching.hazelcast;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -88,6 +89,11 @@ public final class LocalCache extends DefaultCacheKeyService implements Cache, S
         this.cache = cache;
         this.mapConfig = mapConfig;
         groups = new ConcurrentHashMap<String, com.google.common.cache.Cache<Serializable, Serializable>>(8);
+    }
+
+    @Override
+    public Collection<Serializable> values() {
+        return cache.asMap().values();
     }
 
     @Override

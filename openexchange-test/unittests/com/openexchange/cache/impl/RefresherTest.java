@@ -51,6 +51,7 @@ package com.openexchange.cache.impl;
 
 import java.io.InputStream;
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -149,6 +150,10 @@ public class RefresherTest extends TestCase {
                 }
                 @Override
                 public CacheKey newCacheKey(final int contextId, final Serializable... obj) {
+                    throw new UnsupportedOperationException();
+                }
+                @Override
+                public Collection<Serializable> values() {
                     throw new UnsupportedOperationException();
                 }
                 @Override
