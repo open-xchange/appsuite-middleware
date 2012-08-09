@@ -78,3 +78,5 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc mobili
 %config(noreplace) /opt/open-xchange/templates/*
 
 %changelog
+* Tue Jul 10 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Initial release

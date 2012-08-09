@@ -173,6 +173,10 @@ public class MailFolder implements Serializable, Cloneable {
 
     private boolean b_shared;
 
+    private String owner;
+
+    private boolean b_owner;
+
     /**
      * Virtual name of mailbox's root folder
      *
@@ -1111,6 +1115,46 @@ public class MailFolder implements Serializable, Cloneable {
     public void setShared(final boolean shared) {
         this.shared = shared;
         b_shared = true;
+    }
+
+    /**
+     * Gets the shared owner or <code>null</code>.
+     * <p>
+     * <b>Note:</b> {@link #isShared()} needs to return <code>true</code>.
+     * 
+     * @return The owner or <code>null</code>
+     */
+    public String getOwner() {
+        return owner;
+    }
+
+    /**
+     * Checks if the owner was set.
+     *
+     * @return <code>true</code> if owner is set; otherwise <code>false</code>
+     */
+    public boolean containsOwner() {
+        return b_owner;
+    }
+
+    /**
+     * Removes the owner.
+     */
+    public void removeOwne() {
+        owner = null;
+        b_owner = false;
+    }
+
+    /**
+     * Sets the shared owner or <code>null</code>.
+     * <p>
+     * <b>Note:</b> {@link #setShared(boolean)} needs to be invoked with <code>true</code>.
+     * 
+     * @param owner The owner
+     */
+    public void setOwner(String owner) {
+        this.owner = owner;
+        b_owner = true;
     }
 
 }

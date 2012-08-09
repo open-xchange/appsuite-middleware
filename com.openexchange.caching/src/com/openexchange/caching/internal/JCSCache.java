@@ -51,6 +51,9 @@ package com.openexchange.caching.internal;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import org.apache.jcs.JCS;
 import org.apache.jcs.access.CacheAccess;
 import org.apache.jcs.access.exception.ObjectExistsException;
@@ -152,6 +155,16 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
         } catch (final org.apache.jcs.access.exception.CacheException e) {
             throw CacheExceptionCode.CACHE_ERROR.create(e, e.getMessage());
         }
+    }
+
+    @Override
+    public Collection<Serializable> values() {
+        final Object[] keys = cacheControl.getMemoryCache().getKeyArray();
+        final List<Serializable> list = new ArrayList<Serializable>(keys.length);
+        for (final Object key : keys) {
+            list.add(cacheControl.get((Serializable) key));
+        }
+        return list;
     }
 
     @Override

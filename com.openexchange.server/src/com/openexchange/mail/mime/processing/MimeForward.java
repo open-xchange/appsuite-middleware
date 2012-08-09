@@ -248,12 +248,36 @@ public final class MimeForward {
                 /*
                  * Attachment-Forward
                  */
+                if (1 == origMsgs.length) {
+                    final MailMessage originalMsg = origMsgs[0];
+                    final String owner = MimeProcessingUtility.getFolderOwnerIfShared(originalMsg.getFolder(), originalMsg.getAccountId(), session);
+                    if (null != owner) {
+                        final User[] users = UserStorage.getInstance().searchUserByMailLogin(owner, ctx);
+                        if (null != users && users.length > 0) {
+                            final InternetAddress onBehalfOf = new QuotedInternetAddress(users[0].getMail(), true);
+                            forwardMsg.setFrom(onBehalfOf);
+                            final QuotedInternetAddress sender = new QuotedInternetAddress(usm.getSendAddr(), true);
+                            forwardMsg.setSender(sender);
+                        }
+                    }
+                }
                 return asAttachmentForward(origMsgs, forwardMsg);
             }
             /*
              * Inline-Forward
              */
-            return asInlineForward(origMsgs[0], session, ctx, usm, forwardMsg);
+            final MailMessage originalMsg = origMsgs[0];
+            final String owner = MimeProcessingUtility.getFolderOwnerIfShared(originalMsg.getFolder(), originalMsg.getAccountId(), session);
+            if (null != owner) {
+                final User[] users = UserStorage.getInstance().searchUserByMailLogin(owner, ctx);
+                if (null != users && users.length > 0) {
+                    final InternetAddress onBehalfOf = new QuotedInternetAddress(users[0].getMail(), true);
+                    forwardMsg.setFrom(onBehalfOf);
+                    final QuotedInternetAddress sender = new QuotedInternetAddress(usm.getSendAddr(), true);
+                    forwardMsg.setSender(sender);
+                }
+            }
+            return asInlineForward(originalMsg, session, ctx, usm, forwardMsg);
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         } catch (final IOException e) {
@@ -735,5 +759,21 @@ public final class MimeForward {
         }
     }
      */
+
+    private static User getUserFrom(Session session) {
+        try {
+            if (null == session) {
+                return null;
+            }
+            if (session instanceof ServerSession) {
+                return ((ServerSession) session).getUser();
+            }
+            final Context ctx = ContextStorage.getStorageContext(session.getContextId());
+            return UserStorage.getStorageUser(session.getUserId(), ctx);
+        } catch (final Exception e) {
+            // Ignore
+            return null;
+        }
+    }
 
 }

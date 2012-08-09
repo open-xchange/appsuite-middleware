@@ -50,6 +50,7 @@
 package com.openexchange.caching;
 
 import java.io.InputStream;
+import java.util.Properties;
 import com.openexchange.exception.OXException;
 
 /**
@@ -151,6 +152,18 @@ public interface CacheService extends CacheKeyService {
      * @throws OXException If configuration fails
      */
     public void loadConfiguration(InputStream inputStream) throws OXException;
+
+    /**
+     * Additionally feeds the cache manager with specified configuration properties. 
+     * <p>
+     * The cache manager reads a default configuration - defined through property "com.openexchange.caching.configfile" in
+     * 'system.properties' file - on initialization automatically. Therefore this method is useful to extend or overwrite the loaded default
+     * configuration and needs <b>not</b> to be invoked to initialize the cache manager at all.
+     *
+     * @param properties The properties to read from
+     * @throws OXException If configuration fails
+     */
+    void loadConfiguration(Properties properties) throws OXException;
 
     /**
      * Re-Loads the cache manager's default configuration.

@@ -368,31 +368,34 @@ public class MimeMessageFiller {
              */
             InternetAddress from = mail.getFrom()[0];
             InternetAddress sender = null;
-            {
-                final MailPath msgref;
-                if (ComposeType.REPLY.equals(mail.getSendType()) && ((msgref = mail.getMsgref()) != null)) {
-                    MailAccess<?, ?> access = null;
-                    try {
-                        access = MailAccess.getInstance(session, msgref.getAccountId());
-                        access.connect();
-                        final MailFolder refFolder = access.getFolderStorage().getFolder(msgref.getFolder());
-                        if (refFolder.isShared()) {
-                            final String owner = parseOwnerFromSharedPath(msgref.getFolder());
-                            if (null != owner) {
-                                final User[] users = UserStorage.getInstance().searchUserByMailLogin(owner, ctx);
-                                if (null != users && users.length > 0) {
-                                    final InternetAddress onBehalfOf = new QuotedInternetAddress(users[0].getMail(), true);
-                                    sender = from;
-                                    from = onBehalfOf;
-                                }                                
+            if (false) {
+                final MailPath msgref = mail.getMsgref();
+                if (msgref != null) {
+                    final ComposeType sendType = mail.getSendType();
+                    if (ComposeType.REPLY.equals(sendType) || ComposeType.FORWARD.equals(sendType)) {
+                        MailAccess<?, ?> access = null;
+                        try {
+                            access = MailAccess.getInstance(session, msgref.getAccountId());
+                            access.connect();
+                            final MailFolder refFolder = access.getFolderStorage().getFolder(msgref.getFolder());
+                            if (refFolder.isShared()) {
+                                final String owner = refFolder.getOwner();
+                                if (null != owner) {
+                                    final User[] users = UserStorage.getInstance().searchUserByMailLogin(owner, ctx);
+                                    if (null != users && users.length > 0) {
+                                        final InternetAddress onBehalfOf = new QuotedInternetAddress(users[0].getMail(), true);
+                                        sender = from;
+                                        from = onBehalfOf;
+                                    }
+                                }
                             }
-                        }
-                    } catch (final Exception e) {
-                        // Ignore
-                        LOG.warn("Couldn't resolve on-behalf-of address.", e);
-                    } finally {
-                        if (null != access) {
-                            access.close(true);
+                        } catch (final Exception e) {
+                            // Ignore
+                            LOG.warn("Couldn't resolve on-behalf-of address.", e);
+                        } finally {
+                            if (null != access) {
+                                access.close(true);
+                            }
                         }
                     }
                 }
@@ -562,11 +565,6 @@ public class MimeMessageFiller {
                 mimeMessage.addHeader(name, entry.getValue());
             }
         }
-    }
-
-    private String parseOwnerFromSharedPath(String fullName) {
-        // TODO Parse owner out of passed folder full name
-        return null;
     }
 
     private void setReplyTo(final ComposedMailMessage mail, final MimeMessage mimeMessage) throws OXException, MessagingException {

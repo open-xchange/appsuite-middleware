@@ -50,3 +50,5 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc config
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Thu Jul 19 2012 Carsten Hoeger <choegeropen-xchange.com>
+initial release
