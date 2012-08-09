@@ -59,13 +59,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.codec.binary.Hex;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpHost;
+import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.jdom2.Document;
-import org.jdom2.Element;
-import org.jdom2.JDOMException;
-import org.jdom2.input.SAXBuilder;
+import org.apache.http.util.EntityUtils;
+import org.jdom.Document;
+import org.jdom.Element;
+import org.jdom.JDOMException;
+import org.jdom.input.SAXBuilder;
 import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -87,6 +93,12 @@ import com.openexchange.configuration.AJAXConfig.Property;
 public class UpdaterXMLTest extends AbstractAJAXSession {
 
     private AJAXClient client;
+    private String userName;
+    private String password;
+    private String hostname;
+    private String context;
+    private String login;
+    private HttpHost targetHost;
 
     /**
      * Initializes a new {@link UpdaterXMLTest}.
@@ -100,44 +112,88 @@ public class UpdaterXMLTest extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         User user = User.User1;
-        String login = AJAXConfig.getProperty(user.getLogin());
-        String password = AJAXConfig.getProperty(user.getPassword());
-        String hostname = AJAXConfig.getProperty(Property.HOSTNAME);
-        this.client = new AJAXClient(user);
-        DefaultHttpClient httpClient = client.getSession().getHttpClient();
-        httpClient.getCredentialsProvider().setCredentials(new AuthScope(hostname, 80), new UsernamePasswordCredentials(login, password));
+        userName = AJAXConfig.getProperty(user.getLogin());
+        context = AJAXConfig.getProperty(Property.CONTEXTNAME);
+        login = userName + '@' + context;
+        password = AJAXConfig.getProperty(user.getPassword());
+        hostname = AJAXConfig.getProperty(Property.HOSTNAME);
+        targetHost = new HttpHost(hostname, 80);
+        this.client = new AJAXClient(user);        
     }
+    
+    public void testBasicAuth() throws Exception {
+        DefaultHttpClient httpClient = new DefaultHttpClient();
+        try {    
+            
+            HttpGet getXML = new HttpGet("/ajax/updater/update.xml");
+            HttpResponse response = httpClient.execute(targetHost, getXML);
+            HttpEntity entity = response.getEntity();
+            EntityUtils.consume(entity);            
+            assertTrue("Expected 401.", response.getStatusLine().getStatusCode() == 401);
+            
+            httpClient.getCredentialsProvider().setCredentials(
+                new AuthScope(targetHost.getHostName(), targetHost.getPort()),
+                new UsernamePasswordCredentials(login, password));
+            response = httpClient.execute(targetHost, getXML);
+            entity = response.getEntity();
+            EntityUtils.consume(entity);
+            assertTrue("Expected 200.", response.getStatusLine().getStatusCode() == 200);
 
+            List<Cookie> cookies = httpClient.getCookieStore().getCookies();
+            boolean foundCookie = false;
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals("sessionid")) {
+                    foundCookie = true;
+                    break;
+                }
+            }
+            
+            assertTrue("Did not find sessionid cookie.", foundCookie);
+            // Clear credentials to force check of sessionid cookie (which must be invalid)
+            httpClient.getCredentialsProvider().clear();
+            response = httpClient.execute(targetHost, getXML);
+            entity = response.getEntity();
+            EntityUtils.consume(entity);
+            assertTrue("Expected 401.", response.getStatusLine().getStatusCode() == 401);
+        } finally {
+            httpClient.getConnectionManager().shutdown();
+        }
+    }
+    
     public void testUpdateXML() throws Exception {
+        DefaultHttpClient httpClient = client.getSession().getHttpClient();
+        httpClient.getCredentialsProvider().setCredentials(
+            new AuthScope(targetHost.getHostName(), targetHost.getPort()),
+            new UsernamePasswordCredentials(login, password));
         UpdateXMLRequest request = new UpdateXMLRequest();
         UpdateXMLResponse response = client.execute(request);
-
+        
         SAXBuilder builder = new SAXBuilder();
         String xml = response.getXML();
-
+        
         Document doc = null;
         try {
             doc = builder.build(new StringReader(xml));
             Element products = doc.getRootElement();
             List<Element> children = products.getChildren("Product");
-
+            
             Map<String, String> filesToGet = new HashMap<String, String>();
             for (Element child : children) {
                 filesToGet.put(child.getChildText("URL"), child.getChildText("MD5"));
             }
-
+            
             for (String url : filesToGet.keySet()) {
                 FileRequest fileRequest = new FileRequest(extractFileName(url));
                 FileResponse fileResponse = client.execute(fileRequest);
                 byte[] fileBytes = fileResponse.getFileBytes();
                 String md5 = calculateMD5(new ByteArrayInputStream(fileBytes));
-
+                
                 assertEquals("MD5 Hash was not correct for Download from " + url, md5, filesToGet.get(url));
             }
         } catch (JDOMException e) {
             System.out.println(xml);
             throw e;
-        }
+        }        
     }
 
     public void testAgainWithChangedLocale() throws Exception {
