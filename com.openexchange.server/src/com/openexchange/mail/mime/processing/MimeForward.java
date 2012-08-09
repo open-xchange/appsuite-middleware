@@ -248,6 +248,19 @@ public final class MimeForward {
                 /*
                  * Attachment-Forward
                  */
+                if (1 == origMsgs.length) {
+                    final MailMessage originalMsg = origMsgs[0];
+                    final String owner = MimeProcessingUtility.getFolderOwnerIfShared(originalMsg.getFolder(), originalMsg.getAccountId(), session);
+                    if (null != owner) {
+                        final User[] users = UserStorage.getInstance().searchUserByMailLogin(owner, ctx);
+                        if (null != users && users.length > 0) {
+                            final InternetAddress onBehalfOf = new QuotedInternetAddress(users[0].getMail(), true);
+                            forwardMsg.setFrom(onBehalfOf);
+                            final QuotedInternetAddress sender = new QuotedInternetAddress(usm.getSendAddr(), true);
+                            forwardMsg.setSender(sender);
+                        }
+                    }
+                }
                 return asAttachmentForward(origMsgs, forwardMsg);
             }
             /*
