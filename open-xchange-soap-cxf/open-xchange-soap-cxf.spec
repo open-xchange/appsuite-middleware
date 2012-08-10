@@ -16,6 +16,8 @@ URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       Bundle to offer SOAP webservices as discovered in the OSGi system
 Requires:      open-xchange-core >= @OXVERSION@
+Provides:      open-xchange-axis2 = %{version}
+Obsoletes:     open-xchange-axis2 <= %{version}
 
 %description
 Bundle to offer SOAP webservices as discovered in the OSGi system
