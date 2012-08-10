@@ -20,6 +20,8 @@ Requires:      open-xchange-core >= @OXVERSION@
 Requires:      open-xchange-admin >= @OXVERSION@
 Provides:      open-xchange-admin-plugin-autocontextid = %{version}
 Obsoletes:     open-xchange-admin-plugin-autocontextid <= %{version}
+Provides:      open-xchange-admin-plugin-autocontextid-client = %{version}
+Obsoletes:     open-xchange-admin-plugin-autocontextid-client <= %{version}
 
 %description
 Open Xchange Admin AutocontextId Plugin

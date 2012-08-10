@@ -18,8 +18,12 @@ Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       Open Xchange Admin User Copy Plugin
 Requires:      open-xchange-core >= @OXVERSION@
 Requires:      open-xchange-admin >= @OXVERSION@
-Provides:      open-xchange-admin-plugin-usermove = %{version}
-Obsoletes:     open-xchange-admin-plugin-usermove <= %{version}
+Provides:      open-xchange-admin-plugin-user-copy = %{version}
+Obsoletes:     open-xchange-admin-plugin-user-copy <= %{version}
+Provides:      open-xchange-admin-plugin-user-copy-client = %{version}
+Obsoletes:     open-xchange-admin-plugin-user-copy-client <= %{version}
+Provides:      open-xchange-user-copy = %{version}
+Obsoletes:     open-xchange-user-copy <= %{version}
 
 %description
 Open Xchange Admin User Copy Plugin

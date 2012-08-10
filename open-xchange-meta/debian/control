@@ -20,7 +20,7 @@ Description: The Open-Xchange Meta package for OX into Parallels integration
 
 Package: open-xchange-meta-plesk
 Architecture: all
-Depends: ${oxcommon}, ${all-lang}, open-xchange-spamhandler-default, open-xchange-admin-soap, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging, open-xchange-meta-gui, open-xchange-upsell-generic
+Depends: ${oxcommon}, ${all-lang}, open-xchange-spamhandler-default, open-xchange-admin-soap, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging, open-xchange-meta-gui
 Description: The Open-Xchange Meta package for OX into Plesk integration
 
 Package: open-xchange-meta-server
