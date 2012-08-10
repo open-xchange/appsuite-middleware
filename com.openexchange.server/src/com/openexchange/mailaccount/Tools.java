@@ -190,6 +190,8 @@ public final class Tools {
         /*
          * Check full names
          */
+        final int userId = serverSession.getUserId();
+        final int contextId = serverSession.getContextId();
         try {
             String fullName = account.getConfirmedHamFullname();
             if (null == fullName) {
@@ -198,7 +200,7 @@ public final class Tools {
                 }
                 String name = account.getConfirmedHam();
                 if (null == name) {
-                    primaryAccount = storageService.getDefaultMailAccount(serverSession.getUserId(), serverSession.getContextId());
+                    primaryAccount = storageService.getDefaultMailAccount(userId, contextId);
                     name = getName(StorageUtility.INDEX_CONFIRMED_HAM, primaryAccount);
                 }
                 mad.setConfirmedHamFullname((tmp = new StringBuilder(prefix)).append(name).toString());
@@ -216,7 +218,7 @@ public final class Tools {
                 String name = account.getConfirmedSpam();
                 if (null == name) {
                     if (null == primaryAccount) {
-                        primaryAccount = storageService.getDefaultMailAccount(serverSession.getUserId(), serverSession.getContextId());
+                        primaryAccount = storageService.getDefaultMailAccount(userId, contextId);
                     }
                     name = getName(StorageUtility.INDEX_CONFIRMED_SPAM, primaryAccount);
                 }
@@ -235,7 +237,7 @@ public final class Tools {
                 String name = account.getDrafts();
                 if (null == name) {
                     if (null == primaryAccount) {
-                        primaryAccount = storageService.getDefaultMailAccount(serverSession.getUserId(), serverSession.getContextId());
+                        primaryAccount = storageService.getDefaultMailAccount(userId, contextId);
                     }
                     name = getName(StorageUtility.INDEX_DRAFTS, primaryAccount);
                 }
@@ -259,7 +261,7 @@ public final class Tools {
                 String name = account.getSent();
                 if (null == name) {
                     if (null == primaryAccount) {
-                        primaryAccount = storageService.getDefaultMailAccount(serverSession.getUserId(), serverSession.getContextId());
+                        primaryAccount = storageService.getDefaultMailAccount(userId, contextId);
                     }
                     name = getName(StorageUtility.INDEX_SENT, primaryAccount);
                 }
@@ -283,7 +285,7 @@ public final class Tools {
                 String name = account.getSpam();
                 if (null == name) {
                     if (null == primaryAccount) {
-                        primaryAccount = storageService.getDefaultMailAccount(serverSession.getUserId(), serverSession.getContextId());
+                        primaryAccount = storageService.getDefaultMailAccount(userId, contextId);
                     }
                     name = getName(StorageUtility.INDEX_SPAM, primaryAccount);
                 }
@@ -307,7 +309,7 @@ public final class Tools {
                 String name = account.getTrash();
                 if (null == name) {
                     if (null == primaryAccount) {
-                        primaryAccount = storageService.getDefaultMailAccount(serverSession.getUserId(), serverSession.getContextId());
+                        primaryAccount = storageService.getDefaultMailAccount(userId, contextId);
                     }
                     name = getName(StorageUtility.INDEX_TRASH, primaryAccount);
                 }
@@ -324,11 +326,11 @@ public final class Tools {
              * Update and return re-fetched account instance
              */
             if (null == con) {
-                storageService.updateMailAccount(mad, attributes, serverSession.getUserId(), serverSession.getContextId(), serverSession);
-                return storageService.getMailAccount(accountId, serverSession.getUserId(), serverSession.getContextId());
+                storageService.updateMailAccount(mad, attributes, userId, contextId, serverSession);
+                return storageService.getMailAccount(accountId, userId, contextId);
             }
-            storageService.updateMailAccount(mad, attributes, serverSession.getUserId(), serverSession.getContextId(), serverSession, con, false);
-            final MailAccount[] accounts = storageService.getUserMailAccounts(serverSession.getUserId(), serverSession.getContextId(), con);
+            storageService.updateMailAccount(mad, attributes, userId, contextId, serverSession, con, false);
+            final MailAccount[] accounts = storageService.getUserMailAccounts(userId, contextId, con);
             for (final MailAccount macc : accounts) {
                 if (macc.getId() == accountId) {
                     return macc;
@@ -340,8 +342,8 @@ public final class Tools {
              * Checking full names failed
              */
             final StringBuilder sb = new StringBuilder("Checking default folder full names for account ");
-            sb.append(account.getId()).append(" failed with user ").append(serverSession.getUserId());
-            sb.append(" in context ").append(serverSession.getContextId());
+            sb.append(account.getId()).append(" failed with user ").append(userId);
+            sb.append(" in context ").append(contextId);
             com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AbstractMailAccountAction.class)).warn(sb.toString(), e);
             return account;
         }
