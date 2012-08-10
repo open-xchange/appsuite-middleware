@@ -162,7 +162,7 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
         final Object[] keys = cacheControl.getMemoryCache().getKeyArray();
         final List<Serializable> list = new ArrayList<Serializable>(keys.length);
         for (final Object key : keys) {
-            list.add(cacheControl.get((Serializable) key));
+            list.add(cacheControl.get((Serializable) key).getVal());
         }
         return list;
     }

@@ -10,4 +10,6 @@ Package: open-xchange-soap-cxf
 Architecture: all
 Pre-Depends: open-xchange-core (>= @OXVERSION@)
 Depends: ${misc:Depends}
+Replaces: open-xchange-axis2
+Conflicts: open-xchange-axis2
 Description: Bundle to offer SOAP webservices as discovered in the OSGi system

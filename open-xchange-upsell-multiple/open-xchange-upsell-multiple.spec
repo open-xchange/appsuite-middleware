@@ -16,6 +16,8 @@ URL:            http://www.open-xchange.com/
 Source:         %{name}_%{version}.orig.tar.bz2
 Summary:        The multiple Open-Xchange upsell multiple bundle
 Requires:       open-xchange-core >= @OXVERSION@
+Provides:       open-xchange-upsell-generic = %{version}
+Obsoletes:      open-xchange-upsell-generic <= %{version}
 
 %description
 The multiple Open-Xchange upsell multiple bundle

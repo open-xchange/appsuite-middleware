@@ -59,16 +59,18 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrResponse;
 import org.apache.solr.client.solrj.response.FacetField;
+import org.apache.solr.client.solrj.response.FacetField.Count;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.UpdateResponse;
-import org.apache.solr.client.solrj.response.FacetField.Count;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.SolrParams;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexDocument;
@@ -159,7 +161,8 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
     /*
      * Public methods
      */
-    public void releaseCore() {        
+    public void releaseCore() {
+        indexedFolders.clear();
         indexedFolders = null;
         indexedFolders = new HashMap<Integer, Map<String, Set<String>>>();
         final SolrAccessService accessService = Services.getService(SolrAccessService.class);
