@@ -287,6 +287,11 @@ public final class Tools {
                     }
                     name = getName(StorageUtility.INDEX_SPAM, primaryAccount);
                 }
+                if ("Spam".equals(name) && account.getMailServer().endsWith("yahoo.com")) {
+                    name = "Bulk Mail";
+                    mad.setDrafts(name);
+                    attributes.add(Attribute.DRAFTS_LITERAL);
+                }
                 mad.setSpamFullname(tmp.append(name).toString());
                 attributes.add(Attribute.SPAM_FULLNAME_LITERAL);
             }
