@@ -50,6 +50,7 @@
 package com.openexchange.caching;
 
 import java.io.Serializable;
+import java.util.Collection;
 import com.openexchange.exception.OXException;
 
 /**
@@ -87,6 +88,13 @@ public interface Cache {
      * @return <code>true</code> if this cache has a replicated nature; otherwise <code>false</code> (a distributed nature)
      */
     public boolean isReplicated();
+
+    /**
+     * Gets the currently cached elements.
+     * 
+     * @return The values
+     */
+    public Collection<Serializable> values();
 
     /**
      * Checks if this cache is local-only.

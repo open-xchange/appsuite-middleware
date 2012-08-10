@@ -9,6 +9,6 @@ Homepage: http://www.open-xchange.com
 Package: open-xchange-admin-autocontextid
 Architecture: all
 Depends: ${misc:Depends}, open-xchange-admin (>= @OXVERSION@)
-Replaces: open-xchange-admin-plugin-autocontextid
-Conflicts: open-xchange-admin-plugin-autocontextid
+Replaces: open-xchange-admin-plugin-autocontextid, open-xchange-admin-plugin-autocontextid-client
+Conflicts: open-xchange-admin-plugin-autocontextid, open-xchange-admin-plugin-autocontextid-client
 Description: Open Xchange Admin AutocontextId Plugin

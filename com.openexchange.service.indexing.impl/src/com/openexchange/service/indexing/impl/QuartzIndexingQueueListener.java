@@ -131,7 +131,7 @@ public final class QuartzIndexingQueueListener implements MQQueueListener {
 
     private final AtomicLong counter;
 
-    private final QuartzService jobExecutor;
+    private final QuartzService quartzService;
 
     /**
      * Initializes a new {@link QuartzIndexingQueueListener}.
@@ -141,7 +141,7 @@ public final class QuartzIndexingQueueListener implements MQQueueListener {
     public QuartzIndexingQueueListener(final int maxConcurrentJobs, final QuartzService executor) throws SchedulerException {
         super();
         counter = new AtomicLong();
-        jobExecutor = executor;
+        quartzService = executor;
         THRESHOLD.set(maxConcurrentJobs);
         // The special job used for re-scheduling Quartz indexing jobs
         final JobDetail job = newJob(ReschedulerJob.class).withIdentity("rescheduler", GROUP).withDescription("The rescheduling job.").build();
@@ -149,7 +149,7 @@ public final class QuartzIndexingQueueListener implements MQQueueListener {
         final TriggerBuilder<Trigger> triggerBuilder = newTrigger().withIdentity("rescheduler", GROUP).withDescription("The rescheduling trigger.").forJob(job.getKey());
         triggerBuilder.startNow().withSchedule(simpleSchedule().repeatForever().withIntervalInSeconds(15));
         // Schedule
-        jobExecutor.getScheduler().scheduleJob(job, triggerBuilder.build());
+        quartzService.getScheduler().scheduleJob(job, triggerBuilder.build());
     }
 
     @Override
@@ -184,7 +184,7 @@ public final class QuartzIndexingQueueListener implements MQQueueListener {
             /*
              * Tell quartz to schedule the job using our trigger
              */
-            jobExecutor.getScheduler().scheduleJob(job, trigger);
+            quartzService.getScheduler().scheduleJob(job, trigger);
         } catch (final JMSException e) {
             LOG.warn("A JMS error occurred: " + e.getMessage(), e);
         } catch (final SchedulerException e) {
@@ -216,7 +216,7 @@ public final class QuartzIndexingQueueListener implements MQQueueListener {
             /*
              * Tell quartz to schedule the job using our trigger
              */
-            jobExecutor.getScheduler().scheduleJob(job, trigger);
+            quartzService.getScheduler().scheduleJob(job, trigger);
         } catch (final ClassNotFoundException e) {
             LOG.warn("Invalid Java object in indexing message: " + e.getMessage(), e);
         } catch (final IOException e) {

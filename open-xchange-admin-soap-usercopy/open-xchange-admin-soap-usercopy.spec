@@ -18,6 +18,8 @@ Source:         %{name}_%{version}.orig.tar.bz2
 Summary:        Open Xchange Admin User Copy Bundle SOAP server
 Requires:       open-xchange-soap-cxf >= @OXVERSION@
 Requires:	open-xchange-admin-user-copy >= @OXVERSION@
+Provides:       open-xchange-admin-plugin-user-copy-soap = %{version}
+Obsoletes:      open-xchange-admin-plugin-user-copy-soap <= %{version}
 
 %description
 Open Xchange Admin User Copy Bundle SOAP server

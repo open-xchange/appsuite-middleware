@@ -87,6 +87,8 @@ define("chat/ui", function () {
 
     request.onMessage = function (response) {
         var message = response.responseBody;
+	console.log('Got message from server');
+	console.log(message);
         try {
             var json = jQuery.parseJSON(message);
         } catch (e) {
@@ -96,7 +98,7 @@ define("chat/ui", function () {
 
         var me = json.author == myName;
         var date = typeof(json.time) == 'string' ? parseInt(json.time) : json.time;
-        addMessage(json.author, json.text, me ? 'blue' : 'black', new Date(date));
+        addMessage(json.from, json.data.message, me ? 'blue' : 'black', new Date());
 
     };
 

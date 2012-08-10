@@ -9,7 +9,8 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-installroot=$(CURDIR)/debian/open-xchange-l10n
+pkgname=open-xchange-l10n
+installroot=$(CURDIR)/debian/$(pkgname)
 
 configure: configure-stamp
 configure-stamp:
@@ -36,7 +37,7 @@ install: build
 	dh_installdirs
 	for LANG in de_DE fr_FR; do \
 		PACKAGE_EXTENSION=$$(echo $${LANG} | tr '[:upper:]_' '[:lower:]-'); \
-		ant -lib build/lib -Dbasedir=build -DdestDir=$(installroot)-$${PACKAGE_EXTENSION} -DpackageName=open-xchange-l10n -Dlanguage=$${LANG} -f build/build.xml build; \
+		ant -lib build/lib -Dbasedir=build -DdestDir=$(installroot)-$${PACKAGE_EXTENSION} -DpackageName=$(pkgname) -Dlanguage=$${LANG} -f build/build.xml build; \
 	done
 
 # Build architecture-independent files here.
