@@ -165,7 +165,11 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                 Patches.Incoming.patchParticipantListRemovingDoubleUsers(appointmentToSave);
             }
             checkForExplicitRemoves(originalAppointment, appointmentToSave);
-            getAppointmentInterface().updateAppointmentObject(appointmentToSave, parentFolderID, clientLastModified);
+            if (false == containsChanges(originalAppointment, appointmentToSave)) {
+                LOG.debug("No changes detected in " + appointmentToSave + ", skipping update.");
+            } else {
+                getAppointmentInterface().updateAppointmentObject(appointmentToSave, parentFolderID, clientLastModified);
+            }
             clientLastModified = appointmentToSave.getLastModified();
             /*
              * update change exceptions
@@ -296,6 +300,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
              */
             String iCal = new String(bytes.toByteArray(), "UTF-8");
             iCal = Patches.Outgoing.removeEmptyRDates(iCal);
+//            iCal = iCal.replace("@premium", "424242669@devel-mail.netline.de");
             return iCal;
         } catch (final UnsupportedEncodingException e) {
             throw protocolException(e);
@@ -357,7 +362,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
         /*
          * apply patches
          */
-        final String patchedICal = iCal;
+        String patchedICal = iCal;
         
         //XXX to make the UserResolver do it's job correctly
         //patchedICal = patchedICal.replace("424242669@devel-mail.netline.de", "@premium");
@@ -368,6 +373,53 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                 patchedICal, getTimeZone(), factory.getContext(), new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>());
     }
     
+    private static boolean differs(Object value1, Object value2) {
+        if (value1 == value2) {
+            return false;
+        } else if (null == value1 && null != value2) {
+            return true;
+        } else if (null == value2) {
+            return true;
+        } else if (String.class.isInstance(value1) && String.class.isInstance(value2)) {
+            return 0 != ((String)value1).trim().compareTo(((String)value2).trim());
+        } else if (Comparable.class.isInstance(value1)) {
+            return 0 != ((Comparable)value1).compareTo(value2);
+        } else {
+            return false;
+        }
+    }
+    
+    private static boolean differs(int field, Appointment oldAppointment, CalendarDataObject cdo) {
+        return oldAppointment.contains(field) && false == cdo.contains(field) ||
+                false == oldAppointment.contains(field) && cdo.contains(field) ||
+                differs(oldAppointment.get(field), cdo.get(field));
+    }
+    
+    private static boolean containsChanges(Appointment oldAppointment, CalendarDataObject cdo) {
+        try {
+            /*
+             * check appointment fields
+             */
+            for (int field : CALDAV_FIELDS) {
+                if (differs(field, oldAppointment, cdo)) {
+                    return true;
+                }
+            }
+            if (CalendarObject.NO_RECURRENCE != oldAppointment.getRecurrenceType() && 
+                    CalendarObject.NO_RECURRENCE != cdo.getRecurrenceType()) {
+                for (int field : RECURRENCE_FIELDS) {
+                    if (differs(field, oldAppointment, cdo)) {
+                        return true;
+                    }
+                }
+            }
+        } catch (Exception e) { // not enough trust in generic comparisons
+            LOG.error("Error checking for appointment changes", e);
+            return true;
+        }
+        return false;
+    }
+
     private void checkForExplicitRemoves(final Appointment oldAppointment, final CalendarDataObject cdo) {
         /*
          * reset previously set appointment fields

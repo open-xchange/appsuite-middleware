@@ -1,3 +1,7 @@
+* 2012-08-10 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 22769: Don't update appointment unless necessary 
+ 
 * 2012-08-09 - martin.herfurth@open-xchange.com
 
  - Fix for bug 22766: Fixed possible NPE
