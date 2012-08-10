@@ -60,7 +60,7 @@ import com.openexchange.log.LogFactory;
 
 
 /**
- * {@link AtmosphereResourceCleanupListener}
+ * {@link AtmosphereResourceCleanupListener} - Debug cleanup process and remove resources from broadcasters.
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
@@ -92,8 +92,9 @@ public class AtmosphereResourceCleanupListener implements AtmosphereResourceEven
     @Override
     public void onDisconnect(AtmosphereResourceEvent event) {
         for (Broadcaster broadcaster : associatedBroadcasters) {
+            //TODO: actually not needed
             broadcaster.removeAtmosphereResource(resource);
-            LOG.info("Removing resource" + resource + "from broadcaster" + broadcaster);
+            LOG.info("Removing resource: " + resource.uuid() + " from broadcaster: " + broadcaster.getID());
         }
     }
 
