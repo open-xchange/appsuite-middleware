@@ -368,11 +368,13 @@ public final class CSSMatcher {
                             if ('.' == first) {
                                 // .class -> #prefix .prefix-class
                                 builder.append('#').append(cssPrefix).append(' ');
-                                builder.append('.').append(cssPrefix).append('-').append(replaceDotsAndHashes(word.substring(1), cssPrefix, helper)).append(' ');
+                                builder.append('.').append(cssPrefix).append('-');
+                                builder.append(replaceDotsAndHashes(word.substring(1), cssPrefix, helper)).append(' ');
                             } else if ('#' == first) {
                                 // #id -> #prefix #prefix-id
                                 builder.append('#').append(cssPrefix).append(' ');
-                                builder.append('#').append(cssPrefix).append('-').append(replaceDotsAndHashes(word.substring(1), cssPrefix, helper)).append(' ');
+                                builder.append('#').append(cssPrefix).append('-');
+                                builder.append(replaceDotsAndHashes(word.substring(1), cssPrefix, helper)).append(' ');
                             } else {
                                 // element -> #prefix element
                                 builder.append('#').append(cssPrefix).append(' ');
