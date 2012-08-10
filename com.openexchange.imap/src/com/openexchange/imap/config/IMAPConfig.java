@@ -236,6 +236,7 @@ public final class IMAPConfig extends MailConfig {
      * @param session The session possibly caching capabilities information
      * @throws OXException If IMAP capabilities cannot be initialized
      */
+    @SuppressWarnings("unchecked")
     public void initializeCapabilities(final IMAPStore imapStore, final Session session) throws OXException {
         if (imapCapabilities == null) {
             synchronized (this) {
@@ -246,7 +247,7 @@ public final class IMAPConfig extends MailConfig {
                 try {
                     final CapabilitiesResponse response = CapabilitiesCache.getCapabilitiesResponse(imapStore, this, session, accountId);
                     imapCapabilities = response.getImapCapabilities();
-                    capabilities = response.getMap();
+                    capabilities = imapStore.getCapabilities();
                     aclExtension = response.getAclExtension();
                 } catch (final MessagingException e) {
                     throw MailConfigException.create(e);
@@ -294,9 +295,9 @@ public final class IMAPConfig extends MailConfig {
      */
     public boolean isSupportsACLs() {
         final BoolCapVal supportsACLs = IMAPProperties.getInstance().getSupportsACLs();
-        final IMAPCapabilities capabilities = imapCapabilities;
+        final Map<String, String> capabilities = this.capabilities;
         if (capabilities != null && BoolCapVal.AUTO.equals(supportsACLs)) {
-            return capabilities.hasPermissions();
+            return capabilities.containsKey("ACL");
         }
         return BoolCapVal.TRUE.equals(supportsACLs) ? true : false;
     }

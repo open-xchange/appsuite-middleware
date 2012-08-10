@@ -55,6 +55,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -287,6 +288,25 @@ public final class HazelcastCacheService extends DefaultCacheKeyService implemen
             }
         } catch (final IOException e) {
             throw CacheExceptionCode.IO_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    @Override
+    public void loadConfiguration(Properties properties) throws OXException {
+        final Map<MapConfig, Boolean> configs = ConfigurationParser.parseConfig(properties);
+        if (null != configs && !configs.isEmpty()) {
+            final Config config = hazelcastInstance.getConfig();
+            for (final Map.Entry<MapConfig, Boolean> entry : configs.entrySet()) {
+                final MapConfig mapConfig = entry.getKey();
+                if (entry.getValue().booleanValue()) {
+                    // Local only
+                    localOnlyCaches.put(
+                        mapConfig.getName(),
+                        new LocalCache(LocalCacheGenerator.<Serializable, Serializable> createLocalCache(mapConfig), mapConfig));
+                } else {
+                    config.addMapConfig(mapConfig);
+                }
+            }
         }
     }
 

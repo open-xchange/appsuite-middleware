@@ -52,6 +52,7 @@ package com.openexchange.cache.impl;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -267,6 +268,10 @@ public class RefresherTest extends TestCase {
             }
             @Override
             public void loadConfiguration(final InputStream inputStream) throws OXException {
+                throw new UnsupportedOperationException();
+            }
+            @Override
+            public void loadConfiguration(final Properties properties) throws OXException {
                 throw new UnsupportedOperationException();
             }
             @Override

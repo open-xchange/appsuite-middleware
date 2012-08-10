@@ -175,6 +175,10 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
                 response.addWarnings(warnings);
             }
         } catch (final OXException e) {
+            if (AjaxExceptionCodes.BAD_REQUEST.equals(e)) {
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+                return;
+            }
             LOG.error(e.getMessage(), e);
             response.setException(e);
         }  catch (final IllegalStateException e) {

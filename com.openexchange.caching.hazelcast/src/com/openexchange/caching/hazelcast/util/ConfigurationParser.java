@@ -59,6 +59,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.Set;
 import org.apache.commons.logging.Log;
 import com.hazelcast.config.MapConfig;
@@ -201,6 +203,94 @@ public final class ConfigurationParser {
         } finally {
             Streams.close(reader);
         }
+    }
+
+    /**
+     * Parses specified properties.
+     * 
+     * @param properties The properties to parse
+     * @return The resulting map configurations
+     */
+    public static Map<MapConfig, Boolean> parseConfig(final Properties properties) {
+        if (null == properties || properties.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        final Map<String, MapConfig> map = new HashMap<String, MapConfig>(8);
+        final Set<String> localOnly = new HashSet<String>(8);
+        final String namePrefix = NAME_PREFIX;
+        final String prefixDefault = PREFIX_DEFAULT;
+        final int prefixDefaultLength = PREFIX_DEFAULT_LENGTH;
+        final String prefixRegion = PREFIX_REGION;
+        final int prefixRegionLength = PREFIX_REGION_LENGTH;
+        final StringBuilder tmp = new StringBuilder(64);
+        for (final Entry<Object, Object> entry : properties.entrySet()) {
+            tmp.setLength(0);
+            final String line = tmp.append(entry.getKey().toString()).append('=').append(null == entry.getValue() ? "" : entry.getValue().toString()).toString();
+            if (line.startsWith(prefixDefault)) {
+                // First line of default region specification: Is auxiliary enabled?
+                int next = prefixDefaultLength;
+                if ('=' == line.charAt(next) || ':' == line.charAt(next)) {
+                    final String auxiliary = ++next < line.length() ? line.substring(next) : null;
+                    if (isEmpty(auxiliary)) {
+                        localOnly.add(defaultMapName);
+                    }
+                }
+                // Parse line
+                parseLine(line, defaultMapName, map);
+            } else {
+                if (line.startsWith(prefixRegion)) {
+                    final String name;
+                    {
+                        final int dotPos = line.indexOf('.', prefixRegionLength);
+                        if (dotPos < 0) {
+                            final int equalPos = line.indexOf('=', prefixRegionLength);
+                            if (equalPos < 0) {
+                                // Huh...?
+                                name = null;
+                            } else {
+                                tmp.setLength(0);
+                                name = tmp.append(namePrefix).append(line.substring(prefixRegionLength, equalPos)).toString();
+                                // First line of a region specification: Is auxiliary enabled?
+                                final int next = equalPos + 1;
+                                final String auxiliary = next < line.length() ? line.substring(next) : null;
+                                if (isEmpty(auxiliary)) {
+                                    localOnly.add(name);
+                                }
+                            }
+                        } else {
+                            tmp.setLength(0);
+                            name = tmp.append(namePrefix).append(line.substring(prefixRegionLength, dotPos)).toString();
+                        }
+                    }
+                    if (null != name) {
+                        parseLine(line, name, map);
+                    }
+                }
+            }
+        }
+        /*
+         * Check parsed MapConfigs
+         */
+        final Map<MapConfig, Boolean> ret = new HashMap<MapConfig, Boolean>(map.size());
+        final Collection<MapConfig> configs = map.values();
+        for (final MapConfig mapConfig : configs) {
+            final String evictionPolicy = mapConfig.getEvictionPolicy();
+            if (null == evictionPolicy || "NONE".equals(evictionPolicy)) {
+                mapConfig.setEvictionPolicy("LRU");
+                final NearCacheConfig nearCacheConfig = mapConfig.getNearCacheConfig();
+                if (null != nearCacheConfig) {
+                    nearCacheConfig.setEvictionPolicy("LRU");
+                }
+            } else {
+                final NearCacheConfig nearCacheConfig = mapConfig.getNearCacheConfig();
+                if (null != nearCacheConfig) {
+                    nearCacheConfig.setInvalidateOnChange(true);
+                }
+            }
+
+            ret.put(mapConfig, localOnly.contains(mapConfig.getName()) ? Boolean.TRUE : Boolean.FALSE);
+        }
+        return ret;
     }
 
     private static void parseLine(final String line, final String name, final Map<String, MapConfig> map) {

@@ -379,6 +379,13 @@ public final class CSSMatcher {
                     // Special treatment for "body" selector
                     builder.append('#').append(cssPrefix).append(' ');
                 } else {
+                    /*-
+                     * ox-d6fdd67433238e31fb9147aad6634492-BodyImposter ox-d6fdd67433238e31fb9147aad6634492 dt { ... }
+                     * vs.
+                     * ox-d6fdd67433238e31fb9147aad6634492 ox-d6fdd67433238e31fb9147aad6634492-BodyImposter dt { ... }
+                     */
+                    final int insertPos = builder.length();
+                    boolean tagFound = false;
                     for (final String word : words) {
                         if (isEmpty(word)) {
                             builder.append(word);
@@ -393,7 +400,13 @@ public final class CSSMatcher {
                                     builder.append('#').append(cssPrefix).append('-').append(replaceDotsAndHashes(word.substring(1), cssPrefix, helper)).append(' ');
                                 }
                             } else {
-                                builder.append('#').append(cssPrefix).append(' ').append(replaceDotsAndHashes(word, cssPrefix, helper)).append(' ');
+                                if (!tagFound) {
+                                    helper.setLength(0);
+                                    helper.append('#').append(cssPrefix).append(' ');
+                                    builder.insert(insertPos, helper);
+                                    tagFound = true;
+                                }
+                                builder/*.append('#').append(cssPrefix)*/.append(' ').append(replaceDotsAndHashes(word, cssPrefix, helper)).append(' ');
                             }
                         }
                     }
