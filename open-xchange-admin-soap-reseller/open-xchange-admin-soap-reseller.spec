@@ -18,6 +18,8 @@ Source:         %{name}_%{version}.orig.tar.bz2
 Summary:        Open Xchange Admin Reseller Plugin SOAP server
 Requires:       open-xchange-soap-cxf >= @OXVERSION@
 Requires:	open-xchange-admin-reseller >= @OXVERSION@
+Provides:	open-xchange-admin-plugin-reseller-soap = %{version}
+Obsoletes:	open-xchange-admin-plugin-reseller-soap <= %{version}
 
 %description
 Open Xchange Admin Reseller Plugin SOAP server
