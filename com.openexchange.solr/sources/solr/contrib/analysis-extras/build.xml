@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one or more
+    contributor license agreements.  See the NOTICE file distributed with
+    this work for additional information regarding copyright ownership.
+    The ASF licenses this file to You under the Apache License, Version 2.0
+    the "License"); you may not use this file except in compliance with
+    the License.  You may obtain a copy of the License at
+ 
+        http://www.apache.org/licenses/LICENSE-2.0
+ 
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+ -->
+
+<project name="solr-analysis-extras" default="default">
+
+  <description>
+    Additional analysis components
+  </description>
+
+  <import file="../contrib-build.xml"/>
+
+  <path id="classpath">
+  	<pathelement path="${icu.jar}"/>
+        <fileset dir="lib" excludes="${common.classpath.excludes}"/>
+  	<pathelement path="${analyzers-smartcn.jar}"/>
+  	<pathelement path="${analyzers-stempel.jar}"/>
+    <path refid="solr.base.classpath"/>
+  </path>
+
+  <target name="contrib-jars-to-solr" 
+          depends="jar-icu, jar-analyzers-smartcn, jar-analyzers-stempel">
+    <mkdir dir="${build.dir}/lucene-libs"/>
+    <copy todir="${build.dir}/lucene-libs" preservelastmodified="true" flatten="true" failonerror="true" overwrite="true">
+      <fileset file="${icu.jar}"/>
+      <fileset file="${analyzers-smartcn.jar}"/>
+      <fileset file="${analyzers-stempel.jar}"/>
+    </copy>
+  </target>
+
+  <target name="compile-core" depends="jar-icu, jar-analyzers-smartcn, jar-analyzers-stempel, solr-contrib-build.compile-core"/>
+  <target name="dist" depends="contrib-jars-to-solr, common-solr.dist"/>
+</project>

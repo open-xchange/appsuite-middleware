@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one or more
+    contributor license agreements.  See the NOTICE file distributed with
+    this work for additional information regarding copyright ownership.
+    The ASF licenses this file to You under the Apache License, Version 2.0
+    the "License"); you may not use this file except in compliance with
+    the License.  You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+ -->
+<project name="solr-solrj" default="default">
+  <description>Solrj - Solr Java Client</description>
+
+  <property name="ivy.retrieve.pattern" value="${common-solr.dir}/lib/[artifact]-[revision].[ext]"/>
+
+  <import file="../common-build.xml"/>
+
+  <!-- Specialized common-solr.test.classpath, to remove the Solr core test output -->
+  <path id="test.classpath">
+    <pathelement path="${common-solr.dir}/build/solr-test-framework/classes/java"/>
+  	<pathelement path="${tests.userdir}"/>
+  	<path refid="test.base.classpath"/>
+  </path>
+
+  <target name="dist" depends="common-solr.dist">
+    <mkdir  dir="${dist}/solrj-lib" />
+    <copy todir="${dist}/solrj-lib">
+      <fileset dir="${common-solr.dir}/lib">
+        <include name="commons-codec-*.jar"/>
+        <include name="commons-io-*.jar"/>
+        <include name="commons-httpclient-*.jar"/>
+        <include name="*stax-*.jar" />
+        <include name="wstx-*.jar" />
+        <include name="jcl-over-slf4j-*.jar" />
+        <include name="slf4j-api-*.jar" />
+      </fileset>
+    </copy>
+  </target>
+
+  <target name="javadocs" depends="common-solr.javadocs">
+    <mkdir dir="${dest}/docs/api/solrj"/>
+    <copy todir="${dest}/docs/api/solrj">
+      <fileset dir="${javadoc.dir}"/>
+    </copy>
+  </target>
+</project>
