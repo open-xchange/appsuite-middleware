@@ -44,4 +44,14 @@ Bundle-ClassPath: lib/hazelcast-2.3.jar,
  .
 Export-Package: com.hazelcast.cluster,
  com.hazelcast.config,
- com.hazelcast.core
+ com.hazelcast.core,
+ com.hazelcast.examples,
+ com.hazelcast.jmx,
+ com.hazelcast.monitor,
+ com.hazelcast.nio,
+ com.hazelcast.nio.ascii,
+ com.hazelcast.nio.ssl,
+ com.hazelcast.partition,
+ com.hazelcast.query,
+ com.hazelcast.util,
+ com.hazelcast.util.concurrent
