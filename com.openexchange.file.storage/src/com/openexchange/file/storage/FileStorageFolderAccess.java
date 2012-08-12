@@ -79,8 +79,11 @@ public interface FileStorageFolderAccess extends FileStorageConstants {
     public FileStorageFolder getFolder(final String folderId) throws OXException;
 
     /**
-     * Gets the folder considered as personal folder
-     *
+     * Gets the folder considered as personal folder.
+     * <p>
+     * <b>Note</b>: If personal folder is not supported by this file storage, {@link FileStorageExceptionCodes#NO_SUCH_FOLDER
+     * NO_SUCH_FOLDER} is thrown.
+     * 
      * @return The corresponding instance of {@link FileStorageFolder}
      * @throws OXException If either such a folder does not exist or could not be fetched
      */
