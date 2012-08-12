@@ -134,7 +134,7 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
     }
 
     @Override
-    public FileStorageAccountManager getAccount(final String accountId, final Session session) throws OXException {
+    public FileStorageAccountManager getAccountManager(final String accountId, final Session session) throws OXException {
         initIfAbsent(null);
 
         FileStorageAccountManagerProvider candidate = null;

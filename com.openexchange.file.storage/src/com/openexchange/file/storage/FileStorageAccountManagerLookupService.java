@@ -77,5 +77,5 @@ public interface FileStorageAccountManagerLookupService {
      * @return The file storage account manager or <code>null</code>
      * @throws OXException If retrieval fails
      */
-    FileStorageAccountManager getAccount(String accountId, Session session) throws OXException;
+    FileStorageAccountManager getAccountManager(String accountId, Session session) throws OXException;
 }
