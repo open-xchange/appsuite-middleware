@@ -51,6 +51,7 @@ package com.openexchange.groupware.settings.tree.folder;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageFolder;
@@ -123,13 +124,18 @@ public class Infostore implements PreferencesItemService {
                     if (null != defaultAccountManager) {
                         final FileStorageAccount defaultAccount = defaultAccountManager.getAccount(DEFAULT_ID, session);
                         final FileStorageService fileStorageService = defaultAccount.getFileStorageService();
-                        final FileStorageFolder personalFolder = fileStorageService.getAccountAccess(DEFAULT_ID, session).getFolderAccess().getFolder(
-                            FileStorageFolder.PERSONAL);
-                        setting.setSingleValue(new FileStorageFolderIdentifier(
-                            fileStorageService.getId(),
-                            defaultAccount.getId(),
-                            personalFolder.getId()).toString());
-                        return;
+                        final FileStorageAccountAccess accountAccess = fileStorageService.getAccountAccess(DEFAULT_ID, session);
+                        accountAccess.connect();
+                        try {
+                            final FileStorageFolder personalFolder = accountAccess.getFolderAccess().getFolder(FileStorageFolder.PERSONAL);
+                            setting.setSingleValue(new FileStorageFolderIdentifier(
+                                fileStorageService.getId(),
+                                defaultAccount.getId(),
+                                personalFolder.getId()).toString());
+                            return;
+                        } finally {
+                            accountAccess.close();
+                        }
                     }
                 } catch (final OXException e) {
                     // Unable to retrieve default folder

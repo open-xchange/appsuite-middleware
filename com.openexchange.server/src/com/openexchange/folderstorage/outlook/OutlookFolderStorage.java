@@ -62,6 +62,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
@@ -1354,7 +1355,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                         /*
                          * File storage accounts
                          */
-                        final List<FileStorageAccount> fsAccounts = new ArrayList<FileStorageAccount>();
+                        final List<FileStorageAccount> fsAccounts = new LinkedList<FileStorageAccount>();
                         final FileStorageServiceRegistry fsr = OutlookServiceRegistry.getServiceRegistry().getService(FileStorageServiceRegistry.class);
                         if (null == fsr) {
                             // Do nothing
@@ -1367,7 +1368,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                                      */
                                     final List<FileStorageAccount> userAccounts = fsService.getAccountManager().getAccounts(storageParameters.getSession());
                                     for (final FileStorageAccount userAccount : userAccounts) {
-                                        if (SERVICE_INFOSTORE.equals(userAccount.getId())) {
+                                        if (SERVICE_INFOSTORE.equals(userAccount.getId()) || FileStorageAccount.DEFAULT_ID.equals(userAccount.getId())) {
                                             continue;
                                         }
                                         final FileStorageAccountAccess accountAccess = getFSAccountAccess(storageParameters, userAccount);

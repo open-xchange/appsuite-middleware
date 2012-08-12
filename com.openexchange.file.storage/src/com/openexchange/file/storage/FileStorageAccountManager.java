@@ -79,7 +79,7 @@ public interface FileStorageAccountManager extends FileStorageConstants {
      * @param session The session providing needed user data
      * @throws OXException If update fails
      */
-    public void updateAccount(FileStorageAccount account, Session session) throws OXException;;
+    public void updateAccount(FileStorageAccount account, Session session) throws OXException;
 
     /**
      * Deletes an existing account.
@@ -97,7 +97,7 @@ public interface FileStorageAccountManager extends FileStorageConstants {
      * @return All accounts associated with session user.
      * @throws OXException If listing fails
      */
-    public List<FileStorageAccount> getAccounts(Session session) throws OXException;;
+    public List<FileStorageAccount> getAccounts(Session session) throws OXException;
 
     /**
      * Gets an existing file storage account.
