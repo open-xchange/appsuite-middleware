@@ -91,7 +91,7 @@ public final class ConfigFileStorageAccountManagerProvider implements FileStorag
     }
 
     @Override
-    public FileStorageAccountManager getAccount(String accountId, Session session) throws OXException {
+    public FileStorageAccountManager getAccountManager(String accountId, Session session) throws OXException {
         ConfigFileStorageAccount storageAccount = parser.get(accountId);
         if (null == storageAccount) {
             return null;

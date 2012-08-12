@@ -88,7 +88,7 @@ public final class RdbFileStorageAccountManagerProvider implements FileStorageAc
     }
 
     @Override
-    public FileStorageAccountManager getAccount(String accountId, Session session) throws OXException {
+    public FileStorageAccountManager getAccountManager(String accountId, Session session) throws OXException {
         return RdbFileStorageAccountManager.getAccountById(accountId, session);
     }
 
