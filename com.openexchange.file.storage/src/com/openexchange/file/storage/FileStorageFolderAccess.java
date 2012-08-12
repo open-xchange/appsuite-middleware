@@ -90,7 +90,7 @@ public interface FileStorageFolderAccess extends FileStorageConstants {
     public FileStorageFolder getPersonalFolder() throws OXException;
 
     /**
-     * Gets the public folders
+     * Gets the public folders.
      *
      * @return The corresponding instances of {@link FileStorageFolder}
      * @throws OXException If no such folders exist or could not be fetched
