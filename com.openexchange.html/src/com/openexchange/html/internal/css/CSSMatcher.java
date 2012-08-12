@@ -337,54 +337,52 @@ public final class CSSMatcher {
             builder.append(s.substring(0, pos));
         }
         final StringBuilder helper = new StringBuilder(length << 1);
-        {
-            /*-
-             * SIMPLE SELECTORS
-             * 
-             * #id -> #prefix #prefix-id
-             * .class -> #prefix .prefix-class
-             * element -> #prefix element
-             * 
-             * GROUPS (set of simple selectors; comma separated)
-             * 
-             * #id, .class -> #prefix #prefix-id, #prefix .prefix-class
-             * #id, element -> #prefix #prefix-id, #prefix element
-             * .class-A, .class-B -> #prefix .prefix-class-A, #prefix .prefix-class-B
-             * 
-             * Escape every ID, escape every class name, prefix every SIMPLE SELECTOR with #prefix,
-             * every time when occurring within a line
-             */
-            for (final String line : SPLIT_LINES.split(s.substring(pos), 0)) {
-                final String[] words = SPLIT_WORDS.split(line, 0);
-                if (1 == words.length && "body".equalsIgnoreCase(words[0])) {
-                    // Special treatment for "body" selector
-                    builder.append('#').append(cssPrefix).append(' ');
-                } else {
-                    for (final String word : words) {
-                        if (isEmpty(word)) {
-                            builder.append(word);
+        /*-
+         * SIMPLE SELECTORS
+         * 
+         * #id -> #prefix #prefix-id
+         * .class -> #prefix .prefix-class
+         * element -> #prefix element
+         * 
+         * GROUPS (set of simple selectors; comma separated)
+         * 
+         * #id, .class -> #prefix #prefix-id, #prefix .prefix-class
+         * #id, element -> #prefix #prefix-id, #prefix element
+         * .class-A, .class-B -> #prefix .prefix-class-A, #prefix .prefix-class-B
+         * 
+         * Escape every ID, escape every class name, prefix every SIMPLE SELECTOR with #prefix,
+         * every time when occurring within a line
+         */
+        for (final String line : SPLIT_LINES.split(s.substring(pos), 0)) {
+            final String[] words = SPLIT_WORDS.split(line, 0);
+            if (1 == words.length && "body".equalsIgnoreCase(words[0])) {
+                // Special treatment for "body" selector
+                builder.append('#').append(cssPrefix).append(' ');
+            } else {
+                for (final String word : words) {
+                    if (isEmpty(word)) {
+                        builder.append(word);
+                    } else {
+                        final char first = word.charAt(0);
+                        if ('.' == first) {
+                            // .class -> #prefix .prefix-class
+                            builder.append('#').append(cssPrefix).append(' ');
+                            builder.append('.').append(cssPrefix).append('-');
+                            builder.append(replaceDotsAndHashes(word.substring(1), cssPrefix, helper)).append(' ');
+                        } else if ('#' == first) {
+                            // #id -> #prefix #prefix-id
+                            builder.append('#').append(cssPrefix).append(' ');
+                            builder.append('#').append(cssPrefix).append('-');
+                            builder.append(replaceDotsAndHashes(word.substring(1), cssPrefix, helper)).append(' ');
                         } else {
-                            final char first = word.charAt(0);
-                            if ('.' == first) {
-                                // .class -> #prefix .prefix-class
-                                builder.append('#').append(cssPrefix).append(' ');
-                                builder.append('.').append(cssPrefix).append('-');
-                                builder.append(replaceDotsAndHashes(word.substring(1), cssPrefix, helper)).append(' ');
-                            } else if ('#' == first) {
-                                // #id -> #prefix #prefix-id
-                                builder.append('#').append(cssPrefix).append(' ');
-                                builder.append('#').append(cssPrefix).append('-');
-                                builder.append(replaceDotsAndHashes(word.substring(1), cssPrefix, helper)).append(' ');
-                            } else {
-                                // element -> #prefix element
-                                builder.append('#').append(cssPrefix).append(' ');
-                                builder.append(replaceDotsAndHashes(word, cssPrefix, helper)).append(' ');
-                            }
+                            // element -> #prefix element
+                            builder.append('#').append(cssPrefix).append(' ');
+                            builder.append(replaceDotsAndHashes(word, cssPrefix, helper)).append(' ');
                         }
                     }
                 }
-                builder.append('\n');
             }
+            builder.append('\n');
         }
         builder.deleteCharAt(builder.length()-1);
         return builder.append('{').toString();
