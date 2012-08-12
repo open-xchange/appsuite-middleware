@@ -59,6 +59,7 @@ import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.ServiceAware;
+import com.openexchange.groupware.infostore.InfostoreFacades;
 import com.openexchange.session.Session;
 
 
@@ -70,11 +71,11 @@ import com.openexchange.session.Session;
 public class InfostoreDefaultAccountManager implements FileStorageAccountManager {
 
     /**
-     * {@link FileStorageAccountImplementation}
-     *
-     * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+     * The default account for infostore.
      */
     private static final class FileStorageAccountImpl implements FileStorageAccount, ServiceAware {
+
+        private static final long serialVersionUID = -4701429514008282005L;
 
         /**
          * Initializes a new {@link InfostoreDefaultAccountManager.FileStorageAccountImpl}.
@@ -126,7 +127,7 @@ public class InfostoreDefaultAccountManager implements FileStorageAccountManager
 
     @Override
     public FileStorageAccount getAccount(final String id, final Session session) throws OXException {
-        if(id.equals(DEFAULT_ID)) {
+        if(InfostoreFacades.isInfoStoreAvailable() && (DEFAULT_ID.equals(id) || DEFAULT_ACCOUNT.equals(id))) {
             return DEFAULT_ACCOUNT;
         }
         throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(id, "com.openexchange.infostore");
