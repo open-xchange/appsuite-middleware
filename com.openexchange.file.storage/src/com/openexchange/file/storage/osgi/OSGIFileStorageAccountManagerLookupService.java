@@ -146,7 +146,7 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
                 accountManager = cAccountManager;
             }
         }
-        if (null == candidate) {
+        if (null == accountManager) {
             return null;
         }
         return accountManager;
@@ -154,7 +154,7 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
 
     @Override
     public FileStorageAccountManager getAccountManagerFor(final FileStorageService service) throws OXException {
-        initIfAbsent(service);
+        initIfAbsent(service.getId());
 
         FileStorageAccountManagerProvider candidate = null;
         for (final FileStorageAccountManagerProvider provider : providers) {
@@ -168,7 +168,7 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
         return candidate.getAccountManagerFor(service);
     }
 
-    private void initIfAbsent(final FileStorageService service) throws OXException {
+    private void initIfAbsent(final String serviceId) throws OXException {
         Future<Void> future = serializer.get();
         if (null == future) {
             final BundleContext bundleContext = this.bundleContext;
@@ -177,10 +177,10 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
                 @Override
                 public Void call() throws OXException {
                     if (null == bundleContext) {
-                        if (null == service) {
+                        if (null == serviceId) {
                             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create("Missing bundle context.");
                         }
-                        throw FileStorageExceptionCodes.NO_ACCOUNT_MANAGER_FOR_SERVICE.create(service.getId());
+                        throw FileStorageExceptionCodes.NO_ACCOUNT_MANAGER_FOR_SERVICE.create(serviceId);
                     }
                     try {
                         final Collection<ServiceReference<FileStorageAccountManagerProvider>> references = bundleContext.getServiceReferences(FileStorageAccountManagerProvider.class, null);
@@ -204,10 +204,10 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
                             }
                         }
                     } catch (final InvalidSyntaxException e) {
-                        if (null == service) {
+                        if (null == serviceId) {
                             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
                         }
-                        throw FileStorageExceptionCodes.NO_ACCOUNT_MANAGER_FOR_SERVICE.create(e, service.getId());
+                        throw FileStorageExceptionCodes.NO_ACCOUNT_MANAGER_FOR_SERVICE.create(e, serviceId);
                     }
                     return null;
                 }
