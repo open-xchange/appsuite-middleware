@@ -59,7 +59,6 @@ import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.ServiceAware;
-import com.openexchange.groupware.infostore.InfostoreFacades;
 import com.openexchange.session.Session;
 
 
@@ -114,7 +113,6 @@ public class InfostoreDefaultAccountManager implements FileStorageAccountManager
 
     private static final FileStorageAccount DEFAULT_ACCOUNT = new FileStorageAccountImpl();
 
-
     @Override
     public String addAccount(final FileStorageAccount account, final Session session) throws OXException {
         return "";
@@ -122,12 +120,12 @@ public class InfostoreDefaultAccountManager implements FileStorageAccountManager
 
     @Override
     public void deleteAccount(final FileStorageAccount account, final Session session) throws OXException {
-
+        // Nope
     }
 
     @Override
     public FileStorageAccount getAccount(final String id, final Session session) throws OXException {
-        if(InfostoreFacades.isInfoStoreAvailable() && (DEFAULT_ID.equals(id) || DEFAULT_ACCOUNT.equals(id))) {
+        if(/*InfostoreFacades.isInfoStoreAvailable() && */(DEFAULT_ID.equals(id) || DEFAULT_ACCOUNT.equals(id))) {
             return DEFAULT_ACCOUNT;
         }
         throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(id, "com.openexchange.infostore");

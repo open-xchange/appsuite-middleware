@@ -63,9 +63,16 @@ import java.util.Set;
 public interface FileStorageFolder extends FileStorageConstants {
 
     /**
-     * The constant for fullname of an account's root folder.
+     * The constant for full name of an account's root folder.
      */
     public static final String ROOT_FULLNAME = "";
+
+    /**
+     * The constant for full name of an account's personal folder.
+     * <p>
+     * <b>Note</b>: Not every file storage supports personal folders. Thus <code>null</code> or an error might occur.
+     */
+    public static final String PERSONAL = "FS:PERSONAL";
 
     /**
      * The capability identifier for permissions support.
