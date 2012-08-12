@@ -127,7 +127,7 @@ public class Infostore implements PreferencesItemService {
                         final FileStorageAccountAccess accountAccess = fileStorageService.getAccountAccess(DEFAULT_ID, session);
                         accountAccess.connect();
                         try {
-                            final FileStorageFolder personalFolder = accountAccess.getFolderAccess().getFolder(FileStorageFolder.PERSONAL);
+                            final FileStorageFolder personalFolder = accountAccess.getFolderAccess().getPersonalFolder();
                             setting.setSingleValue(new FileStorageFolderIdentifier(
                                 fileStorageService.getId(),
                                 defaultAccount.getId(),
