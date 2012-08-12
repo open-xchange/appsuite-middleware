@@ -78,6 +78,7 @@ public class ConfigFileStorageAccount extends DefaultFileStorageAccount implemen
      *
      * @return The service identifier
      */
+    @Override
     public String getServiceId() {
         return serviceId;
     }
@@ -87,6 +88,7 @@ public class ConfigFileStorageAccount extends DefaultFileStorageAccount implemen
      *
      * @param serviceId The service identifier to set
      */
+    @Override
     public void setServiceId(final String serviceId) {
         this.serviceId = serviceId;
     }

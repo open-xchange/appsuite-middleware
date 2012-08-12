@@ -54,6 +54,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.session.Session;
 
 /**
  * {@link ConfigFileStorageAccountManagerProvider} - The config account manager provider.
@@ -87,6 +88,15 @@ public final class ConfigFileStorageAccountManagerProvider implements FileStorag
     @Override
     public int getRanking() {
         return 10;
+    }
+
+    @Override
+    public FileStorageAccountManager getAccount(String accountId, Session session) throws OXException {
+        ConfigFileStorageAccount storageAccount = parser.get(accountId);
+        if (null == storageAccount) {
+            return null;
+        }
+        return new ConfigFileStorageAccountManager(storageAccount.getFileStorageService());
     }
 
 }

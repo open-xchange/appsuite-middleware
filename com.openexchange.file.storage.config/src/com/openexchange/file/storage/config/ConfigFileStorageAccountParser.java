@@ -100,6 +100,24 @@ public final class ConfigFileStorageAccountParser {
     }
 
     /**
+     * Retrieves the first configured account matching given account identifier.
+     * 
+     * @param accountId The account identifier
+     * @return The first matching account or <code>null</code>
+     */
+    public ConfigFileStorageAccount get(final String accountId) {
+        for (Map.Entry<String, Map<String, ConfigFileStorageAccount>> entry : map.entrySet()) {
+            Map<String, ConfigFileStorageAccount> accounts = entry.getValue();
+            ConfigFileStorageAccount fileStorageAccount = accounts.get(accountId);
+            if (null != fileStorageAccount) {
+                // A configured account available
+                return fileStorageAccount;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Gets the configured accounts for specified service identifier.
      *
      * @param serviceId The service identifier
