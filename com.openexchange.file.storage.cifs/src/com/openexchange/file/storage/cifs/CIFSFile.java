@@ -87,6 +87,12 @@ public final class CIFSFile extends DefaultFile {
         setIsCurrentVersion(true);
     }
 
+    @Override
+    public String toString() {
+        final String url = getURL();
+        return url == null ? super.toString() : url;
+    }
+
     /**
      * Parses specified SMB file.
      *
