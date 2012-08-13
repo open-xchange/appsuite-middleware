@@ -76,11 +76,14 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(CIFSFolderAccess.class);
 
+    private final String login;
+
     /**
      * Initializes a new {@link CIFSFolderAccess}.
      */
     public CIFSFolderAccess(final String rootUrl, final NtlmPasswordAuthentication auth, final FileStorageAccount account, final Session session) {
         super(rootUrl, auth, account, session);
+        login = (String) account.getConfiguration().get(CIFSConstants.CIFS_LOGIN);
     }
 
     @Override
@@ -126,47 +129,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
             if (!smbFolder.isDirectory()) {
                 throw CIFSExceptionCodes.NOT_A_FOLDER.create(folderId);
             }
-            /*
-             * Check sub resources
-             */
-            SmbFile[] subFiles;
-            try {
-                subFiles = smbFolder.canRead() ? smbFolder.listFiles() : new SmbFile[0];
-            } catch (final SmbException e) {
-                final String message = e.getMessage();
-                if (!message.startsWith("Invalid operation") && !message.equals("Access is denied.")) {
-                    throw e;
-                }
-                subFiles = new SmbFile[0];
-            }
-            boolean hasSubdir = false;
-            int fileCount = 0;
-            try {
-                for (final SmbFile sub : subFiles) {
-                    if (sub.isDirectory()) {
-                        hasSubdir = true;
-                    } else if (sub.isFile()) {
-                        fileCount++;
-                    }
-                }
-            } catch (final Exception e) {
-                // Ignore
-                LOG.warn("Couldn't determine has-subfolders and file-count for " + folderId, e);
-                hasSubdir = false;
-                fileCount = 0;
-            }
-            /*
-             * Convert to a folder
-             */
-            final CIFSFolder cifsFolder = new CIFSFolder(session.getUserId());
-            cifsFolder.parseSmbFolder(smbFolder);
-            cifsFolder.setFileCount(fileCount);
-            cifsFolder.setSubfolders(hasSubdir);
-            cifsFolder.setSubscribedSubfolders(hasSubdir);
-            /*
-             * TODO: Set capabilities
-             */
-            return cifsFolder;
+            return toFileStorageFolder(folderId, smbFolder);
         } catch (final OXException e) {
             throw e;
         } catch (final SmbException e) {
@@ -178,9 +141,114 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
         }
     }
 
+    private FileStorageFolder toFileStorageFolder(final String folderId, final SmbFile smbFolder) throws SmbException, OXException {
+        /*
+         * Check sub resources
+         */
+        SmbFile[] subFiles;
+        try {
+            subFiles = smbFolder.canRead() ? smbFolder.listFiles() : new SmbFile[0];
+        } catch (final SmbException e) {
+            final String message = e.getMessage();
+            if (!message.startsWith("Invalid operation") && !message.equals("Access is denied.")) {
+                throw e;
+            }
+            subFiles = new SmbFile[0];
+        }
+        boolean hasSubdir = false;
+        int fileCount = 0;
+        try {
+            for (final SmbFile sub : subFiles) {
+                if (sub.isDirectory()) {
+                    hasSubdir = true;
+                } else if (sub.isFile()) {
+                    fileCount++;
+                }
+            }
+        } catch (final Exception e) {
+            // Ignore
+            LOG.warn("Couldn't determine has-subfolders and file-count for " + folderId, e);
+            hasSubdir = false;
+            fileCount = 0;
+        }
+        /*
+         * Convert to a folder
+         */
+        final CIFSFolder cifsFolder = new CIFSFolder(session.getUserId());
+        cifsFolder.parseSmbFolder(smbFolder);
+        cifsFolder.setFileCount(fileCount);
+        cifsFolder.setSubfolders(hasSubdir);
+        cifsFolder.setSubscribedSubfolders(hasSubdir);
+        /*
+         * TODO: Set capabilities
+         */
+        return cifsFolder;
+    }
+
     @Override
     public FileStorageFolder getPersonalFolder() throws OXException {
-        throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create();
+        try {
+            /*
+             * Check
+             */
+            final String folderId = rootUrl;
+            final String fid = checkFolderId(folderId, rootUrl);
+            final SmbFile smbFolder = new SmbFile(fid, auth);
+            if (!exists(smbFolder)) {
+                throw CIFSExceptionCodes.NOT_FOUND.create(folderId);
+            }
+            if (!smbFolder.isDirectory()) {
+                throw CIFSExceptionCodes.NOT_A_FOLDER.create(folderId);
+            }
+            /*
+             * Check sub resources
+             */
+            final SmbFile homeDir = recursiveSearch(smbFolder, login + '/');
+            if (null == homeDir) {
+                throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create();
+            }
+            return toFileStorageFolder(homeDir.getPath(), homeDir);
+        } catch (final OXException e) {
+            throw e;
+        } catch (final SmbException e) {
+            throw CIFSExceptionCodes.SMB_ERROR.create(e, e.getMessage());
+        } catch (final IOException e) {
+            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } catch (final Exception e) {
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private SmbFile recursiveSearch(final SmbFile smbFolder, final String appendix) throws SmbException {
+        /*
+         * Check sub resources
+         */
+        SmbFile[] subFiles;
+        try {
+            subFiles = smbFolder.canRead() ? smbFolder.listFiles() : new SmbFile[0];
+        } catch (final SmbException e) {
+            final String message = e.getMessage();
+            if (!message.startsWith("Invalid operation") && !message.equals("Access is denied.")) {
+                throw e;
+            }
+            subFiles = new SmbFile[0];
+        }
+        SmbFile homeDir = null;
+        for (int i = 0; null == homeDir && i < subFiles.length; i++) {
+            final SmbFile sub = subFiles[i];
+            if (sub.isDirectory()) {
+                final String path = sub.getPath();
+                if (path.endsWith(appendix)) {
+                    homeDir = sub;
+                } else {
+                    final SmbFile tmp = recursiveSearch(sub, appendix); 
+                    if (null != tmp) {
+                        homeDir = sub;
+                    }
+                }
+            }
+        }
+        return homeDir;
     }
 
     @Override

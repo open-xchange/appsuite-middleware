@@ -89,6 +89,11 @@ public final class CIFSFolder extends DefaultFileStorageFolder {
         permissions = Collections.<FileStoragePermission> singletonList(permission);
     }
 
+    @Override
+    public String toString() {
+        return id == null ? super.toString() : id;
+    }
+
     /**
      * Parses specified CIFS/SMB file.
      *
