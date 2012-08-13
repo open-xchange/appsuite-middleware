@@ -61,6 +61,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.commons.logging.Log;
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.DatabaseService;
@@ -88,6 +89,8 @@ import com.openexchange.tools.sql.DBUtils;
  * @since Open-Xchange v6.18.2
  */
 public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, SecretEncryptionStrategy<GenericProperty> {
+
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(RdbFileStorageAccountStorage.class);
 
     /**
      * The {@link DatabaseService} class.
@@ -216,7 +219,13 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
                 return null;
             }
             final String serviceId = rs.getString(3);
-            final FileStorageService fsService = getService(FileStorageServiceRegistry.class).getFileStorageService(serviceId);
+            final FileStorageServiceRegistry registry = getService(FileStorageServiceRegistry.class);
+            if (!registry.containsFileStorageService(serviceId)) {
+                // No such file storage service known
+                LOG.warn("Unknown file storage service: " + serviceId);
+                return null;
+            }
+            final FileStorageService fsService = registry.getFileStorageService(serviceId);
             final DefaultFileStorageAccount account = new DefaultFileStorageAccount();
             account.setId(String.valueOf(accountId));
             account.setFileStorageService(fsService);
@@ -250,8 +259,6 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
             return account;
         } catch (final SQLException e) {
             throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
-            throw new OXException(e);
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
             databaseService.backReadOnly(contextId, rc);

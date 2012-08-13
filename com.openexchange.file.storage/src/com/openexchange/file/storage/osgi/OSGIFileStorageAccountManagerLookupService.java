@@ -83,22 +83,28 @@ import com.openexchange.session.Session;
 public class OSGIFileStorageAccountManagerLookupService implements FileStorageAccountManagerLookupService {
 
     /**
-     * The backing list.
+     * The backing queue.
      */
-    final Queue<FileStorageAccountManagerProvider> providers;
+    protected final Queue<FileStorageAccountManagerProvider> providers;
 
     /**
      * The bundle context reference.
      */
-    private BundleContext bundleContext;
+    protected volatile BundleContext bundleContext;
 
     /**
      * The tracker instance.
      */
-    private ServiceTracker<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider> tracker;
+    private volatile ServiceTracker<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider> tracker;
 
-    final OSGIEventAdminLookup eventAdminLookup;
+    /**
+     * The event look-up.
+     */
+    protected final OSGIEventAdminLookup eventAdminLookup;
 
+    /**
+     * Used to "seralize" initialization attempts.
+     */
     private final AtomicReference<Future<Void>> serializer;
 
     /**
@@ -117,9 +123,11 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
      * @param context The bundle context
      */
     public void start(final BundleContext context) {
+        this.bundleContext = context;
         if (null == tracker) {
-            tracker = new ServiceTracker<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider>(context, FileStorageAccountManagerProvider.class, new Customizer(context));
+            final ServiceTracker<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider> tracker = new ServiceTracker<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider>(context, FileStorageAccountManagerProvider.class, new Customizer());
             tracker.open();
+            this.tracker = tracker;
         }
     }
 
@@ -127,10 +135,12 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
      * Stops the tracker.
      */
     public void stop() {
+        final ServiceTracker<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider> tracker = this.tracker;
         if (null != tracker) {
             tracker.close();
-            tracker = null;
+            this.tracker = null;
         }
+        this.bundleContext = null;
     }
 
     private static final String PARAM_DEFAULT_ACCOUNT = "file.storage.defaultAccount";
@@ -240,15 +250,13 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
 
     private final class Customizer implements ServiceTrackerCustomizer<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider> {
 
-        private final BundleContext context;
-
-        protected Customizer(final BundleContext context) {
+        protected Customizer() {
             super();
-            this.context = context;
         }
 
         @Override
         public FileStorageAccountManagerProvider addingService(final ServiceReference<FileStorageAccountManagerProvider> reference) {
+            final BundleContext context = bundleContext;
             final FileStorageAccountManagerProvider service = context.getService(reference);
             {
                 final FileStorageAccountManagerProvider addMe = service;
@@ -293,7 +301,7 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
                     final FileStorageAccountManagerProvider removeMe = service;
                     providers.remove(removeMe);
                 } finally {
-                    context.ungetService(reference);
+                    bundleContext.ungetService(reference);
                 }
             }
         }
