@@ -145,9 +145,7 @@ public final class ConfigFileStorageAccountParser {
             final String propName = ((String) key).toLowerCase(Locale.ENGLISH);
             if (propName.startsWith(PREFIX)) {
                 final String id = propName.substring(PREFIX_LEN, propName.indexOf('.', PREFIX_LEN));
-                if (!ids.contains(id)) {
-                    ids.add(id);
-                }
+                ids.add(id);
             }
         }
         /*
