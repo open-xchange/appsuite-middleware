@@ -1864,6 +1864,11 @@ msgstr ""
 msgid "Invalid URL \"%1$s\". Error: %2$s."
 msgstr ""
 
+#. No such folder.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:142
+msgid "No such folder."
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.frontend.uwa/src/com/openexchange/frontend/uwa/UWAWidgetExceptionMessages.java:64
 msgid "The database returned an error: %1$s"
 msgstr ""
