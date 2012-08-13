@@ -57,7 +57,10 @@ import com.openexchange.hazelcast.ClassLoaderAware;
 import com.openexchange.hazelcast.osgi.HazelcastActivator;
 
 /**
- * {@link Hazelcasts} - Utility class for Hazelcast.
+ * <div style="margin-left: 0.1in; background-color:white;">
+ * {@link Hazelcasts} - Utility class for&nbsp;<a href="http://www.hazelcast.com/">Hazelcast</a><br>
+ * <img src="http://www.assemblive.com/static/img/hazelcast-logo.gif" />
+ * </div>
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

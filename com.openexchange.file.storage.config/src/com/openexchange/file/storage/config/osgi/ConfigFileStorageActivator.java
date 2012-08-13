@@ -54,9 +54,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.config.ConfigFileStorageAccountManagerProvider;
 import com.openexchange.file.storage.config.ConfigFileStorageAccountParser;
-import com.openexchange.file.storage.config.services.ConfigFileStorageServiceRegistry;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * {@link ConfigFileStorageActivator}
@@ -87,7 +85,6 @@ public final class ConfigFileStorageActivator extends HousekeepingActivator {
         if (ConfigurationService.class.equals(clazz)) {
             dropFileStorageProperties();
         }
-        ConfigFileStorageServiceRegistry.getServiceRegistry().removeService(clazz);
     }
 
     @Override
@@ -96,7 +93,6 @@ public final class ConfigFileStorageActivator extends HousekeepingActivator {
         if (logger.isInfoEnabled()) {
             logger.info("Re-available service: " + clazz.getName());
         }
-        ConfigFileStorageServiceRegistry.getServiceRegistry().addService(clazz, getService(clazz));
         if (ConfigurationService.class.equals(clazz)) {
             parseFileStorageProperties(getService(ConfigurationService.class));
         }
@@ -110,21 +106,9 @@ public final class ConfigFileStorageActivator extends HousekeepingActivator {
                 log.info("starting bundle: com.openexchange.file.storage.config");
             }
             /*
-             * (Re-)Initialize service registry with available services
-             */
-            final ServiceRegistry registry = ConfigFileStorageServiceRegistry.getServiceRegistry();
-            registry.clearRegistry();
-            final Class<?>[] classes = getNeededServices();
-            for (final Class<?> classe : classes) {
-                final Object service = getService(classe);
-                if (null != service) {
-                    registry.addService(classe, service);
-                }
-            }
-            /*
              * Parse file storage configuration
              */
-            parseFileStorageProperties(registry.getService(ConfigurationService.class, true));
+            parseFileStorageProperties(getService(ConfigurationService.class));
             /*
              * Register services
              */

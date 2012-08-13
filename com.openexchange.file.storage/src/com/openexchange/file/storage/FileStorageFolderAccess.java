@@ -79,6 +79,25 @@ public interface FileStorageFolderAccess extends FileStorageConstants {
     public FileStorageFolder getFolder(final String folderId) throws OXException;
 
     /**
+     * Gets the folder considered as personal folder.
+     * <p>
+     * <b>Note</b>: If personal folder is not supported by this file storage, {@link FileStorageExceptionCodes#NO_SUCH_FOLDER
+     * NO_SUCH_FOLDER} is thrown.
+     * 
+     * @return The corresponding instance of {@link FileStorageFolder}
+     * @throws OXException If either such a folder does not exist or could not be fetched
+     */
+    public FileStorageFolder getPersonalFolder() throws OXException;
+
+    /**
+     * Gets the public folders.
+     *
+     * @return The corresponding instances of {@link FileStorageFolder}
+     * @throws OXException If no such folders exist or could not be fetched
+     */
+    public FileStorageFolder[] getPublicFolders() throws OXException;
+
+    /**
      * Gets the first level subfolders located below the folder whose identifier matches given parameter <code>parentIdentifier</code>.
      * <p>
      * If no subfolders exist below identified folder the constant {@link #EMPTY_PATH} should be returned.

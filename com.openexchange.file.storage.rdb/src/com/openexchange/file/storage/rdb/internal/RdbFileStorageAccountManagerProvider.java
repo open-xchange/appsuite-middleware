@@ -54,6 +54,7 @@ import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.rdb.RdbFileStorageAccountManager;
+import com.openexchange.session.Session;
 
 
 /**
@@ -84,6 +85,11 @@ public final class RdbFileStorageAccountManagerProvider implements FileStorageAc
     @Override
     public int getRanking() {
         return 0;
+    }
+
+    @Override
+    public FileStorageAccountManager getAccountManager(String accountId, Session session) throws OXException {
+        return RdbFileStorageAccountManager.getAccountById(accountId, session);
     }
 
 }

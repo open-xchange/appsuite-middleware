@@ -128,12 +128,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
          * Readable connection
          */
         final int contextId = session.getContextId();
-        final Connection rc;
-        try {
-            rc = databaseService.getReadOnly(contextId);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final Connection rc = databaseService.getReadOnly(contextId);
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -193,6 +188,76 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
         }
     }
 
+    /**
+     * Gets the first account matching specified account identifier.
+     * 
+     * @param accountId The account identifier
+     * @param session The session
+     * @return The matching account or <code>null</code>
+     * @throws OXException If look-up fails
+     */
+    public FileStorageAccount getAccount(final int accountId, final Session session) throws OXException {
+        final DatabaseService databaseService = getService(CLAZZ_DB);
+        /*
+         * Readable connection
+         */
+        final int contextId = session.getContextId();
+        final Connection rc = databaseService.getReadOnly(contextId);
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = rc.prepareStatement("SELECT confId, displayName, serviceId FROM filestorageAccount WHERE cid = ? AND user = ? AND account = ?");
+            int pos = 1;
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos++, session.getUserId());
+            stmt.setInt(pos, accountId);
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                return null;
+            }
+            final String serviceId = rs.getString(3);
+            final FileStorageService fsService = getService(FileStorageServiceRegistry.class).getFileStorageService(serviceId);
+            final DefaultFileStorageAccount account = new DefaultFileStorageAccount();
+            account.setId(String.valueOf(accountId));
+            account.setFileStorageService(fsService);
+            account.setDisplayName(rs.getString(2));
+            {
+                final GenericConfigurationStorageService genericConfStorageService = getService(CLAZZ_GEN_CONF);
+                final Map<String, Object> configuration = new HashMap<String, Object>();
+                final int confId = rs.getInt(1);
+                genericConfStorageService.fill(rc, getContext(session), confId, configuration);
+                /*
+                 * Decrypt password fields for clear-text representation in account's configuration
+                 */
+                final Set<String> secretPropNames = fsService.getSecretProperties();
+                if (!secretPropNames.isEmpty()) {
+                    for (final String passwordElementName : secretPropNames) {
+                        final String toDecrypt = (String) configuration.get(passwordElementName);
+                        if (null != toDecrypt) {
+                            try {
+                                final String decrypted = decrypt(toDecrypt, serviceId, accountId, session, confId, passwordElementName);
+                                configuration.put(passwordElementName, decrypted);
+                            } catch (final OXException x) {
+                                // Must not be fatal
+                                configuration.put(passwordElementName, "");
+                                // Provide a (probably false) password anyway.
+                            }
+                        }
+                    }
+                }
+                account.setConfiguration(configuration);
+            }
+            return account;
+        } catch (final SQLException e) {
+            throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } catch (final OXException e) {
+            throw new OXException(e);
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
+            databaseService.backReadOnly(contextId, rc);
+        }
+    }
+
     private static final String SQL_SELECT_ACCOUNTS = "SELECT account, confId, displayName FROM filestorageAccount WHERE cid = ? AND user = ? AND serviceId = ?";
 
     @Override
@@ -202,12 +267,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
          * Readable connection
          */
         final int contextId = session.getContextId();
-        final Connection rc;
-        try {
-            rc = databaseService.getReadOnly(contextId);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final Connection rc = databaseService.getReadOnly(contextId);
         List<FileStorageAccount> accounts;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -264,12 +324,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
          * Readable connection
          */
         final int contextId = session.getContextId();
-        final Connection rc;
-        try {
-            rc = databaseService.getReadOnly(contextId);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final Connection rc = databaseService.getReadOnly(contextId);
         TIntList accounts;
         PreparedStatement stmt = null;
         ResultSet rs = null;

@@ -58,6 +58,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
+import com.openexchange.session.PutIfAbsent;
 import com.openexchange.session.Session;
 
 /**
@@ -66,7 +67,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ServerSessionAdapter implements ServerSession {
+public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
 
     private static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ServerSessionAdapter.class));
@@ -274,6 +275,20 @@ public class ServerSessionAdapter implements ServerSession {
     @Override
     public void setParameter(final String name, final Object value) {
         session().setParameter(name, value);
+    }
+
+    @Override
+    public Object setParameterIfAbsent(String name, Object value) {
+        final Session session = session();
+        if (session instanceof PutIfAbsent) {
+            return ((PutIfAbsent) session).setParameterIfAbsent(name, value);
+        }
+        final Object prev = session.getParameter(name);
+        if (null == prev) {
+            session.setParameter(name, value);
+            return null;
+        }
+        return prev;
     }
 
     @Override

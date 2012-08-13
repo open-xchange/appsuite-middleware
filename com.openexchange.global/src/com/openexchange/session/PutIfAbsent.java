@@ -47,34 +47,22 @@
  *
  */
 
-package com.openexchange.file.storage.config.services;
+package com.openexchange.session;
 
-import com.openexchange.osgi.ServiceRegistry;
 
 /**
- * {@link ConfigFileStorageServiceRegistry} - The service registry for <code>com.openexchange.file.storage.config</code> bundle.
+ * {@link PutIfAbsent} - Extends {@link Session} by a put-if-absent method for its parameters.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since Open-Xchange v6.18.2
  */
-public final class ConfigFileStorageServiceRegistry {
-
-    private static final ServiceRegistry SERVICE_REGISTRY = new ServiceRegistry(4);
+public interface PutIfAbsent extends Session {
 
     /**
-     * Gets the service registry.
-     *
-     * @return The service registry
+     * Sets specified parameter if currently absent.
+     * 
+     * @param name The parameter name
+     * @param value The parameter value
+     * @return The already existing parameter value if not absent; otherwise <code>null</code> if parameter has been set
      */
-    public static ServiceRegistry getServiceRegistry() {
-        return SERVICE_REGISTRY;
-    }
-
-    /**
-     * Initializes a new {@link ConfigFileStorageServiceRegistry}.
-     */
-    private ConfigFileStorageServiceRegistry() {
-        super();
-    }
-
+    Object setParameterIfAbsent(String name, Object value);
 }

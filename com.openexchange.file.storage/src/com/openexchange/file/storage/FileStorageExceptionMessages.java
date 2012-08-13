@@ -138,6 +138,9 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
     // Invalid URL "%1$s". Error: %2$s.
     public static final String INVALID_URL_MSG = "Invalid URL \"%1$s\". Error: %2$s.";
 
+    // No such folder.
+    public static final String NO_SUCH_FOLDER_MSG = "No such folder.";
+
     /**
      * Initializes a new {@link OXExceptionMessages}.
      */

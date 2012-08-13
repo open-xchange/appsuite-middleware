@@ -50,6 +50,7 @@
 package com.openexchange.file.storage;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
  * {@link FileStorageAccountManagerProvider} - Provides the {@link FileStorageAccountManager account manager} appropriate for a certain
@@ -81,6 +82,16 @@ public interface FileStorageAccountManagerProvider {
      * @return <code>true</code> if this provider supports specified file storage service; otherwise <code>false</code>
      */
     boolean supports(FileStorageService service);
+
+    /**
+     * Gets the appropriate file storage account manager for specified account identifier and session.
+     *
+     * @param accountId The account identifier
+     * @param session The session providing needed user data
+     * @return The file storage account manager or <code>null</code>
+     * @throws OXException If retrieval fails
+     */
+    FileStorageAccountManager getAccountManager(String accountId, Session session) throws OXException;
 
     /**
      * Gets the appropriate account manager for specified {@link FileStorageService file storage service}.

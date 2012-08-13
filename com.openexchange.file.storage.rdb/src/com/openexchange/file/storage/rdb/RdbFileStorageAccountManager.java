@@ -91,6 +91,19 @@ public class RdbFileStorageAccountManager implements FileStorageAccountManager {
         this.service = service;
     }
 
+    /**
+     * Gets the appropriate file storage account manager for specified account identifier and session.
+     *
+     * @param accountId The account identifier
+     * @param session The session providing needed user data
+     * @return The file storage account manager or <code>null</code>
+     * @throws OXException If retrieval fails
+     */
+    public static RdbFileStorageAccountManager getAccountById(final String accountId, final Session session) throws OXException {
+        final FileStorageAccount account = CACHE.getAccount(Integer.parseInt(accountId), session);
+        return null == account ? null : new RdbFileStorageAccountManager(account.getFileStorageService());
+    }
+
     @Override
     public FileStorageAccount getAccount(final String id, final Session session) throws OXException {
         return CACHE.getAccount(serviceId, Integer.parseInt(id), session);

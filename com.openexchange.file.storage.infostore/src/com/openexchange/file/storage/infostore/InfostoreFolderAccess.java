@@ -123,6 +123,18 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess {
     }
 
     @Override
+    public FileStorageFolder getPersonalFolder() throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public FileStorageFolder[] getPublicFolders() throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
     public FileStorageFolder[] getPath2DefaultFolder(final String folderId) throws OXException {
         // TODO Auto-generated method stub
         return null;

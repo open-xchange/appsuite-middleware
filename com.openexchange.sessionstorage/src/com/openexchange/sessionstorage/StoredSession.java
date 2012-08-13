@@ -51,6 +51,8 @@ package com.openexchange.sessionstorage;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import com.openexchange.session.PutIfAbsent;
 import com.openexchange.session.Session;
 
 /**
@@ -58,7 +60,7 @@ import com.openexchange.session.Session;
  * 
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class StoredSession implements Session {
+public class StoredSession implements PutIfAbsent {
 
     private String loginName;
 
@@ -86,9 +88,10 @@ public class StoredSession implements Session {
     
     private String userLogin;
 
-    private Map<String, Object> parameters;
+    private ConcurrentMap<String, Object> parameters;
     
     public StoredSession(String sessionId, String loginName, String password, int contextId, int userId, String secret, String login, String randomToken, String localIP, String authId, String hash, String client, Map<String, Object> parameters) {
+        super();
         this.sessionId = sessionId;
         this.loginName = loginName;
         this.password = password;
@@ -286,7 +289,15 @@ public class StoredSession implements Session {
     }
 
     public void setParameters(final Map<String, Object> parameters) {
-        this.parameters = parameters;
+        this.parameters = new ConcurrentHashMap<String, Object>(parameters);
+    }
+
+    @Override
+    public Object setParameterIfAbsent(String name, Object value) {
+        if (PARAM_LOCK.equals(name)) {
+            return parameters.get(PARAM_LOCK);
+        }
+        return parameters.putIfAbsent(name, value);
     }
 
     @Override

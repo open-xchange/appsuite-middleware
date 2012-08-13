@@ -147,6 +147,16 @@ public final class CMISFolderAccess extends AbstractCMISAccess implements FileSt
         }
     }
 
+    @Override
+    public FileStorageFolder getPersonalFolder() throws OXException {
+        throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create();
+    }
+
+    @Override
+    public FileStorageFolder[] getPublicFolders() throws OXException {
+        return new FileStorageFolder[0];
+    }
+
     private FileStorageFolder convertFolder(final ObjectId folderObjectId, final Folder folder) throws OXException {
         /*
          * Check sub resources
