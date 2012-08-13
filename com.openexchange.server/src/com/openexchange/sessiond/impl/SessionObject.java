@@ -50,13 +50,13 @@
 package com.openexchange.sessiond.impl;
 
 import java.util.Date;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.session.Session;
+import com.openexchange.session.PutIfAbsent;
 
 /**
  * {@link SessionObject} - Implements {@link com.openexchange.session.Session}.
@@ -64,7 +64,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SessionObject implements Session {
+public class SessionObject implements PutIfAbsent {
 
     private final String sessionid;
 
@@ -102,7 +102,7 @@ public class SessionObject implements Session {
 
     private String client;
 
-    private final Map<String, Object> parameters;
+    private final ConcurrentMap<String, Object> parameters;
 
     /**
      * Initializes a new {@link SessionObject}.
@@ -259,6 +259,14 @@ public class SessionObject implements Session {
         } else {
             parameters.put(name, value);
         }
+    }
+
+    @Override
+    public Object setParameterIfAbsent(String name, Object value) {
+        if (PARAM_LOCK.equals(name)) {
+            return parameters.get(PARAM_LOCK);
+        }
+        return parameters.putIfAbsent(name, value);
     }
 
     @Override

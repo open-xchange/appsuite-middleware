@@ -53,6 +53,7 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
@@ -61,6 +62,7 @@ import com.openexchange.caching.objects.CachedSession;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
+import com.openexchange.session.PutIfAbsent;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.services.SessiondServiceRegistry;
 
@@ -70,7 +72,7 @@ import com.openexchange.sessiond.services.SessiondServiceRegistry;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SessionImpl implements Session {
+public final class SessionImpl implements PutIfAbsent {
 
     // A random-enough key for encrypting and decrypting passwords on their way through the caching system.
     private static final String OBFUSCATION_KEY_PROPERTY = "com.openexchange.sessiond.encryptionKey";
@@ -99,7 +101,7 @@ public final class SessionImpl implements Session {
 
     private String client;
 
-    private final Map<String, Object> parameters;
+    private final ConcurrentMap<String, Object> parameters;
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SessionImpl.class));
 
@@ -253,6 +255,14 @@ public final class SessionImpl implements Session {
         } else {
             parameters.put(name, value);
         }
+    }
+
+    @Override
+    public Object setParameterIfAbsent(String name, Object value) {
+        if (PARAM_LOCK.equals(name)) {
+            return parameters.get(PARAM_LOCK);
+        }
+        return parameters.putIfAbsent(name, value);
     }
 
     @Override
