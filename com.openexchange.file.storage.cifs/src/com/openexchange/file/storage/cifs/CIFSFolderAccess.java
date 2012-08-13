@@ -57,6 +57,7 @@ import jcifs.smb.NtlmPasswordAuthentication;
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
 import org.apache.commons.httpclient.URI;
+import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -72,6 +73,8 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileStorageFolderAccess {
+
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(CIFSFolderAccess.class);
 
     /**
      * Initializes a new {@link CIFSFolderAccess}.
@@ -138,12 +141,19 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
             }
             boolean hasSubdir = false;
             int fileCount = 0;
-            for (final SmbFile sub : subFiles) {
-                if (sub.isDirectory()) {
-                    hasSubdir = true;
-                } else if (sub.isFile()) {
-                    fileCount++;
+            try {
+                for (final SmbFile sub : subFiles) {
+                    if (sub.isDirectory()) {
+                        hasSubdir = true;
+                    } else if (sub.isFile()) {
+                        fileCount++;
+                    }
                 }
+            } catch (final Exception e) {
+                // Ignore
+                LOG.warn("Couldn't determine has-subfolders and file-count for " + folderId, e);
+                hasSubdir = false;
+                fileCount = 0;
             }
             /*
              * Convert to a folder

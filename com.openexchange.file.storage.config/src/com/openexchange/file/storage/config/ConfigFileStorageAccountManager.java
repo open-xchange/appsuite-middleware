@@ -168,7 +168,6 @@ public final class ConfigFileStorageAccountManager implements FileStorageAccount
 
     @Override
     public boolean hasEncryptedItems(final Session session) throws OXException {
-        // TODO Auto-generated method stub
         return false;
     }
 
