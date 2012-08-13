@@ -186,20 +186,18 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
                         final Collection<ServiceReference<FileStorageAccountManagerProvider>> references = bundleContext.getServiceReferences(FileStorageAccountManagerProvider.class, null);
                         for (final ServiceReference<FileStorageAccountManagerProvider> reference : references) {
                             final FileStorageAccountManagerProvider addMe = bundleContext.getService(reference);
-                            synchronized (providers) {
-                                if (!providers.contains(addMe)) {
-                                    providers.add(addMe);
-                                    /*
-                                     * Post event
-                                     */
-                                    final EventAdmin eventAdmin = eventAdminLookup.getEventAdmin();
-                                    if (null != eventAdmin) {
-                                        final Dictionary<String, Object> dict = new Hashtable<String, Object>(2);
-                                        dict.put(FileStorageAccountManagerProvider.PROPERTY_RANKING, Integer.valueOf(addMe.getRanking()));
-                                        dict.put(FileStorageAccountManagerProvider.PROPERTY_PROVIDER, addMe);
-                                        final Event event = new Event(FileStorageAccountManagerProvider.TOPIC, dict);
-                                        eventAdmin.postEvent(event);
-                                    }
+                            if (!providers.contains(addMe)) {
+                                providers.add(addMe);
+                                /*
+                                 * Post event
+                                 */
+                                final EventAdmin eventAdmin = eventAdminLookup.getEventAdmin();
+                                if (null != eventAdmin) {
+                                    final Dictionary<String, Object> dict = new Hashtable<String, Object>(2);
+                                    dict.put(FileStorageAccountManagerProvider.PROPERTY_RANKING, Integer.valueOf(addMe.getRanking()));
+                                    dict.put(FileStorageAccountManagerProvider.PROPERTY_PROVIDER, addMe);
+                                    final Event event = new Event(FileStorageAccountManagerProvider.TOPIC, dict);
+                                    eventAdmin.postEvent(event);
                                 }
                             }
                         }
@@ -249,22 +247,20 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
             final FileStorageAccountManagerProvider service = context.getService(reference);
             {
                 final FileStorageAccountManagerProvider addMe = service;
-                synchronized (providers) {
-                    if (!providers.contains(addMe)) {
-                        providers.add(addMe);
-                        /*
-                         * Post event
-                         */
-                        final EventAdmin eventAdmin = eventAdminLookup.getEventAdmin();
-                        if (null != eventAdmin) {
-                            final Dictionary<String, Object> dict = new Hashtable<String, Object>(2);
-                            dict.put(FileStorageAccountManagerProvider.PROPERTY_RANKING, Integer.valueOf(addMe.getRanking()));
-                            dict.put(FileStorageAccountManagerProvider.PROPERTY_PROVIDER, addMe);
-                            final Event event = new Event(FileStorageAccountManagerProvider.TOPIC, dict);
-                            eventAdmin.postEvent(event);
-                        }
-                        return service;
+                if (!providers.contains(addMe)) {
+                    providers.add(addMe);
+                    /*
+                     * Post event
+                     */
+                    final EventAdmin eventAdmin = eventAdminLookup.getEventAdmin();
+                    if (null != eventAdmin) {
+                        final Dictionary<String, Object> dict = new Hashtable<String, Object>(2);
+                        dict.put(FileStorageAccountManagerProvider.PROPERTY_RANKING, Integer.valueOf(addMe.getRanking()));
+                        dict.put(FileStorageAccountManagerProvider.PROPERTY_PROVIDER, addMe);
+                        final Event event = new Event(FileStorageAccountManagerProvider.TOPIC, dict);
+                        eventAdmin.postEvent(event);
                     }
+                    return service;
                 }
                 final org.apache.commons.logging.Log logger =
                     com.openexchange.log.LogFactory.getLog(OSGIFileStorageAccountManagerLookupService.Customizer.class);
@@ -290,9 +286,7 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
             if (null != service) {
                 try {
                     final FileStorageAccountManagerProvider removeMe = service;
-                    synchronized (providers) {
-                        providers.remove(removeMe);
-                    }
+                    providers.remove(removeMe);
                 } finally {
                     context.ungetService(reference);
                 }
