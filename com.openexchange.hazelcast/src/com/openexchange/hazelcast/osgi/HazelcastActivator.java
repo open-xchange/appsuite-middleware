@@ -64,6 +64,7 @@ public class HazelcastActivator extends HousekeepingActivator {
          * Look-up discovery service & obtain its addresses of known nodes in a cluster
          * 
          * Configure Hazelcast for full TCP/IP cluster
+         * (see http://www.hazelcast.com/documentation.jsp#Config)
          * 
          * If multicast is not preferred way of discovery for your environment, then you can configure Hazelcast for full TCP/IP cluster.
          * As configuration below shows, while enable attribute of multicast is set to false, TCP/IP has to be set to true.
@@ -93,16 +94,18 @@ public class HazelcastActivator extends HousekeepingActivator {
                      * Timeout before we assume we are either the first or alone in the cluster
                      */
                     final long delay = getDelay();
-                    final Runnable task = new Runnable() {
+                    if (delay >= 0) {
+                        final Runnable task = new Runnable() {
 
-                        @Override
-                        public void run() {
-                            if (init(Collections.<InetAddress> emptyList())) {
-                                logger.info("Initialized Hazelcast instance via delayed one-shot task after " + delay + "msec.");
+                            @Override
+                            public void run() {
+                                if (init(Collections.<InetAddress> emptyList())) {
+                                    logger.info("Initialized Hazelcast instance via delayed one-shot task after " + delay + "msec.");
+                                }
                             }
-                        }
-                    };
-                    getService(TimerService.class).schedule(task, delay);
+                        };
+                        getService(TimerService.class).schedule(task, delay);
+                    }
                 } else {
                     /*
                      * We already have at least one node at start-up time

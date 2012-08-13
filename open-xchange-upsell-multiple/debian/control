@@ -10,4 +10,13 @@ Package: open-xchange-upsell-multiple
 Architecture: all
 Pre-Depends: open-xchange-core (>= @OXVERSION@)
 Depends: ${misc:Depends}
+Replaces: open-xchange-upsell-generic (<< 6.21.0-0)
+Conflicts: open-xchange-upsell-generic (<< 6.21.0-0)
 Description: The multiple Open-Xchange upsell layer bundle
+
+###### http://wiki.debian.org/Renaming_a_Package #####
+Package: open-xchange-upsell-generic
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, open-xchange-upsell-multiple
+Section: oldlibs
+Description: transitional dummy package

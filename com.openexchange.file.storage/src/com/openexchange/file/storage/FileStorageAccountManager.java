@@ -54,7 +54,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
 /**
- * {@link FileStorageAccountManager} - An account manager.
+ * {@link FileStorageAccountManager} - An account manager for a certain file storage service.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -79,7 +79,7 @@ public interface FileStorageAccountManager extends FileStorageConstants {
      * @param session The session providing needed user data
      * @throws OXException If update fails
      */
-    public void updateAccount(FileStorageAccount account, Session session) throws OXException;;
+    public void updateAccount(FileStorageAccount account, Session session) throws OXException;
 
     /**
      * Deletes an existing account.
@@ -91,13 +91,13 @@ public interface FileStorageAccountManager extends FileStorageConstants {
     public void deleteAccount(FileStorageAccount account, Session session) throws OXException;
 
     /**
-     * Gets all accounts associated with session user.
+     * Gets all service's accounts associated with session user.
      *
      * @param session The session providing needed user data
      * @return All accounts associated with session user.
      * @throws OXException If listing fails
      */
-    public List<FileStorageAccount> getAccounts(Session session) throws OXException;;
+    public List<FileStorageAccount> getAccounts(Session session) throws OXException;
 
     /**
      * Gets an existing file storage account.
@@ -111,16 +111,20 @@ public interface FileStorageAccountManager extends FileStorageConstants {
 
     /**
      * Migrates all encrypted strings from an old secret to a new one.
+     * 
      * @param oldSecret The old secret for decrypting stored secret strings
      * @param newSecret The new secret used for encrypting the secret strings
      * @param session The session providing needed user data
-     * @throws OXException
+     * @throws OXException If migrate operation fails for any reason
      */
     public void migrateToNewSecret(String oldSecret, String newSecret, Session session) throws OXException;
 
     /**
-     * @param session 
-     * @return
+     * Tests for encrypted items.
+     * 
+     * @param session The session providing needed user data
+     * @return <code>true</code> if encrypted items are available; otherwise <code>false</code>
+     * @throws OXException If test for encrypted items fails
      */
     public boolean hasEncryptedItems(Session session) throws OXException;
 

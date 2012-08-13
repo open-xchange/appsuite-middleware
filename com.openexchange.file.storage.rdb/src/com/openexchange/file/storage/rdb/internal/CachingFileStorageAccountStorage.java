@@ -195,6 +195,18 @@ public final class CachingFileStorageAccountStorage implements FileStorageAccoun
         }
     }
 
+    /**
+     * Gets the first account matching specified account identifier.
+     * 
+     * @param accountId The account identifier
+     * @param session The session
+     * @return The matching account or <code>null</code>
+     * @throws OXException If look-up fails
+     */
+    public FileStorageAccount getAccount(final int accountId, final Session session) throws OXException {
+        return delegatee.getAccount(accountId, session);
+    }
+
     @Override
     public int addAccount(final String serviceId, final FileStorageAccount account, final Session session) throws OXException {
         return delegatee.addAccount(serviceId, account, session);
@@ -212,12 +224,8 @@ public final class CachingFileStorageAccountStorage implements FileStorageAccoun
         if (cacheService == null) {
             return delegatee.getAccount(serviceId, id, session);
         }
-        try {
-            final OXObjectFactory<FileStorageAccount> factory = new FileStorageAccountFactory(serviceId, id, delegatee, cacheService, session, cacheLock);
-            return new FileStorageAccountReloader(factory, REGION_NAME);
-        } catch (final OXException e) {
-            throw e;
-        }
+        final OXObjectFactory<FileStorageAccount> factory = new FileStorageAccountFactory(serviceId, id, delegatee, cacheService, session, cacheLock);
+        return new FileStorageAccountReloader(factory, REGION_NAME);
     }
 
     @Override

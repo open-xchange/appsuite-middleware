@@ -74,7 +74,6 @@ public class UnitTests {
         tests.addTestSuite(com.openexchange.groupware.CalendarTest.class);
         tests.addTestSuite(com.openexchange.groupware.CalendarRecurringTests.class);
         tests.addTestSuite(com.openexchange.groupware.AppointmentBugTests.class);
-        tests.addTestSuite(com.openexchange.groupware.notify.AttachedIcalFileTests.class);
 
         tests.addTest(com.openexchange.groupware.calendar.calendarsqltests.CalendarSqlTestSuite.suite());
         tests.addTestSuite(com.openexchange.groupware.calendar.ConflictHandlerTest.class);
@@ -124,9 +123,6 @@ public class UnitTests {
         tests.addTestSuite(com.openexchange.i18n.CompiledLineParserTemplateTest.class);
         tests.addTestSuite(com.openexchange.i18n.GettextParserTest.class);
         tests.addTestSuite(com.openexchange.i18n.impl.FileDiscovererTest.class);
-
-        tests.addTest(com.openexchange.groupware.notify.NotifyTestSuite.suite());
-        tests.addTestSuite(com.openexchange.groupware.notify.StateTest.class);
 
         tests.addTestSuite(com.openexchange.groupware.attach.AttachmentBaseTest.class);
 

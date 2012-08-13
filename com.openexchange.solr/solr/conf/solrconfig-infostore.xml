@@ -60,6 +60,9 @@
             <str name="echoParams">explicit</str>
             <float name="tie">0.01</float>
             <str name="qf">
+                <!-- Deutlich Höhere Gewichtung. Faktor 5-10. Gewichte evt. 
+                durch Nutzer bestimmbar. MLT-Handler für Facets.
+                Gleichbehandlung von Beschreibung und Inhalt -->
                 title^3.0 file_name^3.0 description^2.0 version_comment^2.0 content^2.0 url^1.0 categories^1.0
             </str>
         </lst>
@@ -119,8 +122,28 @@
         <str name="param20">version_comment</str>
         <str name="param21">content</str>
         <str name="param22">md5_sum</str>
+        <str name="param23">locale</str>
     </searchComponent>
 
-    <requestHandler name="/update" class="solr.XmlUpdateRequestHandler" />
+    <requestHandler name="/update" class="solr.XmlUpdateRequestHandler">
+        <lst name="defaults">
+            <str name="update.chain">langid</str>
+        </lst>
+    </requestHandler>
+    <updateRequestProcessorChain name="langid">
+        <processor
+            class="org.apache.solr.update.processor.TikaLanguageIdentifierUpdateProcessorFactory">
+            <bool name="langid">true</bool>
+            <str name="langid.fl">content</str>
+            <str name="langid.whitelist">de,en,fr,it</str>
+            <str name="langid.langField">locale</str>
+            <bool name="langid.map">true</bool>
+            <str name="langid.threshold">0.2</str>
+            <str name="langid.fallback">gen</str>
+        </processor>
+        <processor class="solr.LogUpdateProcessorFactory" />
+        <processor class="solr.RunUpdateProcessorFactory" />
+    </updateRequestProcessorChain>
+    
     <requestHandler name="/update/javabin" class="solr.BinaryUpdateRequestHandler" />
 </config>

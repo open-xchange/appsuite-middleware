@@ -264,6 +264,16 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
     }
 
     @Override
+    public FileStorageFolder getPersonalFolder() throws OXException {
+        throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create();
+    }
+
+    @Override
+    public FileStorageFolder[] getPublicFolders() throws OXException {
+        return new FileStorageFolder[0];
+    }
+
+    @Override
     public FileStorageFolder[] getSubfolders(final String parentId, final boolean all) throws OXException {
         try {
             /*

@@ -50,6 +50,13 @@
 package com.openexchange.groupware.settings.tree.folder;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageAccountManager;
+import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
+import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.folderstorage.filestorage.FileStorageFolderIdentifier;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.InfostoreFacades;
@@ -59,6 +66,8 @@ import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 
@@ -67,6 +76,8 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class Infostore implements PreferencesItemService {
+
+    private static final String DEFAULT_ID = FileStorageAccount.DEFAULT_ID;
 
     /**
      * Default constructor.
@@ -91,19 +102,47 @@ public class Infostore implements PreferencesItemService {
         return new ReadOnlyValue() {
             @Override
             public boolean isAvailable(final UserConfiguration userConfig) {
-                return userConfig.hasInfostore() && InfostoreFacades.isInfoStoreAvailable();
+                return userConfig.hasInfostore();
             }
             @Override
             public void getValue(final Session session, final Context ctx,
                 final User user, final UserConfiguration userConfig,
                 final Setting setting) throws OXException {
-                final OXFolderAccess acc = new OXFolderAccess(ctx);
-                try {
-                    setting.setSingleValue(Integer.valueOf(acc.getDefaultFolder(
+                // Check availability of InfoStore
+                if (InfostoreFacades.isInfoStoreAvailable()) {
+                    setting.setSingleValue(Integer.valueOf(new OXFolderAccess(ctx).getDefaultFolder(
                         user.getId(), FolderObject.INFOSTORE).getObjectID()));
-                } catch (final OXException e) {
-                    throw new OXException(e);
+                    return;
                 }
+                // Choose the primary folder from another file storage
+                final FileStorageAccountManagerLookupService lookupService = ServerServiceRegistry.getInstance().getService(FileStorageAccountManagerLookupService.class);
+                if (null == lookupService) {
+                    throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(FileStorageAccountManagerLookupService.class.getName());
+                }
+                try {
+                    final FileStorageAccountManager defaultAccountManager = lookupService.getAccountManager(DEFAULT_ID, session);
+                    if (null != defaultAccountManager) {
+                        final FileStorageAccount defaultAccount = defaultAccountManager.getAccount(DEFAULT_ID, session);
+                        final FileStorageService fileStorageService = defaultAccount.getFileStorageService();
+                        final FileStorageAccountAccess accountAccess = fileStorageService.getAccountAccess(DEFAULT_ID, session);
+                        accountAccess.connect();
+                        try {
+                            final FileStorageFolder personalFolder = accountAccess.getFolderAccess().getPersonalFolder();
+                            setting.setSingleValue(new FileStorageFolderIdentifier(
+                                fileStorageService.getId(),
+                                defaultAccount.getId(),
+                                personalFolder.getId()).toString());
+                            return;
+                        } finally {
+                            accountAccess.close();
+                        }
+                    }
+                } catch (final OXException e) {
+                    // Unable to retrieve default folder
+                }
+                // All failed
+                setting.setSingleValue(Integer.valueOf(new OXFolderAccess(ctx).getDefaultFolder(
+                    user.getId(), FolderObject.INFOSTORE).getObjectID()));
             }
         };
     }

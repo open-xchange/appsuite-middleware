@@ -1,0 +1,126 @@
+<?xml version="1.0"?>
+
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one or more
+    contributor license agreements.  See the NOTICE file distributed with
+    this work for additional information regarding copyright ownership.
+    The ASF licenses this file to You under the Apache License, Version 2.0
+    the "License"); you may not use this file except in compliance with
+    the License.  You may obtain a copy of the License at
+ 
+        http://www.apache.org/licenses/LICENSE-2.0
+ 
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+ -->
+
+<project name="core" default="default">
+  <description>Lucene Core</description>
+
+  <property name="build.dir" location="../build/core"/>
+
+  <property name="rat.excludes" value="**/TODO,**/*.txt,**/*LuceneResourcesWikiPage.html"/>
+
+  <import file="../common-build.xml"/>
+
+  <path id="classpath"/>
+  
+  <path id="test.classpath">
+    <pathelement location="${common.dir}/build/test-framework/classes/java"/>
+    <path refid="junit-path"/>
+    <pathelement location="${build.dir}/classes/java"/>
+    <pathelement location="${build.dir}/classes/test"/>
+  </path>
+
+  <path id="junit.classpath">
+    <path refid="test.classpath"/>
+    <pathelement path="${java.class.path}"/>
+  </path>
+
+  <target name="compile-core" depends="jflex-notice, javacc-notice, common.compile-core"/>
+  
+  <target name="test-core" depends="common.test"/>
+
+  <target name="javadocs-core" depends="javadocs"/>
+  <target name="javadocs" description="Generate javadoc for core classes">
+  	<sequential>
+      <mkdir dir="${javadoc.dir}/core"/>
+      <invoke-javadoc destdir="${javadoc.dir}/core" title="${Name} ${version} core API">
+        <sources>
+          <packageset dir="${src.dir}"/>
+          <link href=""/>
+        </sources>
+      </invoke-javadoc>
+      <mkdir dir="${build.dir}"/>
+     <jarify basedir="${javadoc.dir}/core" destfile="${build.dir}/${final.name}-javadoc.jar"/>
+    </sequential>
+  </target>
+
+  <target name="jflex" depends="jflex-check,clean-jflex,gen-uax29-supp-macros,
+                                jflex-StandardAnalyzer,jflex-UAX29URLEmailTokenizer"/>
+
+  <target name="gen-uax29-supp-macros">
+    <subant target="gen-uax29-supp-macros">
+       <fileset dir="../contrib/icu" includes="build.xml"/>
+    </subant>
+  </target>
+
+  <target name="jflex-StandardAnalyzer" depends="init,jflex-check" if="jflex.present">
+    <taskdef classname="jflex.anttask.JFlexTask" name="jflex">
+			<classpath refid="jflex.classpath"/>
+    </taskdef>
+
+    <jflex file="src/java/org/apache/lucene/analysis/standard/StandardTokenizerImpl.jflex"
+           outdir="src/java/org/apache/lucene/analysis/standard"
+           nobak="on" />
+    <jflex file="src/java/org/apache/lucene/analysis/standard/ClassicTokenizerImpl.jflex"
+           outdir="src/java/org/apache/lucene/analysis/standard"
+           nobak="on" />
+    <jflex file="src/java/org/apache/lucene/analysis/standard/std31/StandardTokenizerImpl31.jflex"
+           outdir="src/java/org/apache/lucene/analysis/standard/std31"
+           nobak="on" />
+  </target>
+
+  <target name="jflex-UAX29URLEmailTokenizer" depends="jflex-check" if="jflex.present">
+    <taskdef classname="jflex.anttask.JFlexTask" name="jflex">
+			<classpath refid="jflex.classpath"/>
+    </taskdef>
+    <jflex file="src/java/org/apache/lucene/analysis/standard/UAX29URLEmailTokenizerImpl.jflex"
+           outdir="src/java/org/apache/lucene/analysis/standard"
+           nobak="on" />
+    <jflex file="src/java/org/apache/lucene/analysis/standard/std31/UAX29URLEmailTokenizerImpl31.jflex"
+           outdir="src/java/org/apache/lucene/analysis/standard/std31"
+           nobak="on" />
+    <jflex file="src/java/org/apache/lucene/analysis/standard/std34/UAX29URLEmailTokenizerImpl34.jflex"
+           outdir="src/java/org/apache/lucene/analysis/standard/std34"
+           nobak="on" />
+  </target>
+
+  <property name="tld.zones" value="http://www.internic.net/zones/root.zone"/>
+  <property name="tld.output" location="src/java/org/apache/lucene/analysis/standard/ASCIITLD.jflex-macro"/>
+
+  <target name="gen-tlds" depends="compile-tools">
+    <java
+      classname="org.apache.lucene.analysis.standard.GenerateJflexTLDMacros"
+      dir="."
+      fork="true"
+      failonerror="true">
+      <classpath>
+      	<pathelement location="${common.dir}/build/tools/classes/java"/>
+      </classpath>
+      <arg value="${tld.zones}"/>
+      <arg value="${tld.output}"/>
+    </java>
+  </target>
+
+  <target name="clean-jflex">
+    <delete>
+      <fileset dir="src/java/org/apache/lucene/analysis/standard" includes="**/*.java">
+        <containsregexp expression="generated.*by.*JFlex"/>
+      </fileset>
+    </delete>
+  </target>
+</project>

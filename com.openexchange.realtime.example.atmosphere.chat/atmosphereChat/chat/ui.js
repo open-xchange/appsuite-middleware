@@ -60,6 +60,7 @@ define("chat/ui", function () {
         logLevel : 'debug',
         transport : 'websocket' ,
         fallbackTransport: 'long-polling',
+        timeout: 60000,
         headers : {session: session}
         };
 

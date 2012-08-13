@@ -165,7 +165,13 @@ public enum FileStorageExceptionCodes implements OXExceptionCode {
     /**
      * Invalid URL "%1$s". Error: %2$s.
      */
-    INVALID_URL(FileStorageExceptionMessages.INVALID_URL_MSG, Category.CATEGORY_USER_INPUT, 28);
+    INVALID_URL(FileStorageExceptionMessages.INVALID_URL_MSG, Category.CATEGORY_USER_INPUT, 28),
+    /**
+     * No such folder.
+     */
+    NO_SUCH_FOLDER(FileStorageExceptionMessages.NO_SUCH_FOLDER_MSG, Category.CATEGORY_USER_INPUT, 29),
+    
+    ;
 
     /**
      * The prefix constant.

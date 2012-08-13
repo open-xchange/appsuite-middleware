@@ -107,6 +107,7 @@ import com.openexchange.event.impl.EventQueue;
 import com.openexchange.event.impl.osgi.EventHandlerRegistration;
 import com.openexchange.event.impl.osgi.OSGiEventDispatcher;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.parse.FileMetadataParserService;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
@@ -246,8 +247,9 @@ public final class ServerActivator extends HousekeepingActivator {
             ConfigurationService.class, CacheService.class, EventAdmin.class, SessiondService.class, SpringParser.class, JDOMParser.class,
             TimerService.class, ThreadPoolService.class, CalendarAdministrationService.class, AppointmentSqlFactoryService.class,
             CalendarCollectionService.class, MessagingServiceRegistry.class, HtmlService.class, IDBasedFileAccessFactory.class,
-            FileStorageServiceRegistry.class, CryptoService.class, HttpService.class, SystemNameService.class, ImageScalingService.class,
-            ConfigViewFactory.class, StringParser.class, PreviewService.class, TextXtractService.class, SecretEncryptionFactoryService.class
+            FileStorageServiceRegistry.class, FileStorageAccountManagerLookupService.class, CryptoService.class, HttpService.class,
+            SystemNameService.class, ImageScalingService.class, ConfigViewFactory.class, StringParser.class, PreviewService.class,
+            TextXtractService.class, SecretEncryptionFactoryService.class
         };
 
     private static volatile BundleContext CONTEXT;

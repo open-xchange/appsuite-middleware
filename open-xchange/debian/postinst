@@ -31,11 +31,20 @@ for FILE in ${GWCONFFILES}; do
     	/opt/open-xchange/etc/${FILE} 6.20.99 -- "$@"
 done
 
+dpkg-maintscript-helper mv_conffile /etc/default/open-xchange-groupware \
+    /etc/default/open-xchange 6.20.99 -- "$@"
+
 # SoftwareChange_Request-1094
-# -----------------------------------------------------------------------
 dpkg-maintscript-helper rm_conffile \
     /opt/open-xchange/etc/groupware/mailjsoncache.properties -- "$@"
 
+# SoftwareChange_Request-1091
+dpkg-maintscript-helper rm_conffile \
+    /opt/open-xchange/etc/groupware/TidyConfiguration.properties -- "$@"
+dpkg-maintscript-helper rm_conffile \
+    /opt/open-xchange/etc/groupware/TidyMessages.properties -- "$@"
+
+dpkg-maintscript-helper rm_conffile /etc/init.d/open-xchange-groupware -- "$@"
 
 . /opt/open-xchange/lib/oxfunctions.sh
 
@@ -55,6 +64,95 @@ if grep COMMONPROPERTIESDIR $pfile >/dev/null; then
     fi
 fi
 
+postFix() {
+    local version=${1%-*}
+    version=${version//[-.]/}
+
+    # prevent bash from expanding, see bug 13316
+    GLOBIGNORE='*'
+
+    # SoftwareChange_Request-1105
+    pfile=/opt/open-xchange/etc/cache.ccf
+    ptmp=${pfile}.$$
+    if grep -E "^jcs.region.OXIMAPConCache" $pfile > /dev/null; then
+        grep -vE "^jcs.region.OXIMAPConCache" $pfile > $ptmp
+        if [ -s $ptmp ]; then
+            cp $ptmp $pfile
+        fi
+        rm -f $ptmp
+    fi
+
+    # SoftwareChange_Request-1028
+    pfile=/opt/open-xchange/etc/contact.properties
+    if ! ox_exists_property com.openexchange.carddav.tree $pfile; then
+        ox_set_property com.openexchange.carddav.tree "0" $pfile
+    fi
+    if ! ox_exists_property com.openexchange.carddav.combinedRequestTimeout $pfile; then
+        ox_set_property com.openexchange.carddav.combinedRequestTimeout "20000" $pfile
+    fi
+    if ! ox_exists_property com.openexchange.carddav.exposedCollections $pfile; then
+        ox_set_property com.openexchange.carddav.exposedCollections "0" $pfile
+    fi
+    # SoftwareChange_Request-1091
+    if ! ox_exists_property contactldap.configuration.path $pfile; then
+	ox_remove_property contactldap.configuration.path $pfile
+    fi
+
+    # SoftwareChange_Request-1101
+    pfile=/opt/open-xchange/etc/configdb.properties
+    if ox_exists_property writeOnly $pfile; then
+        ox_remove_property writeOnly $pfile
+    fi
+    # SoftwareChange_Request-1091
+    if ox_exists_property useSeparateWrite $pfile; then
+	ox_remove_property useSeparateWrite $pfile
+    fi 
+
+    # SoftwareChange_Request-1091
+    pfile=/opt/open-xchange/etc/system.properties
+    for prop in Calendar Infostore Attachment Notification ServletMappingDir CONFIGPATH \
+	AJPPROPERTIES IMPORTEREXPORTER LDAPPROPERTIES EVENTPROPERTIES PUSHPROPERTIES \
+	UPDATETASKSCFG HTMLEntities MailCacheConfig TidyMessages TidyConfiguration Whitelist; do
+	if ox_exists_property $prop $pfile; then
+	   ox_remove_property $prop $pfile
+	fi
+    done
+    if grep -E '^com.openexchange.caching.configfile.*/' $pfile >/dev/null; then
+        ox_set_property com.openexchange.caching.configfile cache.ccf $pfile
+    fi
+    if ox_exists_property MimeTypeFile $pfile; then
+        ox_set_property MimeTypeFileName mime.types $pfile
+        ox_remove_property MimeTypeFile $pfile
+    fi
+    pfile=/opt/open-xchange/etc/import.properties
+    if ox_exists_property com.openexchange.import.mapper.path $pfile; then
+	ox_remove_property com.openexchange.import.mapper.path $pfile
+    fi
+    pfile=/opt/open-xchange/etc/mail.properties
+    if ox_exists_property com.openexchange.mail.JavaMailProperties $pfile; then
+	ox_remove_property com.openexchange.mail.JavaMailProperties $pfile
+    fi
+    pfile=/opt/open-xchange/etc/sessiond.properties
+    if ox_exists_property com.openexchange.sessiond.sessionCacheConfig $pfile; then
+	ox_remove_property com.openexchange.sessiond.sessionCacheConfig $pfile
+    fi
+
+    # SoftwareChange_Request-1024
+    pfile=/opt/open-xchange/etc/server.properties
+    if ! ox_exists_property com.openexchange.IPMaskV4 $pfile; then
+        ox_set_property com.openexchange.IPMaskV4 "" $pfile
+    fi
+    if ! ox_exists_property com.openexchange.IPMaskV6 $pfile; then
+        ox_set_property com.openexchange.IPMaskV6 "" $pfile
+    fi
+
+    # SoftwareChange_Request-1027
+    pfile=/opt/open-xchange/etc/server.properties
+    if ! ox_exists_property com.openexchange.dispatcher.prefix $pfile; then
+        ox_set_property com.openexchange.dispatcher.prefix "/ajax/" $pfile
+    fi
+}
+
 setConfigFilePermissions() {
     ox_update_permissions "/var/spool/open-xchange/uploads" open-xchange:root 750
     ox_update_permissions "/var/log/open-xchange" open-xchange:root 750
@@ -62,6 +160,10 @@ setConfigFilePermissions() {
 
 case "$1" in
     configure)
+        test -n "$2" && {
+            # we are in update mode, run postFix to apply fixes
+            postFix "$2"
+        }
         setConfigFilePermissions
     ;;
 

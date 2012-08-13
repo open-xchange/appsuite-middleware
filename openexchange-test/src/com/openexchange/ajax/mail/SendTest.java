@@ -126,7 +126,7 @@ public final class SendTest extends AbstractMailTest {
 
         TestMail mail = new TestMail();
         mail.setSubject("Test sending with manager");
-        mail.setFrom(Arrays.asList(new String[] { values.getSendAddress() }));
+        mail.setFrom(values.getSendAddress());
         mail.setTo(Arrays.asList(new String[] { values.getSendAddress() }));
         mail.setContentType(MailContentType.PLAIN.toString());
         mail.setBody("This is the message body.");

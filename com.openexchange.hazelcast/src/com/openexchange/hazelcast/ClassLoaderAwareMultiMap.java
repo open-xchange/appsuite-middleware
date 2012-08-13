@@ -58,6 +58,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import com.hazelcast.core.EntryListener;
 import com.hazelcast.core.MultiMap;
+import com.hazelcast.monitor.LocalMapStats;
 
 /**
  * {@link ClassLoaderAwareMultiMap}
@@ -106,6 +107,11 @@ public final class ClassLoaderAwareMultiMap<K extends Serializable, V extends Se
     @Override
     public String getName() {
         return delegate.getName();
+    }
+
+    @Override
+    public LocalMapStats getLocalMultiMapStats() {
+        return delegate.getLocalMultiMapStats();
     }
 
     @Override

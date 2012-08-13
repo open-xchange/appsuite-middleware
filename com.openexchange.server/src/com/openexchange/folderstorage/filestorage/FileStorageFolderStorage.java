@@ -165,6 +165,13 @@ public final class FileStorageFolderStorage implements FolderStorage {
     private static final String PRIVATE_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
 
     /**
+     * <code>"9"</code>
+     */
+    private static final String INFOSTORE = Integer.toString(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
+
+    private static final String SERVICE_INFOSTORE = "infostore";
+
+    /**
      * Initializes a new {@link FileStorageFolderStorage}.
      */
     public FileStorageFolderStorage() {
@@ -554,7 +561,7 @@ public final class FileStorageFolderStorage implements FolderStorage {
             }
         }
 
-        if (PRIVATE_FOLDER_ID.equals(parentId)) {
+        if (REAL_TREE_ID.equals(treeId) ? PRIVATE_FOLDER_ID.equals(parentId) : INFOSTORE.equals(parentId)) {
             /*
              * Get all user file storage accounts
              */
@@ -568,6 +575,9 @@ public final class FileStorageFolderStorage implements FolderStorage {
                      */
                     final List<FileStorageAccount> userAccounts = fsService.getAccountManager().getAccounts(session);
                     for (final FileStorageAccount userAccount : userAccounts) {
+                        if (SERVICE_INFOSTORE.equals(userAccount.getId()) || FileStorageAccount.DEFAULT_ID.equals(userAccount.getId())) {
+                            continue;
+                        }
                         final FileStorageAccountAccess accountAccess =
                             userAccount.getFileStorageService().getAccountAccess(userAccount.getId(), session);
                         accountAccess.connect();

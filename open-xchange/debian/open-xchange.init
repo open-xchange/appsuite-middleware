@@ -42,6 +42,22 @@ fi
 
 ulimit -n $NRFILES
 
+if ox_is_running open-xchange-admin "/opt/open-xchange/etc/admindaemon"; then
+   echo -n "old 6.20 admin daemon still running, shutting down..."
+   ox_stop_daemon open-xchange-admin
+   while ox_is_running open-xchange-admin "/opt/open-xchange/etc/admindaemon"; do
+        sleep 1
+   done
+   echo " done"
+fi
+if ox_is_running open-xchange-groupware "/opt/open-xchange/etc/groupware"; then
+   echo -n "old 6.20 groupware still running, shutting down..."
+   ox_stop_daemon open-xchange-groupware
+   while ox_is_running open-xchange-groupware "/opt/open-xchange/etc/groupware"; do
+        sleep 1
+   done
+   echo " done"
+fi
 
 case "$1" in
   start)
@@ -52,13 +68,17 @@ case "$1" in
 
   stop)
 	echo -n "Stopping $DESC: "
-	ox_stop_daemon $STARTSCRIPT $NAME
+	ox_stop_daemon $NAME
 	echo "$NAME."
 	;;
 
   restart|force-reload)
 	echo -n "Restarting $DESC: "
-	ox_restart_daemon $STARTSCRIPT $NAME open-xchange open-xchange
+        $0 stop
+        while ox_is_running open-xchange "/opt/open-xchange/sbin/open-xchange"; do
+             sleep 1
+        done
+        $0 start
 	echo "$NAME."
 	;;
 

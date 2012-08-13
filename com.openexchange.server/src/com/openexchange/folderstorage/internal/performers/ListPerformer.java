@@ -185,6 +185,9 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
         }
         try {
             final UserizedFolder[] ret = doList(treeId, parentId, all, openedStorages, checkOnly);
+            for (final UserizedFolder userizedFolder : ret) {
+                userizedFolder.setParentID(parentId);
+            }
             /*
              * Commit
              */
