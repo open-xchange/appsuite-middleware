@@ -131,6 +131,8 @@ public class NoSQLSessionStorageService implements SessionStorageService {
             CassandraHostConfigurator configurator = new CassandraHostConfigurator(CLUSTER);
             ThriftCluster thriftCluster = new ThriftCluster(CLUSTER, configurator);
             ColumnFamilyDefinition cfDefinition = HFactory.createColumnFamilyDefinition(KEYSPACE, CF_NAME);
+            cfDefinition.setMaxCompactionThreshold(128);
+            cfDefinition.setMinCompactionThreshold(16);
             thriftCluster.addKeyspace(new ThriftKsDef(
                 KEYSPACE,
                 "org.apache.cassandra.locator.SimpleStrategy",
@@ -186,9 +188,12 @@ public class NoSQLSessionStorageService implements SessionStorageService {
                 null);
             return session;
         }
-        OXException e = OXNoSQLSessionStorageExceptionCodes.NOSQL_SESSIONSTORAGE_SESSION_NOT_FOUND.create(sessionId);
-        log.error(e.getMessage(), e);
-        throw e;
+        if (log.isDebugEnabled()) {
+            OXException e = OXNoSQLSessionStorageExceptionCodes.NOSQL_SESSIONSTORAGE_SESSION_NOT_FOUND.create(sessionId);
+            log.debug(e.getMessage(), e);
+            throw e;
+        }
+        return null;
     }
 
     @Override
