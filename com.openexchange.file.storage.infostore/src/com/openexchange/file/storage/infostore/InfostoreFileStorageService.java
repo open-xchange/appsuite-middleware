@@ -77,7 +77,7 @@ public class InfostoreFileStorageService implements FileStorageService {
     @Override
     public FileStorageAccountAccess getAccountAccess(final String accountId, final Session session) throws OXException {
         if (!accountId.equals(InfostoreDefaultAccountManager.DEFAULT_ID)) {
-            throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(accountId, getId());
+            throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(accountId, getId(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
         }
         return new InfostoreAccountAccess(session, this);
     }

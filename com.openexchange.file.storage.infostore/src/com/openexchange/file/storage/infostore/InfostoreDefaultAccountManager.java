@@ -100,7 +100,7 @@ public class InfostoreDefaultAccountManager implements FileStorageAccountManager
 
         @Override
         public String getId() {
-            return DEFAULT_ID;
+            return InfostoreDefaultAccountManager.DEFAULT_ID;
         }
 
         @Override

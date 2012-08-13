@@ -634,8 +634,8 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
     }
 
     protected List<FileStorageFileAccess> getAllFileStorageAccesses() throws OXException {
-        final List<FileStorageFileAccess> retval = new ArrayList<FileStorageFileAccess>();
         final List<FileStorageService> allFileStorageServices = getAllFileStorageServices();
+        final List<FileStorageFileAccess> retval = new ArrayList<FileStorageFileAccess>(allFileStorageServices.size());
         for (final FileStorageService fileStorageService : allFileStorageServices) {
             final FileStorageAccountManager accountManager = fileStorageService.getAccountManager();
             final List<FileStorageAccount> accounts = accountManager.getAccounts(session);
