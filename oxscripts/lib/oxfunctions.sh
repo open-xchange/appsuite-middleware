@@ -97,6 +97,7 @@ ox_start_daemon() {
     local user="$3"
     local group="$4"
     test -z "$path" && die "ox_start_daemon: missing path argument (arg 1)"
+    test -x $path   || die "ox_stop_daemon: $path is not executable"
     test -z "$name" && die "ox_start_daemon: missing name argument (arg 2)"
     local runasuser=
     test -n "$user"   && runasuser="--chuid $user"
@@ -140,11 +141,8 @@ ox_is_running() {
 }
 
 ox_stop_daemon() {
-    local path="$1"
-    local name="$2"
-    test -z "$path" && die "ox_stop_daemon: missing path argument (arg 1)"
-    test -z "$name" && die "ox_stop_daemon: missing name argument (arg 2)"
-    test -x $path ||   die "ox_stop_daemon: $path is not executable"
+    local name="$1"
+    test -z "$name" && die "ox_stop_daemon: missing name argument (arg 1)"
     ox_system_type
     local type=$?
     if [ $type -eq $DEBIAN -o $type -eq $UCS ] ; then
@@ -160,23 +158,10 @@ ox_stop_daemon() {
 	    return 0
 	fi
 	kill -TERM $PID
+	rm -f /var/run/${name}.pid
     else
 	die "Unable to handle unknown system type"
     fi
-}
-
-ox_restart_daemon() {
-    local path="$1"
-    local name="$2"
-    local user="$3"
-    local group="$4"
-    test -z "$path" && die "ox_restart_daemon: missing path argument (arg 1)"
-    test -z "$name" && die "ox_restart_daemon: missing name argument (arg 2)"
-    test -x $path ||   die "ox_restart_daemon: $path is not executable"
-    test -z "$user" && user=root
-    ox_stop_daemon $path $name
-    sleep 3
-    ox_start_daemon $path $name $user $group
 }
 
 ox_daemon_status() {

@@ -196,6 +196,23 @@ rc_reset
 
 ulimit -n $NRFILES
 
+if ox_is_running open-xchange-admindaemon "/opt/open-xchange/etc/admindaemon"; then
+   echo -n "old 6.20 admin daemon still running, shutting down..."
+   ox_stop_daemon open-xchange-admindaemon
+   while ox_is_running open-xchange-admindaemon "/opt/open-xchange/etc/admindaemon"; do
+	sleep 1
+   done
+   echo " done"
+fi
+if ox_is_running open-xchange-groupware "/opt/open-xchange/sbin/open-xchange-groupware"; then
+   echo -n "old 6.20 groupware still running, shutting down..."
+   ox_stop_daemon open-xchange-groupware
+   while ox_is_running open-xchange-groupware "/opt/open-xchange/sbin/open-xchange-groupware"; do
+	sleep 1
+   done
+   echo " done"
+fi
+
 case "$1" in
     start)
 	echo -n "Starting open-xchange "
@@ -213,7 +230,7 @@ case "$1" in
 	## Stop daemon with killproc(8) and if this fails
 	## killproc sets the return value according to LSB.
 
-	ox_stop_daemon $OX_BIN $(basename $OX_BIN)
+	ox_stop_daemon $(basename $OX_BIN)
 
 	# Remember status and be verbose
 	rc_status -v

@@ -58,6 +58,8 @@ for FILE in cache.ccf configdb.properties file-logging.properties management.pro
     dpkg-maintscript-helper rm_conffile /opt/open-xchange/etc/admindaemon/$FILE -- "$@"
 done
 
+dpkg-maintscript-helper rm_conffile /etc/default/open-xchange-admin -- "$@"
+dpkg-maintscript-helper rm_conffile /etc/init.d/open-xchange-admin -- "$@"
 
 case "$1" in
     install|upgrade)
