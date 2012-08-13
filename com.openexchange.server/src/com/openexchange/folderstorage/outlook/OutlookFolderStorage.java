@@ -158,6 +158,9 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class OutlookFolderStorage implements FolderStorage {
 
+    /**
+     * The constant for InfoStore's file storage service.
+     */
     private static final String SERVICE_INFOSTORE = "infostore";
 
     /**
@@ -1074,9 +1077,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                              * In virtual tree table, but shouldn't
                              */
                             Delete.deleteFolder(contextId, tree, user.getId(), folderId, false, false, checkWriteConnection(storageParameters));
-                            if (null != memoryTree) {
-                                memoryTree.getCrud().remove(folderId);
-                            }
+                            memoryTree.getCrud().remove(folderId);
                             throw FolderExceptionErrorMessage.TEMPORARY_ERROR.create(e, new Object[0]);
                         }
                     }
@@ -1429,7 +1430,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                     }
                 }
                 /*
-                 * Add file storage root folder below "infostore" folder
+                 * Add file storage root folders below "infostore" folder
                  */
                 if (INFOSTORE.equals(parentId)) {
                     /*
@@ -1453,6 +1454,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                                     final List<FileStorageAccount> userAccounts = fsService.getAccountManager().getAccounts(session);
                                     for (final FileStorageAccount userAccount : userAccounts) {
                                         if (SERVICE_INFOSTORE.equals(userAccount.getId()) || FileStorageAccount.DEFAULT_ID.equals(userAccount.getId())) {
+                                            // Ignore infostore file storage and default account
                                             continue;
                                         }
                                         final FileStorageAccountAccess accountAccess = getFSAccountAccess(storageParameters, userAccount);
