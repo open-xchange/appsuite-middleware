@@ -1521,15 +1521,19 @@ public final class OutlookFolderStorage implements FolderStorage {
         return ret;
     }
 
+    /**
+     * The identifier for default/primary file storage account.
+     */
+    private static final String DEFAULT_ID = FileStorageAccount.DEFAULT_ID;
+
     private FileStorageAccount getDefaultFileStorageAccess(final Session session) throws OXException {
         final FileStorageAccountManagerLookupService lookupService = ServerServiceRegistry.getInstance().getService(FileStorageAccountManagerLookupService.class);
         if (null == lookupService) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(FileStorageAccountManagerLookupService.class.getName());
         }
-        final String defaultId = FileStorageAccount.DEFAULT_ID;
-        final FileStorageAccountManager defaultAccountManager = lookupService.getAccountManager(defaultId, session);
+        final FileStorageAccountManager defaultAccountManager = lookupService.getAccountManager(DEFAULT_ID, session);
         if (null != defaultAccountManager) {
-            return defaultAccountManager.getAccount(defaultId, session);
+            return defaultAccountManager.getAccount(DEFAULT_ID, session);
         }
         return null;
     }

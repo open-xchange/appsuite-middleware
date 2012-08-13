@@ -208,6 +208,8 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
                             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
                         }
                         throw FileStorageExceptionCodes.NO_ACCOUNT_MANAGER_FOR_SERVICE.create(e, serviceId);
+                    } catch (final RuntimeException e) {
+                        throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
                     }
                     return null;
                 }
