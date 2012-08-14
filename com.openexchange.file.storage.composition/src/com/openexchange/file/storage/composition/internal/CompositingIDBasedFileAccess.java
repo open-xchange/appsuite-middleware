@@ -318,11 +318,11 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
         String accountId = access.getAccountAccess().getAccountId();
         Set<Integer> removed = new HashSet<Integer>(versions.length);
         for (int i : versions) {
-            removed.add(i);
+            removed.add(Integer.valueOf(i));
         }
         
         for (int i : notRemoved) {
-            removed.remove(i);
+            removed.remove(Integer.valueOf(i));
         }
         
         String objectId = fileID.getFileId();
