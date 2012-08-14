@@ -148,7 +148,7 @@ public class DefaultDispatcher implements Dispatcher {
          */
         final AJAXActionService action = factory.createActionService(modifiedRequestData.getAction());
         if (action == null) {
-            throw AjaxExceptionCodes.UNKNOWN_ACTION.create(modifiedRequestData.getAction());
+            throw AjaxExceptionCodes.UNKNOWN_ACTION_IN_MODULE.create(modifiedRequestData.getAction(), modifiedRequestData.getModule());
         }
         /*
          * Is it possible to serve request by ETag?

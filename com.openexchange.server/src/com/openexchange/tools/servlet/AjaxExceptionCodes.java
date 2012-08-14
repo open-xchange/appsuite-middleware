@@ -88,7 +88,11 @@ public enum AjaxExceptionCodes implements OXExceptionCode {
     /**
      * Bad request. The server is unable to handle the request.
      */
-    BAD_REQUEST(AjaxExceptionMessages.BAD_REQUEST, Category.CATEGORY_ERROR, 20);
+    BAD_REQUEST(AjaxExceptionMessages.BAD_REQUEST, Category.CATEGORY_ERROR, 20),
+    /**
+     * Unknown AJAX action %1$s in module %2$s.
+     */
+    UNKNOWN_ACTION_IN_MODULE(AjaxExceptionMessages.UnknownActionInModule_MSG, Category.CATEGORY_ERROR, 21);
 
     public static final String PREFIX = "SVL";
 

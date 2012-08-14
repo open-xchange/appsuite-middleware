@@ -69,6 +69,9 @@ public final class AjaxExceptionMessages implements LocalizableStrings {
     // Unknown AJAX action: %s.
     public static final String UnknownAction_MSG = "Unknown AJAX action: %s.";
 
+    // Unknown AJAX action %1$s in module %2$s.
+    public static final String UnknownActionInModule_MSG = "Unknown AJAX action %1$s in module %2$s.";
+
     // Missing the following request parameter: %s
     public static final String MISSING_PARAMETER_MSG = "Missing the following request parameter: %s";
 
