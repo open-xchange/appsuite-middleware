@@ -268,7 +268,11 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
                 final Class<? extends Object> clazz = classes[i];
                 final DeferredServiceTracker<? extends Object> tracker = newDeferredTracker(context, clazz, i);
                 tracker.open();
-                neededServiceTrackers[i] = tracker;
+                if (null != neededServiceTrackers) {
+                    // During tracker.open() an exception can occur and then the reset() method is called, which sets the
+                    // neededServiceTrackers to null. 
+                    neededServiceTrackers[i] = tracker;
+                }
             }
             if (len == 0) {
                 startBundle();
