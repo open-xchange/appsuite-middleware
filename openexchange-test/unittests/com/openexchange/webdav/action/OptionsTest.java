@@ -21,7 +21,7 @@ public class OptionsTest extends ActionTestCase {
 
 		assertEquals("0", res.getHeader("content-length"));
 
-		final Set<String> expected = new HashSet<String>(Arrays.asList("GET","PUT","DELETE","HEAD","OPTIONS","TRACE","PROPPATCH", "PROPFIND","MOVE","COPY","LOCK","UNLOCK", "REPORT"));
+		final Set<String> expected = new HashSet<String>(Arrays.asList("GET","PUT","DELETE","HEAD","OPTIONS","TRACE","PROPPATCH", "PROPFIND", "MOVE", "COPY", "LOCK", "UNLOCK", "REPORT", "ACL", "MKCALENDAR"));
 
 		final String[] got = res.getHeader("Allow").split("\\s*,\\s*");
 
@@ -31,9 +31,16 @@ public class OptionsTest extends ActionTestCase {
 		assertTrue(expected.toString(), expected.isEmpty());
 
 		final String[] davs = res.getHeader("DAV").split("\\s*,\\s*");
-		assertEquals(2,davs.length);
+		assertEquals(9,davs.length);
 		assertEquals("1", davs[0]);
 		assertEquals("2", davs[1]);
+		assertEquals("3", davs[2]);
+		assertEquals("access-control", davs[3]);
+		assertEquals("calendar-access", davs[4]);
+		assertEquals("addressbook", davs[5]);
+		assertEquals("extended-mkcol", davs[6]);
+		assertEquals("calendar-auto-schedule", davs[7]);
+		assertEquals("calendar-schedule", davs[8]);
 
 		assertEquals("bytes", res.getHeader("Accept-Ranges"));
 	}
