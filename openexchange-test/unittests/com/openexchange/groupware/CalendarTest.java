@@ -1793,6 +1793,7 @@ public class CalendarTest extends TestCase {
 
         final UserParticipant userB = new UserParticipant(userid2);
 
+        cdao.setParticipants(new UserParticipant[] { userA, userB });
         cdao.setUsers(new UserParticipant[] { userA, userB });
 
         final CalendarSql csql = new CalendarSql(so);
