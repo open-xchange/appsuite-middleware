@@ -56,7 +56,6 @@ import java.util.Arrays;
 import org.apache.commons.logging.Log;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.infostore.InfostoreFacades;
 import com.openexchange.log.LogFactory;
 
 /**
@@ -738,9 +737,9 @@ public final class UserConfiguration implements Serializable, Cloneable {
                 array.add(FolderObject.PROJECT);
             }
             if (hasInfostore()) {
-                if (InfostoreFacades.isInfoStoreAvailable()) {
+                //if (InfostoreFacades.isInfoStoreAvailable()) {
                     array.add(FolderObject.INFOSTORE);
-                }
+                //}
             }
             if (hasWebMail()) {
                 array.add(FolderObject.MAIL);
