@@ -89,6 +89,7 @@ public final class CIFSFolder extends DefaultFileStorageFolder {
         final DefaultFileStoragePermission permission = DefaultFileStoragePermission.newInstance();
         permission.setEntity(userId);
         permissions = Collections.<FileStoragePermission> singletonList(permission);
+        ownPermission = permission;
     }
 
     @Override
