@@ -47,23 +47,46 @@
  *
  */
 
-package com.openexchange.index;
-
-import java.util.Map;
+package com.openexchange.index.solr.internal.attachments;
 
 /**
- * {@link IndexDocument} - Represents an indexed document.
+ * {@link AttachmentUUID}
  * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface IndexDocument<V> {
-    /**
-     * Gets the object associated with this index document.
-     * 
-     * @return The associated object
-     */
-    public V getObject();
+public class AttachmentUUID {
+
+    private final String uuid;
     
-    public Map<String, Object> getProperties();
+
+    public AttachmentUUID(int module, String service, String account, String folder, String id, int attachmentNum) {
+        super();
+        StringBuilder tmp = new StringBuilder(64);
+        tmp.append(module).append('/');
+        if (service != null) {
+            tmp.append(service).append('/');
+        }
+        if (account != null) {
+            tmp.append(account).append('/');
+        }
+        tmp.append(folder).append('/').append(id).append('/').append(attachmentNum);
+        uuid = tmp.toString();
+    }
+
+    public static AttachmentUUID newUUID(int module, String service, String account, String folder, String id, int attachmentNum) {
+        return new AttachmentUUID(module, service, account, folder, id, attachmentNum);
+    }
+
+    public static AttachmentUUID newUUID(int module, String account, String folder, String id, int attachmentNum) {
+        return new AttachmentUUID(module, null, account, folder, id, attachmentNum);
+    }
+
+    public static AttachmentUUID newUUID(int module, String folder, String id, int attachmentNum) {
+        return new AttachmentUUID(module, null, null, folder, id, attachmentNum);
+    }
+    
+    @Override
+    public String toString() {        
+        return uuid;
+    }
 }

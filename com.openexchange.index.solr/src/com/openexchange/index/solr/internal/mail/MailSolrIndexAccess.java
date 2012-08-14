@@ -75,7 +75,6 @@ import com.openexchange.groupware.Types;
 import com.openexchange.index.FacetParameters;
 import com.openexchange.index.FacetRange;
 import com.openexchange.index.IndexDocument;
-import com.openexchange.index.IndexDocument.Type;
 import com.openexchange.index.IndexField;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.Indexes;
@@ -86,7 +85,6 @@ import com.openexchange.index.mail.MailIndexField;
 import com.openexchange.index.solr.internal.AbstractSolrIndexAccess;
 import com.openexchange.index.solr.internal.Services;
 import com.openexchange.index.solr.mail.MailUUID;
-import com.openexchange.index.solr.mail.SolrMailField;
 import com.openexchange.mail.dataobjects.ContentAwareMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.search.SearchTerm;
@@ -573,9 +571,10 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
         return indexResult;        
     }
     
-    private void setFieldList(final SolrQuery solrQuery, final Set<SolrMailField> fields) {
-        solrQuery.setFields(SolrMailField.solrNamesFor(fields));
-    }
+//    FIXME: remove
+//    private void setFieldList(final SolrQuery solrQuery, final Set<SolrMailField> fields) {
+//        solrQuery.setFields(SolrMailField.solrNamesFor(fields));
+//    }
 
     private String buildFacetQuery(final String solrName, final String from, final String to) {
         if (null == from && null == to) {
@@ -681,11 +680,6 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
             throw new IllegalArgumentException("Parameter `search handler` must not be null!");
         }
         
-        final Type type = parameters.getType();
-        if (type == null || type != Type.MAIL) {
-            throw new IllegalArgumentException("Parameter `type` must be `mail`!");
-        }
-        
         switch(searchHandler) {
             case ALL_REQUEST:
                 return searchHandler;
@@ -724,12 +718,16 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
     }
     
     private int getAccountId(final QueryParameters parameters) {
-        final Object accountIdObj = parameters.getParameters().get("accountId");
-        if (accountIdObj == null || !(accountIdObj instanceof Integer)) {
-            return -1;
+        if (parameters.getParameters() != null) {
+            final Object accountIdObj = parameters.getParameters().get("accountId");
+            if (accountIdObj == null || !(accountIdObj instanceof Integer)) {
+                return -1;
+            }
+            
+            return ((Integer) accountIdObj).intValue();
         }
         
-        return ((Integer) accountIdObj).intValue();
+        return -1;
     }
     
     private String[] getIds(final QueryParameters parameters) {

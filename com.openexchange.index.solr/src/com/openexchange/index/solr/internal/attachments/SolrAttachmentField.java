@@ -49,51 +49,69 @@
 
 package com.openexchange.index.solr.internal.attachments;
 
+import java.util.EnumMap;
+import java.util.Map;
+import com.openexchange.index.AttachmentIndexField;
+import com.openexchange.index.solr.internal.SolrField;
+
 
 /**
  * {@link SolrAttachmentField}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public enum SolrAttachmentField {
+public enum SolrAttachmentField implements SolrField {
     
-    UUID("uuid", "param1"),
-    MODULE("module", "param2"),
-    SERVICE("service", "param3"),
-    ACCOUNT("account", "param4"),
-    FOLDER("folder", "param5"),
-    ID("id", "param6"),
-    FILE_NAME("file_name", "param7"),
-    FILE_SIZE("file_size", "param8"),
-    MIME_TYPE("mime_type", "param9"),
-    MD5_SUM("md5_sum", "param10"),
-    FILE("content", "param11");
+    UUID("uuid", "param1", null),
+    MODULE("module", "param2", AttachmentIndexField.MODULE),
+    SERVICE("service", "param3", AttachmentIndexField.SERVICE),
+    ACCOUNT("account", "param4", AttachmentIndexField.ACCOUNT),
+    FOLDER("folder", "param5", AttachmentIndexField.FOLDER),
+    OBJECT_ID("id", "param6", AttachmentIndexField.ID),    
+    FILE_NAME("file_name", "param7", AttachmentIndexField.FILE_NAME),
+    FILE_SIZE("file_size", "param8", AttachmentIndexField.FILE_SIZE),
+    MIME_TYPE("mime_type", "param9", AttachmentIndexField.MIME_TYPE),
+    MD5_SUM("md5_sum", "param10", AttachmentIndexField.MD5_SUM),
+    CONTENT("content", "param11", AttachmentIndexField.CONTENT),
+    ATTACHMENT_ID("attachment_id", "param12", AttachmentIndexField.ATTACHMENT_ID);
     
+    
+    private static final Map<AttachmentIndexField, SolrAttachmentField> fieldMapping = new EnumMap<AttachmentIndexField, SolrAttachmentField>(AttachmentIndexField.class);
     
     private final String solrName;
     
     private final String paramName;   
+    
+    private final AttachmentIndexField indexField;
+    
+    static {
+        for (SolrAttachmentField solrField : values()) {
+            AttachmentIndexField field = solrField.indexField();
+            if (field != null) {
+                fieldMapping.put(field, solrField);
+            }            
+        }
+    }
 
-    private SolrAttachmentField(String solrName, String paramName) {
+    private SolrAttachmentField(String solrName, String paramName, AttachmentIndexField indexField) {
         this.solrName = solrName;
         this.paramName = paramName;
+        this.indexField = indexField;
     }
     
-    /**
-     * Gets the solrName
-     *
-     * @return The solrName
-     */
     public String solrName() {
         return solrName;
     }
     
-    /**
-     * Gets the paramName
-     *
-     * @return The paramName
-     */
-    public String getParamName() {
+    public String parameterName() {
         return paramName;
+    }
+    
+    public AttachmentIndexField indexField() {
+        return indexField;
+    }
+    
+    public static SolrAttachmentField solrFieldFor(AttachmentIndexField indexField) {
+        return fieldMapping.get(indexField);
     }
 }

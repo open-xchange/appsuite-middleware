@@ -49,21 +49,24 @@
 
 package com.openexchange.index;
 
-import java.util.Map;
 
 /**
- * {@link IndexDocument} - Represents an indexed document.
- * 
+ * {@link AttachmentIndexField}
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface IndexDocument<V> {
-    /**
-     * Gets the object associated with this index document.
-     * 
-     * @return The associated object
-     */
-    public V getObject();
+public enum AttachmentIndexField implements IndexField {
     
-    public Map<String, Object> getProperties();
+    MODULE,
+    SERVICE,
+    ACCOUNT,
+    FOLDER,
+    ID,
+    FILE_NAME,
+    FILE_SIZE,
+    MIME_TYPE,
+    MD5_SUM,
+    CONTENT,
+    ATTACHMENT_ID;
+
 }

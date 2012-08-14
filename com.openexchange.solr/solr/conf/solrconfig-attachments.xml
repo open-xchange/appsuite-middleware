@@ -60,10 +60,7 @@
             <str name="echoParams">explicit</str>
             <float name="tie">0.01</float>
             <str name="qf">
-                <!-- Deutlich Höhere Gewichtung. Faktor 5-10. Gewichte evt. 
-                durch Nutzer bestimmbar. MLT-Handler für Facets.
-                Gleichbehandlung von Beschreibung und Inhalt -->
-                title^3.0 file_name^3.0 description^2.0 version_comment^2.0 url^1.0 categories^1.0
+                file_name^10.0 content_gen^5.0 content_de^5.0 content_en^5.0 content_fr^5.0 content_it^5.0
             </str>
         </lst>
         <lst name="defaults">
@@ -101,27 +98,17 @@
 
     <searchComponent name="queryModifier" class="de.kippdata.cria.solrext.searchcomponents.FormalFieldQueryModifier">
         <str name="param1">uuid</str>
-        <str name="param2">account</str>
+        <str name="param2">module</str>
         <str name="param3">service</str>
-        <str name="param4">folder_id</str>
-        <str name="param5">id</str>
-        <str name="param6">created_by</str>
-        <str name="param7">modified_by</str>
-        <str name="param8">creation_date</str>
-        <str name="param9">last_modified</str>
-        <str name="param10">title</str>
-        <str name="param11">version</str>
-        <str name="param12">file_size</str>
-        <str name="param13">mime_type</str>
-        <str name="param14">file_name</str>
-        <str name="param15">description</str>
-        <str name="param16">url</str>
-        <str name="param17">sequence_number</str>
-        <str name="param18">categories</str>
-        <str name="param19">color_label</str>
-        <str name="param20">version_comment</str>
-        <str name="param22">md5_sum</str>
-        <str name="param23">locale</str>
+        <str name="param4">account</str>        
+        <str name="param5">folder</str>
+        <str name="param6">id</str>
+        <str name="param7">file_name</str>
+        <str name="param8">file_size</str>
+        <str name="param9">mime_type</str>
+        <str name="param10">md5_sum</str>
+        <str name="param11">content{de,en,fr,it}</str>
+        <str name="param12">attachment_id</str>
     </searchComponent>
 
     <requestHandler name="/update" class="solr.XmlUpdateRequestHandler">

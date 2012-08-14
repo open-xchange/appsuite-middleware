@@ -119,6 +119,7 @@
         <field name="service" type="string" stored="true" indexed="true" />
         <field name="account" type="string" stored="true" indexed="true" />
         <field name="id" type="string" stored="true" indexed="true" />
+        <field name="attachment_id" type="int" stored="true" indexed="true" />
         <field name="folder" type="string" stored="true" indexed="true" />
         <!-- Speziell analysieren -->
         <field name="file_name" type="text" stored="true" indexed="true" />

@@ -57,13 +57,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.index.filestore.FilestoreIndexField;
+import com.openexchange.index.solr.internal.SolrField;
 
 /**
  * {@link SolrFilestoreField}
  * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public enum SolrFilestoreField {
+public enum SolrFilestoreField implements SolrField {
 
     UUID("uuid", FilestoreIndexField.UUID, "param1"),
     ACCOUNT("account", FilestoreIndexField.ACCOUNT, "param2"),
@@ -106,7 +107,7 @@ public enum SolrFilestoreField {
             String name = field.solrName();
             if (name != null) {
                 solrNameMapping.put(name, field);
-                fieldMapping.put(field.getIndexField(), field);
+                fieldMapping.put(field.indexField(), field);
                 indexedFields.add(field);
             }
         }
@@ -144,11 +145,11 @@ public enum SolrFilestoreField {
         return solrName;
     }
 
-    public FilestoreIndexField getIndexField() {
+    public FilestoreIndexField indexField() {
         return indexField;
     }
 
-    public String getParameterName() {
+    public String parameterName() {
         return parameterName;
     }
 }

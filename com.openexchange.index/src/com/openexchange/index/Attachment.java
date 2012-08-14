@@ -57,8 +57,6 @@ import java.io.InputStream;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class Attachment {
-    
-    private String uuid;
 
     private int module;
 
@@ -68,7 +66,9 @@ public class Attachment {
 
     private String folder;
 
-    private String id;
+    private String objectId;
+
+    private int attachmentId;
 
     private String fileName;
 
@@ -78,29 +78,10 @@ public class Attachment {
 
     private String md5Sum;
 
-    private InputStream file;
-    
+    private InputStream content;
 
     public Attachment() {
         super();
-    }
-    
-    /**
-     * Gets the uuid
-     *
-     * @return The uuid
-     */
-    public String getUuid() {
-        return uuid;
-    }
-    
-    /**
-     * Sets the uuid
-     *
-     * @param uuid The uuid to set
-     */
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
     }
 
     /**
@@ -176,21 +157,39 @@ public class Attachment {
     }
 
     /**
-     * Gets the id
+     * Gets the objectId
      * 
-     * @return The id
+     * @return The objectId
      */
-    public String getId() {
-        return id;
+    public String getObjectId() {
+        return objectId;
     }
 
     /**
-     * Sets the id
+     * Sets the objectId
      * 
-     * @param id The id to set
+     * @param objectId The objectId to set
      */
-    public void setId(String id) {
-        this.id = id;
+    public void setObjectId(String objectId) {
+        this.objectId = objectId;
+    }
+
+    /**
+     * Gets the attachmentId
+     * 
+     * @return The attachmentId
+     */
+    public int getAttachmentId() {
+        return attachmentId;
+    }
+
+    /**
+     * Sets the attachmentId
+     * 
+     * @param attachmentId The attachmentId to set
+     */
+    public void setAttachmentId(int attachmentId) {
+        this.attachmentId = attachmentId;
     }
 
     /**
@@ -266,21 +265,21 @@ public class Attachment {
     }
 
     /**
-     * Gets the file
+     * Gets the content
      * 
-     * @return The file
+     * @return The content
      */
-    public InputStream getFile() {
-        return file;
+    public InputStream getContent() {
+        return content;
     }
 
     /**
-     * Sets the file
+     * Sets the content
      * 
-     * @param file The file to set
+     * @param file The content to set
      */
-    public void setFile(InputStream file) {
-        this.file = file;
+    public void setContent(InputStream file) {
+        this.content = file;
     }
 
 }

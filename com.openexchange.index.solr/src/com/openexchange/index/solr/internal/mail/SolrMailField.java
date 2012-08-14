@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.index.solr.mail;
+package com.openexchange.index.solr.internal.mail;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -62,6 +62,7 @@ import org.apache.commons.lang.StringUtils;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.index.mail.MailIndexField;
 import com.openexchange.index.solr.internal.Services;
+import com.openexchange.index.solr.internal.SolrField;
 import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
@@ -69,7 +70,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
  * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public enum SolrMailField {
+public enum SolrMailField implements SolrField {
 
     UUID("UUID", MailIndexField.UUID, "param1"),
     TIMESTAMP("TIMESTAMP", MailIndexField.TIMESTAMP, "param2"),
@@ -144,6 +145,11 @@ public enum SolrMailField {
     
     public String parameterName() {
         return customParameter;
+    }
+    
+    @Override
+    public MailIndexField indexField() {
+        return indexField;
     }
     
     public boolean isIndexed() {
@@ -255,5 +261,4 @@ public enum SolrMailField {
             properties = config.getFile(PROP_FILE);
         }
     }
-
 }

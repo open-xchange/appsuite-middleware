@@ -51,7 +51,6 @@ package com.openexchange.index;
 
 import java.util.Map;
 import java.util.Set;
-import com.openexchange.index.IndexDocument.Type;
 
 /**
  * {@link QueryParameters} - Represents query parameters.
@@ -77,7 +76,6 @@ public final class QueryParameters {
         Order order;
         Map<String, Object> parameters;
         SearchHandler handler;
-        Type type;
         Object searchTerm;
 
         /**
@@ -136,11 +134,6 @@ public final class QueryParameters {
             this.handler = handler;
             return this;
         }
-
-        public Builder setType(final Type type) {
-            this.type = type;
-            return this;
-        }
         
         public Builder setFolders(final Set<String> folders) {
             this.folders = folders;
@@ -174,8 +167,6 @@ public final class QueryParameters {
 
     private final Object searchTerm;
 
-    private final Type type;
-
     private final Set<String> folders;
     
     private final IndexField sortField;
@@ -192,7 +183,6 @@ public final class QueryParameters {
         off = builder.off;
         parameters = builder.parameters;
         pattern = builder.pattern;
-        type = builder.type;
         searchTerm = builder.searchTerm;
         folders = builder.folders;
         sortField = builder.sortField;
@@ -260,15 +250,6 @@ public final class QueryParameters {
      */
     public SearchHandler getHandler() {
         return handler;
-    }
-
-    /**
-     * Gets the type.
-     * 
-     * @return The type
-     */
-    public Type getType() {
-        return type;
     }
     
     /**

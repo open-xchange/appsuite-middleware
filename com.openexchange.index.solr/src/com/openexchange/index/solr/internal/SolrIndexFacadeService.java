@@ -60,6 +60,7 @@ import com.openexchange.groupware.Types;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.solr.SolrIndexExceptionCodes;
+import com.openexchange.index.solr.internal.attachments.SolrAttachmentIndexAccess;
 import com.openexchange.index.solr.internal.filestore.SolrFilestoreIndexAccess;
 import com.openexchange.index.solr.internal.mail.MailSolrIndexAccess;
 import com.openexchange.log.LogFactory;
@@ -205,6 +206,9 @@ public class SolrIndexFacadeService implements IndexFacadeService {
                 
             case Types.INFOSTORE:
                 return new SolrFilestoreIndexAccess(identifier);
+                
+            case Types.ATTACHMENT:
+                return new SolrAttachmentIndexAccess(identifier);
                 
             default:
                 throw SolrIndexExceptionCodes.MISSING_ACCESS_FOR_MODULE.create(module);

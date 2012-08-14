@@ -1,6 +1,0 @@
-# Some synonym groups specific to this example
-#
-sankt => st
-josefinum => josephinum
-
-steiler,steyler

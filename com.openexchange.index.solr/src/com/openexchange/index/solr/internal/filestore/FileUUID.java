@@ -66,7 +66,7 @@ public class FileUUID {
     private final String fileUUID;
     
     
-    public FileUUID(int contextId, int userId, String service, String accountId, String folderId, String fileId) {
+    private FileUUID(int contextId, int userId, String service, String accountId, String folderId, String fileId) {
         super();
         StringBuilder tmp = new StringBuilder(64);
         tmp.append(contextId).append('/').append(userId).append('/').append(service).append('/').append(accountId).append('/').append(folderId).append('/').append(fileId);

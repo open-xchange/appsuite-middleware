@@ -62,7 +62,6 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexDocument;
-import com.openexchange.index.IndexDocument.Type;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters.Builder;
@@ -98,11 +97,6 @@ public final class StorageAccess implements Serializable {
      * ID, FLAGS, and COLOR_LABEL
      */
     public static final MailField[] FIELDS = new MailField[] { MailField.ID, MailField.FLAGS, MailField.COLOR_LABEL };
-
-    /**
-     * The mail index document type.
-     */
-    private static final Type MAIL = IndexDocument.Type.MAIL;
 
     private final MailJobInfo info;
 
@@ -279,7 +273,7 @@ public final class StorageAccess implements Serializable {
     public List<MailMessage> allMailsFromIndex(final String fullName) throws OXException, InterruptedException {
         final Map<String, Object> params = new HashMap<String, Object>();
         params.put("accountId", Integer.valueOf(info.accountId));
-        final Builder queryBuilder = new Builder(params).setType(MAIL).setFolders(Collections.singleton(fullName)).setHandler(SearchHandler.ALL_REQUEST);
+        final Builder queryBuilder = new Builder(params).setFolders(Collections.singleton(fullName)).setHandler(SearchHandler.ALL_REQUEST);
         final IndexResult<MailMessage> indexResult = getIndexAccess().query(queryBuilder.build(), null);
         if (0 >= indexResult.getNumFound()) {
             return Collections.emptyList();

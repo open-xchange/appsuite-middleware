@@ -61,7 +61,6 @@ import com.openexchange.index.IndexDocument;
 import com.openexchange.index.StandardIndexDocument;
 import com.openexchange.index.solr.internal.mail.MailFillers.MailFiller;
 import com.openexchange.index.solr.mail.MailUUID;
-import com.openexchange.index.solr.mail.SolrMailField;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.QuotedInternetAddress;
@@ -123,7 +122,7 @@ public final class SolrInputDocumentHelper {
             mailFiller.fill(mail, document);
         }
 
-        return new StandardIndexDocument<MailMessage>(mail, IndexDocument.Type.MAIL);
+        return new StandardIndexDocument<MailMessage>(mail);
     }
 
     /**

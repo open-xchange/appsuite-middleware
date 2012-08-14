@@ -59,8 +59,9 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
+import org.apache.commons.logging.Log;
 import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.SolrQuery.ORDER;
 import org.apache.solr.client.solrj.SolrResponse;
 import org.apache.solr.client.solrj.response.FacetField;
 import org.apache.solr.client.solrj.response.FacetField.Count;
@@ -70,15 +71,16 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.SolrParams;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexField;
 import com.openexchange.index.IndexResult;
+import com.openexchange.index.QueryParameters;
+import com.openexchange.index.QueryParameters.Order;
 import com.openexchange.index.mail.MailIndexField;
 import com.openexchange.index.solr.IndexFolderManager;
-import com.openexchange.index.solr.mail.SolrMailField;
+import com.openexchange.index.solr.internal.mail.SolrMailField;
 import com.openexchange.solr.SolrAccessService;
 import com.openexchange.solr.SolrCoreIdentifier;
 
@@ -88,6 +90,8 @@ import com.openexchange.solr.SolrCoreIdentifier;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
+    
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(AbstractSolrIndexAccess.class);
     
     private final Lock folderCacheLock = new ReentrantLock();
 
@@ -396,5 +400,36 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
         
         sb.append(')');
         return sb.toString();
+    }
+    
+    protected void setSortAndOrder(QueryParameters parameters, SolrQuery solrQuery, Class<? extends SolrField> fieldEnum) {
+        IndexField sortField = parameters.getSortField();
+        if (sortField == null) {
+            return;
+        }
+        
+        SolrField[] enumConstants = fieldEnum.getEnumConstants();
+        if (enumConstants != null) {
+            for (SolrField field : enumConstants) {
+                if (field.indexField() != null && field.indexField().equals(sortField)) {
+                    Order order = parameters.getOrder();
+                    solrQuery.setSortField(field.solrName(), order == null ? ORDER.desc : order.equals(Order.DESC) ? ORDER.desc : ORDER.asc);
+                    return;
+                }
+            }
+            
+            LOG.warn("Did not find a SolrField for IndexField " + sortField.toString());
+        }
+        
+        LOG.warn("Parameter fieldEnum seems not to be a valid enum.");
+    }
+    
+    protected void setFieldList(SolrQuery solrQuery, Set<? extends SolrField> solrFields) {
+        for (SolrField field : solrFields) {
+            String solrName = field.solrName();
+            if (solrName != null) {
+                solrQuery.addField(solrName);
+            }            
+        }
     }
 }

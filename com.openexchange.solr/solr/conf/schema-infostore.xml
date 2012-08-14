@@ -141,12 +141,6 @@
         <field name="mime_type" type="string" stored="true" indexed="true" />
         <!-- infostore_document.file_md5sum -->
         <field name="md5_sum" type="string" stored="true" indexed="false" />
-        <field name="content" type="text" stored="false" indexed="true" />
-        <field name="content_gen" type="text" stored="false" indexed="true" />
-        <field name="content_de" type="text_de" stored="false" indexed="true" />
-        <field name="content_en" type="text_en" stored="false" indexed="true" />
-        <field name="content_fr" type="text_fr" stored="false" indexed="true" />
-        <field name="content_it" type="text_it" stored="false" indexed="true" />
         <field name="sequence_number" type="long" stored="true" indexed="true" />
         <field name="locale" type="string" stored="true" indexed="false" />
     </fields>

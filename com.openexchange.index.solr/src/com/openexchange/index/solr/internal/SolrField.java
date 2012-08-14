@@ -47,23 +47,21 @@
  *
  */
 
-package com.openexchange.index;
+package com.openexchange.index.solr.internal;
 
-import java.util.Map;
+import com.openexchange.index.IndexField;
+
 
 /**
- * {@link IndexDocument} - Represents an indexed document.
- * 
+ * {@link SolrField}
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface IndexDocument<V> {
-    /**
-     * Gets the object associated with this index document.
-     * 
-     * @return The associated object
-     */
-    public V getObject();
+public interface SolrField {
     
-    public Map<String, Object> getProperties();
+    String solrName();
+    
+    String parameterName();
+    
+    IndexField indexField();
 }

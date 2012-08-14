@@ -47,23 +47,18 @@
  *
  */
 
-package com.openexchange.index;
+package com.openexchange.index.solr.internal.attachments;
 
-import java.util.Map;
 
 /**
- * {@link IndexDocument} - Represents an indexed document.
- * 
+ * {@link SolrAttachmentConstants}
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface IndexDocument<V> {
-    /**
-     * Gets the object associated with this index document.
-     * 
-     * @return The associated object
-     */
-    public V getObject();
+public class SolrAttachmentConstants {
     
-    public Map<String, Object> getProperties();
+    public static final String MODULE = "module";
+    
+    public static final int DEFAULT_ATTACHMENT = 1;
+
 }

@@ -52,7 +52,6 @@ package com.openexchange.index.solr.internal.mail;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import com.openexchange.index.solr.mail.SolrMailField;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.search.ANDTerm;
 import com.openexchange.mail.search.BccTerm;

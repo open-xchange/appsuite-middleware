@@ -57,8 +57,6 @@ package com.openexchange.index.solr.filestore;
  */
 public class SolrFilestoreConstants {
     
-    public static final String ATTACHMENT = "attachment";
-    
     public static final String ACCOUNT = "accountId";
 
     public static final String SERVICE = "service";

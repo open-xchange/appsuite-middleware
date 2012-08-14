@@ -60,29 +60,21 @@ import java.util.Map;
 public class StandardIndexDocument<V> implements IndexDocument<V> {
 
     private final V object;
-
-    private final Type type;
     
     private Map<String, Object> properties;
 
     /**
      * Initializes a new {@link StandardIndexDocument}.
      */
-    public StandardIndexDocument(final V object, final Type type) {
+    public StandardIndexDocument(final V object) {
         super();
         this.object = object;
-        this.type = type;
         properties = new HashMap<String, Object>();
     }
 
     @Override
     public V getObject() {
         return object;
-    }
-
-    @Override
-    public com.openexchange.index.IndexDocument.Type getType() {
-        return type;
     }
 
     @Override

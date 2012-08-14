@@ -179,7 +179,6 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
             final QueryParameters.Builder builder = new QueryParameters.Builder(params)
                                                     .setOffset(0)
                                                     .setLength(Integer.MAX_VALUE)
-                                                    .setType(IndexDocument.Type.MAIL)
                                                     .setFolders(Collections.singleton(folder));
             
             

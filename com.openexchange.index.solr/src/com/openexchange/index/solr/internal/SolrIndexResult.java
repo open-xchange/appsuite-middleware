@@ -47,23 +47,52 @@
  *
  */
 
-package com.openexchange.index;
+package com.openexchange.index.solr.internal;
 
+import java.util.List;
 import java.util.Map;
+import com.openexchange.index.IndexDocument;
+import com.openexchange.index.IndexField;
+import com.openexchange.index.IndexResult;
+
 
 /**
- * {@link IndexDocument} - Represents an indexed document.
- * 
+ * {@link SolrIndexResult}
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface IndexDocument<V> {
-    /**
-     * Gets the object associated with this index document.
-     * 
-     * @return The associated object
-     */
-    public V getObject();
+public class SolrIndexResult<T> implements IndexResult<T> {
+
+    private final int numFound;
     
-    public Map<String, Object> getProperties();
+    private final List<IndexDocument<T>> results;
+
+    private final Map<IndexField, Map<String, Long>> facetCounts;
+
+    
+    /**
+     * Initializes a new {@link SolrIndexResult}.
+     */
+    public SolrIndexResult(int numFound, List<IndexDocument<T>> results, Map<IndexField, Map<String, Long>> facetCounts) {
+        super();
+        this.numFound = numFound;
+        this.results = results;
+        this.facetCounts = facetCounts;
+    }
+
+    @Override
+    public int getNumFound() {
+        return numFound;
+    }
+
+    @Override
+    public List<IndexDocument<T>> getResults() {
+        return results;
+    }
+
+    @Override
+    public Map<IndexField, Map<String, Long>> getFacetCounts() {
+        return facetCounts;
+    }
+
 }
