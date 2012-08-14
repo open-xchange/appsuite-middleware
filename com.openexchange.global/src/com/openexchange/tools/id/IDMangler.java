@@ -215,19 +215,24 @@ public class IDMangler {
             }
         } else {
             // Find first delimiter
-            mangled = decodeQP(mangled);
             int prev = 0;
             int pos = mangled.indexOf(PRIMARY_DELIM, prev);
             if (pos == -1) {
             	list.add(mangled);
             	return list;
             }
-            list.add(mangled.substring(prev, pos));
-            pos += PRIMARY_DELIM.length();
-            prev = pos;
-            pos = mangled.indexOf(CHAR_SECONDARY_DELIM, prev);
-            list.add(mangled.substring(prev, pos));
-            list.add(mangled.substring(pos + 1));
+            list.add(decodeQP(mangled.substring(prev, pos)));
+            prev = pos + PRIMARY_DELIM.length();
+            while (prev > 0) {
+                pos = mangled.indexOf(CHAR_SECONDARY_DELIM, prev);
+                if (pos > 0) {
+                    list.add(decodeQP(mangled.substring(prev, pos)));
+                    prev = pos + 1;
+                } else {
+                    list.add(decodeQP(mangled.substring(prev)));
+                    prev = -1;
+                }
+            }
         }
         return list;
     }
