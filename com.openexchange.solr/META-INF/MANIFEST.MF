@@ -6,7 +6,20 @@ Bundle-Version: 6.21.0
 Bundle-Activator: com.openexchange.solr.osgi.SolrActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.concurrent,
+Import-Package: com.hazelcast.cluster,
+ com.hazelcast.config,
+ com.hazelcast.core,
+ com.hazelcast.examples,
+ com.hazelcast.jmx,
+ com.hazelcast.monitor,
+ com.hazelcast.nio,
+ com.hazelcast.nio.ascii,
+ com.hazelcast.nio.ssl,
+ com.hazelcast.partition,
+ com.hazelcast.query,
+ com.hazelcast.util,
+ com.hazelcast.util.concurrent,
+ com.openexchange.concurrent,
  com.openexchange.config,
  com.openexchange.database,
  com.openexchange.database.provider,
