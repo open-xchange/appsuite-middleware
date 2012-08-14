@@ -50,7 +50,6 @@
 package com.openexchange.carddav.mapping;
 
 import java.util.EnumMap;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
@@ -249,10 +248,33 @@ public class CardDAVMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getEmail2();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeEmail2();	
-			}
+            @Override
+            public void remove(Contact contact) {
+                contact.removeEmail2(); 
+            }
+        });
+        
+        mappings.put(ContactField.EMAIL3, new StringMapping() {
+
+            @Override
+            public void set(Contact contact, String value) { 
+                contact.setEmail3(value);
+            }
+
+            @Override
+            public boolean isSet(Contact contact) {
+                return contact.containsEmail3();
+            }
+
+            @Override
+            public String get(Contact contact) { 
+                return contact.getEmail3();
+            }
+
+            @Override
+            public void remove(Contact contact) {
+                contact.removeEmail3(); 
+            }
         });
         
         mappings.put(ContactField.CELLULAR_TELEPHONE1, new StringMapping() {
@@ -755,10 +777,56 @@ public class CardDAVMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getProfession();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeProfession();				
-			}
+            @Override
+            public void remove(Contact contact) {
+                contact.removeProfession();             
+            }
+        });
+        
+        mappings.put(ContactField.INSTANT_MESSENGER1, new StringMapping() {
+
+            @Override
+            public void set(Contact contact, String value) { 
+                contact.setInstantMessenger1(value);
+            }
+
+            @Override
+            public boolean isSet(Contact contact) {
+                return contact.containsInstantMessenger1();
+            }
+
+            @Override
+            public String get(Contact contact) { 
+                return contact.getInstantMessenger1();
+            }
+
+            @Override
+            public void remove(Contact contact) {
+                contact.removeInstantMessenger1();             
+            }
+        });
+        
+        mappings.put(ContactField.INSTANT_MESSENGER2, new StringMapping() {
+
+            @Override
+            public void set(Contact contact, String value) { 
+                contact.setInstantMessenger2(value);
+            }
+
+            @Override
+            public boolean isSet(Contact contact) {
+                return contact.containsInstantMessenger2();
+            }
+
+            @Override
+            public String get(Contact contact) { 
+                return contact.getInstantMessenger2();
+            }
+
+            @Override
+            public void remove(Contact contact) {
+                contact.removeInstantMessenger2();             
+            }
         });
         
         mappings.put(ContactField.IMAGE1, new DefaultMapping<byte[], Contact>() {
