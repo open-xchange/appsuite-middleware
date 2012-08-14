@@ -240,6 +240,9 @@ public class IDMangler {
         for (int i = 'a'; i <= 'z'; i++) {
             PRINTABLE_CHARS.set(i);
         }
+        PRINTABLE_CHARS.set('.');
+        PRINTABLE_CHARS.set('-');
+        PRINTABLE_CHARS.set('_');
     }
 
     private static String encodeQP(final String string) {
