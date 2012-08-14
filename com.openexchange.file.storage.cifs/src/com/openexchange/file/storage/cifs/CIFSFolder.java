@@ -121,7 +121,8 @@ public final class CIFSFolder extends DefaultFileStorageFolder {
                 }
                 creationDate = new Date(smbFile.createTime());
                 lastModifiedDate = new Date(smbFile.getIfModifiedSince());
-                name = smbFile.getName();
+                final String name = smbFile.getName();
+                this.name = name.endsWith("/") ? name.substring(0, name.length() - 1) : name;
                 /*
                  * Iterate headers
                  */
