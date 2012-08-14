@@ -109,7 +109,8 @@ public abstract class AbstractCIFSAccess {
         try {
             return smbFolder.exists();
         } catch (final SmbException e) {
-            if ("The network name cannot be found.".equals(e.getMessage())) {
+            final String message = e.getMessage();
+            if ("The network name cannot be found.".equals(message) || "Access is denied.".equals(message)) {
                 // This means that the named share was not found. 
                 return false;
             }
@@ -125,7 +126,7 @@ public abstract class AbstractCIFSAccess {
      */
     protected boolean indicatesNotReadable(final SmbException e) {
         final String message = e.getMessage();
-        if (message.startsWith("Invalid operation") || message.equals("Access is denied.") || message.equals("Failed to connect to server")) {
+        if (message.startsWith("Invalid operation") || "Access is denied.".equals(message) || "Failed to connect to server".equals(message)) {
             return true;
         }
         return false;

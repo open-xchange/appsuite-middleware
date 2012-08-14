@@ -350,6 +350,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
              * Return root folders
              */
             return getSubfolders(rootUrl, false);
+            // Here we go
         } catch (final OXException e) {
             throw e;
         } catch (final Exception e) {

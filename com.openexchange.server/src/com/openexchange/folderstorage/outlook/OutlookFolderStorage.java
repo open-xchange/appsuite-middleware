@@ -1091,7 +1091,9 @@ public final class OutlookFolderStorage implements FolderStorage {
             }
             outlookFolder = new OutlookFolder(realFolder);
             outlookFolder.setTreeID(treeId);
-            if (!SYSTEM_INFOSTORES.contains(folderId)) {
+            if (SYSTEM_INFOSTORES.contains(folderId)) {
+                outlookFolder.setSubfolderIDs(null);
+            } else {
                 setSubfolders(treeId, folderId, storageParameters, user, tree, contextId, outlookFolder, realFolder);
             }
         }
