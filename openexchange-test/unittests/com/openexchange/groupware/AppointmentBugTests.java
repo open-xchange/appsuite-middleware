@@ -319,7 +319,7 @@ public class AppointmentBugTests extends TestCase {
         final UserParticipant userA = new UserParticipant(userid);
         final UserParticipant userB = new UserParticipant(userid2);
 
-        cdao.setUsers(new UserParticipant[] { userA, userB });
+        cdao.setParticipants(new UserParticipant[] { userA, userB });
 
         final CalendarSql csql = new CalendarSql(so);
 
@@ -952,7 +952,7 @@ public class AppointmentBugTests extends TestCase {
         final UserParticipant userA = new UserParticipant(userid);
         final UserParticipant userB = new UserParticipant(userid2);
 
-        cdao.setUsers(new UserParticipant[] { userA, userB });
+        cdao.setParticipants(new UserParticipant[] { userA, userB });
 
         final CalendarSql csql = new CalendarSql(so);
         final CalendarSql csql2 = new CalendarSql(so2);
@@ -1834,6 +1834,7 @@ public class AppointmentBugTests extends TestCase {
         final UserParticipant userB = new UserParticipant(userid2);
 
         cdao.setUsers(new UserParticipant[] { userA, userB });
+        cdao.setParticipants(new UserParticipant[] { userA, userB });
 
         final CalendarSql csql = new CalendarSql(so);
         final CalendarSql csql2 = new CalendarSql(so2);
