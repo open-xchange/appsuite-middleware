@@ -288,12 +288,13 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
             toDelete.removeAll(conflicted);
             for (IDTuple tuple : toDelete) {
                 String fileFolder = tuple.getFolder();
+                String id = tuple.getId();
                 if (fileFolder == null) {
                     /*
                      * Reload the document to get it's folder id.
                      */
                     for (File file : reloaded) {
-                        if (file.getId().equals(tuple.getId())) {
+                        if (file.getId().equals(id)) {
                             fileFolder = file.getFolderId();                            
                         }
                     }
@@ -301,7 +302,7 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
                     
                 }
                 String folderId = new FolderID(serviceId, accountId, fileFolder).toUniqueID();
-                String objectId = new FileID(serviceId, accountId, fileFolder, tuple.getId()).toUniqueID();
+                String objectId = new FileID(serviceId, accountId, fileFolder, id).toUniqueID();
                 postEvent(FileStorageEventHelper.buildDeleteEvent(session, serviceId, accountId, folderId, objectId, null));
             }
         }
