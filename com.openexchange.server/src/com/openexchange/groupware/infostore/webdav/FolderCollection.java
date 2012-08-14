@@ -428,6 +428,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
             }
             propertyHelper.dumpPropertiesToDB();
 			lockHelper.dumpLocksToDB();
+			exists = true;
 		} catch (WebdavProtocolException x) {
 			throw x;
 		} catch (final Exception x) {
