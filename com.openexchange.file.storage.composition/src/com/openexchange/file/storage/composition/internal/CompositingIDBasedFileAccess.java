@@ -288,12 +288,13 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
             toDelete.removeAll(conflicted);
             for (IDTuple tuple : toDelete) {
                 String fileFolder = tuple.getFolder();
+                String id = tuple.getId();
                 if (fileFolder == null) {
                     /*
                      * Reload the document to get it's folder id.
                      */
                     for (File file : reloaded) {
-                        if (file.getId().equals(tuple.getId())) {
+                        if (file.getId().equals(id)) {
                             fileFolder = file.getFolderId();                            
                         }
                     }
@@ -301,7 +302,7 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
                     
                 }
                 String folderId = new FolderID(serviceId, accountId, fileFolder).toUniqueID();
-                String objectId = new FileID(serviceId, accountId, fileFolder, tuple.getId()).toUniqueID();
+                String objectId = new FileID(serviceId, accountId, fileFolder, id).toUniqueID();
                 postEvent(FileStorageEventHelper.buildDeleteEvent(session, serviceId, accountId, folderId, objectId, null));
             }
         }
@@ -318,11 +319,11 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
         String accountId = access.getAccountAccess().getAccountId();
         Set<Integer> removed = new HashSet<Integer>(versions.length);
         for (int i : versions) {
-            removed.add(i);
+            removed.add(Integer.valueOf(i));
         }
         
         for (int i : notRemoved) {
-            removed.remove(i);
+            removed.remove(Integer.valueOf(i));
         }
         
         String objectId = fileID.getFileId();
@@ -655,64 +656,35 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
     protected abstract EventAdmin getEventAdmin();
 
     // Transaction Handling
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.tx.AbstractService#commit(java.lang.Object)
-     */
+
     @Override
     protected void commit(final Transaction transaction) throws TransactionException {
-        // TODO Auto-generated method stub
-
+        // Nothing
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.tx.AbstractService#createTransaction()
-     */
     @Override
     protected Transaction createTransaction() throws TransactionException {
-        // TODO Auto-generated method stub
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.tx.AbstractService#rollback(java.lang.Object)
-     */
     @Override
     protected void rollback(final Transaction transaction) throws TransactionException {
-        // TODO Auto-generated method stub
-
+        // Nothing
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.tx.TransactionAware#setCommitsTransaction(boolean)
-     */
     @Override
     public void setCommitsTransaction(final boolean commits) {
-        // TODO Auto-generated method stub
-
+        // Nothing
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.tx.TransactionAware#setRequestTransactional(boolean)
-     */
     @Override
     public void setRequestTransactional(final boolean transactional) {
-        // TODO Auto-generated method stub
-
+        // Nothing
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.tx.TransactionAware#setTransactional(boolean)
-     */
     @Override
     public void setTransactional(final boolean transactional) {
-        // TODO Auto-generated method stub
-
+        // Nothing
     }
 
     @Override

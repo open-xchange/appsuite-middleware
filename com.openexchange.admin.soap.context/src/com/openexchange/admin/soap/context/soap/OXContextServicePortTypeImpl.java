@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+import javax.xml.datatype.XMLGregorianCalendar;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.exceptions.ContextExistsException;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
@@ -546,9 +547,15 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
         final com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User();
         user.setGui_spam_filter_enabled(soapUser.isGuiSpamFilterEnabled());
         user.setAliasesForSOAP(soapUser.getAliases());
-        user.setAnniversary(soapUser.getAnniversary().toGregorianCalendar().getTime());
+        XMLGregorianCalendar calendar = soapUser.getAnniversary();
+        if (null != calendar) {
+            user.setAnniversary(calendar.toGregorianCalendar().getTime());
+        }
         user.setAssistant_name(soapUser.getAssistantName());
-        user.setBirthday(soapUser.getBirthday().toGregorianCalendar().getTime());
+        calendar = soapUser.getBirthday();
+        if (null != calendar) {
+            user.setBirthday(calendar.toGregorianCalendar().getTime());
+        }
         user.setBranches(soapUser.getBranches());
         user.setBusiness_category(soapUser.getBusinessCategory());
         user.setCategories(soapUser.getCategories());
