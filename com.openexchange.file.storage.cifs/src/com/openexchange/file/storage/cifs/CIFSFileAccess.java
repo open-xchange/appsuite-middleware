@@ -581,8 +581,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
             try {
                 subFiles = smbFolder.canRead() ? smbFolder.listFiles() : new SmbFile[0];
             } catch (final SmbException e) {
-                final String message = e.getMessage();
-                if (!message.startsWith("Invalid operation") && !message.equals("Access is denied.")) {
+                if (!indicatesNotReadable(e)) {
                     throw e;
                 }
                 subFiles = new SmbFile[0];
@@ -767,8 +766,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
             try {
                 subFiles = smbFolder.canRead() ? smbFolder.listFiles() : new SmbFile[0];
             } catch (final SmbException e) {
-                final String message = e.getMessage();
-                if (!message.startsWith("Invalid operation") && !message.equals("Access is denied.")) {
+                if (!indicatesNotReadable(e)) {
                     throw e;
                 }
                 subFiles = new SmbFile[0];

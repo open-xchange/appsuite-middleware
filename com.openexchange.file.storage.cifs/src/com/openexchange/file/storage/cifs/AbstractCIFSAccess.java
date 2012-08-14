@@ -117,4 +117,18 @@ public abstract class AbstractCIFSAccess {
         }
     }
 
+    /**
+     * Checks if specified <code>SmbException</code> indicates that associated resource is not readable.
+     * 
+     * @param e The SMB exception to examine
+     * @return <code>true</code> if <code>SmbException</code> indicates that associated resource is not readable; otherwise <code>false</code>
+     */
+    protected boolean indicatesNotReadable(final SmbException e) {
+        final String message = e.getMessage();
+        if (message.startsWith("Invalid operation") || message.equals("Access is denied.") || message.equals("Failed to connect to server")) {
+            return true;
+        }
+        return false;
+    }
+
 }

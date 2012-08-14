@@ -70,13 +70,15 @@ import com.openexchange.file.storage.FileStoragePermission;
  */
 public final class CIFSFolder extends DefaultFileStorageFolder {
 
-    private static final String URL_SPEC = CIFSConstants.URL_SPEC;
+    //private static final String URL_SPEC = CIFSConstants.URL_SPEC;
+    private final String rootUrl;
 
     /**
      * Initializes a new {@link CIFSFolder}.
      */
-    public CIFSFolder(final int userId) {
+    public CIFSFolder(final int userId, final String rootUrl) {
         super();
+        this.rootUrl = rootUrl;
         holdsFiles = true;
         b_holdsFiles = true;
         holdsFolders = true;
@@ -105,14 +107,14 @@ public final class CIFSFolder extends DefaultFileStorageFolder {
             try {
                 id = Utils.checkFolderId(smbFile.getPath());
                 {
-                    final String p = smbFile.getParent();
-                    if (URL_SPEC.equals(p)) {
+                    if (rootUrl.equals(smbFile.getPath())) {
                         rootFolder = true;
                         id = FileStorageFolder.ROOT_FULLNAME;
                         parentId = null;
                     } else {
                         rootFolder = false;
-                        parentId = Utils.checkFolderId(p);
+                        final String sParent = Utils.checkFolderId(smbFile.getParent());
+                        parentId = rootUrl.equals(sParent) ? FileStorageFolder.ROOT_FULLNAME : sParent;
                     }
                     b_rootFolder = true;
                 }
