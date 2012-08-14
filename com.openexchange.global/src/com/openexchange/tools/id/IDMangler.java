@@ -218,6 +218,10 @@ public class IDMangler {
             mangled = decodeQP(mangled);
             int prev = 0;
             int pos = mangled.indexOf(PRIMARY_DELIM, prev);
+            if (pos == -1) {
+            	list.add(mangled);
+            	return list;
+            }
             list.add(mangled.substring(prev, pos));
             pos += PRIMARY_DELIM.length();
             prev = pos;

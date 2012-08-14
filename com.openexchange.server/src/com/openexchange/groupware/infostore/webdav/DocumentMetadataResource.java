@@ -756,7 +756,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
                             }
                         }
                     }
-                    throw WebdavProtocolException.Code.GENERAL_ERROR.create(url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                    throw WebdavProtocolException.Code.GENERAL_ERROR.create(url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, x);
                 } finally {
                     try {
                         database.finish();

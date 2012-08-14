@@ -179,6 +179,7 @@ import com.openexchange.tools.events.TestEventAdmin;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.file.external.FileStorageFactory;
+import com.openexchange.tools.file.internal.CompositeFileStorageFactory;
 import com.openexchange.tools.file.internal.DBQuotaFileStorageFactory;
 import com.openexchange.tools.file.internal.LocalFileStorageFactory;
 import com.openexchange.user.UserService;
@@ -637,7 +638,7 @@ public final class Init {
         /*
          * May be invoked multiple times
          */
-        final FileStorageFactory fileStorageStarter = new LocalFileStorageFactory();
+        final FileStorageFactory fileStorageStarter = new CompositeFileStorageFactory();
         FileStorage.setFileStorageStarter(fileStorageStarter);
         final DatabaseService dbService = (DatabaseService) services.get(DatabaseService.class);
         QuotaFileStorage.setQuotaFileStorageStarter(new DBQuotaFileStorageFactory(dbService, fileStorageStarter));
