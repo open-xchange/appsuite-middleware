@@ -59,8 +59,10 @@ import java.util.Properties;
 import java.util.TimeZone;
 import junit.framework.TestCase;
 import com.openexchange.api2.RdbFolderSQLInterface;
+import com.openexchange.calendar.CalendarMySQL;
 import com.openexchange.calendar.CalendarOperation;
 import com.openexchange.calendar.CalendarSql;
+import com.openexchange.calendar.api.AppointmentSqlFactory;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.event.impl.EventConfigImpl;
 import com.openexchange.exception.OXException;
@@ -120,6 +122,8 @@ public class AppointmentBugTests extends TestCase {
 
         contextid = ctx.getContextId();
         userid = user;
+        
+        CalendarMySQL.setApppointmentSqlFactory(new AppointmentSqlFactory());
     }
 
     @Override
