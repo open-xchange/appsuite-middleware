@@ -720,6 +720,8 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
                 // CREATE WITH FILE
                 try {
                     dumpMetadataToDB(body, guessSize);
+                } catch (WebdavProtocolException x) {
+                	throw x;
                 } catch (final OXException x) {
                     if (CATEGORY_PERMISSION_DENIED == x.getCategory()) {
                         throw WebdavProtocolException.Code.GENERAL_ERROR.create(url, HttpServletResponse.SC_FORBIDDEN);
