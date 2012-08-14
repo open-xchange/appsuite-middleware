@@ -1,3 +1,7 @@
+* 2012-08-14 - marcus.klein@open-xchange.com
+
+ - Fix for bug 22779: Preventing NullPointerException if some SOAP values are empty.
+
 * 2012-08-13 - marcus.klein@open-xchange.com
 
  * Fix for bug 22773: Added missing imports for administrative SOAP services.
