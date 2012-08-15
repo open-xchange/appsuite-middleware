@@ -104,6 +104,15 @@ public final class OutlookFolder implements FolderExtension {
         modifiedBy = -1;
     }
 
+    /**
+     * Gets the associated folder from real folder tree.
+     * 
+     * @return The real folder
+     */
+    public Folder getRealFolder() {
+        return realFolder;
+    }
+
     @Override
     public String toString() {
         return new StringBuilder(32).append("{ name=").append(getName()).append(", id=").append(getID()).append('}').toString();
