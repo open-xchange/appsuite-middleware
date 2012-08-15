@@ -267,9 +267,16 @@ public class Executor {
         /*
          * construct query string
          */
-        SearchAdapter adapter = new ContactSearchAdapter(contactSearch, contextID, fields, sortOptions);
+        SearchAdapter adapter = new ContactSearchAdapter(contactSearch, contextID, fields, getCharset(sortOptions));
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(adapter.getClause()).append(';');
+        stringBuilder.append(adapter.getClause());
+        if (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions)) {
+            stringBuilder.append(' ').append(Tools.getOrderClause(sortOptions));
+            if (0 < sortOptions.getLimit()) {
+                stringBuilder.append(' ').append(Tools.getLimitClause(sortOptions));
+            }
+        }
+        stringBuilder.append(';');
         /*
          * prepare statement
          */
