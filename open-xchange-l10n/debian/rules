@@ -35,7 +35,12 @@ install: build
 	dh_testroot
 	dh_prep 
 	dh_installdirs
-	#for LANG in de_DE fr_FR cz_CZ es_ES ca_CA hu_HU it_IT jp_JP lv_LV nl_NL pl_PL ro_RO sk_SK cn_CN tw_TW; do 
+	# available POs in supported languages repo
+	#for LANG in cs_CZ de_DE en_GB es_ES fr_CA fr_FR hu_HU it_IT ja_JP lv_LV nl_NL pl_PL ro_RO ru_RU sk_SK th_TH zh_CN zh_TW; do \
+	# old packaging
+	#for LANG in cs_CZ de_DE es_ES fr_CA fr_FR hu_HU it_IT ja_JP lv_LV nl_NL pl_PL sk_SK zh_CN zh_TW; do \
+	# choeger
+	#for LANG in cz_CZ de_DE es_ES ca_CA fr_FR hu_HU it_IT jp_JP lv_LV nl_NL pl_PL ro_RO sk_SK cn_CN tw_TW; do \
 	for LANG in de_DE fr_FR; do \
 		PACKAGE_EXTENSION=$$(echo $${LANG} | tr '[:upper:]_' '[:lower:]-'); \
 		ant -lib build/lib -Dbasedir=build -DdestDir=$(installroot)-$${PACKAGE_EXTENSION} -DpackageName=$(pkgname) -Dlanguage=$${LANG} -f build/build.xml build; \
