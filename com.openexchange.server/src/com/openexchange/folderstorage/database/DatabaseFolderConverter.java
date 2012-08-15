@@ -58,6 +58,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageAccountManager;
+import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.database.getfolder.SystemInfostoreFolder;
@@ -69,10 +72,13 @@ import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
+import com.openexchange.groupware.infostore.InfostoreFacades;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.preferences.ServerUserSetting;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.oxfolder.OXFolderLoader;
@@ -182,6 +188,31 @@ public final class DatabaseFolderConverter {
     }
 
     /**
+     * The identifier for default/primary file storage account.
+     */
+    private static final String DEFAULT_ID = FileStorageAccount.DEFAULT_ID;
+
+    /**
+     * Look-up of default file storage account.
+     * 
+     * @param session The session
+     * @return The default file storage account or <code>null</code>
+     * @throws OXException If look-up attempt fails
+     */
+    public static FileStorageAccount getDefaultFileStorageAccess(final Session session) throws OXException {
+        final FileStorageAccountManagerLookupService lookupService = ServerServiceRegistry.getInstance().getService(
+            FileStorageAccountManagerLookupService.class);
+        if (null == lookupService) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(FileStorageAccountManagerLookupService.class.getName());
+        }
+        final FileStorageAccountManager defaultAccountManager = lookupService.getAccountManager(DEFAULT_ID, session);
+        if (null != defaultAccountManager) {
+            return defaultAccountManager.getAccount(DEFAULT_ID, session);
+        }
+        return null;
+    }
+
+    /**
      * Converts specified {@link FolderObject} instance to a {@link DatabaseFolder} instance.
      *
      * @param fo The {@link FolderObject} instance
@@ -210,7 +241,15 @@ public final class DatabaseFolderConverter {
                 /*
                  * Return immediately
                  */
-                return folderConverter.convert(fo);
+                final DatabaseFolder databaseFolder = folderConverter.convert(fo);
+                if (FolderObject.SYSTEM_INFOSTORE_FOLDER_ID == folderId && !InfostoreFacades.isInfoStoreAvailable()) {
+                    final FileStorageAccount defaultAccount = getDefaultFileStorageAccess(session);
+                    if (null != defaultAccount) {
+                        // Rename to default account name
+                        databaseFolder.setName(defaultAccount.getDisplayName());
+                    }
+                }
+                return databaseFolder;
             }
             final DatabaseFolder retval;
             /*
@@ -291,27 +330,55 @@ public final class DatabaseFolderConverter {
                  * Set subfolders for folder.
                  */
                 if (FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID == folderId) {
-                    /*
-                     * User-sensitive loading of user infostore folder
-                     */
-                    final TIntList subfolders = OXFolderIteratorSQL.getVisibleSubfolders(folderId, userId, groups, modules, ctx, null);
-                    if (subfolders.isEmpty()) {
-                        retval.setSubfolderIDs(new String[0]);
-                        retval.setSubscribedSubfolders(false);
-                    } else {
-                        final int len = subfolders.size();
-                        final String[] arr = new String[len];
-                        for (int i = 0; i < len; i++) {
-                            arr[i] = String.valueOf(subfolders.get(i));
+                    boolean lookupDb = true;
+                    if (!InfostoreFacades.isInfoStoreAvailable()) {
+                        final FileStorageAccount defaultAccount = getDefaultFileStorageAccess(session);
+                        if (null != defaultAccount) {
+                            /*
+                             * Enforce subfolders are retrieved from appropriate file storage
+                             */
+                            retval.setSubfolderIDs(null);
+                            lookupDb = false;
                         }
-                        retval.setSubfolderIDs(arr);
-                        retval.setSubscribedSubfolders(true);
+                    }
+                    if (lookupDb) {
+                        /*
+                         * User-sensitive loading of user infostore folder
+                         */
+                        final TIntList subfolders = OXFolderIteratorSQL.getVisibleSubfolders(folderId, userId, groups, modules, ctx, null);
+                        if (subfolders.isEmpty()) {
+                            retval.setSubfolderIDs(new String[0]);
+                            retval.setSubscribedSubfolders(false);
+                        } else {
+                            final int len = subfolders.size();
+                            final String[] arr = new String[len];
+                            for (int i = 0; i < len; i++) {
+                                arr[i] = String.valueOf(subfolders.get(i));
+                            }
+                            retval.setSubfolderIDs(arr);
+                            retval.setSubscribedSubfolders(true);
+                        }
                     }
                     /*
                      * Mark for user-sensitive cache
                      */
                     retval.setCacheable(true);
                     retval.setGlobal(false);
+                } else if (FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID == folderId) {
+                    if (!InfostoreFacades.isInfoStoreAvailable()) {
+                        final FileStorageAccount defaultAccount = getDefaultFileStorageAccess(session);
+                        if (null != defaultAccount) {
+                            /*
+                             * Enforce subfolders are retrieved from appropriate file storage
+                             */
+                            retval.setSubfolderIDs(null);
+                            /*
+                             * Mark for user-sensitive cache
+                             */
+                            retval.setCacheable(true);
+                            retval.setGlobal(false);
+                        }
+                    }
                 } else {
                     if (fo.containsSubfolderIds()) {
                         final List<Integer> subfolderIds = fo.getSubfolderIds();

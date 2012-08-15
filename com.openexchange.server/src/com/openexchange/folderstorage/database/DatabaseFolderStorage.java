@@ -77,6 +77,10 @@ import java.util.Queue;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
@@ -101,6 +105,7 @@ import com.openexchange.folderstorage.database.getfolder.SystemPublicFolder;
 import com.openexchange.folderstorage.database.getfolder.SystemRootFolder;
 import com.openexchange.folderstorage.database.getfolder.SystemSharedFolder;
 import com.openexchange.folderstorage.database.getfolder.VirtualListFolder;
+import com.openexchange.folderstorage.filestorage.FileStorageFolderIdentifier;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
@@ -108,6 +113,7 @@ import com.openexchange.folderstorage.type.SystemType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
+import com.openexchange.groupware.infostore.InfostoreFacades;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
@@ -806,7 +812,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                     final int folderId = getUnsignedInteger(folderIdentifier);
 
                     if (folderId < 0) {
-                        throw OXFolderExceptionCode.NOT_EXISTS.create(folderIdentifier, ctx.getContextId());
+                        throw OXFolderExceptionCode.NOT_EXISTS.create(folderIdentifier, Integer.valueOf(ctx.getContextId()));
                     }
 
                     if (FolderObject.SYSTEM_ROOT_FOLDER_ID == folderId) {
@@ -831,7 +837,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 final int folderId = getUnsignedInteger(folderIdentifier);
 
                 if (folderId < 0) {
-                    throw OXFolderExceptionCode.NOT_EXISTS.create(folderIdentifier, ctx.getContextId());
+                    throw OXFolderExceptionCode.NOT_EXISTS.create(folderIdentifier, Integer.valueOf(ctx.getContextId()));
                 }
 
                 final FolderObject fo =
@@ -1265,6 +1271,57 @@ public final class DatabaseFolderStorage implements FolderStorage {
                     list.add(new DatabaseId(sa[0], i, sa[1]));
                 }
                 return list.toArray(new SortableId[list.size()]);
+            }
+
+            if (FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID == parentId) {
+                if (!InfostoreFacades.isInfoStoreAvailable()) {
+                    final Session session = storageParameters.getSession();
+                    final FileStorageAccount defaultAccount = DatabaseFolderConverter.getDefaultFileStorageAccess(session);
+                    if (null != defaultAccount) {
+                        final FileStorageService fileStorageService = defaultAccount.getFileStorageService();
+                        final String defaultId = FileStorageAccount.DEFAULT_ID;
+                        final FileStorageAccountAccess defaultFileStorageAccess = fileStorageService.getAccountAccess(defaultId, session);
+                        defaultFileStorageAccess.connect();
+                        try {
+                            final FileStorageFolder personalFolder = defaultFileStorageAccess.getFolderAccess().getPersonalFolder();
+                            final FileStorageFolderIdentifier fsfi = new FileStorageFolderIdentifier(
+                                fileStorageService.getId(),
+                                defaultAccount.getId(),
+                                personalFolder.getId());
+                            return new SortableId[] { new DatabaseId(fsfi.toString(), 0, personalFolder.getName()) };
+                            // TODO: Shared?
+                        } finally {
+                            defaultFileStorageAccess.close();
+                        }
+                    }
+                }
+            }
+
+            if (FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID == parentId) {
+                if (!InfostoreFacades.isInfoStoreAvailable()) {
+                    final Session session = storageParameters.getSession();
+                    final FileStorageAccount defaultAccount = DatabaseFolderConverter.getDefaultFileStorageAccess(session);
+                    if (null != defaultAccount) {
+                        final FileStorageService fileStorageService = defaultAccount.getFileStorageService();
+                        final String defaultId = FileStorageAccount.DEFAULT_ID;
+                        final FileStorageAccountAccess defaultFileStorageAccess = fileStorageService.getAccountAccess(defaultId, session);
+                        defaultFileStorageAccess.connect();
+                        try {
+                            final FileStorageFolder[] publicFolders = defaultFileStorageAccess.getFolderAccess().getPublicFolders();
+                            final SortableId[] ret = new SortableId[publicFolders.length];
+                            final String serviceId = fileStorageService.getId();
+                            final String accountId = defaultAccount.getId();
+                            for (int i = 0; i < publicFolders.length; i++) {
+                                final FileStorageFolder folder = publicFolders[i];
+                                final FileStorageFolderIdentifier fsfi = new FileStorageFolderIdentifier(serviceId, accountId, folder.getId());
+                                ret[i] = new DatabaseId(fsfi.toString(), i, folder.getName());
+                            }
+                            return ret;
+                        } finally {
+                            defaultFileStorageAccess.close();
+                        }
+                    }
+                }
             }
 
             /*-
