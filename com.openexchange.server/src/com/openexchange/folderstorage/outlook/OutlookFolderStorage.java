@@ -1105,6 +1105,13 @@ public final class OutlookFolderStorage implements FolderStorage {
             outlookFolder = new OutlookFolder(realFolder);
             outlookFolder.setTreeID(treeId);
             if (SYSTEM_INFOSTORES.contains(folderId)) {
+                if (INFOSTORE.equals(folderId) && !InfostoreFacades.isInfoStoreAvailable()) {
+                    final FileStorageAccount defaultAccount = getDefaultFileStorageAccess(storageParameters.getSession());
+                    if (null != defaultAccount) {
+                        // Rename to default account name
+                        outlookFolder.setName(defaultAccount.getDisplayName());
+                    }
+                }
                 outlookFolder.setSubfolderIDs(null);
             } else {
                 setSubfolders(treeId, folderId, storageParameters, user, tree, contextId, outlookFolder, realFolder);
