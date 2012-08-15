@@ -73,6 +73,7 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
@@ -470,6 +471,77 @@ public final class Tools {
 				contact.setAddressOther(null);
 			}
 		}
+	}
+
+	/**
+	 * Creates a new {@link ContactSearchObject} containing only the relevant 
+	 * parts of the supplied search object, extending the contained patterns 
+	 * with implicit wildcards as needed. 
+	 * 
+	 * @param contactSearch
+	 * @return
+	 */
+	public static ContactSearchObject prepareContactSearch(ContactSearchObject contactSearch) {
+        if (null != contactSearch.getPattern() && 0 < contactSearch.getPattern().length()) {
+            /*
+             * "Search contacts"
+             */
+            return prepareSearchContacts(contactSearch);
+        } else {
+            /*
+             * "Search contacts alternative"
+             */
+            return prepareSearchContactsAlternative(contactSearch);
+        }
+    }
+	    
+    private static ContactSearchObject prepareSearchContacts(ContactSearchObject contactSearch) {
+        ContactSearchObject preparedSearchObject = new ContactSearchObject();
+        preparedSearchObject.setFolders(contactSearch.getFolders());
+        if (contactSearch.isStartLetter()) {
+            preparedSearchObject.setStartLetter(true);
+            preparedSearchObject.setPattern(addWildcards(contactSearch.getPattern(), false, true));
+        } else {
+            preparedSearchObject.setStartLetter(false);
+            preparedSearchObject.setPattern(addWildcards(contactSearch.getPattern(), true, true));
+        }
+        return preparedSearchObject;  
+    }
+    
+    private static ContactSearchObject prepareSearchContactsAlternative(ContactSearchObject contactSearch) {
+        ContactSearchObject preparedSearchObject = new ContactSearchObject();
+        boolean prependWildcard = false == contactSearch.isOrSearch() && false == contactSearch.isEmailAutoComplete();
+        preparedSearchObject.setOrSearch(contactSearch.isOrSearch());
+        preparedSearchObject.setEmailAutoComplete(contactSearch.isEmailAutoComplete());
+        preparedSearchObject.setFolders(contactSearch.getFolders());
+        preparedSearchObject.setEmailAutoComplete(contactSearch.isEmailAutoComplete());
+        preparedSearchObject.setCatgories(addWildcards(contactSearch.getCatgories(), true, true));
+        preparedSearchObject.setCityBusiness(addWildcards(contactSearch.getCityBusiness(), prependWildcard, true));
+        preparedSearchObject.setCompany(addWildcards(contactSearch.getCompany(), prependWildcard, true));
+        preparedSearchObject.setDepartment(addWildcards(contactSearch.getDepartment(), prependWildcard, true));
+        preparedSearchObject.setDisplayName(addWildcards(contactSearch.getDisplayName(), prependWildcard, true));
+        preparedSearchObject.setEmail1(addWildcards(contactSearch.getEmail1(), prependWildcard, true));
+        preparedSearchObject.setEmail2(addWildcards(contactSearch.getEmail2(), prependWildcard, true));
+        preparedSearchObject.setEmail3(addWildcards(contactSearch.getEmail3(), prependWildcard, true));
+        preparedSearchObject.setGivenName(addWildcards(contactSearch.getGivenName(), prependWildcard, true));
+        preparedSearchObject.setStreetBusiness(addWildcards(contactSearch.getStreetBusiness(), prependWildcard, true));
+        preparedSearchObject.setSurname(addWildcards(contactSearch.getSurname(), prependWildcard, true));
+        preparedSearchObject.setYomiCompany(addWildcards(contactSearch.getYomiCompany(), prependWildcard, true));
+        preparedSearchObject.setYomiFirstname(addWildcards(contactSearch.getYomiFirstName(), prependWildcard, true));
+        preparedSearchObject.setYomiLastName(addWildcards(contactSearch.getYomiLastName(), prependWildcard, true));
+        return preparedSearchObject;  
+    }
+    
+	private static String addWildcards(String pattern, boolean prepend, boolean append) {
+	    if (null != pattern && 0 < pattern.length() && false == "*".equals(pattern)) {
+            if (prepend && '*' != pattern.charAt(0)) {
+                pattern = "*" + pattern;
+            }
+            if (append && '*' != pattern.charAt(pattern.length() - 1)) {
+                pattern = pattern + "*";
+            }
+	    }
+	    return pattern;
 	}
 	
 	private Tools() {

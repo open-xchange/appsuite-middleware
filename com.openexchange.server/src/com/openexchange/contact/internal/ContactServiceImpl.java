@@ -570,39 +570,34 @@ public class ContactServiceImpl extends DefaultContactService {
 		/*
 		 * prepare search term for users
 		 */
-		final SearchTerm<?> searchTerm;
-		final SingleSearchTerm folderIDTerm = new SingleSearchTerm(SingleOperation.EQUALS);
-		folderIDTerm.addOperand(new ContactFieldOperand(ContactField.FOLDER_ID));
-		folderIDTerm.addOperand(new ConstantOperand<String>(folderID));
-		if (null != userIDs && 0 < userIDs.length) {
-			final SearchTerm<?> userIDsTerm;
-			if (1 == userIDs.length) {
-				final SingleSearchTerm userIDTerm = new SingleSearchTerm(SingleOperation.EQUALS);
-				userIDTerm.addOperand(new ContactFieldOperand(ContactField.INTERNAL_USERID));
-				userIDTerm.addOperand(new ConstantOperand<Integer>(userIDs[0]));
-				userIDsTerm = userIDTerm;
-			} else {
-				final CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
-				for (final int userID : userIDs) {
-					final SingleSearchTerm userIDTerm = new SingleSearchTerm(SingleOperation.EQUALS);
-					userIDTerm.addOperand(new ContactFieldOperand(ContactField.INTERNAL_USERID));
-					userIDTerm.addOperand(new ConstantOperand<Integer>(userID));
-					orTerm.addSearchTerm(userIDTerm);
-				}
-				userIDsTerm = orTerm;
-			}
-			final CompositeSearchTerm compositeTerm = new CompositeSearchTerm(CompositeOperation.AND);
-			compositeTerm.addSearchTerm(folderIDTerm);
-			compositeTerm.addSearchTerm(userIDsTerm);
-			searchTerm = compositeTerm;
-		} else if (null != term) {
-			final CompositeSearchTerm compositeTerm = new CompositeSearchTerm(CompositeOperation.AND);
-			compositeTerm.addSearchTerm(folderIDTerm);
-			compositeTerm.addSearchTerm(term);
-			searchTerm = compositeTerm;
-		} else {
-			searchTerm = folderIDTerm;
-		}
+        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND);
+        SingleSearchTerm folderIDTerm = new SingleSearchTerm(SingleOperation.EQUALS);
+        folderIDTerm.addOperand(new ContactFieldOperand(ContactField.FOLDER_ID));
+        folderIDTerm.addOperand(new ConstantOperand<String>(folderID));
+        searchTerm.addSearchTerm(folderIDTerm);
+        if (null == userIDs || 0 == userIDs.length) {
+            SingleSearchTerm userIDsTerm = new SingleSearchTerm(SingleOperation.GREATER_THAN);
+            userIDsTerm.addOperand(new ContactFieldOperand(ContactField.INTERNAL_USERID));
+            userIDsTerm.addOperand(new ConstantOperand<Integer>(Integer.valueOf(0)));
+            searchTerm.addSearchTerm(userIDsTerm);
+        } else if (1 == userIDs.length) {
+            SingleSearchTerm userIDsTerm = new SingleSearchTerm(SingleOperation.EQUALS);
+            userIDsTerm.addOperand(new ContactFieldOperand(ContactField.INTERNAL_USERID));
+            userIDsTerm.addOperand(new ConstantOperand<Integer>(Integer.valueOf(userIDs[0])));
+            searchTerm.addSearchTerm(userIDsTerm);
+        } else {
+            CompositeSearchTerm userIDsTerm = new CompositeSearchTerm(CompositeOperation.OR);
+            for (int userID : userIDs) {
+                SingleSearchTerm userIDTerm = new SingleSearchTerm(SingleOperation.EQUALS);
+                userIDTerm.addOperand(new ContactFieldOperand(ContactField.INTERNAL_USERID));
+                userIDTerm.addOperand(new ConstantOperand<Integer>(Integer.valueOf(userID)));
+                userIDsTerm.addSearchTerm(userIDTerm);
+            }
+            searchTerm.addSearchTerm(userIDsTerm);
+        }
+        if (null != term) {
+            searchTerm.addSearchTerm(term);
+        }
 		/*
 		 * get user contacts from storage
 		 */
