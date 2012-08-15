@@ -67,7 +67,7 @@ ox_set_JAVA_BIN
 test -z "$LIBPATH"          && LIBPATH=${PREFIX}jar
 
 JAVAMAIN="com.openexchange.admin.user.copy.console.UserCopy"
-ADMINCP=$(for jar in $LIBPATH/ox_admin*.jar; do
+ADMINCP=$(for jar in $LIBPATH/*.jar; do
     echo -n "${jar}:"
     done)
 $JAVA_BIN $JAVA_OXCMD_OPTS $JAVA_XTRAOPTS -classpath ${ADMINCP} $JAVAMAIN "$@"

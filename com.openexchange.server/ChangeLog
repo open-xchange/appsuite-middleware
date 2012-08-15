@@ -1,3 +1,7 @@
+* 2012-08-15 - marcus.klein@open-xchange.com
+
+ - Fix for bug 22592: Corrected start script for usercopy CLT.
+
 * 2012-08-14 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 22730: Added support for IMPP parameters, added mapping for different email fields  
