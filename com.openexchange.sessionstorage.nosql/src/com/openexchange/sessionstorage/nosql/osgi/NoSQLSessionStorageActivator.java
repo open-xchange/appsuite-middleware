@@ -82,7 +82,7 @@ public class NoSQLSessionStorageActivator extends HousekeepingActivator {
      */
     @Override
     public void startBundle() throws Exception {
-        log.info("Starting bundle: com.openexchange.sessionstorage.loxandra");
+        log.info("Starting bundle: com.openexchange.sessionstorage.nosql");
         configService = getService(ConfigurationService.class);
         cryptoService = getService(CryptoService.class);
         registry = NoSQLServiceRegistry.getRegistry();
@@ -112,7 +112,7 @@ public class NoSQLSessionStorageActivator extends HousekeepingActivator {
      */
     @Override
     public void stopBundle() throws Exception {
-        log.info("Stopping bundle: com.openexchange.sessionstorage.loxandra");
+        log.info("Stopping bundle: com.openexchange.sessionstorage.nosql");
         if (service != null) {
             service.cleanUp();
             unregisterServices();

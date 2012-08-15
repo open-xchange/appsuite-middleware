@@ -58,7 +58,7 @@ public class OXRequire extends ScriptableObject implements Function {
 		for (int i = 0; i < dependencies.length; i++) {
 			resolved[i] = resolver.get(dependencies[i], cx, scope);
 		}
-		DeferredResolution.awaitResolution(cx, scope, thisObj, resolved, fun, null);
+		DeferredResolution.awaitResolution(cx, scope, thisObj, resolved, fun, null, new boolean[]{false});
 
 		return null;
 	}
