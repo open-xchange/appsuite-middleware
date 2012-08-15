@@ -283,6 +283,11 @@ public class LdapFactory  {
          * For serialization
          */
         private static final long serialVersionUID = -3548239536056697658L;
+
+        protected DeletedControl() {
+            super();
+        }
+
         @Override
         public byte[] getEncodedValue() {
             return new byte[] {};

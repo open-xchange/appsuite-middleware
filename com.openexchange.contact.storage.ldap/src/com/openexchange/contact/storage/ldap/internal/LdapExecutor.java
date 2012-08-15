@@ -61,7 +61,7 @@ import javax.naming.ldap.SortKey;
 import com.openexchange.contact.storage.ldap.LdapExceptionCodes;
 import com.openexchange.contact.storage.ldap.config.LdapConfig.SearchScope;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
+import com.openexchange.log.Log;
 import com.openexchange.session.Session;
 
 /**
@@ -71,7 +71,7 @@ import com.openexchange.session.Session;
  */
 public class LdapExecutor  {
     
-    private static org.apache.commons.logging.Log LOG = LogFactory.getLog(LdapExecutor.class);
+    private static org.apache.commons.logging.Log LOG = Log.loggerFor(LdapExecutor.class);
 
     private final LdapFactory factory;
     private final LdapContext context;

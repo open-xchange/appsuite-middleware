@@ -63,7 +63,6 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
@@ -75,7 +74,7 @@ import com.openexchange.user.UserService;
  */
 public class LdapContactStorageActivator extends HousekeepingActivator {
 
-    private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LdapContactStorageActivator.class));
+    private final Log LOG = com.openexchange.log.Log.loggerFor(LdapContactStorageActivator.class);
 
     /**
      * Initializes a new {@link LdapContactStorageActivator}.
