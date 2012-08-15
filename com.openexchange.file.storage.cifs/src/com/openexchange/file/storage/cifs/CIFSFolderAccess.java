@@ -500,7 +500,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
              */
             final String newUri;
             {
-                URI uri = new URI(fid, true);
+                URI uri = new URI(fid, false);
                 String path = uri.getPath();
                 if (path.endsWith(SLASH)) {
                     path = path.substring(0, path.length() - 1);
@@ -508,7 +508,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
                 final int pos = path.lastIndexOf('/');
                 final String name = pos >= 0 ? path.substring(pos) : path;
 
-                uri = new URI(newParentId, true);
+                uri = new URI(newParentId, false);
                 path = uri.getPath();
                 if (path.endsWith(SLASH)) {
                     path = path.substring(0, path.length() - 1);
@@ -562,7 +562,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
              */
             final String newUri;
             {
-                final URI uri = new URI(fid, true);
+                final URI uri = new URI(fid, false);
                 String path = uri.getPath();
                 if (path.endsWith(SLASH)) {
                     path = path.substring(0, path.length() - 1);
