@@ -1,8 +1,8 @@
-# #-#-#-#-#  server.fr_FR.po (server)  #-#-#-#-#
+# #-#-#-#-#  server.fr_CA.po (server)  #-#-#-#-#
 # translation of server.po to Français
 # Joëlle Cornavin <joelle@bureau-cornavin.com>, 2010, 2011, 2012.
 # Éric Bischoff <eric@bureau-cornavin.com>, 2012.
-# #-#-#-#-#  errors.fr_FR.po (errors)  #-#-#-#-#
+# #-#-#-#-#  errors.fr_CA.po (errors)  #-#-#-#-#
 # translation of errors.po to Français
 # Joëlle Cornavin <joelle@bureau-cornavin.com>, 2010, 2011.
 # Antje Faber, 2011.
@@ -34,10 +34,10 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"#-#-#-#-#  server.fr_FR.po (server)  #-#-#-#-#\n"
+"#-#-#-#-#  server.fr_CA.po (server)  #-#-#-#-#\n"
 "X-Generator: Lokalize 1.4\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"#-#-#-#-#  errors.fr_FR.po (errors)  #-#-#-#-#\n"
+"#-#-#-#-#  errors.fr_CA.po (errors)  #-#-#-#-#\n"
 "X-Generator: Lokalize 1.4\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
@@ -45,7 +45,7 @@ msgstr ""
 #. %1$s will be replaced with a detailed exception message.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:63
 msgid "Verification of client ticket failed: %1$s"
-msgstr "La vérification du ticket client a échoué : %1$s"
+msgstr "La vérification du billet client a échoué : %1$s"
 
 #. If the problem could not be specified in some more detailed way this message can be used.
 #. %1$s is replaced by some own message that will not be translated.
@@ -57,7 +57,7 @@ msgstr "Problème inconnu : « %1$s »."
 #. %1$s will be replaced with the Kerberos name of the client.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:71
 msgid "Failed to get a delegate ticket for %1$s."
-msgstr "Impossible d'obtenir un ticket de délégation pour %1$s."
+msgstr "Impossible d'obtenir un billet de délégation pour %1$s."
 
 #. Some problem occurred while talking to Kerberos server.
 #. %1$s will be replaced with the message from the underlying exception.
@@ -76,7 +76,7 @@ msgstr ""
 #. %1$s will be replaced with the detailed not translated message from the underlying implementation.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:83
 msgid "Problem while terminating service ticket: %1$s"
-msgstr "Problème en mettant fin au ticket du service : %1$s"
+msgstr "Problème en mettant fin au billet du service : %1$s"
 
 #. Written to the log file if the session contains a Kerberos subject that does not contain any ticket that needs a renewal.
 #. %1$s is replaced with the subjects principal name.
@@ -90,7 +90,7 @@ msgstr ""
 #. %1$s is replaced with the session identifier.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:91
 msgid "No Kerberos delegation ticket found in session %1$s."
-msgstr "Pas de ticket de délégation Kerberos trouvé dans la session %1$s."
+msgstr "Pas de billet de délégation Kerberos trouvé dans la session %1$s."
 
 #. A cache error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caching/src/com/openexchange/caching/CacheExceptionMessage.java:69
@@ -2939,7 +2939,7 @@ msgid ""
 "name, company or E-Mail."
 msgstr ""
 "Aucun champ pouvant donner un nom d'affichage au contact de la ligne %s n'a "
-"été défini : ni nom, ni société ni adresse électronique."
+"été défini : ni nom, ni entreprise, ni adresse électronique."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:115
 msgid "Could not read InputStream as string"
@@ -2976,7 +2976,7 @@ msgstr "Format inconnu : %s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:129
 msgid "Empty file uploaded."
-msgstr "Fichier vide téléchargé."
+msgstr "Fichier vide téléversé."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:131
 msgid "The file you selected does not exist."
@@ -3000,7 +3000,7 @@ msgstr "Ignorer la valeur invalide pour le champ « %1$s » : %2$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:141
 #, fuzzy
 msgid "No file was uploaded"
-msgstr "Fichier vide téléchargé."
+msgstr "Fichier vide téléversé."
 
 #. Truncation error: Not using the standard one, because we cannot map between field name in .ics/.vcd/.csv file and OX field.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:144
@@ -3364,7 +3364,7 @@ msgstr "Choisir un compte existant"
 #. The name for the folder of a facebook account containing user's wall posts.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.facebook/src/com/openexchange/messaging/facebook/NameStrings.java:62
 msgid "Wall posts"
-msgstr "Publications du mur"
+msgstr "Publications du babillard"
 
 #. The name for the folder of a facebook account containing user's action links.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.facebook/src/com/openexchange/messaging/facebook/NameStrings.java:65
@@ -4427,7 +4427,7 @@ msgid ""
 "restrictions by provider. Otherwise subsequent login attempt might not work."
 msgstr ""
 "La vérification des justificatifs d'identité est désactivée. Il se peut que "
-"les connexions aient été restreintes par le fournisseur d'accès. Une "
+"les connexions aient été restreintes par le fournisseur de services. Une "
 "nouvelle tentative de connexion pourrait ne pas fonctionner."
 
 #. Duplicate proxy registration: %1$s
@@ -4553,8 +4553,8 @@ msgstr ""
 "Les données ainsi que toutes les références contenues dans cette page web "
 "sont partagées avec vous, en partant du principe que le propriétaire des "
 "données a été autorisé à vous y donner accès. Ni Open-Xchange, ni aucune de "
-"ses filiales ou sociétés affiliées ne seront tenus pour responsables de leur "
-"publication ou re-publication.\n"
+"ses filiales ou entreprises affiliées ne seront tenus pour responsables de "
+"leur publication ou re-publication.\n"
 "Toute utilisation ou diffusion non autorisée de ces données est interdite. "
 "Si vous avez l'intention de stocker, traiter ou transmettre ces données, "
 "veuillez vous assurer que vous avez le droit de le faire.\n"
@@ -8688,7 +8688,7 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:71
 msgid "File upload failed: %1$s"
-msgstr "Le téléchargement du fichier a échoué : %1$s"
+msgstr "Le téléversement du fichier a échoué : %1$s"
 
 #. *
 #. * Missing affiliation id
@@ -8734,7 +8734,7 @@ msgstr "Module inconnu : %1$d"
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:106
 msgid "An uploaded file referenced by %1$s could not be found"
-msgstr "Un fichier téléchargé, référencé par %1$s, est introuvable"
+msgstr "Un fichier téléversé, référencé par %1$s, est introuvable"
 
 #. *
 #. * Invalid action value: %1$s
@@ -8748,7 +8748,7 @@ msgstr "Valeur d'action invalide : %1$s"
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:116
 msgid "Upload file with id %1$s could not be found"
-msgstr "Le fichier téléchargé d'identifiant %1$s n'a pas pu être trouvé"
+msgstr "Le fichier téléversé d'identifiant %1$s n'a pas pu être trouvé"
 
 #. Upload file's content type \"%1$s\" does not match given file filter \"%2$s\"
 #. Thrown to indicate that currently uploaded file's MIME type does not obey a certain search criterion
@@ -8757,8 +8757,8 @@ msgstr "Le fichier téléchargé d'identifiant %1$s n'a pas pu être trouvé"
 msgid ""
 "Upload file's content type \"%1$s\" does not match given file filter \"%2$s\""
 msgstr ""
-"Le type de contenu « %1$s » du fichier téléchargé ne correspond pas au "
-"filtre de fichiers fourni « %2$s »"
+"Le type de contenu « %1$s » du fichier téléversé ne correspond pas au filtre "
+"de fichiers fourni « %2$s »"
 
 #. *
 #. * A DBPooling error occurred
@@ -9014,7 +9014,7 @@ msgstr "Impossible de créer une instance de PartModifier à partir du nom %1$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:222
 msgid "Upload quota (%1$s) exceeded for file %2$s (size=%3$s)"
 msgstr ""
-"Le quota de téléchargement (%1$s) a été dépassé pour le fichier %2$s de "
+"Le quota de téléversement (%1$s) a été dépassé pour le fichier %2$s de "
 "taille %3$s"
 
 #. *
@@ -9022,7 +9022,7 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:227
 msgid "Upload quota (%1$s) exceeded"
-msgstr "Le quota de téléchargement (%1$s) a été dépassé"
+msgstr "Le quota de téléversement (%1$s) a été dépassé"
 
 #. *
 #. * Invalid integer value %1$s
@@ -9424,7 +9424,7 @@ msgid ""
 "Please limit your recipients to %1$s  (including To/Cc/Bcc), and click "
 "'Send' again."
 msgstr ""
-"Veuillez limiter vos destinataires à %1$s (y compris À/CC/BCC) et cliquez "
+"Veuillez limiter vos destinataires à %1$s (y compris À/CC/CCI) et cliquez "
 "sur « Envoyer » à nouveau."
 
 #. *
@@ -11232,7 +11232,7 @@ msgstr "Le paramètre de requête suivant fait défaut : %s"
 #. Missing upload image.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:79
 msgid "Missing upload image."
-msgstr "Image téléchargée manquante."
+msgstr "Image téléversée manquante."
 
 #. Invalid parameter: %s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:82
@@ -11334,7 +11334,7 @@ msgstr "Exception en analysant le JSON : « %s »."
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/OXJSONExceptionMessage.java:81
 msgid "Invalid cookie."
-msgstr "Cookie invalide."
+msgstr "Témoin invalide."
 
 #. *
 #. * Exception while building JSON.
@@ -14493,7 +14493,7 @@ msgstr "Zoulou"
 #~ msgid ""
 #~ "Cookie JSESSIONID contains non-matching JVM route: %1$s not equal to %2$s"
 #~ msgstr ""
-#~ "Le cookie JSESSIONID contient une route JVM qui ne correspond pas : %1$s "
+#~ "Le témoin JSESSIONID contient une route JVM qui ne correspond pas : %1$s "
 #~ "est différent de %2$s"
 
 #~ msgid ""
@@ -14683,7 +14683,7 @@ msgstr "Zoulou"
 #~ msgstr "Valeur de l'en-tête « Content-Type » invalide : %1$s"
 
 #~ msgid "Invalid cookie header value: %1$s"
-#~ msgstr "Valeur de l'en-tête de cookie invalide : %1$s"
+#~ msgstr "Valeur de l'en-tête de témoin invalide : %1$s"
 
 #~ msgid "Invalid sieve credentials"
 #~ msgstr "Justificatifs d'identité sieve invalides."
@@ -15248,7 +15248,7 @@ msgstr "Zoulou"
 #~ "no name, no company nor e-mail."
 #~ msgstr ""
 #~ "Aucun champ pouvant être utilisé pour nommer des contacts n'a été trouvé "
-#~ "dans ce fichier  : ni nom, ni société ni adresse électronique."
+#~ "dans ce fichier  : ni nom, ni entreprise, ni adresse électronique."
 
 #~ msgid "Invalid date format detected: \"%1$s\". Ignoring value."
 #~ msgstr "Format de date invalide détecté : « %1$s ». Ignorer la valeur."

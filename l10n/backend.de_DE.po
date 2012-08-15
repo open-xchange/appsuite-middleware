@@ -11,6 +11,9 @@
 # This file is distributed under the same license as the PACKAGE package.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER.
 #
+# Antje Faber, 2007.
+# Antje Faber <antje.faber@open-xchange.com>, 2008, 2009, 2010, 2011.
+# Antje Faber, 2006, 2012.
 #. *
 #. * Mail(s) could not be found in folder
 #. * <p>
@@ -25,9 +28,6 @@
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:88
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:90
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:92
-# Antje Faber, 2007.
-# Antje Faber <antje.faber@open-xchange.com>, 2008, 2009, 2010, 2011.
-# Antje Faber, 2006, 2012.
 msgid ""
 msgstr ""
 "Project-Id-Version: errors.de_DE\n"
@@ -36,6 +36,7 @@ msgstr ""
 "PO-Revision-Date: 2012-08-14 12:44+0200\n"
 "Last-Translator: Antje Faber\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
+"Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -1838,8 +1839,8 @@ msgstr "Versionierung wird nicht von WebDAV unterstützt."
 #. File storage account %1$s of service "%2$s" could not be found for user %3$s in context %4$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:76
 msgid ""
-"File storage account %1$s of service \"%2$s\" could not be found for user %3"
-"$s in context %4$s."
+"File storage account %1$s of service \"%2$s\" could not be found for user "
+"%3$s in context %4$s."
 msgstr ""
 "Dateispeicher-Account %1$s des Dienstes \"%2$s\" nicht für Benutzer %3$s im "
 "Kontext %4$s gefunden."
@@ -1969,6 +1970,12 @@ msgstr "Kein Account Manager gefunden für Dienst %1$d"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:139
 msgid "Invalid URL \"%1$s\". Error: %2$s."
 msgstr "Ungültige URL \"%1$s\": Fehler: %2$s."
+
+#. No such folder.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:142
+#, fuzzy
+msgid "No such folder."
+msgstr "Kein solches Element"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.frontend.uwa/src/com/openexchange/frontend/uwa/UWAWidgetExceptionMessages.java:64
 msgid "The database returned an error: %1$s"
@@ -2272,8 +2279,8 @@ msgstr "Übertragungszähler für Kontext %1$d ist nicht vorhanden."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:130
 msgid "Inserting database assignment for context %1$d and server %2$d failed!"
 msgstr ""
-"Das Eintragen der Datenbankzuordnung für den Kontext  %1$d und den Server %2"
-"$d ist fehlgeschlagen."
+"Das Eintragen der Datenbankzuordnung für den Kontext  %1$d und den Server "
+"%2$d ist fehlgeschlagen."
 
 #. Text displayed to user if there is no message.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:63
@@ -2305,7 +2312,7 @@ msgstr "Objekt nicht gefunden. %1$s"
 #. The general message if a user has no access to a certain module (e.g. calendar)
 #. No permission for module: %1$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:78
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:116
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:119
 msgid "No permission for module: %1$s."
 msgstr "Keine Berechtigung für das Modul: %1$s."
 
@@ -2418,8 +2425,8 @@ msgid ""
 "SessionD returned wrong session with identifier %1$s for given session "
 "identifier %2$s."
 msgstr ""
-"Session-ID gab falsche Session mit ID %1$s für die angegebene Session-ID %2"
-"$s zurück."
+"Session-ID gab falsche Session mit ID %1$s für die angegebene Session-ID "
+"%2$s zurück."
 
 #. This message is thrown if an inconsistency in SessionD bundle is detected when a session is added and that sessions identifier is already in use.
 #. %1$s is replaced with the already existing sessions login.
@@ -2430,8 +2437,8 @@ msgid ""
 "Colliding session has login %1$s and new session has login %2$s."
 msgstr ""
 "Konflikt beim Hinzufügen einer neuen Session zum Session Container. Die "
-"kollidierende Session hat das Login %1$s und die neue Session hat das Login %"
-"2$s."
+"kollidierende Session hat das Login %1$s und die neue Session hat das Login "
+"%2$s."
 
 #. This message is thrown if an inconcistency in SessionD bundle is detected when a session should be fetched by its random token.
 #. %1$s is replaced with the session identifier that is returned from the data structures.
@@ -2609,8 +2616,8 @@ msgstr "Implementierungsklasse konnte nicht gefunden werden"
 #. An I/O error occurred while creating the socket connection to IMAP server (%1$s): %2$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/entity2acl/Entity2ACLExceptionMessage.java:73
 msgid ""
-"An I/O error occurred while creating the socket connection to IMAP server (%1"
-"$s): %2$s"
+"An I/O error occurred while creating the socket connection to IMAP server "
+"(%1$s): %2$s"
 msgstr ""
 "E/A-Fehler beim Erstellen der Socket-Verbindung zum IMAP-Server (%1$s): %2$s"
 
@@ -3165,9 +3172,9 @@ msgid ""
 "A Facebook API error occurred. Error code: %1$s. Error message: \"%2$s\". "
 "Please refer to http://fbdevwiki.com/wiki/Error_codes to look-up error code."
 msgstr ""
-"Ein Facebook API-Fehler ist aufgetreten. Fehlercode: %1$s. Fehlermeldung: \"%"
-"2$s\". Nähere Informationen zum Fehlercode finden Sie unter http://fbdevwiki."
-"com/wiki/Error_codes"
+"Ein Facebook API-Fehler ist aufgetreten. Fehlercode: %1$s. Fehlermeldung: "
+"\"%2$s\". Nähere Informationen zum Fehlercode finden Sie unter http://"
+"fbdevwiki.com/wiki/Error_codes"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.facebook/src/com/openexchange/messaging/facebook/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.twitter/src/com/openexchange/messaging/twitter/FormStrings.java:61
@@ -3408,8 +3415,8 @@ msgstr "Kein Anlegezugriff auf E-Mail-Ordner %1$s"
 #. No attachment found with section identifier %1$s in message %2$s in folder %3$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:130
 msgid ""
-"No attachment found with section identifier %1$s in message %2$s in folder %3"
-"$s."
+"No attachment found with section identifier %1$s in message %2$s in folder "
+"%3$s."
 msgstr ""
 "Keine Anlage mit der Section ID %1$s in Nachricht %2$s im Ordner %3$s "
 "gefunden."
@@ -3862,8 +3869,8 @@ msgstr "Flag %1$s konnte aus folgendem Grund nicht geändert werden: %2$s"
 msgid ""
 "Number of search fields (%d) do not match number of search patterns (%d)"
 msgstr ""
-"Die Anzahl der Suchfelder (%d) stimmen nicht mit der Anzahl der Suchmuster (%"
-"d) überein."
+"Die Anzahl der Suchfelder (%d) stimmen nicht mit der Anzahl der Suchmuster "
+"(%d) überein."
 
 #. *
 #. * POP3 search failed due to following reason: %1$s. Switching to application-based search
@@ -4145,8 +4152,8 @@ msgid ""
 "context=%4$s).\n"
 "Error message from server: %5$s"
 msgstr ""
-"Anmeldeverzögerung verweigert die Verbindung zum Server %1$s mit dem Login %2"
-"$s (Benutzer=%3$s, Kontext=%4$s).\n"
+"Anmeldeverzögerung verweigert die Verbindung zum Server %1$s mit dem Login "
+"%2$s (Benutzer=%3$s, Kontext=%4$s).\n"
 "Fehlermeldung vom Server: %5$s."
 
 #. *
@@ -4159,8 +4166,9 @@ msgid ""
 "context=%4$s). Try again in %5$s seconds.\n"
 "Error message from server: %6$s"
 msgstr ""
-"Anmeldeverzögerung verweigert die Verbindung zum Server %1$s mit dem Login %2"
-"$s (Benutzer=%3$s, Kontext=%4$s). Versuchen Sie es in %5$s Sekunden erneut.\n"
+"Anmeldeverzögerung verweigert die Verbindung zum Server %1$s mit dem Login "
+"%2$s (Benutzer=%3$s, Kontext=%4$s). Versuchen Sie es in %5$s Sekunden "
+"erneut.\n"
 "\"Fehlermeldung vom Server: %6$s"
 
 #. *
@@ -4716,7 +4724,7 @@ msgstr "Unzureichende Informationen zum Analysieren/Schreiben des Elements."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:151
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/ReminderExceptionMessage.java:120
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:77
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:100
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:103
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/webdav/WebdavExceptionMessage.java:126
 msgid "Unexpected error: %1$s"
 msgstr "Unerwarteter Fehler: %1$s"
@@ -4866,8 +4874,8 @@ msgstr "Es trat ein vorübergehender Fehler auf. Bitte erneut versuchen."
 #. User "%2$s" must not create subfolders below folder "%2$s" in context "%3$s".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:149
 msgid ""
-"User \"%2$s\" must not create subfolders below folder \"%2$s\" in context \"%"
-"3$s\"."
+"User \"%2$s\" must not create subfolders below folder \"%2$s\" in context "
+"\"%3$s\"."
 msgstr ""
 "Benutzer %2$s hat im Kontext %3$s im Ordner %2$s keine Berechtigung zum "
 "Anlegen von Unterordnern."
@@ -5222,8 +5230,8 @@ msgstr ""
 msgid ""
 "Got an UserParticipant object with a private folder id < 1 : Identifier = %d"
 msgstr ""
-"UserParticipant-Objekt mit einer ID für privaten Ordner < 1 erhalten : ID = %"
-"d"
+"UserParticipant-Objekt mit einer ID für privaten Ordner < 1 erhalten : ID = "
+"%d"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:139
 msgid ""
@@ -5373,8 +5381,8 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:208
 msgid "You do not have the appropriate permissions to read this object %1$d."
 msgstr ""
-"Sie haben nicht die entsprechenden Berechtigungen zum Lesen dieses Objekts %1"
-"$d."
+"Sie haben nicht die entsprechenden Berechtigungen zum Lesen dieses Objekts "
+"%1$d."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:210
 msgid "You do not have the appropriate permissions to create an object"
@@ -5704,8 +5712,8 @@ msgstr "Der Termin ist kein wiederkehrender Termin."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:61
 msgid ""
-"Found a user contact outside global address book in folder %1$d in context %2"
-"$d."
+"Found a user contact outside global address book in folder %1$d in context "
+"%2$d."
 msgstr ""
 "Benutzerkontakt außerhalb des globalen Adressbuchs im Ordner %1$d im Kontext "
 "%2$d gefunden."
@@ -5812,8 +5820,8 @@ msgid ""
 "add a comment for the variables"
 msgstr ""
 "Der Import ist fehlgeschlagen. Einige der eingegebenen Daten übersteigen das "
-"Datenbank-Feldlimit. Bitte kürzen Sie folgende Einträge: %1$s Zeichenlimit: %"
-"2$s Gesendet %3$s"
+"Datenbank-Feldlimit. Bitte kürzen Sie folgende Einträge: %1$s Zeichenlimit: "
+"%2$s Gesendet %3$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:99
 msgid ""
@@ -5866,12 +5874,12 @@ msgstr "Mime-Typ ist nicht definiert."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:115
 msgid ""
-"A contact with private flag cannot be stored in a public folder. Folder: %1"
-"$d context %2$d user %3$d"
+"A contact with private flag cannot be stored in a public folder. Folder: "
+"%1$d context %2$d user %3$d"
 msgstr ""
 "Ein Kontakt mit Privatmarkierung (private flag) kann nicht in einem "
-"öffentlichen Ordner gespeichert werden. Ordner: %1$d Kontext %2$d Benutzer %3"
-"$d"
+"öffentlichen Ordner gespeichert werden. Ordner: %1$d Kontext %2$d Benutzer "
+"%3$d"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:117
 msgid "Image size too large. Image size: %1$d. Max. size: %2$d."
@@ -7404,8 +7412,8 @@ msgid ""
 "Broken CSV file: Lines have different number of cells, line #1 has %d, line #"
 "%d has %d. Is this really a CSV file?"
 msgstr ""
-"Kaputte CSV-Datei: Zeilen haben unterschiedliche Zellenanzahl, Zeile #1 hat %"
-"d, Zeile #%d hat %d. Handelt es sich wirklich um eine CSV-Datei?"
+"Kaputte CSV-Datei: Zeilen haben unterschiedliche Zellenanzahl, Zeile #1 hat "
+"%d, Zeile #%d hat %d. Handelt es sich wirklich um eine CSV-Datei?"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/importexport/csv/CsvExceptionMessages.java:59
 msgid "Illegal state: Found data after presumed last line."
@@ -7534,8 +7542,8 @@ msgid ""
 "Folder %d has two subfolders named %s. The database for context %d is not "
 "consistent."
 msgstr ""
-"Der Ordner %d enthält zwei Unterordner namens %s. Die Datenbank für Kontext %"
-"d ist nicht konsistent."
+"Der Ordner %d enthält zwei Unterordner namens %s. Die Datenbank für Kontext "
+"%d ist nicht konsistent."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:113
 msgid "DocumentMetadata %d could not be deleted. Please try again."
@@ -8101,8 +8109,8 @@ msgstr "Event kann nicht an das Event-System geschickt werden."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:161
 msgid "You are not allowed to edit tasks in folder %1$s (%2$d)."
 msgstr ""
-"Sie haben keine Berechtigung zum Bearbeiten von Aufgaben im Ordner %1$s (%2"
-"$d)."
+"Sie haben keine Berechtigung zum Bearbeiten von Aufgaben im Ordner %1$s "
+"(%2$d)."
 
 #. * Moving items from or into shared folder %1$s (%2$d) is not allowed.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:164
@@ -8263,8 +8271,8 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:74
 msgid ""
-"Unable to determine next update task to execute. Executed: %1$s. Enqueued: %2"
-"$s. Scheduled: %3$s."
+"Unable to determine next update task to execute. Executed: %1$s. Enqueued: "
+"%2$s. Scheduled: %3$s."
 msgstr ""
 "Nächste auszuführende Aktualisierungsaufgabe konnte nicht bestimmt werden. "
 "Ausgeführt: %1$s. In Warteschlange: %2$s. Beauftragt: %3$s."
@@ -8310,8 +8318,8 @@ msgstr "Mehrere Zeilen in Tabellenversion in Schema %1$s gefunden."
 msgid ""
 "Update conflict detected. Another process is currently updating schema %1$s."
 msgstr ""
-"Aktualisierungskonflikt. Ein anderer Prozess aktualisiert derzeit Schema %1"
-"$s."
+"Aktualisierungskonflikt. Ein anderer Prozess aktualisiert derzeit Schema "
+"%1$s."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/internal/SchemaExceptionMessages.java:68
 msgid "Table update failed. Schema %1$s could not be locked."
@@ -8609,8 +8617,8 @@ msgstr "Nachrichtenfeld %1$s kann nicht verarbeitet werden"
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:192
 msgid ""
-"Message field %1$s cannot be handled on server %2$s with login %3$s (user=%4"
-"$s, context=%5$s)"
+"Message field %1$s cannot be handled on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
 msgstr ""
 "Nachrichtenfeld %1$s kann nicht auf dem Server %2$s mit dem Login %3$s "
 "(Benutzer=%4$s, Kontext=%5$s) verarbeitet werden."
@@ -8856,8 +8864,8 @@ msgid ""
 "Image attachment with content id \"%1$s\" not found inside mail %2$s of mail "
 "folder %3$s"
 msgstr ""
-"Bildanhang mit Inhalts-Id \"%1$s\" nicht in E-Mail %2$s des E-Mail-Ordners %3"
-"$s gefunden."
+"Bildanhang mit Inhalts-Id \"%1$s\" nicht in E-Mail %2$s des E-Mail-Ordners "
+"%3$s gefunden."
 
 #. *
 #. * The specified email address %1$s is not covered by allowed email address aliases
@@ -8875,8 +8883,8 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:363
 msgid ""
-"Checking default folders on server %1$s for user %2$s (%3$s) in context on %4"
-"$s failed: %5$s"
+"Checking default folders on server %1$s for user %2$s (%3$s) in context on "
+"%4$s failed: %5$s"
 msgstr ""
 "Prüfen der Standardordner auf dem Server %1$s für Benutzer %2$s (%3$s) im "
 "Kontext auf %4$s fehlgeschlagen: %5$s"
@@ -8936,8 +8944,8 @@ msgstr "Ein Ordner namens %1$s ist bereits vorhanden."
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:398
 msgid ""
-"A folder named %1$s already exists on server %2$s with login %3$s (user=%4"
-"$s, context=%5$s)."
+"A folder named %1$s already exists on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)."
 msgstr ""
 "Eine Verzeichnis namens %1$s ist bereits vorhanden auf dem Server %2$s mit "
 "dem Login %3$s (Benutzer=%4$s, Kontext=%5$s)."
@@ -8947,11 +8955,11 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:408
 msgid ""
-"No create access on mail folder %1$s on server %2$s with login %3$s (user=%4"
-"$s, context=%5$s)."
+"No create access on mail folder %1$s on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)."
 msgstr ""
-"Kein Anlegezugriff auf Mail-Ordner %1$s auf dem Server %2$s mit dem Login %3"
-"$s (Benutzer=%4$s, Kontext=%5$s)."
+"Kein Anlegezugriff auf Mail-Ordner %1$s auf dem Server %2$s mit dem Login "
+"%3$s (Benutzer=%4$s, Kontext=%5$s)."
 
 #. *
 #. * Mail account %1$s with ID %2$s does not support mail transport.
@@ -9112,8 +9120,8 @@ msgstr "Ungültiger Ordnername: \"%1$s\""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:513
 msgid ""
-"Mail folder cannot be created/renamed. Folder name exceeds max length of %1"
-"$s."
+"Mail folder cannot be created/renamed. Folder name exceeds max length of "
+"%1$s."
 msgstr ""
 "Der E-Mail-Ordner kann nicht angelegt oder umbenannt werden. Der Ordnername "
 "übersteigt die maximale Länge von %1$s."
@@ -9180,8 +9188,8 @@ msgid ""
 "%3$s, context=%4$s). Error message from mail server: %5$s"
 msgstr ""
 "Ungültige oder fehlende Login-Daten für den Zugriff auf den Mailserver %1$s. "
-"mit dem Login %2$s (Benutzer=%3$s, Kontext=%4$s).Fehlermeldung von Server: %5"
-"$s."
+"mit dem Login %2$s (Benutzer=%3$s, Kontext=%4$s).Fehlermeldung von Server: "
+"%5$s."
 
 #. *
 #. * Mail folder "%1$s" could not be found.
@@ -9223,12 +9231,12 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:110
 msgid ""
-"Folder \"%1$s\" has been closed on mail server %2$s with login %3$s (user=%4"
-"$s, context=%5$s) .\n"
+"Folder \"%1$s\" has been closed on mail server %2$s with login %3$s (user="
+"%4$s, context=%5$s) .\n"
 "Probably your request took too long."
 msgstr ""
-"Ordner \"%1$s\" wurde auf dem Mailserver %2$s mit dem Login %3$s (Benutzer=%4"
-"$s, Kontext=%5$s) geschlossen.\n"
+"Ordner \"%1$s\" wurde auf dem Mailserver %2$s mit dem Login %3$s (Benutzer="
+"%4$s, Kontext=%5$s) geschlossen.\n"
 "Wahrscheinlich dauerte die Anfrage zu lang."
 
 #. *
@@ -9342,8 +9350,8 @@ msgstr "Verbindung zur Datenbank kann nicht hergestellt werden."
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:197
 msgid ""
-"Connection closed to mail server %1$s with login %2$s (user=%3$s, context=%4"
-"$s)."
+"Connection closed to mail server %1$s with login %2$s (user=%3$s, context="
+"%4$s)."
 msgstr ""
 "Verbindung zum Mailserver %1$s mit Login %2$s geschlossen (Benutzer=%3$s, "
 "Kontext=%4$s)"
@@ -9452,8 +9460,8 @@ msgstr "Ein Befehl an den Mailserver ist fehlgeschlagen. Server-Antwort: %1$s."
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:274
 msgid ""
-"A command failed on mail server %1$s with login %2$s (user=%3$s, context=%4"
-"$s). Server response: %5$s"
+"A command failed on mail server %1$s with login %2$s (user=%3$s, context="
+"%4$s). Server response: %5$s"
 msgstr ""
 "Befehl auf Mailserver %1$s mit Login %2$s fehlgeschlagen (Benutzer=%3$s, "
 "Kontext=%4$s). Server-Antwort: %5$s"
@@ -9489,8 +9497,8 @@ msgstr "Fehler im Mailserver-Protokoll. Fehlermeldung: %1$s"
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:294
 msgid ""
-"Error in protocol to mail server %1$s with login %2$s (user=%3$s, context=%4"
-"$s). Error message: %5$s"
+"Error in protocol to mail server %1$s with login %2$s (user=%3$s, context="
+"%4$s). Error message: %5$s"
 msgstr ""
 "Fehler im Protokoll an Mailserver %1$s mit Login %2$s (Benutzer=%3$s, "
 "Kontext=%4$s). Fehlermeldung: %5$s"
@@ -9533,8 +9541,9 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:320
 msgid ""
-"Wrong or missing login data to access mail transport server %1$s with login %"
-"2$s (user=%3$s, context=%4$s). Error message from mail transport server: %5$s"
+"Wrong or missing login data to access mail transport server %1$s with login "
+"%2$s (user=%3$s, context=%4$s). Error message from mail transport server: "
+"%5$s"
 msgstr ""
 "Ungültige oder fehlende Login-Daten für den Zugriff auf den Mail Transport "
 "Server %1$s. mit dem Login %2$s (Benutzer=%3$s, Kontext=%4$s).Fehlermeldung "
@@ -9611,8 +9620,8 @@ msgstr ""
 #. Found two mail accounts with same identifier %1$s for user %2$s in context %3$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:68
 msgid ""
-"Found two mail accounts with same identifier %1$s for user %2$s in context %3"
-"$s."
+"Found two mail accounts with same identifier %1$s for user %2$s in context "
+"%3$s."
 msgstr ""
 "Zwei E-Mail-Accounts mit gleicher ID %1$s für Benutzer %2$s im Kontext %3$d "
 "gefunden"
@@ -10066,11 +10075,11 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:159
 msgid ""
-"Parent folder %1$s does not allow folder's module setting (%2$s) in context %"
-"3$s"
+"Parent folder %1$s does not allow folder's module setting (%2$s) in context "
+"%3$s"
 msgstr ""
-"Übergeordneter Ordner %1$s erlaubt im Kontext %3$s keine Moduleinstellung (%2"
-"$s) für den Ordner"
+"Übergeordneter Ordner %1$s erlaubt im Kontext %3$s keine Moduleinstellung "
+"(%2$s) für den Ordner"
 
 #. *
 #. * Only one admin CATEGORY_PERMISSION_DENIED is allowed on a private folder
@@ -10247,11 +10256,11 @@ msgstr "Ziel- und Quellordner dürfen im Kontext %1$s nicht identisch sein"
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:264
 msgid ""
-"User %1$s is not allowed to move all subfolders of folder %2$s in context %3"
-"$s"
+"User %1$s is not allowed to move all subfolders of folder %2$s in context "
+"%3$s"
 msgstr ""
-"Der Benutzer %1$s darf nicht alle Unterordner des Ordners %2$s im Kontext %3"
-"$s verschieben."
+"Der Benutzer %1$s darf nicht alle Unterordner des Ordners %2$s im Kontext "
+"%3$s verschieben."
 
 #. *
 #. * User %1$s is not allowed to delete shared folder %2$s in context %3$s
@@ -10274,8 +10283,8 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:278
 msgid "User %1$s is not allowed to delete default folder %2$s in context %3$s"
 msgstr ""
-"Der Benutzer %1$s ist nicht berechtigt, den Standardordner %2$s im Kontext %3"
-"$s zu löschen."
+"Der Benutzer %1$s ist nicht berechtigt, den Standardordner %2$s im Kontext "
+"%3$s zu löschen."
 
 #. *
 #. * User %1$s is not allowed to delete all contained objects in folder %2$s in context %3$s
@@ -10433,8 +10442,8 @@ msgid ""
 "A source folder of module %1$s must not be moved to a target folder of "
 "module %2$s"
 msgstr ""
-"Ein Quellordner des Moduls %1$s darf nicht in einen Zielordner des Moduls %2"
-"$s verschoben werden."
+"Ein Quellordner des Moduls %1$s darf nicht in einen Zielordner des Moduls "
+"%2$s verschoben werden."
 
 #. *
 #. * Operation not executable on folder %1$s in context %2$s
@@ -10576,8 +10585,8 @@ msgid ""
 "Only the owner of parental shared folder %4$s can be the folder admin."
 msgstr ""
 "Der Benutzer %1$s vergibt ungültige Rechte auf freigegebenen Ordner %2$s im "
-"Kontext %3$s. Nur der Eigentümer des übergeordneten freigegebenen Ordners %4"
-"$s kann der Admin des Ordners sein."
+"Kontext %3$s. Nur der Eigentümer des übergeordneten freigegebenen Ordners "
+"%4$s kann der Admin des Ordners sein."
 
 #. *
 #. * Owner %1$s of default folder %2$s must keep the folder admin permission
@@ -10634,8 +10643,8 @@ msgid ""
 "An infostore folder named %1$s already exists below folder %2$s (%3$s) in "
 "context %4$s. Please choose another display name."
 msgstr ""
-"Es existiert bereits ein Infostore-Ordner namens %1$s unterhalb des Ordners %"
-"2$s (%3$s) im Kontext %4$s. Bitte wählen Sie einen anderen Anzeigenamen."
+"Es existiert bereits ein Infostore-Ordner namens %1$s unterhalb des Ordners "
+"%2$s (%3$s) im Kontext %4$s. Bitte wählen Sie einen anderen Anzeigenamen."
 
 #. *
 #. * Folder contains invalid data: "%1$s"
@@ -10694,8 +10703,8 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:499
 msgid ""
-"Only the folder visibility permission is allowed to be changed for folder %1"
-"$s in context %2$s."
+"Only the folder visibility permission is allowed to be changed for folder "
+"%1$s in context %2$s."
 msgstr ""
 "Für den Ordner %1$s im Kontext %2$s ist nur die Berechtigung Sichtbarer "
 "Ordner erlaubt."
@@ -10777,62 +10786,68 @@ msgstr ""
 msgid "Unknown AJAX action: %s."
 msgstr "Unbekannte AJAX-Aktion: %s."
 
-#. Missing the following request parameter: %s
+#. Unknown AJAX action %1$s in module %2$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:73
+#, fuzzy
+msgid "Unknown AJAX action %1$s in module %2$s."
+msgstr "Unbekannte AJAX-Aktion: %s."
+
+#. Missing the following request parameter: %s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:76
 msgid "Missing the following request parameter: %s"
 msgstr "Folgende Anfrageparameter fehlen: %s"
 
 #. Missing upload image.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:76
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:79
 msgid "Missing upload image."
 msgstr "Upload-Bild fehlt"
 
 #. Invalid parameter: %s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:79
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:82
 msgid "Invalid parameter: %s"
 msgstr "Ungültiger Parameter: %s"
 
 #. I/O error while writing to Writer object: %s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:82
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:85
 msgid "I/O error while writing to Writer object: %s"
 msgstr "E/A-Fehler beim Schreiben in Writer Objekt: %s"
 
 #. Missing AJAX request handler for module %s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:85
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:88
 msgid "Missing AJAX request handler for module %s"
 msgstr "Fehlender AJAX Request Handler für das Modul %s"
 
 #. Unknown module: %s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:88
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:91
 msgid "Unknown module: %s."
 msgstr "Unbekanntes Modul: %s"
 
 #. A harmful attachment was detected.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:91
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:94
 msgid "A harmful attachment was detected."
 msgstr "Schädlicher Anhang entdeckt"
 
 #. JSON error: %s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:94
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:97
 msgid "JSON error: %s"
 msgstr "JSON-Fehler: %s"
 
 #. Invalid parameter "%1$s": %2$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:97
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:100
 msgid "Invalid parameter \"%1$s\": %2$s"
 msgstr "Ungültiger Parameter \"%1$s\": %2$s"
 
 #. A parameter conflict occurred.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:103
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:106
 msgid "A parameter conflict occurred."
 msgstr "Es trat ein Parameterkonflikt auf."
 
 #. Parameter "%1$s" conflicts with parameter "%2$s".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:106
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:109
 msgid "Parameter \"%1$s\" conflicts with parameter \"%2$s\"."
 msgstr "Konflikt zwischen Parameter \"%1$s\" und Parameter \"%2$s\"."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:110
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:113
 msgid ""
 "Action \"%1$s\" on request path \"%2$s\" is not permitted via a non-secure "
 "connection."
@@ -10841,29 +10856,29 @@ msgstr ""
 "nicht erlaubt. "
 
 #. The action "%1$s" is disabled due to server configuration
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:113
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:116
 msgid "The action \"%1$s\" is disabled due to server configuration"
 msgstr ""
 "Die Aktion \"%1$s\" wurde aufgrund der Serverkonfiguration deaktiviert."
 
 #. Object has been changed in the meantime.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:119
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:122
 msgid "Object has been changed in the meantime."
 msgstr "Das Objekt hat sich mittlerweile geändert."
 
 #. Unexpected result. Expected "%1$s", but is "%2$s".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:122
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:125
 msgid "Unexpected result. Expected \"%1$s\", but is \"%2$s\"."
 msgstr ""
 "Unerwartetes Ergebnis. Erwartet wurde \"%1$s\", Ergebnis war jedoch \"%2$s\"."
 
 #. Too many concurrent requests. Please try again later.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:125
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:128
 msgid "Too many concurrent requests. Please try again later."
 msgstr "Zu viele gleichzeitige Anfragen. Bitte später erneut versuchen."
 
 #. Bad request. The server is unable to handle the request.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:128
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:131
 msgid "Bad request. The server is unable to handle the request."
 msgstr "Ungültige Anfrage. Der Server kann die Anfrage nicht bearbeiten."
 
@@ -10992,8 +11007,8 @@ msgstr "Leere Passwörter sind nicht zulässig."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/webdav/WebdavExceptionMessage.java:111
 msgid "Unsupported authorization mechanism in \"Authorization\" header: %1$s."
 msgstr ""
-"Nicht unterstützter Autorisierungsmechanismus in \"Authorization\" Header: %1"
-"$s."
+"Nicht unterstützter Autorisierungsmechanismus in \"Authorization\" Header: "
+"%1$s."
 
 #. *
 #. * Resolving user name "%1$s" failed.
@@ -11205,8 +11220,7 @@ msgid ""
 "address and try again."
 msgstr ""
 "Folgender Empfänger ist nicht zulässig: %1$s. Bitte entfernen Sie die "
-"zugehörige "
-"Adresse und versuchen Sie es erneut."
+"zugehörige Adresse und versuchen Sie es erneut."
 
 #. Could not find Apache Solr Core entry for user %1$s and module %2$s in context %3$s.
 #. Apache Solr Core" is a proper name, no translation applicable
@@ -13934,8 +13948,8 @@ msgstr "Zulu"
 #~ "(Benutzer=%4$s, Kontext=%5$s) gelöscht werden."
 
 #~ msgid ""
-#~ "Default folder %1$s must not be unsubscribed on server %2$s with login %3"
-#~ "$s (user=%4$s, context=%5$s)"
+#~ "Default folder %1$s must not be unsubscribed on server %2$s with login "
+#~ "%3$s (user=%4$s, context=%5$s)"
 #~ msgstr ""
 #~ "Das Abonnement für den Standardordner %1$s kann auf dem Server %2$s mit "
 #~ "dem Login %3$s (Benutzer=%4$s, Kontext=%5$s) nicht gelöscht werden."
@@ -13955,8 +13969,8 @@ msgstr "Zulu"
 #~ "Deletion of folder %1$s failed on server %2$s with login %3$s (user=%4$s, "
 #~ "context=%5$s)"
 #~ msgstr ""
-#~ "Das Löschen des Ordners %1$s auf dem %2$s mit dem Login %3$s (Benutzer=%4"
-#~ "$s, Kontext=%5$s) ist fehlgeschlagen."
+#~ "Das Löschen des Ordners %1$s auf dem %2$s mit dem Login %3$s (Benutzer="
+#~ "%4$s, Kontext=%5$s) ist fehlgeschlagen."
 
 #~ msgid "Empty SEND_BODY_CHUNK package MUST NOT be sent"
 #~ msgstr "Leeres SEND_BODY_CHUNK-Paket DARF NICHT gesendet werden"
@@ -14025,8 +14039,8 @@ msgstr "Zulu"
 #~ "Login %2$s (user=%3$s, context=%4$s) fehlgeschlagen"
 
 #~ msgid ""
-#~ "IMAP default folder %1$s could not be created on server %2$s with login %3"
-#~ "$s (user=%4$s, context=%5$s)"
+#~ "IMAP default folder %1$s could not be created on server %2$s with login "
+#~ "%3$s (user=%4$s, context=%5$s)"
 #~ msgstr ""
 #~ "Der IMAP-Standardordner \"%1$s\" konnte nicht auf dem Server %2$s mit dem "
 #~ "Login %3$s (Benutzer=%4$s, Kontext=%5$s) angelegt werden."
@@ -14043,9 +14057,9 @@ msgstr "Zulu"
 #~ "IMAP sort failed due to reason \"%1$s\" on server %2$s with login %3$s "
 #~ "(user=%4$s, context=%5$s). Switching to application-based sorting."
 #~ msgstr ""
-#~ "IMAP-Sortierung ist aufgrund \"%1$s\" auf dem Server %2$s mit dem Login %3"
-#~ "$s (Benutzer=%4$s, Kontext=%5$s) fehlgeschlagen. Es wird auf Applikations-"
-#~ "basierte  Sortierung umgeschaltet."
+#~ "IMAP-Sortierung ist aufgrund \"%1$s\" auf dem Server %2$s mit dem Login "
+#~ "%3$s (Benutzer=%4$s, Kontext=%5$s) fehlgeschlagen. Es wird auf "
+#~ "Applikations-basierte  Sortierung umgeschaltet."
 
 #~ msgid "Identifier of the object is missing."
 #~ msgstr "Fehlende Objekt-ID"
@@ -14079,8 +14093,8 @@ msgstr "Zulu"
 #~ "oder aufgrund eines ungültigen Ordner-Namens)"
 
 #~ msgid ""
-#~ "Mail folder %1$s must not be moved to subsequent folder %2$s on server %3"
-#~ "$s with login %4$s (user=%5$s, context=%6$s)"
+#~ "Mail folder %1$s must not be moved to subsequent folder %2$s on server "
+#~ "%3$s with login %4$s (user=%5$s, context=%6$s)"
 #~ msgstr ""
 #~ "Der E-Mail-Ordner \"%1$s\" darf auf dem Server %3$s mit dem Login %4$s "
 #~ "(Benutzer=%5$s, Kontext=%6$s) nicht in den nachfolgenden Ordner %2$s "
@@ -14100,8 +14114,8 @@ msgstr "Zulu"
 #~ "Message could not be moved to trash folder on server %1$s with login %2$s "
 #~ "(user=%3$s, context=%4$s)"
 #~ msgstr ""
-#~ "Die Nachricht konnte auf dem Server %1$s mit dem Login %2$s (Benutzer=%3"
-#~ "$s, Kontext=%4$s) nicht in den Papierkorb verschoben werden."
+#~ "Die Nachricht konnte auf dem Server %1$s mit dem Login %2$s (Benutzer="
+#~ "%3$s, Kontext=%4$s) nicht in den Papierkorb verschoben werden."
 
 #~ msgid ""
 #~ "Message has been successfully sent, but a copy could not be placed in "
@@ -14190,8 +14204,8 @@ msgstr "Zulu"
 
 #~ msgid ""
 #~ "No data provided from web server: input stream returned \"-1\" while "
-#~ "reading AJP magic bytes in package #%1$d. Wait for input data took %2"
-#~ "$dmsec."
+#~ "reading AJP magic bytes in package #%1$d. Wait for input data took "
+#~ "%2$dmsec."
 #~ msgstr ""
 #~ "Keine Daten vom Web-Server bereitgestellt: Eingabe-Stream gab beim Lesen "
 #~ "von AJP magic bytes im Paket #%1$d \"-1\" zurück. Warten auf Eingabedaten "
@@ -14230,8 +14244,8 @@ msgstr "Zulu"
 #~ "mit dem Login %3$s (Benutzer=%4$s, Kontext=%5$s)."
 
 #~ msgid ""
-#~ "No read access to mail folder %1$s on server %2$s with login %3$s (user=%4"
-#~ "$s, context=%5$s)"
+#~ "No read access to mail folder %1$s on server %2$s with login %3$s (user="
+#~ "%4$s, context=%5$s)"
 #~ msgstr ""
 #~ "Kein Lesezugriff auf den E-Mail-Ordner %1$s auf dem Server %2$s mit dem "
 #~ "Login %3$s (Benutzer=%4$s, Kontext=%5$s)."
@@ -14243,8 +14257,8 @@ msgstr "Zulu"
 #~ "No rename access to mail folder %1$s on server %2$s with login %3$s (user="
 #~ "%4$s, context=%5$s)"
 #~ msgstr ""
-#~ "Keine Berechtigung zum Umbenennen des E-Mail-Ordners %1$s auf dem Server %"
-#~ "2$s mit dem Login %3$s (Benutzer=%4$s, Kontext=%5$s)."
+#~ "Keine Berechtigung zum Umbenennen des E-Mail-Ordners %1$s auf dem Server "
+#~ "%2$s mit dem Login %3$s (Benutzer=%4$s, Kontext=%5$s)."
 
 #~ msgid ""
 #~ "No servlet class name found for key \"%s\". Please check servlet mappings."
@@ -14253,15 +14267,15 @@ msgstr "Zulu"
 #~ "Servlet Mappings."
 
 #~ msgid ""
-#~ "No support of capability \"THREAD=REFERENCES\" on server %2$s with login %"
-#~ "3$s (user=%4$s, context=%5$s)"
+#~ "No support of capability \"THREAD=REFERENCES\" on server %2$s with login "
+#~ "%3$s (user=%4$s, context=%5$s)"
 #~ msgstr ""
 #~ "Thread-Ansicht auf dem Server %2$s mit dem Login %3$s (Benutzer=%4$s, "
 #~ "Kontext=%5$s) wird nicht unterstützt."
 
 #~ msgid ""
-#~ "No write access to IMAP folder %1$s on server %2$s with login %3$s (user=%"
-#~ "4$s, context=%5$s)"
+#~ "No write access to IMAP folder %1$s on server %2$s with login %3$s (user="
+#~ "%4$s, context=%5$s)"
 #~ msgstr ""
 #~ "Kein Schreibzugriff auf den IMAP-Ordner %1$s auf dem Server %2$s mit dem "
 #~ "Login %3$s (Benutzer=%4$s, Kontext=%5$s)."
@@ -14274,8 +14288,8 @@ msgstr "Zulu"
 #~ "mit dem Login %3$s (Benutzer=%4$s, Kontext=%5$s) nicht geöffnet werden. "
 
 #~ msgid ""
-#~ "Rename of folder \"%1$s\" to \"%2$s\" failed on server %3$s with login %4"
-#~ "$s (user=%5$s, context=%6$s)."
+#~ "Rename of folder \"%1$s\" to \"%2$s\" failed on server %3$s with login "
+#~ "%4$s (user=%5$s, context=%6$s)."
 #~ msgstr ""
 #~ "Umbenennen des Ordners \"%1$s\" nach \"%2$s\" ist auf dem Server %3$s mit "
 #~ "dem Login %4$s (Benutzer=%5$s, Kontext=%6$s) fehlgeschlagen."
@@ -14300,11 +14314,11 @@ msgstr "Zulu"
 #~ "%s"
 
 #~ msgid ""
-#~ "Socket closed by web server. Wait for input data of package #%1$d took %2"
-#~ "$dmsec."
+#~ "Socket closed by web server. Wait for input data of package #%1$d took "
+#~ "%2$dmsec."
 #~ msgstr ""
-#~ "Socket durch Webserver geschlossen. Warten auf Eingabedaten des Pakets #%1"
-#~ "$d dauerte %2$dmsec."
+#~ "Socket durch Webserver geschlossen. Warten auf Eingabedaten des Pakets #"
+#~ "%1$d dauerte %2$dmsec."
 
 #~ msgid ""
 #~ "Sort field %1$s is not supported via IMAP SORT command on server %2$s "
@@ -14328,8 +14342,8 @@ msgstr "Zulu"
 #~ "Aufgrund fehlender Admin-Berechtigungen in den ursprünglichen "
 #~ "Berechtigungen vom IMAP-Server konnten die erstellten Berechtigungen "
 #~ "nicht auf den neuen Ordner %1$s angewendet werden. Jedoch wurde der "
-#~ "Ordner auf dem Server %2$s mit dem Login %3$s (Benutzer=%4$s, Kontext=%5"
-#~ "$s) angelegt."
+#~ "Ordner auf dem Server %2$s mit dem Login %3$s (Benutzer=%4$s, Kontext="
+#~ "%5$s) angelegt."
 
 #~ msgid ""
 #~ "The raw content's input stream of message %1$s in folder %2$s cannot be "
@@ -14343,13 +14357,13 @@ msgstr "Zulu"
 #~ msgstr "Analyse des IMAP-Server-URI \"%1$s\" fehlgeschlagen."
 
 #~ msgid ""
-#~ "Unexpected empty body package received from web server. Total-Received: %1"
-#~ "$d | Content-Length: %2$d.\n"
+#~ "Unexpected empty body package received from web server. Total-Received: "
+#~ "%1$d | Content-Length: %2$d.\n"
 #~ "Corresponding AJP forward package:\n"
 #~ "%3$s"
 #~ msgstr ""
-#~ "Unerwartetes leeres body-Paket vom Webserver erhalten. Total-Received: %1"
-#~ "$d | Content-Length: %2$d.\n"
+#~ "Unerwartetes leeres body-Paket vom Webserver erhalten. Total-Received: "
+#~ "%1$d | Content-Length: %2$d.\n"
 #~ "Zugehöriges AJP Weiterleitungspaket:\n"
 #~ "%3$s"
 

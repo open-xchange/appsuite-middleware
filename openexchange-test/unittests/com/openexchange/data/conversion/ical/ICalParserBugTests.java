@@ -91,7 +91,7 @@ public class ICalParserBugTests extends AbstractICalParserTest {
         "CLASS"    ,    "PRIVATE",
         "ATTENDEE" ,     "MAILTO:mickey@disney.invalid");
 
-        assertWarningWhenParsingAppointment(icalText, "Private Appointments can not have attendees. Removing attendees and accepting appointment anyway.");
+        assertWarningWhenParsingAppointment(icalText, "Private appointments can not have attendees. Removing attendees and accepting appointment anyway.");
 
         final Appointment appointment = parseAppointment(icalText);
 
