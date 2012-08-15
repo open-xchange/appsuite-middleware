@@ -75,7 +75,7 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
     /**
      * The logger.
      */
-    protected static final Log LOG = LogFactory.getLog(RequestWatcherServiceImpl.class);
+    protected static final Log LOG = com.openexchange.log.Log.loggerFor(RequestWatcherServiceImpl.class);
 
      //Navigable set, entries ordered by age(youngest first), weakly consistent iterator
     private final ConcurrentSkipListSet<RequestRegistryEntry> requestRegistry;

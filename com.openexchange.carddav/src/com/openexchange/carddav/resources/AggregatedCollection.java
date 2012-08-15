@@ -70,7 +70,7 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
  */
 public class AggregatedCollection extends CardDAVCollection {
 
-    private static final Log LOG = LogFactory.getLog(AggregatedCollection.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(AggregatedCollection.class);
     
     private String displayName = null;
 

@@ -88,7 +88,7 @@ import com.openexchange.timer.TimerService;
  */
 public class AppointmentNotificationPool implements
 		AppointmentNotificationPoolService, Runnable {
-	private static final Log LOG = LogFactory.getLog(AppointmentNotificationPool.class);
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(AppointmentNotificationPool.class);
 	
 	// TODO: Keep shared folder owner, if possible
 	

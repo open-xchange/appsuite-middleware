@@ -30,7 +30,7 @@ import com.openexchange.spamhandler.spamassassin.api.SpamdService;
 public class ParallelsSpamdService implements SpamdService {
 
     private static final ParallelsSpamdService singleton = new ParallelsSpamdService();
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ParallelsSpamdService.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(ParallelsSpamdService.class);
     private static final String POA_SPAM_PROVIDER_ATTRIBUTE_NAME = "POA_SPAM_PROVIDER";
 
     /**

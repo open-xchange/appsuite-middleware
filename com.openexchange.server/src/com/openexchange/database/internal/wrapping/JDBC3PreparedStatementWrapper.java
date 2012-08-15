@@ -78,7 +78,7 @@ public abstract class JDBC3PreparedStatementWrapper extends JDBC3StatementWrappe
 
     private final PreparedStatement delegate;
 
-    private static final Log LOG = LogFactory.getLog(JDBC3PreparedStatementWrapper.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(JDBC3PreparedStatementWrapper.class);
 
     /**
      * Initializes a new {@link JDBC3PreparedStatementWrapper}.

@@ -98,7 +98,7 @@ import com.openexchange.webdav.protocol.helpers.PropertyMixin;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class WebdavPrincipalPerformer implements SessionHolder{
-    private static final Log LOG = LogFactory.getLog(WebdavPrincipalPerformer.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(WebdavPrincipalPerformer.class);
 
     private static WebdavPrincipalPerformer INSTANCE = null;
 

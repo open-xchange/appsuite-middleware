@@ -91,7 +91,7 @@ public abstract class AbstractITipAction implements AJAXActionService{
 
     private static final String OWNER = "com.openexchange.conversion.owner";
 
-    protected static final Log LOG = LogFactory.getLog(AbstractITipAction.class);
+    protected static final Log LOG = com.openexchange.log.Log.loggerFor(AbstractITipAction.class);
 
     protected ServiceLookup services;
 

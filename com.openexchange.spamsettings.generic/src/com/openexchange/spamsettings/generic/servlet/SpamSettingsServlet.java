@@ -29,7 +29,7 @@ public final class SpamSettingsServlet extends PermissionServlet {
      */
     private static final long serialVersionUID = 2124511440962531967L;
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(SpamSettingsServlet.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(SpamSettingsServlet.class);
 
     /**
      * Initializes

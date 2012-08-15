@@ -62,7 +62,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public class TokenUtils {
 	
-	private static final Log log = LogFactory.getLog(TokenUtils.class);
+	private static final Log log = com.openexchange.log.Log.loggerFor(TokenUtils.class);
 	
 	/**
 	 * Method for calculating unique tokens for each node

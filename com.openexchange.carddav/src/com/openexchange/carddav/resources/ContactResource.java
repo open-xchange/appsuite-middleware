@@ -88,7 +88,7 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
  */
 public class ContactResource extends CardDAVResource {
 
-    private static final Log LOG = LogFactory.getLog(ContactResource.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ContactResource.class);
 	private static final OXContainerConverter CONVERTER = new OXContainerConverter((TimeZone) null, (String) null);
 	private static final int MAX_RETRIES = 3;
     

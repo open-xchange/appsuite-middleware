@@ -90,7 +90,7 @@ import com.openexchange.loxandra.impl.cassandra.CassandraEAVContactFactoryServic
  */
 public class TransactionManager {
 	
-	private static final Log log = LogFactory.getLog(TransactionManager.class);
+	private static final Log log = com.openexchange.log.Log.loggerFor(TransactionManager.class);
 	
 	private static Map<String, Queue<Transaction>> queue;
 	

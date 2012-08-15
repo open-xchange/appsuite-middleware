@@ -16,7 +16,7 @@ import com.openexchange.spamsettings.generic.servlet.SpamSettingsServlet;
  */
 public class SpamSettingsServletRegisterer {
 
-    private static final Log LOG = LogFactory.getLog(SpamSettingsServletRegisterer.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(SpamSettingsServletRegisterer.class);
 
     /**
      * The {@link DefaultDeferringURLService} reference.

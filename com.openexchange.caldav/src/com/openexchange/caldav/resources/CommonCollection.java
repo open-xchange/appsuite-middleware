@@ -72,7 +72,7 @@ import com.openexchange.webdav.protocol.helpers.AbstractResource;
  */
 public abstract class CommonCollection extends AbstractCollection {
     
-    protected static Log LOG = LogFactory.getLog(CommonCollection.class);
+    protected static Log LOG = com.openexchange.log.Log.loggerFor(CommonCollection.class);
     
     private final WebdavFactory factory;
     private final WebdavPath url;

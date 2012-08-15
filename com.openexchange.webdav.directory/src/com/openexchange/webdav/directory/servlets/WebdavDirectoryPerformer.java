@@ -95,7 +95,7 @@ import com.openexchange.webdav.protocol.helpers.PropertyMixin;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class WebdavDirectoryPerformer implements SessionHolder {
-    private static final Log LOG = LogFactory.getLog(WebdavDirectoryPerformer.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(WebdavDirectoryPerformer.class);
 
     private static WebdavDirectoryPerformer INSTANCE = null;
 

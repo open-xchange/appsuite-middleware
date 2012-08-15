@@ -73,7 +73,7 @@ import com.openexchange.user.copy.internal.context.ContextLoadTask;
  */
 public class ConnectionFetcherTask implements CopyUserTaskService {
 
-    private static final Log LOG = LogFactory.getLog(ConnectionFetcherTask.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ConnectionFetcherTask.class);
 
     private final DatabaseService service;
 

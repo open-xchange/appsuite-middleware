@@ -56,7 +56,7 @@ package com.anwrt.ooserver.daemon;
  */
 public final class LoggerCommonsImpl extends Logger {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(LoggerCommonsImpl.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(LoggerCommonsImpl.class);
 
     private static final LoggerCommonsImpl INSTANCE = new LoggerCommonsImpl();
 

@@ -64,7 +64,7 @@ import com.openexchange.exception.OXException;
  */
 public class ServletRegisterer {
 
-    private static final Log LOG = LogFactory.getLog(ServletRegisterer.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ServletRegisterer.class);
 
     /**
      * The {@link DefaultDeferringURLService} reference.

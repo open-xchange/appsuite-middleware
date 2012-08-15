@@ -77,7 +77,7 @@ public class BackendRouteFilter implements Filter {
 
     private static final String JSESSIONID_COOKIE="JSESSIONID";
     private static final String JSESSIONID_URL_PARAMETER="jsessionid";
-    private static final Log LOG = LogFactory.getLog(BackendRouteFilter.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(BackendRouteFilter.class);
     private String backendRoute="";
     
     /**

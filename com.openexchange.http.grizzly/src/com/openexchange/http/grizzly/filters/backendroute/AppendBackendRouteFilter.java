@@ -71,7 +71,7 @@ import org.glassfish.grizzly.memory.ByteBufferWrapper;
  */
 public class AppendBackendRouteFilter extends BaseFilter {
 
-    private static final Log LOG = LogFactory.getLog(AppendBackendRouteFilter.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(AppendBackendRouteFilter.class);
     private String backendRoute;
     
     /**

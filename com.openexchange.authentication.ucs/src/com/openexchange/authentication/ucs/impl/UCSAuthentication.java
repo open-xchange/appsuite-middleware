@@ -45,7 +45,7 @@ import com.openexchange.exception.OXException;
  */
 public class UCSAuthentication implements AuthenticationService {
 
-    private static final Log LOG = LogFactory.getLog(UCSAuthentication.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(UCSAuthentication.class);
     private static Properties props;
 
     private static Hashtable<String, String> LDAP_CONFIG = null;

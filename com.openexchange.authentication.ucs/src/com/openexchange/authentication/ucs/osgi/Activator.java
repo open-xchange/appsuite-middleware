@@ -12,7 +12,7 @@ import com.openexchange.authentication.ucs.impl.UCSAuthentication;
 
 public class Activator implements BundleActivator {
 
-    private static transient final Log LOG = LogFactory.getLog(Activator.class);
+    private static transient final Log LOG = com.openexchange.log.Log.loggerFor(Activator.class);
 
     /**
      * Reference to the service registration.

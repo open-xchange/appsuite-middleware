@@ -66,7 +66,7 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
  */
 public class SyncToken extends SingleXMLPropertyMixin {
 
-    private static final Log LOG = LogFactory.getLog(SyncToken.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(SyncToken.class);
 
     private String value = null;
     private final CommonCollection collection;

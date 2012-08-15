@@ -70,7 +70,7 @@ import com.openexchange.http.grizzly.util.FilterChainUtils;
  */
 public class GrizzlOXAddOn implements AddOn {
 
-    private static final Log LOG = LogFactory.getLog(GrizzlOXAddOn.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(GrizzlOXAddOn.class);
 
     private final List<Filter> filters = new ArrayList<Filter>();
 

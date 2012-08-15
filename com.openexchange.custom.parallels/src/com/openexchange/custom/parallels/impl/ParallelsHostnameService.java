@@ -24,7 +24,7 @@ import com.openexchange.groupware.notify.hostname.HostnameService;
  */
 public final class ParallelsHostnameService implements HostnameService {
 
-    private static final Log LOG = LogFactory.getLog(ParallelsHostnameService.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ParallelsHostnameService.class);
 
     @Override
     public String getHostname(final int userId, final int contextId) {

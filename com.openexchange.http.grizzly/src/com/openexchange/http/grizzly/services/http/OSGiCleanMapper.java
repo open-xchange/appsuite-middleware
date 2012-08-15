@@ -70,7 +70,7 @@ import org.glassfish.grizzly.http.server.HttpHandler;
  */
 class OSGiCleanMapper {
 
-    private static final Log LOG = LogFactory.getLog(OSGiCleanMapper.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(OSGiCleanMapper.class);
     private static final ReentrantLock lock = new ReentrantLock();
     private static final TreeSet<String> aliasTree = new TreeSet<String>();
     private static final Map<String, HttpHandler> registrations = new HashMap<String, HttpHandler>(16);

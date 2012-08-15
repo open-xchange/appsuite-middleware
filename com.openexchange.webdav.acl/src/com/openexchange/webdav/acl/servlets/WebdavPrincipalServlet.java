@@ -73,7 +73,7 @@ import com.openexchange.webdav.acl.servlets.WebdavPrincipalPerformer.Action;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class WebdavPrincipalServlet extends OXServlet {
-    private static final transient Log LOG = LogFactory.getLog(WebdavPrincipalServlet.class);
+    private static final transient Log LOG = com.openexchange.log.Log.loggerFor(WebdavPrincipalServlet.class);
 
     @Override
     protected Interface getInterface() {

@@ -81,7 +81,7 @@ public class CardDAV extends OXServlet {
 
 	private static final long serialVersionUID = -6381396333467867154L;
 
-	private static final transient Log LOG = LogFactory.getLog(CardDAV.class);
+	private static final transient Log LOG = com.openexchange.log.Log.loggerFor(CardDAV.class);
     
     private static ServiceLookup services;
     

@@ -106,7 +106,7 @@ import com.openexchange.webdav.protocol.helpers.PropertyMixin;
  */
 public class CarddavPerformer implements SessionHolder {
 
-    private static final Log LOG = LogFactory.getLog(CarddavPerformer.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(CarddavPerformer.class);
 
     private static CarddavPerformer INSTANCE = null;
 

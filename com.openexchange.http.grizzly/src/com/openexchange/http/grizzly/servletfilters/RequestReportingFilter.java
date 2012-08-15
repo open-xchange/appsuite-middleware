@@ -71,7 +71,7 @@ import com.openexchange.osgi.ServiceRegistry;
  */
 public class RequestReportingFilter implements Filter {
 
-    private static final Log LOG = LogFactory.getLog(RequestReportingFilter.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(RequestReportingFilter.class);
 
     // properties of long running eas requests
     private static final String EAS_URI = "/Microsoft-Server-ActiveSync";

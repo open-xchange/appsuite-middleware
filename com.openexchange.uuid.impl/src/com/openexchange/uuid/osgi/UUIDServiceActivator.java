@@ -62,7 +62,7 @@ import com.openexchange.uuid.impl.UUIDServiceImpl;
  */
 public class UUIDServiceActivator extends HousekeepingActivator {
 	
-	private static Log log = LogFactory.getLog(UUIDServiceActivator.class);
+	private static Log log = com.openexchange.log.Log.loggerFor(UUIDServiceActivator.class);
 
 	/*
 	 * (non-Javadoc)

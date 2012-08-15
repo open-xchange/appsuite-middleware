@@ -89,7 +89,7 @@ import com.openexchange.log.LogFactory;
  */
 public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
 
-    private static final Log LOG = LogFactory.getLog(OSGiMainHandler.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(OSGiMainHandler.class);
 
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 

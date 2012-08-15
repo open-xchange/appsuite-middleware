@@ -88,7 +88,7 @@ import com.openexchange.sessionstorage.nosql.exceptions.OXNoSQLSessionStorageExc
  */
 public class NoSQLSessionStorageService implements SessionStorageService {
 
-    private static final Log log = LogFactory.getLog(NoSQLSessionStorageService.class);
+    private static final Log log = com.openexchange.log.Log.loggerFor(NoSQLSessionStorageService.class);
 
     private final String HOST;
 

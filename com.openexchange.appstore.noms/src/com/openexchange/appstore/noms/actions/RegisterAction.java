@@ -12,13 +12,12 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.session.ServerSession;
 
 @DispatcherNotes(noSession=true)
 public class RegisterAction implements AJAXActionService {
 
-	private static final Log LOG = LogFactory.getLog(RegisterAction.class);
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(RegisterAction.class);
 	
 	private final JSONArray database;
 

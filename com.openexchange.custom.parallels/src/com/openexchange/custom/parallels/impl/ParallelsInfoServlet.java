@@ -42,7 +42,7 @@ public final class ParallelsInfoServlet extends PermissionServlet {
      */
     private static final long serialVersionUID = -6454818806420432111L;
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ParallelsInfoServlet.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(ParallelsInfoServlet.class);
 
 
 

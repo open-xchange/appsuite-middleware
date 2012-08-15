@@ -67,7 +67,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class WhiteboardSecretMigrator extends ServiceTracker<SecretMigrator, SecretMigrator> implements SecretMigrator {
 
-    private static final Log LOG = LogFactory.getLog(WhiteboardSecretMigrator.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(WhiteboardSecretMigrator.class);
 
     public WhiteboardSecretMigrator(final BundleContext context) {
         super(context, SecretMigrator.class, null);

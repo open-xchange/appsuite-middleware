@@ -70,7 +70,7 @@ import org.apache.commons.logging.Log;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class OSGiResourceHandler extends HttpHandler implements OSGiHandler {
-    private static final Log LOG = LogFactory.getLog(OSGiResourceHandler.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(OSGiResourceHandler.class);
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
     private final String alias;
     private final String prefix;

@@ -75,7 +75,7 @@ public final class MessagingSMSServlet extends PermissionServlet {
 
     private static final long serialVersionUID = 1541427953784271108L;
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MessagingSMSServlet.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(MessagingSMSServlet.class);
 
     public MessagingSMSServlet() {
         super();

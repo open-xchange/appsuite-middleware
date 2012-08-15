@@ -64,7 +64,7 @@ import freemarker.template.Template;
  */
 public class OXTemplateImpl implements OXTemplate{
 
-	private static final Log LOG = LogFactory.getLog(OXTemplateImpl.class);
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(OXTemplateImpl.class);
 	
     private Template template;
     private TemplateLevel level = TemplateLevel.USER;

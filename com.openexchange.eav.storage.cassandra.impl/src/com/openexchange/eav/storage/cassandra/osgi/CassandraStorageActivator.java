@@ -63,7 +63,7 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public class CassandraStorageActivator extends HousekeepingActivator {
 
-	private static Log log = LogFactory.getLog(CassandraStorageActivator.class);
+	private static Log log = com.openexchange.log.Log.loggerFor(CassandraStorageActivator.class);
 	
 	/*
 	 * (non-Javadoc)

@@ -109,7 +109,7 @@ import com.openexchange.webdav.protocol.helpers.PropertyMixin;
  */
 public class CaldavPerformer implements SessionHolder {
 
-    private static final Log LOG = LogFactory.getLog(CaldavPerformer.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(CaldavPerformer.class);
 
     private static CaldavPerformer INSTANCE = null;
 

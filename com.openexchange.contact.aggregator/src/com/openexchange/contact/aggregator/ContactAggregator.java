@@ -67,7 +67,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class ContactAggregator {
 
-    private static final Log LOG = LogFactory.getLog(ContactAggregator.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ContactAggregator.class);
 
     private final List<ContactSourceFactory> factories = new ArrayList<ContactSourceFactory>();
 

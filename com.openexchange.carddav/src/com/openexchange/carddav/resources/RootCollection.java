@@ -82,7 +82,7 @@ import com.openexchange.webdav.protocol.helpers.AbstractCollection;
 public class RootCollection extends AbstractCollection {
 
 	private static final String EXPOSED_COLLECTIONS_PROPERTY = "com.openexchange.carddav.exposedCollections";
-    private static final Log LOG = LogFactory.getLog(RootCollection.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(RootCollection.class);
     private static final String DISPLAY_NAME = "Addressbooks";
     private static final String AGGREGATED_FOLDER_ID = "Contacts"; // folder ID needs to be exactly "Contacts" for backwards compatibility
     private static final String AGGREGATED_DISPLAY_NAME = "All Contacts";

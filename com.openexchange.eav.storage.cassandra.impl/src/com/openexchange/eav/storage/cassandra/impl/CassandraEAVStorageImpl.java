@@ -96,7 +96,7 @@ import com.openexchange.exception.OXException;
  */
 public class CassandraEAVStorageImpl implements EAVStorage {
 	
-	private static final Log log = LogFactory.getLog(CassandraEAVStorageImpl.class);
+	private static final Log log = com.openexchange.log.Log.loggerFor(CassandraEAVStorageImpl.class);
 	
 	private static Cluster cluster;
 	private static volatile Keyspace keyspace;

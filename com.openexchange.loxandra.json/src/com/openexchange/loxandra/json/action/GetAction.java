@@ -73,7 +73,7 @@ import com.openexchange.tools.session.ServerSession;
 		@Parameter(name = "limited") })
 public class GetAction extends AbstractAction {
 	
-	private static Log log = LogFactory.getLog(GetAction.class);
+	private static Log log = com.openexchange.log.Log.loggerFor(GetAction.class);
 
 	/**
 	 * Constructor

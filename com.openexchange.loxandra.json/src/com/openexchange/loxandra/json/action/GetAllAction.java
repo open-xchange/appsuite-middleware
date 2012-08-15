@@ -73,7 +73,7 @@ import com.openexchange.tools.session.ServerSession;
 		@Parameter(name = "folderUUID")})
 public class GetAllAction extends AbstractAction {
 	
-	private static Log log = LogFactory.getLog(GetAllAction.class);
+	private static Log log = com.openexchange.log.Log.loggerFor(GetAllAction.class);
 
 	/**
 	 * Constructor

@@ -70,7 +70,7 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
  */
 public class CTag extends SingleXMLPropertyMixin {
 
-	protected static final Log LOG = LogFactory.getLog(CTag.class);
+	protected static final Log LOG = com.openexchange.log.Log.loggerFor(CTag.class);
 	
 	private final GroupwareCarddavFactory factory;
     private final CardDAVCollection collection;

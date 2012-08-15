@@ -87,7 +87,7 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 public class NotifyingCalendar extends ITipCalendarWrapper implements AppointmentSQLInterface {
 
-	private static final Log LOG = LogFactory.getLog(NotifyingCalendar.class);
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(NotifyingCalendar.class);
 
 	private final AppointmentSQLInterface delegate;
 

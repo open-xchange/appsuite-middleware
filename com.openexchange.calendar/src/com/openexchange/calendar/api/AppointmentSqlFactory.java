@@ -71,7 +71,7 @@ import com.openexchange.session.Session;
  */
 public class AppointmentSqlFactory implements AppointmentSqlFactoryService {
 
-	private static final Log LOG = LogFactory.getLog(AppointmentSqlFactory.class);
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(AppointmentSqlFactory.class);
 	
     private final List<CalendarFeature> features = new ArrayList<CalendarFeature>();
     

@@ -80,7 +80,7 @@ public class CalDAV extends OXServlet {
 
 	private static final long serialVersionUID = -7768308794451862636L;
 
-	private static final transient Log LOG = LogFactory.getLog(CalDAV.class);
+	private static final transient Log LOG = com.openexchange.log.Log.loggerFor(CalDAV.class);
     
     private static ServiceLookup services;
     

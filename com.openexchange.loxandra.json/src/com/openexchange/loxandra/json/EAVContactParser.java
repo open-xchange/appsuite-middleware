@@ -70,7 +70,7 @@ import com.openexchange.loxandra.helpers.EAVContactHelper;
  */
 public class EAVContactParser {
 	
-	private static Log log = LogFactory.getLog(EAVContactParser.class);
+	private static Log log = com.openexchange.log.Log.loggerFor(EAVContactParser.class);
 	
 	/**
 	 * Parse a {@link JSONObject} and creates an {@link EAVContact} 

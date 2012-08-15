@@ -74,7 +74,7 @@ public class NoSQLSessionStorageActivator extends HousekeepingActivator {
     private ConfigurationService configService;
     private CryptoService cryptoService;
     private ServiceRegistry registry;
-    private final Log log = LogFactory.getLog(NoSQLSessionStorageActivator.class);
+    private final Log log = com.openexchange.log.Log.loggerFor(NoSQLSessionStorageActivator.class);
 
     /*
      * (non-Javadoc)

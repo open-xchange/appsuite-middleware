@@ -12,7 +12,7 @@ import com.openexchange.session.Session;
 
 public class PoolingMailSenderService implements MailSenderService {
 	
-	private static final Log LOG = LogFactory.getLog(PoolingMailSenderService.class);
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(PoolingMailSenderService.class);
 	
 	private final AppointmentNotificationPoolService pool; 
 	private final MailSenderService delegate;

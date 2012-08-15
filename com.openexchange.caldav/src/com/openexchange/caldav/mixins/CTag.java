@@ -71,7 +71,7 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
  */
 public class CTag extends SingleXMLPropertyMixin {
 	
-    private static final Log LOG = LogFactory.getLog(CTag.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(CTag.class);
 
 	private final CommonFolderCollection<?> collection;
     private String value = null;
