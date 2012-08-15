@@ -138,6 +138,10 @@ public class CXFActivator extends HousekeepingActivator {
                              */
                             final CXFNonSpringServlet cxf = new CXFNonSpringServlet();
                             final Bus bus = cxf.getBus();
+                            /*
+                             * Add interceptors here
+                             */
+                            bus.getInInterceptors().add(new RemoveGenericLabelledElementsInterceptor());
                             BusFactory.setDefaultBus(bus);
                             httpService.registerServlet(ALIAS, cxf, null, null);
                             LOG.info("Registered CXF Servlet under: " + ALIAS);

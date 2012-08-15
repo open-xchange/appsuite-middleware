@@ -6,7 +6,8 @@ Bundle-Version: 6.21.0
 Bundle-Activator: com.openexchange.soap.cxf.osgi.CXFActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.log,
+Import-Package: com.openexchange.java,
+ com.openexchange.log,
  com.openexchange.osgi,
  javax.activation,
  javax.annotation,
