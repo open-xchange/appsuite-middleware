@@ -63,7 +63,7 @@ public class Bug20413Test_CompletelyWrongDTStart extends ManagedAppointmentTest 
 		startDate.setTime(actual.getStartDate());
 		//NOTE: Completely irrelevant. Date format not allowed. 
 		assertEquals(Calendar.NOVEMBER, startDate.get(Calendar.MONTH));
-		assertEquals(8, startDate.get(Calendar.DAY_OF_MONTH));
+		assertEquals(9, startDate.get(Calendar.DAY_OF_MONTH));
 		
 	}
 
