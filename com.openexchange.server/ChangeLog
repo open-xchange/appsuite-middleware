@@ -1,6 +1,7 @@
 * 2012-08-14 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 22730: Added support for IMPP parameters, added mapping for different email fields  
+ - Fix for bug 21794: Store filename for CalDAV resources  
  
 * 2012-08-14 - marcus.klein@open-xchange.com
 
