@@ -526,7 +526,7 @@ ox_move_config_file() {
 
     if [ -e "${srcdir}/${srcname}" ]; then
         if [ -e "${dstdir}/${dstname}" ] && \
-           ! cmp "${dstdir}/${dstname}" "${srcdir}/${srcname}" > /dev/null; then
+           ! cmp -s "${dstdir}/${dstname}" "${srcdir}/${srcname}" > /dev/null; then
            mv "${dstdir}/${dstname}" "${dstdir}/${dstname}.rpmnew"
         fi
         mv "${srcdir}/${srcname}" "${dstdir}/${dstname}"
