@@ -53,7 +53,6 @@ import com.openexchange.contact.storage.ldap.id.LdapIDResolver;
 import com.openexchange.contact.storage.ldap.mapping.LdapMapper;
 import com.openexchange.contact.storage.ldap.mapping.LdapMapping;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.Operand;
 import com.openexchange.search.Operation;
@@ -70,7 +69,7 @@ import com.openexchange.search.SingleSearchTerm.SingleOperation;
  */
 public class SearchTermAdapter {
 	
-    private static final org.apache.commons.logging.Log LOG = LogFactory.getLog(SearchTermAdapter.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(SearchTermAdapter.class);
 
     private final String filter;
     private final LdapMapper mapper;

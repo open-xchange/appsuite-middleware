@@ -69,7 +69,6 @@ import com.openexchange.contact.SortOptions;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.log.LogFactory;
 import com.openexchange.search.SingleSearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.search.internal.operands.ConstantOperand;
@@ -82,7 +81,7 @@ import com.openexchange.timer.TimerService;
  */
 public class LdapContactCache {
     
-    private static final org.apache.commons.logging.Log LOG = LogFactory.getLog(LdapContactCache.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(LdapContactCache.class);
     private static final EnumSet<ContactField> CACHED_FIELDS = EnumSet.of(
         ContactField.CONTEXTID, ContactField.FOLDER_ID, ContactField.OBJECT_ID, ContactField.INTERNAL_USERID, ContactField.UID, 
         ContactField.LAST_MODIFIED, ContactField.CREATION_DATE, ContactField.MODIFIED_BY, ContactField.CREATED_BY,
