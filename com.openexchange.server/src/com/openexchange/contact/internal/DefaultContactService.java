@@ -191,7 +191,7 @@ public abstract class DefaultContactService implements ContactService {
 	public SearchIterator<Contact> searchContacts(Session session, ContactSearchObject contactSearch, ContactField[] fields, SortOptions sortOptions) throws OXException {
 		Check.argNotNull(session, "session");
 		Check.argNotNull(contactSearch, "contactSearch");
-		return this.doSearchContacts(session, contactSearch, fields, sortOptions);
+		return this.doSearchContacts(session, Tools.prepareContactSearch(contactSearch), fields, sortOptions);
 	}
 
 	@Override
