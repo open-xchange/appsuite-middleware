@@ -9,5 +9,6 @@ Homepage: http://www.open-xchange.com
 Package: open-xchange-themes-default
 Architecture: all
 Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
+Provides: open-xchange-theme-default
 Description: Enables the default themes in the UI
  Contains configuration files transfered through preferences interface to the UI. Tells the UI the installed themes.
