@@ -138,7 +138,8 @@ public abstract class LdapMapping<T> extends DefaultMapping<T, Contact> implemen
     }
     
     public String getAlternativeLdapAttributeName(boolean suppressOptions) {
-        return suppressOptions ? this.alternativeLdapAttributeName.split(";")[0] : this.alternativeLdapAttributeName;
+        return null != alternativeLdapAttributeName && suppressOptions ? 
+            this.alternativeLdapAttributeName.split(";")[0] : this.alternativeLdapAttributeName;
     }
     
     public boolean isBinary() {
@@ -146,7 +147,7 @@ public abstract class LdapMapping<T> extends DefaultMapping<T, Contact> implemen
     }
     
     public String getLdapAttributeName(boolean suppressOptions) {
-        return suppressOptions ? this.ldapAttributeName.split(";")[0] : this.ldapAttributeName;
+        return null != ldapAttributeName && suppressOptions ? this.ldapAttributeName.split(";")[0] : this.ldapAttributeName;
     }
     
     public void setLdapAttributeName(String ldapAttributeName) {
