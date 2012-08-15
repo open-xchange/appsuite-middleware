@@ -162,6 +162,9 @@ public final class FileStorageFolderStorage implements FolderStorage {
 
     } // End of class Key
 
+    /**
+     * <code>"1"</code>
+     */
     private static final String PRIVATE_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
 
     /**
