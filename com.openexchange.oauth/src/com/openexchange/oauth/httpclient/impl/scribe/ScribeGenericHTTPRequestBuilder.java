@@ -110,14 +110,18 @@ public abstract class ScribeGenericHTTPRequestBuilder<T extends HTTPGenericReque
 
 	protected void setHeaders(Map<String, String> headers, OAuthRequest request) {
 		for(Map.Entry<String, String> header: headers.entrySet()) {
-			request.addHeader(header.getKey(), header.getValue());
+			if (header.getKey() != null && header.getValue() != null) {
+				request.addHeader(header.getKey(), header.getValue());
+			}
 		}
 	}
 
 	protected void setParameters(Map<String, String> params,
 			OAuthRequest request) {
 		for(Map.Entry<String, String> param: params.entrySet()) {
-			request.addQuerystringParameter(param.getKey(), param.getValue());
+			if (param.getKey() != null && param.getValue() != null) {
+				request.addQuerystringParameter(param.getKey(), param.getValue());
+			}
 		}
 	}
 
