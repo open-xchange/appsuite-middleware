@@ -16,174 +16,174 @@ Architecture: all
 Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
 Description: Package containing Open-Xchange backend localization for fr_FR
 
-#Package: open-xchange-l10n-cs-cz
-#Architecture: all
-#Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
-#Replaces: open-xchange-lang-cs-cz (<< 6.21.0-0)
-#Conflicts: open-xchange-lang-cs-cz (<< 6.21.0-0)
-#Description: Package containing Open-Xchange backend localization for cz_CZ
-#
-#Package: open-xchange-l10n-es-es
-#Architecture: all
-#Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
-#Replaces: open-xchange-lang-es-es (<< 6.21.0-0)
-#Conflicts: open-xchange-lang-es-es (<< 6.21.0-0)
-#Description: Package containing Open-Xchange backend localization for es_ES
-#
-#Package: open-xchange-l10n-fr-ca
-#Architecture: all
-#Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
-#Replaces: open-xchange-lang-fr-ca (<< 6.21.0-0)
-#Conflicts: open-xchange-lang-fr-ca (<< 6.21.0-0)
-#Description: Package containing Open-Xchange backend localization for ca_CA
-#
-#Package: open-xchange-l10n-hu-hu
-#Architecture: all
-#Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
-#Replaces: open-xchange-lang-hu-hu (<< 6.21.0-0)
-#Conflicts: open-xchange-lang-hu-hu (<< 6.21.0-0)
-#Description: Package containing Open-Xchange backend localization for hu_HU
-#
-#Package: open-xchange-l10n-it-it
-#Architecture: all
-#Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
-#Replaces: open-xchange-lang-it-it (<< 6.21.0-0)
-#Conflicts: open-xchange-lang-it-it (<< 6.21.0-0)
-#Description: Package containing Open-Xchange backend localization for it_IT
-#
-#Package: open-xchange-l10n-ja-jp
-#Architecture: all
-#Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
-#Replaces: open-xchange-lang-ja-jp (<< 6.21.0-0)
-#Conflicts: open-xchange-lang-ja-jp (<< 6.21.0-0)
-#Description: Package containing Open-Xchange backend localization for jp_JP
-#
-#Package: open-xchange-l10n-lv-lv
-#Architecture: all
-#Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
-#Replaces: open-xchange-lang-lv-lv (<< 6.21.0-0)
-#Conflicts: open-xchange-lang-lv-lv (<< 6.21.0-0)
-#Description: Package containing Open-Xchange backend localization for lv_LV
-#
-#Package: open-xchange-l10n-nl-nl
-#Architecture: all
-#Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
-#Replaces: open-xchange-lang-nl-nl (<< 6.21.0-0)
-#Conflicts: open-xchange-lang-nl-nl (<< 6.21.0-0)
-#Description: Package containing Open-Xchange backend localization for nl_NL
-#
-#Package: open-xchange-l10n-pl-pl
-#Architecture: all
-#Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
-#Replaces: open-xchange-lang-pl-pl (<< 6.21.0-0)
-#Conflicts: open-xchange-lang-pl-pl (<< 6.21.0-0)
-#Description: Package containing Open-Xchange backend localization for pl_PL
-#
-#Package: open-xchange-l10n-ro-ro
-#Architecture: all
-#Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
-#Replaces: open-xchange-lang-ro-ro (<< 6.21.0-0)
-#Conflicts: open-xchange-lang-ro-ro (<< 6.21.0-0)
-#Description: Package containing Open-Xchange backend localization for ro_RO
-#
-#Package: open-xchange-l10n-sk-sk
-#Architecture: all
-#Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
-#Replaces: open-xchange-lang-sk-sk (<< 6.21.0-0)
-#Conflicts: open-xchange-lang-sk-sk (<< 6.21.0-0)
-#Description: Package containing Open-Xchange backend localization for sk_SK
-#
-#Package: open-xchange-l10n-zh-cn
-#Architecture: all
-#Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
-#Replaces: open-xchange-lang-zh-cn (<< 6.21.0-0)
-#Conflicts: open-xchange-lang-zh-cn (<< 6.21.0-0)
-#Description: Package containing Open-Xchange backend localization for cn_CN
-#
-#Package: open-xchange-l10n-zh-tw
-#Architecture: all
-#Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
-#Replaces: open-xchange-lang-zh-tw (<< 6.21.0-0)
-#Conflicts: open-xchange-lang-zh-tw (<< 6.21.0-0)
-#Description: Package containing Open-Xchange backend localization for tw_TW
+Package: open-xchange-l10n-cs-cz
+Architecture: all
+Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
+Replaces: open-xchange-lang-cs-cz (<< 6.21.0-0)
+Conflicts: open-xchange-lang-cs-cz (<< 6.21.0-0)
+Description: Package containing Open-Xchange backend localization for cs_CZ
 
-###### http://wiki.debian.org/Renaming_a_Package #####
+Package: open-xchange-l10n-es-es
+Architecture: all
+Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
+Replaces: open-xchange-lang-es-es (<< 6.21.0-0)
+Conflicts: open-xchange-lang-es-es (<< 6.21.0-0)
+Description: Package containing Open-Xchange backend localization for es_ES
 
-#Package: open-xchange-lang-cs-cz
-#Architecture: all
-#Depends: ${misc:Depends}, open-xchange-l10n-cs-cz
-#Section: oldlibs
-#Description: transitional dummy package
-#
-#Package: open-xchange-lang-es-es
-#Architecture: all
-#Depends: ${misc:Depends}, open-xchange-l10n-es-es
-#Section: oldlibs
-#Description: transitional dummy package
-#
-#Package: open-xchange-lang-fr-ca
-#Architecture: all
-#Depends: ${misc:Depends}, open-xchange-l10n-fr-ca
-#Section: oldlibs
-#Description: transitional dummy package
-#
-#Package: open-xchange-lang-hu-hu
-#Architecture: all
-#Depends: ${misc:Depends}, open-xchange-l10n-hu-hu
-#Section: oldlibs
-#Description: transitional dummy package
-#
-#Package: open-xchange-lang-it-it
-#Architecture: all
-#Depends: ${misc:Depends}, open-xchange-l10n-it-it
-#Section: oldlibs
-#Description: transitional dummy package
-#
-#Package: open-xchange-lang-ja-jp
-#Architecture: all
-#Depends: ${misc:Depends}, open-xchange-l10n-ja-jp
-#Section: oldlibs
-#Description: transitional dummy package
-#
-#Package: open-xchange-lang-lv-lv
-#Architecture: all
-#Depends: ${misc:Depends}, open-xchange-l10n-lv-lv
-#Section: oldlibs
-#Description: transitional dummy package
-#
-#Package: open-xchange-lang-nl-nl
-#Architecture: all
-#Depends: ${misc:Depends}, open-xchange-l10n-nl-nl
-#Section: oldlibs
-#Description: transitional dummy package
-#
-#Package: open-xchange-lang-pl-pl
-#Architecture: all
-#Depends: ${misc:Depends}, open-xchange-l10n-pl-pl
-#Section: oldlibs
-#Description: transitional dummy package
-#
-#Package: open-xchange-lang-ro-ro
-#Architecture: all
-#Depends: ${misc:Depends}, open-xchange-l10n-ro-ro
-#Section: oldlibs
-#Description: transitional dummy package
-#
-#Package: open-xchange-lang-sk-sk
-#Architecture: all
-#Depends: ${misc:Depends}, open-xchange-l10n-sk-sk
-#Section: oldlibs
-#Description: transitional dummy package
-#
-#Package: open-xchange-lang-zh-cn
-#Architecture: all
-#Depends: ${misc:Depends}, open-xchange-l10n-zh-cn
-#Section: oldlibs
-#Description: transitional dummy package
-#
-#Package: open-xchange-lang-zh-tw
-#Architecture: all
-#Depends: ${misc:Depends}, open-xchange-l10n-zh-tw
-#Section: oldlibs
-#Description: transitional dummy package
+Package: open-xchange-l10n-fr-ca
+Architecture: all
+Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
+Replaces: open-xchange-lang-fr-ca (<< 6.21.0-0)
+Conflicts: open-xchange-lang-fr-ca (<< 6.21.0-0)
+Description: Package containing Open-Xchange backend localization for fr_CA
+
+Package: open-xchange-l10n-hu-hu
+Architecture: all
+Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
+Replaces: open-xchange-lang-hu-hu (<< 6.21.0-0)
+Conflicts: open-xchange-lang-hu-hu (<< 6.21.0-0)
+Description: Package containing Open-Xchange backend localization for hu_HU
+
+Package: open-xchange-l10n-it-it
+Architecture: all
+Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
+Replaces: open-xchange-lang-it-it (<< 6.21.0-0)
+Conflicts: open-xchange-lang-it-it (<< 6.21.0-0)
+Description: Package containing Open-Xchange backend localization for it_IT
+
+Package: open-xchange-l10n-ja-jp
+Architecture: all
+Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
+Replaces: open-xchange-lang-ja-jp (<< 6.21.0-0)
+Conflicts: open-xchange-lang-ja-jp (<< 6.21.0-0)
+Description: Package containing Open-Xchange backend localization for ja_JP
+
+Package: open-xchange-l10n-lv-lv
+Architecture: all
+Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
+Replaces: open-xchange-lang-lv-lv (<< 6.21.0-0)
+Conflicts: open-xchange-lang-lv-lv (<< 6.21.0-0)
+Description: Package containing Open-Xchange backend localization for lv_LV
+
+Package: open-xchange-l10n-nl-nl
+Architecture: all
+Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
+Replaces: open-xchange-lang-nl-nl (<< 6.21.0-0)
+Conflicts: open-xchange-lang-nl-nl (<< 6.21.0-0)
+Description: Package containing Open-Xchange backend localization for nl_NL
+
+Package: open-xchange-l10n-pl-pl
+Architecture: all
+Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
+Replaces: open-xchange-lang-pl-pl (<< 6.21.0-0)
+Conflicts: open-xchange-lang-pl-pl (<< 6.21.0-0)
+Description: Package containing Open-Xchange backend localization for pl_PL
+
+Package: open-xchange-l10n-ro-ro
+Architecture: all
+Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
+Replaces: open-xchange-lang-ro-ro (<< 6.21.0-0)
+Conflicts: open-xchange-lang-ro-ro (<< 6.21.0-0)
+Description: Package containing Open-Xchange backend localization for ro_RO
+
+Package: open-xchange-l10n-sk-sk
+Architecture: all
+Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
+Replaces: open-xchange-lang-sk-sk (<< 6.21.0-0)
+Conflicts: open-xchange-lang-sk-sk (<< 6.21.0-0)
+Description: Package containing Open-Xchange backend localization for sk_SK
+
+Package: open-xchange-l10n-zh-cn
+Architecture: all
+Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
+Replaces: open-xchange-lang-zh-cn (<< 6.21.0-0)
+Conflicts: open-xchange-lang-zh-cn (<< 6.21.0-0)
+Description: Package containing Open-Xchange backend localization for zh_CN
+
+Package: open-xchange-l10n-zh-tw
+Architecture: all
+Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
+Replaces: open-xchange-lang-zh-tw (<< 6.21.0-0)
+Conflicts: open-xchange-lang-zh-tw (<< 6.21.0-0)
+Description: Package containing Open-Xchange backend localization for zh_TW
+
+##### http://wiki.debian.org/Renaming_a_Package #####
+
+Package: open-xchange-lang-cs-cz
+Architecture: all
+Depends: ${misc:Depends}, open-xchange-l10n-cs-cz
+Section: oldlibs
+Description: transitional dummy package
+
+Package: open-xchange-lang-es-es
+Architecture: all
+Depends: ${misc:Depends}, open-xchange-l10n-es-es
+Section: oldlibs
+Description: transitional dummy package
+
+Package: open-xchange-lang-fr-ca
+Architecture: all
+Depends: ${misc:Depends}, open-xchange-l10n-fr-ca
+Section: oldlibs
+Description: transitional dummy package
+
+Package: open-xchange-lang-hu-hu
+Architecture: all
+Depends: ${misc:Depends}, open-xchange-l10n-hu-hu
+Section: oldlibs
+Description: transitional dummy package
+
+Package: open-xchange-lang-it-it
+Architecture: all
+Depends: ${misc:Depends}, open-xchange-l10n-it-it
+Section: oldlibs
+Description: transitional dummy package
+
+Package: open-xchange-lang-ja-jp
+Architecture: all
+Depends: ${misc:Depends}, open-xchange-l10n-ja-jp
+Section: oldlibs
+Description: transitional dummy package
+
+Package: open-xchange-lang-lv-lv
+Architecture: all
+Depends: ${misc:Depends}, open-xchange-l10n-lv-lv
+Section: oldlibs
+Description: transitional dummy package
+
+Package: open-xchange-lang-nl-nl
+Architecture: all
+Depends: ${misc:Depends}, open-xchange-l10n-nl-nl
+Section: oldlibs
+Description: transitional dummy package
+
+Package: open-xchange-lang-pl-pl
+Architecture: all
+Depends: ${misc:Depends}, open-xchange-l10n-pl-pl
+Section: oldlibs
+Description: transitional dummy package
+
+Package: open-xchange-lang-ro-ro
+Architecture: all
+Depends: ${misc:Depends}, open-xchange-l10n-ro-ro
+Section: oldlibs
+Description: transitional dummy package
+
+Package: open-xchange-lang-sk-sk
+Architecture: all
+Depends: ${misc:Depends}, open-xchange-l10n-sk-sk
+Section: oldlibs
+Description: transitional dummy package
+
+Package: open-xchange-lang-zh-cn
+Architecture: all
+Depends: ${misc:Depends}, open-xchange-l10n-zh-cn
+Section: oldlibs
+Description: transitional dummy package
+
+Package: open-xchange-lang-zh-tw
+Architecture: all
+Depends: ${misc:Depends}, open-xchange-l10n-zh-tw
+Section: oldlibs
+Description: transitional dummy package
 
