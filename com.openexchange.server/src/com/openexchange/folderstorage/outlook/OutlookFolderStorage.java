@@ -876,6 +876,8 @@ public final class OutlookFolderStorage implements FolderStorage {
                 ret[i] = getFolder(treeId, folderId, storageType, storageParameters);
             } else if (FolderStorage.PRIVATE_ID.equals(folderId)) {
                 ret[i] = getFolder(treeId, folderId, storageType, storageParameters);
+            } else if (SYSTEM_INFOSTORES.contains(folderId)) {
+                ret[i] = getFolder(treeId, folderId, storageType, storageParameters);
             } else {
                 map.put(folderId, i);
             }
