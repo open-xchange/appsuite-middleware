@@ -80,7 +80,7 @@ public class OXDefine extends ScriptableObject implements Function {
 				resolver.remember(theId, o);
 			}
 
-		});
+		}, new boolean[]{false});
 
 		return null;
 	}

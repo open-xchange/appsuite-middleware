@@ -63,6 +63,7 @@ import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
+import com.openexchange.file.storage.FileStorageFolderType;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.session.Session;
@@ -152,7 +153,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
         }
     }
 
-    private FileStorageFolder toFileStorageFolder(final String folderId, final SmbFile smbFolder) throws SmbException, OXException {
+    private CIFSFolder toFileStorageFolder(final String folderId, final SmbFile smbFolder) throws SmbException, OXException {
         /*
          * Check sub resources
          */
@@ -189,6 +190,19 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
         cifsFolder.setFileCount(fileCount);
         cifsFolder.setSubfolders(hasSubdir);
         cifsFolder.setSubscribedSubfolders(hasSubdir);
+        /*
+         * Home dir or public folder?
+         */
+        {
+            final String homeDirectory = getHomeDirectory();
+            if (null != homeDirectory) {
+                if (homeDirectory.equals(smbFolder.getPath())) {
+                    cifsFolder.setType(FileStorageFolderType.HOME_DIRECTORY);
+                } else if (FileStorageFolder.ROOT_FULLNAME.equals(cifsFolder.getParentId())) {
+                    cifsFolder.setType(FileStorageFolderType.PUBLIC_FOLDER);
+                }
+            }
+        }
         /*
          * TODO: Set capabilities
          */
@@ -290,7 +304,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
             /*
              * Convert to FileStorageFolder
              */
-            return toFileStorageFolder(homeDir.getPath(), homeDir);
+            return toFileStorageFolder(homeDir.getPath(), homeDir).setType(FileStorageFolderType.HOME_DIRECTORY);
         } catch (final OXException e) {
             throw e;
         } catch (final SmbException e) {
@@ -349,8 +363,11 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
             /*
              * Return root folders
              */
-            return getSubfolders(rootUrl, false);
-            // Here we go
+            final FileStorageFolder[] subfolders = getSubfolders(rootUrl, false);
+            for (FileStorageFolder folder : subfolders) {
+                ((CIFSFolder) folder).setType(FileStorageFolderType.PUBLIC_FOLDER);
+            }
+            return subfolders;
         } catch (final OXException e) {
             throw e;
         } catch (final Exception e) {
@@ -392,7 +409,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
             for (final SmbFile sub : subFiles) {
                 if (sub.isDirectory()) {
                     final String path = sub.getPath();
-                    if (null == homeDirPath || !homeDirPath.equals(path)) {
+                    if ((null == homeDirPath || !homeDirPath.equals(path)) && !isHidden(sub)) {
                         try {
                             list.add(getFolder(path));
                         } catch (final OXException e) {
@@ -483,7 +500,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
              */
             final String newUri;
             {
-                URI uri = new URI(fid, true);
+                URI uri = new URI(fid, false);
                 String path = uri.getPath();
                 if (path.endsWith(SLASH)) {
                     path = path.substring(0, path.length() - 1);
@@ -491,7 +508,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
                 final int pos = path.lastIndexOf('/');
                 final String name = pos >= 0 ? path.substring(pos) : path;
 
-                uri = new URI(newParentId, true);
+                uri = new URI(newParentId, false);
                 path = uri.getPath();
                 if (path.endsWith(SLASH)) {
                     path = path.substring(0, path.length() - 1);
@@ -545,7 +562,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
              */
             final String newUri;
             {
-                final URI uri = new URI(fid, true);
+                final URI uri = new URI(fid, false);
                 String path = uri.getPath();
                 if (path.endsWith(SLASH)) {
                     path = path.substring(0, path.length() - 1);
@@ -703,6 +720,26 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
             ret[i] = Quota.getUnlimitedQuota(types[i]);
         }
         return ret;
+    }
+
+    private static boolean isHidden(final SmbFile smbFolder) {
+        if (null == smbFolder) {
+            return true;
+        }
+        final String name = smbFolder.getName();
+        return isEmpty(name) || '$' == name.charAt(0);
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
 }

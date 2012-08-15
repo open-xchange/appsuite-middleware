@@ -50,7 +50,7 @@ public class DeferredResolution {
 		this.callback = callback;
 	}
 
-	public static void awaitResolution(final Context cx, final Scriptable scope, final Scriptable thisObj, final Object[] args, final Function function, final Callback cb) {
+	public static void awaitResolution(final Context cx, final Scriptable scope, final Scriptable thisObj, final Object[] args, final Function function, final Callback cb, final boolean[] executionGuard) {
 		for(int i = 0; i < args.length; i++) {
 			Object o = args[i];
 			if (o instanceof DeferredResolution) {
@@ -61,16 +61,19 @@ public class DeferredResolution {
 					@Override
 					public void handle(Object o) {
 						args[index] = o;
-						awaitResolution(cx, scope, thisObj, args, function, cb);
+						awaitResolution(cx, scope, thisObj, args, function, cb, executionGuard);
 					}
 
 				});
 				return;
 			}
 		}
-		Object retval = function.call(cx, scope, thisObj, args);
-		if (cb != null) {
-			cb.handle(retval);
+		if (!executionGuard[0]) {
+			executionGuard[0] = true;
+			Object retval = function.call(cx, scope, thisObj, args);
+			if (cb != null) {
+				cb.handle(retval);
+			}
 		}
 	}
 

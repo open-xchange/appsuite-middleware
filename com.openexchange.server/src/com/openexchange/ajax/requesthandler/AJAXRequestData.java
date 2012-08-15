@@ -977,7 +977,10 @@ public class AJAXRequestData {
      * @return The state
      */
     public AJAXState getState() {
-        return state;
+    	if (state == null) {
+    		state  = new AJAXState();
+    	}
+    	return state;
     }
 
     /**

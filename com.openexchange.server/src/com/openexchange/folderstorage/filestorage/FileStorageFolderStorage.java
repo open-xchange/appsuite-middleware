@@ -504,9 +504,9 @@ public final class FileStorageFolderStorage implements FolderStorage {
             /*
              * Set proper name
              */
-            final FileStorageServiceRegistry msr =
+            final FileStorageServiceRegistry fssr =
                 FileStorageFolderStorageServiceRegistry.getServiceRegistry().getService(FileStorageServiceRegistry.class, true);
-            final FileStorageService fsService = msr.getFileStorageService(serviceId);
+            final FileStorageService fsService = fssr.getFileStorageService(serviceId);
             final FileStorageAccount fsAccount = fsService.getAccountManager().getAccount(accountId, storageParameters.getSession());
             retval.setName(fsAccount.getDisplayName());
             hasSubfolders = rootFolder.hasSubfolders();

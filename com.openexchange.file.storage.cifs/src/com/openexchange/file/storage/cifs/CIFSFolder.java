@@ -61,23 +61,28 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.DefaultFileStoragePermission;
 import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.FileStorageFolderType;
 import com.openexchange.file.storage.FileStoragePermission;
+import com.openexchange.file.storage.TypeAware;
 
 /**
  * {@link CIFSFolder}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CIFSFolder extends DefaultFileStorageFolder {
+public final class CIFSFolder extends DefaultFileStorageFolder implements TypeAware {
 
-    //private static final String URL_SPEC = CIFSConstants.URL_SPEC;
+    // private static final String URL_SPEC = CIFSConstants.URL_SPEC;
     private final String rootUrl;
+
+    private FileStorageFolderType type;
 
     /**
      * Initializes a new {@link CIFSFolder}.
      */
     public CIFSFolder(final int userId, final String rootUrl) {
         super();
+        type = FileStorageFolderType.NONE;
         this.rootUrl = rootUrl;
         holdsFiles = true;
         b_holdsFiles = true;
@@ -93,22 +98,39 @@ public final class CIFSFolder extends DefaultFileStorageFolder {
     }
 
     @Override
+    public FileStorageFolderType getType() {
+        return type;
+    }
+
+    /**
+     * Sets the type.
+     * 
+     * @param type The type to set
+     * @return This folder with type applied
+     */
+    public CIFSFolder setType(FileStorageFolderType type) {
+        this.type = type;
+        return this;
+    }
+
+    @Override
     public String toString() {
         return id == null ? super.toString() : id;
     }
 
     /**
      * Parses specified CIFS/SMB file.
-     *
+     * 
      * @param smbFile The CIFS/SMB file denoting the directory
-     * @throws OXException If parsing  CIFS/SMB file property set fails
+     * @throws OXException If parsing CIFS/SMB file property set fails
      */
     public void parseSmbFolder(final SmbFile smbFile) throws OXException {
         if (null != smbFile) {
             try {
-                id = Utils.checkFolderId(smbFile.getPath());
+                final String path = smbFile.getPath();
+                id = Utils.checkFolderId(path);
                 {
-                    if (rootUrl.equals(smbFile.getPath())) {
+                    if (rootUrl.equals(path)) {
                         rootFolder = true;
                         id = FileStorageFolder.ROOT_FULLNAME;
                         parentId = null;

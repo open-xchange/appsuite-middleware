@@ -322,6 +322,9 @@ public class CommonAppointments {
             }
             return cdao;
         } catch (final OXException e) {
+            if (e.getPrefix().equals("APP")) {
+                throw e;
+            }
             e.printStackTrace();
             return Collections.EMPTY_LIST;
         }
@@ -337,6 +340,9 @@ public class CommonAppointments {
             }
             return cdao;
         } catch (final OXException e) {
+            if (e.getPrefix().equals("APP")) {
+                throw e;
+            }
             e.printStackTrace();
             return Collections.EMPTY_LIST;
         }

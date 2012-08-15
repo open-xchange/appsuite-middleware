@@ -88,7 +88,7 @@ public class Bug11865Test extends CalendarSqlTest {
             appointments.save(update);
             fail("Could change recurrence position for change exception");
         } catch (final OXException e) {
-            if (e.similarTo(OXCalendarExceptionCodes.INVALID_RECURRENCE_POSITION_CHANGE)) {
+            if (!e.similarTo(OXCalendarExceptionCodes.INVALID_RECURRENCE_POSITION_CHANGE)) {
                 fail("Unexpected error code: " + e.getCode());
             }
         }

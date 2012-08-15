@@ -155,6 +155,7 @@ import com.openexchange.resource.internal.ResourceServiceImpl;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.I18nServices;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.SessiondInit;
 import com.openexchange.sessiond.impl.SessiondServiceImpl;
@@ -368,6 +369,7 @@ public final class Init {
         startAndInjectSubscribeServices();
         startAndInjectContactStorageServices();
         startAndInjectContactServices();
+        
     }
 
     public static void startAndInjectConfigBundle() {
@@ -379,6 +381,7 @@ public final class Init {
         TestServiceRegistry.getInstance().addService(ConfigurationService.class, config);
         AJPv13ServiceRegistry.SERVICE_REGISTRY.set(new ServiceRegistry());
         AJPv13ServiceRegistry.getInstance().addService(ConfigurationService.class, config);
+        
     }
 
     private static void startAndInjectThreadPoolBundle() {
