@@ -37,16 +37,8 @@ public class ID {
     public ID(final String id) {
         final Matcher matcher = PATTERN.matcher(id);
         if (!matcher.matches()) {
-            throw new IllegalArgumentException("Could not parse " + id);
+            throw new IllegalArgumentException("Could not parse id: " + id + ". User and context are obligatory for ID creation.");
         }
-        //TODO: handle default context
-//        Caused by: java.lang.IllegalArgumentException: Could not parse thorben
-//        at com.openexchange.realtime.packet.ID.<init>(ID.java:40)
-//        at com.openexchange.realtime.atmosphere.impl.StanzaParser.to(StanzaParser.java:148)
-//        at com.openexchange.realtime.atmosphere.impl.StanzaParser.basics(StanzaParser.java:143)
-//        at com.openexchange.realtime.atmosphere.impl.StanzaParser.parseMessage(StanzaParser.java:122)
-//        at com.openexchange.realtime.atmosphere.impl.StanzaParser.parse(StanzaParser.java:84)
-//        at com.openexchange.realtime.atmosphere.impl.RTAtmosphereHandler.onRequest(RTAtmosphereHandler.java:203)
         protocol = matcher.group(1);
         user = matcher.group(2);
         context = matcher.group(3);
@@ -68,7 +60,7 @@ public class ID {
 
     /*
      * Check optional id components for emtpy strings and sanitize by setting
-     * to null. 
+     * to null or default values. 
      */
     private void sanitize() {
         if (protocol != null && isEmpty(protocol)) {
@@ -78,7 +70,9 @@ public class ID {
         if (resource != null && isEmpty(resource)) {
             resource = null;
         }
+        
     }
+        
 
     private static boolean isEmpty(final String string) {
         if (null == string) {
@@ -97,11 +91,11 @@ public class ID {
      */
     private void validate() throws IllegalArgumentException {
         if (user == null) {
-            throw new IllegalArgumentException("User must not be null");
+            throw new IllegalArgumentException("User information is obligatory for IDs");
         }
 
         if (context == null) {
-            throw new IllegalArgumentException("Context must not be null");
+            throw new IllegalArgumentException("Context information is obligatory for IDs");
         }
     }
 

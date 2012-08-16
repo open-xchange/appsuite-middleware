@@ -51,7 +51,6 @@ package com.openexchange.realtime.atmosphere.impl;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.IQ;
@@ -61,109 +60,130 @@ import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.packet.Stanza;
 
 /**
- * {@link StanzaParser} -  
- *
+ * {@link StanzaParser} -
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class StanzaParser {
 
-	/**
-	 * Parse a JSON based Stanza String into one of the differend kind of Stanza
-	 * implementations we understand.
-	 * @param request the incoming request to parse into a Stanza  
-	 * @return the parsed Stanza
-	 * @throws OXException if the request String could not be parsed
-	 */
-	public static Stanza parse(String request) throws OXException {
-		try {
-			JSONObject object = new JSONObject(request);
+    /**
+     * Parse a JSON based Stanza String into one of the differend kind of Stanza implementations we understand.
+     * 
+     * @param request the incoming request to parse into a Stanza
+     * @return the parsed Stanza
+     * @throws IllegalArgumentException if the request String didn't contain valid JSON or couldn't be parsed from JSON into a Stanza
+     *             because obligatory Stanza elements were missing or Stanza elements had a wrong format
+     */
+    public static Stanza parse(String request) throws OXException {
+        try {
+            JSONObject object = new JSONObject(request);
 
-			if (!object.has("kind")
-					|| object.getString("kind").equalsIgnoreCase("message")) {
-				return parseMessage(object);
-			} else if (object.getString("kind").equalsIgnoreCase("presence")) {
-				return parsePresence(object);
-			} else if (object.getString("kind").equalsIgnoreCase("iq")) {
-				return parseIQ(object);
-			}
+            if (!object.has("kind") || object.getString("kind").equalsIgnoreCase("message")) {
+                return parseMessage(object);
+            } else if (object.getString("kind").equalsIgnoreCase("presence")) {
+                return parsePresence(object);
+            } else if (object.getString("kind").equalsIgnoreCase("iq")) {
+                return parseIQ(object);
+            }
 
-		} catch (JSONException e) {
-			throw OXException.general("Could not parse " + request);
-		}
-		return null;
-	}
+        } catch (JSONException e) {
+            throw OXException.general("Could not parse " + request);
+        }
+        return null;
+    }
 
-	private static Stanza parseIQ(JSONObject object) {
-		IQ query = new IQ();
-		basics(query, object);
+    private static Stanza parseIQ(JSONObject object) {
+        IQ query = new IQ();
+        basics(query, object);
 
-		String type = object.optString("type");
+        String type = object.optString("type");
 
-		for (IQ.Type t : IQ.Type.values()) {
-			if (t.name().equalsIgnoreCase(type)) {
-				query.setType(t);
-				break;
-			}
-		}
+        for (IQ.Type t : IQ.Type.values()) {
+            if (t.name().equalsIgnoreCase(type)) {
+                query.setType(t);
+                break;
+            }
+        }
 
-		return query;
-	}
+        return query;
+    }
 
-	private static Stanza parsePresence(JSONObject object) {
-		Presence presence = new Presence();
-		basics(presence, object);
+    private static Stanza parsePresence(JSONObject object) {
+        Presence presence = new Presence();
+        basics(presence, object);
 
-		return presence;
-	}
+        return presence;
+    }
 
-	private static Stanza parseMessage(JSONObject object) {
-		Message message = new Message();
-		basics(message, object);
+    /**
+     * Parse a JSONObject into a Stanza.
+     * 
+     * @param object the JSONObject containing the unparsed Stanza elements
+     * @return the parsed Stanza object
+     * @throws IllegalArgumentException if the obligatory elements aren't present or elements are in the wrong format
+     */
+    private static Stanza parseMessage(JSONObject object) {
+        Message message = new Message();
+        basics(message, object);
 
-		String type = object.optString("type");
+        String type = object.optString("type");
 
-		if (type == null || type.equals("")) {
-			message.setType(Message.Type.normal);
-		} else {
-			for (Message.Type t : Message.Type.values()) {
-				if (t.name().equalsIgnoreCase(type)) {
-					message.setType(t);
-					break;
-				}
-			}
-		}
+        if (type == null || type.equals("")) {
+            message.setType(Message.Type.normal);
+        } else {
+            for (Message.Type t : Message.Type.values()) {
+                if (t.name().equalsIgnoreCase(type)) {
+                    message.setType(t);
+                    break;
+                }
+            }
+        }
 
-		return message;
-	}
+        return message;
+    }
 
-	private static void basics(Stanza stanza, JSONObject object) {
-		namespace(stanza, object);
-		payload(stanza, object);
-		to(stanza, object);
-	}
+    /**
+     * Parse the obligatory Stanza elements in the JSONObject from the request.
+     * 
+     * @param stanza the Stanza that has to be filled with the obligatory elements
+     * @param object the JSONObject from the request that contains the unparsed Stanza elements
+     * @throws IllegalArgumentException if the obligatory elements aren't present or in the wrong format
+     */
+    private static void basics(Stanza stanza, JSONObject object) {
+        namespace(stanza, object);
+        payload(stanza, object);
+        to(stanza, object);
+    }
 
-	private static void to(Stanza message, JSONObject object) {
-		if (object.has("to")) {
-			message.setTo(new ID(object.optString("to")));
-		}
-	}
+    /**
+     * Set the recipient of the Stanza based on the values found in the JSONObject of the request.
+     * 
+     * @param message message where the recipient should be set
+     * @param object object from where the recipient should be read
+     * @throws IllegalArgumentException if the recipient specified in <code>to:</code> doesn't follow the syntax conventions.
+     */
+    private static void to(Stanza message, JSONObject object) {
+        if (object.has("to")) {
+            message.setTo(new ID(object.optString("to")));
+        }
+    }
 
-	private static void payload(Stanza message, JSONObject object) {
-		if (object.has("data")) {
-			message.setPayload(new Payload(object.optJSONObject("data"), "json"));
-		}
-	}
+    private static void payload(Stanza message, JSONObject object) {
+        if (object.has("data")) {
+            message.setPayload(new Payload(object.optJSONObject("data"), "json"));
+        }
+    }
 
-	private static void namespace(Stanza message, JSONObject object) {
-		if (object.has("ns")) {
-			message.setNamespace(object.optString("ns"));
-		}
+    private static void namespace(Stanza message, JSONObject object) {
+        if (object.has("ns")) {
+            message.setNamespace(object.optString("ns"));
+        }
 
-		if (object.has("namespace")) {
-			message.setNamespace(object.optString("namespace"));
-		}
+        if (object.has("namespace")) {
+            message.setNamespace(object.optString("namespace"));
+        }
 
-	}
+    }
 
 }

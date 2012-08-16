@@ -63,23 +63,14 @@ import com.openexchange.realtime.packet.ID;
  */
 public class IDTest {
 
-    /**
-     * @throws java.lang.Exception
-     */
     @Before
     public void setUp() throws Exception {
     }
 
-    /**
-     * @throws java.lang.Exception
-     */
     @After
     public void tearDown() throws Exception {
     }
 
-    /**
-     * Test method for {@link com.openexchange.realtime.packet.ID#ID(java.lang.String)}.
-     */
     @Test
     public void testIDString() {
         ID newID = new ID("ox://user@context/resource");
@@ -90,12 +81,20 @@ public class IDTest {
     }
     
     @Test
-    public void testIDWithDefaultContext() {
-        ID newID = new ID("thorben");
+    public void testIDStringObligatory() {
+        ID newID = new ID("user@context");
         assertNull(newID.getProtocol());
         assertEquals("user",newID.getUser());
         assertEquals("context",newID.getContext());
         assertNull(newID.getResource());
+    }
+    
+    /**
+     * ID creation has to fail with an IllegalArgumentException if user or context are missing from the String constructor. 
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testIDWithDefaultContext() {
+        new ID("thorben");
     }
 
 }
