@@ -54,6 +54,7 @@ import java.io.InputStream;
 import javax.xml.stream.XMLStreamReader;
 import org.apache.cxf.interceptor.transform.TransformInInterceptor;
 import org.apache.cxf.message.Message;
+import org.apache.cxf.staxutils.DepthXMLStreamReader;
 import org.apache.cxf.staxutils.transform.TransformUtils;
 import com.openexchange.java.Streams;
 
