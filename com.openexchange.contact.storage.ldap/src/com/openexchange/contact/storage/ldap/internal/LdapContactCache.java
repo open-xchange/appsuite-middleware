@@ -69,6 +69,10 @@ import com.openexchange.contact.SortOptions;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.log.LogFactory;
+import com.openexchange.search.CompositeSearchTerm;
+import com.openexchange.search.Operand;
+import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SingleSearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.search.internal.operands.ConstantOperand;
@@ -81,7 +85,7 @@ import com.openexchange.timer.TimerService;
  */
 public class LdapContactCache {
     
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(LdapContactCache.class);
+    private static final org.apache.commons.logging.Log LOG = LogFactory.getLog(LdapContactCache.class);
     private static final EnumSet<ContactField> CACHED_FIELDS = EnumSet.of(
         ContactField.CONTEXTID, ContactField.FOLDER_ID, ContactField.OBJECT_ID, ContactField.INTERNAL_USERID, ContactField.UID, 
         ContactField.LAST_MODIFIED, ContactField.CREATION_DATE, ContactField.MODIFIED_BY, ContactField.CREATED_BY,
@@ -175,6 +179,56 @@ public class LdapContactCache {
     public static boolean isCached(ContactField[] requestedFields) throws OXException {
         return null != requestedFields && CACHED_FIELDS.containsAll(Arrays.asList(requestedFields));
     }
+    
+    /**
+     * Gets a value indicating whether all of the fields referred by the
+     * supplied search term are present in the cache or not.
+     *
+     * @param term the term to check
+     * @return <code>true</code>, if the fields are cached, <code>false</code>,
+     *         otherwise
+     * @throws OXException
+     */
+    public static boolean isCached(SearchTerm<?> term) throws OXException {
+        if (null != term) {
+            if (SingleSearchTerm.class.isInstance(term)) {
+                return isCached((SingleSearchTerm)term);
+            } else if (CompositeSearchTerm.class.isInstance(term)) {
+                return isCached((CompositeSearchTerm)term);
+            } else {
+                throw new IllegalArgumentException("Need either an 'SingleSearchTerm' or 'CompositeSearchTerm'.");
+            }
+        }
+        return false;
+    }
+
+    private static boolean isCached(SingleSearchTerm term) throws OXException {
+        if (null != term.getOperands()) {
+            for (Operand<?> operand : term.getOperands()) {
+                if (Operand.Type.COLUMN.equals(operand.getType())) {
+                    if (ContactField.class.isInstance(operand.getValue())) {
+                        if (false == CACHED_FIELDS.contains(operand.getValue())) {
+                            return false;
+                        }
+                    } else {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    private static boolean isCached(CompositeSearchTerm term) throws OXException {
+        if (null != term.getOperands()) {
+            for (SearchTerm<?> searchTerm : term.getOperands()) {
+                if (false == isCached(searchTerm)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    } 
     
     /**
      * 

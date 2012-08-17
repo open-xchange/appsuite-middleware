@@ -146,7 +146,7 @@ public class CachingLdapContactStorage extends LdapContactStorage {
 
     @Override
     public <O> SearchIterator<Contact> search(Session session, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException {
-        if (LdapContactCache.isCached(fields)) {
+        if (LdapContactCache.isCached(fields) && LdapContactCache.isCached(term)) {
             return sort(filter(cache.values(), term, Tools.getLocale(sortOptions)), sortOptions);
         } else {
             SearchIterator<Contact> searchIterator = super.search(session, term,  
