@@ -49,32 +49,42 @@
 
 package com.openexchange.axis2.services;
 
-import com.openexchange.osgi.ServiceRegistry;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
 
 /**
- * {@link Axis2ServletServiceRegistry} - A registry for services needed by Axis2 bundle
+ * {@link Axis2ServletServices} - A registry for services needed by Axis2 bundle
  * 
  * @author <a href="mailto:choeger@open-xchange.com">Carsten Hoeger</a>
  * 
  */
-public final class Axis2ServletServiceRegistry {
+public final class Axis2ServletServices {
 
-    private static final ServiceRegistry REGISTRY = new ServiceRegistry();
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
+
+    /**
+     * Sets the stored {@link ServiceLookup} reference to specified instance.
+     * 
+     * @param services The instance or <code>null</code>
+     */
+    public static void setServiceLookup(final ServiceLookup services) {
+        REF.set(services);
+    }
 
     /**
      * Gets the service registry
      * 
      * @return The service registry
      */
-    public static ServiceRegistry getServiceRegistry() {
-        return REGISTRY;
+    public static ServiceLookup getServiceRegistry() {
+        return REF.get();
     }
 
     /**
-     * Initializes a new {@link Axis2ServletServiceRegistry}
+     * Initializes a new {@link Axis2ServletServices}
      */
-    private Axis2ServletServiceRegistry() {
+    private Axis2ServletServices() {
         super();
     }
 

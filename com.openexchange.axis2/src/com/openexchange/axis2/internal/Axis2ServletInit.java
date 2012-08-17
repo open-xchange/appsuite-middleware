@@ -56,7 +56,7 @@ import org.apache.axis2.transport.http.AxisServlet;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import com.openexchange.axis2.exeptions.OXAxis2ExceptionCodes;
-import com.openexchange.axis2.services.Axis2ServletServiceRegistry;
+import com.openexchange.axis2.services.Axis2ServletServices;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.Initialization;
@@ -110,7 +110,7 @@ public class Axis2ServletInit implements Initialization {
             return;
         }
 
-        final HttpService httpService = Axis2ServletServiceRegistry.getServiceRegistry().getService(HttpService.class);
+        final HttpService httpService = Axis2ServletServices.getServiceRegistry().getService(HttpService.class);
         if (httpService == null) {
             LOG.error("HTTP service is null. Axis2 servlet cannot be registered");
             return;
@@ -119,7 +119,7 @@ public class Axis2ServletInit implements Initialization {
             /*
              * Register axis2 servlet
              */
-            final ConfigurationService config = Axis2ServletServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+            final ConfigurationService config = Axis2ServletServices.getServiceRegistry().getService(ConfigurationService.class);
 
             final String xml_path_property = config.getProperty(AXIS2_XML_PATH_PROPERTY);
             if (xml_path_property == null) {
@@ -154,7 +154,7 @@ public class Axis2ServletInit implements Initialization {
             LOG.error("Axis2 servlet has not been started.");
             return;
         }
-        final HttpService httpService = Axis2ServletServiceRegistry.getServiceRegistry().getService(HttpService.class);
+        final HttpService httpService = Axis2ServletServices.getServiceRegistry().getService(HttpService.class);
         if (httpService == null) {
             LOG.error("HTTP service is null. Axis2 servlet cannot be unregistered");
         } else {
