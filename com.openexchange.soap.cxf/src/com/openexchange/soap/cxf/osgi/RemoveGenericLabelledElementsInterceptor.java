@@ -83,7 +83,7 @@ public final class RemoveGenericLabelledElementsInterceptor extends TransformInI
         }
 
         XMLStreamReader reader = message.getContent(XMLStreamReader.class);
-        reader = TransformUtils.createNewReaderIfNeeded(reader, message.getContent(InputStream.class));
+        reader = new DepthXMLStreamReader(TransformUtils.createNewReaderIfNeeded(reader, message.getContent(InputStream.class)));
         ByteArrayOutputStream out = Streams.newByteArrayOutputStream(8192);
 
         // TODO: Modify by reader & write to out
