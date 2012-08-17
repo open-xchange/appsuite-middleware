@@ -50,14 +50,16 @@ package com.openexchange.axis2.osgi;
 
 import org.osgi.service.http.HttpService;
 import com.openexchange.axis2.internal.Axis2ServletInit;
-import com.openexchange.axis2.services.Axis2ServletServiceRegistry;
+import com.openexchange.axis2.services.Axis2ServletServices;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.ServiceRegistry;
 
+/**
+ * {@link Activator}
+ */
 public class Activator extends HousekeepingActivator {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory.getLog(Activator.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(Activator.class);
 
     /**
      * Initializes a new {@link Axis2ServletActivator}
@@ -71,43 +73,13 @@ public class Activator extends HousekeepingActivator {
         return new Class<?>[] { ConfigurationService.class, HttpService.class };
     }
 
-
-    @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Re-available service: " + clazz.getName());
-        }
-        Axis2ServletServiceRegistry.getServiceRegistry().addService(clazz, getService(clazz));
-    }
-
-    @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        /*
-         * Never stop the server even if a needed service is absent
-         */
-        if (LOG.isWarnEnabled()) {
-            LOG.warn("Absent service: " + clazz.getName());
-        }
-        Axis2ServletServiceRegistry.getServiceRegistry().removeService(clazz);
-    }
-
     @Override
     public void startBundle() throws Exception {
         try {
             /*
              * (Re-)Initialize server service registry with available services
              */
-            {
-                final ServiceRegistry registry = Axis2ServletServiceRegistry.getServiceRegistry();
-                registry.clearRegistry();
-                final Class<?>[] classes = getNeededServices();
-                for (int i = 0; i < classes.length; i++) {
-                    final Object service = getService(classes[i]);
-                    if (null != service) {
-                        registry.addService(classes[i], service);
-                    }
-                }
-            }
+            Axis2ServletServices.setServiceLookup(this);
             Axis2ServletInit.getInstance().start();
 
             // TODO: ConfigTree may be needed or not...
@@ -123,11 +95,10 @@ public class Activator extends HousekeepingActivator {
     public void stopBundle() throws Exception {
         try {
             Axis2ServletInit.getInstance().stop();
-
             /*
              * Clear service registry
              */
-            Axis2ServletServiceRegistry.getServiceRegistry().clearRegistry();
+            Axis2ServletServices.setServiceLookup(null);
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
