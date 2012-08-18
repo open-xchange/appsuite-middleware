@@ -75,6 +75,7 @@ import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.ServiceAware;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
@@ -614,10 +615,14 @@ public final class FileStorageFolderStorage implements FolderStorage {
             final List<SortableId> list = new ArrayList<SortableId>(size);
             for (int j = 0; j < size; j++) {
                 final FileStorageAccount acc = accounts.get(j);
-                list.add(new FileStorageId(
-                    FileStorageFolderIdentifier.getFQN(acc.getFileStorageService().getId(), acc.getId(), ""),
-                    j,
-                    null));
+                final String serviceId;
+                if (acc instanceof ServiceAware) {
+                    serviceId = ((ServiceAware) acc).getServiceId();
+                } else {
+                    final FileStorageService tmp = acc.getFileStorageService();
+                    serviceId = null == tmp ? null : tmp.getId();
+                }
+                list.add(new FileStorageId(FileStorageFolderIdentifier.getFQN(serviceId, acc.getId(), ""), j, null));
             }
             return list.toArray(new SortableId[list.size()]);
         }
