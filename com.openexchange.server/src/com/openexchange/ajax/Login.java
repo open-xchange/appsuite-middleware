@@ -1150,7 +1150,12 @@ public class Login extends AJAXServlet {
             if (AjaxExceptionCodes.PREFIX.equals(e.getPrefix())) {
                 throw e;
             }
-            if (LoginExceptionCodes.REDIRECT.equals(e) || LoginExceptionCodes.NOT_SUPPORTED.equals(e)) {
+            if (LoginExceptionCodes.NOT_SUPPORTED.equals(e)) {
+                // Rethrow according to previous behavior as "Invalid cookie." error
+                LOG.debug(e.getMessage(), e);
+                throw OXJSONExceptionCodes.INVALID_COOKIE.create(e, new Object[0]);
+            }
+            if (LoginExceptionCodes.REDIRECT.equals(e)) {
                 LOG.debug(e.getMessage(), e);
             } else {
                 LOG.error(e.getMessage(), e);
