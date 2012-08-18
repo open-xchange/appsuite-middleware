@@ -133,12 +133,7 @@ public final class GetAction extends AbstractMailAction {
             if (length != 1) {
                 throw new IllegalArgumentException("JSON array's length is not 1");
             }
-            final AJAXRequestData requestData = new AJAXRequestData();
-            final AJAXRequestData request = req.getRequest();
-            for (final Iterator<String> it = request.getParameterNames(); it.hasNext();) {
-                final String name = it.next();
-                requestData.putParameter(name, request.getParameter(name));
-            }
+            final AJAXRequestData requestData = req.getRequest();
             for (int i = 0; i < length; i++) {
                 final JSONObject folderAndID = paths.getJSONObject(i);
                 requestData.putParameter(AJAXServlet.PARAMETER_FOLDERID, folderAndID.getString(AJAXServlet.PARAMETER_FOLDERID));

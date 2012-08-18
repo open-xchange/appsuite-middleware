@@ -2,6 +2,7 @@
 
  - Fix for 22783: Respond unsupported auto-login feature as common "Invalid cookie." error
  - Fix for 22794: Applying proper map to created ListLsubEntryImpl instance to reflect its subscription status
+ - Fix for bug 22795: Keep right instance of AJAXRequestData that is further used by dispatcher processing
 
 * 2012-08-15 - marcus.klein@open-xchange.com
 
