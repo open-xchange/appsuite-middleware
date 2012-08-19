@@ -133,10 +133,18 @@ public class CXFActivator extends HousekeepingActivator {
                         boolean servletRegistered = false;
                         boolean collectorOpened = false;
                         try {
-                            /*
-                             * Create CXF Servlet
-                             */
                             final CXFNonSpringServlet cxf = new CXFNonSpringServlet();
+                            /*
+                             * Register CXF Servlet
+                             */
+                            httpService.registerServlet(ALIAS, cxf, null, null);
+                            LOG.info("Registered CXF Servlet under: " + ALIAS);
+                            httpService.registerServlet(ALIAS2, cxf, null, null);
+                            LOG.info("Registered CXF Servlet under: " + ALIAS2);
+                            servletRegistered = true;
+                            /*
+                             * Get CXF bus
+                             */
                             final Bus bus = cxf.getBus();
                             /*
                              * Add interceptors here
@@ -150,14 +158,6 @@ public class CXFActivator extends HousekeepingActivator {
                              * Apply as default bus
                              */
                             BusFactory.setDefaultBus(bus);
-                            /*
-                             * Register CXF Servlet
-                             */
-                            httpService.registerServlet(ALIAS, cxf, null, null);
-                            LOG.info("Registered CXF Servlet under: " + ALIAS);
-                            httpService.registerServlet(ALIAS2, cxf, null, null);
-                            LOG.info("Registered CXF Servlet under: " + ALIAS2);
-                            servletRegistered = true;
                             /*
                              * Initialize Webservice collector
                              */
