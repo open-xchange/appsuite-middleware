@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.openexchange.soap.cxf.osgi;
+package com.openexchange.soap.cxf;
 
 import org.apache.commons.logging.Log;
 import com.openexchange.log.LogFactory;

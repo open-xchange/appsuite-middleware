@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.soap.cxf.osgi;
+package com.openexchange.soap.cxf;
 
 import javax.xml.bind.ValidationEvent;
 import javax.xml.bind.ValidationEventHandler;

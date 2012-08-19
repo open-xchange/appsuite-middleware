@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.soap.cxf.osgi;
+package com.openexchange.soap.cxf;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;

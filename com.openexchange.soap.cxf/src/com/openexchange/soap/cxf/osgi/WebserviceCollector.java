@@ -60,6 +60,7 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
+import com.openexchange.soap.cxf.ExceptionUtils;
 import com.openexchange.soap.cxf.WebserviceName;
 
 /**
