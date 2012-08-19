@@ -66,6 +66,7 @@ public class Activator extends HousekeepingActivator {
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(Activator.class);
 
     private volatile Queue<BundleActivator> activators;
+    private volatile Axis2ServletInit servletInit;
 
     /**
      * Initializes a new {@link Axis2ServletActivator}
@@ -86,7 +87,9 @@ public class Activator extends HousekeepingActivator {
              * (Re-)Initialize server service registry with available services
              */
             Axis2ServletServices.setServiceLookup(this);
-            Axis2ServletInit.getInstance().start();
+            final Axis2ServletInit servletInit = Axis2ServletInit.newInstance(context);
+            servletInit.start();
+            this.servletInit = servletInit;
             /*
              * Start-up 3rd party activators
              */
@@ -129,7 +132,11 @@ public class Activator extends HousekeepingActivator {
                 this.activators = null;
             }
 
-            Axis2ServletInit.getInstance().stop();
+            final Axis2ServletInit servletInit = this.servletInit;
+            if (null != servletInit) {
+                servletInit.stop();
+                this.servletInit = null;
+            }
             /*
              * Clear service registry
              */

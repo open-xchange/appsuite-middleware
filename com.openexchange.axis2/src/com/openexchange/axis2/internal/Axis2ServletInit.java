@@ -49,10 +49,10 @@
 
 package com.openexchange.axis2.internal;
 
-import java.net.MalformedURLException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.servlet.ServletException;
-import org.apache.axis2.transport.http.AxisServlet;
+import org.apache.axis2.osgi.OSGiAxisServlet;
+import org.osgi.framework.BundleContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import com.openexchange.axis2.exeptions.OXAxis2ExceptionCodes;
@@ -87,20 +87,19 @@ public class Axis2ServletInit implements Initialization {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory.getLog(Axis2ServletInit.class);
 
-    private static final Axis2ServletInit instance = new Axis2ServletInit();
-
-    public static Axis2ServletInit getInstance() {
-        return instance;
+    public static Axis2ServletInit newInstance(final BundleContext context) {
+        return new Axis2ServletInit(context);
     }
 
     private final AtomicBoolean started;
+    private final BundleContext context;
 
     /**
      * Initializes a new {@link Axis2ServletInit}
-     * @throws MalformedURLException 
      */
-    private Axis2ServletInit() {
+    private Axis2ServletInit(final BundleContext context) {
         super();
+        this.context = context;
         started = new AtomicBoolean();
     }
 
@@ -137,7 +136,7 @@ public class Axis2ServletInit implements Initialization {
             servletConf.put(AXIS2_XML_PATH_PROPERTY, xml_path_property);
             servletConf.put(AXIS2_REPOSITORY_PATH_PROPERTY, repository_path_property);
 
-            httpService.registerServlet(SC_AXIS2_SRVLT_ALIAS, new AxisServlet(), servletConf, null);
+            httpService.registerServlet(SC_AXIS2_SRVLT_ALIAS, new OSGiAxisServlet(context), servletConf, null);
         } catch (final ServletException e) {
             throw OXAxis2ExceptionCodes.SERVLET_REGISTRATION_FAILED.create(e, e.getMessage());
         } catch (final NamespaceException e) {
