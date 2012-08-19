@@ -158,8 +158,8 @@ public final class MessagingGenericDeleteListener implements DeleteListener {
 
     private <S> S getService(final Class<? extends S> clazz) throws OXException {
         try {
-            return MessagingGenericServiceRegistry.getServiceRegistry().getService(clazz, true);
-        } catch (final OXException e) {
+            return MessagingGenericServiceRegistry.getService(clazz);
+        } catch (final RuntimeException e) {
             throw new OXException(e);
         }
     }

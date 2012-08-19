@@ -109,7 +109,7 @@ public class DeleteAction extends AbstractMessagingAccountAction {
         messagingAccount.setId(id);
         messagingService.getAccountManager().deleteAccount(messagingAccount, session);
 
-        return new AJAXRequestResult(1);
+        return new AJAXRequestResult(Integer.valueOf(1));
     }
 
 }
