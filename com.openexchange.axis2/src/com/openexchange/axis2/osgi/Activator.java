@@ -46,8 +46,12 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.axis2.osgi;
 
+import java.util.LinkedList;
+import java.util.Queue;
+import org.osgi.framework.BundleActivator;
 import org.osgi.service.http.HttpService;
 import com.openexchange.axis2.internal.Axis2ServletInit;
 import com.openexchange.axis2.services.Axis2ServletServices;
@@ -60,6 +64,8 @@ import com.openexchange.osgi.HousekeepingActivator;
 public class Activator extends HousekeepingActivator {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(Activator.class);
+
+    private volatile Queue<BundleActivator> activators;
 
     /**
      * Initializes a new {@link Axis2ServletActivator}
@@ -81,9 +87,29 @@ public class Activator extends HousekeepingActivator {
              */
             Axis2ServletServices.setServiceLookup(this);
             Axis2ServletInit.getInstance().start();
+            /*
+             * Start-up 3rd party activators
+             */
+            final Queue<BundleActivator> activators = new LinkedList<BundleActivator>();
+            this.activators = activators;
+            {
+                final org.apache.axis2.osgi.internal.Activator axis2Activator = new org.apache.axis2.osgi.internal.Activator();
+                axis2Activator.start(context);
+                activators.offer(axis2Activator);
+            }
+            {
+                final org.apache.axiom.locator.Activator axiomActivator = new org.apache.axiom.locator.Activator();
+                axiomActivator.start(context);
+                activators.offer(axiomActivator);
+            }
+            {
+                org.apache.geronimo.osgi.locator.Activator geronimoActivator = new org.apache.geronimo.osgi.locator.Activator();
+                geronimoActivator.start(context);
+                activators.offer(geronimoActivator);
+            }
 
             // TODO: ConfigTree may be needed or not...
-            //serviceRegistration = context.registerService(PreferencesItemService.class.getName(), new MailFilterPreferencesItem(), null);
+            // serviceRegistration = context.registerService(PreferencesItemService.class.getName(), new MailFilterPreferencesItem(), null);
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
@@ -94,6 +120,15 @@ public class Activator extends HousekeepingActivator {
     @Override
     public void stopBundle() throws Exception {
         try {
+            final Queue<BundleActivator> activators = this.activators;
+            if (null != activators) {
+                BundleActivator activator;
+                while ((activator = activators.poll()) != null) {
+                    activator.stop(context);
+                }
+                this.activators = null;
+            }
+
             Axis2ServletInit.getInstance().stop();
             /*
              * Clear service registry
