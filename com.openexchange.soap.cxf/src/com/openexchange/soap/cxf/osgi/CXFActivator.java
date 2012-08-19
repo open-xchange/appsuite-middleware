@@ -133,19 +133,19 @@ public class CXFActivator extends HousekeepingActivator {
                         boolean servletRegistered = false;
                         boolean collectorOpened = false;
                         try {
-                            final CXFNonSpringServlet cxf = new CXFNonSpringServlet();
+                            final CXFNonSpringServlet cxfServlet = new CXFNonSpringServlet();
                             /*
                              * Register CXF Servlet
                              */
-                            httpService.registerServlet(ALIAS, cxf, null, null);
+                            httpService.registerServlet(ALIAS, cxfServlet, null, null);
                             LOG.info("Registered CXF Servlet under: " + ALIAS);
-                            httpService.registerServlet(ALIAS2, cxf, null, null);
+                            httpService.registerServlet(ALIAS2, cxfServlet, null, null);
                             LOG.info("Registered CXF Servlet under: " + ALIAS2);
                             servletRegistered = true;
                             /*
                              * Get CXF bus
                              */
-                            final Bus bus = cxf.getBus();
+                            final Bus bus = cxfServlet.getBus();
                             /*
                              * Add interceptors here
                              */
