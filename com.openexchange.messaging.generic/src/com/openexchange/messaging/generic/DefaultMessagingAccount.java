@@ -114,6 +114,9 @@ public class DefaultMessagingAccount implements MessagingAccount, ServiceAware {
             } catch (final Exception e) {
                 messagingService = null;
             }
+            if (null != messagingService) {
+                this.messagingService = messagingService;
+            }
         }
         return messagingService;
     }
