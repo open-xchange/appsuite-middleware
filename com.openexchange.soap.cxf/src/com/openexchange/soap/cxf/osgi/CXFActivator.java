@@ -141,7 +141,7 @@ public class CXFActivator extends HousekeepingActivator {
                             /*
                              * Add interceptors here
                              */
-                            bus.getInInterceptors().add(new RemoveGenericLabelledElementsInterceptor());
+                            //bus.getInInterceptors().add(new RemoveGenericLabelledElementsInterceptor());
                             /*
                              * Set properties
                              */
