@@ -98,11 +98,9 @@ public class WebserviceCollector implements ServiceListener {
         }
         final int type = event.getType();
         if (ServiceEvent.REGISTERED == type) {
-            final ServiceReference<?> ref = event.getServiceReference();
-            add(ref);
+            add(event.getServiceReference());
         } else if (ServiceEvent.UNREGISTERING == type) {
-            final ServiceReference<?> ref = event.getServiceReference();
-            remove(ref);
+            remove(event.getServiceReference());
         }
     }
 
