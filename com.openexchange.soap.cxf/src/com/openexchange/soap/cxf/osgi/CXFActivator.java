@@ -134,7 +134,7 @@ public class CXFActivator extends HousekeepingActivator {
                         boolean collectorOpened = false;
                         try {
                             /*
-                             * Register CXF Servlet
+                             * Create CXF Servlet
                              */
                             final CXFNonSpringServlet cxf = new CXFNonSpringServlet();
                             final Bus bus = cxf.getBus();
@@ -142,7 +142,17 @@ public class CXFActivator extends HousekeepingActivator {
                              * Add interceptors here
                              */
                             bus.getInInterceptors().add(new RemoveGenericLabelledElementsInterceptor());
+                            /*
+                             * Set properties
+                             */
+                            bus.setProperty("set-jaxb-validation-event-handler", Boolean.FALSE);
+                            /*
+                             * Apply as default bus
+                             */
                             BusFactory.setDefaultBus(bus);
+                            /*
+                             * Register CXF Servlet
+                             */
                             httpService.registerServlet(ALIAS, cxf, null, null);
                             LOG.info("Registered CXF Servlet under: " + ALIAS);
                             httpService.registerServlet(ALIAS2, cxf, null, null);
