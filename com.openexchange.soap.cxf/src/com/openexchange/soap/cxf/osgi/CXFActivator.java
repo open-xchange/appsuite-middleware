@@ -145,7 +145,7 @@ public class CXFActivator extends HousekeepingActivator {
                             /*
                              * Set properties
                              */
-                            bus.setProperty("set-jaxb-validation-event-handler", Boolean.FALSE);
+                            bus.setProperty("set-jaxb-validation-event-handler", Boolean.FALSE); // maybe "true" needs to be set instead of Boolean.FALSE
                             /*
                              * Apply as default bus
                              */
