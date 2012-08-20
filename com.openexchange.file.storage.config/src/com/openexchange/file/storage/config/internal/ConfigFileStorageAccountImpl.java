@@ -65,8 +65,6 @@ public class ConfigFileStorageAccountImpl extends DefaultFileStorageAccount impl
 
     private static final long serialVersionUID = -1711683802127778909L;
 
-    private String serviceId;
-
     /**
      * Initializes a new {@link ConfigFileStorageAccountImpl}.
      */
@@ -74,34 +72,14 @@ public class ConfigFileStorageAccountImpl extends DefaultFileStorageAccount impl
         super();
     }
 
-    /**
-     * Gets the service identifier.
-     *
-     * @return The service identifier
-     */
-    @Override
-    public String getServiceId() {
-        return serviceId;
-    }
-
-    /**
-     * Sets the service identifier.
-     *
-     * @param serviceId The service identifier to set
-     */
-    @Override
-    public void setServiceId(final String serviceId) {
-        this.serviceId = serviceId;
-    }
-
     @Override
     public Object clone() {
         try {
             final ConfigFileStorageAccountImpl clone = (ConfigFileStorageAccountImpl) super.clone();
             clone.setFileStorageService(null);
-            final Map<String, Object> thismap = getConfiguration();
+            final Map<String, Object> thismap = this.configuration;
             final Map<String, Object> clonedConfig = null == thismap ? null : new HashMap<String, Object>(thismap);
-            clone.setConfiguration(clonedConfig);
+            clone.configuration = clonedConfig;
             return clone;
         } catch (final CloneNotSupportedException e) {
             throw new InternalError("Clone not supported although Cloneable is implemented.");
