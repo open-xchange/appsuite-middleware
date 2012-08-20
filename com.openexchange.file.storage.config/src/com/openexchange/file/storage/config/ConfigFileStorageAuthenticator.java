@@ -49,7 +49,6 @@
 
 package com.openexchange.file.storage.config;
 
-import java.util.Map;
 import com.openexchange.exception.OXException;
 
 /**
@@ -78,11 +77,11 @@ public interface ConfigFileStorageAuthenticator {
     int getRanking();
 
     /**
-     * Sets the authentication properties to given configuration map.
+     * Sets the authentication properties to given account.
      * 
-     * @param configuration The configuration map
+     * @param account The account to apply authentication properties to
      * @throws OXException If setting authentication properties fails
      */
-    void setAuthenticationProperties(Map<String, Object> configuration) throws OXException;
+    void setAuthenticationProperties(ConfigFileStorageAccount account) throws OXException;
 
 }

@@ -54,6 +54,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.config.ConfigFileStorageAccount;
 import com.openexchange.session.Session;
 
 /**

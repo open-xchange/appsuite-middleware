@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.config.internal;
+package com.openexchange.file.storage.config;
 
 import java.util.HashMap;
 import java.util.Map;

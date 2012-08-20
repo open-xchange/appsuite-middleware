@@ -59,6 +59,7 @@ import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.config.ConfigFileStorageAccount;
 import com.openexchange.file.storage.config.ConfigFileStorageAuthenticator;
 import com.openexchange.session.Session;
 
@@ -150,7 +151,6 @@ public final class ConfigFileStorageAccountManager implements FileStorageAccount
     private ConfigFileStorageAccount cloneAndApplyService(final ConfigFileStorageAccount account, final Session session) throws OXException {
         final ConfigFileStorageAccount ret = (ConfigFileStorageAccount) account.clone();
         ret.setFileStorageService(service);
-        final Map<String, Object> configuration = ret.getConfiguration();
         /*-
          * Set login/password if authenticator is absent
          * 
@@ -159,6 +159,7 @@ public final class ConfigFileStorageAccountManager implements FileStorageAccount
         final ConfigFileStorageAuthenticator authenticator = getAuthenticator(serviceId);
         if (null == authenticator) {
             // Set login/password obtained from session
+            final Map<String, Object> configuration = ret.getConfiguration();
             {
                 final String tmp = (String) configuration.get(CONF_PROPERTY_LOGIN);
                 if (null == tmp) {
@@ -173,7 +174,7 @@ public final class ConfigFileStorageAccountManager implements FileStorageAccount
             }
         } else {
             // Set login/password through authenticator
-            authenticator.setAuthenticationProperties(configuration);
+            authenticator.setAuthenticationProperties(ret);
         }
         return ret;
     }

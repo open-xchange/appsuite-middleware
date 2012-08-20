@@ -63,6 +63,7 @@ import org.apache.commons.logging.Log;
 import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
+import com.openexchange.file.storage.config.ConfigFileStorageAccount;
 import com.openexchange.file.storage.config.ConfigFileStorageAuthenticator;
 
 /**
