@@ -19,3 +19,4 @@ Import-Package: com.openexchange.config,
  org.osgi.framework,
  org.osgi.util.tracker
 Bundle-Activator: com.openexchange.file.storage.config.osgi.ConfigFileStorageActivator
+Export-Package: com.openexchange.file.storage.config

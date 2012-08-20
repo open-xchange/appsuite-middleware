@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.config;
+package com.openexchange.file.storage.config.internal;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -58,10 +58,12 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import org.apache.commons.logging.Log;
 import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
+import com.openexchange.file.storage.config.ConfigFileStorageAuthenticator;
 
 /**
  * {@link ConfigFileStorageAccountParser} - Provides configured accounts parsed from a <i>.properties</i> file.
@@ -82,6 +84,8 @@ public final class ConfigFileStorageAccountParser {
         return INSTANCE;
     }
 
+    private final ConcurrentMap<ConfigFileStorageAuthenticator, ConfigFileStorageAuthenticator> authenticators;
+
     private volatile Map<String, Map<String, ConfigFileStorageAccount>> map;
 
     /**
@@ -89,7 +93,17 @@ public final class ConfigFileStorageAccountParser {
      */
     private ConfigFileStorageAccountParser() {
         super();
+        authenticators = new ConcurrentHashMap<ConfigFileStorageAuthenticator, ConfigFileStorageAuthenticator>(4);
         map = Collections.emptyMap();
+    }
+
+    /**
+     * Gets the authenticators' map.
+     * 
+     * @return The authenticators' map
+     */
+    public ConcurrentMap<ConfigFileStorageAuthenticator, ConfigFileStorageAuthenticator> getAuthenticators() {
+        return authenticators;
     }
 
     /**
@@ -170,7 +184,7 @@ public final class ConfigFileStorageAccountParser {
         this.map = m;
     }
 
-    private static ConfigFileStorageAccount parseAccount(final String id, final Properties properties) throws OXException {
+    private ConfigFileStorageAccount parseAccount(final String id, final Properties properties) throws OXException {
         final StringBuilder sb = new StringBuilder(PREFIX).append(id).append('.');
         final int resetLen = sb.length();
         /*

@@ -47,17 +47,19 @@
  *
  */
 
-package com.openexchange.file.storage.config;
+package com.openexchange.file.storage.config.internal;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.config.ConfigFileStorageAuthenticator;
 import com.openexchange.session.Session;
 
 /**
@@ -79,6 +81,11 @@ public final class ConfigFileStorageAccountManager implements FileStorageAccount
     private final FileStorageService service;
 
     /**
+     * The authenticators' map.
+     */
+    private final ConcurrentMap<ConfigFileStorageAuthenticator, ConfigFileStorageAuthenticator> authenticators;
+
+    /**
      * Initializes a new {@link ConfigFileStorageAccountManager}.
      */
     public ConfigFileStorageAccountManager(final FileStorageService service) {
@@ -88,6 +95,7 @@ public final class ConfigFileStorageAccountManager implements FileStorageAccount
         for (final ConfigFileStorageAccount account : ConfigFileStorageAccountParser.getInstance().getAccountsFor(serviceId).values()) {
             account.setFileStorageService(service);
         }
+        authenticators = ConfigFileStorageAccountParser.getInstance().getAuthenticators();
     }
 
     @Override
@@ -139,26 +147,45 @@ public final class ConfigFileStorageAccountManager implements FileStorageAccount
         return cloneAndApplyService(account, session);
     }
 
-    private ConfigFileStorageAccount cloneAndApplyService(final ConfigFileStorageAccount account, final Session session) {
+    private ConfigFileStorageAccount cloneAndApplyService(final ConfigFileStorageAccount account, final Session session) throws OXException {
         final ConfigFileStorageAccount ret = (ConfigFileStorageAccount) account.clone();
         ret.setFileStorageService(service);
         final Map<String, Object> configuration = ret.getConfiguration();
-        /*
-         * Set login/password if absent
+        /*-
+         * Set login/password if authenticator is absent
+         * 
+         * Check for an appropriate authenticator
          */
-        {
-            final String tmp = (String) configuration.get(CONF_PROPERTY_LOGIN);
-            if (null == tmp) {
-                configuration.put(CONF_PROPERTY_LOGIN, session.getLogin());
+        final ConfigFileStorageAuthenticator authenticator = getAuthenticator(serviceId);
+        if (null == authenticator) {
+            // Set login/password obtained from session
+            {
+                final String tmp = (String) configuration.get(CONF_PROPERTY_LOGIN);
+                if (null == tmp) {
+                    configuration.put(CONF_PROPERTY_LOGIN, session.getLogin());
+                }
             }
-        }
-        {
-            final String tmp = (String) configuration.get(CONF_PROPERTY_PASSWORD);
-            if (null == tmp) {
-                configuration.put(CONF_PROPERTY_PASSWORD, session.getPassword());
+            {
+                final String tmp = (String) configuration.get(CONF_PROPERTY_PASSWORD);
+                if (null == tmp) {
+                    configuration.put(CONF_PROPERTY_PASSWORD, session.getPassword());
+                }
             }
+        } else {
+            // Set login/password through authenticator
+            authenticator.setAuthenticationProperties(configuration);
         }
         return ret;
+    }
+
+    private ConfigFileStorageAuthenticator getAuthenticator(final String serviceId) {
+        ConfigFileStorageAuthenticator candidate = null;
+        for (final ConfigFileStorageAuthenticator authenticator : authenticators.keySet()) {
+            if (authenticator.handles(serviceId) && ((null == candidate) || (candidate.getRanking() < authenticator.getRanking()))) {
+                candidate = authenticator;
+            }
+        }
+        return candidate;
     }
 
     @Override

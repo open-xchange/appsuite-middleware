@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.config;
+package com.openexchange.file.storage.config.internal;
 
 import java.util.Map;
 import com.openexchange.exception.OXException;
