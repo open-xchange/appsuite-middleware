@@ -47,63 +47,35 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere;
+package com.openexchange.realtime.atmosphere.presence;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.MessageDispatcher;
-import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
+import static org.junit.Assert.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
 
 /**
- * {@link OXRTConversionHandler} - Handles Conversion of Stanzas for a given namespace by telling the Stanza payload the format it should
- * convert itslef into, getting the MessageDispatcher and delegating the further processing of the Stanza.
- * 
+ * {@link PresenceStatusToJSONConverterTest} - Test conversion from presence status to JSON.
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class OXRTConversionHandler implements OXRTHandler {
+public class PresenceStatusToJSONConverterTest {
 
-    public static ServiceLookup services;
-
-    private final String namespace, format;
-
-    /**
-     * Initializes a new {@link OXRTConversionHandler}.
-     * 
-     * @param namespace the namespace of Stanzas this OXRTConversionHandler can handle
-     * @param format the format of POJOs that incoming Stanzas should be converted to
-     */
-    public OXRTConversionHandler(String namespace, String format) {
-        this.namespace = namespace;
-        this.format = format;
+    @Before
+    public void setUp() throws Exception {
     }
 
-    @Override
-    public String getNamespace() {
-        return namespace;
-    }
-
-    @Override
-    public void incoming(Stanza stanza, ServerSession session) throws OXException {
-        stanza.setPayload(stanza.getPayload().to(format, session));
-        send(stanza, session);
-    }
-
-    @Override
-    public void outgoing(Stanza stanza, ServerSession session, StanzaSender sender) throws OXException {
-        stanza.setPayload(stanza.getPayload().to("json", session));
-        sender.send(stanza);
+    @After
+    public void tearDown() throws Exception {
     }
 
     /**
-     * Send the Stanza by getting the MessageDispatcher service and letting it handle the further processing of the Stanza.
-     * 
-     * @param stanza the stanza to send
-     * @param session the associated ServerSession
-     * @throws OXException when sending the Stanza fails
+     * Test conversion from presence status to JSON
      */
-    protected void send(Stanza stanza, ServerSession session) throws OXException {
-        services.getService(MessageDispatcher.class).send(stanza, session);
+    @Test
+    public void testConvert() {
+        fail("Not yet implemented");
     }
 
 }

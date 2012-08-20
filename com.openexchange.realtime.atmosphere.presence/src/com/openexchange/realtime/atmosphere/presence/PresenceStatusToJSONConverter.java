@@ -47,63 +47,52 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere;
+package com.openexchange.realtime.atmosphere.presence;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.conversion.simple.SimpleConverter;
+import com.openexchange.conversion.simple.SimplePayloadConverter;
+import com.openexchange.conversion.simple.SimplePayloadConverter.Quality;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.MessageDispatcher;
-import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.realtime.example.presence.PresenceStatus;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link OXRTConversionHandler} - Handles Conversion of Stanzas for a given namespace by telling the Stanza payload the format it should
- * convert itslef into, getting the MessageDispatcher and delegating the further processing of the Stanza.
+ * {@link PresenceStatusToJSONConverter}
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class OXRTConversionHandler implements OXRTHandler {
+public class PresenceStatusToJSONConverter implements SimplePayloadConverter {
 
-    public static ServiceLookup services;
-
-    private final String namespace, format;
-
-    /**
-     * Initializes a new {@link OXRTConversionHandler}.
-     * 
-     * @param namespace the namespace of Stanzas this OXRTConversionHandler can handle
-     * @param format the format of POJOs that incoming Stanzas should be converted to
-     */
-    public OXRTConversionHandler(String namespace, String format) {
-        this.namespace = namespace;
-        this.format = format;
+    @Override
+    public String getInputFormat() {
+        return "presenceStatus";
     }
 
     @Override
-    public String getNamespace() {
-        return namespace;
+    public String getOutputFormat() {
+        return "json";
     }
 
     @Override
-    public void incoming(Stanza stanza, ServerSession session) throws OXException {
-        stanza.setPayload(stanza.getPayload().to(format, session));
-        send(stanza, session);
+    public Quality getQuality() {
+        return Quality.GOOD;
     }
 
     @Override
-    public void outgoing(Stanza stanza, ServerSession session, StanzaSender sender) throws OXException {
-        stanza.setPayload(stanza.getPayload().to("json", session));
-        sender.send(stanza);
-    }
+    public Object convert(Object data, ServerSession session, SimpleConverter converter) throws OXException {
+        try {
+            PresenceStatus status = (PresenceStatus) data;
 
-    /**
-     * Send the Stanza by getting the MessageDispatcher service and letting it handle the further processing of the Stanza.
-     * 
-     * @param stanza the stanza to send
-     * @param session the associated ServerSession
-     * @throws OXException when sending the Stanza fails
-     */
-    protected void send(Stanza stanza, ServerSession session) throws OXException {
-        services.getService(MessageDispatcher.class).send(stanza, session);
+            JSONObject object = new JSONObject();
+            object.put("state", status.getState().name().toLowerCase());
+            object.put("message", status.getMessage());
+
+            return object;
+        } catch (JSONException x) {
+            throw OXException.general(x.getMessage());
+        }
     }
 
 }

@@ -46,49 +46,42 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.realtime.atmosphere.presence;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import static org.junit.Assert.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
-import com.openexchange.conversion.simple.SimpleConverter;
-import com.openexchange.conversion.simple.SimplePayloadConverter;
-import com.openexchange.conversion.simple.SimplePayloadConverter.Quality;
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.example.presence.PresenceStatus;
-import com.openexchange.tools.session.ServerSession;
 
-public class PresenceToJSONConverter implements SimplePayloadConverter {
+/**
+ * {@link JSONToPresenceStatusConverterTest} - Test conversion from JSON to presence status.
+ *
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ */
+public class JSONToPresenceStatusConverterTest {
 
-	@Override
-	public String getInputFormat() {
-		return "presenceStatus";
-	}
+    /**
+     * @throws java.lang.Exception
+     */
+    @Before
+    public void setUp() throws Exception {
+    }
 
-	@Override
-	public String getOutputFormat() {
-		return "json";
-	}
+    /**
+     * @throws java.lang.Exception
+     */
+    @After
+    public void tearDown() throws Exception {
+    }
 
-	@Override
-	public Quality getQuality() {
-		return Quality.GOOD;
-	}
-
-	@Override
-	public Object convert(Object data, ServerSession session,
-			SimpleConverter converter) throws OXException {
-		try {
-			PresenceStatus status = (PresenceStatus) data;
-			
-			JSONObject object = new JSONObject();
-			object.put("state", status.getState().name().toLowerCase());
-			object.put("message", status.getMessage());
-			
-			return object;
-		} catch (JSONException x) {
-			throw OXException.general(x.getMessage());
-		}
-	}
+    /**
+     * Test conversion from JSON to presence status.
+     */
+    @Test
+    public void testConvert() {
+        fail("Not yet implemented");
+    }
 
 }

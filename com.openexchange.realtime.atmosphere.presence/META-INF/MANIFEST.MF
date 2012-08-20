@@ -11,8 +11,9 @@ Import-Package: com.openexchange.conversion,
  com.openexchange.exception,
  com.openexchange.log,
  com.openexchange.osgi,
+ com.openexchange.realtime.atmosphere,
+ com.openexchange.realtime.example.presence,
  com.openexchange.tools.session,
  org.apache.commons.logging,
  org.json,
  org.osgi.framework
-Require-Bundle: org.junit
