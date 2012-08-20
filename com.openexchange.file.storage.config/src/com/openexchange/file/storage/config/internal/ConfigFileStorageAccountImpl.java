@@ -47,19 +47,70 @@
  *
  */
 
-package com.openexchange.file.storage.config;
+package com.openexchange.file.storage.config.internal;
 
+import java.util.HashMap;
+import java.util.Map;
 import com.openexchange.file.storage.FileStorageAccount;
-import com.openexchange.file.storage.ServiceAware;
+import com.openexchange.file.storage.config.ConfigFileStorageAccount;
+import com.openexchange.file.storage.generic.DefaultFileStorageAccount;
 
 /**
- * {@link ConfigFileStorageAccount} - The {@link Cloneable cloneable} pre-configured {@link FileStorageAccount}.
+ * {@link ConfigFileStorageAccountImpl} - The configuration {@link FileStorageAccount} implementation.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18.2
  */
-public interface ConfigFileStorageAccount extends FileStorageAccount, ServiceAware, Cloneable {
+public class ConfigFileStorageAccountImpl extends DefaultFileStorageAccount implements ConfigFileStorageAccount {
 
-    // Interface
+    private static final long serialVersionUID = -1711683802127778909L;
+
+    private String serviceId;
+
+    /**
+     * Initializes a new {@link ConfigFileStorageAccountImpl}.
+     */
+    public ConfigFileStorageAccountImpl() {
+        super();
+    }
+
+    /**
+     * Gets the service identifier.
+     *
+     * @return The service identifier
+     */
+    @Override
+    public String getServiceId() {
+        return serviceId;
+    }
+
+    /**
+     * Sets the service identifier.
+     *
+     * @param serviceId The service identifier to set
+     */
+    @Override
+    public void setServiceId(final String serviceId) {
+        this.serviceId = serviceId;
+    }
+
+    @Override
+    public Object clone() {
+        try {
+            final ConfigFileStorageAccountImpl clone = (ConfigFileStorageAccountImpl) super.clone();
+            clone.setFileStorageService(null);
+            final Map<String, Object> thismap = getConfiguration();
+            final Map<String, Object> clonedConfig = null == thismap ? null : new HashMap<String, Object>(thismap);
+            clone.setConfiguration(clonedConfig);
+            return clone;
+        } catch (final CloneNotSupportedException e) {
+            throw new InternalError("Clone not supported although Cloneable is implemented.");
+        }
+    }
+
+    @Override
+    public String toString() {
+        return new StringBuilder("ConfigFileStorageAccount ( serviceId = ").append(this.serviceId).append(" )").toString();
+    }
 
 }

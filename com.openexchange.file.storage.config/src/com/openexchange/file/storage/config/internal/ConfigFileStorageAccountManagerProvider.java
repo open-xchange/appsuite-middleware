@@ -77,7 +77,7 @@ public final class ConfigFileStorageAccountManagerProvider implements FileStorag
 
     @Override
     public boolean supports(final FileStorageService service) {
-        final Map<String, ConfigFileStorageAccount> accounts = parser.getAccountsFor(service.getId());
+        final Map<String, ConfigFileStorageAccountImpl> accounts = parser.getAccountsFor(service.getId());
         return (null != accounts && !accounts.isEmpty());
     }
 

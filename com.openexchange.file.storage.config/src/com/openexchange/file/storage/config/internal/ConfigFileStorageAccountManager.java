@@ -93,7 +93,7 @@ public final class ConfigFileStorageAccountManager implements FileStorageAccount
         super();
         serviceId = service.getId();
         this.service = service;
-        for (final ConfigFileStorageAccount account : ConfigFileStorageAccountParser.getInstance().getAccountsFor(serviceId).values()) {
+        for (final ConfigFileStorageAccountImpl account : ConfigFileStorageAccountParser.getInstance().getAccountsFor(serviceId).values()) {
             account.setFileStorageService(service);
         }
         authenticators = ConfigFileStorageAccountParser.getInstance().getAuthenticators();
@@ -116,12 +116,12 @@ public final class ConfigFileStorageAccountManager implements FileStorageAccount
 
     @Override
     public List<FileStorageAccount> getAccounts(final Session session) throws OXException {
-        final Map<String, ConfigFileStorageAccount> accounts = ConfigFileStorageAccountParser.getInstance().getAccountsFor(serviceId);
+        final Map<String, ConfigFileStorageAccountImpl> accounts = ConfigFileStorageAccountParser.getInstance().getAccountsFor(serviceId);
         if (null == accounts || accounts.isEmpty()) {
             return Collections.<FileStorageAccount> emptyList();
         }
         final List<FileStorageAccount> ret = new ArrayList<FileStorageAccount>(accounts.size());
-        for (final ConfigFileStorageAccount account : accounts.values()) {
+        for (final ConfigFileStorageAccountImpl account : accounts.values()) {
             ret.add(cloneAndApplyService(account, session));
         }
         return ret;
@@ -129,7 +129,7 @@ public final class ConfigFileStorageAccountManager implements FileStorageAccount
 
     @Override
     public FileStorageAccount getAccount(final String id, final Session session) throws OXException {
-        final Map<String, ConfigFileStorageAccount> accounts = ConfigFileStorageAccountParser.getInstance().getAccountsFor(serviceId);
+        final Map<String, ConfigFileStorageAccountImpl> accounts = ConfigFileStorageAccountParser.getInstance().getAccountsFor(serviceId);
         if (null == accounts) {
             throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(
                 id,
@@ -137,7 +137,7 @@ public final class ConfigFileStorageAccountManager implements FileStorageAccount
                 Integer.valueOf(session.getUserId()),
                 Integer.valueOf(session.getContextId()));
         }
-        final ConfigFileStorageAccount account = accounts.get(id);
+        final ConfigFileStorageAccountImpl account = accounts.get(id);
         if (null == account) {
             throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(
                 id,
@@ -148,8 +148,8 @@ public final class ConfigFileStorageAccountManager implements FileStorageAccount
         return cloneAndApplyService(account, session);
     }
 
-    private ConfigFileStorageAccount cloneAndApplyService(final ConfigFileStorageAccount account, final Session session) throws OXException {
-        final ConfigFileStorageAccount ret = (ConfigFileStorageAccount) account.clone();
+    private ConfigFileStorageAccount cloneAndApplyService(final ConfigFileStorageAccountImpl account, final Session session) throws OXException {
+        final ConfigFileStorageAccountImpl ret = (ConfigFileStorageAccountImpl) account.clone();
         ret.setFileStorageService(service);
         /*-
          * Set login/password if authenticator is absent

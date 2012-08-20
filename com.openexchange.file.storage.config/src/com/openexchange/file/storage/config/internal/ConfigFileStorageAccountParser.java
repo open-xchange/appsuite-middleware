@@ -87,7 +87,7 @@ public final class ConfigFileStorageAccountParser {
 
     private final ConcurrentMap<ConfigFileStorageAuthenticator, ConfigFileStorageAuthenticator> authenticators;
 
-    private volatile Map<String, Map<String, ConfigFileStorageAccount>> map;
+    private volatile Map<String, Map<String, ConfigFileStorageAccountImpl>> map;
 
     /**
      * Initializes a new {@link ConfigFileStorageAccountParser}.
@@ -121,9 +121,9 @@ public final class ConfigFileStorageAccountParser {
      * @return The first matching account or <code>null</code>
      */
     public ConfigFileStorageAccount get(final String accountId) {
-        for (Map.Entry<String, Map<String, ConfigFileStorageAccount>> entry : map.entrySet()) {
-            Map<String, ConfigFileStorageAccount> accounts = entry.getValue();
-            ConfigFileStorageAccount fileStorageAccount = accounts.get(accountId);
+        for (final Map.Entry<String, Map<String, ConfigFileStorageAccountImpl>> entry : map.entrySet()) {
+            final Map<String, ConfigFileStorageAccountImpl> accounts = entry.getValue();
+            final ConfigFileStorageAccountImpl fileStorageAccount = accounts.get(accountId);
             if (null != fileStorageAccount) {
                 // A configured account available
                 return fileStorageAccount;
@@ -138,7 +138,7 @@ public final class ConfigFileStorageAccountParser {
      * @param serviceId The service identifier
      * @return The configured accounts
      */
-    public Map<String, ConfigFileStorageAccount> getAccountsFor(final String serviceId) {
+    public Map<String, ConfigFileStorageAccountImpl> getAccountsFor(final String serviceId) {
         return map.get(serviceId);
     }
 
@@ -166,14 +166,14 @@ public final class ConfigFileStorageAccountParser {
         /*
          * Get the accounts for identifiers
          */
-        final Map<String, Map<String, ConfigFileStorageAccount>> m = new ConcurrentHashMap<String, Map<String, ConfigFileStorageAccount>>();
+        final Map<String, Map<String, ConfigFileStorageAccountImpl>> m = new ConcurrentHashMap<String, Map<String, ConfigFileStorageAccountImpl>>();
         for (final String id : ids) {
             try {
-                final ConfigFileStorageAccount account = parseAccount(id, properties);
+                final ConfigFileStorageAccountImpl account = parseAccount(id, properties);
                 final String serviceId = account.getServiceId();
-                Map<String, ConfigFileStorageAccount> map = m.get(serviceId);
+                Map<String, ConfigFileStorageAccountImpl> map = m.get(serviceId);
                 if (null == map) {
-                    map = new ConcurrentHashMap<String, ConfigFileStorageAccount>(2);
+                    map = new ConcurrentHashMap<String, ConfigFileStorageAccountImpl>(2);
                     m.put(serviceId, map);
                 }
                 map.put(account.getId(), account);
@@ -185,13 +185,13 @@ public final class ConfigFileStorageAccountParser {
         this.map = m;
     }
 
-    private ConfigFileStorageAccount parseAccount(final String id, final Properties properties) throws OXException {
+    private ConfigFileStorageAccountImpl parseAccount(final String id, final Properties properties) throws OXException {
         final StringBuilder sb = new StringBuilder(PREFIX).append(id).append('.');
         final int resetLen = sb.length();
         /*
          * Create account
          */
-        final ConfigFileStorageAccount account = new ConfigFileStorageAccount();
+        final ConfigFileStorageAccountImpl account = new ConfigFileStorageAccountImpl();
         account.setId(id);
         /*
          * Parse display name
