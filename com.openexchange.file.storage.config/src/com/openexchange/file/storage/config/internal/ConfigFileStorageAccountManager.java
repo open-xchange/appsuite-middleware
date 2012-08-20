@@ -179,6 +179,12 @@ public final class ConfigFileStorageAccountManager implements FileStorageAccount
         return ret;
     }
 
+    /**
+     * Gets the appropriate and highest-ranked authenticator for given service identifier.
+     * 
+     * @param serviceId The service identifier
+     * @return The appropriate and highest-ranked authenticator or <code>null</code> if none available
+     */
     private ConfigFileStorageAuthenticator getAuthenticator(final String serviceId) {
         ConfigFileStorageAuthenticator candidate = null;
         for (final ConfigFileStorageAuthenticator authenticator : authenticators.keySet()) {
