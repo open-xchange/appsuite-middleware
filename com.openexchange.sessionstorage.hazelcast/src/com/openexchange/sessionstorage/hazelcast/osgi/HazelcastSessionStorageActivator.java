@@ -58,8 +58,10 @@ import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.sessionstorage.SessionStorageService;
+import com.openexchange.sessionstorage.hazelcast.HazelcastSessionStorageConfiguration;
 import com.openexchange.sessionstorage.hazelcast.HazelcastSessionStorageService;
 import com.openexchange.sessionstorage.hazelcast.exceptions.OXHazelcastSessionStorageExceptionCodes;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link HazelcastSessionStorageActivator}
@@ -78,11 +80,13 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
 
     private HazelcastInstance hazelcast;
 
+    private TimerService timerService;
+
     private ServiceRegistry registry;
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, CryptoService.class, HazelcastInstance.class };
+        return new Class<?>[] { ConfigurationService.class, CryptoService.class, HazelcastInstance.class, TimerService.class };
     }
 
     @Override
@@ -91,11 +95,14 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
         configService = getService(ConfigurationService.class);
         cryptoService = getService(CryptoService.class);
         hazelcast = getService(HazelcastInstance.class);
+        timerService = getService(TimerService.class);
         registry = HazelcastSessionStorageServiceRegistry.getRegistry();
         registry.addService(ConfigurationService.class, configService);
         registry.addService(CryptoService.class, cryptoService);
         registry.addService(HazelcastInstance.class, hazelcast);
+        registry.addService(TimerService.class, timerService);
         boolean enabled = configService.getBoolProperty("com.openexchange.sessionstorage.hazelcast.enabled", false);
+        long lifetime = configService.getIntProperty("com.openexchange.sessionstorage.hazelcast.defaultLifetime", 604800);
         if (enabled) {
             String encryptionKey = configService.getProperty("com.openexchange.sessionstorage.hazelcast.encryptionKey");
             if (encryptionKey == null) {
@@ -103,7 +110,12 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
                 LOG.error(e.getMessage(), e);
                 throw e;
             }
-            service = new HazelcastSessionStorageService();
+            HazelcastSessionStorageConfiguration config = new HazelcastSessionStorageConfiguration(
+                encryptionKey,
+                lifetime,
+                cryptoService,
+                timerService);
+            service = new HazelcastSessionStorageService(config);
             registerService(SessionStorageService.class, service);
         }
     }
@@ -113,6 +125,7 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
         LOG.info("Stopping bundle: com.openexchange.sessionstorage.hazelcast");
         if (service != null) {
             service.cleanUp();
+            service.removeCleanupTask();
             unregisterServices();
         }
         closeTrackers();
