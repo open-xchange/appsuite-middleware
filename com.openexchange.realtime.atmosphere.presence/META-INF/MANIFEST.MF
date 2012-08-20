@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Atmosphere Presence Bundle
+Bundle-SymbolicName: com.openexchange.realtime.atmosphere.presence
+Bundle-Version: 6.22.0.0
+Bundle-Activator: com.openexchange.realtime.atmosphere.presence.osgi.AtmospherePresenceActivator
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.conversion,
+ com.openexchange.conversion.simple,
+ com.openexchange.exception,
+ com.openexchange.log,
+ com.openexchange.osgi,
+ com.openexchange.tools.session,
+ org.apache.commons.logging,
+ org.json,
+ org.osgi.framework
+Require-Bundle: org.junit
