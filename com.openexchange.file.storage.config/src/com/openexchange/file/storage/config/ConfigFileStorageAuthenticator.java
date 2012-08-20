@@ -50,6 +50,7 @@
 package com.openexchange.file.storage.config;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
  * {@link ConfigFileStorageAuthenticator} - Sets the authentication properties for a pre-configured account of a certain service.
@@ -80,8 +81,9 @@ public interface ConfigFileStorageAuthenticator {
      * Sets the authentication properties to given account.
      * 
      * @param account The account to apply authentication properties to
+     * @param session The session of the associated user
      * @throws OXException If setting authentication properties fails
      */
-    void setAuthenticationProperties(ConfigFileStorageAccount account) throws OXException;
+    void setAuthenticationProperties(ConfigFileStorageAccount account, Session session) throws OXException;
 
 }

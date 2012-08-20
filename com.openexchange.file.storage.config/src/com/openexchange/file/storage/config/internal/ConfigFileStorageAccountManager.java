@@ -174,7 +174,7 @@ public final class ConfigFileStorageAccountManager implements FileStorageAccount
             }
         } else {
             // Set login/password through authenticator
-            authenticator.setAuthenticationProperties(ret);
+            authenticator.setAuthenticationProperties(ret, session);
         }
         return ret;
     }
