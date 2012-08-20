@@ -100,6 +100,11 @@ public final class CMISConstants implements FileStorageConstants {
     public static final String CMIS_TIMEOUT = "timeout";
 
     /**
+     * The configuration property name for binding.
+     */
+    public static final String CMIS_BINDING = "binding";
+
+    /**
      * Initializes a new {@link CMISConstants}.
      */
     private CMISConstants() {

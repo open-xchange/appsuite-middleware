@@ -55,6 +55,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.chemistry.opencmis.client.api.Repository;
 import org.apache.chemistry.opencmis.client.api.SessionFactory;
+import org.apache.chemistry.opencmis.client.bindings.CmisBindingFactory;
 import org.apache.chemistry.opencmis.client.runtime.SessionFactoryImpl;
 import org.apache.chemistry.opencmis.commons.SessionParameter;
 import org.apache.chemistry.opencmis.commons.enums.BindingType;
@@ -92,6 +93,8 @@ public final class CMISAccountAccess implements FileStorageAccountAccess {
     private final String password;
 
     private final String repository;
+    
+    private final String binding;
 
     private final boolean sendBasicAuth;
 
@@ -118,13 +121,23 @@ public final class CMISAccountAccess implements FileStorageAccountAccess {
         this.account = account;
         this.session = session;
         final Map<String, Object> configuration = account.getConfiguration();
-        final String repository = (String) configuration.get(CMISConstants.CMIS_REPOSITORY);
-        this.repository = repository == null ? "" : repository;
+        String tmp = (String) configuration.get(CMISConstants.CMIS_REPOSITORY);
+        this.repository = tmp == null ? "" : tmp;
+        tmp = (String) configuration.get(CMISConstants.CMIS_BINDING);
+        this.binding = null == tmp ? "atompub" : tmp;
         username = (String) configuration.get(CMISConstants.CMIS_LOGIN);
         password = (String) configuration.get(CMISConstants.CMIS_PASSWORD);
         sendBasicAuth = isTrue(configuration.get(CMISConstants.CMIS_AUTH_HTTP_BASIC));
         readTimeout = parseInt(configuration.get(CMISConstants.CMIS_TIMEOUT), -1);
         this.service = service;
+    }
+
+    private boolean useAtomPub() {
+        return "atompub".equalsIgnoreCase(binding);
+    }
+
+    private boolean useWebService() {
+        return "webservice".equalsIgnoreCase(binding);
     }
 
     private static int parseInt(Object value, int defaultValue) {
@@ -176,12 +189,6 @@ public final class CMISAccountAccess implements FileStorageAccountAccess {
                 }
                 url = url.trim();
                 /*
-                 * Ensure ending slash character
-                 */
-                if (!url.endsWith("/")) {
-                    url = url + '/';
-                }
-                /*
                  * Add username/password to URL
                  */
                 rootUrl = url;
@@ -199,14 +206,43 @@ public final class CMISAccountAccess implements FileStorageAccountAccess {
                 /*
                  * Connection settings
                  */
-                parameters.put(SessionParameter.ATOMPUB_URL, rootUrl);
-                parameters.put(SessionParameter.BINDING_TYPE, BindingType.ATOMPUB.value());
-                /*
-                 * If NTLM is enabled on SharePoint, you have to activate the OpenCMIS NTLM authentication provider.
-                 */
-                //parameters.put(SessionParameter.AUTHENTICATION_PROVIDER_CLASS, CmisBindingFactory.NTLM_AUTHENTICATION_PROVIDER);
-                parameters.put(SessionParameter.AUTH_HTTP_BASIC, Boolean.toString(sendBasicAuth));
-                parameters.put(SessionParameter.COOKIES, "true");
+                if (useAtomPub()) {
+                    parameters.put(SessionParameter.ATOMPUB_URL, rootUrl);
+                    parameters.put(SessionParameter.BINDING_TYPE, BindingType.ATOMPUB.value());
+                    /*-
+                     * If NTLM is enabled on SharePoint, you have to activate the OpenCMIS NTLM authentication provider.
+                     * 
+                     * See: http://chemistry.apache.org/java/developing/dev-repository-specific-notes.html
+                     * See: http://technet.microsoft.com/en-us/library/ff934619.aspx
+                     * 
+                     * Something like:
+                     * org.apache.chemistry.opencmis.user=xyz
+                     * org.apache.chemistry.opencmis.password=xyz
+                     * org.apache.chemistry.opencmis.binding.spi.type=atompub
+                     * org.apache.chemistry.opencmis.binding.atompub.url=http://spserver/_vti_bin/cmis/rest/60dae9c3-b9b0-4cc7-90e4-3af5b6ff25f6?getrepositoryinfo
+                     * org.apache.chemistry.opencmis.session.repository.id=60dae9c3-b9b0-4cc7-90e4-3af5b6ff25f6
+                     * 
+                     * http://spserver/_vti_bin/CMISSoapwsdl.aspx
+                     */
+                    //parameters.put(SessionParameter.AUTHENTICATION_PROVIDER_CLASS, CmisBindingFactory.NTLM_AUTHENTICATION_PROVIDER);
+                    parameters.put(SessionParameter.AUTH_HTTP_BASIC, Boolean.toString(sendBasicAuth));
+                    parameters.put(SessionParameter.COOKIES, "true");
+                } else if (useWebService()) {
+                    parameters.put(SessionParameter.BINDING_TYPE, BindingType.WEBSERVICES.value());
+                    parameters.put(SessionParameter.WEBSERVICES_ACL_SERVICE, rootUrl);
+                    parameters.put(SessionParameter.WEBSERVICES_DISCOVERY_SERVICE, rootUrl);
+                    parameters.put(SessionParameter.WEBSERVICES_MULTIFILING_SERVICE, rootUrl);
+                    parameters.put(SessionParameter.WEBSERVICES_NAVIGATION_SERVICE, rootUrl);
+                    parameters.put(SessionParameter.WEBSERVICES_OBJECT_SERVICE, rootUrl);
+                    parameters.put(SessionParameter.WEBSERVICES_POLICY_SERVICE, rootUrl);
+                    parameters.put(SessionParameter.WEBSERVICES_RELATIONSHIP_SERVICE, rootUrl);
+                    parameters.put(SessionParameter.WEBSERVICES_REPOSITORY_SERVICE, rootUrl);
+                    parameters.put(SessionParameter.WEBSERVICES_VERSIONING_SERVICE, rootUrl);
+                    parameters.put(SessionParameter.AUTHENTICATION_PROVIDER_CLASS, CmisBindingFactory.NTLM_AUTHENTICATION_PROVIDER);
+                    parameters.put(SessionParameter.AUTH_HTTP_BASIC, "true");
+                    parameters.put(SessionParameter.AUTH_SOAP_USERNAMETOKEN, "true");
+                    parameters.put(SessionParameter.COOKIES, "true");
+                }
                 /*
                  * Timeout
                  */
