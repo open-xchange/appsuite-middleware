@@ -51,6 +51,7 @@ package com.openexchange.contact.storage.ldap.osgi;
 
 import org.apache.commons.logging.Log;
 import com.openexchange.caching.CacheService;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.contact.storage.ContactStorage;
 import com.openexchange.contact.storage.ldap.config.LdapContactStorageFactory;
 import com.openexchange.contact.storage.ldap.database.LdapCreateTableService;
@@ -85,7 +86,8 @@ public class LdapContactStorageActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, ContextService.class, UserService.class, TimerService.class, CacheService.class };
+        return new Class<?>[] { DatabaseService.class, ContextService.class, UserService.class, TimerService.class, 
+            CacheService.class, ConfigurationService.class };
     }
 
     @Override

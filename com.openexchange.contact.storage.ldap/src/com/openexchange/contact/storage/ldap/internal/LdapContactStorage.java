@@ -242,7 +242,7 @@ public class LdapContactStorage extends DefaultContactStorage {
         SingleSearchTerm term = new SingleSearchTerm(SingleOperation.GREATER_THAN);
         term.addOperand(new ContactFieldOperand(ContactField.LAST_MODIFIED));
         term.addOperand(new ConstantOperand<Date>(since));
-        return this.search(session, term, fields, sortOptions);
+        return getSearchIterator(search(session, term, fields, sortOptions, false));
     }
     
     protected <O> SearchIterator<Contact> doSearch(Session session, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException {
