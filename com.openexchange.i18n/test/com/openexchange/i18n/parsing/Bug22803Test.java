@@ -67,7 +67,7 @@ public class Bug22803Test {
     public void testWithTab() throws UnsupportedEncodingException, OXException {
         Translations translations = new POParser().parse(new ByteArrayInputStream(PO_CONTENTS.getBytes("UTF-8")), "Bug22803Test");
         String actual = translations.translate("Date range in search must contain 2 and not %d values.");
-        assertEquals("Translation is wrong.", "Zakres dat w wyszukiwaniu musi zawierać dwie wartości. Aktualna liczba wartości: %d. \\t", actual);
+        assertEquals("Translation is wrong.", "Zakres dat w wyszukiwaniu musi zawiera\u0107 dwie warto\u015bci. Aktualna liczba warto\u015bci: %d. \\t", actual);
     }
 
     private static final String PO_CONTENTS = "msgid \"\"\n" 
@@ -75,6 +75,6 @@ public class Bug22803Test {
         + "\n"
         + "msgid \"Date range in search must contain 2 and not %d values.\"\n"
         + "msgstr \"\"\n"
-        + "\"Zakres dat w wyszukiwaniu musi zawierać dwie wartości. Aktualna liczba \"\n"
-        + "\"wartości: %d. \\t\"\n";
+        + "\"Zakres dat w wyszukiwaniu musi zawiera\u0107 dwie warto\u015bci. Aktualna liczba \"\n"
+        + "\"warto\u015bci: %d. \\t\"\n";
 }
