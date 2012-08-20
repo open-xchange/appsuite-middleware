@@ -8,6 +8,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.config,
  com.openexchange.exception,
  com.openexchange.file.storage,
+ com.openexchange.file.storage.config,
  com.openexchange.file.storage.generic,
  com.openexchange.file.storage.registry,
  com.openexchange.groupware,
@@ -19,4 +20,3 @@ Import-Package: com.openexchange.config,
  org.osgi.framework,
  org.osgi.util.tracker
 Bundle-Activator: com.openexchange.file.storage.config.osgi.ConfigFileStorageActivator
-Export-Package: com.openexchange.file.storage.config
