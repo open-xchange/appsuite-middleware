@@ -56,11 +56,8 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
-
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
-
 import com.openexchange.carddav.GroupwareCarddavFactory;
 import com.openexchange.carddav.Tools;
 import com.openexchange.carddav.mapping.CardDAVMapper;
@@ -71,7 +68,6 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.tools.mappings.MappedTruncation;
 import com.openexchange.groupware.tools.mappings.Mapping;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitObject;
@@ -412,22 +408,22 @@ public class ContactResource extends CardDAVResource {
         StringBuilder stringBuilder = new StringBuilder();
         String name = this.getDisplayName();
         stringBuilder
-        	.append("BEGIN:VCARD\n")
-        	.append("VERSION:3.0\n")
-        	.append("X-ADDRESSBOOKSERVER-KIND:group\n")
-        	.append("N:").append(name).append('\n')
-        	.append("FN:").append(name).append('\n')
-        	.append("UID:").append(this.getUID()).append('\n')
+        	.append("BEGIN:VCARD\r\n")
+        	.append("VERSION:3.0\r\n")
+        	.append("X-ADDRESSBOOKSERVER-KIND:group\r\n")
+        	.append("N:").append(name).append("\r\n")
+        	.append("FN:").append(name).append("\r\n")
+        	.append("UID:").append(this.getUID()).append("\r\n")
         ;
         try {
             List<String> uids = this.resolveMembers(contact.getDistributionList());
             for (String uid : uids) {
-                stringBuilder.append("X-ADDRESSBOOKSERVER-MEMBER:urn:uuid:").append(uid).append('\n');
+                stringBuilder.append("X-ADDRESSBOOKSERVER-MEMBER:urn:uuid:").append(uid).append("\r\n");
             }
         } catch (final OXException e) {
         	throw protocolException(e);
         }
-        stringBuilder.append("END:VCARD");
+        stringBuilder.append("END:VCARD\r\n");
         return stringBuilder.toString();
 	}
 
