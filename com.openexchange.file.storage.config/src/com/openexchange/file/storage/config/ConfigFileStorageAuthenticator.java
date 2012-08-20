@@ -71,7 +71,7 @@ public interface ConfigFileStorageAuthenticator {
      * Gets this authenticator's ranking.
      * <p>
      * The default ranking is zero (<tt>0</tt>). An authenticator with a ranking of {@code Integer.MAX_VALUE} is very likely to be returned
-     * as the default service, whereas an authenticator with a ranking of {@code Integer.MIN_VALUE} is very unlikely to be returned.
+     * as the default authenticator, whereas an authenticator with a ranking of {@code Integer.MIN_VALUE} is very unlikely to be returned.
      * 
      * @return The ranking
      */
