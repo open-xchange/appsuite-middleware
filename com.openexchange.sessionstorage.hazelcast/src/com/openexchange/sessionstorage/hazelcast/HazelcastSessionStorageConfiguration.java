@@ -47,56 +47,51 @@
  *
  */
 
-package com.openexchange.file.storage.config;
+package com.openexchange.sessionstorage.hazelcast;
 
-import java.util.Map;
-import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.FileStorageAccountManager;
-import com.openexchange.file.storage.FileStorageAccountManagerProvider;
-import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.session.Session;
+import com.openexchange.crypto.CryptoService;
+import com.openexchange.timer.TimerService;
 
 /**
- * {@link ConfigFileStorageAccountManagerProvider} - The config account manager provider.
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since Open-Xchange v6.18.2
+ * {@link HazelcastSessionStorageConfiguration}
+ * 
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public final class ConfigFileStorageAccountManagerProvider implements FileStorageAccountManagerProvider {
+public class HazelcastSessionStorageConfiguration {
 
-    private final ConfigFileStorageAccountParser parser;
+    private final String ENCRYPTION_KEY;
+
+    private final long LIFETIME;
+
+    private final CryptoService cryptoService;
+
+    private final TimerService timerService;
 
     /**
-     * Initializes a new {@link ConfigFileStorageAccountManagerProvider}.
+     * Initializes a new {@link HazelcastSessionStorageConfiguration}.
      */
-    public ConfigFileStorageAccountManagerProvider() {
+    public HazelcastSessionStorageConfiguration(String encryptionKey, long lifetime, CryptoService cryptoService, TimerService timerService) {
         super();
-        parser = ConfigFileStorageAccountParser.getInstance();
+        ENCRYPTION_KEY = encryptionKey;
+        LIFETIME = lifetime;
+        this.cryptoService = cryptoService;
+        this.timerService = timerService;
     }
 
-    @Override
-    public boolean supports(final FileStorageService service) {
-        final Map<String, ConfigFileStorageAccount> accounts = parser.getAccountsFor(service.getId());
-        return (null != accounts && !accounts.isEmpty());
+    public String getEncryptionKey() {
+        return ENCRYPTION_KEY;
     }
 
-    @Override
-    public FileStorageAccountManager getAccountManagerFor(final FileStorageService service) throws OXException {
-        return new ConfigFileStorageAccountManager(service);
+    public long getLifetime() {
+        return LIFETIME;
     }
 
-    @Override
-    public int getRanking() {
-        return 10;
+    public CryptoService getCryptoService() {
+        return cryptoService;
     }
 
-    @Override
-    public FileStorageAccountManager getAccountManager(String accountId, Session session) throws OXException {
-        ConfigFileStorageAccount storageAccount = parser.get(accountId);
-        if (null == storageAccount) {
-            return null;
-        }
-        return new ConfigFileStorageAccountManager(storageAccount.getFileStorageService());
+    public TimerService getTimerService() {
+        return timerService;
     }
 
 }

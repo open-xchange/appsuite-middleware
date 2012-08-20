@@ -47,26 +47,57 @@
  *
  */
 
-package com.openexchange.i18n;
+package com.openexchange.file.storage.config.internal;
 
-import com.openexchange.i18n.parsing.Bug22803Test;
-import junit.framework.JUnit4TestAdapter;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.util.Map;
+import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageAccountManager;
+import com.openexchange.file.storage.FileStorageAccountManagerProvider;
+import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.config.ConfigFileStorageAccount;
+import com.openexchange.session.Session;
 
 /**
- * @author <a href="mailto:marcus.klein@open-xchange.org">Marcus Klein</a>
+ * {@link ConfigFileStorageAccountManagerProvider} - The config account manager provider.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since Open-Xchange v6.18.2
  */
-public class UnitTests {
+public final class ConfigFileStorageAccountManagerProvider implements FileStorageAccountManagerProvider {
 
-    private UnitTests() {
+    private final ConfigFileStorageAccountParser parser;
+
+    /**
+     * Initializes a new {@link ConfigFileStorageAccountManagerProvider}.
+     */
+    public ConfigFileStorageAccountManagerProvider() {
         super();
+        parser = ConfigFileStorageAccountParser.getInstance();
     }
 
-    public static Test suite() {
-        final TestSuite suite = new TestSuite();
-        suite.addTestSuite(TranslationToI18NAdapterTest.class);
-        suite.addTest(new JUnit4TestAdapter(Bug22803Test.class));
-        return suite;
+    @Override
+    public boolean supports(final FileStorageService service) {
+        final Map<String, ConfigFileStorageAccountImpl> accounts = parser.getAccountsFor(service.getId());
+        return (null != accounts && !accounts.isEmpty());
     }
+
+    @Override
+    public FileStorageAccountManager getAccountManagerFor(final FileStorageService service) throws OXException {
+        return new ConfigFileStorageAccountManager(service);
+    }
+
+    @Override
+    public int getRanking() {
+        return 10;
+    }
+
+    @Override
+    public FileStorageAccountManager getAccountManager(String accountId, Session session) throws OXException {
+        ConfigFileStorageAccount storageAccount = parser.get(accountId);
+        if (null == storageAccount) {
+            return null;
+        }
+        return new ConfigFileStorageAccountManager(storageAccount.getFileStorageService());
+    }
+
 }

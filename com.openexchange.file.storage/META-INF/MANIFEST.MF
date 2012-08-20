@@ -24,6 +24,7 @@ Import-Package: com.openexchange.datatypes.genericonf,
  org.osgi.util.tracker
 Bundle-Activator: com.openexchange.file.storage.osgi.FileStorageActivator
 Export-Package: com.openexchange.file.storage,
+ com.openexchange.file.storage.config,
  com.openexchange.file.storage.meta,
  com.openexchange.file.storage.parse,
  com.openexchange.file.storage.registry

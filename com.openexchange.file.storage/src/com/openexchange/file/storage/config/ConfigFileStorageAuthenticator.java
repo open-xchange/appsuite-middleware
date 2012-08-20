@@ -49,67 +49,41 @@
 
 package com.openexchange.file.storage.config;
 
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.file.storage.FileStorageAccount;
-import com.openexchange.file.storage.generic.DefaultFileStorageAccount;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
- * {@link ConfigFileStorageAccount} - The configuration {@link FileStorageAccount} implementation.
- *
+ * {@link ConfigFileStorageAuthenticator} - Sets the authentication properties for a pre-configured account of a certain service.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since Open-Xchange v6.18.2
  */
-public class ConfigFileStorageAccount extends DefaultFileStorageAccount implements Cloneable {
-
-    private static final long serialVersionUID = -1711683802127778909L;
-
-    private String serviceId;
+public interface ConfigFileStorageAuthenticator {
 
     /**
-     * Initializes a new {@link ConfigFileStorageAccount}.
+     * Indicates if this authenticator handles the specified file storage service.
+     * 
+     * @param serviceId The file storage service identifier
+     * @return <code>true</code> if this authenticator handles the specified file storage service; otherwise <code>false</code>
      */
-    public ConfigFileStorageAccount() {
-        super();
-    }
+    boolean handles(String serviceId);
 
     /**
-     * Gets the service identifier.
-     *
-     * @return The service identifier
+     * Gets this authenticator's ranking.
+     * <p>
+     * The default ranking is zero (<tt>0</tt>). An authenticator with a ranking of {@code Integer.MAX_VALUE} is very likely to be returned
+     * as the default authenticator, whereas an authenticator with a ranking of {@code Integer.MIN_VALUE} is very unlikely to be returned.
+     * 
+     * @return The ranking
      */
-    @Override
-    public String getServiceId() {
-        return serviceId;
-    }
+    int getRanking();
 
     /**
-     * Sets the service identifier.
-     *
-     * @param serviceId The service identifier to set
+     * Sets the authentication properties to given account.
+     * 
+     * @param account The account to apply authentication properties to
+     * @param session The session of the associated user
+     * @throws OXException If setting authentication properties fails
      */
-    @Override
-    public void setServiceId(final String serviceId) {
-        this.serviceId = serviceId;
-    }
-
-    @Override
-    public Object clone() {
-        try {
-            final ConfigFileStorageAccount clone = (ConfigFileStorageAccount) super.clone();
-            clone.setFileStorageService(null);
-            final Map<String, Object> thismap = getConfiguration();
-            final Map<String, Object> clonedConfig = null == thismap ? null : new HashMap<String, Object>(thismap);
-            clone.setConfiguration(clonedConfig);
-            return clone;
-        } catch (final CloneNotSupportedException e) {
-            throw new InternalError("Clone not supported although Cloneable is implemented.");
-        }
-    }
-
-    @Override
-    public String toString() {
-        return new StringBuilder("ConfigFileStorageAccount ( serviceId = ").append(this.serviceId).append(" )").toString();
-    }
+    void setAuthenticationProperties(ConfigFileStorageAccount account, Session session) throws OXException;
 
 }

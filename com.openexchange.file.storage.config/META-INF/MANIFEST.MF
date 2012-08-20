@@ -8,6 +8,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.config,
  com.openexchange.exception,
  com.openexchange.file.storage,
+ com.openexchange.file.storage.config,
  com.openexchange.file.storage.generic,
  com.openexchange.file.storage.registry,
  com.openexchange.groupware,

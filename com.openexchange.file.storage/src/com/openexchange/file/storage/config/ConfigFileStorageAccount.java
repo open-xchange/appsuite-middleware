@@ -47,26 +47,19 @@
  *
  */
 
-package com.openexchange.i18n;
+package com.openexchange.file.storage.config;
 
-import com.openexchange.i18n.parsing.Bug22803Test;
-import junit.framework.JUnit4TestAdapter;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.ServiceAware;
 
 /**
- * @author <a href="mailto:marcus.klein@open-xchange.org">Marcus Klein</a>
+ * {@link ConfigFileStorageAccount} - The {@link Cloneable cloneable} pre-configured {@link FileStorageAccount}.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since Open-Xchange v6.18.2
  */
-public class UnitTests {
+public interface ConfigFileStorageAccount extends FileStorageAccount, ServiceAware, Cloneable {
 
-    private UnitTests() {
-        super();
-    }
+    // Interface
 
-    public static Test suite() {
-        final TestSuite suite = new TestSuite();
-        suite.addTestSuite(TranslationToI18NAdapterTest.class);
-        suite.addTest(new JUnit4TestAdapter(Bug22803Test.class));
-        return suite;
-    }
 }

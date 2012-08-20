@@ -145,7 +145,11 @@ public class CXFActivator extends HousekeepingActivator {
                             /*
                              * Get CXF bus
                              */
-                            final Bus bus = cxfServlet.getBus();
+                            Bus bus = cxfServlet.getBus();
+                            if (null == bus) {
+                                bus = BusFactory.newInstance().createBus();
+                                cxfServlet.setBus(bus);
+                            }
                             /*
                              * Add interceptors here
                              */

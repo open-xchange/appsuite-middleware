@@ -47,26 +47,48 @@
  *
  */
 
-package com.openexchange.i18n;
+package com.openexchange.file.storage.config.internal;
 
-import com.openexchange.i18n.parsing.Bug22803Test;
-import junit.framework.JUnit4TestAdapter;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.util.HashMap;
+import java.util.Map;
+import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.config.ConfigFileStorageAccount;
+import com.openexchange.file.storage.generic.DefaultFileStorageAccount;
 
 /**
- * @author <a href="mailto:marcus.klein@open-xchange.org">Marcus Klein</a>
+ * {@link ConfigFileStorageAccountImpl} - The configuration {@link FileStorageAccount} implementation.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since Open-Xchange v6.18.2
  */
-public class UnitTests {
+public class ConfigFileStorageAccountImpl extends DefaultFileStorageAccount implements ConfigFileStorageAccount {
 
-    private UnitTests() {
+    private static final long serialVersionUID = -1711683802127778909L;
+
+    /**
+     * Initializes a new {@link ConfigFileStorageAccountImpl}.
+     */
+    public ConfigFileStorageAccountImpl() {
         super();
     }
 
-    public static Test suite() {
-        final TestSuite suite = new TestSuite();
-        suite.addTestSuite(TranslationToI18NAdapterTest.class);
-        suite.addTest(new JUnit4TestAdapter(Bug22803Test.class));
-        return suite;
+    @Override
+    public Object clone() {
+        try {
+            final ConfigFileStorageAccountImpl clone = (ConfigFileStorageAccountImpl) super.clone();
+            clone.setFileStorageService(null);
+            final Map<String, Object> thismap = this.configuration;
+            final Map<String, Object> clonedConfig = null == thismap ? null : new HashMap<String, Object>(thismap);
+            clone.configuration = clonedConfig;
+            return clone;
+        } catch (final CloneNotSupportedException e) {
+            throw new InternalError("Clone not supported although Cloneable is implemented.");
+        }
     }
+
+    @Override
+    public String toString() {
+        return new StringBuilder("ConfigFileStorageAccount ( serviceId = ").append(this.serviceId).append(" )").toString();
+    }
+
 }

@@ -47,17 +47,20 @@
  *
  */
 
-package com.openexchange.file.storage.config;
+package com.openexchange.file.storage.config.internal;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.config.ConfigFileStorageAccount;
+import com.openexchange.file.storage.config.ConfigFileStorageAuthenticator;
 import com.openexchange.session.Session;
 
 /**
@@ -79,15 +82,21 @@ public final class ConfigFileStorageAccountManager implements FileStorageAccount
     private final FileStorageService service;
 
     /**
+     * The authenticators' map.
+     */
+    private final ConcurrentMap<ConfigFileStorageAuthenticator, ConfigFileStorageAuthenticator> authenticators;
+
+    /**
      * Initializes a new {@link ConfigFileStorageAccountManager}.
      */
     public ConfigFileStorageAccountManager(final FileStorageService service) {
         super();
         serviceId = service.getId();
         this.service = service;
-        for (final ConfigFileStorageAccount account : ConfigFileStorageAccountParser.getInstance().getAccountsFor(serviceId).values()) {
+        for (final ConfigFileStorageAccountImpl account : ConfigFileStorageAccountParser.getInstance().getAccountsFor(serviceId).values()) {
             account.setFileStorageService(service);
         }
+        authenticators = ConfigFileStorageAccountParser.getInstance().getAuthenticators();
     }
 
     @Override
@@ -107,12 +116,12 @@ public final class ConfigFileStorageAccountManager implements FileStorageAccount
 
     @Override
     public List<FileStorageAccount> getAccounts(final Session session) throws OXException {
-        final Map<String, ConfigFileStorageAccount> accounts = ConfigFileStorageAccountParser.getInstance().getAccountsFor(serviceId);
+        final Map<String, ConfigFileStorageAccountImpl> accounts = ConfigFileStorageAccountParser.getInstance().getAccountsFor(serviceId);
         if (null == accounts || accounts.isEmpty()) {
             return Collections.<FileStorageAccount> emptyList();
         }
         final List<FileStorageAccount> ret = new ArrayList<FileStorageAccount>(accounts.size());
-        for (final ConfigFileStorageAccount account : accounts.values()) {
+        for (final ConfigFileStorageAccountImpl account : accounts.values()) {
             ret.add(cloneAndApplyService(account, session));
         }
         return ret;
@@ -120,7 +129,7 @@ public final class ConfigFileStorageAccountManager implements FileStorageAccount
 
     @Override
     public FileStorageAccount getAccount(final String id, final Session session) throws OXException {
-        final Map<String, ConfigFileStorageAccount> accounts = ConfigFileStorageAccountParser.getInstance().getAccountsFor(serviceId);
+        final Map<String, ConfigFileStorageAccountImpl> accounts = ConfigFileStorageAccountParser.getInstance().getAccountsFor(serviceId);
         if (null == accounts) {
             throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(
                 id,
@@ -128,7 +137,7 @@ public final class ConfigFileStorageAccountManager implements FileStorageAccount
                 Integer.valueOf(session.getUserId()),
                 Integer.valueOf(session.getContextId()));
         }
-        final ConfigFileStorageAccount account = accounts.get(id);
+        final ConfigFileStorageAccountImpl account = accounts.get(id);
         if (null == account) {
             throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(
                 id,
@@ -139,26 +148,51 @@ public final class ConfigFileStorageAccountManager implements FileStorageAccount
         return cloneAndApplyService(account, session);
     }
 
-    private ConfigFileStorageAccount cloneAndApplyService(final ConfigFileStorageAccount account, final Session session) {
-        final ConfigFileStorageAccount ret = (ConfigFileStorageAccount) account.clone();
+    private ConfigFileStorageAccount cloneAndApplyService(final ConfigFileStorageAccountImpl account, final Session session) throws OXException {
+        final ConfigFileStorageAccountImpl ret = (ConfigFileStorageAccountImpl) account.clone();
         ret.setFileStorageService(service);
-        final Map<String, Object> configuration = ret.getConfiguration();
-        /*
-         * Set login/password if absent
+        /*-
+         * Set login/password if authenticator is absent
+         * 
+         * Check for an appropriate authenticator
          */
-        {
-            final String tmp = (String) configuration.get(CONF_PROPERTY_LOGIN);
-            if (null == tmp) {
-                configuration.put(CONF_PROPERTY_LOGIN, session.getLogin());
+        final ConfigFileStorageAuthenticator authenticator = getAuthenticator(serviceId);
+        if (null == authenticator) {
+            // Set login/password obtained from session
+            final Map<String, Object> configuration = ret.getConfiguration();
+            {
+                final String tmp = (String) configuration.get(CONF_PROPERTY_LOGIN);
+                if (null == tmp) {
+                    configuration.put(CONF_PROPERTY_LOGIN, session.getLogin());
+                }
             }
-        }
-        {
-            final String tmp = (String) configuration.get(CONF_PROPERTY_PASSWORD);
-            if (null == tmp) {
-                configuration.put(CONF_PROPERTY_PASSWORD, session.getPassword());
+            {
+                final String tmp = (String) configuration.get(CONF_PROPERTY_PASSWORD);
+                if (null == tmp) {
+                    configuration.put(CONF_PROPERTY_PASSWORD, session.getPassword());
+                }
             }
+        } else {
+            // Set login/password through authenticator
+            authenticator.setAuthenticationProperties(ret, session);
         }
         return ret;
+    }
+
+    /**
+     * Gets the appropriate and highest-ranked authenticator for given service identifier.
+     * 
+     * @param serviceId The service identifier
+     * @return The appropriate and highest-ranked authenticator or <code>null</code> if none available
+     */
+    private ConfigFileStorageAuthenticator getAuthenticator(final String serviceId) {
+        ConfigFileStorageAuthenticator candidate = null;
+        for (final ConfigFileStorageAuthenticator authenticator : authenticators.keySet()) {
+            if (authenticator.handles(serviceId) && ((null == candidate) || (candidate.getRanking() < authenticator.getRanking()))) {
+                candidate = authenticator;
+            }
+        }
+        return candidate;
     }
 
     @Override

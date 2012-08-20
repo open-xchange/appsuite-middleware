@@ -47,26 +47,34 @@
  *
  */
 
-package com.openexchange.i18n;
+package com.openexchange.i18n.parsing;
 
-import com.openexchange.i18n.parsing.Bug22803Test;
-import junit.framework.JUnit4TestAdapter;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import static org.junit.Assert.*;
+import java.io.ByteArrayInputStream;
+import java.io.UnsupportedEncodingException;
+import org.junit.Test;
+import com.openexchange.exception.OXException;
 
 /**
- * @author <a href="mailto:marcus.klein@open-xchange.org">Marcus Klein</a>
+ * {@link Bug22803Test}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class UnitTests {
+public class Bug22803Test {
 
-    private UnitTests() {
-        super();
+    @SuppressWarnings("static-method")
+    @Test(timeout=100)
+    public void testWithTab() throws UnsupportedEncodingException, OXException {
+        Translations translations = new POParser().parse(new ByteArrayInputStream(PO_CONTENTS.getBytes("UTF-8")), "Bug22803Test");
+        String actual = translations.translate("Date range in search must contain 2 and not %d values.");
+        assertEquals("Translation is wrong.", "Zakres dat w wyszukiwaniu musi zawiera\u0107 dwie warto\u015bci. Aktualna liczba warto\u015bci: %d. \\t", actual);
     }
 
-    public static Test suite() {
-        final TestSuite suite = new TestSuite();
-        suite.addTestSuite(TranslationToI18NAdapterTest.class);
-        suite.addTest(new JUnit4TestAdapter(Bug22803Test.class));
-        return suite;
-    }
+    private static final String PO_CONTENTS = "msgid \"\"\n" 
+        + "msgstr \"\"\n"
+        + "\n"
+        + "msgid \"Date range in search must contain 2 and not %d values.\"\n"
+        + "msgstr \"\"\n"
+        + "\"Zakres dat w wyszukiwaniu musi zawiera\u0107 dwie warto\u015bci. Aktualna liczba \"\n"
+        + "\"warto\u015bci: %d. \\t\"\n";
 }

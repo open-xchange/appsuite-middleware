@@ -75,11 +75,12 @@ import me.prettyprint.hector.api.query.SliceQuery;
 import org.apache.commons.logging.Log;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.sessionstorage.StoredSession;
 import com.openexchange.sessionstorage.nosql.exceptions.OXNoSQLSessionStorageExceptionCodes;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link NoSQLSessionStorageService}
@@ -102,6 +103,8 @@ public class NoSQLSessionStorageService implements SessionStorageService {
 
     private boolean CF_EXISTS;
 
+    private final int LIFETIME;
+
     private final String encryptionKey;
 
     private final String[] COLUMN_NAMES = new String[] {
@@ -115,15 +118,23 @@ public class NoSQLSessionStorageService implements SessionStorageService {
 
     private final CryptoService cryptoService;
 
+    private final TimerService timerService;
+
+    private final ScheduledTimerTask cleanupTask;
+
+    private static NoSQLSessionStorageService instance;
+
     public NoSQLSessionStorageService(NoSQLSessionStorageConfiguration config) {
         HOST = config.getHost();
         PORT = config.getPort();
         KEYSPACE = config.getKeyspace();
         CF_NAME = config.getCf_name();
+        LIFETIME = config.getDefaultLifeTime();
         encryptionKey = config.getEncryptionKey();
         CLUSTER = HOST + ":" + PORT;
         CF_EXISTS = false;
         cryptoService = config.getCryptoService();
+        timerService = config.getTimerService();
         serializer = new StringSerializer();
         cluster = HFactory.getOrCreateCluster("oxCluster", CLUSTER);
         KeyspaceDefinition definition = cluster.describeKeyspace(KEYSPACE);
@@ -152,6 +163,8 @@ public class NoSQLSessionStorageService implements SessionStorageService {
             cluster.addColumnFamily(cfDef);
         }
         keyspace = HFactory.createKeyspace(KEYSPACE, cluster);
+        cleanupTask = timerService.scheduleWithFixedDelay(new NoSQLCleanupTask(), LIFETIME, LIFETIME);
+        instance = this;
     }
 
     @Override
@@ -543,6 +556,37 @@ public class NoSQLSessionStorageService implements SessionStorageService {
             log.error(e.getMessage(), e);
             throw e;
         }
+    }
+
+    public void cleanup() {
+        long time = System.currentTimeMillis();
+        Mutator<String> mutator = HFactory.createMutator(keyspace, serializer);
+        RangeSlicesQuery<String, String, String> query = HFactory.createRangeSlicesQuery(keyspace, serializer, serializer, serializer);
+        query.setColumnFamily(CF_NAME);
+        query.setColumnNames(COLUMN_NAMES);
+        QueryResult<OrderedRows<String, String, String>> result = query.execute();
+        OrderedRows<String, String, String> rows = result.get();
+        List<Row<String, String, String>> rowsList = rows.getList();
+        Iterator<Row<String, String, String>> rowIterator = rowsList.iterator();
+        while (rowIterator.hasNext()) {
+            Row<String, String, String> row = rowIterator.next();
+            ColumnSlice<String, String> columns = row.getColumnSlice();
+            List<HColumn<String, String>> columnList = columns.getColumns();
+            for (HColumn<String, String> column : columnList) {
+                if (time + LIFETIME > column.getClock()) {
+                    mutator.addDeletion(row.getKey(), CF_NAME, column.getName(), serializer);
+                }
+            }
+        }
+        mutator.execute();
+    }
+
+    public static NoSQLSessionStorageService getStorageService() {
+        return instance;
+    }
+
+    public void removeCleanupTask() {
+        cleanupTask.cancel();
     }
 
 }

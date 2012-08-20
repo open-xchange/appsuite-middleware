@@ -47,26 +47,37 @@
  *
  */
 
-package com.openexchange.i18n;
+package com.openexchange.sessionstorage.hazelcast;
 
-import com.openexchange.i18n.parsing.Bug22803Test;
-import junit.framework.JUnit4TestAdapter;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.apache.commons.logging.Log;
+import com.openexchange.log.LogFactory;
 
 /**
- * @author <a href="mailto:marcus.klein@open-xchange.org">Marcus Klein</a>
+ * {@link HazelcastCleanupTask}
+ * 
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class UnitTests {
+public class HazelcastCleanupTask implements Runnable {
 
-    private UnitTests() {
+    private static final Log LOG = LogFactory.getLog(HazelcastCleanupTask.class);
+
+    /**
+     * Initializes a new {@link HazelcastCleanupTask}.
+     */
+    public HazelcastCleanupTask() {
         super();
     }
 
-    public static Test suite() {
-        final TestSuite suite = new TestSuite();
-        suite.addTestSuite(TranslationToI18NAdapterTest.class);
-        suite.addTest(new JUnit4TestAdapter(Bug22803Test.class));
-        return suite;
+    /*
+     * (non-Javadoc)
+     * @see java.lang.Runnable#run()
+     */
+    @Override
+    public void run() {
+        try {
+            HazelcastSessionStorageService.getStorageService().cleanupTask();
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
     }
 }
