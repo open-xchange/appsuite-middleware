@@ -1,3 +1,9 @@
+open-xchange-passwordchange-script (6.22.0-0) unstable; urgency=low
+
+  * prepare for 6.22.0
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 20 Aug 2012 16:19:26 +0200
+
 open-xchange-passwordchange-script (6.21.0-1) unstable; urgency=low
 
   * Initial release
