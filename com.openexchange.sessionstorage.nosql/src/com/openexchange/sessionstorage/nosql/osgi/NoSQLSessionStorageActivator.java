@@ -53,7 +53,6 @@ import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.nosql.cassandra.EmbeddedCassandraService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceRegistry;
@@ -61,19 +60,27 @@ import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.sessionstorage.nosql.NoSQLSessionStorageConfiguration;
 import com.openexchange.sessionstorage.nosql.NoSQLSessionStorageService;
 import com.openexchange.sessionstorage.nosql.exceptions.OXNoSQLSessionStorageExceptionCodes;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link NoSQLSessionStorageActivator}
- *
+ * 
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class NoSQLSessionStorageActivator extends HousekeepingActivator {
 
-    private final Class<?>[] needed = { ConfigurationService.class, EmbeddedCassandraService.class, CryptoService.class };
+    private final Class<?>[] needed = { ConfigurationService.class, EmbeddedCassandraService.class, CryptoService.class, TimerService.class };
+
     private NoSQLSessionStorageService service;
+
     private ConfigurationService configService;
+
     private CryptoService cryptoService;
+
+    private TimerService timerService;
+
     private ServiceRegistry registry;
+
     private final Log log = com.openexchange.log.Log.loggerFor(NoSQLSessionStorageActivator.class);
 
     /*
@@ -85,22 +92,33 @@ public class NoSQLSessionStorageActivator extends HousekeepingActivator {
         log.info("Starting bundle: com.openexchange.sessionstorage.nosql");
         configService = getService(ConfigurationService.class);
         cryptoService = getService(CryptoService.class);
+        timerService = getService(TimerService.class);
         registry = NoSQLServiceRegistry.getRegistry();
         registry.addService(ConfigurationService.class, configService);
         registry.addService(CryptoService.class, cryptoService);
+        registry.addService(TimerService.class, timerService);
         boolean enabled = configService.getBoolProperty("com.openexchange.sessionstorage.nosql.enabled", false);
         if (enabled) {
             String host = configService.getProperty("com.openexchange.sessionstorage.nosql.host", "localhost");
             int port = configService.getIntProperty("com.openexchange.sessionstorage.nosql.port", 9160);
             String keyspace = configService.getProperty("com.openexchange.sessionstorage.nosql.keyspace", "ox");
             String cf_name = configService.getProperty("com.openexchange.sessionstorage.nosql.cfname", "sessionstorage");
+            int defaultLifetime = configService.getIntProperty("com.openexchange.sessionstorage.nosql.defaultLifetime", 604800);
             String encryptionKey = configService.getProperty("com.openexchange.sessionstorage.nosql.encryptionKey");
             if (encryptionKey == null) {
                 OXException e = OXNoSQLSessionStorageExceptionCodes.NOSQL_SESSIONSTORAGE_NO_ENCRYPTION_KEY.create();
                 log.error(e.getMessage(), e);
                 throw e;
             }
-            NoSQLSessionStorageConfiguration config = new NoSQLSessionStorageConfiguration(host, port, keyspace, cf_name, encryptionKey, cryptoService);
+            NoSQLSessionStorageConfiguration config = new NoSQLSessionStorageConfiguration(
+                host,
+                port,
+                keyspace,
+                cf_name,
+                defaultLifetime,
+                encryptionKey,
+                cryptoService,
+                timerService);
             service = new NoSQLSessionStorageService(config);
             registerService(SessionStorageService.class, service);
         }
@@ -115,6 +133,7 @@ public class NoSQLSessionStorageActivator extends HousekeepingActivator {
         log.info("Stopping bundle: com.openexchange.sessionstorage.nosql");
         if (service != null) {
             service.cleanUp();
+            service.removeCleanupTask();
             unregisterServices();
         }
         closeTrackers();

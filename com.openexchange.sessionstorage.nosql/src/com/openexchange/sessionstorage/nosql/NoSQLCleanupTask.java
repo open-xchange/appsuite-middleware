@@ -49,77 +49,36 @@
 
 package com.openexchange.sessionstorage.nosql;
 
-import com.openexchange.crypto.CryptoService;
-import com.openexchange.timer.TimerService;
+import org.apache.commons.logging.Log;
+import com.openexchange.log.LogFactory;
 
 /**
- * {@link NoSQLSessionStorageConfiguration}
+ * {@link NoSQLCleanupTask}
  * 
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class NoSQLSessionStorageConfiguration {
+public class NoSQLCleanupTask implements Runnable {
 
-    private final String host;
-
-    private final int port;
-
-    private final String keyspace;
-
-    private final String cf_name;
-
-    private final int defaultLifetime;
-
-    private final String encryptionKey;
-
-    private final CryptoService cryptoService;
-
-    private final TimerService timerService;
+    private static Log LOG = LogFactory.getLog(NoSQLCleanupTask.class);
 
     /**
-     * Initializes a new {@link NoSQLSessionStorageConfiguration}.
+     * Initializes a new {@link NoSQLCleanupTask}.
      */
-    public NoSQLSessionStorageConfiguration(String host, int port, String keyspace, String cf_name, int defaultLifetime, String encryptionKey, CryptoService cryptoService, TimerService timerService) {
+    public NoSQLCleanupTask() {
         super();
-        this.host = host;
-        this.port = port;
-        this.keyspace = keyspace;
-        this.cf_name = cf_name;
-        this.defaultLifetime = defaultLifetime;
-        this.encryptionKey = encryptionKey;
-        this.cryptoService = cryptoService;
-        this.timerService = timerService;
     }
 
-    public String getHost() {
-        return host;
-    }
-
-    public int getPort() {
-        return port;
-    }
-
-    public String getKeyspace() {
-        return keyspace;
-    }
-
-    public String getCf_name() {
-        return cf_name;
-    }
-
-    public int getDefaultLifeTime() {
-        return defaultLifetime;
-    }
-
-    public String getEncryptionKey() {
-        return encryptionKey;
-    }
-
-    public CryptoService getCryptoService() {
-        return cryptoService;
-    }
-
-    public TimerService getTimerService() {
-        return timerService;
+    /*
+     * (non-Javadoc)
+     * @see java.lang.Runnable#run()
+     */
+    @Override
+    public void run() {
+        try {
+            NoSQLSessionStorageService.getStorageService().cleanup();
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
     }
 
 }
