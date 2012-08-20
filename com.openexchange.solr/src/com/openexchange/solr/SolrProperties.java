@@ -82,5 +82,7 @@ public class SolrProperties {
     public static final String CUSTOM_HANLDER = "com.openexchange.solr.customHandler";
     
     public static final String ALL_HANLDER = "com.openexchange.solr.allHandler";
+
+    public static final String GET_HANDLER = "com.openexchange.solr.getHandler";
    
 }

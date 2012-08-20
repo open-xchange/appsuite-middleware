@@ -50,12 +50,8 @@
 package com.openexchange.solr.internal;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.Properties;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import javax.xml.parsers.ParserConfigurationException;
 import org.apache.commons.logging.Log;
 import org.apache.solr.client.solrj.SolrServer;
@@ -94,11 +90,7 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(EmbeddedSolrAccessImpl.class));
 
-    private final Lock mutex = new ReentrantLock();
-
     private CoreContainer coreContainer;
-
-    private String serverAddress = null;
 
     private final SolrIndexMysql indexMysql;
 
@@ -462,19 +454,6 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
 
         final EmbeddedSolrServer solrServer = new EmbeddedSolrServer(coreContainer, identifier.toString());
         return solrServer;
-    }
-
-    private String getLocalServerAddress() throws OXException {
-        if (serverAddress != null) {
-            return serverAddress;
-        }
-
-        try {
-            final InetAddress addr = InetAddress.getLocalHost();
-            return serverAddress = addr.getHostAddress();
-        } catch (final UnknownHostException e) {
-            throw new OXException(e);
-        }
     }
 
     private void commit(final SolrServer solrServer, final boolean commit) throws OXException {

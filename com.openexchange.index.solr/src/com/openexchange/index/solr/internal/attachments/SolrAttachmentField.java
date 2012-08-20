@@ -50,6 +50,7 @@
 package com.openexchange.index.solr.internal.attachments;
 
 import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.Map;
 import com.openexchange.index.AttachmentIndexField;
 import com.openexchange.index.solr.internal.SolrField;
@@ -78,6 +79,8 @@ public enum SolrAttachmentField implements SolrField {
     
     private static final Map<AttachmentIndexField, SolrAttachmentField> fieldMapping = new EnumMap<AttachmentIndexField, SolrAttachmentField>(AttachmentIndexField.class);
     
+    private static final EnumSet<AttachmentIndexField> indexedFields = EnumSet.noneOf(AttachmentIndexField.class);
+    
     private final String solrName;
     
     private final String paramName;   
@@ -89,6 +92,7 @@ public enum SolrAttachmentField implements SolrField {
             AttachmentIndexField field = solrField.indexField();
             if (field != null) {
                 fieldMapping.put(field, solrField);
+                indexedFields.add(field);
             }            
         }
     }
@@ -113,5 +117,9 @@ public enum SolrAttachmentField implements SolrField {
     
     public static SolrAttachmentField solrFieldFor(AttachmentIndexField indexField) {
         return fieldMapping.get(indexField);
+    }
+    
+    public static EnumSet<AttachmentIndexField> getIndexedFields() {
+        return indexedFields;
     }
 }

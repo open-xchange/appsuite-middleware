@@ -61,4 +61,6 @@ public class SolrAttachmentConstants {
     
     public static final int DEFAULT_ATTACHMENT = 1;
 
+    public static final String IDS = "ids";
+
 }

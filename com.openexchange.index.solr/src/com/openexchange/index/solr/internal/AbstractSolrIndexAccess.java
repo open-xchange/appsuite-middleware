@@ -344,13 +344,13 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
         return converter.createIndexResult(indexDocuments, facetCountsMap);
     }
     
-    protected String buildQueryString(String fieldName, String value) {
+    protected String buildQueryString(String fieldName, Object value) {
         if (fieldName == null || value == null) {
             return null;
         }
         
         StringBuilder sb = new StringBuilder(); 
-        sb.append('(').append(fieldName).append(":\"").append(value).append("\")");
+        sb.append('(').append(fieldName).append(":\"").append(value.toString()).append("\")");
         return sb.toString();
     }
     
@@ -431,5 +431,54 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
                 solrQuery.addField(solrName);
             }            
         }
+    }
+    
+    protected String getStringParameter(QueryParameters parameters, String name) {
+        if (parameters.getParameters() == null) {
+            return null;
+        }
+        
+        Object value = parameters.getParameters().get(name);
+        if (value != null && value instanceof String) {
+            return (String) value;
+        }
+        
+        return null;
+    }
+    
+    protected String[] getStringArrayParameter(QueryParameters parameters, String name) {
+        if (parameters.getParameters() == null) {
+            return null;
+        }
+        
+        Object value = parameters.getParameters().get(name);
+        if (value != null && value instanceof String[]) {
+            return (String[]) value;
+        }
+        
+        return null;
+    }
+    
+    protected Integer getIntParameter(QueryParameters parameters, String name) {
+        if (parameters.getParameters() == null) {
+            return null;
+        }
+        
+        Object value = parameters.getParameters().get(name);
+        if (value != null && value instanceof Integer) {
+            return (Integer) value;
+        }
+        
+        return null;
+    }
+    
+    protected String stringArrayToQuery(String[] values) {
+        StringBuilder sb = new StringBuilder();
+        for (String value : values) {
+            sb.append(value);
+            sb.append(' ');
+        }
+        
+        return sb.toString();
     }
 }

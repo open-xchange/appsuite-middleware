@@ -109,6 +109,7 @@ public class SolrFilestoreIndexAccess extends AbstractSolrIndexAccess<File> {
 
     @Override
     public boolean isIndexed(String accountId, String folderId) throws OXException {
+        // TODO: Use hazelcast for cache?
         return super.isIndexed(Types.INFOSTORE, accountId, folderId);
     }
 
@@ -218,8 +219,8 @@ public class SolrFilestoreIndexAccess extends AbstractSolrIndexAccess<File> {
         switch (searchHandler) {
             case ALL_REQUEST:
             {
-                String service = getService(parameters);
-                String accountId = getAccountId(parameters);
+                String service = getStringParameter(parameters, SolrFilestoreConstants.SERVICE);
+                String accountId = getStringParameter(parameters, SolrFilestoreConstants.ACCOUNT);
                 Set<String> folders = parameters.getFolders();
                 String queryString = buildQueryString(service, accountId, folders);
                 if (queryString.length() == 0) {
@@ -231,11 +232,11 @@ public class SolrFilestoreIndexAccess extends AbstractSolrIndexAccess<File> {
             
             case GET_REQUEST:
             {
-                String service = getService(parameters);
-                String accountId = getAccountId(parameters);
+                String service = getStringParameter(parameters, SolrFilestoreConstants.SERVICE);
+                String accountId = getStringParameter(parameters, SolrFilestoreConstants.ACCOUNT);
                 Set<String> folders = parameters.getFolders();
                 String queryString = buildQueryString(service, accountId, folders);
-                String[] ids = getIds(parameters);
+                String[] ids = getStringArrayParameter(parameters, SolrFilestoreConstants.IDS);
                 final StringBuilder sb = new StringBuilder(queryString);
                 if (queryString.length() != 0) {
                     sb.append(" AND (");
@@ -306,8 +307,8 @@ public class SolrFilestoreIndexAccess extends AbstractSolrIndexAccess<File> {
         switch (searchHandler) {
             case ALL_REQUEST:
             {
-                String service = getService(parameters);
-                String accountId = getAccountId(parameters);
+                String service = getStringParameter(parameters, SolrFilestoreConstants.SERVICE);
+                String accountId = getStringParameter(parameters, SolrFilestoreConstants.ACCOUNT);
                 Set<String> folders = parameters.getFolders();
                 solrQuery = new SolrQuery("*:*");
                 ConfigurationService config = Services.getService(ConfigurationService.class);
@@ -326,7 +327,9 @@ public class SolrFilestoreIndexAccess extends AbstractSolrIndexAccess<File> {
                     solrQuery = new SolrQuery(parameters.getPattern());
                     solrQuery.setQueryType(handler);
                     setSortAndOrder(parameters, solrQuery);
-                    solrQuery.setFilterQueries(buildFilterQueries(getService(parameters), getAccountId(parameters), parameters.getFolders()));
+                    String service = getStringParameter(parameters, SolrFilestoreConstants.SERVICE);
+                    String accountId = getStringParameter(parameters, SolrFilestoreConstants.ACCOUNT);
+                    solrQuery.setFilterQueries(buildFilterQueries(service, accountId, parameters.getFolders()));
                     break;
                 }
             
@@ -339,14 +342,6 @@ public class SolrFilestoreIndexAccess extends AbstractSolrIndexAccess<File> {
     
     private void setSortAndOrder(QueryParameters parameters, SolrQuery solrQuery) {
         setSortAndOrder(parameters, solrQuery, SolrFilestoreField.class);
-//        IndexField sortField = parameters.getSortField();
-//        if (sortField instanceof FilestoreIndexField) {
-//            SolrFilestoreField indexField = SolrFilestoreField.getByIndexField((FilestoreIndexField) sortField);
-//            if (indexField != null) {
-//                Order order = parameters.getOrder();
-//                solrQuery.setSortField(indexField.solrName(), order == null ? ORDER.desc : order.equals(Order.DESC) ? ORDER.desc : ORDER.asc);
-//            }
-//        }
     }
 
     private String[] buildFilterQueries(String service, String accountId, Set<String> folders) {
@@ -414,44 +409,5 @@ public class SolrFilestoreIndexAccess extends AbstractSolrIndexAccess<File> {
         }
         
         return set;        
-    }
-    
-    private String getAccountId(QueryParameters parameters) {
-        if (parameters.getParameters() == null) {
-            return null;
-        }
-        
-        Object accountIdObj = parameters.getParameters().get(SolrFilestoreConstants.ACCOUNT);
-        if (!(accountIdObj instanceof String)) {
-            return null;
-        }
-        
-        return (String) accountIdObj;
-    }
-    
-    private String getService(QueryParameters parameters) {
-        if (parameters.getParameters() == null) {
-            return null;
-        }
-        
-        Object serviceObj = parameters.getParameters().get(SolrFilestoreConstants.SERVICE);
-        if (!(serviceObj instanceof String)) {
-            return null;
-        }
-        
-        return (String) serviceObj;
-    }
-    
-    private String[] getIds(QueryParameters parameters) {
-        if (parameters.getParameters() == null) {
-            return null;
-        }
-        
-        Object idsObj = parameters.getParameters().get(SolrFilestoreConstants.IDS);
-        if (idsObj instanceof String[]) {
-            return (String[]) idsObj;
-        }
-        
-        return null;
     }
 }

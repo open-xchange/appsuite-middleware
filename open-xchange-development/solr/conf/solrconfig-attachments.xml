@@ -83,6 +83,17 @@
             <str>query</str>
         </arr>
     </requestHandler>
+    
+    <requestHandler name="getSearch" class="solr.SearchHandler">
+        <arr name="components">
+            <str>searchFieldSupplier</str>
+            <str>query</str>
+        </arr>
+    </requestHandler>
+    
+    <searchComponent name="searchFieldSupplier" class="de.kippdata.cria.solrext.searchcomponents.SearchFieldSupplier">
+        <str name="sf">uuid</str>
+    </searchComponent>
 
     <requestHandler name="customSearch" class="solr.SearchHandler">
         <lst name="defaults">

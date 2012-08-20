@@ -55,6 +55,7 @@ import java.util.concurrent.Callable;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.ILock;
 import com.hazelcast.core.IMap;
+import com.openexchange.exception.OXException;
 import com.openexchange.solr.SolrAccessService;
 import com.openexchange.solr.SolrCoreIdentifier;
 import com.openexchange.solr.osgi.SolrActivator;
@@ -100,21 +101,29 @@ public class StartCoreCallable implements Callable<String>, Serializable {
             IMap<String, String> solrCores = hazelcast.getMap(DelegationSolrAccessImpl.SOLR_CORE_MAP);
             String owner = solrCores.putIfAbsent(identifier.toString(), newOwner);
             if (owner == null) {
-                DelegationSolrAccessImpl accessService = (DelegationSolrAccessImpl) Services.getService(SolrAccessService.class);
-                EmbeddedSolrAccessImpl embeddedAccess = accessService.getEmbeddedServerAccess();                
-                embeddedAccess.startCore(identifier);
-                startedCore = true;
-                IMap<String, Integer> solrNodes = hazelcast.getMap(SolrActivator.SOLR_NODE_MAP);
-                String localUuid = hazelcast.getCluster().getLocalMember().getUuid();
-                solrNodes.lock(localUuid);
                 try {
-                    Integer integer = solrNodes.get(localUuid);
-                    solrNodes.put(localUuid, new Integer(integer.intValue() + 1));
-                } finally {
-                    solrNodes.unlock(localUuid);
-                }                
-                
-                return newOwner;
+                    DelegationSolrAccessImpl accessService = (DelegationSolrAccessImpl) Services.getService(SolrAccessService.class);
+                    EmbeddedSolrAccessImpl embeddedAccess = accessService.getEmbeddedServerAccess();                
+                    embeddedAccess.startCore(identifier);
+                    startedCore = true;
+                    IMap<String, Integer> solrNodes = hazelcast.getMap(SolrActivator.SOLR_NODE_MAP);
+                    String localUuid = hazelcast.getCluster().getLocalMember().getUuid();
+                    solrNodes.lock(localUuid);
+                    try {
+                        Integer integer = solrNodes.get(localUuid);
+                        solrNodes.put(localUuid, new Integer(integer.intValue() + 1));
+                    } finally {
+                        solrNodes.unlock(localUuid);
+                    }                
+                    
+                    return newOwner;
+                } catch (OXException e) {
+                    solrCores.remove(identifier.toString());
+                    throw e;
+                } catch (RuntimeException e) {
+                    solrCores.remove(identifier.toString());
+                    throw e;
+                }
             }
             
             return owner;
