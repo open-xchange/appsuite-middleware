@@ -53,6 +53,8 @@ import java.util.Map;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.ServiceAware;
+import com.openexchange.messaging.generic.services.MessagingGenericServiceRegistry;
+import com.openexchange.messaging.registry.MessagingServiceRegistry;
 
 /**
  * {@link DefaultMessagingAccount} - The default {@link MessagingAccount} implementation.
@@ -100,6 +102,22 @@ public class DefaultMessagingAccount implements MessagingAccount, ServiceAware {
 
     @Override
     public MessagingService getMessagingService() {
+        MessagingService messagingService = this.messagingService;
+        if (null == messagingService && null != serviceId) {
+            // Try to obtain from registry
+            final MessagingServiceRegistry registry = MessagingGenericServiceRegistry.getService(MessagingServiceRegistry.class);
+            if (null == registry) {
+                return null;
+            }
+            try {
+                messagingService = registry.getMessagingService(serviceId, -1, -1);
+            } catch (final Exception e) {
+                messagingService = null;
+            }
+            if (null != messagingService) {
+                this.messagingService = messagingService;
+            }
+        }
         return messagingService;
     }
 
@@ -112,9 +130,11 @@ public class DefaultMessagingAccount implements MessagingAccount, ServiceAware {
      * Sets the service identifier
      *
      * @param serviceId The service identifier to set
+     * @return This account with service identifier applied
      */
-    public void setServiceId(String serviceId) {
+    public DefaultMessagingAccount setServiceId(final String serviceId) {
         this.serviceId = serviceId;
+        return this;
     }
 
     /**

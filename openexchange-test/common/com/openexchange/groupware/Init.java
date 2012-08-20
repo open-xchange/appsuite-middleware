@@ -60,6 +60,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13Server;
@@ -199,6 +201,8 @@ import com.openexchange.xml.spring.impl.DefaultSpringParser;
  */
 public final class Init {
 
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Init.class));
+
     // private static Properties infostoreProps = null;
 
     private static final List<Initialization> started = new ArrayList<Initialization>();
@@ -232,8 +236,12 @@ public final class Init {
                 if (null == AJPv13Server.getInstance()) {
                     AJPv13Server.setInstance(new com.openexchange.ajp13.najp.AJPv13ServerImpl());
                 }
-                AJPv13Server.startAJPServer();
-                HttpManagersInit.getInstance().start();
+                try {
+                    AJPv13Server.startAJPServer();
+                    HttpManagersInit.getInstance().start();
+                } catch (OXException e) {
+                    LOG.error(e.getMessage(), e);
+                }
             }
 
             @Override

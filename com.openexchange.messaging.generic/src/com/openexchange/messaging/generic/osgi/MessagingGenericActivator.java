@@ -49,14 +49,12 @@
 
 package com.openexchange.messaging.generic.osgi;
 
-import static com.openexchange.messaging.generic.services.MessagingGenericServiceRegistry.getServiceRegistry;
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.caching.CacheService;
 import com.openexchange.context.ContextService;
@@ -72,10 +70,9 @@ import com.openexchange.messaging.generic.groupware.MessagingGenericCreateTableT
 import com.openexchange.messaging.generic.groupware.MessagingGenericDeleteListener;
 import com.openexchange.messaging.generic.internal.CachingMessagingAccountStorage;
 import com.openexchange.messaging.generic.secret.MessagingSecretHandling;
+import com.openexchange.messaging.generic.services.MessagingGenericServiceRegistry;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.ServiceRegistry;
-import com.openexchange.secret.SecretService;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 import com.openexchange.secret.recovery.EncryptedItemDetectorService;
 import com.openexchange.secret.recovery.SecretMigrator;
@@ -87,10 +84,6 @@ import com.openexchange.secret.recovery.SecretMigrator;
  * @since Open-Xchange v6.16
  */
 public class MessagingGenericActivator extends HousekeepingActivator {
-
-    private List<ServiceTracker<?,?>> trackers;
-
-    private List<ServiceRegistration<?>> registrations;
 
     private WhiteboardSecretService secretService;
 
@@ -106,42 +99,12 @@ public class MessagingGenericActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MessagingGenericActivator.class));
-        if (logger.isInfoEnabled()) {
-            logger.info("Re-available service: " + clazz.getName());
-        }
-        getServiceRegistry().addService(clazz, getService(clazz));
-    }
-
-    @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MessagingGenericActivator.class));
-        if (logger.isWarnEnabled()) {
-            logger.warn("Absent service: " + clazz.getName());
-        }
-        getServiceRegistry().removeService(clazz);
-    }
-
-    @Override
     protected void startBundle() throws Exception {
         try {
             /*
              * (Re-)Initialize service registry with available services
              */
-            {
-                final ServiceRegistry registry = getServiceRegistry();
-                registry.clearRegistry();
-                final Class<?>[] classes = getNeededServices();
-                for (final Class<?> classe : classes) {
-                    final Object service = getService(classe);
-                    if (null != service) {
-                        registry.addService(classe, service);
-                    }
-                }
-                registry.addService(SecretService.class, secretService = new WhiteboardSecretService(context));
-                secretService.open();
-            }
+            MessagingGenericServiceRegistry.REF.set(this);
 
             {
                 /*
@@ -165,25 +128,19 @@ public class MessagingGenericActivator extends HousekeepingActivator {
                 getService(CacheService.class).loadConfiguration(new ByteArrayInputStream(ccf));
             }
 
-            trackers = new ArrayList<ServiceTracker<?,?>>();
-
             final ServiceTracker<MessagingService,MessagingService> messagingServiceTracker = new ServiceTracker<MessagingService,MessagingService>(context, MessagingService.class, null);
-            trackers.add(messagingServiceTracker);
+            rememberTracker(messagingServiceTracker);
+            openTrackers();
 
-            for (final ServiceTracker<?,?> tracker : trackers) {
-                tracker.open();
-            }
-
-            registrations = new ArrayList<ServiceRegistration<?>>();
             final MessagingGenericCreateTableTask createTableTask = new MessagingGenericCreateTableTask();
-            registrations.add(context.registerService(UpdateTaskProviderService.class.getName(), new UpdateTaskProviderService() {
+            registerService(UpdateTaskProviderService.class.getName(), new UpdateTaskProviderService() {
                 @Override
                 public Collection<UpdateTask> getUpdateTasks() {
                     return Arrays.asList(((UpdateTask) createTableTask));
                 }
-            }, null));
-            registrations.add(context.registerService(CreateTableService.class, createTableTask, null));
-            registrations.add(context.registerService(DeleteListener.class, new MessagingGenericDeleteListener(), null));
+            });
+            registerService(CreateTableService.class, createTableTask, null);
+            registerService(DeleteListener.class, new MessagingGenericDeleteListener(), null);
 
 
             // Secret Handling
@@ -206,13 +163,13 @@ public class MessagingGenericActivator extends HousekeepingActivator {
                 };
 
 
-                registrations.add(context.registerService(EncryptedItemDetectorService.class.getName(), secretHandling, null));
-                registrations.add(context.registerService(SecretMigrator.class.getName(), secretHandling, null));
+                registerService(EncryptedItemDetectorService.class.getName(), secretHandling, null);
+                registerService(SecretMigrator.class.getName(), secretHandling, null);
 
             }
 
         } catch (final Exception e) {
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MessagingGenericActivator.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.loggerFor(MessagingGenericActivator.class).error(e.getMessage(), e);
             throw e;
         }
     }
@@ -220,35 +177,22 @@ public class MessagingGenericActivator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         try {
-            final List<ServiceTracker<?,?>> trackers = this.trackers;
-            if (null != trackers) {
-                while (!trackers.isEmpty()) {
-                    trackers.remove(0).close();
-                }
-                this.trackers = null;
-            }
-            final List<ServiceRegistration<?>> registrations = this.registrations;
-            if (null != registrations) {
-                while (!registrations.isEmpty()) {
-                    registrations.remove(0).unregister();
-                }
-                this.registrations = null;
-            }
             final CacheService cacheService = getService(CacheService.class);
             if (null != cacheService) {
                 cacheService.freeCache(CachingMessagingAccountStorage.getRegionName());
             }
+            cleanUp();
             /*
              * Clear service registry
              */
-            getServiceRegistry().clearRegistry();
+            MessagingGenericServiceRegistry.REF.set(null);
             final WhiteboardSecretService secretService = this.secretService;
             if (null != secretService) {
                 secretService.close();
                 this.secretService = null;
             }
         } catch (final Exception e) {
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MessagingGenericActivator.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.loggerFor(MessagingGenericActivator.class).error(e.getMessage(), e);
             throw e;
         }
     }

@@ -89,7 +89,7 @@ public class UpdateAction extends AbstractMessagingAccountAction {
         }
         final MessagingAccount account = parser.parse(data, session.getUserId(), session.getContextId());
         account.getMessagingService().getAccountManager().updateAccount(account, session);
-        return new AJAXRequestResult(1);
+        return new AJAXRequestResult(Integer.valueOf(1));
     }
 
 }

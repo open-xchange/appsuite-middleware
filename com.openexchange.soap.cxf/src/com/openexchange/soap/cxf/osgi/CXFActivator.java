@@ -133,21 +133,31 @@ public class CXFActivator extends HousekeepingActivator {
                         boolean servletRegistered = false;
                         boolean collectorOpened = false;
                         try {
+                            final CXFNonSpringServlet cxfServlet = new CXFNonSpringServlet();
                             /*
                              * Register CXF Servlet
                              */
-                            final CXFNonSpringServlet cxf = new CXFNonSpringServlet();
-                            final Bus bus = cxf.getBus();
+                            httpService.registerServlet(ALIAS, cxfServlet, null, null);
+                            LOG.info("Registered CXF Servlet under: " + ALIAS);
+                            httpService.registerServlet(ALIAS2, cxfServlet, null, null);
+                            LOG.info("Registered CXF Servlet under: " + ALIAS2);
+                            servletRegistered = true;
+                            /*
+                             * Get CXF bus
+                             */
+                            final Bus bus = cxfServlet.getBus();
                             /*
                              * Add interceptors here
                              */
-                            bus.getInInterceptors().add(new RemoveGenericLabelledElementsInterceptor());
+                            //bus.getInInterceptors().add(new RemoveGenericLabelledElementsInterceptor());
+                            /*
+                             * Set properties
+                             */
+                            bus.setProperty("set-jaxb-validation-event-handler", Boolean.FALSE); // maybe "true" needs to be set instead of Boolean.FALSE
+                            /*
+                             * Apply as default bus
+                             */
                             BusFactory.setDefaultBus(bus);
-                            httpService.registerServlet(ALIAS, cxf, null, null);
-                            LOG.info("Registered CXF Servlet under: " + ALIAS);
-                            httpService.registerServlet(ALIAS2, cxf, null, null);
-                            LOG.info("Registered CXF Servlet under: " + ALIAS2);
-                            servletRegistered = true;
                             /*
                              * Initialize Webservice collector
                              */

@@ -60,6 +60,7 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
+import com.openexchange.soap.cxf.ExceptionUtils;
 import com.openexchange.soap.cxf.WebserviceName;
 
 /**
@@ -97,11 +98,9 @@ public class WebserviceCollector implements ServiceListener {
         }
         final int type = event.getType();
         if (ServiceEvent.REGISTERED == type) {
-            final ServiceReference<?> ref = event.getServiceReference();
-            add(ref);
+            add(event.getServiceReference());
         } else if (ServiceEvent.UNREGISTERING == type) {
-            final ServiceReference<?> ref = event.getServiceReference();
-            remove(ref);
+            remove(event.getServiceReference());
         }
     }
 
