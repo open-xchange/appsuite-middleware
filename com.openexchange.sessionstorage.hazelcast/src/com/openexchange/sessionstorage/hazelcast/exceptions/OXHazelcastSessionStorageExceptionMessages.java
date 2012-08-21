@@ -51,22 +51,34 @@ package com.openexchange.sessionstorage.hazelcast.exceptions;
 
 import com.openexchange.i18n.LocalizableStrings;
 
-
 /**
  * {@link OXHazelcastSessionStorageExceptionMessages}
- *
+ * 
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class OXHazelcastSessionStorageExceptionMessages implements LocalizableStrings {
-    
+
     public static final String HAZELCAST_SESSIONSTORAGE_NO_ENCRYPTION_KEY_MSG = "Could not find encryption key.";
+
     public final static String HAZELCAST_SESSIONSTORAGE_START_FAILED_MSG = "Start of SessionStorageService failed.";
+
     public final static String HAZELCAST_SESSIONSTORAGE_SAVE_FAILED_MSG = "Saving session with sessionId %1$s failed.";
+
     public final static String HAZELCAST_SESSIONSTORAGE_LOOKUP_FAILED_MSG = "Lookup for session with sessionId %1$s failed.";
+
     public final static String HAZELCAST_SESSIONSTORAGE_REMOVE_FAILED_MSG = "Removing session with sessionId %1$s failed.";
+
     public final static String HAZELCAST_SESSIONSTORAGE_SESSION_NOT_FOUND_MSG = "No session with sessionId %1$s found.";
+
     public final static String HAZELCAST_SESSIONSTORAGE_DUPLICATE_AUTHID_MSG = "Authentication identifier duplicate found. Existing session login: %1$s. Current denied login request: %2$s.";
+
     public final static String HAZELCAST_SESSIONSTORAGE_UNSUPPORTED_OPERATION_MSG = "Operation %1$s not supported.";
+
+    public final static String HAZELCAST_SESSIONSTORAGE_ALTID_NOT_FOUND_MSG = "Lookup for session with altId %1$s failed";
+
+    public final static String HAZELCAST_SESSIONSTORAGE_NO_USERSESSIONS_MSG = "No sessions found for user %1$s in context %2$s";
+
+    public final static String HAZELCAST_SESSIONSTORAGE_NO_CONTEXTSESSIONS_MSG = "No sessions found for context %1$s";
 
     /**
      * Initializes a new {@link OXHazelcastSessionStorageExceptionMessages}.
