@@ -176,7 +176,7 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
             Matcher matcher = OBJECT_ID_PATTERN.matcher(resourceName);
             if (matcher.find()) {
                 try {
-                    int objectID = Integer.parseInt(matcher.group(1));
+                    int objectID = Integer.parseInt(matcher.group(0));
                     for (T t : objects) {
                         if (objectID == t.getObjectID()) {
                             return t;

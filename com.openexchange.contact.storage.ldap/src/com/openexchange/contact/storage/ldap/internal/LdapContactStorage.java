@@ -138,38 +138,19 @@ public class LdapContactStorage extends DefaultContactStorage {
     @Override
     public Contact get(Session session, String folderId, String id, ContactField[] fields) throws OXException {
         check(session.getContextId(), folderId);
-        SearchIterator<Contact> searchIterator = null; 
-        try {
-            searchIterator = this.list(session, folderId, new String[] { id }, fields);
-            if (false == searchIterator.hasNext()) {
-                throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(parse(id), session.getContextId());
-            } else {
-                return searchIterator.next();            
-            }
-        } finally {
-            if (null != searchIterator) {
-                searchIterator.close();
-            }
-        }
+        return doGet(session, folderId, id, fields);
     }
 
     @Override
     public SearchIterator<Contact> all(Session session, String folderId, ContactField[] fields, SortOptions sortOptions) throws OXException {
         check(session.getContextId(), folderId);
-        return getSearchIterator(search(session, fields, null, sortOptions, false));
+        return doAll(session, folderId, fields, sortOptions);
     }
 
     @Override
     public SearchIterator<Contact> list(Session session, String folderId, String[] ids, ContactField[] fields, SortOptions sortOptions) throws OXException {
         check(session.getContextId(), folderId);
-        CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
-        for (String id : ids) {
-            SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
-            term.addOperand(new ContactFieldOperand(ContactField.OBJECT_ID));
-            term.addOperand(new ConstantOperand<String>(id));
-            orTerm.addSearchTerm(term);
-        }
-        return this.search(session, orTerm, fields, sortOptions);
+        return doList(session, folderId, ids, fields, sortOptions);
     }
 
     @Override
@@ -182,10 +163,7 @@ public class LdapContactStorage extends DefaultContactStorage {
             LOG.warn("No ADS deletion support available, unable to get deleted contacts in period.");
             return getSearchIterator(null);
         }
-        SingleSearchTerm term = new SingleSearchTerm(SingleOperation.GREATER_THAN);
-        term.addOperand(new ContactFieldOperand(ContactField.LAST_MODIFIED));
-        term.addOperand(new ConstantOperand<Date>(since));
-        return getSearchIterator(search(session, term, fields, sortOptions, true));
+        return doDeleted(session, folderId, since, fields, sortOptions);
     }
 
     @Override
@@ -194,17 +172,14 @@ public class LdapContactStorage extends DefaultContactStorage {
         if (null == mapper.opt(ContactField.LAST_MODIFIED)) {
             LOG.warn("No LDAP mapping for " + ContactField.LAST_MODIFIED + ", unable to get modified contacts in period.");
             return getSearchIterator(null);                        
-        }        
-        SingleSearchTerm term = new SingleSearchTerm(SingleOperation.GREATER_THAN);
-        term.addOperand(new ContactFieldOperand(ContactField.LAST_MODIFIED));
-        term.addOperand(new ConstantOperand<Date>(since));
-        return this.search(session, term, fields, sortOptions);
+        }
+        return doModified(session, folderID, since, fields, sortOptions);
     }
 
     @Override
     public <O> SearchIterator<Contact> search(Session session, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException {
         checkContext(session.getContextId());
-        return getSearchIterator(search(session, term, fields, sortOptions, false));
+        return doSearch(session, term, fields, sortOptions);
     }
 
     @Override
@@ -225,6 +200,53 @@ public class LdapContactStorage extends DefaultContactStorage {
     @Override
     public void delete(Session session, String folderId, String id, Date lastRead) throws OXException {
         throw LdapExceptionCodes.DELETE_NOT_POSSIBLE.create();
+    }
+    
+    protected Contact doGet(Session session, String folderId, String id, ContactField[] fields) throws OXException {
+        SearchIterator<Contact> searchIterator = null; 
+        try {
+            searchIterator = this.list(session, folderId, new String[] { id }, fields);
+            if (false == searchIterator.hasNext()) {
+                throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(parse(id), session.getContextId());
+            } else {
+                return searchIterator.next();            
+            }
+        } finally {
+            Tools.close(searchIterator);
+        }
+    }
+
+    protected SearchIterator<Contact> doAll(Session session, String folderId, ContactField[] fields, SortOptions sortOptions) throws OXException {
+        return getSearchIterator(search(session, fields, null, sortOptions, false));
+    }
+
+    protected SearchIterator<Contact> doList(Session session, String folderId, String[] ids, ContactField[] fields, SortOptions sortOptions) throws OXException {
+        CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
+        for (String id : ids) {
+            SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
+            term.addOperand(new ContactFieldOperand(ContactField.OBJECT_ID));
+            term.addOperand(new ConstantOperand<String>(id));
+            orTerm.addSearchTerm(term);
+        }
+        return this.search(session, orTerm, fields, sortOptions);
+    }
+    
+    protected SearchIterator<Contact> doDeleted(Session session, String folderId, Date since, ContactField[] fields, SortOptions sortOptions) throws OXException {
+        SingleSearchTerm term = new SingleSearchTerm(SingleOperation.GREATER_THAN);
+        term.addOperand(new ContactFieldOperand(ContactField.LAST_MODIFIED));
+        term.addOperand(new ConstantOperand<Date>(since));
+        return getSearchIterator(search(session, term, fields, sortOptions, true));
+    }   
+    
+    protected SearchIterator<Contact> doModified(Session session, String folderID, Date since, ContactField[] fields, SortOptions sortOptions) throws OXException {
+        SingleSearchTerm term = new SingleSearchTerm(SingleOperation.GREATER_THAN);
+        term.addOperand(new ContactFieldOperand(ContactField.LAST_MODIFIED));
+        term.addOperand(new ConstantOperand<Date>(since));
+        return getSearchIterator(search(session, term, fields, sortOptions, false));
+    }
+    
+    protected <O> SearchIterator<Contact> doSearch(Session session, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException {
+        return getSearchIterator(search(session, term, fields, sortOptions, false));
     }
     
     protected <O> List<Contact> search(Session session, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions, boolean deleted) throws OXException {
@@ -442,7 +464,7 @@ public class LdapContactStorage extends DefaultContactStorage {
      * @param folderID the folder ID to check
      * @throws OXException
      */
-    private void check(int contextID, String folderID) throws OXException {
+    protected void check(int contextID, String folderID) throws OXException {
         checkContext(contextID);
         checkFolder(folderID);
     }
@@ -454,7 +476,7 @@ public class LdapContactStorage extends DefaultContactStorage {
      * @param contextID the context ID to check
      * @throws OXException
      */
-    private void checkContext(int contextID) throws OXException {
+    protected void checkContext(int contextID) throws OXException {
         if (this.config.getContextID() != contextID) {
             throw LdapExceptionCodes.INVALID_CONTEXT.create(contextID);
         }
@@ -467,7 +489,7 @@ public class LdapContactStorage extends DefaultContactStorage {
      * @param folderID the folder ID to check
      * @throws OXException
      */
-    private void checkFolder(String folderID) throws OXException {
+    protected void checkFolder(String folderID) throws OXException {
         if (false == this.config.getFolderID().equals(folderID)) {
             throw LdapExceptionCodes.INVALID_FOLDER.create(folderID);
         }

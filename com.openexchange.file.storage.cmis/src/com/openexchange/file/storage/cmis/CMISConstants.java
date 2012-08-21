@@ -84,6 +84,11 @@ public final class CMISConstants implements FileStorageConstants {
     public static final String CMIS_REPOSITORY = "repository";
 
     /**
+     * The configuration property name for HTTP basic authentication.
+     */
+    public static final String CMIS_AUTH_HTTP_BASIC = "auth.http.basic";
+
+    /**
      * The configuration property name for URL to CMIS server;<br>
      * e.g. <code>"http://&lt;host&gt;:&lt;port&gt;/cmis/atom"</code>.
      */
@@ -93,6 +98,11 @@ public final class CMISConstants implements FileStorageConstants {
      * The configuration property name for timeout for CMIS server.
      */
     public static final String CMIS_TIMEOUT = "timeout";
+
+    /**
+     * The configuration property name for binding.
+     */
+    public static final String CMIS_BINDING = "binding";
 
     /**
      * Initializes a new {@link CMISConstants}.

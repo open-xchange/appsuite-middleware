@@ -27,8 +27,7 @@ public final class QueryResultImpl<T> extends ExecutionResult<T> implements Quer
   /**
    * @return the query used to create this result
    */
-  @Override
-public Query<T> getQuery() {
+  public Query<T> getQuery() {
     return query;
   }
 

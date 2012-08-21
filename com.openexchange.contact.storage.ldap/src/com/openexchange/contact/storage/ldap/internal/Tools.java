@@ -60,6 +60,7 @@ import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.ldap.LdapContext;
 import org.apache.commons.logging.Log;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.storage.ldap.LdapExceptionCodes;
 import com.openexchange.exception.OXException;
@@ -77,16 +78,17 @@ import com.openexchange.tools.iterator.SearchIterator;
 public final class Tools  {
     
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Tools.class));
-    private static final String BASE_PATH = System.getProperty("openexchange.propdir") + File.separator + "contact-storage-ldap"; 
+    private static final String DIRECTORY_NAME = "contact-storage-ldap"; 
 
     private Tools() {
+        super();
     }
     
     public static Properties loadProperties(String fileName) throws OXException {
         Properties properties = new Properties();
         FileInputStream in = null;
         try {
-            properties.load(new FileInputStream(BASE_PATH + File.separator + fileName));
+            properties.load(new FileInputStream(getFile(fileName)));
         } catch (FileNotFoundException e) {
             throw LdapExceptionCodes.ERROR.create(e, e.getMessage());
         } catch (IOException e) {
@@ -97,8 +99,33 @@ public final class Tools  {
         return properties;
     }
     
-    public static String[] listPropertyFiles() {
-        return new File(BASE_PATH).list(new FilenameFilter() {
+    private static File getFile(String fileName) throws OXException {
+        File file = new File(fileName);
+        if (false == file.isAbsolute()) {
+            File directory = LdapServiceLookup.getService(ConfigurationService.class).getDirectory(DIRECTORY_NAME);
+            return new File(directory, fileName);            
+        }        
+        return file;
+    }
+    
+    public static Properties loadProperties(File file) throws OXException {
+        Properties properties = new Properties();
+        FileInputStream in = null;
+        try {
+            properties.load(new FileInputStream(file));
+        } catch (FileNotFoundException e) {
+            throw LdapExceptionCodes.ERROR.create(e, e.getMessage());
+        } catch (IOException e) {
+            throw LdapExceptionCodes.ERROR.create(e, e.getMessage());
+        } finally {
+            Streams.close(in);
+        }
+        return properties;
+    }
+    
+    public static File[] listPropertyFiles() throws OXException {
+        File directory = LdapServiceLookup.getService(ConfigurationService.class).getDirectory(DIRECTORY_NAME);
+        return directory.listFiles(new FilenameFilter() {
             
             @Override
             public boolean accept(File dir, String name) {

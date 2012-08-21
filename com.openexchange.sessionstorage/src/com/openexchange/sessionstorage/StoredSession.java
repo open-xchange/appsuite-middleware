@@ -49,6 +49,7 @@
 
 package com.openexchange.sessionstorage;
 
+import java.io.Serializable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -60,7 +61,7 @@ import com.openexchange.session.Session;
  * 
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class StoredSession implements PutIfAbsent {
+public class StoredSession implements PutIfAbsent, Serializable {
 
     private String loginName;
 
@@ -85,11 +86,11 @@ public class StoredSession implements PutIfAbsent {
     private String hash;
 
     private String client;
-    
+
     private String userLogin;
 
     private ConcurrentMap<String, Object> parameters;
-    
+
     public StoredSession(String sessionId, String loginName, String password, int contextId, int userId, String secret, String login, String randomToken, String localIP, String authId, String hash, String client, Map<String, Object> parameters) {
         super();
         this.sessionId = sessionId;
@@ -107,7 +108,7 @@ public class StoredSession implements PutIfAbsent {
         this.userLogin = "";
         this.parameters = new ConcurrentHashMap<String, Object>();
         // Assign parameters (if not null)
-        if (parameters != null){
+        if (parameters != null) {
             Object parameter = parameters.get(Session.PARAM_LOCK);
             if (null != parameter) {
                 this.parameters.put(Session.PARAM_LOCK, parameter);
@@ -275,11 +276,11 @@ public class StoredSession implements PutIfAbsent {
     public void setClient(final String client) {
         this.client = client;
     }
-    
+
     public String getUserLogin() {
         return userLogin;
     }
-    
+
     public void setUserLogin(final String userLogin) {
         this.userLogin = userLogin;
     }
@@ -333,6 +334,5 @@ public class StoredSession implements PutIfAbsent {
     public void removeRandomToken() {
         randomToken = null;
     }
-
 
 }

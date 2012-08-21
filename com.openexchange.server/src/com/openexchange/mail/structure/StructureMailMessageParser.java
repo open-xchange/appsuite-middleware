@@ -191,6 +191,7 @@ public final class StructureMailMessageParser {
      */
     public StructureMailMessageParser() {
         super();
+        parseTNEFParts = true;
         neverTreatMessageAsAttachment = true;
         inlineDetector = LENIENT_DETECTOR;
     }

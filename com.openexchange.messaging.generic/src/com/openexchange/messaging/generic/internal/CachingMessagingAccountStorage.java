@@ -107,7 +107,7 @@ public final class CachingMessagingAccountStorage implements MessagingAccountSto
     }
 
     private static void invalidateMessagingAccount(final String serviceId, final int id, final int user, final int cid) throws OXException {
-        final CacheService cacheService = MessagingGenericServiceRegistry.getServiceRegistry().getService(CacheService.class);
+        final CacheService cacheService = MessagingGenericServiceRegistry.getService(CacheService.class);
         if (null != cacheService) {
             try {
                 final Cache cache = cacheService.getCache(REGION_NAME);
@@ -167,7 +167,7 @@ public final class CachingMessagingAccountStorage implements MessagingAccountSto
 
     @Override
     public MessagingAccount getAccount(final String serviceId, final int id, final Session session, final Modifier modifier) throws OXException {
-        final CacheService cacheService = MessagingGenericServiceRegistry.getServiceRegistry().getService(CacheService.class);
+        final CacheService cacheService = MessagingGenericServiceRegistry.getService(CacheService.class);
         if (cacheService == null) {
             return delegatee.getAccount(serviceId, id, session, modifier);
         }

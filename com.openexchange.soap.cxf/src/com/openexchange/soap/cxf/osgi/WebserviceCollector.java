@@ -60,12 +60,14 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
+import com.openexchange.soap.cxf.ExceptionUtils;
 import com.openexchange.soap.cxf.WebserviceName;
 
 /**
  * {@link WebserviceCollector}
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class WebserviceCollector implements ServiceListener {
 
@@ -97,11 +99,9 @@ public class WebserviceCollector implements ServiceListener {
         }
         final int type = event.getType();
         if (ServiceEvent.REGISTERED == type) {
-            final ServiceReference<?> ref = event.getServiceReference();
-            add(ref);
+            add(event.getServiceReference());
         } else if (ServiceEvent.UNREGISTERING == type) {
-            final ServiceReference<?> ref = event.getServiceReference();
-            remove(ref);
+            remove(event.getServiceReference());
         }
     }
 
@@ -166,7 +166,6 @@ public class WebserviceCollector implements ServiceListener {
             }
         }
         // Next try the WebService annotation
-
         {
             final WebService webService = service.getClass().getAnnotation(WebService.class);
             String serviceName = webService.serviceName();

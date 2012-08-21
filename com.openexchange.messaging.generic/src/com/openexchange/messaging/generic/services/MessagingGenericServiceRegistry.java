@@ -49,7 +49,8 @@
 
 package com.openexchange.messaging.generic.services;
 
-import com.openexchange.osgi.ServiceRegistry;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link MessagingGenericServiceRegistry} - The service registry for <code>com.openexchange.messaging.generic</code> bundle.
@@ -58,15 +59,32 @@ import com.openexchange.osgi.ServiceRegistry;
  */
 public final class MessagingGenericServiceRegistry {
 
-    private static final ServiceRegistry SERVICE_REGISTRY = new ServiceRegistry(4);
+    /**
+     * The atomic reference to {@link ServiceLookup services}.
+     */
+    public static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
 
     /**
-     * Gets the service registry.
+     * Gets the service of specified type
      *
-     * @return The service registry
+     * @param clazz The service's class
+     * @return The service or <code>null</code> is absent
+     * @throws IllegalStateException If an error occurs while returning the demanded service
      */
-    public static ServiceRegistry getServiceRegistry() {
-        return SERVICE_REGISTRY;
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final ServiceLookup services = REF.get();
+        return null == services ? null : services.getService(clazz);
+    }
+    
+    /**
+     * Gets the optional service  of specified type
+     * 
+     * @param clazz The service's class
+     * @return The service or <code>null</code> is absent
+     */
+    public static <S extends Object> S getOptionalService(final Class<? extends S> clazz) {
+        final ServiceLookup services = REF.get();
+        return null == services ? null : services.getOptionalService(clazz);
     }
 
     /**

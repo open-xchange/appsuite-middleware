@@ -162,7 +162,7 @@ final class POTokenStream {
         return charset.decode(ByteBuffer.wrap(b)).toString();
     }
 
-    private String decode(final String orig) {
+    private static String decode(final String orig) {
         final StringBuilder sb = new StringBuilder(orig);
         int pos = sb.indexOf("\\");
         while (pos != -1) {
@@ -174,8 +174,9 @@ final class POTokenStream {
             case '"':
                 sb.replace(pos, pos + 2, "\"");
                 break;
+            default:
             }
-            pos = sb.indexOf("\\", pos);
+            pos = sb.indexOf("\\", pos + 1);
         }
         return sb.toString();
     }

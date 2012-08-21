@@ -23,8 +23,7 @@ public interface SuperCfResult<K, SN, N> extends ColumnFamilyResult<K, N> {
   
   Collection<SN> getSuperColumns();
   
-  @Override
-K getKey();
+  K getKey();
 
   UUID getUUID(SN sColumnName, N columnName);
 

@@ -463,7 +463,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             } catch (final ParseException e) {
                 throw OXMailfilterExceptionCode.SIEVE_ERROR.create(e, e.getMessage());
             } catch (final SieveException e) {
-                throw OXMailfilterExceptionCode.SIEVE_ERROR.create(e, e.getMessage());
+                throw handleSieveException(e);
             } catch (final JSONException e) {
                 throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, e.getMessage());
             } catch (final TokenMgrError error) {
@@ -613,7 +613,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             } catch (final ParseException e) {
                 throw OXMailfilterExceptionCode.SIEVE_ERROR.create(e, e.getMessage());
             } catch (final SieveException e) {
-                throw OXMailfilterExceptionCode.SIEVE_ERROR.create(e, e.getMessage());
+                throw handleSieveException(e);
             } catch (final JSONException e) {
                 throw OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e, EMPTY_ARGS);
             } catch (final TokenMgrError error) {
@@ -961,6 +961,19 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             }
         }
         throw OXMailfilterExceptionCode.NO_SUCH_ID.create(uniqueid, userName, contextStr);
+    }
+
+    private static OXException handleSieveException(final SieveException e) {
+        final String msg = e.getMessage();
+        final OXException ret = OXMailfilterExceptionCode.SIEVE_ERROR.create(e, msg);
+        if (null != msg) {
+            if (msg.startsWith(OXMailfilterExceptionCode.ERR_PREFIX_REJECTED_ADDRESS)) {
+                ret.setCategory(Category.CATEGORY_USER_INPUT);
+            } else if (msg.startsWith(OXMailfilterExceptionCode.ERR_PREFIX_INVALID_ADDRESS)) {
+                ret.setCategory(Category.CATEGORY_USER_INPUT);
+            }
+        }
+        return ret;
     }
 
     // private int getIndexOfRightRuleForUniqueId(final ArrayList<Rule>
