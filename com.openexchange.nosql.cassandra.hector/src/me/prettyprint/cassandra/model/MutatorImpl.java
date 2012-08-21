@@ -131,13 +131,11 @@ public final class MutatorImpl<K> implements Mutator<K> {
    * we delete the whole thing. 
    * 
    */
-  @Override
-public <SN,N,V> Mutator<K> addSubDelete(K key, String cf, HSuperColumn<SN,N,V> sc) {
+  public <SN,N,V> Mutator<K> addSubDelete(K key, String cf, HSuperColumn<SN,N,V> sc) {
     return addSubDelete(key, cf, sc, keyspace.createClock());
   }
   
-  @Override
-public <SN,N,V> Mutator<K> addSubDelete(K key, String cf, HSuperColumn<SN,N,V> sc, long clock) {
+  public <SN,N,V> Mutator<K> addSubDelete(K key, String cf, HSuperColumn<SN,N,V> sc, long clock) {
     Deletion d = new Deletion().setTimestamp(clock);
     if ( sc.getColumns() != null ) {      
       SlicePredicate pred = new SlicePredicate();

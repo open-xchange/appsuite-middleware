@@ -625,14 +625,14 @@ public final class ConfigurationImpl implements ConfigurationService {
     @Override
     public Map<String, Object> getYamlInFolder(final String folderName) {
         final Map<String, Object> retval = new HashMap<String, Object>();
-        final Iterator<Entry<String, String>> iter = yamlPaths.entrySet().iterator();
+        final Iterator<Entry<String, Object>> iter = yamlFiles.entrySet().iterator();
         String fldName = folderName;
         for (final File dir : dirs) {
-            fldName = dir.getAbsolutePath() + "/" + fldName + "/";
+            fldName = dir.getAbsolutePath() + File.separatorChar + fldName + File.separatorChar;
             while (iter.hasNext()) {
-                final Entry<String, String> entry = iter.next();
-                if (entry.getValue().startsWith(fldName)) {
-                    retval.put(entry.getKey(), yamlFiles.get(entry.getValue()));
+                final Entry<String, Object> entry = iter.next();
+                if (entry.getKey().startsWith(fldName)) {
+                    retval.put(entry.getKey(), entry.getValue());
                 }
             }
         }

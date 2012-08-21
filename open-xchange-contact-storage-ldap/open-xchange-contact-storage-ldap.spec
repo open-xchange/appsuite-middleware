@@ -17,6 +17,13 @@ Source:         %{name}_%{version}.orig.tar.bz2
 Summary:        Contact storage provider using a LDAP server as backend
 Requires:      open-xchange-core >= @OXVERSION@
 
+%description
+Contact storage provider using a LDAP server as backend
+
+Authors:
+--------
+    Open-Xchange
+
 %prep
 %setup -q
 

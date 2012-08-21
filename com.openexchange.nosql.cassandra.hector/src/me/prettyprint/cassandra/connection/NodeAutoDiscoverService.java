@@ -24,7 +24,7 @@ public class NodeAutoDiscoverService extends BackgroundCassandraHostService {
 
   public static final int DEF_AUTO_DISCOVERY_DELAY = 30;
 
-  private final DataCenterValidator dataCenterValidator;
+  private DataCenterValidator dataCenterValidator;
 
 
   public NodeAutoDiscoverService(HConnectionManager connectionManager,

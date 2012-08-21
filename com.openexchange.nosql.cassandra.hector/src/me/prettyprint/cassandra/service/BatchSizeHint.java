@@ -2,8 +2,8 @@ package me.prettyprint.cassandra.service;
 
 public class BatchSizeHint
 {
-	private final int numOfRows;
-	private final int numOfColumns;
+	private int numOfRows;
+	private int numOfColumns;
 
 	public BatchSizeHint(int numOfRows, int numOfColumns)
 	{
