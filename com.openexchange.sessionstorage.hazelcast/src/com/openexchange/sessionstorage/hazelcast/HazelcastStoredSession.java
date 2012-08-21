@@ -49,6 +49,7 @@
 
 package com.openexchange.sessionstorage.hazelcast;
 
+import java.io.Serializable;
 import java.util.Map;
 import com.openexchange.session.Session;
 import com.openexchange.sessionstorage.StoredSession;
@@ -58,7 +59,7 @@ import com.openexchange.sessionstorage.StoredSession;
  * 
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class HazelcastStoredSession extends StoredSession {
+public class HazelcastStoredSession extends StoredSession implements Serializable {
 
     private long lastAccess;
 

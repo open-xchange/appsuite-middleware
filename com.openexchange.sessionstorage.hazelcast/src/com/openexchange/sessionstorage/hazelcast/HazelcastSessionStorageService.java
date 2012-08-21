@@ -107,13 +107,12 @@ public class HazelcastSessionStorageService implements SessionStorageService {
     @Override
     public Session lookupSession(String sessionId) throws OXException {
         if (sessions.containsKey(sessionId)) {
-            Session s = sessions.get(sessionId);
-            HazelcastStoredSession ss = new HazelcastStoredSession(s);
-            ss.setLastAccess(System.currentTimeMillis());
-            sessions.replace(sessionId, new HazelcastStoredSession(s), ss);
-            return ss;
+            HazelcastStoredSession s = sessions.get(sessionId);
+            s.setLastAccess(System.currentTimeMillis());
+            sessions.replace(sessionId, s);
+            return s;
         }
-        OXException e = OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_SESSION_NOT_FOUND.create();
+        OXException e = OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_SESSION_NOT_FOUND.create(sessionId);
         LOG.info(e.getMessage(), e);
         throw e;
     }
@@ -125,17 +124,17 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             sessions.put(session.getSessionID(), ss);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
-            throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_SAVE_FAILED.create(e);
+            throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_SAVE_FAILED.create(session.getSessionID());
         }
     }
 
     @Override
     public void removeSession(String sessionId) throws OXException {
         try {
-            sessions.remove(sessionId);
+            HazelcastStoredSession s = sessions.remove(sessionId);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
-            throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_REMOVE_FAILED.create(e);
+            throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_REMOVE_FAILED.create(sessionId);
         }
     }
 
@@ -203,7 +202,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
         if (userSessions.length > 0) {
             return userSessions[0];
         }
-        OXException e = OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_LOOKUP_FAILED.create();
+        OXException e = OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_NO_USERSESSIONS.create(userId, contextId);
         LOG.warn(e.getMessage(), e);
         throw e;
     }
@@ -245,8 +244,15 @@ public class HazelcastSessionStorageService implements SessionStorageService {
 
     @Override
     public Session getSessionByAlternativeId(String altId) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        for (String sessionId : sessions.keySet()) {
+            HazelcastStoredSession s = sessions.get(sessionId);
+            if (s.getParameter(Session.PARAM_ALTERNATIVE_ID).equals(altId)) {
+                return s;
+            }
+        }
+        OXException e = OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_ALTID_NOT_FOUND.create(altId);
+        LOG.error(e.getMessage(), e);
+        throw e;
     }
 
     @Override

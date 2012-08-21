@@ -56,11 +56,11 @@ import com.openexchange.exception.OXExceptionFactory;
 
 /**
  * {@link OXHazelcastSessionStorageExceptionCodes}
- *
+ * 
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public enum OXHazelcastSessionStorageExceptionCodes implements OXExceptionCode {
-    
+
     HAZELCAST_SESSIONSTORAGE_START_FAILED(OXHazelcastSessionStorageExceptionMessages.HAZELCAST_SESSIONSTORAGE_START_FAILED_MSG, 1, Category.CATEGORY_ERROR),
     HAZELCAST_SESSIONSTORAGE_SAVE_FAILED(OXHazelcastSessionStorageExceptionMessages.HAZELCAST_SESSIONSTORAGE_SAVE_FAILED_MSG, 2, Category.CATEGORY_ERROR),
     HAZELCAST_SESSIONSTORAGE_LOOKUP_FAILED(OXHazelcastSessionStorageExceptionMessages.HAZELCAST_SESSIONSTORAGE_LOOKUP_FAILED_MSG, 3, Category.CATEGORY_ERROR),
@@ -68,8 +68,11 @@ public enum OXHazelcastSessionStorageExceptionCodes implements OXExceptionCode {
     HAZELCAST_SESSIONSTORAGE_SESSION_NOT_FOUND(OXHazelcastSessionStorageExceptionMessages.HAZELCAST_SESSIONSTORAGE_SESSION_NOT_FOUND_MSG, 5, Category.CATEGORY_ERROR),
     HAZELCAST_SESSIONSTORAGE_NO_ENCRYPTION_KEY(OXHazelcastSessionStorageExceptionMessages.HAZELCAST_SESSIONSTORAGE_NO_ENCRYPTION_KEY_MSG, 6, Category.CATEGORY_ERROR),
     HAZELCAST_SESSIONSTORAGE_DUPLICATE_AUTHID(OXHazelcastSessionStorageExceptionMessages.HAZELCAST_SESSIONSTORAGE_DUPLICATE_AUTHID_MSG, 7, Category.CATEGORY_ERROR),
-    HAZELCAST_SESSIONSTORAGE_UNSUPPORTED_OPERATION(OXHazelcastSessionStorageExceptionMessages.HAZELCAST_SESSIONSTORAGE_UNSUPPORTED_OPERATION_MSG, 8, Category.CATEGORY_ERROR);
-    
+    HAZELCAST_SESSIONSTORAGE_UNSUPPORTED_OPERATION(OXHazelcastSessionStorageExceptionMessages.HAZELCAST_SESSIONSTORAGE_UNSUPPORTED_OPERATION_MSG, 8, Category.CATEGORY_ERROR),
+    HAZELCAST_SESSIONSTORAGE_ALTID_NOT_FOUND(OXHazelcastSessionStorageExceptionMessages.HAZELCAST_SESSIONSTORAGE_ALTID_NOT_FOUND_MSG, 9, Category.CATEGORY_ERROR),
+    HAZELCAST_SESSIONSTORAGE_NO_USERSESSIONS(OXHazelcastSessionStorageExceptionMessages.HAZELCAST_SESSIONSTORAGE_NO_USERSESSIONS_MSG, 10, Category.CATEGORY_ERROR),
+    HAZELCAST_SESSIONSTORAGE_NO_CONTEXTESSIONS(OXHazelcastSessionStorageExceptionMessages.HAZELCAST_SESSIONSTORAGE_NO_CONTEXTSESSIONS_MSG, 11, Category.CATEGORY_ERROR);
+
     /**
      * Message of the exception.
      */
@@ -118,7 +121,7 @@ public enum OXHazelcastSessionStorageExceptionCodes implements OXExceptionCode {
     public String getMessage() {
         return message;
     }
-    
+
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      * 
