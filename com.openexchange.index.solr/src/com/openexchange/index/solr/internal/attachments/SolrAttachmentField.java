@@ -49,10 +49,12 @@
 
 package com.openexchange.index.solr.internal.attachments;
 
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.Map;
-import com.openexchange.index.AttachmentIndexField;
+import java.util.Set;
+import com.openexchange.index.attachments.AttachmentIndexField;
 import com.openexchange.index.solr.internal.SolrField;
 
 
@@ -119,7 +121,7 @@ public enum SolrAttachmentField implements SolrField {
         return fieldMapping.get(indexField);
     }
     
-    public static EnumSet<AttachmentIndexField> getIndexedFields() {
-        return indexedFields;
+    public static Set<AttachmentIndexField> getIndexedFields() {
+        return Collections.unmodifiableSet(indexedFields);
     }
 }

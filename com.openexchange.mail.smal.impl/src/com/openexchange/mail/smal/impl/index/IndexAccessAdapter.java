@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.smal.impl.index;
 
-import static com.openexchange.index.solr.mail.SolrMailUtility.releaseAccess;
+import static com.openexchange.index.mail.MailUtility.releaseAccess;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -67,7 +67,7 @@ import com.openexchange.index.QueryParameters;
 import com.openexchange.index.SearchHandler;
 import com.openexchange.index.StandardIndexDocument;
 import com.openexchange.index.mail.MailIndexField;
-import com.openexchange.index.solr.mail.MailUUID;
+import com.openexchange.index.mail.MailUUID;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailSortField;

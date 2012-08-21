@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,64 +47,44 @@
  *
  */
 
-package com.openexchange.index.solr.mail;
+package com.openexchange.index.mail;
 
-import java.util.Set;
-import com.openexchange.index.IndexAccess;
-import com.openexchange.index.IndexFacadeService;
-import com.openexchange.index.IndexField;
-import com.openexchange.index.mail.MailIndexField;
-import com.openexchange.mail.MailField;
-import com.openexchange.mail.MailFields;
-import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.MailPath;
 
 /**
- * {@link SolrMailUtility} - Provides utility methods for Solr mail access.
- * 
+ * {@link MailUUID} - Represents a mail's UUID in index storage.
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SolrMailUtility {
+public class MailUUID {
+
+    private final String mailUUID;
 
     /**
-     * Initializes a new {@link SolrMailUtility}.
+     * Initializes a new {@link MailUUID}.
+     *
+     * @param contextId The context identifier
+     * @param userId The user identifier
+     * @param accountId The account identifier
+     * @param fullName The folder full name
+     * @param mailId The mail identifier
      */
-    private SolrMailUtility() {
+    public MailUUID(final int contextId, final int userId, final int accountId, final String fullName, final String mailId) {
         super();
-    }
-    /**
-     * Gets the indexable fields.
-     * 
-     * @return The indexable fields
-     */
-    public static MailFields getIndexableFields(IndexAccess<MailMessage> indexAccess) {
-        final MailFields fields = new MailFields();
-        final Set<? extends IndexField> indexedFields = indexAccess.getIndexedFields();                
-        for (IndexField field : indexedFields) {
-            if (field instanceof MailIndexField) {
-                MailField mailField = ((MailIndexField) field).getMailField();
-                if (mailField != null && !fields.contains(mailField)) {
-                    fields.add(mailField);
-                }
-            }
-        }
-        
-        return fields;
+        final StringBuilder tmp = new StringBuilder(64);
+        tmp.append(contextId).append(MailPath.SEPERATOR).append(userId).append(MailPath.SEPERATOR);
+        tmp.append(MailPath.getMailPath(accountId, fullName, mailId));
+        mailUUID = tmp.toString();
     }
 
-    /**
-     * Safely releases specified access using given facade.
-     * 
-     * @param facade The facade
-     * @param indexAccess The access
-     */
-    public static void releaseAccess(final IndexFacadeService facade, final IndexAccess<MailMessage> indexAccess) {
-        if (null != indexAccess) {
-            try {
-                facade.releaseIndexAccess(indexAccess);
-            } catch (final Exception e) {
-                // Ignore
-            }
-        }
+    public String getUUID() {
+        return mailUUID;
+    }
+
+    @Override
+    public String toString() {
+        return mailUUID;
     }
 
 }

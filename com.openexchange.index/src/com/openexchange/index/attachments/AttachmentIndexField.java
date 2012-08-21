@@ -47,44 +47,28 @@
  *
  */
 
-package com.openexchange.index.solr.mail;
+package com.openexchange.index.attachments;
 
-import com.openexchange.mail.MailPath;
+import com.openexchange.index.IndexField;
+
 
 /**
- * {@link MailUUID} - Represents a mail's UUID in index storage.
+ * {@link AttachmentIndexField}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MailUUID {
-
-    private final String mailUUID;
-
-    /**
-     * Initializes a new {@link MailUUID}.
-     *
-     * @param contextId The context identifier
-     * @param userId The user identifier
-     * @param accountId The account identifier
-     * @param fullName The folder full name
-     * @param mailId The mail identifier
-     */
-    public MailUUID(final int contextId, final int userId, final int accountId, final String fullName, final String mailId) {
-        super();
-        final StringBuilder tmp = new StringBuilder(64);
-        tmp.append(contextId).append(MailPath.SEPERATOR).append(userId).append(MailPath.SEPERATOR);
-        tmp.append(MailPath.getMailPath(accountId, fullName, mailId));
-        mailUUID = tmp.toString();
-    }
-
-    public String getUUID() {
-        return mailUUID;
-    }
-
-    @Override
-    public String toString() {
-        return mailUUID;
-    }
+public enum AttachmentIndexField implements IndexField {
+    
+    MODULE,
+    SERVICE,
+    ACCOUNT,
+    FOLDER,
+    ID,
+    FILE_NAME,
+    FILE_SIZE,
+    MIME_TYPE,
+    MD5_SUM,
+    CONTENT,
+    ATTACHMENT_ID;
 
 }

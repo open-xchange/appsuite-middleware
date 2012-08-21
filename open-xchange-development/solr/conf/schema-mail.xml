@@ -106,6 +106,6 @@
     </fields>
 
     <uniqueKey>uuid</uniqueKey>
-    <solrQueryParser defaultOperator="AND" />
+    <solrQueryParser defaultOperator="OR" />
     <!-- <defaultSearchField>from_analyzed</defaultSearchField> -->
 </schema>

@@ -47,7 +47,8 @@
  *
  */
 
-package com.openexchange.index.solr.internal.attachments;
+package com.openexchange.index.attachments;
+
 
 /**
  * {@link AttachmentUUID}
@@ -59,7 +60,7 @@ public class AttachmentUUID {
     private final String uuid;
     
 
-    public AttachmentUUID(int module, String service, String account, String folder, String id, int attachmentNum) {
+    private AttachmentUUID(int module, String service, String account, String folder, String id, int attachmentNum) {
         super();
         StringBuilder tmp = new StringBuilder(64);
         tmp.append(module).append('/');
@@ -73,16 +74,25 @@ public class AttachmentUUID {
         uuid = tmp.toString();
     }
 
-    public static AttachmentUUID newUUID(int module, String service, String account, String folder, String id, int attachmentNum) {
-        return new AttachmentUUID(module, service, account, folder, id, attachmentNum);
+    public static AttachmentUUID newUUID(int module, String service, String account, String folder, String objectId, int attachmentId) {
+        return new AttachmentUUID(module, service, account, folder, objectId, attachmentId);
     }
 
-    public static AttachmentUUID newUUID(int module, String account, String folder, String id, int attachmentNum) {
-        return new AttachmentUUID(module, null, account, folder, id, attachmentNum);
+    public static AttachmentUUID newUUID(int module, String account, String folder, String objectId, int attachmentId) {
+        return new AttachmentUUID(module, null, account, folder, objectId, attachmentId);
     }
 
-    public static AttachmentUUID newUUID(int module, String folder, String id, int attachmentNum) {
-        return new AttachmentUUID(module, null, null, folder, id, attachmentNum);
+    public static AttachmentUUID newUUID(int module, String folder, String objectId, int attachmentId) {
+        return new AttachmentUUID(module, null, null, folder, objectId, attachmentId);
+    }
+    
+    public static AttachmentUUID newUUID(Attachment attachment) {
+        return new AttachmentUUID(attachment.getModule(), 
+            attachment.getService(), 
+            attachment.getAccount(),
+            attachment.getFolder(),
+            attachment.getObjectId(),
+            attachment.getAttachmentId());
     }
     
     @Override

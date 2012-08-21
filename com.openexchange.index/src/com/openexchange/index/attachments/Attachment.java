@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.index;
+package com.openexchange.index.attachments;
 
 import java.io.InputStream;
 

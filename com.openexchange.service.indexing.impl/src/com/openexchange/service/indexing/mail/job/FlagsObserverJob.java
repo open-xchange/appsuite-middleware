@@ -64,7 +64,7 @@ import com.openexchange.index.QueryParameters;
 import com.openexchange.index.SearchHandler;
 import com.openexchange.index.QueryParameters.Order;
 import com.openexchange.index.mail.MailIndexField;
-import com.openexchange.index.solr.mail.MailUUID;
+import com.openexchange.index.mail.MailUUID;
 import com.openexchange.log.LogFactory;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.service.indexing.mail.MailJobInfo;

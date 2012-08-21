@@ -52,6 +52,7 @@ package com.openexchange.index.solr.internal.attachments;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -59,16 +60,17 @@ import org.apache.solr.common.SolrInputDocument;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
-import com.openexchange.index.Attachment;
-import com.openexchange.index.AttachmentIndexField;
 import com.openexchange.index.FacetParameters;
+import com.openexchange.index.IndexConstants;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexField;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.Indexes;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.SearchHandler;
-import com.openexchange.index.solr.filestore.SolrFilestoreConstants;
+import com.openexchange.index.attachments.Attachment;
+import com.openexchange.index.attachments.AttachmentIndexField;
+import com.openexchange.index.attachments.AttachmentUUID;
 import com.openexchange.index.solr.internal.AbstractSolrIndexAccess;
 import com.openexchange.index.solr.internal.Services;
 import com.openexchange.index.solr.internal.SolrIndexResult;
@@ -168,9 +170,15 @@ public class SolrAttachmentIndexAccess extends AbstractSolrIndexAccess<Attachmen
 
     @Override
     public void deleteByQuery(QueryParameters parameters) throws OXException {
-        // TODO: May deleting dioes not work like this. Test it...
-        SolrQuery solrQuery = buildSolrQuery(parameters);
-        deleteDocumentsByQuery(solrQuery.toString());
+        IndexResult<Attachment> indexResult = query(parameters, null);
+        List<IndexDocument<Attachment>> documents = indexResult.getResults();
+        Set<String> uuids = new HashSet<String>(documents.size());
+        for (IndexDocument<Attachment> document : documents) {
+            uuids.add(AttachmentUUID.newUUID(document.getObject()).toString());
+        }
+        
+        String deleteQuery = buildQueryStringWithOr(SolrAttachmentField.UUID.solrName(), uuids);
+        deleteDocumentsByQuery(deleteQuery);
     }
 
     @Override
@@ -245,26 +253,13 @@ public class SolrAttachmentIndexAccess extends AbstractSolrIndexAccess<Attachmen
             
             case GET_REQUEST:
             {                
-                String[] ids = getStringArrayParameter(parameters, SolrAttachmentConstants.IDS);
+                String[] ids = getStringArrayParameter(parameters, IndexConstants.IDS);
                 if (ids == null) {
                     throw new IllegalArgumentException("Parameter `ids` must not be null!");
                 }
                 
                 solrQuery = new SolrQuery(stringArrayToQuery(ids));
                 solrQuery.setQueryType(config.getProperty(SolrProperties.GET_HANDLER));
-                addFilterQueries(parameters, solrQuery);
-                break;
-            }
-            
-            case CUSTOM:
-            {
-                Object searchTerm = parameters.getSearchTerm();
-                if (searchTerm == null || !(searchTerm instanceof String)) {
-                    throw new IllegalArgumentException("Parameter `searchTerm` must not be null and must be of type String!");
-                }
-                
-                solrQuery = new SolrQuery((String) searchTerm);
-                solrQuery.setQueryType(config.getProperty(SolrProperties.CUSTOM_HANLDER));
                 addFilterQueries(parameters, solrQuery);
                 break;
             }
@@ -277,20 +272,14 @@ public class SolrAttachmentIndexAccess extends AbstractSolrIndexAccess<Attachmen
     }
     
     private void addFilterQueries(QueryParameters parameters, SolrQuery solrQuery) {
-        Integer module = getIntParameter(parameters, SolrAttachmentConstants.MODULE);
-        String service = getStringParameter(parameters, SolrFilestoreConstants.SERVICE);
-        String accountId = getStringParameter(parameters, SolrFilestoreConstants.ACCOUNT);
+        Integer module = getIntParameter(parameters, IndexConstants.MODULE);
+        String service = getStringParameter(parameters, IndexConstants.SERVICE);
+        String accountId = getStringParameter(parameters, IndexConstants.ACCOUNT);
         addFilterQueryIfNotNull(solrQuery, buildQueryString(SolrAttachmentField.MODULE.solrName(), module));
         addFilterQueryIfNotNull(solrQuery, buildQueryString(SolrAttachmentField.SERVICE.solrName(), service));
         addFilterQueryIfNotNull(solrQuery, buildQueryString(SolrAttachmentField.ACCOUNT.solrName(), accountId));
         addFilterQueryIfNotNull(solrQuery, buildQueryStringWithOr(SolrAttachmentField.FOLDER.solrName(), parameters.getFolders()));
-    }
-    
-    private void addFilterQueryIfNotNull(SolrQuery solrQuery, String filterQuery) {
-        if (filterQuery != null) {
-            solrQuery.addFilterQuery(filterQuery);
-        }
-    }    
+    }  
 
     private SolrInputDocument convertToDocument(IndexDocument<Attachment> document) throws OXException {
         return SolrAttachmentDocumentConverter.convertStatic(document);

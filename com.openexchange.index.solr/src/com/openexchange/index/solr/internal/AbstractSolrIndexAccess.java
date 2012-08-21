@@ -481,4 +481,10 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
         
         return sb.toString();
     }
+    
+    protected void addFilterQueryIfNotNull(SolrQuery solrQuery, String filterQuery) {
+        if (filterQuery != null) {
+            solrQuery.addFilterQuery(filterQuery);
+        }
+    } 
 }

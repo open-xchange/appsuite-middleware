@@ -47,26 +47,46 @@
  *
  */
 
-package com.openexchange.index;
+package com.openexchange.index.filestore;
 
+import java.util.Map;
+import com.openexchange.file.storage.File;
+import com.openexchange.index.IndexConstants;
+import com.openexchange.index.IndexDocument;
 
 /**
- * {@link AttachmentIndexField}
+ * {@link FileUUID}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public enum AttachmentIndexField implements IndexField {
+public class FileUUID {
     
-    MODULE,
-    SERVICE,
-    ACCOUNT,
-    FOLDER,
-    ID,
-    FILE_NAME,
-    FILE_SIZE,
-    MIME_TYPE,
-    MD5_SUM,
-    CONTENT,
-    ATTACHMENT_ID;
+    private final String fileUUID;
+    
+    
+    private FileUUID(String service, String accountId, String folderId, String fileId) {
+        super();
+        StringBuilder tmp = new StringBuilder(64);
+        tmp.append(service).append('/').append(accountId).append('/').append(folderId).append('/').append(fileId);
+        fileUUID = tmp.toString();
+    }
+    
+    @Override
+    public String toString() {
+        return fileUUID;
+    }
+    
+    public static FileUUID newUUID(IndexDocument<File> document) {
+        File file = document.getObject();
+        Map<String, Object> properties = document.getProperties();
+        String service = (String) properties.get(IndexConstants.SERVICE);
+        String accountId = (String) properties.get(IndexConstants.ACCOUNT);
+        
+        return newUUID(service, accountId, file.getFolderId(), file.getId());
+    }
+    
+    public static FileUUID newUUID(String service, String accountId, String folderId, String fileId) {
+        return new FileUUID(service, accountId, folderId, fileId);
+    }
 
 }

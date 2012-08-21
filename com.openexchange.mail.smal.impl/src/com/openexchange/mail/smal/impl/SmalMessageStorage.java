@@ -64,7 +64,7 @@ import com.openexchange.index.QueryParameters;
 import com.openexchange.index.QueryParameters.Order;
 import com.openexchange.index.SearchHandler;
 import com.openexchange.index.mail.MailIndexField;
-import com.openexchange.index.solr.mail.SolrMailUtility;
+import com.openexchange.index.mail.MailUtility;
 import com.openexchange.log.LogFactory;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
@@ -170,7 +170,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
                 FolderJob folderJob = new FolderJob(folder, createJobInfo());
                 submitJob(folderJob);
                 return messageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
-            } else if (searchTerm == null || !SolrMailUtility.getIndexableFields(indexAccess).containsAll(mfs)) {
+            } else if (searchTerm == null || !MailUtility.getIndexableFields(indexAccess).containsAll(mfs)) {
                 return messageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
             }
             

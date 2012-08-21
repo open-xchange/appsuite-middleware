@@ -55,11 +55,12 @@ import java.util.Map;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import com.openexchange.exception.OXException;
-import com.openexchange.index.Attachment;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexField;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.StandardIndexDocument;
+import com.openexchange.index.attachments.Attachment;
+import com.openexchange.index.attachments.AttachmentUUID;
 import com.openexchange.index.solr.internal.Services;
 import com.openexchange.index.solr.internal.SolrIndexResult;
 import com.openexchange.index.solr.internal.SolrResultConverter;
@@ -133,7 +134,7 @@ public class SolrAttachmentDocumentConverter implements SolrResultConverter<Atta
         String mimeType = attachment.getMimeType();
         String md5Sum = attachment.getMd5Sum();
         InputStream file = attachment.getContent();
-        String uuid = AttachmentUUID.newUUID(module, service, account, folder, objectId, attachmentId).toString();   
+        String uuid = AttachmentUUID.newUUID(attachment).toString();   
         if (folder == null) {
             throw new IllegalArgumentException("Folder id must not be null!");
         }

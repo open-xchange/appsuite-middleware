@@ -53,7 +53,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import org.apache.commons.logging.Log;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import com.openexchange.exception.OXException;
@@ -63,12 +62,13 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileFieldSwitcher;
 import com.openexchange.file.storage.meta.FileFieldGet;
 import com.openexchange.file.storage.meta.FileFieldSet;
+import com.openexchange.index.IndexConstants;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexField;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.StandardIndexDocument;
+import com.openexchange.index.filestore.FileUUID;
 import com.openexchange.index.filestore.FilestoreIndexField;
-import com.openexchange.index.solr.filestore.SolrFilestoreConstants;
 import com.openexchange.index.solr.internal.SolrIndexResult;
 import com.openexchange.index.solr.internal.SolrResultConverter;
 
@@ -79,9 +79,6 @@ import com.openexchange.index.solr.internal.SolrResultConverter;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SolrFilestoreDocumentConverter implements SolrResultConverter<File> {
-    
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(SolrFilestoreDocumentConverter.class);
-    
     
     public static SolrInputDocument convertStatic(int contextId, int userId, IndexDocument<File> indexDocument) throws OXException {
         File file = indexDocument.getObject();
@@ -104,9 +101,9 @@ public class SolrFilestoreDocumentConverter implements SolrResultConverter<File>
         
         // Special fields: uuid, account, content
         Map<String, Object> properties = indexDocument.getProperties();
-        String service = (String) properties.get(SolrFilestoreConstants.SERVICE);
-        String accountId = (String) properties.get(SolrFilestoreConstants.ACCOUNT);        
-        document.setField(SolrFilestoreField.UUID.solrName(), FileUUID.newUUID(contextId, userId, indexDocument));
+        String service = (String) properties.get(IndexConstants.SERVICE);
+        String accountId = (String) properties.get(IndexConstants.ACCOUNT);        
+        document.setField(SolrFilestoreField.UUID.solrName(), FileUUID.newUUID(indexDocument));
         document.setField(SolrFilestoreField.SERVICE.solrName(), service);
         document.setField(SolrFilestoreField.ACCOUNT.solrName(), accountId);
         

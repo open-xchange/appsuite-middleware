@@ -49,7 +49,6 @@
 
 package com.openexchange.index.solr.internal.filestore;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.EnumSet;
@@ -100,7 +99,7 @@ public enum SolrFilestoreField implements SolrField {
     
     private static final Map<FilestoreIndexField, SolrFilestoreField> fieldMapping = new EnumMap<FilestoreIndexField, SolrFilestoreField>(FilestoreIndexField.class);
     
-    private static final Set<SolrFilestoreField> indexedFields = EnumSet.noneOf(SolrFilestoreField.class);
+    private static final Set<FilestoreIndexField> indexedFields = EnumSet.noneOf(FilestoreIndexField.class);
     
     static {
         for (SolrFilestoreField field : values()) {
@@ -108,7 +107,7 @@ public enum SolrFilestoreField implements SolrField {
             if (name != null) {
                 solrNameMapping.put(name, field);
                 fieldMapping.put(field.indexField(), field);
-                indexedFields.add(field);
+                indexedFields.add(field.indexField());
             }
         }
     }
@@ -121,8 +120,8 @@ public enum SolrFilestoreField implements SolrField {
         return fieldMapping.get(indexField);
     }
     
-    public static Collection<SolrFilestoreField> getIndexedFields() {
-        return Collections.unmodifiableCollection(solrNameMapping.values());
+    public static Set<FilestoreIndexField> getIndexedFields() {        
+        return Collections.unmodifiableSet(indexedFields);
     }
     
     public static String[] solrNamesFor(Set<SolrFilestoreField> solrFields) {

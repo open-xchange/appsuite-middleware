@@ -47,20 +47,24 @@
  *
  */
 
-package com.openexchange.index.solr.internal.attachments;
+package com.openexchange.index;
 
 
 /**
- * {@link SolrAttachmentConstants}
+ * {@link IndexConstants}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class SolrAttachmentConstants {
+public class IndexConstants {
+    
+    public static final String ACCOUNT = "account";
+
+    public static final String SERVICE = "service";
+    
+    public static final String IDS = "ids";
     
     public static final String MODULE = "module";
     
     public static final int DEFAULT_ATTACHMENT = 1;
-
-    public static final String IDS = "ids";
 
 }
