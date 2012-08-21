@@ -1,0 +1,5 @@
+open-xchange-contact-storage-ldap (6.21.0-0) unstable; urgency=low
+
+  * Initial release
+
+ -- Tobias Friedrich <tobias.friedrich@open-xchange.com>  Tue, 21 Aug 2012 09:46:32 +0200
