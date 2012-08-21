@@ -46,15 +46,15 @@ public class HColumnFamilyImpl<K,N> implements HColumnFamily<K, N> {
   
   private final ExecutingKeyspace keyspace;
   private final String columnFamilyName;
-  private final List<K> _keys;
-  private final HSlicePredicate<N> activeSlicePredicate;
+  private List<K> _keys;
+  private HSlicePredicate<N> activeSlicePredicate;
   private HSlicePredicate<N> lastAppliedPredicate;
-  private final Serializer<K> keySerializer;
-  private final Serializer<N> columnNameSerializer;
-  private final ConfigurableConsistencyLevel consistencyLevelPolicy;
+  private Serializer<K> keySerializer;
+  private Serializer<N> columnNameSerializer;
+  private ConfigurableConsistencyLevel consistencyLevelPolicy;
   private Map<N, HColumn<N,ByteBuffer>> columns;
-  private final ColumnParent columnParent;
-  private final ExceptionsTranslator exceptionsTranslator;
+  private ColumnParent columnParent;
+  private ExceptionsTranslator exceptionsTranslator;
   private boolean hasValues;
   // TODO consider a bounds on this
   private Set<N> columnNames;

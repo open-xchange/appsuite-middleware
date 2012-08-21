@@ -96,119 +96,95 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
 
   }
 
-  @Override
-public void setKeyspaceName(String keyspaceName) {
+  public void setKeyspaceName(String keyspaceName) {
     this.keyspaceName = keyspaceName;
   }
 
-  @Override
-public void setName(String name) {
+  public void setName(String name) {
     this.name = name;
   }
 
-  @Override
-public void setColumnType(ColumnType columnType) {
+  public void setColumnType(ColumnType columnType) {
     this.columnType = columnType;
   }
 
-  @Override
-public void setComparatorType(ComparatorType comparitorType) {
+  public void setComparatorType(ComparatorType comparitorType) {
     this.comparatorType = comparitorType;
   }
 
-  @Override
-public void setSubComparatorType(ComparatorType subComparitorType) {
+  public void setSubComparatorType(ComparatorType subComparitorType) {
     this.subComparatorType = subComparitorType;
   }
 
-	@Override
-    public void setComparatorTypeAlias(String alias) { this.comparatorTypeAlias = alias; }
+	public void setComparatorTypeAlias(String alias) { this.comparatorTypeAlias = alias; }
 
-	@Override
-    public void setSubComparatorTypeAlias(String alias) { this.subComparatorTypeAlias = alias; }
+	public void setSubComparatorTypeAlias(String alias) { this.subComparatorTypeAlias = alias; }
 
-  @Override
-public void setComment(String comment) {
+  public void setComment(String comment) {
     this.comment = comment;
   }
 
-  @Override
-public void setRowCacheSize(double rowCacheSize) {
+  public void setRowCacheSize(double rowCacheSize) {
     this.rowCacheSize = rowCacheSize;
   }
 
-  @Override
-public void setKeyCacheSize(double keyCacheSize) {
+  public void setKeyCacheSize(double keyCacheSize) {
     this.keyCacheSize = keyCacheSize;
   }
 
-  @Override
-public void setReadRepairChance(double readRepairChance) {
+  public void setReadRepairChance(double readRepairChance) {
     this.readRepairChance = readRepairChance;
   }
 
-  @Override
-public void setGcGraceSeconds(int gcGraceSeconds) {
+  public void setGcGraceSeconds(int gcGraceSeconds) {
     this.gcGraceSeconds = gcGraceSeconds;
   }
 
-  @Override
-public void setDefaultValidationClass(String defaultValidationClass) {
+  public void setDefaultValidationClass(String defaultValidationClass) {
     this.defaultValidationClass = defaultValidationClass;
   }
 
-  @Override
-public void setId(int id) {
+  public void setId(int id) {
     this.id = id;
   }
 
-  @Override
-public void setMaxCompactionThreshold(int maxCompactionThreshold) {
+  public void setMaxCompactionThreshold(int maxCompactionThreshold) {
     this.maxCompactionThreshold = maxCompactionThreshold;
   }
 
-  @Override
-public void setMinCompactionThreshold(int minCompactionThreshold) {
+  public void setMinCompactionThreshold(int minCompactionThreshold) {
     this.minCompactionThreshold = minCompactionThreshold;
   }
 
-  @Override
-public void setRowCacheSavePeriodInSeconds(int rowCacheSavePeriodInSeconds) {
+  public void setRowCacheSavePeriodInSeconds(int rowCacheSavePeriodInSeconds) {
     this.rowCacheSavePeriodInSeconds = rowCacheSavePeriodInSeconds;
   }
 
-  @Override
-public void setMemtableOperationsInMillions(double memtableOperationsInMillions) {
+  public void setMemtableOperationsInMillions(double memtableOperationsInMillions) {
     this.memtableOperationsInMillions = memtableOperationsInMillions;
   }
 
-  @Override
-public void setMemtableThroughputInMb(int memtableThroughputInMb) {
+  public void setMemtableThroughputInMb(int memtableThroughputInMb) {
     this.memtableThroughputInMb = memtableThroughputInMb;
   }
 
-  @Override
-public void setMemtableFlushAfterMins(int memtableFlushAfterMins) {
+  public void setMemtableFlushAfterMins(int memtableFlushAfterMins) {
     this.memtableFlushAfterMins = memtableFlushAfterMins;
   }
 
-  @Override
-public void setReplicateOnWrite(boolean replicateOnWrite) {
+  public void setReplicateOnWrite(boolean replicateOnWrite) {
     this.replicateOnWrite = replicateOnWrite;
   }
 
-  @Override
-public void addColumnDefinition( ColumnDefinition columnDefinition){
+  public void addColumnDefinition( ColumnDefinition columnDefinition){
     this.columnDefinitions.add( columnDefinition );
   }
 
-  @Override
-public void setKeyCacheSavePeriodInSeconds(int keyCacheSavePeriodInSeconds) {
+  public void setKeyCacheSavePeriodInSeconds(int keyCacheSavePeriodInSeconds) {
     this.keyCacheSavePeriodInSeconds = keyCacheSavePeriodInSeconds;
   }
 
-  @Override
-public void setKeyValidationClass(String keyValidationClass){
+  public void setKeyValidationClass(String keyValidationClass){
       this.keyValidationClass = keyValidationClass;
   }
 
@@ -241,11 +217,9 @@ public void setKeyValidationClass(String keyValidationClass){
     return this.subComparatorType;
   }
 
-	@Override
-    public String getComparatorTypeAlias() { return this.comparatorTypeAlias; }
+	public String getComparatorTypeAlias() { return this.comparatorTypeAlias; }
 
-	@Override
-    public String getSubComparatorTypeAlias() { return this.subComparatorTypeAlias; }
+	public String getSubComparatorTypeAlias() { return this.subComparatorTypeAlias; }
 
   @Override
   public String getComment() {
@@ -317,13 +291,11 @@ public void setKeyValidationClass(String keyValidationClass){
     return this.memtableThroughputInMb;
   }
 
-  @Override
-public boolean isReplicateOnWrite() {
+  public boolean isReplicateOnWrite() {
     return replicateOnWrite;
   }
 
-  @Override
-public int getKeyCacheSavePeriodInSeconds() {
+  public int getKeyCacheSavePeriodInSeconds() {
     return keyCacheSavePeriodInSeconds;
   }
 
@@ -362,43 +334,35 @@ public int getKeyCacheSavePeriodInSeconds() {
     this.compressionOptions = compressionOptions;
   }
 
-  @Override
-public double getMergeShardsChance() {
+  public double getMergeShardsChance() {
     return mergeShardsChance;
   }
 
-  @Override
-public void setMergeShardsChance(double mergeShardsChance) {
+  public void setMergeShardsChance(double mergeShardsChance) {
     this.mergeShardsChance = mergeShardsChance;
   }
 
-  @Override
-public String getRowCacheProvider() {
+  public String getRowCacheProvider() {
     return rowCacheProvider;
   }
 
-  @Override
-public void setRowCacheProvider(String rowCacheProvider) {
+  public void setRowCacheProvider(String rowCacheProvider) {
     this.rowCacheProvider = rowCacheProvider;
   }
 
-  @Override
-public ByteBuffer getKeyAlias() {
+  public ByteBuffer getKeyAlias() {
     return keyAlias;
   }
 
-  @Override
-public void setKeyAlias(ByteBuffer keyAlias) {
+  public void setKeyAlias(ByteBuffer keyAlias) {
     this.keyAlias = keyAlias;
   }
 
-  @Override
-public int getRowCacheKeysToSave() {
+  public int getRowCacheKeysToSave() {
     return rowCacheKeysToSave;
   }
 
-  @Override
-public void setRowCacheKeysToSave(int rowCacheKeysToSave) {
+  public void setRowCacheKeysToSave(int rowCacheKeysToSave) {
     this.rowCacheKeysToSave = rowCacheKeysToSave;
   }
 }
