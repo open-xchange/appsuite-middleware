@@ -76,7 +76,7 @@ import com.openexchange.log.LogFactory;
  */
 public class AtmosphereServiceImpl  implements AtmosphereService {
     
-    private final static Log LOG = LogFactory.getLog(AtmosphereServiceImpl.class);
+    private final static Log LOG = com.openexchange.log.Log.loggerFor(AtmosphereServiceImpl.class);
     private final AtmosphereFramework atmosphereFramework;
     private final String atmosphereServletMapping;
     

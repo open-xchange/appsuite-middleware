@@ -70,7 +70,7 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class FilterParser {
-    private static final Log LOG = LogFactory.getLog(FilterParser.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(FilterParser.class);
     
     public Filter parse(Element rootElement) throws WebdavProtocolException {
         Filter filter = new Filter();

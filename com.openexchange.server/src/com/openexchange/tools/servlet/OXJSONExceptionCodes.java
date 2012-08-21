@@ -19,14 +19,15 @@ public enum OXJSONExceptionCodes implements OXExceptionCode {
     JSON_READ_ERROR(OXJSONExceptionMessage.JSON_READ_ERROR_MSG, Category.CATEGORY_ERROR, 2),
     /**
      * Invalid cookie.
-     * */
+     */
     INVALID_COOKIE(OXJSONExceptionMessage.INVALID_COOKIE_MSG, Category.CATEGORY_TRY_AGAIN, 3),
     /**
      * Exception while building JSON.
      */
     JSON_BUILD_ERROR(OXJSONExceptionMessage.JSON_BUILD_ERROR_MSG, Category.CATEGORY_ERROR, 4),
     /**
-     * Value "%1$s" of attribute %s contains non digit characters. */
+     * Value "%1$s" of attribute %s contains non digit characters.
+     */
     CONTAINS_NON_DIGITS(OXJSONExceptionMessage.CONTAINS_NON_DIGITS_MSG, Category.CATEGORY_USER_INPUT, 5),
     /**
      * Too many digits within field %1$s.

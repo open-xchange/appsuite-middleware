@@ -71,7 +71,7 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
  */
 public class Owner extends SingleXMLPropertyMixin {
 
-    private static final Log LOG = LogFactory.getLog(Owner.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(Owner.class);
     private static final String PROPERTY_NAME = "owner";
     private final CommonFolderCollection<?> collection;    
 

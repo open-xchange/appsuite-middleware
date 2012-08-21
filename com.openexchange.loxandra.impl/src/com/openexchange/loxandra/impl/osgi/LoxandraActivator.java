@@ -67,7 +67,7 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public final class LoxandraActivator extends HousekeepingActivator {
 	
-	private static Log log = LogFactory.getLog(LoxandraActivator.class);
+	private static Log log = com.openexchange.log.Log.loggerFor(LoxandraActivator.class);
 	
 	/**
 	 * Default Constructor 

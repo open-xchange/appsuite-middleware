@@ -13,10 +13,11 @@ Import-Package: com.openexchange.authentication,
  com.openexchange.groupware.contexts,
  com.openexchange.groupware.contexts.impl,
  com.openexchange.groupware.ldap,
+ com.openexchange.log,
  com.openexchange.sessiond,
  com.openexchange.sessiond.event,
  com.openexchange.tools.ssl,
  javax.naming,
  javax.naming.directory,
  org.apache.commons.logging,
- org.osgi.framework;version="1.3.0"
+ org.osgi.framework

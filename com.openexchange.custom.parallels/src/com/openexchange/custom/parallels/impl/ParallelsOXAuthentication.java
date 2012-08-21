@@ -40,7 +40,7 @@ import com.openexchange.user.UserService;
  */
 public class ParallelsOXAuthentication implements AuthenticationService {
 
-    private static final Log LOG = LogFactory.getLog(ParallelsOXAuthentication.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ParallelsOXAuthentication.class);
 
 
     /**

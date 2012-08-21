@@ -206,18 +206,12 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                         LOG.info("tracked session:" + sessionIdToState.keys());
                         throw ex;
                     }
-//
-//                    String broadcasterId = generateBroadcasterId(atmosphereState.id);
-//                    Broadcaster broadcaster = BroadcasterFactory.getDefault().lookup(broadcasterId, true);
-//                    broadcaster.addAtmosphereResource(atmosphereState.atmosphereResource);
-//                    atmosphereState.atmosphereResource.addEventListener(new AtmosphereResourceCleanupListener(
-//                        atmosphereState.atmosphereResource,
-//                        postData,
-//                        broadcaster));
-
                     handleIncoming(StanzaParser.parse(postData), atmosphereState);
                     LOG.info("Broadcasters after Request");
                     printBroadcasters();
+                } catch (IllegalArgumentException illEx) {
+                    LOG.error(illEx);
+                    writeExceptionToResource(illEx, resource);
                 } catch (OXException e) {
                     LOG.error(e);
                     writeExceptionToResource(e, resource);
@@ -226,9 +220,6 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         }
     }
 
-    /**
-     * 
-     */
     private void printBroadcasters() {
         List<Broadcaster> broadcasters = new ArrayList(BroadcasterFactory.getDefault().lookupAll());
         Collections.sort(broadcasters, new Comparator<Broadcaster>() {
@@ -415,8 +406,9 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         /*
          * Broadcast stanza to all entities matching the user@context by using a wildcard for the resource: /user@context/*
          */
-        // MetaBroadcaster.getDefault().broadcastTo(contextAndUser+"/*", stanzaAsJSON);
-        MetaBroadcaster.getDefault().broadcastTo("/", stanzaAsJSON);
+        MetaBroadcaster.getDefault().broadcastTo(contextAndUser+"/*", stanzaAsJSON);
+        //chat: talk to everybody aka "/"
+        //MetaBroadcaster.getDefault().broadcastTo("/", stanzaAsJSON);
     }
 
     /**

@@ -61,7 +61,7 @@ import com.openexchange.log.LogFactory;
  */
 public class EmbeddedCassandraService {
 	
-	private static Log log = LogFactory.getLog(EmbeddedCassandraService.class);
+	private static Log log = com.openexchange.log.Log.loggerFor(EmbeddedCassandraService.class);
 
 	private CassandraDaemon cassandraDaemon;
 	

@@ -83,7 +83,7 @@ import com.openexchange.loxandra.impl.cassandra.transaction.TransactionManager;
  */
 public class Transaction {
 
-	private static final Log log = LogFactory.getLog(Transaction.class);
+	private static final Log log = com.openexchange.log.Log.loggerFor(Transaction.class);
 	
 	private UUID txKey;
 	

@@ -75,7 +75,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class MailFolderDiscoverer {
 
-    private static final Log LOG = LogFactory.getLog(MailFolderDiscoverer.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(MailFolderDiscoverer.class);
     
     private final FolderService folderService;
 

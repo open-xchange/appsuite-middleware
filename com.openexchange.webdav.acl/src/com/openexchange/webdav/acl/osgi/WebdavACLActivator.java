@@ -65,7 +65,7 @@ import com.openexchange.webdav.protocol.osgi.OSGiPropertyMixin;
  */
 public class WebdavACLActivator extends HousekeepingActivator {
 
-    private static final Log LOG = LogFactory.getLog(WebdavACLActivator.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(WebdavACLActivator.class);
 
     private volatile OSGiPropertyMixin mixin;
 

@@ -34,7 +34,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  */
 public final class ParallelsOpenApiServletRequest  {
 
-    private static final Log LOG = LogFactory.getLog(ParallelsOpenApiServletRequest.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ParallelsOpenApiServletRequest.class);
     private User user;
     private final ConfigurationService configservice;
 

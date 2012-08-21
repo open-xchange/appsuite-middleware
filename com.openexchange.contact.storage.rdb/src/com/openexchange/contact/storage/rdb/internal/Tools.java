@@ -276,25 +276,6 @@ public final class Tools {
     }
     
     /**
-     * Gets the charset from the sort options' collation.
-     * 
-     * @param sortOptions the sort options
-     * @return the charset, if defined, <code>false</code>, otherwise
-     */
-    public static String getCharset(final SortOptions sortOptions) {
-        if (null != sortOptions) {
-            final SuperCollator collator = SuperCollator.get(sortOptions.getCollation());
-            if (null != collator && false == SuperCollator.DEFAULT.equals(collator)) {
-                final String charset = collator.getSqlCharset();
-                if (null != charset && false == charset.equals(SuperCollator.DEFAULT.getSqlCharset())) {
-                    return charset;
-                }
-            }
-        }
-        return null; // no charset
-    }
-    
-    /**
      * Gets the ORDER BY clause from the sort options.
      * 
      * @param sortOptions the sort options

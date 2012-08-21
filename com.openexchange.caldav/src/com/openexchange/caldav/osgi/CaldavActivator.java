@@ -85,7 +85,7 @@ public class CaldavActivator extends HousekeepingActivator {
     
     private static final String NULL_PATH = "/servlet/dav/dev/null";
 
-    private static final Log LOG = LogFactory.getLog(CaldavActivator.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(CaldavActivator.class);
     
     private volatile OSGiPropertyMixin mixin;
     

@@ -1,0 +1,178 @@
+# Mapping between attributes of OX contacts and LDAP objects
+
+# Contact properties are set based on the mapped LDAP attribute name. Empty 
+# mappings are ignored. It's possible to define a second LDAP attribute name 
+# for a property that is used as fall-back if the first one is empty in a 
+# LDAP result, e.g. to define multiple attributes for a display name, or to 
+# have multiple mappings for contacts and distribution lists.  
+
+# For the data-types, each LDAP attribute value is converted/parsed to the type 
+# necessary on the server (Strings, Numbers, Booleans). Dates are assumed to
+# be in UTC and parsed using the pattern 'yyyyMMddHHmmss'. Binary properties
+# may be indicated by appending ';binary' to the LDAP attribute name. Boolean
+# properties may also be set based on a comparison with the LDAP attribute 
+# value, which is defined by the syntax '[LDAP_ATTRIBUTE_NAME]=
+# [EXPECTED_VALUE]', e.g. to set the 'mark_as_distribution_list' property 
+# based on a specific 'objectClass' value.  
+
+
+# == ID Mappings =============================================================
+
+# Numerical IDs are used by the groupware server to identify an object or 
+# user, and therefore should be mapped to an adequate LDAP unique property of
+# the LDAP server. If no numerical identifiers are provided by the LDAP server, 
+# a mapping between the LDAP attribute values and groupware IDs is applied in 
+# an additional step (as configured by the 'idMapping' in the folder's 
+# properties). Binary LDAP attributes are tried to be interpreted as 16-byte 
+# GUIDs. 
+
+# The object ID is always required and must be unique for the LDAP server 
+com.openexchange.contact.storage.ldap.objectid				= objectGUID;binary
+
+# The internal user ID is required if the folder is configured to replace the
+# global address book. Note that if used, the value of the attribute must 
+# match the internal user ID in the groupware server. 
+com.openexchange.contact.storage.ldap.internal_userid		= 
+
+# If not set, the 'created_by' contact property is set to the context admin. 
+# When using the folder as replacement for the global address book, and the
+# users should be able to edit their own entries, this property should be
+# mapped to the same LDAP attribute as 'internal_userid'.
+com.openexchange.contact.storage.ldap.created_by			= 
+
+# If not set, the 'modified_by' contact property is set to the context admin.
+# When using the folder as replacement for the global address book, and the
+# users should be able to edit their own entries, this property should be
+# mapped to the same LDAP attribute as 'internal_userid'.
+com.openexchange.contact.storage.ldap.modified_by			= 
+
+
+# == String mappings =========================================================
+
+com.openexchange.contact.storage.ldap.displayname			= displayName,name
+com.openexchange.contact.storage.ldap.givenname				= givenName
+com.openexchange.contact.storage.ldap.surname				= sn
+com.openexchange.contact.storage.ldap.email1				= mail
+com.openexchange.contact.storage.ldap.department			= department
+com.openexchange.contact.storage.ldap.company				= company
+com.openexchange.contact.storage.ldap.branches				=
+com.openexchange.contact.storage.ldap.business_category		=
+com.openexchange.contact.storage.ldap.postal_code_business	= postalCode
+com.openexchange.contact.storage.ldap.state_business		= st
+com.openexchange.contact.storage.ldap.street_business		= streetAddress
+com.openexchange.contact.storage.ldap.telephone_callback	=
+com.openexchange.contact.storage.ldap.city_home				=
+com.openexchange.contact.storage.ldap.commercial_register	=
+com.openexchange.contact.storage.ldap.country_home			=
+com.openexchange.contact.storage.ldap.email2				=
+com.openexchange.contact.storage.ldap.email3				=
+com.openexchange.contact.storage.ldap.employeetype			=
+com.openexchange.contact.storage.ldap.fax_business			= facsimileTelehoneNumber
+com.openexchange.contact.storage.ldap.fax_home				=
+com.openexchange.contact.storage.ldap.fax_other				=
+com.openexchange.contact.storage.ldap.instant_messenger1	=
+com.openexchange.contact.storage.ldap.instant_messenger2	=
+com.openexchange.contact.storage.ldap.telephone_ip			=
+com.openexchange.contact.storage.ldap.telephone_isdn		= internationaliSDNNumber
+com.openexchange.contact.storage.ldap.manager_name			=
+com.openexchange.contact.storage.ldap.marital_status		=
+com.openexchange.contact.storage.ldap.cellular_telephone1	= mobile
+com.openexchange.contact.storage.ldap.cellular_telephone2	=
+com.openexchange.contact.storage.ldap.nickname				=
+com.openexchange.contact.storage.ldap.number_of_children	=
+com.openexchange.contact.storage.ldap.number_of_employee	=
+com.openexchange.contact.storage.ldap.note					= info
+com.openexchange.contact.storage.ldap.telephone_pager		= pager
+com.openexchange.contact.storage.ldap.telephone_assistant	=
+com.openexchange.contact.storage.ldap.telephone_business1	= telephoneNumber
+com.openexchange.contact.storage.ldap.telephone_business2	=
+com.openexchange.contact.storage.ldap.telephone_car			=
+com.openexchange.contact.storage.ldap.telephone_company		=
+com.openexchange.contact.storage.ldap.telephone_home1		= homePhone
+com.openexchange.contact.storage.ldap.telephone_home2		=
+com.openexchange.contact.storage.ldap.telephone_other		=
+com.openexchange.contact.storage.ldap.postal_code_home		=
+com.openexchange.contact.storage.ldap.profession			=
+com.openexchange.contact.storage.ldap.telephone_radio		=
+com.openexchange.contact.storage.ldap.room_number			= physicalDeliveryOfficeName
+com.openexchange.contact.storage.ldap.sales_volume			=
+com.openexchange.contact.storage.ldap.city_other			=
+com.openexchange.contact.storage.ldap.country_other			=
+com.openexchange.contact.storage.ldap.middle_name			= middleName
+com.openexchange.contact.storage.ldap.postal_code_other		=
+com.openexchange.contact.storage.ldap.state_other			=
+com.openexchange.contact.storage.ldap.street_other			=
+com.openexchange.contact.storage.ldap.spouse_name			=
+com.openexchange.contact.storage.ldap.state_home			=
+com.openexchange.contact.storage.ldap.street_home			=
+com.openexchange.contact.storage.ldap.suffix				=
+com.openexchange.contact.storage.ldap.tax_id				=
+com.openexchange.contact.storage.ldap.telephone_telex		= telexNumber
+com.openexchange.contact.storage.ldap.telephone_ttytdd		=
+com.openexchange.contact.storage.ldap.url					= wWWHomePage
+com.openexchange.contact.storage.ldap.userfield01			=
+com.openexchange.contact.storage.ldap.userfield02			=
+com.openexchange.contact.storage.ldap.userfield03			=
+com.openexchange.contact.storage.ldap.userfield04			=
+com.openexchange.contact.storage.ldap.userfield05			=
+com.openexchange.contact.storage.ldap.userfield06			=
+com.openexchange.contact.storage.ldap.userfield07			=
+com.openexchange.contact.storage.ldap.userfield08			=
+com.openexchange.contact.storage.ldap.userfield09			=
+com.openexchange.contact.storage.ldap.userfield10			=	
+com.openexchange.contact.storage.ldap.userfield11			=
+com.openexchange.contact.storage.ldap.userfield12			=
+com.openexchange.contact.storage.ldap.userfield13			=
+com.openexchange.contact.storage.ldap.userfield14			=
+com.openexchange.contact.storage.ldap.userfield15			=
+com.openexchange.contact.storage.ldap.userfield16			=
+com.openexchange.contact.storage.ldap.userfield17			=
+com.openexchange.contact.storage.ldap.userfield18			=
+com.openexchange.contact.storage.ldap.userfield19			=
+com.openexchange.contact.storage.ldap.userfield20			=
+com.openexchange.contact.storage.ldap.city_business			= l
+com.openexchange.contact.storage.ldap.country_business		= co
+com.openexchange.contact.storage.ldap.assistant_name		=
+com.openexchange.contact.storage.ldap.telephone_primary		=
+com.openexchange.contact.storage.ldap.categories			=
+com.openexchange.contact.storage.ldap.title					= title
+com.openexchange.contact.storage.ldap.position				= 
+com.openexchange.contact.storage.ldap.uid					= objectGUID;binary
+com.openexchange.contact.storage.ldap.profession			= title
+
+
+# == Date mappings ===========================================================
+
+com.openexchange.contact.storage.ldap.birthday				=
+com.openexchange.contact.storage.ldap.anniversary			=
+
+# The last-modified and creation dates are required by the groupware server, 
+# therefore an implicit default date is assumed when no LDAP property is 
+# mapped here, and no results are available for this folder for the 'modified'
+# and 'deleted' API calls. Therefore, any synchronization-based usage will not
+# be available.
+com.openexchange.contact.storage.ldap.lastmodified			= whenChanged
+com.openexchange.contact.storage.ldap.creationdate			= whenCreated
+
+
+# == Misc mappings ===========================================================
+
+# Distribution list members are resolved dynamically using the DNs found in 
+# the  mapped LDAP property
+com.openexchange.contact.storage.ldap.distributionlist		= member
+
+# Special mapping where the boolean value is evaluated using a string 
+# comparison with the attribute value
+com.openexchange.contact.storage.ldap.markasdistributionlist= objectClass=group
+
+# Integer value between 1 and 3 specifying one of the values in email1... email3
+com.openexchange.contact.storage.ldap.defaultaddress		= 
+
+# Contact image, binary format is expected.
+com.openexchange.contact.storage.ldap.image1				= jpegPhoto
+# Should map to the actual image property
+com.openexchange.contact.storage.ldap.number_of_images		= jpegPhoto
+# Should map to the actual image property
+com.openexchange.contact.storage.ldap.image_last_modified	= jpegPhoto
+# Should map to the actual image property
+com.openexchange.contact.storage.ldap.image1_content_type	= jpegPhoto

@@ -34,7 +34,7 @@
     </target>
 
     <target name="patchScripts">
-        <replace dir="${patchSbinDir}" includes="restorecontext">
+        <replace dir="${patchSbinDir}" includes="usercopy">
             <replacefilter token="@oxfunctions@" value="${prefix}/${libDir}/oxfunctions.sh"/>
             <replacefilter token="@oxscriptconf@" value="${confInstallDir}/ox-scriptconf.sh"/>
         </replace>

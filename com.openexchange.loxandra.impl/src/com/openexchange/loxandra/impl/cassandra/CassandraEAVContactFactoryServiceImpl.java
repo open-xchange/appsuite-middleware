@@ -74,7 +74,7 @@ import me.prettyprint.hector.api.factory.HFactory;
  */
 public final class CassandraEAVContactFactoryServiceImpl implements EAVContactFactoryService {
 	
-	private static final Log log = LogFactory.getLog(CassandraEAVContactFactoryServiceImpl.class);
+	private static final Log log = com.openexchange.log.Log.loggerFor(CassandraEAVContactFactoryServiceImpl.class);
 	
 	private final static String DEFAULT_CONFIGURATION = "loxandra.properties";
 	

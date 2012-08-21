@@ -95,7 +95,7 @@ import com.openexchange.webdav.protocol.helpers.AbstractWebdavFactory;
  */
 public class GroupwareCaldavFactory extends AbstractWebdavFactory implements BulkLoader {
 
-    private static final Log LOG = LogFactory.getLog(GroupwareCaldavFactory.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(GroupwareCaldavFactory.class);
     private static final CaldavProtocol PROTOCOL = new CaldavProtocol();
     public static final WebdavPath ROOT_URL = new WebdavPath();
 

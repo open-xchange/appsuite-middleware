@@ -778,7 +778,7 @@ public final class QuotedInternetAddress extends InternetAddress {
         return IDNA.toIDN(aceAddress);
     }
 
-    private final String jcharset;
+    private String jcharset;
 
     /**
      * Initializes a new {@link QuotedInternetAddress}.
@@ -952,6 +952,27 @@ public final class QuotedInternetAddress extends InternetAddress {
      */
     public String getIDNAddress() {
         return toIDN(address);
+    }
+
+    @Override
+    public void setPersonal(String name, String charset) throws UnsupportedEncodingException {
+        personal = name;
+        if (name != null) {
+            if (charset == null) {
+                // use default charset
+                jcharset = MailProperties.getInstance().getDefaultMimeCharset();
+            } else {
+                // MIME charset -> java charset
+                String javaCharset = MimeUtility.javaCharset(charset);
+                if ("utf8".equalsIgnoreCase(javaCharset)) {
+                    javaCharset = "UTF-8";
+                }
+                jcharset = javaCharset;
+            }
+            encodedPersonal = MimeUtility.encodeWord(name, charset, null);
+        } else {
+            encodedPersonal = null;
+        }
     }
 
     /**

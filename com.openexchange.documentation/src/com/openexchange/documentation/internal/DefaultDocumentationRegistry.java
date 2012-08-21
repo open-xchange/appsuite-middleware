@@ -69,7 +69,7 @@ import com.openexchange.exception.OXException;
  */
 public class DefaultDocumentationRegistry implements DocumentationRegistry {
 
-	private static final Log LOG = LogFactory.getLog(DefaultDocumentationRegistry.class);
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(DefaultDocumentationRegistry.class);
 	
     private final Map<String, ModuleDescription> modules;
     private final Map<String, ContainerDescription> containers;

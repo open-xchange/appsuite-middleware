@@ -82,7 +82,7 @@ import com.openexchange.webdav.protocol.helpers.AbstractResource;
  */
 public abstract class CardDAVResource extends AbstractResource {
 
-    private static final Log LOG = LogFactory.getLog(CardDAVResource.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(CardDAVResource.class);
 
     /**
      * The prefix to be applied to all OX CardDAV entities

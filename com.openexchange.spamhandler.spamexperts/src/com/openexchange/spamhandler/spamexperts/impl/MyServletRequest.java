@@ -103,7 +103,7 @@ public final class MyServletRequest  {
 
 	
 	
-	private static final Log LOG = LogFactory.getLog(MyServletRequest.class);
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(MyServletRequest.class);
 	
 	public static final String ACTION_GET_NEW_PANEL_SESSION = "generate_panel_session";
 	

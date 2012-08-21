@@ -79,7 +79,7 @@ import com.openexchange.webdav.protocol.helpers.AbstractResource;
  */
 public abstract class CommonResource<T extends CommonObject> extends AbstractResource {
     
-    protected static Log LOG = LogFactory.getLog(CommonResource.class);
+    protected static Log LOG = com.openexchange.log.Log.loggerFor(CommonResource.class);
     private static final int MAX_RETRIES = 3;
     
     private int retryCount = 0;

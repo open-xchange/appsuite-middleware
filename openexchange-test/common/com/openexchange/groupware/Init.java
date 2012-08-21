@@ -60,6 +60,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13Server;
@@ -155,6 +157,7 @@ import com.openexchange.resource.internal.ResourceServiceImpl;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.I18nServices;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.SessiondInit;
 import com.openexchange.sessiond.impl.SessiondServiceImpl;
@@ -179,6 +182,7 @@ import com.openexchange.tools.events.TestEventAdmin;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.file.external.FileStorageFactory;
+import com.openexchange.tools.file.internal.CompositeFileStorageFactory;
 import com.openexchange.tools.file.internal.DBQuotaFileStorageFactory;
 import com.openexchange.tools.file.internal.LocalFileStorageFactory;
 import com.openexchange.user.UserService;
@@ -196,6 +200,8 @@ import com.openexchange.xml.spring.impl.DefaultSpringParser;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Init {
+
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Init.class));
 
     // private static Properties infostoreProps = null;
 
@@ -230,8 +236,12 @@ public final class Init {
                 if (null == AJPv13Server.getInstance()) {
                     AJPv13Server.setInstance(new com.openexchange.ajp13.najp.AJPv13ServerImpl());
                 }
-                AJPv13Server.startAJPServer();
-                HttpManagersInit.getInstance().start();
+                try {
+                    AJPv13Server.startAJPServer();
+                    HttpManagersInit.getInstance().start();
+                } catch (OXException e) {
+                    LOG.error(e.getMessage(), e);
+                }
             }
 
             @Override
@@ -367,6 +377,7 @@ public final class Init {
         startAndInjectSubscribeServices();
         startAndInjectContactStorageServices();
         startAndInjectContactServices();
+        
     }
 
     public static void startAndInjectConfigBundle() {
@@ -378,6 +389,7 @@ public final class Init {
         TestServiceRegistry.getInstance().addService(ConfigurationService.class, config);
         AJPv13ServiceRegistry.SERVICE_REGISTRY.set(new ServiceRegistry());
         AJPv13ServiceRegistry.getInstance().addService(ConfigurationService.class, config);
+        
     }
 
     private static void startAndInjectThreadPoolBundle() {
@@ -637,7 +649,7 @@ public final class Init {
         /*
          * May be invoked multiple times
          */
-        final FileStorageFactory fileStorageStarter = new LocalFileStorageFactory();
+        final FileStorageFactory fileStorageStarter = new CompositeFileStorageFactory();
         FileStorage.setFileStorageStarter(fileStorageStarter);
         final DatabaseService dbService = (DatabaseService) services.get(DatabaseService.class);
         QuotaFileStorage.setQuotaFileStorageStarter(new DBQuotaFileStorageFactory(dbService, fileStorageStarter));

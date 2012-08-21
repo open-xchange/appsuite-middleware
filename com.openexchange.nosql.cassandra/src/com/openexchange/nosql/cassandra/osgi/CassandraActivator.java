@@ -67,7 +67,7 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public final class CassandraActivator extends HousekeepingActivator {
 	
-	private static Log log = LogFactory.getLog(CassandraActivator.class);
+	private static Log log = com.openexchange.log.Log.loggerFor(CassandraActivator.class);
 	
 	private static String snappyPathProp = "com.openexchange.nosql.cassandra.snappyjava.nativelibs";
 	

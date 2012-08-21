@@ -49,17 +49,18 @@
 
 package com.openexchange.axis2.internal;
 
-import java.net.MalformedURLException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.servlet.ServletException;
-import org.apache.axis2.transport.http.AxisServlet;
+import org.apache.axis2.osgi.OSGiAxisServlet;
+import org.osgi.framework.BundleContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import com.openexchange.axis2.exeptions.OXAxis2ExceptionCodes;
-import com.openexchange.axis2.services.Axis2ServletServiceRegistry;
+import com.openexchange.axis2.services.Axis2ServletServices;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.Initialization;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link Axis2ServletInit}
@@ -86,40 +87,40 @@ public class Axis2ServletInit implements Initialization {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory.getLog(Axis2ServletInit.class);
 
-    private static final Axis2ServletInit instance = new Axis2ServletInit();
-
-    public static Axis2ServletInit getInstance() {
-        return instance;
+    public static Axis2ServletInit newInstance(final BundleContext context) {
+        return new Axis2ServletInit(context);
     }
 
     private final AtomicBoolean started;
+    private final BundleContext context;
 
     /**
      * Initializes a new {@link Axis2ServletInit}
-     * @throws MalformedURLException 
      */
-    private Axis2ServletInit() {
+    private Axis2ServletInit(final BundleContext context) {
         super();
+        this.context = context;
         started = new AtomicBoolean();
     }
 
     @Override
     public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
-            LOG.error("Axis2Servlet already started.");
+            LOG.error("Axis2 Servlet already started.");
             return;
         }
 
-        final HttpService httpService = Axis2ServletServiceRegistry.getServiceRegistry().getService(HttpService.class);
+        final ServiceLookup services = Axis2ServletServices.getServiceRegistry();
+        final HttpService httpService = services.getService(HttpService.class);
         if (httpService == null) {
-            LOG.error("HTTP service is null. Axis2 servlet cannot be registered");
+            LOG.error("HTTP service is null. Axis2 Servlet cannot be registered");
             return;
         }
         try {
             /*
              * Register axis2 servlet
              */
-            final ConfigurationService config = Axis2ServletServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+            final ConfigurationService config = services.getService(ConfigurationService.class);
 
             final String xml_path_property = config.getProperty(AXIS2_XML_PATH_PROPERTY);
             if (xml_path_property == null) {
@@ -135,7 +136,7 @@ public class Axis2ServletInit implements Initialization {
             servletConf.put(AXIS2_XML_PATH_PROPERTY, xml_path_property);
             servletConf.put(AXIS2_REPOSITORY_PATH_PROPERTY, repository_path_property);
 
-            httpService.registerServlet(SC_AXIS2_SRVLT_ALIAS, new AxisServlet(), servletConf, null);
+            httpService.registerServlet(SC_AXIS2_SRVLT_ALIAS, new OSGiAxisServlet(context), servletConf, null);
         } catch (final ServletException e) {
             throw OXAxis2ExceptionCodes.SERVLET_REGISTRATION_FAILED.create(e, e.getMessage());
         } catch (final NamespaceException e) {
@@ -143,20 +144,15 @@ public class Axis2ServletInit implements Initialization {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.server.Initialization#stop()
-     */
     @Override
     public void stop() {
         if (!started.compareAndSet(true, false)) {
-            LOG.error("Axis2 servlet has not been started.");
+            LOG.error("Axis2 Servlet has not been started.");
             return;
         }
-        final HttpService httpService = Axis2ServletServiceRegistry.getServiceRegistry().getService(HttpService.class);
+        final HttpService httpService = Axis2ServletServices.getServiceRegistry().getService(HttpService.class);
         if (httpService == null) {
-            LOG.error("HTTP service is null. Axis2 servlet cannot be unregistered");
+            LOG.error("HTTP service is null. Axis2 Servlet cannot be unregistered");
         } else {
             /*
              * Unregister mail filter servlet

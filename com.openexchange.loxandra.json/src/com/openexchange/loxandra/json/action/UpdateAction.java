@@ -72,7 +72,7 @@ import com.openexchange.tools.session.ServerSession;
 		parameters = { @Parameter(name = "") } )
 public class UpdateAction extends AbstractAction {
 
-	private static final Log log = LogFactory.getLog(UpdateAction.class);
+	private static final Log log = com.openexchange.log.Log.loggerFor(UpdateAction.class);
 	
 	/**
 	 * Constructor

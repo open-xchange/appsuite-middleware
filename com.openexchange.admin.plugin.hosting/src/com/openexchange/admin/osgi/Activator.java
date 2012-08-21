@@ -86,10 +86,10 @@ public class Activator extends HousekeepingActivator {
         this.starter = new PluginStarter();
         try {
             this.starter.start(context, configurationService);
+            track(DatabaseService.class, new DatabaseServiceCustomizer(context, ClientAdminThreadExtended.cache.getPool())).open();
         } catch (final OXGenericException e) {
             LOG.fatal(e.getMessage(), e);
         }
-        track(DatabaseService.class, new DatabaseServiceCustomizer(context, ClientAdminThreadExtended.cache.getPool())).open();
     }
 
     @Override

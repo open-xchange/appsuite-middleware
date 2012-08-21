@@ -963,12 +963,12 @@ final class ListLsubCollection {
         final Response response = r[r.length - 1];
         if (response.isOK()) {
             ListLsubEntryImpl listLsubEntry = null;
-            for (int i = 0, len = r.length; i < len; i++) {
+            for (int i = 0, len = r.length; null == listLsubEntry && i < len; i++) {
                 if (!(r[i] instanceof IMAPResponse)) {
                     continue;
                 }
                 final IMAPResponse ir = (IMAPResponse) r[i];
-                if (null == listLsubEntry && ir.keyEquals("LIST")) {
+                if (ir.keyEquals("LIST")) {
                     listLsubEntry = parseListResponse(ir, null);
                     r[i] = null;
                 }
@@ -1120,7 +1120,7 @@ final class ListLsubCollection {
                 }
                 final IMAPResponse ir = (IMAPResponse) r[i];
                 if (ir.keyEquals(command)) {
-                    final ListLsubEntryImpl listLsubEntry = parseListResponse(ir, null);
+                    final ListLsubEntryImpl listLsubEntry = parseListResponse(ir, lsub ? null : lsubMap);
                     retval = listLsubEntry;
                     {
                         final ListLsubEntryImpl oldEntry = map.get(fullName);

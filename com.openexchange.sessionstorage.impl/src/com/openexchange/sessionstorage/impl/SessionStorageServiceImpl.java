@@ -71,7 +71,7 @@ public class SessionStorageServiceImpl implements SessionStorageService {
     
     private final Map<String, StoredSession> sessions;
 
-    private static Log LOG = LogFactory.getLog(SessionStorageServiceImpl.class);
+    private static Log LOG = com.openexchange.log.Log.loggerFor(SessionStorageServiceImpl.class);
 
     /**
      * Initializes a new {@link SessionStorageServiceImpl}.

@@ -74,7 +74,7 @@ import com.openexchange.webdav.protocol.WebdavStatus;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class WebdavDirectoryServlet extends OXServlet {
-    private static final transient Log LOG = LogFactory.getLog(WebdavDirectoryServlet.class);
+    private static final transient Log LOG = com.openexchange.log.Log.loggerFor(WebdavDirectoryServlet.class);
 
     @Override
     protected Interface getInterface() {

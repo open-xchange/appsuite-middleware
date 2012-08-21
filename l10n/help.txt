@@ -1,0 +1,4 @@
+How to create new backend.lang.po using the POs for OX6
+
+for LANG in $(ls -1d ../frontend6/l10n/??_?? | cut -d '/' -f 4); do echo $LANG; msgcat -o /tmp/tmp.po ../frontend6/l10n/${LANG}/server.${LANG}.po ../frontend6/l10n/${LANG}/errors.${LANG}.po; msgmerge -o l10n/backend.${LANG}.po /tmp/tmp.po l10n/backend.pot; done
+

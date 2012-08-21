@@ -111,7 +111,7 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 	private static final String FOLDER_TRRE_ID_PROPERTY = "com.openexchange.carddav.tree";
 	private static final String COMBINED_REQUEST_TIMEOUT_PROPERTY = "com.openexchange.carddav.combinedRequestTimeout";
 	private static final CarddavProtocol PROTOCOL = new CarddavProtocol();
-	private static final Log LOG = LogFactory.getLog(GroupwareCarddavFactory.class);
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(GroupwareCarddavFactory.class);
 
 	private final FolderService folderService;
 	private final SessionHolder sessionHolder;

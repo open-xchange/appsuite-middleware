@@ -17,7 +17,7 @@ import com.openexchange.webdav.protocol.osgi.OSGiPropertyMixin;
 
 public class CarddavActivator extends HousekeepingActivator {
 
-    private static final Log LOG = LogFactory.getLog(CarddavActivator.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(CarddavActivator.class);
     private static final Class<?>[] NEEDED = new Class[] { HttpService.class, FolderService.class, ConfigViewFactory.class, UserService.class, ContactService.class };
 
     private OSGiPropertyMixin mixin;

@@ -70,7 +70,7 @@ import com.openexchange.tools.TimeZoneUtils;
  */
 public class EAVContactWriter extends CommonWriter {
 	
-	private static Log log = LogFactory.getLog(EAVContactWriter.class);
+	private static Log log = com.openexchange.log.Log.loggerFor(EAVContactWriter.class);
 	
 	private final TimeZone utc;
 	

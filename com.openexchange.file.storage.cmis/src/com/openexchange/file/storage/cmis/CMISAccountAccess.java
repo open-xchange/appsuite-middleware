@@ -50,9 +50,12 @@
 package com.openexchange.file.storage.cmis;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.apache.chemistry.opencmis.client.api.Repository;
 import org.apache.chemistry.opencmis.client.api.SessionFactory;
+import org.apache.chemistry.opencmis.client.bindings.CmisBindingFactory;
 import org.apache.chemistry.opencmis.client.runtime.SessionFactoryImpl;
 import org.apache.chemistry.opencmis.commons.SessionParameter;
 import org.apache.chemistry.opencmis.commons.enums.BindingType;
@@ -90,8 +93,14 @@ public final class CMISAccountAccess implements FileStorageAccountAccess {
     private final String password;
 
     private final String repository;
+    
+    private final String binding;
+
+    private final boolean sendBasicAuth;
 
     private final AtomicBoolean connected;
+
+    private final int readTimeout;
 
     private volatile String rootUrl;
 
@@ -112,10 +121,43 @@ public final class CMISAccountAccess implements FileStorageAccountAccess {
         this.account = account;
         this.session = session;
         final Map<String, Object> configuration = account.getConfiguration();
-        repository = (String) configuration.get(CMISConstants.CMIS_REPOSITORY);
+        String tmp = (String) configuration.get(CMISConstants.CMIS_REPOSITORY);
+        this.repository = tmp == null ? "" : tmp;
+        tmp = (String) configuration.get(CMISConstants.CMIS_BINDING);
+        this.binding = null == tmp ? "atompub" : tmp;
         username = (String) configuration.get(CMISConstants.CMIS_LOGIN);
         password = (String) configuration.get(CMISConstants.CMIS_PASSWORD);
+        sendBasicAuth = isTrue(configuration.get(CMISConstants.CMIS_AUTH_HTTP_BASIC));
+        readTimeout = parseInt(configuration.get(CMISConstants.CMIS_TIMEOUT), -1);
         this.service = service;
+    }
+
+    private boolean useAtomPub() {
+        return "atompub".equalsIgnoreCase(binding);
+    }
+
+    private boolean useWebService() {
+        return "webservice".equalsIgnoreCase(binding);
+    }
+
+    private static int parseInt(Object value, int defaultValue) {
+        if (value instanceof Number) {
+            return ((Number) value).intValue();
+        }
+        if (value instanceof String) {
+            return Integer.parseInt(((String) value).trim());
+        }
+        return defaultValue;
+    }
+
+    private static boolean isTrue(Object value) {
+        if (value instanceof Boolean) {
+            return ((Boolean) value).booleanValue();
+        }
+        if (value instanceof String) {
+            return Boolean.parseBoolean((String) value);
+        }
+        return false;
     }
 
     /**
@@ -139,44 +181,85 @@ public final class CMISAccountAccess implements FileStorageAccountAccess {
     @Override
     public void connect() throws OXException {
         if (connected.compareAndSet(false, true)) {
-            final Map<String, Object> configuration = account.getConfiguration();
-            String url = (String) configuration.get(CMISConstants.CMIS_URL);
-            if (null == url) {
-                throw FileStorageExceptionCodes.MISSING_PARAMETER.create(CMISConstants.CMIS_URL);
+            try {
+                final Map<String, Object> configuration = account.getConfiguration();
+                String url = (String) configuration.get(CMISConstants.CMIS_URL);
+                if (null == url) {
+                    throw FileStorageExceptionCodes.MISSING_PARAMETER.create(CMISConstants.CMIS_URL);
+                }
+                url = url.trim();
+                /*
+                 * Add username/password to URL
+                 */
+                rootUrl = url;
+                /*-
+                 * Create CMIS session
+                 * 
+                 * Default factory implementation
+                 */
+                final Map<String, String> parameters = new HashMap<String, String>(6);
+                /*
+                 * User credentials
+                 */
+                parameters.put(SessionParameter.USER, username);
+                parameters.put(SessionParameter.PASSWORD, password);
+                /*
+                 * Connection settings
+                 */
+                if (useAtomPub()) {
+                    parameters.put(SessionParameter.ATOMPUB_URL, rootUrl);
+                    parameters.put(SessionParameter.BINDING_TYPE, BindingType.ATOMPUB.value());
+                    /*-
+                     * If NTLM is enabled on SharePoint, you have to activate the OpenCMIS NTLM authentication provider.
+                     * 
+                     * See: http://chemistry.apache.org/java/developing/dev-repository-specific-notes.html
+                     * See: http://technet.microsoft.com/en-us/library/ff934619.aspx
+                     * 
+                     * Something like:
+                     * org.apache.chemistry.opencmis.user=xyz
+                     * org.apache.chemistry.opencmis.password=xyz
+                     * org.apache.chemistry.opencmis.binding.spi.type=atompub
+                     * org.apache.chemistry.opencmis.binding.atompub.url=http://spserver/_vti_bin/cmis/rest/60dae9c3-b9b0-4cc7-90e4-3af5b6ff25f6?getrepositoryinfo
+                     * org.apache.chemistry.opencmis.session.repository.id=60dae9c3-b9b0-4cc7-90e4-3af5b6ff25f6
+                     * 
+                     * http://spserver/_vti_bin/CMISSoapwsdl.aspx
+                     */
+                    //parameters.put(SessionParameter.AUTHENTICATION_PROVIDER_CLASS, CmisBindingFactory.NTLM_AUTHENTICATION_PROVIDER);
+                    parameters.put(SessionParameter.AUTH_HTTP_BASIC, Boolean.toString(sendBasicAuth));
+                    parameters.put(SessionParameter.COOKIES, "true");
+                } else if (useWebService()) {
+                    parameters.put(SessionParameter.BINDING_TYPE, BindingType.WEBSERVICES.value());
+                    parameters.put(SessionParameter.WEBSERVICES_ACL_SERVICE, rootUrl);
+                    parameters.put(SessionParameter.WEBSERVICES_DISCOVERY_SERVICE, rootUrl);
+                    parameters.put(SessionParameter.WEBSERVICES_MULTIFILING_SERVICE, rootUrl);
+                    parameters.put(SessionParameter.WEBSERVICES_NAVIGATION_SERVICE, rootUrl);
+                    parameters.put(SessionParameter.WEBSERVICES_OBJECT_SERVICE, rootUrl);
+                    parameters.put(SessionParameter.WEBSERVICES_POLICY_SERVICE, rootUrl);
+                    parameters.put(SessionParameter.WEBSERVICES_RELATIONSHIP_SERVICE, rootUrl);
+                    parameters.put(SessionParameter.WEBSERVICES_REPOSITORY_SERVICE, rootUrl);
+                    parameters.put(SessionParameter.WEBSERVICES_VERSIONING_SERVICE, rootUrl);
+                    parameters.put(SessionParameter.AUTHENTICATION_PROVIDER_CLASS, CmisBindingFactory.NTLM_AUTHENTICATION_PROVIDER);
+                    parameters.put(SessionParameter.AUTH_HTTP_BASIC, "true");
+                    parameters.put(SessionParameter.AUTH_SOAP_USERNAMETOKEN, "true");
+                    parameters.put(SessionParameter.COOKIES, "true");
+                }
+                /*
+                 * Timeout
+                 */
+                parameters.put(SessionParameter.CONNECT_TIMEOUT, "10000");
+                parameters.put(SessionParameter.READ_TIMEOUT, Integer.toString(readTimeout));
+                /*
+                 * Get available repositories
+                 */
+                final SessionFactory factory = SessionFactoryImpl.newInstance();
+                final List<Repository> repositories = factory.getRepositories(parameters);
+                /*
+                 * Create session
+                 */
+                cmisSession = repositories.get(0).createSession();
+            } catch (final RuntimeException e) {
+                throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
-            url = url.trim();
-            /*
-             * Ensure ending slash character
-             */
-            if (!url.endsWith("/")) {
-                url = url + '/';
-            }
-            /*
-             * Add username/password to URL
-             */
-            rootUrl = url;
-            /*-
-             * Create CMIS session
-             * 
-             * Default factory implementation
-             */
-            final SessionFactory factory = SessionFactoryImpl.newInstance();
-            final Map<String, String> parameters = new HashMap<String, String>(6);
-            /*
-             * User credentials
-             */
-            parameters.put(SessionParameter.USER, username);
-            parameters.put(SessionParameter.PASSWORD, password);
-            /*
-             * Connection settings
-             */
-            parameters.put(SessionParameter.ATOMPUB_URL, rootUrl);
-            parameters.put(SessionParameter.BINDING_TYPE, BindingType.ATOMPUB.value());
-            parameters.put(SessionParameter.REPOSITORY_ID, repository);
-            /*
-             * Create session
-             */
-            cmisSession = factory.createSession(parameters);
         } else {
             LOG.debug("CMIS account access already connected.");
         }
@@ -243,6 +326,12 @@ public final class CMISAccountAccess implements FileStorageAccountAccess {
             // connection settings
             parameters.put(SessionParameter.ATOMPUB_URL, rootUrl);
             parameters.put(SessionParameter.BINDING_TYPE, BindingType.ATOMPUB.value());
+            parameters.put(SessionParameter.AUTH_HTTP_BASIC, Boolean.toString(sendBasicAuth));
+            /*
+             * Timeout
+             */
+            parameters.put(SessionParameter.CONNECT_TIMEOUT, "10000");
+            parameters.put(SessionParameter.READ_TIMEOUT, Integer.toString(readTimeout));
             parameters.put(SessionParameter.REPOSITORY_ID, repository);
             // create session
             final org.apache.chemistry.opencmis.client.api.Session cmisSession = factory.createSession(parameters);

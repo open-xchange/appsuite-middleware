@@ -67,7 +67,7 @@ import com.openexchange.osgi.ServiceRegistry;
  */
 public class Activator extends DeferredActivator {
     
-    private static transient final Log LOG = LogFactory.getLog(Activator.class);
+    private static transient final Log LOG = com.openexchange.log.Log.loggerFor(Activator.class);
 
     private ServletRegisterer servletRegisterer;
     

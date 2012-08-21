@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.session;
 
-import java.net.InetAddress;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.session.actions.ChangeIPRequest;
@@ -86,7 +85,7 @@ public final class ChangeIPTest extends AbstractAJAXSession {
     }
 
     public void testIPChange() throws Throwable {
-        String ipAdress = InetAddress.getLocalHost().getHostAddress();
+        String ipAdress = "192.168.123.321";
         final ChangeIPRequest request1 = new ChangeIPRequest(ipAdress, false);
         final ChangeIPResponse response1 = client.execute(request1);
         assertFalse("Change IP response contains an exception.", response1.hasError());

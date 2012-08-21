@@ -111,7 +111,7 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 	
 	private static String PERSONS_IN_FOLDER_ROW_KEY = "PersonsInFolder";
 	
-	private static final Log log = LogFactory.getLog(CassandraEAVContactServiceImpl.class);
+	private static final Log log = com.openexchange.log.Log.loggerFor(CassandraEAVContactServiceImpl.class);
 	
 	/* Some Serializers */
 	private static final CompositeSerializer cs = CompositeSerializer.get();

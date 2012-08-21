@@ -73,7 +73,7 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
  */
 public class FolderCollection extends CardDAVCollection {
 
-    private static final Log LOG = LogFactory.getLog(FolderCollection.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(FolderCollection.class);
 
     private final UserizedFolder folder;
 

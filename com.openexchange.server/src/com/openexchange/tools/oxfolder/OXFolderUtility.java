@@ -66,6 +66,7 @@ import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.data.Check;
+import com.openexchange.groupware.infostore.InfostoreFacades;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -91,6 +92,37 @@ public final class OXFolderUtility {
      */
     private OXFolderUtility() {
         super();
+    }
+
+    /**
+     * Gets the appropriate accessible module for DB folder queries.
+     * 
+     * @param accessibleModules The accessible modules as indicated by user configuration
+     * @return The appropriate accessible module for DB folder queries
+     */
+    public static int[] getAccessibleModulesForFolders(final int[] accessibleModules) {
+        if (null == accessibleModules) {
+            return null;
+        }
+        if (!InfostoreFacades.isInfoStoreAvailable()) {
+            final int pos = Arrays.binarySearch(accessibleModules, FolderObject.INFOSTORE);
+            if (pos >= 0) {
+                // Remove Infostore module identifier to ignore infostore folders
+                final int mlen = accessibleModules.length - 1;
+                final int[] modules = new int[mlen];
+                if (0 == pos) {
+                    System.arraycopy(accessibleModules, 1, modules, 0, modules.length);
+                } else {
+                    System.arraycopy(accessibleModules, 0, modules, 0, pos);
+                    final int len = mlen - pos;
+                    if (len > 0) {
+                        System.arraycopy(accessibleModules, pos + 1, modules, pos, len);
+                    }
+                }
+                return modules;
+            }
+        }
+        return accessibleModules;
     }
 
     /**

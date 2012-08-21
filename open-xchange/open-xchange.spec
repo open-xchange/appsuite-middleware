@@ -20,6 +20,7 @@ Requires:      open-xchange-authentication
 Requires:      open-xchange-authorization
 Requires:      open-xchange-mailstore
 Requires:      open-xchange-httpservice
+Requires:      open-xchange-theme-default
 Requires:      open-xchange-smtp >= @OXVERSION@
 
 %description

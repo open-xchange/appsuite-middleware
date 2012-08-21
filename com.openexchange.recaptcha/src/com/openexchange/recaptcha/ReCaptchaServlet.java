@@ -68,7 +68,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class ReCaptchaServlet extends DataServlet {
 
-    private static final transient Log LOG = LogFactory.getLog(ReCaptchaServlet.class);
+    private static final transient Log LOG = com.openexchange.log.Log.loggerFor(ReCaptchaServlet.class);
 
     private static final String ACTION_HTML = "html";
 

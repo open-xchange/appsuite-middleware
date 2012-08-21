@@ -65,7 +65,7 @@ import static java.text.MessageFormat.format;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class OSGiServletContext extends WebappContext {
-    private static final Log LOG = LogFactory.getLog(OSGiServletContext.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(OSGiServletContext.class);
     /**
      * {@link HttpContext} providing OSGi integration.
      */

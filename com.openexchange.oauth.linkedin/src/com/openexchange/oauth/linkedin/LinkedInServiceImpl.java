@@ -49,6 +49,7 @@
 
 package com.openexchange.oauth.linkedin;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import org.apache.commons.logging.Log;
@@ -114,6 +115,7 @@ public class LinkedInServiceImpl implements LinkedInService{
             account = oAuthService.getAccount(accountId, session, user, contextId);
         } catch (final OXException e) {
             LOG.error(e);
+            return null;
         }
 
         final Token accessToken = new Token(account.getToken(), account.getSecret());
@@ -177,6 +179,9 @@ public class LinkedInServiceImpl implements LinkedInService{
     @Override
     public List<Contact> getContacts(final Session session, final int user, final int contextId, final int accountId) {
     	final Response response = performRequest(session, user, contextId, accountId, Verb.GET, CONNECTIONS_URL);
+    	if (response == null) {
+    		return Collections.emptyList();
+    	}
     	final LinkedInXMLParser parser = new LinkedInXMLParser();
         final List<Contact> contacts = parser.parseConnections(response.getBody());
         return contacts;
@@ -187,7 +192,10 @@ public class LinkedInServiceImpl implements LinkedInService{
 	public JSONObject getProfileForId(final String id, final Session session, final int user, final int contextId, final int accountId) throws OXException {
 		final String uri = "http://api.linkedin.com/v1/people/id="+id+PERSONAL_FIELD_QUERY;
 	   	final Response response = performRequest(session, user, contextId, accountId, Verb.GET, uri + IN_JSON);
-    	return extractJson(response);
+	   	if (response == null) {
+	   		return new JSONObject();
+	   	}
+	   	return extractJson(response);
 	}
 
 
@@ -195,7 +203,10 @@ public class LinkedInServiceImpl implements LinkedInService{
 	public JSONObject getRelationToViewer(final String id, final Session session, final int user, final int contextId, final int accountId) throws OXException {
 		final String uri = "http://api.linkedin.com/v1/people/id="+id+":(relation-to-viewer)";
 	   	final Response response = performRequest(session, user, contextId, accountId, Verb.GET, uri + IN_JSON);
-    	final JSONObject relations = extractJson(response);
+	   	if (response == null) {
+	   		return new JSONObject();
+	   	}
+	   	final JSONObject relations = extractJson(response);
     	return relations;
 	}
 
@@ -203,6 +214,9 @@ public class LinkedInServiceImpl implements LinkedInService{
 	public JSONObject getConnections(final Session session, final int user, final int contextId,	final int accountId) throws OXException {
 		final String uri = "http://api.linkedin.com/v1/people/~/connections"+PERSONAL_FIELD_QUERY;
 		final Response response = performRequest(session, user, contextId, accountId, Verb.GET, uri + IN_JSON);
+		if (response == null) {
+			return new JSONObject();
+		}
 		return extractJson(response);
 	}
 
@@ -211,13 +225,19 @@ public class LinkedInServiceImpl implements LinkedInService{
 	public List<String> getUsersConnectionsIds(final Session session, final int user, final int contextId, final int accountId) throws OXException {
 		final String uri = "http://api.linkedin.com/v1/people/~/connections:(id)";
 		final Response response = performRequest(session, user, contextId, accountId, Verb.GET, uri + IN_JSON);
+		if (response == null) {
+			return Collections.emptyList();
+		}
 		return extractIds(response);
 	}
 
 	public JSONObject getFullProfileById(final String id, final Session session, final int user, final int contextId, final int accountId) throws OXException {
 		final String uri = "http://api.linkedin.com/v1/people/id="+id+":("+RELATION_TO_VIEWER+","+PERSONAL_FIELDS+")";
 	   	final Response response = performRequest(session, user, contextId, accountId, Verb.GET, uri + IN_JSON);
-    	final JSONObject data = extractJson(response);
+	   	if (response == null) {
+	   		return new JSONObject();
+	   	}
+	   	final JSONObject data = extractJson(response);
     	return data;
 	}
 
@@ -237,7 +257,10 @@ public class LinkedInServiceImpl implements LinkedInService{
 			uri = b.toString();
 		}
 	   	final Response response = performRequest(session, user, contextId, accountId, Verb.GET, uri + IN_JSON);
-    	final JSONObject data = extractJson(response);
+	   	if (response == null) {
+	   		return new JSONObject();
+	   	}
+	   	final JSONObject data = extractJson(response);
     	return data;
     }
 
@@ -245,7 +268,10 @@ public class LinkedInServiceImpl implements LinkedInService{
 	public JSONObject getNetworkUpdates(final Session session, final int user, final int contextId, final int accountId) throws OXException {
 		final String uri = "http://api.linkedin.com/v1/people/~/network/updates" + IN_JSON + "&type=CONN";
 	   	final Response response = performRequest(session, user, contextId, accountId, Verb.GET, uri);
-    	final JSONObject data = extractJson(response);
+	   	if (response == null) {
+	   		return new JSONObject();
+	   	}
+	   	final JSONObject data = extractJson(response);
     	return data;
 	}
 
@@ -253,7 +279,10 @@ public class LinkedInServiceImpl implements LinkedInService{
 	public JSONObject getMessageInbox(final Session session, final int user, final int contextId, final int accountId) throws OXException {
 		final String uri = "http://api.linkedin.com/v1/people/~/mailbox:(id,folder,from:(person:(id,first-name,last-name,picture-url,headline)),recipients:(person:(id,first-name,last-name,picture-url,headline)),subject,short-body,last-modified,timestamp,mailbox-item-actions,body)?message-type=message-connections,invitation-request,invitation-reply,inmail-direct-connection&format=json";
 	   	final Response response = performRequest(session, user, contextId, accountId, Verb.GET, uri);
-    	final JSONObject data = extractJson(response);
+	   	if (response == null) {
+	   		return new JSONObject();
+	   	}
+	   	final JSONObject data = extractJson(response);
     	// System.out.println(data);
     	return data;
 	}

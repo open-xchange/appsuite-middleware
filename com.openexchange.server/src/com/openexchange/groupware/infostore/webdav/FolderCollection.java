@@ -428,6 +428,9 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
             }
             propertyHelper.dumpPropertiesToDB();
 			lockHelper.dumpLocksToDB();
+			exists = true;
+		} catch (WebdavProtocolException x) {
+			throw x;
 		} catch (final Exception x) {
 		    throw WebdavProtocolException.generalError(x, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}

@@ -31,7 +31,7 @@ public final class ParallelsOpenApiServlet extends DataServlet {
      * 
      */
     private static final long serialVersionUID = 7650360590998502303L;
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ParallelsOpenApiServlet.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(ParallelsOpenApiServlet.class);
 
     public ParallelsOpenApiServlet() {
         super();

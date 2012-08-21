@@ -678,6 +678,9 @@ public class CalendarSql implements AppointmentSQLInterface {
                     DBUtils.startTransaction(writecon);
                     final CalendarDataObject c = cdao.clone();
                     cimp.deleteAppointment(session.getUserId(), c, writecon, session, ctx, inFolder, clientLastModified);
+                    if (c.containsRecurrenceID()) {
+                        cdao.setRecurrenceID(c.getRecurrenceID());
+                    }
                     writecon.commit();
                 } catch(final OXException oxc) {
                     DBUtils.rollback(writecon);

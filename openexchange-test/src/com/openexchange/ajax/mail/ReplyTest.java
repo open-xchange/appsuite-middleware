@@ -89,7 +89,7 @@ public class ReplyTest extends AbstractReplyTest {
             assertTrue("Sender of original message should become recipient in reply", contains(to, mail2));
 
             String from = myReplyMail.getFrom();
-            assertTrue("New sender field should be empty, because GUI offers selection there", from == null || from.isEmpty());
+            assertTrue("New sender field should be empty, because GUI offers selection there", from == null || from.isEmpty() || from.equals("[]"));
         } finally {
             if (null != client2) {
                 client2.logout();

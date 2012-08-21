@@ -77,7 +77,7 @@ public class TaskModifiedByNotNull implements UpdateTask {
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(TaskModifiedByNotNull
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(TaskModifiedByNotNull
         .class);
 
     /**

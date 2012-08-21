@@ -68,7 +68,7 @@ import org.apache.commons.logging.LogFactory;
  *
  */
 public class FileUtils {
-	private static final Log log = LogFactory.getLog(FileUtils.class);
+	private static final Log log = com.openexchange.log.Log.loggerFor(FileUtils.class);
 	
 	/**
 	 * Read data from a file and convert it to a byte array.

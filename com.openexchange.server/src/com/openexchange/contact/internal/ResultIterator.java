@@ -236,7 +236,7 @@ public class ResultIterator implements SearchIterator<Contact> {
 				while (searchIterator.hasNext()) {
 					Contact contact = searchIterator.next();
 					try {
-						if (this.accept(contact, null)) {
+						if (null != contact && this.accept(contact, null)) {
 							/*
 							 * add contact info for matching member in result
 							 */

@@ -90,7 +90,7 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
 
     private List<NameValuePair> parameters;
 
-    private static final Log LOG = LogFactory.getLog(GMXAndWebDeAPIStep.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(GMXAndWebDeAPIStep.class);
 
     public GMXAndWebDeAPIStep() {
         super();

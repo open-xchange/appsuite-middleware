@@ -50,10 +50,15 @@
 package com.openexchange.file.storage.config.osgi;
 
 import java.util.Properties;
+import java.util.concurrent.ConcurrentMap;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
-import com.openexchange.file.storage.config.ConfigFileStorageAccountManagerProvider;
-import com.openexchange.file.storage.config.ConfigFileStorageAccountParser;
+import com.openexchange.file.storage.config.ConfigFileStorageAuthenticator;
+import com.openexchange.file.storage.config.internal.ConfigFileStorageAccountManagerProvider;
+import com.openexchange.file.storage.config.internal.ConfigFileStorageAccountParser;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -109,6 +114,41 @@ public final class ConfigFileStorageActivator extends HousekeepingActivator {
              * Parse file storage configuration
              */
             parseFileStorageProperties(getService(ConfigurationService.class));
+            /*
+             * Tracker
+             */
+            final BundleContext context = this.context;
+            final ConcurrentMap<ConfigFileStorageAuthenticator, ConfigFileStorageAuthenticator> authenticators = ConfigFileStorageAccountParser.getInstance().getAuthenticators();
+            final ServiceTrackerCustomizer<ConfigFileStorageAuthenticator, ConfigFileStorageAuthenticator> customizer = new ServiceTrackerCustomizer<ConfigFileStorageAuthenticator, ConfigFileStorageAuthenticator>() {
+
+                @Override
+                public ConfigFileStorageAuthenticator addingService(final ServiceReference<ConfigFileStorageAuthenticator> reference) {
+                    final ConfigFileStorageAuthenticator authenticator = context.getService(reference);
+                    if (null == authenticators.putIfAbsent(authenticator, authenticator)) {
+                        return authenticator;
+                    }
+                    context.ungetService(reference);
+                    return null;
+                }
+
+                @Override
+                public void modifiedService(final ServiceReference<ConfigFileStorageAuthenticator> reference, final ConfigFileStorageAuthenticator authenticator) {
+                    // Nope
+                }
+
+                @Override
+                public void removedService(final ServiceReference<ConfigFileStorageAuthenticator> reference, final ConfigFileStorageAuthenticator authenticator) {
+                    if (null != authenticator) {
+                        try {
+                            authenticators.remove(authenticator);
+                        } finally {
+                            context.ungetService(reference);
+                        }
+                    }
+                }
+            };
+            track(ConfigFileStorageAuthenticator.class, customizer);
+            openTrackers();
             /*
              * Register services
              */

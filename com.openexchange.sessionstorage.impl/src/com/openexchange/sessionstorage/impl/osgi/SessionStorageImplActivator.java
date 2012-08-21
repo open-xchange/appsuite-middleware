@@ -63,7 +63,7 @@ import com.openexchange.sessionstorage.impl.SessionStorageServiceImpl;
  */
 public class SessionStorageImplActivator extends HousekeepingActivator {
 
-    private final Log log = LogFactory.getLog(SessionStorageImplActivator.class);
+    private final Log log = com.openexchange.log.Log.loggerFor(SessionStorageImplActivator.class);
 
     private ConfigurationService configService = null;
 

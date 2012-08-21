@@ -103,6 +103,7 @@ import com.openexchange.messaging.MessagingMessageAccess;
 import com.openexchange.messaging.MessagingPermission;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.OrderDirection;
+import com.openexchange.messaging.ServiceAware;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -744,7 +745,14 @@ public final class MessagingFolderStorage implements FolderStorage {
                 final List<SortableId> list = new ArrayList<SortableId>(size);
                 for (int j = 0; j < size; j++) {
                     final MessagingAccount acc = accounts.get(j);
-                    list.add(new MessagingId(MessagingFolderIdentifier.getFQN(acc.getMessagingService().getId(), acc.getId(), ""), j, null));
+                    final String serviceId;
+                    if (acc instanceof ServiceAware) {
+                        serviceId = ((ServiceAware) acc).getServiceId();
+                    } else {
+                        final MessagingService tmp = acc.getMessagingService();
+                        serviceId = null == tmp ? null : tmp.getId();
+                    }
+                    list.add(new MessagingId(MessagingFolderIdentifier.getFQN(serviceId, acc.getId(), ""), j, null));
                 }
                 return list.toArray(new SortableId[list.size()]);
             }

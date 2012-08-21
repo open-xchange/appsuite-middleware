@@ -296,8 +296,10 @@ public class CalendarDowngradeUserTest extends TestCase {
             csql.getObjectById(objectID, parentFolderID);
             fail("The appointment exists!");
         } catch (final OXException x) {
-            x.printStackTrace();
-            fail(x.toString());
+            if (x.getCode() != 1) {
+                x.printStackTrace();
+                fail(x.toString());
+            }
         } catch (final SQLException x) {
             x.printStackTrace();
             fail(x.toString());

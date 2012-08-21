@@ -74,7 +74,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class AggregatingSubscribeService extends AbstractSubscribeService {
 
-    private static final Log LOG = LogFactory.getLog(AggregatingSubscribeService.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(AggregatingSubscribeService.class);
     
     private ContactAggregator aggregator = new ContactAggregator();
     

@@ -7,7 +7,7 @@
 
     <!-- Constants -->
     <property name="i18nDir" value="${prefix}/i18n"/>
-    <property name="languages" value="de_DE,fr_FR"/>
+    <property name="languages" value="cs_CZ,de_DE,en_GB,es_ES,fr_CA,fr_FR,hu_HU,it_IT,ja_JP,lv_LV,nl_NL,pl_PL,ro_RO,ru_RU,sk_SK,th_TH,zh_CN,zh_TW"/>
 
     <import file="build-project.xml"/>
 

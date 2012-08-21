@@ -51,7 +51,9 @@ package com.openexchange.folderstorage.filestorage;
 
 import java.util.List;
 import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.FileStorageFolderType;
 import com.openexchange.file.storage.FileStoragePermission;
+import com.openexchange.file.storage.TypeAware;
 import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Permission;
@@ -69,6 +71,16 @@ import com.openexchange.groupware.container.FolderObject;
 public final class FileStorageFolderImpl extends AbstractFolder {
 
     private static final long serialVersionUID = 6445442372690458946L;
+
+    /**
+     * <code>"10"</code>
+     */
+    private static final String INFOSTORE_USER = Integer.toString(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID);
+
+    /**
+     * <code>"15"</code>
+     */
+    private static final String INFOSTORE_PUBLIC = Integer.toString(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID);
 
     private boolean cacheable;
 
@@ -102,7 +114,16 @@ public final class FileStorageFolderImpl extends AbstractFolder {
         if (isRootFolder) { // Root folder
             parent = PRIVATE_FOLDER_ID;
         } else {
-            parent = FileStorageFolderIdentifier.getFQN(serviceId, accountId, fsFolder.getParentId());
+            String parentId = null;
+            if (fsFolder instanceof TypeAware) {
+                final FileStorageFolderType folderType = ((TypeAware) fsFolder).getType();
+                if (FileStorageFolderType.HOME_DIRECTORY.equals(folderType)) {
+                    parentId = INFOSTORE_USER;
+                } else if (FileStorageFolderType.PUBLIC_FOLDER.equals(folderType)) {
+                    parentId = INFOSTORE_PUBLIC;
+                }
+            }
+            parent = null == parentId ? FileStorageFolderIdentifier.getFQN(serviceId, accountId, fsFolder.getParentId()) : parentId;
         }
         {
             final List<FileStoragePermission> fsPermissions = fsFolder.getPermissions();

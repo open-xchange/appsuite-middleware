@@ -63,6 +63,7 @@ import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
+import com.openexchange.file.storage.FileStorageFolderType;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.session.Session;
@@ -76,7 +77,14 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(CIFSFolderAccess.class);
 
+    /**
+     * Constant string to indicate that home directory has not been found.
+     */
+    private static final String NOT_FOUND = "__NONE";
+
     private final String login;
+
+    private volatile String homeDirPath;
 
     /**
      * Initializes a new {@link CIFSFolderAccess}.
@@ -84,6 +92,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
     public CIFSFolderAccess(final String rootUrl, final NtlmPasswordAuthentication auth, final FileStorageAccount account, final Session session) {
         super(rootUrl, auth, account, session);
         login = (String) account.getConfiguration().get(CIFSConstants.CIFS_LOGIN);
+        homeDirPath = (String) account.getConfiguration().get(CIFSConstants.CIFS_HOME_DIR);
     }
 
     @Override
@@ -129,6 +138,9 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
             if (!smbFolder.isDirectory()) {
                 throw CIFSExceptionCodes.NOT_A_FOLDER.create(folderId);
             }
+            /*
+             * Convert to FileStorageFolder
+             */
             return toFileStorageFolder(folderId, smbFolder);
         } catch (final OXException e) {
             throw e;
@@ -141,7 +153,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
         }
     }
 
-    private FileStorageFolder toFileStorageFolder(final String folderId, final SmbFile smbFolder) throws SmbException, OXException {
+    private CIFSFolder toFileStorageFolder(final String folderId, final SmbFile smbFolder) throws SmbException, OXException {
         /*
          * Check sub resources
          */
@@ -149,8 +161,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
         try {
             subFiles = smbFolder.canRead() ? smbFolder.listFiles() : new SmbFile[0];
         } catch (final SmbException e) {
-            final String message = e.getMessage();
-            if (!message.startsWith("Invalid operation") && !message.equals("Access is denied.")) {
+            if (!indicatesNotReadable(e)) {
                 throw e;
             }
             subFiles = new SmbFile[0];
@@ -174,15 +185,74 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
         /*
          * Convert to a folder
          */
-        final CIFSFolder cifsFolder = new CIFSFolder(session.getUserId());
+        final CIFSFolder cifsFolder = new CIFSFolder(session.getUserId(), rootUrl);
         cifsFolder.parseSmbFolder(smbFolder);
         cifsFolder.setFileCount(fileCount);
         cifsFolder.setSubfolders(hasSubdir);
         cifsFolder.setSubscribedSubfolders(hasSubdir);
         /*
+         * Home dir or public folder?
+         */
+        {
+            final String homeDirectory = getHomeDirectory();
+            if (null != homeDirectory) {
+                if (homeDirectory.equals(smbFolder.getPath())) {
+                    cifsFolder.setType(FileStorageFolderType.HOME_DIRECTORY);
+                } else if (FileStorageFolder.ROOT_FULLNAME.equals(cifsFolder.getParentId())) {
+                    cifsFolder.setType(FileStorageFolderType.PUBLIC_FOLDER);
+                }
+            }
+        }
+        /*
          * TODO: Set capabilities
          */
         return cifsFolder;
+    }
+
+    private String getHomeDirectory() {
+        /*
+         * Check
+         */
+        String homeDirPath = this.homeDirPath;
+        if (null == homeDirPath) {
+            synchronized (this) {
+                homeDirPath = this.homeDirPath;
+                if (null == homeDirPath) {
+                    /*
+                     * Try to determine home directory by user name
+                     */
+                    try {
+                        final String folderId = rootUrl;
+                        final String fid = checkFolderId(folderId, rootUrl);
+                        final SmbFile smbFolder = new SmbFile(fid, auth);
+                        if (!exists(smbFolder)) {
+                            throw CIFSExceptionCodes.NOT_FOUND.create(folderId);
+                        }
+                        if (!smbFolder.isDirectory()) {
+                            throw CIFSExceptionCodes.NOT_A_FOLDER.create(folderId);
+                        }
+                        /*
+                         * Check sub resources
+                         */
+                        final SmbFile homeDir = recursiveSearch(smbFolder, login + '/');
+                        if (null == homeDir) {
+                            throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create();
+                        }
+                        homeDirPath = homeDir.getPath();
+                    } catch (final OXException e) {
+                        homeDirPath = NOT_FOUND;
+                    } catch (final SmbException e) {
+                        homeDirPath = NOT_FOUND;
+                    } catch (final IOException e) {
+                        homeDirPath = NOT_FOUND;
+                    } catch (final Exception e) {
+                        homeDirPath = NOT_FOUND;
+                    }
+                    this.homeDirPath = homeDirPath;
+                }
+            }
+        }
+        return NOT_FOUND.equals(homeDirPath) ? null : homeDirPath;
     }
 
     @Override
@@ -191,23 +261,50 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
             /*
              * Check
              */
-            final String folderId = rootUrl;
-            final String fid = checkFolderId(folderId, rootUrl);
-            final SmbFile smbFolder = new SmbFile(fid, auth);
-            if (!exists(smbFolder)) {
-                throw CIFSExceptionCodes.NOT_FOUND.create(folderId);
-            }
-            if (!smbFolder.isDirectory()) {
-                throw CIFSExceptionCodes.NOT_A_FOLDER.create(folderId);
-            }
-            /*
-             * Check sub resources
-             */
-            final SmbFile homeDir = recursiveSearch(smbFolder, login + '/');
-            if (null == homeDir) {
+            final String homeDirPath = this.homeDirPath;
+            if (NOT_FOUND.equals(homeDirPath)) {
                 throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create();
             }
-            return toFileStorageFolder(homeDir.getPath(), homeDir);
+            final SmbFile homeDir;
+            if (null == homeDirPath) {
+                /*
+                 * Try to determine home directory by user name
+                 */
+                final String folderId = rootUrl;
+                final String fid = checkFolderId(folderId, rootUrl);
+                final SmbFile smbFolder = new SmbFile(fid, auth);
+                if (!exists(smbFolder)) {
+                    throw CIFSExceptionCodes.NOT_FOUND.create(folderId);
+                }
+                if (!smbFolder.isDirectory()) {
+                    throw CIFSExceptionCodes.NOT_A_FOLDER.create(folderId);
+                }
+                /*
+                 * Check sub resources
+                 */
+                homeDir = recursiveSearch(smbFolder, login + '/');
+                if (null == homeDir) {
+                    throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create();
+                }
+                this.homeDirPath = homeDir.getPath();
+            } else {
+                /*
+                 * Get by configured path
+                 */
+                final String folderId = homeDirPath;
+                final String fid = checkFolderId(folderId, rootUrl);
+                homeDir = new SmbFile(fid, auth);
+                if (!exists(homeDir)) {
+                    throw CIFSExceptionCodes.NOT_FOUND.create(folderId);
+                }
+                if (!homeDir.isDirectory()) {
+                    throw CIFSExceptionCodes.NOT_A_FOLDER.create(folderId);
+                }
+            }
+            /*
+             * Convert to FileStorageFolder
+             */
+            return toFileStorageFolder(homeDir.getPath(), homeDir).setType(FileStorageFolderType.HOME_DIRECTORY);
         } catch (final OXException e) {
             throw e;
         } catch (final SmbException e) {
@@ -227,8 +324,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
         try {
             subFiles = smbFolder.canRead() ? smbFolder.listFiles() : new SmbFile[0];
         } catch (final SmbException e) {
-            final String message = e.getMessage();
-            if (!message.startsWith("Invalid operation") && !message.equals("Access is denied.")) {
+            if (!indicatesNotReadable(e)) {
                 throw e;
             }
             subFiles = new SmbFile[0];
@@ -253,7 +349,30 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
 
     @Override
     public FileStorageFolder[] getPublicFolders() throws OXException {
-        return new FileStorageFolder[0];
+        try {
+            /*
+             * All shares except home directory
+             */
+            final String homeDirectory = getHomeDirectory();
+            if (null == homeDirectory) {
+                /*
+                 * No public folders without a home directory
+                 */
+                return new FileStorageFolder[0];
+            }
+            /*
+             * Return root folders
+             */
+            final FileStorageFolder[] subfolders = getSubfolders(rootUrl, false);
+            for (FileStorageFolder folder : subfolders) {
+                ((CIFSFolder) folder).setType(FileStorageFolderType.PUBLIC_FOLDER);
+            }
+            return subfolders;
+        } catch (final OXException e) {
+            throw e;
+        } catch (final Exception e) {
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
     
     @Override
@@ -277,20 +396,26 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
             try {
                 subFiles = smbFolder.canRead() ? smbFolder.listFiles() : new SmbFile[0];
             } catch (final SmbException e) {
-                final String message = e.getMessage();
-                if (!message.startsWith("Invalid operation") && !message.equals("Access is denied.")) {
+                if (!indicatesNotReadable(e)) {
                     throw e;
                 }
                 subFiles = new SmbFile[0];
             }
+            /*
+             * All shares except home directory
+             */
             final List<FileStorageFolder> list = new ArrayList<FileStorageFolder>(subFiles.length);
+            final String homeDirPath = getHomeDirectory();
             for (final SmbFile sub : subFiles) {
                 if (sub.isDirectory()) {
-                    try {
-                        list.add(getFolder(sub.getPath()));
-                    } catch (final OXException e) {
-                        if (!CIFSExceptionCodes.NOT_FOUND.equals(e)) {
-                            throw e;
+                    final String path = sub.getPath();
+                    if ((null == homeDirPath || !homeDirPath.equals(path)) && !isHidden(sub)) {
+                        try {
+                            list.add(getFolder(path));
+                        } catch (final OXException e) {
+                            if (!CIFSExceptionCodes.NOT_FOUND.equals(e)) {
+                                throw e;
+                            }
                         }
                     }
                 }
@@ -375,7 +500,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
              */
             final String newUri;
             {
-                URI uri = new URI(fid, true);
+                URI uri = new URI(fid, false);
                 String path = uri.getPath();
                 if (path.endsWith(SLASH)) {
                     path = path.substring(0, path.length() - 1);
@@ -383,7 +508,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
                 final int pos = path.lastIndexOf('/');
                 final String name = pos >= 0 ? path.substring(pos) : path;
 
-                uri = new URI(newParentId, true);
+                uri = new URI(newParentId, false);
                 path = uri.getPath();
                 if (path.endsWith(SLASH)) {
                     path = path.substring(0, path.length() - 1);
@@ -437,7 +562,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
              */
             final String newUri;
             {
-                final URI uri = new URI(fid, true);
+                final URI uri = new URI(fid, false);
                 String path = uri.getPath();
                 if (path.endsWith(SLASH)) {
                     path = path.substring(0, path.length() - 1);
@@ -595,6 +720,26 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
             ret[i] = Quota.getUnlimitedQuota(types[i]);
         }
         return ret;
+    }
+
+    private static boolean isHidden(final SmbFile smbFolder) {
+        if (null == smbFolder) {
+            return true;
+        }
+        final String name = smbFolder.getName();
+        return isEmpty(name) || '$' == name.charAt(0);
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
 }

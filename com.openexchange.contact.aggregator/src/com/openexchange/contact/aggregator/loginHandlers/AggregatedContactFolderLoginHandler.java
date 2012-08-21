@@ -132,7 +132,7 @@ public class AggregatedContactFolderLoginHandler implements LoginHandlerService 
         this.executor = executor;
     }
 
-    private static final Log LOG = LogFactory.getLog(AggregatedContactFolderLoginHandler.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(AggregatedContactFolderLoginHandler.class);
 
     public void handleLogin(final LoginResult login) throws OXException {
         final int cid = login.getSession().getContextId();

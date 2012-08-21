@@ -81,7 +81,7 @@ public final class MyServlet extends DataServlet {
 	 * 
 	 */
 	private static final long serialVersionUID = -8914926421736440078L;
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MyServlet.class);
+	private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(MyServlet.class);
 
 	public MyServlet() {
 		super();

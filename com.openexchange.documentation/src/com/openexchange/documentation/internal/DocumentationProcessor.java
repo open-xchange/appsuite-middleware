@@ -63,7 +63,7 @@ import com.openexchange.exception.OXException;
  */
 public class DocumentationProcessor {
 	
-    private static final Log LOG = LogFactory.getLog(DocumentationProcessor.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(DocumentationProcessor.class);
     
 	private final DefaultDocumentationRegistry registry;
 	private final DescriptionFactory factory;

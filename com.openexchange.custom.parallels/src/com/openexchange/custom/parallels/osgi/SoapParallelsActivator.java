@@ -27,7 +27,7 @@ import com.openexchange.user.UserService;
 
 public class SoapParallelsActivator extends HousekeepingActivator {
 
-    private static transient final Log LOG = LogFactory.getLog(SoapParallelsActivator.class);
+    private static transient final Log LOG = com.openexchange.log.Log.loggerFor(SoapParallelsActivator.class);
 
     public SoapParallelsActivator() {
         super();

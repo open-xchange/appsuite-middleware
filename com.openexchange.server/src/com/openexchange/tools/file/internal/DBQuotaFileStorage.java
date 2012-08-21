@@ -306,7 +306,9 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
             }
         } catch (final OXException q) {
             try {
-                fileStorage.deleteFile(file);
+            	if (file != null) {
+                    fileStorage.deleteFile(file);
+            	}
             } catch (final OXException f) {
                 throw new OXException(f);
             }

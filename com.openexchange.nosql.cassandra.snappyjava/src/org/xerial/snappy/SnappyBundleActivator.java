@@ -62,7 +62,7 @@ import com.openexchange.log.LogFactory;
  */
 public class SnappyBundleActivator implements BundleActivator {
 	
-	private static Log log = LogFactory.getLog(SnappyBundleActivator.class);
+	private static Log log = com.openexchange.log.Log.loggerFor(SnappyBundleActivator.class);
 
 	@Override
     public void start(BundleContext context) throws Exception {
