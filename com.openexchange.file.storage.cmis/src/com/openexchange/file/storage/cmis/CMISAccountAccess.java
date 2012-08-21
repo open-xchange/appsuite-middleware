@@ -224,7 +224,7 @@ public final class CMISAccountAccess implements FileStorageAccountAccess {
                      * 
                      * http://spserver/_vti_bin/CMISSoapwsdl.aspx
                      */
-                    //parameters.put(SessionParameter.AUTHENTICATION_PROVIDER_CLASS, CmisBindingFactory.NTLM_AUTHENTICATION_PROVIDER);
+                    parameters.put(SessionParameter.AUTHENTICATION_PROVIDER_CLASS, CmisBindingFactory.NTLM_AUTHENTICATION_PROVIDER);
                     parameters.put(SessionParameter.AUTH_HTTP_BASIC, Boolean.toString(sendBasicAuth));
                     parameters.put(SessionParameter.COOKIES, "true");
                 } else if (useWebService()) {

@@ -1,3 +1,7 @@
+* 2012-08-20 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22819: Set category to USER_INPUT for invalid or rejected Internet addresses
+
 * 2012-08-20 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 22809: Send proper linebreaks in group vCards to clients

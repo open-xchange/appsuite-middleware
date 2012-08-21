@@ -100,6 +100,8 @@ public enum OXMailfilterExceptionCode implements OXExceptionCode {
      */
     NO_VALID_PASSWORDSOURCE("The passwordSource given in the config file is not a valid one", CATEGORY_ERROR, 20);
 
+	public static final String ERR_PREFIX_INVALID_ADDRESS = "The parameter for redirect must be a valid Internet email address";
+    public static final String ERR_PREFIX_REJECTED_ADDRESS = "The Internet email address used for redirect is not allowed: ";
 
     private final String message;
 
