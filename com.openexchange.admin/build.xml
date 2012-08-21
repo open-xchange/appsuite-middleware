@@ -52,6 +52,7 @@
     <target name="setVersion">
         <replaceregexp file="META-INF/MANIFEST.MF" match="OXVersion: .*" replace="OXVersion: ${version}" byline="true"/>
         <replaceregexp file="META-INF/MANIFEST.MF" match="OXRevision: .*" replace="OXRevision: ${revision}" byline="true"/>
+        <replaceregexp file="META-INF/MANIFEST.MF" match="Bundle-Version: .*" replace="Bundle-Version: ${version}" byline="true"/>
     </target>
 
     <target name="postClean">
