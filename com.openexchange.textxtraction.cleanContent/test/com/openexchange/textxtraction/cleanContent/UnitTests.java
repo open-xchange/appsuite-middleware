@@ -47,64 +47,22 @@
  *
  */
 
-package com.openexchange.textxtraction;
+package com.openexchange.textxtraction.cleanContent;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.nio.charset.Charset;
-import org.apache.tika.io.TikaInputStream;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Charsets;
-import com.openexchange.java.Streams;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
+
 
 /**
- * {@link AbstractTextXtractService} - The abstract {@link TextXtractService} class providing default implementation for
- * {@link #extractFrom(String, String)} and {@link #extractFromResource(String, String)}.
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link UnitTests}
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public abstract class AbstractTextXtractService implements TextXtractService {
-
-    /**
-     * The ISO-8859-1 character set.
-     */
-    protected static final Charset CHARSET_ISO_8859_1 = Charsets.ISO_8859_1;
-
-    /**
-     * Initializes a new {@link AbstractTextXtractService}.
-     */
-    protected AbstractTextXtractService() {
-        super();
-    }
-
-    @Override
-    public String extractFrom(final String content, final String optMimeType) throws OXException {
-        return extractFrom(Streams.newByteArrayInputStream(content.getBytes(CHARSET_ISO_8859_1)), optMimeType);
-    }
-
-    @Override
-    public String extractFromResource(final String resource, final String optMimeType) throws OXException {
-        final File file = new File(resource);
-        InputStream input = null;
-        try {
-            /*
-             * Generate an InputStream that supports mark()/reset()
-             */
-            if (file.isFile()) {
-                input = new BufferedInputStream(new FileInputStream(file));
-            } else {
-                input = TikaInputStream.get(new URL(resource));
-            }
-            return extractFrom(input, optMimeType);
-        } catch (final IOException e) {
-            throw TextXtractExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } finally {
-            Streams.close(input);
-        }
-    }
+@RunWith(Suite.class)
+@SuiteClasses({
+    CleanContentTextXtractionTest.class
+})
+public class UnitTests {
 
 }
