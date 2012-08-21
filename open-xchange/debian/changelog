@@ -1,3 +1,9 @@
+open-xchange (6.22.0-1) unstable; urgency=low
+
+  * First release candidate for 6.22.0
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 21 Aug 2012 09:19:24 +0200
+
 open-xchange (6.22.0-0) unstable; urgency=low
 
   * prepare for 6.22.0

@@ -53,5 +53,9 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc malpol
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Tue Aug 21 2012 Carsten Hoeger <choeger@open-xchange.com>
+First release candidate for 6.22.0
+* Mon Aug 20 2012 Carsten Hoeger <choeger@open-xchange.com>
+prepare for 6.22.0
 * Thu Jul 12 2012 Carsten Hoeger <choeger@open-xchange.com>
 Initial release

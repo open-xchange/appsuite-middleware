@@ -80,6 +80,10 @@ fi
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Tue Aug 21 2012 Marc Arens <marc.arens@open-xchange.com>
+First release candidate for 6.22.0
+* Mon Aug 20 2012 Marc Arens <marc.arens@open-xchange.com>
+prepare for 6.22.0
 * Tue Jul 03 2012 Marc Arens <marc.arens@open-xchange.com>
 Release build for EDP drop #2
 * Wed Jun 20 2012 Marc Arens <marc.arens@open-xchange.com>

@@ -9,7 +9,7 @@ BuildRequires: open-xchange-log4j
 BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 6
+%define        ox_release 1
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0 
@@ -208,6 +208,10 @@ fi
 /opt/open-xchange/templates/*
 
 %changelog
+* Tue Aug 21 2012 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 6.22.0
+* Mon Aug 20 2012 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 6.22.0
 * Tue Jul 03 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Release build for EDP drop #2
 * Mon Jun 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
