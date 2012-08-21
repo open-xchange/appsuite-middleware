@@ -123,7 +123,9 @@ public class SolrFilestoreEventHandler implements EventHandler {
         File fileMetadata = access.getFileMetadata(id, FileStorageFileAccess.CURRENT_VERSION);
         StandardIndexDocument<File> document = new StandardIndexDocument<File>(fileMetadata);
         document.addProperty(IndexConstants.SERVICE, service);
-        document.addProperty(IndexConstants.ACCOUNT, accountId);       
+        document.addProperty(IndexConstants.ACCOUNT, accountId);    
+        filestoreIndexAccess.addContent(document, true);
+        
         if (hasAttachment(fileMetadata)) {
             InputStream is = access.getDocument(id, FileStorageFileAccess.CURRENT_VERSION);
             Attachment attachment = new Attachment();
@@ -141,8 +143,6 @@ public class SolrFilestoreEventHandler implements EventHandler {
                   
             attachmentIndexAccess.addContent(new StandardIndexDocument<Attachment>(attachment), true);
         }
-        
-        filestoreIndexAccess.addContent(document, true);
     }
     
     private boolean hasAttachment(File file) {
