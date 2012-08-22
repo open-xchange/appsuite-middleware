@@ -213,6 +213,8 @@ public final class CMISAccountAccess implements FileStorageAccountAccess {
                      * If NTLM is enabled on SharePoint, you have to activate the OpenCMIS NTLM authentication provider.
                      * 
                      * See: http://chemistry.apache.org/java/developing/dev-repository-specific-notes.html
+                     * See: http://stackoverflow.com/questions/1168526/authenticate-with-ntlm-or-kerberos-using-java-urlconnection
+                     * See: http://www.intersult.com/wiki/page/Intersult%20HTTP
                      * See: http://technet.microsoft.com/en-us/library/ff934619.aspx
                      * 
                      * Something like:
