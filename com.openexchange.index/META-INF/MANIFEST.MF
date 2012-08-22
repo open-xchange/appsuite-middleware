@@ -11,11 +11,13 @@ Import-Package: com.openexchange.config,
  com.openexchange.file.storage,
  com.openexchange.i18n,
  com.openexchange.mail,
+ com.openexchange.mail.dataobjects,
  com.openexchange.osgi,
  com.openexchange.server,
  com.openexchange.session,
  org.apache.commons.logging,
  org.osgi.framework
 Export-Package: com.openexchange.index,
+ com.openexchange.index.attachments,
  com.openexchange.index.filestore,
  com.openexchange.index.mail

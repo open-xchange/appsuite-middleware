@@ -47,48 +47,43 @@
  *
  */
 
-package com.openexchange.index.solr.internal.filestore;
+package com.openexchange.soap.cxf;
 
-import java.util.Map;
-import com.openexchange.file.storage.File;
-import com.openexchange.index.IndexDocument;
-import com.openexchange.index.solr.filestore.SolrFilestoreConstants;
-
-
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamReader;
 
 /**
- * {@link FileUUID}
+ * {@link ParsingEvent} - Simple container for a parsing event when traversing an {@link XMLStreamReader}.
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class FileUUID {
-    
-    private final String fileUUID;
-    
-    
-    public FileUUID(int contextId, int userId, String service, String accountId, String folderId, String fileId) {
-        super();
-        StringBuilder tmp = new StringBuilder(64);
-        tmp.append(contextId).append('/').append(userId).append('/').append(service).append('/').append(accountId).append('/').append(folderId).append('/').append(fileId);
-        fileUUID = tmp.toString();
+public final class ParsingEvent {
+
+    private final int event;
+    private final QName name;
+    private final String value;
+
+    public ParsingEvent(final int event, final QName name, final String value) {
+        this.event = event;
+        this.name = name;
+        this.value = value;
     }
-    
+
     @Override
     public String toString() {
-        return fileUUID;
+        return new StringBuilder().append("Event(").append(event).append(", ").append(name).append(", ").append(value).append(")").toString();
     }
-    
-    public static FileUUID newUUID(int contextId, int userId, IndexDocument<File> document) {
-        File file = document.getObject();
-        Map<String, Object> properties = document.getProperties();
-        String service = (String) properties.get(SolrFilestoreConstants.SERVICE);
-        String accountId = (String) properties.get(SolrFilestoreConstants.ACCOUNT);
-        
-        return newUUID(contextId, userId, service, accountId, file.getFolderId(), file.getId());
+
+    protected int getEvent() {
+        return event;
     }
-    
-    public static FileUUID newUUID(int contextId, int userId, String service, String accountId, String folderId, String fileId) {
-        return new FileUUID(contextId, userId, service, accountId, folderId, fileId);
+
+    protected QName getName() {
+        return name;
+    }
+
+    protected String getValue() {
+        return value;
     }
 
 }

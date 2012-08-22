@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.smal.impl.index;
 
-import static com.openexchange.index.solr.mail.SolrMailUtility.releaseAccess;
+import static com.openexchange.index.mail.MailUtility.releaseAccess;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -61,15 +61,13 @@ import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.index.IndexAccess;
-import com.openexchange.index.IndexDocument;
-import com.openexchange.index.IndexDocument.Type;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.SearchHandler;
 import com.openexchange.index.StandardIndexDocument;
 import com.openexchange.index.mail.MailIndexField;
-import com.openexchange.index.solr.mail.MailUUID;
+import com.openexchange.index.mail.MailUUID;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailSortField;
@@ -151,7 +149,6 @@ public final class IndexAccessAdapter {
                 params.put("accountId", accountId);
                 final QueryParameters query = new QueryParameters.Builder(params)
                 .setHandler(SearchHandler.ALL_REQUEST)
-                .setType(Type.MAIL)
                 .setFolders(Collections.singleton(fullName)).build();
                 
                 indexAccess.deleteByQuery(query);
@@ -174,7 +171,7 @@ public final class IndexAccessAdapter {
         final Map<String, Object> params = new HashMap<String, Object>();
         params.put("accountId", accountId);
         final QueryParameters qp =
-            new QueryParameters.Builder(params).setLength(1).setOffset(0).setType(IndexDocument.Type.MAIL).setHandler(
+            new QueryParameters.Builder(params).setLength(1).setOffset(0).setHandler(
                 SearchHandler.ALL_REQUEST).setFolders(Collections.singleton(fullName)).build();
         final Set<MailIndexField> fields = new HashSet<MailIndexField>(1);
         fields.add(MailIndexField.ID);
@@ -200,7 +197,7 @@ public final class IndexAccessAdapter {
         IndexAccess<MailMessage> indexAccess = null;
         try {
             indexAccess = facade.acquireIndexAccess(Types.EMAIL, session);
-            indexAccess.addAttachments(new StandardIndexDocument<MailMessage>(message, IndexDocument.Type.MAIL), true);
+            indexAccess.addAttachments(new StandardIndexDocument<MailMessage>(message), true);
         } finally {
             releaseAccess(facade, indexAccess);
         }
@@ -239,7 +236,7 @@ public final class IndexAccessAdapter {
                 }
             }
             final QueryParameters query =
-                new QueryParameters.Builder(params).setHandler(SearchHandler.ALL_REQUEST).setFolders(Collections.singleton(fullName)).setType(Type.MAIL).build();
+                new QueryParameters.Builder(params).setHandler(SearchHandler.ALL_REQUEST).setFolders(Collections.singleton(fullName)).build();
             final IndexResult<MailMessage> result = indexAccess.query(query, null);
             final List<MailMessage> mails = new ArrayList<MailMessage>();
             mails.addAll(IndexDocumentHelper.messagesFrom(result.getResults()));

@@ -57,7 +57,6 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.index.IndexDocument;
-import com.openexchange.index.IndexDocument.Type;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.StandardIndexDocument;
 import com.openexchange.index.solr.IndexFolderManager;
@@ -94,11 +93,6 @@ public abstract class AbstractMailJob extends StandardIndexingJob {
          */
         ATTACHMENTS;
     }
-
-    /**
-     * The mail index document type.
-     */
-    protected static final Type MAIL = IndexDocument.Type.MAIL;
 
     /**
      * The job's information.
@@ -171,7 +165,7 @@ public abstract class AbstractMailJob extends StandardIndexingJob {
         }
         final List<IndexDocument<MailMessage>> documents = new ArrayList<IndexDocument<MailMessage>>(mails.size());
         for (final MailMessage mail : mails) {
-            documents.add(new StandardIndexDocument<MailMessage>(mail, MAIL));
+            documents.add(new StandardIndexDocument<MailMessage>(mail));
         }
         return documents;
     }

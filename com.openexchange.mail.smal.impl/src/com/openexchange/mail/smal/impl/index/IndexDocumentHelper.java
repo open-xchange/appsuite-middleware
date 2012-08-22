@@ -54,7 +54,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import com.openexchange.index.IndexDocument;
-import com.openexchange.index.IndexDocument.Type;
 import com.openexchange.index.StandardIndexDocument;
 import com.openexchange.mail.dataobjects.MailMessage;
 
@@ -64,11 +63,6 @@ import com.openexchange.mail.dataobjects.MailMessage;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IndexDocumentHelper {
-
-    /**
-     * The <code>IndexDocument</code> mail type.
-     */
-    private static final Type MAIL = Type.MAIL;
 
     /**
      * Initializes a new {@link IndexDocumentHelper}.
@@ -121,7 +115,7 @@ public final class IndexDocumentHelper {
         final List<IndexDocument<MailMessage>> list = new ArrayList<IndexDocument<MailMessage>>(mails.size());
         for (final MailMessage mail : mails) {
             mail.setAccountId(accountId);
-            list.add(new StandardIndexDocument<MailMessage>(mail, MAIL));
+            list.add(new StandardIndexDocument<MailMessage>(mail));
         }
         return list;
     }
@@ -138,7 +132,7 @@ public final class IndexDocumentHelper {
             return null;
         }
         mail.setAccountId(accountId);
-        return new StandardIndexDocument<MailMessage>(mail, MAIL);
+        return new StandardIndexDocument<MailMessage>(mail);
     }
 
 }

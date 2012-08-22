@@ -58,12 +58,11 @@ import junit.framework.TestCase;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
-import com.openexchange.index.IndexDocument.Type;
+import com.openexchange.index.IndexConstants;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.SearchHandler;
 import com.openexchange.index.StandardIndexDocument;
-import com.openexchange.index.solr.filestore.SolrFilestoreConstants;
 import com.openexchange.index.solr.internal.filestore.SolrFilestoreIndexAccess;
 
 
@@ -104,13 +103,13 @@ public class SolrFilestoreIndexAccessTest extends TestCase {
         file.setVersionComment("Version comment...");
         
         Map<String, Object> parameters = new HashMap<String, Object>();
-        parameters.put(SolrFilestoreConstants.SERVICE, "http://infostoreservice.ox");
-        parameters.put(SolrFilestoreConstants.ACCOUNT, "sada689");
-        StandardIndexDocument<File> document = new StandardIndexDocument<File>(file, Type.INFOSTORE_DOCUMENT);
+        parameters.put(IndexConstants.SERVICE, "http://infostoreservice.ox");
+        parameters.put(IndexConstants.ACCOUNT, "sada689");
+        StandardIndexDocument<File> document = new StandardIndexDocument<File>(file);
         document.setProperties(parameters);
         indexAccess.addEnvelopeData(document);
         
-        QueryParameters query = new QueryParameters.Builder(parameters).setHandler(SearchHandler.ALL_REQUEST).setType(Type.INFOSTORE_DOCUMENT).build();
+        QueryParameters query = new QueryParameters.Builder(parameters).setHandler(SearchHandler.ALL_REQUEST).build();
         IndexResult<File> result = indexAccess.query(query, null);
         assertTrue("Wrong result size", result.getNumFound() == 1);
         File reloaded = result.getResults().get(0).getObject();

@@ -55,7 +55,6 @@ import junit.framework.TestCase;
 import com.openexchange.groupware.Types;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexDocument;
-import com.openexchange.index.IndexDocument.Type;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
@@ -98,12 +97,12 @@ public class SolrIndexFacadeTest extends TestCase {
             final IndexFacadeService facade = Services.getService(IndexFacadeService.class);
             final IndexAccess<MailMessage> indexAccess = facade.acquireIndexAccess(Types.EMAIL, 999, 1);
             final MailMessage message = MimeMessageConverter.convertMessage(MAIL);
-            final IndexDocument<MailMessage> document = new StandardIndexDocument<MailMessage>(message, Type.MAIL);
+            final IndexDocument<MailMessage> document = new StandardIndexDocument<MailMessage>(message);
             indexAccess.addContent(document, true);
             final FromTerm fromTerm = new FromTerm("Alice");
             final Map<String, Object> params = new HashMap<String, Object>();
 //            params.put("accountId", 0);
-            final QueryParameters qp = new QueryParameters.Builder(params).setHandler(SearchHandler.CUSTOM).setType(Type.MAIL).setSearchTerm(fromTerm).build();
+            final QueryParameters qp = new QueryParameters.Builder(params).setHandler(SearchHandler.CUSTOM).setSearchTerm(fromTerm).build();
             final IndexResult<MailMessage> result = indexAccess.query(qp, null);
             facade.releaseIndexAccess(indexAccess);
         } catch (final Exception e) {

@@ -199,6 +199,9 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
         }
         callbackUrlBuilder.append('&').append(AccountField.SERVICE_ID.getName()).append('=').append(urlEncode(serviceId));
         callbackUrlBuilder.append('&').append(OAuthConstants.SESSION_PARAM_UUID).append('=').append(uuid);
+        if (request.getParameter("cb") != null) {
+        	callbackUrlBuilder.append("&").append("callback=").append(request.getParameter("cb"));
+        }
         /*
          * Invoke
          */

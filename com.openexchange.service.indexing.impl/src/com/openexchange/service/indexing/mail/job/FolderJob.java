@@ -67,9 +67,9 @@ import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexExceptionCodes;
 import com.openexchange.index.QueryParameters.Builder;
 import com.openexchange.index.SearchHandler;
+import com.openexchange.index.mail.MailUUID;
+import com.openexchange.index.mail.MailUtility;
 import com.openexchange.index.solr.IndexFolderManager;
-import com.openexchange.index.solr.mail.MailUUID;
-import com.openexchange.index.solr.mail.SolrMailUtility;
 import com.openexchange.log.LogFactory;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.api.IMailFolderStorage;
@@ -325,7 +325,7 @@ public final class FolderJob extends AbstractMailJob {
                         deleteDBEntry();
                         final Map<String, Object> params = new HashMap<String, Object>();
                         params.put("accountId", Integer.valueOf(accountId));
-                        final Builder queryBuilder = new Builder(params).setType(MAIL);
+                        final Builder queryBuilder = new Builder(params);
                         indexAccess.deleteByQuery(queryBuilder.setHandler(SearchHandler.ALL_REQUEST).setFolders(Collections.singleton(fullName)).build());
                         return false;
                     }
@@ -548,7 +548,7 @@ public final class FolderJob extends AbstractMailJob {
             /*
              * Specify fields
              */
-            final MailFields fields = SolrMailUtility.getIndexableFields(indexAccess);
+            final MailFields fields = MailUtility.getIndexableFields(indexAccess);
             final List<MailMessage> mails = Arrays.asList(mailAccess.getMessageStorage().getMessages(
                 fullName,
                 ids.toArray(new String[ids.size()]),
@@ -619,7 +619,7 @@ public final class FolderJob extends AbstractMailJob {
             /*
              * Specify fields
              */
-            final MailFields fields = SolrMailUtility.getIndexableFields(indexAccess);
+            final MailFields fields = MailUtility.getIndexableFields(indexAccess);
             final List<MailMessage> mails = Arrays.asList(mailAccess.getMessageStorage().getMessages(
                 fullName,
                 ids.toArray(new String[ids.size()]),

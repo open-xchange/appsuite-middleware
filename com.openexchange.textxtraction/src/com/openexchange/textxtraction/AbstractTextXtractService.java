@@ -67,7 +67,7 @@ import com.openexchange.java.Streams;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AbstractTextXtractService implements DelegateTextXtraction {
+public abstract class AbstractTextXtractService implements TextXtractService {
 
     /**
      * The ISO-8859-1 character set.

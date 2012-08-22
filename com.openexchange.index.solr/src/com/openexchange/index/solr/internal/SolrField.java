@@ -47,22 +47,21 @@
  *
  */
 
-package com.openexchange.index.solr.filestore;
+package com.openexchange.index.solr.internal;
+
+import com.openexchange.index.IndexField;
 
 
 /**
- * {@link SolrFilestoreConstants}
+ * {@link SolrField}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class SolrFilestoreConstants {
+public interface SolrField {
     
-    public static final String ATTACHMENT = "attachment";
+    String solrName();
     
-    public static final String ACCOUNT = "accountId";
-
-    public static final String SERVICE = "service";
+    String parameterName();
     
-    public static final String IDS = "ids";
-
+    IndexField indexField();
 }

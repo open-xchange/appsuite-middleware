@@ -58,8 +58,12 @@ import org.quartz.service.QuartzService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
+import com.openexchange.folderstorage.FolderService;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.log.LogFactory;
+import com.openexchange.login.LoginHandlerService;
+import com.openexchange.login.LoginResult;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mail.smal.SmalAccessService;
 import com.openexchange.management.ManagementService;
@@ -74,6 +78,8 @@ import com.openexchange.service.indexing.impl.IndexingServiceImpl;
 import com.openexchange.service.indexing.impl.IndexingServiceInit;
 import com.openexchange.service.indexing.impl.IndexingServiceMBeanImpl;
 import com.openexchange.service.indexing.impl.Services;
+import com.openexchange.service.indexing.infostore.InfostoreAccountJob;
+import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 
@@ -97,7 +103,7 @@ public final class IndexingServiceActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
             ConfigurationService.class, MQService.class, ThreadPoolService.class, DatabaseService.class, MailService.class,
-            SmalAccessService.class, IndexFacadeService.class, SessiondService.class };
+            SmalAccessService.class, IndexFacadeService.class, SessiondService.class, IDBasedFileAccessFactory.class, FolderService.class };
     }
 
     @Override
@@ -212,6 +218,26 @@ public final class IndexingServiceActivator extends HousekeepingActivator {
              * ------------------- Test ---------------------
              */
             // serviceInit.getSender().sendJobMessage(new EchoIndexJob("Echo..."));
+            registerService(LoginHandlerService.class, new LoginHandlerService() {
+                
+                @Override
+                public void handleLogout(LoginResult logout) throws OXException {
+                    // TODO Auto-generated method stub
+                    
+                }
+                
+                @Override
+                public void handleLogin(LoginResult login) throws OXException {
+                    Session session = login.getSession();
+                    InfostoreAccountJob job = new InfostoreAccountJob(session);
+                    try {
+                        job.performJob();
+                    } catch (InterruptedException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                }
+            });
         } catch (final Exception e) {
             log.error("Error starting bundle: com.openexchange.service.indexing.impl", e);
             throw e;

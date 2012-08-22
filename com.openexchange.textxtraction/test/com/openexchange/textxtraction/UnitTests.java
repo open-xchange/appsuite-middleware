@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,64 +47,22 @@
  *
  */
 
-package com.openexchange.index.solr.mail;
+package com.openexchange.textxtraction;
 
-import java.util.Set;
-import com.openexchange.index.IndexAccess;
-import com.openexchange.index.IndexFacadeService;
-import com.openexchange.index.IndexField;
-import com.openexchange.index.mail.MailIndexField;
-import com.openexchange.mail.MailField;
-import com.openexchange.mail.MailFields;
-import com.openexchange.mail.dataobjects.MailMessage;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
+
 
 /**
- * {@link SolrMailUtility} - Provides utility methods for Solr mail access.
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link UnitTests}
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public final class SolrMailUtility {
-
-    /**
-     * Initializes a new {@link SolrMailUtility}.
-     */
-    private SolrMailUtility() {
-        super();
-    }
-    /**
-     * Gets the indexable fields.
-     * 
-     * @return The indexable fields
-     */
-    public static MailFields getIndexableFields(IndexAccess<MailMessage> indexAccess) {
-        final MailFields fields = new MailFields();
-        final Set<? extends IndexField> indexedFields = indexAccess.getIndexedFields();                
-        for (IndexField field : indexedFields) {
-            if (field instanceof MailIndexField) {
-                MailField mailField = ((MailIndexField) field).getMailField();
-                if (mailField != null && !fields.contains(mailField)) {
-                    fields.add(mailField);
-                }
-            }
-        }
-        
-        return fields;
-    }
-
-    /**
-     * Safely releases specified access using given facade.
-     * 
-     * @param facade The facade
-     * @param indexAccess The access
-     */
-    public static void releaseAccess(final IndexFacadeService facade, final IndexAccess<MailMessage> indexAccess) {
-        if (null != indexAccess) {
-            try {
-                facade.releaseIndexAccess(indexAccess);
-            } catch (final Exception e) {
-                // Ignore
-            }
-        }
-    }
+@RunWith(Suite.class)
+@SuiteClasses({
+    TikaTextXtractServiceTest.class
+})
+public class UnitTests {
 
 }
