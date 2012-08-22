@@ -59,7 +59,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
 /**
- * {@link StackXMLStreamReader}
+ * {@link StackXMLStreamReader} - Keeps track of current element depth and manages a stack of elements.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
