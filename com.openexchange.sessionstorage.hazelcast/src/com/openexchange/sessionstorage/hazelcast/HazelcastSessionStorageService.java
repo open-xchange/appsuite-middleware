@@ -93,6 +93,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
     /**
      * Initializes a new {@link HazelcastSessionStorageService}.
      */
+    @SuppressWarnings("unchecked")
     public HazelcastSessionStorageService(HazelcastSessionStorageConfiguration config) {
         super();
         encryptionKey = config.getEncryptionKey();
@@ -110,6 +111,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
         if (sessions.containsKey(sessionId)) {
             HazelcastStoredSession s = sessions.get(sessionId);
             s.setLastAccess(System.currentTimeMillis());
+            s.setPassword(decrypt(s.getPassword()));
             sessions.replace(sessionId, s);
             return s;
         }
@@ -122,6 +124,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
     public void addSession(Session session) throws OXException {
         try {
             HazelcastStoredSession ss = new HazelcastStoredSession(session);
+            ss.setPassword(crypt(ss.getPassword()));
             sessions.put(session.getSessionID(), ss);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
