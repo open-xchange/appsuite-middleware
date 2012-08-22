@@ -53,8 +53,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Queue;
 import java.util.Stack;
 import javax.xml.XMLConstants;
@@ -69,8 +71,14 @@ import org.apache.cxf.message.Exchange;
 import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.Phase;
 import org.apache.cxf.service.model.BindingOperationInfo;
+import org.apache.cxf.service.model.MessagePartInfo;
+import org.apache.cxf.service.model.OperationInfo;
 import org.apache.cxf.service.model.ServiceModelUtil;
 import org.apache.cxf.staxutils.transform.TransformUtils;
+import org.apache.ws.commons.schema.XmlSchemaAnnotated;
+import org.apache.ws.commons.schema.XmlSchemaComplexType;
+import org.apache.ws.commons.schema.XmlSchemaElement;
+import org.apache.ws.commons.schema.XmlSchemaSequence;
 import com.openexchange.java.Streams;
 
 /**
@@ -153,9 +161,11 @@ public final class RemoveGenericLabelledElementsInterceptor extends TransformInI
         private final List<Integer> attributesIndexes;
         private boolean attributesIndexed;
         private final BindingOperationInfoProvider bindingOperationInfoProvider;
+        private final Map<QName, List<QName>> expectedNames;
 
         protected ReplacingXMLStreamReader(final XMLStreamReader reader, final BindingOperationInfoProvider bindingOperationInfoProvider) {
             super(reader);
+            expectedNames = new HashMap<QName, List<QName>>(4);
             this.bindingOperationInfoProvider = bindingOperationInfoProvider;
             pushedAheadEvents = new Stack<List<ParsingEvent>>();
             pushedBackEvents = new Stack<ParsingEvent>();
@@ -232,14 +242,53 @@ public final class RemoveGenericLabelledElementsInterceptor extends TransformInI
             if (null == qName) {
                 return null;
             }
+            List<QName> names = expectedNames.get(qName);
+            if (null != names) {
+                return names.isEmpty() ? null : names.remove(0);
+            }
             /*
              * See http://svn.apache.org/repos/asf/cxf/trunk/rt/frontend/jaxws/src/test/java/org/apache/cxf/jaxws/ServiceModelUtilsTest.java
              * for usage example.
              */
             final BindingOperationInfo operation = bindingOperationInfoProvider.getOperation(qName);
-            final List<String> names = ServiceModelUtil.getOperationInputPartNames(operation.getOperationInfo());
-            // TODO: Determine expected element from BindingOperationInfo
+            names = getOperationInputPartNames(operation.getOperationInfo());
+            if (names != null) {
+                expectedNames.put(qName, names);
+                return names.isEmpty() ? null : names.remove(0);
+            }
             return null;
+        }
+
+        private static List<QName> getOperationInputPartNames(OperationInfo operation) {
+            List<MessagePartInfo> parts = operation.getInput().getMessageParts();
+            if (parts == null) {
+                return Collections.emptyList();
+            }
+            final int size = parts.size();
+            if (size == 0) {
+                return Collections.emptyList();
+            }
+            List<QName> names = new ArrayList<QName>(size);
+            for (MessagePartInfo part : parts) {
+                XmlSchemaAnnotated schema = part.getXmlSchema();
+
+                if (schema instanceof XmlSchemaElement
+                    && ((XmlSchemaElement)schema).getSchemaType() instanceof XmlSchemaComplexType) {
+                    XmlSchemaElement element = (XmlSchemaElement)schema;
+                    XmlSchemaComplexType cplxType = (XmlSchemaComplexType)element.getSchemaType();
+                    XmlSchemaSequence seq = (XmlSchemaSequence)cplxType.getParticle();
+                    if (seq == null || seq.getItems() == null) {
+                        return names;
+                    }
+                    for (int i = 0; i < seq.getItems().size(); i++) {
+                        XmlSchemaElement elChild = (XmlSchemaElement)seq.getItems().get(i);
+                        names.add(elChild.getQName());
+                    }
+                } else {
+                    names.add(part.getConcreteName());
+                }
+            }
+            return names;
         }
 
         @Override
