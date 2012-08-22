@@ -177,30 +177,33 @@ public final class RemoveGenericLabelledElementsInterceptor extends TransformInI
                 if (isGeneric(theName)) {
                     // {http://soap.admin.openexchange.com}db>
                     QName expected = getExpected();
-                    String prefix = theName.getPrefix();
-                    if (isEmpty(prefix) && isEmpty(theName.getNamespaceURI()) && !isEmpty(expected.getNamespaceURI())) {
-                        // prefix = namespaceContext.getPrefix(expected.getNamespaceURI());
-                        // if (prefix == null) {
-                        // prefix = namespaceContext.findUniquePrefix(expected.getNamespaceURI());
-                        // }
-                        prefix = "";
-                    } else if (prefix.length() > 0 && expected.getNamespaceURI().length() == 0) {
-                        prefix = "";
-                    }
-                    expected = new QName(expected.getNamespaceURI(), expected.getLocalPart(), prefix);
-                    if (isEmptyQName(expected)) {
-                        // skip the current element (deep drop)
-                        final int depth = getDepth();
-                        while (depth != getDepth() || super.next() != XMLStreamConstants.END_ELEMENT) {
-                            // get to the matching end element event
+                    if (null != expected) {
+                        // Appropriate replacement candidate found
+                        String prefix = theName.getPrefix();
+                        if (isEmpty(prefix) && isEmpty(theName.getNamespaceURI()) && !isEmpty(expected.getNamespaceURI())) {
+                            // prefix = namespaceContext.getPrefix(expected.getNamespaceURI());
+                            // if (prefix == null) {
+                            // prefix = namespaceContext.findUniquePrefix(expected.getNamespaceURI());
+                            // }
+                            prefix = "";
+                        } else if (prefix.length() > 0 && expected.getNamespaceURI().length() == 0) {
+                            prefix = "";
                         }
-                        event = next();
-                    } else {
-                        currentEvent = createStartElementEvent(expected);
-                        if (theName.equals(expected)) {
-                            pushedAheadEvents.push(null);
+                        expected = new QName(expected.getNamespaceURI(), expected.getLocalPart(), prefix);
+                        if (isEmptyQName(expected)) {
+                            // skip the current element (deep drop)
+                            final int depth = getDepth();
+                            while (depth != getDepth() || super.next() != XMLStreamConstants.END_ELEMENT) {
+                                // get to the matching end element event
+                            }
+                            event = next();
                         } else {
-                            pushedAheadEvents.push(Collections.singletonList(createEndElementEvent(expected)));
+                            currentEvent = createStartElementEvent(expected);
+                            if (theName.equals(expected)) {
+                                pushedAheadEvents.push(null);
+                            } else {
+                                pushedAheadEvents.push(Collections.singletonList(createEndElementEvent(expected)));
+                            }
                         }
                     }
                 }
