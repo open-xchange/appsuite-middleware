@@ -65,7 +65,11 @@ import javax.xml.stream.XMLStreamReader;
  */
 public class StackXMLStreamReader implements XMLStreamReader {
 
+    /**
+     * The underlying reader instance.
+     */
     protected XMLStreamReader reader;
+
     private int depth;
     private final Queue<QName> elements;
 
