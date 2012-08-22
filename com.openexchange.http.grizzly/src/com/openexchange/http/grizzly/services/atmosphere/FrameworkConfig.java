@@ -57,13 +57,13 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 
 /**
- * {@link AtmosphereConfig} - ConfigBuilder with fluent interface. Use like: <code>
- * AtmosphereConfig.with("Atmosphere Servlet", realtimeContext).and("org.atmosphere.cpr.CometSupport.maxInactiveActivity", "100000").build();
+ * {@link FrameworkConfig} - ConfigBuilder with fluent interface. Use like: <code>
+ * FrameworkConfig.with("Atmosphere Servlet", realtimeContext).and("org.atmosphere.cpr.CometSupport.maxInactiveActivity", "100000").build();
  * </code>
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class AtmosphereConfig {
+public class FrameworkConfig {
 
     private Map<String, String> parameters = null;
 
@@ -71,35 +71,35 @@ public class AtmosphereConfig {
 
     private ServletContext servletContext = null;
 
-    private AtmosphereConfig(String servletName, ServletContext servletContext) {
+    private FrameworkConfig(String servletName, ServletContext servletContext) {
         this.parameters = new HashMap<String, String>();
         this.servletContext = servletContext;
         this.servletName = servletName;
     }
     
     /**
-     * Public constructor to create an empty AtmosphereConfig.
+     * Public constructor to create an empty FrameworkConfig.
      * @param servletName the name of the Atmosphere servlet
      * @param servletContext the context where the servlet is going to be destroyed
-     * @return an empty Atmosphereconfig that can be filled with <code>.and</code>
+     * @return an empty FrameworkConfig that can be filled with <code>.and</code>
      */
-    public static AtmosphereConfig with(String servletName, ServletContext servletContext) {
-        return new AtmosphereConfig(servletName, servletContext);
+    public static FrameworkConfig with(String servletName, ServletContext servletContext) {
+        return new FrameworkConfig(servletName, servletContext);
     }
 
     /**
-     * Add a named parameter and its value to this AtmosphereConfig.
+     * Add a named parameter and its value to this FrameworkConfig.
      * @param name the name of the paramter to add
      * @param value the value of the parameter to add
-     * @return the AtmosphereConfig with name:value pair added
+     * @return the FrameworkConfig with name:value pair added
      */
-    public AtmosphereConfig and(String name, String value) {
+    public FrameworkConfig and(String name, String value) {
         this.parameters.put(name, value);
         return this;
     }
 
     /**
-     * Build a ServletConfig from this AtmosphereConfig that can be used to configure the Atmosphere framework.
+     * Build a ServletConfig from this FrameworkConfig that can be used to configure the Atmosphere framework.
      * @return a ServletConfig that can be used to configure the Atmosphere framework.
      */
     public ServletConfig build() {

@@ -65,6 +65,7 @@ import org.atmosphere.cpr.AtmosphereResourceEvent;
 import org.atmosphere.cpr.AtmosphereResponse;
 import org.atmosphere.cpr.Broadcaster;
 import org.atmosphere.cpr.BroadcasterFactory;
+import org.atmosphere.cpr.BroadcasterLifeCyclePolicy;
 import org.atmosphere.cpr.MetaBroadcaster;
 import org.atmosphere.websocket.WebSocketEventListenerAdapter;
 import org.json.JSONException;
@@ -76,6 +77,7 @@ import com.openexchange.log.LogFactory;
 import com.openexchange.realtime.atmosphere.OXRTHandler;
 import com.openexchange.realtime.atmosphere.StanzaSender;
 import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.Payload;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
@@ -97,7 +99,8 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 
     // TODO: Figure Out JSONP and Long-Polling State management. Hot-Swap the
     // AtmosphereResource.
-    // TODO: Close connections and get rid of em
+    // TODO: Close connections and get rid of em, apache doesn't tell us about client disconnects,
+    // 502 Proxy error, resources are destroyed properly though.
 
     private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(RTAtmosphereHandler.class));
 
@@ -149,33 +152,24 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         if (method.equalsIgnoreCase("GET")) {
             if (request.getHeader("negotiating") == null) {
                 try {
-                    LOG.info("GET Request:");
-                    LOG.info("Broadcasters before Request");
-                    printBroadcasters();
+                    printBroadcasters("Broadcasters before GET Request");
                     // create state {id, session, atmoResource} and track ServerSession -> AtmosphereState
                     ServerSession serverSession = getServerSession(getSessionFromHeader(request), getSessionFromParameters(request));
                     RTAtmosphereState atmosphereState = trackState(resource, serverSession);
-                    /*
-                     * Create new broadcaster for AtmosphereResource (if none already exists) Id will be formed like /context/user/resource
-                     */
+
+                    // Create new broadcaster for AtmosphereResource (if none already exists) Id will be formed like /context/user/resource
                     String broadcasterId = generateBroadcasterId(atmosphereState.id);
                     Broadcaster broadcaster = BroadcasterFactory.getDefault().lookup(broadcasterId, true);
                     broadcaster.addAtmosphereResource(atmosphereState.atmosphereResource);
-                    atmosphereState.atmosphereResource.addEventListener(new AtmosphereResourceCleanupListener(
-                        atmosphereState.atmosphereResource,
-                        broadcaster));
-                    /*
-                     * TODO: configure broadcaster lifetime, listeners, schedule keepalive messages etc.
-                     */
 
                     // keep track of connected users
                     trackConnectedUsers(atmosphereState.id.toGeneralForm().toString(), broadcasterId);
 
                     // finally suspend the resource
                     resource.suspend();
-                    LOG.info("Broadcasters after Request");
-                    printBroadcasters();
+                    printBroadcasters("Broadcasters after GET Request");
                 } catch (OXException e) {
+                    // TODO:ExceptionHandling to connected clients
                     writeExceptionToResource(e, resource);
                     LOG.error(e);
                 }
@@ -183,13 +177,11 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                 response.getWriter().write("OK");
             }
             /*
-             * Use POST request to synchronously send data over the server. First Post should contain handshake information. No need to
-             * track state, as we answer over the previously suspended get request
+             * Use POST request to synchronously send data over the server.No need to track state, as we answer over the previously
+             * suspended get request
              */
         } else if (method.equalsIgnoreCase("POST")) {
-            LOG.info("POST Request:");
-            LOG.info("Broadcasters before Request");
-            printBroadcasters();
+            printBroadcasters("Broadcasters before POST Request");
             String postData = request.getReader().readLine();
             if (postData != null) {
                 try {
@@ -198,7 +190,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                         getSessionFromHeader(request),
                         getSessionFromParameters(request),
                         getSessionFromPostData(postData));
-                    
+
                     RTAtmosphereState atmosphereState = sessionIdToState.get(serverSession.getSessionID());
 
                     if (atmosphereState == null) {
@@ -207,8 +199,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                         throw ex;
                     }
                     handleIncoming(StanzaParser.parse(postData), atmosphereState);
-                    LOG.info("Broadcasters after Request");
-                    printBroadcasters();
+                    printBroadcasters("Broadcasters after POST Request");
                 } catch (IllegalArgumentException illEx) {
                     LOG.error(illEx);
                     writeExceptionToResource(illEx, resource);
@@ -220,7 +211,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         }
     }
 
-    private void printBroadcasters() {
+    private void printBroadcasters(String preString) {
         List<Broadcaster> broadcasters = new ArrayList(BroadcasterFactory.getDefault().lookupAll());
         Collections.sort(broadcasters, new Comparator<Broadcaster>() {
 
@@ -229,9 +220,10 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                 return b1.getID().compareTo(b2.getID());
             }
         });
-        StringBuilder sb  = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("\n--------------------------------------------------------------------------------\n");
-        sb.append("List of Broadcasters:\n");
+        sb.append(preString);
+        sb.append(":\n");
         for (Broadcaster broadcaster : broadcasters) {
             sb.append(broadcaster.getID()).append(":");
             Collection<AtmosphereResource> atmosphereResources = broadcaster.getAtmosphereResources();
@@ -241,7 +233,9 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
             }
         }
         sb.append("--------------------------------------------------------------------------------\n");
-        LOG.info(sb.toString());
+        if(LOG.isDebugEnabled()) {
+            LOG.debug(sb.toString());
+        }
     }
 
     /**
@@ -264,7 +258,6 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
     public void onStateChange(AtmosphereResourceEvent event) throws IOException {
         AtmosphereResource resource = event.getResource();
         AtmosphereResponse response = resource.getResponse();
-        LOG.info("\nonStateChange called\n Resource: " + resource.uuid() + "\nBroadcaster: " + event.broadcaster().getID() + "\nMessage: " + event.getMessage());
         if (event.isSuspended()) {
             response.getWriter().write(event.getMessage().toString());
             switch (resource.transport()) {
@@ -278,8 +271,12 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                 break;
             }
         } else if (!event.isResuming()) {
-            LOG.info("Event wasn't resuming remote connection got closed by proxy or browser.");
-            LOG.info("BroadcasterId: " + event.broadcaster().getID() + "Resource: " + event.getResource().uuid() + "SessionId:" + sessionIdToState);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Event wasn't resuming remote connection got closed by proxy or browser: \n"
+                    + "BroadcasterId: " + event.broadcaster().getID() + "\n"
+                    + "Resource: " + event.getResource().uuid() + "\n"
+                );
+            }
         }
     }
 
@@ -406,8 +403,8 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         /*
          * Broadcast stanza to all entities matching the user@context by using a wildcard for the resource: /user@context/*
          */
-        MetaBroadcaster.getDefault().broadcastTo(contextAndUser+"/*", stanzaAsJSON);
-        //chat: talk to everybody aka "/"
+        MetaBroadcaster.getDefault().broadcastTo(contextAndUser + "/*", stanzaAsJSON);
+        // chat: talk to everybody aka "/"
         //MetaBroadcaster.getDefault().broadcastTo("/", stanzaAsJSON);
     }
 
@@ -500,7 +497,18 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
      * @throws OXException
      */
     private void handleInternally(Stanza stanza, RTAtmosphereState atmosphereState) {
-        LOG.info("Handle internally: " + stanza);
+        // Payload payload = stanza.getPayload();
+        //
+        // // handle close
+        // if (payload != null && "json".equals(payload.getFormat())) {
+        // JSONObject json = (JSONObject) payload.getData();
+        // if ("close".equals(json.opt("step"))) {
+        // LOG.info("resuming resource: " + atmosphereState.atmosphereResource.uuid());
+        // printBroadcasters();
+        // atmosphereState.atmosphereResource.getRequest().destroy();
+        // printBroadcasters();
+        // }
+        // }
     }
 
     /**
