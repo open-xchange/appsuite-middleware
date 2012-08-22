@@ -64,7 +64,6 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import org.apache.cxf.interceptor.transform.TransformInInterceptor;
 import org.apache.cxf.message.Message;
-import org.apache.cxf.staxutils.DepthXMLStreamReader;
 import org.apache.cxf.staxutils.transform.TransformUtils;
 import com.openexchange.java.Streams;
 
@@ -124,7 +123,7 @@ public final class RemoveGenericLabelledElementsInterceptor extends TransformInI
         }
     }
 
-    private static final class ReplacingXMLStreamReader extends DepthXMLStreamReader {
+    private static final class ReplacingXMLStreamReader extends StackXMLStreamReader {
 
         // See org.apache.cxf.staxutils.transform.InTransformReader
 
@@ -427,37 +426,6 @@ public final class RemoveGenericLabelledElementsInterceptor extends TransformInI
             }
             return isWhitespace;
         }
-    }
-
-    private static final class ParsingEvent {
-
-        private final int event;
-        private final QName name;
-        private final String value;
-
-        protected ParsingEvent(final int event, final QName name, final String value) {
-            this.event = event;
-            this.name = name;
-            this.value = value;
-        }
-
-        @Override
-        public String toString() {
-            return new StringBuilder().append("Event(").append(event).append(", ").append(name).append(", ").append(value).append(")").toString();
-        }
-
-        protected int getEvent() {
-            return event;
-        }
-
-        protected QName getName() {
-            return name;
-        }
-
-        protected String getValue() {
-            return value;
-        }
-
     }
 
 }
