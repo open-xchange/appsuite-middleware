@@ -63,6 +63,13 @@ public final class ParsingEvent {
     private final QName name;
     private final String value;
 
+    /**
+     * Initializes a new {@link ParsingEvent}.
+     * 
+     * @param event The event identifier
+     * @param name The name
+     * @param value The value
+     */
     public ParsingEvent(final int event, final QName name, final String value) {
         this.event = event;
         this.name = name;
@@ -74,15 +81,30 @@ public final class ParsingEvent {
         return new StringBuilder().append("Event(").append(event).append(", ").append(name).append(", ").append(value).append(")").toString();
     }
 
-    protected int getEvent() {
+    /**
+     * Gets the event identifier.
+     * 
+     * @return The event identifier
+     */
+    public int getEvent() {
         return event;
     }
 
-    protected QName getName() {
+    /**
+     * Gets the name.
+     * 
+     * @return The name
+     */
+    public QName getName() {
         return name;
     }
 
-    protected String getValue() {
+    /**
+     * Gets the value
+     * 
+     * @return The value
+     */
+    public String getValue() {
         return value;
     }
 
