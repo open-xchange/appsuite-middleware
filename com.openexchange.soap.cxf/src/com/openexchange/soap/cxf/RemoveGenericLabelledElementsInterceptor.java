@@ -232,7 +232,12 @@ public final class RemoveGenericLabelledElementsInterceptor extends TransformInI
             if (null == qName) {
                 return null;
             }
-            BindingOperationInfo operation = bindingOperationInfoProvider.getOperation(qName);
+            /*
+             * See http://svn.apache.org/repos/asf/cxf/trunk/rt/frontend/jaxws/src/test/java/org/apache/cxf/jaxws/ServiceModelUtilsTest.java
+             * for usage example.
+             */
+            final BindingOperationInfo operation = bindingOperationInfoProvider.getOperation(qName);
+            final List<String> names = ServiceModelUtil.getOperationInputPartNames(operation.getOperationInfo());
             // TODO: Determine expected element from BindingOperationInfo
             return null;
         }
