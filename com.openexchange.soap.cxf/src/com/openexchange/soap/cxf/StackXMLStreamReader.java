@@ -73,6 +73,11 @@ public class StackXMLStreamReader implements XMLStreamReader {
     private int depth;
     private final Queue<QName> elements;
 
+    /**
+     * Initializes a new {@link StackXMLStreamReader}.
+     * 
+     * @param r The delegate reader
+     */
     public StackXMLStreamReader(final XMLStreamReader r) {
         super();
         this.reader = r;
