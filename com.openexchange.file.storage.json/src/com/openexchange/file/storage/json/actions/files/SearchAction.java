@@ -78,7 +78,6 @@ import com.openexchange.folderstorage.type.FileStorageType;
 import com.openexchange.groupware.Types;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexDocument;
-import com.openexchange.index.IndexDocument.Type;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
@@ -235,7 +234,7 @@ public class SearchAction extends AbstractFileAction {
     }
     
     private QueryParameters buildQuery(String searchTerm, Field sortingField, Set<String> folders, SortDirection sortingOrder, int start, int end) {
-        Builder queryBuilder = new QueryParameters.Builder(searchTerm).setType(Type.INFOSTORE_DOCUMENT).setHandler(
+        Builder queryBuilder = new QueryParameters.Builder(searchTerm).setHandler(
             SearchHandler.SIMPLE).setFolders(folders);
 
         if (sortingField != null) {

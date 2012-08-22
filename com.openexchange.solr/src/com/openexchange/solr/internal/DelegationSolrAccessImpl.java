@@ -49,31 +49,34 @@
 
 package com.openexchange.solr.internal;
 
-import java.io.Serializable;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.FutureTask;
 import org.apache.commons.logging.Log;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.SolrParams;
+import com.hazelcast.core.DistributedTask;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.IMap;
+import com.hazelcast.core.Member;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.LogFactory;
-import com.openexchange.service.messaging.Message;
-import com.openexchange.service.messaging.MessagingService;
 import com.openexchange.solr.SolrAccessService;
-import com.openexchange.solr.SolrCore;
 import com.openexchange.solr.SolrCoreIdentifier;
 import com.openexchange.solr.SolrExceptionCodes;
 import com.openexchange.solr.SolrProperties;
+import com.openexchange.solr.osgi.SolrActivator;
 import com.openexchange.solr.rmi.RMISolrAccessService;
 
 /**
@@ -83,17 +86,16 @@ import com.openexchange.solr.rmi.RMISolrAccessService;
  */
 public class DelegationSolrAccessImpl implements SolrAccessService {
     
+    public static final String SOLR_CORE_MAP = "solrCoreMap";
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DelegationSolrAccessImpl.class));
 
     private final EmbeddedSolrAccessImpl embeddedAccess;
-
-    private final SolrIndexMysql indexMysql;
         
 
     public DelegationSolrAccessImpl(EmbeddedSolrAccessImpl localDelegate) {
         super();
         embeddedAccess = localDelegate;
-        indexMysql = SolrIndexMysql.getInstance();
     }
 
     /**
@@ -303,80 +305,118 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
     
 	@Override
 	public void freeResources(SolrCoreIdentifier identifier) {
-		embeddedAccess.freeResources(identifier);		
+	    if (embeddedAccess.hasActiveCore(identifier)) {
+	        HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
+	        IMap<String, Integer> solrNodes = hazelcast.getMap(SolrActivator.SOLR_NODE_MAP);
+	        String localUuid = hazelcast.getCluster().getLocalMember().getUuid();
+	        solrNodes.lock(localUuid);
+	        try {
+	            Integer integer = solrNodes.get(localUuid);
+	            solrNodes.put(localUuid, new Integer(integer.intValue() - 1));
+	        } finally {
+	            solrNodes.unlock(localUuid);
+	        }
+	        
+	        embeddedAccess.freeResources(identifier);   
+	    }	    	
 	}
+	
+	public void shutDown() throws OXException {
+	    HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
+	    Collection<String> activeCores = embeddedAccess.getActiveCores();
+	    IMap<String, Integer> solrNodes = hazelcast.getMap(SolrActivator.SOLR_NODE_MAP);
+        String localUuid = hazelcast.getCluster().getLocalMember().getUuid();
+        solrNodes.put(localUuid, new Integer(0));
+        
+	    for (String coreName : activeCores) {
+	        IMap<String, String> solrCores = hazelcast.getMap(SOLR_CORE_MAP);
+	        solrCores.removeAsync(coreName);	        
+	    }
+	    
+        embeddedAccess.shutDown();        
+    }
 	
 	public EmbeddedSolrAccessImpl getEmbeddedServerAccess() {
 	    return embeddedAccess;
 	}
-    
-    private SolrAccessService getDelegate(SolrCoreIdentifier identifier) throws OXException {
-    	if (identifier == null) {
-    		throw new IllegalArgumentException("Parameter `identifier` must not be null!");
-    	}
-    	
-    	ConfigurationService config = Services.getService(ConfigurationService.class);
-		boolean isSolrNode = config.getBoolProperty(SolrProperties.IS_NODE, false);
-		if (isSolrNode) {
-			/*
-			 * Three possibilities here:
-			 * 1. The core is already started within our node
-			 * 	  => use embedded solr instance
-			 * 
-			 * 2. The core is not started yet
-			 *    => start it up locally and return embedded solr instance
-			 *    
-			 * 3. The core is started on another node
-			 *    => connect via RMI and return remote solr instance
-			 */
-			if (embeddedAccess.hasActiveCore(identifier) || embeddedAccess.startCore(identifier)) {
-			    if (LOG.isDebugEnabled()) {
-			        LOG.debug("Returning local solr access.");
-			    }
-			    
-	            return embeddedAccess;
-	        }
-			
-			int contextId = identifier.getContextId();
-	        int userId = identifier.getUserId();
-	        int module = identifier.getModule();			
-			SolrCore solrCore = indexMysql.getSolrCore(contextId, userId, module);			
-			if (solrCore.isActive()) {
-				return getRMIAccess(solrCore.getServer());
-			}
-			
-	        throw SolrExceptionCodes.DELEGATION_ERROR.create();	
-		} else {
-			/*
-			 * Two possibilities here:
-			 * 1. The core is already started on another node.
-			 *    => connect via RMI and return remote solr instance
-			 * 
-			 * 2. The core is not started yet.
-			 *    => Delegate core start up to solr nodes. And then?
-			 */
-			int contextId = identifier.getContextId();
-	        int userId = identifier.getUserId();
-	        int module = identifier.getModule();
-			SolrCore solrCore = indexMysql.getSolrCore(contextId, userId, module);
-			if (solrCore.isActive()) {
-				return getRMIAccess(solrCore.getServer());
-			}			
-			
-			MessagingService msgService = Services.getService(MessagingService.class);
-        	Map<String, Serializable> properties = new HashMap<String, Serializable>();
-        	properties.put(MessagingConstants.PROP_IDENTIFIER, identifier);
-        	Message msg = new Message(MessagingConstants.START_CORE_TOPIC, properties);
-        	msgService.postMessage(msg);
-        	if (LOG.isDebugEnabled()) {
-                LOG.debug("Requested a remote solr core startup for core " + identifier.toString() + ".");
+	
+	private SolrAccessService getDelegate(SolrCoreIdentifier identifier) throws OXException {
+	    if (identifier == null) {
+            throw new IllegalArgumentException("Parameter `identifier` must not be null!");
+        }
+	    
+	    ConfigurationService config = Services.getService(ConfigurationService.class);
+        boolean isSolrNode = config.getBoolProperty(SolrProperties.IS_NODE, false);
+        if (isSolrNode && embeddedAccess.hasActiveCore(identifier)) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Returning local solr access.");
             }
+            
+            return embeddedAccess;
+        }
+        
+        HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
+        IMap<String, String> solrCores = hazelcast.getMap(SOLR_CORE_MAP);
+        String owner = solrCores.get(identifier.toString());
+        if (owner == null) {
+            if (isSolrNode) {
+                try {
+                    StartCoreCallable startCoreCallable = new StartCoreCallable(identifier);
+                    owner = startCoreCallable.call();
+                    if (startCoreCallable.startedCore()) {
+                        return embeddedAccess;
+                    }
+                } catch (Exception e) {
+                    throw SolrExceptionCodes.DELEGATION_ERROR.create(e);
+                }
+            } else {
+                IMap<String, Integer> solrNodes = hazelcast.getMap(SolrActivator.SOLR_NODE_MAP);
+                String lowestMember = null;
+                Integer lowestCount = null;
+                for (String memberUuid : solrNodes.keySet()) {
+                    if (memberUuid.equals(hazelcast.getCluster().getLocalMember().getUuid())) {
+                        continue;
+                    }
+                    
+                    Integer coreCount = solrNodes.get(memberUuid);
+                    if (lowestCount == null || coreCount < lowestCount) {
+                        lowestCount = coreCount;
+                        lowestMember = memberUuid;
+                    }
+                }
+                
+                Member elected = null;
+                if (lowestMember != null) {
+                    Set<Member> members = hazelcast.getCluster().getMembers();
+                    for (Member member : members) {
+                        if (member.getUuid().equals(lowestMember)) {
+                            elected = member;
+                            break;
+                        }
+                    }
+                    
+                    if (elected == null) {
+                        throw SolrExceptionCodes.DELEGATION_ERROR.create(); 
+                    }
+                    
+                    FutureTask<String> task = new DistributedTask<String>(new StartCoreCallable(identifier), elected);
+                    ExecutorService executorService = hazelcast.getExecutorService();
+                    executorService.execute(task);
+                    try {
+                        owner = task.get();
+                    } catch (InterruptedException e) {
+                        throw SolrExceptionCodes.DELEGATION_ERROR.create(e);
+                    } catch (ExecutionException e) {
+                        throw SolrExceptionCodes.DELEGATION_ERROR.create(e);
+                    }
+                }
+                
+                throw SolrExceptionCodes.DELEGATION_ERROR.create(); 
+            }
+        }
 
-        	// FIXME: Try to sleep and reconnect here?
-        	throw SolrExceptionCodes.CORE_NOT_STARTED.create(identifier.toString());
-		}   
-    }
-    
+        return getRMIAccess(owner);
+	}    
     
     private static ConcurrentMap<String, RMISolrAccessService> rmiCache = new ConcurrentHashMap<String, RMISolrAccessService>();
     

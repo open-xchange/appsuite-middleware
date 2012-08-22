@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.index.solr.internal.filestore;
+package com.openexchange.index.solr.groupware;
 
 import java.io.InputStream;
 import org.apache.commons.logging.Log;
@@ -62,10 +62,12 @@ import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.groupware.Types;
 import com.openexchange.index.IndexAccess;
-import com.openexchange.index.IndexDocument.Type;
+import com.openexchange.index.IndexConstants;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.StandardIndexDocument;
-import com.openexchange.index.solr.filestore.SolrFilestoreConstants;
+import com.openexchange.index.attachments.Attachment;
+import com.openexchange.index.attachments.AttachmentUUID;
+import com.openexchange.index.filestore.FileUUID;
 import com.openexchange.index.solr.internal.Services;
 import com.openexchange.session.Session;
 
@@ -88,23 +90,25 @@ public class SolrFilestoreEventHandler implements EventHandler {
                 IDBasedFileAccessFactory accessFactory = Services.getService(IDBasedFileAccessFactory.class);
                 IndexFacadeService indexService = Services.getService(IndexFacadeService.class);                    
                 IDBasedFileAccess access = accessFactory.createAccess(session);
-                IndexAccess<File> indexAccess = indexService.acquireIndexAccess(Types.INFOSTORE, session);  
+                IndexAccess<File> filestoreIndexAccess = indexService.acquireIndexAccess(Types.INFOSTORE, session);
+                IndexAccess<Attachment> attachmentIndexAccess = indexService.acquireIndexAccess(Types.ATTACHMENT, session);
                 String service = FileStorageEventHelper.extractService(event);
                 String accountId = FileStorageEventHelper.extractAccountId(event);                    
                 String id = FileStorageEventHelper.extractObjectId(event);
                 if (FileStorageEventHelper.isCreateEvent(event)) {
-                    indexFile(access, indexAccess, session, id, service, accountId);
+                    indexFile(access, filestoreIndexAccess, attachmentIndexAccess, session, id, service, accountId);
                 } else if (FileStorageEventHelper.isUpdateEvent(event)) {
                     // Just reindex
-                    indexFile(access, indexAccess, session, id, service, accountId);
+                    indexFile(access, filestoreIndexAccess, attachmentIndexAccess, session, id, service, accountId);
                 } else if (FileStorageEventHelper.isDeleteEvent(event)) {
                     String folderId = FileStorageEventHelper.extractFolderId(event);
-                    FileUUID uuid = FileUUID.newUUID(session.getContextId(), session.getUserId(), service, accountId, folderId, id);
-                    indexAccess.deleteById(uuid.toString());     
+                    FileUUID uuid = FileUUID.newUUID(service, accountId, folderId, id);
+                    filestoreIndexAccess.deleteById(uuid.toString()); 
+                    attachmentIndexAccess.deleteById(AttachmentUUID.newUUID(Types.INFOSTORE, service, accountId, folderId, id, IndexConstants.DEFAULT_ATTACHMENT).toString());
                     if (access.exists(id, FileStorageFileAccess.CURRENT_VERSION)) {
                         // One or more versions have been deleted. 
                         // We have to reindex the current one.                                           
-                        indexFile(access, indexAccess, session, id, service, accountId);
+                        indexFile(access, filestoreIndexAccess, attachmentIndexAccess, session, id, service, accountId);
                     }
                 }
             } catch (OXException e) {
@@ -115,17 +119,29 @@ public class SolrFilestoreEventHandler implements EventHandler {
         }        
     }
     
-    private void indexFile(IDBasedFileAccess access, IndexAccess<File> indexAccess, Session session, String id, String service, String accountId) throws OXException {        
+    private void indexFile(IDBasedFileAccess access, IndexAccess<File> filestoreIndexAccess, IndexAccess<Attachment> attachmentIndexAccess, Session session, String id, String service, String accountId) throws OXException {        
         File fileMetadata = access.getFileMetadata(id, FileStorageFileAccess.CURRENT_VERSION);
-        StandardIndexDocument<File> document = new StandardIndexDocument<File>(fileMetadata, Type.INFOSTORE_DOCUMENT);
-        document.addProperty(SolrFilestoreConstants.SERVICE, service);
-        document.addProperty(SolrFilestoreConstants.ACCOUNT, accountId);       
+        StandardIndexDocument<File> document = new StandardIndexDocument<File>(fileMetadata);
+        document.addProperty(IndexConstants.SERVICE, service);
+        document.addProperty(IndexConstants.ACCOUNT, accountId);    
+        filestoreIndexAccess.addContent(document, true);
+        
         if (hasAttachment(fileMetadata)) {
-            InputStream is = access.getDocument(id, FileStorageFileAccess.CURRENT_VERSION);                                            
-            document.addProperty(SolrFilestoreConstants.ATTACHMENT, is);                        
-            indexAccess.addAttachments(document, true);
-        } else {
-            indexAccess.addContent(document, true);
+            InputStream is = access.getDocument(id, FileStorageFileAccess.CURRENT_VERSION);
+            Attachment attachment = new Attachment();
+            attachment.setModule(Types.INFOSTORE);
+            attachment.setService(service);
+            attachment.setAccount(accountId);
+            attachment.setFolder(fileMetadata.getFolderId());
+            attachment.setObjectId(id);
+            attachment.setAttachmentId(IndexConstants.DEFAULT_ATTACHMENT);
+            attachment.setFileName(fileMetadata.getFileName());
+            attachment.setFileSize(fileMetadata.getFileSize());
+            attachment.setMimeType(fileMetadata.getFileMIMEType());
+            attachment.setMd5Sum(fileMetadata.getFileMD5Sum());
+            attachment.setContent(is);
+                  
+            attachmentIndexAccess.addContent(new StandardIndexDocument<Attachment>(attachment), true);
         }
     }
     

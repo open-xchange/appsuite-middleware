@@ -135,7 +135,6 @@ public class MailSearchHandler implements SearchHandler {
                     QueryParameters.Builder builder = new QueryParameters.Builder(params)
                                                                 .setOffset(range[0])
                                                                 .setLength(range[1] - range[0])
-                                                                .setType(IndexDocument.Type.MAIL)
                                                                 .setSortField(MailIndexField.RECEIVED_DATE)
                                                                 .setOrder(Order.DESC);                    
                     String fullName = query.getFullName();

@@ -53,7 +53,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexAccess;
-import com.openexchange.index.solr.mail.MailUUID;
+import com.openexchange.index.mail.MailUUID;
 import com.openexchange.log.LogFactory;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.service.indexing.mail.MailJobInfo;

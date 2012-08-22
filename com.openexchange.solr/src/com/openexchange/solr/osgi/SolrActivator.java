@@ -12,16 +12,13 @@ import java.rmi.registry.Registry;
 import java.rmi.server.RMIServerSocketFactory;
 import java.rmi.server.RMISocketFactory;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.Dictionary;
-import java.util.Hashtable;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventConstants;
-import org.osgi.service.event.EventHandler;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.IMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
@@ -36,7 +33,6 @@ import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.service.messaging.MessagingService;
 import com.openexchange.solr.SolrAccessService;
 import com.openexchange.solr.SolrCoreConfigService;
-import com.openexchange.solr.SolrCoreIdentifier;
 import com.openexchange.solr.SolrMBean;
 import com.openexchange.solr.SolrProperties;
 import com.openexchange.solr.groupware.SolrCoreLoginHandler;
@@ -44,7 +40,6 @@ import com.openexchange.solr.groupware.SolrCoresCreateTableService;
 import com.openexchange.solr.groupware.SolrCoresCreateTableTask;
 import com.openexchange.solr.internal.DelegationSolrAccessImpl;
 import com.openexchange.solr.internal.EmbeddedSolrAccessImpl;
-import com.openexchange.solr.internal.MessagingConstants;
 import com.openexchange.solr.internal.RMISolrAccessImpl;
 import com.openexchange.solr.internal.Services;
 import com.openexchange.solr.internal.SolrCoreConfigServiceImpl;
@@ -59,7 +54,9 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public class SolrActivator extends HousekeepingActivator {
 
-	static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SolrActivator.class));
+    public static final String SOLR_NODE_MAP = "solrNodeMap";
+
+    static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SolrActivator.class));
 	
 	private volatile DelegationSolrAccessImpl delegationAccess;
 
@@ -71,7 +68,7 @@ public class SolrActivator extends HousekeepingActivator {
 
 	@Override
 	protected Class<?>[] getNeededServices() {
-		return new Class<?>[] { ConfigurationService.class, DatabaseService.class, MessagingService.class, ThreadPoolService.class };
+		return new Class<?>[] { ConfigurationService.class, DatabaseService.class, MessagingService.class, ThreadPoolService.class, HazelcastInstance.class };
 	}
 
 	@Override
@@ -82,6 +79,7 @@ public class SolrActivator extends HousekeepingActivator {
 		embeddedAccess.startUp();
 		DelegationSolrAccessImpl accessService = this.delegationAccess = new DelegationSolrAccessImpl(embeddedAccess);
 		registerService(SolrAccessService.class, accessService);
+		addService(SolrAccessService.class, accessService);
 		SolrCoreConfigServiceImpl coreService = new SolrCoreConfigServiceImpl();
 		registerService(SolrCoreConfigService.class, coreService);
 		addService(SolrCoreConfigService.class, coreService);
@@ -92,8 +90,16 @@ public class SolrActivator extends HousekeepingActivator {
 		registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new SolrCoresCreateTableTask(createTableService)));
 		// new SolrCoreStoresCreateTableTask()
 		registerService(LoginHandlerService.class, new SolrCoreLoginHandler(embeddedAccess));
-		registerEventHandler();
 		registerMBean(coreService);		
+		HazelcastInstance hazelcast = getService(HazelcastInstance.class);
+		
+		ConfigurationService config = getService(ConfigurationService.class);
+        boolean isSolrNode = config.getBoolProperty(SolrProperties.IS_NODE, false);
+        if (isSolrNode) {
+            IMap<String, Integer> solrNodes = hazelcast.getMap(SOLR_NODE_MAP);
+            String memberUuid = hazelcast.getCluster().getLocalMember().getUuid();
+            solrNodes.put(memberUuid, new Integer(0));
+        }
 		openTrackers();
 	}
 
@@ -107,9 +113,10 @@ public class SolrActivator extends HousekeepingActivator {
 		    managementService.unregisterMBean(solrMBeanName);
 		    solrMBean = null;
 		}
-		EmbeddedSolrAccessImpl embeddedAccess = this.delegationAccess.getEmbeddedServerAccess();
-		if (embeddedAccess != null) {
-			embeddedAccess.shutDown();
+
+		DelegationSolrAccessImpl delegationAccess = this.delegationAccess;
+		if (delegationAccess != null) {
+		    delegationAccess.shutDown();
 			this.delegationAccess = null;
 		}
 	}
@@ -144,34 +151,6 @@ public class SolrActivator extends HousekeepingActivator {
         } catch (NotCompliantMBeanException e) {
             LOG.error(e.getMessage(), e);
         }
-	}
-	
-	private void registerEventHandler() {
-	    Dictionary<String, Object> ht = new Hashtable<String, Object>();
-        ht.put(EventConstants.EVENT_TOPIC, new String[] { MessagingConstants.START_CORE_TOPIC });
-        final EmbeddedSolrAccessImpl embeddedAccess = this.delegationAccess.getEmbeddedServerAccess();
-        EventHandler startCoreEventHandler = new EventHandler() {         
-            @Override
-            public void handleEvent(Event event) {
-                String topic = event.getTopic();
-                if (topic.equals(MessagingConstants.START_CORE_TOPIC)) {
-                    Object property = event.getProperty(MessagingConstants.PROP_IDENTIFIER);
-                    if (property != null && property instanceof SolrCoreIdentifier) {
-                        SolrCoreIdentifier identifier = (SolrCoreIdentifier) property;
-                        try {
-                            ConfigurationService config = Services.getService(ConfigurationService.class);
-                            boolean isSolrNode = config.getBoolProperty(SolrProperties.IS_NODE, false);
-                            if (isSolrNode && !embeddedAccess.hasActiveCore(identifier)) {
-                                embeddedAccess.startCore(identifier);
-                            }
-                        } catch (OXException e) {
-                            LOG.error("Could not start solr core.", e);
-                        }                       
-                    }
-                }               
-            }
-        };      
-        registerService(EventHandler.class, startCoreEventHandler);
 	}
 
 	private void registerRMIInterface() {

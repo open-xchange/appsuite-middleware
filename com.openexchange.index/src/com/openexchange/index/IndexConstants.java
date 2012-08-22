@@ -47,44 +47,24 @@
  *
  */
 
-package com.openexchange.index.solr.mail;
+package com.openexchange.index;
 
-import com.openexchange.mail.MailPath;
 
 /**
- * {@link MailUUID} - Represents a mail's UUID in index storage.
+ * {@link IndexConstants}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MailUUID {
+public class IndexConstants {
+    
+    public static final String ACCOUNT = "account";
 
-    private final String mailUUID;
-
-    /**
-     * Initializes a new {@link MailUUID}.
-     *
-     * @param contextId The context identifier
-     * @param userId The user identifier
-     * @param accountId The account identifier
-     * @param fullName The folder full name
-     * @param mailId The mail identifier
-     */
-    public MailUUID(final int contextId, final int userId, final int accountId, final String fullName, final String mailId) {
-        super();
-        final StringBuilder tmp = new StringBuilder(64);
-        tmp.append(contextId).append(MailPath.SEPERATOR).append(userId).append(MailPath.SEPERATOR);
-        tmp.append(MailPath.getMailPath(accountId, fullName, mailId));
-        mailUUID = tmp.toString();
-    }
-
-    public String getUUID() {
-        return mailUUID;
-    }
-
-    @Override
-    public String toString() {
-        return mailUUID;
-    }
+    public static final String SERVICE = "service";
+    
+    public static final String IDS = "ids";
+    
+    public static final String MODULE = "module";
+    
+    public static final int DEFAULT_ATTACHMENT = 1;
 
 }

@@ -49,7 +49,6 @@
 
 package com.openexchange.index.solr.internal.filestore;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.EnumSet;
@@ -57,13 +56,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.index.filestore.FilestoreIndexField;
+import com.openexchange.index.solr.internal.SolrField;
 
 /**
  * {@link SolrFilestoreField}
  * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public enum SolrFilestoreField {
+public enum SolrFilestoreField implements SolrField {
 
     UUID("uuid", FilestoreIndexField.UUID, "param1"),
     ACCOUNT("account", FilestoreIndexField.ACCOUNT, "param2"),
@@ -99,15 +99,15 @@ public enum SolrFilestoreField {
     
     private static final Map<FilestoreIndexField, SolrFilestoreField> fieldMapping = new EnumMap<FilestoreIndexField, SolrFilestoreField>(FilestoreIndexField.class);
     
-    private static final Set<SolrFilestoreField> indexedFields = EnumSet.noneOf(SolrFilestoreField.class);
+    private static final Set<FilestoreIndexField> indexedFields = EnumSet.noneOf(FilestoreIndexField.class);
     
     static {
         for (SolrFilestoreField field : values()) {
             String name = field.solrName();
             if (name != null) {
                 solrNameMapping.put(name, field);
-                fieldMapping.put(field.getIndexField(), field);
-                indexedFields.add(field);
+                fieldMapping.put(field.indexField(), field);
+                indexedFields.add(field.indexField());
             }
         }
     }
@@ -120,8 +120,8 @@ public enum SolrFilestoreField {
         return fieldMapping.get(indexField);
     }
     
-    public static Collection<SolrFilestoreField> getIndexedFields() {
-        return Collections.unmodifiableCollection(solrNameMapping.values());
+    public static Set<FilestoreIndexField> getIndexedFields() {        
+        return Collections.unmodifiableSet(indexedFields);
     }
     
     public static String[] solrNamesFor(Set<SolrFilestoreField> solrFields) {
@@ -144,11 +144,11 @@ public enum SolrFilestoreField {
         return solrName;
     }
 
-    public FilestoreIndexField getIndexField() {
+    public FilestoreIndexField indexField() {
         return indexField;
     }
 
-    public String getParameterName() {
+    public String parameterName() {
         return parameterName;
     }
 }

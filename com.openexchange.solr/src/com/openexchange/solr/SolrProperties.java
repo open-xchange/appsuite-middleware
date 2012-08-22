@@ -68,7 +68,11 @@ public class SolrProperties {
     public static final String SCHEMA_FILE_INFOSTORE = "com.openexchange.solr.schemaInfostore";
     
     public static final String CONFIG_FILE_INFOSTORE = "com.openexchange.solr.configInfostore";
-        
+    
+    public static final String SCHEMA_FILE_ATTACHMENTS = "com.openexchange.solr.schemaAttachments";
+    
+    public static final String CONFIG_FILE_ATTACHMENTS = "com.openexchange.solr.configAttachments";   
+       
     public static final String IS_NODE = "com.openexchange.solr.isSolrNode";
     
     public static final String CONFIG_DIR = "com.openexchange.solr.configDir";
@@ -78,5 +82,7 @@ public class SolrProperties {
     public static final String CUSTOM_HANLDER = "com.openexchange.solr.customHandler";
     
     public static final String ALL_HANLDER = "com.openexchange.solr.allHandler";
+
+    public static final String GET_HANDLER = "com.openexchange.solr.getHandler";
    
 }

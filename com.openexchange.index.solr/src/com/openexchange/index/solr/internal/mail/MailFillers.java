@@ -56,7 +56,6 @@ import javax.mail.internet.AddressException;
 import org.apache.solr.common.SolrDocument;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexExceptionCodes;
-import com.openexchange.index.solr.mail.SolrMailField;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.dataobjects.MailMessage;

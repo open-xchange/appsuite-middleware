@@ -49,12 +49,10 @@
 
 package com.openexchange.index.solr.internal.filestore;
 
-import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import org.apache.commons.logging.Log;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import com.openexchange.exception.OXException;
@@ -64,16 +62,15 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileFieldSwitcher;
 import com.openexchange.file.storage.meta.FileFieldGet;
 import com.openexchange.file.storage.meta.FileFieldSet;
+import com.openexchange.index.IndexConstants;
 import com.openexchange.index.IndexDocument;
-import com.openexchange.index.IndexDocument.Type;
 import com.openexchange.index.IndexField;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.StandardIndexDocument;
+import com.openexchange.index.filestore.FileUUID;
 import com.openexchange.index.filestore.FilestoreIndexField;
-import com.openexchange.index.solr.filestore.SolrFilestoreConstants;
-import com.openexchange.index.solr.internal.Services;
+import com.openexchange.index.solr.internal.SolrIndexResult;
 import com.openexchange.index.solr.internal.SolrResultConverter;
-import com.openexchange.textxtraction.TextXtractService;
 
 
 /**
@@ -83,15 +80,12 @@ import com.openexchange.textxtraction.TextXtractService;
  */
 public class SolrFilestoreDocumentConverter implements SolrResultConverter<File> {
     
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(SolrFilestoreDocumentConverter.class);
-    
-    
     public static SolrInputDocument convertStatic(int contextId, int userId, IndexDocument<File> indexDocument) throws OXException {
         File file = indexDocument.getObject();
         SolrInputDocument document = new SolrInputDocument();
         FileFieldSwitcher getter = new FileFieldGet();
         for (SolrFilestoreField field : SolrFilestoreField.values()) {
-            FilestoreIndexField indexField = field.getIndexField();
+            FilestoreIndexField indexField = field.indexField();
             Field fileField = indexField.getFileField();
             if (fileField != null && fileField != Field.CONTENT) {
                 Object value = fileField.doSwitch(getter, file);
@@ -107,23 +101,11 @@ public class SolrFilestoreDocumentConverter implements SolrResultConverter<File>
         
         // Special fields: uuid, account, content
         Map<String, Object> properties = indexDocument.getProperties();
-        String service = (String) properties.get(SolrFilestoreConstants.SERVICE);
-        String accountId = (String) properties.get(SolrFilestoreConstants.ACCOUNT);        
-        document.setField(SolrFilestoreField.UUID.solrName(), FileUUID.newUUID(contextId, userId, indexDocument));
+        String service = (String) properties.get(IndexConstants.SERVICE);
+        String accountId = (String) properties.get(IndexConstants.ACCOUNT);        
+        document.setField(SolrFilestoreField.UUID.solrName(), FileUUID.newUUID(indexDocument));
         document.setField(SolrFilestoreField.SERVICE.solrName(), service);
         document.setField(SolrFilestoreField.ACCOUNT.solrName(), accountId);
-        InputStream fileIs = null;
-        if (properties.containsKey(SolrFilestoreConstants.ATTACHMENT)) {
-            fileIs = (InputStream) properties.get(SolrFilestoreConstants.ATTACHMENT);            
-            // TODO: Move to UpdateProcessor
-            TextXtractService xtractService = Services.getService(TextXtractService.class);
-            try {
-                String extractedText = xtractService.extractFrom(fileIs, file.getFileMIMEType());
-                document.setField(SolrFilestoreField.CONTENT.solrName(), extractedText);
-            } catch (OXException e) {
-                LOG.warn("Could not extract text from attachment. Only the douments metadata will be indexed.", e);
-            }
-        }
         
         return document;
     }
@@ -131,7 +113,7 @@ public class SolrFilestoreDocumentConverter implements SolrResultConverter<File>
     @Override
     public IndexDocument<File> convert(SolrDocument document) throws OXException {
         File converted = convertStatic(document);
-        IndexDocument<File> indexDocument = new StandardIndexDocument<File>(converted, Type.INFOSTORE_DOCUMENT);
+        IndexDocument<File> indexDocument = new StandardIndexDocument<File>(converted);
         
         return indexDocument;
     }
@@ -144,7 +126,7 @@ public class SolrFilestoreDocumentConverter implements SolrResultConverter<File>
             Object value = field.getValue();
             SolrFilestoreField solrField = SolrFilestoreField.getBySolrName(name);
             if (solrField != null && value != null) {
-                FilestoreIndexField indexField = solrField.getIndexField();
+                FilestoreIndexField indexField = solrField.indexField();
                 Field fileField = indexField.getFileField();
                 if (fileField != null) {
                     fileField.doSwitch(setter, file, value);
@@ -157,7 +139,7 @@ public class SolrFilestoreDocumentConverter implements SolrResultConverter<File>
 
     @Override
     public IndexResult<File> createIndexResult(List<IndexDocument<File>> documents, Map<IndexField, Map<String, Long>> facetCounts) throws OXException {
-        return new SolrFilestoreIndexResult(documents.size(), documents, facetCounts);
+        return new SolrIndexResult<File>(documents.size(), documents, facetCounts);
     }
 
 }

@@ -47,53 +47,20 @@
  *
  */
 
-package com.openexchange.index.solr.internal.filestore;
+package com.openexchange.index;
 
-import java.util.List;
 import java.util.Map;
-import com.openexchange.file.storage.File;
-import com.openexchange.index.IndexDocument;
-import com.openexchange.index.IndexField;
-import com.openexchange.index.IndexResult;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 
 /**
- * {@link SolrFilestoreIndexResult}
+ * {@link IndexSearchEngine}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class SolrFilestoreIndexResult implements IndexResult<File> {
-
-    private final int numFound;
+public interface IndexSearchEngine {
     
-    private final List<IndexDocument<File>> results;
-
-    private final Map<IndexField, Map<String, Long>> facetCounts;
-
-    
-    /**
-     * Initializes a new {@link SolrFilestoreIndexResult}.
-     */
-    public SolrFilestoreIndexResult(int numFound, List<IndexDocument<File>> results, Map<IndexField, Map<String, Long>> facetCounts) {
-        super();
-        this.numFound = numFound;
-        this.results = results;
-        this.facetCounts = facetCounts;
-    }
-
-    @Override
-    public int getNumFound() {
-        return numFound;
-    }
-
-    @Override
-    public List<IndexDocument<File>> getResults() {
-        return results;
-    }
-
-    @Override
-    public Map<IndexField, Map<String, Long>> getFacetCounts() {
-        return facetCounts;
-    }
+    Map<Integer, IndexResult<?>> search(Session session, String searchTerm) throws OXException;
 
 }

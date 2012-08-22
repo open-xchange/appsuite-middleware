@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.smal.impl.processor;
 
-import static com.openexchange.index.solr.mail.SolrMailUtility.releaseAccess;
+import static com.openexchange.index.mail.MailUtility.releaseAccess;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;

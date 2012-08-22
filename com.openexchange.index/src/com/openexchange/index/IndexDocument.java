@@ -58,14 +58,6 @@ import java.util.Map;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface IndexDocument<V> {
-
-    /**
-     * The document's type.
-     */
-    public static enum Type {
-        MAIL, CONTACT, APPOINTMENT, TASK, INFOSTORE_DOCUMENT;
-    }
-
     /**
      * Gets the object associated with this index document.
      * 
@@ -74,12 +66,4 @@ public interface IndexDocument<V> {
     public V getObject();
     
     public Map<String, Object> getProperties();
-
-    /**
-     * Gets the document's type.
-     * 
-     * @return The type
-     */
-    Type getType();
-
 }

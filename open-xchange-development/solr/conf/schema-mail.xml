@@ -100,9 +100,12 @@
         <field name="subject" type="text" stored="true" indexed="true" />
         <field name="content_flag" type="boolean" stored="false" indexed="true" />
         <field name="content" type="text" stored="false" indexed="true" />
+        
+        <!-- Attachment fields: file name, mime type, content -->
+        
     </fields>
 
     <uniqueKey>uuid</uniqueKey>
-    <solrQueryParser defaultOperator="AND" />
+    <solrQueryParser defaultOperator="OR" />
     <!-- <defaultSearchField>from_analyzed</defaultSearchField> -->
 </schema>
