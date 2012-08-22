@@ -105,7 +105,7 @@ public class StackXMLStreamReader implements XMLStreamReader {
     /**
      * Gets the current element stack.
      * <p>
-     * <b>Note</b>: Return queue is a <i>copy</i> only. Changes will not be reflected in this reader's collection.
+     * <b>Note</b>: Returned queue is a <i>copy</i>. Changes will not be reflected in this reader's collection.
      * 
      * @return The element stack
      */
