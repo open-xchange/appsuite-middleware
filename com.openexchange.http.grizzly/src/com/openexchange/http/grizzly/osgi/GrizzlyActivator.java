@@ -116,7 +116,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void startBundle() throws OXException, ServletException, NamespaceException {
+    protected void startBundle() throws OXException {
         try {
             if (LOG.isInfoEnabled()) {
                 LOG.info("Starting Grizzly server.");
@@ -187,9 +187,19 @@ public class GrizzlyActivator extends HousekeepingActivator {
             }
 
             if (LOG.isInfoEnabled()) {
-                LOG.info("Enabling BackendRouteAddon for Grizzly server.");
+                LOG.info("Enabling GrizzlOXAddon for Grizzly server.");
             }
             networkListener.registerAddOn(new GrizzlOXAddOn());
+
+            /*
+             * AtmosphereServiceImpl that contains the framework to handle requests dispatched from the atmosphere servlet
+             */
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Registering Atmosphere service for Grizzly server.");
+            }
+            AtmosphereServiceImpl atmosphereServiceImpl = new AtmosphereServiceImpl(grizzly, context.getBundle());
+            registerService(AtmosphereService.class, atmosphereServiceImpl);
+            
             
             if (LOG.isInfoEnabled()) {
                 LOG.info(String.format(
@@ -197,17 +207,6 @@ public class GrizzlyActivator extends HousekeepingActivator {
                     httpHost,
                     Integer.valueOf(httpPort)));
             }
-            
-            
-            
-
-            /*
-             * AtmosphereServiceImpl that contains the framework to handle requests dispatched from the atmosphere servlet
-             */
-            AtmosphereServiceImpl atmosphereServiceImpl = new AtmosphereServiceImpl(grizzly, context.getBundle());
-            registerService(AtmosphereService.class, atmosphereServiceImpl);
-            
-            
             grizzly.addListener(networkListener);
             grizzly.start();
 
@@ -215,14 +214,13 @@ public class GrizzlyActivator extends HousekeepingActivator {
              * Servicefactory that creates instances of the HttpService interface that grizzly implements. Each distinct bundle that uses
              * getService() will get its own instance of HttpServiceImpl
              */
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Registering OSGi HttpService for Grizzly server.");
+            }
             serviceFactory = new HttpServiceFactory(grizzly, context.getBundle());
             registerService(HttpService.class.getName(), serviceFactory);
             
-         
-
-            
-            
-        } catch (final IOException e) {
+        } catch (final Exception e) {
             throw GrizzlyExceptionCode.GRIZZLY_SERVER_NOT_STARTED.create(e, new Object[] {});
         }
 
@@ -237,11 +235,11 @@ public class GrizzlyActivator extends HousekeepingActivator {
         GrizzlyServiceRegistry.getInstance().clearRegistry();
         
         if (LOG.isInfoEnabled()) {
-            LOG.info("Unregistering HttpService");
+            LOG.info("Unregistering services.");
         }
         unregisterServices();
         if (LOG.isInfoEnabled()) {
-            LOG.info("Stopping Grizzly OSGi HttpService");
+            LOG.info("Stopping Grizzly.");
         }
         grizzly.stop();
     }
