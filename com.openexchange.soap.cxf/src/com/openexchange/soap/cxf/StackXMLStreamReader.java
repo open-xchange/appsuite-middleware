@@ -94,6 +94,15 @@ public class StackXMLStreamReader implements XMLStreamReader {
     }
 
     /**
+     * Gets the current element stack reference.
+     * 
+     * @return The element stack
+     */
+    protected Queue<QName> getElementsDirect() {
+        return elements;
+    }
+
+    /**
      * Gets the current element stack.
      * <p>
      * <b>Note</b>: Return queue is a <i>copy</i> only. Changes will not be reflected in this reader's collection.
