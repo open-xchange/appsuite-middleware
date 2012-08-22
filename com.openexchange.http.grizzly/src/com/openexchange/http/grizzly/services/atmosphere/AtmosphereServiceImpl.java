@@ -50,6 +50,10 @@
 package com.openexchange.http.grizzly.services.atmosphere;
 
 import java.io.IOException;
+import java.util.Enumeration;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import org.apache.commons.logging.Log;
 import org.atmosphere.container.Grizzly2CometSupport;
 import org.atmosphere.cpr.AtmosphereFramework;
@@ -80,17 +84,24 @@ public class AtmosphereServiceImpl  implements AtmosphereService {
     private final AtmosphereFramework atmosphereFramework;
     private final String atmosphereServletMapping;
     
-    public AtmosphereServiceImpl(HttpServer grizzly, Bundle bundle) {
+    public AtmosphereServiceImpl(HttpServer grizzly, Bundle bundle) throws ServletException {
         
         ConfigurationService configurationService = GrizzlyServiceRegistry.getInstance().getService(ConfigurationService.class);
         String realtimeContextPath = configurationService.getProperty("com.openexchange.http.realtime.contextPath", "/realtime");
         atmosphereServletMapping = configurationService.getProperty("com.openexchange.http.atmosphere.servletMapping", "/atmosphere/*");
         
+        WebappContext realtimeContext = new WebappContext("Realtime context", realtimeContextPath);
+        
         AtmosphereServlet atmosphereServlet = new AtmosphereServlet(false, false);
         atmosphereFramework = atmosphereServlet.framework();
+        ServletConfig config = AtmosphereConfig.with("Atmosphere Servlet", realtimeContext)
+            .and("org.atmosphere.cpr.maxBroadcasterLifeCyclePolicyIdleTime", "300000")
+            .and("org.atmosphere.cpr.broadcasterLifeCyclePolicy","NEVER")
+            //.and("org.atmosphere.cpr.CometSupport.maxInactiveActivity", "1000")
+            .build();
+        atmosphereFramework.init(config);
         atmosphereFramework.setAsyncSupport(new Grizzly2CometSupport(atmosphereFramework.getAtmosphereConfig()));
         
-        WebappContext realtimeContext = new WebappContext("Realtime context", realtimeContextPath);
         ServletRegistration atmosphereRegistration = realtimeContext.addServlet("AtmosphereServlet", atmosphereServlet);
         atmosphereRegistration.addMapping(atmosphereServletMapping);
         atmosphereRegistration.setLoadOnStartup(0);
