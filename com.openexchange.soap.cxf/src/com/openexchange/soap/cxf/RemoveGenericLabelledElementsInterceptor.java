@@ -62,8 +62,10 @@ import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+import org.apache.cxf.interceptor.StaxInInterceptor;
 import org.apache.cxf.interceptor.transform.TransformInInterceptor;
 import org.apache.cxf.message.Message;
+import org.apache.cxf.phase.Phase;
 import org.apache.cxf.staxutils.transform.TransformUtils;
 import com.openexchange.java.Streams;
 
@@ -78,7 +80,7 @@ public final class RemoveGenericLabelledElementsInterceptor extends TransformInI
      * Initializes a new {@link RemoveGenericLabelledElementsInterceptor}.
      */
     public RemoveGenericLabelledElementsInterceptor() {
-        super();
+        super(Phase.POST_STREAM, Collections.<String> singletonList(StaxInInterceptor.class.getName()));
     }
 
     private static boolean disabled() {
