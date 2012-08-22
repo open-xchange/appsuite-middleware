@@ -55,6 +55,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Queue;
 import java.util.Stack;
 import javax.xml.XMLConstants;
 import javax.xml.namespace.NamespaceContext;
@@ -64,8 +65,11 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import org.apache.cxf.interceptor.StaxInInterceptor;
 import org.apache.cxf.interceptor.transform.TransformInInterceptor;
+import org.apache.cxf.message.Exchange;
 import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.Phase;
+import org.apache.cxf.service.model.BindingOperationInfo;
+import org.apache.cxf.service.model.ServiceModelUtil;
 import org.apache.cxf.staxutils.transform.TransformUtils;
 import com.openexchange.java.Streams;
 
@@ -75,6 +79,11 @@ import com.openexchange.java.Streams;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class RemoveGenericLabelledElementsInterceptor extends TransformInInterceptor {
+
+    private static interface BindingOperationInfoProvider {
+        
+        BindingOperationInfo getOperation(QName opName);
+    }
 
     /**
      * Initializes a new {@link RemoveGenericLabelledElementsInterceptor}.
@@ -104,7 +113,15 @@ public final class RemoveGenericLabelledElementsInterceptor extends TransformInI
             XMLStreamReader reader = message.getContent(XMLStreamReader.class);
             InputStream is = message.getContent(InputStream.class);
             // Create transforming reader
-            final XMLStreamReader transformReader = new ReplacingXMLStreamReader(TransformUtils.createNewReaderIfNeeded(reader, is));
+            final Exchange exchange = message.getExchange();
+            final BindingOperationInfoProvider bindingOperationInfoProvider = new BindingOperationInfoProvider() {
+                
+                @Override
+                public BindingOperationInfo getOperation(final QName opName) {
+                    return ServiceModelUtil.getOperation(exchange, opName);
+                }
+            };
+            final XMLStreamReader transformReader = new ReplacingXMLStreamReader(TransformUtils.createNewReaderIfNeeded(reader, is), bindingOperationInfoProvider);
             if (transformReader != null) {
                 message.setContent(XMLStreamReader.class, transformReader);
                 message.removeContent(InputStream.class);
@@ -132,13 +149,14 @@ public final class RemoveGenericLabelledElementsInterceptor extends TransformInI
         private final Stack<List<ParsingEvent>> pushedAheadEvents;
         private final Stack<ParsingEvent> pushedBackEvents;
         private ParsingEvent currentEvent;
-        private QName lastNonGeneric;
         private final NamespaceContext namespaceContext;
         private final List<Integer> attributesIndexes;
         private boolean attributesIndexed;
+        private final BindingOperationInfoProvider bindingOperationInfoProvider;
 
-        protected ReplacingXMLStreamReader(final XMLStreamReader reader) {
+        protected ReplacingXMLStreamReader(final XMLStreamReader reader, final BindingOperationInfoProvider bindingOperationInfoProvider) {
             super(reader);
+            this.bindingOperationInfoProvider = bindingOperationInfoProvider;
             pushedAheadEvents = new Stack<List<ParsingEvent>>();
             pushedBackEvents = new Stack<ParsingEvent>();
             attributesIndexes = new ArrayList<Integer>();
@@ -158,7 +176,7 @@ public final class RemoveGenericLabelledElementsInterceptor extends TransformInI
                 final QName theName = super.getName();
                 if (isGeneric(theName)) {
                     // {http://soap.admin.openexchange.com}db>
-                    QName expected = getExpected(lastNonGeneric); // new QName("http://soap.admin.openexchange.com", "auth", "");
+                    QName expected = getExpected();
                     String prefix = theName.getPrefix();
                     if (isEmpty(prefix) && isEmpty(theName.getNamespaceURI()) && !isEmpty(expected.getNamespaceURI())) {
                         // prefix = namespaceContext.getPrefix(expected.getNamespaceURI());
@@ -185,12 +203,8 @@ public final class RemoveGenericLabelledElementsInterceptor extends TransformInI
                             pushedAheadEvents.push(Collections.singletonList(createEndElementEvent(expected)));
                         }
                     }
-                } else {
-                    lastNonGeneric = theName;
                 }
             } else if (XMLStreamConstants.END_ELEMENT == event) {
-                final QName theName = super.getName();
-
                 final List<ParsingEvent> pe = pushedAheadEvents.pop();
                 if (null != pe) {
                     pushedBackEvents.addAll(pe);
@@ -200,11 +214,23 @@ public final class RemoveGenericLabelledElementsInterceptor extends TransformInI
             } else {
                 currentEvent = null;
             }
-
             return event;
         }
 
-        private QName getExpected(final QName lastNonGeneric) {
+        private QName getExpected() {
+            if (null == bindingOperationInfoProvider) {
+                return null;
+            }
+            final Queue<QName> elements = getElements();
+            QName qName = elements.poll();
+            while (null != qName && isGeneric(qName)) {
+                qName = elements.poll();
+            }
+            if (null == qName) {
+                return null;
+            }
+            BindingOperationInfo operation = bindingOperationInfoProvider.getOperation(qName);
+            // TODO: Determine expected element from BindingOperationInfo
             return null;
         }
 
