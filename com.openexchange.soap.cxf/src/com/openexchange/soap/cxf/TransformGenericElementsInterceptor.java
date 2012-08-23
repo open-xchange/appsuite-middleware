@@ -52,6 +52,7 @@ package com.openexchange.soap.cxf;
 import java.io.InputStream;
 import javax.xml.stream.XMLStreamReader;
 import org.apache.commons.logging.Log;
+import org.apache.cxf.interceptor.DocLiteralInInterceptor;
 import org.apache.cxf.interceptor.Fault;
 import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
@@ -69,7 +70,7 @@ public class TransformGenericElementsInterceptor extends AbstractPhaseIntercepto
 
     public TransformGenericElementsInterceptor() {
         super(Phase.UNMARSHAL);
-        addBefore("DocLiteralInInterceptor");
+        addBefore(DocLiteralInInterceptor.class.getName());
     }
 
     @Override
