@@ -78,6 +78,7 @@ final class ReplacingXMLStreamReader extends DepthXMLStreamReader {
     private final Stack<ParsingEvent> pushedBackEvents;
     private ParsingEvent currentEvent;
     private QName lastNonGeneric;
+    private int genericAttributePos;
     private final NamespaceContext namespaceContext;
     private final List<Integer> attributesIndexes;
     private boolean attributesIndexed;
@@ -108,6 +109,7 @@ final class ReplacingXMLStreamReader extends DepthXMLStreamReader {
             attributesIndexed = false;
             final QName theName = super.getName();
             if (isGeneric(theName)) {
+                genericAttributePos++;
                 QName expected = getExpected(lastNonGeneric);
                 String prefix = theName.getPrefix();
                 if (isEmpty(prefix) && isEmpty(theName.getNamespaceURI()) && !isEmpty(expected.getNamespaceURI())) {
@@ -136,7 +138,9 @@ final class ReplacingXMLStreamReader extends DepthXMLStreamReader {
                     }
                 }
             } else {
+                currentEvent = null;
                 lastNonGeneric = theName;
+                genericAttributePos = 0;
             }
         } else if (XMLStreamConstants.END_ELEMENT == event) {
             final QName theName = super.getName();
@@ -159,6 +163,7 @@ final class ReplacingXMLStreamReader extends DepthXMLStreamReader {
         if (null == name) {
             bop = exchange.getBindingOperationInfo();
         } else {
+            // TODO is this ever used?
             bop = ServiceModelUtil.getOperation(exchange, name);
         }
         List<MessagePartInfo> parts = bop.getOperationInfo().getInput().getMessageParts();
@@ -168,14 +173,12 @@ final class ReplacingXMLStreamReader extends DepthXMLStreamReader {
             if (schema instanceof XmlSchemaElement && ((XmlSchemaElement) schema).getSchemaType() instanceof XmlSchemaComplexType) {
                 XmlSchemaComplexType cplxType = (XmlSchemaComplexType) ((XmlSchemaElement) schema).getSchemaType();
                 XmlSchemaSequence seq = (XmlSchemaSequence) cplxType.getParticle();
-                for (XmlSchemaSequenceMember item : seq.getItems()) {
-                    XmlSchemaElement elChild = (XmlSchemaElement) item;
-                    QName name2 = elChild.getQName();
-                    System.out.println(name2);
-                }
+                XmlSchemaElement child = (XmlSchemaElement) seq.getItems().get(genericAttributePos - 1);
+                return child.getQName();   
             }
+            throw new UnsupportedOperationException("Don't know how to handle part " + part.toString());
         }
-        return null;
+        throw new UnsupportedOperationException("Can not find parts for " + name);
     }
 
     @Override
