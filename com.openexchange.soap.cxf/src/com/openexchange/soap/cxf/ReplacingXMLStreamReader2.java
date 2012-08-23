@@ -51,6 +51,7 @@ package com.openexchange.soap.cxf;
 
 import java.util.Locale;
 import java.util.Stack;
+import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
@@ -60,6 +61,7 @@ import org.apache.cxf.service.model.BindingOperationInfo;
 import org.apache.ws.commons.schema.XmlSchemaComplexType;
 import org.apache.ws.commons.schema.XmlSchemaElement;
 import org.apache.ws.commons.schema.XmlSchemaSequence;
+import org.apache.ws.commons.schema.XmlSchemaSequenceMember;
 
 /**
  * {@link ReplacingXMLStreamReader2}
@@ -90,13 +92,19 @@ public class ReplacingXMLStreamReader2 extends StreamReaderDelegate {
             if (isGeneric(name)) {
                 QName expected = getExpected(stack.get(stack.size() - 2));
                 element.setExpected(expected);
+                element.setXmlSchema(getChildSchema(stack.get(stack.size() - 2), expected));
+                current = element;
+            } else if (isEmptyURI(name)) {
+                XmlSchemaElement schema = getChildSchema(stack.get(stack.size() - 2), name);
+                QName expected = schema.getQName();
+                element.setExpected(expected);
+                element.setXmlSchema(schema);
                 current = element;
             } else {
                 element.setExpected(name);
                 current = null;
             }
-            stack.push(element);
-        } else if (XMLStreamConstants.END_ELEMENT == event) {
+        } else if (XMLStreamConstants.END_ELEMENT == event && !stack.empty()) {
             current = stack.pop();
         } else {
             current = null;
@@ -125,8 +133,27 @@ public class ReplacingXMLStreamReader2 extends StreamReaderDelegate {
         throw new XMLStreamException("Complex type expected.");
     }
 
+    private static XmlSchemaElement getChildSchema(ReplacingElement parent, QName name) {
+        XmlSchemaElement schema = parent.getXmlSchema();
+        if (schema.getSchemaType() instanceof XmlSchemaComplexType) {
+            XmlSchemaComplexType cplxType = (XmlSchemaComplexType) schema.getSchemaType();
+            XmlSchemaSequence seq = (XmlSchemaSequence) cplxType.getParticle();
+            for (XmlSchemaSequenceMember member : seq.getItems()) {
+                XmlSchemaElement element = (XmlSchemaElement) member;
+                if (element.getName().equals(name.getLocalPart())) {
+                    return element;
+                }
+            }
+        }
+        return null;
+    }
+
     private static boolean isGeneric(final QName name) {
         final String localPart = name.getLocalPart();
         return null != localPart && localPart.toLowerCase(Locale.US).startsWith("c-gensym");
+    }
+
+    private static boolean isEmptyURI(QName name) {
+        return XMLConstants.NULL_NS_URI.equals(name.getNamespaceURI());
     }
 }
