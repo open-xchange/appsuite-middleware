@@ -95,8 +95,7 @@ public class AtmosphereServiceImpl  implements AtmosphereService {
         AtmosphereServlet atmosphereServlet = new AtmosphereServlet(false, false);
         atmosphereFramework = atmosphereServlet.framework();
         ServletConfig config = FrameworkConfig.with("Atmosphere Servlet", realtimeContext)
-            .and("org.atmosphere.cpr.maxBroadcasterLifeCyclePolicyIdleTime", "100000")
-            .and("org.atmosphere.cpr.broadcasterLifeCyclePolicy","IDLE_DESTROY")
+            .and("org.atmosphere.cpr.broadcasterLifeCyclePolicy","NEVER")
             .build();
         atmosphereFramework.init(config);
         atmosphereFramework.setAsyncSupport(new Grizzly2CometSupport(atmosphereFramework.getAtmosphereConfig()));

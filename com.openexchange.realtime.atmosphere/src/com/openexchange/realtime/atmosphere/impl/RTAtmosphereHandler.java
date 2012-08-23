@@ -160,6 +160,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                     // Create new broadcaster for AtmosphereResource (if none already exists) Id will be formed like /context/user/resource
                     String broadcasterId = generateBroadcasterId(atmosphereState.id);
                     Broadcaster broadcaster = BroadcasterFactory.getDefault().lookup(broadcasterId, true);
+                    atmosphereState.atmosphereResource.addEventListener(new AtmosphereResourceCleanupListener(resource, broadcaster));
                     broadcaster.addAtmosphereResource(atmosphereState.atmosphereResource);
 
                     // keep track of connected users
@@ -212,6 +213,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
     }
 
     private void printBroadcasters(String preString) {
+        if(LOG.isDebugEnabled()) {
         List<Broadcaster> broadcasters = new ArrayList(BroadcasterFactory.getDefault().lookupAll());
         Collections.sort(broadcasters, new Comparator<Broadcaster>() {
 
@@ -233,7 +235,6 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
             }
         }
         sb.append("--------------------------------------------------------------------------------\n");
-        if(LOG.isDebugEnabled()) {
             LOG.debug(sb.toString());
         }
     }
@@ -259,6 +260,9 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         AtmosphereResource resource = event.getResource();
         AtmosphereResponse response = resource.getResponse();
         if (event.isSuspended()) {
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("\n\nonStateChange: Writing message: "+event.getMessage().toString()+" to resource: "+resource.uuid()+"\n\n");
+            }
             response.getWriter().write(event.getMessage().toString());
             switch (resource.transport()) {
             case JSONP:
@@ -497,18 +501,22 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
      * @throws OXException
      */
     private void handleInternally(Stanza stanza, RTAtmosphereState atmosphereState) {
-        // Payload payload = stanza.getPayload();
-        //
-        // // handle close
-        // if (payload != null && "json".equals(payload.getFormat())) {
-        // JSONObject json = (JSONObject) payload.getData();
-        // if ("close".equals(json.opt("step"))) {
-        // LOG.info("resuming resource: " + atmosphereState.atmosphereResource.uuid());
-        // printBroadcasters();
-        // atmosphereState.atmosphereResource.getRequest().destroy();
-        // printBroadcasters();
-        // }
-        // }
+         Payload payload = stanza.getPayload();
+        
+        if (payload != null && "json".equals(payload.getFormat())) {
+            JSONObject json = (JSONObject) payload.getData();
+            // handle open
+            if ("open".equals(json.opt("step"))) {
+                LOG.info("Open by resource: " + atmosphereState.atmosphereResource.uuid());
+                printBroadcasters("After open:");
+                atmosphereState.atmosphereResource.getResponse().write("{result: 'opened'}");
+            }
+            // handle close
+            if ("close".equals(json.opt("step"))) {
+                LOG.info("Close by resource: " + atmosphereState.atmosphereResource.uuid());
+                atmosphereState.atmosphereResource.getResponse().write("{result: 'closed'}");
+            }
+        }
     }
 
     /**
