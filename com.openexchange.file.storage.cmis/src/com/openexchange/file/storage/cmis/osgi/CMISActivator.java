@@ -51,6 +51,7 @@ package com.openexchange.file.storage.cmis.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+import org.apache.chemistry.opencmis.client.bindings.spi.http.HttpUtils;
 import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -152,6 +153,7 @@ public final class CMISActivator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         try {
+            HttpUtils.clearInvokers();
             final CMISServiceRegisterer registerer = this.registerer;
             if (null != registerer) {
                 registerer.close();

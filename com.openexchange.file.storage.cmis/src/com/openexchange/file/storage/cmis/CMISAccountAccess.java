@@ -206,7 +206,29 @@ public final class CMISAccountAccess implements FileStorageAccountAccess {
                 /*
                  * Connection settings
                  */
-                if (useAtomPub()) {
+                if (useWebService()) {
+                    parameters.put(SessionParameter.BINDING_TYPE, BindingType.WEBSERVICES.value());
+                    parameters.put(SessionParameter.WEBSERVICES_ACL_SERVICE, rootUrl);
+                    parameters.put(SessionParameter.WEBSERVICES_DISCOVERY_SERVICE, rootUrl);
+                    parameters.put(SessionParameter.WEBSERVICES_MULTIFILING_SERVICE, rootUrl);
+                    parameters.put(SessionParameter.WEBSERVICES_NAVIGATION_SERVICE, rootUrl);
+                    parameters.put(SessionParameter.WEBSERVICES_OBJECT_SERVICE, rootUrl);
+                    parameters.put(SessionParameter.WEBSERVICES_POLICY_SERVICE, rootUrl);
+                    parameters.put(SessionParameter.WEBSERVICES_RELATIONSHIP_SERVICE, rootUrl);
+                    parameters.put(SessionParameter.WEBSERVICES_REPOSITORY_SERVICE, rootUrl);
+                    parameters.put(SessionParameter.WEBSERVICES_VERSIONING_SERVICE, rootUrl);
+                    /*
+                     * Http invoker
+                     */
+                    parameters.put("org.apache.chemistry.opencmis.binding.HttpInvoker", CMISFileStorageHttpInvoker.class.getName());
+                    /*
+                     * Rest
+                     */
+                    parameters.put(SessionParameter.AUTHENTICATION_PROVIDER_CLASS, CmisBindingFactory.NTLM_AUTHENTICATION_PROVIDER);
+                    parameters.put(SessionParameter.AUTH_HTTP_BASIC, "true");
+                    parameters.put(SessionParameter.AUTH_SOAP_USERNAMETOKEN, "true");
+                    parameters.put(SessionParameter.COOKIES, "true");
+                } else if (useAtomPub()) {
                     parameters.put(SessionParameter.ATOMPUB_URL, rootUrl);
                     parameters.put(SessionParameter.BINDING_TYPE, BindingType.ATOMPUB.value());
                     /*-
@@ -229,24 +251,9 @@ public final class CMISAccountAccess implements FileStorageAccountAccess {
                     parameters.put(SessionParameter.AUTHENTICATION_PROVIDER_CLASS, CmisBindingFactory.NTLM_AUTHENTICATION_PROVIDER);
                     parameters.put(SessionParameter.AUTH_HTTP_BASIC, Boolean.toString(sendBasicAuth));
                     parameters.put(SessionParameter.COOKIES, "true");
-                } else if (useWebService()) {
-                    parameters.put(SessionParameter.BINDING_TYPE, BindingType.WEBSERVICES.value());
-                    parameters.put(SessionParameter.WEBSERVICES_ACL_SERVICE, rootUrl);
-                    parameters.put(SessionParameter.WEBSERVICES_DISCOVERY_SERVICE, rootUrl);
-                    parameters.put(SessionParameter.WEBSERVICES_MULTIFILING_SERVICE, rootUrl);
-                    parameters.put(SessionParameter.WEBSERVICES_NAVIGATION_SERVICE, rootUrl);
-                    parameters.put(SessionParameter.WEBSERVICES_OBJECT_SERVICE, rootUrl);
-                    parameters.put(SessionParameter.WEBSERVICES_POLICY_SERVICE, rootUrl);
-                    parameters.put(SessionParameter.WEBSERVICES_RELATIONSHIP_SERVICE, rootUrl);
-                    parameters.put(SessionParameter.WEBSERVICES_REPOSITORY_SERVICE, rootUrl);
-                    parameters.put(SessionParameter.WEBSERVICES_VERSIONING_SERVICE, rootUrl);
-                    parameters.put(SessionParameter.AUTHENTICATION_PROVIDER_CLASS, CmisBindingFactory.NTLM_AUTHENTICATION_PROVIDER);
-                    parameters.put(SessionParameter.AUTH_HTTP_BASIC, "true");
-                    parameters.put(SessionParameter.AUTH_SOAP_USERNAMETOKEN, "true");
-                    parameters.put(SessionParameter.COOKIES, "true");
                 }
                 /*
-                 * Timeout
+                 * Timeout parameters
                  */
                 parameters.put(SessionParameter.CONNECT_TIMEOUT, "10000");
                 parameters.put(SessionParameter.READ_TIMEOUT, Integer.toString(readTimeout));
