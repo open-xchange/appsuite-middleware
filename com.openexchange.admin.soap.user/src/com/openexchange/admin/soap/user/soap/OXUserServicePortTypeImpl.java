@@ -492,9 +492,13 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
 <<<<<<< HEAD
         user.setGui_spam_filter_enabled(soapUser.isGuiSpamFilterEnabled());
         user.setAliasesForSOAP(soapUser.getAliases());
-        user.setAnniversary(soapUser.getAnniversary().toGregorianCalendar().getTime());
+        if (null != soapUser.getAnniversary()) {
+            user.setAnniversary(soapUser.getAnniversary().toGregorianCalendar().getTime());
+        }
         user.setAssistant_name(soapUser.getAssistantName());
-        user.setBirthday(soapUser.getBirthday().toGregorianCalendar().getTime());
+        if (null != soapUser.getBirthday()) {
+            user.setBirthday(soapUser.getBirthday().toGregorianCalendar().getTime());
+        }
         user.setBranches(soapUser.getBranches());
         user.setBusiness_category(soapUser.getBusinessCategory());
         user.setCategories(soapUser.getCategories());
@@ -1189,12 +1193,14 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
         final User soapUser = new User();
         soapUser.setGuiSpamFilterEnabled(user.getGui_spam_filter_enabled());
         soapUser.setAliases(user.getAliasesForSOAP());
-        try {
-            final GregorianCalendar c = new GregorianCalendar();
-            c.setTime(user.getAnniversary());
-            soapUser.setAnniversary(DatatypeFactory.newInstance().newXMLGregorianCalendar(c));
-        } catch (final DatatypeConfigurationException e) {
-            soapUser.setAnniversary(null);
+        if (null != user.getAnniversary()) {
+            try {
+                final GregorianCalendar c = new GregorianCalendar();
+                c.setTime(user.getAnniversary());
+                soapUser.setAnniversary(DatatypeFactory.newInstance().newXMLGregorianCalendar(c));
+            } catch (final DatatypeConfigurationException e) {
+                soapUser.setAnniversary(null);
+            }
         }
         soapUser.setAssistantName(user.getAssistant_name());
         try {
