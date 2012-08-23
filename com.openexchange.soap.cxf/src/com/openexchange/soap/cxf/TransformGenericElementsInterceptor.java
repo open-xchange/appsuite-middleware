@@ -49,62 +49,37 @@
 
 package com.openexchange.soap.cxf;
 
-import javax.xml.namespace.QName;
+import java.io.InputStream;
+import javax.xml.stream.XMLStreamReader;
+import org.apache.commons.logging.Log;
+import org.apache.cxf.interceptor.Fault;
+import org.apache.cxf.message.Message;
+import org.apache.cxf.phase.AbstractPhaseInterceptor;
+import org.apache.cxf.phase.Phase;
+import org.apache.cxf.staxutils.transform.TransformUtils;
 
 /**
- * {@link ParsingEvent} - Simple container for a parsing event when traversing an {@link XMLStreamReader}.
+ * {@link TransformGenericElementsInterceptor}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class ParsingEvent {
+public class TransformGenericElementsInterceptor extends AbstractPhaseInterceptor<Message> {
 
-    private final int event;
-    private final QName name;
-    private final String value;
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(TransformGenericElementsInterceptor.class);
 
-    /**
-     * Initializes a new {@link ParsingEvent}.
-     * 
-     * @param event The event identifier
-     * @param name The name
-     * @param value The value
-     */
-    public ParsingEvent(final int event, final QName name, final String value) {
-        this.event = event;
-        this.name = name;
-        this.value = value;
+    public TransformGenericElementsInterceptor() {
+        super(Phase.UNMARSHAL);
+        addBefore("DocLiteralInInterceptor");
     }
 
     @Override
-    public String toString() {
-        return new StringBuilder().append("Event(").append(event).append(", ").append(name).append(", ").append(value).append(")").toString();
+    public void handleMessage(Message message) throws Fault {
+        XMLStreamReader reader = message.getContent(XMLStreamReader.class);
+        InputStream is = message.getContent(InputStream.class);
+        reader = TransformUtils.createNewReaderIfNeeded(reader, is);
+        // Create transforming reader
+        reader = new ReplacingXMLStreamReader(message.getExchange(), reader);
+        message.setContent(XMLStreamReader.class, reader);
+        message.removeContent(InputStream.class);
     }
-
-    /**
-     * Gets the event identifier.
-     * 
-     * @return The event identifier
-     */
-    public int getEvent() {
-        return event;
-    }
-
-    /**
-     * Gets the name.
-     * 
-     * @return The name
-     */
-    public QName getName() {
-        return name;
-    }
-
-    /**
-     * Gets the value
-     * 
-     * @return The value
-     */
-    public String getValue() {
-        return value;
-    }
-
 }
