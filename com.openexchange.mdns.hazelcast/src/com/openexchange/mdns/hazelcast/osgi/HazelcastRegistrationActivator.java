@@ -60,7 +60,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 
 
 /**
- * {@link HazelcastRegistrationActivator}
+ * {@link HazelcastRegistrationActivator} - The only purpose is to register a Hazelcast MDNS service that identifies the node as Hazelcast-capable.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
