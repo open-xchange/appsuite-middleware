@@ -51,7 +51,6 @@ package com.openexchange.soap.cxf;
 
 import java.io.InputStream;
 import javax.xml.stream.XMLStreamReader;
-import org.apache.commons.logging.Log;
 import org.apache.cxf.interceptor.AbstractInDatabindingInterceptor;
 import org.apache.cxf.interceptor.DocLiteralInInterceptor;
 import org.apache.cxf.interceptor.Fault;
@@ -68,8 +67,6 @@ import org.apache.cxf.staxutils.transform.TransformUtils;
  */
 public class TransformGenericElementsInterceptor extends AbstractInDatabindingInterceptor {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(TransformGenericElementsInterceptor.class);
-
     public TransformGenericElementsInterceptor() {
         super(Phase.UNMARSHAL);
         addBefore(DocLiteralInInterceptor.class.getName());
@@ -78,12 +75,11 @@ public class TransformGenericElementsInterceptor extends AbstractInDatabindingIn
     @Override
     public void handleMessage(Message message) throws Fault {
         XMLStreamReader reader = message.getContent(XMLStreamReader.class);
-        InputStream is = message.getContent(InputStream.class);
-        reader = TransformUtils.createNewReaderIfNeeded(reader, is);
+        reader = TransformUtils.createNewReaderIfNeeded(reader, message.getContent(InputStream.class));
         Exchange exchange = message.getExchange();
         BindingOperationInfo bop = getBindingOperationInfo(exchange, reader.getName(), isRequestor(message));
         // Create transforming reader
-        reader = new ReplacingXMLStreamReader2(bop, reader);
+        reader = new ReplacingXMLStreamReader(bop, reader);
         message.setContent(XMLStreamReader.class, reader);
         message.removeContent(InputStream.class);
     }
