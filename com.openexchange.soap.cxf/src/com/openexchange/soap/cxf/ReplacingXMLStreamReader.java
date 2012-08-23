@@ -90,7 +90,8 @@ public class ReplacingXMLStreamReader extends StreamReaderDelegate {
             ReplacingElement element = new ReplacingElement(name);
             stack.push(element);
             if (isGeneric(name)) {
-                QName expected = getExpected(stack.get(stack.size() - 2));
+                String typeName = findType();
+                QName expected = getExpected(stack.get(stack.size() - 2), typeName);
                 element.setExpected(expected);
                 element.setXmlSchema(getChildSchema(stack.get(stack.size() - 2), expected));
                 current = element;
@@ -122,7 +123,7 @@ public class ReplacingXMLStreamReader extends StreamReaderDelegate {
         return null == current ? super.getNamespaceURI() : current.getExpected().getNamespaceURI();
     }
 
-    private static QName getExpected(ReplacingElement parent) throws XMLStreamException {
+    private static QName getExpected(ReplacingElement parent, String typeName) throws XMLStreamException {
         XmlSchemaElement schema = parent.getXmlSchema();
         if (schema.getSchemaType() instanceof XmlSchemaComplexType) {
             XmlSchemaComplexType cplxType = (XmlSchemaComplexType) schema.getSchemaType();
@@ -134,15 +135,33 @@ public class ReplacingXMLStreamReader extends StreamReaderDelegate {
     }
 
     private static XmlSchemaElement getChildSchema(ReplacingElement parent, QName name) {
+        String localPart = name.getLocalPart();
         XmlSchemaElement schema = parent.getXmlSchema();
         if (schema.getSchemaType() instanceof XmlSchemaComplexType) {
             XmlSchemaComplexType cplxType = (XmlSchemaComplexType) schema.getSchemaType();
             XmlSchemaSequence seq = (XmlSchemaSequence) cplxType.getParticle();
+            parent.resetChildPosition();
             for (XmlSchemaSequenceMember member : seq.getItems()) {
+                parent.nextChildPosition();
                 XmlSchemaElement element = (XmlSchemaElement) member;
-                if (element.getName().equals(name.getLocalPart())) {
+                String schemaTypeName = element.getSchemaTypeName().getLocalPart();
+                String attributeName = element.getName();
+                if (localPart.equals(schemaTypeName) || localPart.equals(attributeName)) {
                     return element;
                 }
+            }
+        }
+        return null;
+    }
+
+    private String findType() {
+        if (getAttributeCount() == 0) {
+            return null;
+        }
+        for (int i = 0; i < getAttributeCount(); i++) {
+            String name = getAttributeLocalName(i);
+            if ("type".equals(name)) {
+                return getAttributeValue(i);
             }
         }
         return null;
