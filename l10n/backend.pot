@@ -2520,6 +2520,11 @@ msgstr ""
 msgid "The maximum number of HTTP sessions (%1$n) is exceeded."
 msgstr ""
 
+#. * The following needed feature could not be enabled: \"%1$s\"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.grizzly/src/com/openexchange/http/grizzly/GrizzlyExceptionMessage.java:68
+msgid "The following needed feature could not be enabled: \"%1$s\""
+msgstr ""
+
 #. * Error while trying to interrupt Request processing
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.requestwatcher/src/com/openexchange/http/requestwatcher/RequestWatcherExceptionMessage.java:62
 msgid "Error while trying to interrupt Request processing"
