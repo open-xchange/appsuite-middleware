@@ -55,20 +55,21 @@ import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
- * {@link OXRTConversionHandler} - Handles Conversion of Stanzas for a given
- * namespace. 
- *
+ * {@link OXRTConversionHandler} - Handles Conversion of Stanzas for a given namespace by telling the Stanza payload the format it should
+ * convert itslef into, getting the MessageDispatcher and delegating the further processing of the Stanza.
+ * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class OXRTConversionHandler implements OXRTHandler {
 
     public static ServiceLookup services;
+
     private final String namespace, format;
-    
+
     /**
      * Initializes a new {@link OXRTConversionHandler}.
+     * 
      * @param namespace the namespace of Stanzas this OXRTConversionHandler can handle
      * @param format the format of POJOs that incoming Stanzas should be converted to
      */
@@ -76,7 +77,7 @@ public class OXRTConversionHandler implements OXRTHandler {
         this.namespace = namespace;
         this.format = format;
     }
-    
+
     @Override
     public String getNamespace() {
         return namespace;
@@ -93,10 +94,10 @@ public class OXRTConversionHandler implements OXRTHandler {
         stanza.setPayload(stanza.getPayload().to("json", session));
         sender.send(stanza);
     }
-    
+
     /**
-     * Send the Stanza by getting the MessageDispatcher service and letting it
-     * handle the further processing of the Stanza. 
+     * Send the Stanza by getting the MessageDispatcher service and letting it handle the further processing of the Stanza.
+     * 
      * @param stanza the stanza to send
      * @param session the associated ServerSession
      * @throws OXException when sending the Stanza fails

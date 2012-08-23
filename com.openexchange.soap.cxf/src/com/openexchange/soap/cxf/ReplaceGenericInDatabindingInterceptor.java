@@ -47,70 +47,36 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.impl;
+package com.openexchange.soap.cxf;
 
-import java.util.HashSet;
-import java.util.Set;
-import org.atmosphere.cpr.AtmosphereResource;
-import org.atmosphere.cpr.AtmosphereResourceEvent;
-import org.atmosphere.cpr.AtmosphereResourceEventListener;
-import org.atmosphere.cpr.Broadcaster;
-import com.openexchange.log.Log;
-import com.openexchange.log.LogFactory;
+import org.apache.commons.logging.Log;
+import org.apache.cxf.interceptor.AbstractInDatabindingInterceptor;
+import org.apache.cxf.interceptor.DocLiteralInInterceptor;
+import org.apache.cxf.interceptor.Fault;
+import org.apache.cxf.message.Message;
+import org.apache.cxf.phase.Phase;
 
 
 /**
- * {@link AtmosphereResourceCleanupListener} - Debug cleanup process and remove resources from broadcasters.
+ * {@link ReplaceGenericInDatabindingInterceptor}
  *
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class AtmosphereResourceCleanupListener implements AtmosphereResourceEventListener {
-    private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(RTAtmosphereHandler.class));
-    private Broadcaster[] associatedBroadcasters;
-    private AtmosphereResource resource;
+public class ReplaceGenericInDatabindingInterceptor extends AbstractInDatabindingInterceptor {
+
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ReplaceGenericInDatabindingInterceptor.class);
+
     /**
-     * Initializes a new {@link AtmosphereResourceCleanupListener}.
-     * @param associatedBroadcasters the associated Broadcasters
+     * Initializes a new {@link ReplaceGenericInDatabindingInterceptor}.
      */
-    public AtmosphereResourceCleanupListener(AtmosphereResource resource, Broadcaster... associatedBroadcasters) {
-        this.associatedBroadcasters = associatedBroadcasters;
-        this.resource = resource;
+    public ReplaceGenericInDatabindingInterceptor() {
+        super(Phase.UNMARSHAL);
+        addBefore(DocLiteralInInterceptor.class.getName());
     }
 
     @Override
-    public void onSuspend(AtmosphereResourceEvent event) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void onResume(AtmosphereResourceEvent event) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void onDisconnect(AtmosphereResourceEvent event) {
-        for (Broadcaster broadcaster : associatedBroadcasters) {
-            //TODO: actually not needed
-            broadcaster.removeAtmosphereResource(resource);
-            LOG.info("Removing resource: " + resource.uuid() + " from broadcaster: " + broadcaster.getID());
-        }
-    }
-
-    @Override
-    public void onBroadcast(AtmosphereResourceEvent event) {
-        // TODO Auto-generated method stub
-
-    }
-
-    /* (non-Javadoc)
-     * @see org.atmosphere.cpr.AtmosphereResourceEventListener#onThrowable(org.atmosphere.cpr.AtmosphereResourceEvent)
-     */
-    @Override
-    public void onThrowable(AtmosphereResourceEvent event) {
-        // TODO Auto-generated method stub
-
+    public void handleMessage(final Message message) throws Fault {
+        // TODO
     }
 
 }

@@ -47,23 +47,41 @@
  *
  */
 
-package com.openexchange.http.grizzly;
+package com.openexchange.realtime.atmosphere.presence;
 
-import com.openexchange.i18n.LocalizableStrings;
+import static org.junit.Assert.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 
 /**
- * {@link GrizzlyExceptionMessage}
+ * {@link JSONToPresenceStatusConverterTest} - Test conversion from JSON to presence status.
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class GrizzlyExceptionMessage implements LocalizableStrings{
-    /** The grizzly server could not be started */
-    public static final String GRIZZLY_SERVER_NOT_STARTED_MSG = "The grizzly server could not be started";
-    /** The following needed service is missing: \"%1$s\" */
-    public static final String NEEDED_SERVICE_MISSING_MSG = "The following needed service is missing: \"%1$s\"";
-    /** "Maximum number of HTTP sessions (%1$n) exceeded */
-    public static final String MAX_NUMBER_OF_SESSIONS_REACHED_MSG = "The maximum number of HTTP sessions (%1$n) is exceeded.";
-    /** The following needed feature could not be enabled: \"%1$s\" */
-    public static final String GRIZZLY_FEATURE_MISSING_MSG = "The following needed feature could not be enabled: \"%1$s\"";
+public class JSONToPresenceStatusConverterTest {
+
+    /**
+     * @throws java.lang.Exception
+     */
+    @Before
+    public void setUp() throws Exception {
+    }
+
+    /**
+     * @throws java.lang.Exception
+     */
+    @After
+    public void tearDown() throws Exception {
+    }
+
+    /**
+     * Test conversion from JSON to presence status.
+     */
+    @Test
+    public void testConvert() {
+        fail("Not yet implemented");
+    }
+
 }

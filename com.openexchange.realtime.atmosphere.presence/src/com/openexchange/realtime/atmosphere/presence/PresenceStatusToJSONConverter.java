@@ -47,23 +47,52 @@
  *
  */
 
-package com.openexchange.http.grizzly;
+package com.openexchange.realtime.atmosphere.presence;
 
-import com.openexchange.i18n.LocalizableStrings;
-
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.conversion.simple.SimpleConverter;
+import com.openexchange.conversion.simple.SimplePayloadConverter;
+import com.openexchange.conversion.simple.SimplePayloadConverter.Quality;
+import com.openexchange.exception.OXException;
+import com.openexchange.realtime.example.presence.PresenceStatus;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link GrizzlyExceptionMessage}
- *
+ * {@link PresenceStatusToJSONConverter}
+ * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class GrizzlyExceptionMessage implements LocalizableStrings{
-    /** The grizzly server could not be started */
-    public static final String GRIZZLY_SERVER_NOT_STARTED_MSG = "The grizzly server could not be started";
-    /** The following needed service is missing: \"%1$s\" */
-    public static final String NEEDED_SERVICE_MISSING_MSG = "The following needed service is missing: \"%1$s\"";
-    /** "Maximum number of HTTP sessions (%1$n) exceeded */
-    public static final String MAX_NUMBER_OF_SESSIONS_REACHED_MSG = "The maximum number of HTTP sessions (%1$n) is exceeded.";
-    /** The following needed feature could not be enabled: \"%1$s\" */
-    public static final String GRIZZLY_FEATURE_MISSING_MSG = "The following needed feature could not be enabled: \"%1$s\"";
+public class PresenceStatusToJSONConverter implements SimplePayloadConverter {
+
+    @Override
+    public String getInputFormat() {
+        return "presenceStatus";
+    }
+
+    @Override
+    public String getOutputFormat() {
+        return "json";
+    }
+
+    @Override
+    public Quality getQuality() {
+        return Quality.GOOD;
+    }
+
+    @Override
+    public Object convert(Object data, ServerSession session, SimpleConverter converter) throws OXException {
+        try {
+            PresenceStatus status = (PresenceStatus) data;
+
+            JSONObject object = new JSONObject();
+            object.put("state", status.getState().name().toLowerCase());
+            object.put("message", status.getMessage());
+
+            return object;
+        } catch (JSONException x) {
+            throw OXException.general(x.getMessage());
+        }
+    }
+
 }

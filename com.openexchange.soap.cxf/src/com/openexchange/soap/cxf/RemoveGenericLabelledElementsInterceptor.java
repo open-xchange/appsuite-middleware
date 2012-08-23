@@ -52,9 +52,13 @@ package com.openexchange.soap.cxf;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Queue;
 import java.util.Stack;
 import javax.xml.XMLConstants;
 import javax.xml.namespace.NamespaceContext;
@@ -62,10 +66,21 @@ import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+import org.apache.cxf.endpoint.Endpoint;
+import org.apache.cxf.interceptor.StaxInInterceptor;
 import org.apache.cxf.interceptor.transform.TransformInInterceptor;
+import org.apache.cxf.message.Exchange;
 import org.apache.cxf.message.Message;
-import org.apache.cxf.staxutils.DepthXMLStreamReader;
+import org.apache.cxf.phase.Phase;
+import org.apache.cxf.service.model.BindingInfo;
+import org.apache.cxf.service.model.BindingOperationInfo;
+import org.apache.cxf.service.model.MessagePartInfo;
+import org.apache.cxf.service.model.OperationInfo;
 import org.apache.cxf.staxutils.transform.TransformUtils;
+import org.apache.ws.commons.schema.XmlSchemaAnnotated;
+import org.apache.ws.commons.schema.XmlSchemaComplexType;
+import org.apache.ws.commons.schema.XmlSchemaElement;
+import org.apache.ws.commons.schema.XmlSchemaSequence;
 import com.openexchange.java.Streams;
 
 /**
@@ -75,16 +90,50 @@ import com.openexchange.java.Streams;
  */
 public final class RemoveGenericLabelledElementsInterceptor extends TransformInInterceptor {
 
+    private static interface BindingOperationInfoProvider {
+
+        BindingOperationInfo getOperation(QName opName);
+
+        Collection<BindingOperationInfo> getOperations();
+    }
+
+    private static final BindingOperationInfoProvider DUMMY = new BindingOperationInfoProvider() {
+
+        @Override
+        public BindingOperationInfo getOperation(final QName opName) {
+            return null;
+        }
+
+        @Override
+        public Collection<BindingOperationInfo> getOperations() {
+            return Collections.emptyList();
+        }
+    };
+
+    private static final class DefaultBindingOperationInfoProvider implements BindingOperationInfoProvider {
+        private final BindingInfo service;
+
+        protected DefaultBindingOperationInfoProvider(BindingInfo service) {
+            super();
+            this.service = service;
+        }
+
+        @Override
+        public BindingOperationInfo getOperation(final QName opName) {
+            return service.getOperation(opName);
+        }
+
+        @Override
+        public Collection<BindingOperationInfo> getOperations() {
+            return service.getOperations();
+        }
+    }
+
     /**
      * Initializes a new {@link RemoveGenericLabelledElementsInterceptor}.
      */
     public RemoveGenericLabelledElementsInterceptor() {
-        super();
-    }
-
-    private static boolean disabled() {
-        // TODO: Remove me if implementation is done
-        return true;
+        super(Phase.POST_STREAM, Collections.<String> singletonList(StaxInInterceptor.class.getName()));
     }
 
     private static boolean transformWithinReader() {
@@ -93,17 +142,21 @@ public final class RemoveGenericLabelledElementsInterceptor extends TransformInI
 
     @Override
     public void handleMessage(final Message message) {
-        if (disabled()) {
-            return;
-        }
         /*
          * Transform within reader or within stream content
          */
         if (transformWithinReader()) {
             XMLStreamReader reader = message.getContent(XMLStreamReader.class);
             InputStream is = message.getContent(InputStream.class);
+            // Create BindingOperationInfoProvider instance
+            final BindingOperationInfoProvider bindingOperationInfoProvider;
+            {
+                final Exchange exchange = message.getExchange();
+                final Endpoint ep = exchange.get(Endpoint.class);
+                bindingOperationInfoProvider = null == ep ? DUMMY : new DefaultBindingOperationInfoProvider(ep.getEndpointInfo().getBinding());
+            }
             // Create transforming reader
-            final XMLStreamReader transformReader = new ReplacingXMLStreamReader(TransformUtils.createNewReaderIfNeeded(reader, is));
+            final XMLStreamReader transformReader = new ReplacingXMLStreamReader(TransformUtils.createNewReaderIfNeeded(reader, is), bindingOperationInfoProvider);
             if (transformReader != null) {
                 message.setContent(XMLStreamReader.class, transformReader);
                 message.removeContent(InputStream.class);
@@ -124,20 +177,29 @@ public final class RemoveGenericLabelledElementsInterceptor extends TransformInI
         }
     }
 
-    private static final class ReplacingXMLStreamReader extends DepthXMLStreamReader {
+    private static final class ReplacingXMLStreamReader extends StackXMLStreamReader {
 
         // See org.apache.cxf.staxutils.transform.InTransformReader
 
         private final Stack<List<ParsingEvent>> pushedAheadEvents;
         private final Stack<ParsingEvent> pushedBackEvents;
         private ParsingEvent currentEvent;
-        private QName lastNonGeneric;
         private final NamespaceContext namespaceContext;
         private final List<Integer> attributesIndexes;
         private boolean attributesIndexed;
+        private final BindingOperationInfoProvider bindingOperationInfoProvider;
+        private final Map<QName, List<QName>> expectedNames;
 
-        protected ReplacingXMLStreamReader(final XMLStreamReader reader) {
+        protected ReplacingXMLStreamReader(final XMLStreamReader reader, final BindingOperationInfoProvider bindingOperationInfoProvider) {
             super(reader);
+            // Initialize mapping for expected names
+            final Collection<BindingOperationInfo> operations = bindingOperationInfoProvider.getOperations();
+            expectedNames = new HashMap<QName, List<QName>>(operations.size());
+            for (final BindingOperationInfo operation : operations) {
+                expectedNames.put(operation.getName(), getOperationInputPartNames(operation.getOperationInfo()));
+            }
+            // Initialize rest
+            this.bindingOperationInfoProvider = bindingOperationInfoProvider;
             pushedAheadEvents = new Stack<List<ParsingEvent>>();
             pushedBackEvents = new Stack<ParsingEvent>();
             attributesIndexes = new ArrayList<Integer>();
@@ -157,39 +219,38 @@ public final class RemoveGenericLabelledElementsInterceptor extends TransformInI
                 final QName theName = super.getName();
                 if (isGeneric(theName)) {
                     // {http://soap.admin.openexchange.com}db>
-                    QName expected = getExpected(lastNonGeneric); // new QName("http://soap.admin.openexchange.com", "auth", "");
-                    String prefix = theName.getPrefix();
-                    if (isEmpty(prefix) && isEmpty(theName.getNamespaceURI()) && !isEmpty(expected.getNamespaceURI())) {
-                        // prefix = namespaceContext.getPrefix(expected.getNamespaceURI());
-                        // if (prefix == null) {
-                        // prefix = namespaceContext.findUniquePrefix(expected.getNamespaceURI());
-                        // }
-                        prefix = "";
-                    } else if (prefix.length() > 0 && expected.getNamespaceURI().length() == 0) {
-                        prefix = "";
-                    }
-                    expected = new QName(expected.getNamespaceURI(), expected.getLocalPart(), prefix);
-                    if (isEmptyQName(expected)) {
-                        // skip the current element (deep drop)
-                        final int depth = getDepth();
-                        while (depth != getDepth() || super.next() != XMLStreamConstants.END_ELEMENT) {
-                            // get to the matching end element event
+                    QName expected = getExpected();
+                    if (null != expected) {
+                        // Appropriate replacement candidate found
+                        String prefix = theName.getPrefix();
+                        if (isEmpty(prefix) && isEmpty(theName.getNamespaceURI()) && !isEmpty(expected.getNamespaceURI())) {
+                            // prefix = namespaceContext.getPrefix(expected.getNamespaceURI());
+                            // if (prefix == null) {
+                            // prefix = namespaceContext.findUniquePrefix(expected.getNamespaceURI());
+                            // }
+                            prefix = "";
+                        } else if (prefix.length() > 0 && expected.getNamespaceURI().length() == 0) {
+                            prefix = "";
                         }
-                        event = next();
-                    } else {
-                        currentEvent = createStartElementEvent(expected);
-                        if (theName.equals(expected)) {
-                            pushedAheadEvents.push(null);
+                        expected = new QName(expected.getNamespaceURI(), expected.getLocalPart(), prefix);
+                        if (isEmptyQName(expected)) {
+                            // skip the current element (deep drop)
+                            final int depth = getDepth();
+                            while (depth != getDepth() || super.next() != XMLStreamConstants.END_ELEMENT) {
+                                // get to the matching end element event
+                            }
+                            event = next();
                         } else {
-                            pushedAheadEvents.push(Collections.singletonList(createEndElementEvent(expected)));
+                            currentEvent = createStartElementEvent(expected);
+                            if (theName.equals(expected)) {
+                                pushedAheadEvents.push(null);
+                            } else {
+                                pushedAheadEvents.push(Collections.singletonList(createEndElementEvent(expected)));
+                            }
                         }
                     }
-                } else {
-                    lastNonGeneric = theName;
                 }
             } else if (XMLStreamConstants.END_ELEMENT == event) {
-                final QName theName = super.getName();
-
                 final List<ParsingEvent> pe = pushedAheadEvents.pop();
                 if (null != pe) {
                     pushedBackEvents.addAll(pe);
@@ -199,21 +260,76 @@ public final class RemoveGenericLabelledElementsInterceptor extends TransformInI
             } else {
                 currentEvent = null;
             }
-
             return event;
         }
 
-        private QName getExpected(final QName lastNonGeneric) {
+        private QName getExpected() {
+            if (null == bindingOperationInfoProvider) {
+                return null;
+            }
+            final Queue<QName> elements = getElements();
+            QName qName = elements.poll();
+            while (null != qName && isGeneric(qName)) {
+                qName = elements.poll();
+            }
+            if (null == qName) {
+                return null;
+            }
+            List<QName> names = expectedNames.get(qName);
+            if (null != names) {
+                return names.isEmpty() ? null : names.remove(0);
+            }
+            /*
+             * See http://svn.apache.org/repos/asf/cxf/trunk/rt/frontend/jaxws/src/test/java/org/apache/cxf/jaxws/ServiceModelUtilsTest.java
+             * for usage example.
+             */
+            final BindingOperationInfo operation = bindingOperationInfoProvider.getOperation(qName);
+            names = getOperationInputPartNames(operation.getOperationInfo());
+            if (names != null) {
+                expectedNames.put(qName, names);
+                return names.isEmpty() ? null : names.remove(0);
+            }
             return null;
+        }
+
+        private static List<QName> getOperationInputPartNames(OperationInfo operation) {
+            List<MessagePartInfo> parts = operation.getInput().getMessageParts();
+            if (parts == null) {
+                return Collections.emptyList();
+            }
+            final int size = parts.size();
+            if (size == 0) {
+                return Collections.emptyList();
+            }
+            List<QName> names = new ArrayList<QName>(size);
+            for (MessagePartInfo part : parts) {
+                XmlSchemaAnnotated schema = part.getXmlSchema();
+
+                if (schema instanceof XmlSchemaElement
+                    && ((XmlSchemaElement)schema).getSchemaType() instanceof XmlSchemaComplexType) {
+                    XmlSchemaElement element = (XmlSchemaElement)schema;
+                    XmlSchemaComplexType cplxType = (XmlSchemaComplexType)element.getSchemaType();
+                    XmlSchemaSequence seq = (XmlSchemaSequence)cplxType.getParticle();
+                    if (seq == null || seq.getItems() == null) {
+                        return names;
+                    }
+                    for (int i = 0; i < seq.getItems().size(); i++) {
+                        XmlSchemaElement elChild = (XmlSchemaElement)seq.getItems().get(i);
+                        names.add(elChild.getQName());
+                    }
+                } else {
+                    names.add(part.getConcreteName());
+                }
+            }
+            return names;
         }
 
         @Override
         public String getLocalName() {
             if (currentEvent != null) {
                 return currentEvent.getName().getLocalPart();
-            } else {
-                return super.getLocalName();
             }
+            return super.getLocalName();
         }
 
         @Override
@@ -233,9 +349,8 @@ public final class RemoveGenericLabelledElementsInterceptor extends TransformInI
         public String getNamespaceURI() {
             if (currentEvent != null) {
                 return currentEvent.getName().getNamespaceURI();
-            } else {
-                return super.getNamespaceURI();
             }
+            return super.getNamespaceURI();
         }
 
         private QName readCurrentElement() {
@@ -302,9 +417,8 @@ public final class RemoveGenericLabelledElementsInterceptor extends TransformInI
             final QName aname = getAttributeName(index);
             if (XMLConstants.NULL_NS_URI.equals(aname.getNamespaceURI())) {
                 return "";
-            } else {
-                return namespaceContext.getPrefix(aname.getNamespaceURI());
             }
+            return namespaceContext.getPrefix(aname.getNamespaceURI());
         }
 
         @Override
@@ -427,37 +541,6 @@ public final class RemoveGenericLabelledElementsInterceptor extends TransformInI
             }
             return isWhitespace;
         }
-    }
-
-    private static final class ParsingEvent {
-
-        private final int event;
-        private final QName name;
-        private final String value;
-
-        protected ParsingEvent(final int event, final QName name, final String value) {
-            this.event = event;
-            this.name = name;
-            this.value = value;
-        }
-
-        @Override
-        public String toString() {
-            return new StringBuilder().append("Event(").append(event).append(", ").append(name).append(", ").append(value).append(")").toString();
-        }
-
-        protected int getEvent() {
-            return event;
-        }
-
-        protected QName getName() {
-            return name;
-        }
-
-        protected String getValue() {
-            return value;
-        }
-
     }
 
 }

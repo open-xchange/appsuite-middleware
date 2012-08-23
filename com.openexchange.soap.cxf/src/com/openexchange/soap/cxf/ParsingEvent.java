@@ -47,23 +47,64 @@
  *
  */
 
-package com.openexchange.http.grizzly;
+package com.openexchange.soap.cxf;
 
-import com.openexchange.i18n.LocalizableStrings;
-
+import javax.xml.namespace.QName;
 
 /**
- * {@link GrizzlyExceptionMessage}
+ * {@link ParsingEvent} - Simple container for a parsing event when traversing an {@link XMLStreamReader}.
  *
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class GrizzlyExceptionMessage implements LocalizableStrings{
-    /** The grizzly server could not be started */
-    public static final String GRIZZLY_SERVER_NOT_STARTED_MSG = "The grizzly server could not be started";
-    /** The following needed service is missing: \"%1$s\" */
-    public static final String NEEDED_SERVICE_MISSING_MSG = "The following needed service is missing: \"%1$s\"";
-    /** "Maximum number of HTTP sessions (%1$n) exceeded */
-    public static final String MAX_NUMBER_OF_SESSIONS_REACHED_MSG = "The maximum number of HTTP sessions (%1$n) is exceeded.";
-    /** The following needed feature could not be enabled: \"%1$s\" */
-    public static final String GRIZZLY_FEATURE_MISSING_MSG = "The following needed feature could not be enabled: \"%1$s\"";
+public final class ParsingEvent {
+
+    private final int event;
+    private final QName name;
+    private final String value;
+
+    /**
+     * Initializes a new {@link ParsingEvent}.
+     * 
+     * @param event The event identifier
+     * @param name The name
+     * @param value The value
+     */
+    public ParsingEvent(final int event, final QName name, final String value) {
+        this.event = event;
+        this.name = name;
+        this.value = value;
+    }
+
+    @Override
+    public String toString() {
+        return new StringBuilder().append("Event(").append(event).append(", ").append(name).append(", ").append(value).append(")").toString();
+    }
+
+    /**
+     * Gets the event identifier.
+     * 
+     * @return The event identifier
+     */
+    public int getEvent() {
+        return event;
+    }
+
+    /**
+     * Gets the name.
+     * 
+     * @return The name
+     */
+    public QName getName() {
+        return name;
+    }
+
+    /**
+     * Gets the value
+     * 
+     * @return The value
+     */
+    public String getValue() {
+        return value;
+    }
+
 }

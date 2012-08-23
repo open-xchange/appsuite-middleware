@@ -95,6 +95,8 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
         configService = getService(ConfigurationService.class);
         cryptoService = getService(CryptoService.class);
         hazelcast = getService(HazelcastInstance.class);
+        // Config c = hazelcast.getConfig();
+        // c.setClassLoader(Thread.currentThread().getContextClassLoader());
         timerService = getService(TimerService.class);
         registry = HazelcastSessionStorageServiceRegistry.getRegistry();
         registry.addService(ConfigurationService.class, configService);

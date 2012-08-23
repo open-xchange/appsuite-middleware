@@ -68,7 +68,9 @@ public enum GrizzlyExceptionCode implements OXExceptionCode {
     /** The following needed service is missing: "%1$s" */
     NEEDED_SERVICE_MISSING(NEEDED_SERVICE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 2),
     /** The maximum number of HTTP sessions (%1$n) is exceeded */
-    MAX_NUMBER_OF_SESSIONS_REACHED(MAX_NUMBER_OF_SESSIONS_REACHED_MSG, CATEGORY_ERROR, 3)
+    MAX_NUMBER_OF_SESSIONS_REACHED(MAX_NUMBER_OF_SESSIONS_REACHED_MSG, CATEGORY_ERROR, 3),
+    /** The maximum number of HTTP sessions (%1$n) is exceeded */
+    GRIZZLY_FEATURE_MISSING(GRIZZLY_FEATURE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 4)
     ;
 
     private final String message;

@@ -60,6 +60,7 @@ import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.soap.cxf.TransformGenericElementsInterceptor;
 
 /**
  * {@link CXFActivator} - The activator for CXF bundle.
@@ -153,11 +154,7 @@ public class CXFActivator extends HousekeepingActivator {
                             /*
                              * Add interceptors here
                              */
-                            //bus.getInInterceptors().add(new RemoveGenericLabelledElementsInterceptor());
-                            /*
-                             * Set properties
-                             */
-                            bus.setProperty("set-jaxb-validation-event-handler", Boolean.FALSE); // maybe "true" needs to be set instead of Boolean.FALSE
+                            bus.getInInterceptors().add(new TransformGenericElementsInterceptor());
                             /*
                              * Apply as default bus
                              */
