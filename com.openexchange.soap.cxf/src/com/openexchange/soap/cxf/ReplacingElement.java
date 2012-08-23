@@ -95,6 +95,10 @@ class ReplacingElement {
         return childPosition++;
     }
 
+    public void resetChildPosition() {
+        childPosition = 0;
+    }
+
     @Override
     public String toString() {
         return "ReplacingElement \"" + original + "\" -> \"" + expected + "\"";
