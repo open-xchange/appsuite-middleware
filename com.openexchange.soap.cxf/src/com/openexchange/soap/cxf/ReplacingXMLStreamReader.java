@@ -62,8 +62,14 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import org.apache.cxf.message.Exchange;
 import org.apache.cxf.service.model.BindingOperationInfo;
+import org.apache.cxf.service.model.MessagePartInfo;
 import org.apache.cxf.service.model.ServiceModelUtil;
 import org.apache.cxf.staxutils.DepthXMLStreamReader;
+import org.apache.ws.commons.schema.XmlSchemaAnnotated;
+import org.apache.ws.commons.schema.XmlSchemaComplexType;
+import org.apache.ws.commons.schema.XmlSchemaElement;
+import org.apache.ws.commons.schema.XmlSchemaSequence;
+import org.apache.ws.commons.schema.XmlSchemaSequenceMember;
 
 final class ReplacingXMLStreamReader extends DepthXMLStreamReader {
 
@@ -149,8 +155,26 @@ final class ReplacingXMLStreamReader extends DepthXMLStreamReader {
     }
 
     private QName getExpected(final QName name) {
-        BindingOperationInfo bop = ServiceModelUtil.getOperation(exchange, name);
-        // FIXME
+        final BindingOperationInfo bop;
+        if (null == name) {
+            bop = exchange.getBindingOperationInfo();
+        } else {
+            bop = ServiceModelUtil.getOperation(exchange, name);
+        }
+        List<MessagePartInfo> parts = bop.getOperationInfo().getInput().getMessageParts();
+        for (MessagePartInfo part : parts) {
+            XmlSchemaAnnotated schema = part.getXmlSchema();
+
+            if (schema instanceof XmlSchemaElement && ((XmlSchemaElement) schema).getSchemaType() instanceof XmlSchemaComplexType) {
+                XmlSchemaComplexType cplxType = (XmlSchemaComplexType) ((XmlSchemaElement) schema).getSchemaType();
+                XmlSchemaSequence seq = (XmlSchemaSequence) cplxType.getParticle();
+                for (XmlSchemaSequenceMember item : seq.getItems()) {
+                    XmlSchemaElement elChild = (XmlSchemaElement) item;
+                    QName name2 = elChild.getQName();
+                    System.out.println(name2);
+                }
+            }
+        }
         return null;
     }
 
