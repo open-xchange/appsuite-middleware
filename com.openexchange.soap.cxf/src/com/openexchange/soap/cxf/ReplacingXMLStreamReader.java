@@ -69,13 +69,13 @@ import org.apache.ws.commons.schema.XmlSchemaAnnotated;
 import org.apache.ws.commons.schema.XmlSchemaComplexType;
 import org.apache.ws.commons.schema.XmlSchemaElement;
 import org.apache.ws.commons.schema.XmlSchemaSequence;
-import org.apache.ws.commons.schema.XmlSchemaSequenceMember;
 
 final class ReplacingXMLStreamReader extends DepthXMLStreamReader {
 
     private final Exchange exchange;
     private final Stack<List<ParsingEvent>> pushedAheadEvents;
     private final Stack<ParsingEvent> pushedBackEvents;
+    private boolean replacing = false;
     private ParsingEvent currentEvent;
     private QName lastNonGeneric;
     private int genericAttributePos;
@@ -109,6 +109,7 @@ final class ReplacingXMLStreamReader extends DepthXMLStreamReader {
             attributesIndexed = false;
             final QName theName = super.getName();
             if (isGeneric(theName)) {
+                replacing = true;
                 genericAttributePos++;
                 QName expected = getExpected(lastNonGeneric);
                 String prefix = theName.getPrefix();
@@ -137,6 +138,11 @@ final class ReplacingXMLStreamReader extends DepthXMLStreamReader {
                         pushedAheadEvents.push(Collections.singletonList(createEndElementEvent(expected)));
                     }
                 }
+            } else if (replacing && isEmptyURI(theName)) {
+                // TODO
+                QName expected = getExpected(theName);
+                currentEvent = createStartElementEvent(expected);
+                pushedAheadEvents.push(Collections.singletonList(createEndElementEvent(expected)));
             } else {
                 currentEvent = null;
                 lastNonGeneric = theName;
@@ -154,7 +160,6 @@ final class ReplacingXMLStreamReader extends DepthXMLStreamReader {
         } else {
             currentEvent = null;
         }
-
         return event;
     }
 
@@ -169,7 +174,6 @@ final class ReplacingXMLStreamReader extends DepthXMLStreamReader {
         List<MessagePartInfo> parts = bop.getOperationInfo().getInput().getMessageParts();
         for (MessagePartInfo part : parts) {
             XmlSchemaAnnotated schema = part.getXmlSchema();
-
             if (schema instanceof XmlSchemaElement && ((XmlSchemaElement) schema).getSchemaType() instanceof XmlSchemaComplexType) {
                 XmlSchemaComplexType cplxType = (XmlSchemaComplexType) ((XmlSchemaElement) schema).getSchemaType();
                 XmlSchemaSequence seq = (XmlSchemaSequence) cplxType.getParticle();
@@ -376,6 +380,10 @@ final class ReplacingXMLStreamReader extends DepthXMLStreamReader {
     private static boolean isGeneric(final QName name) {
         final String localPart = name.getLocalPart();
         return null != localPart && localPart.toLowerCase(Locale.US).startsWith("c-gensym");
+    }
+
+    private static boolean isEmptyURI(QName name) {
+        return XMLConstants.NULL_NS_URI.equals(name.getNamespaceURI());
     }
 
     private static boolean isEmptyQName(final QName qname) {

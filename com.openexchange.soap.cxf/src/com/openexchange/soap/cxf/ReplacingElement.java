@@ -49,42 +49,49 @@
 
 package com.openexchange.soap.cxf;
 
-import java.io.InputStream;
-import javax.xml.stream.XMLStreamReader;
-import org.apache.commons.logging.Log;
-import org.apache.cxf.interceptor.AbstractInDatabindingInterceptor;
-import org.apache.cxf.interceptor.DocLiteralInInterceptor;
-import org.apache.cxf.interceptor.Fault;
-import org.apache.cxf.message.Exchange;
-import org.apache.cxf.message.Message;
-import org.apache.cxf.phase.Phase;
-import org.apache.cxf.service.model.BindingOperationInfo;
-import org.apache.cxf.staxutils.transform.TransformUtils;
+import javax.xml.namespace.QName;
+import org.apache.ws.commons.schema.XmlSchemaElement;
 
 /**
- * {@link TransformGenericElementsInterceptor}
+ * {@link ReplacingElement} remembers all values when some XML tag needs to be replaced within the {@link ReplacingXMLStreamReader}.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class TransformGenericElementsInterceptor extends AbstractInDatabindingInterceptor {
+class ReplacingElement {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(TransformGenericElementsInterceptor.class);
+    private final QName original;
+    private QName expected;
+    private XmlSchemaElement xmlSchema;
+    private int childPosition = 0;
 
-    public TransformGenericElementsInterceptor() {
-        super(Phase.UNMARSHAL);
-        addBefore(DocLiteralInInterceptor.class.getName());
+    public ReplacingElement(QName original) {
+        super();
+        this.original = original;
     }
 
-    @Override
-    public void handleMessage(Message message) throws Fault {
-        XMLStreamReader reader = message.getContent(XMLStreamReader.class);
-        InputStream is = message.getContent(InputStream.class);
-        reader = TransformUtils.createNewReaderIfNeeded(reader, is);
-        Exchange exchange = message.getExchange();
-        BindingOperationInfo bop = getBindingOperationInfo(exchange, reader.getName(), isRequestor(message));
-        // Create transforming reader
-        reader = new ReplacingXMLStreamReader2(bop, reader);
-        message.setContent(XMLStreamReader.class, reader);
-        message.removeContent(InputStream.class);
+    public ReplacingElement(QName original, QName expected) {
+        super();
+        this.original = original;
+        this.expected = expected;
+    }
+
+    public QName getExpected() {
+        return expected;
+    }
+
+    public void setExpected(QName expected) {
+        this.expected = expected;
+    }
+
+    public XmlSchemaElement getXmlSchema() {
+        return xmlSchema;
+    }
+
+    public void setXmlSchema(XmlSchemaElement xmlSchema) {
+        this.xmlSchema = xmlSchema;
+    }
+
+    public int nextChildPosition() {
+        return childPosition++;
     }
 }
