@@ -94,4 +94,9 @@ class ReplacingElement {
     public int nextChildPosition() {
         return childPosition++;
     }
+
+    @Override
+    public String toString() {
+        return "ReplacingElement \"" + original + "\" -> \"" + expected + "\"";
+    }
 }
