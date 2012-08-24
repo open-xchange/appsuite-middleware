@@ -47,18 +47,14 @@
  *
  */
 
-package com.openexchange.file.storage.cmis;
+package com.openexchange.file.storage.cmis.http;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigInteger;
-import java.net.HttpURLConnection;
 import java.net.URI;
-import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -68,16 +64,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.zip.GZIPOutputStream;
-import org.apache.chemistry.opencmis.client.bindings.impl.ClientVersion;
 import org.apache.chemistry.opencmis.client.bindings.impl.CmisBindingsHelper;
 import org.apache.chemistry.opencmis.client.bindings.spi.BindingSession;
-import org.apache.chemistry.opencmis.client.bindings.spi.http.HttpInvoker;
+import org.apache.chemistry.opencmis.client.bindings.spi.http.AbstractHttpInvoker;
 import org.apache.chemistry.opencmis.client.bindings.spi.http.HttpUtils.Output;
 import org.apache.chemistry.opencmis.client.bindings.spi.http.HttpUtils.Response;
 import org.apache.chemistry.opencmis.commons.SessionParameter;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisConnectionException;
 import org.apache.chemistry.opencmis.commons.impl.UrlBuilder;
-import org.apache.chemistry.opencmis.commons.spi.AuthenticationProvider;
 import org.apache.commons.logging.Log;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -101,7 +95,6 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
-import com.openexchange.file.storage.cmis.http.NTLMSchemeFactory;
 import com.openexchange.java.Streams;
 
 /**
@@ -109,190 +102,9 @@ import com.openexchange.java.Streams;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class CMISFileStorageHttpInvoker implements HttpInvoker {
+public class CMISFileStorageHttpInvoker extends AbstractHttpInvoker {
 
     private static final Log log = com.openexchange.log.Log.loggerFor(CMISFileStorageHttpInvoker.class);
-
-    private static final class ResourceReleasingInputStream extends BufferedInputStream {
-
-        private static final int defaultBufferSize = 8192;
-
-        private final DefaultHttpClient httpClient;
-
-        private final HttpRequestBase httpRequest;
-
-        public ResourceReleasingInputStream(InputStream in, HttpRequestBase httpRequest, DefaultHttpClient httpClient) {
-            this(in, defaultBufferSize, httpRequest, httpClient);
-        }
-
-        public ResourceReleasingInputStream(InputStream in, final int size, HttpRequestBase httpRequest, DefaultHttpClient httpClient) {
-            super(in, size);
-            this.httpRequest = httpRequest;
-            this.httpClient = httpClient;
-        }
-
-        private static BufferedInputStream toBufferedInputStream(InputStream in, final int size) {
-            if (in instanceof BufferedInputStream) {
-                return (BufferedInputStream) in;
-            }
-            return new BufferedInputStream(in, size);
-        }
-
-        @Override
-        public int read() throws IOException {
-            try {
-                return in.read();
-            } catch (final IOException ex) {
-                // In case of an IOException the connection will be released
-                // back to the connection manager automatically
-
-                // Closing the input stream will trigger connection release
-                close();
-                throw ex;
-            } catch (final RuntimeException ex) {
-                // In case of an unexpected exception you may want to abort
-                // the HTTP request in order to shut down the underlying
-                // connection immediately.
-                httpRequest.abort();
-                // Closing the input stream will trigger connection release
-                close();
-                throw ex;
-            }
-        }
-
-        @Override
-        public int read(byte b[]) throws IOException {
-            try {
-                return read(b, 0, b.length);
-            } catch (final IOException ex) {
-                // In case of an IOException the connection will be released
-                // back to the connection manager automatically
-
-                // Closing the input stream will trigger connection release
-                close();
-                throw ex;
-            } catch (final RuntimeException ex) {
-                // In case of an unexpected exception you may want to abort
-                // the HTTP request in order to shut down the underlying
-                // connection immediately.
-                httpRequest.abort();
-                // Closing the input stream will trigger connection release
-                close();
-                throw ex;
-            }
-        }
-
-        @Override
-        public int read(byte b[], int off, int len) throws IOException {
-            try {
-                return in.read(b, off, len);
-            } catch (final IOException ex) {
-                // In case of an IOException the connection will be released
-                // back to the connection manager automatically
-
-                // Closing the input stream will trigger connection release
-                close();
-                throw ex;
-            } catch (final RuntimeException ex) {
-                // In case of an unexpected exception you may want to abort
-                // the HTTP request in order to shut down the underlying
-                // connection immediately.
-                httpRequest.abort();
-                // Closing the input stream will trigger connection release
-                close();
-                throw ex;
-            }
-        }
-
-        @Override
-        public long skip(long n) throws IOException {
-            try {
-                return in.skip(n);
-            } catch (final IOException ex) {
-                // In case of an IOException the connection will be released
-                // back to the connection manager automatically
-
-                // Closing the input stream will trigger connection release
-                close();
-                throw ex;
-            } catch (final RuntimeException ex) {
-                // In case of an unexpected exception you may want to abort
-                // the HTTP request in order to shut down the underlying
-                // connection immediately.
-                httpRequest.abort();
-                // Closing the input stream will trigger connection release
-                close();
-                throw ex;
-            }
-        }
-
-        @Override
-        public int available() throws IOException {
-            try {
-                return in.available();
-            } catch (final IOException ex) {
-                // In case of an IOException the connection will be released
-                // back to the connection manager automatically
-
-                // Closing the input stream will trigger connection release
-                close();
-                throw ex;
-            } catch (final RuntimeException ex) {
-                // In case of an unexpected exception you may want to abort
-                // the HTTP request in order to shut down the underlying
-                // connection immediately.
-                httpRequest.abort();
-                // Closing the input stream will trigger connection release
-                close();
-                throw ex;
-            }
-        }
-
-        @Override
-        public void close() {
-            // Safely close stream and...
-            Streams.close(in);
-            // ... release HTTP resources immediately
-            if (null != httpRequest) {
-                httpRequest.reset();
-            }
-            if (null != httpClient) {
-                httpClient.getConnectionManager().shutdown();
-            }
-        }
-
-        @Override
-        public void mark(int readlimit) {
-            in.mark(readlimit);
-        }
-
-        @Override
-        public void reset() throws IOException {
-            try {
-                in.reset();
-            } catch (final IOException ex) {
-                // In case of an IOException the connection will be released
-                // back to the connection manager automatically
-
-                // Closing the input stream will trigger connection release
-                close();
-                throw ex;
-            } catch (final RuntimeException ex) {
-                // In case of an unexpected exception you may want to abort
-                // the HTTP request in order to shut down the underlying
-                // connection immediately.
-                httpRequest.abort();
-                // Closing the input stream will trigger connection release
-                close();
-                throw ex;
-            }
-        }
-
-        @Override
-        public boolean markSupported() {
-            return in.markSupported();
-        }
-    }
 
     /**
      * The HTTPS identifier constant.
@@ -312,13 +124,15 @@ public class CMISFileStorageHttpInvoker implements HttpInvoker {
     }
 
     @Override
-    public Response invoke(UrlBuilder urlBuilder, String method, String contentType, Map<String, String> headers, Output writer, BindingSession session, BigInteger offset, BigInteger length) throws Exception {
-        Object ntlm = session.get("org.apache.chemistry.opencmis.binding.auth.ntlm");
-        if (null == ntlm || !Boolean.parseBoolean(ntlm.toString().trim())) {
-            return doCommonInvoke(urlBuilder, method, contentType, headers, writer, session, offset, length);
-        }
+    protected boolean invokeCustom(UrlBuilder urlBuilder, String method, String contentType, Map<String, String> headers, Output writer, BindingSession session, BigInteger offset, BigInteger length) {
+        final Object ntlm = session.get("org.apache.chemistry.opencmis.binding.auth.ntlm");
+        return (null != ntlm && Boolean.parseBoolean(ntlm.toString().trim()));
+    }
+
+    @Override
+    protected Response doInvokeCustom(UrlBuilder urlBuilder, String method, String contentType, Map<String, String> headers, Output writer, BindingSession session, BigInteger offset, BigInteger length) throws Exception {
         /*
-         * NTLM <GET> request
+         * NTLM request
          */
         DefaultHttpClient httpClient = null;
         HttpRequestBase httpRequest = null;
@@ -367,7 +181,10 @@ public class CMISFileStorageHttpInvoker implements HttpInvoker {
                 final HttpDelete httpDelete = new HttpDelete(uri);
                 httpRequest = httpDelete;
             } else {
-                throw new CmisConnectionException("Unsupported method: " + (method == null ? "null" : method));
+                if (null == method) {
+                    throw new CmisConnectionException("Missing method.");
+                }
+                throw new CmisConnectionException("Unsupported method: " + method);
             }
 
             // Set content type
@@ -528,134 +345,6 @@ public class CMISFileStorageHttpInvoker implements HttpInvoker {
             return client;
         } catch (final GeneralSecurityException e) {
             throw new RuntimeException(e);
-        }
-    }
-
-    private Response doCommonInvoke(UrlBuilder url, String method, String contentType, Map<String, String> headers, Output writer, BindingSession session, BigInteger offset, BigInteger length) {
-        try {
-            // log before connect
-            if (log.isDebugEnabled()) {
-                log.debug(method + " " + url);
-            }
-
-            // connect
-            final HttpURLConnection conn = (HttpURLConnection) (new URL(url.toString())).openConnection();
-            conn.setRequestMethod(method);
-            conn.setDoInput(true);
-            conn.setDoOutput(writer != null);
-            conn.setAllowUserInteraction(false);
-            conn.setUseCaches(false);
-            conn.setRequestProperty("User-Agent", ClientVersion.OPENCMIS_CLIENT);
-
-            // timeouts
-            int connectTimeout = session.get(SessionParameter.CONNECT_TIMEOUT, -1);
-            if (connectTimeout >= 0) {
-                conn.setConnectTimeout(connectTimeout);
-            }
-
-            int readTimeout = session.get(SessionParameter.READ_TIMEOUT, -1);
-            if (readTimeout >= 0) {
-                conn.setReadTimeout(readTimeout);
-            }
-
-            // set content type
-            if (contentType != null) {
-                conn.setRequestProperty("Content-Type", contentType);
-            }
-            // set other headers
-            if (headers != null) {
-                for (Map.Entry<String, String> header : headers.entrySet()) {
-                    conn.addRequestProperty(header.getKey(), header.getValue());
-                }
-            }
-
-            // authenticate
-            AuthenticationProvider authProvider = CmisBindingsHelper.getAuthenticationProvider(session);
-            if (authProvider != null) {
-                Map<String, List<String>> httpHeaders = authProvider.getHTTPHeaders(url.toString());
-                if (httpHeaders != null) {
-                    for (Map.Entry<String, List<String>> header : httpHeaders.entrySet()) {
-                        if (header.getValue() != null) {
-                            for (String value : header.getValue()) {
-                                conn.addRequestProperty(header.getKey(), value);
-                            }
-                        }
-                    }
-                }
-            }
-
-            // range
-            if ((offset != null) || (length != null)) {
-                StringBuilder sb = new StringBuilder("bytes=");
-
-                if ((offset == null) || (offset.signum() == -1)) {
-                    offset = BigInteger.ZERO;
-                }
-
-                sb.append(offset.toString());
-                sb.append("-");
-
-                if ((length != null) && (length.signum() == 1)) {
-                    sb.append(offset.add(length.subtract(BigInteger.ONE)).toString());
-                }
-
-                conn.setRequestProperty("Range", sb.toString());
-            }
-
-            // compression
-            Object compression = session.get(SessionParameter.COMPRESSION);
-            if ((compression != null) && Boolean.parseBoolean(compression.toString())) {
-                conn.setRequestProperty("Accept-Encoding", "gzip,deflate");
-            }
-
-            // locale
-            if (session.get(CmisBindingsHelper.ACCEPT_LANGUAGE) instanceof String) {
-                conn.setRequestProperty("Accept-Language", session.get(CmisBindingsHelper.ACCEPT_LANGUAGE).toString());
-            }
-
-            // send data
-            if (writer != null) {
-                conn.setChunkedStreamingMode((64 * 1024) - 1);
-
-                OutputStream connOut = null;
-
-                Object clientCompression = session.get(SessionParameter.CLIENT_COMPRESSION);
-                if ((clientCompression != null) && Boolean.parseBoolean(clientCompression.toString())) {
-                    conn.setRequestProperty("Content-Encoding", "gzip");
-                    connOut = new GZIPOutputStream(conn.getOutputStream(), 4096);
-                } else {
-                    connOut = conn.getOutputStream();
-                }
-
-                OutputStream out = new BufferedOutputStream(connOut, BUFFER_SIZE);
-                writer.write(out);
-                out.flush();
-            }
-
-            // connect
-            conn.connect();
-
-            // get stream, if present
-            int respCode = conn.getResponseCode();
-            InputStream inputStream = null;
-            if ((respCode == 200) || (respCode == 201) || (respCode == 203) || (respCode == 206)) {
-                inputStream = conn.getInputStream();
-            }
-
-            // log after connect
-            if (log.isTraceEnabled()) {
-                log.trace(method + " " + url + " > Headers: " + conn.getHeaderFields());
-            }
-
-            // forward response HTTP headers
-            if (authProvider != null) {
-                authProvider.putResponseHeaders(url.toString(), respCode, conn.getHeaderFields());
-            }
-
-            // get the response
-            return new Response(respCode, conn.getResponseMessage(), conn.getHeaderFields(), inputStream, conn.getErrorStream());
-        } catch (Exception e) {
-            throw new CmisConnectionException("Cannot access " + url + ": " + e.getMessage(), e);
         }
     }
 

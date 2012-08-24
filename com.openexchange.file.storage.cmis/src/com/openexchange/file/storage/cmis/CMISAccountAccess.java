@@ -68,6 +68,7 @@ import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.cmis.http.CMISFileStorageHttpInvoker;
 import com.openexchange.session.Session;
 
 /**
