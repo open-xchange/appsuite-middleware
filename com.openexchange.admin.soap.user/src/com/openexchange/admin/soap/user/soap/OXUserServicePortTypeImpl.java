@@ -480,8 +480,14 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
             return null;
         }
         final com.openexchange.admin.rmi.dataobjects.Credentials credentials = new com.openexchange.admin.rmi.dataobjects.Credentials();
-        credentials.setLogin(soapCredentials.getLogin());
-        credentials.setPassword(soapCredentials.getPassword());
+        String login = soapCredentials.getLogin();
+        if (null != login) {
+            credentials.setLogin(login);
+        }
+        String password = soapCredentials.getPassword();
+        if (null !=password) {
+            credentials.setPassword(password);
+        }
         return credentials;
     }
 
@@ -1206,10 +1212,22 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
             return null;
         }
         final com.openexchange.admin.rmi.dataobjects.Group group = new com.openexchange.admin.rmi.dataobjects.Group();
-        group.setDisplayname(soapGroup.getDisplayname());
-        group.setId(soapGroup.getId());
-        group.setMembers(soapGroup.getMembers().toArray(new Integer[0]));
-        group.setName(soapGroup.getName());
+        String displayname = soapGroup.getDisplayname();
+        if (null != displayname) {
+            group.setDisplayname(displayname);
+        }
+        Integer id = soapGroup.getId();
+        if (null != id) {
+            group.setId(id);
+        }
+        List<Integer> members = soapGroup.getMembers();
+        if (null != members) {
+            group.setMembers(members.toArray(new Integer[0]));
+        }
+        String name = soapGroup.getName();
+        if (null != name) {
+            group.setName(name);
+        }
         return group;
     }
 
@@ -1230,18 +1248,64 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
             return null;
         }
         final com.openexchange.admin.rmi.dataobjects.Context ret = new com.openexchange.admin.rmi.dataobjects.Context();
-        ret.setAverage_size(soapContext.getAverageSize());
-        ret.setEnabled(soapContext.isEnabled());
-        ret.setFilestore_name(soapContext.getFilestoreName());
-        ret.setFilestoreId(soapContext.getFilestoreId());
-        ret.setId(soapContext.getId());
-        ret.setLoginMappings(new HashSet<String>(soapContext.getLoginMappings()));
-        ret.setMaxQuota(soapContext.getMaxQuota());
-        ret.setName(soapContext.getName());
-        ret.setUsedQuota(soapContext.getUsedQuota());
-        ret.setReadDatabase(soap2Database(soapContext.getReadDatabase()));
-        ret.setWriteDatabase(soap2Database(soapContext.getWriteDatabase()));
-        ret.setUserAttributes(soap2MapMap(soapContext.getUserAttributes()));
+
+        Long lng = soapContext.getAverageSize();
+        if (null != lng) {
+            ret.setAverage_size(lng);
+        }
+
+        Boolean enabled = soapContext.isEnabled();
+        if (null != enabled) {
+            ret.setEnabled(enabled);
+        }
+
+        String s = soapContext.getFilestoreName();
+        if (null != s) {
+            ret.setFilestore_name(s);
+        }
+
+        Integer itg = soapContext.getFilestoreId();
+        if (null != itg) {
+            ret.setFilestoreId(itg);
+        }
+
+        itg = soapContext.getId();
+        ret.setId(itg);
+
+        List<String> loginMappings = soapContext.getLoginMappings();
+        if (null != loginMappings) {
+            ret.setLoginMappings(new HashSet<String>(loginMappings));
+        }
+
+        lng = soapContext.getMaxQuota();
+        if (null != lng) {
+            ret.setMaxQuota(lng);
+        }
+
+        String name = soapContext.getName();
+        if (null != name) {
+            ret.setName(name);
+        }
+
+        Long usedQuota = soapContext.getUsedQuota();
+        if (null != usedQuota) {
+            ret.setUsedQuota(usedQuota);
+        }
+
+        Database readDatabase = soapContext.getReadDatabase();
+        if (null != readDatabase) {
+            ret.setReadDatabase(soap2Database(readDatabase));
+        }
+
+        Database writeDatabase = soapContext.getWriteDatabase();
+        if (null != writeDatabase) {
+            ret.setWriteDatabase(soap2Database(writeDatabase));
+        }
+
+        SOAPStringMapMap userAttributes = soapContext.getUserAttributes();
+        if (null != userAttributes) {
+            ret.setUserAttributes(soap2MapMap(userAttributes));
+        }
         return ret;
     }
 
@@ -1250,22 +1314,81 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
             return null;
         }
         final com.openexchange.admin.rmi.dataobjects.Database ret = new com.openexchange.admin.rmi.dataobjects.Database();
-        ret.setClusterWeight(soapDatabase.getClusterWeight());
-        ret.setCurrentUnits(soapDatabase.getCurrentUnits());
-        ret.setDriver(soapDatabase.getDriver());
-        ret.setId(soapDatabase.getId());
-        ret.setLogin(soapDatabase.getLogin());
-        ret.setMaster(soapDatabase.isMaster());
-        ret.setMasterId(soapDatabase.getMasterId());
-        ret.setMaxUnits(soapDatabase.getMaxUnits());
-        ret.setName(soapDatabase.getName());
-        ret.setPassword(soapDatabase.getPassword());
-        ret.setPoolHardLimit(soapDatabase.getPoolHardLimit());
-        ret.setPoolInitial(soapDatabase.getPoolInitial());
-        ret.setPoolMax(soapDatabase.getPoolMax());
-        ret.setRead_id(soapDatabase.getReadId());
-        ret.setScheme(soapDatabase.getScheme());
-        ret.setUrl(soapDatabase.getUrl());
+
+        Integer itg = soapDatabase.getClusterWeight();
+        if (itg != null) {
+            ret.setClusterWeight(itg);
+        }
+
+        itg = soapDatabase.getCurrentUnits();
+        if (itg != null) {
+            ret.setCurrentUnits(itg);
+        }
+
+        String tmp = soapDatabase.getDriver();
+        if (tmp != null) {
+            ret.setDriver(tmp);
+        }
+
+        itg = soapDatabase.getId();
+        if (itg != null) {
+            ret.setId(itg);
+        }
+
+        tmp = soapDatabase.getLogin();
+        if (tmp != null) {
+            ret.setLogin(tmp);
+        }
+
+        itg = soapDatabase.getMasterId();
+        if (itg != null) {
+            ret.setMasterId(itg);
+        }
+
+        itg = soapDatabase.getMaxUnits();
+        if (itg != null) {
+            ret.setMaxUnits(itg);
+        }
+
+        tmp = soapDatabase.getName();
+        if (tmp != null) {
+            ret.setName(tmp);
+        }
+
+        tmp = soapDatabase.getPassword();
+        if (tmp != null) {
+            ret.setPassword(tmp);
+        }
+
+        itg = soapDatabase.getPoolHardLimit();
+        if (itg != null) {
+            ret.setPoolHardLimit(itg);
+        }
+
+        itg = soapDatabase.getPoolInitial();
+        if (itg != null) {
+            ret.setPoolInitial(itg);
+        }
+
+        itg = soapDatabase.getPoolMax();
+        if (itg != null) {
+            ret.setPoolMax(itg);
+        }
+
+        itg = soapDatabase.getReadId();
+        if (itg != null) {
+            ret.setRead_id(itg);
+        }
+
+        tmp = soapDatabase.getScheme();
+        if (tmp != null) {
+            ret.setScheme(tmp);
+        }
+
+        tmp = soapDatabase.getUrl();
+        if (tmp != null) {
+            ret.setUrl(tmp);
+        }
         return ret;
     }
 
@@ -1274,37 +1397,161 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
             return null;
         }
         final com.openexchange.admin.rmi.dataobjects.UserModuleAccess moduleAccess = new com.openexchange.admin.rmi.dataobjects.UserModuleAccess();
-        moduleAccess.setActiveSync(booleanValue(soapModuleAccess.isActiveSync()));
-        moduleAccess.setCalendar(booleanValue(soapModuleAccess.isCalendar()));
-        moduleAccess.setCollectEmailAddresses(booleanValue(soapModuleAccess.isCollectEmailAddresses()));
-        moduleAccess.setContacts(booleanValue(soapModuleAccess.isContacts()));
-        moduleAccess.setDelegateTask(booleanValue(soapModuleAccess.isDelegateTask()));
-        moduleAccess.setDeniedPortal(booleanValue(soapModuleAccess.isDeniedPortal()));
-        moduleAccess.setEditGroup(booleanValue(soapModuleAccess.isEditGroup()));
-        moduleAccess.setEditPassword(booleanValue(soapModuleAccess.isEditPassword()));
-        moduleAccess.setEditPublicFolders(booleanValue(soapModuleAccess.isEditPublicFolders()));
-        moduleAccess.setEditResource(booleanValue(soapModuleAccess.isEditResource()));
-        moduleAccess.setForum(booleanValue(soapModuleAccess.isForum()));
-        moduleAccess.setGlobalAddressBookDisabled(booleanValue(soapModuleAccess.isGlobalAddressBookDisabled()));
-        moduleAccess.setIcal(booleanValue(soapModuleAccess.isIcal()));
-        moduleAccess.setInfostore(booleanValue(soapModuleAccess.isInfostore()));
-        moduleAccess.setMultipleMailAccounts(booleanValue(soapModuleAccess.isMultipleMailAccounts()));
-        moduleAccess.setOLOX20(booleanValue(soapModuleAccess.isOLOX20()));
-        moduleAccess.setPinboardWrite(booleanValue(soapModuleAccess.isPinboardWrite()));
-        moduleAccess.setProjects(booleanValue(soapModuleAccess.isProjects()));
-        moduleAccess.setPublication(booleanValue(soapModuleAccess.isPublication()));
-        moduleAccess.setPublicFolderEditable(booleanValue(soapModuleAccess.isPublicFolderEditable()));
-        moduleAccess.setReadCreateSharedFolders(booleanValue(soapModuleAccess.isReadCreateSharedFolders()));
-        moduleAccess.setRssBookmarks(booleanValue(soapModuleAccess.isRssBookmarks()));
-        moduleAccess.setRssPortal(booleanValue(soapModuleAccess.isRssPortal()));
-        moduleAccess.setSubscription(booleanValue(soapModuleAccess.isSubscription()));
-        moduleAccess.setSyncml(booleanValue(soapModuleAccess.isSyncml()));
-        moduleAccess.setTasks(booleanValue(soapModuleAccess.isTasks()));
-        moduleAccess.setUSM(booleanValue(soapModuleAccess.isUSM()));
-        moduleAccess.setVcard(booleanValue(soapModuleAccess.isVcard()));
-        moduleAccess.setWebdav(booleanValue(soapModuleAccess.isWebdav()));
-        moduleAccess.setWebdavXml(booleanValue(soapModuleAccess.isWebdavXml()));
-        moduleAccess.setWebmail(booleanValue(soapModuleAccess.isWebmail()));
+        
+        Boolean activeSync = soapModuleAccess.isActiveSync();
+        if (null != activeSync) {
+            moduleAccess.setActiveSync(booleanValue(activeSync));
+        }
+        
+        Boolean calendar = soapModuleAccess.isCalendar();
+        if (null != calendar) {
+            moduleAccess.setCalendar(booleanValue(calendar));
+        }
+        
+        Boolean tmp = soapModuleAccess.isCollectEmailAddresses();
+        if (tmp != null) {
+            moduleAccess.setCollectEmailAddresses(booleanValue(tmp));
+        }
+
+        tmp = soapModuleAccess.isContacts();
+        if (tmp != null) {
+            moduleAccess.setContacts(booleanValue(tmp));
+        }
+
+        tmp = soapModuleAccess.isDelegateTask();
+        if (tmp != null) {
+            moduleAccess.setDelegateTask(booleanValue(tmp));
+        }
+
+        tmp = soapModuleAccess.isDeniedPortal();
+        if (tmp != null) {
+            moduleAccess.setDeniedPortal(booleanValue(tmp));
+        }
+
+        tmp = soapModuleAccess.isEditGroup();
+        if (tmp != null) {
+            moduleAccess.setEditGroup(booleanValue(tmp));
+        }
+
+        tmp = soapModuleAccess.isEditPassword();
+        if (tmp != null) {
+            moduleAccess.setEditPassword(booleanValue(tmp));
+        }
+
+        tmp = soapModuleAccess.isEditPublicFolders();
+        if (tmp != null) {
+            moduleAccess.setEditPublicFolders(booleanValue(tmp));
+        }
+
+        tmp = soapModuleAccess.isEditResource();
+        if (tmp != null) {
+            moduleAccess.setEditResource(booleanValue(tmp));
+        }
+
+        tmp = soapModuleAccess.isForum();
+        if (tmp != null) {
+            moduleAccess.setForum(booleanValue(tmp));
+        }
+
+        tmp = soapModuleAccess.isGlobalAddressBookDisabled();
+        if (tmp != null) {
+            moduleAccess.setGlobalAddressBookDisabled(booleanValue(tmp));
+        }
+
+        tmp = soapModuleAccess.isIcal();
+        if (tmp != null) {
+            moduleAccess.setIcal(booleanValue(tmp));
+        }
+
+        tmp = soapModuleAccess.isInfostore();
+        if (tmp != null) {
+            moduleAccess.setInfostore(booleanValue(tmp));
+        }
+
+        tmp = soapModuleAccess.isMultipleMailAccounts();
+        if (tmp != null) {
+            moduleAccess.setMultipleMailAccounts(booleanValue(tmp));
+        }
+
+        tmp = soapModuleAccess.isOLOX20();
+        if (tmp != null) {
+            moduleAccess.setOLOX20(booleanValue(tmp));
+        }
+
+        tmp = soapModuleAccess.isPinboardWrite();
+        if (tmp != null) {
+            moduleAccess.setPinboardWrite(booleanValue(tmp));
+        }
+
+        tmp = soapModuleAccess.isProjects();
+        if (tmp != null) {
+            moduleAccess.setProjects(booleanValue(tmp));
+        }
+
+        tmp = soapModuleAccess.isPublication();
+        if (tmp != null) {
+            moduleAccess.setPublication(booleanValue(tmp));
+        }
+
+        tmp = soapModuleAccess.isPublicFolderEditable();
+        if (tmp != null) {
+            moduleAccess.setPublicFolderEditable(booleanValue(tmp));
+        }
+
+        tmp = soapModuleAccess.isReadCreateSharedFolders();
+        if (tmp != null) {
+            moduleAccess.setReadCreateSharedFolders(booleanValue(tmp));
+        }
+
+        tmp = soapModuleAccess.isRssBookmarks();
+        if (tmp != null) {
+            moduleAccess.setRssBookmarks(booleanValue(tmp));
+        }
+
+        tmp = soapModuleAccess.isRssPortal();
+        if (tmp != null) {
+            moduleAccess.setRssPortal(booleanValue(tmp));
+        }
+
+        tmp = soapModuleAccess.isSubscription();
+        if (tmp != null) {
+            moduleAccess.setSubscription(booleanValue(tmp));
+        }
+
+        tmp = soapModuleAccess.isSyncml();
+        if (tmp != null) {
+            moduleAccess.setSyncml(booleanValue(tmp));
+        }
+
+        tmp = soapModuleAccess.isTasks();
+        if (tmp != null) {
+            moduleAccess.setTasks(booleanValue(tmp));
+        }
+
+        tmp = soapModuleAccess.isUSM();
+        if (tmp != null) {
+            moduleAccess.setUSM(booleanValue(tmp));
+        }
+
+        tmp = soapModuleAccess.isVcard();
+        if (tmp != null) {
+            moduleAccess.setVcard(booleanValue(tmp));
+        }
+
+        tmp = soapModuleAccess.isWebdav();
+        if (tmp != null) {
+            moduleAccess.setWebdav(booleanValue(tmp));
+        }
+
+        tmp = soapModuleAccess.isWebdavXml();
+        if (tmp != null) {
+            moduleAccess.setWebdavXml(booleanValue(tmp));
+        }
+
+        tmp = soapModuleAccess.isWebmail();
+        if (tmp != null) {
+            moduleAccess.setWebmail(booleanValue(tmp));
+        }
         return moduleAccess;
     }
 
