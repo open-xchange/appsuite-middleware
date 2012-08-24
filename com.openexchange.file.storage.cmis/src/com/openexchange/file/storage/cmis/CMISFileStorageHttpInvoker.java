@@ -462,15 +462,13 @@ public class CMISFileStorageHttpInvoker implements HttpInvoker {
                     }
                     // Releasing HTTP resources delegated to ResourceReleasingInputStream instance
                     instream = new ResourceReleasingInputStream(instream, httpRequest, httpClient);
+                    httpRequest = null;
+                    httpClient = null;
                     // Successful execution?
                     if (success) {
-                        httpRequest = null;
-                        httpClient = null;
                         return new Response(respCode, statusLine.getReasonPhrase(), respHeaders, instream, null);
                     }
                     // As error stream
-                    httpRequest = null;
-                    httpClient = null;
                     return new Response(respCode, statusLine.getReasonPhrase(), respHeaders, null, instream);
                 } catch (final RuntimeException ex) {
                     // In case of an unexpected exception you may want to abort
