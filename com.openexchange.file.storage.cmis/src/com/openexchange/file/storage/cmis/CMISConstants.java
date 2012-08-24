@@ -84,9 +84,9 @@ public final class CMISConstants implements FileStorageConstants {
     public static final String CMIS_REPOSITORY = "repository";
 
     /**
-     * The configuration property name for HTTP basic authentication.
+     * The configuration property name for authentication type: basic, soap, ntlm
      */
-    public static final String CMIS_AUTH_HTTP_BASIC = "auth.http.basic";
+    public static final String CMIS_AUTH_TYPE = "authtype";
 
     /**
      * The configuration property name for URL to CMIS server;<br>
