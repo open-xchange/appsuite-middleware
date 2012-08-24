@@ -142,8 +142,10 @@ public class NoSQLSessionStorageService implements SessionStorageService {
             CassandraHostConfigurator configurator = new CassandraHostConfigurator(CLUSTER);
             ThriftCluster thriftCluster = new ThriftCluster(CLUSTER, configurator);
             ColumnFamilyDefinition cfDefinition = HFactory.createColumnFamilyDefinition(KEYSPACE, CF_NAME);
-            cfDefinition.setMaxCompactionThreshold(128);
-            cfDefinition.setMinCompactionThreshold(16);
+            cfDefinition.setMaxCompactionThreshold(4);	// should be as low as possible
+            cfDefinition.setMinCompactionThreshold(2);	// in order to perform compactions
+            cfDefinition.setCompactionStrategy("SizeTieredCompactionStrategy"); 
+            
             thriftCluster.addKeyspace(new ThriftKsDef(
                 KEYSPACE,
                 "org.apache.cassandra.locator.SimpleStrategy",
