@@ -632,12 +632,14 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
             }
         }
         soapUser.setAssistantName(user.getAssistant_name());
-        try {
-            final GregorianCalendar c = new GregorianCalendar();
-            c.setTime(user.getBirthday());
-            soapUser.setBirthday(DatatypeFactory.newInstance().newXMLGregorianCalendar(c));
-        } catch (final DatatypeConfigurationException e) {
-            soapUser.setAnniversary(null);
+        if (null != user.getBirthday()) {
+            try {
+                final GregorianCalendar c = new GregorianCalendar();
+                c.setTime(user.getBirthday());
+                soapUser.setBirthday(DatatypeFactory.newInstance().newXMLGregorianCalendar(c));
+            } catch (final DatatypeConfigurationException e) {
+                soapUser.setAnniversary(null);
+            }
         }
         soapUser.setBranches(user.getBranches());
         soapUser.setBusinessCategory(user.getBusiness_category());
