@@ -49,6 +49,7 @@
 
 package com.openexchange.soap.cxf;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.Stack;
 import javax.xml.XMLConstants;
@@ -89,22 +90,25 @@ public class ReplacingXMLStreamReader extends StreamReaderDelegate {
             final QName name = super.getName();
             ReplacingElement element = new ReplacingElement(name);
             stack.push(element);
+            final QName expected;
+            final XmlSchemaElement schema;
             if (isGeneric(name)) {
                 String typeName = findType();
-                QName expected = getExpected(stack.get(stack.size() - 2), typeName);
-                element.setExpected(expected);
-                element.setXmlSchema(getChildSchema(stack.get(stack.size() - 2), expected));
-                current = element;
+                schema = getChildSchema(stack.get(stack.size() - 2), typeName);
             } else if (isEmptyURI(name)) {
-                XmlSchemaElement schema = getChildSchema(stack.get(stack.size() - 2), name);
-                QName expected = schema.getQName();
-                element.setExpected(expected);
+                schema = getChildSchema(stack.get(stack.size() - 2), name.getLocalPart());
+            } else {
+                schema = null;
+            }
+            if (null != schema) {
                 element.setXmlSchema(schema);
+                expected = schema.getQName();
                 current = element;
             } else {
-                element.setExpected(name);
+                expected = name;
                 current = null;
             }
+            element.setExpected(expected);
         } else if (XMLStreamConstants.END_ELEMENT == event && !stack.empty()) {
             current = stack.pop();
         } else {
@@ -123,32 +127,32 @@ public class ReplacingXMLStreamReader extends StreamReaderDelegate {
         return null == current ? super.getNamespaceURI() : current.getExpected().getNamespaceURI();
     }
 
-    private static QName getExpected(ReplacingElement parent, String typeName) throws XMLStreamException {
+    private static XmlSchemaElement getChildSchema(ReplacingElement parent, String name) {
         XmlSchemaElement schema = parent.getXmlSchema();
         if (schema.getSchemaType() instanceof XmlSchemaComplexType) {
             XmlSchemaComplexType cplxType = (XmlSchemaComplexType) schema.getSchemaType();
             XmlSchemaSequence seq = (XmlSchemaSequence) cplxType.getParticle();
-            XmlSchemaElement child = (XmlSchemaElement) seq.getItems().get(parent.nextChildPosition());
-            return child.getQName();
+            if (null == name) {
+                return byPosition(parent, seq.getItems());
+            }
+            return byName(parent, seq.getItems(), name);
         }
-        throw new XMLStreamException("Complex type expected.");
+        return null;
     }
 
-    private static XmlSchemaElement getChildSchema(ReplacingElement parent, QName name) {
-        String localPart = name.getLocalPart();
-        XmlSchemaElement schema = parent.getXmlSchema();
-        if (schema.getSchemaType() instanceof XmlSchemaComplexType) {
-            XmlSchemaComplexType cplxType = (XmlSchemaComplexType) schema.getSchemaType();
-            XmlSchemaSequence seq = (XmlSchemaSequence) cplxType.getParticle();
-            parent.resetChildPosition();
-            for (XmlSchemaSequenceMember member : seq.getItems()) {
-                parent.nextChildPosition();
-                XmlSchemaElement element = (XmlSchemaElement) member;
-                String schemaTypeName = element.getSchemaTypeName().getLocalPart();
-                String attributeName = element.getName();
-                if (localPart.equals(schemaTypeName) || localPart.equals(attributeName)) {
-                    return element;
-                }
+    private static XmlSchemaElement byPosition(ReplacingElement parent, List<XmlSchemaSequenceMember> childs) {
+        return (XmlSchemaElement) childs.get(parent.nextChildPosition());
+    }
+
+    private static XmlSchemaElement byName(ReplacingElement parent, List<XmlSchemaSequenceMember> childs, String name) {
+        parent.resetChildPosition();
+        for (XmlSchemaSequenceMember member : childs) {
+            parent.nextChildPosition();
+            XmlSchemaElement element = (XmlSchemaElement) member;
+            String schemaTypeName = element.getSchemaTypeName().getLocalPart();
+            String attributeName = element.getName();
+            if (name.equals(schemaTypeName) || name.equals(attributeName)) {
+                return element;
             }
         }
         return null;
@@ -161,7 +165,12 @@ public class ReplacingXMLStreamReader extends StreamReaderDelegate {
         for (int i = 0; i < getAttributeCount(); i++) {
             String name = getAttributeLocalName(i);
             if ("type".equals(name)) {
-                return getAttributeValue(i);
+                String value = getAttributeValue(i);
+                int pos = value.indexOf(':');
+                if (-1 == pos) {
+                    return value;
+                }
+                return value.substring(pos + 1);
             }
         }
         return null;
