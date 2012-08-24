@@ -11,11 +11,16 @@ import com.openexchange.realtime.atmosphere.presence.PresenceStatusToJSONConvert
 import com.openexchange.realtime.example.presence.PresenceService;
 
 /**
- * {@link AtmospherePresenceActivator} - Register the presence specific payload converters. The SimpleConverterActivator listens for
- * registrations of new SimplePayloadConverters. When we register our presence specific SimplePayloadConverters they are wrapped in a
- * PayloadConverterAdapter and registered as ResultConverter service so they can be added to the DefaultConverter (as the
- * DispatcherActivator is listening for new ResultConverter services) which then can be used by the {@link Payload} to convert itself via
- * the conversion service offered by the {@link DefaultConverter}
+ * {@link AtmospherePresenceActivator} - Register the presence specific payload converters as SimplePayloadConverters and add a new
+ * OXRTHandler service that can handle incoming and outgoing Stanzas.
+ * <ol>
+ * <li>The <code>SimpleConverterActivator</code> listens for registrations of new <code>SimplePayloadConverters</code>.</li>
+ * <li>When we register our presence specific <code>SimplePayloadConverters</code> the <code>SimpleconverterActivator</code> wraps them in a
+ * <code>PayloadConverterAdapter</code> and registers them as <code>ResultConverter</code> services</li>
+ * <li>The <code>DispatcherActivator</code> is listening for new <code>ResultConverter</code> services and adds them to the
+ * <code>DefaultConverter</code></li>
+ * <li>The presence <code>Payload</code> can then convert itself via the conversion service offered by the <code>DefaultConverter</code></li>
+ * </ol>
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
@@ -25,7 +30,7 @@ public class AtmospherePresenceActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-//        return new Class[] { PresenceSubscriptionService.class, PresenceStatusService.class };
+        // return new Class[] { PresenceSubscriptionService.class, PresenceStatusService.class };
         return new Class[] {};
     }
 
@@ -40,13 +45,10 @@ public class AtmospherePresenceActivator extends HousekeepingActivator {
 
         /*
          * After adding the new SimplePayloadConverters that are able to convert from and to presenceStatus we can register a new
-         * OXRTConversionHandler for PresenceStatus. All this ConversionHandler does is to tell the payload to convert itself into the
+         * OXRTConversionHandler for the PresenceStatus. All this ConversionHandler does is to tell the payload to convert itself into the
          * desired format.
          */
         registerService(OXRTHandler.class, new OXRTConversionHandler("presence", "presenceStatus"));
-        if(LOG.isInfoEnabled()) {
-            LOG.info("Added presence status converters and handler.");
-        }
     }
 
 }

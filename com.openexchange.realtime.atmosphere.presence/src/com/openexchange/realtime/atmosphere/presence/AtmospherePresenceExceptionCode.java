@@ -49,74 +49,87 @@
 
 package com.openexchange.realtime.atmosphere.presence;
 
-import static com.openexchange.realtime.atmosphere.presence.AtmospherePresenceExceptionCode.OBLIGATORY_ELEMENT_MISSING;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.conversion.simple.SimpleConverter;
-import com.openexchange.conversion.simple.SimplePayloadConverter;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.example.presence.PresenceService.PresenceState;
-import com.openexchange.realtime.example.presence.PresenceStatus;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.exception.OXExceptionCode;
+import com.openexchange.exception.OXExceptionFactory;
+import static com.openexchange.realtime.atmosphere.presence.AtmospherePresenceExceptionMessage.*;
+
 
 /**
- * {@link JSONToPresenceStatusConverter} - Convert incoming PresenceStatus from JSON to PresenceStatus POJO  
-   {
-     kind: 'presence'
-     ns: 'presence',
-     to: 'myuser@mycontext',
-     data: {
-       state: 'online'
-       message: 'i am here',
-       priority: 0
-     }
-  };
- * 
+ * {@link AtmospherePresenceExceptionCode}
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class JSONToPresenceStatusConverter implements SimplePayloadConverter {
+public enum AtmospherePresenceExceptionCode implements OXExceptionCode {
+    
+    /** The following obligatory element is missing: \"%1$s\" */
+    OBLIGATORY_ELEMENT_MISSING(OBLIGATORY_ELEMENT_MISSING_MSG, CATEGORY_ERROR, 1)
+    ;
 
+    private final String message;
+    private final int number;
+    private final Category category;
+
+    private AtmospherePresenceExceptionCode(final String message, final Category category, final int detailNumber) {
+        this.message = message;
+        number = detailNumber;
+        this.category = category;
+    }
+    
     @Override
-    public String getInputFormat() {
-        return "json";
+    public boolean equals(OXException e) {
+        return OXExceptionFactory.getInstance().equals(this, e);
     }
 
     @Override
-    public String getOutputFormat() {
-        return "presenceStatus";
+    public int getNumber() {
+        return number;
     }
 
     @Override
-    public Quality getQuality() {
-        return Quality.GOOD;
+    public Category getCategory() {
+        return category;
+    }
+
+    @Override
+    public String getPrefix() {
+        return "GRIZZLY";
+    }
+
+    @Override
+    public String getMessage() {
+        return message;
+    }
+    
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     *
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create() {
+        return OXExceptionFactory.getInstance().create(this, new Object[0]);
     }
 
     /**
-     * Convert a JSON Object into a StatusPresence Object.
-     * The JSON has to be formed like {state: 'theState', message: 'theMessage'} where state is obligatory and message is optional.
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     *
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
      */
-    @Override
-    public Object convert(Object data, ServerSession session, SimpleConverter converter) throws OXException {
-        JSONObject object = (JSONObject) data;
+    public OXException create(final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
+    }
 
-        PresenceState state = null;
-
-        try {
-            String status = object.getString("state");
-            for (PresenceState s : PresenceState.values()) {
-                if (s.name().equalsIgnoreCase(status)) {
-                    state = s;
-                    break;
-                }
-            }
-            if(state == null) {
-                throw OBLIGATORY_ELEMENT_MISSING.create("state");
-            }
-        } catch (JSONException e) {
-            throw OXException.general(e.getMessage());
-        }
-
-        return new PresenceStatus(state, object.optString("message"));
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     *
+     * @param cause The optional initial cause
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create(final Throwable cause, final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, cause, args);
     }
 
 }

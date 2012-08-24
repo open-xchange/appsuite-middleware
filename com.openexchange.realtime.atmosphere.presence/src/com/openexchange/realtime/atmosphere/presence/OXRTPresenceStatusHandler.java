@@ -47,7 +47,22 @@
  *
  */
 package com.openexchange.realtime.atmosphere.presence;
+/*
+ * Build OXRTHandler(s) and SimpleConverters to handle 
 
+   * Ask someone else for permission to see his status. Done by triggering a method on the PresenceSubscriptionService
+   * Give someone permission to see my status
+        -> PresenceSubscriptionService
+   * Get a list of OXIDs whose status I can see and their status
+       -> PresenceSubscriptionService and PresenceStatusService
+   * Change my status
+       -> PresenceStatusService
+   * Transport status changes
+       This is an outgoing message 
+   * Transport subscribe requests
+        This, too, is an outgoing message
+        
+ */
 public class OXRTPresenceStatusHandler {
 
 }

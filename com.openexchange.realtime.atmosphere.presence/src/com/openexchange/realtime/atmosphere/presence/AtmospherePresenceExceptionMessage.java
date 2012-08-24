@@ -47,55 +47,17 @@
  *
  */
 
-package com.openexchange.realtime.example.presence;
+package com.openexchange.realtime.atmosphere.presence;
 
-import com.openexchange.realtime.example.presence.PresenceService.PresenceState;
+import com.openexchange.i18n.LocalizableStrings;
+
 
 /**
- * {@link PresenceStatus} - A Presence status to be used to signalize your status via a state:message pair.
- * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link AtmospherePresenceExceptionMessage}
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class PresenceStatus {
-
-    private PresenceService.PresenceState state;
-
-    private String message;
-
-    /**
-     * Initializes a new {@link PresenceStatus}.
-     * 
-     * @param state One of the avilable states to choose from
-     * @param message The optional user provided message to associate with the current state. May be null.
-     * @throws IllegalArgumentException when the state is missing
-     */
-    public PresenceStatus(PresenceState state, String message) {
-        if (state == null) {
-            throw new IllegalArgumentException("Missing obligatory state parameter");
-        }
-        this.state = state;
-        if (message == null) {
-            this.message = "";
-        } else {
-            this.message = message;
-        }
-    }
-
-    public PresenceService.PresenceState getState() {
-        return state;
-    }
-
-    public void setState(PresenceService.PresenceState state) {
-        this.state = state;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
+public class AtmospherePresenceExceptionMessage implements LocalizableStrings{
+    /** The following obligatory element is missing: \"%1$s\" */
+    public static final String OBLIGATORY_ELEMENT_MISSING_MSG = "The following obligatory element is missing: \"%1$s\"";
 }
