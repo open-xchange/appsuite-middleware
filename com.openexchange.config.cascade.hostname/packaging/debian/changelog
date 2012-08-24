@@ -1,3 +1,9 @@
+open-xchange-config-cascade-hostname (6.20.7.0-2) unstable; urgency=low
+
+  * Second release candidate for 6.20.7
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 24 Aug 2012 15:16:58 +0200
+
 open-xchange-config-cascade-hostname (6.20.7.0-1) unstable; urgency=low
 
   * First release candidate for 6.20.7
