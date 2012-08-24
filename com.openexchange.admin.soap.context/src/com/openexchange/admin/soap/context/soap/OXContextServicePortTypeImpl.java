@@ -563,7 +563,7 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
             filestore.setSize(l);
         }
 
-        String s = soapFilestore.getUrl();
+        final String s = soapFilestore.getUrl();
         if (s != null) {
             filestore.setUrl(s);
         }
