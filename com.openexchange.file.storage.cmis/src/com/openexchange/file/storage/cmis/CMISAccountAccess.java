@@ -129,7 +129,8 @@ public final class CMISAccountAccess implements FileStorageAccountAccess {
         this.binding = null == tmp ? "atompub" : tmp;
         username = (String) configuration.get(CMISConstants.CMIS_LOGIN);
         password = (String) configuration.get(CMISConstants.CMIS_PASSWORD);
-        authType = (String) configuration.get(CMISConstants.CMIS_AUTH_TYPE);
+        tmp = (String) configuration.get(CMISConstants.CMIS_AUTH_TYPE);
+        authType = tmp == null ? "basic" : tmp.trim();
         readTimeout = parseInt(configuration.get(CMISConstants.CMIS_TIMEOUT), -1);
         this.service = service;
     }
