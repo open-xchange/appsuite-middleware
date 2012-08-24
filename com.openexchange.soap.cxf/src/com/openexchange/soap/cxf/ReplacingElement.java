@@ -91,6 +91,10 @@ class ReplacingElement {
         this.xmlSchema = xmlSchema;
     }
 
+    public void setChildPosition(int childPosition) {
+        this.childPosition = childPosition;
+    }
+
     public int nextChildPosition() {
         return childPosition++;
     }

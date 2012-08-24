@@ -50,8 +50,9 @@
 package com.openexchange.soap.cxf;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Stack;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamConstants;
@@ -132,10 +133,18 @@ public class ReplacingXMLStreamReader extends StreamReaderDelegate {
         if (schema.getSchemaType() instanceof XmlSchemaComplexType) {
             XmlSchemaComplexType cplxType = (XmlSchemaComplexType) schema.getSchemaType();
             XmlSchemaSequence seq = (XmlSchemaSequence) cplxType.getParticle();
-            if (null == name) {
-                return byPosition(parent, seq.getItems());
+            int rememberPosition = parent.nextChildPosition();
+            XmlSchemaElement retval = null;
+            // First try to use the given type name. But with PHP this type name is "Struct".
+            if (null != name) {
+                retval = byName(parent, seq.getItems(), name);
             }
-            return byName(parent, seq.getItems(), name);
+            if (null != retval) {
+                return retval;
+            }
+            // If no child is found using the type name, fall back to child position because of PHP using "Struct" as type name.
+            parent.setChildPosition(rememberPosition);
+            return byPosition(parent, seq.getItems());
         }
         return null;
     }
@@ -176,9 +185,15 @@ public class ReplacingXMLStreamReader extends StreamReaderDelegate {
         return null;
     }
 
+    private static final Pattern GENERIC_PATTERN = Pattern.compile("(?:c-gensym|param)\\d+");
+
     private static boolean isGeneric(final QName name) {
         final String localPart = name.getLocalPart();
-        return null != localPart && localPart.toLowerCase(Locale.US).startsWith("c-gensym");
+        if (null == localPart) {
+            return false;
+        }
+        Matcher matcher = GENERIC_PATTERN.matcher(localPart);
+        return matcher.matches();
     }
 
     private static boolean isEmptyURI(QName name) {
