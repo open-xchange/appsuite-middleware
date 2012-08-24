@@ -101,7 +101,6 @@ class User {
 	var $fax_business;
 	var $fax_home;
 	var $fax_other;
-	var $gUI_Spam_filter_capabilities_enabled;
 	var $given_name;
 	var $guiPreference;
 	var $id;
@@ -430,10 +429,9 @@ function getFullUserObject($name, $random_id) {
 	$user->fax_business = $name."_fax_business";
 	$user->fax_home = $name."_fax_home";
 	$user->fax_other = $name."_fax_other";
-	$user->gUI_Spam_filter_capabilities_enabled = "false";
 	
 	$user->imapLogin = $name."_imapLogin";
-	$user->imapServer = "imaps://".$name."_imapserver:993";
+	$user->imapServer = "imaps://".$name."Imapserver:993";
 	
 	$user->info = $name."_info";
 	$user->instant_messenger1 = $name."_instant_messenger1";
@@ -461,7 +459,7 @@ function getFullUserObject($name, $random_id) {
 	$user->room_number = $name."_room_number";
 	$user->sales_volume = $name."_sales_volume";	
 	
-	$user->smtpServer = "smtps://".$name."_smtpServer:583";
+	$user->smtpServer = "smtps://".$name."SmtpServer:583";
 	
 	$user->spam_filter_enabled = true;
 	$user->spouse_name = $name."_spouse_name";
