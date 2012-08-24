@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
 import com.openexchange.admin.rmi.OXGroupInterface;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
@@ -420,8 +421,14 @@ public class OXGroupServicePortTypeImpl implements OXGroupServicePortType {
             return null;
         }
         final com.openexchange.admin.rmi.dataobjects.Credentials credentials = new com.openexchange.admin.rmi.dataobjects.Credentials();
-        credentials.setLogin(soapCredentials.getLogin());
-        credentials.setPassword(soapCredentials.getPassword());
+        final String login = soapCredentials.getLogin();
+        if (null != login) {
+            credentials.setLogin(login);
+        }
+        final String password = soapCredentials.getPassword();
+        if (null != password) {
+            credentials.setPassword(password);
+        }
         return credentials;
     }
 
@@ -430,127 +437,6 @@ public class OXGroupServicePortTypeImpl implements OXGroupServicePortType {
             return null;
         }
         final com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User();
-<<<<<<< HEAD
-        user.setGui_spam_filter_enabled(soapUser.isGuiSpamFilterEnabled());
-        user.setAliasesForSOAP(soapUser.getAliases());
-        user.setAnniversary(soapUser.getAnniversary().toGregorianCalendar().getTime());
-        user.setAssistant_name(soapUser.getAssistantName());
-        user.setBirthday(soapUser.getBirthday().toGregorianCalendar().getTime());
-        user.setBranches(soapUser.getBranches());
-        user.setBusiness_category(soapUser.getBusinessCategory());
-        user.setCategories(soapUser.getCategories());
-        user.setCellular_telephone1(soapUser.getCellularTelephone1());
-        user.setCellular_telephone2(soapUser.getCellularTelephone2());
-        user.setCity_business(soapUser.getCityBusiness());
-        user.setCity_home(soapUser.getCityHome());
-        user.setCity_other(soapUser.getCityOther());
-        user.setCommercial_register(soapUser.getCommercialRegister());
-        user.setCompany(soapUser.getCompany());
-        user.setContextadmin(null == soapUser.isContextadmin() ? false : soapUser.isContextadmin().booleanValue());
-        user.setCountry_business(soapUser.getCountryBusiness());
-        user.setCountry_home(soapUser.getCountryHome());
-        user.setCountry_other(soapUser.getCountryOther());
-        user.setDefaultSenderAddress(soapUser.getDefaultSenderAddress());
-        user.setDefault_group(soap2Group(soapUser.getDefaultGroup()));
-        user.setDepartment(soapUser.getDepartment());
-        user.setDisplay_name(soapUser.getDisplayName());
-        user.setEmail1(soapUser.getEmail1());
-        user.setEmail2(soapUser.getEmail2());
-        user.setEmail3(soapUser.getEmail3());
-        user.setEmployeeType(soapUser.getEmployeeType());
-        user.setFax_business(soapUser.getFaxBusiness());
-        user.setFax_home(soapUser.getFaxHome());
-        user.setFax_other(soapUser.getFaxOther());
-        user.setFolderTree(soapUser.getFolderTree());
-        user.setGiven_name(soapUser.getGivenName());
-        user.setGuiPreferences(soap2Map(soapUser.getGuiPreferencesForSoap()));
-        user.setId(soapUser.getId());
-        user.setImapLogin(soapUser.getImapLogin());
-        user.setImapServer(soapUser.getImapServer());
-        user.setInfo(soapUser.getInfo());
-        user.setInstant_messenger1(soapUser.getInstantMessenger1());
-        user.setInstant_messenger2(soapUser.getInstantMessenger2());
-        user.setLanguage(soapUser.getLanguage());
-        user.setMail_folder_confirmed_ham_name(soapUser.getMailFolderConfirmedHamName());
-        user.setMail_folder_confirmed_spam_name(soapUser.getMailFolderConfirmedSpamName());
-        user.setMail_folder_drafts_name(soapUser.getMailFolderDraftsName());
-        user.setMail_folder_sent_name(soapUser.getMailFolderSentName());
-        user.setMail_folder_spam_name(soapUser.getMailFolderSpamName());
-        user.setMail_folder_trash_name(soapUser.getMailFolderTrashName());
-        user.setMailenabled(soapUser.isMailenabled());
-        user.setManager_name(soapUser.getManagerName());
-        user.setMarital_status(soapUser.getMaritalStatus());
-        user.setMiddle_name(soapUser.getMiddleName());
-        user.setName(soapUser.getName());
-        user.setNickname(soapUser.getNickname());
-        user.setNote(soapUser.getNote());
-        user.setNumber_of_children(soapUser.getNumberOfChildren());
-        user.setNumber_of_employee(soapUser.getNumberOfEmployee());
-        user.setPassword(soapUser.getPassword());
-        user.setPasswordMech(soapUser.getPasswordMech());
-        user.setPassword_expired(soapUser.isPasswordExpired());
-        user.setPosition(soapUser.getPosition());
-        user.setPostal_code_business(soapUser.getPostalCodeBusiness());
-        user.setPostal_code_home(soapUser.getPostalCodeHome());
-        user.setPostal_code_other(soapUser.getPostalCodeOther());
-        user.setPrimaryEmail(soapUser.getPrimaryEmail());
-        user.setProfession(soapUser.getProfession());
-        user.setRoom_number(soapUser.getRoomNumber());
-        user.setSales_volume(soapUser.getSalesVolume());
-        user.setSmtpServer(soapUser.getSmtpServer());
-        user.setSpouse_name(soapUser.getSpouseName());
-        user.setState_business(soapUser.getStateBusiness());
-        user.setState_home(soapUser.getStateHome());
-        user.setState_other(soapUser.getStateOther());
-        user.setStreet_business(soapUser.getStreetBusiness());
-        user.setStreet_home(soapUser.getStreetHome());
-        user.setStreet_other(soapUser.getStreetOther());
-        user.setSuffix(soapUser.getSuffix());
-        user.setSur_name(soapUser.getSurName());
-        user.setTax_id(soapUser.getTaxId());
-        user.setTelephone_assistant(soapUser.getTelephoneAssistant());
-        user.setTelephone_business1(soapUser.getTelephoneBusiness1());
-        user.setTelephone_business2(soapUser.getTelephoneBusiness2());
-        user.setTelephone_callback(soapUser.getTelephoneCallback());
-        user.setTelephone_car(soapUser.getTelephoneCar());
-        user.setTelephone_company(soapUser.getTelephoneCompany());
-        user.setTelephone_home1(soapUser.getTelephoneHome1());
-        user.setTelephone_home2(soapUser.getTelephoneHome2());
-        user.setTelephone_ip(soapUser.getTelephoneIp());
-        user.setTelephone_isdn(soapUser.getTelephoneIsdn());
-        user.setTelephone_other(soapUser.getTelephoneOther());
-        user.setTelephone_pager(soapUser.getTelephonePager());
-        user.setTelephone_primary(soapUser.getTelephonePrimary());
-        user.setTelephone_radio(soapUser.getTelephoneRadio());
-        user.setTelephone_telex(soapUser.getTelephoneTelex());
-        user.setTelephone_ttytdd(soapUser.getTelephoneTtytdd());
-        user.setTimezone(soapUser.getTimezone());
-        user.setTitle(soapUser.getTitle());
-        user.setUploadFileSizeLimit(soapUser.getUploadFileSizeLimit());
-        user.setUploadFileSizeLimitPerFile(soapUser.getUploadFileSizeLimitPerFile());
-        user.setUrl(soapUser.getUrl());
-        user.setUserAttributes(soap2MapMap(soapUser.getUserAttributes()));
-        user.setUserfield01(soapUser.getUserfield01());
-        user.setUserfield02(soapUser.getUserfield02());
-        user.setUserfield03(soapUser.getUserfield03());
-        user.setUserfield04(soapUser.getUserfield04());
-        user.setUserfield05(soapUser.getUserfield05());
-        user.setUserfield06(soapUser.getUserfield06());
-        user.setUserfield07(soapUser.getUserfield07());
-        user.setUserfield08(soapUser.getUserfield08());
-        user.setUserfield09(soapUser.getUserfield09());
-        user.setUserfield10(soapUser.getUserfield10());
-        user.setUserfield11(soapUser.getUserfield11());
-        user.setUserfield12(soapUser.getUserfield12());
-        user.setUserfield13(soapUser.getUserfield13());
-        user.setUserfield14(soapUser.getUserfield14());
-        user.setUserfield15(soapUser.getUserfield15());
-        user.setUserfield16(soapUser.getUserfield16());
-        user.setUserfield17(soapUser.getUserfield17());
-        user.setUserfield18(soapUser.getUserfield18());
-        user.setUserfield19(soapUser.getUserfield19());
-        user.setUserfield20(soapUser.getUserfield20());
-=======
         final Boolean guiSpamFilterEnabled = soapUser.isGuiSpamFilterEnabled();
         if (null != guiSpamFilterEnabled) {
             user.setGui_spam_filter_enabled(guiSpamFilterEnabled);
@@ -1119,7 +1005,6 @@ public class OXGroupServicePortTypeImpl implements OXGroupServicePortType {
             user.setUserfield20(tmp);
         }
 
->>>>>>> 3ae1d20... workaround for problems with strange data from PHP clients
         return user;
     }
 
@@ -1267,10 +1152,22 @@ public class OXGroupServicePortTypeImpl implements OXGroupServicePortType {
             return null;
         }
         final com.openexchange.admin.rmi.dataobjects.Group group = new com.openexchange.admin.rmi.dataobjects.Group();
-        group.setDisplayname(soapGroup.getDisplayname());
-        group.setId(soapGroup.getId());
-        group.setMembers(soapGroup.getMembers().toArray(new Integer[0]));
-        group.setName(soapGroup.getName());
+        final String displayname = soapGroup.getDisplayname();
+        if (null != displayname) {
+            group.setDisplayname(displayname);
+        }
+        final Integer id = soapGroup.getId();
+        if (null != id) {
+            group.setId(id);
+        }
+        final List<Integer> members = soapGroup.getMembers();
+        if (null != members) {
+            group.setMembers(members.toArray(new Integer[0]));
+        }
+        final String name = soapGroup.getName();
+        if (null != name) {
+            group.setName(name);
+        }
         return group;
     }
 

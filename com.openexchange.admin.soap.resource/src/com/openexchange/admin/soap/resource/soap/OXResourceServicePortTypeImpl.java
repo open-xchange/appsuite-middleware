@@ -240,8 +240,14 @@ public class OXResourceServicePortTypeImpl implements OXResourceServicePortType 
             return null;
         }
         final com.openexchange.admin.rmi.dataobjects.Credentials credentials = new com.openexchange.admin.rmi.dataobjects.Credentials();
-        credentials.setLogin(soapCredentials.getLogin());
-        credentials.setPassword(soapCredentials.getPassword());
+        final String login = soapCredentials.getLogin();
+        if (null != login) {
+            credentials.setLogin(login);
+        }
+        final String password = soapCredentials.getPassword();
+        if (null != password) {
+            credentials.setPassword(password);
+        }
         return credentials;
     }
 
@@ -250,12 +256,38 @@ public class OXResourceServicePortTypeImpl implements OXResourceServicePortType 
             return null;
         }
         final com.openexchange.admin.rmi.dataobjects.Resource resource = new com.openexchange.admin.rmi.dataobjects.Resource();
-        resource.setAvailable(soapResource.isAvailable());
-        resource.setDescription(soapResource.getDescription());
-        resource.setDisplayname(soapResource.getDisplayname());
-        resource.setEmail(soapResource.getEmail());
-        resource.setId(soapResource.getId());
-        resource.setName(soapResource.getName());
+
+        Boolean b = soapResource.isAvailable();
+        if (b != null) {
+            resource.setAvailable(b);
+        }
+
+        String tmp = soapResource.getDescription();
+        if (tmp != null) {
+            resource.setDescription(tmp);
+        }
+
+        tmp = soapResource.getDisplayname();
+        if (tmp != null) {
+            resource.setDisplayname(tmp);
+        }
+
+        tmp = soapResource.getEmail();
+        if (tmp != null) {
+            resource.setEmail(tmp);
+        }
+
+        Integer i = soapResource.getId();
+        if (i != null) {
+            resource.setId(i);
+        }
+
+        tmp = soapResource.getName();
+        if (tmp != null) {
+            resource.setName(tmp);
+        }
+
+
         return resource;
     }
 
@@ -278,13 +310,42 @@ public class OXResourceServicePortTypeImpl implements OXResourceServicePortType 
             return null;
         }
         final com.openexchange.admin.rmi.dataobjects.Filestore filestore = new com.openexchange.admin.rmi.dataobjects.Filestore();
-        filestore.setCurrentContexts(soapFilestore.getCurrentContexts());
-        filestore.setId(soapFilestore.getId());
-        filestore.setMaxContexts(soapFilestore.getMaxContexts());
-        filestore.setReserved(soapFilestore.getReserved());
-        filestore.setSize(soapFilestore.getSize());
-        filestore.setUrl(soapFilestore.getUrl());
-        filestore.setUsed(soapFilestore.getUsed());
+
+        Integer tmp = soapFilestore.getCurrentContexts();
+        if (tmp != null) {
+            filestore.setCurrentContexts(tmp);
+        }
+
+        tmp = soapFilestore.getId();
+        if (tmp != null) {
+            filestore.setId(tmp);
+        }
+
+        tmp = soapFilestore.getMaxContexts();
+        if (tmp != null) {
+            filestore.setMaxContexts(tmp);
+        }
+
+        Long l = soapFilestore.getReserved();
+        if (l != null) {
+            filestore.setReserved(l);
+        }
+
+        l = soapFilestore.getSize();
+        if (l != null) {
+            filestore.setSize(l);
+        }
+
+        String s = soapFilestore.getUrl();
+        if (s != null) {
+            filestore.setUrl(s);
+        }
+
+        l = soapFilestore.getUsed();
+        if (l != null) {
+            filestore.setUsed(l);
+        }
+
         return filestore;
     }
 
