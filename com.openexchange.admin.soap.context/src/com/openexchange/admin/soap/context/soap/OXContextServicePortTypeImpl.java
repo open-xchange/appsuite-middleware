@@ -546,7 +546,13 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
         }
         final com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User();
         user.setGui_spam_filter_enabled(soapUser.isGuiSpamFilterEnabled());
-        user.setAliasesForSOAP(soapUser.getAliases());
+        if (null != soapUser.getAliases()) {
+            for (String alias : soapUser.getAliases()) {
+                if (null != alias) {
+                    user.addAlias(alias);
+                }
+            }
+        }
         XMLGregorianCalendar calendar = soapUser.getAnniversary();
         if (null != calendar) {
             user.setAnniversary(calendar.toGregorianCalendar().getTime());
@@ -695,7 +701,11 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
         ret.setFilestore_name(soapContext.getFilestoreName());
         ret.setFilestoreId(soapContext.getFilestoreId());
         ret.setId(soapContext.getId());
-        ret.setLoginMappings(new HashSet<String>(soapContext.getLoginMappings()));
+        for (String loginMapping : soapContext.getLoginMappings()) {
+            if (null != loginMapping) {
+                ret.addLoginMapping(loginMapping);
+            }
+        }
         ret.setMaxQuota(soapContext.getMaxQuota());
         ret.setName(soapContext.getName());
         ret.setUsedQuota(soapContext.getUsedQuota());
