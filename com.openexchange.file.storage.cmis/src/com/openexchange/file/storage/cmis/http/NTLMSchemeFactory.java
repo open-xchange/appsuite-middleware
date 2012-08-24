@@ -47,29 +47,30 @@
  *
  */
 
-package com.openexchange.soap.cxf;
+package com.openexchange.file.storage.cmis.http;
 
-import javax.xml.bind.ValidationEvent;
-import javax.xml.bind.ValidationEventHandler;
+import org.apache.http.auth.AuthScheme;
+import org.apache.http.auth.AuthSchemeFactory;
+import org.apache.http.params.HttpParams;
+
 
 /**
- * {@link IgnoreUnexpectedElementsHandler}
- * 
+ * {@link NTLMSchemeFactory}
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class IgnoreUnexpectedElementsHandler implements ValidationEventHandler {
+public class NTLMSchemeFactory implements AuthSchemeFactory {
 
     /**
-     * Initializes a new {@link IgnoreUnexpectedElementsHandler}.
+     * Initializes a new {@link NTLMSchemeFactory}.
      */
-    public IgnoreUnexpectedElementsHandler() {
+    public NTLMSchemeFactory() {
         super();
     }
 
     @Override
-    public boolean handleEvent(final ValidationEvent event) {
-        // true: keep going. In this case we only want to continue for the error we're trying to hide.
-        return event.getMessage().startsWith("unexpected element (");
+    public AuthScheme newInstance(final HttpParams params) {
+        return new org.apache.http.impl.auth.NTLMScheme(new JCIFSEngine());
     }
 
 }

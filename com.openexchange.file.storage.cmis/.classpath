@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry exported="true" kind="lib" path="lib/fluent-hc-4.2.1.jar" sourcepath="source/fluent-hc-4.2.1-src.zip"/>
+	<classpathentry exported="true" kind="lib" path="lib/httpclient-4.2.1.jar" sourcepath="source/httpclient-4.2.1-src.zip"/>
+	<classpathentry exported="true" kind="lib" path="lib/httpclient-cache-4.2.1.jar" sourcepath="source/httpclient-cache-4.2.1-src.zip"/>
+	<classpathentry exported="true" kind="lib" path="lib/httpcore-4.2.1.jar" sourcepath="source/httpcore-4.2.1-src.zip"/>
+	<classpathentry exported="true" kind="lib" path="lib/httpmime-4.2.1.jar" sourcepath="source/httpmime-4.2.1-src.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/jcifs-1.3.17.jar" sourcepath="source/jcifs-1.3.17-src.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/chemistry-opencmis-client-api-0.7.0.jar" sourcepath="source/chemistry-opencmis-client-api-0.7.0-src.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/chemistry-opencmis-client-bindings-0.7.0.jar" sourcepath="source/chemistry-opencmis-client-bindings-0.7.0-src.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/chemistry-opencmis-client-bindings-0.7.0.jar" sourcepath="lib/chemistry-opencmis-client-bindings-0.7.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/chemistry-opencmis-client-impl-0.7.0.jar" sourcepath="source/chemistry-opencmis-client-impl-0.7.0-src.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/chemistry-opencmis-commons-api-0.7.0.jar" sourcepath="source/chemistry-opencmis-commons-api-0.7.0-src.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/chemistry-opencmis-commons-impl-0.7.0.jar" sourcepath="source/chemistry-opencmis-commons-impl-0.7.0-src.jar"/>

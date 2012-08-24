@@ -311,7 +311,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
         long time = System.currentTimeMillis();
         for (String sessionId : sessions.keySet()) {
             HazelcastStoredSession s = sessions.get(sessionId);
-            if (time + lifetime > s.getLastAccess()) {
+            if (time > s.getLastAccess() + lifetime) {
                 sessions.remove(sessionId);
             }
         }

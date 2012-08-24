@@ -417,8 +417,14 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
             return null;
         }
         final com.openexchange.admin.rmi.dataobjects.Credentials credentials = new com.openexchange.admin.rmi.dataobjects.Credentials();
-        credentials.setLogin(soapCredentials.getLogin());
-        credentials.setPassword(soapCredentials.getPassword());
+        final String login = soapCredentials.getLogin();
+        if (null != login) {
+            credentials.setLogin(login);
+        }
+        final String password = soapCredentials.getPassword();
+        if (null != password) {
+            credentials.setPassword(password);
+        }
         return credentials;
     }
 
@@ -427,13 +433,42 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
             return null;
         }
         final com.openexchange.admin.rmi.dataobjects.Filestore filestore = new com.openexchange.admin.rmi.dataobjects.Filestore();
-        filestore.setCurrentContexts(soapFilestore.getCurrentContexts());
-        filestore.setId(soapFilestore.getId());
-        filestore.setMaxContexts(soapFilestore.getMaxContexts());
-        filestore.setReserved(soapFilestore.getReserved());
-        filestore.setSize(soapFilestore.getSize());
-        filestore.setUrl(soapFilestore.getUrl());
-        filestore.setUsed(soapFilestore.getUsed());
+
+        Integer tmp = soapFilestore.getCurrentContexts();
+        if (tmp != null) {
+            filestore.setCurrentContexts(tmp);
+        }
+
+        tmp = soapFilestore.getId();
+        if (tmp != null) {
+            filestore.setId(tmp);
+        }
+
+        tmp = soapFilestore.getMaxContexts();
+        if (tmp != null) {
+            filestore.setMaxContexts(tmp);
+        }
+
+        Long l = soapFilestore.getReserved();
+        if (l != null) {
+            filestore.setReserved(l);
+        }
+
+        l = soapFilestore.getSize();
+        if (l != null) {
+            filestore.setSize(l);
+        }
+
+        final String s = soapFilestore.getUrl();
+        if (s != null) {
+            filestore.setUrl(s);
+        }
+
+        l = soapFilestore.getUsed();
+        if (l != null) {
+            filestore.setUsed(l);
+        }
+
         return filestore;
     }
 
@@ -457,8 +492,14 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
             return null;
         }
         final com.openexchange.admin.rmi.dataobjects.MaintenanceReason reason = new com.openexchange.admin.rmi.dataobjects.MaintenanceReason();
-        reason.setId(soapReason.getId());
-        reason.setText(soapReason.getText());
+        final Integer id = soapReason.getId();
+        if (null != id) {
+            reason.setId(id);
+        }
+        final String text = soapReason.getText();
+        if (null != text) {
+            reason.setText(text);
+        }
         return reason;
     }
 
@@ -477,8 +518,14 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
             return null;
         }
         final com.openexchange.admin.rmi.dataobjects.Server server = new com.openexchange.admin.rmi.dataobjects.Server();
-        server.setId(soapServer.getId());
-        server.setName(soapServer.getName());
+        final Integer id = soapServer.getId();
+        if (null != id) {
+            server.setId(id);
+        }
+        final String name = soapServer.getName();
+        if (null != name) {
+            server.setName(name);
+        }
         return server;
     }
 
@@ -497,22 +544,81 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
             return null;
         }
         final com.openexchange.admin.rmi.dataobjects.Database ret = new com.openexchange.admin.rmi.dataobjects.Database();
-        ret.setClusterWeight(soapDatabase.getClusterWeight());
-        ret.setCurrentUnits(soapDatabase.getCurrentUnits());
-        ret.setDriver(soapDatabase.getDriver());
-        ret.setId(soapDatabase.getId());
-        ret.setLogin(soapDatabase.getLogin());
-        ret.setMaster(soapDatabase.isMaster());
-        ret.setMasterId(soapDatabase.getMasterId());
-        ret.setMaxUnits(soapDatabase.getMaxUnits());
-        ret.setName(soapDatabase.getName());
-        ret.setPassword(soapDatabase.getPassword());
-        ret.setPoolHardLimit(soapDatabase.getPoolHardLimit());
-        ret.setPoolInitial(soapDatabase.getPoolInitial());
-        ret.setPoolMax(soapDatabase.getPoolMax());
-        ret.setRead_id(soapDatabase.getReadId());
-        ret.setScheme(soapDatabase.getScheme());
-        ret.setUrl(soapDatabase.getUrl());
+
+        Integer itg = soapDatabase.getClusterWeight();
+        if (itg != null) {
+            ret.setClusterWeight(itg);
+        }
+
+        itg = soapDatabase.getCurrentUnits();
+        if (itg != null) {
+            ret.setCurrentUnits(itg);
+        }
+
+        String tmp = soapDatabase.getDriver();
+        if (tmp != null) {
+            ret.setDriver(tmp);
+        }
+
+        itg = soapDatabase.getId();
+        if (itg != null) {
+            ret.setId(itg);
+        }
+
+        tmp = soapDatabase.getLogin();
+        if (tmp != null) {
+            ret.setLogin(tmp);
+        }
+
+        itg = soapDatabase.getMasterId();
+        if (itg != null) {
+            ret.setMasterId(itg);
+        }
+
+        itg = soapDatabase.getMaxUnits();
+        if (itg != null) {
+            ret.setMaxUnits(itg);
+        }
+
+        tmp = soapDatabase.getName();
+        if (tmp != null) {
+            ret.setName(tmp);
+        }
+
+        tmp = soapDatabase.getPassword();
+        if (tmp != null) {
+            ret.setPassword(tmp);
+        }
+
+        itg = soapDatabase.getPoolHardLimit();
+        if (itg != null) {
+            ret.setPoolHardLimit(itg);
+        }
+
+        itg = soapDatabase.getPoolInitial();
+        if (itg != null) {
+            ret.setPoolInitial(itg);
+        }
+
+        itg = soapDatabase.getPoolMax();
+        if (itg != null) {
+            ret.setPoolMax(itg);
+        }
+
+        itg = soapDatabase.getReadId();
+        if (itg != null) {
+            ret.setRead_id(itg);
+        }
+
+        tmp = soapDatabase.getScheme();
+        if (tmp != null) {
+            ret.setScheme(tmp);
+        }
+
+        tmp = soapDatabase.getUrl();
+        if (tmp != null) {
+            ret.setUrl(tmp);
+        }
         return ret;
     }
 

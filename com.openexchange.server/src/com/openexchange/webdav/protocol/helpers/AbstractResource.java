@@ -451,7 +451,7 @@ public abstract class AbstractResource implements WebdavResource {
 
 	public class SpecialSetSwitch implements PropertySwitch{
 
-		private final String value;
+		protected final String value;
 
 		public SpecialSetSwitch(final String value) {
 			this.value = value;

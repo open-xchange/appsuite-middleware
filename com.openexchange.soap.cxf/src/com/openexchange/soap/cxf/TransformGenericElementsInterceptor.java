@@ -51,12 +51,13 @@ package com.openexchange.soap.cxf;
 
 import java.io.InputStream;
 import javax.xml.stream.XMLStreamReader;
-import org.apache.commons.logging.Log;
+import org.apache.cxf.interceptor.AbstractInDatabindingInterceptor;
 import org.apache.cxf.interceptor.DocLiteralInInterceptor;
 import org.apache.cxf.interceptor.Fault;
+import org.apache.cxf.message.Exchange;
 import org.apache.cxf.message.Message;
-import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
+import org.apache.cxf.service.model.BindingOperationInfo;
 import org.apache.cxf.staxutils.transform.TransformUtils;
 
 /**
@@ -64,9 +65,7 @@ import org.apache.cxf.staxutils.transform.TransformUtils;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class TransformGenericElementsInterceptor extends AbstractPhaseInterceptor<Message> {
-
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(TransformGenericElementsInterceptor.class);
+public class TransformGenericElementsInterceptor extends AbstractInDatabindingInterceptor {
 
     public TransformGenericElementsInterceptor() {
         super(Phase.UNMARSHAL);
@@ -76,10 +75,11 @@ public class TransformGenericElementsInterceptor extends AbstractPhaseIntercepto
     @Override
     public void handleMessage(Message message) throws Fault {
         XMLStreamReader reader = message.getContent(XMLStreamReader.class);
-        InputStream is = message.getContent(InputStream.class);
-        reader = TransformUtils.createNewReaderIfNeeded(reader, is);
+        reader = TransformUtils.createNewReaderIfNeeded(reader, message.getContent(InputStream.class));
+        Exchange exchange = message.getExchange();
+        BindingOperationInfo bop = getBindingOperationInfo(exchange, reader.getName(), isRequestor(message));
         // Create transforming reader
-        reader = new ReplacingXMLStreamReader(message.getExchange(), reader);
+        reader = new ReplacingXMLStreamReader(bop, reader);
         message.setContent(XMLStreamReader.class, reader);
         message.removeContent(InputStream.class);
     }

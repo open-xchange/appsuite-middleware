@@ -50,61 +50,61 @@
 package com.openexchange.soap.cxf;
 
 import javax.xml.namespace.QName;
+import org.apache.ws.commons.schema.XmlSchemaElement;
 
 /**
- * {@link ParsingEvent} - Simple container for a parsing event when traversing an {@link XMLStreamReader}.
+ * {@link ReplacingElement} remembers all values when some XML tag needs to be replaced within the {@link ReplacingXMLStreamReader}.
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class ParsingEvent {
+class ReplacingElement {
 
-    private final int event;
-    private final QName name;
-    private final String value;
+    private final QName original;
+    private QName expected;
+    private XmlSchemaElement xmlSchema;
+    private int childPosition = 0;
 
-    /**
-     * Initializes a new {@link ParsingEvent}.
-     * 
-     * @param event The event identifier
-     * @param name The name
-     * @param value The value
-     */
-    public ParsingEvent(final int event, final QName name, final String value) {
-        this.event = event;
-        this.name = name;
-        this.value = value;
+    public ReplacingElement(QName original) {
+        super();
+        this.original = original;
+    }
+
+    public ReplacingElement(QName original, QName expected) {
+        super();
+        this.original = original;
+        this.expected = expected;
+    }
+
+    public QName getExpected() {
+        return expected;
+    }
+
+    public void setExpected(QName expected) {
+        this.expected = expected;
+    }
+
+    public XmlSchemaElement getXmlSchema() {
+        return xmlSchema;
+    }
+
+    public void setXmlSchema(XmlSchemaElement xmlSchema) {
+        this.xmlSchema = xmlSchema;
+    }
+
+    public void setChildPosition(int childPosition) {
+        this.childPosition = childPosition;
+    }
+
+    public int nextChildPosition() {
+        return childPosition++;
+    }
+
+    public void resetChildPosition() {
+        childPosition = 0;
     }
 
     @Override
     public String toString() {
-        return new StringBuilder().append("Event(").append(event).append(", ").append(name).append(", ").append(value).append(")").toString();
+        return "ReplacingElement \"" + original + "\" -> \"" + expected + "\"";
     }
-
-    /**
-     * Gets the event identifier.
-     * 
-     * @return The event identifier
-     */
-    public int getEvent() {
-        return event;
-    }
-
-    /**
-     * Gets the name.
-     * 
-     * @return The name
-     */
-    public QName getName() {
-        return name;
-    }
-
-    /**
-     * Gets the value
-     * 
-     * @return The value
-     */
-    public String getValue() {
-        return value;
-    }
-
 }

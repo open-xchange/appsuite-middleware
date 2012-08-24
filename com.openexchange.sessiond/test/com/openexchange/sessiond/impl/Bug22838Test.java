@@ -47,68 +47,45 @@
  *
  */
 
-package com.openexchange.file.storage.cmis;
+package com.openexchange.sessiond.impl;
 
-import com.openexchange.file.storage.FileStorageConstants;
+import junit.framework.TestCase;
+import com.openexchange.config.SimConfigurationService;
+import com.openexchange.session.Session;
 
 /**
- * {@link CMISConstants} - Provides useful constants for CMIS file storage.
+ * {@link Bug22838Test}
  * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public final class CMISConstants implements FileStorageConstants {
+public class Bug22838Test extends TestCase {
+
+    private SessiondConfigInterface config;
 
     /**
-     * The identifier for CMIS file storage service.
+     * Initializes a new {@link Bug22838Test}.
+     * 
+     * @param name
      */
-    public static final String ID = "com.openexchange.file.storage.cmis";
+    public Bug22838Test(String name) {
+        super(name);
+    }
 
-    /**
-     * The scheme of a CMIS URL: <code>"cmis://"</code>.
-     */
-    public static final String URL_SPEC = "cmis://";
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        config = new SessiondConfigImpl(new SimConfigurationService());
+        SessionHandler.init(config);
+    }
 
-    /**
-     * The configuration property name for login.
-     */
-    public static final String CMIS_LOGIN = CONF_PROPERTY_LOGIN;
+    @Override
+    protected void tearDown() throws Exception {
+        super.tearDown();
+    }
 
-    /**
-     * The configuration property name for password.
-     */
-    public static final String CMIS_PASSWORD = CONF_PROPERTY_PASSWORD;
-
-    /**
-     * The configuration property name for repository.
-     */
-    public static final String CMIS_REPOSITORY = "repository";
-
-    /**
-     * The configuration property name for authentication type: basic, soap, ntlm
-     */
-    public static final String CMIS_AUTH_TYPE = "authtype";
-
-    /**
-     * The configuration property name for URL to CMIS server;<br>
-     * e.g. <code>"http://&lt;host&gt;:&lt;port&gt;/cmis/atom"</code>.
-     */
-    public static final String CMIS_URL = "url";
-
-    /**
-     * The configuration property name for timeout for CMIS server.
-     */
-    public static final String CMIS_TIMEOUT = "timeout";
-
-    /**
-     * The configuration property name for binding.
-     */
-    public static final String CMIS_BINDING = "binding";
-
-    /**
-     * Initializes a new {@link CMISConstants}.
-     */
-    private CMISConstants() {
-        super();
+    public void testMergeEmptyArrayWithNull() throws Exception {
+        Session[] retval = SessionHandler.removeUserSessions(0, 0, true);
+        assertEquals("Array length not 0", 0, retval.length);
     }
 
 }

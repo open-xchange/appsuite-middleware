@@ -92,14 +92,20 @@ public class FileMetadataParser implements FileMetadataParserService{
     @Override
     public File parse(final JSONObject object) throws OXException {
         final DefaultFile file = new DefaultFile();
-
+        
         try {
-            File.Field.inject(jsonHandler, file, object);
+        	JSONObject purged = new JSONObject(object.toString());
+        	if (purged.has("last_modified")) {
+        		purged.remove("last_modified");
+        	}
+        	File.Field.inject(jsonHandler, file, object);
         } catch (final RuntimeException x) {
             if(x.getCause() != null && JSONException.class.isInstance(x.getCause())) {
                 throw AjaxExceptionCodes.JSON_ERROR.create( x.getCause().getMessage());
             }
             throw x;
+        } catch (JSONException x) {
+            throw AjaxExceptionCodes.JSON_ERROR.create( x.getCause().getMessage());
         }
 
         return file;

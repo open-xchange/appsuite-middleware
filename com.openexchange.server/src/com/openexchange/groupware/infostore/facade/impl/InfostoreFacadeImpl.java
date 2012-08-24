@@ -755,8 +755,12 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             CheckSizeSwitch.checkSizes(document, getProvider(), sessionObj.getContext());
 
             final DocumentMetadata oldDocument = checkWriteLock(document.getId(), sessionObj);
-
-            document.setLastModified(new Date());
+            
+            
+            final Set<Metadata> updatedCols = new HashSet<Metadata>(Arrays.asList(modifiedColumns));
+            if (!updatedCols.contains(Metadata.LAST_MODIFIED_LITERAL)) {
+                document.setLastModified(new Date());
+            }
             document.setModifiedBy(sessionObj.getUserId());
 
             VALIDATION.validate(document);
@@ -768,7 +772,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             // db.createDocument(document, data, sessionObj.getContext(),
             // sessionObj.getUserObject(), getUserConfiguration(sessionObj));
 
-            final Set<Metadata> updatedCols = new HashSet<Metadata>(Arrays.asList(modifiedColumns));
             updatedCols.add(Metadata.LAST_MODIFIED_LITERAL);
             updatedCols.add(Metadata.MODIFIED_BY_LITERAL);
 

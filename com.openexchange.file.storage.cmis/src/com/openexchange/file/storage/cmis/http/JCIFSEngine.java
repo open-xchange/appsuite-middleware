@@ -47,36 +47,57 @@
  *
  */
 
-package com.openexchange.soap.cxf;
+package com.openexchange.file.storage.cmis.http;
 
-import org.apache.commons.logging.Log;
-import org.apache.cxf.interceptor.AbstractInDatabindingInterceptor;
-import org.apache.cxf.interceptor.DocLiteralInInterceptor;
-import org.apache.cxf.interceptor.Fault;
-import org.apache.cxf.message.Message;
-import org.apache.cxf.phase.Phase;
+import java.io.IOException;
+import jcifs.ntlmssp.NtlmFlags;
+import jcifs.ntlmssp.Type1Message;
+import jcifs.ntlmssp.Type2Message;
+import jcifs.ntlmssp.Type3Message;
+import jcifs.util.Base64;
+import org.apache.http.impl.auth.NTLMEngine;
+import org.apache.http.impl.auth.NTLMEngineException;
 
 
 /**
- * {@link ReplaceGenericInDatabindingInterceptor}
+ * {@link JCIFSEngine}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ReplaceGenericInDatabindingInterceptor extends AbstractInDatabindingInterceptor {
-
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ReplaceGenericInDatabindingInterceptor.class);
+public final class JCIFSEngine implements NTLMEngine {
 
     /**
-     * Initializes a new {@link ReplaceGenericInDatabindingInterceptor}.
+     * Initializes a new {@link JCIFSEngine}.
      */
-    public ReplaceGenericInDatabindingInterceptor() {
-        super(Phase.UNMARSHAL);
-        addBefore(DocLiteralInInterceptor.class.getName());
+    public JCIFSEngine() {
+        super();
+    }
+
+    private static final int TYPE_1_FLAGS = 
+        NtlmFlags.NTLMSSP_NEGOTIATE_56 | 
+        NtlmFlags.NTLMSSP_NEGOTIATE_128 | 
+        NtlmFlags.NTLMSSP_NEGOTIATE_NTLM2 | 
+        NtlmFlags.NTLMSSP_NEGOTIATE_ALWAYS_SIGN | 
+        NtlmFlags.NTLMSSP_REQUEST_TARGET;
+
+    @Override
+    public String generateType1Msg(final String domain, final String workstation) throws NTLMEngineException {
+        final Type1Message type1Message = new Type1Message(TYPE_1_FLAGS, domain, workstation);
+        return Base64.encode(type1Message.toByteArray());
     }
 
     @Override
-    public void handleMessage(final Message message) throws Fault {
-        // TODO
+    public String generateType3Msg(final String username, final String password, final String domain, final String workstation, final String challenge) throws NTLMEngineException {
+        Type2Message type2Message;
+        try {
+            type2Message = new Type2Message(Base64.decode(challenge));
+        } catch (final IOException exception) {
+            throw new NTLMEngineException("Invalid NTLM type 2 message", exception);
+        }
+        final int type2Flags = type2Message.getFlags();
+        final int type3Flags = type2Flags & (0xffffffff ^ (NtlmFlags.NTLMSSP_TARGET_TYPE_DOMAIN | NtlmFlags.NTLMSSP_TARGET_TYPE_SERVER));
+        final Type3Message type3Message = new Type3Message(type2Message, password, domain, username, workstation, type3Flags);
+        return Base64.encode(type3Message.toByteArray());
     }
 
 }
