@@ -50,7 +50,6 @@
 package com.openexchange.file.storage.cmis;
 
 import java.io.InputStream;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -168,7 +167,7 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
             document.getProperty(PropertyIds.OBJECT_ID);
             return true;
         } catch (final CmisBaseException e) {
-            throw CMISExceptionCodes.CMIS_ERROR.create(e, e.getMessage());
+            throw handleCmisException(e);
         } catch (final RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -219,7 +218,7 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
              */
             return new CMISFile(folderId, id, session.getUserId()).parseSmbFile(document);
         } catch (final CmisBaseException e) {
-            throw CMISExceptionCodes.CMIS_ERROR.create(e, e.getMessage());
+            throw handleCmisException(e);
         } catch (final RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -227,15 +226,15 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
 
     @Override
     public void saveFileMetadata(final File file, final long sequenceNumber) throws OXException {
-        createCmisFile(file, null);
+        createCmisFile(file, null, null);
     }
 
     @Override
     public void saveFileMetadata(final File file, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
-        createCmisFile(file, modifiedFields);
+        createCmisFile(file, modifiedFields, null);
     }
 
-    private Document createCmisFile(final File file, final List<Field> modifiedFields) throws OXException {
+    private Document createCmisFile(final File file, final List<Field> modifiedFields, final ContentStream contentStream) throws OXException {
         try {
             final Set<Field> set =
                 null == modifiedFields || modifiedFields.isEmpty() ? EnumSet.allOf(Field.class) : EnumSet.copyOf(modifiedFields);
@@ -263,37 +262,21 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
             if (null == name) {
                 throw CMISExceptionCodes.MISSING_FILE_NAME.create();
             }
-            final String id;
-            {
-                final String fid = file.getId();
-                if (null == fid) {
-                    id = name;
-                    file.setId(id);
-                } else {
-                    id = fid;
-                }
-            }
             /*
              * Properties
              */
             final Map<String, Object> properties = new HashMap<String, Object>(4);
             properties.put(PropertyIds.OBJECT_TYPE_ID, ObjectType.DOCUMENT_BASETYPE_ID);
             properties.put(PropertyIds.NAME, name);
-            final String fileMIMEType = file.getFileMIMEType();
-            if (null != fileMIMEType) {
-                properties.put(PropertyIds.CONTENT_STREAM_MIME_TYPE, fileMIMEType);
-            }
-            /*
-             * Dummy content
-             */
-            final ContentStream contentStream =
-                new ContentStreamImpl(name, BigInteger.valueOf(1), "text/plain", Streams.newByteArrayInputStream("1".getBytes()));
+            properties.put(PropertyIds.CONTENT_STREAM_FILE_NAME, contentStream.getFileName());
+            properties.put(PropertyIds.CONTENT_STREAM_MIME_TYPE, contentStream.getMimeType());
+            //properties.put(PropertyIds.PATH, parent.getPath());
             /*
              * Create a major version
              */
             return parent.createDocument(properties, contentStream, VersioningState.MAJOR);
         } catch (final CmisBaseException e) {
-            throw CMISExceptionCodes.CMIS_ERROR.create(e, e.getMessage());
+            throw handleCmisException(e);
         } catch (final RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -372,7 +355,7 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
              */
             return new IDTuple(destFolder, newDoc.getId());
         } catch (final CmisBaseException e) {
-            throw CMISExceptionCodes.CMIS_ERROR.create(e, e.getMessage());
+            throw handleCmisException(e);
         } catch (final RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
@@ -416,7 +399,7 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
              */
             return document.getContentStream().getStream();
         } catch (final CmisBaseException e) {
-            throw CMISExceptionCodes.CMIS_ERROR.create(e, e.getMessage());
+            throw handleCmisException(e);
         } catch (final RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -435,16 +418,12 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
     private void saveDocument0(final File file, final InputStream data, final List<Field> modifiedFields) throws OXException {
         try {
             /*
-             * Save metadata
-             */
-            final Document document = createCmisFile(file, modifiedFields);
-            /*
-             * Upload data
+             * Save document
              */
             final ContentStream contentStream = new ContentStreamImpl(file.getFileName(), null, file.getFileMIMEType(), data);
-            document.setContentStream(contentStream, true, true);
+            createCmisFile(file, modifiedFields, contentStream);
         } catch (final CmisBaseException e) {
-            throw CMISExceptionCodes.CMIS_ERROR.create(e, e.getMessage());
+            throw handleCmisException(e);
         } catch (final RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
@@ -485,7 +464,7 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
                 ((Document) cmisSession.getObject(documentId)).deleteAllVersions();
             }
         } catch (final CmisBaseException e) {
-            throw CMISExceptionCodes.CMIS_ERROR.create(e, e.getMessage());
+            throw handleCmisException(e);
         } catch (final RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -532,7 +511,7 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
              */
             return ret;
         } catch (final CmisBaseException e) {
-            throw CMISExceptionCodes.CMIS_ERROR.create(e, e.getMessage());
+            throw handleCmisException(e);
         } catch (final RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -579,7 +558,7 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
              */
             return new int[0];
         } catch (final CmisBaseException e) {
-            throw CMISExceptionCodes.CMIS_ERROR.create(e, e.getMessage());
+            throw handleCmisException(e);
         } catch (final RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -649,7 +628,7 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
             properties.put(PropertyIds.LAST_MODIFICATION_DATE, calendar);
             document.updateProperties(properties);
         } catch (final CmisBaseException e) {
-            throw CMISExceptionCodes.CMIS_ERROR.create(e, e.getMessage());
+            throw handleCmisException(e);
         } catch (final RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -699,7 +678,7 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
              */
             return files;
         } catch (final CmisBaseException e) {
-            throw CMISExceptionCodes.CMIS_ERROR.create(e, e.getMessage());
+            throw handleCmisException(e);
         } catch (final RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -777,7 +756,7 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
              */
             return new FileTimedResult(files);
         } catch (final CmisBaseException e) {
-            throw CMISExceptionCodes.CMIS_ERROR.create(e, e.getMessage());
+            throw handleCmisException(e);
         } catch (final RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -898,7 +877,7 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
                 }
             }
         } catch (final CmisBaseException e) {
-            throw CMISExceptionCodes.CMIS_ERROR.create(e, e.getMessage());
+            throw handleCmisException(e);
         } catch (final RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
