@@ -101,12 +101,12 @@ import com.openexchange.user.UserService;
  */
 public final class CMISFileAccess extends AbstractCMISAccess implements FileStorageFileAccess {
 
-    private final FileStorageAccountAccess accountAccess;
+    private final CMISAccountAccess accountAccess;
 
     /**
      * Initializes a new {@link CMISFileAccess}.
      */
-    public CMISFileAccess(final String rootUrl, final org.apache.chemistry.opencmis.client.api.Session cmisSession, final FileStorageAccount account, final Session session, final FileStorageAccountAccess accountAccess) {
+    public CMISFileAccess(final String rootUrl, final org.apache.chemistry.opencmis.client.api.Session cmisSession, final FileStorageAccount account, final Session session, final CMISAccountAccess accountAccess) {
         super(rootUrl, cmisSession, account, session);
         this.accountAccess = accountAccess;
     }

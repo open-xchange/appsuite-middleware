@@ -90,11 +90,14 @@ import com.openexchange.session.Session;
  */
 public final class CMISFolderAccess extends AbstractCMISAccess implements FileStorageFolderAccess {
 
+    private final CMISAccountAccess accountAccess;
+
     /**
      * Initializes a new {@link CMISFolderAccess}.
      */
-    public CMISFolderAccess(final String rootUrl, final org.apache.chemistry.opencmis.client.api.Session cmisSession, final FileStorageAccount account, final Session session) {
+    public CMISFolderAccess(final String rootUrl, final org.apache.chemistry.opencmis.client.api.Session cmisSession, final FileStorageAccount account, final Session session, final CMISAccountAccess accountAccess) {
         super(rootUrl, cmisSession, account, session);
+        this.accountAccess = accountAccess;
     }
 
     @Override
@@ -290,7 +293,11 @@ public final class CMISFolderAccess extends AbstractCMISAccess implements FileSt
                     }
                 }
             }
-            return cmisSession.createFolder(toCreate.getProperties(), folderObjectId, Collections.<Policy> emptyList(), aces, Collections.<Ace> emptyList()).getId();
+            final Map<String, Object> properties = new HashMap<String, Object>(2);
+            properties.put(PropertyIds.OBJECT_TYPE_ID, ObjectType.FOLDER_BASETYPE_ID);
+            properties.put(PropertyIds.NAME, toCreate.getName());
+            properties.put(PropertyIds.CREATED_BY, accountAccess.getUser());
+            return cmisSession.createFolder(properties, folderObjectId, Collections.<Policy> emptyList(), aces, Collections.<Ace> emptyList()).getId();
         } catch (final CmisBaseException e) {
             throw handleCmisException(e);
         } catch (final RuntimeException e) {
