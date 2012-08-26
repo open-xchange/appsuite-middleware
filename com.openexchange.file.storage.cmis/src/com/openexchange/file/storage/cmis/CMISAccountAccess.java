@@ -274,15 +274,29 @@ public final class CMISAccountAccess implements FileStorageAccountAccess {
                  */
                 parameters.put(SessionParameter.CONNECT_TIMEOUT, "10000");
                 parameters.put(SessionParameter.READ_TIMEOUT, Integer.toString(readTimeout));
-                /*
-                 * Get available repositories
+                /*-
+                 * Check if repository is specified
+                 * 
+                 * Either create session by listed repositories or by directly referencing repository
                  */
                 final SessionFactory factory = SessionFactoryImpl.newInstance();
-                final List<Repository> repositories = factory.getRepositories(parameters);
-                /*
-                 * Create session
-                 */
-                cmisSession = repositories.get(0).createSession();
+                final String repository = this.repository;
+                if (isEmpty(repository)) {
+                    /*
+                     * Get available repositories
+                     */
+                    final List<Repository> repositories = factory.getRepositories(parameters);
+                    /*
+                     * Create session
+                     */
+                    cmisSession = repositories.get(0).createSession();
+                } else {
+                    parameters.put(SessionParameter.REPOSITORY_ID, repository);
+                    /*
+                     * Create session
+                     */
+                    cmisSession = factory.createSession(parameters);
+                }
             } catch (final RuntimeException e) {
                 throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
@@ -392,5 +406,17 @@ public final class CMISAccountAccess implements FileStorageAccountAccess {
      * ----------------------------------------------------------- Helper methods ---------------------------------------------------------
      * ------------------------------------------------------------------------------------------------------------------------------------
      */
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
 
 }
