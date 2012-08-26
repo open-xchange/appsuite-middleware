@@ -269,6 +269,7 @@ public final class CMISAccountAccess implements FileStorageAccountAccess {
                     parameters.put(SessionParameter.AUTH_SOAP_USERNAMETOKEN, useSoapUsernameToken() ? "true" : "false");
                     parameters.put(SessionParameter.COOKIES, "true");
                 }
+                // parameters.put("org.apache.chemistry.opencmis.binding.clienttransferencoding", "base64");
                 /*
                  * Timeout parameters
                  */

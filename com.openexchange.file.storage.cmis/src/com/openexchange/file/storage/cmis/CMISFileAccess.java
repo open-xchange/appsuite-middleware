@@ -72,6 +72,7 @@ import org.apache.chemistry.opencmis.commons.data.ContentStream;
 import org.apache.chemistry.opencmis.commons.enums.VersioningState;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisBaseException;
 import org.apache.chemistry.opencmis.commons.impl.dataobjects.ContentStreamImpl;
+import org.apache.commons.codec.binary.Base64InputStream;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
@@ -234,7 +235,7 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
         createCmisFile(file, modifiedFields, null);
     }
 
-    private Document createCmisFile(final File file, final List<Field> modifiedFields, final ContentStream contentStream) throws OXException {
+    private Document createCmisFile(final File file, final List<Field> modifiedFields, final ContentStreamImpl contentStream) throws OXException {
         try {
             final Set<Field> set =
                 null == modifiedFields || modifiedFields.isEmpty() ? EnumSet.allOf(Field.class) : EnumSet.copyOf(modifiedFields);
@@ -302,6 +303,11 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
             if (null != document) {
                 document.updateProperties(properties, true);
                 if (null != contentStream) {
+                    final InputStream stream = contentStream.getStream();
+                    if (null != stream) {
+                        // Returning data as Base64 is needed for MS Sharepoint
+                        contentStream.setStream(new Base64InputStream(stream, true));
+                    }
                     document.setContentStream(contentStream, true, true);
                 }
                 // Reload & return document
@@ -453,7 +459,7 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
             /*
              * Save document
              */
-            final ContentStream contentStream = new ContentStreamImpl(file.getFileName(), null, file.getFileMIMEType(), data);
+            final ContentStreamImpl contentStream = new ContentStreamImpl(file.getFileName(), null, file.getFileMIMEType(), data);
             createCmisFile(file, modifiedFields, contentStream);
         } catch (final CmisBaseException e) {
             throw handleCmisException(e);
