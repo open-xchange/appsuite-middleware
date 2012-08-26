@@ -153,27 +153,44 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
             /*
              * Check
              */
-            final ObjectId folderObjectId;
-            final CmisObject object;
-            if (FileStorageFolder.ROOT_FULLNAME.equals(folderId) || rootUrl.equals(folderId)) {
-                object = cmisSession.getRootFolder();
-                folderObjectId = cmisSession.createObjectId(object.getId());
-            } else {
-                folderObjectId = cmisSession.createObjectId(folderId);
-                object = cmisSession.getObject(folderObjectId);
-            }
-            if (null == object) {
+            if (!checkFolder(folderId)) {
                 return false;
             }
-            if (!ObjectType.DOCUMENT_BASETYPE_ID.equals(object.getType().getId())) {
+            final ObjectId oid = cmisSession.createObjectId(id);
+            final CmisObject cdocument = cmisSession.getObject(oid);
+            if (null == cdocument) {
                 return false;
             }
+            if (!ObjectType.DOCUMENT_BASETYPE_ID.equals(cdocument.getType().getId())) {
+                return false;
+            }
+            final Document document = (Document) cdocument;
+            document.getProperty(PropertyIds.OBJECT_ID);
             return true;
         } catch (final CmisBaseException e) {
             throw CMISExceptionCodes.CMIS_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private boolean checkFolder(final String folderId) {
+        final ObjectId folderObjectId;
+        final CmisObject object;
+        if (FileStorageFolder.ROOT_FULLNAME.equals(folderId) || rootUrl.equals(folderId)) {
+            object = cmisSession.getRootFolder();
+            folderObjectId = cmisSession.createObjectId(object.getId());
+        } else {
+            folderObjectId = cmisSession.createObjectId(folderId);
+            object = cmisSession.getObject(folderObjectId);
+        }
+        if (null == object) {
+            return false;
+        }
+        if (!ObjectType.FOLDER_BASETYPE_ID.equals(object.getType().getId())) {
+            return false;
+        }
+        return true;
     }
 
     @Override
@@ -185,15 +202,18 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
             /*
              * Check
              */
-            final ObjectId folderObjectId = cmisSession.createObjectId(folderId);
-            final CmisObject object = cmisSession.getObject(folderObjectId);
-            if (null == object) {
+            if (!checkFolder(folderId)) {
                 throw CMISExceptionCodes.NOT_FOUND.create(folderId);
             }
-            if (!ObjectType.DOCUMENT_BASETYPE_ID.equals(object.getType().getId())) {
+            final ObjectId oid = cmisSession.createObjectId(id);
+            final CmisObject cdocument = cmisSession.getObject(oid);
+            if (null == cdocument) {
+                throw CMISExceptionCodes.NOT_FOUND.create(folderId);
+            }
+            if (!ObjectType.DOCUMENT_BASETYPE_ID.equals(cdocument.getType().getId())) {
                 throw CMISExceptionCodes.NOT_A_FILE.create(folderId);
             }
-            final Document document = (Document) object;
+            final Document document = (Document) cdocument;
             /*
              * Start conversion
              */
