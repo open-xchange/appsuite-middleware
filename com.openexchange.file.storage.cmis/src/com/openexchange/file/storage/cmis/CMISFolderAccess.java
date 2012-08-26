@@ -70,9 +70,9 @@ import org.apache.chemistry.opencmis.commons.enums.AclPropagation;
 import org.apache.chemistry.opencmis.commons.enums.Action;
 import org.apache.chemistry.opencmis.commons.enums.UnfileObject;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisBaseException;
-import org.apache.chemistry.opencmis.commons.exceptions.CmisNotSupportedException;
 import org.apache.chemistry.opencmis.commons.impl.dataobjects.AccessControlEntryImpl;
 import org.apache.chemistry.opencmis.commons.impl.dataobjects.AccessControlPrincipalDataImpl;
+import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -89,6 +89,8 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CMISFolderAccess extends AbstractCMISAccess implements FileStorageFolderAccess {
+
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(CMISFolderAccess.class);
 
     private final CMISAccountAccess accountAccess;
 
@@ -184,8 +186,9 @@ public final class CMISFolderAccess extends AbstractCMISAccess implements FileSt
         if (allowableActions.contains(Action.CAN_GET_ACL)) {
             try {
                 cmisSession.getAcl(folderObjectId, true);
-            } catch (final CmisNotSupportedException e) {
+            } catch (final CmisBaseException e) {
                 // ACL must not be obtained
+                LOG.debug("Couldn't access ACL list.", e);
             }
         }
         //cmisSession.get
