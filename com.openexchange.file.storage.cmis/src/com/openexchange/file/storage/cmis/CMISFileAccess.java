@@ -277,7 +277,7 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
              * Properties
              */
             final Map<String, Object> properties = new HashMap<String, Object>(4);
-            properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document");
+            properties.put(PropertyIds.OBJECT_TYPE_ID, ObjectType.DOCUMENT_BASETYPE_ID);
             properties.put(PropertyIds.NAME, name);
             final String fileMIMEType = file.getFileMIMEType();
             if (null != fileMIMEType) {
