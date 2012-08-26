@@ -775,15 +775,18 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
         return new FileDelta(EMPTY_ITER, EMPTY_ITER, EMPTY_ITER, 0L);
     }
 
+    private static final String ALL = "*";
+
     @Override
     public SearchIterator<File> search(final String pattern, final List<Field> fields, final String folderId, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
+        final String pat = isEmpty(pattern) ? ALL : pattern;
         final List<File> results;
         if (ALL_FOLDERS == folderId) {
             /*
              * Recursively search files in directories
              */
             results = new LinkedList<File>();
-            recursiveSearchFile(pattern, rootUrl, fields, results);
+            recursiveSearchFile(pat, rootUrl, fields, results);
         } else {
             /*
              * Get files from folder
@@ -794,7 +797,7 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
              */
             for (final Iterator<File> iterator = results.iterator(); iterator.hasNext();) {
                 final File file = iterator.next();
-                if (!file.matches(pattern)) {
+                if (!file.matches(pat)) {
                     iterator.remove();
                 }
             }
@@ -884,6 +887,18 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
     @Override
     public FileStorageAccountAccess getAccountAccess() {
         return accountAccess;
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
 }
