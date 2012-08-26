@@ -274,7 +274,7 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
             /*
              * Create a major version
              */
-            return parent.createDocument(properties, contentStream, VersioningState.MAJOR);
+            return parent.createDocument(properties, contentStream, VersioningState.NONE);
         } catch (final CmisBaseException e) {
             throw handleCmisException(e);
         } catch (final RuntimeException e) {
