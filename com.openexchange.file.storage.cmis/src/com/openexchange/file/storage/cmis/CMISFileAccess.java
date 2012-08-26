@@ -243,7 +243,7 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
              */
             final String folderId = file.getFolderId();
             final ObjectId folderObjectId;
-            final CmisObject object;
+            CmisObject object;
             if (FileStorageFolder.ROOT_FULLNAME.equals(folderId) || rootUrl.equals(folderId)) {
                 object = cmisSession.getRootFolder();
                 folderObjectId = cmisSession.createObjectId(object.getId());
@@ -258,9 +258,32 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
                 throw CMISExceptionCodes.NOT_A_FOLDER.create(folderId);
             }
             final Folder parent = (Folder) object;
-            final String name = file.getFileName();
-            if (null == name) {
-                throw CMISExceptionCodes.MISSING_FILE_NAME.create();
+            /*
+             * Create or update
+             */
+            final String id = file.getId();
+            final ObjectId documentId = null == id ? null : cmisSession.createObjectId(id);
+            final Document document;
+            {
+                if (null == documentId) {
+                    document = null;
+                } else {
+                    object = cmisSession.getObject(documentId);
+                    if (null == object) {
+                        throw CMISExceptionCodes.NOT_FOUND.create(id);
+                    }
+                    if (!ObjectType.DOCUMENT_BASETYPE_ID.equals(object.getType().getId())) {
+                        throw CMISExceptionCodes.NOT_A_FILE.create(id);
+                    }
+                    document = (Document) object;
+                }
+            }
+            String name = file.getTitle();
+            if (isEmpty(name)) {
+                name = file.getFileName();
+                if (null == name) {
+                    throw CMISExceptionCodes.MISSING_FILE_NAME.create();
+                }
             }
             /*
              * Properties
@@ -268,12 +291,22 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
             final Map<String, Object> properties = new HashMap<String, Object>(4);
             properties.put(PropertyIds.OBJECT_TYPE_ID, ObjectType.DOCUMENT_BASETYPE_ID);
             properties.put(PropertyIds.NAME, name);
-            properties.put(PropertyIds.CONTENT_STREAM_FILE_NAME, contentStream.getFileName());
-            properties.put(PropertyIds.CONTENT_STREAM_MIME_TYPE, contentStream.getMimeType());
+            if (null != contentStream) {
+                properties.put(PropertyIds.CONTENT_STREAM_FILE_NAME, contentStream.getFileName());
+                properties.put(PropertyIds.CONTENT_STREAM_MIME_TYPE, contentStream.getMimeType());
+            }
             //properties.put(PropertyIds.PATH, parent.getPath());
             /*
-             * Create a major version
+             * Perform create or update
              */
+            if (null != document) {
+                document.updateProperties(properties, true);
+                if (null != contentStream) {
+                    document.setContentStream(contentStream, true, true);
+                }
+                // Reload & return document
+                return (Document) cmisSession.getObject(documentId);
+            }
             return parent.createDocument(properties, contentStream, VersioningState.NONE);
         } catch (final CmisBaseException e) {
             throw handleCmisException(e);
