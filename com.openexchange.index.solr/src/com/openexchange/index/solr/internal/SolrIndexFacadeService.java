@@ -84,7 +84,7 @@ public class SolrIndexFacadeService implements IndexFacadeService {
      * Timeout in minutes.
      * An index access will be released after being unused for this time and if it isn't referenced anymore.
      */
-    private static final long SOFT_TIMEOUT = 10;
+    private static final long SOFT_TIMEOUT = 1;
     
     /**
      * Timeout in minutes.

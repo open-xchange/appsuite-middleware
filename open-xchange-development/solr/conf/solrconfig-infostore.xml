@@ -4,7 +4,7 @@
         ${solr.abortOnConfigurationError:true}
     </abortOnConfigurationError>
 
-    <luceneMatchVersion>LUCENE_33</luceneMatchVersion>
+    <luceneMatchVersion>LUCENE_36</luceneMatchVersion>
 
     <dataDir>${solr.core.dataDir}</dataDir>
     <lib dir="${libDir:/opt/open-xchange/solr/lib}" />
@@ -63,7 +63,7 @@
                 <!-- Deutlich Höhere Gewichtung. Faktor 5-10. Gewichte evt. 
                 durch Nutzer bestimmbar. MLT-Handler für Facets.
                 Gleichbehandlung von Beschreibung und Inhalt -->
-                title^3.0 file_name^3.0 description^2.0 version_comment^2.0 url^1.0 categories^1.0
+                title_gen^10.0 title_de^10.0 title_en^10.0 title_fr^10.0 title_it^10.0 file_name^10.0 description_gen^5.0 description_de^5.0 description_en^5.0 description_fr^5.0 description_it^5.0 version_comment_gen^5.0 version_comment_de^5.0 version_comment_en^5.0 version_comment_fr^5.0 version_comment_it^5.0 url^2.0 categories^2.0
             </str>
         </lst>
         <lst name="defaults">
@@ -109,18 +109,14 @@
         <str name="param7">modified_by</str>
         <str name="param8">creation_date</str>
         <str name="param9">last_modified</str>
-        <str name="param10">title</str>
+        <str name="param10">title{gen,de,en,fr,it}</str>
         <str name="param11">version</str>
-        <str name="param12">file_size</str>
-        <str name="param13">mime_type</str>
-        <str name="param14">file_name</str>
-        <str name="param15">description</str>
+        <str name="param15">description{gen,de,en,fr,it}</str>
         <str name="param16">url</str>
         <str name="param17">sequence_number</str>
         <str name="param18">categories</str>
         <str name="param19">color_label</str>
-        <str name="param20">version_comment</str>
-        <str name="param22">md5_sum</str>
+        <str name="param20">version_comment{gen,de,en,fr,it}</str>
         <str name="param23">locale</str>
     </searchComponent>
 
@@ -133,7 +129,7 @@
         <processor
             class="org.apache.solr.update.processor.TikaLanguageIdentifierUpdateProcessorFactory">
             <bool name="langid">true</bool>
-            <str name="langid.fl">content</str>
+            <str name="langid.fl">title,description,version_comment</str>
             <str name="langid.whitelist">de,en,fr,it</str>
             <str name="langid.langField">locale</str>
             <bool name="langid.map">true</bool>

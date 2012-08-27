@@ -4,7 +4,7 @@
         ${solr.abortOnConfigurationError:true}
     </abortOnConfigurationError>
 
-    <luceneMatchVersion>LUCENE_33</luceneMatchVersion>
+    <luceneMatchVersion>LUCENE_36</luceneMatchVersion>
 
     <dataDir>${solr.core.dataDir}</dataDir>
     <lib dir="${libDir:/opt/open-xchange/solr/lib}" />
@@ -118,7 +118,7 @@
         <str name="param8">file_size</str>
         <str name="param9">mime_type</str>
         <str name="param10">md5_sum</str>
-        <str name="param11">content{de,en,fr,it}</str>
+        <str name="param11">content{gen,de,en,fr,it}</str>
         <str name="param12">attachment_id</str>
     </searchComponent>
 
