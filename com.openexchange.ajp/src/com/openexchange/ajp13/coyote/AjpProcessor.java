@@ -1083,7 +1083,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                              * 
                              * Abort client ping to not mess up AJP communication cycle
                              */
-                            LOG.debug("First body chunk has not been received, yet. Client ping has been therefore been aborted.");
+                            LOG.debug("First body chunk has not been received, yet. Client ping has therefore been aborted.");
                         }
                     }
                 } catch (final IOException e) {
