@@ -50,14 +50,29 @@
 package com.openexchange.snippet;
 
 import java.util.Collection;
-
+import java.util.Map;
 
 /**
  * {@link Snippet} - Represents arbitrary (textual) content.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface Snippet {
+
+    /**
+     * The property identifier for the creator.
+     */
+    public static final String PROP_CREATED_BY = "com.openexchange.snippet.createdby";
+
+    /**
+     * The property identifier for the shared flag.
+     */
+    public static final String PROP_SHARED = "com.openexchange.snippet.shared";
+
+    /**
+     * The property identifier for the miscellaneous JSON data.
+     */
+    public static final String PROP_MISC = "com.openexchange.snippet.misc";
 
     /**
      * Gets the textual content.
@@ -79,4 +94,25 @@ public interface Snippet {
      * @return The JSON data or <code>null</code> if absent
      */
     Object getMisc();
+
+    /**
+     * Signals whether this snippet is shared to others.
+     * 
+     * @return <code>true</code> if shared; otherwise <code>false</code>
+     */
+    boolean isShared();
+
+    /**
+     * Gets the identifier of this snippet's creator.
+     * 
+     * @return The creator identifier
+     */
+    int getCreatedBy();
+
+    /**
+     * Gets this snippet's properties.
+     * 
+     * @return The properties
+     */
+    Map<String, Object> getProperties();
 }
