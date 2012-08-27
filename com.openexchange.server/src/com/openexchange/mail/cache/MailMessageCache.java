@@ -49,11 +49,11 @@
 
 package com.openexchange.mail.cache;
 
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
@@ -155,7 +155,7 @@ public final class MailMessageCache {
 
     static final String REGION_NAME = "MailMessageCache";
 
-    private static final ConcurrentMap<CacheKey, ReadWriteLock> contextLocks = new NonBlockingHashMap<CacheKey, ReadWriteLock>();
+    private static final ConcurrentMap<CacheKey, ReadWriteLock> contextLocks = new ConcurrentHashMap<CacheKey, ReadWriteLock>();
 
     private static volatile MailMessageCache singleton;
 

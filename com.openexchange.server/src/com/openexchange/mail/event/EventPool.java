@@ -52,10 +52,10 @@ package com.openexchange.mail.event;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.TimeUnit;
-import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.concurrent.Blocker;
@@ -144,7 +144,7 @@ public final class EventPool implements Runnable {
      */
     private EventPool() throws OXException {
         super();
-        map = new NonBlockingHashMap<PooledEvent, PooledEvent>(1024);
+        map = new ConcurrentHashMap<PooledEvent, PooledEvent>(1024);
         queue = new DelayQueue<PooledEvent>();
         blocker = new ConcurrentBlocker();
         try {

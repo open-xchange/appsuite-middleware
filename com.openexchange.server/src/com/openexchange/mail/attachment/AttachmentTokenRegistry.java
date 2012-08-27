@@ -50,8 +50,8 @@
 package com.openexchange.mail.attachment;
 
 import java.util.Iterator;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPools;
@@ -119,8 +119,8 @@ public final class AttachmentTokenRegistry implements AttachmentTokenConstants {
      */
     private AttachmentTokenRegistry() throws OXException {
         super();
-        map = new NonBlockingHashMap<Key, ConcurrentMap<String, AttachmentToken>>();
-        tokens = new NonBlockingHashMap<String, AttachmentToken>();
+        map = new ConcurrentHashMap<Key, ConcurrentMap<String, AttachmentToken>>();
+        tokens = new ConcurrentHashMap<String, AttachmentToken>();
         final TimerService timerService = ThreadPools.getTimerService();
         final Runnable task = new CleanExpiredTokensRunnable(map, tokens);
         timerTask = timerService.scheduleWithFixedDelay(task, CLEANER_FREQUENCY, CLEANER_FREQUENCY);
@@ -221,7 +221,7 @@ public final class AttachmentTokenRegistry implements AttachmentTokenConstants {
         final Key key = keyFor(session);
         ConcurrentMap<String, AttachmentToken> userTokens = map.remove(key);
         if (null == userTokens) {
-            final ConcurrentMap<String, AttachmentToken> newmap = new NonBlockingHashMap<String, AttachmentToken>();
+            final ConcurrentMap<String, AttachmentToken> newmap = new ConcurrentHashMap<String, AttachmentToken>();
             userTokens = map.putIfAbsent(key, newmap);
             if (null == userTokens) {
                 userTokens = newmap;
