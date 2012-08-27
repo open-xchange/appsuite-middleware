@@ -50,22 +50,14 @@
 package com.openexchange.snippet;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
 
 
 /**
- * {@link SnippetService} - The snippet service to manage arbitrary (likewise textual) contents.
+ * {@link SnippetManagement} - The snippet management for <code>CRUD</code> (<b>c</b>reate, <b>r</b>ead, <b>u</b>pdate, and <b>d</b>elete) operations. 
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface SnippetService {
+public interface SnippetManagement {
 
-    /**
-     * Gets the snippet management for specified session.
-     * 
-     * @param session The session providing user data
-     * @return The snippet management
-     * @throws OXException If management cannot be returned for any reason
-     */
-    SnippetManagement getManagement(Session session) throws OXException;
+    Snippet getSnippet() throws OXException;
 }
