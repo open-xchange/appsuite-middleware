@@ -51,9 +51,9 @@ package com.openexchange.mail;
 
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Lock;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.java.SynchronizedBasedReentrantLock;
 import com.openexchange.session.Session;
 
@@ -212,7 +212,7 @@ public final class MailSessionCache {
     public void putParameter(final int accountId, final String parameterName, final Object parameterValue) {
         ConcurrentMap<String, Object> accountMap = map.get(accountId);
         if (null == accountMap) {
-            final ConcurrentMap<String, Object> newInst = new ConcurrentHashMap<String, Object>();
+            final ConcurrentMap<String, Object> newInst = new NonBlockingHashMap<String, Object>();
             accountMap = map.putIfAbsent(accountId, newInst);
             if (null == accountMap) {
                 accountMap = newInst;
@@ -237,7 +237,7 @@ public final class MailSessionCache {
     public Object putParameterIfAbsent(final int accountId, final String parameterName, final Object parameterValue) {
         ConcurrentMap<String, Object> accountMap = map.get(accountId);
         if (null == accountMap) {
-            final ConcurrentMap<String, Object> newInst = new ConcurrentHashMap<String, Object>();
+            final ConcurrentMap<String, Object> newInst = new NonBlockingHashMap<String, Object>();
             accountMap = map.putIfAbsent(accountId, newInst);
             if (null == accountMap) {
                 accountMap = newInst;

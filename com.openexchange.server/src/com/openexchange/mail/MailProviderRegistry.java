@@ -76,7 +76,7 @@ public final class MailProviderRegistry {
     /**
      * Concurrent map used as set for mail providers
      */
-    private static final ConcurrentMap<Protocol, MailProvider> PROVIDERS = new ConcurrentHashMap<Protocol, MailProvider>();
+    private static final ConcurrentMap<Protocol, MailProvider> PROVIDERS = new NonBlockingHashMap<Protocol, MailProvider>();
 
     private static final AtomicReference<AllMailProvider> ALL_PROVIDER = new AtomicReference<AllMailProvider>();
 
