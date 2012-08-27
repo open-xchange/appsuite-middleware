@@ -924,7 +924,7 @@ public class OXUserCopyServicePortTypeImpl implements OXUserCopyServicePortType 
         }
 
         Boolean bool = soapDatabase.isMaster();
-        if (tmp != null) {
+        if (bool != null) {
             ret.setMaster(bool);
         }
 
