@@ -445,7 +445,7 @@ public class OXResourceServicePortTypeImpl implements OXResourceServicePortType 
         }
 
         Boolean bool = soapDatabase.isMaster();
-        if (tmp != null) {
+        if (bool != null) {
             ret.setMaster(bool);
         }
 

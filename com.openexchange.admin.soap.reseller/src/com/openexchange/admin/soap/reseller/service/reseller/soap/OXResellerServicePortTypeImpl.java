@@ -524,7 +524,7 @@ public class OXResellerServicePortTypeImpl implements OXResellerServicePortType 
         }
 
         Boolean bool = soapDatabase.isMaster();
-        if (tmp != null) {
+        if (bool != null) {
             ret.setMaster(bool);
         }
 
