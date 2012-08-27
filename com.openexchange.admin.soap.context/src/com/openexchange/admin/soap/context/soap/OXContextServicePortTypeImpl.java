@@ -1270,6 +1270,11 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
             ret.setLogin(tmp);
         }
 
+        Boolean bool = soapDatabase.isMaster();
+        if (null != bool) {
+            ret.setMaster(bool);
+        }
+
         itg = soapDatabase.getMasterId();
         if (itg != null) {
             ret.setMasterId(itg);

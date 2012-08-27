@@ -237,6 +237,11 @@ public class OXTaskMgmtServicePortTypeImpl implements OXTaskMgmtServicePortType 
             ret.setLogin(tmp);
         }
 
+        Boolean bool = soapDatabase.isMaster();
+        if (tmp != null) {
+            ret.setMaster(bool);
+        }
+
         itg = soapDatabase.getMasterId();
         if (itg != null) {
             ret.setMasterId(itg);

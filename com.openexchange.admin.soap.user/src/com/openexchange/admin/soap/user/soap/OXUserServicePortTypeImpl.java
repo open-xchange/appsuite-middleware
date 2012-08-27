@@ -1353,6 +1353,11 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
             ret.setLogin(tmp);
         }
 
+        Boolean bool = soapDatabase.isMaster();
+        if (tmp != null) {
+            ret.setMaster(bool);
+        }
+
         itg = soapDatabase.getMasterId();
         if (itg != null) {
             ret.setMasterId(itg);
