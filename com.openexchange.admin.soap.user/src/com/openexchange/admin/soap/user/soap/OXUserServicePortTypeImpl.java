@@ -1446,7 +1446,7 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
         }
 
         Boolean bool = soapDatabase.isMaster();
-        if (tmp != null) {
+        if (bool != null) {
             ret.setMaster(bool);
         }
 
