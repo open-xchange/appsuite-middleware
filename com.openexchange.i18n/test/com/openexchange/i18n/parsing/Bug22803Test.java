@@ -72,6 +72,7 @@ public class Bug22803Test {
 
     private static final String PO_CONTENTS = "msgid \"\"\n" 
         + "msgstr \"\"\n"
+        + "\"Content-Type: text/plain; charset=UTF-8\\n\"\n"
         + "\n"
         + "msgid \"Date range in search must contain 2 and not %d values.\"\n"
         + "msgstr \"\"\n"
