@@ -54,7 +54,7 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 
 /**
  * {@link DoubleKeyMap} - A double-key map.
@@ -75,7 +75,7 @@ final class DoubleKeyMap<K1, K2, V> implements Serializable {
      * @param clazz he class of the values
      */
     public DoubleKeyMap(final Class<V> clazz) {
-        map = new ConcurrentHashMap<K1, Map<K2, V>>();
+        map = new NonBlockingHashMap<K1, Map<K2, V>>();
         this.clazz = clazz;
     }
 
@@ -167,7 +167,7 @@ final class DoubleKeyMap<K1, K2, V> implements Serializable {
         }
         Map<K2, V> innerMap = this.map.get(k1);
         if (innerMap == null) {
-            innerMap = new ConcurrentHashMap<K2, V>(values.length);
+            innerMap = new NonBlockingHashMap<K2, V>(values.length);
             this.map.put(k1, innerMap);
         }
         for (int i = 0; i < values.length; i++) {
@@ -191,7 +191,7 @@ final class DoubleKeyMap<K1, K2, V> implements Serializable {
         }
         Map<K2, V> innerMap = this.map.get(k1);
         if (innerMap == null) {
-            innerMap = new ConcurrentHashMap<K2, V>();
+            innerMap = new NonBlockingHashMap<K2, V>();
             this.map.put(k1, innerMap);
         }
         return innerMap.put(k2, value);
