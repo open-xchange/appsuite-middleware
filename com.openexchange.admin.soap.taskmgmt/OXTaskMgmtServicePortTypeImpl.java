@@ -158,22 +158,86 @@ public class OXTaskMgmtServicePortTypeImpl implements OXTaskMgmtServicePortType 
             return null;
         }
         final com.openexchange.admin.rmi.dataobjects.Database ret = new com.openexchange.admin.rmi.dataobjects.Database();
-        ret.setClusterWeight(soapDatabase.getClusterWeight());
-        ret.setCurrentUnits(soapDatabase.getCurrentUnits());
-        ret.setDriver(soapDatabase.getDriver());
-        ret.setId(soapDatabase.getId());
-        ret.setLogin(soapDatabase.getLogin());
-        ret.setMaster(soapDatabase.isMaster());
-        ret.setMasterId(soapDatabase.getMasterId());
-        ret.setMaxUnits(soapDatabase.getMaxUnits());
-        ret.setName(soapDatabase.getName());
-        ret.setPassword(soapDatabase.getPassword());
-        ret.setPoolHardLimit(soapDatabase.getPoolHardLimit());
-        ret.setPoolInitial(soapDatabase.getPoolInitial());
-        ret.setPoolMax(soapDatabase.getPoolMax());
-        ret.setRead_id(soapDatabase.getReadId());
-        ret.setScheme(soapDatabase.getScheme());
-        ret.setUrl(soapDatabase.getUrl());
+
+        Integer itg = soapDatabase.getClusterWeight();
+        if (itg != null) {
+            ret.setClusterWeight(itg);
+        }
+
+        itg = soapDatabase.getCurrentUnits();
+        if (itg != null) {
+            ret.setCurrentUnits(itg);
+        }
+
+        String tmp = soapDatabase.getDriver();
+        if (tmp != null) {
+            ret.setDriver(tmp);
+        }
+
+        itg = soapDatabase.getId();
+        if (itg != null) {
+            ret.setId(itg);
+        }
+
+        tmp = soapDatabase.getLogin();
+        if (tmp != null) {
+            ret.setLogin(tmp);
+        }
+
+        Boolean bool = soapDatabase.isMaster();
+        if (tmp != null) {
+            ret.setMaster(bool);
+        }
+
+        itg = soapDatabase.getMasterId();
+        if (itg != null) {
+            ret.setMasterId(itg);
+        }
+
+        itg = soapDatabase.getMaxUnits();
+        if (itg != null) {
+            ret.setMaxUnits(itg);
+        }
+
+        tmp = soapDatabase.getName();
+        if (tmp != null) {
+            ret.setName(tmp);
+        }
+
+        tmp = soapDatabase.getPassword();
+        if (tmp != null) {
+            ret.setPassword(tmp);
+        }
+
+        itg = soapDatabase.getPoolHardLimit();
+        if (itg != null) {
+            ret.setPoolHardLimit(itg);
+        }
+
+        itg = soapDatabase.getPoolInitial();
+        if (itg != null) {
+            ret.setPoolInitial(itg);
+        }
+
+        itg = soapDatabase.getPoolMax();
+        if (itg != null) {
+            ret.setPoolMax(itg);
+        }
+
+        itg = soapDatabase.getReadId();
+        if (itg != null) {
+            ret.setRead_id(itg);
+        }
+
+        tmp = soapDatabase.getScheme();
+        if (tmp != null) {
+            ret.setScheme(tmp);
+        }
+
+        tmp = soapDatabase.getUrl();
+        if (tmp != null) {
+            ret.setUrl(tmp);
+        }
         return ret;
     }
 
