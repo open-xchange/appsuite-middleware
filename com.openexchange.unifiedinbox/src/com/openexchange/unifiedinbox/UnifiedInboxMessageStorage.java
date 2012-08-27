@@ -432,16 +432,20 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                             final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
                             if (messageStorage instanceof ISimplifiedThreadStructure) {
                                 final List<List<MailMessage>> list = ((ISimplifiedThreadStructure) messageStorage).getThreadSortedMessages(fn, includeSent, false, null, max, sortField, order, checkedFields);
+                                final List<List<MailMessage>> ret = new ArrayList<List<MailMessage>>(list.size());
                                 final UnifiedInboxUID helper = new UnifiedInboxUID();
                                 for (final List<MailMessage> list2 : list) {
+                                    final List<MailMessage> messages = new ArrayList<MailMessage>(list2.size());
                                     for (final MailMessage accountMail : list2) {
                                         final UnifiedMailMessage umm = new UnifiedMailMessage(accountMail);
                                         umm.setMailId(helper.setUID(accountId, fn, accountMail.getMailId()).toString());
                                         umm.setFolder(fullName);
                                         umm.setAccountId(accountId);
+                                        messages.add(umm);
                                     }
+                                    ret.add(messages);
                                 }
-                                return list;
+                                return ret;
                             }
                             /*-
                              * 1. Send 'all' request with id, folder_id, level, and received_date - you need all that data.
@@ -505,16 +509,20 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                                 }
                             };
                             Collections.sort(list, listComparator);
+                            final List<List<MailMessage>> ret = new ArrayList<List<MailMessage>>(list.size());
                             final UnifiedInboxUID helper = new UnifiedInboxUID();
                             for (final List<MailMessage> list2 : list) {
+                                final List<MailMessage> messages = new ArrayList<MailMessage>(list2.size());
                                 for (final MailMessage accountMail : list2) {
                                     final UnifiedMailMessage umm = new UnifiedMailMessage(accountMail);
                                     umm.setMailId(helper.setUID(accountId, fn, accountMail.getMailId()).toString());
                                     umm.setFolder(fullName);
                                     umm.setAccountId(accountId);
+                                    messages.add(umm);
                                 }
+                                ret.add(messages);
                             }
-                            return list;
+                            return ret;
                         } catch (final OXException e) {
                             final StringBuilder tmp = new StringBuilder(128);
                             tmp.append("Couldn't get messages from folder \"");
@@ -1335,6 +1343,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                     toFill[pos] = umm;
                     umm.setMailId(mailIds[pos]);
                     umm.setFolder(uiFullname);
+                    umm.setAccountId(accountId);
                 }
             }
         }
