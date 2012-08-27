@@ -49,15 +49,34 @@
 
 package com.openexchange.snippet;
 
-import com.openexchange.exception.OXException;
+import java.util.Collection;
 
 
 /**
- * {@link SnippetService} - The snippet service to manage arbitrary (likewise textual) contents.
+ * {@link Snippet} - Represents arbitrary (textual) content.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface SnippetService {
+public interface Snippet {
 
-    Snippet getSnippet() throws OXException;
+    /**
+     * Gets the textual content.
+     * 
+     * @return The content
+     */
+    String getContent();
+
+    /**
+     * Gets the collection of attachments.
+     * 
+     * @return The attachments or an empty collection if none attached
+     */
+    Collection<Attachment> getAttachments();
+
+    /**
+     * Gets miscellaneous JSON data.
+     * 
+     * @return The JSON data or <code>null</code> if absent
+     */
+    Object getMisc();
 }

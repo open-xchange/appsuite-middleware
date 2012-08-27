@@ -49,15 +49,36 @@
 
 package com.openexchange.snippet;
 
-import com.openexchange.exception.OXException;
+import java.io.InputStream;
 
 
 /**
- * {@link SnippetService} - The snippet service to manage arbitrary (likewise textual) contents.
+ * {@link Attachment} - Represents a file attachment for a snippet.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface SnippetService {
+public interface Attachment {
 
-    Snippet getSnippet() throws OXException;
+    /**
+     * Gets the content's type according to RFC 822; e.g. <code>"text/plain; charset=UTF-8; name=mytext.txt"</code>
+     * 
+     * @return The content's type or <code>null</code>
+     */
+    String getContentType();
+
+    /**
+     * Gets the content's disposition according to RFC 822; e.g. <code>"attachment; filename=mytext.txt"</code>
+     * 
+     * @return The content's disposition or <code>null</code>
+     */
+    String getContentDisposition();
+
+    /**
+     * Gets the attachment's size if known.
+     * 
+     * @return The size or <code>-1</code> if unknown
+     */
+    long getSize();
+
+    InputStream getInputStream();
 }
