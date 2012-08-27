@@ -49,22 +49,36 @@
 
 package com.openexchange.snippet;
 
-import com.openexchange.exception.OXException;
+import com.openexchange.i18n.LocalizableStrings;
 
 
 /**
- * {@link SnippetManagement} - The snippet management for <code>CRUD</code> (<b>c</b>reate, <b>r</b>ead, <b>u</b>pdate, and <b>d</b>elete) operations. 
+ * {@link SnippetExceptionMessages} - Exception messages for Message Queue (MQ) module that needs to be translated.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface SnippetManagement {
+public final class SnippetExceptionMessages implements LocalizableStrings {
+
+    // An error occurred: %1$s
+    public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
+
+    // An I/O error occurred: %1$s
+    public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
+
+    // No such snippet found for identifier: %1$s
+    public static final String SNIPPET_NOT_FOUND_MSG = "No such snippet found for identifier: %1$s";
+    
+    // A JSON error occurred: %1$s
+    public static final String JSON_ERROR_MSG = "A JSON error occurred: %1$s";
+
+    // Illegal state: %1$s
+    public static final String ILLEGAL_STATE_MSG = "Illegal state: %1$s";
 
     /**
-     * Gets a snippet by specified identifier.
-     * 
-     * @param id The identifier
-     * @return The snippet
-     * @throws OXException If such a snippet does not exist
+     * Initializes a new {@link SnippetExceptionMessages}.
      */
-    Snippet getSnippet(String id) throws OXException;
+    private SnippetExceptionMessages() {
+        super();
+    }
+
 }
