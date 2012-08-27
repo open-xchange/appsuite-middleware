@@ -65,39 +65,39 @@ public enum CMISExceptionCodes implements OXExceptionCode {
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(CMISExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CATEGORY_ERROR, 1),
+    UNEXPECTED_ERROR(CMISExceptionMessages.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1),
     /**
      * A CMIS error occurred: %1$s
      */
-    CMIS_ERROR(CMISExceptionMessages.CMIS_ERROR_MSG, Category.CATEGORY_ERROR, 2),
+    CMIS_ERROR(CMISExceptionMessages.CMIS_ERROR_MSG, CATEGORY_USER_INPUT, 2),
     /**
      * Invalid CMIS URL: %1$s
      */
-    INVALID_CMIS_URL(CMISExceptionMessages.INVALID_CMIS_URL_MSG, Category.CATEGORY_ERROR, 3),
+    INVALID_CMIS_URL(CMISExceptionMessages.INVALID_CMIS_URL_MSG, CATEGORY_USER_INPUT, 3),
     /**
      * CMIS URL does not denote a directory: %1$s
      */
-    NOT_A_FOLDER(CMISExceptionMessages.NOT_A_FOLDER_MSG, Category.CATEGORY_ERROR, 4),
+    NOT_A_FOLDER(CMISExceptionMessages.NOT_A_FOLDER_MSG, CATEGORY_USER_INPUT, 4),
     /**
      * The CMIS resource does not exist: %1$s
      */
-    NOT_FOUND(CMISExceptionMessages.NOT_FOUND_MSG, Category.CATEGORY_ERROR, 5),
+    NOT_FOUND(CMISExceptionMessages.NOT_FOUND_MSG, CATEGORY_USER_INPUT, 5),
     /**
      * Update denied for CMIS resource: %1$s
      */
-    UPDATE_DENIED(CMISExceptionMessages.UPDATE_DENIED_MSG, Category.CATEGORY_ERROR, 6),
+    UPDATE_DENIED(CMISExceptionMessages.UPDATE_DENIED_MSG, CATEGORY_USER_INPUT, 6),
     /**
      * Delete denied for CMIS resource: %1$s
      */
-    DELETE_DENIED(CMISExceptionMessages.DELETE_DENIED_MSG, Category.CATEGORY_ERROR, 7),
+    DELETE_DENIED(CMISExceptionMessages.DELETE_DENIED_MSG, CATEGORY_USER_INPUT, 7),
     /**
      * CMIS URL does not denote a file: %1$s
      */
-    NOT_A_FILE(CMISExceptionMessages.NOT_A_FILE_MSG, Category.CATEGORY_ERROR, 8),
+    NOT_A_FILE(CMISExceptionMessages.NOT_A_FILE_MSG, CATEGORY_USER_INPUT, 8),
     /**
      * Missing file name.
      */
-    MISSING_FILE_NAME(CMISExceptionMessages.MISSING_FILE_NAME_MSG, Category.CATEGORY_ERROR, 12),
+    MISSING_FILE_NAME(CMISExceptionMessages.MISSING_FILE_NAME_MSG, CATEGORY_USER_INPUT, 12),
     /**
      * Versioning not supported by CMIS file storage.
      */

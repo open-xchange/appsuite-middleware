@@ -342,8 +342,8 @@ public final class FileStorageFolderStorage implements FolderStorage {
             }
         }
 
-        final String fullname = accountAccess.getFolderAccess().createFolder(fsFolder);
-        folder.setID(new FileStorageFolderIdentifier(serviceId, accountId, fullname).toString());
+        final String fullName = accountAccess.getFolderAccess().createFolder(fsFolder);
+        folder.setID(new FileStorageFolderIdentifier(serviceId, accountId, fullName).toString());
     }
 
     @Override
@@ -359,9 +359,9 @@ public final class FileStorageFolderStorage implements FolderStorage {
             getFileStorageAccessForAccount(fsfi.getServiceId(), fsfi.getAccountId(), storageParameters.getSession(), accesses);
         openFileStorageAccess(accountAccess);
 
-        final String fullname = fsfi.getFolderId();
+        final String fullName = fsfi.getFolderId();
         final FileStorageFolderAccess folderAccess = accountAccess.getFolderAccess();
-        folderAccess.clearFolder(fullname, true);
+        folderAccess.clearFolder(fullName, true);
     }
 
     @Override
@@ -377,12 +377,12 @@ public final class FileStorageFolderStorage implements FolderStorage {
             getFileStorageAccessForAccount(fsfi.getServiceId(), fsfi.getAccountId(), storageParameters.getSession(), accesses);
         openFileStorageAccess(accountAccess);
 
-        final String fullname = fsfi.getFolderId();
+        final String fullName = fsfi.getFolderId();
         /*
          * Only backup if fullname does not denote trash (sub)folder
          */
         final FileStorageFolderAccess folderAccess = accountAccess.getFolderAccess();
-        folderAccess.deleteFolder(fullname, true);
+        folderAccess.deleteFolder(fullName, true);
     }
 
     @Override

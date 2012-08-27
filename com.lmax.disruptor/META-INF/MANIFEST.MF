@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Ant-Version: Apache Ant 1.8.2
+Created-By: 1.6.0_21-b06 (Sun Microsystems Inc.)
+Built-By: barkerm
+Bundle-Name: Disruptor Framework
+Bundle-Vendor: LMAX Disruptor Development Team
+Bundle-Version: 2.10.3
+Bundle-Description: Disruptor - Concurrent Programming Framework
+Bundle-SymbolicName: com.lmax.disruptor
+Bundle-ManifestVersion: 2
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: org.osgi.framework,sun.misc
+Export-Package: com.lmax.disruptor;uses:="com.lmax.disruptor.util,sun.
+ misc";version=2.10.3,com.lmax.disruptor.dsl;uses:="com.lmax.disruptor
+ ,com.lmax.disruptor.util";version=2.10.3,com.lmax.disruptor.collectio
+ ns;version=2.10.3,com.lmax.disruptor.util;uses:="sun.misc";version=2.
+ 10.3
+Bundle-ClassPath: lib/disruptor-2.10.3.jar,
+ .

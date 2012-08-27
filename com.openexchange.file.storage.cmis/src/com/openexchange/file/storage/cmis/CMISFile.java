@@ -139,7 +139,9 @@ public final class CMISFile extends DefaultFile {
                     }
                 }
                 if (set.contains(Field.TITLE)) {
-                    setTitle(document.getName());
+                    final String name = document.getName();
+                    setTitle(name);
+                    setFileName(name);
                 }
                 final ContentStream contentStream = document.getContentStream();
                 if (set.contains(Field.FILE_MIMETYPE)) {
