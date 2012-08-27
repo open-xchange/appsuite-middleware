@@ -53,7 +53,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.conversion.simple.SimplePayloadConverter;
-import com.openexchange.conversion.simple.SimplePayloadConverter.Quality;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.example.presence.PresenceStatus;
 import com.openexchange.tools.session.ServerSession;
