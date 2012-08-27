@@ -60,6 +60,21 @@ import java.util.Map;
 public interface Snippet {
 
     /**
+     * The property identifier for the identifier.
+     */
+    public static final String PROP_ID = "com.openexchange.snippet.id";
+
+    /**
+     * The property identifier for the type.
+     */
+    public static final String PROP_TYPE = "com.openexchange.snippet.type";
+
+    /**
+     * The property identifier for the display name.
+     */
+    public static final String PROP_DISPLAY_NAME = "com.openexchange.snippet.displayname";
+
+    /**
      * The property identifier for the creator.
      */
     public static final String PROP_CREATED_BY = "com.openexchange.snippet.createdby";
@@ -73,6 +88,27 @@ public interface Snippet {
      * The property identifier for the miscellaneous JSON data.
      */
     public static final String PROP_MISC = "com.openexchange.snippet.misc";
+
+    /**
+     * Gets the identifier.
+     * 
+     * @return The identifier.
+     */
+    String getId();
+
+    /**
+     * Gets the type; e.g. <code>"signature"</code>.
+     * 
+     * @return The type
+     */
+    String getType();
+
+    /**
+     * Gets the display name.
+     * 
+     * @return The display name
+     */
+    String getDisplayName();
 
     /**
      * Gets the textual content.
@@ -90,6 +126,13 @@ public interface Snippet {
 
     /**
      * Gets miscellaneous JSON data.
+     * <p>
+     * Allowed is any object returned by:
+     * 
+     * <pre>
+     * String sJson = &quot;...&quot;; // Any JSON representation
+     * new org.json.JSONTokener(sJson).next();
+     * </pre>
      * 
      * @return The JSON data or <code>null</code> if absent
      */
