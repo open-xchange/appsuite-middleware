@@ -54,7 +54,7 @@ import com.openexchange.session.Session;
 
 
 /**
- * {@link SnippetService} - The snippet service to manage arbitrary (likewise textual) contents.
+ * {@link SnippetService} - The snippet service to manage arbitrary (likly textual) contents.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
