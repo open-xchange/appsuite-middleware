@@ -70,57 +70,57 @@ public class DefaultSnippet implements Snippet {
     /**
      * The identifier.
      */
-    protected int id;
+    private int id;
 
     /**
      * The account identifier.
      */
-    protected int accountId;
+    private int accountId;
 
     /**
      * The module identifier.
      */
-    protected String module;
+    private String module;
 
     /**
      * The type.
      */
-    protected String type;
+    private String type;
 
     /**
      * The display name.
      */
-    protected String displayName;
+    private String displayName;
 
     /**
      * The content.
      */
-    protected String content;
+    private String content;
 
     /**
      * The attachments.
      */
-    protected List<Attachment> attachments;
+    private List<Attachment> attachments;
 
     /**
      * The miscellaneous JSON object.
      */
-    protected Object misc;
+    private Object misc;
 
     /**
      * The shared flag.
      */
-    protected Boolean shared;
+    private Boolean shared;
 
     /**
      * The creator identifier.
      */
-    protected int createdBy;
+    private int createdBy;
 
     /**
      * The backing properties.
      */
-    protected final Map<String, Object> properties;
+    private final Map<String, Object> properties;
 
     /**
      * Initializes a new {@link DefaultSnippet}.
