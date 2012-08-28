@@ -56,6 +56,7 @@ import org.joox.Match;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.xmpp.XMPPExtension;
 import com.openexchange.realtime.xmpp.packet.XMPPMessage;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link XMPPHandler}
@@ -64,7 +65,7 @@ import com.openexchange.realtime.xmpp.packet.XMPPMessage;
  */
 public class XMPPHandler {
 
-    private final Map<String, XMPPExtension> extensions = new HashMap<String, XMPPExtension>();
+    private final Map<String, XMPPComponent> components = new HashMap<String, XMPPComponent>();
 
     public void handle(XMPPContainer container) throws OXException {
         Match match = JOOX.$(container.getXml());
@@ -77,15 +78,37 @@ public class XMPPHandler {
         } else if (match.tag().equals("presence")) {
             service = "presence";
         }
-        extensions.get(service).handleIncoming(new XMPPMessage(match, container.getSession()), container.getSession());
+
+        ServerSession session = container.getSession();
+        XMPPMessage xmpp = new XMPPMessage(match, session);
+        String resource = getComponentResource(session, xmpp);
+        XMPPComponent xmppComponent = components.get(resource);
+        if (xmppComponent == null) {
+            // TODO: handle
+        }
+
+        XMPPExtension xmppExtension = xmppComponent.getExtension(service);
+        if (xmppExtension == null) {
+            // TODO: handle
+        }
+
+        xmppExtension.handleIncoming(xmpp, session);
     }
 
-    public void addExtension(XMPPExtension extension) {
-        this.extensions.put(extension.getServiceName(), extension);
+    public void addComponent(XMPPComponent component) {
+        this.components.put(component.getResource(), component);
     }
 
-    public void removeExtension(XMPPExtension extension) {
-        this.extensions.remove(extension.getServiceName());
+    public void removeComponent(String resource) {
+        this.components.remove(resource);
+    }
+    
+    public XMPPComponent getComponent(String resource) {
+        return this.components.get(resource);
     }
 
+    private String getComponentResource(ServerSession session, XMPPMessage xmpp) {
+        String[] split = xmpp.getTo().getDomain().split(session.getContext().getName());
+        return split.length == 0 ? "" : split[0];
+    }
 }

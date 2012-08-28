@@ -20,6 +20,7 @@ Import-Package: com.openexchange.conversion.simple,
  com.openexchange.threadpool,
  com.openexchange.tools.encoding,
  com.openexchange.tools.session,
+ org.apache.commons.logging;version="1.1.1",
  org.joox,
  org.osgi.framework
 Bundle-ActivationPolicy: lazy
