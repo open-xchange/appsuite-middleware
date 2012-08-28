@@ -229,19 +229,20 @@ public final class Duplicate {
                     deleteEntries(name2ids, cid, tree, user, cm.connection);
                 } else {
                     cm.upgradeConnection();
+                    final Connection connection = cm.connection;
                     // Start transaction
                     boolean rollback = false;
                     try {
-                        cm.connection.setAutoCommit(false); // BEGIN
+                        connection.setAutoCommit(false); // BEGIN
                         rollback = true;
-                        deleteEntries(name2ids, cid, tree, user, cm.connection);
-                        cm.connection.commit(); // COMMIT
+                        deleteEntries(name2ids, cid, tree, user, connection);
+                        connection.commit(); // COMMIT
                         rollback = false;
                     } finally {
                         if (rollback) {
-                            DBUtils.rollback(cm.connection); // ROLLBACK
+                            DBUtils.rollback(connection); // ROLLBACK
                         }
-                        DBUtils.autocommit(cm.connection);
+                        DBUtils.autocommit(connection);
                     }
                 }
             }
