@@ -121,7 +121,7 @@ public interface Snippet {
      * 
      * @return The identifier.
      */
-    int getId();
+    String getId();
 
     /**
      * Gets the account identifier (if applicable for associated module).

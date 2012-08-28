@@ -70,7 +70,7 @@ public class DefaultSnippet implements Snippet {
     /**
      * The identifier.
      */
-    private int id;
+    private String id;
 
     /**
      * The account identifier.
@@ -130,18 +130,17 @@ public class DefaultSnippet implements Snippet {
         properties = new HashMap<String, Object>(16);
         accountId = -1;
         createdBy = -1;
-        id = -1;
     }
 
     @Override
-    public int getId() {
-        int id = this.id;
-        if (id < 0) {
-            final Integer itg = (Integer) properties.get(PROP_ID);
-            if (null == itg) {
-                return -1;
+    public String getId() {
+        String id = this.id;
+        if (null == id) {
+            final String s = (String) properties.get(PROP_ID);
+            if (null == s) {
+                return null;
             }
-            id = itg.intValue();
+            id = s;
             this.id = id;
         }
         return id;
@@ -277,15 +276,15 @@ public class DefaultSnippet implements Snippet {
     }
 
     /**
-     * Sets the id
+     * Sets the identifier
      * 
-     * @param id The id to set
+     * @param id The identifier to set
      * @return This snippet with argument applied
      */
-    public DefaultSnippet setId(final int id) {
+    public DefaultSnippet setId(final String id) {
         this.id = id;
-        if (id >= 0) {
-            properties.put(PROP_ID, Integer.valueOf(id));
+        if (id != null) {
+            properties.put(PROP_ID, id);
         } else {
             properties.remove(PROP_ID);
         }
@@ -471,7 +470,7 @@ public class DefaultSnippet implements Snippet {
             return;
         }
         if (PROP_ID.equals(propName)) {
-            setId((value instanceof Integer) ? ((Integer) value).intValue() : -1);
+            setId(null == value ? null : value.toString());
             return;
         }
         if (PROP_MISC.equals(propName)) {
@@ -537,7 +536,7 @@ public class DefaultSnippet implements Snippet {
             return;
         }
         if (PROP_ID.equals(propName)) {
-            id = -1;
+            id = null;
             return;
         }
         if (PROP_MISC.equals(propName)) {
@@ -566,7 +565,7 @@ public class DefaultSnippet implements Snippet {
         accountId = -1;
         createdBy = -1;
         displayName = null;
-        id = -1;
+        id = null;
         misc = null;
         module = null;
         shared = null;

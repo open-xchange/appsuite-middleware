@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,53 +47,73 @@
  *
  */
 
-package com.openexchange.snippet;
+package com.openexchange.snippet.mime;
 
-import java.util.Set;
-import com.openexchange.exception.OXException;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
+
 
 /**
- * {@link SnippetManagement} - The snippet management for <code>CRUD</code> (<b>c</b>reate, <b>r</b>ead, <b>u</b>pdate, and <b>d</b>elete)
- * operations.
- * 
+ * {@link Services}
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface SnippetManagement {
+public final class Services {
 
     /**
-     * Gets a snippet by specified identifier.
-     * 
-     * @param id The identifier
-     * @return The snippet
-     * @throws OXException If such a snippet does not exist
+     * Initializes a new {@link Services}.
      */
-    Snippet getSnippet(String id) throws OXException;
+    private Services() {
+        super();
+    }
+
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
 
     /**
-     * Creates specified snippet.
+     * Sets the service lookup.
      * 
-     * @param snippet The snippet to create
-     * @return The newly created snippet's identifier
-     * @throws OXException If create operation fails
+     * @param serviceLookup The service lookup or <code>null</code>
      */
-    String createSnippet(Snippet snippet) throws OXException;
+    public static void setServiceLookup(final ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
+    }
 
     /**
-     * Updates specified snippet.
+     * Gets the service lookup.
      * 
-     * @param id The identifier of the snippet to update
-     * @param snippet The snippet providing the data to update
-     * @param properties The properties to update
-     * @throws OXException If update operation fails
+     * @return The service lookup or <code>null</code>
      */
-    void updateSnippet(String id, Snippet snippet, Set<Property> properties) throws OXException;
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
+    }
 
     /**
-     * Updates specified snippet.
+     * Gets the service of specified type
      * 
-     * @param id The identifier of the snippet to delete
-     * @throws OXException If delete operation fails
+     * @param clazz The service's class
+     * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
      */
-    void deleteSnippet(String id) throws OXException;
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.caching.hazelcast\" not started?");
+        }
+        return serviceLookup.getService(clazz);
+    }
+
+    /**
+     * (Optionally) Gets the service of specified type
+     * 
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        try {
+            return getService(clazz);
+        } catch (final IllegalStateException e) {
+            return null;
+        }
+    }
 
 }

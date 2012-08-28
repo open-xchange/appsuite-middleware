@@ -198,7 +198,11 @@ public final class RdbSnippetManagement implements SnippetManagement {
     }
 
     @Override
-    public Snippet getSnippet(final int id) throws OXException {
+    public Snippet getSnippet(final String identifier) throws OXException {
+        if (null == identifier) {
+            return null;
+        }
+        final int id = Integer.parseInt(identifier);
         final DatabaseService databaseService = getDatabaseService();
         final int contextId = this.contextId;
         final Connection con = databaseService.getReadOnly(contextId);
@@ -309,7 +313,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
     }
 
     @Override
-    public int createSnippet(final Snippet snippet) throws OXException {
+    public String createSnippet(final Snippet snippet) throws OXException {
         final DatabaseService databaseService = getDatabaseService();
         final int contextId = this.contextId;
         final Connection con = databaseService.getWritable(contextId);
@@ -389,7 +393,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
             con.commit(); // COMMIT
             DBUtils.autocommit(con);
             rollback = false;
-            return id;
+            return Integer.toString(id);
         } catch (final SQLException e) {
             throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -403,7 +407,11 @@ public final class RdbSnippetManagement implements SnippetManagement {
     }
 
     @Override
-    public void updateSnippet(final int id, final Snippet snippet, final Set<Property> properties) throws OXException {
+    public void updateSnippet(final String identifier, final Snippet snippet, final Set<Property> properties) throws OXException {
+        if (null == identifier) {
+            return;
+        }
+        final int id = Integer.parseInt(identifier);
         final DatabaseService databaseService = getDatabaseService();
         final int contextId = this.contextId;
         final Connection con = databaseService.getWritable(contextId);
@@ -609,7 +617,11 @@ public final class RdbSnippetManagement implements SnippetManagement {
     }
 
     @Override
-    public void deleteSnippet(final int id) throws OXException {
+    public void deleteSnippet(final String identifier) throws OXException {
+        if (null == identifier) {
+            return;
+        }
+        final int id = Integer.parseInt(identifier);
         final DatabaseService databaseService = getDatabaseService();
         final int contextId = this.contextId;
         final Connection con = databaseService.getWritable(contextId);

@@ -1,4 +1,4 @@
-/*
+/*-
  *
  *    OPEN-XCHANGE legal information
  *
@@ -47,53 +47,56 @@
  *
  */
 
-package com.openexchange.snippet;
+package com.openexchange.snippet.mime.osgi;
 
-import java.util.Set;
-import com.openexchange.exception.OXException;
+import org.apache.commons.logging.Log;
+import com.openexchange.caching.CacheService;
+import com.openexchange.context.ContextService;
+import com.openexchange.crypto.CryptoService;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.id.IDGeneratorService;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.snippet.mime.Services;
 
 /**
- * {@link SnippetManagement} - The snippet management for <code>CRUD</code> (<b>c</b>reate, <b>r</b>ead, <b>u</b>pdate, and <b>d</b>elete)
- * operations.
- * 
+ * {@link RdbSnippetActivator} - The activator for RDB Snippet bundle.
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface SnippetManagement {
+public class RdbSnippetActivator extends HousekeepingActivator {
 
     /**
-     * Gets a snippet by specified identifier.
-     * 
-     * @param id The identifier
-     * @return The snippet
-     * @throws OXException If such a snippet does not exist
+     * Initializes a new {@link RdbSnippetActivator}.
      */
-    Snippet getSnippet(String id) throws OXException;
+    public RdbSnippetActivator() {
+        super();
+    }
 
-    /**
-     * Creates specified snippet.
-     * 
-     * @param snippet The snippet to create
-     * @return The newly created snippet's identifier
-     * @throws OXException If create operation fails
-     */
-    String createSnippet(Snippet snippet) throws OXException;
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] {
+            DatabaseService.class, ContextService.class, CacheService.class, CryptoService.class, IDGeneratorService.class };
+    }
 
-    /**
-     * Updates specified snippet.
-     * 
-     * @param id The identifier of the snippet to update
-     * @param snippet The snippet providing the data to update
-     * @param properties The properties to update
-     * @throws OXException If update operation fails
-     */
-    void updateSnippet(String id, Snippet snippet, Set<Property> properties) throws OXException;
+    @Override
+    protected void startBundle() throws Exception {
+        final Log logger = com.openexchange.log.Log.loggerFor(RdbSnippetActivator.class);
+        logger.info("Starting bundle: com.openexchange.snippet.mime");
+        try {
+            Services.setServiceLookup(this);
+            /*
+             * Register
+             */
+            
+        } catch (final Exception e) {
+            logger.error("Error starting bundle: com.openexchange.snippet.mime", e);
+            throw e;
+        }
+    }
 
-    /**
-     * Updates specified snippet.
-     * 
-     * @param id The identifier of the snippet to delete
-     * @throws OXException If delete operation fails
-     */
-    void deleteSnippet(String id) throws OXException;
-
+    @Override
+    protected void stopBundle() throws Exception {
+        super.stopBundle();
+        Services.setServiceLookup(null);
+    }
 }
