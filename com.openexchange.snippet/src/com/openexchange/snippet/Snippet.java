@@ -182,4 +182,11 @@ public interface Snippet {
      * @return The properties as an unmodifiable {@link Map map}
      */
     Map<String, Object> getProperties();
+
+    /**
+     * Gets this snippet's unnamed properties.
+     * 
+     * @return The unnamed properties as an unmodifiable {@link Map map}
+     */
+    Map<String, Object> getUnnamedProperties();
 }

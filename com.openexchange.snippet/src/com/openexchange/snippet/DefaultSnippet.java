@@ -262,6 +262,20 @@ public class DefaultSnippet implements Snippet {
         return Collections.unmodifiableMap(properties);
     }
 
+    @Override
+    public Map<String, Object> getUnnamedProperties() {
+        final Map<String, Object> m = new HashMap<String, Object>(properties);
+        m.remove(PROP_ACCOUNT_ID);
+        m.remove(PROP_CREATED_BY);
+        m.remove(PROP_DISPLAY_NAME);
+        m.remove(PROP_ID);
+        m.remove(PROP_MISC);
+        m.remove(PROP_MODULE);
+        m.remove(PROP_SHARED);
+        m.remove(PROP_TYPE);
+        return m;
+    }
+
     /**
      * Sets the id
      * 

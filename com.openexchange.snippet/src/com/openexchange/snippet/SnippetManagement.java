@@ -66,5 +66,5 @@ public interface SnippetManagement {
      * @return The snippet
      * @throws OXException If such a snippet does not exist
      */
-    Snippet getSnippet(String id) throws OXException;
+    Snippet getSnippet(int id) throws OXException;
 }
