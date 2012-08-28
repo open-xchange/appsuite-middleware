@@ -73,6 +73,45 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class Duplicate {
 
+    private static final class ConnectionManager {
+        private final DatabaseService databaseService;
+        private final int contextId;
+        protected boolean readWrite;
+        protected Connection connection;
+
+        protected ConnectionManager(final Connection connection, final boolean readWrite, final int contextId, final DatabaseService databaseService) {
+            super();
+            this.databaseService = databaseService;
+            this.contextId = contextId;
+            this.connection = connection;
+            this.readWrite = readWrite;
+        }
+
+        protected void upgradeConnection() throws OXException {
+            if (readWrite) {
+                // Already a read-write connection
+                return;
+            }
+            releaseConnection();
+            this.connection = databaseService.getWritable(contextId);
+            this.readWrite = true;
+        }
+
+        protected void releaseConnection() {
+            final Connection connection = this.connection;
+            if (null == connection) {
+                return;
+            }
+            if (readWrite) {
+                DBUtils.autocommit(connection);
+                databaseService.backWritable(contextId, connection);
+            } else {
+                databaseService.backReadOnly(contextId, connection);
+            }
+            this.connection = null;
+        }
+    } // End of class ConnectionManager
+
     /**
      * Initializes a new {@link Duplicate}.
      */
@@ -92,29 +131,14 @@ public final class Duplicate {
     public static Map<String, List<String>> lookupDuplicateNames(final int cid, final int tree, final int user) throws OXException {
         final DatabaseService databaseService = getDatabaseService();
         // Get a connection
-        final Connection con;
+        final Connection con = databaseService.getReadOnly(cid);
+        final ConnectionManager cm = new ConnectionManager(con, false, cid, databaseService);
         try {
-            con = databaseService.getWritable(cid);
-        } catch (final OXException e) {
-            throw e;
-        }
-        try {
-            con.setAutoCommit(false); // BEGIN
-            final Map<String, List<String>> ret = lookupDuplicateNames(cid, tree, user, con);
-            con.commit(); // COMMIT
-            return ret;
-        } catch (final SQLException e) {
-            DBUtils.rollback(con); // ROLLBACK
-            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
-            DBUtils.rollback(con); // ROLLBACK
-            throw e;
-        } catch (final Exception e) {
-            DBUtils.rollback(con); // ROLLBACK
+            return lookupDuplicateNames(cid, tree, user, cm);
+        } catch (final RuntimeException e) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.autocommit(con);
-            databaseService.backWritable(cid, con);
+            cm.releaseConnection();
         }
     }
 
@@ -128,8 +152,8 @@ public final class Duplicate {
      * @return The name-2-IDs mapping
      * @throws OXException
      */
-    public static Map<String, List<String>> lookupDuplicateNames(final int cid, final int tree, final int user, final Connection con) throws OXException {
-        if (null == con) {
+    public static Map<String, List<String>> lookupDuplicateNames(final int cid, final int tree, final int user, final ConnectionManager cm) throws OXException {
+        if (null == cm) {
             return lookupDuplicateNames(cid, tree, user);
         }
         PreparedStatement stmt = null;
@@ -142,7 +166,7 @@ public final class Duplicate {
                  * Detect possible duplicates
                  */
                 stmt =
-                    con.prepareStatement("SELECT name, COUNT(name), parentId FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? GROUP BY parentId, name");
+                    cm.connection.prepareStatement("SELECT name, COUNT(name), parentId FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? GROUP BY parentId, name");
                 pos = 1;
                 stmt.setInt(pos++, cid);
                 stmt.setInt(pos++, tree);
@@ -170,7 +194,7 @@ public final class Duplicate {
             for (final Entry<String, String> entry : name2parent.entrySet()) {
                 try {
                     stmt =
-                        con.prepareStatement("SELECT folderId FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? AND name = ? AND parentId = ?");
+                        cm.connection.prepareStatement("SELECT folderId FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? AND name = ? AND parentId = ?");
                     final String name = entry.getKey();
                     pos = 1;
                     stmt.setInt(pos++, cid);
@@ -195,11 +219,31 @@ public final class Duplicate {
             /*
              * Delete duplicates from table
              */
-            for (final Entry<String, List<String>> entry : name2ids.entrySet()) {
-                final List<String> folderIds = entry.getValue();
-                final int sz = folderIds.size();
-                for (int i = 0; i < sz; i++) {
-                    Delete.deleteFolder(cid, tree, user, folderIds.get(i), false, false, con);
+            if (!name2ids.isEmpty()) {
+                /*
+                 * Do it...
+                 */
+                final boolean transactional = !cm.connection.getAutoCommit() && cm.readWrite;
+                if (transactional) {
+                    // Already in transaction state
+                    deleteEntries(name2ids, cid, tree, user, cm.connection);
+                } else {
+                    cm.upgradeConnection();
+                    final Connection connection = cm.connection;
+                    // Start transaction
+                    boolean rollback = false;
+                    try {
+                        connection.setAutoCommit(false); // BEGIN
+                        rollback = true;
+                        deleteEntries(name2ids, cid, tree, user, connection);
+                        connection.commit(); // COMMIT
+                        rollback = false;
+                    } finally {
+                        if (rollback) {
+                            DBUtils.rollback(connection); // ROLLBACK
+                        }
+                        DBUtils.autocommit(connection);
+                    }
                 }
             }
             /*
@@ -208,10 +252,20 @@ public final class Duplicate {
             return name2ids;
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-        } catch (final Exception e) {
+        } catch (final RuntimeException e) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
+        }
+    }
+
+    private static void deleteEntries(final Map<String, List<String>> name2ids, final int cid, final int tree, final int user, final Connection con) throws OXException {
+        for (final Entry<String, List<String>> entry : name2ids.entrySet()) {
+            final List<String> folderIds = entry.getValue();
+            final int sz = folderIds.size();
+            for (int i = 0; i < sz; i++) { // All but first entry
+                Delete.deleteFolder(cid, tree, user, folderIds.get(i), false, false, con);
+            }
         }
     }
 

@@ -54,6 +54,7 @@ import javax.servlet.ServletException;
 import org.glassfish.grizzly.comet.CometAddOn;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.grizzly.http.server.NetworkListener;
+import org.glassfish.grizzly.http.server.StaticHttpHandler;
 import org.glassfish.grizzly.websockets.WebSocketAddOn;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
@@ -163,6 +164,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
              *  create, configure and start server
              */
             grizzly = new HttpServer();
+            
             final NetworkListener networkListener = new NetworkListener("http-listener", httpHost, 8080);
             
             if (hasJMXEnabled) {
@@ -219,6 +221,9 @@ public class GrizzlyActivator extends HousekeepingActivator {
             }
             serviceFactory = new HttpServiceFactory(grizzly, context.getBundle());
             registerService(HttpService.class.getName(), serviceFactory);
+            
+//            grizzly.getServerConfiguration().addHttpHandler(new StaticHttpHandler("/var/www/ox7"), "/");
+//            grizzly.getServerConfiguration().addHttpHandler(new StaticHttpHandler("/var/www/ox7"), "/v=7.0.0-1.20120614.152235");
             
         } catch (final Exception e) {
             throw GrizzlyExceptionCode.GRIZZLY_SERVER_NOT_STARTED.create(e, new Object[] {});

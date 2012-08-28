@@ -16,7 +16,7 @@ class GroupTests extends PHPUnit_Framework_TestCase {
 		global $OXMASTER_ADMIN_PASS;
 		
 		// create a new context 
-		getContextClient($SOAPHOST)->create($ctx, $admin_user, getCredentialsObject($OXMASTER_ADMIN, $OXMASTER_ADMIN_PASS));
+		$create_context_result = getContextClient($SOAPHOST)->create($ctx, $admin_user, getCredentialsObject($OXMASTER_ADMIN, $OXMASTER_ADMIN_PASS));
 
 		// verify that the context is created
 		if (!is_soap_fault($create_context_result)) {
@@ -43,7 +43,7 @@ class GroupTests extends PHPUnit_Framework_TestCase {
 		}
 
 		// now create a user within this context
-		$new_user = getFullUserObject("soaptest_createuser", $ctx->id);
+		$new_user = getFullUserObject("soaptestCreateuser", $ctx->id);
 		getUserClient($SOAPHOST)->create($ctx, $new_user, getCredentialsObject($admin_user->name, $admin_user->password));
 
 		// now list all users and find the create one, if found, compare if all values were set correctly
@@ -202,7 +202,7 @@ class GroupTests extends PHPUnit_Framework_TestCase {
 		
 
 		$random_id = generateContextId();
-		$name = "soap_test_admin_" . $random_id;
+		$name = "soapTestAdmin" . $random_id;
 		$admin_user = getFullUserObject($name, $random_id);
 
 		$ctx = new Context();
@@ -223,7 +223,7 @@ class GroupTests extends PHPUnit_Framework_TestCase {
 	 */
 	public function testDeleteGroup(){
 		$random_id = generateContextId();
-		$name = "soap_test_admin_" . $random_id;
+		$name = "soapTestAdmin" . $random_id;
 		$admin_user = getFullUserObject($name, $random_id);
 
 		$ctx = new Context();
@@ -250,7 +250,7 @@ class GroupTests extends PHPUnit_Framework_TestCase {
 	 */
 	public function testChangeGroup(){
 		$random_id = generateContextId();
-		$name = "soap_test_admin_" . $random_id;
+		$name = "soapTestAdmin" . $random_id;
 		$admin_user = getFullUserObject($name, $random_id);
 
 		$ctx = new Context();
