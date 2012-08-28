@@ -49,12 +49,29 @@
 
 package com.openexchange.snippet;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 /**
- * {@link AbstractAttachment} - The abstract attachment class.
+ * {@link DefaultAttachment} - The default attachment implementation based on {@link InputStreamProvider}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AbstractAttachment implements Attachment {
+public class DefaultAttachment implements Attachment {
+
+    /**
+     * The {@link InputStream stream} provider.
+     */
+    public static interface InputStreamProvider {
+
+        /**
+         * Gets the input stream.
+         * 
+         * @return The input stream
+         * @throws IOException If an I/O error occurs
+         */
+        InputStream getInputStream() throws IOException;
+    }
 
     /**
      * The content type.
@@ -72,9 +89,14 @@ public abstract class AbstractAttachment implements Attachment {
     protected long size;
 
     /**
-     * Initializes a new {@link AbstractAttachment}.
+     * The input stream provider
      */
-    protected AbstractAttachment() {
+    protected InputStreamProvider streamProvider;
+
+    /**
+     * Initializes a new {@link DefaultAttachment}.
+     */
+    protected DefaultAttachment() {
         super();
         size = -1L;
     }
@@ -94,12 +116,21 @@ public abstract class AbstractAttachment implements Attachment {
         return size;
     }
 
+    @Override
+    public InputStream getInputStream() throws IOException {
+        final InputStreamProvider streamProvider = this.streamProvider;
+        if (null == streamProvider) {
+            throw new IOException("No input stream available.");
+        }
+        return streamProvider.getInputStream();
+    }
+
     /**
      * Sets the content type
      * 
      * @param contentType The content type to set
      */
-    public void setContentType(String contentType) {
+    public void setContentType(final String contentType) {
         this.contentType = contentType;
     }
 
@@ -108,7 +139,7 @@ public abstract class AbstractAttachment implements Attachment {
      * 
      * @param contentDisposition The content disposition to set
      */
-    public void setContentDisposition(String contentDisposition) {
+    public void setContentDisposition(final String contentDisposition) {
         this.contentDisposition = contentDisposition;
     }
 
@@ -117,8 +148,17 @@ public abstract class AbstractAttachment implements Attachment {
      * 
      * @param size The size to set
      */
-    public void setSize(long size) {
+    public void setSize(final long size) {
         this.size = size;
+    }
+
+    /**
+     * Sets the stream provider
+     * 
+     * @param streamProvider The stream provider to set
+     */
+    public void setStreamProvider(final InputStreamProvider streamProvider) {
+        this.streamProvider = streamProvider;
     }
 
 }

@@ -49,6 +49,7 @@
 
 package com.openexchange.snippet;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 
@@ -84,6 +85,7 @@ public interface Attachment {
      * Gets the input stream.
      * 
      * @return The input stream
+     * @throws IOException If an I/O error occurs
      */
-    InputStream getInputStream();
+    InputStream getInputStream() throws IOException;
 }
