@@ -60,32 +60,42 @@ import java.util.Map;
 public interface Snippet {
 
     /**
-     * The property identifier for the identifier.
+     * The property name for the identifier.
      */
     public static final String PROP_ID = "com.openexchange.snippet.id";
 
     /**
-     * The property identifier for the type.
+     * The property name for the account identifier.
+     */
+    public static final String PROP_ACCOUNT_ID = "com.openexchange.snippet.accountid";
+
+    /**
+     * The property name for the type; e.g. <code>"signature"</code>.
      */
     public static final String PROP_TYPE = "com.openexchange.snippet.type";
 
     /**
-     * The property identifier for the display name.
+     * The property name for the display name.
      */
     public static final String PROP_DISPLAY_NAME = "com.openexchange.snippet.displayname";
 
     /**
-     * The property identifier for the creator.
+     * The property name for the module identifier; e.g. <code>"com.openexchange.mail"</code>.
+     */
+    public static final String PROP_MODULE = "com.openexchange.snippet.module";
+
+    /**
+     * The property name for the creator.
      */
     public static final String PROP_CREATED_BY = "com.openexchange.snippet.createdby";
 
     /**
-     * The property identifier for the shared flag.
+     * The property name for the shared flag.
      */
     public static final String PROP_SHARED = "com.openexchange.snippet.shared";
 
     /**
-     * The property identifier for the miscellaneous JSON data.
+     * The property name for the optional miscellaneous JSON data.
      */
     public static final String PROP_MISC = "com.openexchange.snippet.misc";
 
@@ -94,7 +104,21 @@ public interface Snippet {
      * 
      * @return The identifier.
      */
-    String getId();
+    int getId();
+
+    /**
+     * Gets the account identifier (if applicable for associated module).
+     * 
+     * @return The account identifier or <code>-1</code>.
+     */
+    int getAccountId();
+
+    /**
+     * Gets the module identifier; e.g. <code>"com.openexchange.mail"</code>.
+     * 
+     * @return The module identifier
+     */
+    String getModule();
 
     /**
      * Gets the type; e.g. <code>"signature"</code>.
@@ -148,7 +172,7 @@ public interface Snippet {
     /**
      * Gets the identifier of this snippet's creator.
      * 
-     * @return The creator identifier
+     * @return The creator identifier or <code>-1</code> if absent
      */
     int getCreatedBy();
 

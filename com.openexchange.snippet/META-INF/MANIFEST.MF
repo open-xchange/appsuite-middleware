@@ -9,4 +9,5 @@ Import-Package: com.openexchange.exception,
  com.openexchange.i18n,
  com.openexchange.log,
  com.openexchange.session,
- org.apache.commons.logging
+ org.apache.commons.logging,
+ org.json

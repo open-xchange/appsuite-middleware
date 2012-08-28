@@ -60,16 +60,16 @@ import java.io.InputStream;
 public interface Attachment {
 
     /**
-     * Gets the content's type according to RFC 822; e.g. <code>"text/plain; charset=UTF-8; name=mytext.txt"</code>
+     * Gets the content type according to RFC 822; e.g. <code>"text/plain; charset=UTF-8; name=mytext.txt"</code>
      * 
-     * @return The content's type or <code>null</code>
+     * @return The content type or <code>null</code>
      */
     String getContentType();
 
     /**
-     * Gets the content's disposition according to RFC 822; e.g. <code>"attachment; filename=mytext.txt"</code>
+     * Gets the content disposition according to RFC 822; e.g. <code>"attachment; filename=mytext.txt"</code>
      * 
-     * @return The content's disposition or <code>null</code>
+     * @return The content disposition or <code>null</code>
      */
     String getContentDisposition();
 
@@ -80,5 +80,10 @@ public interface Attachment {
      */
     long getSize();
 
+    /**
+     * Gets the input stream.
+     * 
+     * @return The input stream
+     */
     InputStream getInputStream();
 }
