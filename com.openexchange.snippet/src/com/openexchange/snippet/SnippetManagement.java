@@ -49,12 +49,13 @@
 
 package com.openexchange.snippet;
 
+import java.util.Set;
 import com.openexchange.exception.OXException;
 
-
 /**
- * {@link SnippetManagement} - The snippet management for <code>CRUD</code> (<b>c</b>reate, <b>r</b>ead, <b>u</b>pdate, and <b>d</b>elete) operations. 
- *
+ * {@link SnippetManagement} - The snippet management for <code>CRUD</code> (<b>c</b>reate, <b>r</b>ead, <b>u</b>pdate, and <b>d</b>elete)
+ * operations.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface SnippetManagement {
@@ -67,4 +68,32 @@ public interface SnippetManagement {
      * @throws OXException If such a snippet does not exist
      */
     Snippet getSnippet(int id) throws OXException;
+
+    /**
+     * Creates specified snippet.
+     * 
+     * @param snippet The snippet to create
+     * @return The newly created snippet's identifier
+     * @throws OXException If create operation fails
+     */
+    int createSnippet(Snippet snippet) throws OXException;
+
+    /**
+     * Updates specified snippet.
+     * 
+     * @param id The identifier of the snippet to update
+     * @param snippet The snippet providing the data to update
+     * @param properties The properties to update
+     * @throws OXException If update operation fails
+     */
+    void updateSnippet(int id, Snippet snippet, Set<SnippetProperties> properties) throws OXException;
+
+    /**
+     * Updates specified snippet.
+     * 
+     * @param id The identifier of the snippet to delete
+     * @throws OXException If delete operation fails
+     */
+    void deleteSnippet(int id) throws OXException;
+
 }

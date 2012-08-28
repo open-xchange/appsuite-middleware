@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,45 +47,73 @@
  *
  */
 
-package com.openexchange.snippet;
+package com.openexchange.snippet.rdb;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
 
 /**
- * {@link Attachment} - Represents a file attachment for a snippet.
+ * {@link Services}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Attachment {
+public final class Services {
 
     /**
-     * Gets the content type according to RFC 822; e.g. <code>"text/plain; charset=UTF-8; name=mytext.txt"</code>
-     * 
-     * @return The content type or <code>null</code>
+     * Initializes a new {@link Services}.
      */
-    String getContentType();
+    private Services() {
+        super();
+    }
+
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
 
     /**
-     * Gets the content disposition according to RFC 822; e.g. <code>"attachment; filename=mytext.txt"</code>
+     * Sets the service lookup.
      * 
-     * @return The content disposition or <code>null</code>
+     * @param serviceLookup The service lookup or <code>null</code>
      */
-    String getContentDisposition();
+    public static void setServiceLookup(final ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
+    }
 
     /**
-     * Gets the attachment's size if known.
+     * Gets the service lookup.
      * 
-     * @return The size or <code>-1</code> if unknown
+     * @return The service lookup or <code>null</code>
      */
-    long getSize();
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
+    }
 
     /**
-     * Gets the input stream.
+     * Gets the service of specified type
      * 
-     * @return The input stream
-     * @throws IOException If an I/O error occurs
+     * @param clazz The service's class
+     * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
      */
-    InputStream getInputStream() throws IOException;
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.caching.hazelcast\" not started?");
+        }
+        return serviceLookup.getService(clazz);
+    }
+
+    /**
+     * (Optionally) Gets the service of specified type
+     * 
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        try {
+            return getService(clazz);
+        } catch (final IllegalStateException e) {
+            return null;
+        }
+    }
+
 }

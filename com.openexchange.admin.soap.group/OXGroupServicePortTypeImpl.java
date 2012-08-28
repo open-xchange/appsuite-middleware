@@ -431,7 +431,13 @@ public class OXGroupServicePortTypeImpl implements OXGroupServicePortType {
         }
         final com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User();
         user.setGui_spam_filter_enabled(soapUser.isGuiSpamFilterEnabled());
-        user.setAliasesForSOAP(soapUser.getAliases());
+        if (null != soapUser.getAliases()) {
+            for (String alias : soapUser.getAliases()) {
+                if (null != alias) {
+                    user.addAlias(alias);
+                }
+            }
+        }
         user.setAnniversary(soapUser.getAnniversary().toGregorianCalendar().getTime());
         user.setAssistant_name(soapUser.getAssistantName());
         user.setBirthday(soapUser.getBirthday().toGregorianCalendar().getTime());
@@ -725,7 +731,13 @@ public class OXGroupServicePortTypeImpl implements OXGroupServicePortType {
         ret.setFilestore_name(soapContext.getFilestoreName());
         ret.setFilestoreId(soapContext.getFilestoreId());
         ret.setId(soapContext.getId());
-        ret.setLoginMappings(new HashSet<String>(soapContext.getLoginMappings()));
+        if (null != soapContext.getLoginMappings()) {
+            for (String loginMapping : soapContext.getLoginMappings()) {
+                if (null != loginMapping) {
+                    ret.addLoginMapping(loginMapping);
+                }
+            }
+        }
         ret.setMaxQuota(soapContext.getMaxQuota());
         ret.setName(soapContext.getName());
         ret.setUsedQuota(soapContext.getUsedQuota());

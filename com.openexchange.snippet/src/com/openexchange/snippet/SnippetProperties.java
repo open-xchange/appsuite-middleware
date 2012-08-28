@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,43 +49,69 @@
 
 package com.openexchange.snippet;
 
-import java.io.IOException;
-import java.io.InputStream;
-
-
 /**
- * {@link Attachment} - Represents a file attachment for a snippet.
- *
+ * {@link SnippetProperties} - The snippet's properties.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Attachment {
+public enum SnippetProperties {
 
     /**
-     * Gets the content type according to RFC 822; e.g. <code>"text/plain; charset=UTF-8; name=mytext.txt"</code>
-     * 
-     * @return The content type or <code>null</code>
+     * The snippet's properties.
      */
-    String getContentType();
+    PROPERTIES(null),
+    /**
+     * The property for the identifier.
+     */
+    ID("snpt.id"),
+    /**
+     * The property for the account identifier.
+     */
+    ACCOUNT_ID("snpt.accountid"),
+    /**
+     * The property for the type; e.g. <code>"signature"</code>.
+     */
+    TYPE("snpt.type"),
+    /**
+     * The property for the display name.
+     */
+    DISPLAY_NAME("snpt.displayname"),
+    /**
+     * The property for the module identifier; e.g. <code>"com.openexchange.mail"</code>.
+     */
+    MODULE("snpt.module"),
+    /**
+     * The property for the creator.
+     */
+    CREATED_BY("snpt.createdby"),
+    /**
+     * The property for the shared flag.
+     */
+    SHARED("snpt.shared"),
+    /**
+     * The property for the optional miscellaneous JSON data.
+     */
+    MISC("snpt.misc"),
+
+    ;
+
+    private final String propName;
+
+    private SnippetProperties(final String propName) {
+        this.propName = propName;
+    }
 
     /**
-     * Gets the content disposition according to RFC 822; e.g. <code>"attachment; filename=mytext.txt"</code>
+     * Gets the property name
      * 
-     * @return The content disposition or <code>null</code>
+     * @return The property name or <code>null</code> if no property is associated
      */
-    String getContentDisposition();
+    public String getPropName() {
+        return propName;
+    }
 
-    /**
-     * Gets the attachment's size if known.
-     * 
-     * @return The size or <code>-1</code> if unknown
-     */
-    long getSize();
-
-    /**
-     * Gets the input stream.
-     * 
-     * @return The input stream
-     * @throws IOException If an I/O error occurs
-     */
-    InputStream getInputStream() throws IOException;
+    @Override
+    public String toString() {
+        return propName;
+    }
 }

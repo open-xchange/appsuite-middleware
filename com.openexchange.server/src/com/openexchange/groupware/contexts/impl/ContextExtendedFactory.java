@@ -83,7 +83,8 @@ public class ContextExtendedFactory implements OXObjectFactory<ContextExtended> 
 		this.contextId = contextId;
 	}
 
-	public Serializable getKey() {
+	@Override
+    public Serializable getKey() {
 		return I(contextId);
 	}
 

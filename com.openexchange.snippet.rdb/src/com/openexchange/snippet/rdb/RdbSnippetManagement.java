@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,45 +47,51 @@
  *
  */
 
-package com.openexchange.snippet;
+package com.openexchange.snippet.rdb;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.util.Set;
+import com.openexchange.exception.OXException;
+import com.openexchange.snippet.Snippet;
+import com.openexchange.snippet.SnippetManagement;
+import com.openexchange.snippet.SnippetProperties;
 
 
 /**
- * {@link Attachment} - Represents a file attachment for a snippet.
+ * {@link RdbSnippetManagement}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Attachment {
+public final class RdbSnippetManagement implements SnippetManagement {
 
     /**
-     * Gets the content type according to RFC 822; e.g. <code>"text/plain; charset=UTF-8; name=mytext.txt"</code>
-     * 
-     * @return The content type or <code>null</code>
+     * Initializes a new {@link RdbSnippetManagement}.
      */
-    String getContentType();
+    public RdbSnippetManagement() {
+        super();
+    }
 
-    /**
-     * Gets the content disposition according to RFC 822; e.g. <code>"attachment; filename=mytext.txt"</code>
-     * 
-     * @return The content disposition or <code>null</code>
-     */
-    String getContentDisposition();
+    @Override
+    public Snippet getSnippet(final int id) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-    /**
-     * Gets the attachment's size if known.
-     * 
-     * @return The size or <code>-1</code> if unknown
-     */
-    long getSize();
+    @Override
+    public int createSnippet(final Snippet snippet) throws OXException {
+        // TODO Auto-generated method stub
+        return 0;
+    }
 
-    /**
-     * Gets the input stream.
-     * 
-     * @return The input stream
-     * @throws IOException If an I/O error occurs
-     */
-    InputStream getInputStream() throws IOException;
+    @Override
+    public void updateSnippet(final int id, final Snippet snippet, final Set<SnippetProperties> properties) throws OXException {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void deleteSnippet(final int id) throws OXException {
+        // TODO Auto-generated method stub
+        
+    }
+
 }

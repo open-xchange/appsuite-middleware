@@ -11,3 +11,4 @@ Import-Package: com.openexchange.exception,
  com.openexchange.session,
  org.apache.commons.logging,
  org.json
+Export-Package: com.openexchange.snippet
