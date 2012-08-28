@@ -1,3 +1,7 @@
+* 2012-08-28 - jan.bauerdick@open-xchange.com
+
+ - New bundle c.o.aws: Providing services to communicate with amazon web services
+
 * 2012-08-28 - thorben.betten@open-xchange.com
 
  - Fix for bug 22851: Abort keep-alive run if expected first request chunk has not been received so far
