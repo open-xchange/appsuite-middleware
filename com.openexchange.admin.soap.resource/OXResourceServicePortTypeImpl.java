@@ -298,7 +298,13 @@ public class OXResourceServicePortTypeImpl implements OXResourceServicePortType 
         ret.setFilestore_name(soapContext.getFilestoreName());
         ret.setFilestoreId(soapContext.getFilestoreId());
         ret.setId(soapContext.getId());
-        ret.setLoginMappings(new HashSet<String>(soapContext.getLoginMappings()));
+        if (null != soapContext.getLoginMappings()) {
+            for (String loginMapping : soapContext.getLoginMappings()) {
+                if (null != loginMapping) {
+                    ret.addLoginMapping(loginMapping);
+                }
+            }
+        }
         ret.setMaxQuota(soapContext.getMaxQuota());
         ret.setName(soapContext.getName());
         ret.setUsedQuota(soapContext.getUsedQuota());

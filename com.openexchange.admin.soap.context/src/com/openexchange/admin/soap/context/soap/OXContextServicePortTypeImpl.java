@@ -587,9 +587,12 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
             user.setGui_spam_filter_enabled(guiSpamFilterEnabled);
         }
 
-        final List<String> aliases = soapUser.getAliases();
-        if (null != aliases) {
-            user.setAliasesForSOAP(aliases);
+        if (null != soapUser.getAliases()) {
+            for (String alias : soapUser.getAliases()) {
+                if (null != alias) {
+                    user.addAlias(alias);
+                }
+            }
         }
 
         final XMLGregorianCalendar anniversary = soapUser.getAnniversary();
@@ -1202,9 +1205,12 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
         itg = soapContext.getId();
         ret.setId(itg);
 
-        final List<String> loginMappings = soapContext.getLoginMappings();
-        if (null != loginMappings) {
-            ret.setLoginMappings(new HashSet<String>(loginMappings));
+        if (null != soapContext.getLoginMappings()) {
+            for (String loginMapping : soapContext.getLoginMappings()) {
+                if (null != loginMapping) {
+                    ret.addLoginMapping(loginMapping);
+                }
+            }
         }
 
         lng = soapContext.getMaxQuota();
