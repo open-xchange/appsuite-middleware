@@ -113,9 +113,12 @@ public class OXUserCopyServicePortTypeImpl implements OXUserCopyServicePortType 
             user.setGui_spam_filter_enabled(guiSpamFilterEnabled);
         }
 
-        final List<String> aliases = soapUser.getAliases();
-        if (null != aliases) {
-            user.setAliasesForSOAP(aliases);
+        if (null != soapUser.getAliases()) {
+            for (String alias : soapUser.getAliases()) {
+                if (null != alias) {
+                    user.addAlias(alias);
+                }
+            }
         }
 
         final XMLGregorianCalendar anniversary = soapUser.getAnniversary();
