@@ -49,7 +49,7 @@
 
 package com.openexchange.snippet;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -146,7 +146,7 @@ public interface Snippet {
      * 
      * @return The attachments or an empty collection if none attached
      */
-    Collection<Attachment> getAttachments();
+    List<Attachment> getAttachments();
 
     /**
      * Gets miscellaneous JSON data.

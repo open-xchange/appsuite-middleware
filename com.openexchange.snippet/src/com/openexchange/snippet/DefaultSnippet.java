@@ -49,7 +49,7 @@
 
 package com.openexchange.snippet;
 
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -209,8 +209,8 @@ public class DefaultSnippet implements Snippet {
     }
 
     @Override
-    public Collection<Attachment> getAttachments() {
-        return attachments == null ? Collections.<Attachment> emptyList() : attachments;
+    public List<Attachment> getAttachments() {
+        return attachments == null ? Collections.<Attachment> emptyList() : new ArrayList<Attachment>(attachments);
     }
 
     @Override
@@ -360,7 +360,7 @@ public class DefaultSnippet implements Snippet {
      * @return This snippet with argument applied
      */
     public DefaultSnippet setAttachments(List<Attachment> attachments) {
-        this.attachments = attachments;
+        this.attachments = attachments == null ? Collections.<Attachment> emptyList() : new ArrayList<Attachment>(attachments);
         return this;
     }
 
