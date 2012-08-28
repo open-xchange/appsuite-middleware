@@ -232,16 +232,16 @@ public final class Duplicate {
                     // Start transaction
                     boolean rollback = false;
                     try {
-                        con.setAutoCommit(false); // BEGIN
+                        cm.connection.setAutoCommit(false); // BEGIN
                         rollback = true;
-                        deleteEntries(name2ids, cid, tree, user, con);
-                        con.commit(); // COMMIT
+                        deleteEntries(name2ids, cid, tree, user, cm.connection);
+                        cm.connection.commit(); // COMMIT
                         rollback = false;
                     } finally {
                         if (rollback) {
-                            DBUtils.rollback(con); // ROLLBACK
+                            DBUtils.rollback(cm.connection); // ROLLBACK
                         }
-                        DBUtils.autocommit(con);
+                        DBUtils.autocommit(cm.connection);
                     }
                 }
             }
