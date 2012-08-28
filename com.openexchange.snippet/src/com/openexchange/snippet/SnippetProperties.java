@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,51 +49,69 @@
 
 package com.openexchange.snippet;
 
-import java.util.Set;
-import com.openexchange.exception.OXException;
-
 /**
- * {@link SnippetManagement} - The snippet management for <code>CRUD</code> (<b>c</b>reate, <b>r</b>ead, <b>u</b>pdate, and <b>d</b>elete)
- * operations.
+ * {@link SnippetProperties} - The snippet's properties.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface SnippetManagement {
+public enum SnippetProperties {
 
     /**
-     * Gets a snippet by specified identifier.
-     * 
-     * @param id The identifier
-     * @return The snippet
-     * @throws OXException If such a snippet does not exist
+     * The snippet's properties.
      */
-    Snippet getSnippet(int id) throws OXException;
+    PROPERTIES(null),
+    /**
+     * The property for the identifier.
+     */
+    ID("snpt.id"),
+    /**
+     * The property for the account identifier.
+     */
+    ACCOUNT_ID("snpt.accountid"),
+    /**
+     * The property for the type; e.g. <code>"signature"</code>.
+     */
+    TYPE("snpt.type"),
+    /**
+     * The property for the display name.
+     */
+    DISPLAY_NAME("snpt.displayname"),
+    /**
+     * The property for the module identifier; e.g. <code>"com.openexchange.mail"</code>.
+     */
+    MODULE("snpt.module"),
+    /**
+     * The property for the creator.
+     */
+    CREATED_BY("snpt.createdby"),
+    /**
+     * The property for the shared flag.
+     */
+    SHARED("snpt.shared"),
+    /**
+     * The property for the optional miscellaneous JSON data.
+     */
+    MISC("snpt.misc"),
+
+    ;
+
+    private final String propName;
+
+    private SnippetProperties(final String propName) {
+        this.propName = propName;
+    }
 
     /**
-     * Creates specified snippet.
+     * Gets the property name
      * 
-     * @param snippet The snippet to create
-     * @return The newly created snippet's identifier
-     * @throws OXException If create operation fails
+     * @return The property name or <code>null</code> if no property is associated
      */
-    int createSnippet(Snippet snippet) throws OXException;
+    public String getPropName() {
+        return propName;
+    }
 
-    /**
-     * Updates specified snippet.
-     * 
-     * @param id The identifier of the snippet to update
-     * @param snippet The snippet providing the data to update
-     * @param properties The properties to update
-     * @throws OXException If update operation fails
-     */
-    void updateSnippet(int id, Snippet snippet, Set<SnippetProperties> properties) throws OXException;
-
-    /**
-     * Updates specified snippet.
-     * 
-     * @param id The identifier of the snippet to delete
-     * @throws OXException If delete operation fails
-     */
-    void deleteSnippet(int id) throws OXException;
-
+    @Override
+    public String toString() {
+        return propName;
+    }
 }

@@ -62,42 +62,42 @@ public interface Snippet {
     /**
      * The property name for the identifier.
      */
-    public static final String PROP_ID = "com.openexchange.snippet.id";
+    public static final String PROP_ID = SnippetProperties.ID.getPropName();
 
     /**
      * The property name for the account identifier.
      */
-    public static final String PROP_ACCOUNT_ID = "com.openexchange.snippet.accountid";
+    public static final String PROP_ACCOUNT_ID = SnippetProperties.ACCOUNT_ID.getPropName();
 
     /**
      * The property name for the type; e.g. <code>"signature"</code>.
      */
-    public static final String PROP_TYPE = "com.openexchange.snippet.type";
+    public static final String PROP_TYPE = SnippetProperties.TYPE.getPropName();
 
     /**
      * The property name for the display name.
      */
-    public static final String PROP_DISPLAY_NAME = "com.openexchange.snippet.displayname";
+    public static final String PROP_DISPLAY_NAME = SnippetProperties.DISPLAY_NAME.getPropName();
 
     /**
      * The property name for the module identifier; e.g. <code>"com.openexchange.mail"</code>.
      */
-    public static final String PROP_MODULE = "com.openexchange.snippet.module";
+    public static final String PROP_MODULE = SnippetProperties.MODULE.getPropName();
 
     /**
      * The property name for the creator.
      */
-    public static final String PROP_CREATED_BY = "com.openexchange.snippet.createdby";
+    public static final String PROP_CREATED_BY = SnippetProperties.CREATED_BY.getPropName();
 
     /**
      * The property name for the shared flag.
      */
-    public static final String PROP_SHARED = "com.openexchange.snippet.shared";
+    public static final String PROP_SHARED = SnippetProperties.SHARED.getPropName();
 
     /**
      * The property name for the optional miscellaneous JSON data.
      */
-    public static final String PROP_MISC = "com.openexchange.snippet.misc";
+    public static final String PROP_MISC = SnippetProperties.MISC.getPropName();
 
     /**
      * Gets the identifier.
