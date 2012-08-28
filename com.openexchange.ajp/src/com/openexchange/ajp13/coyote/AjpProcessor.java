@@ -1081,7 +1081,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                             /*-
                              * First body chunk has not been received, yet
                              * 
-                             * Abort client ping to not mess up AJP communication cycle
+                             * Abort client ping to not mess up AJP communication cycle because that first chunk is sent autarchically by Web Server. 
                              */
                             LOG.debug("First body chunk has not been received, yet. Client ping has therefore been aborted.");
                         }
