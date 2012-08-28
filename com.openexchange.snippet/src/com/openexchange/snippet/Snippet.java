@@ -179,7 +179,7 @@ public interface Snippet {
     /**
      * Gets this snippet's properties.
      * 
-     * @return The properties
+     * @return The properties as an unmodifiable {@link Map map}
      */
     Map<String, Object> getProperties();
 }
