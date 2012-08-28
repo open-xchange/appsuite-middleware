@@ -53,9 +53,16 @@ import org.apache.commons.logging.Log;
 import com.openexchange.caching.CacheService;
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
+import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
+import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
+import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.snippet.rdb.Services;
+import com.openexchange.snippet.rdb.groupware.RdbSnippetCreateTableTask;
+import com.openexchange.snippet.rdb.groupware.RdbSnippetDeleteListener;
 
 /**
  * {@link RdbSnippetActivator} - The activator for RDB Snippet bundle.
@@ -82,10 +89,25 @@ public class RdbSnippetActivator extends HousekeepingActivator {
         final Log logger = com.openexchange.log.Log.loggerFor(RdbSnippetActivator.class);
         logger.info("Starting bundle: com.openexchange.snippet.rdb");
         try {
-            // Do something here
+            Services.setServiceLookup(this);
+            /*
+             * Register groupware stuff
+             */
+            final RdbSnippetCreateTableTask createTableTask = new RdbSnippetCreateTableTask();
+            registerService(UpdateTaskProviderService.class.getName(), new DefaultUpdateTaskProviderService(createTableTask));
+            registerService(CreateTableService.class, createTableTask);
+            registerService(DeleteListener.class, new RdbSnippetDeleteListener());
+            
+            
         } catch (final Exception e) {
             logger.error("Error starting bundle: com.openexchange.snippet.rdb", e);
             throw e;
         }
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        super.stopBundle();
+        Services.setServiceLookup(null);
     }
 }
