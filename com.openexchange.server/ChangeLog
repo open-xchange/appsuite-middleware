@@ -1,3 +1,7 @@
+* 2012-08-28 - jan.bauerdick@open-xchange.com
+
+ - New bundle c.o.aws: Providing services to communicate with amazon web services
+
 * 2012-08-27 - thorben.betten@open-xchange.com
 
  - Fix for bug 22755: Proper Content-Disposition header when downloading a file with Safari
