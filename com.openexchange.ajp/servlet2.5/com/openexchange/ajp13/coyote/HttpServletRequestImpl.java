@@ -207,6 +207,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
      */
     public HttpServletRequestImpl(final HttpServletResponseImpl response) {
         super();
+        contentLength = -1L;
         max = AJPv13Config.getMaxRequestParameterCount();
         contextPath = "";
         requestedSessionIdFromCookie = true;

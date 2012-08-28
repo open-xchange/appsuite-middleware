@@ -212,11 +212,15 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     /**
      * The main read-write-lock.
+     * <p>
+     * A writer can acquire the read lock, but not vice-versa.
      */
     private final ReadWriteLock mainLock;
 
     /**
-     * The soft lock for non-blocking access to output stream.
+     * The soft lock for non-blocking access to output/input stream.
+     * <p>
+     * A writer can acquire this read lock.
      */
     protected final Lock softLock;
 
@@ -1057,17 +1061,29 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                         }
                     } else {
                         /*
-                         * Not committed, yet. Write an empty GET-BODY-CHUNK package.
+                         * Check if very first body chunk has already been received
                          */
-                        output.write(AJPv13Response.getGetBodyChunkBytes(0));
-                        output.flush();
-                        lastWriteAccess = System.currentTimeMillis();
-                        /*
-                         * Receive empty body chunk
-                         */
-                        receive();
-                        if (DEBUG) {
-                            LOG.debug("Performed keep-alive through an empty get-body-chunk package (and received that empty chunk).");
+                        if (!first || request.getContentLength() < 0) {
+                            /*
+                             * Not committed, yet. Write an empty GET-BODY-CHUNK package.
+                             */
+                            output.write(AJPv13Response.getGetBodyChunkBytes(0));
+                            output.flush();
+                            lastWriteAccess = System.currentTimeMillis();
+                            /*
+                             * Receive empty body chunk (that requires the soft lock to be acquired)
+                             */
+                            receive();
+                            if (DEBUG) {
+                                LOG.debug("Performed keep-alive through an empty get-body-chunk package (and received that empty chunk).");
+                            }
+                        } else if (DEBUG) {
+                            /*-
+                             * First body chunk has not been received, yet
+                             * 
+                             * Abort client ping to not mess up AJP communication cycle because that first chunk is sent autarchically by Web Server. 
+                             */
+                            LOG.debug("First body chunk has not been received, yet. Client ping has therefore been aborted.");
                         }
                     }
                 } catch (final IOException e) {
@@ -2061,22 +2077,27 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
      * Receive a chunk of data. Called to implement the 'special' packet in ajp13 and to receive the data after we send a GET_BODY packet
      */
     public boolean receive() throws IOException {
-        first = false;
-        bodyMessage.reset();
-        readMessage(bodyMessage);
-        // No data received.
-        if (bodyMessage.getLen() == 0) {
-            // just the header
-            // Don't mark 'end of stream' for the first chunk.
-            return false;
+        softLock.lock();
+        try {
+            first = false;
+            bodyMessage.reset();
+            readMessage(bodyMessage);
+            // No data received.
+            if (bodyMessage.getLen() == 0) {
+                // just the header
+                // Don't mark 'end of stream' for the first chunk.
+                return false;
+            }
+            final int blen = bodyMessage.peekInt();
+            if (blen == 0) {
+                return false;
+            }
+            bodyMessage.getBytes(bodyBytes);
+            empty = false;
+            return true;
+        } finally {
+            softLock.unlock();
         }
-        final int blen = bodyMessage.peekInt();
-        if (blen == 0) {
-            return false;
-        }
-        bodyMessage.getBytes(bodyBytes);
-        empty = false;
-        return true;
     }
 
     /**

@@ -559,9 +559,6 @@ public class User {
      * 
      */
     public List<String> getAliases() {
-        if (aliases == null) {
-            aliases = new ArrayList<String>();
-        }
         return this.aliases;
     }
 

@@ -13,3 +13,5 @@ to the system properties to export needed classes.
 
 An alternative solution using a fragment can be found in this blog:
 http://blog.meschberger.ch/2008/10/osgi-bundles-require-classes-from.html
+
+https://bugs.eclipse.org/bugs/show_bug.cgi?id=371829

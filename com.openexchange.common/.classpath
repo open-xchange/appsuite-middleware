@@ -2,6 +2,7 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="test"/>
+	<classpathentry exported="true" kind="lib" path="lib/high-scale-lib-1.1.4.jar" sourcepath="source/high-scale-lib-1.1.4-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/guava-13.0.jar" sourcepath="source/guava-13.0-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/org.apache.httpcomponents.httpclient_4.1.2.v201203221030.jar" sourcepath="source/org.apache.httpcomponents.httpclient.source_4.1.2.v201203221030.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/org.apache.httpcomponents.httpcore_4.1.4.v201203221030.jar" sourcepath="source/org.apache.httpcomponents.httpcore.source_4.1.4.v201203221030.jar"/>

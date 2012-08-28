@@ -49,6 +49,7 @@
 
 package com.openexchange.realtime.xmpp;
 
+import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.xmpp.packet.XMPPStanza;
@@ -95,5 +96,13 @@ public interface XMPPExtension {
      * @throws OXException
      */
     public void handleIncoming(XMPPStanza xmpp, ServerSession session) throws OXException;
+    
+    /**
+     * Returns a Set of components served by this Extension. 
+     * @param iq The original IQ request.
+     * @return
+     * @throws OXException
+     */
+    public Set<String> getComponents();
 
 }

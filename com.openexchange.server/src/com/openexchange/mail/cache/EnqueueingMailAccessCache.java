@@ -53,8 +53,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.Queue;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.api.IMailFolderStorage;
@@ -167,7 +167,7 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
         super();
         this.queueCapacity = queueCapacity;
         try {
-            map = new ConcurrentHashMap<Key, MailAccessQueue>();
+            map = new NonBlockingHashMap<Key, MailAccessQueue>();
             final int configuredIdleSeconds = MailProperties.getInstance().getMailAccessCacheIdleSeconds();
             defaultIdleSeconds = configuredIdleSeconds <= 0 ? 7 : configuredIdleSeconds;
             /*

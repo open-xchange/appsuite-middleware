@@ -79,6 +79,8 @@ public final class UnifiedMailMessage extends MailMessage {
 
     private String folder;
 
+    private Integer accountId;
+
     /**
      * Initializes a new {@link UnifiedMailMessage}.
      */
@@ -799,12 +801,12 @@ public final class UnifiedMailMessage extends MailMessage {
 
     @Override
     public int getAccountId() {
-        return delegatee.getAccountId();
+        return null == accountId ? delegatee.getAccountId() : accountId.intValue();
     }
 
     @Override
     public boolean containsAccountId() {
-        return delegatee.containsAccountId();
+        return null != accountId || delegatee.containsAccountId();
     }
 
     @Override
@@ -814,7 +816,7 @@ public final class UnifiedMailMessage extends MailMessage {
 
     @Override
     public void setAccountId(final int accountId) {
-        delegatee.setAccountId(accountId);
+        this.accountId = Integer.valueOf(accountId);
     }
 
     @Override

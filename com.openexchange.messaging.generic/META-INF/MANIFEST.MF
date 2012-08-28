@@ -34,6 +34,7 @@ Import-Package: com.openexchange.cache,
  com.openexchange.secret.recovery,
  com.openexchange.server,
  com.openexchange.session,
+ com.openexchange.snippet,
  com.openexchange.tools.session,
  com.openexchange.tools.sql,
  com.openexchange.tools.stream,
@@ -47,6 +48,5 @@ Import-Package: com.openexchange.cache,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.util.tracker
-Bundle-ActivationPolicy: lazy
 Export-Package: com.openexchange.messaging.generic,
  com.openexchange.messaging.generic.internet
