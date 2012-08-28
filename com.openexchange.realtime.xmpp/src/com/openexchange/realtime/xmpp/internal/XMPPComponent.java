@@ -49,66 +49,44 @@
 
 package com.openexchange.realtime.xmpp.internal;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import org.joox.JOOX;
-import org.joox.Match;
-import com.openexchange.exception.OXException;
 import com.openexchange.realtime.xmpp.XMPPExtension;
-import com.openexchange.realtime.xmpp.packet.XMPPMessage;
-import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link XMPPHandler}
+ * {@link XMPPComponent}
  * 
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class XMPPHandler {
+public class XMPPComponent {
 
-    private final Map<String, XMPPComponent> components = new HashMap<String, XMPPComponent>();
+    private String resource;
 
-    public void handle(XMPPContainer container) throws OXException {
-        Match match = JOOX.$(container.getXml());
-        String namespace = match.attrs("xmlns").get(0);
-        String service = null;
-        if (namespace != null) {
-            service = namespace;
-        } else if (match.tag().equals("message")) {
-            service = "chat";
-        } else if (match.tag().equals("presence")) {
-            service = "presence";
-        }
+    private Map<String, XMPPExtension> extensions;
 
-        ServerSession session = container.getSession();
-        XMPPMessage xmpp = new XMPPMessage(match, session);
-        String resource = getComponentResource(session, xmpp);
-        XMPPComponent xmppComponent = components.get(resource);
-        if (xmppComponent == null) {
-            // TODO: handle
-        }
-
-        XMPPExtension xmppExtension = xmppComponent.getExtension(service);
-        if (xmppExtension == null) {
-            // TODO: handle
-        }
-
-        xmppExtension.handleIncoming(xmpp, session);
+    public XMPPComponent(String resource) {
+        this.resource = resource;
+        extensions = new HashMap<String, XMPPExtension>();
     }
 
-    public void addComponent(XMPPComponent component) {
-        this.components.put(component.getResource(), component);
+    public String getResource() {
+        return resource;
     }
 
-    public void removeComponent(String resource) {
-        this.components.remove(resource);
-    }
-    
-    public XMPPComponent getComponent(String resource) {
-        return this.components.get(resource);
+    public void putExtension(XMPPExtension extension) {
+        this.extensions.put(extension.getServiceName(), extension);
     }
 
-    private String getComponentResource(ServerSession session, XMPPMessage xmpp) {
-        String[] split = xmpp.getTo().getDomain().split(session.getContext().getName());
-        return split.length == 0 ? "" : split[0];
+    public XMPPExtension getExtension(String service) {
+        return this.extensions.get(service);
+    }
+
+    public void removeExtension(String service) {
+        this.extensions.remove(service);
+    }
+
+    public Collection<XMPPExtension> getExtensions() {
+        return extensions.values();
     }
 }

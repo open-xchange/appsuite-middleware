@@ -47,81 +47,46 @@
  *
  */
 
-package com.openexchange.realtime.xmpp.internal;
+package com.openexchange.realtime.xmpp.internal.extension;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.MessageDispatcher;
-import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.Message;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.xmpp.XMPPDelivery;
 import com.openexchange.realtime.xmpp.XMPPExtension;
-import com.openexchange.realtime.xmpp.packet.JID;
-import com.openexchange.realtime.xmpp.packet.XMPPMessage;
 import com.openexchange.realtime.xmpp.packet.XMPPStanza;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link XMPPChatExtension}
+ * {@link DiscoExtension}
  * 
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class XMPPChatExtension implements XMPPExtension {
-
-    public static ServiceLookup services;
+public class DiscoExtension implements XMPPExtension {
 
     @Override
     public String getServiceName() {
-        return "chat";
+        return "http://jabber.org/protocol/disco#items";
     }
 
     @Override
     public boolean canHandle(Stanza stanza) {
-        return Message.class.isInstance(stanza) && canHandleNamespace(stanza.getNamespace()) && ((Message) stanza).getType() == Message.Type.chat;
+        return false;
     }
 
     @Override
     public void handleOutgoing(Stanza stanza, XMPPDelivery delivery, ServerSession session) throws OXException {
-        Message msg = (Message) stanza;
-        XMPPMessage xmpp = new XMPPMessage(XMPPMessage.Type.chat, session);
-        transform(msg, xmpp, session);
-
-        delivery.deliver(xmpp, session);
     }
 
     @Override
     public void handleIncoming(XMPPStanza xmpp, ServerSession session) throws OXException {
-        Message message = new Message();
-        message.setType(Message.Type.chat);
-        transform((XMPPMessage) xmpp, message, session);
-        services.getService(MessageDispatcher.class).send(message, xmpp.getSession());
     }
 
-    private boolean canHandleNamespace(String namespace) {
-        return namespace != null && namespace.trim().equals("chat");
-    }
-
-    private void transform(Message message, XMPPMessage xmpp, ServerSession session) throws OXException {
-        ID from = message.getFrom();
-        xmpp.setFrom(new JID(from.getUser(), from.getContext(), from.getResource()));
-
-        ID to = message.getTo();
-        xmpp.setTo(new JID(to.getUser(), to.getContext(), to.getResource()));
-
-        xmpp.setPayload(message.getPayload().to("xmpp", session));
-    }
-
-    private void transform(XMPPMessage xmpp, Message message, ServerSession session) throws OXException {
-        JID from = xmpp.getFrom();
-        message.setFrom(new ID(null, from.getUser(), from.getDomain(), from.getResource()));
-
-        JID to = xmpp.getTo();
-        message.setTo(new ID(null, to.getUser(), to.getDomain(), to.getResource()));
-
-        message.setPayload(xmpp.getPayload().to("chatMessage", session));
-
-        message.setNamespace("chat");
+    @Override
+    public Set<String> getComponents() {
+        return new HashSet<String>(Arrays.asList("", "test."));
     }
 
 }
