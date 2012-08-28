@@ -102,6 +102,19 @@ public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl imp
                ") ENGINE=InnoDB";
     }
 
+    private String getSnippetContentName() {
+        return "snippetContent";
+    }
+    private String getSnippetContentTable() {
+        return "CREATE TABLE "+getSnippetContentName()+" (" + 
+               " cid INT4 unsigned NOT NULL," + 
+               " user INT4 unsigned NOT NULL," + 
+               " id INT4 unsigned NOT NULL," + 
+               " content TEXT CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
+               " PRIMARY KEY (cid, user, id)" + 
+               ") ENGINE=InnoDB";
+    }
+
     private String getSnippetAttachmentName() {
         return "snippetAttachment";
     }
@@ -131,7 +144,7 @@ public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl imp
 
     @Override
     protected String[] getCreateStatements() {
-        return new String[] { getSnippetTable(), getSnippetAttachmentTable(), getSnippetMiscName() };
+        return new String[] { getSnippetTable(), getSnippetContentName(), getSnippetAttachmentTable(), getSnippetMiscName() };
     }
 
     @Override
@@ -151,6 +164,7 @@ public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl imp
         final Connection writeCon = ds.getForUpdateTask(contextId);
         try {
             createTable(getSnippetName(), getSnippetTable(), writeCon);
+            createTable(getSnippetContentName(), getSnippetContentTable(), writeCon);
             createTable(getSnippetAttachmentName(), getSnippetAttachmentTable(), writeCon);
             createTable(getSnippetMiscName(), getSnippetMiscTable(), writeCon);
         } finally {
@@ -212,7 +226,7 @@ public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl imp
 
     @Override
     public String[] tablesToCreate() {
-        return new String[] { getSnippetTable(), getSnippetAttachmentTable(), getSnippetMiscName() };
+        return new String[] { getSnippetTable(), getSnippetContentName(), getSnippetAttachmentTable(), getSnippetMiscName() };
     }
 
     private <S> S getService(final Class<? extends S> clazz) throws OXException {

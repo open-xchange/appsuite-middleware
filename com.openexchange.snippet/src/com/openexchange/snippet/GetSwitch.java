@@ -49,51 +49,82 @@
 
 package com.openexchange.snippet;
 
-import java.util.Set;
-import com.openexchange.exception.OXException;
+import org.apache.commons.logging.Log;
 
 /**
- * {@link SnippetManagement} - The snippet management for <code>CRUD</code> (<b>c</b>reate, <b>r</b>ead, <b>u</b>pdate, and <b>d</b>elete)
- * operations.
- * 
+ * {@link GetSwitch}
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface SnippetManagement {
+public class GetSwitch implements PropertySwitch {
+
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(GetSwitch.class);
+
+    private final Snippet snippet;
 
     /**
-     * Gets a snippet by specified identifier.
+     * Initializes a new {@link GetSwitch}.
      * 
-     * @param id The identifier
-     * @return The snippet
-     * @throws OXException If such a snippet does not exist
+     * @param snippet The snippet to get properties from
      */
-    Snippet getSnippet(int id) throws OXException;
+    public GetSwitch(final Snippet snippet) {
+        super();
+        this.snippet = snippet;
+    }
 
-    /**
-     * Creates specified snippet.
-     * 
-     * @param snippet The snippet to create
-     * @return The newly created snippet's identifier
-     * @throws OXException If create operation fails
-     */
-    int createSnippet(Snippet snippet) throws OXException;
+    @Override
+    public Object id() {
+        return Integer.valueOf(snippet.getId());
+    }
 
-    /**
-     * Updates specified snippet.
-     * 
-     * @param id The identifier of the snippet to update
-     * @param snippet The snippet providing the data to update
-     * @param properties The properties to update
-     * @throws OXException If update operation fails
-     */
-    void updateSnippet(int id, Snippet snippet, Set<Property> properties) throws OXException;
+    @Override
+    public Object properties() {
+        return snippet.getUnnamedProperties();
+    }
 
-    /**
-     * Updates specified snippet.
-     * 
-     * @param id The identifier of the snippet to delete
-     * @throws OXException If delete operation fails
-     */
-    void deleteSnippet(int id) throws OXException;
+    @Override
+    public Object content() {
+        return snippet.getContent();
+    }
+
+    @Override
+    public Object attachments() {
+        return snippet.getAttachments();
+    }
+
+    @Override
+    public Object accountId() {
+        return Integer.valueOf(snippet.getAccountId());
+    }
+
+    @Override
+    public Object type() {
+        return snippet.getType();
+    }
+
+    @Override
+    public Object displayName() {
+        return snippet.getDisplayName();
+    }
+
+    @Override
+    public Object module() {
+        return snippet.getModule();
+    }
+
+    @Override
+    public Object createdBy() {
+        return Integer.valueOf(snippet.getCreatedBy());
+    }
+
+    @Override
+    public Object shared() {
+        return Boolean.valueOf(snippet.isShared());
+    }
+
+    @Override
+    public Object misc() {
+        return snippet.getMisc();
+    }
 
 }

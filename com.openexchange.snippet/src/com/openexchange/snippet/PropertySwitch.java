@@ -49,51 +49,88 @@
 
 package com.openexchange.snippet;
 
-import java.util.Set;
-import com.openexchange.exception.OXException;
-
 /**
- * {@link SnippetManagement} - The snippet management for <code>CRUD</code> (<b>c</b>reate, <b>r</b>ead, <b>u</b>pdate, and <b>d</b>elete)
- * operations.
+ * {@link PropertySwitch} - Adapts the visitor pattern for a snippet's properties.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface SnippetManagement {
+public interface PropertySwitch {
 
     /**
-     * Gets a snippet by specified identifier.
+     * Handles identifier.
      * 
-     * @param id The identifier
-     * @return The snippet
-     * @throws OXException If such a snippet does not exist
+     * @return The result object or <code>null</code>
      */
-    Snippet getSnippet(int id) throws OXException;
+    public Object id();
 
     /**
-     * Creates specified snippet.
+     * Handles (unnamed) properties.
      * 
-     * @param snippet The snippet to create
-     * @return The newly created snippet's identifier
-     * @throws OXException If create operation fails
+     * @return The result object or <code>null</code>
      */
-    int createSnippet(Snippet snippet) throws OXException;
+    public Object properties();
 
     /**
-     * Updates specified snippet.
+     * Handles content.
      * 
-     * @param id The identifier of the snippet to update
-     * @param snippet The snippet providing the data to update
-     * @param properties The properties to update
-     * @throws OXException If update operation fails
+     * @return The result object or <code>null</code>
      */
-    void updateSnippet(int id, Snippet snippet, Set<Property> properties) throws OXException;
+    public Object content();
 
     /**
-     * Updates specified snippet.
+     * Handles attachments.
      * 
-     * @param id The identifier of the snippet to delete
-     * @throws OXException If delete operation fails
+     * @return The result object or <code>null</code>
      */
-    void deleteSnippet(int id) throws OXException;
+    public Object attachments();
+
+    /**
+     * Handles account identifier.
+     * 
+     * @return The result object or <code>null</code>
+     */
+    public Object accountId();
+
+    /**
+     * Handles type identifier.
+     * 
+     * @return The result object or <code>null</code>
+     */
+    public Object type();
+
+    /**
+     * Handles display name.
+     * 
+     * @return The result object or <code>null</code>
+     */
+    public Object displayName();
+
+    /**
+     * Handles module identifier.
+     * 
+     * @return The result object or <code>null</code>
+     */
+    public Object module();
+
+    /**
+     * Handles creator identifier.
+     * 
+     * @return The result object or <code>null</code>
+     */
+    public Object createdBy();
+
+    /**
+     * Handles shared flag.
+     * 
+     * @return The result object or <code>null</code>
+     */
+    public Object shared();
+
+    /**
+     * Handles miscellaneous JSON data.
+     * 
+     * @return The result object or <code>null</code>
+     */
+    public Object misc();
 
 }

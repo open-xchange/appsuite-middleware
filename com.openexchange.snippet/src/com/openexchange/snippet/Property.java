@@ -50,11 +50,11 @@
 package com.openexchange.snippet;
 
 /**
- * {@link SnippetProperties} - The snippet's properties.
+ * {@link Property} - A snippet's properties.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum SnippetProperties {
+public enum Property {
 
     /**
      * The snippet's properties.
@@ -105,7 +105,7 @@ public enum SnippetProperties {
 
     private final String propName;
 
-    private SnippetProperties(final String propName) {
+    private Property(final String propName) {
         this.propName = propName;
     }
 
@@ -121,5 +121,40 @@ public enum SnippetProperties {
     @Override
     public String toString() {
         return propName;
+    }
+
+    /**
+     * Invokes appropriate switcher's method for this property.
+     * 
+     * @param switcher The switcher
+     * @return The possible result object or <code>null</code>
+     */
+    public Object doSwitch(final PropertySwitch switcher) {
+        switch (this) {
+        case ACCOUNT_ID:
+            return switcher.accountId();
+        case ATTACHMENTS:
+            return switcher.attachments();
+        case CONTENT:
+            return switcher.content();
+        case CREATED_BY:
+            return switcher.createdBy();
+        case DISPLAY_NAME:
+            return switcher.displayName();
+        case ID:
+            return switcher.id();
+        case MISC:
+            return switcher.misc();
+        case MODULE:
+            return switcher.module();
+        case PROPERTIES:
+            return switcher.properties();
+        case SHARED:
+            return switcher.shared();
+        case TYPE:
+            return switcher.type();
+        default:
+            throw new IllegalArgumentException();
+        }
     }
 }
