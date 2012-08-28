@@ -96,7 +96,7 @@ public class DefaultAttachment implements Attachment {
     /**
      * Initializes a new {@link DefaultAttachment}.
      */
-    protected DefaultAttachment() {
+    public DefaultAttachment() {
         super();
         size = -1L;
     }

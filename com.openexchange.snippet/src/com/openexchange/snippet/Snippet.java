@@ -49,8 +49,12 @@
 
 package com.openexchange.snippet;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * {@link Snippet} - Represents arbitrary (textual) content.
@@ -98,6 +102,19 @@ public interface Snippet {
      * The property name for the optional miscellaneous JSON data.
      */
     public static final String PROP_MISC = SnippetProperties.MISC.getPropName();
+
+    /**
+     * The set of named properties.
+     */
+    public static final Set<String> NAMED_PROPERTIES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
+        PROP_ACCOUNT_ID,
+        PROP_CREATED_BY,
+        PROP_DISPLAY_NAME,
+        PROP_ID,
+        PROP_MISC,
+        PROP_MODULE,
+        PROP_SHARED,
+        PROP_TYPE)));
 
     /**
      * Gets the identifier.

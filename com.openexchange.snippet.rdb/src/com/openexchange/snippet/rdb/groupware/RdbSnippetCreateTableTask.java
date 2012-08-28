@@ -90,12 +90,16 @@ public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl imp
         return "CREATE TABLE "+getSnippetName()+" (" + 
                " cid INT4 unsigned NOT NULL," + 
                " user INT4 unsigned NOT NULL," + 
-               " serviceId VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
-               " account INT4 unsigned NOT NULL," + 
-               " confId INT4 unsigned NOT NULL," + 
+               " id INT4 unsigned NOT NULL," + 
+               " accountId INT4 unsigned NOT NULL," + 
                " displayName VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
-               " PRIMARY KEY (cid, user, serviceId, account)" + 
-               ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+               " module VARCHAR(255) CHARACTER SET latin1 NOT NULL," + 
+               " type VARCHAR(255) CHARACTER SET latin1 NOT NULL," + 
+               " shared TINYINT unsigned DEFAULT NULL," + 
+               " lastModified BIGINT(64) NOT NULL," + 
+               " confId INT4 unsigned NOT NULL," + 
+               " PRIMARY KEY (cid, user, id)" + 
+               ") ENGINE=InnoDB";
     }
 
     private String getSnippetAttachmentName() {
@@ -105,17 +109,29 @@ public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl imp
         return "CREATE TABLE "+getSnippetAttachmentName()+" (" + 
                " cid INT4 unsigned NOT NULL," + 
                " user INT4 unsigned NOT NULL," + 
-               " serviceId VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
-               " account INT4 unsigned NOT NULL," + 
-               " confId INT4 unsigned NOT NULL," + 
-               " displayName VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
-               " PRIMARY KEY (cid, user, serviceId, account)" + 
-               ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+               " id INT4 unsigned NOT NULL," + 
+               " referenceId VARCHAR(255) CHARACTER SET latin1 NOT NULL," + 
+               " fileName VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
+               " INDEX (cid, user, id)" + 
+               ") ENGINE=InnoDB";
+    }
+
+    private String getSnippetMiscName() {
+        return "snippetMisc";
+    }
+    private String getSnippetMiscTable() {
+        return "CREATE TABLE "+getSnippetMiscName()+" (" + 
+               " cid INT4 unsigned NOT NULL," + 
+               " user INT4 unsigned NOT NULL," + 
+               " id INT4 unsigned NOT NULL," + 
+               " json TEXT CHARACTER SET latin1 NOT NULL," + 
+               " PRIMARY KEY (cid, user, id)" + 
+               ") ENGINE=InnoDB";
     }
 
     @Override
     protected String[] getCreateStatements() {
-        return new String[] { getSnippetTable(), getSnippetAttachmentTable() };
+        return new String[] { getSnippetTable(), getSnippetAttachmentTable(), getSnippetMiscName() };
     }
 
     @Override
@@ -131,12 +147,47 @@ public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl imp
     @Override
     public void perform(final PerformParameters params) throws com.openexchange.exception.OXException {
         final int contextId = params.getContextId();
-        createTable(getSnippetName(), getSnippetTable(), contextId);
-        createTable(getSnippetAttachmentName(), getSnippetAttachmentTable(), contextId);
+        final DatabaseService ds = getService(DatabaseService.class);
+        final Connection writeCon = ds.getForUpdateTask(contextId);
+        try {
+            createTable(getSnippetName(), getSnippetTable(), writeCon);
+            createTable(getSnippetAttachmentName(), getSnippetAttachmentTable(), writeCon);
+            createTable(getSnippetMiscName(), getSnippetMiscTable(), writeCon);
+        } finally {
+            ds.backForUpdateTask(contextId, writeCon);
+        }
         final Log logger = com.openexchange.log.Log.loggerFor(RdbSnippetCreateTableTask.class);
         if (logger.isInfoEnabled()) {
             logger.info("UpdateTask '" + RdbSnippetCreateTableTask.class.getSimpleName() + "' successfully performed!");
         }
+    }
+
+    private void createTable(final String tablename, final String sqlCreate, final Connection writeCon) throws OXException {
+        PreparedStatement stmt = null;
+        try {
+            if (tableExists(writeCon, tablename)) {
+                return;
+            }
+            stmt = writeCon.prepareStatement(sqlCreate);
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+    }
+
+    private boolean tableExists(final Connection con, final String table) throws SQLException {
+        final DatabaseMetaData metaData = con.getMetaData();
+        ResultSet rs = null;
+        boolean retval = false;
+        try {
+            rs = metaData.getTables(null, null, table, new String[] { "TABLE" });
+            retval = (rs.next() && rs.getString("TABLE_NAME").equals(table));
+        } finally {
+            DBUtils.closeSQLStuff(rs);
+        }
+        return retval;
     }
 
     @Override
@@ -156,48 +207,12 @@ public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl imp
 
     @Override
     public String[] requiredTables() {
-        return new String[] { "user" };
+        return NO_TABLES;
     }
 
     @Override
     public String[] tablesToCreate() {
-        return new String[] { "messagingAccount" };
-    }
-
-    private void createTable(final String tablename, final String sqlCreate, final int contextId) throws OXException {
-        final DatabaseService ds = getService(DatabaseService.class);
-        final Connection writeCon;
-        try {
-            writeCon = ds.getWritable(contextId);
-        } catch (final OXException e) {
-            throw e;
-        }
-        PreparedStatement stmt = null;
-        try {
-            if (tableExists(writeCon, tablename)) {
-                return;
-            }
-            stmt = writeCon.prepareStatement(sqlCreate);
-            stmt.executeUpdate();
-        } catch (final SQLException e) {
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } finally {
-            DBUtils.closeSQLStuff(stmt);
-            ds.backWritable(contextId, writeCon);
-        }
-    }
-
-    private boolean tableExists(final Connection con, final String table) throws SQLException {
-        final DatabaseMetaData metaData = con.getMetaData();
-        ResultSet rs = null;
-        boolean retval = false;
-        try {
-            rs = metaData.getTables(null, null, table, new String[] { "TABLE" });
-            retval = (rs.next() && rs.getString("TABLE_NAME").equals(table));
-        } finally {
-            DBUtils.closeSQLStuff(rs);
-        }
-        return retval;
+        return new String[] { getSnippetTable(), getSnippetAttachmentTable(), getSnippetMiscName() };
     }
 
     private <S> S getService(final Class<? extends S> clazz) throws OXException {

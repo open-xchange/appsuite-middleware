@@ -81,6 +81,10 @@ public enum SnippetExceptionCodes implements OXExceptionCode {
      * Illegal state: %1$s
      */
     ILLEGAL_STATE(SnippetExceptionMessages.ILLEGAL_STATE_MSG, CATEGORY_ERROR, 5),
+    /**
+     * A SQL error occurred: %1$s
+     */
+    SQL_ERROR(SnippetExceptionMessages.SQL_ERROR_MSG, CATEGORY_ERROR, 4),
 
     ;
 

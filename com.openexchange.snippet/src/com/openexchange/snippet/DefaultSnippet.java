@@ -499,6 +499,26 @@ public class DefaultSnippet implements Snippet {
     }
 
     /**
+     * Puts unnamed properties from given map.
+     * 
+     * @param properties The map providing unnamed properties
+     * @return This snippet with unnamed properties applied
+     */
+    public DefaultSnippet putUnnamedProperties(final Map<String, Object> properties) {
+        if (null == properties || properties.isEmpty()) {
+            return this;
+        }
+        final Map<String, Object> thisProps = this.properties;
+        for (final Map.Entry<String, Object> entry : properties.entrySet()) {
+            final String propName = entry.getKey();
+            if (!NAMED_PROPERTIES.contains(propName)) {
+                thisProps.put(propName, entry.getValue());
+            }
+        }
+        return this;
+    }
+
+    /**
      * Removes named property.
      * 
      * @param propName The property name

@@ -74,6 +74,9 @@ public final class SnippetExceptionMessages implements LocalizableStrings {
     // Illegal state: %1$s
     public static final String ILLEGAL_STATE_MSG = "Illegal state: %1$s";
 
+    // A SQL error occurred: %1$s
+    public static final String SQL_ERROR_MSG = "A SQL error occurred: %1$s";
+
     /**
      * Initializes a new {@link SnippetExceptionMessages}.
      */
