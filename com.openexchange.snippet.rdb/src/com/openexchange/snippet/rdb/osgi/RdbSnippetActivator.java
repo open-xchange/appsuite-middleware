@@ -49,19 +49,21 @@
 
 package com.openexchange.snippet.rdb.osgi;
 
-import java.util.Hashtable;
-
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceEvent;
-import org.osgi.framework.ServiceListener;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTracker;
+import org.apache.commons.logging.Log;
+import com.openexchange.caching.CacheService;
+import com.openexchange.context.ContextService;
+import com.openexchange.crypto.CryptoService;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
 
+/**
+ * {@link RdbSnippetActivator} - The activator for RDB Snippet bundle.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
 public class RdbSnippetActivator extends HousekeepingActivator {
 
-    
     /**
      * Initializes a new {@link RdbSnippetActivator}.
      */
@@ -71,7 +73,19 @@ public class RdbSnippetActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        // TODO Auto-generated method stub
-        return null;
+        return new Class<?>[] {
+            DatabaseService.class, GenericConfigurationStorageService.class, ContextService.class, CacheService.class, CryptoService.class };
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+        final Log logger = com.openexchange.log.Log.loggerFor(RdbSnippetActivator.class);
+        logger.info("Starting bundle: com.openexchange.snippet.rdb");
+        try {
+            // Do something here
+        } catch (final Exception e) {
+            logger.error("Error sdarting bundle: com.openexchange.snippet.rdb", e);
+            throw e;
+        }
     }
 }
