@@ -259,7 +259,7 @@ public class DefaultSnippet implements Snippet {
 
     @Override
     public Map<String, Object> getProperties() {
-        return new HashMap<String, Object>(properties);
+        return Collections.unmodifiableMap(properties);
     }
 
     /**
