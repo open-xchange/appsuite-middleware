@@ -59,6 +59,7 @@ import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorage
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.id.IDGeneratorService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.snippet.rdb.Services;
 import com.openexchange.snippet.rdb.groupware.RdbSnippetCreateTableTask;
@@ -81,7 +82,8 @@ public class RdbSnippetActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
-            DatabaseService.class, GenericConfigurationStorageService.class, ContextService.class, CacheService.class, CryptoService.class };
+            DatabaseService.class, GenericConfigurationStorageService.class, ContextService.class, CacheService.class, CryptoService.class,
+            IDGeneratorService.class };
     }
 
     @Override

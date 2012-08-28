@@ -91,7 +91,7 @@ public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl imp
                " cid INT4 unsigned NOT NULL," + 
                " user INT4 unsigned NOT NULL," + 
                " id INT4 unsigned NOT NULL," + 
-               " accountId INT4 unsigned NOT NULL," + 
+               " accountId INT4 unsigned DEFAULT NULL," + 
                " displayName VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
                " module VARCHAR(255) CHARACTER SET latin1 NOT NULL," + 
                " type VARCHAR(255) CHARACTER SET latin1 NOT NULL," + 
@@ -111,7 +111,7 @@ public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl imp
                " user INT4 unsigned NOT NULL," + 
                " id INT4 unsigned NOT NULL," + 
                " referenceId VARCHAR(255) CHARACTER SET latin1 NOT NULL," + 
-               " fileName VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
+               " fileName VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL," + 
                " INDEX (cid, user, id)" + 
                ") ENGINE=InnoDB";
     }

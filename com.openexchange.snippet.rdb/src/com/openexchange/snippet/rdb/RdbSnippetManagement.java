@@ -56,6 +56,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -69,6 +70,9 @@ import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorage
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.filestore.FilestoreStorage;
+import com.openexchange.id.IDGeneratorService;
+import com.openexchange.mail.mime.ContentDisposition;
+import com.openexchange.mail.mime.ContentType;
 import com.openexchange.session.Session;
 import com.openexchange.snippet.Attachment;
 import com.openexchange.snippet.DefaultAttachment;
@@ -95,6 +99,27 @@ public final class RdbSnippetManagement implements SnippetManagement {
 
     private static GenericConfigurationStorageService getStorageService() {
         return getService(GenericConfigurationStorageService.class);
+    }
+
+    private static IDGeneratorService getIdGeneratorService() {
+        return getService(IDGeneratorService.class);
+    }
+
+    private static String extractFilename(final Attachment attachment) {
+        if (null == attachment) {
+            return null;
+        }
+        try {
+            final String sContentDisposition = attachment.getContentDisposition();
+            String fn = null == sContentDisposition ? null : new ContentDisposition(sContentDisposition).getFilenameParameter();
+            if (fn == null) {
+                final String sContentType = attachment.getContentType();
+                fn = null == sContentType ? null : new ContentType(sContentType).getNameParameter();
+            }
+            return fn;
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private static final ConcurrentMap<Integer, QuotaFileStorage> FILE_STORE_CACHE = new ConcurrentHashMap<Integer, QuotaFileStorage>();
@@ -266,8 +291,94 @@ public final class RdbSnippetManagement implements SnippetManagement {
 
     @Override
     public int createSnippet(final Snippet snippet) throws OXException {
-        // TODO Auto-generated method stub
-        return 0;
+        final DatabaseService databaseService = getDatabaseService();
+        final int contextId = this.contextId;
+        final Connection con = databaseService.getWritable(contextId);
+        PreparedStatement stmt = null;
+        try {
+            // Obtain identifier
+            final int id = getIdGeneratorService().getId("com.openexchange.snippet.rdb", contextId);
+            // Store attachments
+            final List<Attachment> attachments = snippet.getAttachments();
+            if (null != attachments && !attachments.isEmpty()) {
+                final QuotaFileStorage fileStorage = getFileStorage(getContext(session));
+                stmt = con.prepareStatement("INSERT INTO snippetAttachment (cid, user, id, referenceId, fileName) VALUES (?, ?, ?, ?, ?)");
+                for (final Attachment attachment : attachments) {
+                    final String referenceId = fileStorage.saveNewFile(attachment.getInputStream());
+                    stmt.setInt(1, contextId);
+                    stmt.setInt(2, userId);
+                    stmt.setInt(3, id);
+                    stmt.setString(4, referenceId);
+                    final String fileName = extractFilename(attachment);
+                    if (null == fileName) {
+                        stmt.setNull(5, Types.VARCHAR);
+                    } else {
+                        stmt.setString(5, fileName);
+                    }
+                    stmt.addBatch();
+                }
+                stmt.executeBatch();
+                DBUtils.closeSQLStuff(stmt);
+                stmt = null;
+            }
+            // Store JSON object
+            {
+                final Object misc = snippet.getMisc();
+                if (null != misc) {
+                    stmt = con.prepareStatement("INSERT INTO snippetMisc (cid, user, id, json) VALUES (?, ?, ?, ?)");
+                    stmt.setInt(1, contextId);
+                    stmt.setInt(2, userId);
+                    stmt.setInt(3, id);
+                    stmt.setString(4, misc.toString());
+                    stmt.executeUpdate();
+                    DBUtils.closeSQLStuff(stmt);
+                    stmt = null;
+                }
+            }
+            // Store unnamed properties
+            final int confId;
+            {
+                final Map<String, Object> unnamedProperties = snippet.getUnnamedProperties();
+                if (null == unnamedProperties || unnamedProperties.isEmpty()) {
+                    confId = -1;
+                } else {
+                    final GenericConfigurationStorageService genericConfStorageService = getStorageService();
+                    final Map<String, Object> configuration = new HashMap<String, Object>(unnamedProperties);
+                    confId = genericConfStorageService.save(con, getContext(session), configuration);
+                }
+            }
+            // Store snippet
+            stmt = con.prepareStatement("INSERT INTO snippet (cid, user, id, accountId, displayName, module, type, shared, lastModified, confId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
+            stmt.setInt(3, id);
+            {
+                final int accountId = snippet.getAccountId();
+                if (accountId >= 0) {
+                    stmt.setInt(4, accountId);
+                } else {
+                    stmt.setNull(4, Types.INTEGER);
+                }
+            }
+            stmt.setString(5, snippet.getDisplayName());
+            stmt.setString(6, snippet.getModule());
+            stmt.setString(7, snippet.getType());
+            stmt.setInt(8, snippet.isShared() ? 1 : 0);
+            stmt.setLong(9, System.currentTimeMillis());
+            stmt.setInt(10, confId);
+            stmt.executeUpdate();
+            /*
+             * Return identifier
+             */
+            return id;
+        } catch (final SQLException e) {
+            throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } catch (IOException e) {
+            throw SnippetExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+            databaseService.backReadOnly(contextId, con);
+        }
     }
 
     @Override

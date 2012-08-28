@@ -61,6 +61,14 @@ public enum SnippetProperties {
      */
     PROPERTIES(null),
     /**
+     * The snippet's content.
+     */
+    CONTENT(null),
+    /**
+     * The snippet's attachments.
+     */
+    ATTACHMENTS(null),
+    /**
      * The property for the identifier.
      */
     ID("snpt.id"),
