@@ -23,7 +23,6 @@ Import-Package: com.openexchange.conversion.simple,
  org.apache.commons.logging,
  org.joox,
  org.osgi.framework
-Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,
  lib/netty-3.5.2.Final.jar
 Require-Bundle: com.openexchange.global
