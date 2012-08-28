@@ -137,7 +137,7 @@ public class DefaultSnippet implements Snippet {
     public int getId() {
         int id = this.id;
         if (id < 0) {
-            Integer itg = (Integer) properties.get(PROP_ID);
+            final Integer itg = (Integer) properties.get(PROP_ID);
             if (null == itg) {
                 return -1;
             }
@@ -151,7 +151,7 @@ public class DefaultSnippet implements Snippet {
     public int getAccountId() {
         int accountId = this.accountId;
         if (accountId < 0) {
-            Integer itg = (Integer) properties.get(PROP_ACCOUNT_ID);
+            final Integer itg = (Integer) properties.get(PROP_ACCOUNT_ID);
             if (null == itg) {
                 return -1;
             }
@@ -165,7 +165,7 @@ public class DefaultSnippet implements Snippet {
     public String getModule() {
         String module = this.module;
         if (null == module) {
-            String s = (String) properties.get(PROP_MODULE);
+            final String s = (String) properties.get(PROP_MODULE);
             if (null == s) {
                 return null;
             }
@@ -179,7 +179,7 @@ public class DefaultSnippet implements Snippet {
     public String getType() {
         String type = this.type;
         if (null == type) {
-            String s = (String) properties.get(PROP_TYPE);
+            final String s = (String) properties.get(PROP_TYPE);
             if (null == s) {
                 return null;
             }
@@ -193,7 +193,7 @@ public class DefaultSnippet implements Snippet {
     public String getDisplayName() {
         String displayName = this.displayName;
         if (null == displayName) {
-            String s = (String) properties.get(PROP_DISPLAY_NAME);
+            final String s = (String) properties.get(PROP_DISPLAY_NAME);
             if (null == s) {
                 return null;
             }
@@ -217,7 +217,7 @@ public class DefaultSnippet implements Snippet {
     public Object getMisc() {
         Object misc = this.misc;
         if (null == misc) {
-            Object obj = properties.get(PROP_MISC);
+            final Object obj = properties.get(PROP_MISC);
             if (null == obj) {
                 return null;
             }
@@ -236,7 +236,7 @@ public class DefaultSnippet implements Snippet {
     public boolean isShared() {
         Boolean shared = this.shared;
         if (null == shared) {
-            Boolean b = (Boolean) properties.get(PROP_SHARED);
+            final Boolean b = (Boolean) properties.get(PROP_SHARED);
             shared = null == b ? Boolean.FALSE : b;
             this.shared = shared;
         }
@@ -247,7 +247,7 @@ public class DefaultSnippet implements Snippet {
     public int getCreatedBy() {
         int createdBy = this.createdBy;
         if (createdBy < 0) {
-            Integer itg = (Integer) properties.get(PROP_CREATED_BY);
+            final Integer itg = (Integer) properties.get(PROP_CREATED_BY);
             if (null == itg) {
                 return -1;
             }
@@ -268,7 +268,7 @@ public class DefaultSnippet implements Snippet {
      * @param id The id to set
      * @return This snippet with argument applied
      */
-    public DefaultSnippet setId(int id) {
+    public DefaultSnippet setId(final int id) {
         this.id = id;
         if (id >= 0) {
             properties.put(PROP_ID, Integer.valueOf(id));
@@ -284,7 +284,7 @@ public class DefaultSnippet implements Snippet {
      * @param accountId The accountId to set
      * @return This snippet with argument applied
      */
-    public DefaultSnippet setAccountId(int accountId) {
+    public DefaultSnippet setAccountId(final int accountId) {
         this.accountId = accountId;
         if (accountId >= 0) {
             properties.put(PROP_ACCOUNT_ID, Integer.valueOf(accountId));
@@ -300,7 +300,7 @@ public class DefaultSnippet implements Snippet {
      * @param module The module to set
      * @return This snippet with argument applied
      */
-    public DefaultSnippet setModule(String module) {
+    public DefaultSnippet setModule(final String module) {
         this.module = module;
         if (null == module) {
             properties.remove(PROP_MODULE);
@@ -316,7 +316,7 @@ public class DefaultSnippet implements Snippet {
      * @param type The type to set
      * @return This snippet with argument applied
      */
-    public DefaultSnippet setType(String type) {
+    public DefaultSnippet setType(final String type) {
         this.type = type;
         if (null == type) {
             properties.remove(PROP_TYPE);
@@ -332,7 +332,7 @@ public class DefaultSnippet implements Snippet {
      * @param displayName The displayName to set
      * @return This snippet with argument applied
      */
-    public DefaultSnippet setDisplayName(String displayName) {
+    public DefaultSnippet setDisplayName(final String displayName) {
         this.displayName = displayName;
         if (null == displayName) {
             properties.remove(PROP_DISPLAY_NAME);
@@ -348,7 +348,7 @@ public class DefaultSnippet implements Snippet {
      * @param content The content to set
      * @return This snippet with argument applied
      */
-    public DefaultSnippet setContent(String content) {
+    public DefaultSnippet setContent(final String content) {
         this.content = content;
         return this;
     }
@@ -359,7 +359,7 @@ public class DefaultSnippet implements Snippet {
      * @param attachments The attachments to set
      * @return This snippet with argument applied
      */
-    public DefaultSnippet setAttachments(List<Attachment> attachments) {
+    public DefaultSnippet setAttachments(final List<Attachment> attachments) {
         this.attachments = attachments == null ? Collections.<Attachment> emptyList() : new ArrayList<Attachment>(attachments);
         return this;
     }
@@ -394,7 +394,7 @@ public class DefaultSnippet implements Snippet {
      * @param shared The shared flag to set
      * @return This snippet with argument applied
      */
-    public DefaultSnippet setShared(boolean shared) {
+    public DefaultSnippet setShared(final boolean shared) {
         final Boolean b = Boolean.valueOf(shared);
         this.shared = b;
         properties.put(PROP_SHARED, b);
@@ -407,7 +407,7 @@ public class DefaultSnippet implements Snippet {
      * @param createdBy The creator to set
      * @return This snippet with argument applied
      */
-    public DefaultSnippet setCreatedBy(int createdBy) {
+    public DefaultSnippet setCreatedBy(final int createdBy) {
         this.createdBy = createdBy;
         if (createdBy >= 0) {
             properties.put(PROP_CREATED_BY, Integer.valueOf(createdBy));
@@ -423,7 +423,7 @@ public class DefaultSnippet implements Snippet {
      * @param propName The property name
      * @return <code>true</code> if contained; otherwise <code>false</code>
      */
-    public boolean containsProperty(String propName) {
+    public boolean containsProperty(final String propName) {
         return properties.containsKey(propName);
     }
 
@@ -433,7 +433,7 @@ public class DefaultSnippet implements Snippet {
      * @param propName The property name
      * @return The associated value or <code>null</code> if absent
      */
-    public Object get(String propName) {
+    public Object get(final String propName) {
         return properties.get(propName);
     }
 
@@ -443,7 +443,7 @@ public class DefaultSnippet implements Snippet {
      * @param propName The property name
      * @param value The property value
      */
-    public void put(String propName, Object value) {
+    public void put(final String propName, final Object value) {
         if (PROP_ACCOUNT_ID.equals(propName)) {
             setAccountId((value instanceof Integer) ? ((Integer) value).intValue() : -1);
             return;
