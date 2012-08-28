@@ -84,7 +84,7 @@ public class RdbSnippetActivator extends HousekeepingActivator {
         try {
             // Do something here
         } catch (final Exception e) {
-            logger.error("Error sdarting bundle: com.openexchange.snippet.rdb", e);
+            logger.error("Error starting bundle: com.openexchange.snippet.rdb", e);
             throw e;
         }
     }
