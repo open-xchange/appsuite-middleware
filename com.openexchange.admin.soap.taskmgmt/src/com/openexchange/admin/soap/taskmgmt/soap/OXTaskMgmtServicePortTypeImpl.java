@@ -169,9 +169,12 @@ public class OXTaskMgmtServicePortTypeImpl implements OXTaskMgmtServicePortType 
         itg = soapContext.getId();
         ret.setId(itg);
 
-        final List<String> loginMappings = soapContext.getLoginMappings();
-        if (null != loginMappings) {
-            ret.setLoginMappings(new HashSet<String>(loginMappings));
+        if (null != soapContext.getLoginMappings()) {
+            for (String loginMapping : soapContext.getLoginMappings()) {
+                if (null != loginMapping) {
+                    ret.addLoginMapping(loginMapping);
+                }
+            }
         }
 
         lng = soapContext.getMaxQuota();

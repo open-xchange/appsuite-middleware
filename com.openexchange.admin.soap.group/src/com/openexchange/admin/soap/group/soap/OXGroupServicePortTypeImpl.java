@@ -430,6 +430,7 @@ public class OXGroupServicePortTypeImpl implements OXGroupServicePortType {
             return null;
         }
         final com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User();
+<<<<<<< HEAD
         user.setGui_spam_filter_enabled(soapUser.isGuiSpamFilterEnabled());
         user.setAliasesForSOAP(soapUser.getAliases());
         user.setAnniversary(soapUser.getAnniversary().toGregorianCalendar().getTime());
@@ -549,6 +550,576 @@ public class OXGroupServicePortTypeImpl implements OXGroupServicePortType {
         user.setUserfield18(soapUser.getUserfield18());
         user.setUserfield19(soapUser.getUserfield19());
         user.setUserfield20(soapUser.getUserfield20());
+=======
+        final Boolean guiSpamFilterEnabled = soapUser.isGuiSpamFilterEnabled();
+        if (null != guiSpamFilterEnabled) {
+            user.setGui_spam_filter_enabled(guiSpamFilterEnabled);
+        }
+
+        if (null != soapUser.getAliases()) {
+            for (String alias : soapUser.getAliases()) {
+                if (null != alias) {
+                    user.addAlias(alias);
+                }
+            }
+        }
+
+        final XMLGregorianCalendar anniversary = soapUser.getAnniversary();
+        if (null != anniversary) {
+            user.setAnniversary(anniversary.toGregorianCalendar().getTime());
+        }
+
+        final String assistantName = soapUser.getAssistantName();
+        if (null != assistantName) {
+            user.setAssistant_name(assistantName);
+        }
+
+        final XMLGregorianCalendar birthday = soapUser.getBirthday();
+        if (null != birthday) {
+            user.setBirthday(birthday.toGregorianCalendar().getTime());
+        }
+
+        String tmp = soapUser.getBranches();
+        if (tmp != null) {
+            user.setBranches(tmp);
+        }
+
+        tmp = soapUser.getBusinessCategory();
+        if (tmp != null) {
+            user.setBusiness_category(tmp);
+        }
+
+        tmp = soapUser.getCategories();
+        if (tmp != null) {
+            user.setCategories(tmp);
+        }
+
+        tmp = soapUser.getCellularTelephone1();
+        if (tmp != null) {
+            user.setCellular_telephone1(tmp);
+        }
+
+        tmp = soapUser.getCellularTelephone2();
+        if (tmp != null) {
+            user.setCellular_telephone2(tmp);
+        }
+
+        tmp = soapUser.getCityBusiness();
+        if (tmp != null) {
+            user.setCity_business(tmp);
+        }
+
+        tmp = soapUser.getCityHome();
+        if (tmp != null) {
+            user.setCity_home(tmp);
+        }
+
+        tmp = soapUser.getCityOther();
+        if (tmp != null) {
+            user.setCity_other(tmp);
+        }
+
+        tmp = soapUser.getCommercialRegister();
+        if (tmp != null) {
+            user.setCommercial_register(tmp);
+        }
+
+        tmp = soapUser.getCompany();
+        if (tmp != null) {
+            user.setCompany(tmp);
+        }
+
+        tmp = soapUser.getCountryBusiness();
+        if (tmp != null) {
+            user.setCountry_business(tmp);
+        }
+
+        tmp = soapUser.getCountryHome();
+        if (tmp != null) {
+            user.setCountry_home(tmp);
+        }
+
+        tmp = soapUser.getCountryOther();
+        if (tmp != null) {
+            user.setCountry_other(tmp);
+        }
+
+        tmp = soapUser.getDefaultSenderAddress();
+        if (tmp != null) {
+            user.setDefaultSenderAddress(tmp);
+        }
+
+        tmp = soapUser.getDepartment();
+        if (tmp != null) {
+            user.setDepartment(tmp);
+        }
+
+        tmp = soapUser.getDisplayName();
+        if (tmp != null) {
+            user.setDisplay_name(tmp);
+        }
+
+        tmp = soapUser.getEmail1();
+        if (tmp != null) {
+            user.setEmail1(tmp);
+        }
+
+        tmp = soapUser.getEmail2();
+        if (tmp != null) {
+            user.setEmail2(tmp);
+        }
+
+        tmp = soapUser.getEmail3();
+        if (tmp != null) {
+            user.setEmail3(tmp);
+        }
+
+        tmp = soapUser.getEmployeeType();
+        if (tmp != null) {
+            user.setEmployeeType(tmp);
+        }
+
+        tmp = soapUser.getFaxBusiness();
+        if (tmp != null) {
+            user.setFax_business(tmp);
+        }
+
+        tmp = soapUser.getFaxHome();
+        if (tmp != null) {
+            user.setFax_home(tmp);
+        }
+
+        tmp = soapUser.getFaxOther();
+        if (tmp != null) {
+            user.setFax_other(tmp);
+        }
+
+        Integer itg = soapUser.getFolderTree();
+        if (itg != null) {
+            user.setFolderTree(itg);
+        }
+
+        tmp = soapUser.getGivenName();
+        if (tmp != null) {
+            user.setGiven_name(tmp);
+        }
+
+        itg = soapUser.getId();
+        if (itg != null) {
+            user.setId(itg);
+        }
+
+        tmp = soapUser.getImapLogin();
+        if (tmp != null) {
+            user.setImapLogin(tmp);
+        }
+
+        tmp = soapUser.getImapServer();
+        if (tmp != null) {
+            user.setImapServer(tmp);
+        }
+
+        tmp = soapUser.getInfo();
+        if (tmp != null) {
+            user.setInfo(tmp);
+        }
+
+        tmp = soapUser.getInstantMessenger1();
+        if (tmp != null) {
+            user.setInstant_messenger1(tmp);
+        }
+
+        tmp = soapUser.getInstantMessenger2();
+        if (tmp != null) {
+            user.setInstant_messenger2(tmp);
+        }
+
+        tmp = soapUser.getLanguage();
+        if (tmp != null) {
+            user.setLanguage(tmp);
+        }
+
+        tmp = soapUser.getMailFolderConfirmedHamName();
+        if (tmp != null) {
+            user.setMail_folder_confirmed_ham_name(tmp);
+        }
+
+        tmp = soapUser.getMailFolderConfirmedSpamName();
+        if (tmp != null) {
+            user.setMail_folder_confirmed_spam_name(tmp);
+        }
+
+        tmp = soapUser.getMailFolderDraftsName();
+        if (tmp != null) {
+            user.setMail_folder_drafts_name(tmp);
+        }
+
+        tmp = soapUser.getMailFolderSentName();
+        if (tmp != null) {
+            user.setMail_folder_sent_name(tmp);
+        }
+
+        tmp = soapUser.getMailFolderSpamName();
+        if (tmp != null) {
+            user.setMail_folder_spam_name(tmp);
+        }
+
+        tmp = soapUser.getMailFolderTrashName();
+        if (tmp != null) {
+            user.setMail_folder_trash_name(tmp);
+        }
+
+        tmp = soapUser.getManagerName();
+        if (tmp != null) {
+            user.setManager_name(tmp);
+        }
+
+        tmp = soapUser.getMaritalStatus();
+        if (tmp != null) {
+            user.setMarital_status(tmp);
+        }
+
+        tmp = soapUser.getMiddleName();
+        if (tmp != null) {
+            user.setMiddle_name(tmp);
+        }
+
+        tmp = soapUser.getName();
+        if (tmp != null) {
+            user.setName(tmp);
+        }
+
+        tmp = soapUser.getNickname();
+        if (tmp != null) {
+            user.setNickname(tmp);
+        }
+
+        tmp = soapUser.getNote();
+        if (tmp != null) {
+            user.setNote(tmp);
+        }
+
+        tmp = soapUser.getNumberOfChildren();
+        if (tmp != null) {
+            user.setNumber_of_children(tmp);
+        }
+
+        tmp = soapUser.getNumberOfEmployee();
+        if (tmp != null) {
+            user.setNumber_of_employee(tmp);
+        }
+
+        tmp = soapUser.getPassword();
+        if (tmp != null) {
+            user.setPassword(tmp);
+        }
+
+        tmp = soapUser.getPasswordMech();
+        if (tmp != null) {
+            user.setPasswordMech(tmp);
+        }
+
+        tmp = soapUser.getPosition();
+        if (tmp != null) {
+            user.setPosition(tmp);
+        }
+
+        tmp = soapUser.getPostalCodeBusiness();
+        if (tmp != null) {
+            user.setPostal_code_business(tmp);
+        }
+
+        tmp = soapUser.getPostalCodeHome();
+        if (tmp != null) {
+            user.setPostal_code_home(tmp);
+        }
+
+        tmp = soapUser.getPostalCodeOther();
+        if (tmp != null) {
+            user.setPostal_code_other(tmp);
+        }
+
+        tmp = soapUser.getPrimaryEmail();
+        if (tmp != null) {
+            user.setPrimaryEmail(tmp);
+        }
+
+        tmp = soapUser.getProfession();
+        if (tmp != null) {
+            user.setProfession(tmp);
+        }
+
+        tmp = soapUser.getRoomNumber();
+        if (tmp != null) {
+            user.setRoom_number(tmp);
+        }
+
+        tmp = soapUser.getSalesVolume();
+        if (tmp != null) {
+            user.setSales_volume(tmp);
+        }
+
+        tmp = soapUser.getSmtpServer();
+        if (tmp != null) {
+            user.setSmtpServer(tmp);
+        }
+
+        tmp = soapUser.getSpouseName();
+        if (tmp != null) {
+            user.setSpouse_name(tmp);
+        }
+
+        tmp = soapUser.getStateBusiness();
+        if (tmp != null) {
+            user.setState_business(tmp);
+        }
+
+        tmp = soapUser.getStateHome();
+        if (tmp != null) {
+            user.setState_home(tmp);
+        }
+
+        tmp = soapUser.getStateOther();
+        if (tmp != null) {
+            user.setState_other(tmp);
+        }
+
+        tmp = soapUser.getStreetBusiness();
+        if (tmp != null) {
+            user.setStreet_business(tmp);
+        }
+
+        tmp = soapUser.getStreetHome();
+        if (tmp != null) {
+            user.setStreet_home(tmp);
+        }
+
+        tmp = soapUser.getStreetOther();
+        if (tmp != null) {
+            user.setStreet_other(tmp);
+        }
+
+        tmp = soapUser.getSuffix();
+        if (tmp != null) {
+            user.setSuffix(tmp);
+        }
+
+        tmp = soapUser.getSurName();
+        if (tmp != null) {
+            user.setSur_name(tmp);
+        }
+
+        tmp = soapUser.getTaxId();
+        if (tmp != null) {
+            user.setTax_id(tmp);
+        }
+
+        tmp = soapUser.getTelephoneAssistant();
+        if (tmp != null) {
+            user.setTelephone_assistant(tmp);
+        }
+
+        tmp = soapUser.getTelephoneBusiness1();
+        if (tmp != null) {
+            user.setTelephone_business1(tmp);
+        }
+
+        tmp = soapUser.getTelephoneBusiness2();
+        if (tmp != null) {
+            user.setTelephone_business2(tmp);
+        }
+
+        tmp = soapUser.getTelephoneCallback();
+        if (tmp != null) {
+            user.setTelephone_callback(tmp);
+        }
+
+        tmp = soapUser.getTelephoneCar();
+        if (tmp != null) {
+            user.setTelephone_car(tmp);
+        }
+
+        tmp = soapUser.getTelephoneCompany();
+        if (tmp != null) {
+            user.setTelephone_company(tmp);
+        }
+
+        tmp = soapUser.getTelephoneHome1();
+        if (tmp != null) {
+            user.setTelephone_home1(tmp);
+        }
+
+        tmp = soapUser.getTelephoneHome2();
+        if (tmp != null) {
+            user.setTelephone_home2(tmp);
+        }
+
+        tmp = soapUser.getTelephoneIp();
+        if (tmp != null) {
+            user.setTelephone_ip(tmp);
+        }
+
+        tmp = soapUser.getTelephoneIsdn();
+        if (tmp != null) {
+            user.setTelephone_isdn(tmp);
+        }
+
+        tmp = soapUser.getTelephoneOther();
+        if (tmp != null) {
+            user.setTelephone_other(tmp);
+        }
+
+        tmp = soapUser.getTelephonePager();
+        if (tmp != null) {
+            user.setTelephone_pager(tmp);
+        }
+
+        tmp = soapUser.getTelephonePrimary();
+        if (tmp != null) {
+            user.setTelephone_primary(tmp);
+        }
+
+        tmp = soapUser.getTelephoneRadio();
+        if (tmp != null) {
+            user.setTelephone_radio(tmp);
+        }
+
+        tmp = soapUser.getTelephoneTelex();
+        if (tmp != null) {
+            user.setTelephone_telex(tmp);
+        }
+
+        tmp = soapUser.getTelephoneTtytdd();
+        if (tmp != null) {
+            user.setTelephone_ttytdd(tmp);
+        }
+
+        tmp = soapUser.getTimezone();
+        if (tmp != null) {
+            user.setTimezone(tmp);
+        }
+
+        tmp = soapUser.getTitle();
+        if (tmp != null) {
+            user.setTitle(tmp);
+        }
+
+        itg = soapUser.getUploadFileSizeLimit();
+        if (itg != null) {
+            user.setUploadFileSizeLimit(itg);
+        }
+
+        itg = soapUser.getUploadFileSizeLimitPerFile();
+        if (itg != null) {
+            user.setUploadFileSizeLimitPerFile(itg);
+        }
+
+        tmp = soapUser.getUrl();
+        if (tmp != null) {
+            user.setUrl(tmp);
+        }
+
+        tmp = soapUser.getUserfield01();
+        if (tmp != null) {
+            user.setUserfield01(tmp);
+        }
+
+        tmp = soapUser.getUserfield02();
+        if (tmp != null) {
+            user.setUserfield02(tmp);
+        }
+
+        tmp = soapUser.getUserfield03();
+        if (tmp != null) {
+            user.setUserfield03(tmp);
+        }
+
+        tmp = soapUser.getUserfield04();
+        if (tmp != null) {
+            user.setUserfield04(tmp);
+        }
+
+        tmp = soapUser.getUserfield05();
+        if (tmp != null) {
+            user.setUserfield05(tmp);
+        }
+
+        tmp = soapUser.getUserfield06();
+        if (tmp != null) {
+            user.setUserfield06(tmp);
+        }
+
+        tmp = soapUser.getUserfield07();
+        if (tmp != null) {
+            user.setUserfield07(tmp);
+        }
+
+        tmp = soapUser.getUserfield08();
+        if (tmp != null) {
+            user.setUserfield08(tmp);
+        }
+
+        tmp = soapUser.getUserfield09();
+        if (tmp != null) {
+            user.setUserfield09(tmp);
+        }
+
+        tmp = soapUser.getUserfield10();
+        if (tmp != null) {
+            user.setUserfield10(tmp);
+        }
+
+        tmp = soapUser.getUserfield11();
+        if (tmp != null) {
+            user.setUserfield11(tmp);
+        }
+
+        tmp = soapUser.getUserfield12();
+        if (tmp != null) {
+            user.setUserfield12(tmp);
+        }
+
+        tmp = soapUser.getUserfield13();
+        if (tmp != null) {
+            user.setUserfield13(tmp);
+        }
+
+        tmp = soapUser.getUserfield14();
+        if (tmp != null) {
+            user.setUserfield14(tmp);
+        }
+
+        tmp = soapUser.getUserfield15();
+        if (tmp != null) {
+            user.setUserfield15(tmp);
+        }
+
+        tmp = soapUser.getUserfield16();
+        if (tmp != null) {
+            user.setUserfield16(tmp);
+        }
+
+        tmp = soapUser.getUserfield17();
+        if (tmp != null) {
+            user.setUserfield17(tmp);
+        }
+
+        tmp = soapUser.getUserfield18();
+        if (tmp != null) {
+            user.setUserfield18(tmp);
+        }
+
+        tmp = soapUser.getUserfield19();
+        if (tmp != null) {
+            user.setUserfield19(tmp);
+        }
+
+        tmp = soapUser.getUserfield20();
+        if (tmp != null) {
+            user.setUserfield20(tmp);
+        }
+
+>>>>>>> 3ae1d20... workaround for problems with strange data from PHP clients
         return user;
     }
 
@@ -720,18 +1291,67 @@ public class OXGroupServicePortTypeImpl implements OXGroupServicePortType {
             return null;
         }
         final com.openexchange.admin.rmi.dataobjects.Context ret = new com.openexchange.admin.rmi.dataobjects.Context();
-        ret.setAverage_size(soapContext.getAverageSize());
-        ret.setEnabled(soapContext.isEnabled());
-        ret.setFilestore_name(soapContext.getFilestoreName());
-        ret.setFilestoreId(soapContext.getFilestoreId());
-        ret.setId(soapContext.getId());
-        ret.setLoginMappings(new HashSet<String>(soapContext.getLoginMappings()));
-        ret.setMaxQuota(soapContext.getMaxQuota());
-        ret.setName(soapContext.getName());
-        ret.setUsedQuota(soapContext.getUsedQuota());
-        ret.setReadDatabase(soap2Database(soapContext.getReadDatabase()));
-        ret.setWriteDatabase(soap2Database(soapContext.getWriteDatabase()));
-        ret.setUserAttributes(soap2MapMap(soapContext.getUserAttributes()));
+        Long lng = soapContext.getAverageSize();
+        if (null != lng) {
+            ret.setAverage_size(lng);
+        }
+
+        final Boolean enabled = soapContext.isEnabled();
+        if (null != enabled) {
+            ret.setEnabled(enabled);
+        }
+
+        final String s = soapContext.getFilestoreName();
+        if (null != s) {
+            ret.setFilestore_name(s);
+        }
+
+        Integer itg = soapContext.getFilestoreId();
+        if (null != itg) {
+            ret.setFilestoreId(itg);
+        }
+
+        itg = soapContext.getId();
+        ret.setId(itg);
+
+        if (null != soapContext.getLoginMappings()) {
+            for (String loginMapping : soapContext.getLoginMappings()) {
+                if (null != loginMapping) {
+                    ret.addLoginMapping(loginMapping);
+                }
+            }
+        }
+
+        lng = soapContext.getMaxQuota();
+        if (null != lng) {
+            ret.setMaxQuota(lng);
+        }
+
+        final String name = soapContext.getName();
+        if (null != name) {
+            ret.setName(name);
+        }
+
+        final Long usedQuota = soapContext.getUsedQuota();
+        if (null != usedQuota) {
+            ret.setUsedQuota(usedQuota);
+        }
+
+        final Database readDatabase = soapContext.getReadDatabase();
+        if (null != readDatabase) {
+            ret.setReadDatabase(soap2Database(readDatabase));
+        }
+
+        final Database writeDatabase = soapContext.getWriteDatabase();
+        if (null != writeDatabase) {
+            ret.setWriteDatabase(soap2Database(writeDatabase));
+        }
+
+        final SOAPStringMapMap userAttributes = soapContext.getUserAttributes();
+        if (null != userAttributes) {
+            ret.setUserAttributes(soap2MapMap(userAttributes));
+        }
+
         return ret;
     }
 

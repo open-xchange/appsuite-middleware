@@ -293,18 +293,66 @@ public class OXResourceServicePortTypeImpl implements OXResourceServicePortType 
             return null;
         }
         final com.openexchange.admin.rmi.dataobjects.Context ret = new com.openexchange.admin.rmi.dataobjects.Context();
-        ret.setAverage_size(soapContext.getAverageSize());
-        ret.setEnabled(soapContext.isEnabled());
-        ret.setFilestore_name(soapContext.getFilestoreName());
-        ret.setFilestoreId(soapContext.getFilestoreId());
-        ret.setId(soapContext.getId());
-        ret.setLoginMappings(new HashSet<String>(soapContext.getLoginMappings()));
-        ret.setMaxQuota(soapContext.getMaxQuota());
-        ret.setName(soapContext.getName());
-        ret.setUsedQuota(soapContext.getUsedQuota());
-        ret.setReadDatabase(soap2Database(soapContext.getReadDatabase()));
-        ret.setWriteDatabase(soap2Database(soapContext.getWriteDatabase()));
-        ret.setUserAttributes(soap2MapMap(soapContext.getUserAttributes()));
+        Long lng = soapContext.getAverageSize();
+        if (null != lng) {
+            ret.setAverage_size(lng);
+        }
+
+        final Boolean enabled = soapContext.isEnabled();
+        if (null != enabled) {
+            ret.setEnabled(enabled);
+        }
+
+        final String s = soapContext.getFilestoreName();
+        if (null != s) {
+            ret.setFilestore_name(s);
+        }
+
+        Integer itg = soapContext.getFilestoreId();
+        if (null != itg) {
+            ret.setFilestoreId(itg);
+        }
+
+        itg = soapContext.getId();
+        ret.setId(itg);
+
+        if (null != soapContext.getLoginMappings()) {
+            for (String loginMapping : soapContext.getLoginMappings()) {
+                if (null != loginMapping) {
+                    ret.addLoginMapping(loginMapping);
+                }
+            }
+        }
+
+        lng = soapContext.getMaxQuota();
+        if (null != lng) {
+            ret.setMaxQuota(lng);
+        }
+
+        final String name = soapContext.getName();
+        if (null != name) {
+            ret.setName(name);
+        }
+
+        final Long usedQuota = soapContext.getUsedQuota();
+        if (null != usedQuota) {
+            ret.setUsedQuota(usedQuota);
+        }
+
+        final Database readDatabase = soapContext.getReadDatabase();
+        if (null != readDatabase) {
+            ret.setReadDatabase(soap2Database(readDatabase));
+        }
+
+        final Database writeDatabase = soapContext.getWriteDatabase();
+        if (null != writeDatabase) {
+            ret.setWriteDatabase(soap2Database(writeDatabase));
+        }
+
+        final SOAPStringMapMap userAttributes = soapContext.getUserAttributes();
+        if (null != userAttributes) {
+            ret.setUserAttributes(soap2MapMap(userAttributes));
+        }
         return ret;
     }
 
