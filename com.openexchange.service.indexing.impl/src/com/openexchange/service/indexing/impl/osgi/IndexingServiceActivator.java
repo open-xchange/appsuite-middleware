@@ -54,7 +54,6 @@ import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
 import org.osgi.framework.ServiceReference;
-import org.quartz.core.QuartzSchedulerMBeanImpl;
 import org.quartz.service.QuartzService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
@@ -67,6 +66,9 @@ import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginResult;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mail.smal.SmalAccessService;
+import com.openexchange.mail.utils.MailPasswordUtil;
+import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.management.ManagementService;
 import com.openexchange.mq.MQService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -74,12 +76,15 @@ import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.service.indexing.IndexingService;
 import com.openexchange.service.indexing.IndexingServiceMBean;
+import com.openexchange.service.indexing.hazelcast.MailFolderJob;
 import com.openexchange.service.indexing.impl.CompositeServiceLookup;
 import com.openexchange.service.indexing.impl.IndexingServiceImpl;
 import com.openexchange.service.indexing.impl.IndexingServiceInit;
 import com.openexchange.service.indexing.impl.IndexingServiceMBeanImpl;
 import com.openexchange.service.indexing.impl.Services;
 import com.openexchange.service.indexing.infostore.InfostoreAccountJob;
+import com.openexchange.service.indexing.mail.MailJobInfo;
+import com.openexchange.service.indexing.mail.MailJobInfo.Builder;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -103,8 +108,9 @@ public final class IndexingServiceActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
-            ConfigurationService.class, MQService.class, ThreadPoolService.class, DatabaseService.class, MailService.class,
-            SmalAccessService.class, IndexFacadeService.class, SessiondService.class, IDBasedFileAccessFactory.class, FolderService.class };
+            ConfigurationService.class, ThreadPoolService.class, DatabaseService.class, MailService.class,
+            SmalAccessService.class, IndexFacadeService.class, SessiondService.class, IDBasedFileAccessFactory.class, FolderService.class,
+            MailAccountStorageService.class };
     }
 
     @Override
@@ -112,108 +118,111 @@ public final class IndexingServiceActivator extends HousekeepingActivator {
         final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(IndexingServiceActivator.class));
         log.info("Starting bundle: com.openexchange.service.indexing.impl");
         try {
-            final CompositeServiceLookup compositeServiceLookup = new CompositeServiceLookup(context);
+            CompositeServiceLookup compositeServiceLookup = new CompositeServiceLookup(context);
             compositeServiceLookup.addAll(getNeededServices(), this);
             Services.setServiceLookup(compositeServiceLookup);
-            /*
-             * IndexingService initialization
-             */
-            final int maxConcurrentJobs = 8;
-            final IndexingServiceInit serviceInit = new IndexingServiceInit(maxConcurrentJobs, this);
-            serviceInit.init();
-            /*
-             * Start receiving jobs? --> indexing-service.properties
-             */
-            {
-                final ConfigurationService service = getService(ConfigurationService.class);
-                final boolean startReceiver = service.getBoolProperty("com.openexchange.service.indexing.startReceiver", true);
-                if (startReceiver) {
-                    serviceInit.initReceiver();
-                }
-            }
-            this.serviceInit = serviceInit;
-            /*
-             * Register service
-             */
-            final IndexingServiceImpl indexingService = new IndexingServiceImpl(serviceInit);
-            registerService(IndexingService.class, indexingService);
-            addService(IndexingService.class, indexingService);
-            compositeServiceLookup.addIfAbsent(IndexingService.class, new ServiceLookup() {
-
-                @Override
-                public <S> S getService(final Class<? extends S> clazz) {
-                    if (!IndexingService.class.equals(clazz)) {
-                        throw new IllegalStateException("Invalid class: " + clazz.getName());
-                    }
-                    @SuppressWarnings("unchecked")
-                    final S ret = (S) indexingService;
-                    return ret;
-                }
-
-                @Override
-                public <S> S getOptionalService(final Class<? extends S> clazz) {
-                    return getService(clazz);
-                }
-            });
-            /*
-             * Service tracker(s)
-             */
-            final ObjectName indexingMBeanName = new ObjectName(IndexingServiceMBean.DOMAIN, "name", "Indexing Service MBean");
-            // trackService(ManagementService.class);
-            track(ManagementService.class, new SimpleRegistryListener<ManagementService>() {
-
-                @Override
-                public void added(final ServiceReference<ManagementService> ref, final ManagementService service) {
-                    try {
-                        service.registerMBean(indexingMBeanName, new IndexingServiceMBeanImpl());                 
-                    } catch (final NotCompliantMBeanException e) {
-                        log.error(e.getMessage(), e);
-                    } catch (final OXException e) {
-                        log.error(e.getMessage(), e);
-                    }
-                }
-
-                @Override
-                public void removed(final ServiceReference<ManagementService> ref, final ManagementService service) {
-                    try {
-                        service.unregisterMBean(indexingMBeanName);
-                    } catch (final OXException e) {
-                        log.error(e.getMessage(), e);
-                    }
-                }
-
-            });
-            track(QuartzService.class, new SimpleRegistryListener<QuartzService>() {
-
-                private final AtomicReference<QuartzService> aRef = new AtomicReference<QuartzService>();
-
-                @Override
-                public void added(final ServiceReference<QuartzService> ref, final QuartzService service) {
-                    aRef.set(service);
-                    Services.getServiceLookup().addIfAbsent(QuartzService.class, new ServiceLookup() {
-                        
-                        @Override
-                        public <S> S getService(final Class<? extends S> clazz) {
-                            return getOptionalService(clazz);
-                        }
-                        
-                        @Override
-                        public <S> S getOptionalService(final Class<? extends S> clazz) {
-                            if (QuartzService.class.equals(clazz)) {
-                                return (S) aRef.get();
-                            }
-                            return null;
-                        }
-                    });
-                }
-
-                @Override
-                public void removed(final ServiceReference<QuartzService> ref, final QuartzService service) {
-                    aRef.set(null);
-                }
-                
-            });
-            openTrackers();
+//            final CompositeServiceLookup compositeServiceLookup = new CompositeServiceLookup(context);
+//            compositeServiceLookup.addAll(getNeededServices(), this);
+//            Services.setServiceLookup(compositeServiceLookup);
+//            /*
+//             * IndexingService initialization
+//             */
+//            final int maxConcurrentJobs = 8;
+//            final IndexingServiceInit serviceInit = new IndexingServiceInit(maxConcurrentJobs, this);
+//            serviceInit.init();
+//            /*
+//             * Start receiving jobs? --> indexing-service.properties
+//             */
+//            {
+//                final ConfigurationService service = getService(ConfigurationService.class);
+//                final boolean startReceiver = service.getBoolProperty("com.openexchange.service.indexing.startReceiver", true);
+//                if (startReceiver) {
+//                    serviceInit.initReceiver();
+//                }
+//            }
+//            this.serviceInit = serviceInit;
+//            /*
+//             * Register service
+//             */
+//            final IndexingServiceImpl indexingService = new IndexingServiceImpl(serviceInit);
+//            registerService(IndexingService.class, indexingService);
+//            addService(IndexingService.class, indexingService);
+//            compositeServiceLookup.addIfAbsent(IndexingService.class, new ServiceLookup() {
+//
+//                @Override
+//                public <S> S getService(final Class<? extends S> clazz) {
+//                    if (!IndexingService.class.equals(clazz)) {
+//                        throw new IllegalStateException("Invalid class: " + clazz.getName());
+//                    }
+//                    @SuppressWarnings("unchecked")
+//                    final S ret = (S) indexingService;
+//                    return ret;
+//                }
+//
+//                @Override
+//                public <S> S getOptionalService(final Class<? extends S> clazz) {
+//                    return getService(clazz);
+//                }
+//            });
+//            /*
+//             * Service tracker(s)
+//             */
+//            final ObjectName indexingMBeanName = new ObjectName(IndexingServiceMBean.DOMAIN, "name", "Indexing Service MBean");
+//            // trackService(ManagementService.class);
+//            track(ManagementService.class, new SimpleRegistryListener<ManagementService>() {
+//
+//                @Override
+//                public void added(final ServiceReference<ManagementService> ref, final ManagementService service) {
+//                    try {
+//                        service.registerMBean(indexingMBeanName, new IndexingServiceMBeanImpl());                 
+//                    } catch (final NotCompliantMBeanException e) {
+//                        log.error(e.getMessage(), e);
+//                    } catch (final OXException e) {
+//                        log.error(e.getMessage(), e);
+//                    }
+//                }
+//
+//                @Override
+//                public void removed(final ServiceReference<ManagementService> ref, final ManagementService service) {
+//                    try {
+//                        service.unregisterMBean(indexingMBeanName);
+//                    } catch (final OXException e) {
+//                        log.error(e.getMessage(), e);
+//                    }
+//                }
+//
+//            });
+//            track(QuartzService.class, new SimpleRegistryListener<QuartzService>() {
+//
+//                private final AtomicReference<QuartzService> aRef = new AtomicReference<QuartzService>();
+//
+//                @Override
+//                public void added(final ServiceReference<QuartzService> ref, final QuartzService service) {
+//                    aRef.set(service);
+//                    Services.getServiceLookup().addIfAbsent(QuartzService.class, new ServiceLookup() {
+//                        
+//                        @Override
+//                        public <S> S getService(final Class<? extends S> clazz) {
+//                            return getOptionalService(clazz);
+//                        }
+//                        
+//                        @Override
+//                        public <S> S getOptionalService(final Class<? extends S> clazz) {
+//                            if (QuartzService.class.equals(clazz)) {
+//                                return (S) aRef.get();
+//                            }
+//                            return null;
+//                        }
+//                    });
+//                }
+//
+//                @Override
+//                public void removed(final ServiceReference<QuartzService> ref, final QuartzService service) {
+//                    aRef.set(null);
+//                }
+//                
+//            });
+//            openTrackers();
 
             /*-
              * ------------------- Test ---------------------
@@ -228,15 +237,43 @@ public final class IndexingServiceActivator extends HousekeepingActivator {
                 }
                 
                 @Override
-                public void handleLogin(LoginResult login) throws OXException {
-                    Session session = login.getSession();
-                    InfostoreAccountJob job = new InfostoreAccountJob(session);
-                    try {
-                        job.performJob();
-                    } catch (InterruptedException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
+                public void handleLogin(final LoginResult login) throws OXException {
+                    new Thread(new Runnable() {
+                        
+                        @Override
+                        public void run() {
+                            try {
+                                Session session = login.getSession();
+                                MailAccountStorageService storageService = getService(MailAccountStorageService.class);
+                                MailAccount mailAccount = storageService.getMailAccount(0, session.getUserId(), session.getContextId());
+                                
+                                Builder builder = new MailJobInfo.Builder(session.getUserId(), session.getContextId())
+                                    .accountId(0)
+                                    .login(mailAccount.getLogin())
+                                    .primaryPassword(session.getPassword())
+                                    .port(mailAccount.getMailPort())
+                                    .server(mailAccount.getMailServer())
+                                    .secure(mailAccount.isMailSecure());
+                                
+                                String password = mailAccount.getPassword();
+                                if (password == null) {
+                                    password = session.getPassword();
+                                } else {
+                                    password = MailPasswordUtil.decrypt(password, session, 0, mailAccount.getLogin(), mailAccount.getMailServer());  
+                                }
+                                builder.password(password);
+                                
+                                InfostoreAccountJob job = new InfostoreAccountJob(session);  
+                                MailFolderJob folderJob = new MailFolderJob("INBOX", builder.build());
+                            
+                                job.performJob();
+                                folderJob.performJob();
+                            } catch (Exception e) {
+                                // TODO Auto-generated catch block
+                                e.printStackTrace();
+                            }                            
+                        }
+                    }).start();                    
                 }
             });
         } catch (final Exception e) {

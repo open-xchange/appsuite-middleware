@@ -347,14 +347,6 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
         long start = System.currentTimeMillis();
         ConfigurationService config = Services.getService(ConfigurationService.class);
         boolean isSolrNode = config.getBoolProperty(SolrProperties.IS_NODE, false);
-        // if (isSolrNode && embeddedAccess.hasActiveCore(identifier)) {
-        // if (LOG.isDebugEnabled()) {
-        // LOG.debug("Returning local solr access.");
-        // }
-        //
-        // return embeddedAccess;
-        // }
-
         HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
         String ownAddress = resolveSocketAddress(hazelcast.getCluster().getLocalMember().getInetSocketAddress());
         IMap<String, String> solrCores = hazelcast.getMap(SOLR_CORE_MAP);

@@ -1,159 +1,162 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <config>
-	<abortOnConfigurationError>
-		${solr.abortOnConfigurationError:true}
-	</abortOnConfigurationError>
+    <abortOnConfigurationError>
+        ${solr.abortOnConfigurationError:true}
+    </abortOnConfigurationError>
 
-	<luceneMatchVersion>LUCENE_36</luceneMatchVersion>
+    <luceneMatchVersion>LUCENE_36</luceneMatchVersion>
 
-	<dataDir>${solr.core.dataDir}</dataDir>
-	<lib dir="${libDir:/opt/open-xchange/solr/lib}" />
+    <dataDir>${solr.core.dataDir}</dataDir>
+    <lib dir="${libDir:/opt/open-xchange/solr/lib}" />
 
-	<mainIndex>
-		<useCompoundFile>false</useCompoundFile>
-		<ramBufferSizeMB>32</ramBufferSizeMB>
-		<mergeFactor>10</mergeFactor>
-		<maxFieldLength>10000</maxFieldLength>
-		<unlockOnStartup>true</unlockOnStartup>
-		<reopenReaders>true</reopenReaders>
-		<writeLockTimeout>1000</writeLockTimeout>
-		<commitLockTimeout>10000</commitLockTimeout>
-		<lockType>simple</lockType>
-		<deletionPolicy class="solr.SolrDeletionPolicy">
-			<str name="keepOptimizedOnly">false</str>
-			<str name="maxCommitsToKeep">1</str>
-		</deletionPolicy>
-	</mainIndex>
+    <mainIndex>
+        <useCompoundFile>false</useCompoundFile>
+        <ramBufferSizeMB>32</ramBufferSizeMB>
+        <mergeFactor>10</mergeFactor>
+        <maxFieldLength>10000</maxFieldLength>
+        <unlockOnStartup>true</unlockOnStartup>
+        <reopenReaders>true</reopenReaders>
+        <writeLockTimeout>1000</writeLockTimeout>
+        <commitLockTimeout>10000</commitLockTimeout>
+        <lockType>simple</lockType>
+        <deletionPolicy class="solr.SolrDeletionPolicy">
+            <str name="keepOptimizedOnly">false</str>
+            <str name="maxCommitsToKeep">1</str>
+        </deletionPolicy>
+    </mainIndex>
 
-	<!-- <jmx /> -->
+    <updateHandler class="solr.DirectUpdateHandler2" />
 
-	<updateHandler class="solr.DirectUpdateHandler2" />
+    <query>
+        <maxBooleanClauses>1024</maxBooleanClauses>
+        <filterCache class="solr.FastLRUCache" size="512" initialSize="512" autowarmCount="0" />
+        <queryResultCache class="solr.LRUCache" size="512" initialSize="512" autowarmCount="0" />
+        <documentCache class="solr.LRUCache" size="512" initialSize="512" autowarmCount="0" />
+        <enableLazyFieldLoading>true</enableLazyFieldLoading>
+        <queryResultWindowSize>20</queryResultWindowSize>
+        <queryResultMaxDocsCached>200</queryResultMaxDocsCached>
+        <listener event="newSearcher" class="solr.QuerySenderListener">
+            <arr name="queries"></arr>
+        </listener>
+        <useColdSearcher>false</useColdSearcher>
+        <maxWarmingSearchers>5</maxWarmingSearchers>
+    </query>
 
-	<query>
-		<maxBooleanClauses>1024</maxBooleanClauses>
-		<filterCache class="solr.FastLRUCache" size="512"
-			initialSize="512" autowarmCount="0" />
-		<queryResultCache class="solr.LRUCache" size="512"
-			initialSize="512" autowarmCount="0" />
-		<documentCache class="solr.LRUCache" size="512"
-			initialSize="512" autowarmCount="0" />
-		<enableLazyFieldLoading>true</enableLazyFieldLoading>
-		<queryResultWindowSize>20</queryResultWindowSize>
-		<queryResultMaxDocsCached>200</queryResultMaxDocsCached>
-		<listener event="newSearcher" class="solr.QuerySenderListener">
-			<arr name="queries"></arr>
-		</listener>
-		<useColdSearcher>false</useColdSearcher>
-		<maxWarmingSearchers>5</maxWarmingSearchers>
-	</query>
+    <requestDispatcher handleSelect="true">
+        <requestParsers enableRemoteStreaming="false" multipartUploadLimitInKB="2048000" />
+        <httpCaching never304="true" />
+    </requestDispatcher>
 
-	<requestDispatcher handleSelect="true">
-		<requestParsers enableRemoteStreaming="false"
-			multipartUploadLimitInKB="2048000" />
-		<httpCaching never304="true" />
-	</requestDispatcher>
+    <!-- For debugging purposes only -->
+    <requestHandler name="standard" class="solr.SearchHandler" default="false">
+        <lst name="defaults">
+            <str name="echoParams">explicit</str>
+        </lst>
+    </requestHandler>
 
-	<!-- For debugging purposes only -->
-	<requestHandler name="standard" class="solr.SearchHandler"
-		default="false">
-		<lst name="defaults">
-			<str name="echoParams">explicit</str>
-		</lst>
-	</requestHandler>
+    <requestHandler name="simpleSearch" class="solr.SearchHandler">
+        <lst name="invariants">
+            <str name="defType">dismax</str>
+            <str name="echoParams">explicit</str>
+            <float name="tie">0.01</float>
+            <str name="qf">
+                content_gen^1.0 content_de^1.0 content_en^1.0 content_fr^1.0 content_it^1.0 subject_gen^3.0 subject_de^3.0 subject_en^3.0 subject_fr^3.0 subject_it^3.0 from^2.0 to^2.0
+                cc^1.0 bcc^1.0
+            </str>
+        </lst>
+        <lst name="defaults">
+            <str name="fl">*</str> <!-- Envelope Felder -->
+        </lst>
 
-	<requestHandler name="simpleSearch" class="solr.SearchHandler">
-		<lst name="invariants">
-			<str name="defType">dismax</str>
-			<str name="echoParams">explicit</str>
-			<float name="tie">0.01</float>
-			<str name="qf">
-				content_gen^1.0 content_de^1.0 content_en^1.0 content_fr^1.0 content_it^1.0 subject_gen^3.0 subject_de^3.0 subject_en^3.0 subject_fr^3.0 subject_it^3.0 from^2.0 to^2.0 cc^1.0 bcc^1.0
-			</str>			
-		</lst>
-		<lst name="defaults">
-			<str name="fl">*</str> <!-- Envelope Felder -->
-		</lst>
-		
-		<arr name="components">
-			<str>query</str>
-		</arr>
-	</requestHandler>
+        <arr name="components">
+            <str>query</str>
+        </arr>
+    </requestHandler>
 
-	<requestHandler name="allSearch" class="solr.SearchHandler">
-		<lst name="defaults">
-			<str name="fl">*</str> <!-- Envelope Felder -->
-			<str name="df">full_name</str>
-			<str name="q.op">OR</str>
-		</lst>
-		
-		<arr name="components">
-			<str>query</str>
-		</arr>
-	</requestHandler>
+    <requestHandler name="allSearch" class="solr.SearchHandler">
+        <lst name="defaults">
+            <str name="fl">*</str> <!-- Envelope Felder -->
+            <str name="df">full_name</str>
+            <str name="q.op">OR</str>
+        </lst>
 
-	<requestHandler name="customSearch" class="solr.SearchHandler">
-		<lst name="defaults">
-			<str name="fl">*</str>
-<!-- 			<str name="df">full_name</str> -->
-			<str name="q.op">OR</str>
-		</lst>
+        <arr name="components">
+            <str>query</str>
+        </arr>
+    </requestHandler>
+    
+    <requestHandler name="getSearch" class="solr.SearchHandler">
+        <arr name="components">
+            <str>searchFieldSupplier</str>
+            <str>query</str>
+        </arr>
+    </requestHandler>
+    
+    <searchComponent name="searchFieldSupplier" class="de.kippdata.cria.solrext.searchcomponents.SearchFieldSupplier">
+        <str name="sf">uuid</str>
+    </searchComponent>
 
-		<!-- Use this only if "components" is not specified to use the defaults -->
-		<!-- 
-		<arr name="first-components">
-			<str>queryModifier</str>
-		</arr>
-		-->
-		<arr name="components">
-			<str>queryModifier</str>
-			<str>query</str>
-			<!-- Uncomment for debugging purposes only -->
-			<!-- 
-			<str>debug</str>
-			-->
-		</arr>
-	</requestHandler>
+    <requestHandler name="customSearch" class="solr.SearchHandler">
+        <lst name="defaults">
+            <str name="fl">*</str>
+            <!-- <str name="df">full_name</str> -->
+            <str name="q.op">OR</str>
+        </lst>
 
-	<searchComponent name="queryModifier"
-		class="de.kippdata.cria.solrext.searchcomponents.FormalFieldQueryModifier">
-		<str name="param1">uuid</str>
-		<str name="param2">timestamp</str>
-		<str name="param3">account</str>
-		<str name="param4">full_name</str>
-		<str name="param5">id</str>
-		<str name="param6">color_label</str>
-		<str name="param7">attachment</str>
-		<str name="param8">received_date</str>
-		<str name="param9">sent_date</str>
-		<str name="param10">size</str>
-		<str name="param11">flag_answered</str>
-		<str name="param12">flag_deleted</str>
-		<str name="param13">flag_draft</str>
-		<str name="param14">flag_flagged</str>
-		<str name="param15">flag_recent</str>
-		<str name="param16">flag_seen</str>
-		<str name="param17">flag_user</str>
-		<str name="param18">flag_spam</str>
-		<str name="param19">flag_forwarded</str>
-		<str name="param20">flag_read_ack</str>
-		<str name="param21">user_flags</str>
-		<str name="param22">from</str>
-		<str name="param23">to</str>
-		<str name="param24">cc</str>
-		<str name="param25">bcc</str>
-		<str name="param26">subject{gen,de,en,fr,it}</str>
-		<str name="param27">content_flag</str>
-		<str name="param28">content{gen,de,en,fr,it}</str>
-	</searchComponent>
+        <!-- Use this only if "components" is not specified to use the defaults -->
+        <!--
+            <arr name="first-components">
+            <str>queryModifier</str>
+            </arr>
+        -->
+        <arr name="components">
+            <str>queryModifier</str>
+            <str>query</str>
+            <!-- Uncomment for debugging purposes only -->
+            <!--
+                <str>debug</str>
+            -->
+        </arr>
+    </requestHandler>
 
-	<requestHandler name="/update" class="solr.XmlUpdateRequestHandler">
+    <searchComponent name="queryModifier" class="de.kippdata.cria.solrext.searchcomponents.FormalFieldQueryModifier">
+        <str name="param1">uuid</str>
+        <str name="param2">timestamp</str>
+        <str name="param3">account</str>
+        <str name="param4">full_name</str>
+        <str name="param5">id</str>
+        <str name="param6">color_label</str>
+        <str name="param7">attachment</str>
+        <str name="param8">received_date</str>
+        <str name="param9">sent_date</str>
+        <str name="param10">size</str>
+        <str name="param11">flag_answered</str>
+        <str name="param12">flag_deleted</str>
+        <str name="param13">flag_draft</str>
+        <str name="param14">flag_flagged</str>
+        <str name="param15">flag_recent</str>
+        <str name="param16">flag_seen</str>
+        <str name="param17">flag_user</str>
+        <str name="param18">flag_spam</str>
+        <str name="param19">flag_forwarded</str>
+        <str name="param20">flag_read_ack</str>
+        <str name="param21">user_flags</str>
+        <str name="param22">from</str>
+        <str name="param23">to</str>
+        <str name="param24">cc</str>
+        <str name="param25">bcc</str>
+        <str name="param26">subject{gen,de,en,fr,it}</str>
+        <str name="param27">content_flag</str>
+        <str name="param28">content{gen,de,en,fr,it}</str>
+    </searchComponent>
+
+    <requestHandler name="/update" class="solr.XmlUpdateRequestHandler">
         <lst name="defaults">
             <str name="update.chain">langid</str>
         </lst>
     </requestHandler>
     <updateRequestProcessorChain name="langid">
-        <processor
-            class="org.apache.solr.update.processor.TikaLanguageIdentifierUpdateProcessorFactory">
+        <processor class="org.apache.solr.update.processor.TikaLanguageIdentifierUpdateProcessorFactory">
             <bool name="langid">true</bool>
             <str name="langid.fl">subject,content</str>
             <str name="langid.whitelist">de,en,fr,it</str>
@@ -165,7 +168,7 @@
         <processor class="solr.LogUpdateProcessorFactory" />
         <processor class="solr.RunUpdateProcessorFactory" />
     </updateRequestProcessorChain>
-    
+
     <requestHandler name="/update/javabin" class="solr.BinaryUpdateRequestHandler" />
 
 </config>

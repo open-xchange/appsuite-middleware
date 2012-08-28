@@ -47,24 +47,31 @@
  *
  */
 
-package com.openexchange.index;
+package com.openexchange.index.attachments;
 
 
 /**
- * {@link IndexConstants}
+ * {@link ObjectIdTerm}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class IndexConstants {
+public class ObjectIdTerm extends SearchTerm<String> {
     
-    public static final String ACCOUNT = "account";
+    private final String pattern;
+    
+    
+    public ObjectIdTerm(String pattern) {
+        super();
+        this.pattern = pattern;
+    }
 
-    public static final String SERVICE = "service";
-    
-    public static final String IDS = "ids";
-    
-    public static final String MODULE = "module";
-    
-    public static final String DEFAULT_ATTACHMENT = "1";
+    @Override
+    public String getPattern() {
+        return pattern;
+    }
 
+    @Override
+    public void accept(SearchTermVisitor visitor) {
+        visitor.visit(this);
+    }
 }

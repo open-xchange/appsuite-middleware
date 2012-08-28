@@ -56,12 +56,9 @@ import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import org.apache.commons.lang.StringUtils;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.index.mail.MailIndexField;
-import com.openexchange.index.solr.internal.Services;
 import com.openexchange.index.solr.internal.SolrField;
 import com.openexchange.mail.dataobjects.MailMessage;
 
@@ -72,52 +69,47 @@ import com.openexchange.mail.dataobjects.MailMessage;
  */
 public enum SolrMailField implements SolrField {
 
-    UUID("UUID", MailIndexField.UUID, "param1"),
-    TIMESTAMP("TIMESTAMP", MailIndexField.TIMESTAMP, "param2"),
-    ACCOUNT("ACCOUNT", MailIndexField.ACCOUNT, "param3"),
-    FULL_NAME("FULL_NAME", MailIndexField.FULL_NAME, "param4"),
-    ID("ID", MailIndexField.ID, "param5"),
-    COLOR_LABEL("COLOR_LABEL", MailIndexField.COLOR_LABEL, "param6"),
-    ATTACHMENT("ATTACHMENT", MailIndexField.ATTACHMENT, "param7"),
-    RECEIVED_DATE("RECEIVED_DATE", MailIndexField.RECEIVED_DATE, "param8"),
-    SENT_DATE("SENT_DATE", MailIndexField.SENT_DATE, "param9"),
-    SIZE("SIZE", MailIndexField.SIZE, "param10"),
-    FLAG_ANSWERED("FLAG_ANSWERED", MailIndexField.FLAG_ANSWERED, "param11"),
-    FLAG_DELETED("FLAG_DELETED", MailIndexField.FLAG_DELETED, "param12"),
-    FLAG_DRAFT("FLAG_DRAFT", MailIndexField.FLAG_DRAFT, "param13"),
-    FLAG_FLAGGED("FLAG_FLAGGED", MailIndexField.FLAG_FLAGGED, "param14"),
-    FLAG_RECENT("FLAG_RECENT", MailIndexField.FLAG_RECENT, "param15"),
-    FLAG_SEEN("FLAG_SEEN", MailIndexField.FLAG_SEEN, "param16"),
-    FLAG_USER("FLAG_USER", MailIndexField.FLAG_USER, "param17"),
-    FLAG_SPAM("FLAG_SPAM", MailIndexField.FLAG_SPAM, "param18"),
-    FLAG_FORWARDED("FLAG_FORWARDED", MailIndexField.FLAG_FORWARDED, "param19"),
-    FLAG_READ_ACK("FLAG_READ_ACK", MailIndexField.FLAG_READ_ACK, "param20"),
-    USER_FLAGS("USER_FLAGS", MailIndexField.USER_FLAGS, "param21"),
-    FROM("FROM", MailIndexField.FROM, "param22"),
-    TO("TO", MailIndexField.TO, "param23"),
-    CC("CC", MailIndexField.CC, "param24"),
-    BCC("BCC", MailIndexField.BCC, "param25"),
-    SUBJECT("SUBJECT", MailIndexField.SUBJECT, "param26"),
-    CONTENT_FLAG("CONTENT_FLAG", MailIndexField.CONTENT_FLAG, "param27"),
-    CONTENT("CONTENT", MailIndexField.CONTENT, "param28");
+    UUID("uuid", MailIndexField.UUID, "param1"),
+    TIMESTAMP("timestamp", MailIndexField.TIMESTAMP, "param2"),
+    ACCOUNT("account", MailIndexField.ACCOUNT, "param3"),
+    FULL_NAME("full_name", MailIndexField.FULL_NAME, "param4"),
+    ID("id", MailIndexField.ID, "param5"),
+    COLOR_LABEL("color_label", MailIndexField.COLOR_LABEL, "param6"),
+    ATTACHMENT("attachment", MailIndexField.ATTACHMENT, "param7"),
+    RECEIVED_DATE("received_date", MailIndexField.RECEIVED_DATE, "param8"),
+    SENT_DATE("sent_date", MailIndexField.SENT_DATE, "param9"),
+    SIZE("size", MailIndexField.SIZE, "param10"),
+    FLAG_ANSWERED("flag_answered", MailIndexField.FLAG_ANSWERED, "param11"),
+    FLAG_DELETED("flag_deleted", MailIndexField.FLAG_DELETED, "param12"),
+    FLAG_DRAFT("flag_draft", MailIndexField.FLAG_DRAFT, "param13"),
+    FLAG_FLAGGED("flag_flagged", MailIndexField.FLAG_FLAGGED, "param14"),
+    FLAG_RECENT("flag_recent", MailIndexField.FLAG_RECENT, "param15"),
+    FLAG_SEEN("flag_seen", MailIndexField.FLAG_SEEN, "param16"),
+    FLAG_USER("flag_user", MailIndexField.FLAG_USER, "param17"),
+    FLAG_SPAM("flag_spam", MailIndexField.FLAG_SPAM, "param18"),
+    FLAG_FORWARDED("flag_forwarded", MailIndexField.FLAG_FORWARDED, "param19"),
+    FLAG_READ_ACK("flag_read_ack", MailIndexField.FLAG_READ_ACK, "param20"),
+    USER_FLAGS("user_flags", MailIndexField.USER_FLAGS, "param21"),
+    FROM("from", MailIndexField.FROM, "param22"),
+    TO("to", MailIndexField.TO, "param23"),
+    CC("cc", MailIndexField.CC, "param24"),
+    BCC("bcc", MailIndexField.BCC, "param25"),
+    SUBJECT("subject", MailIndexField.SUBJECT, "param26"),
+    CONTENT_FLAG("content_flag", MailIndexField.CONTENT_FLAG, "param27"),
+    CONTENT("content", MailIndexField.CONTENT, "param28");
 
-
-    private static final String PROP_FILE = "solr_mailfields.properties";
     
     private static final Map<MailIndexField, SolrMailField> fieldMapping = new EnumMap<MailIndexField, SolrMailField>(MailIndexField.class);
 
     private static final Set<MailIndexField> indexedFields;
 
-    private static Properties properties = null;
-
-    private final String propertyName;
+    private final String solrName;
 
     private final MailIndexField indexField;
     
     private final String customParameter;
 
     static {
-        checkProperties();
         final Set<MailIndexField> set = EnumSet.noneOf(MailIndexField.class);
         for (final SolrMailField field : values()) {
             fieldMapping.put(field.indexField, field);
@@ -129,19 +121,15 @@ public enum SolrMailField implements SolrField {
         indexedFields = Collections.unmodifiableSet(set);
     }
 
-    private SolrMailField(final String propertyName, final MailIndexField indexField, final String customParameter) {
-        this.propertyName = propertyName;
+    private SolrMailField(final String solrName, final MailIndexField indexField, final String customParameter) {
+        this.solrName = solrName;
         this.indexField = indexField;
         this.customParameter = customParameter;
     }
 
     @Override
     public String solrName() {
-        final String value = properties.getProperty(propertyName);
-        if (StringUtils.isEmpty(value)) {
-            return null;
-        }
-        return value;
+        return solrName;
     }
     
     @Override
@@ -155,7 +143,7 @@ public enum SolrMailField implements SolrField {
     }
     
     public boolean isIndexed() {
-        return !StringUtils.isEmpty(properties.getProperty(propertyName));
+        return !StringUtils.isEmpty(solrName);
     }
 
     /**
@@ -169,7 +157,7 @@ public enum SolrMailField implements SolrField {
             return null;
         }
         for (final SolrMailField field : values()) {
-            if (solrName.equals(properties.getProperty(field.propertyName))) {
+            if (solrName.equals(field.solrName)) {
                 return field.indexField;
             }
         }
@@ -254,13 +242,6 @@ public enum SolrMailField implements SolrField {
 
             default:
                 return null;
-        }
-    }
-
-    private static synchronized void checkProperties() {
-        if (properties == null) {
-            final ConfigurationService config = Services.getService(ConfigurationService.class);
-            properties = config.getFile(PROP_FILE);
         }
     }
 }

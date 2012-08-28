@@ -50,6 +50,7 @@
 package com.openexchange.index.mail;
 
 import com.openexchange.mail.MailPath;
+import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
  * {@link MailUUID} - Represents a mail's UUID in index storage.
@@ -59,6 +60,7 @@ import com.openexchange.mail.MailPath;
  */
 public class MailUUID {
 
+    // FIXME: Modify like AttachmentUUID
     private final String mailUUID;
 
     /**
@@ -85,6 +87,14 @@ public class MailUUID {
     @Override
     public String toString() {
         return mailUUID;
+    }
+    
+    public static MailUUID newUUID(int contextId, int userId, int accountId, String fullName, String mailId) {
+        return new MailUUID(contextId, userId, accountId, fullName, mailId);
+    }
+    
+    public static MailUUID newUUID(int contextId, int userId, MailMessage message) {
+        return new MailUUID(contextId, userId, message.getAccountId(), message.getFolder(), message.getMailId());
     }
 
 }

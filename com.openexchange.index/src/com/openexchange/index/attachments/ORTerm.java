@@ -47,24 +47,32 @@
  *
  */
 
-package com.openexchange.index;
+package com.openexchange.index.attachments;
+
 
 
 /**
- * {@link IndexConstants}
+ * {@link ORTerm}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class IndexConstants {
+public class ORTerm extends SearchTerm<SearchTerm<?>[]> {
     
-    public static final String ACCOUNT = "account";
+    private final SearchTerm<?>[] terms;
+    
 
-    public static final String SERVICE = "service";
-    
-    public static final String IDS = "ids";
-    
-    public static final String MODULE = "module";
-    
-    public static final String DEFAULT_ATTACHMENT = "1";
+    public ORTerm(SearchTerm<?>[] terms) {
+        super();
+        this.terms = terms;
+    }
 
+    @Override
+    public SearchTerm<?>[] getPattern() {        
+        return terms;
+    }
+
+    @Override
+    public void accept(SearchTermVisitor visitor) {
+        visitor.visit(this);
+    }
 }

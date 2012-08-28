@@ -65,6 +65,7 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.smal.impl.processor.DefaultProcessorStrategy;
+import com.openexchange.mail.smal.impl.processor.DoNothingProcessor;
 import com.openexchange.mail.smal.impl.processor.MailFolderInfo;
 import com.openexchange.mail.smal.impl.processor.Processor;
 import com.openexchange.mail.smal.impl.processor.ProcessorStrategy;
@@ -152,7 +153,9 @@ public abstract class AbstractSMALStorage {
         this.accountId = accountId;
         this.delegateMailAccess = delegateMailAccess;
         processorStrategy = DefaultProcessorStrategy.getInstance();
-        processor = new Processor(processorStrategy);
+        // FIXME: revert
+        processor = new DoNothingProcessor(processorStrategy);
+//        processor = new Processor(processorStrategy);
     }
 
     /**

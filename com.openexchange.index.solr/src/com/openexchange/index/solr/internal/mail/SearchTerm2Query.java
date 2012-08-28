@@ -62,6 +62,7 @@ import com.openexchange.mail.search.ComparablePattern;
 import com.openexchange.mail.search.FlagTerm;
 import com.openexchange.mail.search.FromTerm;
 import com.openexchange.mail.search.HeaderTerm;
+import com.openexchange.mail.search.IdTerm;
 import com.openexchange.mail.search.NOTTerm;
 import com.openexchange.mail.search.ORTerm;
 import com.openexchange.mail.search.ReceivedDateTerm;
@@ -184,6 +185,15 @@ public final class SearchTerm2Query {
         @Override
         public void visit(final HeaderTerm term) {
             throw new IllegalStateException("Unsupported search term: " + HeaderTerm.class.getName());
+        }
+        
+        @Override
+        public void visit(IdTerm term) {
+            if (SolrMailField.ID.isIndexed()) {
+                final List<String> fields = Collections.singletonList(SolrMailField.ID.parameterName());
+                stringPattern(fields, term.getPattern());
+            }
+            
         }
 
         @Override

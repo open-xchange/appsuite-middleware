@@ -112,8 +112,15 @@ public final class SolrInputDocumentHelper {
         if (fullNameField != null && document.containsKey(fullNameField)) {
             mail.setFolder(document.getFieldValue(fullNameField).toString());
         }
-        if (accountField != null && document.containsKey(accountField)) {
-            mail.setAccountId(MailFillers.<Integer> getFieldValue(accountField, document).intValue());
+        if (accountField != null && document.containsKey(accountField)) {           
+            try {
+                String fieldValue = (String) MailFillers.getFieldValue(accountField, document);
+                mail.setAccountId(Integer.parseInt(fieldValue));
+            } catch (NumberFormatException e) {
+                // ignore
+            } catch (ClassCastException e) {
+                // ignore
+            }
         }
         /*
          * Iterate mail fillers
@@ -179,7 +186,7 @@ public final class SolrInputDocumentHelper {
          */
         setFieldInDocument(inputDocument, SolrMailField.TIMESTAMP, stamp);
         setFieldInDocument(inputDocument, SolrMailField.UUID, uuid);
-        setFieldInDocument(inputDocument, SolrMailField.ACCOUNT, accountId);
+        setFieldInDocument(inputDocument, SolrMailField.ACCOUNT, String.valueOf(accountId));
 
         /*
          * Envelope data

@@ -47,24 +47,31 @@
  *
  */
 
-package com.openexchange.index;
+package com.openexchange.service.indexing.hazelcast;
+
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.IQueue;
+import com.hazelcast.core.ISet;
+import com.hazelcast.core.Member;
+import com.openexchange.service.indexing.impl.Services;
 
 
 /**
- * {@link IndexConstants}
+ * {@link HazelcastIndexingService}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class IndexConstants {
+public class HazelcastIndexingService {
     
-    public static final String ACCOUNT = "account";
+    private static final String QUEUE_NAME = "indexingJobQueue";
+    
+    private static final String NODE_LIST_NAME = "indexingNodes";
+    
+    public void doIt() {
+        HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
+        ISet<Member> indexNodes = hazelcast.getSet(NODE_LIST_NAME);
 
-    public static final String SERVICE = "service";
-    
-    public static final String IDS = "ids";
-    
-    public static final String MODULE = "module";
-    
-    public static final String DEFAULT_ATTACHMENT = "1";
+        IQueue<Object> queue = hazelcast.getQueue(QUEUE_NAME);
+    }
 
 }

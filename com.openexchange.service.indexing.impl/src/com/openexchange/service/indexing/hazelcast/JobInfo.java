@@ -47,24 +47,106 @@
  *
  */
 
-package com.openexchange.index;
+package com.openexchange.service.indexing.hazelcast;
+
+import java.io.Serializable;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
- * {@link IndexConstants}
+ * {@link JobInfo}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class IndexConstants {
+public class JobInfo implements Serializable {
     
-    public static final String ACCOUNT = "account";
-
-    public static final String SERVICE = "service";
+    private static final long serialVersionUID = 3704945446543513829L;
     
-    public static final String IDS = "ids";
+    private String jobClass;
     
-    public static final String MODULE = "module";
+    private int contextId;
     
-    public static final String DEFAULT_ATTACHMENT = "1";
+    private int userId;
+    
+    private int module;
+    
+    private Map<String, Object> properties;    
+    
+    
+    private JobInfo(String jobClass, int contextId, int userId, int module, Map<String, Object> properties) {
+        super();
+        this.jobClass = jobClass;
+        this.contextId = contextId;
+        this.userId = userId;
+        this.module = module;
+        this.properties = properties;            
+    }
+    
+    public String getJobClass() {
+        return jobClass;
+    }
+    
+    public int getContextId() {
+        return contextId;
+    }
+    
+    public int getUserId() {
+        return userId;
+    }
+    
+    public int getModule() {
+        return module;
+    }
+    
+    public Map<String, Object> getProperties() {
+        return Collections.unmodifiableMap(properties);
+    }
+    
+    
+    public static final class Builder {
+        
+        private String jobClass;
+        
+        private int contextId;
+        
+        private int userId;
+        
+        private int module;
+        
+        private Map<String, Object> properties = new HashMap<String, Object>();
+        
+        
+        public Builder(String jobClass) {
+            super();
+            this.jobClass = jobClass;
+        }
+        
+        public Builder setContextId(int contextId) {
+            this.contextId = contextId;
+            return this;
+        }
+        
+        public Builder setUserId(int userId) {
+            this.userId = userId;
+            return this;
+        }
+        
+        public Builder setModule(int module) {
+            this.module = module;
+            return this;
+        }
+        
+        public Builder addProperty(String key, Object value) {
+            properties.put(key, value);
+            return this;
+        }
+        
+        public JobInfo build() {
+            JobInfo jobInfo = new JobInfo(jobClass, contextId, userId, module, properties);
+            return jobInfo;
+        }
+    }
 
 }

@@ -49,82 +49,90 @@
 
 package com.openexchange.index.solr.internal.attachments;
 
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.EnumSet;
-import java.util.Map;
-import java.util.Set;
-import com.openexchange.index.attachments.AttachmentIndexField;
-import com.openexchange.index.solr.internal.SolrField;
+import com.openexchange.index.attachments.ANDTerm;
+import com.openexchange.index.attachments.ORTerm;
+import com.openexchange.index.attachments.ObjectIdTerm;
+import com.openexchange.index.attachments.SearchTerm;
+import com.openexchange.index.attachments.SearchTermVisitor;
 
 
 /**
- * {@link SolrAttachmentField}
+ * {@link SolrAttachmentSearchTermVisitor}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public enum SolrAttachmentField implements SolrField {
+public class SolrAttachmentSearchTermVisitor implements SearchTermVisitor {
     
-    UUID("uuid", "param1", null),
-    MODULE("module", "param2", AttachmentIndexField.MODULE),
-    SERVICE("service", "param3", AttachmentIndexField.SERVICE),
-    ACCOUNT("account", "param4", AttachmentIndexField.ACCOUNT),
-    FOLDER("folder", "param5", AttachmentIndexField.FOLDER),
-    OBJECT_ID("id", "param6", AttachmentIndexField.OBJECT_ID),    
-    FILE_NAME("file_name", "param7", AttachmentIndexField.FILE_NAME),
-    FILE_SIZE("file_size", "param8", AttachmentIndexField.FILE_SIZE),
-    MIME_TYPE("mime_type", "param9", AttachmentIndexField.MIME_TYPE),
-    MD5_SUM("md5_sum", "param10", AttachmentIndexField.MD5_SUM),
-    CONTENT("content", "param11", AttachmentIndexField.CONTENT),
-    ATTACHMENT_ID("attachment_id", "param12", AttachmentIndexField.ATTACHMENT_ID);
+    private StringBuilder queryBuilder;
     
-    
-    private static final Map<AttachmentIndexField, SolrAttachmentField> fieldMapping = new EnumMap<AttachmentIndexField, SolrAttachmentField>(AttachmentIndexField.class);
-    
-    private static final EnumSet<AttachmentIndexField> indexedFields = EnumSet.noneOf(AttachmentIndexField.class);
-    
-    private final String solrName;
-    
-    private final String paramName;   
-    
-    private final AttachmentIndexField indexField;
-    
-    static {
-        for (SolrAttachmentField solrField : values()) {
-            AttachmentIndexField field = solrField.indexField();
-            if (field != null) {
-                fieldMapping.put(field, solrField);
-                indexedFields.add(field);
-            }            
-        }
+
+    public SolrAttachmentSearchTermVisitor() {
+        super();
+        queryBuilder = new StringBuilder();
     }
 
-    private SolrAttachmentField(String solrName, String paramName, AttachmentIndexField indexField) {
-        this.solrName = solrName;
-        this.paramName = paramName;
-        this.indexField = indexField;
+    @Override
+    public void visit(ORTerm term) {
+        SearchTerm<?>[] searchTerms = term.getPattern();
+        if (searchTerms == null || searchTerms.length == 0) {
+            return;
+        }
+        
+        SearchTerm<?> firstTerm = searchTerms[0];
+        if (searchTerms.length == 1) {
+            queryBuilder.append(toQuery(firstTerm));
+            return;
+        }        
+        
+        queryBuilder.append(" (");
+        queryBuilder.append(toQuery(firstTerm));
+        for (int i = 1; i < searchTerms.length; i++) {
+            queryBuilder.append(" OR ");
+            queryBuilder.append(toQuery(searchTerms[i]));            
+        }
+        queryBuilder.append(")");
     }
     
     @Override
-    public String solrName() {
-        return solrName;
+    public void visit(ANDTerm term) {        
+        SearchTerm<?>[] searchTerms = term.getPattern();
+        if (searchTerms == null || searchTerms.length == 0) {
+            return;
+        }
+        
+        SearchTerm<?> firstTerm = searchTerms[0];
+        if (searchTerms.length == 1) {
+            queryBuilder.append(toQuery(firstTerm));
+            return;
+        }        
+        
+        queryBuilder.append(" (");
+        queryBuilder.append(toQuery(firstTerm));
+        for (int i = 1; i < searchTerms.length; i++) {
+            queryBuilder.append(" AND ");
+            queryBuilder.append(toQuery(searchTerms[i]));            
+        }
+        queryBuilder.append(")");
     }
     
     @Override
-    public String parameterName() {
-        return paramName;
+    public void visit(ObjectIdTerm objectIdTerm) {
+        queryBuilder.append(" (")
+            .append(SolrAttachmentField.OBJECT_ID.parameterName())
+            .append(":")
+            .append(objectIdTerm.getPattern())
+            .append(")");
     }
     
     @Override
-    public AttachmentIndexField indexField() {
-        return indexField;
+    public String toString() {
+        return queryBuilder.toString().trim();
     }
     
-    public static SolrAttachmentField solrFieldFor(AttachmentIndexField indexField) {
-        return fieldMapping.get(indexField);
-    }
-    
-    public static Set<AttachmentIndexField> getIndexedFields() {
-        return Collections.unmodifiableSet(indexedFields);
+    public static String toQuery(SearchTerm<?> searchTerm) {
+        SolrAttachmentSearchTermVisitor visitor = new SolrAttachmentSearchTermVisitor();
+        searchTerm.accept(visitor);
+        
+        return visitor.toString();
     }
 }

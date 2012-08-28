@@ -47,24 +47,39 @@
  *
  */
 
-package com.openexchange.index;
+package com.openexchange.index.solr;
+
+import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+import com.openexchange.index.attachments.ANDTerm;
+import com.openexchange.index.attachments.ORTerm;
+import com.openexchange.index.attachments.ObjectIdTerm;
+import com.openexchange.index.attachments.SearchTerm;
+import com.openexchange.index.solr.internal.attachments.SolrAttachmentField;
+import com.openexchange.index.solr.internal.attachments.SolrAttachmentSearchTermVisitor;
 
 
 /**
- * {@link IndexConstants}
+ * {@link SolrAttachmentSearchTermVisitorTest}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class IndexConstants {
+public class SolrAttachmentSearchTermVisitorTest {
     
-    public static final String ACCOUNT = "account";
-
-    public static final String SERVICE = "service";
-    
-    public static final String IDS = "ids";
-    
-    public static final String MODULE = "module";
-    
-    public static final String DEFAULT_ATTACHMENT = "1";
+    @Test
+    public void testVisitor() {
+        ObjectIdTerm t1 = new ObjectIdTerm("1");
+        ObjectIdTerm t2 = new ObjectIdTerm("2");
+        ObjectIdTerm t3 = new ObjectIdTerm("3");
+        ObjectIdTerm t4 = new ObjectIdTerm("4");
+        
+        ORTerm orTerm1 = new ORTerm(new SearchTerm<?>[] { t1, t2 });
+        ORTerm orTerm2 = new ORTerm(new SearchTerm<?>[] { t3, t4 });
+        ANDTerm andTerm = new ANDTerm(new SearchTerm<?>[] { orTerm1, orTerm2 });
+        String query = SolrAttachmentSearchTermVisitor.toQuery(andTerm);
+        String field = SolrAttachmentField.OBJECT_ID.parameterName();
+        String expected = "(((" + field + ":1) OR (" + field + ":2)) AND ((" + field + ":3) OR (" + field + ":4)))";
+        assertEquals(expected, query);
+    }
 
 }

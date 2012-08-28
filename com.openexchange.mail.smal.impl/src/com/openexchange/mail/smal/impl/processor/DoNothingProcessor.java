@@ -47,24 +47,45 @@
  *
  */
 
-package com.openexchange.index;
+package com.openexchange.mail.smal.impl.processor;
+
+import java.util.Map;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.session.Session;
 
 
 /**
- * {@link IndexConstants}
+ * {@link DoNothingProcessor}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class IndexConstants {
-    
-    public static final String ACCOUNT = "account";
+public class DoNothingProcessor extends Processor {
 
-    public static final String SERVICE = "service";
+    /**
+     * Initializes a new {@link DoNothingProcessor}.
+     * @param strategy
+     */
+    public DoNothingProcessor(ProcessorStrategy strategy) {
+        super(strategy);
+    }
     
-    public static final String IDS = "ids";
+    @Override
+    public void processFolderAsync(MailFolder folder, int accountId, Session session, Map<String, Object> params) throws OXException {
+
+    }
     
-    public static final String MODULE = "module";
+    @Override
+    public void processFolderAsync(MailFolder mailFolder, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, Map<String, Object> params) throws OXException {
+
+    }
     
-    public static final String DEFAULT_ATTACHMENT = "1";
+    @Override
+    public void processFolderAsync(MailFolderInfo folderInfo, int accountId, Session session, Map<String, Object> params) throws OXException {
+
+    }
 
 }

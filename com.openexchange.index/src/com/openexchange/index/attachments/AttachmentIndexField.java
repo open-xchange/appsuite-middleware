@@ -63,7 +63,7 @@ public enum AttachmentIndexField implements IndexField {
     SERVICE,
     ACCOUNT,
     FOLDER,
-    ID,
+    OBJECT_ID,
     FILE_NAME,
     FILE_SIZE,
     MIME_TYPE,

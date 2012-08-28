@@ -114,7 +114,7 @@ public class SolrAttachmentDocumentConverter implements SolrResultConverter<Atta
             attachment.setMd5Sum((String) document.get(SolrAttachmentField.MD5_SUM.solrName()));
         }
         if (document.containsKey(SolrAttachmentField.ATTACHMENT_ID.solrName())) {
-            attachment.setAttachmentId(((Integer) document.get(SolrAttachmentField.ATTACHMENT_ID.solrName())).intValue());
+            attachment.setAttachmentId((String) document.get(SolrAttachmentField.ATTACHMENT_ID.solrName()));
         }
         
         return new StandardIndexDocument<Attachment>(attachment);
@@ -128,7 +128,7 @@ public class SolrAttachmentDocumentConverter implements SolrResultConverter<Atta
         String account = attachment.getAccount();
         String folder = attachment.getFolder();
         String objectId = attachment.getObjectId();
-        int attachmentId = attachment.getAttachmentId();
+        String attachmentId = attachment.getAttachmentId();
         String fileName = attachment.getFileName();
         long fileSize = attachment.getFileSize();
         String mimeType = attachment.getMimeType();
@@ -150,7 +150,7 @@ public class SolrAttachmentDocumentConverter implements SolrResultConverter<Atta
         inputDocument.setField(SolrAttachmentField.FOLDER.solrName(), folder);
         inputDocument.setField(SolrAttachmentField.OBJECT_ID.solrName(), objectId);
         inputDocument.setField(SolrAttachmentField.FILE_SIZE.solrName(), new Long(fileSize));    
-        inputDocument.setField(SolrAttachmentField.ATTACHMENT_ID.solrName(), new Integer(attachmentId));    
+        inputDocument.setField(SolrAttachmentField.ATTACHMENT_ID.solrName(), attachmentId);    
         
         setFieldIfNotNull(inputDocument, SolrAttachmentField.SERVICE.solrName(), service);
         setFieldIfNotNull(inputDocument, SolrAttachmentField.ACCOUNT.solrName(), account);

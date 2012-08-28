@@ -129,8 +129,8 @@ public class SmalActivator extends HousekeepingActivator {
         {
             final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
             serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
-            final IndexEventHandler eventHandler = this.eventHandler = new IndexEventHandler();
-            registerService(EventHandler.class, eventHandler, serviceProperties);
+//            final IndexEventHandler eventHandler = this.eventHandler = new IndexEventHandler();
+//            registerService(EventHandler.class, eventHandler, serviceProperties);
         }
         /*
          * Register update task, create table job and delete listener

@@ -60,7 +60,7 @@ public class AttachmentUUID {
     private final String uuid;
     
 
-    private AttachmentUUID(int module, String service, String account, String folder, String id, int attachmentNum) {
+    private AttachmentUUID(int module, String service, String account, String folder, String objectId, String attachmentId) {
         super();
         StringBuilder tmp = new StringBuilder(64);
         tmp.append(module).append('/');
@@ -70,19 +70,19 @@ public class AttachmentUUID {
         if (account != null) {
             tmp.append(account).append('/');
         }
-        tmp.append(folder).append('/').append(id).append('/').append(attachmentNum);
+        tmp.append(folder).append('/').append(objectId).append('/').append(attachmentId);
         uuid = tmp.toString();
     }
 
-    public static AttachmentUUID newUUID(int module, String service, String account, String folder, String objectId, int attachmentId) {
+    public static AttachmentUUID newUUID(int module, String service, String account, String folder, String objectId, String attachmentId) {
         return new AttachmentUUID(module, service, account, folder, objectId, attachmentId);
     }
 
-    public static AttachmentUUID newUUID(int module, String account, String folder, String objectId, int attachmentId) {
+    public static AttachmentUUID newUUID(int module, String account, String folder, String objectId, String attachmentId) {
         return new AttachmentUUID(module, null, account, folder, objectId, attachmentId);
     }
 
-    public static AttachmentUUID newUUID(int module, String folder, String objectId, int attachmentId) {
+    public static AttachmentUUID newUUID(int module, String folder, String objectId, String attachmentId) {
         return new AttachmentUUID(module, null, null, folder, objectId, attachmentId);
     }
     

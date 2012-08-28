@@ -50,6 +50,8 @@
 package com.openexchange.index.attachments;
 
 import java.io.InputStream;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * {@link Attachment}
@@ -57,6 +59,12 @@ import java.io.InputStream;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class Attachment {
+
+    private static final Set<String> ALLOWED_TYPES = new HashSet<String>();
+    
+    static {
+        ALLOWED_TYPES.add("application/pdf");
+    }
 
     private int module;
 
@@ -68,7 +76,7 @@ public class Attachment {
 
     private String objectId;
 
-    private int attachmentId;
+    private String attachmentId;
 
     private String fileName;
 
@@ -179,7 +187,7 @@ public class Attachment {
      * 
      * @return The attachmentId
      */
-    public int getAttachmentId() {
+    public String getAttachmentId() {
         return attachmentId;
     }
 
@@ -188,7 +196,7 @@ public class Attachment {
      * 
      * @param attachmentId The attachmentId to set
      */
-    public void setAttachmentId(int attachmentId) {
+    public void setAttachmentId(String attachmentId) {
         this.attachmentId = attachmentId;
     }
 
@@ -281,5 +289,8 @@ public class Attachment {
     public void setContent(InputStream file) {
         this.content = file;
     }
-
+    
+    public static Set<String> allowedMimeTypes() {
+        return ALLOWED_TYPES;
+    }
 }

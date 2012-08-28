@@ -47,24 +47,20 @@
  *
  */
 
-package com.openexchange.index;
+package com.openexchange.index.attachments;
 
 
 /**
- * {@link IndexConstants}
+ * {@link SearchTermVisitor}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class IndexConstants {
+public interface SearchTermVisitor {
     
-    public static final String ACCOUNT = "account";
+    void visit(ORTerm term);
+    
+    void visit(ANDTerm term);
 
-    public static final String SERVICE = "service";
-    
-    public static final String IDS = "ids";
-    
-    public static final String MODULE = "module";
-    
-    public static final String DEFAULT_ATTACHMENT = "1";
+    void visit(ObjectIdTerm objectIdTerm);
 
 }

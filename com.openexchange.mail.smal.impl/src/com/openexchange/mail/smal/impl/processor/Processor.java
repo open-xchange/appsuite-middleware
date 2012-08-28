@@ -93,7 +93,7 @@ import com.openexchange.threadpool.behavior.DiscardBehavior;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class Processor {
+public class Processor {
 
     /**
      * The logger constant.
