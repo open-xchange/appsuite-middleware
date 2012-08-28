@@ -1,9 +1,9 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Open-Xchange Messaging Generic Bundle
-Bundle-SymbolicName: com.openexchange.messaging.generic
+Bundle-Name: Open-Xchange Snippted RDB Bundle
+Bundle-SymbolicName: com.openexchange.snippet.rdb
 Bundle-Version: 6.21.0
-Bundle-Activator: com.openexchange.messaging.generic.osgi.MessagingGenericActivator
+Bundle-Activator: com.openexchange.snippet.rdb.osgi.RdbSnippetActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.cache,
@@ -21,20 +21,12 @@ Import-Package: com.openexchange.cache,
  com.openexchange.groupware.delete,
  com.openexchange.groupware.update,
  com.openexchange.log,
- com.openexchange.mail,
- com.openexchange.mail.mime,
- com.openexchange.mail.mime.datasource,
- com.openexchange.mail.mime.utils,
- com.openexchange.mail.text,
- com.openexchange.messaging,
- com.openexchange.messaging.registry,
  com.openexchange.osgi,
  com.openexchange.secret,
  com.openexchange.secret.osgi.tools,
  com.openexchange.secret.recovery,
  com.openexchange.server,
  com.openexchange.session,
- com.openexchange.snippet,
  com.openexchange.tools.session,
  com.openexchange.tools.sql,
  com.openexchange.tools.stream,
@@ -42,11 +34,6 @@ Import-Package: com.openexchange.cache,
  gnu.trove.list,
  gnu.trove.list.array,
  gnu.trove.procedure,
- javax.activation,
- javax.mail,
- javax.mail.internet,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.util.tracker
-Export-Package: com.openexchange.messaging.generic,
- com.openexchange.messaging.generic.internet
