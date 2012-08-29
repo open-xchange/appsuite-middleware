@@ -161,6 +161,7 @@ public abstract class SnippetAction implements AJAXActionService {
      * @throws OXException If performing request fails for any reason
      * @throws JSONException If a JSON error occurs
      */
+    @SuppressWarnings("unused")
     protected AJAXRequestResult performREST(final SnippetRequest snippetRequest, final Method method) throws OXException, JSONException {
         throw AjaxExceptionCodes.BAD_REQUEST.create();
     }
