@@ -56,19 +56,21 @@ import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.snippet.SnippetService;
+import com.openexchange.snippet.mime.MimeSnippetService;
 import com.openexchange.snippet.mime.Services;
 
 /**
- * {@link RdbSnippetActivator} - The activator for RDB Snippet bundle.
+ * {@link MimeSnippetActivator} - The activator for MIME Snippet bundle.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class RdbSnippetActivator extends HousekeepingActivator {
+public class MimeSnippetActivator extends HousekeepingActivator {
 
     /**
-     * Initializes a new {@link RdbSnippetActivator}.
+     * Initializes a new {@link MimeSnippetActivator}.
      */
-    public RdbSnippetActivator() {
+    public MimeSnippetActivator() {
         super();
     }
 
@@ -80,14 +82,14 @@ public class RdbSnippetActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        final Log logger = com.openexchange.log.Log.loggerFor(RdbSnippetActivator.class);
+        final Log logger = com.openexchange.log.Log.loggerFor(MimeSnippetActivator.class);
         logger.info("Starting bundle: com.openexchange.snippet.mime");
         try {
             Services.setServiceLookup(this);
             /*
              * Register
              */
-            
+            registerService(SnippetService.class, new MimeSnippetService());
         } catch (final Exception e) {
             logger.error("Error starting bundle: com.openexchange.snippet.mime", e);
             throw e;
