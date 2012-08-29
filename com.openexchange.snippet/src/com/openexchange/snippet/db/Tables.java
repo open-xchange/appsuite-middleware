@@ -94,7 +94,7 @@ public final class Tables {
                " PRIMARY KEY (cid, user, id)," + 
                " INDEX `indexUser` (cid, user)," + 
                " INDEX `indexShared` (cid, shared)," + 
-               " INDEX `indexRefType` (cid, user, id, refType)," + 
+               " INDEX `indexRefType` (cid, user, id, refType)" + 
                ") ENGINE=InnoDB";
     }
 

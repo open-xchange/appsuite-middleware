@@ -40,3 +40,4 @@ Import-Package: com.openexchange.ajax,
  org.json,
  org.osgi.framework,
  org.osgi.service.http
+Bundle-Activator: com.openexchange.snippet.json.osgi.SnippetJsonActivator

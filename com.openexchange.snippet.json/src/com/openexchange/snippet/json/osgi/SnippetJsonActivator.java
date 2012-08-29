@@ -47,66 +47,42 @@
  *
  */
 
-package com.openexchange.snippet.json;
+package com.openexchange.snippet.json.osgi;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.documentation.annotations.Module;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.snippet.json.action.Method;
-import com.openexchange.snippet.json.action.SnippetAction;
+import org.apache.commons.logging.Log;
+import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.snippet.SnippetService;
+import com.openexchange.snippet.json.SnippetActionFactory;
+import com.openexchange.snippet.json.converter.SnippetJSONResultConverter;
 
 /**
- * {@link SnippetActionFactory}
+ * {@link SnippetJsonActivator} - Activator for the snippet's JSON interface.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Module(
-    name = "snippet",
-    description = "Provides access to snippets associated with the current user and context. A REST-like access is provided, too (no <tt>action</tt> URL parameter)"
-)
-public class SnippetActionFactory implements AJAXActionServiceFactory {
+public class SnippetJsonActivator extends AJAXModuleActivator {
 
-    private final Map<String, SnippetAction> actions;
-
-    /**
-     * Initializes a new {@link SnippetActionFactory}.
-     * 
-     * @param services The service look-up
-     */
-    public SnippetActionFactory(final ServiceLookup services) {
+    public SnippetJsonActivator() {
         super();
-        actions = new ConcurrentHashMap<String, SnippetAction>(10);
-        addJSlobAction(new com.openexchange.snippet.json.action.AllAction(services, actions));
-        addJSlobAction(new com.openexchange.snippet.json.action.GetAction(services, actions));
-        addJSlobAction(new com.openexchange.snippet.json.action.ListAction(services, actions));
-        addJSlobAction(new com.openexchange.snippet.json.action.DeleteAction(services, actions));
-        addJSlobAction(new com.openexchange.snippet.json.action.NewAction(services, actions));
-    }
-
-    private void addJSlobAction(final SnippetAction snippetAction) {
-        final List<Method> restMethods = snippetAction.getRESTMethods();
-        if (null != restMethods && !restMethods.isEmpty()) {
-            for (final Method method : restMethods) {
-                actions.put(method.toString(), snippetAction);
-            }
-        }
-        actions.put(snippetAction.getAction(), snippetAction);
     }
 
     @Override
-    public AJAXActionService createActionService(final String action) throws OXException {
-        return actions.get(action);
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { SnippetService.class };
     }
 
     @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
+    protected void startBundle() throws Exception {
+        final Log log = com.openexchange.log.Log.loggerFor(SnippetJsonActivator.class);
+        registerModule(new SnippetActionFactory(this), "snippet");
+        registerService(ResultConverter.class, new SnippetJSONResultConverter());
+        log.info("Bundle successfully started: com.openexchange.snippet.json");
     }
 
+    @Override
+    protected void stopBundle() throws Exception {
+        super.stopBundle();
+        com.openexchange.log.Log.loggerFor(SnippetJsonActivator.class).info("Bundle stopped: com.openexchange.snippet.json");
+    }
 }

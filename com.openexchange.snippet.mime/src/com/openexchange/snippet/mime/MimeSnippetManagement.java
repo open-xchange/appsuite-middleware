@@ -61,9 +61,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -337,6 +339,8 @@ public final class MimeSnippetManagement implements SnippetManagement {
         }
     }
 
+    private static final Set<String> IGNORABLES = new HashSet<String>(Arrays.asList(Snippet.PROP_MISC));
+
     @Override
     public String createSnippet(final Snippet snippet) throws OXException {
         final DatabaseService databaseService = getDatabaseService();
@@ -348,7 +352,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
             // Set headers
             for (final Map.Entry<String, Object> entry : snippet.getProperties().entrySet()) {
                 final String name = entry.getKey();
-                if (!Snippet.PROP_MISC.equals(name)) {
+                if (!IGNORABLES.contains(name)) {
                     mimeMessage.setHeader(name, entry.getValue().toString());
                 }
             }

@@ -105,7 +105,7 @@ public class SnippetJSONResultConverter implements ResultConverter {
                 return;
             }
             /*
-             * Collection of JSlobs
+             * Collection of snippets
              */
             @SuppressWarnings("unchecked") final Collection<Snippet> snippets = (Collection<Snippet>) resultObject;
             final JSONArray jArray = new JSONArray();
@@ -120,17 +120,17 @@ public class SnippetJSONResultConverter implements ResultConverter {
 
     private JSONObject convertSnippet(final Snippet snippet) throws JSONException {
         final JSONObject json = new JSONObject();
-        final int accountId = snippet.getAccountId();
-        if (accountId >= 0) {
-            json.put(Property.ACCOUNT_ID.getPropName(), accountId);
+        int itg = snippet.getAccountId();
+        if (itg >= 0) {
+            json.put(Property.ACCOUNT_ID.getPropName(), itg);
         }
         String tmp = snippet.getContent();
         if (null != tmp) {
             json.put(Property.CONTENT.getPropName(), tmp);
         }
-        final int createdBy = snippet.getCreatedBy();
-        if (createdBy >= 0) {
-            json.put(Property.CREATED_BY.getPropName(), createdBy);
+        itg = snippet.getCreatedBy();
+        if (itg >= 0) {
+            json.put(Property.CREATED_BY.getPropName(), itg);
         }
         tmp = snippet.getDisplayName();
         if (null != tmp) {
@@ -159,26 +159,26 @@ public class SnippetJSONResultConverter implements ResultConverter {
         }
         final List<Attachment> attachments = snippet.getAttachments();
         if (null != attachments && !attachments.isEmpty()) {
-            final JSONArray ja = new JSONArray();
+            final JSONArray jArray = new JSONArray();
             for (final Attachment attachment : attachments) {
-                final JSONObject jo = new JSONObject();
+                final JSONObject jsonAttachment = new JSONObject();
                 tmp = attachment.getContentDisposition();
                 if (null != tmp) {
-                    jo.put("content-disposition", tmp);
+                    jsonAttachment.put("content-disposition", tmp);
                 }
                 tmp = attachment.getContentType();
                 if (null != tmp) {
-                    jo.put("content-type", tmp);
+                    jsonAttachment.put("content-type", tmp);
                 }
                 tmp = attachment.getId();
                 if (null != tmp) {
-                    jo.put("id", tmp);
+                    jsonAttachment.put("id", tmp);
                 }
                 final long size = attachment.getSize();
                 if (size > 0) {
-                    jo.put("size", size);
+                    jsonAttachment.put("size", size);
                 }
-                ja.put(jo);
+                jArray.put(jsonAttachment);
             }
         }
         return json;

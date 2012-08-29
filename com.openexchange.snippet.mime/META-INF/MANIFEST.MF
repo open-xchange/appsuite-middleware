@@ -51,3 +51,4 @@ Import-Package: com.openexchange.cache,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.util.tracker
+Bundle-Activator: com.openexchange.snippet.mime.osgi.MimeSnippetActivator

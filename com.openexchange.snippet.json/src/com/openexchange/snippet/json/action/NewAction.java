@@ -65,6 +65,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.snippet.Attachment;
 import com.openexchange.snippet.DefaultAttachment;
 import com.openexchange.snippet.DefaultSnippet;
+import com.openexchange.snippet.Property;
 import com.openexchange.snippet.json.SnippetJsonParser;
 import com.openexchange.snippet.json.SnippetRequest;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -102,6 +103,16 @@ public final class NewAction extends SnippetAction {
         // Parse from JSON to snippet
         final DefaultSnippet snippet = new DefaultSnippet();
         SnippetJsonParser.parse(jsonSnippet, snippet);
+        // Check for needed fields
+        if (isEmpty(snippet.getDisplayName())) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(Property.DISPLAY_NAME.getPropName());
+        }
+        if (isEmpty(snippet.getType())) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(Property.TYPE.getPropName());
+        }
+        if (isEmpty(snippet.getModule())) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(Property.MODULE.getPropName());
+        }
         final List<Attachment> attachments = snippet.getAttachments();
         if (null != attachments) {
             for (final Attachment attachment : attachments) {
