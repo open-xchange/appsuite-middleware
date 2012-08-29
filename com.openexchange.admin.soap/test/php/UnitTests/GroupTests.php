@@ -43,7 +43,7 @@ class GroupTests extends PHPUnit_Framework_TestCase {
 		}
 
 		// now create a user within this context
-		$new_user = getFullUserObject("soaptestCreateuser", $ctx->id);
+		$new_user = getFullUserObject("soap-test-createuser", $ctx->id);
 		getUserClient($SOAPHOST)->create($ctx, $new_user, getCredentialsObject($admin_user->name, $admin_user->password));
 
 		// now list all users and find the create one, if found, compare if all values were set correctly
@@ -64,7 +64,7 @@ class GroupTests extends PHPUnit_Framework_TestCase {
 		}
 		
 		// now init a new group
-		$group = getFullGroupObject("soaptest_creatgroup", $ctx->id);		
+		$group = getFullGroupObject("soap-test-creategroup", $ctx->id);		
 		
 		$group->members = array(intval($new_users_id));		
 		
@@ -202,13 +202,13 @@ class GroupTests extends PHPUnit_Framework_TestCase {
 		
 
 		$random_id = generateContextId();
-		$name = "soapTestAdmin" . $random_id;
+		$name = "soap-test-admin_" . $random_id;
 		$admin_user = getFullUserObject($name, $random_id);
 
 		$ctx = new Context();
 		$ctx->id = $random_id;
 		$ctx->maxQuota = 1;
-		$ctx->name = "soap_test_context" . $random_id;
+		$ctx->name = "soap-test-context" . $random_id;
 
 		$this->createAndVerifyGroup($ctx,$admin_user);		
 	}
@@ -223,13 +223,13 @@ class GroupTests extends PHPUnit_Framework_TestCase {
 	 */
 	public function testDeleteGroup(){
 		$random_id = generateContextId();
-		$name = "soapTestAdmin" . $random_id;
+		$name = "soap-test-admin-" . $random_id;
 		$admin_user = getFullUserObject($name, $random_id);
 
 		$ctx = new Context();
 		$ctx->id = $random_id;
 		$ctx->maxQuota = 1;
-		$ctx->name = "soap_test_context" . $random_id;
+		$ctx->name = "soap-test-context" . $random_id;
 
 		// create a new group and verify
 		$new_group = $this->createAndVerifyGroup($ctx,$admin_user);		
@@ -250,13 +250,13 @@ class GroupTests extends PHPUnit_Framework_TestCase {
 	 */
 	public function testChangeGroup(){
 		$random_id = generateContextId();
-		$name = "soapTestAdmin" . $random_id;
+		$name = "soap-test-admin-" . $random_id;
 		$admin_user = getFullUserObject($name, $random_id);
 
 		$ctx = new Context();
 		$ctx->id = $random_id;
 		$ctx->maxQuota = 1;
-		$ctx->name = "soap_test_context" . $random_id;
+		$ctx->name = "soap-test-context" . $random_id;
 
 		// create a new group and verify
 		$new_group = $this->createAndVerifyGroup($ctx,$admin_user);		
@@ -282,6 +282,7 @@ class GroupTests extends PHPUnit_Framework_TestCase {
 	}
 	
 	public function verifyUser($expected, $server_response) {
+		// TODO: give out field name in assertEquals() message string (see anniversary and birthday)
 		$this->assertEquals($expected->name, $server_response->name);
 		$this->assertEquals($expected->display_name, $server_response->display_name);
 		$this->assertEquals($expected->given_name, $server_response->given_name);
@@ -290,18 +291,18 @@ class GroupTests extends PHPUnit_Framework_TestCase {
 		$this->assertEquals($expected->primaryEmail, $server_response->primaryEmail);
 		
 		// parse anniversary and check day and month year
-		$ani_expected = date_parse($expected->anniversary);
-		$ani_server = date_parse($server_response->anniversary);
-		$this->assertEquals($ani_expected->year, $ani_server->year);
-		$this->assertEquals($ani_expected->month, $ani_server->month);
-		$this->assertEquals($ani_expected->day, $ani_server->day);
+		$ani_expected = (object) date_parse($expected->anniversary);
+		$ani_server   = (object) date_parse($server_response->anniversary);
+		$this->assertEquals($ani_expected->year, $ani_server->year, "anniversary year");
+		$this->assertEquals($ani_expected->month, $ani_server->month, "anniversary month");
+		$this->assertEquals($ani_expected->day, $ani_server->day, "anniversary day");
 		
 		// parse birthday and check day month year
-		$birth_expected = date_parse($expected->birthday);
-		$birth_server = date_parse($server_response->birthday);
-		$this->assertEquals($birth_expected->year, $birth_server->year);
-		$this->assertEquals($birth_expected->month, $birth_server->month);
-		$this->assertEquals($birth_expected->day, $birth_server->day);
+		$birth_expected = (object) date_parse($expected->birthday);
+		$birth_server   = (object) date_parse($server_response->birthday);
+		$this->assertEquals($birth_expected->year, $birth_server->year, "birthday year");
+		$this->assertEquals($birth_expected->month, $birth_server->month, "birthday month");
+		$this->assertEquals($birth_expected->day, $birth_server->day, "birthday day");
 		
 		$this->assertEquals($expected->assistant_name, $server_response->assistant_name);
 		$this->assertEquals($expected->branches, $server_response->branches);
