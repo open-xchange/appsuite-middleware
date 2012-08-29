@@ -66,6 +66,7 @@ import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.UpdateTaskV2;
+import com.openexchange.snippet.db.Tables;
 import com.openexchange.snippet.rdb.Services;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -83,28 +84,14 @@ public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl imp
         super();
     }
 
-    private String getSnippetName() {
-        return "snippet";
-    }
-    private String getSnippetTable() {
-        return "CREATE TABLE "+getSnippetName()+" (" + 
-               " cid INT4 unsigned NOT NULL," + 
-               " user INT4 unsigned NOT NULL," + 
-               " id INT4 unsigned NOT NULL," + 
-               " accountId INT4 unsigned DEFAULT NULL," + 
-               " displayName VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
-               " module VARCHAR(255) CHARACTER SET latin1 NOT NULL," + 
-               " type VARCHAR(255) CHARACTER SET latin1 NOT NULL," + 
-               " shared TINYINT unsigned DEFAULT NULL," + 
-               " lastModified BIGINT(64) NOT NULL," + 
-               " confId INT4 unsigned NOT NULL," + 
-               " PRIMARY KEY (cid, user, id)" + 
-               ") ENGINE=InnoDB";
-    }
+    /*-
+     * --------------------------------------------------------------------------------------------------
+     */
 
     private String getSnippetContentName() {
         return "snippetContent";
     }
+
     private String getSnippetContentTable() {
         return "CREATE TABLE "+getSnippetContentName()+" (" + 
                " cid INT4 unsigned NOT NULL," + 
@@ -115,9 +102,14 @@ public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl imp
                ") ENGINE=InnoDB";
     }
 
+    /*-
+     * --------------------------------------------------------------------------------------------------
+     */
+
     private String getSnippetAttachmentName() {
         return "snippetAttachment";
     }
+
     private String getSnippetAttachmentTable() {
         return "CREATE TABLE "+getSnippetAttachmentName()+" (" + 
                " cid INT4 unsigned NOT NULL," + 
@@ -129,9 +121,14 @@ public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl imp
                ") ENGINE=InnoDB";
     }
 
+    /*-
+     * --------------------------------------------------------------------------------------------------
+     */
+
     private String getSnippetMiscName() {
         return "snippetMisc";
     }
+
     private String getSnippetMiscTable() {
         return "CREATE TABLE "+getSnippetMiscName()+" (" + 
                " cid INT4 unsigned NOT NULL," + 
@@ -144,7 +141,7 @@ public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl imp
 
     @Override
     protected String[] getCreateStatements() {
-        return new String[] { getSnippetTable(), getSnippetContentName(), getSnippetAttachmentTable(), getSnippetMiscName() };
+        return new String[] { Tables.getSnippetTable(), getSnippetContentName(), getSnippetAttachmentTable(), getSnippetMiscName() };
     }
 
     @Override
@@ -163,7 +160,7 @@ public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl imp
         final DatabaseService ds = getService(DatabaseService.class);
         final Connection writeCon = ds.getForUpdateTask(contextId);
         try {
-            createTable(getSnippetName(), getSnippetTable(), writeCon);
+            createTable(Tables.getSnippetName(), Tables.getSnippetTable(), writeCon);
             createTable(getSnippetContentName(), getSnippetContentTable(), writeCon);
             createTable(getSnippetAttachmentName(), getSnippetAttachmentTable(), writeCon);
             createTable(getSnippetMiscName(), getSnippetMiscTable(), writeCon);
@@ -226,7 +223,7 @@ public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl imp
 
     @Override
     public String[] tablesToCreate() {
-        return new String[] { getSnippetTable(), getSnippetContentName(), getSnippetAttachmentTable(), getSnippetMiscName() };
+        return new String[] { Tables.getSnippetTable(), getSnippetContentName(), getSnippetAttachmentTable(), getSnippetMiscName() };
     }
 
     private <S> S getService(final Class<? extends S> clazz) throws OXException {

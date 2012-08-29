@@ -61,6 +61,13 @@ import java.io.InputStream;
 public interface Attachment {
 
     /**
+     * Gets the attachment identifier.
+     * 
+     * @return The identifier
+     */
+    String getId();
+
+    /**
      * Gets the content type according to RFC 822; e.g. <code>"text/plain; charset=UTF-8; name=mytext.txt"</code>
      * 
      * @return The content type or <code>null</code>

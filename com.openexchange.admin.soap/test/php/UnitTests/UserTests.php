@@ -42,7 +42,7 @@ class UserTests extends PHPUnit_Framework_TestCase {
 		}
 
 		// now create a user within this context
-		$new_user = getFullUserObject("soaptest_createuser", $ctx->id);
+		$new_user = getFullUserObject("soap-test-createuser", $ctx->id);
 		$user_create_response = getUserClient($SOAPHOST)->create($ctx, $new_user, getCredentialsObject($admin_user->name, $admin_user->password));
 
 		// now list all users and find the create one, if found, compare if all values were set correctly
@@ -132,13 +132,13 @@ class UserTests extends PHPUnit_Framework_TestCase {
 		
 
 		$random_id = generateContextId();
-		$name = "soap_test_admin_" . $random_id;
+		$name = "soap-test-admin-" . $random_id;
 		$admin_user = getFullUserObject($name, $random_id);
 
 		$ctx = new Context();
 		$ctx->id = $random_id;
 		$ctx->maxQuota = 1;
-		$ctx->name = "soap_test_context" . $random_id;
+		$ctx->name = "soap-test-context" . $random_id;
 
 		$this->createAndVerifyUser($ctx,$admin_user);		
 	}
@@ -155,13 +155,13 @@ class UserTests extends PHPUnit_Framework_TestCase {
 	 */
 	public function testChangeUser(){
 		$random_id = generateContextId();
-		$name = "soap_test_admin_" . $random_id;
+		$name = "soap-test-admin-" . $random_id;
 		$admin_user = getFullUserObject($name, $random_id);
 
 		$ctx = new Context();
 		$ctx->id = $random_id;
 		$ctx->maxQuota = 1;
-		$ctx->name = "soap_test_context" . $random_id;
+		$ctx->name = "soap-test-context" . $random_id;
 
 		// create new context and new user
 		$new_user = $this->createAndVerifyUser($ctx,$admin_user);
@@ -182,13 +182,13 @@ class UserTests extends PHPUnit_Framework_TestCase {
 	 */
 	public function testDeleteUser(){
 		$random_id = generateContextId();
-		$name = "soap_test_admin_" . $random_id;
+		$name = "soap-test-admin-" . $random_id;
 		$admin_user = getFullUserObject($name, $random_id);
 
 		$ctx = new Context();
 		$ctx->id = $random_id;
 		$ctx->maxQuota = 1;
-		$ctx->name = "soap_test_context" . $random_id;
+		$ctx->name = "soap-test-context" . $random_id;
 
 		// create new context and new user
 		$new_user = $this->createAndVerifyUser($ctx,$admin_user);
@@ -217,18 +217,18 @@ class UserTests extends PHPUnit_Framework_TestCase {
 		$this->assertEquals($expected->primaryEmail, $server_response->primaryEmail);
 		
 		// parse anniversary and check day and month year
-		$ani_expected = date_parse($expected->anniversary);
-		$ani_server = date_parse($server_response->anniversary);
-		$this->assertEquals($ani_expected->year, $ani_server->year);
-		$this->assertEquals($ani_expected->month, $ani_server->month);
-		$this->assertEquals($ani_expected->day, $ani_server->day);
+		$ani_expected = (object) date_parse($expected->anniversary);
+		$ani_server   = (object) date_parse($server_response->anniversary);
+		$this->assertEquals($ani_expected->year, $ani_server->year, "anniversary year");
+		$this->assertEquals($ani_expected->month, $ani_server->month, "anniversary month");
+		$this->assertEquals($ani_expected->day, $ani_server->day, "anniversary day");
 		
 		// parse birthday and check day month year
-		$birth_expected = date_parse($expected->birthday);
-		$birth_server = date_parse($server_response->birthday);
-		$this->assertEquals($birth_expected->year, $birth_server->year);
-		$this->assertEquals($birth_expected->month, $birth_server->month);
-		$this->assertEquals($birth_expected->day, $birth_server->day);
+		$birth_expected = (object) date_parse($expected->birthday);
+		$birth_server   = (object) date_parse($server_response->birthday);
+		$this->assertEquals($birth_expected->year, $birth_server->year, "birthday year");
+		$this->assertEquals($birth_expected->month, $birth_server->month, "birthday month");
+		$this->assertEquals($birth_expected->day, $birth_server->day, "birthday day");
 		
 		
 		

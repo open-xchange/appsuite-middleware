@@ -74,6 +74,11 @@ public class DefaultAttachment implements Attachment {
     }
 
     /**
+     * The identifier.
+     */
+    protected String id;
+
+    /**
      * The content type.
      */
     protected String contentType;
@@ -102,6 +107,11 @@ public class DefaultAttachment implements Attachment {
     }
 
     @Override
+    public String getId() {
+        return id;
+    }
+
+    @Override
     public String getContentType() {
         return contentType;
     }
@@ -123,6 +133,15 @@ public class DefaultAttachment implements Attachment {
             throw new IOException("No input stream available.");
         }
         return streamProvider.getInputStream();
+    }
+    
+    /**
+     * Sets the identifier
+     *
+     * @param id The identifier to set
+     */
+    public void setId(final String id) {
+        this.id = id;
     }
 
     /**

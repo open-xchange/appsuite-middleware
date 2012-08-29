@@ -56,19 +56,18 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.snippet.rdb.Services;
+import com.openexchange.snippet.ReferenceType;
+import com.openexchange.snippet.rdb.RdbSnippetManagement;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link RdbSnippetDeleteListener}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class RdbSnippetDeleteListener implements DeleteListener {
@@ -85,7 +84,6 @@ public final class RdbSnippetDeleteListener implements DeleteListener {
         if (DeleteEvent.TYPE_USER != event.getType()) {
             return;
         }
-        final DatabaseService databaseService = getService(DatabaseService.class);
         /*
          * Writable connection
          */
@@ -93,58 +91,50 @@ public final class RdbSnippetDeleteListener implements DeleteListener {
         PreparedStatement stmt = null;
         try {
             final int userId = event.getId();
-            final TIntList confIds;
+            final TIntList ids;
             {
                 ResultSet rs = null;
                 try {
-                    stmt = writeCon.prepareStatement("SELECT confId FROM messagingAccount WHERE cid = ? AND user = ?");
+                    stmt =
+                        writeCon.prepareStatement("SELECT id FROM snippet WHERE cid = ? AND user = ? AND refType=" + ReferenceType.GENCONF.getType());
                     int pos = 1;
                     stmt.setInt(pos++, contextId);
                     stmt.setInt(pos++, userId);
                     rs = stmt.executeQuery();
-                    confIds = new TIntArrayList(4);
+                    ids = new TIntArrayList(4);
                     while (rs.next()) {
-                        confIds.add(rs.getInt(1));
+                        ids.add(Integer.parseInt(rs.getString(1)));
                     }
                 } finally {
                     DBUtils.closeSQLStuff(rs);
                 }
             }
             DBUtils.closeSQLStuff(stmt);
-            /*
-             * Delete account configurations using generic conf
-             */
-            if (!confIds.isEmpty()) {
-                final GenericConfigurationStorageService genericConfStorageService = getService(GenericConfigurationStorageService.class);
-                final Context context = event.getContext();
-                class GenConfDelete implements TIntProcedure {
-
-                    OXException genConfError;
-
-                    @Override
-                    public boolean execute(final int confId) {
-                        try {
-                            genericConfStorageService.delete(writeCon, context, confId);
-                            return true;
-                        } catch (final OXException e) {
-                            genConfError = e;
-                            return false;
-                        }
-                    }
-                }
-                final GenConfDelete gcd = new GenConfDelete();
-                if (!confIds.forEach(gcd) && null != gcd.genConfError) {
-                    throw gcd.genConfError;
-                }
+            stmt = null;
+            if (ids.isEmpty()) {
+                return;
             }
             /*
-             * Delete account data
+             * Delete them
              */
-            stmt = writeCon.prepareStatement("DELETE FROM messagingAccount WHERE cid = ? AND user = ?");
-            int pos = 1;
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, userId);
-            stmt.executeUpdate();
+            final AtomicReference<OXException> error = new AtomicReference<OXException>();
+            ids.forEach(new TIntProcedure() {
+
+                @Override
+                public boolean execute(final int id) {
+                    try {
+                        RdbSnippetManagement.deleteSnippet(id, userId, contextId, writeCon);
+                        return true;
+                    } catch (final OXException e) {
+                        error.set(e);
+                        return false;
+                    }
+                }
+            });
+            final OXException e = error.get();
+            if (null != e) {
+                throw e;
+            }
         } catch (final OXException e) {
             throw new OXException(e);
         } catch (final SQLException e) {
@@ -153,14 +143,6 @@ public final class RdbSnippetDeleteListener implements DeleteListener {
             throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(stmt);
-        }
-    }
-
-    private <S> S getService(final Class<? extends S> clazz) throws OXException {
-        try {
-            return Services.getService(clazz);
-        } catch (final RuntimeException e) {
-            throw new OXException(e);
         }
     }
 

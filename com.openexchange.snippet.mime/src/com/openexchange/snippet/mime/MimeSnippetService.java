@@ -70,7 +70,7 @@ public final class MimeSnippetService implements SnippetService {
     }
 
     @Override
-    public SnippetManagement getManagement(Session session) throws OXException {
+    public SnippetManagement getManagement(final Session session) throws OXException {
         return new MimeSnippetManagement(session);
     }
 

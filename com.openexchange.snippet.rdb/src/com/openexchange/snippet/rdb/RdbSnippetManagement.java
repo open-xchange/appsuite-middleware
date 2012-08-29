@@ -51,6 +51,9 @@ package com.openexchange.snippet.rdb;
 
 import static com.openexchange.snippet.rdb.Services.getService;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.procedure.TIntProcedure;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -58,6 +61,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -65,6 +71,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
@@ -80,6 +87,7 @@ import com.openexchange.snippet.Attachment;
 import com.openexchange.snippet.DefaultAttachment;
 import com.openexchange.snippet.DefaultSnippet;
 import com.openexchange.snippet.GetSwitch;
+import com.openexchange.snippet.ReferenceType;
 import com.openexchange.snippet.Snippet;
 import com.openexchange.snippet.SnippetExceptionCodes;
 import com.openexchange.snippet.SnippetManagement;
@@ -121,7 +129,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
                 fn = null == sContentType ? null : new ContentType(sContentType).getNameParameter();
             }
             return fn;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return null;
         }
     }
@@ -142,9 +150,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
     }
 
     private final int contextId;
-
     private final int userId;
-
     private final Session session;
 
     /**
@@ -164,6 +170,10 @@ public final class RdbSnippetManagement implements SnippetManagement {
         return getService(ContextService.class).getContext(session.getContextId());
     }
 
+    private static Context getContext(final int contextId) throws OXException {
+        return getService(ContextService.class).getContext(contextId);
+    }
+
     /**
      * {@link QuotaFileStorageStreamProvider} - File store stream provider.
      * 
@@ -180,7 +190,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
          * @param filestoreLocation The file store location
          * @param fileStorage The file store
          */
-        public QuotaFileStorageStreamProvider(String filestoreLocation, QuotaFileStorage fileStorage) {
+        public QuotaFileStorageStreamProvider(final String filestoreLocation, final QuotaFileStorage fileStorage) {
             super();
             this.filestoreLocation = filestoreLocation;
             this.fileStorage = fileStorage;
@@ -198,6 +208,125 @@ public final class RdbSnippetManagement implements SnippetManagement {
     }
 
     @Override
+    public List<Snippet> getSnippets(final String... types) throws OXException {
+        final DatabaseService databaseService = getDatabaseService();
+        final int contextId = this.contextId;
+        final Connection con = databaseService.getReadOnly(contextId);
+        final TIntList ids;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            final StringBuilder sql = new StringBuilder("SELECT id FROM snippet WHERE cid=? AND (user=? OR shared>0) AND refType=").append(ReferenceType.GENCONF.getType());
+            if (null != types && types.length > 0) {
+                sql.append(" AND (");
+                sql.append("type=?");
+                for (int i = 1; i < types.length; i++) {
+                    sql.append(" OR type=?");
+                }
+                sql.append(')');
+            }
+            stmt = con.prepareStatement(sql.toString());
+            int pos = 0;
+            stmt.setInt(++pos, contextId);
+            stmt.setInt(++pos, userId);
+            if (null != types && types.length > 0) {
+                for (final String type : types) {
+                    stmt.setString(++pos, type);
+                }
+            }
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                return Collections.emptyList();
+            }
+            ids = new TIntArrayList(8);
+            do {
+                ids.add(Integer.parseInt(rs.getString(1)));
+            } while (rs.next());
+        } catch (final SQLException e) {
+            throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(rs, stmt);
+            databaseService.backReadOnly(contextId, con);
+        }
+        if (ids.isEmpty()) {
+            return Collections.emptyList();
+        }
+        final List<Snippet> list = new ArrayList<Snippet>(ids.size());
+        final AtomicReference<OXException> error = new AtomicReference<OXException>();
+        ids.forEach(new TIntProcedure() {
+            
+            @Override
+            public boolean execute(final int id) {
+                try {
+                    list.add(getSnippet(Integer.toString(id)));
+                    return true;
+                } catch (final OXException e) {
+                    error.set(e);
+                    return false;
+                }
+            }
+        });
+        final OXException e = error.get();
+        if (null != e) {
+            throw e;
+        }
+        return list;
+    }
+
+    @Override
+    public List<Snippet> getOwnSnippets() throws OXException {
+        final DatabaseService databaseService = getDatabaseService();
+        final int contextId = this.contextId;
+        final Connection con = databaseService.getReadOnly(contextId);
+        final TIntList ids;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            final StringBuilder sql = new StringBuilder("SELECT id FROM snippet WHERE cid=? AND user=? AND refType=").append(ReferenceType.GENCONF.getType());
+            stmt = con.prepareStatement(sql.toString());
+            int pos = 0;
+            stmt.setInt(++pos, contextId);
+            stmt.setInt(++pos, userId);
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                return Collections.emptyList();
+            }
+            ids = new TIntArrayList(8);
+            do {
+                ids.add(Integer.parseInt(rs.getString(1)));
+            } while (rs.next());
+        } catch (final SQLException e) {
+            throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(rs, stmt);
+            databaseService.backReadOnly(contextId, con);
+        }
+        if (ids.isEmpty()) {
+            return Collections.emptyList();
+        }
+        final List<Snippet> list = new ArrayList<Snippet>(ids.size());
+        final AtomicReference<OXException> error = new AtomicReference<OXException>();
+        ids.forEach(new TIntProcedure() {
+            
+            @Override
+            public boolean execute(final int id) {
+                try {
+                    list.add(getSnippet(Integer.toString(id)));
+                    return true;
+                } catch (final OXException e) {
+                    error.set(e);
+                    return false;
+                }
+            }
+        });
+        final OXException e = error.get();
+        if (null != e) {
+            throw e;
+        }
+        return list;
+    }
+
+    @Override
     public Snippet getSnippet(final String identifier) throws OXException {
         if (null == identifier) {
             return null;
@@ -209,11 +338,11 @@ public final class RdbSnippetManagement implements SnippetManagement {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT accountId, displayName, module, type, shared, confId FROM snippet WHERE cid=? AND user=? AND id=?");
+            stmt = con.prepareStatement("SELECT accountId, displayName, module, type, shared, refId FROM snippet WHERE cid=? AND user=? AND id=? AND refType=" + ReferenceType.GENCONF.getType());
             int pos = 0;
             stmt.setInt(++pos, contextId);
             stmt.setInt(++pos, userId);
-            stmt.setInt(++pos, id);
+            stmt.setString(++pos, Integer.toString(id));
             rs = stmt.executeQuery();
             if (!rs.next()) {
                 throw SnippetExceptionCodes.SNIPPET_NOT_FOUND.create(Integer.valueOf(id));
@@ -229,7 +358,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
             snippet.setModule(rs.getString(3));
             snippet.setType(rs.getString(4));
             snippet.setShared(rs.getInt(5) > 0);
-            final int confId = rs.getInt(6);
+            final int confId = Integer.parseInt(rs.getString(6));
             closeSQLStuff(rs, stmt);
             rs = null;
             stmt = null;
@@ -289,6 +418,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
                     final String referenceId = rs.getString(1);
                     if (!rs.wasNull()) {
                         final DefaultAttachment attachment = new DefaultAttachment();
+                        attachment.setId(referenceId);
                         attachment.setContentType(fileStorage.getMimeType(referenceId));
                         attachment.setContentDisposition("attachment; filename=\"" + rs.getString(2) + "\"");
                         attachment.setStreamProvider(new QuotaFileStorageStreamProvider(referenceId, fileStorage));
@@ -326,7 +456,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
             final int id = getIdGeneratorService().getId("com.openexchange.snippet.rdb", contextId);
             // Store attachments
             final List<Attachment> attachments = snippet.getAttachments();
-            updateAttachments(id, attachments, false, getContext(session), con);
+            updateAttachments(id, attachments, false, getContext(session), userId, contextId, con);
             // Store content
             {
                 final String content = snippet.getContent();
@@ -368,10 +498,10 @@ public final class RdbSnippetManagement implements SnippetManagement {
                 }
             }
             // Store snippet
-            stmt = con.prepareStatement("INSERT INTO snippet (cid, user, id, accountId, displayName, module, type, shared, lastModified, confId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            stmt = con.prepareStatement("INSERT INTO snippet (cid, user, id, accountId, displayName, module, type, shared, lastModified, refId, refType) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "+ReferenceType.GENCONF.getType()+")");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
-            stmt.setInt(3, id);
+            stmt.setString(3, Integer.toString(id));
             {
                 final int accountId = snippet.getAccountId();
                 if (accountId >= 0) {
@@ -385,7 +515,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
             stmt.setString(7, snippet.getType());
             stmt.setInt(8, snippet.isShared() ? 1 : 0);
             stmt.setLong(9, System.currentTimeMillis());
-            stmt.setInt(10, confId);
+            stmt.setString(10, Integer.toString(confId));
             stmt.executeUpdate();
             /*
              * Commit & return identifier
@@ -407,7 +537,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
     }
 
     @Override
-    public String updateSnippet(final String identifier, final Snippet snippet, final Set<Property> properties) throws OXException {
+    public String updateSnippet(final String identifier, final Snippet snippet, final Set<Property> properties, final Collection<Attachment> addAttachments, final Collection<Attachment> removeAttachments) throws OXException {
         if (null == identifier) {
             return identifier;
         }
@@ -432,7 +562,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
                 stmt = con.prepareStatement(updateBuilder.getUpdateStatement());
                 final GetSwitch getter = new GetSwitch(snippet);
                 int pos = 0;
-                for (Property modifiableProperty : modifiableProperties) {
+                for (final Property modifiableProperty : modifiableProperties) {
                     final Object value = modifiableProperty.doSwitch(getter);
                     if (null != value) {
                         stmt.setObject(++pos, value);
@@ -440,7 +570,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
                 }
                 stmt.setLong(++pos, contextId);
                 stmt.setLong(++pos, userId);
-                stmt.setLong(++pos, id);
+                stmt.setString(++pos, Integer.toString(id));
                 if (LOG.isDebugEnabled()) {
                     final String query = stmt.toString();
                     LOG.debug(new StringBuilder(query.length() + 32).append("Trying to perform SQL update query for attributes ").append(
@@ -477,13 +607,13 @@ public final class RdbSnippetManagement implements SnippetManagement {
                 {
                     ResultSet rs = null;
                     try {
-                        stmt = con.prepareStatement("SELECT confId FROM snippet WHERE cid=? AND user=? AND id=?");
+                        stmt = con.prepareStatement("SELECT refId FROM snippet WHERE cid=? AND user=? AND id=? AND refType="+ReferenceType.GENCONF.getType());
                         int pos = 0;
                         stmt.setLong(++pos, contextId);
                         stmt.setLong(++pos, userId);
-                        stmt.setLong(++pos, id);
+                        stmt.setString(++pos, Integer.toString(id));
                         rs = stmt.executeQuery();
-                        confId = rs.next() ? rs.getInt(1) : -1;
+                        confId = rs.next() ? Integer.parseInt(rs.getString(1)) : -1;
                     } finally {
                         closeSQLStuff(rs, stmt);
                         stmt = null;
@@ -527,8 +657,11 @@ public final class RdbSnippetManagement implements SnippetManagement {
             /*
              * Update attachments
              */
-            if (properties.contains(Property.ATTACHMENTS)) {
-                updateAttachments(contextId, snippet.getAttachments(), true, context, con);
+            if (null != removeAttachments && !removeAttachments.isEmpty()) {
+                removeAttachments(id, removeAttachments, context, userId, contextId, con);
+            }
+            if (null != addAttachments && !addAttachments.isEmpty()) {
+                updateAttachments(id, addAttachments, false, context, userId, contextId, con);
             }
             /*
              * Commit & return
@@ -549,7 +682,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
         }
     }
 
-    private void updateAttachments(final int id, final List<Attachment> attachments, final boolean deleteExisting, final Context context, final Connection con) throws OXException {
+    private static void updateAttachments(final int id, final Collection<Attachment> attachments, final boolean deleteExisting, final Context context, final int userId, final int contextId, final Connection con) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -610,10 +743,35 @@ public final class RdbSnippetManagement implements SnippetManagement {
             }
         } catch (final SQLException e) {
             throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw SnippetExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
+        }
+    }
+
+    private static void removeAttachments(final int id, final Collection<Attachment> attachments, final Context context, final int userId, final int contextId, final Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        try {
+            final QuotaFileStorage fileStorage = getFileStorage(context);
+            for (final Attachment attachment : attachments) {
+                final String attachmentId = attachment.getId();
+                fileStorage.deleteFile(attachmentId);
+                // Delete from table, too
+                stmt = con.prepareStatement("DELETE FROM snippetAttachment WHERE cid=? AND user=? AND id=? AND referenceId=?");
+                int pos = 0;
+                stmt.setLong(++pos, contextId);
+                stmt.setLong(++pos, userId);
+                stmt.setLong(++pos, id);
+                stmt.setString(++pos, attachmentId);
+                stmt.executeUpdate();
+                closeSQLStuff(stmt);
+                stmt = null;
+            }
+        } catch (final SQLException e) {
+            throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
         }
     }
 
@@ -626,13 +784,38 @@ public final class RdbSnippetManagement implements SnippetManagement {
         final DatabaseService databaseService = getDatabaseService();
         final int contextId = this.contextId;
         final Connection con = databaseService.getWritable(contextId);
-        PreparedStatement stmt = null;
         boolean rollback = false;
         try {
             con.setAutoCommit(false); // BEGIN;
             rollback = true;
+            deleteSnippet(id, userId, contextId, con);
+            con.commit(); // COMMIT
+            rollback = false;
+        } catch (final SQLException e) {
+            throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                DBUtils.rollback(con);
+            }
+            DBUtils.autocommit(con);
+            databaseService.backReadOnly(contextId, con);
+        }
+    }
+
+    /**
+     * Deletes specified snippet.
+     * 
+     * @param id The snippet identifier
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param con The connection to use
+     * @throws OXException If delete attempt fails
+     */
+    public static void deleteSnippet(final int id, final int userId, final int contextId, final Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        try {
             // Delete attachments
-            updateAttachments(id, null, true, getContext(session), con);
+            updateAttachments(id, null, true, getContext(contextId), userId, contextId, con);
             // Delete content
             stmt = con.prepareStatement("DELETE FROM snippetContent WHERE cid=? AND user=? AND id=?");
             int pos = 0;
@@ -656,13 +839,13 @@ public final class RdbSnippetManagement implements SnippetManagement {
             {
                 ResultSet rs = null;
                 try {
-                    stmt = con.prepareStatement("SELECT confId FROM snippet WHERE cid=? AND user=? AND id=?");
+                    stmt = con.prepareStatement("SELECT refId FROM snippet WHERE cid=? AND user=? AND id=? AND refType="+ReferenceType.GENCONF.getType());
                     pos = 0;
                     stmt.setLong(++pos, contextId);
                     stmt.setLong(++pos, userId);
-                    stmt.setLong(++pos, id);
+                    stmt.setString(++pos, Integer.toString(id));
                     rs = stmt.executeQuery();
-                    confId = rs.next() ? rs.getInt(1) : -1;
+                    confId = rs.next() ? Integer.parseInt(rs.getString(1)) : -1;
                 } finally {
                     closeSQLStuff(rs, stmt);
                     stmt = null;
@@ -671,32 +854,21 @@ public final class RdbSnippetManagement implements SnippetManagement {
             }
             if (confId > 0) {
                 final GenericConfigurationStorageService storageService = getStorageService();
-                storageService.delete(con, getContext(session), confId);
+                storageService.delete(con, getContext(contextId), confId);
             }
             // Delete snippet
-            stmt = con.prepareStatement("DELETE FROM snippet WHERE cid=? AND user=? AND id=?");
+            stmt = con.prepareStatement("DELETE FROM snippet WHERE cid=? AND user=? AND id=? AND refType="+ReferenceType.GENCONF.getType());
             pos = 0;
             stmt.setLong(++pos, contextId);
             stmt.setLong(++pos, userId);
-            stmt.setLong(++pos, id);
+            stmt.setString(++pos, Integer.toString(id));
             stmt.executeUpdate();
             DBUtils.closeSQLStuff(stmt);
             stmt = null;
-            /*
-             * Commit & return
-             */
-            con.commit(); // COMMIT
-            DBUtils.autocommit(con);
-            rollback = false;
         } catch (final SQLException e) {
             throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                DBUtils.rollback(con);
-                DBUtils.autocommit(con);
-            }
             DBUtils.closeSQLStuff(stmt);
-            databaseService.backReadOnly(contextId, con);
         }
     }
 

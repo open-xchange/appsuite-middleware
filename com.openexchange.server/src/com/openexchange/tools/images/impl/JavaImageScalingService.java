@@ -141,6 +141,9 @@ public class JavaImageScalingService implements ImageScalingService {
             return pictureData;
         }
 
+        if (null == pictureData) {
+            return pictureData;
+        }
         ManagedFile managedFile = null;
         try {
             ManagedFileManagement mfm = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
@@ -149,12 +152,12 @@ public class JavaImageScalingService implements ImageScalingService {
             if (imageInformation == null) {
                 return Streams.newByteArrayInputStream(managedFile.getInputStream());
             }
-
+   
             AffineTransform exifTransformation = getExifTransformation(imageInformation);
             if (exifTransformation == null) {
                 return Streams.newByteArrayInputStream(managedFile.getInputStream());
             }
-
+   
             AffineTransformOp op = new AffineTransformOp(exifTransformation, AffineTransformOp.TYPE_BICUBIC);
             BufferedImage image = ImageIO.read(managedFile.getInputStream());
             ColorModel cm = (image.getType() == BufferedImage.TYPE_BYTE_GRAY) ? image.getColorModel() : null;
@@ -163,12 +166,12 @@ public class JavaImageScalingService implements ImageScalingService {
             g.setBackground(Color.WHITE);
             g.clearRect(0, 0, destinationImage.getWidth(), destinationImage.getHeight());
             destinationImage = op.filter(image, destinationImage);
-
+   
             UnsynchronizedByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream();
             if (!ImageIO.write(destinationImage, fileType, baos)) {
                 throw new IOException("Couldn't rotate image");
             }
-
+   
             return new ByteArrayInputStream(baos.toByteArray());
         } finally {
             if (managedFile != null) {

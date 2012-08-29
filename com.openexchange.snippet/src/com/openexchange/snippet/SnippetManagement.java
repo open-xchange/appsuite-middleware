@@ -49,6 +49,8 @@
 
 package com.openexchange.snippet;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 
@@ -59,6 +61,23 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface SnippetManagement {
+
+    /**
+     * Gets all available snippets.
+     * 
+     * @param The optional types to filter against
+     * @return All available snippets
+     * @throws OXException If retrieval operation fails
+     */
+    List<Snippet> getSnippets(String... types) throws OXException;
+
+    /**
+     * Gets all snippets belonging to associated user.
+     * 
+     * @return All user-associated snippets
+     * @throws OXException If retrieval operation fails
+     */
+    List<Snippet> getOwnSnippets() throws OXException;
 
     /**
      * Gets a snippet by specified identifier.
@@ -84,10 +103,12 @@ public interface SnippetManagement {
      * @param id The identifier of the snippet to update
      * @param snippet The snippet providing the data to update
      * @param properties The properties to update
+     * @param addAttachments The attachments to add
+     * @param removeAttachments The attachments to remove
      * @return The updated snippet's identifier
      * @throws OXException If update operation fails
      */
-    String updateSnippet(String id, Snippet snippet, Set<Property> properties) throws OXException;
+    String updateSnippet(String id, Snippet snippet, Set<Property> properties, Collection<Attachment> addAttachments, Collection<Attachment> removeAttachments) throws OXException;
 
     /**
      * Updates specified snippet.
