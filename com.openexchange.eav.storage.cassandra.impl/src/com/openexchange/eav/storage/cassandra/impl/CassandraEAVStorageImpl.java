@@ -81,7 +81,6 @@ import me.prettyprint.hector.api.mutation.Mutator;
 import org.apache.cassandra.db.KeyspaceNotDefinedException;
 import org.apache.cassandra.utils.ByteBufferUtil;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -211,7 +210,7 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 				
 				Iterator<Composite> it = result.getColumnNames().iterator();
 				while (it.hasNext()) {
-					Composite columnName = (Composite) it.next();
+					Composite columnName = it.next();
 					ByteBuffer value = result.getColumn(columnName).getValue();
 					attr.put(ByteBufferUtil.string((ByteBuffer)columnName.get(0)), JSONUtil.toObject((ByteBufferUtil.string(value))));
 				}
@@ -255,7 +254,7 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 		
 		Iterator<UUID> it = uuids.iterator();
 		while (it.hasNext()) {
-			UUID uuid = (UUID) it.next();
+			UUID uuid = it.next();
 			Map<String, Object> map = getAttributes(uuid);
 			retAttr.put(uuid, map);
 			
@@ -274,7 +273,7 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 		
 		Iterator<UUID> it = uuids.iterator();
 		while (it.hasNext()) {
-			UUID uuid = (UUID) it.next();
+			UUID uuid = it.next();
 			Map<String, Object> map = getAttributes(uuid, attributes);
 			retAttr.put(uuid, map);
 			
@@ -318,7 +317,7 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 		
 		Iterator<String> it = attributes.keySet().iterator();
 		while (it.hasNext()) {
-			String columnName = (String) it.next();
+			String columnName = it.next();
 			Object o = attributes.get(columnName);
 			Composite compoColumnName = new Composite(columnName);
 			if (o == null) {
@@ -330,12 +329,13 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 						Object j = JSONCoercion.coerceToJSON(o);
 						String json = null;
 						
-						if (j instanceof JSONObject)
-							json = ((JSONObject)JSONCoercion.coerceToJSON(o)).toString();
-						else if (j instanceof JSONArray)
-							json = ((JSONArray)JSONCoercion.coerceToJSON(o)).toString();
-						else
-							throw new OXException(666, "Unsupported attribute type. Data: " + j);
+						if (j instanceof JSONObject) {
+                            json = ((JSONObject)JSONCoercion.coerceToJSON(o)).toString();
+                        } else if (j instanceof JSONArray) {
+                            json = ((JSONArray)JSONCoercion.coerceToJSON(o)).toString();
+                        } else {
+                            throw new OXException(666, "Unsupported attribute type. Data: " + j);
+                        }
 						
 						m.addInsertion(xtPropsKey, CF_XT_PROPS, HFactory.createColumn(compoColumnName, json));
 					
@@ -346,19 +346,20 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 					if (o instanceof String) {
 						m.addInsertion(xtPropsKey, CF_XT_PROPS, HFactory.createColumn(compoColumnName, (String)o));
 					} else if (o instanceof Integer) {
-						m.addInsertion(xtPropsKey, CF_XT_PROPS, HFactory.createColumn(compoColumnName, String.valueOf((Integer)o)));
-					} else if (o instanceof Long)
-						m.addInsertion(xtPropsKey, CF_XT_PROPS, HFactory.createColumn(compoColumnName, String.valueOf((Long)o)));
-					else if (o instanceof Double)
-						m.addInsertion(xtPropsKey, CF_XT_PROPS, HFactory.createColumn(compoColumnName, String.valueOf((Double)o)));
-					else if (o instanceof Boolean)
-						m.addInsertion(xtPropsKey, CF_XT_PROPS, HFactory.createColumn(compoColumnName, String.valueOf((Boolean)o)));
-					else if (o instanceof Float)
-						m.addInsertion(xtPropsKey, CF_XT_PROPS, HFactory.createColumn(compoColumnName, String.valueOf((Float)o)));
-					else if (o instanceof Date)
-						m.addInsertion(xtPropsKey, CF_XT_PROPS, HFactory.createColumn(compoColumnName, String.valueOf(((Date) o).getTime())));
-					else
-						throw new OXException(666, "Unsupported attribute type. Data: " + o);
+						m.addInsertion(xtPropsKey, CF_XT_PROPS, HFactory.createColumn(compoColumnName, String.valueOf(o)));
+					} else if (o instanceof Long) {
+                        m.addInsertion(xtPropsKey, CF_XT_PROPS, HFactory.createColumn(compoColumnName, String.valueOf(o)));
+                    } else if (o instanceof Double) {
+                        m.addInsertion(xtPropsKey, CF_XT_PROPS, HFactory.createColumn(compoColumnName, String.valueOf(o)));
+                    } else if (o instanceof Boolean) {
+                        m.addInsertion(xtPropsKey, CF_XT_PROPS, HFactory.createColumn(compoColumnName, String.valueOf(o)));
+                    } else if (o instanceof Float) {
+                        m.addInsertion(xtPropsKey, CF_XT_PROPS, HFactory.createColumn(compoColumnName, String.valueOf(o)));
+                    } else if (o instanceof Date) {
+                        m.addInsertion(xtPropsKey, CF_XT_PROPS, HFactory.createColumn(compoColumnName, String.valueOf(((Date) o).getTime())));
+                    } else {
+                        throw new OXException(666, "Unsupported attribute type. Data: " + o);
+                    }
 				}
 			}
 		}
