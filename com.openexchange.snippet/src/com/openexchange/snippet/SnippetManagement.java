@@ -49,6 +49,7 @@
 
 package com.openexchange.snippet;
 
+import java.util.List;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 
@@ -59,6 +60,23 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface SnippetManagement {
+
+    /**
+     * Gets all available snippets.
+     * 
+     * @param The optional types to filter against
+     * @return All available snippets
+     * @throws OXException If retrieval operation fails
+     */
+    List<Snippet> getSnippets(String... types) throws OXException;
+
+    /**
+     * Gets all snippets belonging to associated user.
+     * 
+     * @return All user-associated snippets
+     * @throws OXException If retrieval operation fails
+     */
+    List<Snippet> getOwnSnippets() throws OXException;
 
     /**
      * Gets a snippet by specified identifier.

@@ -53,12 +53,18 @@ import org.apache.commons.logging.Log;
 import com.openexchange.caching.CacheService;
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
+import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
+import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.snippet.SnippetService;
 import com.openexchange.snippet.mime.MimeSnippetService;
 import com.openexchange.snippet.mime.Services;
+import com.openexchange.snippet.mime.groupware.MimeSnippetCreateTableTask;
+import com.openexchange.snippet.mime.groupware.MimeSnippetDeleteListener;
 
 /**
  * {@link MimeSnippetActivator} - The activator for MIME Snippet bundle.
@@ -86,6 +92,13 @@ public class MimeSnippetActivator extends HousekeepingActivator {
         logger.info("Starting bundle: com.openexchange.snippet.mime");
         try {
             Services.setServiceLookup(this);
+            /*
+             * Register groupware stuff
+             */
+            final MimeSnippetCreateTableTask createTableTask = new MimeSnippetCreateTableTask();
+            registerService(UpdateTaskProviderService.class.getName(), new DefaultUpdateTaskProviderService(createTableTask));
+            registerService(CreateTableService.class, createTableTask);
+            registerService(DeleteListener.class, new MimeSnippetDeleteListener());
             /*
              * Register
              */

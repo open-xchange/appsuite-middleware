@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,43 +47,34 @@
  *
  */
 
-package com.openexchange.datatypes.genericonf.storage.osgi;
+package com.openexchange.snippet;
 
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.database.CreateTableService;
-import com.openexchange.database.provider.DBProvider;
-import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
-import com.openexchange.datatypes.genericonf.storage.impl.ClearGenConfTables;
-import com.openexchange.datatypes.genericonf.storage.impl.CreateGenConfTables;
-import com.openexchange.datatypes.genericonf.storage.impl.MySQLGenericConfigurationStorage;
-import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.osgi.HousekeepingActivator;
 
-public class Activator extends HousekeepingActivator {
+/**
+ * {@link ReferenceType} - Reference types.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public enum ReferenceType {
 
-    public static final AtomicReference<GenericConfigurationStorageService> REF =
-        new AtomicReference<GenericConfigurationStorageService>();
+    /**
+     * The type for generic configuration reference.
+     */
+    GENCONF,
+    /**
+     * The type for file storage reference.
+     */
+    FILE_STORAGE,
+    
+    ;
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { DBProvider.class };
+    /**
+     * Gets the type.
+     * 
+     * @return The type
+     */
+    public int getType() {
+        return ordinal();
     }
-
-    @Override
-    protected void startBundle() throws Exception {
-        final MySQLGenericConfigurationStorage mySQLGenericConfigurationStorage = new MySQLGenericConfigurationStorage();
-        mySQLGenericConfigurationStorage.setDBProvider(getService(DBProvider.class));
-        registerService(DeleteListener.class, new ClearGenConfTables(), null);
-        registerService(CreateTableService.class, new CreateGenConfTables(), null);
-        registerService(GenericConfigurationStorageService.class, mySQLGenericConfigurationStorage, null);
-        REF.set(mySQLGenericConfigurationStorage);
-    }
-
-    @Override
-    public void stopBundle() {
-        REF.set(null);
-        unregisterServices();
-        cleanUp();
-    }
-
+    
 }

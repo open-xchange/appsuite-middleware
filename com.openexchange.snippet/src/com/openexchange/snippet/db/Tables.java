@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,43 +47,55 @@
  *
  */
 
-package com.openexchange.datatypes.genericonf.storage.osgi;
+package com.openexchange.snippet.db;
 
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.database.CreateTableService;
-import com.openexchange.database.provider.DBProvider;
-import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
-import com.openexchange.datatypes.genericonf.storage.impl.ClearGenConfTables;
-import com.openexchange.datatypes.genericonf.storage.impl.CreateGenConfTables;
-import com.openexchange.datatypes.genericonf.storage.impl.MySQLGenericConfigurationStorage;
-import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.osgi.HousekeepingActivator;
 
-public class Activator extends HousekeepingActivator {
+/**
+ * {@link Tables} - Provides table specifications.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public final class Tables {
 
-    public static final AtomicReference<GenericConfigurationStorageService> REF =
-        new AtomicReference<GenericConfigurationStorageService>();
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { DBProvider.class };
+    /**
+     * Initializes a new {@link Tables}.
+     */
+    private Tables() {
+        super();
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        final MySQLGenericConfigurationStorage mySQLGenericConfigurationStorage = new MySQLGenericConfigurationStorage();
-        mySQLGenericConfigurationStorage.setDBProvider(getService(DBProvider.class));
-        registerService(DeleteListener.class, new ClearGenConfTables(), null);
-        registerService(CreateTableService.class, new CreateGenConfTables(), null);
-        registerService(GenericConfigurationStorageService.class, mySQLGenericConfigurationStorage, null);
-        REF.set(mySQLGenericConfigurationStorage);
+    /**
+     * Gets the name of the snippet table.
+     * 
+     * @return The table name
+     */
+    public static String getSnippetName() {
+        return "snippet";
     }
 
-    @Override
-    public void stopBundle() {
-        REF.set(null);
-        unregisterServices();
-        cleanUp();
+    /**
+     * Gets the SQL's <code>CREATE</code> statement for the snippet table
+     * 
+     * @return The SQL's <code>CREATE</code> statement
+     */
+    public static String getSnippetTable() {
+        return "CREATE TABLE "+getSnippetName()+" (" + 
+               " cid INT4 unsigned NOT NULL," + 
+               " user INT4 unsigned NOT NULL," + 
+               " id VARCHAR(64) CHARACTER SET latin1 NOT NULL," + 
+               " accountId INT4 unsigned DEFAULT NULL," + 
+               " displayName VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
+               " module VARCHAR(255) CHARACTER SET latin1 NOT NULL," + 
+               " type VARCHAR(255) CHARACTER SET latin1 NOT NULL," + 
+               " shared TINYINT unsigned DEFAULT NULL," + 
+               " refType TINYINT unsigned NOT NULL," + 
+               " refId VARCHAR(255) CHARACTER SET latin1 NOT NULL," + 
+               " lastModified BIGINT(64) NOT NULL," + 
+               " PRIMARY KEY (cid, user, id)," + 
+               " INDEX `indexUser` (cid, user)," + 
+               " INDEX `indexShared` (cid, shared)," + 
+               " INDEX `indexRefType` (cid, user, id, refType)," + 
+               ") ENGINE=InnoDB";
     }
 
 }

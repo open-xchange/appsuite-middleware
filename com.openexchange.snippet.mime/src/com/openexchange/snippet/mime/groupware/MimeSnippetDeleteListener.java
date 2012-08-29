@@ -47,35 +47,33 @@
  *
  */
 
-package com.openexchange.snippet.rdb.groupware;
+package com.openexchange.snippet.mime.groupware;
 
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.procedure.TIntProcedure;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.LinkedList;
+import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.snippet.ReferenceType;
-import com.openexchange.snippet.rdb.RdbSnippetManagement;
+import com.openexchange.snippet.mime.MimeSnippetManagement;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
- * {@link RdbSnippetDeleteListener}
+ * {@link MimeSnippetDeleteListener}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class RdbSnippetDeleteListener implements DeleteListener {
+public final class MimeSnippetDeleteListener implements DeleteListener {
 
     /**
-     * Initializes a new {@link RdbSnippetDeleteListener}.
+     * Initializes a new {@link MimeSnippetDeleteListener}.
      */
-    public RdbSnippetDeleteListener() {
+    public MimeSnippetDeleteListener() {
         super();
     }
 
@@ -91,19 +89,19 @@ public final class RdbSnippetDeleteListener implements DeleteListener {
         PreparedStatement stmt = null;
         try {
             final int userId = event.getId();
-            final TIntList ids;
+            final List<String> ids;
             {
                 ResultSet rs = null;
                 try {
                     stmt =
-                        writeCon.prepareStatement("SELECT id FROM snippet WHERE cid = ? AND user = ? AND refType=" + ReferenceType.GENCONF.getType());
+                        writeCon.prepareStatement("SELECT id FROM snippet WHERE cid = ? AND user = ? AND refType=" + ReferenceType.FILE_STORAGE.getType());
                     int pos = 1;
                     stmt.setInt(pos++, contextId);
                     stmt.setInt(pos++, userId);
                     rs = stmt.executeQuery();
-                    ids = new TIntArrayList(4);
+                    ids = new LinkedList<String>();
                     while (rs.next()) {
-                        ids.add(Integer.parseInt(rs.getString(1)));
+                        ids.add(rs.getString(1));
                     }
                 } finally {
                     DBUtils.closeSQLStuff(rs);
@@ -117,23 +115,8 @@ public final class RdbSnippetDeleteListener implements DeleteListener {
             /*
              * Delete them
              */
-            final AtomicReference<OXException> error = new AtomicReference<OXException>();
-            ids.forEach(new TIntProcedure() {
-
-                @Override
-                public boolean execute(final int id) {
-                    try {
-                        RdbSnippetManagement.deleteSnippet(id, userId, contextId, writeCon);
-                        return true;
-                    } catch (final OXException e) {
-                        error.set(e);
-                        return false;
-                    }
-                }
-            });
-            final OXException e = error.get();
-            if (null != e) {
-                throw e;
+            for (final String id : ids) {
+                MimeSnippetManagement.deleteSnippet(id, userId, contextId, writeCon);
             }
         } catch (final OXException e) {
             throw new OXException(e);

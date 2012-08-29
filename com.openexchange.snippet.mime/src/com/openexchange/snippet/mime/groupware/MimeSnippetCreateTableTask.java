@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.snippet.rdb.groupware;
+package com.openexchange.snippet.mime.groupware;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -67,81 +67,26 @@ import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.snippet.db.Tables;
-import com.openexchange.snippet.rdb.Services;
+import com.openexchange.snippet.mime.Services;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
- * {@link RdbSnippetCreateTableTask}
+ * {@link MimeSnippetCreateTableTask}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl implements UpdateTaskV2 {
+public final class MimeSnippetCreateTableTask extends AbstractCreateTableImpl implements UpdateTaskV2 {
 
     /**
-     * Initializes a new {@link RdbSnippetCreateTableTask}.
+     * Initializes a new {@link MimeSnippetCreateTableTask}.
      */
-    public RdbSnippetCreateTableTask() {
+    public MimeSnippetCreateTableTask() {
         super();
-    }
-
-    /*-
-     * --------------------------------------------------------------------------------------------------
-     */
-
-    private String getSnippetContentName() {
-        return "snippetContent";
-    }
-
-    private String getSnippetContentTable() {
-        return "CREATE TABLE "+getSnippetContentName()+" (" + 
-               " cid INT4 unsigned NOT NULL," + 
-               " user INT4 unsigned NOT NULL," + 
-               " id INT4 unsigned NOT NULL," + 
-               " content TEXT CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
-               " PRIMARY KEY (cid, user, id)" + 
-               ") ENGINE=InnoDB";
-    }
-
-    /*-
-     * --------------------------------------------------------------------------------------------------
-     */
-
-    private String getSnippetAttachmentName() {
-        return "snippetAttachment";
-    }
-
-    private String getSnippetAttachmentTable() {
-        return "CREATE TABLE "+getSnippetAttachmentName()+" (" + 
-               " cid INT4 unsigned NOT NULL," + 
-               " user INT4 unsigned NOT NULL," + 
-               " id INT4 unsigned NOT NULL," + 
-               " referenceId VARCHAR(255) CHARACTER SET latin1 NOT NULL," + 
-               " fileName VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL," + 
-               " INDEX (cid, user, id)" + 
-               ") ENGINE=InnoDB";
-    }
-
-    /*-
-     * --------------------------------------------------------------------------------------------------
-     */
-
-    private String getSnippetMiscName() {
-        return "snippetMisc";
-    }
-
-    private String getSnippetMiscTable() {
-        return "CREATE TABLE "+getSnippetMiscName()+" (" + 
-               " cid INT4 unsigned NOT NULL," + 
-               " user INT4 unsigned NOT NULL," + 
-               " id INT4 unsigned NOT NULL," + 
-               " json TEXT CHARACTER SET latin1 NOT NULL," + 
-               " PRIMARY KEY (cid, user, id)" + 
-               ") ENGINE=InnoDB";
     }
 
     @Override
     protected String[] getCreateStatements() {
-        return new String[] { Tables.getSnippetTable(), getSnippetContentName(), getSnippetAttachmentTable(), getSnippetMiscName() };
+        return new String[] { Tables.getSnippetTable() };
     }
 
     @Override
@@ -161,15 +106,12 @@ public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl imp
         final Connection writeCon = ds.getForUpdateTask(contextId);
         try {
             createTable(Tables.getSnippetName(), Tables.getSnippetTable(), writeCon);
-            createTable(getSnippetContentName(), getSnippetContentTable(), writeCon);
-            createTable(getSnippetAttachmentName(), getSnippetAttachmentTable(), writeCon);
-            createTable(getSnippetMiscName(), getSnippetMiscTable(), writeCon);
         } finally {
             ds.backForUpdateTask(contextId, writeCon);
         }
-        final Log logger = com.openexchange.log.Log.loggerFor(RdbSnippetCreateTableTask.class);
+        final Log logger = com.openexchange.log.Log.loggerFor(MimeSnippetCreateTableTask.class);
         if (logger.isInfoEnabled()) {
-            logger.info("UpdateTask '" + RdbSnippetCreateTableTask.class.getSimpleName() + "' successfully performed!");
+            logger.info("UpdateTask '" + MimeSnippetCreateTableTask.class.getSimpleName() + "' successfully performed!");
         }
     }
 
@@ -223,7 +165,7 @@ public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl imp
 
     @Override
     public String[] tablesToCreate() {
-        return new String[] { Tables.getSnippetTable(), getSnippetContentName(), getSnippetAttachmentTable(), getSnippetMiscName() };
+        return new String[] { Tables.getSnippetTable() };
     }
 
     private <S> S getService(final Class<? extends S> clazz) throws OXException {
