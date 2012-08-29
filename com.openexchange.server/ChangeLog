@@ -1,3 +1,6 @@
+* 2012-08-29 - thorben.betten@open-xchange.com
+ - Fix for bug 22860: Prevent NPE in file management
+
 * 2012-08-20 - marcus.klein@open-xchange.com
 
  - Fix for bug 22803: Parse escaped characters properly from PO file without entering an endless loop.
