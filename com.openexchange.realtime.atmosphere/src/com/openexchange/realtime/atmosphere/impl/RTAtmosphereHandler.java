@@ -66,7 +66,6 @@ import org.atmosphere.cpr.AtmosphereResponse;
 import org.atmosphere.cpr.Broadcaster;
 import org.atmosphere.cpr.BroadcasterFactory;
 import org.atmosphere.cpr.MetaBroadcaster;
-import org.atmosphere.websocket.WebSocketEventListenerAdapter;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
@@ -108,7 +107,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
     private final HandlerLibrary library;
 
     // Keep track of sessionID -> RTAtmosphereState to uniquely identify connected clients
-    private ConcurrentHashMap<String, RTAtmosphereState> sessionIdToState;
+    private final ConcurrentHashMap<String, RTAtmosphereState> sessionIdToState;
 
     // Keep track of user@context -> {context/user/resource1, context/user/resource2, ...} for canHandle/isConnected
     private final Map<String, Set<String>> userToBroadcasterIDs;

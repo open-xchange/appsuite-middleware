@@ -71,7 +71,8 @@ public class MessageDispatcherImpl implements MessageDispatcher {
     private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(MessageDispatcher.class));
 	private final Map<String, Channel> channels = new ConcurrentHashMap<String, Channel>();
 
-	public void send(final Stanza stanza, final ServerSession session) throws OXException {
+	@Override
+    public void send(final Stanza stanza, final ServerSession session) throws OXException {
 		final ID to = stanza.getTo();
 
 		final String protocol = to.getProtocol();

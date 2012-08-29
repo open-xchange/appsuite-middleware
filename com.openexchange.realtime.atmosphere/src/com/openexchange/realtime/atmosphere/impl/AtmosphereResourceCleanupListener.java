@@ -49,8 +49,6 @@
 
 package com.openexchange.realtime.atmosphere.impl;
 
-import java.util.HashSet;
-import java.util.Set;
 import org.atmosphere.cpr.AtmosphereResource;
 import org.atmosphere.cpr.AtmosphereResourceEvent;
 import org.atmosphere.cpr.AtmosphereResourceEventListener;
@@ -66,8 +64,8 @@ import com.openexchange.log.LogFactory;
  */
 public class AtmosphereResourceCleanupListener implements AtmosphereResourceEventListener {
     private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(RTAtmosphereHandler.class));
-    private Broadcaster[] associatedBroadcasters;
-    private AtmosphereResource resource;
+    private final Broadcaster[] associatedBroadcasters;
+    private final AtmosphereResource resource;
     /**
      * Initializes a new {@link AtmosphereResourceCleanupListener}.
      * @param associatedBroadcasters the associated Broadcasters
