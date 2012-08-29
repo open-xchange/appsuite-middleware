@@ -407,9 +407,9 @@ public final class RdbSnippetManagement implements SnippetManagement {
     }
 
     @Override
-    public void updateSnippet(final String identifier, final Snippet snippet, final Set<Property> properties) throws OXException {
+    public String updateSnippet(final String identifier, final Snippet snippet, final Set<Property> properties) throws OXException {
         if (null == identifier) {
-            return;
+            return identifier;
         }
         final int id = Integer.parseInt(identifier);
         final DatabaseService databaseService = getDatabaseService();
@@ -536,6 +536,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
             con.commit(); // COMMIT
             DBUtils.autocommit(con);
             rollback = false;
+            return identifier;
         } catch (final SQLException e) {
             throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {

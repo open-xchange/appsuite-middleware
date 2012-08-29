@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,54 +47,31 @@
  *
  */
 
-package com.openexchange.snippet;
+package com.openexchange.snippet.mime;
 
-import java.util.Set;
 import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
+import com.openexchange.snippet.SnippetManagement;
+import com.openexchange.snippet.SnippetService;
+
 
 /**
- * {@link SnippetManagement} - The snippet management for <code>CRUD</code> (<b>c</b>reate, <b>r</b>ead, <b>u</b>pdate, and <b>d</b>elete)
- * operations.
- * 
+ * {@link MimeSnippetService}
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface SnippetManagement {
+public final class MimeSnippetService implements SnippetService {
 
     /**
-     * Gets a snippet by specified identifier.
-     * 
-     * @param id The identifier
-     * @return The snippet
-     * @throws OXException If such a snippet does not exist
+     * Initializes a new {@link MimeSnippetService}.
      */
-    Snippet getSnippet(String id) throws OXException;
+    public MimeSnippetService() {
+        super();
+    }
 
-    /**
-     * Creates specified snippet.
-     * 
-     * @param snippet The snippet to create
-     * @return The newly created snippet's identifier
-     * @throws OXException If create operation fails
-     */
-    String createSnippet(Snippet snippet) throws OXException;
-
-    /**
-     * Updates specified snippet.
-     * 
-     * @param id The identifier of the snippet to update
-     * @param snippet The snippet providing the data to update
-     * @param properties The properties to update
-     * @return The updated snippet's identifier
-     * @throws OXException If update operation fails
-     */
-    String updateSnippet(String id, Snippet snippet, Set<Property> properties) throws OXException;
-
-    /**
-     * Updates specified snippet.
-     * 
-     * @param id The identifier of the snippet to delete
-     * @throws OXException If delete operation fails
-     */
-    void deleteSnippet(String id) throws OXException;
+    @Override
+    public SnippetManagement getManagement(Session session) throws OXException {
+        return new MimeSnippetManagement(session);
+    }
 
 }
