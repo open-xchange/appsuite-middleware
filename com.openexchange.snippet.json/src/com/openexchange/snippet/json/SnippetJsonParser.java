@@ -102,7 +102,7 @@ public final class SnippetJsonParser {
                 set.add(Property.ACCOUNT_ID);
             }
         }
-        key = Property.CONTENT.getPropName();
+        key = "content";
         if (jsonSnippet.hasAndNotNull(key)) {
             snippet.setContent(jsonSnippet.getString(key));
             if (null != set) {
@@ -170,7 +170,7 @@ public final class SnippetJsonParser {
                 set.add(Property.PROPERTIES);
             }
         }
-        key = Property.ATTACHMENTS.getPropName();
+        key = "attachments";
         if (jsonSnippet.hasAndNotNull(key)) {
             final JSONArray jsonAttachments = jsonSnippet.getJSONArray(key);
             final int len = jsonAttachments.length();

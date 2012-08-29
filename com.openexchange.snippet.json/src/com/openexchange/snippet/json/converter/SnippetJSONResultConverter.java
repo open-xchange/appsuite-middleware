@@ -126,7 +126,7 @@ public class SnippetJSONResultConverter implements ResultConverter {
         }
         String tmp = snippet.getContent();
         if (null != tmp) {
-            json.put(Property.CONTENT.getPropName(), tmp);
+            json.put("content", tmp);
         }
         itg = snippet.getCreatedBy();
         if (itg >= 0) {
@@ -180,6 +180,7 @@ public class SnippetJSONResultConverter implements ResultConverter {
                 }
                 jArray.put(jsonAttachment);
             }
+            json.put("attachments", jArray);
         }
         return json;
     }

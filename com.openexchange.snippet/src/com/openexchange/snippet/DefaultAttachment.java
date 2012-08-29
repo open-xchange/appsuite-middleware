@@ -180,4 +180,28 @@ public class DefaultAttachment implements Attachment {
         this.streamProvider = streamProvider;
     }
 
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder();
+        builder.append("DefaultAttachment [");
+        final String delim = ", ";
+        if (id != null) {
+            builder.append("id=").append(id).append(delim);
+        }
+        if (contentType != null) {
+            builder.append("contentType=").append(contentType).append(delim);
+        }
+        if (contentDisposition != null) {
+            builder.append("contentDisposition=").append(contentDisposition).append(delim);
+        }
+        if (size > 0) {
+            builder.append("size=").append(size).append(delim);
+        }
+        if (streamProvider != null) {
+            builder.append("streamProvider=").append(streamProvider);
+        }
+        builder.append(']');
+        return builder.toString();
+    }
+
 }

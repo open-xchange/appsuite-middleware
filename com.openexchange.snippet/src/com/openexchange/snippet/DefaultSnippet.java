@@ -582,4 +582,46 @@ public class DefaultSnippet implements Snippet {
         return properties.entrySet();
     }
 
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder(128);
+        builder.append("DefaultSnippet [");
+        final String delim = ", ";
+        if (id != null) {
+            builder.append("id=").append(id).append(delim);
+        }
+        if (accountId >= 0) {
+            builder.append("accountId=").append(accountId).append(delim);
+        }
+        if (module != null) {
+            builder.append("module=").append(module).append(delim);
+        }
+        if (type != null) {
+            builder.append("type=").append(type).append(delim);
+        }
+        if (displayName != null) {
+            builder.append("displayName=").append(displayName).append(delim);
+        }
+        if (content != null) {
+            builder.append("content=").append(content).append(delim);
+        }
+        if (attachments != null) {
+            builder.append("attachments=").append(attachments).append(delim);
+        }
+        if (misc != null) {
+            builder.append("misc=").append(misc).append(delim);
+        }
+        if (shared != null) {
+            builder.append("shared=").append(shared).append(delim);
+        }
+        if (createdBy >= 0) {
+            builder.append("createdBy=").append(createdBy).append(delim);
+        }
+        if (properties != null) {
+            builder.append("properties=").append(getUnnamedProperties());
+        }
+        builder.append(']');
+        return builder.toString();
+    }
+
 }
