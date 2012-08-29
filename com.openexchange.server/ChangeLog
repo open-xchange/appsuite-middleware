@@ -1,3 +1,7 @@
+* 2012-08-29 - jan.bauerdick@open-xchange.com
+
+ - New bundle c.o.cluster.discovery.aws: Find aws nodes in cluster
+
 * 2012-08-28 - jan.bauerdick@open-xchange.com
 
  - New bundle c.o.aws: Providing services to communicate with amazon web services
