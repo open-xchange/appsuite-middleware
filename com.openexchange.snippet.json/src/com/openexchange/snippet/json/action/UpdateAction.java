@@ -50,8 +50,10 @@
 package com.openexchange.snippet.json.action;
 
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -61,7 +63,10 @@ import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.snippet.Attachment;
 import com.openexchange.snippet.DefaultSnippet;
+import com.openexchange.snippet.Property;
+import com.openexchange.snippet.SnippetManagement;
 import com.openexchange.snippet.json.SnippetJsonParser;
 import com.openexchange.snippet.json.SnippetRequest;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -96,16 +101,19 @@ public final class UpdateAction extends SnippetAction {
 
     @Override
     protected AJAXRequestResult perform(final SnippetRequest snippetRequest) throws OXException, JSONException {
+        final String id = snippetRequest.checkParameter("id");
         final JSONObject jsonSnippet = (JSONObject) snippetRequest.getRequestData().getData();
         if (null == jsonSnippet) {
             throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
         }
         // Parse from JSON to snippet
         final DefaultSnippet snippet = new DefaultSnippet();
-        SnippetJsonParser.parse(jsonSnippet, snippet);
-        // TODO: Update
-        final String id = getSnippetService().getManagement(snippetRequest.getSession()).updateSnippet(getAction(), snippet, null, null, null);
-        return new AJAXRequestResult(id, "string");
+        final Set<Property> properties = EnumSet.noneOf(Property.class);
+        SnippetJsonParser.parse(jsonSnippet, snippet, properties);
+        // Update
+        final SnippetManagement management = getSnippetService().getManagement(snippetRequest.getSession());
+        final String newId = management.updateSnippet(id, snippet, properties, Collections.<Attachment> emptyList(), Collections.<Attachment> emptyList());
+        return new AJAXRequestResult(newId, "string");
     }
 
     @Override
@@ -119,15 +127,15 @@ public final class UpdateAction extends SnippetAction {
         final AJAXRequestData requestData = snippetRequest.getRequestData();
         final String pathInfo = requestData.getPathInfo();
         if (isEmpty(pathInfo)) {
-            requestData.setAction("update");
+            throw AjaxExceptionCodes.BAD_REQUEST.create();
+        }
+        // TODO: Fix it...
+        final String[] pathElements = SPLIT_PATH.split(pathInfo);
+        final int length = pathElements.length;
+        if (0 != length) {
+            throw AjaxExceptionCodes.UNKNOWN_ACTION.create(pathInfo);
         } else {
-            final String[] pathElements = SPLIT_PATH.split(pathInfo);
-            final int length = pathElements.length;
-            if (0 == length) {
-                requestData.setAction("new");
-            } else {
-                throw AjaxExceptionCodes.UNKNOWN_ACTION.create(pathInfo);
-            }
+            requestData.setAction("update");
         }
         return actions.get(requestData.getAction()).perform(snippetRequest);
     }

@@ -98,38 +98,65 @@ public final class SnippetJsonParser {
         String key = Property.ACCOUNT_ID.getPropName();
         if (jsonSnippet.hasAndNotNull(key)) {
             snippet.setAccountId(jsonSnippet.getInt(key));
+            if (null != set) {
+                set.add(Property.ACCOUNT_ID);
+            }
         }
         key = Property.CONTENT.getPropName();
         if (jsonSnippet.hasAndNotNull(key)) {
             snippet.setContent(jsonSnippet.getString(key));
+            if (null != set) {
+                set.add(Property.CONTENT);
+            }
         }
         key = Property.CREATED_BY.getPropName();
         if (jsonSnippet.hasAndNotNull(key)) {
             snippet.setCreatedBy(jsonSnippet.getInt(key));
+            if (null != set) {
+                set.add(Property.CREATED_BY);
+            }
         }
         key = Property.DISPLAY_NAME.getPropName();
         if (jsonSnippet.hasAndNotNull(key)) {
             snippet.setDisplayName(jsonSnippet.getString(key));
+            if (null != set) {
+                set.add(Property.DISPLAY_NAME);
+            }
         }
         key = Property.ID.getPropName();
         if (jsonSnippet.hasAndNotNull(key)) {
             snippet.setId(jsonSnippet.getString(key));
+            if (null != set) {
+                set.add(Property.ID);
+            }
         }
         key = Property.MISC.getPropName();
         if (jsonSnippet.hasAndNotNull(key)) {
             snippet.setMisc(jsonSnippet.get(key));
+            if (null != set) {
+                set.add(Property.MISC);
+            }
         }
         key = Property.MODULE.getPropName();
         if (jsonSnippet.hasAndNotNull(key)) {
             snippet.setModule(jsonSnippet.getString(key));
+            if (null != set) {
+                set.add(Property.MODULE);
+            }
         }
         key = Property.SHARED.getPropName();
         if (jsonSnippet.hasAndNotNull(key)) {
             snippet.setShared(jsonSnippet.getBoolean(key));
+            if (null != set) {
+                set.add(Property.SHARED);
+            }
         }
         key = Property.TYPE.getPropName();
         if (jsonSnippet.hasAndNotNull(key)) {
             snippet.setType(jsonSnippet.getString(key));
+            if (null != set) {
+                set.add(Property.TYPE);
+            }
         }
         key = "unnamedproperties";
         if (jsonSnippet.hasAndNotNull(key)) {
@@ -139,6 +166,9 @@ public final class SnippetJsonParser {
                 up.put(entry.getKey(), entry.getValue());
             }
             snippet.putUnnamedProperties(up);
+            if (null != set) {
+                set.add(Property.PROPERTIES);
+            }
         }
         key = Property.ATTACHMENTS.getPropName();
         if (jsonSnippet.hasAndNotNull(key)) {
@@ -151,6 +181,9 @@ public final class SnippetJsonParser {
                 list.add(attachment);
             }
             snippet.setAttachments(list);
+            if (null != set) {
+                set.add(Property.ATTACHMENTS);
+            }
         }
     }
 
