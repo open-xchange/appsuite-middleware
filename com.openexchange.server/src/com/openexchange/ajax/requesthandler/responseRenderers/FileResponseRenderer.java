@@ -225,7 +225,7 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
     }
 
-    private IFileHolder rotateIfImage(IFileHolder file) throws IOException, OXException {
+    private IFileHolder rotateIfImage(final IFileHolder file) throws IOException, OXException {
         final ImageScalingService scaler = this.scaler;
         if (scaler == null) {
             return file;
@@ -236,8 +236,10 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
 
         final InputStream rotated = scaler.rotateAccordingExif(file.getStream(), file.getContentType());
-        file = new FileHolder(rotated, -1, file.getContentType(), "");
-        return file;
+        if (null == rotated) {
+            // TODO: What to to then?
+        }
+        return new FileHolder(rotated, -1, file.getContentType(), "");
     }
 
     /**
