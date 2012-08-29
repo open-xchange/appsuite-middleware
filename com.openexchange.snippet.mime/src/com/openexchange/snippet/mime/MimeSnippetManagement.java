@@ -383,7 +383,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
                             if (!(attachment instanceof DefaultAttachment)) {
                                 throw SnippetExceptionCodes.ILLEGAL_STATE.create("Missing attachment identifier");
                             }
-                            ((DefaultAttachment) attachment).setId(UUID.randomUUID().toString()); 
+                            ((DefaultAttachment) attachment).setId(UUID.randomUUID().toString());
                         }
                         multipart.addBodyPart(attachment2MimePart(attachment));
                     }
@@ -663,7 +663,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
 
     /**
      * Deletes specified snippet
-     * 
+     *
      * @param id The snippet identifier
      * @param userId The user identifier
      * @param contextId The context identifier

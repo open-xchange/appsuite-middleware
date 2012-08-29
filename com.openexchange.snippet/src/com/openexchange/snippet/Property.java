@@ -51,7 +51,7 @@ package com.openexchange.snippet;
 
 /**
  * {@link Property} - A snippet's properties.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public enum Property {
@@ -111,7 +111,7 @@ public enum Property {
 
     /**
      * Gets the property name
-     * 
+     *
      * @return The property name or <code>null</code> if no property is associated
      */
     public String getPropName() {
@@ -125,7 +125,7 @@ public enum Property {
 
     /**
      * Invokes appropriate switcher's method for this property.
-     * 
+     *
      * @param switcher The switcher
      * @return The possible result object or <code>null</code>
      */

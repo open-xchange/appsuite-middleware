@@ -66,7 +66,7 @@ public final class Tables {
 
     /**
      * Gets the name of the snippet table.
-     * 
+     *
      * @return The table name
      */
     public static String getSnippetName() {
@@ -75,26 +75,26 @@ public final class Tables {
 
     /**
      * Gets the SQL's <code>CREATE</code> statement for the snippet table
-     * 
+     *
      * @return The SQL's <code>CREATE</code> statement
      */
     public static String getSnippetTable() {
-        return "CREATE TABLE "+getSnippetName()+" (" + 
-               " cid INT4 unsigned NOT NULL," + 
-               " user INT4 unsigned NOT NULL," + 
-               " id VARCHAR(64) CHARACTER SET latin1 NOT NULL," + 
-               " accountId INT4 unsigned DEFAULT NULL," + 
-               " displayName VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
-               " module VARCHAR(255) CHARACTER SET latin1 NOT NULL," + 
-               " type VARCHAR(255) CHARACTER SET latin1 NOT NULL," + 
-               " shared TINYINT unsigned DEFAULT NULL," + 
-               " refType TINYINT unsigned NOT NULL," + 
-               " refId VARCHAR(255) CHARACTER SET latin1 NOT NULL," + 
-               " lastModified BIGINT(64) NOT NULL," + 
-               " PRIMARY KEY (cid, user, id)," + 
-               " INDEX `indexUser` (cid, user)," + 
-               " INDEX `indexShared` (cid, shared)," + 
-               " INDEX `indexRefType` (cid, user, id, refType)" + 
+        return "CREATE TABLE "+getSnippetName()+" (" +
+               " cid INT4 unsigned NOT NULL," +
+               " user INT4 unsigned NOT NULL," +
+               " id VARCHAR(64) CHARACTER SET latin1 NOT NULL," +
+               " accountId INT4 unsigned DEFAULT NULL," +
+               " displayName VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
+               " module VARCHAR(255) CHARACTER SET latin1 NOT NULL," +
+               " type VARCHAR(255) CHARACTER SET latin1 NOT NULL," +
+               " shared TINYINT unsigned DEFAULT NULL," +
+               " refType TINYINT unsigned NOT NULL," +
+               " refId VARCHAR(255) CHARACTER SET latin1 NOT NULL," +
+               " lastModified BIGINT(64) NOT NULL," +
+               " PRIMARY KEY (cid, user, id)," +
+               " INDEX `indexUser` (cid, user)," +
+               " INDEX `indexShared` (cid, shared)," +
+               " INDEX `indexRefType` (cid, user, id, refType)" +
                ") ENGINE=InnoDB";
     }
 

@@ -98,7 +98,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link RdbSnippetManagement}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class RdbSnippetManagement implements SnippetManagement {
@@ -176,7 +176,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
 
     /**
      * {@link QuotaFileStorageStreamProvider} - File store stream provider.
-     * 
+     *
      * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
      */
     public static final class QuotaFileStorageStreamProvider implements DefaultAttachment.InputStreamProvider {
@@ -186,7 +186,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
 
         /**
          * Initializes a new {@link QuotaFileStorageStreamProvider}.
-         * 
+         *
          * @param filestoreLocation The file store location
          * @param fileStorage The file store
          */
@@ -254,7 +254,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
         final List<Snippet> list = new ArrayList<Snippet>(ids.size());
         final AtomicReference<OXException> error = new AtomicReference<OXException>();
         ids.forEach(new TIntProcedure() {
-            
+
             @Override
             public boolean execute(final int id) {
                 try {
@@ -307,7 +307,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
         final List<Snippet> list = new ArrayList<Snippet>(ids.size());
         final AtomicReference<OXException> error = new AtomicReference<OXException>();
         ids.forEach(new TIntProcedure() {
-            
+
             @Override
             public boolean execute(final int id) {
                 try {
@@ -804,7 +804,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
 
     /**
      * Deletes specified snippet.
-     * 
+     *
      * @param id The snippet identifier
      * @param userId The user identifier
      * @param contextId The context identifier

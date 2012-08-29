@@ -68,7 +68,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link GetAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @Action(
@@ -85,7 +85,7 @@ public final class GetAction extends SnippetAction {
 
     /**
      * Initializes a new {@link GetAction}.
-     * 
+     *
      * @param services The service look-up
      */
     public GetAction(final ServiceLookup services, final Map<String, SnippetAction> actions) {
@@ -98,7 +98,7 @@ public final class GetAction extends SnippetAction {
         final String id = snippetRequest.checkParameter("id");
         SnippetService snippetService = getSnippetService();
         Snippet snippet = snippetService.getManagement(snippetRequest.getSession()).getSnippet(id);
-   
+
         return new AJAXRequestResult(snippet, "snippet");
     }
 

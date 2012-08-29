@@ -67,7 +67,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link DeleteAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @Action(
@@ -84,7 +84,7 @@ public final class DeleteAction extends SnippetAction {
 
     /**
      * Initializes a new {@link DeleteAction}.
-     * 
+     *
      * @param services The service look-up
      */
     public DeleteAction(final ServiceLookup services, final Map<String, SnippetAction> actions) {
@@ -97,7 +97,7 @@ public final class DeleteAction extends SnippetAction {
         final JSONArray ids = (JSONArray) snippetRequest.getRequestData().getData();
         if (null != ids) {
             final int length = ids.length();
-    
+
             SnippetManagement management = getSnippetService().getManagement(snippetRequest.getSession());
             for (int i = 0; i < length; i++) {
                 management.deleteSnippet(ids.getString(i));

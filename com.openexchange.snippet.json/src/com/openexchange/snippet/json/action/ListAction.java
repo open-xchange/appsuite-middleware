@@ -65,12 +65,12 @@ import com.openexchange.snippet.json.SnippetRequest;
 
 /**
  * {@link ListAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @Action(
     name = "list"
-    , description = "Get a list of snippets associated with the current user and context." 
+    , description = "Get a list of snippets associated with the current user and context."
     , method = RequestMethod.PUT
     , parameters = {}
     , requestBody = "An array containing snippet identifiers."
@@ -80,7 +80,7 @@ public final class ListAction extends SnippetAction {
 
     /**
      * Initializes a new {@link ListAction}.
-     * 
+     *
      * @param services The service look-up
      */
     public ListAction(final ServiceLookup services, final Map<String, SnippetAction> actions) {

@@ -82,12 +82,12 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link AttachAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @Action(
     name = "attach"
-    , description = "Attaches a file attachment to an existing snippet associated with the current user and context." 
+    , description = "Attaches a file attachment to an existing snippet associated with the current user and context."
     , method = RequestMethod.POST
     , parameters = {
         @Parameter(name = "id", description = "The snippet's identifier", optional=false)

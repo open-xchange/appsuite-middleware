@@ -67,7 +67,7 @@ public final class SnippetExceptionMessages implements LocalizableStrings {
 
     // No such snippet found for identifier: %1$s
     public static final String SNIPPET_NOT_FOUND_MSG = "No such snippet found for identifier: %1$s";
-    
+
     // A JSON error occurred: %1$s
     public static final String JSON_ERROR_MSG = "A JSON error occurred: %1$s";
 

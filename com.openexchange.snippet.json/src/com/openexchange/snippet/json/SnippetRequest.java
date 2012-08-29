@@ -55,7 +55,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link SnippetRequest} - A snippet request.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SnippetRequest {
@@ -66,7 +66,7 @@ public class SnippetRequest {
 
     /**
      * Initializes a new {@link SnippetRequest}.
-     * 
+     *
      * @param requestData The AJAX request data
      * @param session The session
      */
@@ -86,7 +86,7 @@ public class SnippetRequest {
 
     /**
      * Checks for presence of specified parameter.
-     * 
+     *
      * @param name The parameter name
      * @return <code>true</code> if such a parameter exists; otherwise <code>false</code> if absent
      */
@@ -96,7 +96,7 @@ public class SnippetRequest {
 
     /**
      * Gets the value mapped to given parameter name.
-     * 
+     *
      * @param name The parameter name
      * @return The value mapped to given parameter name
      * @throws NullPointerException If name is <code>null</code>
@@ -108,7 +108,7 @@ public class SnippetRequest {
 
     /**
      * Tries to get a parameter value as parsed as a certain type
-     * 
+     *
      * @param name The parameter name
      * @param coerceTo The type the parameter should be interpreted as
      * @return The coerced value
@@ -120,7 +120,7 @@ public class SnippetRequest {
 
     /**
      * Gets the parsed <code>int</code> value of denoted parameter.
-     * 
+     *
      * @param name The parameter name
      * @return The parsed <code>int</code> value
      * @throws OXException If parameter is missing or not a number.
@@ -131,7 +131,7 @@ public class SnippetRequest {
 
     /**
      * Gets the associated session.
-     * 
+     *
      * @return The session
      */
     public ServerSession getSession() {
@@ -140,7 +140,7 @@ public class SnippetRequest {
 
     /**
      * Gets the AJAX request data
-     * 
+     *
      * @return The AJAX request data
      */
     public AJAXRequestData getRequestData() {

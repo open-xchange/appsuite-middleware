@@ -67,7 +67,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link RdbSnippetDeleteListener}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class RdbSnippetDeleteListener implements DeleteListener {

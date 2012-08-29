@@ -57,14 +57,14 @@ import com.openexchange.exception.OXException;
 /**
  * {@link SnippetManagement} - The snippet management for <code>CRUD</code> (<b>c</b>reate, <b>r</b>ead, <b>u</b>pdate, and <b>d</b>elete)
  * operations.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface SnippetManagement {
 
     /**
      * Gets all available snippets.
-     * 
+     *
      * @param The optional types to filter against
      * @return All available snippets
      * @throws OXException If retrieval operation fails
@@ -73,7 +73,7 @@ public interface SnippetManagement {
 
     /**
      * Gets all snippets belonging to associated user.
-     * 
+     *
      * @return All user-associated snippets
      * @throws OXException If retrieval operation fails
      */
@@ -81,7 +81,7 @@ public interface SnippetManagement {
 
     /**
      * Gets a snippet by specified identifier.
-     * 
+     *
      * @param id The identifier
      * @return The snippet
      * @throws OXException If such a snippet does not exist
@@ -90,7 +90,7 @@ public interface SnippetManagement {
 
     /**
      * Creates specified snippet.
-     * 
+     *
      * @param snippet The snippet to create
      * @return The newly created snippet's identifier
      * @throws OXException If create operation fails
@@ -99,7 +99,7 @@ public interface SnippetManagement {
 
     /**
      * Updates specified snippet.
-     * 
+     *
      * @param id The identifier of the snippet to update
      * @param snippet The snippet providing the data to update
      * @param properties The properties to update
@@ -112,7 +112,7 @@ public interface SnippetManagement {
 
     /**
      * Updates specified snippet.
-     * 
+     *
      * @param id The identifier of the snippet to delete
      * @throws OXException If delete operation fails
      */

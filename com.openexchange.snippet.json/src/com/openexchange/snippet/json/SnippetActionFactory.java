@@ -63,7 +63,7 @@ import com.openexchange.snippet.json.action.SnippetAction;
 
 /**
  * {@link SnippetActionFactory}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @Module(
@@ -76,7 +76,7 @@ public class SnippetActionFactory implements AJAXActionServiceFactory {
 
     /**
      * Initializes a new {@link SnippetActionFactory}.
-     * 
+     *
      * @param services The service look-up
      */
     public SnippetActionFactory(final ServiceLookup services) {

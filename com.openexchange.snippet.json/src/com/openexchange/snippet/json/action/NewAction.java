@@ -71,7 +71,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link NewAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @Action(
@@ -87,7 +87,7 @@ public final class NewAction extends SnippetAction {
 
     /**
      * Initializes a new {@link NewAction}.
-     * 
+     *
      * @param services The service look-up
      */
     public NewAction(final ServiceLookup services, final Map<String, SnippetAction> actions) {

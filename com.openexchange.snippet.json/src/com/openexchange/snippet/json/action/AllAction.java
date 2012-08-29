@@ -64,12 +64,12 @@ import com.openexchange.snippet.json.SnippetRequest;
 
 /**
  * {@link AllAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @Action(
     name = "all"
-    , description = "Gets all snippets associated with the current user and context." 
+    , description = "Gets all snippets associated with the current user and context."
     , method = RequestMethod.GET
     , parameters = {
         @Parameter(name = "type", description = "Optional comma-separated identifiers for snippet types", optional=true)

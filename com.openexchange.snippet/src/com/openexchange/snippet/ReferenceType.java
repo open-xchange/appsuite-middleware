@@ -65,16 +65,16 @@ public enum ReferenceType {
      * The type for file storage reference.
      */
     FILE_STORAGE,
-    
+
     ;
 
     /**
      * Gets the type.
-     * 
+     *
      * @return The type
      */
     public int getType() {
         return ordinal();
     }
-    
+
 }

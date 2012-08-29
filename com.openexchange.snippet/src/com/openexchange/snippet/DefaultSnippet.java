@@ -62,7 +62,7 @@ import org.json.JSONTokener;
 
 /**
  * {@link DefaultSnippet} - The default snippet implementation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class DefaultSnippet implements Snippet {
@@ -277,7 +277,7 @@ public class DefaultSnippet implements Snippet {
 
     /**
      * Sets the identifier
-     * 
+     *
      * @param id The identifier to set
      * @return This snippet with argument applied
      */
@@ -293,7 +293,7 @@ public class DefaultSnippet implements Snippet {
 
     /**
      * Sets the accountId
-     * 
+     *
      * @param accountId The accountId to set
      * @return This snippet with argument applied
      */
@@ -309,7 +309,7 @@ public class DefaultSnippet implements Snippet {
 
     /**
      * Sets the module
-     * 
+     *
      * @param module The module to set
      * @return This snippet with argument applied
      */
@@ -325,7 +325,7 @@ public class DefaultSnippet implements Snippet {
 
     /**
      * Sets the type
-     * 
+     *
      * @param type The type to set
      * @return This snippet with argument applied
      */
@@ -341,7 +341,7 @@ public class DefaultSnippet implements Snippet {
 
     /**
      * Sets the displayName
-     * 
+     *
      * @param displayName The displayName to set
      * @return This snippet with argument applied
      */
@@ -357,7 +357,7 @@ public class DefaultSnippet implements Snippet {
 
     /**
      * Sets the content
-     * 
+     *
      * @param content The content to set
      * @return This snippet with argument applied
      */
@@ -368,7 +368,7 @@ public class DefaultSnippet implements Snippet {
 
     /**
      * Sets the attachments
-     * 
+     *
      * @param attachments The attachments to set
      * @return This snippet with argument applied
      */
@@ -379,7 +379,7 @@ public class DefaultSnippet implements Snippet {
 
     /**
      * Sets the miscellaneous JSON object.
-     * 
+     *
      * @param misc The miscellaneous JSON object to set
      * @return This snippet with argument applied
      */
@@ -403,7 +403,7 @@ public class DefaultSnippet implements Snippet {
 
     /**
      * Sets the shared flag
-     * 
+     *
      * @param shared The shared flag to set
      * @return This snippet with argument applied
      */
@@ -416,7 +416,7 @@ public class DefaultSnippet implements Snippet {
 
     /**
      * Sets the creator
-     * 
+     *
      * @param createdBy The creator to set
      * @return This snippet with argument applied
      */
@@ -432,7 +432,7 @@ public class DefaultSnippet implements Snippet {
 
     /**
      * Tests for existence of specified property.
-     * 
+     *
      * @param propName The property name
      * @return <code>true</code> if contained; otherwise <code>false</code>
      */
@@ -442,7 +442,7 @@ public class DefaultSnippet implements Snippet {
 
     /**
      * Gets the named property's value.
-     * 
+     *
      * @param propName The property name
      * @return The associated value or <code>null</code> if absent
      */
@@ -452,7 +452,7 @@ public class DefaultSnippet implements Snippet {
 
     /**
      * Puts specified property.
-     * 
+     *
      * @param propName The property name
      * @param value The property value
      */
@@ -499,7 +499,7 @@ public class DefaultSnippet implements Snippet {
 
     /**
      * Puts unnamed properties from given map.
-     * 
+     *
      * @param properties The map providing unnamed properties
      * @return This snippet with unnamed properties applied
      */
@@ -519,7 +519,7 @@ public class DefaultSnippet implements Snippet {
 
     /**
      * Removes named property.
-     * 
+     *
      * @param propName The property name
      */
     public void remove(final String propName) {
@@ -575,7 +575,7 @@ public class DefaultSnippet implements Snippet {
 
     /**
      * Gets the properties' entry set.
-     * 
+     *
      * @return The entry set
      */
     public Set<Entry<String, Object>> entrySet() {

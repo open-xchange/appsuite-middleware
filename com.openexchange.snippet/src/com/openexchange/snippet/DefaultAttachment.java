@@ -54,7 +54,7 @@ import java.io.InputStream;
 
 /**
  * {@link DefaultAttachment} - The default attachment implementation based on {@link InputStreamProvider}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class DefaultAttachment implements Attachment {
@@ -66,7 +66,7 @@ public class DefaultAttachment implements Attachment {
 
         /**
          * Gets the input stream.
-         * 
+         *
          * @return The input stream
          * @throws IOException If an I/O error occurs
          */
@@ -134,7 +134,7 @@ public class DefaultAttachment implements Attachment {
         }
         return streamProvider.getInputStream();
     }
-    
+
     /**
      * Sets the identifier
      *
@@ -146,7 +146,7 @@ public class DefaultAttachment implements Attachment {
 
     /**
      * Sets the content type
-     * 
+     *
      * @param contentType The content type to set
      */
     public void setContentType(final String contentType) {
@@ -155,7 +155,7 @@ public class DefaultAttachment implements Attachment {
 
     /**
      * Sets the content disposition
-     * 
+     *
      * @param contentDisposition The content disposition to set
      */
     public void setContentDisposition(final String contentDisposition) {
@@ -164,7 +164,7 @@ public class DefaultAttachment implements Attachment {
 
     /**
      * Sets the size
-     * 
+     *
      * @param size The size to set
      */
     public void setSize(final long size) {
@@ -173,7 +173,7 @@ public class DefaultAttachment implements Attachment {
 
     /**
      * Sets the stream provider
-     * 
+     *
      * @param streamProvider The stream provider to set
      */
     public void setStreamProvider(final InputStreamProvider streamProvider) {

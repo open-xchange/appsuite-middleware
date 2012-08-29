@@ -58,7 +58,7 @@ import com.openexchange.snippet.json.converter.SnippetJSONResultConverter;
 
 /**
  * {@link SnippetJsonActivator} - Activator for the snippet's JSON interface.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SnippetJsonActivator extends AJAXModuleActivator {

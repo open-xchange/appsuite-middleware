@@ -71,7 +71,7 @@ import com.openexchange.snippet.json.SnippetRequest;
 
 /**
  * {@link DetachAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @Action(

@@ -64,7 +64,7 @@ import com.openexchange.snippet.Property;
 
 /**
  * {@link SnippetJsonParser} - The JSON parser for snippets.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SnippetJsonParser {
@@ -78,7 +78,7 @@ public final class SnippetJsonParser {
 
     /**
      * Parses specified JSON into given snippet.
-     * 
+     *
      * @param jsonSnippet The JSON snippet
      * @param snippet The snippet
      * @throws JSONException If a JSON error occurs
@@ -89,7 +89,7 @@ public final class SnippetJsonParser {
 
     /**
      * Parses specified JSON into given snippet.
-     * 
+     *
      * @param jsonSnippet The JSON snippet
      * @param snippet The snippet
      * @throws JSONException If a JSON error occurs
@@ -189,7 +189,7 @@ public final class SnippetJsonParser {
 
     /**
      * Parses specified JSON into given attachments.
-     * 
+     *
      * @param jsonAttachment The JOSN attachment
      * @param attachment The attachment
      * @throws JSONException If a JSON error occurs

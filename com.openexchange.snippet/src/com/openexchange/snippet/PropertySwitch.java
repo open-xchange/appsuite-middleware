@@ -51,84 +51,84 @@ package com.openexchange.snippet;
 
 /**
  * {@link PropertySwitch} - Adapts the visitor pattern for a snippet's properties.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface PropertySwitch {
 
     /**
      * Handles identifier.
-     * 
+     *
      * @return The result object or <code>null</code>
      */
     public Object id();
 
     /**
      * Handles (unnamed) properties.
-     * 
+     *
      * @return The result object or <code>null</code>
      */
     public Object properties();
 
     /**
      * Handles content.
-     * 
+     *
      * @return The result object or <code>null</code>
      */
     public Object content();
 
     /**
      * Handles attachments.
-     * 
+     *
      * @return The result object or <code>null</code>
      */
     public Object attachments();
 
     /**
      * Handles account identifier.
-     * 
+     *
      * @return The result object or <code>null</code>
      */
     public Object accountId();
 
     /**
      * Handles type identifier.
-     * 
+     *
      * @return The result object or <code>null</code>
      */
     public Object type();
 
     /**
      * Handles display name.
-     * 
+     *
      * @return The result object or <code>null</code>
      */
     public Object displayName();
 
     /**
      * Handles module identifier.
-     * 
+     *
      * @return The result object or <code>null</code>
      */
     public Object module();
 
     /**
      * Handles creator identifier.
-     * 
+     *
      * @return The result object or <code>null</code>
      */
     public Object createdBy();
 
     /**
      * Handles shared flag.
-     * 
+     *
      * @return The result object or <code>null</code>
      */
     public Object shared();
 
     /**
      * Handles miscellaneous JSON data.
-     * 
+     *
      * @return The result object or <code>null</code>
      */
     public Object misc();

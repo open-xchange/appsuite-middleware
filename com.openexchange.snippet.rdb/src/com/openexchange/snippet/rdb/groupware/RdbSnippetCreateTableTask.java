@@ -72,7 +72,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link RdbSnippetCreateTableTask}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl implements UpdateTaskV2 {
@@ -93,12 +93,12 @@ public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl imp
     }
 
     private String getSnippetContentTable() {
-        return "CREATE TABLE "+getSnippetContentName()+" (" + 
-               " cid INT4 unsigned NOT NULL," + 
-               " user INT4 unsigned NOT NULL," + 
-               " id INT4 unsigned NOT NULL," + 
-               " content TEXT CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
-               " PRIMARY KEY (cid, user, id)" + 
+        return "CREATE TABLE "+getSnippetContentName()+" (" +
+               " cid INT4 unsigned NOT NULL," +
+               " user INT4 unsigned NOT NULL," +
+               " id INT4 unsigned NOT NULL," +
+               " content TEXT CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
+               " PRIMARY KEY (cid, user, id)" +
                ") ENGINE=InnoDB";
     }
 
@@ -111,13 +111,13 @@ public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl imp
     }
 
     private String getSnippetAttachmentTable() {
-        return "CREATE TABLE "+getSnippetAttachmentName()+" (" + 
-               " cid INT4 unsigned NOT NULL," + 
-               " user INT4 unsigned NOT NULL," + 
-               " id INT4 unsigned NOT NULL," + 
-               " referenceId VARCHAR(255) CHARACTER SET latin1 NOT NULL," + 
-               " fileName VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL," + 
-               " INDEX (cid, user, id)" + 
+        return "CREATE TABLE "+getSnippetAttachmentName()+" (" +
+               " cid INT4 unsigned NOT NULL," +
+               " user INT4 unsigned NOT NULL," +
+               " id INT4 unsigned NOT NULL," +
+               " referenceId VARCHAR(255) CHARACTER SET latin1 NOT NULL," +
+               " fileName VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL," +
+               " INDEX (cid, user, id)" +
                ") ENGINE=InnoDB";
     }
 
@@ -130,12 +130,12 @@ public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl imp
     }
 
     private String getSnippetMiscTable() {
-        return "CREATE TABLE "+getSnippetMiscName()+" (" + 
-               " cid INT4 unsigned NOT NULL," + 
-               " user INT4 unsigned NOT NULL," + 
-               " id INT4 unsigned NOT NULL," + 
-               " json TEXT CHARACTER SET latin1 NOT NULL," + 
-               " PRIMARY KEY (cid, user, id)" + 
+        return "CREATE TABLE "+getSnippetMiscName()+" (" +
+               " cid INT4 unsigned NOT NULL," +
+               " user INT4 unsigned NOT NULL," +
+               " id INT4 unsigned NOT NULL," +
+               " json TEXT CHARACTER SET latin1 NOT NULL," +
+               " PRIMARY KEY (cid, user, id)" +
                ") ENGINE=InnoDB";
     }
 

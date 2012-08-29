@@ -64,7 +64,7 @@ public class GetSwitch implements PropertySwitch {
 
     /**
      * Initializes a new {@link GetSwitch}.
-     * 
+     *
      * @param snippet The snippet to get properties from
      */
     public GetSwitch(final Snippet snippet) {
