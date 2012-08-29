@@ -62,7 +62,9 @@ import com.openexchange.exception.OXExceptionFactory;
 public enum OXAWSExceptionCodes implements OXExceptionCode {
 
     AWS_NO_ACCESSKEY(OXAWSExceptionMessages.AWS_NO_ACCESSKEY_MSG, 1, Category.CATEGORY_ERROR),
-    AWS_NO_SECRETKEY(OXAWSExceptionMessages.AWS_NO_SECRETKEY_MSG, 2, Category.CATEGORY_ERROR);
+    AWS_NO_SECRETKEY(OXAWSExceptionMessages.AWS_NO_SECRETKEY_MSG, 2, Category.CATEGORY_ERROR),
+    AWS_NO_EC2_REGION(OXAWSExceptionMessages.AWS_NO_EC2_REGION_MSG, 3, Category.CATEGORY_WARNING),
+    AWS_NO_LB_REGION(OXAWSExceptionMessages.AWS_NO_LB_REGION_MSG, 4, Category.CATEGORY_WARNING);
 
     /**
      * Message of the exception.

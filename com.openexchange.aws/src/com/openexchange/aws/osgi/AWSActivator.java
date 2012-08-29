@@ -76,6 +76,10 @@ public class AWSActivator extends HousekeepingActivator {
 
     private String secretKey;
 
+    private String ec2Region;
+
+    private String lbRegion;
+
     /**
      * Initializes a new {@link AWSActivator}.
      */
@@ -94,15 +98,25 @@ public class AWSActivator extends HousekeepingActivator {
         configService = getService(ConfigurationService.class);
         accessKey = configService.getProperty("com.openexchange.aws.accessKey");
         secretKey = configService.getProperty("com.openexchange.aws.secretKey");
+        ec2Region = configService.getProperty("com.openexchange.aws.ec2region");
+        lbRegion = configService.getProperty("com.openexchange.aws.lbregion");
         if (accessKey == null) {
             throw OXAWSExceptionCodes.AWS_NO_ACCESSKEY.create();
         }
         if (secretKey == null) {
             throw OXAWSExceptionCodes.AWS_NO_SECRETKEY.create();
         }
+        if (ec2Region == null) {
+            throw OXAWSExceptionCodes.AWS_NO_EC2_REGION.create();
+        }
+        if (lbRegion == null) {
+            throw OXAWSExceptionCodes.AWS_NO_LB_REGION.create();
+        }
         AWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
         AmazonEC2 amazonEC2 = new AmazonEC2Client(credentials);
+        amazonEC2.setEndpoint(ec2Region);
         AmazonElasticLoadBalancing amazonLoadBalancing = new AmazonElasticLoadBalancingClient(credentials);
+        amazonLoadBalancing.setEndpoint(lbRegion);
         registerService(AmazonEC2.class, amazonEC2);
         registerService(AmazonElasticLoadBalancing.class, amazonLoadBalancing);
     }

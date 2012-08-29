@@ -62,6 +62,10 @@ public class OXAWSExceptionMessages implements LocalizableStrings {
 
     public static final String AWS_NO_SECRETKEY_MSG = "Missing secret key.";
 
+    public static final String AWS_NO_EC2_REGION_MSG = "EC2 region not set.";
+
+    public static final String AWS_NO_LB_REGION_MSG = "Loadbalancing region not set.";
+
     /**
      * Initializes a new {@link OXAWSExceptionMessages}.
      */
