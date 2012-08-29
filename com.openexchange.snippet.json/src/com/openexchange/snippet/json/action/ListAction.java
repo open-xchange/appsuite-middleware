@@ -47,52 +47,63 @@
  *
  */
 
-package com.openexchange.snippet;
+package com.openexchange.snippet.json.action;
 
-import java.io.IOException;
-import java.io.InputStream;
-
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import org.json.JSONArray;
+import org.json.JSONException;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.snippet.Snippet;
+import com.openexchange.snippet.SnippetManagement;
+import com.openexchange.snippet.json.SnippetRequest;
 
 /**
- * {@link Attachment} - Represents a file attachment for a snippet.
- *
+ * {@link ListAction}
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Attachment {
+@Action(
+    name = "list"
+    , description = "Get a list of snippets associated with the current user and context." 
+    , method = RequestMethod.PUT
+    , parameters = {}
+    , requestBody = "An array containing snippet identifiers."
+    , responseDescription = "An array containing snippets."
+)
+public final class ListAction extends SnippetAction {
 
     /**
-     * Gets the attachment identifier.
+     * Initializes a new {@link ListAction}.
      * 
-     * @return The identifier
+     * @param services The service look-up
      */
-    String getId();
+    public ListAction(final ServiceLookup services, final Map<String, SnippetAction> actions) {
+        super(services, actions);
+    }
 
-    /**
-     * Gets the content type according to RFC 822; e.g. <code>"text/plain; charset=UTF-8; name=mytext.txt"</code>
-     * 
-     * @return The content type or <code>null</code>
-     */
-    String getContentType();
+    @Override
+    protected AJAXRequestResult perform(final SnippetRequest snippetRequest) throws OXException, JSONException {
+        final JSONArray ids = (JSONArray) snippetRequest.getRequestData().getData();
+        final int length = ids.length();
+        final List<Snippet> snippets = new ArrayList<Snippet>(length);
 
-    /**
-     * Gets the content disposition according to RFC 822; e.g. <code>"attachment; filename=mytext.txt"</code>
-     * 
-     * @return The content disposition or <code>null</code>
-     */
-    String getContentDisposition();
+        SnippetManagement management = getSnippetService().getManagement(snippetRequest.getSession());
+        for (int i = 0; i < length; i++) {
+            snippets.add(management.getSnippet(ids.getString(i)));
+        }
 
-    /**
-     * Gets the attachment's size if known.
-     * 
-     * @return The size or <code>-1</code> if unknown
-     */
-    long getSize();
+        return new AJAXRequestResult(snippets, "snippet");
+    }
 
-    /**
-     * Gets the input stream.
-     * 
-     * @return The input stream
-     * @throws IOException If an I/O error occurs
-     */
-    InputStream getInputStream() throws IOException;
+    @Override
+    public String getAction() {
+        return "list";
+    }
+
 }

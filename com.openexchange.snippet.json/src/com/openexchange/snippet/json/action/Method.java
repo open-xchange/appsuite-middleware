@@ -47,52 +47,42 @@
  *
  */
 
-package com.openexchange.snippet;
+package com.openexchange.snippet.json.action;
 
-import java.io.IOException;
-import java.io.InputStream;
-
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 
 /**
- * {@link Attachment} - Represents a file attachment for a snippet.
- *
+ * An enumeration for HTTP methods.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Attachment {
+public enum Method {
+    GET, PUT, POST, DELETE;
+
+    private static final Map<String, Method> MAP;
+
+    static {
+        final Method[] values = Method.values();
+        final Map<String, Method> m = new HashMap<String, Method>(values.length);
+        for (final Method method : values) {
+            m.put(method.name(), method);
+        }
+        MAP = Collections.unmodifiableMap(m);
+    }
 
     /**
-     * Gets the attachment identifier.
+     * Gets the appropriate method.
      * 
-     * @return The identifier
+     * @param method The method identifier
+     * @return The appropriate method or <code>null</code>
      */
-    String getId();
-
-    /**
-     * Gets the content type according to RFC 822; e.g. <code>"text/plain; charset=UTF-8; name=mytext.txt"</code>
-     * 
-     * @return The content type or <code>null</code>
-     */
-    String getContentType();
-
-    /**
-     * Gets the content disposition according to RFC 822; e.g. <code>"attachment; filename=mytext.txt"</code>
-     * 
-     * @return The content disposition or <code>null</code>
-     */
-    String getContentDisposition();
-
-    /**
-     * Gets the attachment's size if known.
-     * 
-     * @return The size or <code>-1</code> if unknown
-     */
-    long getSize();
-
-    /**
-     * Gets the input stream.
-     * 
-     * @return The input stream
-     * @throws IOException If an I/O error occurs
-     */
-    InputStream getInputStream() throws IOException;
+    public static Method methodFor(final String method) {
+        if (null == method) {
+            return null;
+        }
+        return MAP.get(method.toUpperCase(Locale.US));
+    }
 }

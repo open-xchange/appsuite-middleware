@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,52 +47,59 @@
  *
  */
 
-package com.openexchange.snippet;
+package com.openexchange.snippet.json.action;
 
-import java.io.IOException;
-import java.io.InputStream;
-
+import java.util.List;
+import java.util.Map;
+import org.json.JSONException;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.snippet.Snippet;
+import com.openexchange.snippet.SnippetService;
+import com.openexchange.snippet.json.SnippetRequest;
 
 /**
- * {@link Attachment} - Represents a file attachment for a snippet.
- *
+ * {@link AllAction}
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Attachment {
+@Action(
+    name = "all"
+    , description = "Gets all snippets associated with the current user and context." 
+    , method = RequestMethod.GET
+    , parameters = {
+        @Parameter(name = "type", description = "Optional comma-separated identifiers for snippet types", optional=true)
+    }
+)
+public final class AllAction extends SnippetAction {
 
     /**
-     * Gets the attachment identifier.
-     * 
-     * @return The identifier
+     * Initializes a new {@link AllAction}.
      */
-    String getId();
+    public AllAction(final ServiceLookup services, final Map<String, SnippetAction> actions) {
+        super(services, actions);
+    }
 
-    /**
-     * Gets the content type according to RFC 822; e.g. <code>"text/plain; charset=UTF-8; name=mytext.txt"</code>
-     * 
-     * @return The content type or <code>null</code>
-     */
-    String getContentType();
+    @Override
+    protected AJAXRequestResult perform(final SnippetRequest snippetRequest) throws OXException, JSONException {
+        final String[] types;
+        {
+            final String tmp = snippetRequest.getParameter("type", String.class);
+            types = isEmpty(tmp) ? new String[0] : SPLIT_CSV.split(tmp);
+        }
+        final SnippetService snippetService = getSnippetService();
 
-    /**
-     * Gets the content disposition according to RFC 822; e.g. <code>"attachment; filename=mytext.txt"</code>
-     * 
-     * @return The content disposition or <code>null</code>
-     */
-    String getContentDisposition();
+        final List<Snippet> snippets = snippetService.getManagement(snippetRequest.getSession()).getSnippets(types);
+        return new AJAXRequestResult(snippets, "snippet");
+    }
 
-    /**
-     * Gets the attachment's size if known.
-     * 
-     * @return The size or <code>-1</code> if unknown
-     */
-    long getSize();
+    @Override
+    public String getAction() {
+        return "all";
+    }
 
-    /**
-     * Gets the input stream.
-     * 
-     * @return The input stream
-     * @throws IOException If an I/O error occurs
-     */
-    InputStream getInputStream() throws IOException;
 }

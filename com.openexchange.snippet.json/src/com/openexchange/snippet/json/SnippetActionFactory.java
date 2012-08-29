@@ -47,52 +47,63 @@
  *
  */
 
-package com.openexchange.snippet;
+package com.openexchange.snippet.json;
 
-import java.io.IOException;
-import java.io.InputStream;
-
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.documentation.annotations.Module;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.snippet.json.action.Method;
+import com.openexchange.snippet.json.action.SnippetAction;
 
 /**
- * {@link Attachment} - Represents a file attachment for a snippet.
- *
+ * {@link SnippetActionFactory}
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Attachment {
+@Module(name = "jslob", description = "Provides access to JSlob data associated with the current user and context. A REST-like access is provided, too (no <tt>action</tt> URL parameter)")
+public class SnippetActionFactory implements AJAXActionServiceFactory {
+
+    private final Map<String, SnippetAction> actions;
 
     /**
-     * Gets the attachment identifier.
+     * Initializes a new {@link SnippetActionFactory}.
      * 
-     * @return The identifier
+     * @param services The service look-up
      */
-    String getId();
+    public SnippetActionFactory(final ServiceLookup services) {
+        super();
+        actions = new ConcurrentHashMap<String, SnippetAction>(10);
+        addJSlobAction(new com.openexchange.snippet.json.action.AllAction(services, actions));
+        addJSlobAction(new com.openexchange.snippet.json.action.GetAction(services, actions));
+        addJSlobAction(new com.openexchange.snippet.json.action.ListAction(services, actions));
+        addJSlobAction(new com.openexchange.snippet.json.action.DeleteAction(services, actions));
+        addJSlobAction(new com.openexchange.snippet.json.action.NewAction(services, actions));
+    }
 
-    /**
-     * Gets the content type according to RFC 822; e.g. <code>"text/plain; charset=UTF-8; name=mytext.txt"</code>
-     * 
-     * @return The content type or <code>null</code>
-     */
-    String getContentType();
+    private void addJSlobAction(final SnippetAction snippetAction) {
+        final List<Method> restMethods = snippetAction.getRESTMethods();
+        if (null != restMethods && !restMethods.isEmpty()) {
+            for (final Method method : restMethods) {
+                actions.put(method.toString(), snippetAction);
+            }
+        }
+        actions.put(snippetAction.getAction(), snippetAction);
+    }
 
-    /**
-     * Gets the content disposition according to RFC 822; e.g. <code>"attachment; filename=mytext.txt"</code>
-     * 
-     * @return The content disposition or <code>null</code>
-     */
-    String getContentDisposition();
+    @Override
+    public AJAXActionService createActionService(final String action) throws OXException {
+        return actions.get(action);
+    }
 
-    /**
-     * Gets the attachment's size if known.
-     * 
-     * @return The size or <code>-1</code> if unknown
-     */
-    long getSize();
+    @Override
+    public Collection<? extends AJAXActionService> getSupportedServices() {
+        return java.util.Collections.unmodifiableCollection(actions.values());
+    }
 
-    /**
-     * Gets the input stream.
-     * 
-     * @return The input stream
-     * @throws IOException If an I/O error occurs
-     */
-    InputStream getInputStream() throws IOException;
 }

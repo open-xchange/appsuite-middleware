@@ -62,6 +62,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -417,6 +418,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
                     final String referenceId = rs.getString(1);
                     if (!rs.wasNull()) {
                         final DefaultAttachment attachment = new DefaultAttachment();
+                        attachment.setId(referenceId);
                         attachment.setContentType(fileStorage.getMimeType(referenceId));
                         attachment.setContentDisposition("attachment; filename=\"" + rs.getString(2) + "\"");
                         attachment.setStreamProvider(new QuotaFileStorageStreamProvider(referenceId, fileStorage));
@@ -535,7 +537,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
     }
 
     @Override
-    public String updateSnippet(final String identifier, final Snippet snippet, final Set<Property> properties) throws OXException {
+    public String updateSnippet(final String identifier, final Snippet snippet, final Set<Property> properties, final Collection<Attachment> addAttachments, final Collection<Attachment> removeAttachments) throws OXException {
         if (null == identifier) {
             return identifier;
         }
@@ -655,8 +657,11 @@ public final class RdbSnippetManagement implements SnippetManagement {
             /*
              * Update attachments
              */
-            if (properties.contains(Property.ATTACHMENTS)) {
-                updateAttachments(contextId, snippet.getAttachments(), true, context, userId, contextId, con);
+            if (null != removeAttachments && !removeAttachments.isEmpty()) {
+                removeAttachments(id, removeAttachments, context, userId, contextId, con);
+            }
+            if (null != addAttachments && !addAttachments.isEmpty()) {
+                updateAttachments(id, addAttachments, false, context, userId, contextId, con);
             }
             /*
              * Commit & return
@@ -677,7 +682,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
         }
     }
 
-    private static void updateAttachments(final int id, final List<Attachment> attachments, final boolean deleteExisting, final Context context, final int userId, final int contextId, final Connection con) throws OXException {
+    private static void updateAttachments(final int id, final Collection<Attachment> attachments, final boolean deleteExisting, final Context context, final int userId, final int contextId, final Connection con) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -742,6 +747,31 @@ public final class RdbSnippetManagement implements SnippetManagement {
             throw SnippetExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
+        }
+    }
+
+    private static void removeAttachments(final int id, final Collection<Attachment> attachments, final Context context, final int userId, final int contextId, final Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        try {
+            final QuotaFileStorage fileStorage = getFileStorage(context);
+            for (final Attachment attachment : attachments) {
+                final String attachmentId = attachment.getId();
+                fileStorage.deleteFile(attachmentId);
+                // Delete from table, too
+                stmt = con.prepareStatement("DELETE FROM snippetAttachment WHERE cid=? AND user=? AND id=? AND referenceId=?");
+                int pos = 0;
+                stmt.setLong(++pos, contextId);
+                stmt.setLong(++pos, userId);
+                stmt.setLong(++pos, id);
+                stmt.setString(++pos, attachmentId);
+                stmt.executeUpdate();
+                closeSQLStuff(stmt);
+                stmt = null;
+            }
+        } catch (final SQLException e) {
+            throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
         }
     }
 

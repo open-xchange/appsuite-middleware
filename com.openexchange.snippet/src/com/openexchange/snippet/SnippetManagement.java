@@ -49,6 +49,7 @@
 
 package com.openexchange.snippet;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.exception.OXException;
@@ -102,10 +103,12 @@ public interface SnippetManagement {
      * @param id The identifier of the snippet to update
      * @param snippet The snippet providing the data to update
      * @param properties The properties to update
+     * @param addAttachments The attachments to add
+     * @param removeAttachments The attachments to remove
      * @return The updated snippet's identifier
      * @throws OXException If update operation fails
      */
-    String updateSnippet(String id, Snippet snippet, Set<Property> properties) throws OXException;
+    String updateSnippet(String id, Snippet snippet, Set<Property> properties, Collection<Attachment> addAttachments, Collection<Attachment> removeAttachments) throws OXException;
 
     /**
      * Updates specified snippet.

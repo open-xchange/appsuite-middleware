@@ -61,13 +61,16 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import javax.activation.DataHandler;
@@ -175,7 +178,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
     }
 
     @Override
-    public List<Snippet> getSnippets(String... types) throws OXException {
+    public List<Snippet> getSnippets(final String... types) throws OXException {
         final DatabaseService databaseService = getDatabaseService();
         final int contextId = this.contextId;
         final Connection con = databaseService.getReadOnly(contextId);
@@ -312,6 +315,10 @@ public final class MimeSnippetManagement implements SnippetManagement {
             attachment.setContentDisposition(contentDisposition == null ? null : contentDisposition.toString());
             attachment.setContentType(contentType.toString());
             attachment.setSize(part.getSize());
+            header = part.getHeader("AttachmentId", null);
+            if (null != header) {
+                attachment.setId(header);
+            }
             attachment.setStreamProvider(new InputStreamProviderImpl(part));
         }
     }
@@ -367,6 +374,12 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 // Attachments
                 if ((null != attachments) && !attachments.isEmpty()) {
                     for (final Attachment attachment : attachments) {
+                        if (null == attachment.getId()) {
+                            if (!(attachment instanceof DefaultAttachment)) {
+                                throw SnippetExceptionCodes.ILLEGAL_STATE.create("Missing attachment identifier");
+                            }
+                            ((DefaultAttachment) attachment).setId(UUID.randomUUID().toString()); 
+                        }
                         multipart.addBodyPart(attachment2MimePart(attachment));
                     }
                 }
@@ -421,7 +434,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
     }
 
     @Override
-    public String updateSnippet(final String id, final Snippet snippet, final Set<Property> properties) throws OXException {
+    public String updateSnippet(final String id, final Snippet snippet, final Set<Property> properties, final Collection<Attachment> addAttachments, final Collection<Attachment> removeAttachments) throws OXException {
         final DatabaseService databaseService = getDatabaseService();
         final int contextId = this.contextId;
         final Connection con = databaseService.getWritable(contextId);
@@ -524,34 +537,37 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 }
             }
             // Check for attachments
-            final List<MimeBodyPart> attachmentParts;
-            if (properties.contains(Property.ATTACHMENTS)) {
-                final List<Attachment> attachments = snippet.getAttachments();
-                if (null == attachments || attachments.isEmpty()) {
-                    attachmentParts = null;
-                } else {
-                    attachmentParts = new ArrayList<MimeBodyPart>(attachments.size());
-                    for (final Attachment attachment : attachments) {
-                        attachmentParts.add(attachment2MimePart(attachment));
+            final List<MimeBodyPart> attachmentParts = new ArrayList<MimeBodyPart>();
+            // Add existing
+            if (storageContentType.startsWith("multipart/")) {
+                final Multipart multipart = (Multipart) storageMessage.getContent();
+                final int length = multipart.getCount();
+                for (int i = 1; i < length; i++) { // skip first
+                    final String header = storageMessage.getHeader(MessageHeaders.HDR_CONTENT_TYPE, null);
+                    if (null == header || !header.toLowerCase(Locale.US).startsWith("text/javascript")) {
+                        attachmentParts.add((MimeBodyPart) multipart.getBodyPart(i));
                     }
                 }
-            } else {
-                if (storageContentType.startsWith("multipart/")) {
-                    final Multipart multipart = (Multipart) storageMessage.getContent();
-                    final int length = multipart.getCount();
-                    attachmentParts = new ArrayList<MimeBodyPart>(length);
-                    for (int i = 1; i < length; i++) { // skip first
-                        final String header = storageMessage.getHeader(MessageHeaders.HDR_CONTENT_TYPE, null);
-                        if (null == header || !header.toLowerCase(Locale.US).startsWith("text/javascript")) {
-                            attachmentParts.add((MimeBodyPart) multipart.getBodyPart(i));
+            }
+            // Removed
+            if (null != removeAttachments && !removeAttachments.isEmpty()) {
+                for (final Attachment attachment : removeAttachments) {
+                    for (final Iterator<MimeBodyPart> iterator = attachmentParts.iterator(); iterator.hasNext();) {
+                        final String header = iterator.next().getHeader("AttachmentId", null);
+                        if (null != header && header.equals(attachment.getId())) {
+                            iterator.remove();
                         }
                     }
-                } else {
-                    attachmentParts = null;
+                }
+            }
+            // New ones
+            if (null != addAttachments && !addAttachments.isEmpty()) {
+                for (final Attachment attachment : addAttachments) {
+                    attachmentParts.add(attachment2MimePart(attachment));
                 }
             }
             // Check gathered parts
-            if (null != miscPart || (null != attachmentParts && !attachmentParts.isEmpty())) {
+            if (null != miscPart || !attachmentParts.isEmpty()) {
                 // Create a multipart message
                 final Multipart primaryMultipart = new MimeMultipart();
                 // Add text part
@@ -560,7 +576,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
                 primaryMultipart.addBodyPart(textPart);
                 // Add attachment parts
-                if (null != attachmentParts && !attachmentParts.isEmpty()) {
+                if (!attachmentParts.isEmpty()) {
                     for (final MimeBodyPart mimePart : attachmentParts) {
                         primaryMultipart.addBodyPart(mimePart);
                     }
@@ -679,6 +695,10 @@ public final class MimeSnippetManagement implements SnippetManagement {
         bodyPart.setDataHandler(new DataHandler(new MessageDataSource(attachment.getInputStream(), contentType)));
         bodyPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
         bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(contentType));
+        final String attachmentId = attachment.getId();
+        if (null != attachmentId) {
+            bodyPart.setHeader("AttachmentId", attachmentId);
+        }
         /*
          * Force base64 encoding
          */
