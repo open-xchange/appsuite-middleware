@@ -189,7 +189,8 @@ public final class MimeSnippetManagement implements SnippetManagement {
         ResultSet rs = null;
         try {
             final StringBuilder sql = new StringBuilder("SELECT id FROM snippet WHERE cid=? AND (user=? OR shared>0) AND refType=").append(ReferenceType.FILE_STORAGE.getType());
-            if (null != types && types.length > 0) {
+            final boolean hasTypes = (null != types) && (types.length > 0);
+            if (hasTypes) {
                 sql.append(" AND (");
                 sql.append("type=?");
                 for (int i = 1; i < types.length; i++) {
@@ -201,7 +202,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
             int pos = 0;
             stmt.setInt(++pos, contextId);
             stmt.setInt(++pos, userId);
-            if (null != types && types.length > 0) {
+            if (hasTypes) {
                 for (final String type : types) {
                     stmt.setString(++pos, type);
                 }
