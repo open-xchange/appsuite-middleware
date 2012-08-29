@@ -82,7 +82,6 @@ import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.log.LogFactory;
-import com.openexchange.log.LogProperties;
 
 public class AdminDaemon {
 
