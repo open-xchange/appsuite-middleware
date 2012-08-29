@@ -142,11 +142,10 @@ public final class NewAction extends SnippetAction {
         } else {
             final String[] pathElements = SPLIT_PATH.split(pathInfo);
             final int length = pathElements.length;
-            if (0 == length) {
-                requestData.setAction("new");
-            } else {
+            if (0 < length) {
                 throw AjaxExceptionCodes.UNKNOWN_ACTION.create(pathInfo);
             }
+            requestData.setAction("new");
         }
         return actions.get(requestData.getAction()).perform(snippetRequest);
     }

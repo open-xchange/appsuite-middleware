@@ -129,20 +129,30 @@ public final class UpdateAction extends SnippetAction {
         if (isEmpty(pathInfo)) {
             throw AjaxExceptionCodes.BAD_REQUEST.create();
         }
-        // TODO: Fix it...
         final String[] pathElements = SPLIT_PATH.split(pathInfo);
         final int length = pathElements.length;
-        if (0 != length) {
-            throw AjaxExceptionCodes.UNKNOWN_ACTION.create(pathInfo);
-        } else {
-            requestData.setAction("update");
+        if (0 == length) {
+            throw AjaxExceptionCodes.BAD_REQUEST.create();
         }
+        if (1 < length) {
+            throw AjaxExceptionCodes.UNKNOWN_ACTION.create(pathInfo);
+        }
+        /*-
+         * "Update specific snippet"
+         *  PUT /snippet/11
+         */
+        final String element = pathElements[0];
+        if (element.indexOf(',') >= 0) {
+            throw AjaxExceptionCodes.BAD_REQUEST.create();
+        }
+        requestData.setAction("update");
+        requestData.putParameter("id", element);
         return actions.get(requestData.getAction()).perform(snippetRequest);
     }
 
     @Override
     public String getAction() {
-        return "new";
+        return "update";
     }
 
     @Override
