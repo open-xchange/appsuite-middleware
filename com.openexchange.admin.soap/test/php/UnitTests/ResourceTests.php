@@ -136,7 +136,7 @@ class ResourceTests extends PHPUnit_Framework_TestCase {
 
 		// TODO: all SOAP calls should be try-catched like this...
 		try {
-			res_list_response = getResourceClient($SOAPHOST)->listAll($ctx, "*", getCredentialsObject($admin_user->name, $admin_user->password));
+			$res_list_response = getResourceClient($SOAPHOST)->listAll($ctx, "*", getCredentialsObject($admin_user->name, $admin_user->password));
 		} catch (SoapFault $fault) {
 			handleSoapFault($fault);
 		} catch (Exception $e) {
@@ -207,7 +207,7 @@ class ResourceTests extends PHPUnit_Framework_TestCase {
 	 */
 	public function testDeleteResource(){
 		$random_id = generateContextId();
-		$name = "soap-test-admin_" . $random_id;
+		$name = "soap-test-admin-" . $random_id;
 		$admin_user = getFullUserObject($name, $random_id);
 
 		$ctx = new Context();

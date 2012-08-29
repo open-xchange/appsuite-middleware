@@ -6,14 +6,14 @@
  * 
  */
 
-$SOAPHOST = "dhcp178.oxnbg.int";
+$SOAPHOST = "localhost";
 
 $OXMASTER_ADMIN = "oxadminmaster";
-$OXMASTER_ADMIN_PASS = "secret";
+$OXMASTER_ADMIN_PASS = "admin_master_password";
 
 $CONTEXT_ID = 2;
 $CONTEXT_ADMIN = "oxadmin";
-$CONTEXT_ADMIN_PASS = "secret";
+$CONTEXT_ADMIN_PASS = "admin_password";
 
 class Credentials {
 	var $login;
