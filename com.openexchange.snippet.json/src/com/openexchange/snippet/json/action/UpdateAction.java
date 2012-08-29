@@ -52,47 +52,46 @@ package com.openexchange.snippet.json.action;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.snippet.Attachment;
-import com.openexchange.snippet.DefaultAttachment;
 import com.openexchange.snippet.DefaultSnippet;
-import com.openexchange.snippet.Property;
 import com.openexchange.snippet.json.SnippetJsonParser;
 import com.openexchange.snippet.json.SnippetRequest;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
- * {@link NewAction}
+ * {@link UpdateAction}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @Action(
-    name = "new"
-    , description = "Creates a snippet."
-    , method = RequestMethod.POST
-    , parameters = {}
-    , requestBody = "The snippet's JSON representation"
+    name = "update"
+    , description = "Updates a specific snippet."
+    , method = RequestMethod.PUT
+    , parameters = {
+        @Parameter(name = "id", description = "The identifier of the snippet.")
+    }
+    , requestBody = "The snippet's JSON representation provding the fields to update"
 )
-public final class NewAction extends SnippetAction {
+public final class UpdateAction extends SnippetAction {
 
     private final List<Method> restMethods;
 
     /**
-     * Initializes a new {@link NewAction}.
+     * Initializes a new {@link UpdateAction}.
      * 
      * @param services The service look-up
      */
-    public NewAction(final ServiceLookup services, final Map<String, SnippetAction> actions) {
+    public UpdateAction(final ServiceLookup services, final Map<String, SnippetAction> actions) {
         super(services, actions);
-        restMethods = Collections.singletonList(Method.POST);
+        restMethods = Collections.singletonList(Method.PUT);
     }
 
     @Override
@@ -104,32 +103,14 @@ public final class NewAction extends SnippetAction {
         // Parse from JSON to snippet
         final DefaultSnippet snippet = new DefaultSnippet();
         SnippetJsonParser.parse(jsonSnippet, snippet);
-        // Check for needed fields
-        if (isEmpty(snippet.getDisplayName())) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create(Property.DISPLAY_NAME.getPropName());
-        }
-        if (isEmpty(snippet.getType())) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create(Property.TYPE.getPropName());
-        }
-        if (isEmpty(snippet.getModule())) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create(Property.MODULE.getPropName());
-        }
-        final List<Attachment> attachments = snippet.getAttachments();
-        if (null != attachments) {
-            for (final Attachment attachment : attachments) {
-                if (null == attachment.getId()) {
-                    ((DefaultAttachment) attachment).setId(UUID.randomUUID().toString());
-                }
-            }
-        }
-        // Create via management
-        final String id = getSnippetService().getManagement(snippetRequest.getSession()).createSnippet(snippet);
+        // TODO: Update
+        final String id = getSnippetService().getManagement(snippetRequest.getSession()).updateSnippet(getAction(), snippet, null, null, null);
         return new AJAXRequestResult(id, "string");
     }
 
     @Override
     protected AJAXRequestResult performREST(final SnippetRequest snippetRequest, final Method method) throws OXException, JSONException {
-        if (!Method.POST.equals(method)) {
+        if (!Method.PUT.equals(method)) {
             throw AjaxExceptionCodes.BAD_REQUEST.create();
         }
         /*
@@ -138,7 +119,7 @@ public final class NewAction extends SnippetAction {
         final AJAXRequestData requestData = snippetRequest.getRequestData();
         final String pathInfo = requestData.getPathInfo();
         if (isEmpty(pathInfo)) {
-            requestData.setAction("new");
+            requestData.setAction("update");
         } else {
             final String[] pathElements = SPLIT_PATH.split(pathInfo);
             final int length = pathElements.length;

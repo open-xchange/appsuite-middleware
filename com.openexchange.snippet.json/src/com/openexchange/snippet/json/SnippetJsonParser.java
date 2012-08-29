@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -83,6 +84,17 @@ public final class SnippetJsonParser {
      * @throws JSONException If a JSON error occurs
      */
     public static void parse(final JSONObject jsonSnippet, final DefaultSnippet snippet) throws JSONException {
+        parse(jsonSnippet, snippet, null);
+    }
+
+    /**
+     * Parses specified JSON into given snippet.
+     * 
+     * @param jsonSnippet The JSON snippet
+     * @param snippet The snippet
+     * @throws JSONException If a JSON error occurs
+     */
+    public static void parse(final JSONObject jsonSnippet, final DefaultSnippet snippet, final Set<Property> set) throws JSONException {
         String key = Property.ACCOUNT_ID.getPropName();
         if (jsonSnippet.hasAndNotNull(key)) {
             snippet.setAccountId(jsonSnippet.getInt(key));
