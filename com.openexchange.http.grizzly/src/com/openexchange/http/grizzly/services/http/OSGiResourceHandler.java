@@ -44,22 +44,20 @@
 
 package com.openexchange.http.grizzly.services.http;
 
-import org.osgi.service.http.HttpContext;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import org.apache.commons.logging.Log;
 import org.glassfish.grizzly.http.server.HttpHandler;
 import org.glassfish.grizzly.http.server.Request;
 import org.glassfish.grizzly.http.server.Response;
 import org.glassfish.grizzly.http.server.util.MimeType;
 import org.glassfish.grizzly.servlet.HttpServletRequestImpl;
 import org.glassfish.grizzly.servlet.HttpServletResponseImpl;
-import com.openexchange.log.LogFactory;
-import org.apache.commons.logging.Log;
+import org.osgi.service.http.HttpContext;
 
 /**
  * OSGi Resource {@link HttpHandler}.
@@ -194,7 +192,7 @@ public class OSGiResourceHandler extends HttpHandler implements OSGiHandler {
         public OSGiHttpServletRequest(
                 Request request, OSGiServletContext context) throws IOException {
             super();
-            initialize(request);
+            initialize(request, context);
             setContextImpl(context);
         }
     }
