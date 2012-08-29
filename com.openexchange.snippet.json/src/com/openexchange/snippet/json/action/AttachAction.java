@@ -144,17 +144,23 @@ public final class AttachAction extends SnippetAction {
             /*
              * Check file item's content type
              */
-            final ContentType ct = new ContentType(uploadFile.getContentType());
+            final String sContentType = uploadFile.getContentType();
+            final ContentType ct = new ContentType(sContentType);
             if (!checkFileType(fileTypeFilter, ct)) {
-                throw UploadException.UploadCode.INVALID_FILE_TYPE.create("new", uploadFile.getContentType(), fileTypeFilter);
+                throw UploadException.UploadCode.INVALID_FILE_TYPE.create(sContentType, fileTypeFilter);
             }
             attachments.add(processFileItem(uploadFile));
         }
         /*
          * Update
          */
-        snippetService.getManagement(snippetRequest.getSession()).updateSnippet(id, snippet, Collections.<Property> emptySet(), attachments, null);
-        return new AJAXRequestResult(Integer.valueOf(1), "int");
+        final String newId = snippetService.getManagement(snippetRequest.getSession()).updateSnippet(
+            id,
+            snippet,
+            Collections.<Property> emptySet(),
+            attachments,
+            Collections.<Attachment> emptyList());
+        return new AJAXRequestResult(newId, "string");
     }
 
     private static Attachment processFileItem(final UploadFile fileItem) {

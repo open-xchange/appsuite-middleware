@@ -355,7 +355,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
             // Set other stuff
             final List<Attachment> attachments = snippet.getAttachments();
             final Object misc = snippet.getMisc();
-            if (((null != attachments) && !attachments.isEmpty()) || (null != misc)) {
+            if (notEmpty(attachments) || (null != misc)) {
                 final MimeMultipart multipart = new MimeMultipart("mixed");
                 // Content part
                 {
@@ -372,7 +372,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
                     multipart.addBodyPart(miscPart);
                 }
                 // Attachments
-                if ((null != attachments) && !attachments.isEmpty()) {
+                if (notEmpty(attachments)) {
                     for (final Attachment attachment : attachments) {
                         if (null == attachment.getId()) {
                             if (!(attachment instanceof DefaultAttachment)) {
@@ -550,7 +550,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 }
             }
             // Removed
-            if (null != removeAttachments && !removeAttachments.isEmpty()) {
+            if (notEmpty(removeAttachments)) {
                 for (final Attachment attachment : removeAttachments) {
                     for (final Iterator<MimeBodyPart> iterator = attachmentParts.iterator(); iterator.hasNext();) {
                         final String header = iterator.next().getHeader("AttachmentId", null);
@@ -561,13 +561,13 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 }
             }
             // New ones
-            if (null != addAttachments && !addAttachments.isEmpty()) {
+            if (notEmpty(addAttachments)) {
                 for (final Attachment attachment : addAttachments) {
                     attachmentParts.add(attachment2MimePart(attachment));
                 }
             }
             // Check gathered parts
-            if (null != miscPart || !attachmentParts.isEmpty()) {
+            if (null != miscPart || notEmpty(attachmentParts)) {
                 // Create a multipart message
                 final Multipart primaryMultipart = new MimeMultipart();
                 // Add text part
@@ -576,7 +576,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
                 primaryMultipart.addBodyPart(textPart);
                 // Add attachment parts
-                if (!attachmentParts.isEmpty()) {
+                if (notEmpty(attachmentParts)) {
                     for (final MimeBodyPart mimePart : attachmentParts) {
                         primaryMultipart.addBodyPart(mimePart);
                     }
@@ -711,6 +711,10 @@ public final class MimeSnippetManagement implements SnippetManagement {
             bodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MimeMessageUtility.foldContentDisposition(header));
         }
         return bodyPart;
+    }
+
+    private static <E> boolean notEmpty(final Collection<E> col) {
+        return null != col && !col.isEmpty();
     }
 
     private static boolean isEmpty(final String string) {

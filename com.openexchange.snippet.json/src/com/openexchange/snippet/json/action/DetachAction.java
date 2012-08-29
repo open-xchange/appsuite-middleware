@@ -74,7 +74,12 @@ import com.openexchange.snippet.json.SnippetRequest;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Action(name = "detach", description = "Removes a file attachment from an existing snippet associated with the current user and context.", method = RequestMethod.POST, parameters = { @Parameter(name = "id", description = "The snippet's identifier", optional = false) })
+@Action(
+    name = "detach",
+    description = "Removes a file attachment from an existing snippet associated with the current user and context.",
+    method = RequestMethod.POST,
+    parameters = { @Parameter(name = "id", description = "The snippet's identifier", optional = false) }
+)
 public final class DetachAction extends SnippetAction {
 
     /**
@@ -101,13 +106,13 @@ public final class DetachAction extends SnippetAction {
         /*
          * Update
          */
-        snippetService.getManagement(snippetRequest.getSession()).updateSnippet(
+        final String newId = snippetService.getManagement(snippetRequest.getSession()).updateSnippet(
             id,
             snippet,
             Collections.<Property> emptySet(),
-            null,
+            Collections.<Attachment> emptyList(),
             attachments);
-        return new AJAXRequestResult(Integer.valueOf(1), "int");
+        return new AJAXRequestResult(newId, "string");
     }
 
     @Override
