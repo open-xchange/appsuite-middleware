@@ -42,7 +42,7 @@ class ResourceTests extends PHPUnit_Framework_TestCase {
 		
 
 		// now create a resource within this context
-		$new_res = getFullResourceObject("soaptest_createresource", $ctx->id);
+		$new_res = getFullResourceObject("soap-test-createresource", $ctx->id);
 		getResourceClient($SOAPHOST)->create($ctx, $new_res, getCredentialsObject($admin_user->name, $admin_user->password));
 
 		// now list all resources and find the create one, if found, compare if all values were set correctly
@@ -130,35 +130,47 @@ class ResourceTests extends PHPUnit_Framework_TestCase {
 		// now change res within this context		
 		getResourceClient($SOAPHOST)->change($ctx, $res, getCredentialsObject($admin_user->name, $admin_user->password));
 
-		// now list all res and find the changed one, if found, compare if all values were set correctly
-		$res_list_response = getResourceClient($SOAPHOST)->listAll($ctx, "*", getCredentialsObject($admin_user->name, $admin_user->password));
-		
-		// loop through res and for each user id response, query server for res details
-		$found_changed_res = false;
-		if(is_array($res_list_response)){
-			foreach ($res_list_response['return'] as $ret_group){
+		$res_list_response = false;
+
+		// now list all res and find the changed one, if found, compare if all values were set correctly	
+
+		// TODO: all SOAP calls should be try-catched like this...
+		try {
+			res_list_response = getResourceClient($SOAPHOST)->listAll($ctx, "*", getCredentialsObject($admin_user->name, $admin_user->password));
+		} catch (SoapFault $fault) {
+			handleSoapFault($fault);
+		} catch (Exception $e) {
+			handleExcepion($e);
+		}
+
+		if ($res_list_response) {
+			// loop through res and for each user id response, query server for res details
+			$found_changed_res = false;
+			if(is_array($res_list_response)){
+				foreach ($res_list_response['return'] as $ret_group){
+					$query_res = new Group();
+					$query_res->id = $ret_group->id;
+					$res_get_response = getResourceClient($SOAPHOST)->getData($ctx, $query_res, getCredentialsObject($admin_user->name, $admin_user->password));
+					if($group_get_response->name == $res->name){
+						$this->verifyResource($res,$res_get_response);
+						$found_changed_res = true;
+					}			 
+				}	
+			} else {
+				// only 1 res left in system, is it the deleted one?
 				$query_res = new Group();
-				$query_res->id = $ret_group->id;
+				$query_res->id = $res_list_response->id;
 				$res_get_response = getResourceClient($SOAPHOST)->getData($ctx, $query_res, getCredentialsObject($admin_user->name, $admin_user->password));
-				if($group_get_response->name == $res->name){
+				if($res_get_response->name == $res->name){
 					$this->verifyResource($res,$res_get_response);
 					$found_changed_res = true;
 				}			 
-			}	
-		}else{
-			// only 1 res left in system, is it the deleted one?
-			$query_res = new Group();
-			$query_res->id = $res_list_response->id;
-			$res_get_response = getResourceClient($SOAPHOST)->getData($ctx, $query_res, getCredentialsObject($admin_user->name, $admin_user->password));
-			if($res_get_response->name == $res->name){
-				$this->verifyResource($res,$res_get_response);
-				$found_changed_res = true;
-			}			 
-		}
-		$this->assertTrue($found_changed_res);		
-	}
-	
-	
+			}
+			$this->assertTrue($found_changed_res);		
+		} else {
+			$this->fail();
+		}		
+	}	
 	/**
 	 * Create a new Resource in the OX System via SOAP
 	 * and then check if it was created correctly!
@@ -174,13 +186,13 @@ class ResourceTests extends PHPUnit_Framework_TestCase {
 		
 
 		$random_id = generateContextId();
-		$name = "soap_test_admin_" . $random_id;
+		$name = "soap-test-admin-" . $random_id;
 		$admin_user = getFullUserObject($name, $random_id);
 
 		$ctx = new Context();
 		$ctx->id = $random_id;
 		$ctx->maxQuota = 1;
-		$ctx->name = "soap_test_context" . $random_id;
+		$ctx->name = "soap-test-context" . $random_id;
 
 		$this->createAndVerifyResource($ctx,$admin_user);		
 	}
@@ -195,13 +207,13 @@ class ResourceTests extends PHPUnit_Framework_TestCase {
 	 */
 	public function testDeleteResource(){
 		$random_id = generateContextId();
-		$name = "soap_test_admin_" . $random_id;
+		$name = "soap-test-admin_" . $random_id;
 		$admin_user = getFullUserObject($name, $random_id);
 
 		$ctx = new Context();
 		$ctx->id = $random_id;
 		$ctx->maxQuota = 1;
-		$ctx->name = "soap_test_context" . $random_id;
+		$ctx->name = "soap-test-context" . $random_id;
 
 		// create a new res and verify
 		$new_res = $this->createAndVerifyResource($ctx,$admin_user);		
@@ -222,13 +234,13 @@ class ResourceTests extends PHPUnit_Framework_TestCase {
 	 */
 	public function testChangeResource(){
 		$random_id = generateContextId();
-		$name = "soap_test_admin_" . $random_id;
+		$name = "soap-test-admin-" . $random_id;
 		$admin_user = getFullUserObject($name, $random_id);
 
 		$ctx = new Context();
 		$ctx->id = $random_id;
 		$ctx->maxQuota = 1;
-		$ctx->name = "soap_test_context" . $random_id;
+		$ctx->name = "soap-test-context" . $random_id;
 
 		// create a new res and change data then verify
 		$new_res = $this->createAndVerifyResource($ctx,$admin_user);
@@ -268,15 +280,15 @@ class ResourceTests extends PHPUnit_Framework_TestCase {
 		$this->assertEquals($expected->primaryEmail, $server_response->primaryEmail);
 		
 		// parse anniversary and check day and month year
-		$ani_expected = date_parse($expected->anniversary);
-		$ani_server = date_parse($server_response->anniversary);
+		$ani_expected = (object) date_parse($expected->anniversary);
+		$ani_server   = (object) date_parse($server_response->anniversary);
 		$this->assertEquals($ani_expected->year, $ani_server->year);
 		$this->assertEquals($ani_expected->month, $ani_server->month);
 		$this->assertEquals($ani_expected->day, $ani_server->day);
 		
 		// parse birthday and check day month year
-		$birth_expected = date_parse($expected->birthday);
-		$birth_server = date_parse($server_response->birthday);
+		$birth_expected = (object) date_parse($expected->birthday);
+		$birth_server   = (object) date_parse($server_response->birthday);
 		$this->assertEquals($birth_expected->year, $birth_server->year);
 		$this->assertEquals($birth_expected->month, $birth_server->month);
 		$this->assertEquals($birth_expected->day, $birth_server->day);

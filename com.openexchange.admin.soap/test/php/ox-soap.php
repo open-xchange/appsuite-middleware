@@ -6,12 +6,12 @@
  * 
  */
 
-$SOAPHOST = "cc-server-apache.netline.de";
+$SOAPHOST = "dhcp178.oxnbg.int";
 
 $OXMASTER_ADMIN = "oxadminmaster";
-$OXMASTER_ADMIN_PASS = "netline";
+$OXMASTER_ADMIN_PASS = "secret";
 
-$CONTEXT_ID = 1;
+$CONTEXT_ID = 2;
 $CONTEXT_ADMIN = "oxadmin";
 $CONTEXT_ADMIN_PASS = "secret";
 
@@ -320,7 +320,8 @@ function getUserObject($user_id){
 
 // some error handling functions
 function handleSoapFault($SoapFault) {
-	printf($SoapFault->faultstring . "\n");
+	printf("faultcode: "       . $SoapFault->faultcode . "\n");
+	printf("faultstring: " . $SoapFault->faultstring . "\n");
 }
 
 function handleExcepion($SoapException) {
