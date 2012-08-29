@@ -135,6 +135,7 @@ public enum SolrMailField implements SolrField {
         this.customParameter = customParameter;
     }
 
+    @Override
     public String solrName() {
         final String value = properties.getProperty(propertyName);
         if (StringUtils.isEmpty(value)) {
@@ -143,6 +144,7 @@ public enum SolrMailField implements SolrField {
         return value;
     }
     
+    @Override
     public String parameterName() {
         return customParameter;
     }

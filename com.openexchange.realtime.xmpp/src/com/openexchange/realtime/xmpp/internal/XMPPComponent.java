@@ -61,9 +61,9 @@ import com.openexchange.realtime.xmpp.XMPPExtension;
  */
 public class XMPPComponent {
 
-    private String resource;
+    private final String resource;
 
-    private Map<String, XMPPExtension> extensions;
+    private final Map<String, XMPPExtension> extensions;
 
     public XMPPComponent(String resource) {
         this.resource = resource;

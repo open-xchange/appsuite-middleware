@@ -486,7 +486,7 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 		
 		Iterator<String> it = props.keySet().iterator();
 		while (it.hasNext()) {
-			String key = (String) it.next();
+			String key = it.next();
 			personUpdater.setString(new Composite("unnamed", key), props.get(key));
 		}
 		

@@ -76,7 +76,7 @@ public class ContextExtendedFactory implements OXObjectFactory<ContextExtended> 
 	private static final Log LOG = LogFactory
 			.getLog(ContextExtendedFactory.class);
 
-	private int contextId;
+	private final int contextId;
 	public static CachingContextStorage parent;
 
 	public ContextExtendedFactory(int contextId) {
