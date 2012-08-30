@@ -377,6 +377,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 attachment.setId(header);
             }
             attachment.setStreamProvider(new InputStreamProviderImpl(part));
+            snippet.addAttachment(attachment);
         }
     }
 

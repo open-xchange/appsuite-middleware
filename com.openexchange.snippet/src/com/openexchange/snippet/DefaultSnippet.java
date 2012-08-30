@@ -378,6 +378,24 @@ public class DefaultSnippet implements Snippet {
     }
 
     /**
+     * Adds specified attachment.
+     * 
+     * @param attachment The attachment
+     * @return This snippet with attachment added
+     */
+    public DefaultSnippet addAttachment(final Attachment attachment) {
+        if (null != attachment) {
+            List<Attachment> attachments = this.attachments;
+            if (null == attachments) {
+                attachments = new ArrayList<Attachment>(4);
+                this.attachments = attachments;
+            }
+            attachments.add(attachment);
+        }
+        return this;
+    }
+
+    /**
      * Sets the miscellaneous JSON object.
      *
      * @param misc The miscellaneous JSON object to set
