@@ -138,10 +138,14 @@ public final class GetAttachmentAction extends SnippetAction implements ETagAwar
     protected AJAXRequestResult perform(final SnippetRequest snippetRequest) throws OXException {
         final String id = snippetRequest.checkParameter("id");
         final String attachmentId = snippetRequest.checkParameter("attachmentid");
-        final boolean saveToDisk;
+        boolean saveToDisk;
         {
             final String saveParam = snippetRequest.getParameter(Mail.PARAMETER_SAVE, String.class);
-            saveToDisk = ((saveParam == null || saveParam.length() == 0) ? false : ((Integer.parseInt(saveParam)) > 0));
+            try {
+                saveToDisk = ((saveParam == null || saveParam.length() == 0) ? false : ((Integer.parseInt(saveParam)) > 0));
+            } catch (final NumberFormatException e) {
+                saveToDisk = "true".equalsIgnoreCase(saveParam) || "yes".equalsIgnoreCase(saveParam) || "on".equalsIgnoreCase(saveParam);
+            }
         }
         // Get service
         final SnippetService snippetService = getSnippetService();
