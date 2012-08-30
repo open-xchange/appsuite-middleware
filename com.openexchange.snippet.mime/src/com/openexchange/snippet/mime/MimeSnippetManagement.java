@@ -450,6 +450,8 @@ public final class MimeSnippetManagement implements SnippetManagement {
             }
             // Save
             mimeMessage.saveChanges();
+            mimeMessage.removeHeader("Message-ID");
+            mimeMessage.removeHeader("MIME-Version");
             byte[] byteArray;
             {
                 final ByteArrayOutputStream outputStream = Streams.newByteArrayOutputStream(8192);
@@ -695,6 +697,8 @@ public final class MimeSnippetManagement implements SnippetManagement {
             }
             // Save to MIME structure...
             updateMessage.saveChanges();
+            updateMessage.removeHeader("Message-ID");
+            updateMessage.removeHeader("MIME-Version");
             // ... and write to byte array
             byte[] byteArray;
             {
