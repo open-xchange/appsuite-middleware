@@ -403,27 +403,39 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 byteArray = outputStream.toByteArray();
             }
             final QuotaFileStorage fileStorage = getFileStorage(getContext(session));
-            final String file = fileStorage.saveNewFile(Streams.newByteArrayInputStream(byteArray), byteArray.length);
+            String file = fileStorage.saveNewFile(Streams.newByteArrayInputStream(byteArray), byteArray.length);
             // Store in DB, too
-            stmt = con.prepareStatement("INSERT INTO snippet (cid, user, id, accountId, displayName, module, type, shared, lastModified, refId, refType) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "+ReferenceType.FILE_STORAGE.getType()+")");
-            stmt.setInt(1, contextId);
-            stmt.setInt(2, userId);
-            stmt.setString(3, file);
-            {
-                final int accountId = snippet.getAccountId();
-                if (accountId >= 0) {
-                    stmt.setInt(4, accountId);
-                } else {
-                    stmt.setNull(4, Types.INTEGER);
+            boolean error = true;
+            try {
+                stmt =
+                    con.prepareStatement("INSERT INTO snippet (cid, user, id, accountId, displayName, module, type, shared, lastModified, refId, refType) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, " + ReferenceType.FILE_STORAGE.getType() + ")");
+                stmt.setInt(1, contextId);
+                stmt.setInt(2, userId);
+                stmt.setString(3, file);
+                {
+                    final int accountId = snippet.getAccountId();
+                    if (accountId >= 0) {
+                        stmt.setInt(4, accountId);
+                    } else {
+                        stmt.setNull(4, Types.INTEGER);
+                    }
+                }
+                stmt.setString(5, snippet.getDisplayName());
+                stmt.setString(6, snippet.getModule());
+                stmt.setString(7, snippet.getType());
+                stmt.setInt(8, snippet.isShared() ? 1 : 0);
+                stmt.setLong(9, System.currentTimeMillis());
+                stmt.setString(10, file);
+                stmt.executeUpdate();
+                error = false;
+            } finally {
+                if (error) {
+                    // Delete file on error
+                    fileStorage.deleteFile(file);
+                    file = null;
                 }
             }
-            stmt.setString(5, snippet.getDisplayName());
-            stmt.setString(6, snippet.getModule());
-            stmt.setString(7, snippet.getType());
-            stmt.setInt(8, snippet.isShared() ? 1 : 0);
-            stmt.setLong(9, System.currentTimeMillis());
-            stmt.setString(10, file);
-            stmt.executeUpdate();
+            // Return identifier
             return file;
         } catch (final MessagingException e) {
             throw SnippetExceptionCodes.IO_ERROR.create(e, e.getMessage());
