@@ -140,6 +140,19 @@ public final class GetAction extends SnippetAction {
                     }
                     requestData.setData(array);
                 }
+            } else if (2 == length) {
+                /*-
+                 * "Get specific snippet attachment"
+                 *  GET /snippet/11/789
+                 */
+                final String element = pathElements[0];
+                final String attachment = pathElements[1];
+                if (element.indexOf(',') >= 0) {
+                    throw AjaxExceptionCodes.BAD_REQUEST.create();
+                }
+                requestData.setAction("getattachment");
+                requestData.putParameter("id", element);
+                requestData.putParameter("attachmentid", attachment);
             } else {
                 throw AjaxExceptionCodes.UNKNOWN_ACTION.create(pathInfo);
             }

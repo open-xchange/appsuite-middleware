@@ -85,6 +85,10 @@ public enum SnippetExceptionCodes implements OXExceptionCode {
      * A SQL error occurred: %1$s
      */
     SQL_ERROR(SnippetExceptionMessages.SQL_ERROR_MSG, CATEGORY_ERROR, 4),
+    /**
+     * No such snippet attachment found for identifier %1$s in snippet %2$s
+     */
+    ATTACHMENT_NOT_FOUND(SnippetExceptionMessages.ATTACHMENT_NOT_FOUND_MSG, CATEGORY_ERROR, 5),
 
     ;
 
