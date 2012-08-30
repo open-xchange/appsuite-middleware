@@ -500,8 +500,8 @@ public class DefaultSnippet implements Snippet {
             return;
         }
         if (PROP_SHARED.equals(propName)) {
-            if (value instanceof Boolean) {
-                setShared(((Boolean) value).booleanValue());
+            if (null != value) {
+                setShared((value instanceof Boolean) ? ((Boolean) value).booleanValue() : Boolean.parseBoolean(value.toString()));
             } else {
                 shared = null;
                 properties.remove(PROP_SHARED);
