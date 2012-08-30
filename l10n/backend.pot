@@ -9829,6 +9829,11 @@ msgstr ""
 msgid "Bad request. The server is unable to handle the request."
 msgstr ""
 
+#. Missing request body.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:134
+msgid "Missing request body."
+msgstr ""
+
 #. *
 #. * Exception while writing JSON.
 #.
