@@ -87,6 +87,10 @@ public class SnippetActionFactory implements AJAXActionServiceFactory {
         addJSlobAction(new com.openexchange.snippet.json.action.ListAction(services, actions));
         addJSlobAction(new com.openexchange.snippet.json.action.DeleteAction(services, actions));
         addJSlobAction(new com.openexchange.snippet.json.action.NewAction(services, actions));
+        addJSlobAction(new com.openexchange.snippet.json.action.AttachAction(services, actions));
+        addJSlobAction(new com.openexchange.snippet.json.action.DetachAction(services, actions));
+        addJSlobAction(new com.openexchange.snippet.json.action.UpdateAction(services, actions));
+        addJSlobAction(new com.openexchange.snippet.json.action.GetAttachmentAction(services, actions));
     }
 
     private void addJSlobAction(final SnippetAction snippetAction) {
