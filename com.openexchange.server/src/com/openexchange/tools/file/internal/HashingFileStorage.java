@@ -177,7 +177,7 @@ public class HashingFileStorage implements FileStorage {
             bufOut = new BufferedOutputStream(new FileOutputStream(filePath));
 
             int i = 0;
-            while((i = bufIn.read()) != -1) {
+            while((i = bufIn.read()) >= 0) {
                 bufOut.write(i);
             }
         } catch (final FileNotFoundException e) {
