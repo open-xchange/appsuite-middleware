@@ -350,6 +350,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
         PreparedStatement stmt = null;
         try {
             final MimeMessage mimeMessage = new MimeMessage(getDefaultSession());
+            mimeMessage.setHeader(Property.CREATED_BY.getPropName(), Integer.toString(userId));
             // Set headers
             for (final Map.Entry<String, Object> entry : snippet.getProperties().entrySet()) {
                 final String name = entry.getKey();
