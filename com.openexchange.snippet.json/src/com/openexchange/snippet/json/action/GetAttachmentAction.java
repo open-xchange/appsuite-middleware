@@ -167,7 +167,7 @@ public final class GetAttachmentAction extends SnippetAction implements ETagAwar
             /*
              * Read from stream
              */
-            final ByteArrayOutputStream out = Streams.newByteArrayOutputStream(8192);
+            ByteArrayOutputStream out = Streams.newByteArrayOutputStream(8192);
             /*
              * Write from content's input stream to byte array output stream
              */
@@ -186,6 +186,7 @@ public final class GetAttachmentAction extends SnippetAction implements ETagAwar
              */
             snippetRequest.getRequestData().setFormat("file");
             final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(out.toByteArray());
+            out = null;
             fileHolder.setName(extractFilename(attachment));
             fileHolder.setContentType(saveToDisk ? "application/octet-stream" : attachment.getContentType());
             final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
