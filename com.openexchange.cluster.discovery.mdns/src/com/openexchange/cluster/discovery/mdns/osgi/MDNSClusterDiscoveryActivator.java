@@ -51,8 +51,6 @@ package com.openexchange.cluster.discovery.mdns.osgi;
 
 import java.net.InetAddress;
 import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
@@ -82,23 +80,16 @@ public final class MDNSClusterDiscoveryActivator extends HousekeepingActivator {
     private final class ClusterAwareMdnsServiceListener implements ClusterListenerNotifier, MDNSServiceListener {
 
         private final List<ClusterListener> clusterListeners;
-        private final Queue<ClusterEvent> clusterEvents;
         private final String serviceId;
 
         protected ClusterAwareMdnsServiceListener(final String serviceId) {
             super();
             clusterListeners = new CopyOnWriteArrayList<ClusterListener>();
-            clusterEvents = new ConcurrentLinkedQueue<ClusterEvent>();
             this.serviceId = serviceId;
         }
 
         @Override
         public void addListener(final ClusterListener listener) {
-            for (ClusterEvent event = clusterEvents.poll(); null != event; event = clusterEvents.poll()) {
-                for (final InetAddress inetAddress : event.getAddresses()) {
-                    listener.added(inetAddress);                    
-                }
-            }
             clusterListeners.add(listener);
         }
 
@@ -129,10 +120,6 @@ public final class MDNSClusterDiscoveryActivator extends HousekeepingActivator {
         @Override
         public void onServiceAdded(final String serviceId, final MDNSServiceEntry entry) {
             if (this.serviceId.equals(serviceId)) {
-                if (clusterListeners.isEmpty()) {
-                    clusterEvents.offer(new ClusterEvent(entry));
-                    return;
-                }
                 /*
                  * Notify listeners
                  */
