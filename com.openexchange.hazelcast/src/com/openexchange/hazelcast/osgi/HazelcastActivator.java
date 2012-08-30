@@ -22,7 +22,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.hazelcast.ClassLoaderAwareHazelcastInstance;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.timer.TimerService;
-import com.openexchange.tools.strings.StringParser;
+import com.openexchange.tools.strings.TimeSpanParser;
 
 /**
  * {@link HazelcastActivator} - The activator for Hazelcast bundle (registers a {@link HazelcastInstance} for ths JVM)
@@ -54,7 +54,7 @@ public class HazelcastActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { ConfigurationService.class, TimerService.class, StringParser.class };
+        return new Class[] { ConfigurationService.class, TimerService.class };
     }
 
     @Override
@@ -150,7 +150,7 @@ public class HazelcastActivator extends HousekeepingActivator {
      */
     long getDelay() {
         final String delay = getService(ConfigurationService.class).getProperty("com.openexchange.hazelcast.startupDelay", "60000");
-        return getService(StringParser.class).parse(delay, long.class).longValue();
+        return TimeSpanParser.parseTimespan(delay).longValue();
     }
 
     /**
