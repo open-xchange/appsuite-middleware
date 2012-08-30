@@ -60,6 +60,8 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.mime.ContentDisposition;
+import com.openexchange.mail.mime.ContentType;
 import com.openexchange.snippet.Attachment;
 import com.openexchange.snippet.Property;
 import com.openexchange.snippet.Snippet;
@@ -155,24 +157,24 @@ public class SnippetJSONResultConverter implements ResultConverter {
         json.put(Property.SHARED.getPropName(), snippet.isShared());
         final Map<String, Object> unnamedProperties = snippet.getUnnamedProperties();
         if (null != unnamedProperties && !unnamedProperties.isEmpty()) {
-            json.put("unnamedproperties", new JSONObject(unnamedProperties));
+            json.put("props", new JSONObject(unnamedProperties));
         }
         final List<Attachment> attachments = snippet.getAttachments();
         if (null != attachments && !attachments.isEmpty()) {
             final JSONArray jArray = new JSONArray();
             for (final Attachment attachment : attachments) {
                 final JSONObject jsonAttachment = new JSONObject();
-                tmp = attachment.getContentDisposition();
+                tmp = extractFilename(attachment);
                 if (null != tmp) {
-                    jsonAttachment.put("content-disposition", tmp);
+                    jsonAttachment.put("filename", tmp);
                 }
                 tmp = attachment.getContentType();
                 if (null != tmp) {
-                    jsonAttachment.put("content-type", tmp);
+                    jsonAttachment.put("mimetype", tmp);
                 }
                 tmp = attachment.getId();
                 if (null != tmp) {
-                    jsonAttachment.put("attachmentid", tmp);
+                    jsonAttachment.put("id", tmp);
                 }
                 final long size = attachment.getSize();
                 if (size > 0) {
@@ -180,9 +182,26 @@ public class SnippetJSONResultConverter implements ResultConverter {
                 }
                 jArray.put(jsonAttachment);
             }
-            json.put("attachments", jArray);
+            json.put("files", jArray);
         }
         return json;
+    }
+
+    private static String extractFilename(final Attachment attachment) {
+        if (null == attachment) {
+            return null;
+        }
+        try {
+            final String sContentDisposition = attachment.getContentDisposition();
+            String fn = null == sContentDisposition ? null : new ContentDisposition(sContentDisposition).getFilenameParameter();
+            if (fn == null) {
+                final String sContentType = attachment.getContentType();
+                fn = null == sContentType ? null : new ContentType(sContentType).getNameParameter();
+            }
+            return fn;
+        } catch (final Exception e) {
+            return null;
+        }
     }
 
 }

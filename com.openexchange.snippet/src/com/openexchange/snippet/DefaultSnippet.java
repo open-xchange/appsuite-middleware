@@ -476,11 +476,11 @@ public class DefaultSnippet implements Snippet {
      */
     public void put(final String propName, final Object value) {
         if (PROP_ACCOUNT_ID.equals(propName)) {
-            setAccountId((value instanceof Integer) ? ((Integer) value).intValue() : -1);
+            setAccountId(null == value ? -1 : ((value instanceof Integer) ? ((Integer) value).intValue() : Integer.parseInt(value.toString())));
             return;
         }
         if (PROP_CREATED_BY.equals(propName)) {
-            setCreatedBy((value instanceof Integer) ? ((Integer) value).intValue() : -1);
+            setCreatedBy(null == value ? -1 : ((value instanceof Integer) ? ((Integer) value).intValue() : Integer.parseInt(value.toString())));
             return;
         }
         if (PROP_DISPLAY_NAME.equals(propName)) {
