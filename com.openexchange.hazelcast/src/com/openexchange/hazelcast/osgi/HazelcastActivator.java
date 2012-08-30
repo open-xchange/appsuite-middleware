@@ -90,8 +90,10 @@ public class HazelcastActivator extends HousekeepingActivator {
                     final ClusterListener clusterListener = new HazelcastInitializingClusterListener(activator);
                     discovery.addListener(clusterListener);
                     activator.clusterListener = clusterListener;
-                    /*
-                     * Timeout before we assume we are either the first or alone in the cluster
+                    /*-
+                     * For safety schedule a one-shot action after specified delay -> we are the only node.
+                     * 
+                     * 
                      */
                     final long delay = getDelay();
                     if (delay >= 0) {
@@ -181,7 +183,7 @@ public class HazelcastActivator extends HousekeepingActivator {
             final TcpIpConfig tcpIpConfig = join.getTcpIpConfig();
             tcpIpConfig.setEnabled(true);
             for (final InetAddress address : nodes) {
-                tcpIpConfig.addAddress(new Address(address, config.getPort()));
+                tcpIpConfig.addAddress(new Address(address, config.getNetworkConfig().getPort()));
             }
             /*
              * Create appropriate Hazelcast instance from configuration
