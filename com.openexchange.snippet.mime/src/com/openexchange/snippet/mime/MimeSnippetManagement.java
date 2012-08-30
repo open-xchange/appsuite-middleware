@@ -108,6 +108,7 @@ import com.openexchange.snippet.SnippetExceptionCodes;
 import com.openexchange.snippet.SnippetManagement;
 import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.sql.DBUtils;
 
 
 /**
@@ -371,7 +372,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
             attachment.setContentDisposition(contentDisposition == null ? null : contentDisposition.toString());
             attachment.setContentType(contentType.toString());
             attachment.setSize(part.getSize());
-            header = part.getHeader("AttachmentId", null);
+            header = part.getHeader("attachmentid", null);
             if (null != header) {
                 attachment.setId(header);
             }
@@ -449,7 +450,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
             }
             // Save
             mimeMessage.saveChanges();
-            final byte[] byteArray;
+            byte[] byteArray;
             {
                 final ByteArrayOutputStream outputStream = Streams.newByteArrayOutputStream(8192);
                 mimeMessage.writeTo(outputStream);
@@ -457,6 +458,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
             }
             final QuotaFileStorage fileStorage = getFileStorage(getContext(session));
             final String file = fileStorage.saveNewFile(Streams.newByteArrayInputStream(byteArray), byteArray.length);
+            byteArray = null; // Drop immediately
             // Store in DB, too
             String newId = Integer.toString(getIdGeneratorService().getId("com.openexchange.snippet.mime", contextId));
             boolean error = true;
@@ -512,27 +514,31 @@ public final class MimeSnippetManagement implements SnippetManagement {
         }
         final DatabaseService databaseService = getDatabaseService();
         final int contextId = this.contextId;
-        final Connection con = databaseService.getWritable(contextId);
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
+        final QuotaFileStorage fileStorage = getFileStorage(getContext(session));
+        boolean error = true;
+        String oldFile = null;
+        String newFile = null;
         try {
-            String file;
             {
-                stmt = con.prepareStatement("SELECT refId FROM snippet WHERE cid=? AND id=? AND refType=" + FS_TYPE);
-                int pos = 0;
-                stmt.setInt(++pos, contextId);
-                stmt.setString(++pos, identifier);
-                rs = stmt.executeQuery();
-                if (!rs.next()) {
-                    throw SnippetExceptionCodes.SNIPPET_NOT_FOUND.create(identifier);
+                final Connection con = databaseService.getReadOnly(contextId);
+                PreparedStatement stmt = null;
+                ResultSet rs = null;
+                try {
+                    stmt = con.prepareStatement("SELECT refId FROM snippet WHERE cid=? AND id=? AND refType=" + FS_TYPE);
+                    int pos = 0;
+                    stmt.setInt(++pos, contextId);
+                    stmt.setString(++pos, identifier);
+                    rs = stmt.executeQuery();
+                    if (!rs.next()) {
+                        throw SnippetExceptionCodes.SNIPPET_NOT_FOUND.create(identifier);
+                    }
+                    oldFile = rs.getString(1);
+                } finally {
+                    closeSQLStuff(rs, stmt);
+                    databaseService.backReadOnly(contextId, con);
                 }
-                file = rs.getString(1);
-                closeSQLStuff(rs, stmt);
-                rs = null;
-                stmt = null;
             }
-            final QuotaFileStorage fileStorage = getFileStorage(getContext(session));
-            final MimeMessage storageMessage = new MimeMessage(getDefaultSession(), fileStorage.getFile(file));
+            final MimeMessage storageMessage = new MimeMessage(getDefaultSession(), fileStorage.getFile(oldFile));
             final ContentType storageContentType;
             {
                 final String header = storageMessage.getHeader(MessageHeaders.HDR_CONTENT_TYPE, null);
@@ -644,7 +650,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
             if (notEmpty(removeAttachments)) {
                 for (final Attachment attachment : removeAttachments) {
                     for (final Iterator<MimeBodyPart> iterator = attachmentParts.iterator(); iterator.hasNext();) {
-                        final String header = iterator.next().getHeader("AttachmentId", null);
+                        final String header = iterator.next().getHeader("attachmentid", null);
                         if (null != header && header.equals(attachment.getId())) {
                             iterator.remove();
                         }
@@ -684,45 +690,78 @@ public final class MimeSnippetManagement implements SnippetManagement {
             }
             // Save
             updateMessage.saveChanges();
-            final byte[] byteArray;
+            byte[] byteArray;
             {
                 final ByteArrayOutputStream outputStream = Streams.newByteArrayOutputStream(8192);
                 updateMessage.writeTo(outputStream);
                 byteArray = outputStream.toByteArray();
             }
-            // Re-create file
-            fileStorage.deleteFile(file);
-            file = fileStorage.saveNewFile(Streams.newByteArrayInputStream(byteArray), byteArray.length);
-            /*
-             * Update DB, too
-             */
-            stmt = con.prepareStatement("DELETE FROM snippet WHERE cid=? AND user=? AND id=? AND refType="+FS_TYPE);
-            int pos = 0;
-            stmt.setLong(++pos, contextId);
-            stmt.setLong(++pos, userId);
-            stmt.setString(++pos, identifier);
-            stmt.executeUpdate();
-            closeSQLStuff(stmt);
-            stmt = con.prepareStatement("INSERT INTO snippet (cid, user, id, accountId, displayName, module, type, shared, lastModified, refId, refType) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "+FS_TYPE+")");
-            stmt.setInt(1, contextId);
-            stmt.setInt(2, userId);
-            stmt.setString(3, identifier);
+            // Create file carrying new MIME data
+            newFile = fileStorage.saveNewFile(Streams.newByteArrayInputStream(byteArray), byteArray.length);
+            byteArray = null; // Drop immediately
             {
-                final String sAccountId = updateMessage.getHeader(Property.ACCOUNT_ID.getPropName(), null);
-                if (sAccountId != null) {
-                    stmt.setInt(4, Integer.parseInt(sAccountId));
-                } else {
-                    stmt.setNull(4, Types.INTEGER);
+                final Connection con = databaseService.getWritable(contextId);
+                PreparedStatement stmt = null;
+                boolean rollback = false;
+                try {
+                    /*-
+                     * Update DB, too
+                     * 
+                     * 1. Create dummy entry to check DB schema consistency
+                     * 2. Delete existing
+                     * 3. Make dummy entry the real entry
+                     */
+                    con.setAutoCommit(false); // COMMIT
+                    rollback = true;
+                    stmt =
+                        con.prepareStatement("INSERT INTO snippet (cid, user, id, accountId, displayName, module, type, shared, lastModified, refId, refType) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, " + FS_TYPE + ")");
+                    int pos = 0;
+                    stmt.setInt(++pos, contextId);
+                    stmt.setInt(++pos, userId);
+                    stmt.setString(++pos, "--" + identifier);
+                    {
+                        final String sAccountId = updateMessage.getHeader(Property.ACCOUNT_ID.getPropName(), null);
+                        if (sAccountId != null) {
+                            stmt.setInt(++pos, Integer.parseInt(sAccountId));
+                        } else {
+                            stmt.setNull(++pos, Types.INTEGER);
+                        }
+                    }
+                    stmt.setString(++pos, updateMessage.getHeader(Property.DISPLAY_NAME.getPropName(), null));
+                    stmt.setString(++pos, updateMessage.getHeader(Property.MODULE.getPropName(), null));
+                    stmt.setString(++pos, updateMessage.getHeader(Property.TYPE.getPropName(), null));
+                    stmt.setInt(++pos, Boolean.parseBoolean(updateMessage.getHeader(Property.SHARED.getPropName(), null)) ? 1 : 0);
+                    stmt.setLong(++pos, System.currentTimeMillis());
+                    stmt.setString(++pos, newFile);
+                    stmt.executeUpdate();
+                    stmt = con.prepareStatement("DELETE FROM snippet WHERE cid=? AND user=? AND id=? AND refType=" + FS_TYPE);
+                    pos = 0;
+                    stmt.setLong(++pos, contextId);
+                    stmt.setLong(++pos, userId);
+                    stmt.setString(++pos, identifier);
+                    stmt.executeUpdate();
+                    closeSQLStuff(stmt);
+                    stmt = con.prepareStatement("UPDATE snippet SET id=? WHERE cid=? AND user=? AND id=? AND refType=" + FS_TYPE);
+                    pos = 0;
+                    stmt.setString(++pos, identifier);
+                    stmt.setLong(++pos, contextId);
+                    stmt.setLong(++pos, userId);
+                    stmt.setString(++pos, "--" + identifier);
+                    stmt.executeUpdate();
+                    con.commit();
+                    rollback = false;
+                } finally {
+                    if (rollback) {
+                        DBUtils.rollback(con);
+                    }
+                    closeSQLStuff(stmt);
+                    DBUtils.autocommit(con);
+                    databaseService.backWritable(contextId, con);
                 }
             }
-            stmt.setString(5, updateMessage.getHeader(Property.DISPLAY_NAME.getPropName(), null));
-            stmt.setString(6, updateMessage.getHeader(Property.MODULE.getPropName(), null));
-            stmt.setString(7, updateMessage.getHeader(Property.TYPE.getPropName(), null));
-            stmt.setInt(8, Boolean.parseBoolean(updateMessage.getHeader(Property.SHARED.getPropName(), null)) ? 1 : 0);
-            stmt.setLong(9, System.currentTimeMillis());
-            stmt.setString(10, file);
-            stmt.executeUpdate();
-            return file;
+            // Mark as successfully processed
+            error = false;
+            return identifier;
         } catch (final MessagingException e) {
             throw SnippetExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
@@ -732,8 +771,24 @@ public final class MimeSnippetManagement implements SnippetManagement {
         } catch (final RuntimeException e) {
             throw SnippetExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            closeSQLStuff(rs, stmt);
-            databaseService.backWritable(contextId, con);
+            if (error) {
+                // Delete newly created file
+                deleteSafe(newFile, fileStorage);
+            } else {
+                // Delete obsolete file
+                deleteSafe(oldFile, fileStorage);
+            }
+        }
+    }
+
+    private static void deleteSafe(final String file, final QuotaFileStorage fileStorage) {
+        if (null == file) {
+            return;
+        }
+        try {
+            fileStorage.deleteFile(file);
+        } catch (final Exception e) {
+            // Ignore any regular exception
         }
     }
 
@@ -808,7 +863,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
         if (null == attachmentId) {
             attachmentId = UUID.randomUUID().toString();
         }
-        bodyPart.setHeader("AttachmentId", attachmentId);
+        bodyPart.setHeader("attachmentid", attachmentId);
         /*
          * Force base64 encoding
          */
