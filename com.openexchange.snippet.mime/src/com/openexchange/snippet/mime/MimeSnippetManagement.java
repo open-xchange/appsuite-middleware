@@ -88,6 +88,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.filestore.FilestoreStorage;
+import com.openexchange.id.IDGeneratorService;
 import com.openexchange.java.Streams;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
@@ -143,6 +144,10 @@ public final class MimeSnippetManagement implements SnippetManagement {
         return getService(DatabaseService.class);
     }
 
+    private static IDGeneratorService getIdGeneratorService() {
+        return getService(IDGeneratorService.class);
+    }
+
     private static Context getContext(final int contextId) throws OXException {
         return getService(ContextService.class).getContext(contextId);
     }
@@ -188,7 +193,6 @@ public final class MimeSnippetManagement implements SnippetManagement {
         final DatabaseService databaseService = getDatabaseService();
         final int contextId = this.contextId;
         final Connection con = databaseService.getReadOnly(contextId);
-        final List<String> ids;
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -215,24 +219,27 @@ public final class MimeSnippetManagement implements SnippetManagement {
             if (!rs.next()) {
                 return Collections.emptyList();
             }
-            ids = new LinkedList<String>();
+            final List<String> ids = new LinkedList<String>();
             do {
                 ids.add(rs.getString(1));
             } while (rs.next());
+            closeSQLStuff(rs, stmt);
+            rs = null;
+            stmt = null;
+            if (ids.isEmpty()) {
+                return Collections.emptyList();
+            }
+            final List<Snippet> list = new ArrayList<Snippet>(ids.size());
+            for (final String id : ids) {
+                list.add(getSnippet0(id, con));
+            }
+            return list;
         } catch (final SQLException e) {
             throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
             databaseService.backReadOnly(contextId, con);
         }
-        if (ids.isEmpty()) {
-            return Collections.emptyList();
-        }
-        final List<Snippet> list = new ArrayList<Snippet>(ids.size());
-        for (final String id : ids) {
-            list.add(getSnippet(id));
-        }
-        return list;
     }
 
     @Override
@@ -240,7 +247,6 @@ public final class MimeSnippetManagement implements SnippetManagement {
         final DatabaseService databaseService = getDatabaseService();
         final int contextId = this.contextId;
         final Connection con = databaseService.getReadOnly(contextId);
-        final List<String> ids;
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -253,32 +259,71 @@ public final class MimeSnippetManagement implements SnippetManagement {
             if (!rs.next()) {
                 return Collections.emptyList();
             }
-            ids = new LinkedList<String>();
+            final List<String> ids = new LinkedList<String>();
             do {
                 ids.add(rs.getString(1));
             } while (rs.next());
+            closeSQLStuff(rs, stmt);
+            rs = null;
+            stmt = null;
+            if (ids.isEmpty()) {
+                return Collections.emptyList();
+            }
+            final List<Snippet> list = new ArrayList<Snippet>(ids.size());
+            for (final String id : ids) {
+                list.add(getSnippet0(id, con));
+            }
+            return list;
         } catch (final SQLException e) {
             throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
             databaseService.backReadOnly(contextId, con);
         }
-        if (ids.isEmpty()) {
-            return Collections.emptyList();
-        }
-        final List<Snippet> list = new ArrayList<Snippet>(ids.size());
-        for (final String id : ids) {
-            list.add(getSnippet(id));
-        }
-        return list;
     }
 
     @Override
     public Snippet getSnippet(final String id) throws OXException {
+        final DatabaseService databaseService = getDatabaseService();
+        final int contextId = this.contextId;
+        final Connection con = databaseService.getReadOnly(contextId);
         try {
+            return getSnippet0(id, con);
+        } finally {
+            databaseService.backReadOnly(contextId, con);
+        }
+    }
+
+    private Snippet getSnippet0(final String identifier, final Connection con) throws OXException {
+        if (null == identifier) {
+            return null;
+        }
+        if (null == con) {
+            return getSnippet(identifier);
+        }
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            final String file;
+            final int creator;
+            {
+                stmt = con.prepareStatement("SELECT refId, user FROM snippet WHERE cid=? AND id=? AND refType=" + FS_TYPE);
+                int pos = 0;
+                stmt.setInt(++pos, contextId);
+                stmt.setString(++pos, identifier);
+                rs = stmt.executeQuery();
+                if (!rs.next()) {
+                    throw SnippetExceptionCodes.SNIPPET_NOT_FOUND.create(identifier);
+                }
+                file = rs.getString(1);
+                creator = rs.getInt(2);
+                closeSQLStuff(rs, stmt);
+                rs = null;
+                stmt = null;
+            }
             final QuotaFileStorage fileStorage = getFileStorage(getContext(session));
-            final MimeMessage mimeMessage = new MimeMessage(getDefaultSession(), fileStorage.getFile(id));
-            final DefaultSnippet snippet = new DefaultSnippet();
+            final MimeMessage mimeMessage = new MimeMessage(getDefaultSession(), fileStorage.getFile(file));
+            final DefaultSnippet snippet = new DefaultSnippet().setId(identifier).setCreatedBy(creator);
             final String lcct;
             {
                 final String tmp = mimeMessage.getHeader(MessageHeaders.HDR_CONTENT_TYPE, null);
@@ -301,12 +346,16 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 parseSnippet(mimeMessage, mimeMessage, snippet);
             }
             return snippet;
+        } catch (final SQLException e) {
+            throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final MessagingException e) {
             throw SnippetExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
             throw SnippetExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw SnippetExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(rs, stmt);
         }
     }
 
@@ -407,15 +456,16 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 byteArray = outputStream.toByteArray();
             }
             final QuotaFileStorage fileStorage = getFileStorage(getContext(session));
-            String file = fileStorage.saveNewFile(Streams.newByteArrayInputStream(byteArray), byteArray.length);
+            final String file = fileStorage.saveNewFile(Streams.newByteArrayInputStream(byteArray), byteArray.length);
             // Store in DB, too
+            String newId = Integer.toString(getIdGeneratorService().getId("com.openexchange.snippet.mime", contextId));
             boolean error = true;
             try {
                 stmt =
                     con.prepareStatement("INSERT INTO snippet (cid, user, id, accountId, displayName, module, type, shared, lastModified, refId, refType) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, " + FS_TYPE + ")");
                 stmt.setInt(1, contextId);
                 stmt.setInt(2, userId);
-                stmt.setString(3, file);
+                stmt.setString(3, newId);
                 {
                     final int accountId = snippet.getAccountId();
                     if (accountId >= 0) {
@@ -436,11 +486,11 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 if (error) {
                     // Delete file on error
                     fileStorage.deleteFile(file);
-                    file = null;
+                    newId = null;
                 }
             }
             // Return identifier
-            return file;
+            return newId;
         } catch (final MessagingException e) {
             throw SnippetExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
@@ -456,20 +506,39 @@ public final class MimeSnippetManagement implements SnippetManagement {
     }
 
     @Override
-    public String updateSnippet(final String id, final Snippet snippet, final Set<Property> properties, final Collection<Attachment> addAttachments, final Collection<Attachment> removeAttachments) throws OXException {
+    public String updateSnippet(final String identifier, final Snippet snippet, final Set<Property> properties, final Collection<Attachment> addAttachments, final Collection<Attachment> removeAttachments) throws OXException {
+        if (null == identifier) {
+            return null;
+        }
         final DatabaseService databaseService = getDatabaseService();
         final int contextId = this.contextId;
         final Connection con = databaseService.getWritable(contextId);
         PreparedStatement stmt = null;
+        ResultSet rs = null;
         try {
+            String file;
+            {
+                stmt = con.prepareStatement("SELECT refId FROM snippet WHERE cid=? AND id=? AND refType=" + FS_TYPE);
+                int pos = 0;
+                stmt.setInt(++pos, contextId);
+                stmt.setString(++pos, identifier);
+                rs = stmt.executeQuery();
+                if (!rs.next()) {
+                    throw SnippetExceptionCodes.SNIPPET_NOT_FOUND.create(identifier);
+                }
+                file = rs.getString(1);
+                closeSQLStuff(rs, stmt);
+                rs = null;
+                stmt = null;
+            }
             final QuotaFileStorage fileStorage = getFileStorage(getContext(session));
-            final MimeMessage storageMessage = new MimeMessage(getDefaultSession(), fileStorage.getFile(id));
+            final MimeMessage storageMessage = new MimeMessage(getDefaultSession(), fileStorage.getFile(file));
             final ContentType storageContentType;
             {
                 final String header = storageMessage.getHeader(MessageHeaders.HDR_CONTENT_TYPE, null);
                 storageContentType = isEmpty(header) ? ContentType.DEFAULT_CONTENT_TYPE : new ContentType(header);
             }
-
+            // New MIME message for changes
             final MimeMessage updateMessage = new MimeMessage(getDefaultSession());
             // Update properties
             {
@@ -621,7 +690,9 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 updateMessage.writeTo(outputStream);
                 byteArray = outputStream.toByteArray();
             }
-            final String file = fileStorage.saveNewFile(Streams.newByteArrayInputStream(byteArray), byteArray.length);
+            // Re-create file
+            fileStorage.deleteFile(file);
+            file = fileStorage.saveNewFile(Streams.newByteArrayInputStream(byteArray), byteArray.length);
             /*
              * Update DB, too
              */
@@ -629,13 +700,13 @@ public final class MimeSnippetManagement implements SnippetManagement {
             int pos = 0;
             stmt.setLong(++pos, contextId);
             stmt.setLong(++pos, userId);
-            stmt.setString(++pos, id);
+            stmt.setString(++pos, identifier);
             stmt.executeUpdate();
             closeSQLStuff(stmt);
             stmt = con.prepareStatement("INSERT INTO snippet (cid, user, id, accountId, displayName, module, type, shared, lastModified, refId, refType) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "+FS_TYPE+")");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
-            stmt.setString(3, file);
+            stmt.setString(3, identifier);
             {
                 final String sAccountId = updateMessage.getHeader(Property.ACCOUNT_ID.getPropName(), null);
                 if (sAccountId != null) {
@@ -661,7 +732,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
         } catch (final RuntimeException e) {
             throw SnippetExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            closeSQLStuff(stmt);
+            closeSQLStuff(rs, stmt);
             databaseService.backWritable(contextId, con);
         }
     }
@@ -681,29 +752,45 @@ public final class MimeSnippetManagement implements SnippetManagement {
     /**
      * Deletes specified snippet
      *
-     * @param id The snippet identifier
+     * @param identifier The snippet identifier
      * @param userId The user identifier
      * @param contextId The context identifier
      * @param con The connection to use
      * @throws OXException If delete attempt fails
      */
-    public static void deleteSnippet(final String id, final int userId, final int contextId, final Connection con) throws OXException {
+    public static void deleteSnippet(final String identifier, final int userId, final int contextId, final Connection con) throws OXException {
         PreparedStatement stmt = null;
+        ResultSet rs = null;
         try {
+            final String file;
+            {
+                stmt = con.prepareStatement("SELECT refId FROM snippet WHERE cid=? AND id=? AND refType=" + FS_TYPE);
+                int pos = 0;
+                stmt.setInt(++pos, contextId);
+                stmt.setString(++pos, identifier);
+                rs = stmt.executeQuery();
+                if (!rs.next()) {
+                    throw SnippetExceptionCodes.SNIPPET_NOT_FOUND.create(identifier);
+                }
+                file = rs.getString(1);
+                closeSQLStuff(rs, stmt);
+                rs = null;
+                stmt = null;
+            }
             final QuotaFileStorage fileStorage = getFileStorage(getContext(contextId));
-            fileStorage.deleteFile(id);
+            fileStorage.deleteFile(file);
             stmt = con.prepareStatement("DELETE FROM snippet WHERE cid=? AND user=? AND id=? AND refType="+FS_TYPE);
             int pos = 0;
             stmt.setLong(++pos, contextId);
             stmt.setLong(++pos, userId);
-            stmt.setString(++pos, id);
+            stmt.setString(++pos, identifier);
             stmt.executeUpdate();
         } catch (final SQLException e) {
             throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw SnippetExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            closeSQLStuff(stmt);
+            closeSQLStuff(rs, stmt);
         }
     }
 
@@ -717,10 +804,11 @@ public final class MimeSnippetManagement implements SnippetManagement {
         bodyPart.setDataHandler(new DataHandler(new MessageDataSource(attachment.getInputStream(), contentType)));
         bodyPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
         bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(contentType));
-        final String attachmentId = attachment.getId();
-        if (null != attachmentId) {
-            bodyPart.setHeader("AttachmentId", attachmentId);
+        String attachmentId = attachment.getId();
+        if (null == attachmentId) {
+            attachmentId = UUID.randomUUID().toString();
         }
+        bodyPart.setHeader("AttachmentId", attachmentId);
         /*
          * Force base64 encoding
          */
