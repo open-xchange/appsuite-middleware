@@ -717,6 +717,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
                      * 2. Delete existing
                      * 3. Make dummy entry the real entry
                      */
+                    final String dummyId = "--" + identifier;
                     con.setAutoCommit(false); // BEGIN
                     rollback = true;
                     stmt =
@@ -724,7 +725,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
                     int pos = 0;
                     stmt.setInt(++pos, contextId);
                     stmt.setInt(++pos, userId);
-                    stmt.setString(++pos, "--" + identifier);
+                    stmt.setString(++pos, dummyId);
                     {
                         final String sAccountId = updateMessage.getHeader(Property.ACCOUNT_ID.getPropName(), null);
                         if (sAccountId != null) {
@@ -753,7 +754,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
                     stmt.setString(++pos, identifier);
                     stmt.setLong(++pos, contextId);
                     stmt.setLong(++pos, userId);
-                    stmt.setString(++pos, "--" + identifier);
+                    stmt.setString(++pos, dummyId);
                     stmt.executeUpdate();
                     con.commit(); // COMMIT
                     rollback = false;
