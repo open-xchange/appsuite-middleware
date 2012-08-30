@@ -77,7 +77,7 @@ import com.openexchange.snippet.json.SnippetRequest;
 @Action(
     name = "detach",
     description = "Removes a file attachment from an existing snippet associated with the current user and context.",
-    method = RequestMethod.POST,
+    method = RequestMethod.PUT,
     parameters = { @Parameter(name = "id", description = "The snippet's identifier", optional = false) }
 )
 public final class DetachAction extends SnippetAction {
