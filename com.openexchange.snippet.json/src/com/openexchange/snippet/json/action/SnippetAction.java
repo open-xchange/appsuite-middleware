@@ -144,7 +144,7 @@ public abstract class SnippetAction implements AJAXActionService {
     }
 
     /**
-     * Performs given JSlob request.
+     * Performs given snippet request.
      *
      * @param snippetRequest The snippet request
      * @return The AJAX result
@@ -153,9 +153,9 @@ public abstract class SnippetAction implements AJAXActionService {
     protected abstract AJAXRequestResult perform(SnippetRequest snippetRequest) throws OXException, JSONException;
 
     /**
-     * Performs given JSlob request in REST style.
+     * Performs given snippet request in REST style.
      *
-     * @param snippetRequest The JSlob request
+     * @param snippetRequest The snippet request
      * @param method The REST method to perform
      * @return The AJAX result
      * @throws OXException If performing request fails for any reason
@@ -167,14 +167,14 @@ public abstract class SnippetAction implements AJAXActionService {
     }
 
     /**
-     * Gets the action identifier for this JSlob action.
+     * Gets the action identifier for this snippet action.
      *
      * @return The action identifier; e.g. <code>"get"</code>
      */
     public abstract String getAction();
 
     /**
-     * Gets the REST method identifiers for this JSlob action.
+     * Gets the REST method identifiers for this snippet action.
      *
      * @return The REST method identifiers or <code>null</code> (e.g. <code>"GET"</code>)
      */
