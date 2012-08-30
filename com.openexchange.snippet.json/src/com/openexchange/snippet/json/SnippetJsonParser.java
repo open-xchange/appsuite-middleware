@@ -199,7 +199,7 @@ public final class SnippetJsonParser {
         if (jsonAttachment.hasAndNotNull(key)) {
             attachment.setContentDisposition(jsonAttachment.getString(key));
         }
-        key = "id";
+        key = "attachmentid";
         if (jsonAttachment.hasAndNotNull(key)) {
             attachment.setId(jsonAttachment.getString(key));
         }

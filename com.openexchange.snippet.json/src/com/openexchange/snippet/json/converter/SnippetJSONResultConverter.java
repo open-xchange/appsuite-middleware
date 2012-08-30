@@ -172,7 +172,7 @@ public class SnippetJSONResultConverter implements ResultConverter {
                 }
                 tmp = attachment.getId();
                 if (null != tmp) {
-                    jsonAttachment.put("id", tmp);
+                    jsonAttachment.put("attachmentid", tmp);
                 }
                 final long size = attachment.getSize();
                 if (size > 0) {
