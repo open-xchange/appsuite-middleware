@@ -52,6 +52,7 @@ package com.openexchange.snippet.mime;
 import static com.openexchange.mail.mime.MimeDefaultSession.getDefaultSession;
 import static com.openexchange.snippet.mime.Services.getService;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import gnu.trove.ConcurrentTIntObjectHashMap;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -73,8 +74,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import javax.activation.DataHandler;
 import javax.mail.BodyPart;
 import javax.mail.Header;
@@ -117,6 +116,11 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class MimeSnippetManagement implements SnippetManagement {
 
+    /**
+     * The file storage reference type identifier: <b><code>1</code></b>.
+     */
+    private static final int FS_TYPE = ReferenceType.FILE_STORAGE.getType();
+
     private static final class InputStreamProviderImpl implements InputStreamProvider {
 
         private final MimePart part;
@@ -150,10 +154,10 @@ public final class MimeSnippetManagement implements SnippetManagement {
         return getService(ContextService.class).getContext(session.getContextId());
     }
 
-    private static final ConcurrentMap<Integer, QuotaFileStorage> FILE_STORE_CACHE = new ConcurrentHashMap<Integer, QuotaFileStorage>();
+    private static final ConcurrentTIntObjectHashMap<QuotaFileStorage> FILE_STORE_CACHE = new ConcurrentTIntObjectHashMap<QuotaFileStorage>();
 
     private static QuotaFileStorage getFileStorage(final Context ctx) throws OXException {
-        final Integer key = Integer.valueOf(ctx.getContextId());
+        final int key = ctx.getContextId();
         QuotaFileStorage qfs = FILE_STORE_CACHE.get(key);
         if (null == qfs) {
             final QuotaFileStorage quotaFileStorage = QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
@@ -188,7 +192,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            final StringBuilder sql = new StringBuilder("SELECT id FROM snippet WHERE cid=? AND (user=? OR shared>0) AND refType=").append(ReferenceType.FILE_STORAGE.getType());
+            final StringBuilder sql = new StringBuilder("SELECT id FROM snippet WHERE cid=? AND (user=? OR shared>0) AND refType=").append(FS_TYPE);
             final boolean hasTypes = (null != types) && (types.length > 0);
             if (hasTypes) {
                 sql.append(" AND (");
@@ -240,7 +244,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            final StringBuilder sql = new StringBuilder("SELECT id FROM snippet WHERE cid=? AND user=? AND refType=").append(ReferenceType.FILE_STORAGE.getType());
+            final StringBuilder sql = new StringBuilder("SELECT id FROM snippet WHERE cid=? AND user=? AND refType=").append(FS_TYPE);
             stmt = con.prepareStatement(sql.toString());
             int pos = 0;
             stmt.setInt(++pos, contextId);
@@ -408,7 +412,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
             boolean error = true;
             try {
                 stmt =
-                    con.prepareStatement("INSERT INTO snippet (cid, user, id, accountId, displayName, module, type, shared, lastModified, refId, refType) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, " + ReferenceType.FILE_STORAGE.getType() + ")");
+                    con.prepareStatement("INSERT INTO snippet (cid, user, id, accountId, displayName, module, type, shared, lastModified, refId, refType) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, " + FS_TYPE + ")");
                 stmt.setInt(1, contextId);
                 stmt.setInt(2, userId);
                 stmt.setString(3, file);
@@ -621,14 +625,14 @@ public final class MimeSnippetManagement implements SnippetManagement {
             /*
              * Update DB, too
              */
-            stmt = con.prepareStatement("DELETE FROM snippet WHERE cid=? AND user=? AND id=? AND refType="+ReferenceType.FILE_STORAGE.getType());
+            stmt = con.prepareStatement("DELETE FROM snippet WHERE cid=? AND user=? AND id=? AND refType="+FS_TYPE);
             int pos = 0;
             stmt.setLong(++pos, contextId);
             stmt.setLong(++pos, userId);
             stmt.setString(++pos, id);
             stmt.executeUpdate();
             closeSQLStuff(stmt);
-            stmt = con.prepareStatement("INSERT INTO snippet (cid, user, id, accountId, displayName, module, type, shared, lastModified, refId, refType) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "+ReferenceType.FILE_STORAGE.getType()+")");
+            stmt = con.prepareStatement("INSERT INTO snippet (cid, user, id, accountId, displayName, module, type, shared, lastModified, refId, refType) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "+FS_TYPE+")");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
             stmt.setString(3, file);
@@ -688,7 +692,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
         try {
             final QuotaFileStorage fileStorage = getFileStorage(getContext(contextId));
             fileStorage.deleteFile(id);
-            stmt = con.prepareStatement("DELETE FROM snippet WHERE cid=? AND user=? AND id=? AND refType="+ReferenceType.FILE_STORAGE.getType());
+            stmt = con.prepareStatement("DELETE FROM snippet WHERE cid=? AND user=? AND id=? AND refType="+FS_TYPE);
             int pos = 0;
             stmt.setLong(++pos, contextId);
             stmt.setLong(++pos, userId);
