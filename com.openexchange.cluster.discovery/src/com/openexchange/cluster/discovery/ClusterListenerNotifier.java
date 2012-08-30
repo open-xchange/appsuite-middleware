@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,21 +49,21 @@
 
 package com.openexchange.cluster.discovery;
 
-import java.net.InetAddress;
-import java.util.List;
-
 /**
- * The {@link ClusterDiscoveryService} maintains a list of known nodes and informs listeners of changes to that list.
- * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link ClusterListenerNotifier} - Notifies added {@link ClusterListener}s about appearing/disappearing nodes in cluster.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface ClusterDiscoveryService extends ClusterListenerNotifier {
+public interface ClusterListenerNotifier {
 
     /**
-     * Retrieve a list of currently known nodes.
-     * 
-     * @return A list of currently known nodes.
+     * Registers a listener to be notified of changes to the known cluster nodes.
      */
-    List<InetAddress> getNodes();
+    public abstract void addListener(ClusterListener listener);
+
+    /**
+     * Un-registers a listener.
+     */
+    public abstract void removeListener(ClusterListener listener);
 
 }

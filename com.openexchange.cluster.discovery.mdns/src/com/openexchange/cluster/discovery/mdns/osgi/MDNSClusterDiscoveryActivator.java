@@ -50,8 +50,9 @@
 package com.openexchange.cluster.discovery.mdns.osgi;
 
 import java.net.InetAddress;
-import java.util.Collections;
 import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
@@ -60,6 +61,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.cluster.discovery.ClusterDiscoveryService;
 import com.openexchange.cluster.discovery.ClusterListener;
+import com.openexchange.cluster.discovery.ClusterListenerNotifier;
 import com.openexchange.cluster.discovery.mdns.MDNSClusterDiscoveryService;
 import com.openexchange.mdns.MDNSService;
 import com.openexchange.mdns.MDNSServiceEntry;
@@ -77,31 +79,32 @@ public final class MDNSClusterDiscoveryActivator extends HousekeepingActivator {
 
     private static final String SERVICE_ID = "openexchange.service.hazelcast";
 
-    private final class RegisteringListener implements ClusterDiscoveryService, MDNSServiceListener {
+    private final class ClusterAwareMdnsServiceListener implements ClusterListenerNotifier, MDNSServiceListener {
 
         private final List<ClusterListener> clusterListeners;
+        private final Queue<ClusterEvent> clusterEvents;
         private final String serviceId;
 
-        protected RegisteringListener(final String serviceId, final AtomicReference<MDNSService> serviceRef) {
+        protected ClusterAwareMdnsServiceListener(final String serviceId) {
             super();
             clusterListeners = new CopyOnWriteArrayList<ClusterListener>();
+            clusterEvents = new ConcurrentLinkedQueue<ClusterEvent>();
             this.serviceId = serviceId;
-            registerService(ClusterDiscoveryService.class, new MDNSClusterDiscoveryService(serviceId, serviceRef, this));
         }
 
         @Override
         public void addListener(final ClusterListener listener) {
+            for (ClusterEvent event = clusterEvents.poll(); null != event; event = clusterEvents.poll()) {
+                for (final InetAddress inetAddress : event.getAddresses()) {
+                    listener.added(inetAddress);                    
+                }
+            }
             clusterListeners.add(listener);
         }
 
         @Override
         public void removeListener(final ClusterListener listener) {
             clusterListeners.remove(listener);
-        }
-
-        @Override
-        public List<InetAddress> getNodes() {
-            return Collections.emptyList();
         }
 
         public void close() {
@@ -126,6 +129,10 @@ public final class MDNSClusterDiscoveryActivator extends HousekeepingActivator {
         @Override
         public void onServiceAdded(final String serviceId, final MDNSServiceEntry entry) {
             if (this.serviceId.equals(serviceId)) {
+                if (clusterListeners.isEmpty()) {
+                    clusterEvents.offer(new ClusterEvent(entry));
+                    return;
+                }
                 /*
                  * Notify listeners
                  */
@@ -142,14 +149,14 @@ public final class MDNSClusterDiscoveryActivator extends HousekeepingActivator {
     /**
      * Reference for RegisteringListener.
      */
-    protected final AtomicReference<RegisteringListener> registeringListenerRef;
+    protected final AtomicReference<ClusterAwareMdnsServiceListener> registeringListenerRef;
 
     /**
      * Initializes a new {@link MDNSClusterDiscoveryActivator}.
      */
     public MDNSClusterDiscoveryActivator() {
         super();
-        registeringListenerRef = new AtomicReference<RegisteringListener>();
+        registeringListenerRef = new AtomicReference<ClusterAwareMdnsServiceListener>();
     }
 
     @Override
@@ -179,7 +186,8 @@ public final class MDNSClusterDiscoveryActivator extends HousekeepingActivator {
                 final MDNSService service = context.getService(reference);
                 try {
                     if (serviceRef.compareAndSet(null, service)) {
-                        final RegisteringListener registeringListener = new RegisteringListener(SERVICE_ID, serviceRef);
+                        final ClusterAwareMdnsServiceListener registeringListener = new ClusterAwareMdnsServiceListener(SERVICE_ID);
+                        registerService(ClusterDiscoveryService.class, new MDNSClusterDiscoveryService(SERVICE_ID, serviceRef, registeringListener));
                         service.addListener(registeringListener);
                         registeringListenerRef.set(registeringListener);
                         return service;
@@ -205,7 +213,7 @@ public final class MDNSClusterDiscoveryActivator extends HousekeepingActivator {
                 if (null == service) {
                     return;
                 }
-                final RegisteringListener registeringListener = registeringListenerRef.getAndSet(null);
+                final ClusterAwareMdnsServiceListener registeringListener = registeringListenerRef.getAndSet(null);
                 if (null != registeringListener) {
                     service.removeListener(registeringListener);
                     registeringListener.close();
@@ -219,7 +227,7 @@ public final class MDNSClusterDiscoveryActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        final RegisteringListener registeringListener = registeringListenerRef.getAndSet(null);
+        final ClusterAwareMdnsServiceListener registeringListener = registeringListenerRef.getAndSet(null);
         if (null != registeringListener) {
             registeringListener.close();
         }

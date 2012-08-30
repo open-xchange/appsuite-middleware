@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,23 +47,37 @@
  *
  */
 
-package com.openexchange.cluster.discovery;
+package com.openexchange.cluster.discovery.mdns.osgi;
 
 import java.net.InetAddress;
+import java.util.Arrays;
 import java.util.List;
+import com.openexchange.mdns.MDNSServiceEntry;
 
 /**
- * The {@link ClusterDiscoveryService} maintains a list of known nodes and informs listeners of changes to that list.
+ * {@link ClusterEvent} - A cluster event.
  * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface ClusterDiscoveryService extends ClusterListenerNotifier {
+public final class ClusterEvent {
+
+    private final List<InetAddress> addresses;
 
     /**
-     * Retrieve a list of currently known nodes.
-     * 
-     * @return A list of currently known nodes.
+     * Initializes a new {@link ClusterEvent}.
      */
-    List<InetAddress> getNodes();
+    public ClusterEvent(final MDNSServiceEntry entry) {
+        super();
+        addresses = Arrays.asList(entry.getAddresses());
+    }
+
+    /**
+     * Gets the addresses
+     * 
+     * @return The addresses
+     */
+    public List<InetAddress> getAddresses() {
+        return addresses;
+    }
 
 }
