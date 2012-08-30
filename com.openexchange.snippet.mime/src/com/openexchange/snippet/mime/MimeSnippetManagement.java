@@ -519,6 +519,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
         String oldFile = null;
         String newFile = null;
         try {
+            // Obtain file identifier
             {
                 final Connection con = databaseService.getReadOnly(contextId);
                 PreparedStatement stmt = null;
@@ -533,11 +534,15 @@ public final class MimeSnippetManagement implements SnippetManagement {
                         throw SnippetExceptionCodes.SNIPPET_NOT_FOUND.create(identifier);
                     }
                     oldFile = rs.getString(1);
+                    if (null == oldFile) {
+                        throw SnippetExceptionCodes.SNIPPET_NOT_FOUND.create(identifier);
+                    }
                 } finally {
                     closeSQLStuff(rs, stmt);
                     databaseService.backReadOnly(contextId, con);
                 }
             }
+            // Create MIME message from existing file
             final MimeMessage storageMessage = new MimeMessage(getDefaultSession(), fileStorage.getFile(oldFile));
             final ContentType storageContentType;
             {
@@ -553,33 +558,33 @@ public final class MimeSnippetManagement implements SnippetManagement {
                     switch (property) {
                     case ACCOUNT_ID:
                         updateMessage.setHeader(Property.ACCOUNT_ID.getPropName(), Integer.toString(snippet.getAccountId()));
-                        propNames.add(Property.ACCOUNT_ID.getPropName());
+                        propNames.add(Snippet.PROP_ACCOUNT_ID);
                         break;
                     case CREATED_BY:
                         updateMessage.setHeader(Property.CREATED_BY.getPropName(), Integer.toString(snippet.getCreatedBy()));
-                        propNames.add(Property.CREATED_BY.getPropName());
+                        propNames.add(Snippet.PROP_CREATED_BY);
                         break;
                     case DISPLAY_NAME:
                         updateMessage.setHeader(Property.DISPLAY_NAME.getPropName(), snippet.getDisplayName());
-                        propNames.add(Property.DISPLAY_NAME.getPropName());
+                        propNames.add(Snippet.PROP_DISPLAY_NAME);
                         break;
                     case MODULE:
                         updateMessage.setHeader(Property.MODULE.getPropName(), snippet.getModule());
-                        propNames.add(Property.MODULE.getPropName());
+                        propNames.add(Snippet.PROP_MODULE);
                         break;
                     case SHARED:
                         updateMessage.setHeader(Property.SHARED.getPropName(), Boolean.toString(snippet.isShared()));
-                        propNames.add(Property.SHARED.getPropName());
+                        propNames.add(Snippet.PROP_SHARED);
                         break;
                     case TYPE:
                         updateMessage.setHeader(Property.TYPE.getPropName(), snippet.getType());
-                        propNames.add(Property.TYPE.getPropName());
+                        propNames.add(Snippet.PROP_TYPE);
                         break;
                     default:
                         break;
                     }
                 }
-                // Copy remaining to updateMessage; this action included unnamed properties
+                // Copy remaining to updateMessage; this action includes unnamed properties
                 @SuppressWarnings("unchecked")
                 final Enumeration<Header> nonMatchingHeaders = storageMessage.getNonMatchingHeaders(propNames.toArray(new String[0]));
                 while (nonMatchingHeaders.hasMoreElements()) {
@@ -688,8 +693,9 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 updateMessage.setText(content, "UTF-8", "plain");
                 updateMessage.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
             }
-            // Save
+            // Save to MIME structure...
             updateMessage.saveChanges();
+            // ... and write to byte array
             byte[] byteArray;
             {
                 final ByteArrayOutputStream outputStream = Streams.newByteArrayOutputStream(8192);
@@ -711,7 +717,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
                      * 2. Delete existing
                      * 3. Make dummy entry the real entry
                      */
-                    con.setAutoCommit(false); // COMMIT
+                    con.setAutoCommit(false); // BEGIN
                     rollback = true;
                     stmt =
                         con.prepareStatement("INSERT INTO snippet (cid, user, id, accountId, displayName, module, type, shared, lastModified, refId, refType) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, " + FS_TYPE + ")");
@@ -734,6 +740,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
                     stmt.setLong(++pos, System.currentTimeMillis());
                     stmt.setString(++pos, newFile);
                     stmt.executeUpdate();
+                    closeSQLStuff(stmt);
                     stmt = con.prepareStatement("DELETE FROM snippet WHERE cid=? AND user=? AND id=? AND refType=" + FS_TYPE);
                     pos = 0;
                     stmt.setLong(++pos, contextId);
@@ -748,7 +755,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
                     stmt.setLong(++pos, userId);
                     stmt.setString(++pos, "--" + identifier);
                     stmt.executeUpdate();
-                    con.commit();
+                    con.commit(); // COMMIT
                     rollback = false;
                 } finally {
                     if (rollback) {
