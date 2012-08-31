@@ -97,6 +97,8 @@ public final class IMAPConfig extends MailConfig {
 
     private boolean secure;
 
+    private Boolean acl;
+
     private IIMAPProperties mailProperties;
 
     private InetAddress imapServerAddress;
@@ -289,11 +291,24 @@ public final class IMAPConfig extends MailConfig {
     }
 
     /**
+     * Sets the ACL flag.
+     * 
+     * @param acl <code>true</code> if ACL extension is supported; otherwise <code>false</code>
+     */
+    public void setAcl(boolean acl) {
+        this.acl = Boolean.valueOf(acl);
+    }
+
+    /**
      * Checks if ACLs are supported
      *
      * @return <code>true</code> if ACLs are supported; otherwise <code>false</code>
      */
     public boolean isSupportsACLs() {
+        final Boolean acl = this.acl;
+        if (null != acl) {
+            return acl.booleanValue();
+        }
         final BoolCapVal supportsACLs = IMAPProperties.getInstance().getSupportsACLs();
         final Map<String, String> capabilities = this.capabilities;
         if (capabilities != null && BoolCapVal.AUTO.equals(supportsACLs)) {

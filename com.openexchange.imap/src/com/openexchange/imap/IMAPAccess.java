@@ -336,6 +336,11 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     private static volatile Map<HostAndPort, Long> timedOutServers;
 
     /**
+     * Remembers whether a certain IMAP server supports the ACL extension.
+     */
+    private static volatile ConcurrentMap<String, Boolean> aclCapableServers;
+
+    /**
      * The scheduled timer task to clean-up maps.
      */
     private static ScheduledTimerTask cleanUpTimerTask;
@@ -917,6 +922,32 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              * Add server's capabilities
              */
             config.initializeCapabilities(imapStore, session);
+            /*
+             * Special check for ACLs
+             */
+            if (config.isSupportsACLs()) {
+                final String key = new StringBuilder(server).append('@').append(port).toString();
+                Boolean b = aclCapableServers.get(key);
+                if (null == b) {
+                    Boolean nb;
+                    final IMAPFolder dummy = (IMAPFolder) imapStore.getFolder("INBOX");
+                    try {
+                        dummy.myRights();
+                        nb = Boolean.TRUE;
+                    } catch (MessagingException e) {
+                        // MessagingException - If the server doesn't support the ACL extension
+                        nb = Boolean.FALSE;
+                    }
+                    b = aclCapableServers.putIfAbsent(key, nb);
+                    if (null == b) {
+                        b = nb;
+                    }
+                }
+                if (!b.booleanValue()) {
+                    // MessagingException - If the server doesn't support the ACL extension
+                    config.setAcl(false);
+                }
+            }
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e, config, session);
         }
@@ -1146,6 +1177,9 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         if (null == timedOutServers) {
             timedOutServers = new ConcurrentHashMap<HostAndPort, Long>();
         }
+        if (null == aclCapableServers) {
+            aclCapableServers = new ConcurrentHashMap<String, Boolean>();
+        }
         if (null == cleanUpTimerTask) {
             final TimerService timerService = IMAPServiceRegistry.getService(TimerService.class);
             if (null != timerService) {
@@ -1195,6 +1229,9 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         if (null != cleanUpTimerTask) {
             cleanUpTimerTask.cancel(false);
             cleanUpTimerTask = null;
+        }
+        if (null != aclCapableServers) {
+            aclCapableServers = null;
         }
         if (null != timedOutServers) {
             timedOutServers = null;
