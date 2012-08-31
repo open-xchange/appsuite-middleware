@@ -136,7 +136,7 @@ class ResourceTests extends PHPUnit_Framework_TestCase {
 
 		// TODO: all SOAP calls should be try-catched like this...
 		try {
-			$res_list_response = getResourceClient($SOAPHOST)->listAll($ctx, "*", getCredentialsObject($admin_user->name, $admin_user->password));
+			$res_list_response = getResourceClient($SOAPHOST)->listAll($ctx, getCredentialsObject($admin_user->name, $admin_user->password));
 		} catch (SoapFault $fault) {
 			handleSoapFault($fault);
 		} catch (Exception $e) {
@@ -315,7 +315,7 @@ class ResourceTests extends PHPUnit_Framework_TestCase {
 		$this->assertEquals($expected->fax_business, $server_response->fax_business);
 		$this->assertEquals($expected->fax_home, $server_response->fax_home);
 		$this->assertEquals($expected->fax_other, $server_response->fax_other);
-		$this->assertEquals($expected->gUI_Spam_filter_capabilities_enabled, $server_response->gUI_Spam_filter_capabilities_enabled);
+		$this->assertEquals($expected->gui_spam_filter_enabled, $server_response->gui_spam_filter_enabled);
 		$this->assertEquals($expected->imapLogin, $server_response->imapLogin);
 		
 		// special case of asserting because ox sends all imap infos in the "imapserver" attribute
@@ -357,9 +357,7 @@ class ResourceTests extends PHPUnit_Framework_TestCase {
 		$this->assertEquals($smtp_uri["host"], $server_response->smtpServer);
 		$this->assertEquals($smtp_uri["port"], $server_response->smtpPort);
 		$this->assertEquals($smtp_uri["scheme"]."://", $server_response->smtpSchema);	
-		
-		
-		$this->assertEquals($expected->spam_filter_enabled, $server_response->spam_filter_enabled);
+
 		$this->assertEquals($expected->spouse_name, $server_response->spouse_name);
 		$this->assertEquals($expected->state_business, $server_response->state_business);
 		$this->assertEquals($expected->state_home, $server_response->state_home);
