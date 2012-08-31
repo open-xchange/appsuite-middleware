@@ -81,6 +81,7 @@ Import-Package: com.openexchange.api2,
  javax.net.ssl,
  javax.security.auth,
  org.apache.commons.logging,
+ org.cliffc.high_scale_lib,
  org.osgi.framework,
  org.osgi.service.event
 Export-Package: com.openexchange.imap,

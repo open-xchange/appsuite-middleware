@@ -55,9 +55,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import javax.mail.MessagingException;
 import javax.mail.internet.IDNA;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCapabilities;
 import com.openexchange.imap.IMAPException;
@@ -117,7 +117,7 @@ public final class IMAPConfig extends MailConfig {
     public IMAPConfig(final int accountId) {
         super();
         this.accountId = accountId;
-        params = new ConcurrentHashMap<String, Object>(4);
+        params = new NonBlockingHashMap<String, Object>(4);
     }
 
     /**

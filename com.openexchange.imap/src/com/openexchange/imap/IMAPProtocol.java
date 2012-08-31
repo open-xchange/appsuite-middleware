@@ -51,8 +51,8 @@ package com.openexchange.imap;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.Protocol;
@@ -115,7 +115,7 @@ public final class IMAPProtocol extends Protocol {
      * Initializes the max-count map.
      */
     public void initExtMaxCountMap() {
-        map = new ConcurrentHashMap<InetAddress, Integer>(4);
+        map = new NonBlockingHashMap<InetAddress, Integer>(4);
         overallExternalMaxCount = null;
     }
 

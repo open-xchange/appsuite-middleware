@@ -52,12 +52,12 @@ package com.openexchange.imap.cache;
 import java.net.InetSocketAddress;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import javax.mail.MessagingException;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.imap.config.IMAPConfig;
@@ -88,7 +88,7 @@ public final class MBoxEnabledCache {
         if (MAP == null) {
             synchronized (MBoxEnabledCache.class) {
                 if (MAP == null) {
-                    MAP = new ConcurrentHashMap<InetSocketAddress, Future<Boolean>>();
+                    MAP = new NonBlockingHashMap<InetSocketAddress, Future<Boolean>>();
                 }
             }
         }

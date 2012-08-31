@@ -52,11 +52,11 @@ package com.openexchange.imap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import javax.mail.MessagingException;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.services.IMAPServiceRegistry;
@@ -137,7 +137,7 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
         protected ReentrantSemaphoredBoundedIMAPStoreContainer(final String server, final int port, final String login, final String pw, final int maxCount) {
             super(server, port, login, pw);
             semaphore = new Semaphore(maxCount, true);
-            stores = new ConcurrentHashMap<Thread, CountedIMAPStore>(maxCount);
+            stores = new NonBlockingHashMap<Thread, CountedIMAPStore>(maxCount);
             final ConfigurationService configurationService = IMAPServiceRegistry.getService(ConfigurationService.class);
             timeoutMillis = null == configurationService ? 20000 : configurationService.getIntProperty("com.openexchange.imap.imapConnectionTimeout", 20000);
             if (DEBUG) {
