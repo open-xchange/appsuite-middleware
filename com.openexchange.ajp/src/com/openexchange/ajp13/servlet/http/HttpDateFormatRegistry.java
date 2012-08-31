@@ -56,8 +56,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.ajp13.AJPv13ServiceRegistry;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.tools.TimeZoneUtils;
@@ -116,7 +116,7 @@ public final class HttpDateFormatRegistry {
      */
     private HttpDateFormatRegistry() {
         super();
-        detectors = new NonBlockingHashMap<String, BrowserDetector>(16);
+        detectors = new ConcurrentHashMap<String, BrowserDetector>(16);
         final TimeZone gmtTimeZone = TimeZoneUtils.getTimeZone("GMT");
         {
             final SimpleDateFormat headerDateFormat = new SimpleDateFormat("EEE',' dd MMMM yyyy HH:mm:ss z", Locale.ENGLISH);

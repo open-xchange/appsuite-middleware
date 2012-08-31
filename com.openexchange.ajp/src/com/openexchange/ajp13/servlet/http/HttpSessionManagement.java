@@ -52,7 +52,9 @@ package com.openexchange.ajp13.servlet.http;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
-import org.cliffc.high_scale_lib.NonBlockingHashMap;
+import java.util.concurrent.ConcurrentHashMap;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import com.openexchange.ajp13.AJPv13ServiceRegistry;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.timer.ScheduledTimerTask;
@@ -79,7 +81,7 @@ public final class HttpSessionManagement {
     static void init() {
         synchronized (HttpSessionManagement.class) {
             if (null == sessions) {
-                sessions = new NonBlockingHashMap<String, HttpSessionWrapper>();
+                sessions = new ConcurrentHashMap<String, HttpSessionWrapper>();
                 final ConfigurationService service = AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class);
                 maxActiveSessions = null == service ? -1 : service.getIntProperty("com.openexchange.servlet.maxActiveSessions", -1);
                 final TimerService timer = AJPv13ServiceRegistry.getInstance().getService(TimerService.class);

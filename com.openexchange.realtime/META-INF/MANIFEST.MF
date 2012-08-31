@@ -15,7 +15,6 @@ Import-Package: com.openexchange.conversion.simple,
  com.openexchange.session,
  com.openexchange.tools.session,
  org.apache.commons.logging,
- org.cliffc.high_scale_lib,
  org.osgi.framework
 Export-Package: com.openexchange.realtime,
  com.openexchange.realtime.packet,

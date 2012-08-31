@@ -54,7 +54,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import org.cliffc.high_scale_lib.NonBlockingHashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.realtime.packet.ID;
 
 /**
@@ -82,7 +82,7 @@ public class IDMap<T> implements Map<ID, T> {
      */
     public IDMap(final boolean concurrent) {
         super();
-        delegate = concurrent ? new NonBlockingHashMap<ID, T>() : new HashMap<ID, T>();
+        delegate = concurrent ? new ConcurrentHashMap<ID, T>() : new HashMap<ID, T>();
     }
 
     @Override

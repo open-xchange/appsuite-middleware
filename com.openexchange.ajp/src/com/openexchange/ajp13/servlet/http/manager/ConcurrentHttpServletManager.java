@@ -55,11 +55,15 @@ import java.util.Dictionary;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import org.cliffc.high_scale_lib.NonBlockingHashMap;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.SingleThreadModel;
+import javax.servlet.http.HttpServlet;
 import com.openexchange.ajp13.AJPv13Utility;
 import com.openexchange.ajp13.servlet.ServletConfigLoader;
 import com.openexchange.ajp13.servlet.http.FiFoServletQueue;
@@ -92,7 +96,7 @@ public final class ConcurrentHttpServletManager extends AbstractHttpServletManag
         final ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
         readLock = readWriteLock.readLock();
         writeLock = readWriteLock.writeLock();
-        implierCache = new NonBlockingHashMap<String, ServletQueue>();
+        implierCache = new ConcurrentHashMap<String, ServletQueue>();
     }
 
     @Override

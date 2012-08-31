@@ -57,9 +57,9 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.apache.commons.logging.Log;
-import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.config.NearCacheConfig;
@@ -115,8 +115,8 @@ public final class HazelcastCacheService extends DefaultCacheKeyService implemen
     public HazelcastCacheService(final HazelcastInstance hazelcastInstance) {
         super();
         this.hazelcastInstance = hazelcastInstance;
-        regionNames = new NonBlockingHashMap<String, Boolean>(16);
-        localOnlyCaches = new NonBlockingHashMap<String, LocalCache>(16);
+        regionNames = new ConcurrentHashMap<String, Boolean>(16);
+        localOnlyCaches = new ConcurrentHashMap<String, LocalCache>(16);
     }
 
     /**

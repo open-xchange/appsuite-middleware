@@ -55,6 +55,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.Lock;
@@ -64,7 +65,6 @@ import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceInfo;
 import javax.jmdns.ServiceListener;
 import javax.jmdns.impl.JmDNSImpl;
-import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.mdns.MDNSExceptionCodes;
 import com.openexchange.mdns.MDNSService;
@@ -115,8 +115,8 @@ public final class MDNSServiceImpl implements MDNSService, MDNSReregisterer {
             if (!((JmDNSImpl) jmdns).getServiceTypes().containsKey(serviceType)) {
                 jmdns.registerServiceType(serviceType);
             }
-            map = new NonBlockingHashMap<String, ConcurrentMap<UUID, MDNSServiceEntry>>();
-            registeredServicesSet = new NonBlockingHashMap<Key, ServiceInfo>();
+            map = new ConcurrentHashMap<String, ConcurrentMap<UUID, MDNSServiceEntry>>();
+            registeredServicesSet = new ConcurrentHashMap<Key, ServiceInfo>();
             /*
              * Add service listener for "_openexchange._tcp.local."
              */
