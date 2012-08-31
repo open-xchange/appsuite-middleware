@@ -50,6 +50,7 @@
 package com.openexchange.ajp13;
 
 import java.util.concurrent.ConcurrentMap;
+import javax.servlet.http.HttpServletRequest;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 
 /**

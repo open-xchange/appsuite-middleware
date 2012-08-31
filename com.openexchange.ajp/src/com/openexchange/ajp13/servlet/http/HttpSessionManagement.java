@@ -52,6 +52,8 @@ package com.openexchange.ajp13.servlet.http;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.ajp13.AJPv13ServiceRegistry;
 import com.openexchange.config.ConfigurationService;
