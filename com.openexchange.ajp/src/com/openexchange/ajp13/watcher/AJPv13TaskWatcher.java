@@ -53,10 +53,10 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.ajp13.AJPv13ServiceRegistry;
@@ -88,7 +88,7 @@ public class AJPv13TaskWatcher {
      */
     public AJPv13TaskWatcher(final ThreadPoolService threadPoolService) {
         super();
-        tasks = new ConcurrentHashMap<Long, com.openexchange.ajp13.watcher.Task>();
+        tasks = new NonBlockingHashMap<Long, com.openexchange.ajp13.watcher.Task>();
         /*
          * Start keep-alive task
          */

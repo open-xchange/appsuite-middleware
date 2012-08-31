@@ -55,12 +55,8 @@ import java.net.URISyntaxException;
 import java.util.Dictionary;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.SingleThreadModel;
-import javax.servlet.http.HttpServlet;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.servlet.ServletConfigLoader;
 import com.openexchange.ajp13.servlet.http.FiFoServletQueue;
@@ -99,8 +95,8 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
      */
     protected AbstractHttpServletManager(final Map<String, Constructor<?>> servletConstructorMap) {
         super();
-        servletPool = new ConcurrentHashMap<String, ServletQueue>();
-        parkedServletPool = new ConcurrentHashMap<String, ConcurrentStack<ServletQueue>>(4);
+        servletPool = new NonBlockingHashMap<String, ServletQueue>();
+        parkedServletPool = new NonBlockingHashMap<String, ConcurrentStack<ServletQueue>>(4);
         createServlets(servletConstructorMap);
     }
 
