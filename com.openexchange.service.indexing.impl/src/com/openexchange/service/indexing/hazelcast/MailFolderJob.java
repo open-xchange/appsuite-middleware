@@ -50,6 +50,7 @@
 package com.openexchange.service.indexing.hazelcast;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -105,6 +106,11 @@ import com.openexchange.session.Session;
 public class MailFolderJob implements IndexingJob {
     
     private static final Log LOG = com.openexchange.log.Log.loggerFor(MailFolderJob.class);
+    
+    private static final MailField[] CHANGEABLE_FIELDS = new MailField[] { 
+        MailField.ID,
+        MailField.FLAGS,
+        MailField.COLOR_LABEL };
 
     private static final long serialVersionUID = -900105721652425254L;
     
@@ -149,35 +155,41 @@ public class MailFolderJob implements IndexingJob {
                 .setSortField(MailIndexField.RECEIVED_DATE)
                 .setOrder(Order.DESC)
                 .build();            
-            if (folderStorage.exists(folder)) {
+            if (folderStorage.exists(folder)) {                
                 IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
-                Set<MailIndexField> fields = Collections.singleton(MailIndexField.ID);                
-                IndexResult<MailMessage> indexResult = mailIndex.query(mailAllQuery, fields);
-                MailMessage[] storageMails = messageStorage.searchMessages(
+                MailMessage[] storageResult = messageStorage.searchMessages(
                     folder,
                     IndexRange.NULL,
                     MailSortField.RECEIVED_DATE,
                     OrderDirection.DESC,
                     null,
-                    new MailField[] { MailField.ID });
-                
-                Set<String> indexIds = new HashSet<String>();
-                for (IndexDocument<MailMessage> document : indexResult.getResults()) {
-                    indexIds.add(document.getObject().getMailId());
-                }                
-                Set<String> storageIds = new HashSet<String>();
-                for (MailMessage msg : storageMails) {
-                    storageIds.add(msg.getMailId());
+                    CHANGEABLE_FIELDS);                
+                Map<String, MailMessage> storageMails = new HashMap<String, MailMessage>();
+                for (MailMessage msg : storageResult) {
+                    storageMails.put(msg.getMailId(), msg);
                 }
                 
-                deleteObsoleteMails(indexIds, storageIds, mailIndex, attachmentIndex);
-                addNewMails(indexIds, storageIds, mailIndex, attachmentIndex, messageStorage);
+                if (IndexFolderManager.isIndexed(info.contextId, info.userId, Types.EMAIL, String.valueOf(info.accountId), folder)) {         
+                    IndexResult<MailMessage> indexResult = mailIndex.query(mailAllQuery, MailIndexField.getFor(CHANGEABLE_FIELDS));                    
+                    Map<String, MailMessage> indexMails = new HashMap<String, MailMessage>();
+                    for (IndexDocument<MailMessage> document : indexResult.getResults()) {
+                        MailMessage msg = document.getObject();
+                        indexMails.put(msg.getMailId(), msg);
+                    }                
+                    
+                    deleteMails(indexMails.keySet(), storageMails.keySet(), mailIndex, attachmentIndex);
+                    addMails(indexMails.keySet(), storageMails.keySet(), mailIndex, attachmentIndex, messageStorage);
+                    changeMails(indexMails, storageMails, mailIndex, attachmentIndex, messageStorage);              
+                } else {
+                    addMails(Collections.EMPTY_SET, storageMails.keySet(), mailIndex, attachmentIndex, messageStorage);
+                    IndexFolderManager.setIndexed(info.contextId, info.userId, Types.EMAIL, String.valueOf(info.accountId), folder);
+                }                
             } else {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Deleting folder from index: " + info.toString());
                 }
                 
-                IndexFolderManager.deleteFolderEntry(info.contextId, info.userId, Types.EMAIL, String.valueOf(info.accountId), folder);                
+                IndexFolderManager.deleteFolderEntry(info.contextId, info.userId, Types.EMAIL, String.valueOf(info.accountId), folder);
                 mailIndex.deleteByQuery(mailAllQuery);
                 Map<String, Object> attachmentAllParams = new HashMap<String, Object>();
                 params.put(IndexConstants.MODULE, new Integer(Types.EMAIL));
@@ -199,8 +211,82 @@ public class MailFolderJob implements IndexingJob {
             }
         }        
     }
+    
+    private void changeMails(Map<String, MailMessage> indexMails, Map<String, MailMessage> storageMails, final IndexAccess<MailMessage> mailIndex, final IndexAccess<Attachment> attachmentIndex, final IMailMessageStorage messageStorage) throws OXException {
+        Set<String> toRemove = new HashSet<String>(indexMails.keySet());
+        toRemove.removeAll(storageMails.keySet());
+        
+        Set<String> toCompare = new HashSet<String>(indexMails.keySet());
+        toCompare.removeAll(toRemove);
+        
+        final List<String> changedMails = new ArrayList<String>();
+        for (String id : toCompare) {
+            MailMessage storageMail = storageMails.get(id);
+            MailMessage indexMail = indexMails.get(id);
+            if (isDifferent(storageMail, indexMail)) {
+                changedMails.add(storageMail.getMailId());
+            }
+        }
+        
+        if (changedMails.isEmpty()) {
+            return;
+        }
+        ChunkPerformer.perform(new Performable() {            
+            @Override
+            public int perform(int off, int len) throws OXException {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Adding a chunk of mails of folder " + folder + ": " + info.toString());
+                }
+                
+                List<String> subList = changedMails.subList(off, len);                
+                MailMessage[] messages = messageStorage.getMessages(
+                    folder, 
+                    subList.toArray(new String[subList.size()]), 
+                    MailField.values());
+                
+                String[] mailIds = new String[messages.length];
+                for (int i = 0; i < messages.length; i++) {
+                    MailMessage mailMessage = messages[i];
+                    if (mailMessage != null) {
+                        mailIds[i] = (mailMessage.getMailId());
+                    }
+                }
+                
+                List<IndexDocument<MailMessage>> documents = new ArrayList<IndexDocument<MailMessage>>(messages.length);
+                String[] primaryContents = messageStorage.getPrimaryContents(folder, mailIds);                
+                for (int i = 0; i < messages.length; i++) {
+                    MailMessage message = messages[i];
+                    if (message != null) {
+                        ContentAwareMailMessage contentAwareMessage = new ContentAwareMailMessage(primaryContents[i], message);
+                        documents.add(new StandardIndexDocument<MailMessage>(contentAwareMessage));           
+                    }
+                }
 
-    private void addNewMails(Set<String> indexIds, Set<String> storageIds, final IndexAccess<MailMessage> mailIndex, final IndexAccess<Attachment> attachmentIndex, final IMailMessageStorage messageStorage) throws OXException {
+                if (!documents.isEmpty()) {
+                    mailIndex.addContent(documents, true);
+                }
+                
+                return subList.size();
+            }
+
+            @Override
+            public int getChunkSize() {
+                return CHUNK_SIZE;
+            }
+
+            @Override
+            public int getLength() {
+                return changedMails.size();
+            }
+
+            @Override
+            public int getInitialOffset() {
+                return 0;
+            }         
+        });
+    }
+
+    private void addMails(Set<String> indexIds, Set<String> storageIds, final IndexAccess<MailMessage> mailIndex, final IndexAccess<Attachment> attachmentIndex, final IMailMessageStorage messageStorage) throws OXException {
         final List<String> toAdd = new ArrayList<String>(storageIds);
         toAdd.removeAll(indexIds);
         if (toAdd.isEmpty()) {
@@ -271,7 +357,7 @@ public class MailFolderJob implements IndexingJob {
         });
     }
 
-    private void deleteObsoleteMails(Set<String> indexIds, Set<String> storageIds, final IndexAccess<MailMessage> mailIndex, final IndexAccess<Attachment> attachmentIndex) throws OXException {
+    private void deleteMails(Set<String> indexIds, Set<String> storageIds, final IndexAccess<MailMessage> mailIndex, final IndexAccess<Attachment> attachmentIndex) throws OXException {
         final List<String> toDelete = new ArrayList<String>(indexIds);
         toDelete.removeAll(storageIds);
         if (toDelete.isEmpty()) {
@@ -331,6 +417,38 @@ public class MailFolderJob implements IndexingJob {
                 return 0;
             }
         });
+    }
+    
+    private boolean isDifferent(final MailMessage storageMail, final MailMessage indexMail) {
+        if (null == storageMail || null == indexMail) {
+            return false;
+        }
+        /*
+         * Check system flags
+         */
+        if (storageMail.getFlags() != indexMail.getFlags()) {
+            return true;
+        }
+        /*
+         * Check color label
+         */
+        if (storageMail.getColorLabel() != indexMail.getColorLabel()) {
+            return true;
+        }
+        /*
+         * Check user flags
+         */
+        final Set<String> storageUserFlags;
+        {
+            final String[] stoUserFlags = storageMail.getUserFlags();
+            storageUserFlags = null == stoUserFlags ? Collections.<String> emptySet() : new HashSet<String>(Arrays.asList(stoUserFlags));
+        }
+        final Set<String> indexUserFlags;
+        {
+            final String[] idxUserFlags = indexMail.getUserFlags();
+            indexUserFlags = null == idxUserFlags ? Collections.<String> emptySet() : new HashSet<String>(Arrays.asList(idxUserFlags));
+        }
+        return (!storageUserFlags.equals(indexUserFlags));
     }
     
     private MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getMailAccess() throws OXException {

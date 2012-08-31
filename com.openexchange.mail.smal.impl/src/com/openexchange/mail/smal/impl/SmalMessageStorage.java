@@ -200,7 +200,13 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
                 parameters = builder.setHandler(SearchHandler.CUSTOM).setSearchTerm(searchTerm).build();
             }
 
+            long start = System.currentTimeMillis();
             final IndexResult<MailMessage> result = indexAccess.query(parameters, MailIndexField.getFor(fields));
+            if (LOG.isDebugEnabled()) {
+                long diff = System.currentTimeMillis() - start;
+                LOG.debug("Index Query lasted " + diff + "ms.");
+            }
+            
             List<IndexDocument<MailMessage>> documents = result.getResults();
             List<MailMessage> mails;
             if (indexRange != null) {

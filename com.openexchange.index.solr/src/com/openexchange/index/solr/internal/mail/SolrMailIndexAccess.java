@@ -153,18 +153,13 @@ public class SolrMailIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
     }
 
     @Override
-    public void change(IndexDocument<MailMessage> document, Set<? extends IndexField> fields) throws OXException {
-        addDocument(convertToDocument(document));
+    public void change(final IndexDocument<MailMessage> document, final Set<? extends IndexField> fields) throws OXException {
+        throw new UnsupportedOperationException("change is not implemented.");
     }
 
     @Override
-    public void change(Collection<IndexDocument<MailMessage>> documents, Set<? extends IndexField> fields) throws OXException {
-        List<SolrInputDocument> inputDocuments = new ArrayList<SolrInputDocument>();
-        for (IndexDocument<MailMessage> document : documents) {
-            inputDocuments.add(convertToDocument(document));
-        }
-
-        addDocuments(inputDocuments);
+    public void change(final Collection<IndexDocument<MailMessage>> documents, final Set<? extends IndexField> fields) throws OXException {     
+        throw new UnsupportedOperationException("change is not implemented.");
     }
 
     @Override
@@ -213,7 +208,7 @@ public class SolrMailIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
         return null;
     }
     
-    private boolean setSortAndOrder(final QueryParameters parameters, final SolrQuery query) {
+    private boolean setSortAndOrder(QueryParameters parameters, final SolrQuery query) {
         final IndexField indexField = parameters.getSortField();
         String sortField = null;
         boolean retval = false;
