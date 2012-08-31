@@ -49,24 +49,43 @@
 
 package com.openexchange.sessiond.impl;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import junit.framework.TestCase;
+import com.openexchange.config.SimConfigurationService;
+import com.openexchange.session.Session;
 
 /**
- * {@link UnitTests}
+ * {@link Bug22838Test}
  * 
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class UnitTests {
+public class Bug22838Test extends TestCase {
 
-    private UnitTests() {
-        super();
+    private SessiondConfigInterface config;
+
+    /**
+     * Initializes a new {@link Bug22838Test}.
+     * 
+     * @param name
+     */
+    public Bug22838Test(String name) {
+        super(name);
     }
 
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(Bug16158Test.class);
-        tests.addTestSuite(Bug22838Test.class);
-        return tests;
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        config = new SessiondConfigImpl(new SimConfigurationService());
+        SessionHandler.init(config);
     }
+
+    @Override
+    protected void tearDown() throws Exception {
+        super.tearDown();
+    }
+
+    public void testMergeEmptyArrayWithNull() throws Exception {
+        Session[] retval = SessionHandler.removeUserSessions(0, 0, true);
+        assertEquals("Array length not 0", 0, retval.length);
+    }
+
 }
