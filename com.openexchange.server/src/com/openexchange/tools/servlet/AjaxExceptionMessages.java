@@ -130,4 +130,7 @@ public final class AjaxExceptionMessages implements LocalizableStrings {
     // Bad request. The server is unable to handle the request.
     public static final String BAD_REQUEST = "Bad request. The server is unable to handle the request.";
 
+    // Missing request body.
+    public static final String MISSING_REQUEST_BODY_MSG = "Missing request body.";
+
 }

@@ -62,7 +62,7 @@ public interface SnippetService {
 
     /**
      * Gets the snippet management for specified session.
-     * 
+     *
      * @param session The session providing user data
      * @return The snippet management
      * @throws OXException If management cannot be returned for any reason

@@ -62,7 +62,7 @@ import com.openexchange.server.ServiceLookup;
  */
 public class FlickrMetadata extends AbstractOAuthServiceMetaData {
 	
-	private ServiceLookup services;
+	private final ServiceLookup services;
 	
 	public FlickrMetadata(ServiceLookup services) {
 		this.services = services;

@@ -1,10 +1,7 @@
 package com.openexchange.oauth.httpclient;
 
 import java.util.Map;
-import java.util.TreeMap;
-
 import org.scribe.model.OAuthRequest;
-import org.scribe.model.ParameterList;
 import org.scribe.model.Response;
 
 import com.openexchange.exception.OXException;
@@ -14,7 +11,7 @@ import com.openexchange.http.client.builder.HTTPResponse;
 public class OAuthHTTPRequest implements HTTPRequest {
 
 	private final OAuthRequest delegate;
-	private Map<String, String> parameters;
+	private final Map<String, String> parameters;
 
 	public OAuthHTTPRequest(OAuthRequest req, Map<String, String> parameters) {
 		delegate = req;

@@ -34,4 +34,5 @@ Import-Package: com.openexchange.conversion,
  org.atmosphere.websocket,
  org.atmosphere.websocket.protocol,
  org.json,
- org.osgi.framework
+ org.osgi.framework,
+ org.osgi.service.http;version="1.2.1"

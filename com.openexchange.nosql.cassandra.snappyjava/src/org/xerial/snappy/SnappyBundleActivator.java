@@ -52,8 +52,6 @@ import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
-import com.openexchange.log.LogFactory;
-
 /**
  * OSGi bundle entry point
  * 

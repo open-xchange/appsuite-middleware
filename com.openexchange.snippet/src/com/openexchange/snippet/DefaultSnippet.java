@@ -62,7 +62,7 @@ import org.json.JSONTokener;
 
 /**
  * {@link DefaultSnippet} - The default snippet implementation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class DefaultSnippet implements Snippet {
@@ -70,7 +70,7 @@ public class DefaultSnippet implements Snippet {
     /**
      * The identifier.
      */
-    private int id;
+    private String id;
 
     /**
      * The account identifier.
@@ -130,18 +130,17 @@ public class DefaultSnippet implements Snippet {
         properties = new HashMap<String, Object>(16);
         accountId = -1;
         createdBy = -1;
-        id = -1;
     }
 
     @Override
-    public int getId() {
-        int id = this.id;
-        if (id < 0) {
-            final Integer itg = (Integer) properties.get(PROP_ID);
-            if (null == itg) {
-                return -1;
+    public String getId() {
+        String id = this.id;
+        if (null == id) {
+            final String s = (String) properties.get(PROP_ID);
+            if (null == s) {
+                return null;
             }
-            id = itg.intValue();
+            id = s;
             this.id = id;
         }
         return id;
@@ -277,15 +276,15 @@ public class DefaultSnippet implements Snippet {
     }
 
     /**
-     * Sets the id
-     * 
-     * @param id The id to set
+     * Sets the identifier
+     *
+     * @param id The identifier to set
      * @return This snippet with argument applied
      */
-    public DefaultSnippet setId(final int id) {
+    public DefaultSnippet setId(final String id) {
         this.id = id;
-        if (id >= 0) {
-            properties.put(PROP_ID, Integer.valueOf(id));
+        if (id != null) {
+            properties.put(PROP_ID, id);
         } else {
             properties.remove(PROP_ID);
         }
@@ -294,7 +293,7 @@ public class DefaultSnippet implements Snippet {
 
     /**
      * Sets the accountId
-     * 
+     *
      * @param accountId The accountId to set
      * @return This snippet with argument applied
      */
@@ -310,7 +309,7 @@ public class DefaultSnippet implements Snippet {
 
     /**
      * Sets the module
-     * 
+     *
      * @param module The module to set
      * @return This snippet with argument applied
      */
@@ -326,7 +325,7 @@ public class DefaultSnippet implements Snippet {
 
     /**
      * Sets the type
-     * 
+     *
      * @param type The type to set
      * @return This snippet with argument applied
      */
@@ -342,7 +341,7 @@ public class DefaultSnippet implements Snippet {
 
     /**
      * Sets the displayName
-     * 
+     *
      * @param displayName The displayName to set
      * @return This snippet with argument applied
      */
@@ -358,7 +357,7 @@ public class DefaultSnippet implements Snippet {
 
     /**
      * Sets the content
-     * 
+     *
      * @param content The content to set
      * @return This snippet with argument applied
      */
@@ -369,7 +368,7 @@ public class DefaultSnippet implements Snippet {
 
     /**
      * Sets the attachments
-     * 
+     *
      * @param attachments The attachments to set
      * @return This snippet with argument applied
      */
@@ -379,8 +378,26 @@ public class DefaultSnippet implements Snippet {
     }
 
     /**
-     * Sets the miscellaneous JSON object.
+     * Adds specified attachment.
      * 
+     * @param attachment The attachment
+     * @return This snippet with attachment added
+     */
+    public DefaultSnippet addAttachment(final Attachment attachment) {
+        if (null != attachment) {
+            List<Attachment> attachments = this.attachments;
+            if (null == attachments) {
+                attachments = new ArrayList<Attachment>(4);
+                this.attachments = attachments;
+            }
+            attachments.add(attachment);
+        }
+        return this;
+    }
+
+    /**
+     * Sets the miscellaneous JSON object.
+     *
      * @param misc The miscellaneous JSON object to set
      * @return This snippet with argument applied
      */
@@ -404,7 +421,7 @@ public class DefaultSnippet implements Snippet {
 
     /**
      * Sets the shared flag
-     * 
+     *
      * @param shared The shared flag to set
      * @return This snippet with argument applied
      */
@@ -417,7 +434,7 @@ public class DefaultSnippet implements Snippet {
 
     /**
      * Sets the creator
-     * 
+     *
      * @param createdBy The creator to set
      * @return This snippet with argument applied
      */
@@ -433,7 +450,7 @@ public class DefaultSnippet implements Snippet {
 
     /**
      * Tests for existence of specified property.
-     * 
+     *
      * @param propName The property name
      * @return <code>true</code> if contained; otherwise <code>false</code>
      */
@@ -443,7 +460,7 @@ public class DefaultSnippet implements Snippet {
 
     /**
      * Gets the named property's value.
-     * 
+     *
      * @param propName The property name
      * @return The associated value or <code>null</code> if absent
      */
@@ -453,17 +470,17 @@ public class DefaultSnippet implements Snippet {
 
     /**
      * Puts specified property.
-     * 
+     *
      * @param propName The property name
      * @param value The property value
      */
     public void put(final String propName, final Object value) {
         if (PROP_ACCOUNT_ID.equals(propName)) {
-            setAccountId((value instanceof Integer) ? ((Integer) value).intValue() : -1);
+            setAccountId(null == value ? -1 : ((value instanceof Number) ? ((Number) value).intValue() : Integer.parseInt(value.toString())));
             return;
         }
         if (PROP_CREATED_BY.equals(propName)) {
-            setCreatedBy((value instanceof Integer) ? ((Integer) value).intValue() : -1);
+            setCreatedBy(null == value ? -1 : ((value instanceof Number) ? ((Number) value).intValue() : Integer.parseInt(value.toString())));
             return;
         }
         if (PROP_DISPLAY_NAME.equals(propName)) {
@@ -471,7 +488,7 @@ public class DefaultSnippet implements Snippet {
             return;
         }
         if (PROP_ID.equals(propName)) {
-            setId((value instanceof Integer) ? ((Integer) value).intValue() : -1);
+            setId(null == value ? null : value.toString());
             return;
         }
         if (PROP_MISC.equals(propName)) {
@@ -483,8 +500,8 @@ public class DefaultSnippet implements Snippet {
             return;
         }
         if (PROP_SHARED.equals(propName)) {
-            if (value instanceof Boolean) {
-                setShared(((Boolean) value).booleanValue());
+            if (null != value) {
+                setShared((value instanceof Boolean) ? ((Boolean) value).booleanValue() : Boolean.parseBoolean(value.toString()));
             } else {
                 shared = null;
                 properties.remove(PROP_SHARED);
@@ -500,7 +517,7 @@ public class DefaultSnippet implements Snippet {
 
     /**
      * Puts unnamed properties from given map.
-     * 
+     *
      * @param properties The map providing unnamed properties
      * @return This snippet with unnamed properties applied
      */
@@ -520,7 +537,7 @@ public class DefaultSnippet implements Snippet {
 
     /**
      * Removes named property.
-     * 
+     *
      * @param propName The property name
      */
     public void remove(final String propName) {
@@ -537,7 +554,7 @@ public class DefaultSnippet implements Snippet {
             return;
         }
         if (PROP_ID.equals(propName)) {
-            id = -1;
+            id = null;
             return;
         }
         if (PROP_MISC.equals(propName)) {
@@ -566,7 +583,7 @@ public class DefaultSnippet implements Snippet {
         accountId = -1;
         createdBy = -1;
         displayName = null;
-        id = -1;
+        id = null;
         misc = null;
         module = null;
         shared = null;
@@ -576,11 +593,53 @@ public class DefaultSnippet implements Snippet {
 
     /**
      * Gets the properties' entry set.
-     * 
+     *
      * @return The entry set
      */
     public Set<Entry<String, Object>> entrySet() {
         return properties.entrySet();
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder(128);
+        builder.append("DefaultSnippet [");
+        final String delim = ", ";
+        if (id != null) {
+            builder.append("id=").append(id).append(delim);
+        }
+        if (accountId >= 0) {
+            builder.append("accountId=").append(accountId).append(delim);
+        }
+        if (module != null) {
+            builder.append("module=").append(module).append(delim);
+        }
+        if (type != null) {
+            builder.append("type=").append(type).append(delim);
+        }
+        if (displayName != null) {
+            builder.append("displayName=").append(displayName).append(delim);
+        }
+        if (content != null) {
+            builder.append("content=").append(content).append(delim);
+        }
+        if (attachments != null) {
+            builder.append("attachments=").append(attachments).append(delim);
+        }
+        if (misc != null) {
+            builder.append("misc=").append(misc).append(delim);
+        }
+        if (shared != null) {
+            builder.append("shared=").append(shared).append(delim);
+        }
+        if (createdBy >= 0) {
+            builder.append("createdBy=").append(createdBy).append(delim);
+        }
+        if (properties != null) {
+            builder.append("properties=").append(getUnnamedProperties());
+        }
+        builder.append(']');
+        return builder.toString();
     }
 
 }

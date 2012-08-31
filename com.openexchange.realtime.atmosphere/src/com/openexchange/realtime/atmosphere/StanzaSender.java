@@ -50,7 +50,6 @@
 package com.openexchange.realtime.atmosphere;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.impl.StanzaWriter;
 import com.openexchange.realtime.packet.Stanza;
 
 /**

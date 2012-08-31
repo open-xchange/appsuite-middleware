@@ -54,7 +54,7 @@ import java.io.InputStream;
 
 /**
  * {@link DefaultAttachment} - The default attachment implementation based on {@link InputStreamProvider}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class DefaultAttachment implements Attachment {
@@ -66,12 +66,17 @@ public class DefaultAttachment implements Attachment {
 
         /**
          * Gets the input stream.
-         * 
+         *
          * @return The input stream
          * @throws IOException If an I/O error occurs
          */
         InputStream getInputStream() throws IOException;
     }
+
+    /**
+     * The identifier.
+     */
+    protected String id;
 
     /**
      * The content type.
@@ -102,6 +107,11 @@ public class DefaultAttachment implements Attachment {
     }
 
     @Override
+    public String getId() {
+        return id;
+    }
+
+    @Override
     public String getContentType() {
         return contentType;
     }
@@ -126,8 +136,17 @@ public class DefaultAttachment implements Attachment {
     }
 
     /**
+     * Sets the identifier
+     *
+     * @param id The identifier to set
+     */
+    public void setId(final String id) {
+        this.id = id;
+    }
+
+    /**
      * Sets the content type
-     * 
+     *
      * @param contentType The content type to set
      */
     public void setContentType(final String contentType) {
@@ -136,7 +155,7 @@ public class DefaultAttachment implements Attachment {
 
     /**
      * Sets the content disposition
-     * 
+     *
      * @param contentDisposition The content disposition to set
      */
     public void setContentDisposition(final String contentDisposition) {
@@ -145,7 +164,7 @@ public class DefaultAttachment implements Attachment {
 
     /**
      * Sets the size
-     * 
+     *
      * @param size The size to set
      */
     public void setSize(final long size) {
@@ -154,11 +173,35 @@ public class DefaultAttachment implements Attachment {
 
     /**
      * Sets the stream provider
-     * 
+     *
      * @param streamProvider The stream provider to set
      */
     public void setStreamProvider(final InputStreamProvider streamProvider) {
         this.streamProvider = streamProvider;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder();
+        builder.append("DefaultAttachment [");
+        final String delim = ", ";
+        if (id != null) {
+            builder.append("id=").append(id).append(delim);
+        }
+        if (contentType != null) {
+            builder.append("contentType=").append(contentType).append(delim);
+        }
+        if (contentDisposition != null) {
+            builder.append("contentDisposition=").append(contentDisposition).append(delim);
+        }
+        if (size > 0) {
+            builder.append("size=").append(size).append(delim);
+        }
+        if (streamProvider != null) {
+            builder.append("streamProvider=").append(streamProvider);
+        }
+        builder.append(']');
+        return builder.toString();
     }
 
 }

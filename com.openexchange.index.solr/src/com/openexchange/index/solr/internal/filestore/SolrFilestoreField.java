@@ -135,14 +135,17 @@ public enum SolrFilestoreField implements SolrField {
         this.parameterName = parameterName;
     }
 
+    @Override
     public String solrName() {
         return solrName;
     }
 
+    @Override
     public FilestoreIndexField indexField() {
         return indexField;
     }
 
+    @Override
     public String parameterName() {
         return parameterName;
     }

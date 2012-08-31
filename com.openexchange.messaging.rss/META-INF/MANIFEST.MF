@@ -27,7 +27,8 @@ Import-Package: com.openexchange.datatypes.genericonf,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.util.tracker,
- org.xml.sax
+ org.xml.sax,
+ org.xml.sax.helpers
 Bundle-ClassPath: lib/htmlcleaner-2.2.jar,
  lib/rome-1.0.jar,
  lib/rome-fetcher-1.0.jar,

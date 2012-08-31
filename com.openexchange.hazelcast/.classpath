@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry exported="true" kind="lib" path="lib/hazelcast-2.3.jar" sourcepath="lib/hazelcast-2.3.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/hazelcast-2.3.1.jar" sourcepath="lib/hazelcast-2.3.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/asm-4.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/kryo-2.19.jar" sourcepath="sources/kryo-2.19-src.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/minlog-1.2.jar"/>

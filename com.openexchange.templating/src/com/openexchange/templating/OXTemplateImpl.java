@@ -55,8 +55,6 @@ import java.io.Writer;
 import org.apache.commons.logging.Log;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
-
 import freemarker.template.Template;
 
 /**

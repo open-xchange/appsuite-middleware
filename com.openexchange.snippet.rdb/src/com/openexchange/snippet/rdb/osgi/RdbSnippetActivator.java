@@ -99,8 +99,8 @@ public class RdbSnippetActivator extends HousekeepingActivator {
             registerService(UpdateTaskProviderService.class.getName(), new DefaultUpdateTaskProviderService(createTableTask));
             registerService(CreateTableService.class, createTableTask);
             registerService(DeleteListener.class, new RdbSnippetDeleteListener());
-            
-            
+
+
         } catch (final Exception e) {
             logger.error("Error starting bundle: com.openexchange.snippet.rdb", e);
             throw e;

@@ -105,14 +105,17 @@ public enum SolrAttachmentField implements SolrField {
         this.indexField = indexField;
     }
     
+    @Override
     public String solrName() {
         return solrName;
     }
     
+    @Override
     public String parameterName() {
         return paramName;
     }
     
+    @Override
     public AttachmentIndexField indexField() {
         return indexField;
     }

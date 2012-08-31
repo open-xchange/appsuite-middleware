@@ -92,7 +92,13 @@ public enum AjaxExceptionCodes implements OXExceptionCode {
     /**
      * Unknown AJAX action %1$s in module %2$s.
      */
-    UNKNOWN_ACTION_IN_MODULE(AjaxExceptionMessages.UnknownActionInModule_MSG, Category.CATEGORY_ERROR, 21);
+    UNKNOWN_ACTION_IN_MODULE(AjaxExceptionMessages.UnknownActionInModule_MSG, Category.CATEGORY_ERROR, 21),
+    /**
+     * Missing request body.
+     */
+    MISSING_REQUEST_BODY(AjaxExceptionMessages.MISSING_REQUEST_BODY_MSG, Category.CATEGORY_ERROR, 22),
+    
+    ;
 
     public static final String PREFIX = "SVL";
 

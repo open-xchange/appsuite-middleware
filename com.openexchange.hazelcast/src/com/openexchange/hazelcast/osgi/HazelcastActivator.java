@@ -22,7 +22,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.hazelcast.ClassLoaderAwareHazelcastInstance;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.timer.TimerService;
-import com.openexchange.tools.strings.StringParser;
+import com.openexchange.tools.strings.TimeSpanParser;
 
 /**
  * {@link HazelcastActivator} - The activator for Hazelcast bundle (registers a {@link HazelcastInstance} for ths JVM)
@@ -54,7 +54,7 @@ public class HazelcastActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { ConfigurationService.class, TimerService.class, StringParser.class };
+        return new Class[] { ConfigurationService.class, TimerService.class };
     }
 
     @Override
@@ -90,8 +90,10 @@ public class HazelcastActivator extends HousekeepingActivator {
                     final ClusterListener clusterListener = new HazelcastInitializingClusterListener(activator);
                     discovery.addListener(clusterListener);
                     activator.clusterListener = clusterListener;
-                    /*
-                     * Timeout before we assume we are either the first or alone in the cluster
+                    /*-
+                     * For safety schedule a one-shot action after specified delay -> we are the only node.
+                     * 
+                     * 
                      */
                     final long delay = getDelay();
                     if (delay >= 0) {
@@ -148,7 +150,7 @@ public class HazelcastActivator extends HousekeepingActivator {
      */
     long getDelay() {
         final String delay = getService(ConfigurationService.class).getProperty("com.openexchange.hazelcast.startupDelay", "60000");
-        return getService(StringParser.class).parse(delay, long.class).longValue();
+        return TimeSpanParser.parseTimespan(delay).longValue();
     }
 
     /**
@@ -181,7 +183,7 @@ public class HazelcastActivator extends HousekeepingActivator {
             final TcpIpConfig tcpIpConfig = join.getTcpIpConfig();
             tcpIpConfig.setEnabled(true);
             for (final InetAddress address : nodes) {
-                tcpIpConfig.addAddress(new Address(address, config.getPort()));
+                tcpIpConfig.addAddress(new Address(address, config.getNetworkConfig().getPort()));
             }
             /*
              * Create appropriate Hazelcast instance from configuration

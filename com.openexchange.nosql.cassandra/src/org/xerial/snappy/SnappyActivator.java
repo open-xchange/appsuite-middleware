@@ -55,7 +55,6 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**

@@ -1,5 +1,6 @@
 package com.openexchange.realtime.example.atmosphere.chat;
 
+import org.osgi.service.http.HttpService;
 import com.openexchange.conversion.simple.SimplePayloadConverter;
 import com.openexchange.http.grizzly.services.atmosphere.AtmosphereService;
 import com.openexchange.log.Log;
@@ -16,12 +17,13 @@ public class AtmosphereChatActivator extends HousekeepingActivator {
     
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[]{AtmosphereService.class};
+        return new Class[]{HttpService.class, AtmosphereService.class};
     }
 
     @Override
     protected void startBundle() throws Exception {
 
+        track(HttpService.class);
         trackService(AtmosphereService.class);
         openTrackers();
         
@@ -50,8 +52,11 @@ public class AtmosphereChatActivator extends HousekeepingActivator {
         //Add the atmosphere chat handler
         AtmosphereService service = getService(AtmosphereService.class);
         service.addAtmosphereHandler("/chat", new ChatHandler());
-        
         LOG.info("added \"/chat\" AtmosphereHandler");
+        
+        HttpService httpService = getService(HttpService.class);
+        httpService.registerResources("/originalAtmosphereChat", "/originalAtmosphereChat", null);
+        httpService.registerResources("/atmosphereChat", "/atmosphereChat", null);
     }
 
 }

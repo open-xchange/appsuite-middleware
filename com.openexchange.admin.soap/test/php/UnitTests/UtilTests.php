@@ -85,15 +85,15 @@ class UtilTests extends PHPUnit_Framework_TestCase {
                         fail();
                     }
                 }
-            } else {
+            } else if ($result) {
 
                 // we just got 1 server as reply from  admindaemon
                 if($result->id == $server->id){
                     // ohoh, server is still registered, admindaemon seems to be bugge in unregisterprocess
                     fail();
                 }
-            }
-        }else{
+            } // if no server at all can be found, all is fine
+        } else {
             $this->fail("Error while listing all registered servers to verify unregistered server");
         }
 
@@ -116,7 +116,7 @@ class UtilTests extends PHPUnit_Framework_TestCase {
         // register via soap
         $result = getUtilClient($SOAPHOST)->registerFilestore($filestore, getCredentialsObject($OXMASTER_ADMIN, $OXMASTER_ADMIN_PASS));
 
-        if (is_soap_fault($list_result)) {
+        if (is_soap_fault($result)) {
             fail("Error while registering filestore");
         }else{
 
@@ -164,7 +164,7 @@ class UtilTests extends PHPUnit_Framework_TestCase {
 
         $result = getUtilClient($SOAPHOST)->unregisterFilestore($filestore, getCredentialsObject($OXMASTER_ADMIN, $OXMASTER_ADMIN_PASS));
 
-        if (is_soap_fault($list_result)) {
+        if (is_soap_fault($result)) {
             fail("Error while unregistering filestore");
         }else{
             // filestore was unregistered, now list all filestores
@@ -197,7 +197,7 @@ class UtilTests extends PHPUnit_Framework_TestCase {
 
         $result = getUtilClient($SOAPHOST)->changeFilestore($filestore, getCredentialsObject($OXMASTER_ADMIN, $OXMASTER_ADMIN_PASS));
         $found_store = false;
-        if (is_soap_fault($list_result)) {
+        if (is_soap_fault($result)) {
             fail("Error while change filestore");
         }else{
             // now load filestore again and return
@@ -235,7 +235,7 @@ class UtilTests extends PHPUnit_Framework_TestCase {
 
         $result = getUtilClient($SOAPHOST)->registerDatabase($database, getCredentialsObject($OXMASTER_ADMIN, $OXMASTER_ADMIN_PASS));
         $found_db = false;
-        if (is_soap_fault($list_result)) {
+        if (is_soap_fault($result)) {
             fail("Error while registering database");
         }else{
             // set database id
@@ -278,7 +278,7 @@ class UtilTests extends PHPUnit_Framework_TestCase {
 
         $result = getUtilClient($SOAPHOST)->unregisterDatabase($database, getCredentialsObject($OXMASTER_ADMIN, $OXMASTER_ADMIN_PASS));
         
-        if (is_soap_fault($list_result)) {
+        if (is_soap_fault($result)) {
             fail("Error while unregistering database");
         }else{
             
