@@ -61,8 +61,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
@@ -163,7 +161,7 @@ public final class ServletConfigLoader {
             final ServletConfigWrapper servletConfig = new ServletConfigWrapper();
             final ServletContextWrapper servletContext = new ServletContextWrapper(servletConfig);
             servletConfig.setServletContextWrapper(servletContext);
-            defaultInstance = new ServletConfigLoader(servletConfig, servletContext, new File(servletConfigDir));
+            defaultInstance = new ServletConfigLoader(servletConfig, servletContext, null == servletConfigDir ? null : new File(servletConfigDir));
         }
     }
 
@@ -175,7 +173,7 @@ public final class ServletConfigLoader {
      */
     private static Map<String, String> loadDirProps(final File dir) {
         final Map<String, String> m = new HashMap<String, String>();
-        if (dir.exists() && dir.isDirectory()) {
+        if (null != dir && dir.exists() && dir.isDirectory()) {
             for (final File f : dir.listFiles()) {
                 if (f.isFile() && f.getName().toLowerCase().endsWith(FILEEXT_PROPERTIES)) {
                     m.putAll(loadProperties(f));
@@ -362,7 +360,7 @@ public final class ServletConfigLoader {
     /**
      * Gets the directory in which all servlet configurations are kept
      *
-     * @return The configurations' directory
+     * @return The configurations' directory or <code>null</code> if not initialized
      */
     public File getDirectory() {
         return directory;
@@ -380,7 +378,7 @@ public final class ServletConfigLoader {
          * Lookup class-specific properties
          */
         if (props == null) {
-            if (!clazzGuardian.contains(clazz)) {
+            if (!clazzGuardian.contains(clazz) && null != directory) {
                 props = loadProperties(new File(
                     directory,
                     new StringBuilder(32).append(clazz).append('.').append(FILEEXT_PROPERTIES).toString()));
@@ -424,7 +422,7 @@ public final class ServletConfigLoader {
          * Lookup class-specific properties
          */
         if (props == null) {
-            if (!clazzGuardian.contains(clazz)) {
+            if (!clazzGuardian.contains(clazz) && null != directory) {
                 props = loadProperties(new File(
                     directory,
                     new StringBuilder(32).append(clazz).append('.').append(FILEEXT_PROPERTIES).toString()));
