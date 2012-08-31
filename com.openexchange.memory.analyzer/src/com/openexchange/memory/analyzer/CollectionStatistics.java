@@ -73,7 +73,7 @@ public abstract class CollectionStatistics {
             return;
         if (!interactingCodeWrite.contains(invokingCode))
             interactingCodeWrite.add(invokingCode);
-
+        recordAcess();
     }
 
     public void recordRead(final String invokingCode) {
@@ -81,7 +81,7 @@ public abstract class CollectionStatistics {
             return;
         if (!interactingCodeRead.contains(invokingCode))
             interactingCodeRead.add(invokingCode);
-//        reads++;
+        recordAcess();
     }
 
     public void recordDelete(final String invokingCode) {
@@ -89,7 +89,7 @@ public abstract class CollectionStatistics {
             return;
         if (!interactingCodeDelete.contains(invokingCode))
             interactingCodeDelete.add(invokingCode);
-//        deletes++;
+        recordAcess();
     }
 
     public void recordAcess() {

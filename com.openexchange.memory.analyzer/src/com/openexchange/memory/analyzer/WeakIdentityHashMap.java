@@ -117,12 +117,12 @@ public class WeakIdentityHashMap<K, V> implements Map<K, V> {
 
     @Override
     public V get(Object key) {
-        reap();
+//        reap();
         return backingStore.get(new IdentityWeakReference(key));
     }
     @Override
     public V put(K key, V value) {
-        reap();
+//        reap();
         return backingStore.put(new IdentityWeakReference(key), value);
     }
 
