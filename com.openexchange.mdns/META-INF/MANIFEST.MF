@@ -16,6 +16,7 @@ Import-Package: com.openexchange.exception,
  com.openexchange.threadpool,
  com.openexchange.threadpool.behavior,
  org.apache.commons.logging,
+ org.cliffc.high_scale_lib,
  org.eclipse.osgi.framework.console,
  org.osgi.framework,
  org.osgi.util.tracker

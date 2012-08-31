@@ -52,8 +52,8 @@ package com.openexchange.mdns.internal;
 import static com.openexchange.java.util.UUIDs.fromUnformattedString;
 import java.net.InetAddress;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.mdns.MDNSServiceEntry;
 
 /**
@@ -144,7 +144,7 @@ public final class MDNSListener implements javax.jmdns.ServiceListener {
             new MDNSServiceEntryImpl(new InetAddress[] { info.getInetAddress() } /*info.getInetAddresses()*/, info.getPort(), id, serviceId, info.toString(), Constants.SERVICE_TYPE);
         ConcurrentMap<UUID, MDNSServiceEntry> inner = map.get(serviceId);
         if (null == inner) {
-            final ConcurrentMap<UUID, MDNSServiceEntry> newInner = new ConcurrentHashMap<UUID, MDNSServiceEntry>();
+            final ConcurrentMap<UUID, MDNSServiceEntry> newInner = new NonBlockingHashMap<UUID, MDNSServiceEntry>();
             inner = map.putIfAbsent(serviceId, newInner);
             if (null == inner) {
                 inner = newInner;

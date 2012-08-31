@@ -50,7 +50,7 @@
 package com.openexchange.realtime.impl;
 
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;
@@ -69,7 +69,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class MessageDispatcherImpl implements MessageDispatcher {
     private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(MessageDispatcher.class));
-	private final Map<String, Channel> channels = new ConcurrentHashMap<String, Channel>();
+	private final Map<String, Channel> channels = new NonBlockingHashMap<String, Channel>();
 
 	@Override
     public void send(final Stanza stanza, final ServerSession session) throws OXException {
