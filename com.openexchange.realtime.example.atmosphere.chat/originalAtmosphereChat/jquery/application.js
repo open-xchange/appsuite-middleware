@@ -13,6 +13,10 @@ $(function () {
     var subSocket;
     var transport = 'websocket';
 
+    <!-- The following code is just here for demonstration purpose and not required -->
+    <!-- Used to demonstrate the request.onTransportFailure callback. Not mandatory -->
+    var sseSupported = false;
+
     var transports = new Array();
     transports[0] = "websocket";
     transports[1] = "sse";
@@ -20,12 +24,15 @@ $(function () {
     transports[3] = "long-polling";
     transports[4] = "streaming";
     transports[5] = "ajax";
-
+    
+    var splits = document.location.toString().split('/');
+    var proto = splits[0]; var host = splits[2];
+    var location = proto+"//"+host+"/realtime/atmosphere/chat";
+    
     $.each(transports, function (index, transport) {
         var req = new $.atmosphere.AtmosphereRequest();
 
-//        req.url = document.location.toString() + 'chat';
-        req.url = "http://"+document.location.toString().split('/')[2]+"/realtime/atmosphere/chat";
+        req.url = location;
         req.contentType = "application/json";
         req.transport = transport;
         req.headers = { "negotiating" : "true" };
@@ -40,14 +47,14 @@ $(function () {
 
         socket.subscribe(req)
     });
-    //Below is code that can be re-used
+    <!-- Below is code that can be re-used -->
 
     // We are now ready to cut the request
-    var request = {url : "http://"+document.location.toString().split('/')[2]+"/realtime/atmosphere/chat",
+    var request = { url: location,
         contentType : "application/json",
         logLevel : 'debug',
         shared : 'true',
-        transport : 'websocket' ,
+        transport : transport ,
         fallbackTransport: 'long-polling'};
 
 
@@ -62,7 +69,7 @@ $(function () {
         }
     };
 
-    //You can share messages between window/tabs.
+    <!-- You can share messages between window/tabs.   -->
     request.onLocalMessage = function(message) {
         if (transport != 'local') {
             header.append($('<h4>', { text: 'A new tab/window has been opened'}).css('color', 'green'));
@@ -79,15 +86,15 @@ $(function () {
         }
     };
 
-    //For demonstration of how you can customize the fallbackTransport using the onTransportFailure function
-    request.onTransportFailure = function(errorMsg, request) {
-        jQuery.atmosphere.info(errorMsg);
-        if (window.EventSource) {
-            request.fallbackTransport = "long-polling";
-            transport = "websocket";
-        }
-        header.html($('<h3>', { text: 'Atmosphere Chat. Default transport is WebSocket, fallback is ' + request.fallbackTransport }));
-    };
+//    <!-- For demonstration of how you can customize the fallbackTransport using the onTransportFailure function -->
+//    request.onTransportFailure = function(errorMsg, request) {
+//        jQuery.atmosphere.info(errorMsg);
+//        if (window.EventSource) {
+//            request.fallbackTransport = "sse";
+//            transport = "see";
+//        }
+//        header.html($('<h3>', { text: 'Atmosphere Chat. Default transport is WebSocket, fallback is ' + request.fallbackTransport }));
+//    };
 
     request.onReconnect = function (request, response) {
         socket.info("Reconnecting")

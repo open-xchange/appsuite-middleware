@@ -56,6 +56,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import org.atmosphere.cpr.AtmosphereHandler;
@@ -151,6 +152,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
             if (request.getHeader("negotiating") == null) {
                 try {
                     printBroadcasters("Broadcasters before GET Request");
+                    printSessions("Sessions before GET Request");
                     // create state {id, session, atmoResource} and track ServerSession -> AtmosphereState
                     ServerSession serverSession = getServerSession(getSessionFromHeader(request), getSessionFromParameters(request));
                     RTAtmosphereState atmosphereState = trackState(resource, serverSession);
@@ -167,6 +169,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                     // finally suspend the resource
                     resource.suspend();
                     printBroadcasters("Broadcasters after GET Request");
+                    printSessions("Sessions after GET Request");
                 } catch (OXException e) {
                     // TODO:ExceptionHandling to connected clients
                     writeExceptionToResource(e, resource);
@@ -181,6 +184,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
              */
         } else if (method.equalsIgnoreCase("POST")) {
             printBroadcasters("Broadcasters before POST Request");
+            printSessions("Sessions before POST Request");
             String postData = request.getReader().readLine();
             if (postData != null) {
                 try {
@@ -199,6 +203,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                     }
                     handleIncoming(StanzaParser.parse(postData), atmosphereState);
                     printBroadcasters("Broadcasters after POST Request");
+                    printSessions("Sessions after POST Request");
                 } catch (IllegalArgumentException illEx) {
                     LOG.error(illEx);
                     writeExceptionToResource(illEx, resource);
@@ -233,6 +238,28 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
             }
         }
         sb.append("--------------------------------------------------------------------------------\n");
+            LOG.debug(sb.toString());
+        }
+    }
+    
+    private void printSessions(String preString) {
+        if (LOG.isDebugEnabled()) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("\n--------------------------------------------------------------------------------\n");
+            sb.append(preString);
+            sb.append(":\n");
+            Set<Entry<String,RTAtmosphereState>> sessionSet = sessionIdToState.entrySet();
+            sb.append("\tSessions: " + sessionSet.size()).append('\n');
+            for (Entry<String, RTAtmosphereState> entry : sessionSet) {
+                String session = entry.getKey();
+                RTAtmosphereState resource = entry.getValue();
+                sb.append("\t\t");
+                sb.append("Session: ").append(session);
+                sb.append(" <-> ");
+                sb.append("Resource: ").append(resource.atmosphereResource.uuid());
+                sb.append('\n');
+            }
+            sb.append("--------------------------------------------------------------------------------\n");
             LOG.debug(sb.toString());
         }
     }

@@ -22,6 +22,10 @@ define("chat/ui", function () {
     var author = null;
     var logged = true;
     var socket = $.atmosphere;
+    
+    var splits = document.location.toString().split('/');
+    var proto = splits[0]; var host = splits[2];
+    var location = proto+"//"+host+"/realtime/atmosphere/rt";
 
     <!-- The following code is just here for demonstration purpose and not required -->
     <!-- Used to demonstrate the request.onTransportFailure callback. Not mandatory -->
@@ -38,7 +42,7 @@ define("chat/ui", function () {
     $.each(transports, function (index, transport) {
         var req = new $.atmosphere.AtmosphereRequest();
 
-	      req.url = "http://marens.netline.de/realtime/atmosphere/rt";
+	    req.url = location;
         req.contentType = "application/json";
         req.transport = transport;
         req.headers = { "negotiating" : "true", session: session };
@@ -56,12 +60,13 @@ define("chat/ui", function () {
     });
     
     var request = {
-        url: "http://marens.netline.de/realtime/atmosphere/rt",
+        url: location,
         contentType : "application/json",
         logLevel : 'debug',
         transport : 'websocket' ,
         fallbackTransport: 'long-polling',
         timeout: 60000,
+        maxRequests : 3,
         headers : {session: session}
         };
 
@@ -97,14 +102,14 @@ define("chat/ui", function () {
 
     request.onClose = function(response) {
         socket.info("Closing")
-        subSocket.push(jQuery.stringifyJSON({
-            session: session,
-            ns: 'ox:handshake',
-            data: {
-              step: 'close',
-              resource: 'Browser'
-            }
-        }));
+//        subSocket.push(jQuery.stringifyJSON({
+//            session: session,
+//            ns: 'ox:handshake',
+//            data: {
+//              step: 'close',
+//              resource: 'Browser'
+//            }
+//        }));
         //logged = false;
     };
 
@@ -116,14 +121,14 @@ define("chat/ui", function () {
     
     var subSocket = socket.subscribe(request);
     
-    subSocket.push(jQuery.stringifyJSON({
-    session: session,
-    ns: 'ox:handshake',
-    data: {
-      step: 'open',
-      resource: 'Browser'
-    }
-    }));
+//    subSocket.push(jQuery.stringifyJSON({
+//    session: session,
+//    ns: 'ox:handshake',
+//    data: {
+//      step: 'open',
+//      resource: 'Browser'
+//    }
+//    }));
 //    subSocket.push(jQuery.stringifyJSON({author: ox.userName, message: "logged into chat"}));
 
     status.css('color', 'blue');

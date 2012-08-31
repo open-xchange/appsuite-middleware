@@ -51,7 +51,7 @@ public class AtmosphereChatActivator extends HousekeepingActivator {
         
         //Add the atmosphere chat handler
         AtmosphereService service = getService(AtmosphereService.class);
-        service.addAtmosphereHandler("/chat", new ChatHandler());
+        service.addAtmosphereHandler("/chat", new OriginalChatAtmosphereHandler());
         LOG.info("added \"/chat\" AtmosphereHandler");
         
         HttpService httpService = getService(HttpService.class);
