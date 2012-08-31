@@ -126,9 +126,12 @@ public class HazelcastActivator extends HousekeepingActivator {
 
             @Override
             public void removedService(final ServiceReference<ClusterDiscoveryService> reference, final ClusterDiscoveryService service) {
+                if (null == service) {
+                    return;
+                }
                 final ClusterListener clusterListener = HazelcastActivator.this.clusterListener;
                 if (null != clusterListener) {
-                    getService(ClusterDiscoveryService.class).removeListener(clusterListener);
+                    service.removeListener(clusterListener);
                     HazelcastActivator.this.clusterListener = null;
                 }
                 final HazelcastInstance hazelcastInstance = REF_HAZELCAST_INSTANCE.get();
