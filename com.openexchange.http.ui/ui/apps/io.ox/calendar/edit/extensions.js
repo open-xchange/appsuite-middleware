@@ -1,0 +1,1 @@
+define("io.ox/calendar/edit/extensions",["io.ox/core/extensions","io.ox/calendar/edit/extensions/recurrence/view-repeat-option","io.ox/calendar/edit/extensions/recurrence/view-recurrence"],function(){return"use strict",{init:function(){}}})

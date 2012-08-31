@@ -1,0 +1,1 @@
+define("io.ox/calendar/view-mini",["io.ox/calendar/util","gettext!io.ox/calendar/calendar"],function(a){return"use strict",{draw:function(b){var c;console.debug(a.getDayNames().join(" ")),c=a.getMonthScaffold(b),_(c).each(function(a){console.debug(_(a).map(function(a){return _.pad(a.date,2," ")}).join(" "))})}}})

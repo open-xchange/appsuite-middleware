@@ -1,0 +1,1 @@
+define("io.ox/preview/officePreview",["io.ox/preview/officePreview/main"],function(){"use strict";function a(a){require(["io.ox/preview/officePreview/main"],function(b){b.getApp(a).launch()})}return{draw:a}})

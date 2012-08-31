@@ -1,0 +1,1 @@
+define("io.ox/portal/portal.fr_FR",["io.ox/core/gettext"],function(g){return g("io.ox/portal/portal",{"nplurals":2,"plural":"n>1","dictionary":{"Good morning":"","Good evening":"","Hello":""}});});

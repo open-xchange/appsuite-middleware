@@ -1,0 +1,1 @@
+define("io.ox/core/api/resource",["io.ox/core/http","io.ox/core/api/factory"],function(a,b){var c=b({module:"resource",keyGenerator:function(a){return String(a.id)},requests:{all:{},list:{},get:{},search:{action:"search",getData:function(a){return{pattern:a}}}}});return"use strict",c})

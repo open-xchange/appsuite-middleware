@@ -1,0 +1,1 @@
+define("io.ox/calendar/actions.fr_FR",["io.ox/core/gettext"],function(g){return g("io.ox/calendar/actions",{"nplurals":2,"plural":"n>1","dictionary":{}});});

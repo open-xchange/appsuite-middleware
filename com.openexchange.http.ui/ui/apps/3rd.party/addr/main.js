@@ -1,0 +1,1 @@
+define("3rd.party/addr/main",[],function(){var a,b=ox.ui.createApp({name:"3rd.party/addr"});return"use strict",b.setLauncher(function(){b.setWindow(a=ox.ui.createWindow({title:"Plaxo Address Book"})),a.nodes.main.append($("<iframe>",{src:"http://www.plaxo.com/?lang=en",frameborder:0}).css({width:"100%",height:"100%"})),a.show()}),{getApp:b.getInstance}})

@@ -1,0 +1,20 @@
+CACHE MANIFEST
+# build: 7.0.0-1.20120614.152235
+
+CACHE:
+v=7.0.0-1.20120614.152235/favicon.ico
+v=7.0.0-1.20120614.152235/boot.js
+v=7.0.0-1.20120614.152235/pre-core.js
+v=7.0.0-1.20120614.152235/blank.html
+v=7.0.0-1.20120614.152235/src/serverconfig.js
+v=7.0.0-1.20120614.152235/src/offline.js
+# theme
+v=7.0.0-1.20120614.152235/apps/themes/login/login.css
+v=7.0.0-1.20120614.152235/apps/themes/login/busy.gif
+v=7.0.0-1.20120614.152235/apps/themes/login/fonts/OpenSans-Light.ttf
+
+NETWORK:
+*
+
+FALLBACK:
+v=7.0.0-1.20120614.152235/src/online.js v=7.0.0-1.20120614.152235/src/offline.js

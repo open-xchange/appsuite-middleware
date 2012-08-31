@@ -1,0 +1,1 @@
+define("io.ox/calendar/edit/main.fr_FR",["io.ox/core/gettext"],function(g){return g("io.ox/calendar/edit/main",{"nplurals":2,"plural":"n>1","dictionary":{"Sunday":"","Monday":"","Tuesday":"","Wednesday":"","Thursday":"","Friday":"","Saturday":"","January":"","February":"","March":"","April":"","June":"","July":"","August":"","September":"","November":"","Temporary":""}});});
