@@ -57,6 +57,7 @@ import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.snippet.Attachment;
 import com.openexchange.snippet.DefaultAttachment;
 import com.openexchange.snippet.DefaultSnippet;
@@ -158,7 +159,7 @@ public final class SnippetJsonParser {
                 set.add(Property.TYPE);
             }
         }
-        key = "unnamedproperties";
+        key = "props";
         if (jsonSnippet.hasAndNotNull(key)) {
             final JSONObject jsonUnnamedProperties = jsonSnippet.getJSONObject(key);
             final Map<String, Object> up = new HashMap<String, Object>(jsonUnnamedProperties.length());
@@ -170,7 +171,7 @@ public final class SnippetJsonParser {
                 set.add(Property.PROPERTIES);
             }
         }
-        key = "attachments";
+        key = "files";
         if (jsonSnippet.hasAndNotNull(key)) {
             final JSONArray jsonAttachments = jsonSnippet.getJSONArray(key);
             final int len = jsonAttachments.length();
@@ -195,15 +196,18 @@ public final class SnippetJsonParser {
      * @throws JSONException If a JSON error occurs
      */
     public static void parse(final JSONObject jsonAttachment, final DefaultAttachment attachment) throws JSONException {
-        String key = "content-disposition";
+        String key = "filename";
         if (jsonAttachment.hasAndNotNull(key)) {
-            attachment.setContentDisposition(jsonAttachment.getString(key));
+            final ContentDisposition cd = new ContentDisposition();
+            cd.setAttachment();
+            cd.setFilenameParameter(jsonAttachment.getString(key));
+            attachment.setContentDisposition(cd.toString());
         }
         key = "id";
         if (jsonAttachment.hasAndNotNull(key)) {
             attachment.setId(jsonAttachment.getString(key));
         }
-        key = "content-type";
+        key = "mimetype";
         if (jsonAttachment.hasAndNotNull(key)) {
             attachment.setContentType(jsonAttachment.getString(key));
         }

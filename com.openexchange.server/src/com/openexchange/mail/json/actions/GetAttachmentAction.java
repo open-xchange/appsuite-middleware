@@ -202,7 +202,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
             /*
              * Read from stream
              */
-            final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream();
+            ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream();
             /*
              * Write from content's input stream to byte array output stream
              */
@@ -221,6 +221,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
              */
             req.getRequest().setFormat("file");
             final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(out.toByteArray());
+            out = null;
             fileHolder.setName(mailPart.getFileName());
             fileHolder.setContentType(saveToDisk ? "application/octet-stream" : mailPart.getContentType().toString());
             final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");

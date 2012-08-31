@@ -52,12 +52,12 @@ package com.openexchange.imap.cache;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import javax.mail.MessagingException;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.AccessedIMAPStore;
 import com.openexchange.mail.MailExceptionCode;
@@ -135,7 +135,7 @@ public final class ListLsubCache {
 
     private static final boolean DO_GETACL = true;
 
-    private static final ConcurrentMap<Key, ConcurrentMap<Integer, Future<ListLsubCollection>>> MAP = new ConcurrentHashMap<Key, ConcurrentMap<Integer, Future<ListLsubCollection>>>();
+    private static final ConcurrentMap<Key, ConcurrentMap<Integer, Future<ListLsubCollection>>> MAP = new NonBlockingHashMap<Key, ConcurrentMap<Integer, Future<ListLsubCollection>>>();
 
     /**
      * No instance
@@ -472,7 +472,7 @@ public final class ListLsubCache {
         final Key key = keyFor(session);
         ConcurrentMap<Integer, Future<ListLsubCollection>> map = MAP.get(key);
         if (null == map) {
-            final ConcurrentMap<Integer, Future<ListLsubCollection>> newmap = new ConcurrentHashMap<Integer, Future<ListLsubCollection>>();
+            final ConcurrentMap<Integer, Future<ListLsubCollection>> newmap = new NonBlockingHashMap<Integer, Future<ListLsubCollection>>();
             map = MAP.putIfAbsent(key, newmap);
             if (null == map) {
                 map = newmap;

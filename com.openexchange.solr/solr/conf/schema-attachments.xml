@@ -126,16 +126,18 @@
         <field name="file_size" type="long" stored="true" indexed="true" />
         <field name="mime_type" type="string" stored="true" indexed="true" />
         <field name="md5_sum" type="string" stored="true" indexed="false" />
+        
         <field name="content" type="text" stored="false" indexed="false" />
         <field name="content_gen" type="text" stored="false" indexed="true" />
         <field name="content_de" type="text_de" stored="false" indexed="true" />
         <field name="content_en" type="text_en" stored="false" indexed="true" />
         <field name="content_fr" type="text_fr" stored="false" indexed="true" />
         <field name="content_it" type="text_it" stored="false" indexed="true" />
+        
         <field name="locale" type="string" stored="true" indexed="false" />
     </fields>
 
     <uniqueKey>uuid</uniqueKey>
     <solrQueryParser defaultOperator="OR" />
-    <defaultSearchField>uuid</defaultSearchField>
+    <defaultSearchField>file_name</defaultSearchField>
 </schema>

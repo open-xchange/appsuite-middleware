@@ -51,8 +51,8 @@ package com.openexchange.ajp13.util;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Locale;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 
 /**
  * {@link CharsetValidator}
@@ -83,7 +83,7 @@ public final class CharsetValidator {
      */
     private CharsetValidator() {
         super();
-        map = new ConcurrentHashMap<IgnoreCaseString, Boolean>(8);
+        map = new NonBlockingHashMap<IgnoreCaseString, Boolean>(8);
     }
 
     private static final String TEST = "foo";

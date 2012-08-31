@@ -57,7 +57,7 @@ import java.util.List;
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public interface ClusterDiscoveryService {
+public interface ClusterDiscoveryService extends ClusterListenerNotifier {
 
     /**
      * Retrieve a list of currently known nodes.
@@ -65,15 +65,5 @@ public interface ClusterDiscoveryService {
      * @return A list of currently known nodes.
      */
     List<InetAddress> getNodes();
-
-    /**
-     * Registers a listener to be notified of changes to the known cluster nodes.
-     */
-    void addListener(ClusterListener listener);
-
-    /**
-     * Un-registers a listener.
-     */
-    void removeListener(ClusterListener listener);
 
 }

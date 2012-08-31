@@ -4,7 +4,7 @@
 		${solr.abortOnConfigurationError:true}
 	</abortOnConfigurationError>
 
-	<luceneMatchVersion>LUCENE_33</luceneMatchVersion>
+	<luceneMatchVersion>LUCENE_36</luceneMatchVersion>
 
 	<dataDir>${solr.core.dataDir}</dataDir>
 	<lib dir="${libDir:/opt/open-xchange/solr/lib}" />
@@ -67,7 +67,7 @@
 			<str name="echoParams">explicit</str>
 			<float name="tie">0.01</float>
 			<str name="qf">
-				content_de^1.0 content_en^1.0 subject_de^3.0 subject_en^3.0 from^2.0 to^2.0 cc^1.0 bcc^1.0
+				content_gen^1.0 content_de^1.0 content_en^1.0 content_fr^1.0 content_it^1.0 subject_gen^3.0 subject_de^3.0 subject_en^3.0 subject_fr^3.0 subject_it^3.0 from^2.0 to^2.0 cc^1.0 bcc^1.0
 			</str>			
 		</lst>
 		<lst name="defaults">
@@ -141,20 +141,31 @@
 		<str name="param23">to</str>
 		<str name="param24">cc</str>
 		<str name="param25">bcc</str>
-		<str name="param26">subject</str>
+		<str name="param26">subject{gen,de,en,fr,it}</str>
 		<str name="param27">content_flag</str>
-		<str name="param28">content</str>
+		<str name="param28">content{gen,de,en,fr,it}</str>
 	</searchComponent>
 
-	<requestHandler name="/update" class="solr.XmlUpdateRequestHandler" />
-	<requestHandler name="/update/javabin" class="solr.BinaryUpdateRequestHandler" />
-	<!-- <requestHandler name="/analysis/document" class="solr.DocumentAnalysisRequestHandler" 
-		/> -->
-	<!-- <requestHandler name="/analysis/field" class="solr.FieldAnalysisRequestHandler" 
-		/> -->
-	<!-- <requestHandler name="/update/csv" class="solr.CSVRequestHandler" startup="lazy" 
-		/> -->
-	<!-- <requestHandler name="/admin/" class="org.apache.solr.handler.admin.AdminHandlers" 
-		/> -->
+	<requestHandler name="/update" class="solr.XmlUpdateRequestHandler">
+        <lst name="defaults">
+            <str name="update.chain">langid</str>
+        </lst>
+    </requestHandler>
+    <updateRequestProcessorChain name="langid">
+        <processor
+            class="org.apache.solr.update.processor.TikaLanguageIdentifierUpdateProcessorFactory">
+            <bool name="langid">true</bool>
+            <str name="langid.fl">subject,content</str>
+            <str name="langid.whitelist">de,en,fr,it</str>
+            <str name="langid.langField">locale</str>
+            <bool name="langid.map">true</bool>
+            <str name="langid.threshold">0.2</str>
+            <str name="langid.fallback">gen</str>
+        </processor>
+        <processor class="solr.LogUpdateProcessorFactory" />
+        <processor class="solr.RunUpdateProcessorFactory" />
+    </updateRequestProcessorChain>
+    
+    <requestHandler name="/update/javabin" class="solr.BinaryUpdateRequestHandler" />
 
 </config>

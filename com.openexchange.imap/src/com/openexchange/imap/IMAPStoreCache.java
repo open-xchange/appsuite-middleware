@@ -51,15 +51,15 @@ package com.openexchange.imap;
 
 import java.util.Iterator;
 import java.util.Queue;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import javax.mail.MessagingException;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.services.IMAPServiceRegistry;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.Protocol;
 import com.openexchange.mail.config.MailProperties;
@@ -193,8 +193,8 @@ public final class IMAPStoreCache {
         behavior = CallerRunsBehavior.getInstance();
         this.checkConnected = checkConnected;
         protocol = IMAPProvider.PROTOCOL_IMAP;
-        map = new ConcurrentHashMap<Key, IMAPStoreContainer>();
-        keys = new ConcurrentHashMap<IMAPStoreCache.User, Queue<Key>>();
+        map = new NonBlockingHashMap<Key, IMAPStoreContainer>();
+        keys = new NonBlockingHashMap<IMAPStoreCache.User, Queue<Key>>();
 
         final ConfigurationService service = IMAPServiceRegistry.getService(ConfigurationService.class);
         final BoundedIMAPStoreContainer.ImplType it = null == service ? BoundedIMAPStoreContainer.ImplType.SEMAPHORE : BoundedIMAPStoreContainer.ImplType.valueOf(service.getProperty("com.openexchange.imap.cacheImplType", "SEMAPHORE"));

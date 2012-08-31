@@ -63,11 +63,11 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.mail.Folder;
 import javax.mail.MessagingException;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.mail.mime.MimeMailException;
@@ -124,8 +124,8 @@ final class ListLsubCollection {
      */
     protected ListLsubCollection(final IMAPFolder imapFolder, final String[] shared, final String[] user, final boolean doStatus, final boolean doGetAcl) throws MessagingException {
         super();
-        listMap = new ConcurrentHashMap<String, ListLsubEntryImpl>();
-        lsubMap = new ConcurrentHashMap<String, ListLsubEntryImpl>();
+        listMap = new NonBlockingHashMap<String, ListLsubEntryImpl>();
+        lsubMap = new NonBlockingHashMap<String, ListLsubEntryImpl>();
         deprecated = new AtomicBoolean();
         this.shared = shared == null ? new String[0] : shared;
         this.user = user == null ? new String[0] : user;
@@ -144,8 +144,8 @@ final class ListLsubCollection {
      */
     protected ListLsubCollection(final IMAPStore imapStore, final String[] shared, final String[] user, final boolean doStatus, final boolean doGetAcl) throws OXException {
         super();
-        listMap = new ConcurrentHashMap<String, ListLsubEntryImpl>();
-        lsubMap = new ConcurrentHashMap<String, ListLsubEntryImpl>();
+        listMap = new NonBlockingHashMap<String, ListLsubEntryImpl>();
+        lsubMap = new NonBlockingHashMap<String, ListLsubEntryImpl>();
         deprecated = new AtomicBoolean();
         this.shared = shared == null ? new String[0] : shared;
         this.user = user == null ? new String[0] : user;

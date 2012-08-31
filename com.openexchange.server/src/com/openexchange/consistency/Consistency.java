@@ -459,7 +459,7 @@ public abstract class Consistency implements ConsistencyMBean {
         try {
             wcon = Database.get(ctx, true);
             if (tableExists(wcon, "snippet")) {
-                stmt = wcon.prepareStatement("SELECT id FROM snippet WHERE cid=? AND refType=1");
+                stmt = wcon.prepareStatement("SELECT refId FROM snippet WHERE cid=? AND refType=1");
                 stmt.setInt(1, ctx.getContextId());
                 rs = stmt.executeQuery();
                 while (rs.next()) {
@@ -803,7 +803,7 @@ public abstract class Consistency implements ConsistencyMBean {
                     final String old_identifier = it.next();
                     // Not recoverable
                     if (tableExists(con, "snippet")) {
-                        stmt = con.prepareStatement("DELETE FROM snippet WHERE cid=? AND id=? AND refType=1");
+                        stmt = con.prepareStatement("DELETE FROM snippet WHERE cid=? AND refId=? AND refType=1");
                         int pos = 0;
                         stmt.setInt(++pos, ctx.getContextId());
                         stmt.setString(++pos, old_identifier);
@@ -1018,7 +1018,7 @@ public abstract class Consistency implements ConsistencyMBean {
                     final String old_identifier = it.next();
                     // Not recoverable
                     if (tableExists(con, "snippet")) {
-                        stmt = con.prepareStatement("DELETE FROM snippet WHERE cid=? AND id=? AND refType=1");
+                        stmt = con.prepareStatement("DELETE FROM snippet WHERE cid=? AND refId=? AND refType=1");
                         int pos = 0;
                         stmt.setInt(++pos, contextId);
                         stmt.setString(++pos, old_identifier);
@@ -1050,7 +1050,6 @@ public abstract class Consistency implements ConsistencyMBean {
                             deleteSnippet(id, userId, contextId, con);
                         }
                     }
-
                     con.commit();
                     rollback = false;
                 } catch (final SQLException e) {

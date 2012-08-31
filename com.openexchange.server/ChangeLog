@@ -1,3 +1,7 @@
+* 2012-08-31 - marcus.klein@open-xchange.com
+
+ - Fix for bug 22751: Registering properly the actions for the conversion HTTP/JSON interface within dispatcher.
+
 * 2012-08-29 - thorben.betten@open-xchange.com
 
  - Fix for bug 22860: Prevent possible NPE in file management
@@ -66,7 +70,7 @@
 
  - Fix for bug 22769: Don't update appointment unless necessary 
  
-* 2012-08-09 - martin.herfurth@open-xchange.com
+* 2012-08-09 - thorben.betten@open-xchange.com
 
  - Fix for bug 22766: Fixed possible NPE
  - Fix for bug 22740: Rely on IMAP store's capabilities only

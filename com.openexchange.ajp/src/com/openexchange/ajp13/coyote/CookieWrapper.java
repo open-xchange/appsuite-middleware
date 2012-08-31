@@ -49,6 +49,7 @@
 
 package com.openexchange.ajp13.coyote;
 
+import java.util.Set;
 import javax.servlet.http.Cookie;
 
 /**

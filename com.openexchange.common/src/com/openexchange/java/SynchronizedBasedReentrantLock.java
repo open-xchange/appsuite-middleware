@@ -110,7 +110,7 @@ public final class SynchronizedBasedReentrantLock implements Lock {
     @Override
     public void lock() {
         final Thread caller = Thread.currentThread();
-        synchronized (this) {
+        synchronized (lock) {
             if (caller == owner) {
                 count++;
                 return;
@@ -135,7 +135,7 @@ public final class SynchronizedBasedReentrantLock implements Lock {
      */
     @Override
     public boolean tryLock() {
-        synchronized (this) {
+        synchronized (lock) {
             if (owner != null) {
                 return false;
             }
@@ -151,7 +151,7 @@ public final class SynchronizedBasedReentrantLock implements Lock {
      */
     @Override
     public void unlock() {
-        synchronized (this) {
+        synchronized (lock) {
             if (Thread.currentThread() != owner) {
                 throw new IllegalMonitorStateException("Current thread does not hold this lock");
             }
@@ -168,7 +168,7 @@ public final class SynchronizedBasedReentrantLock implements Lock {
      * @return the owner of this lock.
      */
     public Thread getOwner() {
-        synchronized (this) {
+        synchronized (lock) {
             return owner;
         }
     }

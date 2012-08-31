@@ -51,10 +51,8 @@ package com.openexchange.user.json.actions;
 
 import java.util.Date;
 import java.util.Locale;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -67,6 +65,7 @@ import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -106,6 +105,13 @@ public final class UpdateAction extends AbstractUserAction {
         super();
     }
 
+    private static ContactField[] CONTACT_FIELDS = {
+        ContactField.DISTRIBUTIONLIST, ContactField.LINKS, ContactField.CATEGORIES, ContactField.COLOR_LABEL, ContactField.PRIVATE_FLAG,
+        ContactField.NUMBER_OF_ATTACHMENTS, ContactField.FOLDER_ID, ContactField.OBJECT_ID, ContactField.INTERNAL_USERID,
+        ContactField.CREATED_BY, ContactField.CREATION_DATE, ContactField.MODIFIED_BY, ContactField.LAST_MODIFIED };
+
+    private static UserField[] USER_FIELDS = { UserField.ID, UserField.LOCALE, UserField.TIME_ZONE };
+
     @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         /*
@@ -126,8 +132,9 @@ public final class UpdateAction extends AbstractUserAction {
         Contact parsedUserContact;
         User parsedUser;
 		try {
-			parsedUserContact = ContactMapper.getInstance().deserialize(jData, ContactMapper.getInstance().getAllFields());
-			parsedUser = UserMapper.getInstance().deserialize(jData, UserMapper.getInstance().getAllFields());
+			parsedUserContact = ContactMapper.getInstance().deserialize(jData, CONTACT_FIELDS);
+			jData.put(UserField.ID.getName(), id);
+			parsedUser = UserMapper.getInstance().deserialize(jData, USER_FIELDS);
 		} catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
 		}

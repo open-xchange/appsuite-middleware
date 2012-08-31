@@ -292,7 +292,7 @@ public final class QuartzIndexingQueueListener implements MQQueueListener {
         return tmp instanceof Long ? ((Long) tmp).longValue() : Long.parseLong(tmp.toString().trim());
     }
 
-    static final class ReschedulerJob implements Job {
+    public static final class ReschedulerJob implements Job {
 
         private final Scheduler scheduler;
 
@@ -342,7 +342,7 @@ public final class QuartzIndexingQueueListener implements MQQueueListener {
     /**
      * A wrapper for an {@link IndexingJob} instance.
      */
-    static final class QuartzIndexingJob implements Job {
+    public static final class QuartzIndexingJob implements Job {
 
         /**
          * Initializes a new {@link QuartzIndexingJob}.

@@ -378,6 +378,24 @@ public class DefaultSnippet implements Snippet {
     }
 
     /**
+     * Adds specified attachment.
+     * 
+     * @param attachment The attachment
+     * @return This snippet with attachment added
+     */
+    public DefaultSnippet addAttachment(final Attachment attachment) {
+        if (null != attachment) {
+            List<Attachment> attachments = this.attachments;
+            if (null == attachments) {
+                attachments = new ArrayList<Attachment>(4);
+                this.attachments = attachments;
+            }
+            attachments.add(attachment);
+        }
+        return this;
+    }
+
+    /**
      * Sets the miscellaneous JSON object.
      *
      * @param misc The miscellaneous JSON object to set
@@ -458,11 +476,11 @@ public class DefaultSnippet implements Snippet {
      */
     public void put(final String propName, final Object value) {
         if (PROP_ACCOUNT_ID.equals(propName)) {
-            setAccountId((value instanceof Integer) ? ((Integer) value).intValue() : -1);
+            setAccountId(null == value ? -1 : ((value instanceof Number) ? ((Number) value).intValue() : Integer.parseInt(value.toString())));
             return;
         }
         if (PROP_CREATED_BY.equals(propName)) {
-            setCreatedBy((value instanceof Integer) ? ((Integer) value).intValue() : -1);
+            setCreatedBy(null == value ? -1 : ((value instanceof Number) ? ((Number) value).intValue() : Integer.parseInt(value.toString())));
             return;
         }
         if (PROP_DISPLAY_NAME.equals(propName)) {
@@ -482,8 +500,8 @@ public class DefaultSnippet implements Snippet {
             return;
         }
         if (PROP_SHARED.equals(propName)) {
-            if (value instanceof Boolean) {
-                setShared(((Boolean) value).booleanValue());
+            if (null != value) {
+                setShared((value instanceof Boolean) ? ((Boolean) value).booleanValue() : Boolean.parseBoolean(value.toString()));
             } else {
                 shared = null;
                 properties.remove(PROP_SHARED);

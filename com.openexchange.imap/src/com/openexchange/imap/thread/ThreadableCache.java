@@ -54,10 +54,10 @@ import gnu.trove.TLongCollection;
 import gnu.trove.set.TLongSet;
 import gnu.trove.set.hash.TLongHashSet;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.imap.cache.util.LockedConcurrentMap;
 import com.openexchange.imap.cache.util.MaxCapacityLinkedHashMap;
 import com.openexchange.session.Session;
@@ -100,7 +100,7 @@ public final class ThreadableCache {
      */
     private ThreadableCache() {
         super();
-        userMap = new ConcurrentHashMap<UserKey, ConcurrentTIntObjectHashMap<ConcurrentMap<String, ThreadableCacheEntry>>>(1024);
+        userMap = new NonBlockingHashMap<UserKey, ConcurrentTIntObjectHashMap<ConcurrentMap<String, ThreadableCacheEntry>>>(1024);
     }
 
     /**

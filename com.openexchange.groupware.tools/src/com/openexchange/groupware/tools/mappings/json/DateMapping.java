@@ -51,10 +51,9 @@ package com.openexchange.groupware.tools.mappings.json;
 
 import java.util.Date;
 import java.util.TimeZone;
-
+import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
@@ -66,19 +65,38 @@ import com.openexchange.session.Session;
  */
 public abstract class DateMapping<O> extends DefaultJsonMapping<Date, O> {
 
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(DateMapping.class);
+
+	/**
+	 * Initializes a new {@link DateMapping}.
+	 * 
+	 * @param ajaxName The AJAX name
+	 * @param columnID The column identifier
+	 */
 	public DateMapping(final String ajaxName, final int columnID) {
 		super(ajaxName, columnID);
 	}
 
 	@Override
 	public void deserialize(JSONObject from, O to) throws JSONException, OXException {
-		this.set(to, from.isNull(getAjaxName()) ? null : new Date(from.getLong(getAjaxName())));
+		final String ajaxName = getAjaxName();
+		if (from.isNull(ajaxName)) {
+            set(to, null);
+        } else {
+            final Object object = from.get(ajaxName);
+            if (object instanceof Number) {
+                set(to, new Date(((Number) object).longValue()));
+            } else {
+                LOG.warn("JSONObject[\""+ajaxName+"\"] is not a number: " + object);
+                set(to, null);
+            }
+        }
 	}
 
 	@Override
 	public Object serialize(O from, TimeZone timeZone, Session session) throws JSONException {
 		final Date value = this.get(from);
-		return null != value ? value.getTime() : JSONObject.NULL;
+		return null == value ? JSONObject.NULL : Long.valueOf(value.getTime());
 	}
 
 }

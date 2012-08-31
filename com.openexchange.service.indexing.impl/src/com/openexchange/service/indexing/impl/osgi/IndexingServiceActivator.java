@@ -54,6 +54,7 @@ import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
 import org.osgi.framework.ServiceReference;
+import org.quartz.core.QuartzSchedulerMBeanImpl;
 import org.quartz.service.QuartzService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
@@ -157,14 +158,14 @@ public final class IndexingServiceActivator extends HousekeepingActivator {
             /*
              * Service tracker(s)
              */
-            final ObjectName objectName = new ObjectName(IndexingServiceMBean.DOMAIN, "name", "Indexing Service MBean");
+            final ObjectName indexingMBeanName = new ObjectName(IndexingServiceMBean.DOMAIN, "name", "Indexing Service MBean");
             // trackService(ManagementService.class);
             track(ManagementService.class, new SimpleRegistryListener<ManagementService>() {
 
                 @Override
                 public void added(final ServiceReference<ManagementService> ref, final ManagementService service) {
                     try {
-                        service.registerMBean(objectName, new IndexingServiceMBeanImpl());
+                        service.registerMBean(indexingMBeanName, new IndexingServiceMBeanImpl());                 
                     } catch (final NotCompliantMBeanException e) {
                         log.error(e.getMessage(), e);
                     } catch (final OXException e) {
@@ -175,7 +176,7 @@ public final class IndexingServiceActivator extends HousekeepingActivator {
                 @Override
                 public void removed(final ServiceReference<ManagementService> ref, final ManagementService service) {
                     try {
-                        service.unregisterMBean(objectName);
+                        service.unregisterMBean(indexingMBeanName);
                     } catch (final OXException e) {
                         log.error(e.getMessage(), e);
                     }

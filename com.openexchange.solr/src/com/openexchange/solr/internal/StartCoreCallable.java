@@ -50,7 +50,6 @@
 package com.openexchange.solr.internal;
 
 import java.io.Serializable;
-import java.net.InetSocketAddress;
 import java.util.concurrent.Callable;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.ILock;
@@ -72,64 +71,19 @@ public class StartCoreCallable implements Callable<String>, Serializable {
     
     private final SolrCoreIdentifier identifier;
     
-    private boolean startedCore = false;
     
-    
-    public StartCoreCallable(SolrCoreIdentifier identifier) {
+    public StartCoreCallable(SolrCoreIdentifier identifier, String ownerAddress) {
         super();
         this.identifier = identifier;
-    }
-    
-    public boolean startedCore() {
-        return startedCore;
     }
 
     @Override
     public String call() throws Exception {
-        HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
-        ILock lock = hazelcast.getLock("solrCoreStartupLock_" + identifier.toString());
-        lock.lock();
-        try {                    
-            InetSocketAddress socketAddress = hazelcast.getCluster().getLocalMember().getInetSocketAddress();
-            String newOwner;
-            if (socketAddress.isUnresolved()) {
-                newOwner = socketAddress.getHostName();
-            } else {
-                newOwner = socketAddress.getAddress().getHostAddress();
-            }
-            
-            IMap<String, String> solrCores = hazelcast.getMap(DelegationSolrAccessImpl.SOLR_CORE_MAP);
-            String owner = solrCores.putIfAbsent(identifier.toString(), newOwner);
-            if (owner == null) {
-                try {
-                    DelegationSolrAccessImpl accessService = (DelegationSolrAccessImpl) Services.getService(SolrAccessService.class);
-                    EmbeddedSolrAccessImpl embeddedAccess = accessService.getEmbeddedServerAccess();                
-                    embeddedAccess.startCore(identifier);
-                    startedCore = true;
-                    IMap<String, Integer> solrNodes = hazelcast.getMap(SolrActivator.SOLR_NODE_MAP);
-                    String localUuid = hazelcast.getCluster().getLocalMember().getUuid();
-                    solrNodes.lock(localUuid);
-                    try {
-                        Integer integer = solrNodes.get(localUuid);
-                        solrNodes.put(localUuid, new Integer(integer.intValue() + 1));
-                    } finally {
-                        solrNodes.unlock(localUuid);
-                    }                
-                    
-                    return newOwner;
-                } catch (OXException e) {
-                    solrCores.remove(identifier.toString());
-                    throw e;
-                } catch (RuntimeException e) {
-                    solrCores.remove(identifier.toString());
-                    throw e;
-                }
-            }
-            
-            return owner;
-        } finally {
-            lock.unlock();
-        }
+        DelegationSolrAccessImpl accessService = (DelegationSolrAccessImpl) Services.getService(SolrAccessService.class);
+        EmbeddedSolrAccessImpl embeddedAccess = accessService.getEmbeddedServerAccess();                
+        embeddedAccess.startCore(identifier);
+        
+        return null;
     }
 
 }

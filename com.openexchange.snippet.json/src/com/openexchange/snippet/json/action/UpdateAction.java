@@ -66,6 +66,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.snippet.Attachment;
 import com.openexchange.snippet.DefaultSnippet;
 import com.openexchange.snippet.Property;
+import com.openexchange.snippet.Snippet;
 import com.openexchange.snippet.SnippetManagement;
 import com.openexchange.snippet.json.SnippetJsonParser;
 import com.openexchange.snippet.json.SnippetRequest;
@@ -113,7 +114,8 @@ public final class UpdateAction extends SnippetAction {
         // Update
         final SnippetManagement management = getSnippetService().getManagement(snippetRequest.getSession());
         final String newId = management.updateSnippet(id, snippet, properties, Collections.<Attachment> emptyList(), Collections.<Attachment> emptyList());
-        return new AJAXRequestResult(newId, "string");
+        final Snippet newSnippet = management.getSnippet(newId);
+        return new AJAXRequestResult(newSnippet, "snippet");
     }
 
     @Override
