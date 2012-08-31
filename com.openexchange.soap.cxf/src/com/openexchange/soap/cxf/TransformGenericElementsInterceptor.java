@@ -47,43 +47,40 @@
  *
  */
 
-package com.openexchange.conversion.servlet;
+package com.openexchange.soap.cxf;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.conversion.servlet.actions.ConvertAction;
-import com.openexchange.server.ServiceLookup;
+import java.io.InputStream;
+import javax.xml.stream.XMLStreamReader;
+import org.apache.cxf.interceptor.AbstractInDatabindingInterceptor;
+import org.apache.cxf.interceptor.DocLiteralInInterceptor;
+import org.apache.cxf.interceptor.Fault;
+import org.apache.cxf.message.Exchange;
+import org.apache.cxf.message.Message;
+import org.apache.cxf.phase.Phase;
+import org.apache.cxf.service.model.BindingOperationInfo;
+import org.apache.cxf.staxutils.transform.TransformUtils;
 
 /**
- * {@link ConversionActionFactory}
+ * {@link TransformGenericElementsInterceptor}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class ConversionActionFactory implements AJAXActionServiceFactory {
+public class TransformGenericElementsInterceptor extends AbstractInDatabindingInterceptor {
 
-    private final Map<String, AJAXActionService> actions;
-
-    /**
-     * Initializes a new {@link ConversionActionFactory}.
-     *
-     * @param services The service look-up
-     */
-    public ConversionActionFactory(final ServiceLookup services) {
-        super();
-        actions = new ConcurrentHashMap<String, AJAXActionService>(2);
-        actions.put("convert", new ConvertAction(services));
+    public TransformGenericElementsInterceptor() {
+        super(Phase.UNMARSHAL);
+        addBefore(DocLiteralInInterceptor.class.getName());
     }
 
     @Override
-    public AJAXActionService createActionService(final String action) {
-        return actions.get(action);
-    }
-
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
+    public void handleMessage(Message message) throws Fault {
+        XMLStreamReader reader = message.getContent(XMLStreamReader.class);
+        reader = TransformUtils.createNewReaderIfNeeded(reader, message.getContent(InputStream.class));
+        Exchange exchange = message.getExchange();
+        BindingOperationInfo bop = getBindingOperationInfo(exchange, reader.getName(), isRequestor(message));
+        // Create transforming reader
+        reader = new ReplacingXMLStreamReader(bop, reader);
+        message.setContent(XMLStreamReader.class, reader);
+        message.removeContent(InputStream.class);
     }
 }

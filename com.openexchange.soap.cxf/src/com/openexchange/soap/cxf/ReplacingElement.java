@@ -49,27 +49,62 @@
 
 package com.openexchange.soap.cxf;
 
-import javax.xml.bind.ValidationEvent;
-import javax.xml.bind.ValidationEventHandler;
+import javax.xml.namespace.QName;
+import org.apache.ws.commons.schema.XmlSchemaElement;
 
 /**
- * {@link IgnoreUnexpectedElementsHandler}
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link ReplacingElement} remembers all values when some XML tag needs to be replaced within the {@link ReplacingXMLStreamReader}.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class IgnoreUnexpectedElementsHandler implements ValidationEventHandler {
+class ReplacingElement {
 
-    /**
-     * Initializes a new {@link IgnoreUnexpectedElementsHandler}.
-     */
-    public IgnoreUnexpectedElementsHandler() {
+    private final QName original;
+    private QName expected;
+    private XmlSchemaElement xmlSchema;
+    private int childPosition = 0;
+
+    public ReplacingElement(QName original) {
         super();
+        this.original = original;
+    }
+
+    public ReplacingElement(QName original, QName expected) {
+        super();
+        this.original = original;
+        this.expected = expected;
+    }
+
+    public QName getExpected() {
+        return expected;
+    }
+
+    public void setExpected(QName expected) {
+        this.expected = expected;
+    }
+
+    public XmlSchemaElement getXmlSchema() {
+        return xmlSchema;
+    }
+
+    public void setXmlSchema(XmlSchemaElement xmlSchema) {
+        this.xmlSchema = xmlSchema;
+    }
+
+    public void setChildPosition(int childPosition) {
+        this.childPosition = childPosition;
+    }
+
+    public int nextChildPosition() {
+        return childPosition++;
+    }
+
+    public void resetChildPosition() {
+        childPosition = 0;
     }
 
     @Override
-    public boolean handleEvent(final ValidationEvent event) {
-        // true: keep going. In this case we only want to continue for the error we're trying to hide.
-        return event.getMessage().startsWith("unexpected element (");
+    public String toString() {
+        return "ReplacingElement \"" + original + "\" -> \"" + expected + "\"";
     }
-
 }
