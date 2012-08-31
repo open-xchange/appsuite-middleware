@@ -61,6 +61,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;

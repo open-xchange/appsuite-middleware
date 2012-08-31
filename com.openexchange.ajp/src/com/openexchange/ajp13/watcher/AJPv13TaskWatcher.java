@@ -61,7 +61,6 @@ import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.ajp13.AJPv13ServiceRegistry;
 import com.openexchange.ajp13.exception.AJPv13Exception;
-import com.openexchange.ajp13.najp.AJPv13ServerImpl;
 import com.openexchange.log.Log;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
