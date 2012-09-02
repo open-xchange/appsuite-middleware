@@ -74,7 +74,7 @@ public class HazelcastActivator extends HousekeepingActivator {
          * new member joins.
          */
         final BundleContext context = this.context;
-        track(ClusterDiscoveryService.class, new ServiceTrackerCustomizer<ClusterDiscoveryService, ClusterDiscoveryService>() {
+        final ServiceTrackerCustomizer<ClusterDiscoveryService, ClusterDiscoveryService> clusterDiscoveryServiceTracker = new ServiceTrackerCustomizer<ClusterDiscoveryService, ClusterDiscoveryService>() {
 
             @Override
             public ClusterDiscoveryService addingService(final ServiceReference<ClusterDiscoveryService> reference) {
@@ -142,7 +142,8 @@ public class HazelcastActivator extends HousekeepingActivator {
                 Hazelcast.shutdownAll();
                 context.ungetService(reference);
             }
-        });
+        };
+        track(ClusterDiscoveryService.class, clusterDiscoveryServiceTracker);
         openTrackers();
     }
 
