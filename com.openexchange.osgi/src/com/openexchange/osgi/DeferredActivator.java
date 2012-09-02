@@ -306,7 +306,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
     /**
      * Updates this bundles service state entry
      */
-    final void updateServiceState() {
+    protected final void updateServiceState() {
         if (null == context) {
             return;
         }
@@ -338,7 +338,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
      * @param index The class' index
      * @param clazz The service's class
      */
-    final void signalAvailability(final int index, final Class<?> clazz) {
+    protected final void signalAvailability(final int index, final Class<?> clazz) {
         availability |= (1 << index);
         if (started.get()) {
             /*
@@ -356,7 +356,8 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
                 } catch (final Exception e) {
                     final Bundle bundle = context.getBundle();
                     final StringBuilder errorBuilder = new StringBuilder(64);
-                    if (LOG.isErrorEnabled()) {
+                    final boolean errorEnabled = LOG.isErrorEnabled();
+                    if (errorEnabled) {
                         errorBuilder.append("\nStart-up of bundle \"").append(bundle.getSymbolicName()).append("\" failed: ");
                         final String errorMsg = e.getMessage();
                         if (null == errorMsg || "null".equals(errorMsg)) {
@@ -378,11 +379,11 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
 
                             @Override
                             public void run() {
-                                shutDownBundle(bundle, errorBuilder);
+                                shutDownBundle(bundle, errorEnabled ? errorBuilder : null);
                             }
                         }).start();
                     } else {
-                        shutDownBundle(bundle, errorBuilder);
+                        shutDownBundle(bundle, errorEnabled ? errorBuilder : null);
                     }
                 }
             }
@@ -395,18 +396,18 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
      * @param bundle The bundle to shut-down
      * @param errorBuilder The error string builder
      */
-    static void shutDownBundle(final Bundle bundle, final StringBuilder errorBuilder) {
+    protected static void shutDownBundle(final Bundle bundle, final StringBuilder errorBuilder) {
         try {
             /*
              * Stop with Bundle.STOP_TRANSIENT set to zero
              */
             bundle.stop();
-            if (LOG.isErrorEnabled()) {
+            if (null != errorBuilder) {
                 errorBuilder.setLength(0);
                 LOG.error(errorBuilder.append("\n\nBundle \"").append(bundle.getSymbolicName()).append("\" stopped.\n"));
             }
         } catch (final BundleException e) {
-            if (LOG.isErrorEnabled()) {
+            if (null != errorBuilder) {
                 errorBuilder.setLength(0);
                 LOG.error(errorBuilder.append("\n\nBundle \"").append(bundle.getSymbolicName()).append("\" could not be stopped.\n"));
             }
