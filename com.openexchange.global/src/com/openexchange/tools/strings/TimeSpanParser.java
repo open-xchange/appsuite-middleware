@@ -77,19 +77,22 @@ public class TimeSpanParser  implements StringParser {
 
     /**
      * A timespan specification consists of a number and a unit of measurement. Units are:
-     * ms for miliseconds
-     * s for seconds
-     * m for minutes
-     * h for hours
-     * D for days
-     * W for weeks
+     * <ul>
+     * <li><tt>ms</tt> for miliseconds</li>
+     * <li><tt>s</tt> for seconds</li>
+     * <li><tt>m</tt> for minutes</li>
+     * <li><tt>h</tt> for hours</li>
+     * <li><tt>D</tt> for days</li>
+     * <li><tt>W</tt> for weeks</li>
+     * </ul>
      *
-     * So, for example 2D 1h 12ms would be 2 days and one hour and 12 milliseconds
-     * @param span
-     * @return
+     * So, for example <tt>&quot;2D 1h 12ms&quot;</tt> would be 2 days and one hour and 12 milliseconds
+     * 
+     * @param span The span string
+     * @return The parsed <tt>Long</tt> value
      */
     public static Long parseTimespan(final String span) {
-        if(span == null) {
+        if (span == null) {
             return Long.valueOf(-1);
         }
         final StringBuilder numberBuilder = new StringBuilder();
@@ -97,16 +100,16 @@ public class TimeSpanParser  implements StringParser {
         int mode = 0;
         long tally = 0;
 
-        for(final char c : span.toCharArray()) {
-            if(Character.isDigit(c)) {
-                if(mode == 0) {
+        for (final char c : span.toCharArray()) {
+            if (Character.isDigit(c)) {
+                if (mode == 0) {
                     numberBuilder.append(c);
                 } else {
-                    final String unit = unitBuilder.toString().toUpperCase();
+                    final String unit = 0 == unitBuilder.length() ? "MS" : unitBuilder.toString().toUpperCase();
                     final Long factor = UNITS.get(unit);
-                    if(factor == null) {
+                    if (factor == null) {
 
-                        throw new IllegalArgumentException("I don't know unit "+unit);
+                        throw new IllegalArgumentException("I don't know unit " + unit);
                     }
                     tally += Long.parseLong(numberBuilder.toString()) * factor.longValue();
                     numberBuilder.setLength(0);
@@ -114,25 +117,27 @@ public class TimeSpanParser  implements StringParser {
                     mode = 0;
                     numberBuilder.append(c);
                 }
-            } else if(Character.isLetter(c)){
+            } else if (Character.isLetter(c)) {
                 mode = 1;
                 unitBuilder.append(c);
             } else {
                 // IGNORE
             }
         }
-        if(numberBuilder.length() != 0) {
-            final String unit = unitBuilder.toString().toUpperCase();
+        if (numberBuilder.length() != 0) {
+            final String unit = 0 == unitBuilder.length() ? "MS" : unitBuilder.toString().toUpperCase();
             final Long factor = UNITS.get(unit);
-            if(factor == null) {
-                throw new IllegalArgumentException("I don't know unit "+unit);
+            if (factor == null) {
+                throw new IllegalArgumentException("I don't know unit " + unit);
             }
             tally += Long.parseLong(numberBuilder.toString()) * factor.longValue();
         }
         return Long.valueOf(tally);
     }
 
-    private static final Set<Class<?>> SUPPORTED = new HashSet<Class<?>>() {{
+    private static final Set<Class<?>> SUPPORTED = new HashSet<Class<?>>() {
+        private static final long serialVersionUID = -551644321593953282L;
+    {
         add(Long.class);
         add(long.class);
         add(Date.class);
