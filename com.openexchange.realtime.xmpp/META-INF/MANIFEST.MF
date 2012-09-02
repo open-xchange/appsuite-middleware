@@ -27,4 +27,4 @@ Import-Package: com.openexchange.authentication,
  org.joox,
  org.osgi.framework
 Bundle-ClassPath: .,
- lib/netty-3.5.2.Final.jar
+ lib/netty-3.5.5.Final.jar
