@@ -1,3 +1,7 @@
+* 2012-09-03 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22889: No keep-alive run if very first request body chunk not yet received
+
 * 2012-08-31 - marcus.klein@open-xchange.com
 
  - Fix for bug 22751: Registering properly the actions for the conversion HTTP/JSON interface within dispatcher.
