@@ -239,10 +239,7 @@ public class AJAXRequestDataTools {
      * @return The parsed <tt>boolean</tt> value (<code>false</code> on absence)
      */
     public static boolean parseBoolParameter(final String parameter) {
-        if (null == parameter) {
-            return false;
-        }
-        return BOOL_VALS.contains(parameter.trim().toLowerCase(Locale.ENGLISH));
+        return (null != parameter) && BOOL_VALS.contains(parameter.trim().toLowerCase(Locale.ENGLISH));
     }
 
     /**
