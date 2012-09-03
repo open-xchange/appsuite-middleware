@@ -301,8 +301,9 @@ public class AJAXRequestDataTools {
             pathInfo = pathInfo.substring(0, lastIndex);
         }
         String module = pathInfo.substring(prefix.length());
-        if (module.endsWith("/")) {
-        	module = module.substring(0, module.length()-1);
+        final int mlen = module.length()-1;
+        if ('/' == module.charAt(mlen)) {
+            module = module.substring(0, mlen);
         }
         return module;
     }
