@@ -482,9 +482,10 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     }
 
     public void stopKeepAlivePing() {
+        final ScheduledTimerTask scheduledKeepAliveTask = this.scheduledKeepAliveTask;
         if (null != scheduledKeepAliveTask) {
             scheduledKeepAliveTask.cancel(false);
-            scheduledKeepAliveTask = null;
+            this.scheduledKeepAliveTask = null;
             /*
              * Task is automatically purged from TimerService by PurgeRunnable
              */
