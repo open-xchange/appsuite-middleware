@@ -107,14 +107,25 @@ class UserTests extends PHPUnit_Framework_TestCase {
 
 		// loop through users and for each user id response, query server for user details
 		$found_deleted_user = false;
-		foreach ($user_list_response['return'] as $ret_user){
-			$query_user = new User();
-			$query_user->id = $ret_user->id;
-			$user_get_response = getUserClient($SOAPHOST)->getData($ctx, $query_user, getCredentialsObject($admin_user->name, $admin_user->password));
-			if($user_get_response->name == $new_user->name){
-				$found_deleted_user = true;
-			}			 
-		}	
+		if (!is_soap_fault($user_list_response)) {
+		    if (is_array($user_list_response)) {
+        		foreach ($user_list_response['return'] as $ret_user){
+        			$query_user = new User();
+        			$query_user->id = $ret_user->id;
+        			$user_get_response = getUserClient($SOAPHOST)->getData($ctx, $query_user, getCredentialsObject($admin_user->name, $admin_user->password));
+        			if($user_get_response->name == $user->name){
+        				$found_deleted_user = true;
+        			}
+        		}
+        	} else {
+        	    $query_user = new User();
+                $query_user->id = $user_list_response->id;
+                $user_get_response = getUserClient($SOAPHOST)->getData($ctx, $query_user, getCredentialsObject($admin_user->name, $admin_user->password));
+                if($user_get_response->name == $user->name){
+                    $found_deleted_user = true;
+                }
+        	}
+    	}
 		$this->assertFalse($found_deleted_user);	
 	} 
 	
@@ -254,12 +265,12 @@ class UserTests extends PHPUnit_Framework_TestCase {
 		$this->assertEquals($expected->fax_business, $server_response->fax_business);
 		$this->assertEquals($expected->fax_home, $server_response->fax_home);
 		$this->assertEquals($expected->fax_other, $server_response->fax_other);
-		$this->assertEquals($expected->gUI_Spam_filter_capabilities_enabled, $server_response->gUI_Spam_filter_capabilities_enabled);
+		$this->assertEquals($expected->gui_spam_filter_enabled, $server_response->gui_spam_filter_enabled);
 		$this->assertEquals($expected->imapLogin, $server_response->imapLogin);
 		
 		// special case of asserting because ox sends all imap infos in the "imapserver" attribute
 		// First parse, then assert
-		$imap_uri = parse_url($expected->imapServer);		
+		$imap_uri = parse_url($expected->imapServer);
 		$this->assertEquals($imap_uri["host"], $server_response->imapServer);
 		$this->assertEquals($imap_uri["port"], $server_response->imapPort);
 		$this->assertEquals($imap_uri["scheme"]."://", $server_response->imapSchema);
@@ -296,9 +307,7 @@ class UserTests extends PHPUnit_Framework_TestCase {
 		$this->assertEquals($smtp_uri["host"], $server_response->smtpServer);
 		$this->assertEquals($smtp_uri["port"], $server_response->smtpPort);
 		$this->assertEquals($smtp_uri["scheme"]."://", $server_response->smtpSchema);	
-		
-		
-		$this->assertEquals($expected->spam_filter_enabled, $server_response->spam_filter_enabled);
+
 		$this->assertEquals($expected->spouse_name, $server_response->spouse_name);
 		$this->assertEquals($expected->state_business, $server_response->state_business);
 		$this->assertEquals($expected->state_home, $server_response->state_home);

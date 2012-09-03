@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 0
+%define        ox_release 1
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -50,5 +50,9 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc config
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Tue Aug 21 2012 Carsten Hoeger <choegeropen-xchange.com>
+First release candidate for 6.22.0
+* Mon Aug 20 2012 Carsten Hoeger <choegeropen-xchange.com>
+prepare for 6.22.0
 * Thu Jul 19 2012 Carsten Hoeger <choegeropen-xchange.com>
 initial release

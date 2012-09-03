@@ -150,7 +150,11 @@ public class ReplacingXMLStreamReader extends StreamReaderDelegate {
     }
 
     private static XmlSchemaElement byPosition(ReplacingElement parent, List<XmlSchemaSequenceMember> childs) {
-        return (XmlSchemaElement) childs.get(parent.nextChildPosition());
+        int pos = parent.nextChildPosition();
+        if (childs.size() <= pos) {
+            return null;
+        }
+        return (XmlSchemaElement) childs.get(pos);
     }
 
     private static XmlSchemaElement byName(ReplacingElement parent, List<XmlSchemaSequenceMember> childs, String name) {

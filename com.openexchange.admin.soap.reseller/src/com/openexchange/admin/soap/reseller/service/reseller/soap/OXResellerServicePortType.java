@@ -21,7 +21,7 @@ import javax.xml.ws.ResponseWrapper;
 @XmlSeeAlso({ObjectFactory.class, com.openexchange.admin.soap.reseller.service.reseller.rmi.dataobjects.ObjectFactory.class, com.openexchange.admin.soap.reseller.service.rmi.ObjectFactory.class, com.openexchange.admin.soap.reseller.service.rmi.exceptions.ObjectFactory.class, com.openexchange.admin.soap.reseller.service.soap.dataobjects.ObjectFactory.class, com.openexchange.admin.soap.reseller.service.reseller.rmi.exceptions.ObjectFactory.class, com.openexchange.admin.soap.reseller.service.rmi.dataobjects.ObjectFactory.class, com.openexchange.admin.soap.reseller.service.reseller.soap.dataobjects.ObjectFactory.class, com.openexchange.admin.soap.reseller.service.io.ObjectFactory.class})
 public interface OXResellerServicePortType {
 
-    //@javax.jws.Oneway
+    //@Oneway
     @Action(input = "urn:updateDatabaseRestrictions", fault = {@FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:updateDatabaseRestrictionsInvalidCredentialsException"), @FaultAction(className = StorageException_Exception.class, value = "urn:updateDatabaseRestrictionsStorageException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:updateDatabaseRestrictionsRemoteException"), @FaultAction(className = OXResellerException_Exception.class, value = "urn:updateDatabaseRestrictionsOXResellerException")})
     @RequestWrapper(localName = "updateDatabaseRestrictions", targetNamespace = "http://soap.reseller.admin.openexchange.com", className = "com.openexchange.admin.soap.reseller.service.reseller.soap.UpdateDatabaseRestrictions")
     @WebMethod(action = "urn:updateDatabaseRestrictions")

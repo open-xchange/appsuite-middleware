@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 3
+%define        ox_release 1
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0 
@@ -307,6 +307,22 @@ Authors:
 
 #-------------------------------------------------------------------------------------
 
+%package gl-es
+Group:      Applications/Productivity
+Summary:    Package containing Open-Xchange backend localization for gl_ES
+Provides:       open-xchange-lang-community-gl-es = %{version}
+Obsoletes:      open-xchange-lang-community-gl-es <= %{version}
+
+%description gl-es
+Package containing Open-Xchange backend localization for gl_ES
+This localization package are driven by the community.
+
+Authors:
+--------
+    Open-Xchange
+
+#-------------------------------------------------------------------------------------
+
 %package he-he
 Group:      Applications/Productivity
 Summary:    Package containing Open-Xchange backend localization for he_HE
@@ -323,6 +339,22 @@ Authors:
 
 #-------------------------------------------------------------------------------------
 
+%package hi-in
+Group:      Applications/Productivity
+Summary:    Package containing Open-Xchange backend localization for hi_IN
+Provides:       open-xchange-lang-community-hi-in = %{version}
+Obsoletes:      open-xchange-lang-community-hi-in <= %{version}
+
+%description hi-in
+Package containing Open-Xchange backend localization for hi_IN
+This localization package are driven by the community.
+
+Authors:
+--------
+    Open-Xchange
+
+#-------------------------------------------------------------------------------------
+
 %package ko-ko
 Group:      Applications/Productivity
 Summary:    Package containing Open-Xchange backend localization for ko_KO
@@ -331,6 +363,22 @@ Obsoletes:      open-xchange-lang-community-ko-ko <= %{version}
 
 %description ko-ko
 Package containing Open-Xchange backend localization for ko_KO
+This localization package are driven by the community.
+
+Authors:
+--------
+    Open-Xchange
+
+#-------------------------------------------------------------------------------------
+
+%package no-nb
+Group:      Applications/Productivity
+Summary:    Package containing Open-Xchange backend localization for no_NB
+Provides:       open-xchange-lang-community-no-nb = %{version}
+Obsoletes:      open-xchange-lang-community-no-nb <= %{version}
+
+%description no-nb
+Package containing Open-Xchange backend localization for no_NB
 This localization package are driven by the community.
 
 Authors:
@@ -371,6 +419,22 @@ Authors:
 
 #-------------------------------------------------------------------------------------
 
+%package ru-ru
+Group:      Applications/Productivity
+Summary:    Package containing Open-Xchange backend localization for ru_RU
+Provides:       open-xchange-lang-community-ru-ru = %{version}
+Obsoletes:      open-xchange-lang-community-ru-ru <= %{version}
+
+%description ru-ru
+Package containing Open-Xchange backend localization for ru_RU
+This localization package are driven by the community.
+
+Authors:
+--------
+    Open-Xchange
+
+#-------------------------------------------------------------------------------------
+
 %package sv-sv
 Group:      Applications/Productivity
 Summary:    Package containing Open-Xchange backend localization for sv_SV
@@ -395,6 +459,22 @@ Obsoletes:      open-xchange-lang-community-tr-tr <= %{version}
 
 %description tr-tr
 Package containing Open-Xchange backend localization for tr_TR
+This localization package are driven by the community.
+
+Authors:
+--------
+    Open-Xchange
+
+#-------------------------------------------------------------------------------------
+
+%package vi-vi
+Group:      Applications/Productivity
+Summary:    Package containing Open-Xchange backend localization for vi_VI
+Provides:       open-xchange-lang-community-vi-vi = %{version}
+Obsoletes:      open-xchange-lang-community-vi-vi <= %{version}
+
+%description vi-vi
+Package containing Open-Xchange backend localization for vi_VI
 This localization package are driven by the community.
 
 Authors:
@@ -545,6 +625,10 @@ done
 /opt/open-xchange/i18n/*zh_TW*
 
 %changelog
+* Tue Aug 21 2012 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 6.22.0
+* Mon Aug 20 2012 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 6.22.0
 * Tue Jul 03 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Release build for EDP drop #2
 * Mon Jun 04 2012 Marcus Klein <marcus.klein@open-xchange.com>

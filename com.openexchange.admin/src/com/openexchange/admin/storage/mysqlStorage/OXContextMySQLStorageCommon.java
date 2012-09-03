@@ -423,14 +423,6 @@ public class OXContextMySQLStorageCommon {
         if (null == db.getRead_id() || 0 == db.getRead_id().intValue()) {
             db.setRead_id(db.getId());
         }
-    
-        // create context entry in configdb
-        // quota is in MB, but we store in Byte
-        long quota_max_temp = ctx.getMaxQuota().longValue();
-        if (quota_max_temp != -1) {
-            quota_max_temp *= Math.pow(2, 20);
-            ctx.setMaxQuota(L(quota_max_temp));
-        }
         fillContextTable(ctx, con);
 
         try {
@@ -574,7 +566,12 @@ public class OXContextMySQLStorageCommon {
             stmt.setBoolean(3, true);
             stmt.setInt(4, ctx.getFilestoreId().intValue());
             stmt.setString(5, ctx.getFilestore_name());
-            stmt.setLong(6, ctx.getMaxQuota().longValue());
+            // quota is in MB, but we store in Byte
+            long quota_max_temp = ctx.getMaxQuota().longValue();
+            if (quota_max_temp != -1) {
+                quota_max_temp *= Math.pow(2, 20);
+            }
+            stmt.setLong(6, quota_max_temp);
             stmt.executeUpdate();
         } catch (final SQLException e) {
             throw new StorageException(e.getMessage(), e);

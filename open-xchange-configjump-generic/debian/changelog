@@ -1,3 +1,15 @@
+open-xchange-configjump-generic (6.22.0-1) unstable; urgency=low
+
+  * First release candidate for 6.22.0
+
+ -- Carsten Hoeger <choegeropen-xchange.com>  Tue, 21 Aug 2012 09:19:59 +0200
+
+open-xchange-configjump-generic (6.22.0-0) unstable; urgency=low
+
+  * prepare for 6.22.0
+
+ -- Carsten Hoeger <choegeropen-xchange.com>  Mon, 20 Aug 2012 16:19:36 +0200
+
 open-xchange-configjump-generic (6.21.0-0) unstable; urgency=low
 
   * initial release

@@ -1,3 +1,15 @@
+open-xchange-log4j (6.22.0-1) unstable; urgency=low
+
+  * First release candidate for 6.22.0
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 21 Aug 2012 09:19:07 +0200
+
+open-xchange-log4j (6.22.0-0) unstable; urgency=low
+
+  * prepare for 6.22.0
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 20 Aug 2012 16:18:22 +0200
+
 open-xchange-log4j (6.21.0-6) unstable; urgency=low
 
   * Release build for EDP drop #2

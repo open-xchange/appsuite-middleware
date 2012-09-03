@@ -50,7 +50,7 @@ class GroupTests extends PHPUnit_Framework_TestCase {
 		$user_list_response = getUserClient($SOAPHOST)->list($ctx, "*", getCredentialsObject($admin_user->name, $admin_user->password));
 
 		// loop through users and for each user id response, query server for user details
-		$new_users_id = -1;
+		$users_id_array = array();
 		foreach ($user_list_response['return'] as $ret_user){
 			$query_user = new User();
 			$query_user->id = $ret_user->id;
@@ -58,16 +58,17 @@ class GroupTests extends PHPUnit_Framework_TestCase {
 			if($user_get_response->name == $new_user->name){
 				// verfiy user data				
 				$this->verifyUser($new_user,$user_get_response);
-				$new_users_id = $user_get_response->id;
+				$users_id_array[] = $user_get_response->id;
+				var_dump($users_id_array);
 			}
-			 
 		}
 		
 		// now init a new group
-		$group = getFullGroupObject("soap-test-creategroup", $ctx->id);		
-		
-		$group->members = array(intval($new_users_id));		
-		
+		$group = getFullGroupObject("soap-test-creategroup", $ctx->id);
+
+		// FIXME PHP still sends <members><item>3</item></members> but it must be <members>3</members> but PHP understands that server response strangely...
+		$group->members = $users_id_array;
+
 		try { 	
 			// create this group in OX System
 			getGroupClient($SOAPHOST)->create($ctx, $group, getCredentialsObject($admin_user->name, $admin_user->password));
@@ -359,7 +360,7 @@ class GroupTests extends PHPUnit_Framework_TestCase {
 		$this->assertEquals($expected->fax_home, $server_response->fax_home);
 		$this->assertEquals($expected->fax_other, $server_response->fax_other);
 		// TODO: non-existing property in both $expected and $server_response, disabled for now
-		//$this->assertEquals($expected->gUI_Spam_filter_capabilities_enabled, $server_response->gUI_Spam_filter_capabilities_enabled);
+		$this->assertEquals($expected->gui_spam_filter_enabled, $server_response->gui_spam_filter_enabled);
 		$this->assertEquals($expected->imapLogin, $server_response->imapLogin);
 			
 		// special case of asserting because ox sends all imap infos in the "imapserver" attribute
@@ -408,8 +409,6 @@ class GroupTests extends PHPUnit_Framework_TestCase {
 		//$this->assertEquals($smtp_uri["scheme"]."://", $server_response->smtpSchema);	
 		// /nope
 		
-		// TODO: undefined property	
-		//$this->assertEquals($expected->spam_filter_enabled, $server_response->spam_filter_enabled);
 		$this->assertEquals($expected->spouse_name, $server_response->spouse_name);
 		$this->assertEquals($expected->state_business, $server_response->state_business);
 		$this->assertEquals($expected->state_home, $server_response->state_home);
