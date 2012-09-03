@@ -68,7 +68,7 @@ public privileged aspect CollectionAnalyzerAspect {
         }
     }
     //This boolean will set the creation log to full tracelog and not just the position inside the sourcecode
-    private boolean FULL_TRACELOG = Boolean.parseBoolean(System.getProperty("ox.ma.full.tracelog","true"));
+    private boolean FULL_TRACELOG = Boolean.parseBoolean(System.getProperty("ox.ma.full.tracelog","false"));
 
     private final int SIZE_FOR_COLLECTIONS = SUSPECT_PERIOD * 60 / CHECKCHANGED_INTERVAL;
 

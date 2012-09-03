@@ -8,8 +8,8 @@ OXRevision: 5
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Vendor: Open-Xchange Inc.
 Require-Bundle: org.aspectj.runtime;visibility:=reexport
-Import-Package: org.osgi.framework,
- org.apache.commons.logging,
- com.openexchange.log
+Import-Package: org.osgi.framework;visibility:=reexport,
+ org.apache.commons.logging;visibility:=reexport,
+ com.openexchange.log;visibility:=reexport
 Export-Package: com.openexchange.memory.analyzer;aspects="CollectionAnalyzerAspect"
 Eclipse-SupplementBundle: com.openexchange*
