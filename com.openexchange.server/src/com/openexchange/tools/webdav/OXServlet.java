@@ -125,7 +125,7 @@ public abstract class OXServlet extends WebDavServlet {
 
         @Override
         public String getUserAgent() {
-            return null == userAgent ? req.getHeader("user-agent") : userAgent;;
+            return null == userAgent ? req.getHeader("user-agent") : userAgent;
         }
 
         @Override
