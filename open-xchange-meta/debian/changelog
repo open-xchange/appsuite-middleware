@@ -1,3 +1,9 @@
+open-xchange-meta (6.23.0-0) unstable; urgency=low
+
+  * prepare for next EDP drop
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 03 Sep 2012 13:47:02 +0200
+
 open-xchange-meta (6.22.0-1) unstable; urgency=low
 
   * First release candidate for 6.22.0

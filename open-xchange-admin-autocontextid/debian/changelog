@@ -1,3 +1,9 @@
+open-xchange-admin-autocontextid (6.23.0-0) unstable; urgency=low
+
+  * prepare for next EDP drop
+
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Mon, 03 Sep 2012 13:46:24 +0200
+
 open-xchange-admin-autocontextid (6.22.0-1) unstable; urgency=low
 
   * First release candidate for 6.22.0
