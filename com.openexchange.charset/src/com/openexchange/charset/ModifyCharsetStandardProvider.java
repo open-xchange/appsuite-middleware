@@ -90,7 +90,7 @@ public final class ModifyCharsetStandardProvider {
          */
         CharsetProvider charsetProvider = null;
         try {
-            charsetProvider = new JapaneseReplacementCharsetProvider(backupCharsetProvider);
+            charsetProvider = new AsianReplacementCharsetProvider(backupCharsetProvider);
         } catch (final UnsupportedCharsetException e) {
             /*
              * Leave unchanged since fall-back charset "CP50220" is not support by JVM
@@ -122,6 +122,7 @@ public final class ModifyCharsetStandardProvider {
         if (null == charsetProvider) {
             return null;
         }
+        charsetProvider = new CachingCharsetProvider(charsetProvider);
         /*
          * Reinitialize field
          */
