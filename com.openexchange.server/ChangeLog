@@ -1,3 +1,7 @@
+* 2012-09-04 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22886: Read and write support for ISO-2022-CN charset
+
 * 2012-09-04 - jan.bauerdick@open-xchange.com
 
  - New bundle c.o.aws.loadbalancing: Register and deregister ec2 instances with the elastic loadbalancer
