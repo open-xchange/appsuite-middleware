@@ -55,6 +55,7 @@ import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
 import org.osgi.framework.ServiceReference;
 import org.quartz.service.QuartzService;
+import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
@@ -110,7 +111,7 @@ public final class IndexingServiceActivator extends HousekeepingActivator {
         return new Class<?>[] {
             ConfigurationService.class, ThreadPoolService.class, DatabaseService.class, MailService.class,
             SmalAccessService.class, IndexFacadeService.class, SessiondService.class, IDBasedFileAccessFactory.class, FolderService.class,
-            MailAccountStorageService.class };
+            MailAccountStorageService.class, HazelcastInstance.class };
     }
 
     @Override

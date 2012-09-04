@@ -145,8 +145,7 @@ public class MailFolderJob implements IndexingJob {
         IndexAccess<MailMessage> mailIndex = indexFacade.acquireIndexAccess(Types.EMAIL, info.userId, info.contextId);
         IndexAccess<Attachment> attachmentIndex = indexFacade.acquireIndexAccess(Types.ATTACHMENT, info.userId, info.contextId);
         MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage> mailAccess = getMailAccess();
-        try {
-            IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
+        try {            
             Map<String, Object> params = new HashMap<String, Object>();
             params.put(IndexConstants.ACCOUNT, Integer.valueOf(info.accountId));
             Builder queryBuilder = new Builder(params);
@@ -154,8 +153,10 @@ public class MailFolderJob implements IndexingJob {
                 .setFolders(Collections.singleton(folder))
                 .setSortField(MailIndexField.RECEIVED_DATE)
                 .setOrder(Order.DESC)
-                .build();            
-            if (folderStorage.exists(folder)) {                
+                .build();
+            
+            IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
+            if (folderStorage.exists(folder)) {
                 IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
                 MailMessage[] storageResult = messageStorage.searchMessages(
                     folder,
