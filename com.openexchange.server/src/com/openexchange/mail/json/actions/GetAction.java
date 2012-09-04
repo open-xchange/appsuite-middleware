@@ -281,12 +281,16 @@ public final class GetAction extends AbstractMailAction {
                     fileHolder.setName(new StringBuilder(mail.getSubject()).append(".eml").toString());
                     return new AJAXRequestResult(fileHolder, "file");
                 }
+                final ContentType rct = new ContentType("text/plain");
                 final ContentType ct = mail.getContentType();
                 if (ct.containsCharsetParameter() && CharsetDetector.isValid(ct.getCharsetParameter())) {
                     data = new AJAXRequestResult(new String(baos.toByteArray(), Charsets.forName(ct.getCharsetParameter())), "string");
+                    rct.setCharsetParameter(ct.getCharsetParameter());
                 } else {
                     data = new AJAXRequestResult(new String(baos.toByteArray(), com.openexchange.java.Charsets.UTF_8), "string");
+                    rct.setCharsetParameter("UTF-8");
                 }
+                data.setHeader("Content-Type", rct.toString());
             } else if (showMessageHeaders) {
                 /*
                  * Get message
