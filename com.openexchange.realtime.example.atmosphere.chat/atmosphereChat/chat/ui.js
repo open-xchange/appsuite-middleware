@@ -22,6 +22,10 @@ define("chat/ui", function () {
     var author = null;
     var logged = true;
     var socket = $.atmosphere;
+    
+    var splits = document.location.toString().split('/');
+    var proto = splits[0]; var host = splits[2];
+    var location = proto+"//"+host+"/realtime/atmosphere/rt";
 
     <!-- The following code is just here for demonstration purpose and not required -->
     <!-- Used to demonstrate the request.onTransportFailure callback. Not mandatory -->
@@ -38,7 +42,7 @@ define("chat/ui", function () {
     $.each(transports, function (index, transport) {
         var req = new $.atmosphere.AtmosphereRequest();
 
-	req.url = "http://marens.netline.de/realtime/atmosphere/rt";
+	    req.url = location;
         req.contentType = "application/json";
         req.transport = transport;
         req.headers = { "negotiating" : "true", session: session };
@@ -48,19 +52,21 @@ define("chat/ui", function () {
         }
 
         req.onReconnect = function(request) {
-            request.close();
+          console.log("onReconnect, closing request: "+request);
+          request.close();
         }
 
         socket.subscribe(req)
     });
     
     var request = {
-        url: "http://marens.netline.de/realtime/atmosphere/rt",
+        url: location,
         contentType : "application/json",
         logLevel : 'debug',
         transport : 'websocket' ,
         fallbackTransport: 'long-polling',
         timeout: 60000,
+        maxRequests : 3,
         headers : {session: session}
         };
 
@@ -73,23 +79,14 @@ define("chat/ui", function () {
         input.removeAttr('disabled').focus();
     };
 
-    //For demonstration of how you can customize the fallbackTransport based on the browser
-//    request.onTransportFailure = function(errorMsg, request) {
-//        jQuery.atmosphere.info(errorMsg);
-//        if ( window.EventSource ) {
-//            request.fallbackTransport = "long-polling";
-//        }
-//        header.html($('<h3>', { text: 'Atmosphere Chat. Default transport is WebSocket, fallback is ' + request.fallbackTransport }));
-//    };
-
     request.onReconnect = function (request, response) {
         socket.info("Reconnecting")
     };
 
     request.onMessage = function (response) {
         var message = response.responseBody;
-	console.log('Got message from server');
-	console.log(message);
+	      console.log('Got message from server');
+	      console.log(message);
         try {
             var json = jQuery.parseJSON(message);
         } catch (e) {
@@ -104,7 +101,16 @@ define("chat/ui", function () {
     };
 
     request.onClose = function(response) {
-        logged = false;
+        socket.info("Closing")
+//        subSocket.push(jQuery.stringifyJSON({
+//            session: session,
+//            ns: 'ox:handshake',
+//            data: {
+//              step: 'close',
+//              resource: 'Browser'
+//            }
+//        }));
+        //logged = false;
     };
 
     request.onError = function(response) {
@@ -115,14 +121,16 @@ define("chat/ui", function () {
     
     var subSocket = socket.subscribe(request);
     
-    subSocket.push(jQuery.stringifyJSON({
-    session: session,
-    ns: 'ox:handshake',
-    data: {
-      resource: 'Browser'
-    }
-    }));
+//    subSocket.push(jQuery.stringifyJSON({
+//    session: session,
+//    ns: 'ox:handshake',
+//    data: {
+//      step: 'open',
+//      resource: 'Browser'
+//    }
+//    }));
 //    subSocket.push(jQuery.stringifyJSON({author: ox.userName, message: "logged into chat"}));
+
     status.css('color', 'blue');
 
     input.keydown(function(e) {

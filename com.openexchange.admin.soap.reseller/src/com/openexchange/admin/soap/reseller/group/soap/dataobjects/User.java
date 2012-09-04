@@ -1,7 +1,6 @@
 
 package com.openexchange.admin.soap.reseller.group.soap.dataobjects;
 
-import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -570,6 +569,15 @@ public class User {
      */
     public XMLGregorianCalendar getAnniversary() {
         return anniversary;
+    }
+    
+    /**
+     * Sets the aliases
+     *
+     * @param aliases The aliases to set
+     */
+    public void setAliases(List<String> aliases) {
+        this.aliases = aliases;
     }
 
     /**

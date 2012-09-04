@@ -46,6 +46,10 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Tue Aug 21 2012 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 6.22.0
+* Mon Aug 20 2012 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 6.22.0
 * Tue Jul 03 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Release build for EDP drop #2
 * Tue Jun 26 2012 Marcus Klein <marcus.klein@open-xchange.com>

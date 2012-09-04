@@ -58,7 +58,7 @@ import java.util.Set;
 
 /**
  * {@link Snippet} - Represents arbitrary (textual) content.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface Snippet {
@@ -118,49 +118,49 @@ public interface Snippet {
 
     /**
      * Gets the identifier.
-     * 
+     *
      * @return The identifier.
      */
     String getId();
 
     /**
      * Gets the account identifier (if applicable for associated module).
-     * 
+     *
      * @return The account identifier or <code>-1</code>.
      */
     int getAccountId();
 
     /**
      * Gets the module identifier; e.g. <code>"com.openexchange.mail"</code>.
-     * 
+     *
      * @return The module identifier
      */
     String getModule();
 
     /**
      * Gets the type; e.g. <code>"signature"</code>.
-     * 
+     *
      * @return The type
      */
     String getType();
 
     /**
      * Gets the display name.
-     * 
+     *
      * @return The display name
      */
     String getDisplayName();
 
     /**
      * Gets the textual content.
-     * 
+     *
      * @return The content
      */
     String getContent();
 
     /**
      * Gets the collection of attachments.
-     * 
+     *
      * @return The attachments or an empty collection if none attached
      */
     List<Attachment> getAttachments();
@@ -169,40 +169,40 @@ public interface Snippet {
      * Gets miscellaneous JSON data.
      * <p>
      * Allowed is any object returned by:
-     * 
+     *
      * <pre>
      * String sJson = &quot;...&quot;; // Any JSON representation
      * new org.json.JSONTokener(sJson).next();
      * </pre>
-     * 
+     *
      * @return The JSON data or <code>null</code> if absent
      */
     Object getMisc();
 
     /**
      * Signals whether this snippet is shared to others.
-     * 
+     *
      * @return <code>true</code> if shared; otherwise <code>false</code>
      */
     boolean isShared();
 
     /**
      * Gets the identifier of this snippet's creator.
-     * 
+     *
      * @return The creator identifier or <code>-1</code> if absent
      */
     int getCreatedBy();
 
     /**
      * Gets this snippet's properties.
-     * 
+     *
      * @return The properties as an unmodifiable {@link Map map}
      */
     Map<String, Object> getProperties();
 
     /**
      * Gets this snippet's unnamed properties.
-     * 
+     *
      * @return The unnamed properties as an unmodifiable {@link Map map}
      */
     Map<String, Object> getUnnamedProperties();

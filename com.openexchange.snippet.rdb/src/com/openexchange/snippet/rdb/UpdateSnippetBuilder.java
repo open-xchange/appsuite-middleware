@@ -73,7 +73,7 @@ public class UpdateSnippetBuilder implements PropertySwitch {
 
     /**
      * Gets the update statement.
-     * 
+     *
      * @return The update statement or <code>null</code>
      * @see #getModifiableProperties()
      */
@@ -92,7 +92,7 @@ public class UpdateSnippetBuilder implements PropertySwitch {
 
     /**
      * Gets the modifiable properties.
-     * 
+     *
      * @return The modifiable properties or <code>null</code>
      * @see #getUpdateStatement()
      */

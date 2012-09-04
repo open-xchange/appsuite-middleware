@@ -67,7 +67,7 @@ public final class SnippetExceptionMessages implements LocalizableStrings {
 
     // No such snippet found for identifier: %1$s
     public static final String SNIPPET_NOT_FOUND_MSG = "No such snippet found for identifier: %1$s";
-    
+
     // A JSON error occurred: %1$s
     public static final String JSON_ERROR_MSG = "A JSON error occurred: %1$s";
 
@@ -76,6 +76,9 @@ public final class SnippetExceptionMessages implements LocalizableStrings {
 
     // A SQL error occurred: %1$s
     public static final String SQL_ERROR_MSG = "A SQL error occurred: %1$s";
+
+    // No such snippet attachment found for identifier %1$s in snippet %2$s
+    public static final String ATTACHMENT_NOT_FOUND_MSG = "No such snippet attachment found for identifier %1$s in snippet %2$s";
 
     /**
      * Initializes a new {@link SnippetExceptionMessages}.

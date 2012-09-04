@@ -50,7 +50,10 @@
 package org.quartz.service.osgi;
 
 import java.io.StringReader;
+import java.lang.management.ManagementFactory;
 import java.util.Properties;
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleActivator;
@@ -58,6 +61,9 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerFactory;
+import org.quartz.core.QuartzScheduler;
+import org.quartz.core.QuartzSchedulerMBeanImpl;
+import org.quartz.core.QuartzSchedulerResources;
 import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.service.QuartzService;
 import org.quartz.service.internal.QuartzServiceImpl;
@@ -107,7 +113,9 @@ public final class QuartzActivator implements BundleActivator {
                 		"\n" + 
                 		"org.quartz.jobStore.misfireThreshold=60000\n" + 
                 		"\n" + 
-                		"org.quartz.jobStore.class=org.quartz.simpl.RAMJobStore";
+                		"org.quartz.jobStore.class=org.quartz.simpl.RAMJobStore\n" +
+                		"\n" +
+                		"org.quartz.scheduler.jmx.export=true";
                 properties = new Properties();
                 properties.load(new StringReader(sProps));
             }

@@ -224,7 +224,7 @@ public final class IMAPFolderConverter {
 
     }
 
-    // private static final ConcurrentMap<Key, Object> M = new ConcurrentHashMap<Key, Object>();
+    // private static final ConcurrentMap<Key, Object> M = new NonBlockingHashMap<Key, Object>();
 
     private static final boolean DO_STATUS = false;
 

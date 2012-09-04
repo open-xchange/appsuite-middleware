@@ -1,0 +1,45 @@
+
+.io-ox-halo .widget-title {
+    margin: 0.5em 0 1em 0;
+    font-size: 16pt;
+}
+
+.io-ox-halo .vgrid-cell:last-child {
+    border-bottom: 0px none;
+}
+
+.io-ox-halo h1 {
+    font-size: 24px;
+    font-weight: normal;
+}
+
+.io-ox-halo h2 {
+    font-size: 18px;
+}
+
+.ray {
+    margin: 0px 0px 30px 0px;
+}
+.io-ox-subheader {
+    font-weight:300;
+    font-size: 13pt;
+}
+.io-ox-left-column, .io-ox-right-column {
+    margin: 0;
+    padding: 0;
+    display: block;
+}
+.io-ox-left-column {
+    float: left;
+    width: 48%;
+    padding-right: 2%;
+}
+.io-ox-right-column {
+    float: right;
+    width: 48%;
+    padding-left: 2%;
+}
+
+.io-ox-halo .vgrid-cell.mail{
+    padding: 6px 0;
+}

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: HTTP Client Helpers
 Bundle-SymbolicName: com.openexchange.http.client
-Bundle-Version: 6.21.0
+Bundle-Version: 6.23.0
 Bundle-Activator: com.openexchange.http.client.osgi.HTTPClientActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: J2SE-1.5

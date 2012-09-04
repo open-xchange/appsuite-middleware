@@ -1,0 +1,1 @@
+define("io.ox/settings/settings.fr_FR",["io.ox/core/gettext"],function(g){return g("io.ox/settings/settings",{"nplurals":2,"plural":"n>1","dictionary":{}});});

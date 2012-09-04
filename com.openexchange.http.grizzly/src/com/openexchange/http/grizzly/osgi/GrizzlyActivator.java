@@ -52,10 +52,14 @@ package com.openexchange.http.grizzly.osgi;
 import java.io.IOException;
 import javax.servlet.ServletException;
 import org.glassfish.grizzly.comet.CometAddOn;
+import org.glassfish.grizzly.http.HttpRequestPacket;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.grizzly.http.server.NetworkListener;
 import org.glassfish.grizzly.http.server.StaticHttpHandler;
+import org.glassfish.grizzly.websockets.WebSocket;
 import org.glassfish.grizzly.websockets.WebSocketAddOn;
+import org.glassfish.grizzly.websockets.WebSocketApplication;
+import org.glassfish.grizzly.websockets.WebSocketEngine;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
 import org.osgi.service.http.HttpService;
@@ -179,6 +183,17 @@ public class GrizzlyActivator extends HousekeepingActivator {
                     LOG.info("Enabling WebSockets for Grizzly server.");
                 }
                 networkListener.registerAddOn(new WebSocketAddOn());
+                WebSocketEngine.getEngine().register(new WebSocketApplication() {
+                    
+                    @Override
+                    public boolean isApplicationRequest(HttpRequestPacket request) {
+                        return "/echo".equals(request.getRequestURI());
+                    }
+
+                    public void onMessage(WebSocket socket, String data) {
+                        socket.send(data);
+                    }
+                });
             }
             
             if (hasCometEnabled) {

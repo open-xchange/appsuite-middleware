@@ -105,18 +105,22 @@ public class FrameworkConfig {
     public ServletConfig build() {
         return new ServletConfig() {
 
+            @Override
             public String getServletName() {
                 return servletName;
             }
 
+            @Override
             public ServletContext getServletContext() {
                 return servletContext;
             }
 
+            @Override
             public String getInitParameter(String name) {
                 return parameters.get(name);
             }
 
+            @Override
             public Enumeration<String> getInitParameterNames() {
                 return Collections.enumeration(parameters.keySet());
             }

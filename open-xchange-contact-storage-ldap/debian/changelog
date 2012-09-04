@@ -1,3 +1,9 @@
+open-xchange-contact-storage-ldap (6.23.0-0) unstable; urgency=low
+
+  * prepare for next EDP drop
+
+ -- Tobias Friedrich <tobias.friedrich@open-xchange.com>  Mon, 03 Sep 2012 13:47:03 +0200
+
 open-xchange-contact-storage-ldap (6.21.0-0) unstable; urgency=low
 
   * Initial release

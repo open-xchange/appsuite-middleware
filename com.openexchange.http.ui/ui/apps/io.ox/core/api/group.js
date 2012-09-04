@@ -1,0 +1,2 @@
+define("io.ox/core/api/group",["io.ox/core/http","io.ox/core/api/factory"],function(a,b){var c=b({module:"group",keyGenerator:function(a){return String(a.id)},requests:{all:{columns:"1,20",sort:"500",order:"asc"},list:{},get:{},search:{action:"search",columns:"1,20,500,524",sort:"500",order:"asc",getData:function(a){return{pattern:a}}}}});return"use strict",c.getTextNode=function(a){var b=document.createTextNode("");return c.get({id:a}).done(function(a){b.nodeValue=a.display_name}).always(function(
+){_.defer(function(){b=null})}),b},c})

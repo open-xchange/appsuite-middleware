@@ -1,0 +1,1 @@
+define("3rd.party/noms/generic/main",function(){var a,b=ox.ui.createApp({name:"3rd.party/noms/generic"});return"use strict",b.setLauncher(function(c){if(!c)return;b.setWindow(a=ox.ui.createWindow({name:c.url,title:c.name,toolbar:!1,search:!1})),a.show(function(){a.nodes.main.append($("<iframe>",{src:c.url,width:"100%",height:"100%",frameBorder:0}))})}),{getApp:b.getInstance}})

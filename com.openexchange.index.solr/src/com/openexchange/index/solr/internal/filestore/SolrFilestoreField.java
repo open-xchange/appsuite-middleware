@@ -76,17 +76,12 @@ public enum SolrFilestoreField implements SolrField {
     LAST_MODIFIED("last_modified", FilestoreIndexField.LAST_MODIFIED, "param9"),
     TITLE("title", FilestoreIndexField.TITLE, "param10"),
     VERSION("version", FilestoreIndexField.VERSION, "param11"),
-    FILE_SIZE("file_size", FilestoreIndexField.FILE_SIZE, "param12"),
-    MIME_TYPE("mime_type", FilestoreIndexField.MIME_TYPE, "param13"),
-    FILE_NAME("file_name", FilestoreIndexField.FILE_NAME, "param14"),
     DESCRIPTION("description", FilestoreIndexField.DESCRIPTION, "param15"),
     URL("url", FilestoreIndexField.URL, "param16"),
     SEQUENCE_NUMBER("sequence_number", FilestoreIndexField.SEQUENCE_NUMBER, "param17"),
     CATEGORIES("categories", FilestoreIndexField.CATEGORIES, "param18"),
     COLOR_LABEL("color_label", FilestoreIndexField.COLOR_LABEL, "param19"),
-    VERSION_COMMENT("version_comment", FilestoreIndexField.VERSION_COMMENT, "param20"),
-    CONTENT("content", FilestoreIndexField.CONTENT, "param21"),
-    MD5_SUM("md5_sum", FilestoreIndexField.MD5_SUM, "param22");
+    VERSION_COMMENT("version_comment", FilestoreIndexField.VERSION_COMMENT, "param20");
     
 
     private String solrName;
@@ -140,14 +135,17 @@ public enum SolrFilestoreField implements SolrField {
         this.parameterName = parameterName;
     }
 
+    @Override
     public String solrName() {
         return solrName;
     }
 
+    @Override
     public FilestoreIndexField indexField() {
         return indexField;
     }
 
+    @Override
     public String parameterName() {
         return parameterName;
     }

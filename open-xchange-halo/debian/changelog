@@ -1,3 +1,9 @@
+open-xchange-halo (6.23.0-0) unstable; urgency=low
+
+  * prepare for next EDP drop
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 03 Sep 2012 13:47:07 +0200
+
 open-xchange-halo (6.21.0-6) unstable; urgency=low
 
   * Release build for EDP drop #2

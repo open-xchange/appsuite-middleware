@@ -68,12 +68,15 @@ public class AWSClusterDiscoveryService implements ClusterDiscoveryService {
 
     private final AmazonEC2 amazonEC2;
 
+    private final List<ClusterListener> listeners;
+
     /**
      * Initializes a new {@link AWSClusterDiscoveryService}.
      */
     public AWSClusterDiscoveryService(AmazonEC2 amazonEC2) {
         super();
         this.amazonEC2 = amazonEC2;
+        this.listeners = new ArrayList<ClusterListener>();
     }
 
     @Override
@@ -93,12 +96,16 @@ public class AWSClusterDiscoveryService implements ClusterDiscoveryService {
 
     @Override
     public void addListener(ClusterListener listener) {
-        // nothing to do
+        synchronized (listeners) {
+            listeners.add(listener);
+        }
     }
 
     @Override
     public void removeListener(ClusterListener listener) {
-        // nothing to do
+        synchronized (listeners) {
+            listeners.remove(listener);
+        }
     }
 
 }

@@ -10,6 +10,6 @@ Bundle-Vendor: Open-Xchange Inc.
 Require-Bundle: org.aspectj.runtime;visibility:=reexport
 Import-Package: org.osgi.framework;visibility:=reexport,
  org.apache.commons.logging;visibility:=reexport,
- com.openexchange.log;visibility:=reexport 
+ com.openexchange.log;visibility:=reexport
 Export-Package: com.openexchange.memory.analyzer;aspects="CollectionAnalyzerAspect"
 Eclipse-SupplementBundle: com.openexchange*

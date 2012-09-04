@@ -61,7 +61,6 @@ import com.openexchange.admin.rmi.impl.OXContext;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.log.LogFactory;
-import com.openexchange.log.LogProperties;
 import com.openexchange.osgi.HousekeepingActivator;
 
 public class Activator extends HousekeepingActivator {

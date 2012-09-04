@@ -53,7 +53,6 @@ import java.util.Date;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.DataFields;
-import com.openexchange.ajax.fields.TaskFields;
 import com.openexchange.ajax.parser.TaskParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.TasksSQLInterface;

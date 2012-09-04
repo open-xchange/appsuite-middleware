@@ -1,0 +1,1 @@
+define("io.ox/applications/view-favorites",["io.ox/core/api/apps","io.ox/applications/view-common"],function(a,b){return"use strict",{draw:function(c){var d=$("<div>").append($("<div>").addClass("clear-title").text("Favorite applications")),e=$("<div>").addClass("apps");return _(a.getFavorites()).each(function(a){e.append(b.drawApp(a,c))}),d.children().eq(0).after(e),d}}})

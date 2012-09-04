@@ -99,11 +99,11 @@ public class InfostoreAccountJob implements IndexingJob {
     
     private int priority;
     
-    private long timestamp;
+    private final long timestamp;
 
-    private ConcurrentHashMap<String, Object> properties;
+    private final ConcurrentHashMap<String, Object> properties;
 
-    private Session session;
+    private final Session session;
     
     
     public InfostoreAccountJob(Session session) {

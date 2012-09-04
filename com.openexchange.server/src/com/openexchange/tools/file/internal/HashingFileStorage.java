@@ -66,6 +66,7 @@ import javax.activation.MimetypesFileTypeMap;
 import org.apache.commons.logging.Log;
 import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.tools.file.external.FileStorage;
 import com.openexchange.tools.file.external.FileStorageCodes;
@@ -176,7 +177,7 @@ public class HashingFileStorage implements FileStorage {
             bufOut = new BufferedOutputStream(new FileOutputStream(filePath));
 
             int i = 0;
-            while((i = bufIn.read()) != -1) {
+            while((i = bufIn.read()) >= 0) {
                 bufOut.write(i);
             }
         } catch (final FileNotFoundException e) {
@@ -184,20 +185,8 @@ public class HashingFileStorage implements FileStorage {
         } catch (final IOException e) {
             throw FileStorageCodes.IOERROR.create(e.toString());
         } finally {
-            if (bufIn != null) {
-                try {
-                    bufIn.close();
-                } catch (final IOException e) {
-                    LOG.error(e.getMessage(), e);
-                }
-            }
-            if (bufOut != null) {
-                try {
-                    bufOut.close();
-                } catch (final IOException e) {
-                    LOG.error(e.getMessage(), e);
-                }
-            }
+            Streams.close(bufIn);
+            Streams.close(bufOut);
         }
 
         return filestorePath[0]+"/"+filestorePath[1];

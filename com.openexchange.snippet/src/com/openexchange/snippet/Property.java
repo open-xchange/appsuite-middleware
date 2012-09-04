@@ -51,7 +51,7 @@ package com.openexchange.snippet;
 
 /**
  * {@link Property} - A snippet's properties.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public enum Property {
@@ -71,35 +71,35 @@ public enum Property {
     /**
      * The property for the identifier.
      */
-    ID("snpt.id"),
+    ID("id"),
     /**
      * The property for the account identifier.
      */
-    ACCOUNT_ID("snpt.accountid"),
+    ACCOUNT_ID("accountid"),
     /**
      * The property for the type; e.g. <code>"signature"</code>.
      */
-    TYPE("snpt.type"),
+    TYPE("type"),
     /**
      * The property for the display name.
      */
-    DISPLAY_NAME("snpt.displayname"),
+    DISPLAY_NAME("displayname"),
     /**
      * The property for the module identifier; e.g. <code>"com.openexchange.mail"</code>.
      */
-    MODULE("snpt.module"),
+    MODULE("module"),
     /**
      * The property for the creator.
      */
-    CREATED_BY("snpt.createdby"),
+    CREATED_BY("createdby"),
     /**
      * The property for the shared flag.
      */
-    SHARED("snpt.shared"),
+    SHARED("shared"),
     /**
      * The property for the optional miscellaneous JSON data.
      */
-    MISC("snpt.misc"),
+    MISC("misc"),
 
     ;
 
@@ -111,7 +111,7 @@ public enum Property {
 
     /**
      * Gets the property name
-     * 
+     *
      * @return The property name or <code>null</code> if no property is associated
      */
     public String getPropName() {
@@ -125,7 +125,7 @@ public enum Property {
 
     /**
      * Invokes appropriate switcher's method for this property.
-     * 
+     *
      * @param switcher The switcher
      * @return The possible result object or <code>null</code>
      */

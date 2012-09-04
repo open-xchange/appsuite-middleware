@@ -1,0 +1,1 @@
+define("io.ox/mail/mail.fr_FR",["io.ox/core/gettext"],function(g){return g("io.ox/mail/mail",{"nplurals":2,"plural":"n>1","dictionary":{}});});

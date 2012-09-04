@@ -82,23 +82,28 @@ public enum RealtimeExceptionCodes implements OXExceptionCode {
         this.category = category;
     }
 	
-	public int getNumber() {
+	@Override
+    public int getNumber() {
 		return number;
 	}
 
-	public Category getCategory() {
+	@Override
+    public Category getCategory() {
 		// TODO Auto-generated method stub
 		return category;
 	}
 
-	public String getPrefix() {
+	@Override
+    public String getPrefix() {
 		return "RT";
 	}
 
-	public String getMessage() {
+	@Override
+    public String getMessage() {
 		return message;
 	}
 	
+    @Override
     public boolean equals(final OXException e) {
         return OXExceptionFactory.getInstance().equals(this, e);
     }

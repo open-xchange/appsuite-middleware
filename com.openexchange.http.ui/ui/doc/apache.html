@@ -1,0 +1,131 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Developer Documentation</title>
+<link href="prettify.css" type="text/css" rel="stylesheet"/>
+<link href="default.css" type="text/css" rel="stylesheet"/>
+<script type="text/javascript" src="jquery.min.js"></script>
+<script type="text/javascript" src="prettify.js"></script>
+<script>
+$(document).ready(function () {
+    // script to pre trick
+    $('body script').each(function () {
+        var node = $(this);
+        $('<pre>').addClass('prettyprint lang-js')
+            .text($.trim(node.text()).replace(/[ ]{4}/g, '  '))
+            .insertBefore(node);
+        node.remove();
+    });
+    // apply pretty print
+    prettyPrint();
+    // add reference anchors
+    var anchors = {};
+    $('h2,h3').add($('dt')).each(function () {
+        var node = $(this), text = node.text().replace(/\(.*\)\s*$/, '()');
+        if (anchors[text]) return;
+        node.prepend($('<a>').attr('name', text));
+        anchors[text] = true;
+    });
+    $('code,ul.params>li>i').each(function () {
+        var node = $(this), text = node.text();
+        if (anchors[text]) {
+            node.empty().append($('<a>').attr('href', '#' + text).text(text));
+        }
+    });
+});
+</script>
+</head>
+<body>
+
+<p class="header">ox7 &ndash; Developer Documentation &ndash; <a href="index.html">Index</a></p>
+
+<h1>Apache Configuration</h1>
+
+<p>If you read this in your browser you should have done this already:</p>
+<pre class="text">
+1.  Check out the UI from git
+
+2.  Figure out Apache's document root. Common places are:
+
+    - MacOS: <i>/Library/WebServer/Documents</i>
+    - Linux: <i>/var/www</i>
+    
+3.  Create a new folder <i>ox7</i> in Apache's document root
+
+4.  Build the UI and the documentation with ant:
+
+        <i>ant -Dbuild=/Library/WebServer/Documents/ox7 all doc</i>
+    or
+        <i>export BUILD="/Library/WebServer/Documents/ox7"
+        ant all doc</i>
+
+5.  If everything works fine, the documentation should be at
+    <a href="http://localhost/ox7/doc">http://localhost/ox7/doc</a>.
+
+</pre>
+
+<!-- Under construction -->
+<div style="display: none">
+<p>If you read this in your browser you should have done this already:</p>
+<pre class="text">
+1.  Check out the UI from git
+
+2.  Figure out Apache's document root. Common places are:
+
+    - MacOS: <i>/Library/WebServer/Documents</i>
+    - Linux: <i>/var/www</i>
+    
+3.  Create a new folder <i>ox7</i> in Apache's document root
+
+4.  You need node.js to build the UI:
+
+    For MacOS:
+    
+    - Visit <a href="https://sites.google.com/site/nodejsmacosx/">https://sites.google.com/site/nodejsmacosx/</a>
+      and install stable version.
+    
+    - Open terminal
+    
+    - Set environment variable:
+        <i>export buildir="/Library/WebServer/Documents/ox7"</i>
+        
+    - Build UI:
+      <i>./build.sh</i>
+      
+    - Build documentation:
+      <i>./build.sh doc</i>
+      
+5.  If everything works fine, the documentation should be at
+    <a href="http://localhost/ox7/doc">http://localhost/ox7/doc</a>.
+
+</pre>
+</div>
+
+<p>Now configure Apache:</p>
+<pre class="text">
+1.  Make sure Apache loads the following modules:
+
+    <i>mod_proxy, mod_proxy_ajp, mod_expires, mod_deflate, mod_rewrite,
+    mod_headers, mod_mime, and mod_setenvif</i>
+    
+2.  Tell your Apache to process .htaccess files and how to connect to backend:
+
+    <i>ProxyPass /ox7/api ajp://127.0.0.1:8009/ajax
+    # optional parameters: retry=0 connectiontimeout=5 timeout=10
+
+    &lt;Directory /Library/WebServer/Documents/ox7>
+      Options None +FollowSymLinks
+      AllowOverride Indexes FileInfo
+    &lt;/Directory></i>
+    
+    Use the proper document root depending on your OS or custom configuration!
+
+3.  If backend does not run on <i>localhost</i> (127.0.0.1),
+    you have to adjust the ProxyPass directive.
+
+4.  Restart Apache, e.g. <i>sudo apachectl restart</i>
+</pre>
+
+<p>And please double check everything you're doing!</p></body>
+</html>

@@ -57,6 +57,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.cluster.discovery.ClusterDiscoveryService;
 import com.openexchange.cluster.discovery.ClusterListener;
+import com.openexchange.cluster.discovery.ClusterListenerNotifier;
 import com.openexchange.exception.OXException;
 import com.openexchange.mdns.MDNSService;
 import com.openexchange.mdns.MDNSServiceEntry;
@@ -72,14 +73,14 @@ public final class MDNSClusterDiscoveryService implements ClusterDiscoveryServic
 
     private final AtomicReference<MDNSService> serviceRef;
 
-    private final ClusterDiscoveryService delegate;
+    private final ClusterListenerNotifier delegate;
 
     /**
      * Initializes a new {@link MDNSClusterDiscoveryService}.
      * 
      * @param serviceId
      */
-    public MDNSClusterDiscoveryService(final String serviceId, final AtomicReference<MDNSService> serviceRef, final ClusterDiscoveryService delegate) {
+    public MDNSClusterDiscoveryService(final String serviceId, final AtomicReference<MDNSService> serviceRef, final ClusterListenerNotifier delegate) {
         super();
         this.serviceId = serviceId;
         this.serviceRef = serviceRef;

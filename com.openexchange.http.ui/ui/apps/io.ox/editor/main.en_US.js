@@ -1,0 +1,1 @@
+define("io.ox/editor/main.en_US",["io.ox/core/gettext"],function(g){return g("io.ox/editor/main",{"nplurals":2,"plural":"(n!=1)","dictionary":{}});});

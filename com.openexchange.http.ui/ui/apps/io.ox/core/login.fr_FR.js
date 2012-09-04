@@ -1,0 +1,1 @@
+define("io.ox/core/login.fr_FR",["io.ox/core/gettext"],function(g){return g("io.ox/core/login",{"nplurals":2,"plural":"n>1","dictionary":{"User name":"Nom d'utilisateur","Password":"Mot de passe","Sign in":"Connexion","Stay signed in":"Rester connecté","Forgot your password?":"Mot de passe oublié?","Languages":"Langues"}});});

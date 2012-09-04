@@ -51,6 +51,7 @@ package com.openexchange.realtime.impl;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;

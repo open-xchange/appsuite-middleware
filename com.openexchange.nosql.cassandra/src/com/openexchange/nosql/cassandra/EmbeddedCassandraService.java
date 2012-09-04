@@ -52,8 +52,6 @@ import java.io.IOException;
 import org.apache.cassandra.thrift.CassandraDaemon;
 import org.apache.commons.logging.Log;
 
-import com.openexchange.log.LogFactory;
-
 /**
  * An embedded Cassandra instance for OX.
  * 

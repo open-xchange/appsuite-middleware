@@ -1,0 +1,1 @@
+define("io.ox/portal/portal.en_US",["io.ox/core/gettext"],function(g){return g("io.ox/portal/portal",{"nplurals":2,"plural":"(n!=1)","dictionary":{}});});

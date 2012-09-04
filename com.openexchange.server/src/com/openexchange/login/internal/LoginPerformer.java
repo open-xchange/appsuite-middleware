@@ -60,7 +60,6 @@ import java.util.regex.Pattern;
 import javax.security.auth.login.LoginException;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.Cookie;
 import com.openexchange.authentication.LoginExceptionCodes;
@@ -82,6 +81,7 @@ import com.openexchange.groupware.notify.hostname.internal.HostDataImpl;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.java.Strings;
+import com.openexchange.log.LogFactory;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
@@ -221,7 +221,7 @@ public final class LoginPerformer {
             // Check if indicated client is allowed to perform a login
             checkClient(request, user, ctx);
             // Create session
-            final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class, true);
+            final SessiondService sessiondService = SessiondService.SERVICE_REFERENCE.get();
             Session session = null;
             {
                 int cnt = 0;
@@ -329,12 +329,7 @@ public final class LoginPerformer {
      */
     public Session doLogout(final String sessionId) throws OXException {
         // Drop the session
-        final SessiondService sessiondService;
-        try {
-            sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class, true);
-        } catch (final OXException e) {
-            throw LoginExceptionCodes.COMMUNICATION.create(e);
-        }
+        final SessiondService sessiondService = SessiondService.SERVICE_REFERENCE.get();
         final Session session = sessiondService.getSession(sessionId);
         if (null == session) {
             if (LOG.isDebugEnabled()) {

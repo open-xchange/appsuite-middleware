@@ -8,7 +8,7 @@ BuildRequires: open-xchange-core
 BuildRequires: open-xchange-admin
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 0
+%define        ox_release 1
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -59,5 +59,9 @@ ox_move_config_file /opt/open-xchange/etc/admindaemon /opt/open-xchange/etc plug
 %config(noreplace) /opt/open-xchange/etc/plugin/*
 
 %changelog
+* Tue Aug 21 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+First release candidate for 6.22.0
+* Mon Aug 20 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+prepare for 6.22.0
 * Fri Jun 15 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Initial packaging

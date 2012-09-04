@@ -61,29 +61,36 @@ import java.io.InputStream;
 public interface Attachment {
 
     /**
+     * Gets the attachment identifier.
+     *
+     * @return The identifier
+     */
+    String getId();
+
+    /**
      * Gets the content type according to RFC 822; e.g. <code>"text/plain; charset=UTF-8; name=mytext.txt"</code>
-     * 
+     *
      * @return The content type or <code>null</code>
      */
     String getContentType();
 
     /**
      * Gets the content disposition according to RFC 822; e.g. <code>"attachment; filename=mytext.txt"</code>
-     * 
+     *
      * @return The content disposition or <code>null</code>
      */
     String getContentDisposition();
 
     /**
      * Gets the attachment's size if known.
-     * 
+     *
      * @return The size or <code>-1</code> if unknown
      */
     long getSize();
 
     /**
      * Gets the input stream.
-     * 
+     *
      * @return The input stream
      * @throws IOException If an I/O error occurs
      */

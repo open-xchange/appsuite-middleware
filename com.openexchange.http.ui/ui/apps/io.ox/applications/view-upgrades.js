@@ -1,0 +1,1 @@
+define("io.ox/applications/view-upgrades",["io.ox/core/api/apps","io.ox/applications/view-common"],function(){return"use strict",{draw:function(){var a=$("<div>").append($("<div>").addClass("clear-title").text("Available upgrades")).append($("<p>").text("Under construction ... Premium/Upsell etc."));return a}}})

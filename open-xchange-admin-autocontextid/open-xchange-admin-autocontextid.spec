@@ -64,6 +64,10 @@ done
 %config(noreplace) /opt/open-xchange/etc/mysql/*
 
 %changelog
+* Tue Aug 21 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+First release candidate for 6.22.0
+* Mon Aug 20 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+prepare for 6.22.0
 * Tue Jul 03 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Release build for EDP drop #2
 * Fri Jun 15 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>

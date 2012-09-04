@@ -102,6 +102,8 @@ public abstract class OXServlet extends WebDavServlet {
 
         private final HttpServletRequest req;
 
+        private final String userAgent;
+
         private final String pass;
 
         private final String client;
@@ -114,6 +116,7 @@ public abstract class OXServlet extends WebDavServlet {
             super();
             this.client = req.getParameter("client");
             version = req.getParameter("version");
+            userAgent = req.getParameter("agent");
             this.login = login;
             this.req = req;
             this.pass = pass;
@@ -122,7 +125,7 @@ public abstract class OXServlet extends WebDavServlet {
 
         @Override
         public String getUserAgent() {
-            return req.getHeader("user-agent");
+            return null == userAgent ? req.getHeader("user-agent") : userAgent;
         }
 
         @Override

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Snippet MIME Bundle
 Bundle-SymbolicName: com.openexchange.snippet.mime
-Bundle-Version: 6.21.0
+Bundle-Version: 6.23.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.cache,
@@ -33,6 +33,7 @@ Import-Package: com.openexchange.cache,
  com.openexchange.server,
  com.openexchange.session,
  com.openexchange.snippet,
+ com.openexchange.snippet.db,
  com.openexchange.tools.file,
  com.openexchange.tools.file.external,
  com.openexchange.tools.session,
@@ -50,3 +51,4 @@ Import-Package: com.openexchange.cache,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.util.tracker
+Bundle-Activator: com.openexchange.snippet.mime.osgi.MimeSnippetActivator

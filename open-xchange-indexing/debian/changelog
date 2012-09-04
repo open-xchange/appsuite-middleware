@@ -1,3 +1,9 @@
+open-xchange-indexing (6.23.0-0) unstable; urgency=low
+
+  * prepare for next EDP drop
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Mon, 03 Sep 2012 13:47:09 +0200
+
 open-xchange-indexing (6.21.0-6) unstable; urgency=low
 
   * Release build for EDP drop #2

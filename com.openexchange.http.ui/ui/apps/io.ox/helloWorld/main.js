@@ -1,0 +1,1 @@
+define("io.ox/helloWorld/main",[],function(){var a=ox.ui.createApp({name:"io.ox/helloWorld"});return"use strict",a.setLauncher(function(){var b=ox.ui.createWindow({name:"io.ox/helloWorld",title:"Hello World"});a.setWindow(b),b.nodes.main.css({padding:"13px",textAlign:"center"}).append($("<h1>").text("Hello World!")),b.show()}),{getApp:a.getInstance}})

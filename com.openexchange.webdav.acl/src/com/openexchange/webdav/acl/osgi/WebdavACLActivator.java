@@ -51,7 +51,6 @@ package com.openexchange.webdav.acl.osgi;
 
 import org.apache.commons.logging.Log;
 import org.osgi.service.http.HttpService;
-import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.UserService;
 import com.openexchange.webdav.acl.servlets.WebdavPrincipalPerformer;

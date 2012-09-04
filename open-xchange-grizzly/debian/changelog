@@ -1,3 +1,9 @@
+open-xchange-grizzly (6.23.0-0) unstable; urgency=low
+
+  * prepare for next EDP drop
+
+ -- Marc Arens <marc.arens@open-xchange.com>  Mon, 03 Sep 2012 13:47:04 +0200
+
 open-xchange-grizzly (6.21.0-1) unstable; urgency=low
 
   * Release build for EDP drop #2

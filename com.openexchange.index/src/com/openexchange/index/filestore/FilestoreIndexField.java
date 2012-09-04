@@ -73,17 +73,13 @@ public enum FilestoreIndexField implements IndexField {
     LAST_MODIFIED(Field.LAST_MODIFIED),
     TITLE(Field.TITLE),
     VERSION(Field.VERSION),
-    FILE_SIZE(Field.FILE_SIZE),
-    MIME_TYPE(Field.FILE_MIMETYPE),
-    FILE_NAME(Field.FILENAME),
     DESCRIPTION(Field.DESCRIPTION),
     URL(Field.URL),
     SEQUENCE_NUMBER(Field.SEQUENCE_NUMBER),
     CATEGORIES(Field.CATEGORIES),
     COLOR_LABEL(Field.COLOR_LABEL),
-    VERSION_COMMENT(Field.VERSION_COMMENT),
-    CONTENT(Field.CONTENT),
-    MD5_SUM(Field.FILE_MD5SUM);
+    VERSION_COMMENT(Field.VERSION_COMMENT);
+
     
     
     private static final Map<Field, FilestoreIndexField> mapping = new EnumMap<Field, FilestoreIndexField>(Field.class);

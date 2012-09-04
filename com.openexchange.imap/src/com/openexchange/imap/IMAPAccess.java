@@ -63,7 +63,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -73,6 +72,7 @@ import javax.mail.event.FolderEvent;
 import javax.mail.event.FolderListener;
 import javax.mail.internet.IDNA;
 import javax.security.auth.Subject;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.acl.ACLExtension;
@@ -234,7 +234,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     /**
      * The validity map.
      */
-    private static final ConcurrentMap<Key, ConcurrentTIntObjectHashMap<AtomicLong>> VALIDITY_MAP = new ConcurrentHashMap<IMAPAccess.Key, ConcurrentTIntObjectHashMap<AtomicLong>>();
+    private static final ConcurrentMap<Key, ConcurrentTIntObjectHashMap<AtomicLong>> VALIDITY_MAP = new NonBlockingHashMap<IMAPAccess.Key, ConcurrentTIntObjectHashMap<AtomicLong>>();
 
     /**
      * Drops the user-associated validity.
@@ -334,6 +334,11 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      * a server-port-pair will throw an appropriate exception.
      */
     private static volatile Map<HostAndPort, Long> timedOutServers;
+
+    /**
+     * Remembers whether a certain IMAP server supports the ACL extension.
+     */
+    private static volatile ConcurrentMap<String, Boolean> aclCapableServers;
 
     /**
      * The scheduled timer task to clean-up maps.
@@ -917,6 +922,32 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              * Add server's capabilities
              */
             config.initializeCapabilities(imapStore, session);
+            /*
+             * Special check for ACLs
+             */
+            if (config.isSupportsACLs()) {
+                final String key = new StringBuilder(server).append('@').append(port).toString();
+                Boolean b = aclCapableServers.get(key);
+                if (null == b) {
+                    Boolean nb;
+                    final IMAPFolder dummy = (IMAPFolder) imapStore.getFolder("INBOX");
+                    try {
+                        dummy.myRights();
+                        nb = Boolean.TRUE;
+                    } catch (MessagingException e) {
+                        // MessagingException - If the server doesn't support the ACL extension
+                        nb = Boolean.FALSE;
+                    }
+                    b = aclCapableServers.putIfAbsent(key, nb);
+                    if (null == b) {
+                        b = nb;
+                    }
+                }
+                if (!b.booleanValue()) {
+                    // MessagingException - If the server doesn't support the ACL extension
+                    config.setAcl(false);
+                }
+            }
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e, config, session);
         }
@@ -1128,7 +1159,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         MBoxEnabledCache.init();
         ACLExtensionInit.getInstance().start();
         Entity2ACLInit.getInstance().start();
-        maxCountCache = new ConcurrentHashMap<String, Integer>(16);
+        maxCountCache = new NonBlockingHashMap<String, Integer>(16);
 
         final ConfigurationService confService = IMAPServiceRegistry.getService(ConfigurationService.class);
         final boolean useIMAPStoreCache = null == confService ? true : confService.getBoolProperty("com.openexchange.imap.useIMAPStoreCache", true);
@@ -1144,7 +1175,10 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     private static synchronized void initMaps() {
         if (null == timedOutServers) {
-            timedOutServers = new ConcurrentHashMap<HostAndPort, Long>();
+            timedOutServers = new NonBlockingHashMap<HostAndPort, Long>();
+        }
+        if (null == aclCapableServers) {
+            aclCapableServers = new NonBlockingHashMap<String, Boolean>();
         }
         if (null == cleanUpTimerTask) {
             final TimerService timerService = IMAPServiceRegistry.getService(TimerService.class);
@@ -1195,6 +1229,9 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         if (null != cleanUpTimerTask) {
             cleanUpTimerTask.cancel(false);
             cleanUpTimerTask = null;
+        }
+        if (null != aclCapableServers) {
+            aclCapableServers = null;
         }
         if (null != timedOutServers) {
             timedOutServers = null;

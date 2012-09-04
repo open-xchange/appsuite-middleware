@@ -1,10 +1,112 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<schema name="OX Schema Mail" version="1.1">
+<schema name="OX Schema Mail" version="1.5">
     <types>
         <fieldType name="boolean" class="solr.BoolField" omitNorms="true" />
         <fieldType name="string" class="solr.StrField" sortMissingLast="true" omitNorms="true" />
         <fieldType name="long" class="solr.LongField" omitNorms="true" />
         <fieldType name="int" class="solr.IntField" omitNorms="true" />
+        
+        <fieldType name="addr" class="solr.TextField">
+            <analyzer>
+                <tokenizer class="solr.KeywordTokenizerFactory" />
+                <filter class="de.kippdata.solrext.analyzer.InternetAddressCleanupFilterFactory" />
+                <filter class="solr.WordDelimiterFilterFactory" catenateWords="0" catenateNumbers="0" catenateAll="0" splitOnCaseChange="0"
+                    splitOnNumerics="0" types="${confDir:/opt/open-xchange/solr/conf}/wdf.txt" />
+                <filter class="de.kippdata.solrext.analyzer.DomainSkipFilterFactory" domains="de com co.uk net fr it" />
+                <filter class="solr.WordDelimiterFilterFactory" catenateWords="0" catenateNumbers="0" catenateAll="0" splitOnCaseChange="0"
+                    splitOnNumerics="0" />
+                <filter class="solr.LengthFilterFactory" min="2" max="30" />
+                <filter class="solr.LowerCaseFilterFactory" />
+            </analyzer>
+        </fieldType>
+        
+        <!-- German -->
+        <fieldType name="text_de" class="solr.TextField" positionIncrementGap="100">
+            <analyzer type="index">
+                <tokenizer class="solr.StandardTokenizerFactory" />
+                <filter class="solr.LowerCaseFilterFactory" />
+                <filter class="solr.StopFilterFactory" ignoreCase="true" words="${confDir:/opt/open-xchange/solr/conf}/stopwords_en.txt"
+                    enablePositionIncrements="true" />
+                <filter class="solr.GermanNormalizationFilterFactory" />
+                <filter class="solr.GermanLightStemFilterFactory" />
+            </analyzer>
+            <analyzer type="query">
+                <tokenizer class="solr.StandardTokenizerFactory" />
+                <filter class="solr.SynonymFilterFactory" synonyms="${confDir:/opt/open-xchange/solr/conf}/synonyms.txt" ignoreCase="true" expand="true" />
+                <filter class="solr.LowerCaseFilterFactory" />
+                <filter class="solr.StopFilterFactory" ignoreCase="true" words="${confDir:/opt/open-xchange/solr/conf}/stopwords_en.txt"
+                    enablePositionIncrements="true" />
+                <filter class="solr.GermanNormalizationFilterFactory" />
+                <filter class="solr.GermanLightStemFilterFactory" />
+            </analyzer>
+        </fieldType>
+
+        <!-- English -->
+        <fieldType name="text_en" class="solr.TextField" positionIncrementGap="100">
+            <analyzer type="index">
+                <tokenizer class="solr.StandardTokenizerFactory" />                
+                <filter class="solr.StopFilterFactory" ignoreCase="true" words="${confDir:/opt/open-xchange/solr/conf}/stopwords_en.txt"
+                    enablePositionIncrements="true" />
+                <filter class="solr.LowerCaseFilterFactory" />
+                <filter class="solr.EnglishPossessiveFilterFactory" />
+                <filter class="solr.KeywordMarkerFilterFactory" protected="${confDir:/opt/open-xchange/solr/conf}/protwords.txt" />
+                <filter class="solr.PorterStemFilterFactory" />
+            </analyzer>
+            <analyzer type="query">
+                <tokenizer class="solr.StandardTokenizerFactory" />
+                <filter class="solr.SynonymFilterFactory" synonyms="${confDir:/opt/open-xchange/solr/conf}/synonyms.txt" ignoreCase="true" expand="true" />
+                <filter class="solr.StopFilterFactory" ignoreCase="true" words="${confDir:/opt/open-xchange/solr/conf}/stopwords_en.txt"
+                    enablePositionIncrements="true" />
+                <filter class="solr.LowerCaseFilterFactory" />
+                <filter class="solr.EnglishPossessiveFilterFactory" />
+                <filter class="solr.KeywordMarkerFilterFactory" protected="${confDir:/opt/open-xchange/solr/conf}/protwords.txt" />
+                <filter class="solr.PorterStemFilterFactory" />
+            </analyzer>
+        </fieldType>
+
+        <!-- French -->
+        <fieldType name="text_fr" class="solr.TextField" positionIncrementGap="100">
+            <analyzer type="index">
+                <tokenizer class="solr.StandardTokenizerFactory" />
+                <!-- removes l', etc -->
+                <filter class="solr.ElisionFilterFactory" ignoreCase="true" articles="${confDir:/opt/open-xchange/solr/conf}/contractions_fr.txt" />
+                <filter class="solr.LowerCaseFilterFactory" />
+                <filter class="solr.StopFilterFactory" ignoreCase="true" words="${confDir:/opt/open-xchange/solr/conf}/stopwords_fr.txt" format="snowball"
+                    enablePositionIncrements="true" />
+                <filter class="solr.FrenchLightStemFilterFactory" />
+            </analyzer>
+            <analyzer type="query">
+                <tokenizer class="solr.StandardTokenizerFactory" />
+                <filter class="solr.SynonymFilterFactory" synonyms="${confDir:/opt/open-xchange/solr/conf}/synonyms.txt" ignoreCase="true" expand="true" />
+                <!-- removes l', etc -->
+                <filter class="solr.ElisionFilterFactory" ignoreCase="true" articles="${confDir:/opt/open-xchange/solr/conf}/contractions_fr.txt" />
+                <filter class="solr.LowerCaseFilterFactory" />
+                <filter class="solr.StopFilterFactory" ignoreCase="true" words="${confDir:/opt/open-xchange/solr/conf}/stopwords_fr.txt" format="snowball"
+                    enablePositionIncrements="true" />
+                <filter class="solr.FrenchLightStemFilterFactory" />
+            </analyzer>
+        </fieldType>
+
+        <!-- Italian -->
+        <fieldType name="text_it" class="solr.TextField" positionIncrementGap="100">
+            <analyzer type="index">
+                <tokenizer class="solr.StandardTokenizerFactory" />
+                <!-- removes l', etc -->
+                <filter class="solr.ElisionFilterFactory" ignoreCase="true" articles="${confDir:/opt/open-xchange/solr/conf}/contractions_it.txt" />
+                <filter class="solr.LowerCaseFilterFactory" />
+                <filter class="solr.StopFilterFactory" ignoreCase="true" words="${confDir:/opt/open-xchange/solr/conf}/stopwords_it.txt" format="snowball" enablePositionIncrements="true" />
+                <filter class="solr.ItalianLightStemFilterFactory" />
+            </analyzer>
+            <analyzer type="query">
+                <tokenizer class="solr.StandardTokenizerFactory" />
+                <filter class="solr.SynonymFilterFactory" synonyms="${confDir:/opt/open-xchange/solr/conf}/synonyms.txt" ignoreCase="true" expand="true" />
+                <!-- removes l', etc -->
+                <filter class="solr.ElisionFilterFactory" ignoreCase="true" articles="${confDir:/opt/open-xchange/solr/conf}/contractions_it.txt" />
+                <filter class="solr.LowerCaseFilterFactory" />
+                <filter class="solr.StopFilterFactory" ignoreCase="true" words="${confDir:/opt/open-xchange/solr/conf}/stopwords_it.txt" format="snowball" enablePositionIncrements="true" />
+                <filter class="solr.ItalianLightStemFilterFactory" />
+            </analyzer>
+        </fieldType>
 
         <fieldType name="text" class="solr.TextField" positionIncrementGap="100" omitNorms="false">
             <analyzer type="index">
@@ -22,33 +124,6 @@
                 <filter class="solr.SynonymFilterFactory" synonyms="${confDir:/opt/open-xchange/solr/conf}/synonyms.txt" ignoreCase="true" expand="true" />
                 <filter class="solr.RemoveDuplicatesTokenFilterFactory" />
             </analyzer>
-        </fieldType>
-
-        <fieldType name="addr" class="solr.TextField">
-            <analyzer>
-                <tokenizer class="solr.KeywordTokenizerFactory" />
-                <filter class="de.kippdata.solrext.analyzer.InternetAddressCleanupFilterFactory" />
-                <filter class="solr.WordDelimiterFilterFactory" catenateWords="0" catenateNumbers="0" catenateAll="0" splitOnCaseChange="0"
-                    splitOnNumerics="0" types="${confDir:/opt/open-xchange/solr/conf}/wdf.txt" />
-                <filter class="de.kippdata.solrext.analyzer.DomainSkipFilterFactory" domains="de com co.uk net" />
-                <filter class="solr.WordDelimiterFilterFactory" catenateWords="0" catenateNumbers="0" catenateAll="0" splitOnCaseChange="0"
-                    splitOnNumerics="0" />
-                <filter class="solr.LengthFilterFactory" min="2" max="30" />
-                <filter class="solr.LowerCaseFilterFactory" />
-            </analyzer>
-            <!-- <analyzer> -->
-            <!-- <tokenizer class="solr.KeywordTokenizerFactory" /> -->
-            <!-- <filter class="de.kippdata.solrext.analyzer.InternetAddressCleanupFilterFactory"/> -->
-            <!-- <filter class="solr.WordDelimiterFilterFactory" -->
-            <!-- catenateWords="0" catenateNumbers="0" catenateAll="0" splitOnCaseChange="0" -->
-            <!-- splitOnNumerics="0" -->
-            <!-- types="${confDir:/opt/open-xchange/solr/conf}/wdf.txt" /> -->
-            <!-- <filter class="de.kippdata.solrext.analyzer.DomainSkipFilterFactory"/> -->
-            <!-- <filter class="solr.WordDelimiterFilterFactory" -->
-            <!-- catenateWords="0" catenateNumbers="0" catenateAll="0" splitOnCaseChange="0" -->
-            <!-- splitOnNumerics="0" /> -->
-            <!-- <filter class="solr.LengthFilterFactory" min="2" max="30" /> -->
-            <!-- </analyzer> -->
         </fieldType>
     </types>
 
@@ -79,33 +154,32 @@
         <field name="flag_forwarded" type="boolean" stored="true" indexed="true" />
         <field name="flag_read_ack" type="boolean" stored="true" indexed="true" />
         <field name="user_flags" type="string" stored="true" indexed="true" multiValued="true" />
+        
+        <field name="content_flag" type="boolean" stored="false" indexed="true" />
 
         <field name="from" type="addr" stored="true" indexed="true" multiValued="true" />
-        <!-- <field name="from_analyzed" type="addr" stored="false" indexed="true" multiValued="true" /> -->
-        <!-- <copyField source="from" dest="from_analyzed" /> -->
-
         <field name="to" type="addr" stored="true" indexed="true" multiValued="true" />
-        <!-- <field name="to_analyzed" type="addr" stored="false" indexed="true" multiValued="true" /> -->
-        <!-- <copyField source="to" dest="to_analyzed" /> -->
-
         <field name="cc" type="addr" stored="true" indexed="true" multiValued="true" />
-        <!-- <field name="cc_analyzed" type="addr" stored="false" indexed="true" multiValued="true" /> -->
-        <!-- <copyField source="cc" dest="cc_analyzed" /> -->
-
         <field name="bcc" type="addr" stored="true" indexed="true" multiValued="true" />
-        <!-- <field name="bcc_analyzed" type="addr" stored="false" indexed="true" multiValued="true" /> -->
-        <!-- <copyField source="bcc" dest="bcc_analyzed" /> -->
 
-        <!-- Subject Field -->
-        <field name="subject" type="text" stored="true" indexed="true" />
-        <field name="content_flag" type="boolean" stored="false" indexed="true" />
-        <field name="content" type="text" stored="false" indexed="true" />
+        <field name="subject" type="text" stored="false" indexed="false" />
+        <field name="subject_gen" type="text" stored="true" indexed="true" />
+        <field name="subject_de" type="text_de" stored="true" indexed="true" />
+        <field name="subject_en" type="text_en" stored="true" indexed="true" />
+        <field name="subject_fr" type="text_fr" stored="true" indexed="true" />
+        <field name="subject_it" type="text_it" stored="true" indexed="true" />        
         
-        <!-- Attachment fields: file name, mime type, content -->
+        <field name="content" type="text" stored="false" indexed="false" />  
+        <field name="content_gen" type="text" stored="false" indexed="true" />
+        <field name="content_de" type="text_de" stored="false" indexed="true" />
+        <field name="content_en" type="text_en" stored="false" indexed="true" />
+        <field name="content_fr" type="text_fr" stored="false" indexed="true" />
+        <field name="content_it" type="text_it" stored="false" indexed="true" /> 
         
+        <field name="locale" type="string" stored="true" indexed="false" />     
     </fields>
 
     <uniqueKey>uuid</uniqueKey>
     <solrQueryParser defaultOperator="OR" />
-    <!-- <defaultSearchField>from_analyzed</defaultSearchField> -->
+    <defaultSearchField>from</defaultSearchField>
 </schema>

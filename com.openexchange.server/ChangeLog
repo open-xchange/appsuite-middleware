@@ -1,3 +1,19 @@
+* 2012-09-04 - jan.bauerdick@open-xchange.com
+
+ - New bundle c.o.aws.loadbalancing: Register and deregister ec2 instances with the elastic loadbalancer
+
+* 2012-09-03 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22889: No keep-alive run if very first request body chunk not yet received
+
+* 2012-08-31 - marcus.klein@open-xchange.com
+
+ - Fix for bug 22751: Registering properly the actions for the conversion HTTP/JSON interface within dispatcher.
+
+* 2012-08-29 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22860: Prevent possible NPE in file management
+
 * 2012-08-29 - jan.bauerdick@open-xchange.com
 
  - New bundle c.o.cluster.discovery.aws: Find aws nodes in cluster
@@ -62,7 +78,7 @@
 
  - Fix for bug 22769: Don't update appointment unless necessary 
  
-* 2012-08-09 - martin.herfurth@open-xchange.com
+* 2012-08-09 - thorben.betten@open-xchange.com
 
  - Fix for bug 22766: Fixed possible NPE
  - Fix for bug 22740: Rely on IMAP store's capabilities only

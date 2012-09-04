@@ -1,0 +1,437 @@
+/**
+ * All content on this website (including text, images, source
+ * code and any other original works), unless otherwise noted,
+ * is licensed under a Creative Commons License.
+ *
+ * http://creativecommons.org/licenses/by-nc-sa/2.5/
+ *
+ * Copyright (C) Open-Xchange Inc., 2006-2011
+ * Mail: info@open-xchange.com
+ *
+ * @author Matthias Biggeleben <matthias.biggeleben@open-xchange.com>
+ */
+
+/* VGrid elements */
+
+.vgrid-cell.mail * {
+    height: 1.5em; /* good for what? */
+}
+
+.vgrid-cell.mail {
+    padding: 6px 13px 6px 13px;
+    line-height: 1.5em;
+    height: 3em;
+}
+
+.io-ox-portal-widget .vgrid-cell.mail { /* portal */
+    padding: 6px 2px 6px 2px;
+}
+
+.vgrid-cell.mail .flag,
+.mail-detail .flag {
+    min-width: 2em;
+    padding: 0 0.5em 0 0.5em;
+    margin-left: 1em;
+    border-radius: 5px;
+    display: inline-block;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    float: right;
+}
+
+.rgba .vgrid-cell.mail .flag,
+.rgba .mail-detail .flag  {
+    border: 1px solid rgba(0, 0, 0, 0.25);
+}
+
+.vgrid-cell.mail .flag.flag_0 {
+    display: none;
+}
+
+.vgrid-cell.mail.deleted * {
+    text-decoration: line-through;
+}
+
+.vgrid-cell.mail .priority {
+    font-weight: bold;
+    color: @mail-priority;
+    float: right;
+}
+
+/* unread */
+
+.vgrid-cell.mail .subject i.icon-envelope { display: none; }
+.vgrid-cell.mail.unread .subject i.icon-envelope { display: inline-block; margin-right: 0.5em; }
+
+.vgrid-cell.mail.unread .subject {
+    font-weight: bold;
+    color: #08c;
+}
+
+.vgrid-cell.mail.unread .date {
+    font-weight: bold;
+    color: #333;
+}
+
+.vgrid-cell.mai.unread .from span.person {
+    font-weight: 800;
+}
+
+.vgrid-cell.mail.unread { background-color: #f5f5f5; }
+
+/* end:unread */
+
+.vgrid-cell.mail .from {}
+
+.vgrid-cell.mail .from span.person {
+    color: black;
+    font-weight: 500;
+}
+
+.vgrid-cell.mail.me .from {
+    color: #aaa;
+    font-weight: normal;
+}
+
+.vgrid-cell.mail .date,
+.vgrid-cell.thread-summary .date {
+    color: #777;
+    font-weight: 200;
+    display: inline-block;
+    float: right;
+}
+
+.vgrid-cell.mail .attachment {
+    background: url(images/attachment.png) no-repeat 0px 0px;
+    width: 17px;
+    margin-left: 1em;
+    float: right;
+}
+
+.vgrid-cell.mail .thread-size {
+    color: #999;
+    min-width: 1em;
+    font-weight: normal;
+    padding: 0 0.5em 0 0.5em;
+    margin-left: 1em;
+    display: inline-block;
+    float: right;
+    position: relative;
+    z-index: 2;
+    cursor: pointer;
+}
+
+.borderradius .vgrid-cell.mail .thread-size {
+    background-color: #e5e5e5;
+    text-align: center;
+    border-radius: 5px;
+}
+
+.borderradius .vgrid-cell.mail.selected .thread-size {
+    background-color: darken(@selected-background, 10%);
+}
+
+.vgrid-cell.thread-summary {
+    padding: 0;
+}
+
+.vgrid-cell .thread-summary-item {
+    padding: 5px 12px 5px 25px;
+    border-bottom: 1px solid #fff;
+    background-color: #eee;
+    cursor: pointer;
+}
+
+.vgrid-cell .thread-summary-item.unread,
+.vgrid-cell .thread-summary-item.unread .date {
+    font-weight: bold;
+}
+
+.vgrid-cell .thread-summary-item.selected,
+.vgrid-cell .thread-summary-item.selected:hover {
+    background-color: #08c;
+}
+
+.vgrid-cell .thread-summary-item.selected * {
+    color: white !important;
+}
+
+.vgrid-cell .thread-summary-item:hover {
+    background-color: #ddd;
+}
+
+.vgrid-cell .thread-summary-item:last-child {
+    border-bottom: 0px none;
+}
+
+/* Detail view */
+
+.mail-detail-pane {
+    background-color: #fff;
+}
+
+.mail-detail {
+    position: relative;
+    background-color: #fff;
+    overflow-y: visible;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    user-select: text;
+    clear: both;
+    padding: 30px 40px 30px 40px;
+    border-bottom: 1px solid #eee;
+    min-height: 200px;
+    z-index: 0;
+}
+
+.mail-detail.by-myself {
+}
+
+.mail-detail.by-myself a {
+    color: #888 !important;
+}
+
+.mail-detail-clear-both {
+    clear: both;
+    height: 0px;
+}
+
+.mail-detail:last-child {
+    border-bottom: 0px none;
+}
+
+.mail-detail.thread-inline-actions {
+    border: 0px none;
+    padding: 18px 40px 0 40px;
+    min-height: initial;
+    text-align: right;
+    z-index: 1;
+}
+
+.mail-detail.thread-inline-actions .io-ox-inline-links {
+    margin-bottom: 0;
+}
+
+.mail-detail .infoblock {
+	padding: 13px;
+    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 1em;
+    cursor: pointer;
+}
+
+.mail-detail .infoblock a {
+    text-decoration: underline;
+}
+
+.mail-detail .date {
+    color: #888;
+    display: inline-block;
+    float: right;
+}
+
+.mail-detail .subject,
+.mail-detail .thread-size,
+.mail-detail .flag {
+    font-size: 16pt;
+    margin: 0 0 0.6em 0;
+    word-wrap: break-word;
+}
+
+.mail-detail.unread .from .person-link {
+    font-weight: bold;
+}
+
+.mail-detail.unread .subject {
+    font-family: @font-normal;
+    font-weight: bold;
+}
+
+.mail-detail .thread-size {
+    color: #aaa;
+    float: right;
+    display: inline-block;
+    margin-left: 0.5em;
+}
+
+.mail-detail .flag { min-width: 1.5em; width: 1.5em; }
+.mail-detail .flag_0 { display: none; }
+
+.mail-detail .priority {
+    font-weight: bold;
+    font-size: 80%;
+    color: @mail-priority;
+    vertical-align: top;
+}
+
+.mail-detail .contact-picture {
+    float: right;
+    width: 64px;
+    height: 64px;
+    margin: 0 0 1em 1.5em;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: contain;
+}
+
+.mail-detail .list {
+    line-height: 1.40em;
+    margin: 0 0 0.8em 0;
+    vertical-align: top;
+}
+
+.mail-detail .io-ox-label {
+    font-family: OpenSans, Arial, Helvetica, sans-serif;
+    color: #aaa;
+}
+
+.mail-detail .to-cc .person-link {
+    color: #333;
+}
+
+.mail-detail .attachment-list {
+}
+
+.mail-detail .instant-preview {
+    max-width: inherit;
+}
+
+.mail-detail .spacer {
+    background-color: #ccc;
+    border: 0px none;
+    height: 1px;
+    margin: 0.5em 0 1em 0;
+}
+
+.mail-detail .content {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 13px;
+    line-height: 20px;
+    max-width: 750px;
+    margin-top: 1em;
+    cursor: auto;
+    position: relative;
+}
+
+/* TODO: remove / temp. fix for bootstrap */
+.mail-detail .content [class*="span"] {
+    float: none;
+    margin-left: 0;
+}
+
+/* TODO: remove / temp. fix for sanitized HTML */
+.mail-detail .content { padding: 0 !important; }
+.mail-detail .content > div > [class$="-content"] { padding: 0; }
+
+.mail-detail .content.plain-text {
+    white-space: pre-wrap;
+}
+
+.touch .mail-detail .content.plain-text {
+    font-size: @touch-font-size;
+}
+
+.mail-detail blockquote {
+    font-size: 12px;
+    border-left: 1px solid #08c;
+    padding: 0.5em 1em 0.5em 39px;
+    margin: 1em 0 1em 0;
+}
+
+.mail-detail blockquote p {
+    font-size: 13px;
+}
+
+/* flag colors */
+.flag_1  { background-color:  #9d261d; } /* red old: 913F3F  Crimson*/
+.flag_2  { background-color:  darken(#049cdb, 5%); } /* blue */
+.flag_3  { background-color:  #46a546; } /* green */
+.flag_4  { background-color:  #aaa; } /* dark gray */
+.flag_5  { background-color:  #c09853; } /* brown */
+.flag_6  { background-color:  #d9edf7; } /* aqua */
+.flag_7  { background-color:  #f89406; } /* orange */
+.flag_8  { background-color:  #c3325f; } /* pink */
+.flag_9  { background-color:  lighten(#049cdb, 25%); } /* light blue */
+.flag_10 { background-color:  #ffc40d; } /* yellow */
+
+/* reading lamp */
+
+.spotlight .window-head, .spotlight .leftside { opacity: 0.3; }
+.spotlight .window-content, .spotlight .window-container-center { background-color: #000; }
+.spotlight .mail-detail-pane { background-color: #444; }
+.spotlight .scrollable-pane { max-width: 900px; min-height: 100%; background-color: white; }
+
+.spotlight .mail-detail { border-color: #444; border-width: 5px; background-color: #eee; min-height: 400px; }
+.spotlight .content { background-color: white; max-width: 100%; padding: 30px 110px 30px 40px !important; margin: 0 -40px -30px -40px; min-height: 300px; }
+.spotlight .mail-detail .content.plain-text { max-width: 100%; }
+.spotlight .subject { color: #555; }
+.spotlight .person-link { color: #bbb; font-weight: 200; }
+.spotlight .io-ox-inline-links a,
+.spotlight .view:hover .io-ox-inline-links a { color: #bbb; font-weight: 200; }
+.spotlight .contact-picture { opacity: 0.50; }
+.spotlight .contact-picture.default-picture { display: none; }
+
+.spotlight-icon {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    width: 60px;
+    height: 60px;
+    border-radius: 30px;
+    display: none;
+    background-repeat: no-repeat;
+    background-position: 20px 18px;
+    background-color: #CCC;
+    background-color: rgba(255, 192, 0, 0.8);
+    cursor: pointer;
+}
+
+.spotlight-icon:hover { background-color: rgba(200, 200, 200, 0.5); }
+.spotlight .spotlight-icon { display: block; z-index: 30; }
+
+/* attachment preview */
+
+h4.mail-attachment-preview {
+    height: 3em;
+    color: #333;
+}
+
+/* label dropdown */
+.mail-detail .active-label {
+    font-weight: bold;
+}
+
+/* fix bootstrap */
+.mail-detail .content img {
+    width: auto;
+    vertical-align: middle;
+}
+
+.mail-detail .content p {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.mail-detail .content small {
+    color: inherit;
+    font-size: initial;
+}
+
+.mail-detail .content code {
+    font-family: inherit;
+}
+
+.mail-detail .content table {
+    border: 0px none; line-height: normal; border-collapse: initial;
+}
+
+.mail-detail .content li { line-height: 16px; margin-bottom: 0.7em; }
+
+.mail-detail pre {
+    background-color: initial;
+    border: 0px none;
+    -webkit-border-radius: 0; -moz-border-radius: 0; border-radius: 0;
+}
+
+.io-ox-mail-main .window-title .badge {
+    cursor: pointer;
+}

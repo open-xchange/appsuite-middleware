@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange System Extension Bundle
 Bundle-Description: Open-Xchange Extension Bundle exporting Sun classes
 Bundle-SymbolicName: com.openexchange.system.extension
-Bundle-Version: 6.21.0
+Bundle-Version: 6.23.0
 Bundle-Vendor: Open-Xchange Inc.
 Fragment-Host: system.bundle;extension:=framework
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -11,4 +11,5 @@ Export-Package: sun.nio.ch,
  sun.security.action,
  sun.misc,
  sun.reflect,
- javax.swing
+ javax.swing,
+ javax.swing.text

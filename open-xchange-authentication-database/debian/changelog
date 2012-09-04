@@ -1,3 +1,21 @@
+open-xchange-authentication-database (6.23.0-0) unstable; urgency=low
+
+  * prepare for next EDP drop
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 03 Sep 2012 13:45:55 +0200
+
+open-xchange-authentication-database (6.22.0-1) unstable; urgency=low
+
+  * First release candidate for 6.22.0
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 21 Aug 2012 09:19:15 +0200
+
+open-xchange-authentication-database (6.22.0-0) unstable; urgency=low
+
+  * prepare for 6.22.0
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 20 Aug 2012 16:18:32 +0200
+
 open-xchange-authentication-database (6.21.0-6) unstable; urgency=low
 
   * Release build for EDP drop #2

@@ -56,6 +56,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import org.apache.commons.logging.Log;
 import org.atmosphere.container.Grizzly2CometSupport;
+import org.atmosphere.container.Grizzly2WebSocketSupport;
 import org.atmosphere.cpr.AtmosphereFramework;
 import org.atmosphere.cpr.AtmosphereHandler;
 import org.atmosphere.cpr.AtmosphereRequest;
@@ -98,7 +99,8 @@ public class AtmosphereServiceImpl  implements AtmosphereService {
             .and("org.atmosphere.cpr.broadcasterLifeCyclePolicy","NEVER")
             .build();
         atmosphereFramework.init(config);
-        atmosphereFramework.setAsyncSupport(new Grizzly2CometSupport(atmosphereFramework.getAtmosphereConfig()));
+//        atmosphereFramework.setAsyncSupport(new Grizzly2CometSupport(atmosphereFramework.getAtmosphereConfig()));
+        atmosphereFramework.setAsyncSupport(new Grizzly2WebSocketSupport(atmosphereFramework.getAtmosphereConfig()));
         
         ServletRegistration atmosphereRegistration = realtimeContext.addServlet("AtmosphereServlet", atmosphereServlet);
         atmosphereRegistration.addMapping(atmosphereServletMapping);

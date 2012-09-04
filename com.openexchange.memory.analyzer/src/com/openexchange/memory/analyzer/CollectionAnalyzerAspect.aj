@@ -67,6 +67,8 @@ public privileged aspect CollectionAnalyzerAspect {
             INCREASING_PERCENTAGE = 0.5F;
         }
     }
+    //This boolean will set the creation log to full tracelog and not just the position inside the sourcecode
+    private boolean FULL_TRACELOG = Boolean.parseBoolean(System.getProperty("ox.ma.full.tracelog","false"));
 
     private final int SIZE_FOR_COLLECTIONS = SUSPECT_PERIOD * 60 / CHECKCHANGED_INTERVAL;
 
@@ -74,6 +76,7 @@ public privileged aspect CollectionAnalyzerAspect {
 
     protected WeakIdentityHashMap<Object, CollectionStatistics> hasChangedStatistics = new WeakIdentityHashMap<Object, CollectionStatistics>();
 
+    @SuppressWarnings("rawtypes")
     protected WeakIdentityHashMap<Iterator, WeakReference<Object>> iteratorStats = new WeakIdentityHashMap<Iterator, WeakReference<Object>>();
 
     private boolean init = false;
@@ -91,77 +94,95 @@ public privileged aspect CollectionAnalyzerAspect {
         myThread.start();
         init = true;
     }
-
+    
     // Collection access
-    before(Collection col) : call(* java.util.Collection+.*(..)) && target(col) && !within(com.openexchange.memory.analyzer..*){
+    pointcut colAccess(): call(* java.util.Collection+.*(..));
+    //Optimierung auf Access
+    before(Collection col) : colAccess() && !colWrite() && !colRead() && !colDelete() && !colIterator()  && target(col) && !within(com.openexchange.memory.analyzer..*){
         final CollectionStatistics stats = getStatistics(col);
         stats.recordAcess();
     }
 
-    //Collection creation
+    // Collection creation
     after() returning (Collection col): call(java.util.Collection+.new(..)) && !within(com.openexchange.memory.analyzer..*){
         final CollectionStatistics stats = getStatistics(col);
-        stats.recordCreation(getFullStackTrace());
+        if (FULL_TRACELOG){
+            stats.recordCreation(getFullStackTrace());
+        } else {
+            stats.recordCreation(getLocation(thisJoinPointStaticPart));
+        }
     }
     
     // Collection writes
-    pointcut writeCol(): (call(* java.util.Collection+.add*(..)) || call(* java.util.Collection+.addAll*(..)));
-    before(Collection col) : writeCol() && target(col) && !within(com.openexchange.memory.analyzer..*){
+    pointcut colWrite(): (call(* java.util.Collection+.add*(..)) || call(* java.util.Collection+.addAll*(..)));
+    before(Collection col) : colWrite() && target(col) && !within(com.openexchange.memory.analyzer..*){
         final CollectionStatistics stats = getStatistics(col);
-        stats.recordWrite(getLocation(thisJoinPoint));
+        stats.recordWrite(getLocation(thisJoinPointStaticPart));
     }
 
     // Collection reads
-    before(Collection col) : call(* java.util.Collection+.get*(..)) && target(col) && !within(com.openexchange.memory.analyzer..*){
+    pointcut colRead():  call(* java.util.Collection+.get*(..));
+    before(Collection col) : colRead() && target(col) && !within(com.openexchange.memory.analyzer..*){
         final CollectionStatistics stats = getStatistics(col);
-        stats.recordRead(getLocation(thisJoinPoint));
+        stats.recordRead(getLocation(thisJoinPointStaticPart));
     }
 
-    after(Collection col) returning (Iterator it): call(* java.util.Collection+.iterator*(..)) && target(col) && !within(com.openexchange.memory.analyzer..*){
+    // Collection Iterator creation
+    pointcut colIterator(): call(* java.util.Collection+.iterator*(..));
+    after(Collection col) returning (Iterator it): colIterator() && target(col) && !within(com.openexchange.memory.analyzer..*){
         iteratorStats.put(it, new WeakReference<Object>(col));
     }
 
     // Collection deletes
-    pointcut deleteCol(): (call(* java.util.Collection+.remove*(..)) || call(* java.util.Collection+.clear*(..)));
-    before(Collection col) : deleteCol()  && target(col) && !within(com.openexchange.memory.analyzer..*){
+    pointcut colDelete(): (call(* java.util.Collection+.remove*(..)) || call(* java.util.Collection+.clear*(..)));
+    before(Collection col) : colDelete()  && target(col) && !within(com.openexchange.memory.analyzer..*){
         final CollectionStatistics stats = getStatistics(col);
-        stats.recordDelete(getLocation(thisJoinPoint));
+        stats.recordDelete(getLocation(thisJoinPointStaticPart));
     }
 
     // Map access
-    before(Map map) : call(* java.util.Map+.*(..)) && target(map) && !within(com.openexchange.memory.analyzer..*){
+    pointcut mapAccess(): call(* java.util.Map+.*(..));
+    //Optimierung auf Access
+    before(Map map) : mapAccess() && !mapWrite() && !mapRead() && !mapDelete() && !mapIterator() && target(map) && !within(com.openexchange.memory.analyzer..*){
         final CollectionStatistics stats = getStatistics(map);
         stats.recordAcess();
     }
     
-    //Map creation
+    // Map creation
     after() returning (Map map): call(java.util.Map+.new(..)) && !within(com.openexchange.memory.analyzer..*){
         final CollectionStatistics stats = getStatistics(map);
-        stats.recordCreation(getFullStackTrace());
+        if (FULL_TRACELOG){
+            stats.recordCreation(getFullStackTrace());
+        } else {
+            stats.recordCreation(getLocation(thisJoinPointStaticPart));
+        }
     }
 
     // Map writes
-    pointcut writeMap(): (call(* java.util.Map+.put*(..)) || call(* java.util.Map+.putAll*(..)));
-    before(Map map) : writeMap() && target(map) && !within(com.openexchange.memory.analyzer..*){
+    pointcut mapWrite(): (call(* java.util.Map+.put*(..)) || call(* java.util.Map+.putAll*(..)));
+    before(Map map) : mapWrite() && target(map) && !within(com.openexchange.memory.analyzer..*){
         final CollectionStatistics stats = getStatistics(map);
-        stats.recordWrite(getLocation(thisJoinPoint));
+        stats.recordWrite(getLocation(thisJoinPointStaticPart));
     }
 
     // Map reads
-    before(Map map) : call(* java.util.Map+.get*(..)) && target(map) && !within(com.openexchange.memory.analyzer..*){
+    pointcut mapRead(): call(* java.util.Map+.get*(..));
+    before(Map map) : mapRead() && target(map) && !within(com.openexchange.memory.analyzer..*){
         final CollectionStatistics stats = getStatistics(map);
-        stats.recordRead(getLocation(thisJoinPoint));
+        stats.recordRead(getLocation(thisJoinPointStaticPart));
     }
 
-    after(Map map) returning (Iterator it) : call(* java.util.Map+.iterator*(..)) && target(map) &&  !within(com.openexchange.memory.analyzer..*){
+    // Map Iterator creation
+    pointcut mapIterator(): call(* java.util.Map+.iterator*(..));
+    after(Map map) returning (Iterator it) : mapIterator()  && target(map) &&  !within(com.openexchange.memory.analyzer..*){
         iteratorStats.put(it, new WeakReference<Object>(map));
     }
 
     // Map deletes
-    pointcut deleteMap(): (call(* java.util.Map+.remove*(..)) || call(* java.util.Map+.clear*(..)));
-    before(Map map) : deleteMap() && target(map) && !within(com.openexchange.memory.analyzer..*){
+    pointcut mapDelete(): (call(* java.util.Map+.remove*(..)) || call(* java.util.Map+.clear*(..)));
+    before(Map map) : mapDelete() && target(map) && !within(com.openexchange.memory.analyzer..*){
         final CollectionStatistics stats = getStatistics(map);
-        stats.recordDelete(getLocation(thisJoinPoint));
+        stats.recordDelete(getLocation(thisJoinPointStaticPart));
     }
 
     // Iterator Operations
@@ -171,7 +192,7 @@ public privileged aspect CollectionAnalyzerAspect {
             final Object ob = wR.get();
             if (ob != null) {
                 CollectionStatistics stats = getStatistics(ob);
-                stats.recordRead(getLocation(thisJoinPoint));
+                stats.recordRead(getLocation(thisJoinPointStaticPart));
             }
         }
     }
@@ -182,7 +203,7 @@ public privileged aspect CollectionAnalyzerAspect {
             final Object ob = wR.get();
             if (ob != null) {
                 CollectionStatistics stats = getStatistics(ob);
-                stats.recordDelete(getLocation(thisJoinPoint));
+                stats.recordDelete(getLocation(thisJoinPointStaticPart));
             }
         }
     }
@@ -216,40 +237,46 @@ public privileged aspect CollectionAnalyzerAspect {
      * Returns a CollectionStatistics instance for the given collection.
      */
     private CollectionStatistics getStatistics(final Object targetCollection) {
-        CollectionStatistics stats = statistics.get(targetCollection);
+        CollectionStatistics stats = hasChangedStatistics.get(targetCollection);
         if (stats == null) {
-            if (targetCollection instanceof Map) {
-                stats = new CollectionStatisticsMaps(
-                    targetCollection.getClass().getName(),
-                    (Map) targetCollection,
-                    STARTUP_DELAY,
-                    MIN_COLLECTION_ELEMENTS,
-                    SIZE_FOR_COLLECTIONS,
-                    INCREASING_PERCENTAGE,
-                    TIMEOUT_PERIOD);
+            stats = statistics.get(targetCollection);
+            //Optimierung mit doppelten null check
+            if (stats == null) {
+                if (targetCollection instanceof Map) {
+                    stats = new CollectionStatisticsMaps(
+                        targetCollection.getClass().getName(),
+                        (Map) targetCollection,
+                        STARTUP_DELAY,
+                        MIN_COLLECTION_ELEMENTS,
+                        SIZE_FOR_COLLECTIONS,
+                        INCREASING_PERCENTAGE,
+                        TIMEOUT_PERIOD);
+                } else {
+                    stats = new CollectionStatisticsCollection(
+                        targetCollection.getClass().getName(),
+                        (Collection) targetCollection,
+                        STARTUP_DELAY,
+                        MIN_COLLECTION_ELEMENTS,
+                        SIZE_FOR_COLLECTIONS,
+                        INCREASING_PERCENTAGE,
+                        TIMEOUT_PERIOD);
+                }
+                statistics.put(targetCollection, stats);
+                hasChangedStatistics.put(targetCollection, stats);
             } else {
-                stats = new CollectionStatisticsCollection(
-                    targetCollection.getClass().getName(),
-                    (Collection) targetCollection,
-                    STARTUP_DELAY,
-                    MIN_COLLECTION_ELEMENTS,
-                    SIZE_FOR_COLLECTIONS,
-                    INCREASING_PERCENTAGE,
-                    TIMEOUT_PERIOD);
+                hasChangedStatistics.put(targetCollection, stats);
             }
-            statistics.put(targetCollection, stats);
-            hasChangedStatistics.put(targetCollection, stats);
-        } else {
-            hasChangedStatistics.put(targetCollection, stats);
+            
         }
+        
         return stats;
     }
 
     /**
      * Returns a developer usable String for the line of code the joinpoint is acting on.
      */
-    private String getLocation(final JoinPoint thisJoinPoint) {
-        return thisJoinPoint.getStaticPart().getSourceLocation().toString();
+    private String getLocation(final JoinPoint.StaticPart thisJoinPoint) {
+        return thisJoinPoint.getSourceLocation().toString();
     }
 
     private static class CollectionAnalyzerThread extends Thread {

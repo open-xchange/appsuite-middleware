@@ -60,15 +60,21 @@ public class GetSwitch implements PropertySwitch {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(GetSwitch.class);
 
-    private final Snippet snippet;
+    /**
+     * The snippet.
+     */
+    protected final Snippet snippet;
 
     /**
      * Initializes a new {@link GetSwitch}.
-     * 
+     *
      * @param snippet The snippet to get properties from
      */
     public GetSwitch(final Snippet snippet) {
         super();
+        if (null == snippet) {
+            throw new IllegalArgumentException("Snippet must not be null.");
+        }
         this.snippet = snippet;
     }
 

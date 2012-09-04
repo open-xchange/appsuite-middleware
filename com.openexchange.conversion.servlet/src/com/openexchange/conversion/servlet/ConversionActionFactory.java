@@ -54,7 +54,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.exception.OXException;
+import com.openexchange.conversion.servlet.actions.ConvertAction;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -74,11 +74,11 @@ public class ConversionActionFactory implements AJAXActionServiceFactory {
     public ConversionActionFactory(final ServiceLookup services) {
         super();
         actions = new ConcurrentHashMap<String, AJAXActionService>(2);
-        //actions.put("convert", new NamesAction(services));
+        actions.put("convert", new ConvertAction(services));
     }
 
     @Override
-    public AJAXActionService createActionService(final String action) throws OXException {
+    public AJAXActionService createActionService(final String action) {
         return actions.get(action);
     }
 
@@ -86,5 +86,4 @@ public class ConversionActionFactory implements AJAXActionServiceFactory {
     public Collection<? extends AJAXActionService> getSupportedServices() {
         return java.util.Collections.unmodifiableCollection(actions.values());
     }
-
 }

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Snippet Bundle
 Bundle-SymbolicName: com.openexchange.snippet
-Bundle-Version: 6.21.0
+Bundle-Version: 6.23.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.exception,
@@ -11,4 +11,5 @@ Import-Package: com.openexchange.exception,
  com.openexchange.session,
  org.apache.commons.logging,
  org.json
-Export-Package: com.openexchange.snippet
+Export-Package: com.openexchange.snippet,
+ com.openexchange.snippet.db

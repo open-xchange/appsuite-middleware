@@ -67,6 +67,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import javax.activation.MimetypesFileTypeMap;
 import org.apache.commons.logging.Log;
+import com.openexchange.java.Streams;
 import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.file.external.FileStorage;
@@ -646,20 +647,14 @@ public class LocalFileStorage implements FileStorage {
             fos = new FileOutputStream(file);
             final byte[] buf = new byte[DEFAULT_BUFSIZE];
             int len = input.read(buf);
-            while (len != -1) {
+            while (len > 0) {
                 fos.write(buf, 0, len);
                 len = input.read(buf);
             }
         } catch (final IOException e) {
             throw FileStorageCodes.IOERROR.create(e, e.getMessage());
         } finally {
-            if (null != fos) {
-                try {
-                    fos.close();
-                } catch (final IOException e) {
-                    throw FileStorageCodes.IOERROR.create(e, e.getMessage());
-                }
-            }
+            Streams.close(fos);
         }
     }
 

@@ -66,7 +66,6 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.tasks.Task;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tasks.json.TaskRequest;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;

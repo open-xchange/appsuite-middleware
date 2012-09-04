@@ -78,6 +78,26 @@ msgstr ""
 msgid "No Kerberos delegation ticket found in session %1$s."
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.loadbalancing/src/com/openexchange/aws/loadbalancing/exceptions/OXAWSLoadBalancingExceptionMessages.java:61
+msgid "Name of loadbalancer missing."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.loadbalancing/src/com/openexchange/aws/loadbalancing/exceptions/OXAWSLoadBalancingExceptionMessages.java:63
+msgid "No zone specified."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.loadbalancing/src/com/openexchange/aws/loadbalancing/exceptions/OXAWSLoadBalancingExceptionMessages.java:65
+msgid "Could not create loadbalancer."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.loadbalancing/src/com/openexchange/aws/loadbalancing/exceptions/OXAWSLoadBalancingExceptionMessages.java:67
+msgid "Could not register instance with id %1$s with the loadbalancer."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.loadbalancing/src/com/openexchange/aws/loadbalancing/exceptions/OXAWSLoadBalancingExceptionMessages.java:69
+msgid "Could not deregister instance with id %1$s from the loadbalancer."
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws/src/com/openexchange/aws/exceptions/OXAWSExceptionMessages.java:61
 msgid "Missing access key."
 msgstr ""
@@ -9829,6 +9849,11 @@ msgstr ""
 msgid "Bad request. The server is unable to handle the request."
 msgstr ""
 
+#. Missing request body.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:134
+msgid "Missing request body."
+msgstr ""
+
 #. *
 #. * Exception while writing JSON.
 #.
@@ -10178,6 +10203,11 @@ msgstr ""
 #. No such snippet found for identifier: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetExceptionMessages.java:69
 msgid "No such snippet found for identifier: %1$s"
+msgstr ""
+
+#. No such snippet attachment found for identifier %1$s in snippet %2$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetExceptionMessages.java:81
+msgid "No such snippet attachment found for identifier %1$s in snippet %2$s"
 msgstr ""
 
 #. Could not find Apache Solr Core entry for user %1$s and module %2$s in context %3$s.

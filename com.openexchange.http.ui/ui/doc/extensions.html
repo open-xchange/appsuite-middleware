@@ -1,0 +1,139 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Developer Documentation</title>
+<link href="prettify.css" type="text/css" rel="stylesheet"/>
+<link href="default.css" type="text/css" rel="stylesheet"/>
+<script type="text/javascript" src="jquery.min.js"></script>
+<script type="text/javascript" src="prettify.js"></script>
+<script>
+$(document).ready(function () {
+    // script to pre trick
+    $('body script').each(function () {
+        var node = $(this);
+        $('<pre>').addClass('prettyprint lang-js')
+            .text($.trim(node.text()).replace(/[ ]{4}/g, '  '))
+            .insertBefore(node);
+        node.remove();
+    });
+    // apply pretty print
+    prettyPrint();
+    // add reference anchors
+    var anchors = {};
+    $('h2,h3').add($('dt')).each(function () {
+        var node = $(this), text = node.text().replace(/\(.*\)\s*$/, '()');
+        if (anchors[text]) return;
+        node.prepend($('<a>').attr('name', text));
+        anchors[text] = true;
+    });
+    $('code,ul.params>li>i').each(function () {
+        var node = $(this), text = node.text();
+        if (anchors[text]) {
+            node.empty().append($('<a>').attr('href', '#' + text).text(text));
+        }
+    });
+});
+</script>
+</head>
+<body>
+
+<p class="header">ox7 &ndash; Developer Documentation &ndash; <a href="index.html">Index</a></p>
+
+<h1>Extension Points</h1>
+
+<p>Examples:</p>
+
+<script type="text/example">
+var ext = require("io.ox/core/extensions");
+ext.point('io.ox/mail/detail').extend({
+    index: 180,
+    id: 'ad',
+    draw: function (data) {
+        this.append(
+            $("<div>")
+            .css({
+                backgroundImage: "url(" + ox.base + "/apps/themes/default/ad.jpg)",
+                width: "468px",
+                height: "60px",
+                margin: "0px auto 20px auto"
+            })
+        );
+    }
+});
+</script>
+
+<script type="text/example">
+    var ext = require("io.ox/core/extensions");
+    ext.point("io.ox/calendar/detail").extend({
+        index: 1000, 
+        id: "dreiChinesen",
+        draw: function (appointment) {
+            var psuedoChineseTitle = appointment.title.replace(/[aeiou]/g, "o");
+            var $titleNode = $("<h1/>").text(psuedoChineseTitle);
+            return this.append($titleNode);
+        } 
+    });
+</script>
+
+<script type="text/example">
+// Disable participants
+var ext = require("io.ox/core/extensions");
+ext.point("io.ox/calendar/detail").disable("participants");
+</script>
+
+<script type="text/example">
+// Disable date
+var ext = require("io.ox/core/extensions");
+ext.point("io.ox/calendar/detail").disable("date");
+</script>
+
+<script type="text/example">
+// Re-enable date
+var ext = require("io.ox/core/extensions");
+ext.point("io.ox/calendar/detail").enable("date");
+</script>
+
+<script type="text/example">
+// Extend "draw" function (to introduce "customize")
+var ext = require("io.ox/core/extensions");
+ext.addWrapper("draw", function (e) {
+    e.original();
+    ext.point(e.id).invoke("customize", this, e.args);
+});
+
+// use new "customize" function
+ext.point("io.ox/calendar/detail/date/time").extend({
+    id: "highlight",
+    customize: function () {
+        this.css({
+            backgroundColor: "yellow",
+            padding: "3px",
+            border: "1px solid #fc0"
+        });
+    }
+});
+</script>
+
+<script type="text/example">
+// Replace existing extension
+var ext = require("io.ox/core/extensions");
+ext.point("io.ox/calendar/detail").replace({
+    id: "title",
+    draw: function (data) {
+        this.append(
+            $("<div>").addClass("title").text("Hello World! " + data.title)
+        );
+    }
+});
+</script>
+
+<script type="text/example">
+// Shuffle extension order
+var ext = require("io.ox/core/extensions");
+ext.point("io.ox/calendar/detail").each(function (e) {
+    e.index = Math.random() * 1000 >> 0;
+}).sort();
+</script>
+</body>
+</html>

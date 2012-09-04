@@ -1,0 +1,1262 @@
+/**
+ * All content on this website (including text, images, source
+ * code and any other original works), unless otherwise noted,
+ * is licensed under a Creative Commons License.
+ *
+ * http://creativecommons.org/licenses/by-nc-sa/2.5/
+ *
+ * Copyright (C) 2011 Open-Xchange, Inc.
+ * Mail: info@open-xchange.com
+ *
+ * @author Matthias Biggeleben <matthias.biggeleben@open-xchange.com>
+ */
+
+#io-ox-core.wallpaper {
+background: @wallpaper-fallback-color; /* Old browsers */
+background: -moz-radial-gradient(center, circle cover, @wallpaper-color1 0%, @wallpaper-color2 40%, @wallpaper-color3 100%); /* FF3.6+ */
+background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%,@wallpaper-color1), color-stop(31%,@wallpaper-color2), color-stop(100%,@wallpaper-color3)); /* Chrome,Safari4+ */
+background: -webkit-radial-gradient(center, ellipse cover,  @wallpaper-color1 0%,@wallpaper-color2 31%,@wallpaper-color3 100%); /* Chrome10+,Safari5.1+ */
+background: -o-radial-gradient(center, ellipse cover,  @wallpaper-color1 0%,@wallpaper-color2 31%,@wallpaper-color3 100%); /* Opera 12+ */
+background: -ms-radial-gradient(center, ellipse cover,  @wallpaper-color1 0%,@wallpaper-color2 31%,@wallpaper-color3 100%); /* IE10+ */
+background: radial-gradient(center, ellipse cover,  @wallpaper-color1 0%,@wallpaper-color2 31%,@wallpaper-color3 100%); /* W3C */
+filter: ~"progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#a8a8a8',GradientType=1 );"
+}
+
+/* scrollable for touch devices, esp. iOS */
+.scrollable {
+    overflow: auto !important;
+    -webkit-overflow-scrolling: touch;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.scrollable-pane {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: table;
+}
+
+/* top bar */
+
+#io-ox-topbar {
+    bottom: auto;
+    height: 40px;
+    overflow: hidden;
+    z-index: 2;
+    /* --- */
+    background-color: #2C2C2C;
+    background-image: -moz-linear-gradient(top, @topbar-background-alt, @topbar-background);
+    background-image: -ms-linear-gradient(top, @topbar-background-alt, @topbar-background);
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(@topbar-background-alt), to(@topbar-background));
+    background-image: -webkit-linear-gradient(top, @topbar-background-alt, @topbar-background);
+    background-image: -o-linear-gradient(top, @topbar-background-alt, @topbar-background);
+    background-image: linear-gradient(top, @topbar-background-alt, @topbar-background);
+    background-repeat: repeat-x;
+}
+
+#io-ox-top-logo-small {
+    width: 63px;
+    height: 22px;
+    margin: 7px 13px 0 13px;
+    float: right;
+    background-image: url(logo-small.xpng);
+    background-repeat: no-repeat;
+}
+
+/* ------------------------------------- */
+/* ipad: better fat finger support */
+
+.touch #io-ox-topbar { height: 40px; }
+.touch #io-ox-topbar .launcher { font-size: 14px; line-height: 35px; padding: 2px 15px 5px 15px; }
+.touch #io-ox-screens { top: 42px; }
+.touch #io-ox-windowmanager .window-container-center { width: 100% !important; }
+.touch #io-ox-top-logo-small { margin-top: 6px; }
+
+.touch body { font-size: @touch-font-size; }
+
+.touch .scrollable .scrollable-pane { -webkit-transform: translate3d(0, 0, 0); }
+
+/* ------------------------------------- */
+
+#io-ox-topbar .launcher {
+    color: @topbar-launcher-color;
+    padding: 0px 12px 0px 12px;
+    line-height: 40px;
+    text-align: center;
+    white-space: nowrap;
+    display: inline-block !important;
+    -webkit-tap-highlight-color: transparent;
+    max-width: 10em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+}
+
+#io-ox-topbar .launcher.right {
+    float: right;
+    display: inline-block !important;
+}
+
+#io-ox-topbar .launcher.hover {
+    color: @topbar-launcher-color-hover;
+    background-color: @topbar-launcher-background-hover;
+}
+
+#io-ox-topbar .launcher.active {
+    color: @topbar-launcher-color-active;
+    background-color: @topbar-launcher-background-active;
+}
+
+@-webkit-keyframes launcherColours {
+    from { background-color: transparent; color: #aaa; }
+      to { background-color: @topbar-progress-color; color: #fff; }
+}
+
+@-moz-keyframes launcherColours {
+    from { background-color: transparent; color: #aaa; }
+      to { background-color: @topbar-progress-color; color: #fff; }
+}
+
+#io-ox-topbar .launcher.io-ox-progress {
+    -moz-animation-direction: alternate;
+    -moz-animation-duration: 0.75s;
+    -moz-animation-iteration-count: infinite;
+    -moz-animation-name: launcherColours;
+    -moz-animation-timing-function: ease-in-out;
+    -webkit-animation-direction: alternate;
+    -webkit-animation-duration: 0.75s;
+    -webkit-animation-iteration-count: infinite;
+    -webkit-animation-name: launcherColours;
+    -webkit-animation-timing-function: ease-in-out;
+}
+
+#io-ox-welcome-upsell {
+    font-size: 18pt;
+    line-height: 1.1em;
+    text-align: center;
+    color: white;
+    border: 4px solid white;
+    -moz-border-radius: 10px;
+    -webkit-border-radius: 10px;
+    border-radius: 10px 10px 10px 10px;
+    box-shadow: 0px 0px 20px -5px #000;
+    background: rgb(169,3,41); /* Old browsers */
+    background: -moz-radial-gradient(center, ellipse cover,  rgba(169,3,41,1) 0%, rgba(143,2,34,1) 44%, rgba(109,0,25,1) 100%); /* FF3.6+ */
+    background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%,rgba(169,3,41,1)), color-stop(44%,rgba(143,2,34,1)), color-stop(100%,rgba(109,0,25,1))); /* Chrome,Safari4+ */
+    background: -webkit-radial-gradient(center, ellipse cover,  rgba(169,3,41,1) 0%,rgba(143,2,34,1) 44%,rgba(109,0,25,1) 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-radial-gradient(center, ellipse cover,  rgba(169,3,41,1) 0%,rgba(143,2,34,1) 44%,rgba(109,0,25,1) 100%); /* Opera 12+ */
+    background: -ms-radial-gradient(center, ellipse cover,  rgba(169,3,41,1) 0%,rgba(143,2,34,1) 44%,rgba(109,0,25,1) 100%); /* IE10+ */
+    background: radial-gradient(center, ellipse cover,  rgba(169,3,41,1) 0%,rgba(143,2,34,1) 44%,rgba(109,0,25,1) 100%); /* W3C */
+}
+
+/* empty desktop */
+#io-ox-desktop {
+    top: 32px;
+    z-index: 1;
+    overflow: hidden;
+}
+
+#io-ox-welcome {
+    background-color: @welcome-background;
+    background-color: @welcome-background-rgba;
+    color: @welcome-color;
+    top: auto;
+    height: 70px;
+    padding: 10px 13px 10px 13px;
+    text-shadow: 0px 0px 1px #fff;
+    text-align: right;
+    border-top: 1px solid @welcome-border-color;
+}
+
+#io-ox-welcome .accent {
+    color: @welcome-color-accent;
+    display: inline-block;
+    margin: 0 0.15em 0 0.15em;
+}
+
+#io-ox-welcome .clock {
+    color: @welcome-color-bright;
+}
+
+/* window manager */
+
+#io-ox-screens {
+    top: 40px;
+    overflow: hidden;
+}
+
+#io-ox-windowmanager {
+    overflow: hidden;
+}
+
+#io-ox-windowmanager-pane {
+    left: 0%;
+    width: 100%;
+}
+
+/* .csstransforms3d.touch #io-ox-windowmanager-pane { */
+/*     -webkit-transition-duration: 0.35s; */
+/*     -webkit-transition-timing-function: linear; */
+/* } */
+
+.window-container {
+    position: absolute;
+    top: 0px;
+    width: 100%;
+    bottom: 0px;
+    left: 0px;
+}
+
+.window-container-center {
+    position: relative;
+    margin: 0px auto 0px auto;
+    width: 100% !important; /* 90% */
+    max-width: 100%;
+    height: 100%;
+}
+
+#io-ox-windowmanager.fullscreen .window-container-center {
+    width: 100% !important;
+}
+
+.window-blocker {
+    background-color: #fff;
+    background-color: rgba(255, 255, 255, 0.8);
+    opacity: 0.8;
+    z-index: 30;
+}
+
+.rgba .window-blocker {
+    opacity: 1;
+}
+
+.window-head {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    height: 49px;
+    left: 0px;
+    z-index: 20;
+
+    color: @head-color;
+
+    border-bottom: 1px solid #d5d5d5;
+
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+
+    /* --- */
+    background-color: #EEE;
+    background-repeat: repeat-x;
+    background-image: -moz-linear-gradient(top, @window-head-top 0%, @window-head-bottom 100%);
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, @window-head-top), color-stop(100%, @window-head-bottom));
+    background-image: -webkit-linear-gradient(top, @window-head-top 0%, @window-head-bottom 100%);
+    background-image: -ms-linear-gradient(top, @window-head-top 0%, @window-head-bottom 100%);
+    background-image: -o-linear-gradient(top, @window-head-top 0%, @window-head-bottom 100%);
+    background-image: linear-gradient(top, @window-head-top 0%, @window-head-bottom 100%);
+    filter: ~"progid:DXImageTransform.Microsoft.gradient( startColorstr='@window-head-top', endColorstr='@window-head-bottom', GradientType=0 );"
+}
+
+.window-title {
+    position: absolute;
+    top: 8px;
+    height: 36px;
+    left: 0px;
+    padding: 0 10px 0 13px;
+    width: 300px;
+    color: @window-title-color;
+    font-family: OpenSans, Helvetica, Arial, sans-serif;
+    font-weight: 200;
+    font-size: 22px;
+    line-height: 30px;
+    text-shadow: 0px 0px 3px #fff;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -ms-box-sizing: border-box;
+    box-sizing: border-box;
+    /* override h1 */
+    display: block;
+    margin: 0;
+}
+
+.window-title b.caret {
+    vertical-align: middle;
+    margin-left: 0.25em;
+}
+
+.window-title .badge {
+    position: relative;
+    display: inline-block;
+    line-height: 1.4em;
+    top: -3px;
+    left: 10px;
+}
+
+.window-toolbar {
+    position: absolute;
+    top: 10px;
+    right: 40px;
+    left: 300px;
+    padding: 4px 0 4px 13px;
+    height: 30px;
+    white-space: nowrap;
+}
+
+.window-toolbar a {
+    line-height: 24px;
+    color: @toolbar-link-color;
+    display: inline-block;
+    margin: 0 2em 0 0;
+    cursor: pointer;
+    white-space: nowrap;
+    text-decoration: none;
+    outline: 0;
+}
+
+.window-toolbar .dropdown-menu a {
+    margin-right: 0;
+}
+
+.touch .window-toolbar a {
+    outline: 0;
+}
+
+a.button {
+    line-height: 18px;
+    color: #fff;
+    text-align: center;
+    display: inline-block;
+    margin: 0 10px 0 0;
+    cursor: pointer;
+    background-color: #555;
+    border: 1px solid #333;
+    padding: 5px 1.5em 4px 1.5em;
+    white-space: nowrap;
+    vertical-align: middle;
+    outline: none;
+    text-decoration: none;
+}
+
+.window-toolbar a:hover, a.button:hover {
+    text-decoration: underline;
+}
+
+/*
+.window-toolbar a:focus, .window-toolbar a:hover,
+a.button:focus, a.button:hover {
+    border-color: #555;
+    box-shadow: 0px 0px 5px -1px #000;
+}
+*/
+
+a.button.default-action {
+    color: #fff;
+    border: 1px solid #007CBA;
+    background-color: #2DA6E3;
+    background-image: -moz-linear-gradient(center top, @accent1-bright, @accent1);
+    background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(@accent1-bright), to(@accent1));
+    background-image: -o-linear-gradient(top, @accent1-bright 0%, @accent1 100%);
+}
+
+.window-controls {
+    position: absolute;
+    top: 12px;
+    right: 13px;
+}
+
+.window-control {
+    font-family: Arial, Helvetica, sans-serif;
+    margin-left: 5px;
+    display: inline-block;
+    overflow: hidden;
+    height: 38px;
+}
+
+.window-control .close {
+    font-size: 40px;
+    line-height: 30px;
+}
+
+.window-body {
+    position: absolute;
+    top: 50px;
+    right: 0px;
+    bottom: 0px;
+    left: 0px;
+    white-space: normal;
+    z-index: 10;
+}
+
+.window-body.movedown {
+    top: 56px;
+}
+
+.window-settings {
+    position: absolute;
+    top: 0px;
+    right: -1px !important;
+    left: -1px !important;
+    z-index: 1;
+    padding: 10px 15px 10px 15px;
+    color: @head-color;
+    background-color: mix(@settings-color, @settings-background, 400%/15);
+    background-image: -moz-linear-gradient(center top,
+        mix(@settings-color, @settings-background, 100%/15),
+        mix(@settings-color, @settings-background, 500%/15));
+    background-image: -webkit-gradient(linear, 0% 0%, 0% 100%,
+        from(mix(@settings-color, @settings-background, 100%/15)),
+        to(mix(@settings-color, @settings-background, 500%/15)));
+    background-image: -o-linear-gradient(top,
+        mix(@settings-color, @settings-background, 100%/15) 0%,
+        mix(@settings-color, @settings-background, 500%/15) 100%);
+    filter: ~"progid:DXImageTransform.Microsoft.gradient(startColorstr="mix(@settings-color, @settings-background, 100%/15)~", endColorstr="mix(@settings-color, @settings-background, 500%/15)~")";
+}
+
+.window-content {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    bottom: 0px;
+    left: 0px;
+    z-index: 2;
+    background-color: @background;
+    overflow: hidden;
+}
+
+.window-content textarea, textarea {
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    user-select: text;
+    resize: none;
+}
+
+.user-select-text {
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    user-select: text;
+}
+
+/* vGrid */
+
+.vgrid {}
+
+.vgrid .vgrid-scrollpane {
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    -webkit-tap-highlight-color: transparent;
+    z-index: 1;
+    bottom: 34px;
+}
+
+.vgrid, .vgrid:focus {
+    outline: none;
+}
+
+.vgrid-toolbar {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    line-height: 18px;
+    padding: 8px 13px 8px 13px;
+    border-top: 1px solid mix(@color, @background, 200%/15);
+    background-color: #f5f5f5;
+    z-index: 2;
+}
+
+.vgrid-cell {
+    position: absolute;
+    right: 0;
+    left: 0;
+    padding: 8px 13px 8px 13px;
+    border-bottom: 1px solid mix(@color, @background, 200%/15);
+    color: @color;
+    background-color: @background; /* resolves hw accel anti-aliasing */
+}
+
+.vgrid-cell-padding {
+    padding: 8px 13px 8px 13px; /* for consistent elements */
+}
+
+.vgrid-cell.hover {
+    cursor: pointer;
+}
+
+.vgrid-cell.hover:hover {
+    background-color: mix(@color, @background, 1000%/255);
+}
+
+.vgrid-cell * {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vgrid-cell-checkbox {
+    width: 30px;
+    height: 100% !important;
+    float: left;
+    display: none;
+}
+
+.vgrid-cell-checkbox label {
+  margin-bottom: 0px; /* reset bootstrap */
+}
+
+.vgrid-cell-checkbox input {
+    border: 0px none;
+}
+
+.vgrid.editable .vgrid-cell-checkbox {
+    display: block;
+}
+
+.vgrid-cell.odd {
+    /*background-color: mix(@color, @background, 1000%/255);*/
+}
+
+.vgrid-cell.vgrid-label {
+    font-weight: bold;
+    text-align: center;
+    line-height: 1em;
+    padding: 5px 13px 4px 13px;
+    background-color: mix(@color, @background, 100%/15);
+    border-bottom: 1px solid mix(@color, @background, 300%/15);
+    background-image: -webkit-gradient(
+        linear,
+        left top,
+        left bottom,
+        color-stop(0.20, @background),
+        color-stop(1.00, mix(@color, @background, 1500%/255))
+    );
+    background-image: -o-linear-gradient(top, @background 20%, mix(@color, @background, 1500%/255) 100%);
+    background-image: -moz-linear-gradient(
+        center bottom,
+        mix(@color, @background, 1500%/255) 0%,
+        @background 80%
+    );
+    filter: ~"progid:DXImageTransform.Microsoft.gradient(startColorstr="@background~", endColorstr="mix(@color, @background, 1500%/255)~")";
+    cursor: pointer;
+}
+
+.vgrid-cell.vgrid-label.left {
+    text-align: left;
+}
+
+.vgrid-cell.selected {
+    background-color: @selected-background !important;
+    background-image: -webkit-gradient(
+        linear,
+        left top,
+        left bottom,
+        color-stop(0, lighten(@selected-background, 20%)),
+        color-stop(1, darken(@selected-background, 5%))
+    ) !important;
+    background-image: -o-linear-gradient(top, lighten(@selected-background, 20%) 0%, darken(@selected-background, 5%) 100%) !important;
+    background-image: -moz-linear-gradient(
+        center top,
+        lighten(@selected-background, 20%) 0%,
+        darken(@selected-background, 5%) 100%
+    ) !important;
+    filter: ~"progid:DXImageTransform.Microsoft.gradient(startColorstr="lighten(@selected-background, 20%)", endColorstr="darken(@selected-background, 5%)~")";
+    border-bottom-color: black;
+}
+
+.vgrid-cell.selected * {
+    color: white !important;
+}
+
+.vgrid-cell.relative {
+    position: relative;
+}
+
+.vgrid-cell.no-border {
+    border-bottom: 0px none;
+}
+
+/* ---- */
+
+.leftside {
+    position: absolute;
+    top: 0px;
+    bottom: 0px;
+    left: 0px;
+    width: 200px;
+    background-color: @background;
+}
+
+.reverse.leftside {
+    width: auto;
+    right: 310px;
+}
+
+.rightside {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    bottom: 0px;
+    left: 200px;
+    background-color: @background;
+}
+
+.reverse.rightside {
+    left: auto;
+    width: 310px;
+}
+
+.withStatusBar {
+    bottom: 30px;
+}
+
+.statusBar {
+    position: absolute;
+    top: auto;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    height: 19px;
+    padding-top: 10px;
+    padding-left: 10px;
+    background-color: @status-background;
+    border-top: 1px solid darken(@status-background, 10%);
+    color: @status-color;
+    font-size: 8pt;
+}
+
+.atb, .abs {
+    position: absolute;
+    top: 0px;
+    bottom: 0px;
+}
+
+.abs {
+    left: 0px;
+    right: 0px;
+}
+
+.abs-lr {
+    position: absolute;
+    left: 0px;
+    right: 0px;
+}
+
+/* ---- */
+
+.bright-text {
+    color: #888;
+}
+
+.email-address, .blue {
+    color: @accent1-bright;
+}
+
+.person, .person-link {
+    color: @person-link-color;
+}
+
+.ellipsis {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+a.action-link {
+    color: @action-link-color;
+}
+
+.delimiter {
+    color: #ccc;
+}
+
+.default-content-padding {
+    padding: 30px 40px 30px 40px;
+}
+
+a.attachment-link {
+    color: @mail-attachment-link-color;
+}
+
+a.attachment-link:hover {
+    color: @mail-attachment-link-color-hover;
+}
+
+a.nolink {
+    color: @color;
+    text-decoration: none;
+}
+
+.border-top {
+    border-top: 1px solid #ccc;
+}
+
+.border-right {
+    border-right: 1px solid #ccc;
+}
+
+.border-bottom {
+    border-bottom: 1px solid #ccc;
+}
+
+.border-left {
+    border-left: 1px solid #ccc;
+}
+
+/*  removed because searchfield is now type=text */
+.no-searchfield .searchfield-wrapper {
+    width: 300px;
+    height: 17px;
+    line-height: 1em;
+    padding: 1px 10px 1px 10px;
+    background-color: white;
+    -moz-border-radius: 10px;
+    -webkit-border-radius: 10px;
+    border-radius: 10px 10px 10px 10px;
+    border: 1px solid #bbb;
+    display: inline-block;
+    float: right;
+}
+
+
+.searchfield-wrapper {
+    margin: 6px 0 0 0;
+}
+
+input[type=search] {
+    width: 220px;
+    height: 17px;
+    line-height: 1em;
+    padding: 0px;
+    border: 0px none #a00;
+}
+
+/* Dialogs */
+.io-ox-dialog-underlay {
+    background-color: black;
+    opacity: 0.30;
+    z-index: 65000;
+}
+
+.io-ox-dialog-popup {
+    position: relative;
+    width: 500px;
+    margin: 0 auto 0 auto;
+    overflow: visible;
+    background-color: white;
+    border: 1px solid #111;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px 5px 5px 5px;
+    z-index: 65001;
+}
+
+.io-ox-dialog-popup .form-actions {
+    text-align: right;
+}
+
+.boxshadow .io-ox-dialog-popup {
+    border: 0px none;
+    -moz-box-shadow: 0px 5px 25px -5px #000;
+    -webkit-box-shadow: 0px 5px 25px -5px #000;
+    box-shadow: 0px 5px 25px -5px #000;
+}
+
+.io-ox-dialog-popup .content {
+    overflow: auto;
+}
+
+.io-ox-dialog-popup .content .plain-text {
+    font-size: 12pt;
+    text-align: center;
+    color: @color;
+    padding: 10px;
+}
+
+.io-ox-dialog-popup .modal-footer .btn {
+    min-width: 5em;
+}
+
+.io-ox-dialog-pane {
+    width: 500px;  /* Shrink to fit would be nicer */
+    overflow: visible;
+    background-color: white;
+    border: 3px solid #111;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px 5px 5px 5px;
+    z-index: 65001;
+}
+
+.io-ox-dialog-pane .content {
+    font-size: 12pt;
+    text-align: center;
+    color: @color;
+    padding: 10px;
+}
+
+/* Lightbox */
+
+.io-ox-lightbox-popup {
+    overflow: hidden;
+    background-color: white;
+    border: 3px solid #111;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px 5px 5px 5px;
+    z-index: 65001;
+    padding: 20px;
+}
+
+/* hints */
+
+span.hint {
+    font-size: 8pt;
+    text-align: left;
+}
+
+/* fail handling */
+.io-ox-fail {
+    font-weight: normal;
+    color: #888;
+}
+
+.io-ox-center {
+    display: table;
+    width: 100%;
+    height: 100%;
+}
+
+.io-ox-center > div {
+    display: table-cell;
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* inline links */
+.io-ox-inline-links {
+    text-align: right;
+    margin: 0 0 1em 0;
+    clear: both;
+    -webkit-user-select: none; -moz-user-select: none; user-select: none;
+}
+
+.io-ox-inline-links.empty {
+    padding: 0px;
+    height: 0.5em; /* some min height */
+}
+
+.io-ox-inline-links a,
+.io-ox-inline-links span.dropdown {
+    color: @inline-link-color;
+    text-decoration: none;
+    padding: 0 0 0 0.5em;
+    outline: 0;
+}
+
+.io-ox-inline-links span.dropdown ul {
+    text-align: left;
+}
+
+.io-ox-inline-links span.dropdown .caret {
+    margin-right: 5px;
+}
+
+.io-ox-inline-links a:hover {
+    text-decoration: underline;
+}
+
+.io-ox-action-link {
+    display: inline-block;
+    white-space: nowrap;
+    margin-left: 0.75em;
+}
+
+.io-ox-action-link:first-child {
+    margin-left: 0;
+}
+
+.io-ox-multi-selection .summary {
+    font-size: 24pt;
+    font-weight: 200;
+    line-height: 1.2em;
+    color: #ccc;
+}
+
+.io-ox-multi-selection .summary b {
+    color: #aaa;
+}
+
+.io-ox-multi-selection .io-ox-inline-links {
+    text-align: center;
+}
+
+.io-ox-multi-selection .io-ox-inline-links a {
+    color: @inline-link-color;
+}
+
+.io-ox-multi-selection .io-ox-inline-links.empty {
+    display: none;
+}
+
+/* side popups */
+.io-ox-sidepopup {
+    background-color: white;
+    border-left: 1px solid #aaa;
+    border-right: 1px solid #aaa;
+    z-index: 3; /* above .window-content */
+}
+
+.io-ox-sidepopup-pane { z-index: 1; }
+
+.io-ox-sidepopup.right {
+    left: 49.5%;
+    right: 0px;
+    border-right: 0px none;
+    -moz-box-shadow: -10px 0px 30px -10px #aaa;
+    -webkit-box-shadow: -10px 0px 30px -10px #aaa;
+    box-shadow: -10px 0px 30px -10px #aaa;
+}
+
+.io-ox-sidepopup.left {
+    left: 0px;
+    right: 49.5%;
+    border-left: 0px none;
+    -moz-box-shadow: 10px 0px 30px -10px #aaa;
+    -webkit-box-shadow: 10px 0px 30px -10px #aaa;
+    box-shadow: 10px 0px 30px -10px #aaa;
+}
+
+.io-ox-sidepopup-close { position: absolute; top: 8px; z-index: 2; }
+.io-ox-sidepopup.left .io-ox-sidepopup-close { right: 15px; }
+.io-ox-sidepopup.right .io-ox-sidepopup-close { right: 15px; }
+
+.io-ox-sidepopup-arrow {
+    position: absolute;
+    z-index: 4;
+}
+
+.io-ox-sidepopup-arrow.left { left: 0px; right: 49.5%; }
+.io-ox-sidepopup-arrow.right { left: 49.5%; right: 0px; }
+
+.io-ox-sidepopup-arrow .border {
+    position: absolute;
+    height: 0;
+    width: 0;
+    border: 20px solid transparent;
+    top: -20px;
+}
+
+.io-ox-sidepopup-arrow .triangle {
+    position: absolute;
+    height: 0;
+    width: 0px;
+    border: 20px solid transparent;
+    top: -20px;
+}
+
+.io-ox-sidepopup-arrow.left .border {
+    border-left-color: #aaa;
+    right: -40px;
+}
+
+.io-ox-sidepopup-arrow.left .triangle {
+    border-left-color: #fff;
+    right: -39px;
+}
+
+.io-ox-sidepopup-arrow.right .border {
+    border-right-color: #aaa;
+    left: -40px;
+}
+
+.io-ox-sidepopup-arrow.right .triangle {
+    border-right-color: #fff;
+    left: -39px;
+}
+
+/* input fields */
+
+input.nice-input {
+    color: @color;
+    background-color: white;
+    border: 1px solid #ccc;
+    padding: 0.10em 0.5em 0.10em 0.5em;
+    border-radius: 0.25em;
+    outline: 0;
+}
+
+.boxshadow input.nice-input:focus {
+    border-color: transparent;
+    box-shadow: 0px 0px 5px 1px @accent1;
+}
+
+/* auto complete */
+
+.autocomplete-popup {
+    position: absolute;
+    background-color: white;
+    border: 1px solid #ccc;
+    box-shadow: 0px 5px 20px -10px black;
+    z-index: 100000;
+    height: 200px;
+    overflow-x: hidden;
+    overfloy-y: auto;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -ms-box-sizing: border-box;
+    box-sizing: border-box;
+    padding-top: 3px;
+}
+
+.autocomplete-popup .autocomplete-item {
+    padding: 0 5px 5px 5px;
+    line-height: 1.5em;
+    cursor: pointer;
+}
+
+.autocomplete-popup .autocomplete-item.selected {
+    background-color: #eee;
+}
+
+/* folder tree */
+
+.io-ox-foldertree {
+    overflow: auto;
+    padding: 13px 0 4px 0;
+}
+
+.io-ox-foldertree .folder {
+    line-height: 18px;
+    padding: 3px 13px 3px 13px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.io-ox-foldertree .folder.selectable:hover {
+    background-color: #efefef;
+    cursor: pointer;
+}
+
+.io-ox-foldertree .folder .folder-label {
+    font-size: 14px;
+    font-weight: 200;
+}
+
+.io-ox-foldertree .folder.selected {
+    background-color: @selected-background !important;
+    background-image: -webkit-gradient(
+        linear,
+        left top,
+        left bottom,
+        color-stop(0, lighten(@selected-background, 20%)),
+        color-stop(1, darken(@selected-background, 5%))
+    ) !important;
+    background-image: -o-linear-gradient(top, lighten(@selected-background, 20%) 0%, darken(@selected-background, 5%) 100%) !important;
+    background-image: -moz-linear-gradient(
+        center top,
+        lighten(@selected-background, 20%) 0%,
+        darken(@selected-background, 5%) 100%
+    ) !important;
+    filter: ~"progid:DXImageTransform.Microsoft.gradient(startColorstr="lighten(@selected-background, 20%)", endColorstr="darken(@selected-background, 5%)~")";
+}
+
+.io-ox-foldertree .folder.selected * {
+    color: white !important;
+}
+
+.io-ox-foldertree .folder.greyed-out {
+    color: #bbb;
+}
+
+.io-ox-foldertree .folder.greyed-out .folder-icon {
+    opacity: 0.30;
+}
+
+.io-ox-foldertree .subfolders { }
+
+.io-ox-foldertree .folder-arrow {
+    float: left;
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+    background-repeat: no-repeat;
+    background-position: 0px 4px;
+    background-image: none;
+}
+
+.io-ox-foldertree .folder-icon {
+    float: left;
+    width: 16px;
+    height: 16px;
+    border: 0px none;
+    margin: 0 6px 0 0;
+}
+
+.io-ox-foldertree .folder-counter {
+    color: #888;
+    font-size: 11px;
+    padding: 0 0.75em 0 0.75em;
+    text-align: right;
+    margin-left: 0.5em;
+    display: inline-block;
+    float: right;
+}
+
+.borderradius .io-ox-foldertree .folder-counter {
+    background-color: #f0f0f0;
+    border-radius: 5px;
+}
+
+.borderradius .io-ox-foldertree .folder.selected .folder-counter {
+    color: white;
+    background-color: #035696;
+}
+
+.io-ox-foldertree .foldertree-links {
+    padding: 1em 13px 1em 29px;
+}
+
+.io-ox-foldertree .section {
+    margin-bottom: 21px;
+}
+
+.io-ox-foldertree .section .section-title {
+    font-size: 21px;
+    line-height: 1em;
+    font-weight: 200;
+    color: #ccc;
+    padding: 0 13px 0.5em 13px;
+}
+
+.io-ox-foldertree .folder .shared-by {
+    font-weight: 200;
+    padding-left: 22px;
+}
+
+.io-ox-sectionTitle {
+	font-size: 1.2em;
+	font-weight: bold;
+	margin-top:1em;
+	margin-bottom: 0.5em;
+}
+
+.io-ox-clickable {
+    cursor: pointer;
+}
+
+/*OMG find better place*/
+div.jGrowl {
+	z-index: 			9999;
+	color: 				#fff;
+	font-size: 			12px;
+}
+
+/** Normal Style Positions **/
+div.jGrowl {
+	position:			absolute;
+}
+
+body > div.jGrowl {
+	position:			fixed;
+}
+
+div.jGrowl.top-left {
+	left: 				0px;
+	top: 				0px;
+}
+
+div.jGrowl.top-right {
+	right: 				0px;
+	top: 				0px;
+}
+
+div.jGrowl.bottom-left {
+	left: 				0px;
+	bottom:				0px;
+}
+
+div.jGrowl.bottom-right {
+	right: 				0px;
+	bottom: 			0px;
+}
+
+div.jGrowl.center {
+	top: 				0px;
+	width: 				50%;
+	left: 				25%;
+}
+
+/** Cross Browser Styling **/
+div.center div.jGrowl-notification, div.center div.jGrowl-closer {
+	margin-left: 		auto;
+	margin-right: 		auto;
+}
+
+div.jGrowl div.jGrowl-notification, div.jGrowl div.jGrowl-closer {
+	background-color: 		#000;
+	opacity: 				.85;
+	zoom: 					1;
+	width: 					235px;
+	padding: 				10px;
+	margin-top: 			5px;
+	margin-bottom: 			5px;
+	font-family: 			Tahoma, Arial, Helvetica, sans-serif;
+	font-size: 				1em;
+	text-align: 			left;
+	display: 				none;
+	-moz-border-radius: 	5px;
+	-webkit-border-radius:	5px;
+}
+
+div.jGrowl div.jGrowl-notification {
+	min-height: 			40px;
+}
+
+div.jGrowl div.jGrowl-notification,
+div.jGrowl div.jGrowl-closer {
+	margin: 				10px;
+}
+
+div.jGrowl div.jGrowl-notification div.jGrowl-header {
+	font-weight: 			bold;
+	font-size:				.85em;
+}
+
+div.jGrowl div.jGrowl-notification div.jGrowl-close {
+	z-index:				99;
+	float: 					right;
+	font-weight: 			bold;
+	font-size: 				1em;
+	cursor:					pointer;
+}
+
+div.jGrowl div.jGrowl-closer {
+	padding-top: 			4px;
+	padding-bottom: 		4px;
+	cursor: 				pointer;
+	font-size:				.9em;
+	font-weight: 			bold;
+	text-align: 			center;
+}
+
+/** Hide jGrowl when printing **/
+@media print {
+	div.jGrowl {
+		display: 			none;
+	}
+}
+/** OMG END **/
+
+
+/** MEDIA QUERIES AT THE VERY BOTTOM -- EITHER MISTRANSFORMED OR EATEN BY LESS.JS **/
+
+@media screen and (min-height: 800px) {
+    .window-head { height: 59px; }
+    .window-title, .window-toolbar, .window-controls { top: 15px; }
+    .window-body { top: 60px; }
+}
