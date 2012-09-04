@@ -58,11 +58,15 @@ import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.OXGroupInterface;
 import com.openexchange.admin.rmi.OXResourceInterface;
 import com.openexchange.admin.rmi.OXUserInterface;
+import com.openexchange.admin.soap.reseller.context.reseller.soap.OXResellerContextServicePortType;
 import com.openexchange.admin.soap.reseller.context.reseller.soap.OXResellerContextServicePortTypeImpl;
+import com.openexchange.admin.soap.reseller.group.reseller.soap.OXResellerGroupServicePortType;
 import com.openexchange.admin.soap.reseller.group.reseller.soap.OXResellerGroupServicePortTypeImpl;
+import com.openexchange.admin.soap.reseller.resource.reseller.soap.OXResellerResourceServicePortType;
 import com.openexchange.admin.soap.reseller.resource.reseller.soap.OXResellerResourceServicePortTypeImpl;
 import com.openexchange.admin.soap.reseller.service.reseller.soap.OXResellerServicePortType;
 import com.openexchange.admin.soap.reseller.service.reseller.soap.OXResellerServicePortTypeImpl;
+import com.openexchange.admin.soap.reseller.user.reseller.soap.OXResellerUserServicePortType;
 import com.openexchange.admin.soap.reseller.user.reseller.soap.OXResellerUserServicePortTypeImpl;
 import com.openexchange.osgi.HousekeepingActivator;
 
@@ -150,8 +154,26 @@ public final class SoapResellerActivator extends HousekeepingActivator {
         track(Remote.class, trackerCustomizer);
         openTrackers();
 
-        final OXResellerServicePortTypeImpl soapService = new OXResellerServicePortTypeImpl();
-        registerService(OXResellerServicePortType.class, soapService);
+        {
+            final OXResellerServicePortTypeImpl soapService = new OXResellerServicePortTypeImpl();
+            registerService(OXResellerServicePortType.class, soapService);
+        }
+        {
+            final OXResellerUserServicePortTypeImpl soapService = new OXResellerUserServicePortTypeImpl();
+            registerService(OXResellerUserServicePortType.class, soapService);
+        }
+        {
+            final OXResellerResourceServicePortTypeImpl soapService = new OXResellerResourceServicePortTypeImpl();
+            registerService(OXResellerResourceServicePortType.class, soapService);
+        }
+        {
+            final OXResellerGroupServicePortTypeImpl soapService = new OXResellerGroupServicePortTypeImpl();
+            registerService(OXResellerGroupServicePortType.class, soapService);
+        }
+        {
+            final OXResellerContextServicePortTypeImpl soapService = new OXResellerContextServicePortTypeImpl();
+            registerService(OXResellerContextServicePortType.class, soapService);
+        }
     }
 
 }
