@@ -68,7 +68,7 @@ public class FilterActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        FilteredSubscriptionSourceDiscoveryService.CONFIG_VIEW_FACTORY = getService(ConfigViewFactory.class);
+        FilteredSubscriptionSourceDiscoveryService.CONFIG_VIEW_FACTORY.set(getService(ConfigViewFactory.class));
     }
 
 }
