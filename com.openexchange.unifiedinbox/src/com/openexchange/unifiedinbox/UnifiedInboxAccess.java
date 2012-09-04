@@ -120,7 +120,7 @@ public final class UnifiedInboxAccess extends MailAccess<UnifiedInboxFolderStora
 
     private transient UnifiedInboxMessageStorage messageStorage;
 
-    private transient MailLogicTools logicTools;
+    private transient UnifiedInboxLogicTools logicTools;
 
     /**
      * Initializes a new {@link UnifiedInboxAccess}.
@@ -192,7 +192,7 @@ public final class UnifiedInboxAccess extends MailAccess<UnifiedInboxFolderStora
             throw UnifiedInboxException.Code.NOT_CONNECTED.create();
         }
         if (null == logicTools) {
-            logicTools = new MailLogicTools(session, accountId);
+            logicTools = new UnifiedInboxLogicTools(session, accountId);
         }
         return logicTools;
     }

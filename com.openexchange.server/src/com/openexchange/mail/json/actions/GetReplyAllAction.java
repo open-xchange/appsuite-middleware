@@ -153,7 +153,9 @@ public final class GetReplyAllAction extends AbstractMailAction {
              */
             final MailServletInterface mailInterface = getMailInterface(req);
             final MailMessage mail = mailInterface.getReplyMessageForDisplay(folderPath, uid, true, usmNoSave);
-            mail.setAccountId(mailInterface.getAccountID());
+            if (!mail.containsAccountId()) {
+                mail.setAccountId(mailInterface.getAccountID());
+            }
             return new AJAXRequestResult(mail, "mail");
         } catch (final OXException e) {
             final Object[] args = e.getDisplayArgs();
