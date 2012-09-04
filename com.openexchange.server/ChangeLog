@@ -1,6 +1,7 @@
 * 2012-09-04 - thorben.betten@open-xchange.com
 
  - Fix for bug 22886: Read and write support for ISO-2022-CN charset
+ - Fix for bug 22884: Set appropriate content type
 
 * 2012-09-04 - jan.bauerdick@open-xchange.com
 
