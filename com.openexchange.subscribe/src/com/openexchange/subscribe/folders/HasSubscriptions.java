@@ -57,10 +57,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.log.LogFactory;
 import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.tools.session.ServerSession;
 
@@ -126,7 +126,7 @@ public class HasSubscriptions implements AdditionalFolderField {
              return allFalse(folder.size());
          }
          try {
-             hasSubscriptions.putAll(AbstractSubscribeService.STORAGE.hasSubscriptions(session.getContext(), folderIdsToQuery));
+             hasSubscriptions.putAll(AbstractSubscribeService.STORAGE.get().hasSubscriptions(session.getContext(), folderIdsToQuery));
              final List<Object> retval = new ArrayList<Object>(folder.size());
              for(final String fn : folderIds) {
                  if (hasSubscriptions.get(fn).booleanValue()) {
