@@ -584,7 +584,7 @@ public class MimeMessageFiller {
             } else if (mail.containsFrom()) {
                 mimeMessage.setReplyTo(mail.getFrom());
             }
-        } else if (usm.getReplyToAddr() == null || usm.getReplyToAddr().length() == 0) {
+        } else if (isEmpty(usm.getReplyToAddr())) {
             InternetAddress[] replyTo = null;
             final MailAccountStorageService mass = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
             if (null != mass) {
@@ -1929,5 +1929,17 @@ public class MimeMessageFiller {
             return fileName;
         }
     } // End of ImageDataImageProvider
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
 
 }
