@@ -1,0 +1,21 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange AWS Loadbalancing bundle
+Bundle-SymbolicName: com.openexchange.aws.loadbalancing
+Bundle-Version: 6.21.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.amazonaws.auth,
+ com.amazonaws.services.ec2.model,
+ com.amazonaws.services.elasticloadbalancing,
+ com.amazonaws.services.elasticloadbalancing.model,
+ com.openexchange.config,
+ com.openexchange.exception,
+ com.openexchange.i18n,
+ com.openexchange.log,
+ com.openexchange.osgi,
+ org.apache.commons.logging,
+ org.osgi.framework
+Bundle-ClassPath: .
+Bundle-Activator: com.openexchange.aws.loadbalancing.osgi.AWSLoadBalancingActivator
+Export-Package: com.openexchange.aws.loadbalancing

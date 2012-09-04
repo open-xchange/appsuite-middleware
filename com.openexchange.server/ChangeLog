@@ -1,3 +1,7 @@
+* 2012-09-04 - jan.bauerdick@open-xchange.com
+
+ - New bundle c.o.aws.loadbalancing: Register and deregister ec2 instances with the elastic loadbalancer
+
 * 2012-09-03 - thorben.betten@open-xchange.com
 
  - Fix for bug 22889: No keep-alive run if very first request body chunk not yet received
