@@ -70,7 +70,6 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.log.Log;
 import com.openexchange.mail.MailExceptionCode;
@@ -284,13 +283,14 @@ public final class GetAction extends AbstractMailAction {
                 final ContentType rct = new ContentType("text/plain");
                 final ContentType ct = mail.getContentType();
                 if (ct.containsCharsetParameter() && CharsetDetector.isValid(ct.getCharsetParameter())) {
-                    data = new AJAXRequestResult(new String(baos.toByteArray(), Charsets.forName(ct.getCharsetParameter())), "string");
                     rct.setCharsetParameter(ct.getCharsetParameter());
                 } else {
-                    data = new AJAXRequestResult(new String(baos.toByteArray(), com.openexchange.java.Charsets.UTF_8), "string");
                     rct.setCharsetParameter("UTF-8");
                 }
-                data.setHeader("Content-Type", rct.toString());
+                req.getRequest().setFormat("file");
+                final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(baos.toByteArray());
+                fileHolder.setContentType(rct.toString());
+                data = new AJAXRequestResult(fileHolder, "file");
             } else if (showMessageHeaders) {
                 /*
                  * Get message
@@ -306,7 +306,19 @@ public final class GetAction extends AbstractMailAction {
                     final int unreadMsgs = mail.getUnreadMessages();
                     mail.setUnreadMessages(unreadMsgs < 0 ? 0 : unreadMsgs + 1);
                 }
-                data = new AJAXRequestResult(formatMessageHeaders(mail.getHeadersIterator()), "string");
+                final ContentType rct = new ContentType("text/plain");
+                final ContentType ct = mail.getContentType();
+                if (ct.containsCharsetParameter() && CharsetDetector.isValid(ct.getCharsetParameter())) {
+                    rct.setCharsetParameter(ct.getCharsetParameter());
+                } else {
+                    rct.setCharsetParameter("UTF-8");
+                }
+                req.getRequest().setFormat("file");
+                final String sHeaders = formatMessageHeaders(mail.getHeadersIterator());
+                final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(sHeaders.getBytes(rct.getCharsetParameter()));
+                fileHolder.setContentType(rct.toString());
+                data = new AJAXRequestResult(fileHolder, "file");
+                //data = new AJAXRequestResult(formatMessageHeaders(mail.getHeadersIterator()), "string");
                 if (doUnseen) {
                     /*
                      * Leave mail as unseen
