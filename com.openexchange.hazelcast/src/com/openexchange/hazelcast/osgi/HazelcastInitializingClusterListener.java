@@ -61,16 +61,18 @@ import com.openexchange.cluster.discovery.ClusterListener;
  */
 final class HazelcastInitializingClusterListener implements ClusterListener {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(HazelcastInitializingClusterListener.class);
-
     private final HazelcastActivator activator;
+    private final long stamp;
+    private final Log logger;
 
     /**
      * Initializes a new {@link HazelcastInitializingClusterListener}.
      */
-    HazelcastInitializingClusterListener(final HazelcastActivator activator) {
+    protected HazelcastInitializingClusterListener(final HazelcastActivator activator, final long stamp, Log logger) {
         super();
         this.activator = activator;
+        this.stamp = stamp;
+        this.logger = logger;
     }
 
     @Override
@@ -80,10 +82,11 @@ final class HazelcastInitializingClusterListener implements ClusterListener {
 
     @Override
     public void added(final InetAddress address) {
-        if (activator.init(Collections.<InetAddress> singletonList(address))) {
-            if (LOG.isInfoEnabled()) {
-                LOG.info("Initialized Hazelcast instance via cluster listener notification about an appeared Open-Xchange node: " + address);
+        if (activator.init(Collections.<InetAddress> singletonList(address), stamp, logger)) {
+            if (logger.isInfoEnabled()) {
+                logger.info("\nHazelcast:\n\tInitialized Hazelcast instance via cluster listener notification about an appeared Open-Xchange node: "+address+"\n");
             }
         }
     }
+
 }
