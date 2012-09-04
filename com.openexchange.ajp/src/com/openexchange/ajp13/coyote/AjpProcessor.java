@@ -142,7 +142,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     /**
      * Request object.
      */
-    private final HttpServletRequestImpl request;
+    protected final HttpServletRequestImpl request;
 
     /**
      * Response object.
@@ -482,9 +482,10 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     }
 
     public void stopKeepAlivePing() {
+        final ScheduledTimerTask scheduledKeepAliveTask = this.scheduledKeepAliveTask;
         if (null != scheduledKeepAliveTask) {
             scheduledKeepAliveTask.cancel(false);
-            scheduledKeepAliveTask = null;
+            this.scheduledKeepAliveTask = null;
             /*
              * Task is automatically purged from TimerService by PurgeRunnable
              */
@@ -1061,29 +1062,17 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                         }
                     } else {
                         /*
-                         * Check if very first body chunk has already been received
+                         * Not committed, yet. Write an empty GET-BODY-CHUNK package.
                          */
-                        if (!first || request.getContentLength() < 0) {
-                            /*
-                             * Not committed, yet. Write an empty GET-BODY-CHUNK package.
-                             */
-                            output.write(AJPv13Response.getGetBodyChunkBytes(0));
-                            output.flush();
-                            lastWriteAccess = System.currentTimeMillis();
-                            /*
-                             * Receive empty body chunk (that requires the soft lock to be acquired)
-                             */
-                            receive();
-                            if (DEBUG) {
-                                LOG.debug("Performed keep-alive through an empty get-body-chunk package (and received that empty chunk).");
-                            }
-                        } else if (DEBUG) {
-                            /*-
-                             * First body chunk has not been received, yet
-                             * 
-                             * Abort client ping to not mess up AJP communication cycle because that first chunk is sent autarchically by Web Server. 
-                             */
-                            LOG.debug("First body chunk has not been received, yet. Client ping has therefore been aborted.");
+                        output.write(AJPv13Response.getGetBodyChunkBytes(0));
+                        output.flush();
+                        lastWriteAccess = System.currentTimeMillis();
+                        /*
+                         * Receive empty body chunk (that requires the soft lock to be acquired)
+                         */
+                        receive();
+                        if (DEBUG) {
+                            LOG.debug("Performed keep-alive through an empty get-body-chunk package (and received that empty chunk).");
                         }
                     }
                 } catch (final IOException e) {
@@ -2077,27 +2066,22 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
      * Receive a chunk of data. Called to implement the 'special' packet in ajp13 and to receive the data after we send a GET_BODY packet
      */
     public boolean receive() throws IOException {
-        softLock.lock();
-        try {
-            first = false;
-            bodyMessage.reset();
-            readMessage(bodyMessage);
-            // No data received.
-            if (bodyMessage.getLen() == 0) {
-                // just the header
-                // Don't mark 'end of stream' for the first chunk.
-                return false;
-            }
-            final int blen = bodyMessage.peekInt();
-            if (blen == 0) {
-                return false;
-            }
-            bodyMessage.getBytes(bodyBytes);
-            empty = false;
-            return true;
-        } finally {
-            softLock.unlock();
+        first = false;
+        bodyMessage.reset();
+        readMessage(bodyMessage);
+        // No data received.
+        if (bodyMessage.getLen() == 0) {
+            // just the header
+            // Don't mark 'end of stream' for the first chunk.
+            return false;
         }
+        final int blen = bodyMessage.peekInt();
+        if (blen == 0) {
+            return false;
+        }
+        bodyMessage.getBytes(bodyBytes);
+        empty = false;
+        return true;
     }
 
     /**
@@ -2310,7 +2294,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     }
 
-    private static final class KeepAliveRunnable implements Runnable {
+    private final class KeepAliveRunnable implements Runnable {
 
         private final AjpProcessor ajpProcessor;
 
@@ -2332,6 +2316,10 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         public void run() {
             try {
                 if (ajpProcessor.isProcessing() && ((System.currentTimeMillis() - ajpProcessor.getLastWriteAccess()) > max)) {
+                    if (first && request.getContentLengthLong() > 0) {
+                        // Very first request data chunk not yet received
+                        return;
+                    }
                     /*
                      * Send "keep-alive" package
                      */
