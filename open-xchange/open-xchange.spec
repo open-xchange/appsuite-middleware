@@ -177,6 +177,10 @@ fi
 /sbin/rcopen-xchange
 
 %changelog
+* Tue Sep 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 6.23.0
+* Mon Sep 03 2012 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for next EDP drop
 * Tue Aug 21 2012 Marcus Klein <marcus.klein@open-xchange.com>
 First release candidate for 6.22.0
 * Mon Aug 20 2012 Marcus Klein <marcus.klein@open-xchange.com>
