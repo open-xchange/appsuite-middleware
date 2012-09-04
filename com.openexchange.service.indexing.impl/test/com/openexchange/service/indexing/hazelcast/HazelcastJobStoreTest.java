@@ -53,6 +53,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -84,7 +85,10 @@ import org.quartz.spi.ClassLoadHelper;
 import org.quartz.spi.OperableTrigger;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.IMap;
 import com.hazelcast.core.Instance;
+import com.hazelcast.query.EntryObject;
+import com.hazelcast.query.PredicateBuilder;
 
 
 /**
@@ -121,6 +125,38 @@ public class HazelcastJobStoreTest {
     public void tearDown() throws Exception {
         jobStore.shutdown();      
         jobStore = null;
+    }
+    
+    @Test
+    public void testNotEqualPredicate() throws Exception {
+        HazelcastInstance hazelcast = getHazelcastInstance();
+        IMap<String, MapValue> map = hazelcast.getMap("mapName");
+        map.addIndex("value", false);
+        
+        map.put("key1", new MapValue(1));
+        
+        EntryObject entryObject = new PredicateBuilder().getEntryObject().get("value");
+        PredicateBuilder notEqualPredicate = entryObject.notEqual(5);
+        Collection<MapValue> values = map.values(notEqualPredicate);
+        assertTrue(!values.isEmpty());
+    }
+    
+    private HazelcastInstance getHazelcastInstance() throws JobPersistenceException {
+        return jobStore.getHazelcast();
+    }
+    
+    private static final class MapValue implements Serializable {
+        
+        private final int value;
+        
+        public MapValue(int value) {
+            super();
+            this.value = value;            
+        }
+        
+        public int getValue() {
+            return value;
+        }
     }
     
     @Test
