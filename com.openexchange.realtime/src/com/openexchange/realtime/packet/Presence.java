@@ -51,10 +51,24 @@ package com.openexchange.realtime.packet;
 
 /**
  * {@link Presence} - Exchanges presence information.
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
 public class Presence extends Stanza {
+
+    public enum Type {
+        subscribe, subscribed, unsubscribed, pending, none;
+    }
+
+    private Type state;
+
+    public Type getState() {
+        return state;
+    }
+
+    public void setState(Type state) {
+        this.state = state;
+    }
 
 }
