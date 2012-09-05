@@ -57,6 +57,18 @@ public interface OXResellerContextServicePortType {
         com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Credentials auth
     ) throws InvalidCredentialsException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception;
 
+    @WebResult(name = "return", targetNamespace = "http://soap.reseller.admin.openexchange.com")
+    @Action(input = "urn:list", output = "urn:listResponse", fault = {@FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:listInvalidCredentialsException"), @FaultAction(className = StorageException_Exception.class, value = "urn:listStorageException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:listRemoteException"), @FaultAction(className = InvalidDataException_Exception.class, value = "urn:listInvalidDataException")})
+    @RequestWrapper(localName = "list", targetNamespace = "http://soap.reseller.admin.openexchange.com", className = "com.openexchange.admin.soap.reseller.context.reseller.soap.List")
+    @WebMethod(action = "urn:list")
+    @ResponseWrapper(localName = "listResponse", targetNamespace = "http://soap.reseller.admin.openexchange.com", className = "com.openexchange.admin.soap.reseller.context.reseller.soap.ListResponse")
+    public java.util.List<com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext> list(
+        @WebParam(name = "ctx", targetNamespace = "http://soap.reseller.admin.openexchange.com")
+        com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext ctx,
+        @WebParam(name = "auth", targetNamespace = "http://soap.reseller.admin.openexchange.com")
+        com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Credentials auth
+    ) throws InvalidCredentialsException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception;
+
     @SOAPBinding(parameterStyle = SOAPBinding.ParameterStyle.BARE)
     @Action(input = "urn:changeModuleAccess", output = "urn:changeModuleAccessResponse", fault = {@FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:changeModuleAccessInvalidCredentialsException"), @FaultAction(className = DuplicateExtensionException_Exception.class, value = "urn:changeModuleAccessDuplicateExtensionException"), @FaultAction(className = NoSuchContextException_Exception.class, value = "urn:changeModuleAccessNoSuchContextException"), @FaultAction(className = StorageException_Exception.class, value = "urn:changeModuleAccessStorageException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:changeModuleAccessRemoteException"), @FaultAction(className = InvalidDataException_Exception.class, value = "urn:changeModuleAccessInvalidDataException")})
     @WebMethod(action = "urn:changeModuleAccess")
