@@ -127,6 +127,8 @@ public final class LoginWriter {
     private static void write(final Session session, final JSONObject json, final Collection<OXException> warnings, final Locale locale) throws JSONException {
         json.put(AJAXServlet.PARAMETER_SESSION, session.getSessionID());
         json.put(LoginFields.RANDOM_PARAM, session.getRandomToken());
+        json.put(AJAXServlet.PARAMETER_USER, session.getLogin());
+        json.put(AJAXServlet.PARAMETER_USER_ID, session.getUserId());
         if (null != warnings && !warnings.isEmpty()) {
             /*
              * Write warnings

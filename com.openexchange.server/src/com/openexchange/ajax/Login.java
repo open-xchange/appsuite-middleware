@@ -668,7 +668,6 @@ public class Login extends AJAXServlet {
                                 }
                                 final JSONObject json = new JSONObject();
                                 LoginWriter.write(session, json);
-                                json.put(AJAXServlet.PARAMETER_USER, session.getLogin());
                                 // Append "config/modules"
                                 appendModules(session, json, req);
                                 response.setData(json);
