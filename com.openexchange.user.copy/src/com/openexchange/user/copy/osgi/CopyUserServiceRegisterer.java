@@ -66,9 +66,9 @@ public class CopyUserServiceRegisterer implements ServiceTrackerCustomizer<CopyU
 
     private final BundleContext context;
     
-    private UserCopyServiceImpl copyService;
+    private volatile UserCopyServiceImpl copyService;
     
-    private ServiceRegistration<CopyUserTaskService> registration;
+    private volatile ServiceRegistration<UserCopyService> registration;
 
     public CopyUserServiceRegisterer(final BundleContext context) {
         super();
@@ -77,9 +77,11 @@ public class CopyUserServiceRegisterer implements ServiceTrackerCustomizer<CopyU
 
     public CopyUserTaskService addingService(final ServiceReference<CopyUserTaskService> reference) {
         final CopyUserTaskService taskService = context.getService(reference);
+        UserCopyServiceImpl copyService = this.copyService;
         if (copyService == null) {
             copyService = new UserCopyServiceImpl();
-            context.registerService(UserCopyService.class, copyService, null);
+            this.copyService = copyService;
+            registration = context.registerService(UserCopyService.class, copyService, null);
         }
 
         copyService.addTask(taskService);            
@@ -91,11 +93,16 @@ public class CopyUserServiceRegisterer implements ServiceTrackerCustomizer<CopyU
     }
 
     public void removedService(final ServiceReference<CopyUserTaskService> reference, final CopyUserTaskService taskService) {
+        final UserCopyServiceImpl copyService = this.copyService;
         if (copyService != null) {
             copyService.removeTask(taskService);
             if (0 == copyService.getTaskCount()) {
-                registration.unregister();
-                copyService = null;
+                final ServiceRegistration<UserCopyService> registration = this.registration;
+                if (null != registration) {
+                    registration.unregister();
+                    this.registration = null;
+                }
+                this.copyService = null;
             }
         }
         context.ungetService(reference);
