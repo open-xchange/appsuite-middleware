@@ -55,15 +55,16 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBProviderUser;
 import com.openexchange.database.provider.RequestDBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.log.LogFactory;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tx.TransactionAware;
 import com.openexchange.tx.TransactionExceptionCodes;
@@ -79,9 +80,13 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
     private final ThreadLocal<ThreadState> txState = new ThreadLocal<ThreadState>();
 
     private static final class ThreadState {
-        public List<Undoable> undoables = new ArrayList<Undoable>();
-        public boolean preferWriteCon;
-        public Set<Connection> writeCons = new HashSet<Connection>();
+        protected final List<Undoable> undoables = new ArrayList<Undoable>();
+        protected boolean preferWriteCon;
+        protected final Set<Connection> writeCons = new HashSet<Connection>();
+        
+        protected ThreadState() {
+            super();
+        }
     }
 
     public DBProvider getProvider() {
@@ -175,26 +180,35 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
 
     @Override
     public void rollback() throws OXException {
-        final List<Undoable> failed = new ArrayList<Undoable>();
-        final List<Undoable> undos = new ArrayList<Undoable>(txState.get().undoables);
+        final ThreadState threadState = txState.get();
+        if (null == threadState) {
+            // Nothing to do
+            return;
+        }
+        final List<Undoable> undos = new ArrayList<Undoable>(threadState.undoables);
+        if (undos.isEmpty()) {
+            // Nothing to do
+            return;
+        }
+        final List<Undoable> failed = new LinkedList<Undoable>();
         Collections.reverse(undos);
-        for(final Undoable undo : undos) {
+        for (final Undoable undo : undos) {
             try {
                 undo.undo();
             } catch (final OXException x) {
-                LOG.fatal(x.getMessage(),x);
+                LOG.fatal(x.getMessage(), x);
                 failed.add(undo);
             }
         }
-        if (failed.size() != 0) {
+        if (!failed.isEmpty()) {
             final OXException exception = TransactionExceptionCodes.NO_COMPLETE_ROLLBACK.create();
             if (LOG.isFatalEnabled()) {
                 final StringBuilder explanations = new StringBuilder();
-                for(final Undoable undo : failed) {
+                for (final Undoable undo : failed) {
                     explanations.append(undo.error());
                     explanations.append('\n');
                 }
-                LOG.fatal(explanations.toString(),exception);
+                LOG.fatal(explanations.toString(), exception);
             }
             throw exception;
         }
