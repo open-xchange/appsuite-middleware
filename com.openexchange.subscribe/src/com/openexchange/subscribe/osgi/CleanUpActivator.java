@@ -64,7 +64,7 @@ import com.openexchange.subscribe.internal.FolderCleanUpEventHandler;
  */
 public class CleanUpActivator extends HousekeepingActivator {
 
-    private FolderCleanUpEventHandler folderCleanUpEventHandler;
+    private volatile FolderCleanUpEventHandler folderCleanUpEventHandler;
 
     @Override
     public void startBundle() throws Exception {
@@ -77,7 +77,11 @@ public class CleanUpActivator extends HousekeepingActivator {
 
     @Override
     public void stopBundle() throws Exception {
-        folderCleanUpEventHandler.close();
+        final FolderCleanUpEventHandler folderCleanUpEventHandler = this.folderCleanUpEventHandler;
+        if (null != folderCleanUpEventHandler) {
+            folderCleanUpEventHandler.close();
+            this.folderCleanUpEventHandler = null;
+        }
     }
 
     @Override
