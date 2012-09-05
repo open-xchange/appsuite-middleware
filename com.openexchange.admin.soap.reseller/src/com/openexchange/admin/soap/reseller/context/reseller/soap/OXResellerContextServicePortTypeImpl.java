@@ -127,7 +127,7 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
     public java.util.List<com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext> list(java.lang.String searchPattern,com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Credentials auth) throws InvalidCredentialsException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    { 
         final OXContextInterface contextInterface = getContextInterface();
         try {
-            final com.openexchange.admin.rmi.dataobjects.Context[] contexts = contextInterface.list(searchPattern, soap2Credentials(auth));
+            final com.openexchange.admin.rmi.dataobjects.Context[] contexts = contextInterface.list(isEmpty(searchPattern) ? "*" : searchPattern, soap2Credentials(auth));
             if (null == contexts) {
                 return Collections.emptyList();
             }
@@ -1662,4 +1662,17 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
         }
         return ret;
     }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
+
 }
