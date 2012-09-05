@@ -238,6 +238,18 @@ public interface OXContextServicePortType {
     ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception;
 
     @WebResult(name = "return", targetNamespace = "http://soap.admin.openexchange.com")
+    @Action(input = "urn:list", output = "urn:listResponse", fault = {@FaultAction(className = StorageException_Exception.class, value = "urn:listStorageException"), @FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:listInvalidCredentialsException"), @FaultAction(className = InvalidDataException_Exception.class, value = "urn:listInvalidDataException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:listRemoteException")})
+    @RequestWrapper(localName = "list", targetNamespace = "http://soap.admin.openexchange.com", className = "com.openexchange.admin.soap.context.soap.List")
+    @WebMethod(action = "urn:list")
+    @ResponseWrapper(localName = "listResponse", targetNamespace = "http://soap.admin.openexchange.com", className = "com.openexchange.admin.soap.context.soap.ListResponse")
+    public java.util.List<com.openexchange.admin.soap.context.dataobjects.Context> list(
+        @WebParam(name = "ctx", targetNamespace = "http://soap.admin.openexchange.com")
+        com.openexchange.admin.soap.context.dataobjects.Context ctx,
+        @WebParam(name = "auth", targetNamespace = "http://soap.admin.openexchange.com")
+        com.openexchange.admin.soap.context.dataobjects.Credentials auth
+    ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception;
+
+    @WebResult(name = "return", targetNamespace = "http://soap.admin.openexchange.com")
     @Action(input = "urn:exists", output = "urn:existsResponse", fault = {@FaultAction(className = StorageException_Exception.class, value = "urn:existsStorageException"), @FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:existsInvalidCredentialsException"), @FaultAction(className = InvalidDataException_Exception.class, value = "urn:existsInvalidDataException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:existsRemoteException")})
     @RequestWrapper(localName = "exists", targetNamespace = "http://soap.admin.openexchange.com", className = "com.openexchange.admin.soap.context.soap.Exists")
     @WebMethod(action = "urn:exists")

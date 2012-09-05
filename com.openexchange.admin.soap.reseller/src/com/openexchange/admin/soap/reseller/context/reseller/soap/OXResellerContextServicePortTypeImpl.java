@@ -25,6 +25,7 @@ import com.openexchange.admin.rmi.exceptions.NoSuchFilestoreException;
 import com.openexchange.admin.rmi.exceptions.NoSuchReasonException;
 import com.openexchange.admin.rmi.exceptions.OXContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext;
 import com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Credentials;
 import com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Filestore;
 import com.openexchange.admin.soap.reseller.context.soap.dataobjects.Context;
@@ -144,6 +145,27 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
             throw new StorageException_Exception(e.getMessage(), e);
         } catch (final InvalidDataException e) {
             throw new InvalidDataException_Exception(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public List<ResellerContext> list(ResellerContext ctx, Credentials auth) throws InvalidCredentialsException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception {
+        final OXContextInterface contextInterface = getContextInterface();
+        try {
+            final com.openexchange.admin.rmi.dataobjects.Context context = contextInterface.getData(soap2Context(ctx), soap2Credentials(auth));
+            final java.util.List<com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext> list = new ArrayList<com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext>(1);
+            list.add(context2Soap(context));
+            return list;
+        } catch (final RemoteException e) {
+            throw new RemoteException_Exception(e.getMessage(), e);
+        } catch (final InvalidCredentialsException e) {
+            throw new InvalidCredentialsException_Exception(e.getMessage(), e);
+        } catch (final StorageException e) {
+            throw new StorageException_Exception(e.getMessage(), e);
+        } catch (final InvalidDataException e) {
+            throw new InvalidDataException_Exception(e.getMessage(), e);
+        } catch (final NoSuchContextException e) {
+            return Collections.emptyList();
         }
     }
 
