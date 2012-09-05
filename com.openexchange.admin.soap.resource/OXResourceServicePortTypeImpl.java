@@ -435,6 +435,10 @@ public class OXResourceServicePortTypeImpl implements OXResourceServicePortType 
         soapContext.setEnabled(context.getEnabled());
         soapContext.setFilestoreId(context.getFilestoreId());
         soapContext.setFilestoreName(context.getFilestore_name());
+        final HashSet<String> lmappings = context.getLoginMappings();
+        if (null != lmappings && !lmappings.isEmpty()) {
+            soapContext.setLoginMappings(new ArrayList<String>(lmappings));
+        }
         soapContext.setId(context.getId());
         soapContext.setMaxQuota(context.getMaxQuota());
         soapContext.setName(context.getName());

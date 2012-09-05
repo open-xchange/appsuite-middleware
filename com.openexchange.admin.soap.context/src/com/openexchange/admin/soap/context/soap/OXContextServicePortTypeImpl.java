@@ -10,6 +10,7 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
@@ -1591,6 +1592,10 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
         soapContext.setEnabled(context.getEnabled());
         soapContext.setFilestoreId(context.getFilestoreId());
         soapContext.setFilestoreName(context.getFilestore_name());
+        final HashSet<String> lmappings = context.getLoginMappings();
+        if (null != lmappings && !lmappings.isEmpty()) {
+            soapContext.setLoginMappings(new ArrayList<String>(lmappings));
+        }
         soapContext.setId(context.getId());
         soapContext.setMaxQuota(context.getMaxQuota());
         soapContext.setName(context.getName());
