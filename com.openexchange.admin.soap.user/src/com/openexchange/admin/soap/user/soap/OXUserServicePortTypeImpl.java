@@ -9,6 +9,7 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
@@ -1086,23 +1087,29 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
         final User soapUser = new User();
         soapUser.setGuiSpamFilterEnabled(user.getGui_spam_filter_enabled());
         soapUser.setAliases(user.getAliasesForSOAP());
-        if (null != user.getAnniversary()) {
+        Date d = user.getAnniversary();
+        if (null == d) {
+            soapUser.setAnniversary(null);
+        } else {
             try {
                 final GregorianCalendar c = new GregorianCalendar();
-                c.setTime(user.getAnniversary());
+                c.setTime(d);
                 soapUser.setAnniversary(DatatypeFactory.newInstance().newXMLGregorianCalendar(c));
             } catch (final DatatypeConfigurationException e) {
                 soapUser.setAnniversary(null);
             }
         }
         soapUser.setAssistantName(user.getAssistant_name());
-        if (null != user.getBirthday()) {
+        d = user.getBirthday();
+        if (null == d) {
+            soapUser.setBirthday(null);
+        } else {
             try {
                 final GregorianCalendar c = new GregorianCalendar();
-                c.setTime(user.getBirthday());
+                c.setTime(d);
                 soapUser.setBirthday(DatatypeFactory.newInstance().newXMLGregorianCalendar(c));
             } catch (final DatatypeConfigurationException e) {
-                soapUser.setAnniversary(null);
+                soapUser.setBirthday(null);
             }
         }
         soapUser.setBranches(user.getBranches());
