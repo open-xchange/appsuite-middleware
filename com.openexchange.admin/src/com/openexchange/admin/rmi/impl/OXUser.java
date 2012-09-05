@@ -1223,7 +1223,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     }
 
     private void checkContext(final Context ctx) throws InvalidDataException {
-        if (null == ctx.getId()) {
+        if (null == ctx || null == ctx.getId()) {
             throw new InvalidDataException("Context invalid");
         }
         /*-
