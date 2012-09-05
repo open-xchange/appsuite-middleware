@@ -13,6 +13,7 @@
  - Fix for bug 22883: Added missing reseller interfaces
  - Fix for bug 22928: Fixed activator of bundle 'com.openexchange.user.copy'
  - Fix for bug 22870: Checking for possibly empty mail identifier on action=get_structure request
+ - Fix for bug 22927: Fixed CleanUpActivator of bundle 'com.openexchange.subscribe'
 
 * 2012-09-04 - thorben.betten@open-xchange.com
 
