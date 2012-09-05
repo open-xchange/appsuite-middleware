@@ -360,7 +360,9 @@ public final class GetAction extends AbstractMailAction {
                 if (mail == null) {
                     throw MailExceptionCode.MAIL_NOT_FOUND.create(uid, folderPath);
                 }
-                mail.setAccountId(mailInterface.getAccountID());
+                if (!mail.containsAccountId()) {
+                    mail.setAccountId(mailInterface.getAccountID());
+                }
                 data = new AJAXRequestResult(mail, "mail");
             }
             data.addWarnings(warnings);
