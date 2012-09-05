@@ -1383,7 +1383,10 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
         final com.openexchange.admin.soap.reseller.user.soap.dataobjects.Group soapGroup = new com.openexchange.admin.soap.reseller.user.soap.dataobjects.Group();
         soapGroup.setDisplayname(group.getDisplayname());
         soapGroup.setId(group.getId());
-        soapGroup.setMembers(Arrays.asList(group.getMembers()));
+        {
+            final Integer[] members = group.getMembers();
+            soapGroup.setMembers(null == members ? null : Arrays.asList(members));
+        }
         soapGroup.setName(group.getName());
         return soapGroup;
     }

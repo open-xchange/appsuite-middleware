@@ -11,8 +11,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -830,7 +828,10 @@ public class OXUserCopyServicePortTypeImpl implements OXUserCopyServicePortType 
         final Group soapGroup = new Group();
         soapGroup.setDisplayname(group.getDisplayname());
         soapGroup.setId(group.getId());
-        soapGroup.setMembers(Arrays.asList(group.getMembers()));
+        {
+            final Integer[] members = group.getMembers();
+            soapGroup.setMembers(null == members ? null : Arrays.asList(members));
+        }
         soapGroup.setName(group.getName());
         return soapGroup;
     }

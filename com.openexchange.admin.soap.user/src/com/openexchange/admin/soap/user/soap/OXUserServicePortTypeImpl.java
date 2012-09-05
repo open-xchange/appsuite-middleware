@@ -11,7 +11,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
@@ -1260,7 +1259,10 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
         final Group soapGroup = new Group();
         soapGroup.setDisplayname(group.getDisplayname());
         soapGroup.setId(group.getId());
-        soapGroup.setMembers(Arrays.asList(group.getMembers()));
+        {
+            final Integer[] members = group.getMembers();
+            soapGroup.setMembers(null == members ? null : Arrays.asList(members));
+        }
         soapGroup.setName(group.getName());
         return soapGroup;
     }
