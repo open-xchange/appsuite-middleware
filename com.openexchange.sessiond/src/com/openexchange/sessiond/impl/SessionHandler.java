@@ -298,7 +298,7 @@ public final class SessionHandler {
      * @return The session ID associated with newly created session
      * @throws OXException If creating a new session fails
      */
-    protected static String addSession(final int userId, final String loginName, final String password, final int contextId, final String clientHost, final String login, final String authId, final String hash, final String client) throws OXException {
+    protected static SessionImpl addSession(final int userId, final String loginName, final String password, final int contextId, final String clientHost, final String login, final String authId, final String hash, final String client) throws OXException {
         checkMaxSessPerUser(userId, contextId);
         checkMaxSessPerClient(client, userId, contextId);
         checkAuthId(login, authId);
@@ -315,7 +315,7 @@ public final class SessionHandler {
         // Post event for created session
         postSessionCreation(session);
         // Return session ID
-        return sessionId;
+        return session;
     }
 
     private static void checkMaxSessPerUser(final int userId, final int contextId) throws OXException {
