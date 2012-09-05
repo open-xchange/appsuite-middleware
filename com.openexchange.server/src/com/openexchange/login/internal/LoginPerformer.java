@@ -243,7 +243,7 @@ public final class LoginPerformer {
                 final String capabilities = (String) properties.get("client.capabilities");
                 if (null == capabilities) {
                     session.setParameter(Session.PARAM_CAPABILITIES, Collections.<String> emptyList());
-                    retval.addWarning(LoginExceptionCodes.MISSING_CAPABILITIES.create());
+                    // retval.addWarning(LoginExceptionCodes.MISSING_CAPABILITIES.create());
                 } else {
                     final String[] sa = SPLIT.split(capabilities, 0);
                     final int length = sa.length;
