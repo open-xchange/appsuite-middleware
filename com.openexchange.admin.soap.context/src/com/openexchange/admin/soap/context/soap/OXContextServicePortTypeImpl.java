@@ -457,27 +457,6 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
     }
 
     @Override
-    public List<Context> list(Context ctx, Credentials auth) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception {
-        final OXContextInterface contextInterface = getContextInterface();
-        try {
-            final com.openexchange.admin.rmi.dataobjects.Context c = contextInterface.getData(soap2Context(ctx), soap2Credentials(auth));
-            final java.util.List<Context> list = new ArrayList<Context>(1);
-            list.add(context2Soap(c));
-            return list;
-        } catch (final RemoteException e) {
-            throw new RemoteException_Exception(e.getMessage(), e);
-        } catch (final InvalidCredentialsException e) {
-            throw new InvalidCredentialsException_Exception(e.getMessage(), e);
-        } catch (final StorageException e) {
-            throw new StorageException_Exception(e.getMessage(), e);
-        } catch (final InvalidDataException e) {
-            throw new InvalidDataException_Exception(e.getMessage(), e);
-        } catch (NoSuchContextException e) {
-            return Collections.emptyList();
-        }
-    }
-
-    @Override
     public java.lang.Boolean exists(final Context ctx,final Credentials auth) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , RemoteException_Exception    { 
         final OXContextInterface contextInterface = getContextInterface();
         try {
