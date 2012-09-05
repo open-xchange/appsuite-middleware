@@ -2,6 +2,7 @@
 
  - Fix for bug 22897: Make generated session instance available, rather than only providing its identifier
  - Fix for bug 22918: Deal with possible absent ThreadState instance
+ - Fix for bug 22921: Added null guard to prevent NPE
 
 * 2012-09-04 - thorben.betten@open-xchange.com
 
