@@ -15,6 +15,7 @@
  - Fix for bug 22870: Checking for possibly empty mail identifier on action=get_structure request
  - Fix for bug 22927: Fixed CleanUpActivator of bundle 'com.openexchange.subscribe'
  - Fix for bug 22926: Fixed activator of bundle 'com.openexchange.mobile.configuration.json'
+ - Fix for bug 22929: Prefer user name when generating NoSuchUserException's message
 
 * 2012-09-04 - thorben.betten@open-xchange.com
 
