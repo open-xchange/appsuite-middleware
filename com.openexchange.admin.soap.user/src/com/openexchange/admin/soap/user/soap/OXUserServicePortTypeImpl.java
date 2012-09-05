@@ -370,7 +370,7 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
         try {
             final com.openexchange.admin.rmi.dataobjects.User[] users = userInterface.list(
                 soap2Context(ctx),
-                searchPattern,
+                isEmpty(searchPattern) ? "*" : searchPattern,
                 soap2Credentials(auth));
             if (null == users) {
                 return Collections.emptyList();
@@ -401,7 +401,7 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
         try {
             final com.openexchange.admin.rmi.dataobjects.User[] users = userInterface.listCaseInsensitive(
                 soap2Context(ctx),
-                searchPattern,
+                isEmpty(searchPattern) ? "*" : searchPattern,
                 soap2Credentials(auth));
             if (null == users) {
                 return Collections.emptyList();
@@ -1691,6 +1691,18 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
         }
         soapMap.setEntries(entries);
         return soapMap;
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
 }
