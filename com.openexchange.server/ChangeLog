@@ -1,3 +1,7 @@
+* 2012-09-05 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22897: Make generated session instance available, rather than only providing its identifier
+
 * 2012-09-04 - thorben.betten@open-xchange.com
 
  - Fix for bug 22886: Read and write support for ISO-2022-CN charset
