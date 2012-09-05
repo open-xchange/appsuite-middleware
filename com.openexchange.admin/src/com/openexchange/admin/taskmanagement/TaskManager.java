@@ -54,14 +54,12 @@ import java.util.Hashtable;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
-
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.rmi.exceptions.TaskManagerException;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
+import com.openexchange.log.LogFactory;
 
 public class TaskManager {
 
@@ -138,8 +136,11 @@ public class TaskManager {
     
     public ExtendedFutureTask<?> getTask(final int jid, final Integer cid) throws TaskManagerException {
         synchronized (this.jobs) {
-            final ExtendedFutureTask<?> job = this.jobs.get(jid); 
-            if( null != cid && job.cid != cid ) {
+            final ExtendedFutureTask<?> job = this.jobs.get(Integer.valueOf(jid));
+            if (null == job) {
+                return null;
+            }
+            if (null != cid && job.cid != cid.intValue()) {
                 throw new TaskManagerException("The job with the id " + jid + " does not belong to context id " + cid);
             }
             return job;
