@@ -8,6 +8,7 @@
  - Fix for bug 22890: Added null guard
  - Fix for bug 22883: Added missing reseller interfaces
  - Fix for bug 22928: Fixed activator of bundle 'com.openexchange.user.copy'
+ - Fix for bug 22870: Checking for possibly empty mail identifier on action=get_structure request
 
 * 2012-09-04 - thorben.betten@open-xchange.com
 
