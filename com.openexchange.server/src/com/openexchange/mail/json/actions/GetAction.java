@@ -290,6 +290,7 @@ public final class GetAction extends AbstractMailAction {
                 req.getRequest().setFormat("file");
                 final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(baos.toByteArray());
                 fileHolder.setContentType(rct.toString());
+                fileHolder.setName("msgsrc.txt");
                 data = new AJAXRequestResult(fileHolder, "file");
             } else if (showMessageHeaders) {
                 /*
