@@ -315,7 +315,10 @@ public final class MessageWriter {
                 try {
                     int accId = accountId;
                     if (mail instanceof Delegatized) {
-                        accId = ((Delegatized) mail).getUndelegatedAccountId();
+                        final int undelegatedAccountId = ((Delegatized) mail).getUndelegatedAccountId();
+                        if (undelegatedAccountId >= 0) {
+                            accId = undelegatedAccountId;
+                        }
                     }
                     if (withKey) {
                         ((JSONObject) jsonContainer).put(FolderChildFields.FOLDER_ID, prepareFullname(accId, mail.getFolder()));
