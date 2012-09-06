@@ -82,7 +82,7 @@ public final class UnifiedMailMessage extends MailMessage implements Delegatized
 
     private Integer accountId;
 
-    private final int undelegatedAccountId;
+    private int undelegatedAccountId;
 
     /**
      * Initializes a new {@link UnifiedMailMessage}.
@@ -91,6 +91,14 @@ public final class UnifiedMailMessage extends MailMessage implements Delegatized
         super();
         this.undelegatedAccountId = undelegatedAccountId;
         this.delegatee = delegatee;
+    }
+
+    @Override
+    public void setUndelegatedAccountId(final int undelegatedAccountId) {
+        if (delegatee instanceof Delegatized) {
+            ((Delegatized) delegatee).setUndelegatedAccountId(undelegatedAccountId);
+        }
+        this.undelegatedAccountId = undelegatedAccountId;
     }
 
     @Override
