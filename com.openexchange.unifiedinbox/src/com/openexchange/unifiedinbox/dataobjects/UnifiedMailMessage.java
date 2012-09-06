@@ -58,6 +58,7 @@ import javax.activation.DataHandler;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailPath;
+import com.openexchange.mail.dataobjects.Delegatized;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentDisposition;
@@ -69,7 +70,7 @@ import com.openexchange.mail.mime.HeaderCollection;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class UnifiedMailMessage extends MailMessage {
+public final class UnifiedMailMessage extends MailMessage implements Delegatized {
 
     private static final long serialVersionUID = 9180380482758580171L;
 
@@ -79,12 +80,22 @@ public final class UnifiedMailMessage extends MailMessage {
 
     private String folder;
 
+    private Integer accountId;
+
+    private final int undelegatedAccountId;
+
     /**
      * Initializes a new {@link UnifiedMailMessage}.
      */
-    public UnifiedMailMessage(final MailMessage delegatee) {
+    public UnifiedMailMessage(final MailMessage delegatee, final int undelegatedAccountId) {
         super();
+        this.undelegatedAccountId = undelegatedAccountId;
         this.delegatee = delegatee;
+    }
+
+    @Override
+    public int getUndelegatedAccountId() {
+        return undelegatedAccountId;
     }
 
     @Override
