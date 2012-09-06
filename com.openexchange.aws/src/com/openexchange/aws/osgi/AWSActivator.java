@@ -53,6 +53,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.services.autoscaling.AmazonAutoScaling;
+import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.elasticloadbalancing.AmazonElasticLoadBalancing;
@@ -117,8 +119,11 @@ public class AWSActivator extends HousekeepingActivator {
         amazonEC2.setEndpoint(ec2Region);
         AmazonElasticLoadBalancing amazonLoadBalancing = new AmazonElasticLoadBalancingClient(credentials);
         amazonLoadBalancing.setEndpoint(lbRegion);
+        AmazonAutoScaling amazonAutoScaling = new AmazonAutoScalingClient(credentials);
+        amazonAutoScaling.setEndpoint(ec2Region);
         registerService(AmazonEC2.class, amazonEC2);
         registerService(AmazonElasticLoadBalancing.class, amazonLoadBalancing);
+        registerService(AmazonAutoScaling.class, amazonAutoScaling);
     }
 
     @Override

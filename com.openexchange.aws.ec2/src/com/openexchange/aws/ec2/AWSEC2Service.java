@@ -47,55 +47,59 @@
  *
  */
 
-package com.openexchange.cluster.discovery.aws.osgi;
+package com.openexchange.aws.ec2;
 
-import org.apache.commons.logging.Log;
-import com.amazonaws.services.ec2.AmazonEC2;
-import com.amazonaws.services.elasticloadbalancing.AmazonElasticLoadBalancing;
-import com.openexchange.cluster.discovery.ClusterDiscoveryService;
-import com.openexchange.cluster.discovery.aws.AWSClusterDiscoveryService;
-import com.openexchange.log.LogFactory;
-import com.openexchange.osgi.HousekeepingActivator;
+import java.util.List;
+import com.amazonaws.services.ec2.model.InstanceStateChange;
+import com.amazonaws.services.elasticloadbalancing.model.HealthCheck;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link AWSClusterDiscoveryActivator}
+ * {@link AWSEC2Service}
  * 
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class AWSClusterDiscoveryActivator extends HousekeepingActivator {
-
-    private static Log LOG = LogFactory.getLog(AWSClusterDiscoveryActivator.class);
-
-    private AmazonEC2 amazonEC2;
-
-    private AmazonElasticLoadBalancing lbClient;
+public interface AWSEC2Service {
 
     /**
-     * Initializes a new {@link AWSClusterDiscoveryActivator}.
+     * Start a new EC2 instance
+     * 
+     * @return Id of started instance
+     * @throws OXException When new instance can not start
      */
-    public AWSClusterDiscoveryActivator() {
-        super();
-    }
+    public String startInstance() throws OXException;
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { AmazonEC2.class, AmazonElasticLoadBalancing.class };
-    }
+    /**
+     * Stop instances
+     * 
+     * @param A list of the instanceIds to stop
+     * @return A list of changed instances
+     * @throws OXException When instances can not stop
+     */
+    public List<InstanceStateChange> stopInstances(List<String> instanceIds) throws OXException;
 
-    @Override
-    protected void startBundle() throws Exception {
-        LOG.info("Starting bundle: com.openexchange.cluster.discovery.aws");
-        lbClient = getService(AmazonElasticLoadBalancing.class);
-        amazonEC2 = getService(AmazonEC2.class);
-        AWSClusterDiscoveryService service = new AWSClusterDiscoveryService(lbClient, amazonEC2);
-        registerService(ClusterDiscoveryService.class, service);
-    }
+    /**
+     * Stop a single instance
+     * 
+     * @param instanceId The id of the instance to stop
+     * @return A list of changed instances
+     * @throws OXException When instance can not stop
+     */
+    public List<InstanceStateChange> stopInstance(String instanceId) throws OXException;
 
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("Stopping bundle: com.openexchange.cluster.discovery.aws");
-        unregisterServices();
-        cleanUp();
-    }
+    /**
+     * Check health of an instance
+     * 
+     * @param instanceId The id of the instance to check
+     * @return The health of the checked instance
+     */
+    public HealthCheck checkHealth(String instanceId);
+
+    /**
+     * Stops all instances started by service
+     * 
+     * @throws OXException When instances can not stop
+     */
+    public void stopAllInstances() throws OXException;
 
 }

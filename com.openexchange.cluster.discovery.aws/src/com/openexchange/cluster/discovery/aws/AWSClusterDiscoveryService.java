@@ -56,6 +56,9 @@ import java.util.List;
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.model.Address;
 import com.amazonaws.services.ec2.model.DescribeAddressesResult;
+import com.amazonaws.services.elasticloadbalancing.AmazonElasticLoadBalancing;
+import com.amazonaws.services.elasticloadbalancing.model.DescribeLoadBalancersResult;
+import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription;
 import com.openexchange.cluster.discovery.ClusterDiscoveryService;
 import com.openexchange.cluster.discovery.ClusterListener;
 
@@ -68,13 +71,16 @@ public class AWSClusterDiscoveryService implements ClusterDiscoveryService {
 
     private final AmazonEC2 amazonEC2;
 
+    private final AmazonElasticLoadBalancing lbClient;
+
     private final List<ClusterListener> listeners;
 
     /**
      * Initializes a new {@link AWSClusterDiscoveryService}.
      */
-    public AWSClusterDiscoveryService(AmazonEC2 amazonEC2) {
+    public AWSClusterDiscoveryService(AmazonElasticLoadBalancing lbClient, AmazonEC2 amazonEC2) {
         super();
+        this.lbClient = lbClient;
         this.amazonEC2 = amazonEC2;
         this.listeners = new ArrayList<ClusterListener>();
     }
@@ -82,6 +88,18 @@ public class AWSClusterDiscoveryService implements ClusterDiscoveryService {
     @Override
     public List<InetAddress> getNodes() {
         List<InetAddress> retval = new ArrayList<InetAddress>();
+        DescribeLoadBalancersResult lbResult = lbClient.describeLoadBalancers();
+        List<LoadBalancerDescription> descriptions = lbResult.getLoadBalancerDescriptions();
+        if (descriptions.size() > 0) {
+            for (LoadBalancerDescription desc : descriptions) {
+                try {
+                    retval.add(InetAddress.getByName(desc.getDNSName()));
+                } catch (UnknownHostException e) {
+                    // ignore
+                }
+            }
+            return retval;
+        }
         DescribeAddressesResult result = amazonEC2.describeAddresses();
         List<Address> addresses = result.getAddresses();
         for (Address a : addresses) {

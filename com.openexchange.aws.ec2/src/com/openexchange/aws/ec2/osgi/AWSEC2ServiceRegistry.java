@@ -47,55 +47,28 @@
  *
  */
 
-package com.openexchange.cluster.discovery.aws.osgi;
+package com.openexchange.aws.ec2.osgi;
 
-import org.apache.commons.logging.Log;
-import com.amazonaws.services.ec2.AmazonEC2;
-import com.amazonaws.services.elasticloadbalancing.AmazonElasticLoadBalancing;
-import com.openexchange.cluster.discovery.ClusterDiscoveryService;
-import com.openexchange.cluster.discovery.aws.AWSClusterDiscoveryService;
-import com.openexchange.log.LogFactory;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
- * {@link AWSClusterDiscoveryActivator}
+ * {@link AWSEC2ServiceRegistry}
  * 
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class AWSClusterDiscoveryActivator extends HousekeepingActivator {
+public class AWSEC2ServiceRegistry {
 
-    private static Log LOG = LogFactory.getLog(AWSClusterDiscoveryActivator.class);
-
-    private AmazonEC2 amazonEC2;
-
-    private AmazonElasticLoadBalancing lbClient;
+    private static ServiceRegistry registry = new ServiceRegistry();
 
     /**
-     * Initializes a new {@link AWSClusterDiscoveryActivator}.
+     * Initializes a new {@link AWSEC2ServiceRegistry}.
      */
-    public AWSClusterDiscoveryActivator() {
+    public AWSEC2ServiceRegistry() {
         super();
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { AmazonEC2.class, AmazonElasticLoadBalancing.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        LOG.info("Starting bundle: com.openexchange.cluster.discovery.aws");
-        lbClient = getService(AmazonElasticLoadBalancing.class);
-        amazonEC2 = getService(AmazonEC2.class);
-        AWSClusterDiscoveryService service = new AWSClusterDiscoveryService(lbClient, amazonEC2);
-        registerService(ClusterDiscoveryService.class, service);
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("Stopping bundle: com.openexchange.cluster.discovery.aws");
-        unregisterServices();
-        cleanUp();
+    public static ServiceRegistry getRegistry() {
+        return registry;
     }
 
 }

@@ -1,3 +1,7 @@
+* 2012-09-06 - jan.bauerdick@open-xchange.com
+
+ - New bundle c.o.aws.ec2: Start and stop EC2 instances and register them with the loadbalancer
+
 * 2012-09-05 - thorben.betten@open-xchange.com
 
  - Fix for bug 22897: Make generated session instance available, rather than only providing its identifier
