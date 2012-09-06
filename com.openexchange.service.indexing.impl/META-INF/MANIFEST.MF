@@ -5,6 +5,7 @@ Bundle-SymbolicName: com.openexchange.service.indexing.impl
 Bundle-Version: 6.23.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Eclipse-RegisterBuddy: com.openexchange.hazelcast
 Import-Package: com.hazelcast.cluster,
  com.hazelcast.config,
  com.hazelcast.core,
@@ -60,6 +61,7 @@ Import-Package: com.hazelcast.cluster,
  com.openexchange.service.indexing,
  com.openexchange.session,
  com.openexchange.sessiond,
+ com.openexchange.solr,
  com.openexchange.threadpool,
  com.openexchange.threadpool.behavior,
  com.openexchange.tools.iterator,

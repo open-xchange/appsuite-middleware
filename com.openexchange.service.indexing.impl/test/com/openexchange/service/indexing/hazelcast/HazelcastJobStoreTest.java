@@ -53,11 +53,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import java.io.Serializable;
+
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -82,13 +82,12 @@ import org.quartz.impl.triggers.SimpleTriggerImpl;
 import org.quartz.jobs.NoOpJob;
 import org.quartz.simpl.CascadingClassLoadHelper;
 import org.quartz.spi.ClassLoadHelper;
+import org.quartz.spi.JobStore;
 import org.quartz.spi.OperableTrigger;
+
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.IMap;
 import com.hazelcast.core.Instance;
-import com.hazelcast.query.EntryObject;
-import com.hazelcast.query.PredicateBuilder;
 
 
 /**
@@ -98,7 +97,7 @@ import com.hazelcast.query.PredicateBuilder;
  */
 public class HazelcastJobStoreTest {
     
-    protected TestableHazelcastJobStore jobStore = null;
+    protected JobStore jobStore = null;
     
     protected SampleSignaler signaler = null;
 
@@ -127,42 +126,44 @@ public class HazelcastJobStoreTest {
         jobStore = null;
     }
     
-    @Test
-    public void testNotEqualPredicate() throws Exception {
-        HazelcastInstance hazelcast = getHazelcastInstance();
-        IMap<String, MapValue> map = hazelcast.getMap("mapName");
-        map.addIndex("value", false);
-        
-        map.put("key1", new MapValue(1));
-        
-        EntryObject entryObject = new PredicateBuilder().getEntryObject().get("value");
-        PredicateBuilder notEqualPredicate = entryObject.notEqual(5);
-        Collection<MapValue> values = map.values(notEqualPredicate);
-        assertTrue(!values.isEmpty());
-    }
-    
-    private HazelcastInstance getHazelcastInstance() throws JobPersistenceException {
-        return jobStore.getHazelcast();
-    }
-    
-    private static final class MapValue implements Serializable {
-        
-        private final int value;
-        
-        public MapValue(int value) {
-            super();
-            this.value = value;            
-        }
-        
-        public int getValue() {
-            return value;
-        }
-    }
+//    @Test
+//    public void testNotEqualPredicate() throws Exception {
+//        HazelcastInstance hazelcast = getHazelcastInstance();
+//        IMap<String, MapValue> map = hazelcast.getMap("mapName");
+//        map.addIndex("value", false);
+//        
+//        map.put("key1", new MapValue(1));
+//        
+//        EntryObject entryObject = new PredicateBuilder().getEntryObject().get("value");
+//        PredicateBuilder notEqualPredicate = entryObject.notEqual(5);
+//        Collection<MapValue> values = map.values(notEqualPredicate);
+//        assertTrue(!values.isEmpty());
+//    }
+//    
+//    private HazelcastInstance getHazelcastInstance() throws JobPersistenceException {
+//        return jobStore.getHazelcast();
+//    }
+//    
+//    private static final class MapValue implements Serializable {
+//        
+//        private final int value;
+//        
+//        public MapValue(int value) {
+//            super();
+//            this.value = value;            
+//        }
+//        
+//        public int getValue() {
+//            return value;
+//        }
+//    }
     
     @Test
     public void testConcurrentExecution() throws Exception {
         MutableJobDetail jobDetail = (MutableJobDetail) this.jobDetail.clone();
         jobDetail.setConcurrentExecution(false);
+        jobStore.storeJob(jobDetail, true);
+        
         SimpleTriggerImpl trigger1 = (SimpleTriggerImpl) SimpleScheduleBuilder.repeatSecondlyForever(5).build();
         trigger1.setKey(new TriggerKey("testTrigger1", "testTriggerGroup1"));
         trigger1.setJobKey(jobDetail.getKey());
@@ -178,8 +179,12 @@ public class HazelcastJobStoreTest {
         jobStore.storeTrigger(trigger2, false);
         
         long firstFireTime = new Date(trigger1.getNextFireTime().getTime()).getTime();
-        List<OperableTrigger> nextTriggers = jobStore.acquireNextTriggers(firstFireTime, 1, 0L);
+        List<OperableTrigger> nextTriggers = jobStore.acquireNextTriggers(firstFireTime, 2, 0L);        
         Assert.assertTrue(nextTriggers.size() == 1);
+        
+        nextTriggers = jobStore.acquireNextTriggers(firstFireTime, 2, 0L);        
+        Assert.assertTrue(nextTriggers.size() == 0);
+        
     }
     
     /*
@@ -187,7 +192,6 @@ public class HazelcastJobStoreTest {
      */
     @Test
     public void testAcquireNextTrigger() throws Exception {
-        
         Date baseFireTimeDate = DateBuilder.evenMinuteDateAfterNow();
         long baseFireTime = baseFireTimeDate.getTime();
         
@@ -213,23 +217,25 @@ public class HazelcastJobStoreTest {
         
         long firstFireTime = new Date(trigger1.getNextFireTime().getTime()).getTime();
 
-        List<OperableTrigger> nextTriggers = jobStore.acquireNextTriggers(10, 1, 0L);
-        assertTrue(nextTriggers.isEmpty());
-        jobStore.triggersFired(nextTriggers);
-        
-        TriggerKey[] toCompare = new TriggerKey[] { trigger2.getKey(), trigger3.getKey(), trigger1.getKey() };
-        for (int i = 0; i < toCompare.length; i++) {
-            nextTriggers = jobStore.acquireNextTriggers(firstFireTime + 10000, 1, 0L);
-            assertEquals(toCompare[i], nextTriggers.get(0).getKey());
-            jobStore.triggersFired(Collections.singletonList(nextTriggers.get(0)));
-        }
-        
-        nextTriggers = jobStore.acquireNextTriggers(firstFireTime + 10000, 1, 0L);
-        assertTrue(nextTriggers.isEmpty());
+        assertTrue(jobStore.acquireNextTriggers(10, 1, 0L).isEmpty());
+        assertEquals(
+            trigger2.getKey(), 
+            jobStore.acquireNextTriggers(firstFireTime + 10000, 1, 0L).get(0).getKey());
+        assertEquals(
+            trigger3.getKey(), 
+            jobStore.acquireNextTriggers(firstFireTime + 10000, 1, 0L).get(0).getKey());
+        assertEquals(
+            trigger1.getKey(), 
+            jobStore.acquireNextTriggers(firstFireTime + 10000, 1, 0L).get(0).getKey());
+        assertTrue(
+            jobStore.acquireNextTriggers(firstFireTime + 10000, 1, 0L).isEmpty());
+
 
         // release trigger3
         jobStore.releaseAcquiredTrigger(trigger3);
-        assertEquals(trigger3, jobStore.acquireNextTriggers(new Date(trigger1.getNextFireTime().getTime()).getTime() + 10000, 1, 1L).get(0));
+        assertEquals(
+            trigger3, 
+            jobStore.acquireNextTriggers(new Date(trigger1.getNextFireTime().getTime()).getTime() + 10000, 1, 1L).get(0));
     }
 
     @Test

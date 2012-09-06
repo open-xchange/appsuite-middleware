@@ -59,6 +59,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
+
 import org.quartz.Calendar;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
@@ -79,6 +81,7 @@ import org.quartz.spi.OperableTrigger;
 import org.quartz.spi.SchedulerSignaler;
 import org.quartz.spi.TriggerFiredBundle;
 import org.quartz.spi.TriggerFiredResult;
+
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.ILock;
 import com.hazelcast.core.IMap;
@@ -155,7 +158,6 @@ public class HazelcastJobStore implements JobStore {
         
         triggersByKey.addIndex("trigger.nextFireTime", true);
         triggersByKey.addIndex("trigger.misfireInstruction", false);
-        triggersByKey.addIndex("state", true);
     }
 
     @Override
@@ -185,7 +187,7 @@ public class HazelcastJobStore implements JobStore {
 
     @Override
     public long getEstimatedTimeToReleaseAndAcquireTrigger() {
-        return 5;
+        return 20;
     }
 
     @Override
@@ -711,7 +713,7 @@ public class HazelcastJobStore implements JobStore {
             return TriggerState.BLOCKED;
         }
         
-        return TriggerState.NONE;
+        return TriggerState.NORMAL;
     }
 
     @Override
@@ -918,6 +920,7 @@ public class HazelcastJobStore implements JobStore {
         List<OperableTrigger> returnList = new ArrayList<OperableTrigger>();
         lock.lock();
         long now = System.currentTimeMillis();
+        long firstAcquiredTriggerFireTime = 0L;
         try {
             EntryObject e = new PredicateBuilder().getEntryObject();
             PredicateBuilder query = e.get("trigger.nextFireTime").isNotNull()
@@ -928,12 +931,16 @@ public class HazelcastJobStore implements JobStore {
             
             Collection<TriggerStateWrapper> filteredTriggers = triggersByKey.values(query);
             ArrayList<TriggerStateWrapper> triggers = new ArrayList<TriggerStateWrapper>(filteredTriggers);
-            Collections.sort(triggers, new TriggerTimeComparator());
+            Collections.sort(triggers, new TriggerWrapperTimeComparator());
 
-            Set<TriggerKey> excluded = new HashSet<TriggerKey>();
+            Set<JobKey> excluded = new HashSet<JobKey>();
             for (TriggerStateWrapper stateWrapper : triggers) {
-                if (stateWrapper.getState() == TriggerStateWrapper.STATE_BLOCKED || stateWrapper.getState() == TriggerStateWrapper.STATE_COMPLETE) {
+                if (cannotAcquire(stateWrapper)) {
                     continue;
+                }
+                
+                if(firstAcquiredTriggerFireTime > 0 && stateWrapper.getTrigger().getNextFireTime().getTime() > (firstAcquiredTriggerFireTime + timeWindow)) {                    
+                    break;
                 }
                 
                 if (applyMisfire(stateWrapper)) {
@@ -953,28 +960,59 @@ public class HazelcastJobStore implements JobStore {
                 }
                 
                 if (jobDetail.isConcurrentExectionDisallowed()) {
-                    if (excluded.contains(stateWrapper.getTrigger().getKey())) {
+                    if (excluded.contains(jobKey)) {
                         continue;
                     }
                     
-                    excluded.add(stateWrapper.getTrigger().getKey());                    
+                    excluded.add(jobKey);                    
+                }                                
+                
+                triggersByKey.remove(stateWrapper.getTrigger().getKey());
+                stateWrapper.setState(TriggerStateWrapper.STATE_ACQUIRED);
+                OperableTrigger trigger = (OperableTrigger) stateWrapper.getTrigger();
+                trigger.setFireInstanceId(getFiredTriggerRecordId());
+                triggersByKey.put(stateWrapper.getTrigger().getKey(), stateWrapper);
+                if (firstAcquiredTriggerFireTime == 0) {
+                    firstAcquiredTriggerFireTime = trigger.getNextFireTime().getTime();
                 }
                 
-                returnList.add((OperableTrigger) stateWrapper.getTrigger());
+                returnList.add(trigger);
                 if (returnList.size() == maxCount) {
                     break;
                 }
-            }
+            }            
             
             return returnList;
         } finally {
             lock.unlock();
         }
     }
+    
+    private static final AtomicLong ftrCtr = new AtomicLong(System.currentTimeMillis());
+
+    protected String getFiredTriggerRecordId() {
+        return String.valueOf(ftrCtr.incrementAndGet());
+    }
+    
+    private boolean cannotAcquire(TriggerStateWrapper stateWrapper) {
+        return stateWrapper.getState() == TriggerStateWrapper.STATE_BLOCKED 
+                || stateWrapper.getState() == TriggerStateWrapper.STATE_COMPLETE
+                || stateWrapper.getState() == TriggerStateWrapper.STATE_PAUSED
+                || stateWrapper.getState() == TriggerStateWrapper.STATE_ACQUIRED;
+    }
 
     @Override
     public void releaseAcquiredTrigger(OperableTrigger trigger) throws JobPersistenceException {
-
+        lock.lock();
+        try {
+            TriggerStateWrapper stateWrapper = triggersByKey.remove(trigger.getKey());
+            if (stateWrapper != null) {
+                stateWrapper.setState(stateWrapper.getOldState());
+                triggersByKey.put(trigger.getKey(), stateWrapper);
+            }
+        } finally {
+            lock.unlock();
+        }
     }
 
     @Override
@@ -1195,6 +1233,8 @@ public class HazelcastJobStore implements JobStore {
         
         public static final int STATE_BLOCKED = 5;
         
+        public static final int STATE_ACQUIRED = 6;
+        
         private final Trigger trigger;
         
         private int state;
@@ -1241,7 +1281,7 @@ public class HazelcastJobStore implements JobStore {
      * value first), if the priorities are the same, then they are sorted
      * by key.
      */
-    class TriggerTimeComparator implements Comparator<TriggerStateWrapper>, Serializable {
+    class TriggerWrapperTimeComparator implements Comparator<TriggerStateWrapper>, Serializable {
       
         private static final long serialVersionUID = -3904243490805975570L;
 

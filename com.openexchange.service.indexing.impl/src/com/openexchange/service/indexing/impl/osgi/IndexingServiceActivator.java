@@ -49,12 +49,14 @@
 
 package com.openexchange.service.indexing.impl.osgi;
 
-import java.util.concurrent.atomic.AtomicReference;
-import javax.management.NotCompliantMBeanException;
-import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
-import org.osgi.framework.ServiceReference;
+import org.quartz.JobBuilder;
+import org.quartz.JobDataMap;
+import org.quartz.JobDetail;
+import org.quartz.Trigger;
+import org.quartz.TriggerBuilder;
 import org.quartz.service.QuartzService;
+
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
@@ -70,20 +72,12 @@ import com.openexchange.mail.smal.SmalAccessService;
 import com.openexchange.mail.utils.MailPasswordUtil;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.management.ManagementService;
-import com.openexchange.mq.MQService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.SimpleRegistryListener;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.service.indexing.IndexingService;
-import com.openexchange.service.indexing.IndexingServiceMBean;
-import com.openexchange.service.indexing.hazelcast.MailFolderJob;
+import com.openexchange.service.indexing.hazelcast.HazelcastIndexingService;
+import com.openexchange.service.indexing.hazelcast.MailIndexingJob;
 import com.openexchange.service.indexing.impl.CompositeServiceLookup;
-import com.openexchange.service.indexing.impl.IndexingServiceImpl;
 import com.openexchange.service.indexing.impl.IndexingServiceInit;
-import com.openexchange.service.indexing.impl.IndexingServiceMBeanImpl;
 import com.openexchange.service.indexing.impl.Services;
-import com.openexchange.service.indexing.infostore.InfostoreAccountJob;
 import com.openexchange.service.indexing.mail.MailJobInfo;
 import com.openexchange.service.indexing.mail.MailJobInfo.Builder;
 import com.openexchange.session.Session;
@@ -111,7 +105,7 @@ public final class IndexingServiceActivator extends HousekeepingActivator {
         return new Class<?>[] {
             ConfigurationService.class, ThreadPoolService.class, DatabaseService.class, MailService.class,
             SmalAccessService.class, IndexFacadeService.class, SessiondService.class, IDBasedFileAccessFactory.class, FolderService.class,
-            MailAccountStorageService.class, HazelcastInstance.class };
+            MailAccountStorageService.class, HazelcastInstance.class, QuartzService.class };
     }
 
     @Override
@@ -242,7 +236,7 @@ public final class IndexingServiceActivator extends HousekeepingActivator {
                     new Thread(new Runnable() {
                         
                         @Override
-                        public void run() {
+                        public void run() {                            
                             try {
                                 Session session = login.getSession();
                                 MailAccountStorageService storageService = getService(MailAccountStorageService.class);
@@ -264,11 +258,28 @@ public final class IndexingServiceActivator extends HousekeepingActivator {
                                 }
                                 builder.password(password);
                                 
-                                InfostoreAccountJob job = new InfostoreAccountJob(session);  
-                                MailFolderJob folderJob = new MailFolderJob("INBOX", builder.build());
-                            
-                                job.performJob();
-                                folderJob.performJob();
+                                JobDataMap jobData = new JobDataMap();
+                                jobData.put(HazelcastIndexingService.MAIL_JOB_INFO, builder.build());
+                                jobData.put("folder", "INBOX");
+                                JobDetail jobDetail = JobBuilder.newJob(MailIndexingJob.class)
+                                    .withIdentity(session.getContextId() + '/' + session.getUserId() + "INBOX", "indexingJobs")
+                                    .usingJobData(jobData)                                    
+                                    .build();
+                                
+                                Trigger trigger = TriggerBuilder.newTrigger()
+                                        .forJob(jobDetail)
+                                        .startNow()
+                                        .withIdentity("loginTrigger", "indexingTriggers")
+                                        .build();
+                                
+                                HazelcastIndexingService indexingService = new HazelcastIndexingService();
+                                indexingService.scheduleJob(jobDetail, trigger);
+                                
+//                                InfostoreAccountJob job = new InfostoreAccountJob(session);  
+//                                MailFolderJob folderJob = new MailFolderJob("INBOX", builder.build());
+//                            
+//                                job.performJob();
+//                                folderJob.performJob();
                             } catch (Exception e) {
                                 // TODO Auto-generated catch block
                                 e.printStackTrace();

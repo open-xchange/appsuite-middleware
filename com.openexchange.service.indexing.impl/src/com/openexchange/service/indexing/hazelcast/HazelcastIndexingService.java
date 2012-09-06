@@ -49,10 +49,13 @@
 
 package com.openexchange.service.indexing.hazelcast;
 
-import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.IQueue;
-import com.hazelcast.core.ISet;
-import com.hazelcast.core.Member;
+import org.quartz.JobDetail;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.Trigger;
+import org.quartz.service.QuartzService;
+
+import com.openexchange.exception.OXException;
 import com.openexchange.service.indexing.impl.Services;
 
 
@@ -63,15 +66,16 @@ import com.openexchange.service.indexing.impl.Services;
  */
 public class HazelcastIndexingService {
     
-    private static final String QUEUE_NAME = "indexingJobQueue";
+    public static final String MAIL_JOB_INFO = "mailJobInfo";
     
-    private static final String NODE_LIST_NAME = "indexingNodes";
-    
-    public void doIt() {
-        HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
-        ISet<Member> indexNodes = hazelcast.getSet(NODE_LIST_NAME);
-
-        IQueue<Object> queue = hazelcast.getQueue(QUEUE_NAME);
+    public void scheduleJob(JobDetail jobDetail, Trigger trigger) throws OXException {
+        QuartzService quartzService = Services.getService(QuartzService.class);
+        Scheduler scheduler = quartzService.getScheduler();
+        try {
+            scheduler.scheduleJob(jobDetail, trigger);
+        } catch (SchedulerException e) {
+            throw new OXException(e);
+        }
     }
 
 }

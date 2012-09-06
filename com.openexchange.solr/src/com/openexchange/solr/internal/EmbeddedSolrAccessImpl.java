@@ -52,7 +52,9 @@ package com.openexchange.solr.internal;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Properties;
+
 import javax.xml.parsers.ParserConfigurationException;
+
 import org.apache.commons.logging.Log;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -65,6 +67,7 @@ import org.apache.solr.core.CoreContainer;
 import org.apache.solr.core.CoreDescriptor;
 import org.apache.solr.core.SolrCore;
 import org.xml.sax.SAXException;
+
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
@@ -113,6 +116,7 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
             throw new IllegalStateException(ISE_MSG);
         }
         
+        long start = System.currentTimeMillis();
         try {
             int module = identifier.getModule();
             com.openexchange.solr.SolrCore solrCore = getCoreOrCreateEnvironment(identifier);
@@ -143,6 +147,11 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
             throw new OXException(e);
         } catch (final SAXException e) {
             throw new OXException(e);
+        } finally {
+            if (LOG.isDebugEnabled()) {
+                long diff = System.currentTimeMillis() - start;
+                LOG.debug("Core start lastet " + diff + "ms.");
+            }
         }
     }
     
