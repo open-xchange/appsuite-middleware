@@ -49,12 +49,8 @@
 
 package com.openexchange.admin;
 
-import java.rmi.AccessException;
-import java.rmi.AlreadyBoundException;
-import java.rmi.NotBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
-import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.logging.Log;
@@ -62,15 +58,12 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.exceptions.OXGenericException;
-import com.openexchange.admin.rmi.OXContextInterface;
-import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.AdminCacheExtended;
 import com.openexchange.admin.tools.PropertyHandlerExtended;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.log.LogFactory;
-import com.openexchange.log.LogProperties;
 
 public class PluginStarter {
 
@@ -90,7 +83,7 @@ public class PluginStarter {
         super();
     }
 
-    public void start(final BundleContext context, final ConfigurationService service) throws RemoteException, AlreadyBoundException, StorageException, OXGenericException {
+    public void start(final BundleContext context, final ConfigurationService service) throws RemoteException, StorageException, OXGenericException {
         try {
             AdminCache.compareAndSet(null, service);
             this.context = context;
@@ -98,14 +91,12 @@ public class PluginStarter {
 
             // Create all OLD Objects and bind export them
             oxctx_v2 = new com.openexchange.admin.rmi.impl.OXContext(context);
-            final OXContextInterface oxctx_stub_v2 = (OXContextInterface) UnicastRemoteObject.exportObject(oxctx_v2, 0);
 
             oxutil_v2 = new com.openexchange.admin.rmi.impl.OXUtil();
-            final OXUtilInterface oxutil_stub_v2 = (OXUtilInterface) UnicastRemoteObject.exportObject(oxutil_v2, 0);
 
             // bind all NEW Objects to registry
-            services.add(context.registerService(Remote.class, oxctx_stub_v2, null));
-            services.add(context.registerService(Remote.class, oxutil_stub_v2, null));
+            services.add(context.registerService(Remote.class, oxctx_v2, null));
+            services.add(context.registerService(Remote.class, oxutil_v2, null));
 
             // startJMX();
 
@@ -122,7 +113,7 @@ public class PluginStarter {
         }
     }
 
-    public void stop() throws AccessException, RemoteException, NotBoundException {
+    public void stop() {
         for (ServiceRegistration<Remote> registration : services) {
             context.ungetService(registration.getReference());
         }

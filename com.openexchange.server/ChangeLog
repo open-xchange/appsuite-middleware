@@ -1,3 +1,7 @@
+* 2012-09-06 - marcus.klein@open-xchange.com
+
+ - Fix for bug 22872: Publishing directly the object of a RMI Remote interface instead of its stub makes the objects not disappear anymore.
+
 * 2012-09-05 - marcus.klein@open-xchange.com
 
  - Fix for bug 22915: No NPE if SOAP method is not found.
