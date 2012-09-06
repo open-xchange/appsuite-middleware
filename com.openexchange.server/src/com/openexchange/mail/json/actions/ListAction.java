@@ -133,7 +133,9 @@ public final class ListAction extends AbstractMailAction {
                 for (int i = 0; i < mails.length; i++) {
                     final MailMessage mail = mails[i];
                     if (mail != null) {
-                        mail.setAccountId(accountID);
+                        if (!mail.containsAccountId()) {
+                            mail.setAccountId(accountID);
+                        }
                         list.add(mail);
                     }
                 }

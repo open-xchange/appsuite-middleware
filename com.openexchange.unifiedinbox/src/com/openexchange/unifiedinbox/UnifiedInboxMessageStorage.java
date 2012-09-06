@@ -299,10 +299,11 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                  */
             }
             // Wait for completion of each submitted task
+            final int undelegatedAccountId = access.getAccountId();
             try {
                 for (int i = 0; i < numTasks; i++) {
                     final GetMessagesResult result = completionService.take().get();
-                    insertMessage(mailIds, messages, result.accountId, result.folder, result.mails, fullName);
+                    insertMessage(mailIds, messages, result.accountId, result.folder, result.mails, fullName, undelegatedAccountId);
                 }
                 if (DEBUG) {
                     LOG.debug(new StringBuilder(64).append("Retrieving ").append(mailIds.length).append(" messages from folder \"").append(
@@ -352,7 +353,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                 if (null == mail) {
                     return null;
                 }
-                mail = new UnifiedMailMessage(mail);
+                mail = new UnifiedMailMessage(mail, access.getAccountId());
                 mail.loadContent();
                 mail.setMailId(mailId);
                 mail.setFolder(fullName);
@@ -401,6 +402,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                     }
                 }
             }
+            final int undelegatedAccountId = access.getAccountId();
             final boolean descending = OrderDirection.DESC.equals(order);
             final MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE :  sortField;
             final MailFields mfs = new MailFields(mailFields);
@@ -437,7 +439,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                                 for (final List<MailMessage> list2 : list) {
                                     final List<MailMessage> messages = new ArrayList<MailMessage>(list2.size());
                                     for (final MailMessage accountMail : list2) {
-                                        final UnifiedMailMessage umm = new UnifiedMailMessage(accountMail);
+                                        final UnifiedMailMessage umm = new UnifiedMailMessage(accountMail, undelegatedAccountId);
                                         umm.setMailId(helper.setUID(accountId, fn, accountMail.getMailId()).toString());
                                         umm.setFolder(fullName);
                                         umm.setAccountId(accountId);
@@ -514,7 +516,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                             for (final List<MailMessage> list2 : list) {
                                 final List<MailMessage> messages = new ArrayList<MailMessage>(list2.size());
                                 for (final MailMessage accountMail : list2) {
-                                    final UnifiedMailMessage umm = new UnifiedMailMessage(accountMail);
+                                    final UnifiedMailMessage umm = new UnifiedMailMessage(accountMail, undelegatedAccountId);
                                     umm.setMailId(helper.setUID(accountId, fn, accountMail.getMailId()).toString());
                                     umm.setFolder(fullName);
                                     umm.setAccountId(accountId);
@@ -717,6 +719,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             final MailField[] checkedFields = mfs.toArray();
             // Create completion service for simultaneous access
             final int length = accounts.size();
+            final int undelegatedAccountId = access.getAccountId();
             final Executor executor = ThreadPools.getThreadPool().getExecutor();
             final TrackingCompletionService<List<MailMessage>> completionService =
                 new UnifiedInboxCompletionService<List<MailMessage>>(executor);
@@ -743,7 +746,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                             final List<MailMessage> messages = new ArrayList<MailMessage>(accountMails.length);
                             final UnifiedInboxUID helper = new UnifiedInboxUID();
                             for (final MailMessage accountMail : accountMails) {
-                                final UnifiedMailMessage umm = new UnifiedMailMessage(accountMail);
+                                final UnifiedMailMessage umm = new UnifiedMailMessage(accountMail, undelegatedAccountId);
                                 umm.setMailId(helper.setUID(accountId, fn, accountMail.getMailId()).toString());
                                 umm.setFolder(fullName);
                                 umm.setAccountId(accountId);
@@ -853,6 +856,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             final MailField[] checkedFields = mfs.toArray();
             // Create completion service for simultaneous access
             final int length = accounts.size();
+            final int undelegatedAccountId = access.getAccountId();
             final Executor executor = ThreadPools.getThreadPool().getExecutor();
             final TrackingCompletionService<List<MailMessage>> completionService =
                 new UnifiedInboxCompletionService<List<MailMessage>>(executor);
@@ -879,7 +883,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                             final List<MailMessage> messages = new ArrayList<MailMessage>(accountMails.length);
                             final UnifiedInboxUID helper = new UnifiedInboxUID();
                             for (final MailMessage accountMail : accountMails) {
-                                final UnifiedMailMessage umm = new UnifiedMailMessage(accountMail);
+                                final UnifiedMailMessage umm = new UnifiedMailMessage(accountMail, undelegatedAccountId);
                                 umm.setMailId(helper.setUID(accountId, fn, accountMail.getMailId()).toString());
                                 umm.setFolder(fullName);
                                 umm.setAccountId(accountId);
@@ -986,6 +990,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                 accounts = l.toArray(new MailAccount[l.size()]);
             }
             final int length = accounts.length;
+            final int undelegatedAccountId = access.getAccountId();
             final Executor executor = ThreadPools.getThreadPool().getExecutor();
             final TrackingCompletionService<List<MailMessage>> completionService =
                 new UnifiedInboxCompletionService<List<MailMessage>>(executor);
@@ -1011,7 +1016,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                             final UnifiedInboxUID helper = new UnifiedInboxUID();
                             final List<MailMessage> messages = new ArrayList<MailMessage>(accountMails.length);
                             for (final MailMessage accountMail : accountMails) {
-                                final UnifiedMailMessage umm = new UnifiedMailMessage(accountMail);
+                                final UnifiedMailMessage umm = new UnifiedMailMessage(accountMail, undelegatedAccountId);
                                 umm.setMailId(helper.setUID(accountId, fn, accountMail.getMailId()).toString());
                                 umm.setFolder(fullName);
                                 umm.setAccountId(accountId);
@@ -1327,7 +1332,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
      * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
      */
 
-    private static void insertMessage(final String[] mailIds, final MailMessage[] toFill, final int accountId, final String folder, final MailMessage[] mails, final String uiFullname) {
+    private static void insertMessage(final String[] mailIds, final MailMessage[] toFill, final int accountId, final String folder, final MailMessage[] mails, final String uiFullname, final int undelegatedAccountId) {
         final UnifiedInboxUID helper = new UnifiedInboxUID();
         for (final MailMessage mail : mails) {
             if (null != mail) {
@@ -1339,7 +1344,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                     }
                 }
                 if (pos != -1) {
-                    final UnifiedMailMessage umm = new UnifiedMailMessage(mail);
+                    final UnifiedMailMessage umm = new UnifiedMailMessage(mail, undelegatedAccountId);
                     toFill[pos] = umm;
                     umm.setMailId(mailIds[pos]);
                     umm.setFolder(uiFullname);
