@@ -280,17 +280,23 @@ public final class GetAction extends AbstractMailAction {
                     fileHolder.setName(new StringBuilder(mail.getSubject()).append(".eml").toString());
                     return new AJAXRequestResult(fileHolder, "file");
                 }
-                final ContentType rct = new ContentType("text/plain");
                 final ContentType ct = mail.getContentType();
                 if (ct.containsCharsetParameter() && CharsetDetector.isValid(ct.getCharsetParameter())) {
-                    rct.setCharsetParameter(ct.getCharsetParameter());
+                    data = new AJAXRequestResult(new String(baos.toByteArray(), ct.getCharsetParameter()), "string");
                 } else {
-                    rct.setCharsetParameter("UTF-8");
+                    data = new AJAXRequestResult(new String(baos.toByteArray(), "UTF-8"), "string");
                 }
-                req.getRequest().setFormat("file");
-                final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(baos.toByteArray());
-                fileHolder.setContentType(rct.toString());
-                data = new AJAXRequestResult(fileHolder, "file");
+                // final ContentType rct = new ContentType("text/plain");
+                // if (ct.containsCharsetParameter() && CharsetDetector.isValid(ct.getCharsetParameter())) {
+                // rct.setCharsetParameter(ct.getCharsetParameter());
+                // } else {
+                // rct.setCharsetParameter("UTF-8");
+                // }
+                // req.getRequest().setFormat("file");
+                // final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(baos.toByteArray());
+                // fileHolder.setContentType(rct.toString());
+                // fileHolder.setName("msgsrc.txt");
+                // data = new AJAXRequestResult(fileHolder, "file");
             } else if (showMessageHeaders) {
                 /*
                  * Get message
@@ -313,12 +319,12 @@ public final class GetAction extends AbstractMailAction {
                 } else {
                     rct.setCharsetParameter("UTF-8");
                 }
-                req.getRequest().setFormat("file");
-                final String sHeaders = formatMessageHeaders(mail.getHeadersIterator());
-                final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(sHeaders.getBytes(rct.getCharsetParameter()));
-                fileHolder.setContentType(rct.toString());
-                data = new AJAXRequestResult(fileHolder, "file");
-                //data = new AJAXRequestResult(formatMessageHeaders(mail.getHeadersIterator()), "string");
+                // req.getRequest().setFormat("file");
+                // final String sHeaders = formatMessageHeaders(mail.getHeadersIterator());
+                // final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(sHeaders.getBytes(rct.getCharsetParameter()));
+                // fileHolder.setContentType(rct.toString());
+                // data = new AJAXRequestResult(fileHolder, "file");
+                data = new AJAXRequestResult(formatMessageHeaders(mail.getHeadersIterator()), "string");
                 if (doUnseen) {
                     /*
                      * Leave mail as unseen
