@@ -59,7 +59,7 @@ import com.openexchange.session.Session;
 import com.openexchange.zmal.config.ZmalProperties;
 
 /**
- * {@link ZmalProvider} - The provider for ZMAL protocol.
+ * {@link ZmalProvider} - The provider for Zimbra mail protocol.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
