@@ -7,7 +7,9 @@ Bundle-Version: 6.23.0
 Bundle-Vendor: Open-Xchange Inc.
 Fragment-Host: system.bundle;extension:=framework
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Export-Package: com.sun.net,
+Export-Package: sun.security,
+ sun.security.util,
+ com.sun.net,
  com.sun.net.ssl,
  sun.nio.ch,
  sun.security.action,
