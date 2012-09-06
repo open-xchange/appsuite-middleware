@@ -51,6 +51,7 @@ package com.openexchange.cluster.discovery.aws.osgi;
 
 import org.apache.commons.logging.Log;
 import com.amazonaws.services.ec2.AmazonEC2;
+import com.amazonaws.services.elasticloadbalancing.AmazonElasticLoadBalancing;
 import com.openexchange.cluster.discovery.ClusterDiscoveryService;
 import com.openexchange.cluster.discovery.aws.AWSClusterDiscoveryService;
 import com.openexchange.log.LogFactory;
@@ -67,6 +68,8 @@ public class AWSClusterDiscoveryActivator extends HousekeepingActivator {
 
     private AmazonEC2 amazonEC2;
 
+    private AmazonElasticLoadBalancing lbClient;
+
     /**
      * Initializes a new {@link AWSClusterDiscoveryActivator}.
      */
@@ -76,14 +79,15 @@ public class AWSClusterDiscoveryActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { AmazonEC2.class };
+        return new Class<?>[] { AmazonEC2.class, AmazonElasticLoadBalancing.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         LOG.info("Starting bundle: com.openexchange.cluster.discovery.aws");
+        lbClient = getService(AmazonElasticLoadBalancing.class);
         amazonEC2 = getService(AmazonEC2.class);
-        AWSClusterDiscoveryService service = new AWSClusterDiscoveryService(amazonEC2);
+        AWSClusterDiscoveryService service = new AWSClusterDiscoveryService(lbClient, amazonEC2);
         registerService(ClusterDiscoveryService.class, service);
     }
 
