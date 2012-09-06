@@ -313,7 +313,9 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                     for (int i = 0; i < size; i++) {
                         final MailMessage mm = it.next();
                         if (null != mm && (!unseen || !mm.isSeen()) && (!ignoreDeleted || !mm.isDeleted())) {
-                            mm.setAccountId(mailInterface.getAccountID());
+                            if (!mm.containsAccountId()) {
+                                mm.setAccountId(mailInterface.getAccountID());
+                            }
                             mails.add(mm);
                         }
                     }
@@ -327,7 +329,9 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                     for (int i = 0; i < size; i++) {
                         final MailMessage mm = it.next();
                         if (null != mm && (!unseen || !mm.isSeen()) && (!ignoreDeleted || !mm.isDeleted())) {
-                            mm.setAccountId(mailInterface.getAccountID());
+                            if (!mm.containsAccountId()) {
+                                mm.setAccountId(mailInterface.getAccountID());
+                            }
                             mails.add(mm);
                         }
                     }
