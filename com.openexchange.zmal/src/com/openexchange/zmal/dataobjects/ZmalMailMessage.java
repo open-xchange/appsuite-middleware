@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,53 +47,92 @@
  *
  */
 
-package com.openexchange.zmal.osgi;
+package com.openexchange.zmal.dataobjects;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.mail.api.MailProvider;
-import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.user.UserService;
-import com.openexchange.zmal.Services;
-import com.openexchange.zmal.ZmalProvider;
+import java.io.InputStream;
+import java.util.List;
+import javax.activation.DataHandler;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.dataobjects.MailPart;
+
 
 /**
- * {@link ZmalActivator} - The Zimbra MAL activator.
+ * {@link ZmalMailMessage}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ZmalActivator extends HousekeepingActivator {
-	
-	
+public class ZmalMailMessage extends MailMessage {
+
+    private String mailId;
+    private int unreadCount;
+    private Object content;
+    private DataHandler dataHandler;
+    private InputStream inputStream;
+    private final int count;
+    private List<MailPart> parts;
+
     /**
-     * Initializes a new {@link ZmalActivator}.
+     * Initializes a new {@link ZmalMailMessage}.
      */
-    public ZmalActivator() {
+    public ZmalMailMessage() {
         super();
+        count = MailMessage.NO_ENCLOSED_PARTS;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, MailAccountStorageService.class, UserService.class };
+    public String getMailId() {
+        return mailId;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-        /*
-         * Register Zimbra MAL mail provider
-         */
-        final Dictionary<String, String> dictionary = new Hashtable<String, String>(1);
-        dictionary.put("protocol", ZmalProvider.PROTOCOL_ZMAL.toString());
-        registerService(MailProvider.class, ZmalProvider.getInstance(), dictionary);
+    public void setMailId(String id) {
+        this.mailId = id;
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        Services.setServiceLookup(null);
-        super.stopBundle();
+    public int getUnreadMessages() {
+        return unreadCount;
+    }
+
+    @Override
+    public void setUnreadMessages(int unreadMessages) {
+        this.unreadCount = unreadMessages;
+    }
+
+    @Override
+    public Object getContent() throws OXException {
+        return content;
+    }
+
+    @Override
+    public DataHandler getDataHandler() throws OXException {
+        return dataHandler;
+    }
+
+    @Override
+    public InputStream getInputStream() throws OXException {
+        return inputStream;
+    }
+
+    @Override
+    public int getEnclosedCount() throws OXException {
+        return count;
+    }
+
+    @Override
+    public MailPart getEnclosedMailPart(int index) throws OXException {
+        return parts.get(index);
+    }
+
+    @Override
+    public void loadContent() throws OXException {
+        // Not applicable
+    }
+
+    @Override
+    public void prepareForCaching() {
+        // Not applicable
     }
 
 }
