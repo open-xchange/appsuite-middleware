@@ -47,54 +47,17 @@
  *
  */
 
-package com.openexchange.http.grizzly.addons;
+package com.openexchange.http.probe;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.glassfish.grizzly.filterchain.Filter;
-import org.glassfish.grizzly.filterchain.FilterChainBuilder;
-import org.glassfish.grizzly.http.server.AddOn;
-import org.glassfish.grizzly.http.server.HttpServerFilter;
-import org.glassfish.grizzly.http.server.NetworkListener;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.http.grizzly.filters.backendroute.AppendBackendRouteFilter;
-import com.openexchange.http.grizzly.osgi.GrizzlyServiceRegistry;
-import com.openexchange.http.grizzly.util.FilterChainUtils;
+import com.openexchange.i18n.LocalizableStrings;
+
 
 /**
- * {@link GrizzlOXAddOn}
- * 
+ * {@link ProbeExceptionMessage}
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class GrizzlOXAddOn implements AddOn {
-
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(GrizzlOXAddOn.class);
-
-    private final List<Filter> filters = new ArrayList<Filter>();
-
-    public GrizzlOXAddOn() {
-        //1. BackendRouteFilter
-        ConfigurationService configurationService = GrizzlyServiceRegistry.getInstance().getService(ConfigurationService.class);
-        final String backendRoute = configurationService.getProperty("com.openexchange.http.grizzly.backendRoute", "");
-        AppendBackendRouteFilter appendBackendRouteFilter = new AppendBackendRouteFilter(backendRoute);
-        filters.add(appendBackendRouteFilter);
-    }
-
-    @Override
-    public void setup(NetworkListener networkListener, FilterChainBuilder builder) {
-        AddOn[] addOns = networkListener.getAddOns();
-        for (AddOn addOn : addOns) {
-            LOG.info("Current Addon is: " + addOn.getClass());
-        }
-        int httpServerFilterIdx = builder.indexOfType(HttpServerFilter.class);
-        if (httpServerFilterIdx > 0) {
-            builder.addAll(httpServerFilterIdx -1 , filters);
-        }
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("FilterChain after adding Watchers:\n" + FilterChainUtils.formatFilterChainString(builder.build()));
-        }
-    }
-
+public class ProbeExceptionMessage implements LocalizableStrings{
+    /** The following needed service is missing: \"%1$s\" */
+    public static final String NEEDED_SERVICE_MISSING_MSG = "The following needed service is missing: \"%1$s\"";
 }

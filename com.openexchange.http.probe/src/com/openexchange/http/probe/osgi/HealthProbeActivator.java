@@ -46,55 +46,45 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package com.openexchange.http.probe.osgi;
 
-package com.openexchange.http.grizzly.addons;
-
-import java.util.ArrayList;
-import java.util.List;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.glassfish.grizzly.filterchain.Filter;
-import org.glassfish.grizzly.filterchain.FilterChainBuilder;
-import org.glassfish.grizzly.http.server.AddOn;
-import org.glassfish.grizzly.http.server.HttpServerFilter;
-import org.glassfish.grizzly.http.server.NetworkListener;
+import org.osgi.service.http.HttpService;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.http.grizzly.filters.backendroute.AppendBackendRouteFilter;
-import com.openexchange.http.grizzly.osgi.GrizzlyServiceRegistry;
-import com.openexchange.http.grizzly.util.FilterChainUtils;
+import com.openexchange.http.probe.HealthProbeServlet;
+import com.openexchange.http.probe.ProbeExceptionCode;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link GrizzlOXAddOn}
  * 
+ * {@link HealthProbeActivator} - Get the HttpService and register the HealthProbeServlet. 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class GrizzlOXAddOn implements AddOn {
+public class HealthProbeActivator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(GrizzlOXAddOn.class);
-
-    private final List<Filter> filters = new ArrayList<Filter>();
-
-    public GrizzlOXAddOn() {
-        //1. BackendRouteFilter
-        ConfigurationService configurationService = GrizzlyServiceRegistry.getInstance().getService(ConfigurationService.class);
-        final String backendRoute = configurationService.getProperty("com.openexchange.http.grizzly.backendRoute", "");
-        AppendBackendRouteFilter appendBackendRouteFilter = new AppendBackendRouteFilter(backendRoute);
-        filters.add(appendBackendRouteFilter);
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class[] {ConfigurationService.class, HttpService.class};
     }
 
     @Override
-    public void setup(NetworkListener networkListener, FilterChainBuilder builder) {
-        AddOn[] addOns = networkListener.getAddOns();
-        for (AddOn addOn : addOns) {
-            LOG.info("Current Addon is: " + addOn.getClass());
+    protected void startBundle() throws Exception {
+        trackService(ConfigurationService.class);
+        trackService(HttpService.class);
+        openTrackers();
+        
+        ConfigurationService configService = getService(ConfigurationService.class);
+        if (configService == null) {
+            throw ProbeExceptionCode.NEEDED_SERVICE_MISSING.create(ConfigurationService.class.getName());
         }
-        int httpServerFilterIdx = builder.indexOfType(HttpServerFilter.class);
-        if (httpServerFilterIdx > 0) {
-            builder.addAll(httpServerFilterIdx -1 , filters);
+
+        final String alias = configService.getProperty("com.openexchange.http.probe.alias", "/healthProbe");
+        
+        HttpService service = getService(HttpService.class);
+        if(service == null) {
+            throw ProbeExceptionCode.NEEDED_SERVICE_MISSING.create(HttpService.class.getName());
         }
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("FilterChain after adding Watchers:\n" + FilterChainUtils.formatFilterChainString(builder.build()));
-        }
+        service.registerServlet(alias, new HealthProbeServlet(), null, null);
     }
 
 }
