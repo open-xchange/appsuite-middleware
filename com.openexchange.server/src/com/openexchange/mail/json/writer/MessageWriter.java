@@ -71,6 +71,7 @@ import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.config.MailProperties;
+import com.openexchange.mail.dataobjects.Delegatized;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MimeFilter;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
@@ -312,10 +313,14 @@ public final class MessageWriter {
             @Override
             public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid) throws OXException {
                 try {
+                    int accId = accountId;
+                    if (mail instanceof Delegatized) {
+                        accId = ((Delegatized) mail).getUndelegatedAccountId();
+                    }
                     if (withKey) {
-                        ((JSONObject) jsonContainer).put(FolderChildFields.FOLDER_ID, prepareFullname(accountId, mail.getFolder()));
+                        ((JSONObject) jsonContainer).put(FolderChildFields.FOLDER_ID, prepareFullname(accId, mail.getFolder()));
                     } else {
-                        ((JSONArray) jsonContainer).put(prepareFullname(accountId, mail.getFolder()));
+                        ((JSONArray) jsonContainer).put(prepareFullname(accId, mail.getFolder()));
                     }
                 } catch (final JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
