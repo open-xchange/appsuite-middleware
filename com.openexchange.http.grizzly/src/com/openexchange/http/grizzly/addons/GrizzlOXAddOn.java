@@ -75,17 +75,11 @@ public class GrizzlOXAddOn implements AddOn {
     private final List<Filter> filters = new ArrayList<Filter>();
 
     public GrizzlOXAddOn() {
-        //init the features of the GrizzlOXAddOn
-        
         //1. BackendRouteFilter
         ConfigurationService configurationService = GrizzlyServiceRegistry.getInstance().getService(ConfigurationService.class);
         final String backendRoute = configurationService.getProperty("com.openexchange.http.grizzly.backendRoute", "");
         AppendBackendRouteFilter appendBackendRouteFilter = new AppendBackendRouteFilter(backendRoute);
         filters.add(appendBackendRouteFilter);
-        
-        //2. EASKeepAliveFilter
-//        EASKeepAliveFilter easKeepAliveFilter = new EASKeepAliveFilter("");
-//        filters.add(easKeepAliveFilter);
     }
 
     @Override

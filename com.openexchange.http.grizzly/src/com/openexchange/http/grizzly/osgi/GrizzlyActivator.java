@@ -49,8 +49,6 @@
 
 package com.openexchange.http.grizzly.osgi;
 
-import java.io.IOException;
-import javax.servlet.ServletException;
 import org.glassfish.grizzly.comet.CometAddOn;
 import org.glassfish.grizzly.http.HttpRequestPacket;
 import org.glassfish.grizzly.http.server.HttpServer;
@@ -63,7 +61,6 @@ import org.glassfish.grizzly.websockets.WebSocketEngine;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
 import org.osgi.service.http.HttpService;
-import org.osgi.service.http.NamespaceException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.grizzly.GrizzlyExceptionCode;
@@ -75,7 +72,6 @@ import com.openexchange.http.requestwatcher.osgi.services.RequestWatcherService;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.server.ServiceExceptionCode;
 
 /**
  * {@link GrizzlyActivator}
@@ -152,7 +148,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
             // create addons based on given configuration
             final ConfigurationService configService = grizzlyServiceRegistry.getService(ConfigurationService.class);
             if (configService == null) {
-                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigurationService.class.getName());
+                throw GrizzlyExceptionCode.NEEDED_SERVICE_MISSING.create(ConfigurationService.class.getName());
             }
 
             /*
@@ -163,6 +159,8 @@ public class GrizzlyActivator extends HousekeepingActivator {
             final boolean hasJMXEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasJMXEnabled", false);
             final boolean hasWebsocketsEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasWebSocketsEnabled", false);
             final boolean hasCometEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasCometEnabled", false);
+            final boolean hasDeliverUiEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasDeliverUiEnabled", false);
+            
 
             /*
              *  create, configure and start server
@@ -170,6 +168,8 @@ public class GrizzlyActivator extends HousekeepingActivator {
             grizzly = new HttpServer();
             
             final NetworkListener networkListener = new NetworkListener("http-listener", httpHost, 8080);
+            networkListener.setChunkingEnabled(false);
+            
             
             if (hasJMXEnabled) {
                 if (LOG.isInfoEnabled()) {
@@ -201,6 +201,15 @@ public class GrizzlyActivator extends HousekeepingActivator {
                     LOG.info("Enabling Comet for Grizzly server.");
                 }
                 networkListener.registerAddOn(new CometAddOn());
+            }
+            
+            if (hasDeliverUiEnabled) {
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("Enabling UI delivery via Grizzly server.");
+                }
+                final String uiRootPath = configService.getProperty("com.openexchange.ui.rootPath", "/var/www/ox7/");
+                final String uiAlias = configService.getProperty("com.openexchange.http.grizzly.uiAlias", "/ox7");
+                grizzly.getServerConfiguration().addHttpHandler(new StaticHttpHandler(uiRootPath), uiAlias);
             }
 
             if (LOG.isInfoEnabled()) {
@@ -236,9 +245,6 @@ public class GrizzlyActivator extends HousekeepingActivator {
             }
             serviceFactory = new HttpServiceFactory(grizzly, context.getBundle());
             registerService(HttpService.class.getName(), serviceFactory);
-            
-//            grizzly.getServerConfiguration().addHttpHandler(new StaticHttpHandler("/var/www/ox7"), "/");
-//            grizzly.getServerConfiguration().addHttpHandler(new StaticHttpHandler("/var/www/ox7"), "/v=7.0.0-1.20120614.152235");
             
         } catch (final Exception e) {
             throw GrizzlyExceptionCode.GRIZZLY_SERVER_NOT_STARTED.create(e, new Object[] {});
