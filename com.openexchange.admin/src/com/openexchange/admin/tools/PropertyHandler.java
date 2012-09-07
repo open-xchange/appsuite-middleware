@@ -82,15 +82,11 @@ public class PropertyHandler {
     //private static final String PROPERTIES_RMI              = "RMI_PROP_CONFIG";
     protected final static String PROPERTIES_SQL = "SQL_PROP_CONFIG";
 
-
     // The following lines define the property values for the database implementations
     public static final String GROUP_STORAGE = "GROUP_STORAGE";
     public static final String RESOURCE_STORAGE = "RESOURCE_STORAGE";
-    public static final String TOOL_STORAGE = "TOOL_STORAGE";
     public static final String USER_STORAGE = "USER_STORAGE";
-    
-    
-    
+
     public PropertyHandler(final Properties sysprops) {
         this.allPropValues = new Hashtable<String, Object>();
         this.sysprops = sysprops;

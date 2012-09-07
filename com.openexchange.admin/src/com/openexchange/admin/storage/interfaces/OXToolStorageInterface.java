@@ -48,8 +48,6 @@
  */
 package com.openexchange.admin.storage.interfaces;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import org.apache.commons.logging.Log;
 import com.openexchange.admin.daemons.AdminDaemon;
@@ -69,11 +67,6 @@ import com.openexchange.log.LogFactory;
 
 public abstract class OXToolStorageInterface {
 
-    /**
-     * Proxy attribute for the class implementing this interface.
-     */
-    private static Class<? extends OXToolStorageInterface> implementingClass;
-
     private static final Log log = LogFactory.getLog(OXToolStorageInterface.class);
 
     protected static AdminCache cache = null;
@@ -92,51 +85,10 @@ public abstract class OXToolStorageInterface {
     /**
      * Creates a new instance implementing the group storage interface.
      * @return an instance implementing the group storage interface.
-     * @throws com.openexchange.admin.rmi.exceptions.StorageException Storage exception
      */
-    public static OXToolStorageInterface getInstance() throws StorageException {
-        synchronized (OXToolStorageInterface.class) {
-            if (null == implementingClass) {
-                final String className = prop.getProp(PropertyHandler.TOOL_STORAGE, null);
-                if (null != className) {
-                    try {
-                        implementingClass = Class.forName(className).asSubclass(OXToolStorageInterface.class);
-                    } catch (final ClassNotFoundException e) {
-                        log.error(e.getMessage(), e);
-                        throw new StorageException(e);
-                    }
-                } else {
-                    final StorageException storageException = new StorageException("Property for tool_storage not defined");
-                    log.error(storageException.getMessage(), storageException);
-                    throw storageException;
-                }
-            }
-        }
-        Constructor<? extends OXToolStorageInterface> cons;
-        try {
-            cons = implementingClass.getConstructor(new Class[] {});
-            return cons.newInstance(new Object[] {});
-        } catch (final SecurityException e) {
-            log.error(e.getMessage(), e);
-            throw new StorageException(e);
-        } catch (final NoSuchMethodException e) {
-            log.error(e.getMessage(), e);
-            throw new StorageException(e);
-        } catch (final IllegalArgumentException e) {
-            log.error(e.getMessage(), e);
-            throw new StorageException(e);
-        } catch (final InstantiationException e) {
-            log.error(e.getMessage(), e);
-            throw new StorageException(e);
-        } catch (final IllegalAccessException e) {
-            log.error(e.getMessage(), e);
-            throw new StorageException(e);
-        } catch (final InvocationTargetException e) {
-            log.error(e.getMessage(), e);
-            throw new StorageException(e);
-        }
+    public static OXToolStorageInterface getInstance() {
+        return new com.openexchange.admin.storage.mysqlStorage.OXToolMySQLStorage();
     }
-
 
     /**
      * Checks if given domain is used by any user,group or resource as mailaddress in given context.

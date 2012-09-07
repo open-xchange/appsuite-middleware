@@ -65,22 +65,17 @@ import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
  * General abstraction class used by all impl classes
  * 
  * @author d7
- *
  */
 public abstract class OXCommonImpl {
+
     private final static Log log = LogFactory.getLog(OXCommonImpl.class);
-    
+
     protected final OXToolStorageInterface tool;
-    
-    public OXCommonImpl() throws StorageException {
-        try {
-            tool = OXToolStorageInterface.getInstance();
-        } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
-            throw e;
-        }
+
+    public OXCommonImpl() {
+        tool = OXToolStorageInterface.getInstance();
     }
-    
+
     protected final void contextcheck(final Context ctx) throws InvalidCredentialsException {
         if (null == ctx || null == ctx.getId()) {
             final InvalidCredentialsException e = new InvalidCredentialsException("Client sent invalid context data object");
