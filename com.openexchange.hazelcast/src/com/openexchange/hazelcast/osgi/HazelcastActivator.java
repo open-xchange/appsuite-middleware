@@ -60,6 +60,7 @@ public class HazelcastActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         final Log logger = com.openexchange.log.Log.loggerFor(HazelcastActivator.class);
+        final boolean infoEnabled = logger.isInfoEnabled();
         /*-
          * Look-up discovery service & obtain its addresses of known nodes in a cluster
          * 
@@ -74,12 +75,17 @@ public class HazelcastActivator extends HousekeepingActivator {
          * new member joins.
          */
         final BundleContext context = this.context;
-        final ServiceTrackerCustomizer<ClusterDiscoveryService, ClusterDiscoveryService> clusterDiscoveryServiceTracker = new ServiceTrackerCustomizer<ClusterDiscoveryService, ClusterDiscoveryService>() {
+        track(ClusterDiscoveryService.class, new ServiceTrackerCustomizer<ClusterDiscoveryService, ClusterDiscoveryService>() {
 
             @Override
             public ClusterDiscoveryService addingService(final ServiceReference<ClusterDiscoveryService> reference) {
                 final ClusterDiscoveryService discovery = context.getService(reference);
+                final long st = System.currentTimeMillis();
                 final List<InetAddress> nodes = discovery.getNodes();
+                if (infoEnabled) {
+                    final long et = System.currentTimeMillis();
+                    logger.info("\nHazelcast\n\tAvailable cluster nodes received in "+(et - st)+"msec from "+ClusterDiscoveryService.class.getSimpleName()+":\n\t"+nodes+"\n");
+                }
                 if (nodes.isEmpty()) {
                     /*-
                      * Wait for at least one via ClusterListener
@@ -87,13 +93,11 @@ public class HazelcastActivator extends HousekeepingActivator {
                      * Add cluster listener to manage appearing/disappearing nodes
                      */
                     final HazelcastActivator activator = HazelcastActivator.this;
-                    final ClusterListener clusterListener = new HazelcastInitializingClusterListener(activator);
+                    final ClusterListener clusterListener = new HazelcastInitializingClusterListener(activator, st, logger);
                     discovery.addListener(clusterListener);
                     activator.clusterListener = clusterListener;
-                    /*-
-                     * For safety schedule a one-shot action after specified delay -> we are the only node.
-                     * 
-                     * 
+                    /*
+                     * Timeout before we assume we are either the first or alone in the cluster
                      */
                     final long delay = getDelay();
                     if (delay >= 0) {
@@ -101,8 +105,10 @@ public class HazelcastActivator extends HousekeepingActivator {
 
                             @Override
                             public void run() {
-                                if (init(Collections.<InetAddress> emptyList())) {
-                                    logger.info("Initialized Hazelcast instance via delayed one-shot task after " + delay + "msec.");
+                                if (init(Collections.<InetAddress> emptyList(), st, logger)) {
+                                    if (infoEnabled) {
+                                        logger.info("\nHazelcast:\n\tInitialized Hazelcast instance via delayed one-shot task after " + delay + "msec.\n");
+                                    }
                                 }
                             }
                         };
@@ -112,8 +118,10 @@ public class HazelcastActivator extends HousekeepingActivator {
                     /*
                      * We already have at least one node at start-up time
                      */
-                    if (init(nodes)) {
-                        logger.info("Initialized Hazelcast instance via initially available Open-Xchange nodes.");
+                    if (init(nodes, st, logger)) {
+                        if (infoEnabled) {
+                            logger.info("\nHazelcast:\n\tInitialized Hazelcast instance via initially available Open-Xchange nodes.\n");
+                        }
                     }
                 }
                 return discovery;
@@ -142,8 +150,7 @@ public class HazelcastActivator extends HousekeepingActivator {
                 Hazelcast.shutdownAll();
                 context.ungetService(reference);
             }
-        };
-        track(ClusterDiscoveryService.class, clusterDiscoveryServiceTracker);
+        });
         openTrackers();
     }
 
@@ -161,10 +168,12 @@ public class HazelcastActivator extends HousekeepingActivator {
      * Initializes and registers a {@link HazelcastInstance} for a full TCP/IP cluster.
      * 
      * @param nodes The pre-known nodes
+     * @param stamp The start-up time stamp
+     * @param logger The logger instance
      * @return <code>true</code> if <tt>HazelcastInstance</tt> has been initialized by this call; otherwise <code>false</code> if already
      *         done by another call
      */
-    boolean init(final List<InetAddress> nodes) {
+    boolean init(final List<InetAddress> nodes, final long stamp, final Log logger) {
         synchronized (this) {
             if (null != REF_HAZELCAST_INSTANCE.get()) {
                 // Already initialized
@@ -187,7 +196,7 @@ public class HazelcastActivator extends HousekeepingActivator {
             final TcpIpConfig tcpIpConfig = join.getTcpIpConfig();
             tcpIpConfig.setEnabled(true);
             for (final InetAddress address : nodes) {
-                tcpIpConfig.addAddress(new Address(address, config.getNetworkConfig().getPort()));
+                tcpIpConfig.addAddress(new Address(address, config.getPort()));
             }
             /*
              * Create appropriate Hazelcast instance from configuration
@@ -195,6 +204,9 @@ public class HazelcastActivator extends HousekeepingActivator {
             final HazelcastInstance hazelcastInstance = new ClassLoaderAwareHazelcastInstance(Hazelcast.newHazelcastInstance(config), false);
             registerService(HazelcastInstance.class, hazelcastInstance);
             REF_HAZELCAST_INSTANCE.set(hazelcastInstance);
+            if (logger.isInfoEnabled()) {
+                logger.info("\nHazelcast:\n\tStarted in " + (System.currentTimeMillis() - stamp) + "msec.\n");
+            }
             return true;
         }
     }

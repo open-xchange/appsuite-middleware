@@ -58,6 +58,7 @@ import com.openexchange.tools.session.ServerSession;
  * 
  * @author francisco.laguna@open-xchange.com
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public interface MessageDispatcher {
 
@@ -69,5 +70,15 @@ public interface MessageDispatcher {
      * @throws OXException If send operation fails for any reason
      */
     public void send(Stanza stanza, ServerSession session) throws OXException;
+
+    /**
+     * Determines if a {@link Stanza} can be delivered without delay. In other words: Is the recipient online?
+     * 
+     * @param stanza
+     * @param session
+     * @return
+     * @throws OXException
+     */
+    public boolean canDeliverInstantly(Stanza stanza, ServerSession session) throws OXException;
 
 }

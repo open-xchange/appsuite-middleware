@@ -125,6 +125,15 @@ public class Group {
         }
         return this.members;
     }
+    
+    /**
+     * Sets the members
+     *
+     * @param members The members to set
+     */
+    public void setMembers(List<Integer> members) {
+        this.members = members;
+    }
 
     /**
      * Ruft den Wert der name-Eigenschaft ab.

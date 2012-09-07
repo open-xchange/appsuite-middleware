@@ -50,6 +50,7 @@
 package com.openexchange.realtime.impl;
 
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.Log;
@@ -64,61 +65,64 @@ import com.openexchange.tools.session.ServerSession;
 /**
  * {@link MessageDispatcherImpl}
  * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco
- *         Laguna</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class MessageDispatcherImpl implements MessageDispatcher {
+
     private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(MessageDispatcher.class));
-	private final Map<String, Channel> channels = new NonBlockingHashMap<String, Channel>();
 
-	@Override
+    private final Map<String, Channel> channels = new ConcurrentHashMap<String, Channel>();
+
     public void send(final Stanza stanza, final ServerSession session) throws OXException {
-		final ID to = stanza.getTo();
+        Channel channel = chooseChannel(stanza, session);
 
-		final String protocol = to.getProtocol();
-		Channel channel = null;
+        if (channel == null) {
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Couldn't find appropriate channel for sending stanza");
+            }
+            throw RealtimeExceptionCodes.NO_APPROPRIATE_CHANNEL.create(stanza.getTo().toString(), stanza.getNamespace());
+        }
 
-		if (protocol != null) {
-			channel = channels.get(protocol);
-			if (channel == null) {
-				throw RealtimeExceptionCodes.UNKNOWN_CHANNEL.create(protocol);
-			}
-		} else {
-			channel = chooseChannel(stanza, session);
-			if (channel == null) {
-			    if(LOG.isInfoEnabled()) {
-			        LOG.info("Couldn't find appropriate channel for sending stanza");
-			    }
-				return; // Probably not online
-				//throw RealtimeExceptionCodes.NO_APPROPRIATE_CHANNEL.create(to.toString(), stanza.getNamespace());
-			}
-		}
+        channel.send(stanza, session);
+    }
 
+    private Channel chooseChannel(Stanza stanza, ServerSession session) throws OXException {
+        ID to = stanza.getTo();
+        String protocol = to.getProtocol();
 
-		channel.send(stanza, session);
+        Channel channel = null;
 
-	}
+        if (protocol != null) {
+            channel = channels.get(protocol);
+            if (channel == null) {
+                throw RealtimeExceptionCodes.UNKNOWN_CHANNEL.create(protocol);
+            }
+            return channel;
+        }
 
-	private Channel chooseChannel(final Stanza stanza, final ServerSession session) throws OXException {
-		final ID to = stanza.getTo();
-		final String namespace = stanza.getNamespace();
-		
-		Channel candidate = null;
-		for(final Channel channel: channels.values()){
-			if ((candidate == null || candidate.getPriority() < channel.getPriority()) && channel.canHandle(namespace, to, session)) {
-				candidate = channel;
-			}
-		}
-		
-		return candidate;
-	}
-	
-	public void addChannel(final Channel channel) {
-		channels.put(channel.getProtocol(), channel);
-	}
-	
-	public void removeChannel(final Channel channel) {
-		channels.remove(channel.getProtocol());
-	}
+        String namespace = stanza.getNamespace();
+
+        for (Channel c : channels.values()) {
+            if ((channel == null || channel.getPriority() < c.getPriority()) && c.canHandle(namespace, to, session)) {
+                channel = c;
+            }
+        }
+
+        return channel;
+    }
+
+    public void addChannel(final Channel channel) {
+        channels.put(channel.getProtocol(), channel);
+    }
+
+    public void removeChannel(final Channel channel) {
+        channels.remove(channel.getProtocol());
+    }
+
+    @Override
+    public boolean canDeliverInstantly(Stanza stanza, ServerSession session) throws OXException {
+        return chooseChannel(stanza, session) != null;
+    }
 
 }

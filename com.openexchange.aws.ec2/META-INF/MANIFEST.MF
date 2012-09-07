@@ -1,0 +1,22 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange AWS EC2 bundle
+Bundle-SymbolicName: com.openexchange.aws.ec2
+Bundle-Version: 6.21.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.amazonaws.services.autoscaling.model,
+ com.amazonaws.services.ec2,
+ com.amazonaws.services.ec2.model,
+ com.amazonaws.services.elasticloadbalancing,
+ com.amazonaws.services.elasticloadbalancing.model,
+ com.openexchange.aws.loadbalancing,
+ com.openexchange.config,
+ com.openexchange.exception,
+ com.openexchange.log,
+ com.openexchange.osgi,
+ org.apache.commons.logging;version="1.1.1",
+ org.osgi.framework,
+ org.osgi.util.tracker;version="1.5.1"
+Bundle-Activator: com.openexchange.aws.ec2.osgi.AWSEC2Activator
+Export-Package: com.openexchange.aws.ec2

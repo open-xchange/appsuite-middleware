@@ -50,8 +50,10 @@
 package com.openexchange.mobile.configuration.json.osgi;
 
 import static com.openexchange.mobile.configuration.json.osgi.MobilityProvisioningServiceRegistry.getInstance;
+import javax.servlet.ServletException;
 import org.apache.commons.logging.Log;
 import org.osgi.service.http.HttpService;
+import org.osgi.service.http.NamespaceException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.log.LogFactory;
@@ -83,14 +85,36 @@ public class MobilityProvisioningActivator extends HousekeepingActivator {
 		if (LOG.isWarnEnabled()) {
 			LOG.warn("Absent service: " + clazz.getName());
 		}
-
-		getInstance().addService(clazz, getService(clazz));
+		final Object service = getService(clazz);
+		if (service instanceof HttpService) {
+		    final DispatcherPrefixService dispatcherPrefixService = getService(DispatcherPrefixService.class);
+            if (null != dispatcherPrefixService) {
+                final String alias = dispatcherPrefixService.getPrefix() + SERVLET_PATH_APPENDIX;
+                try {
+                    ((HttpService) service).registerServlet(alias, new MobilityProvisioningServlet(), null, null);
+                } catch (final ServletException e) {
+                    LOG.error("Unable to register servlet for " + alias, e);
+                } catch (final NamespaceException e) {
+                    LOG.error("Unable to register servlet for " + alias, e);
+                } catch (final Exception e) {
+                    LOG.error("Unable to register servlet for " + alias, e);
+                }
+		    }
+		}
+        getInstance().addService(clazz, service);
 	}
 
 	@Override
 	protected void handleUnavailability(final Class<?> clazz) {
 		if (LOG.isInfoEnabled()) {
 			LOG.info("Re-available service: " + clazz.getName());
+		}
+		if (HttpService.class.equals(clazz)) {
+		    final HttpService service = getService(HttpService.class);
+		    final DispatcherPrefixService dispatcherPrefixService = getService(DispatcherPrefixService.class);
+            if (null != service && null != dispatcherPrefixService) {
+                service.unregister(dispatcherPrefixService.getPrefix() + SERVLET_PATH_APPENDIX);
+            }
 		}
 		getInstance().removeService(clazz);
 
@@ -126,7 +150,11 @@ public class MobilityProvisioningActivator extends HousekeepingActivator {
 	@Override
 	protected void stopBundle() throws Exception {
 		try {
-		    getService(HttpService.class).unregister(getService(DispatcherPrefixService.class).getPrefix() + SERVLET_PATH_APPENDIX);
+		    final HttpService service = getService(HttpService.class);
+            final DispatcherPrefixService dispatcherPrefixService = getService(DispatcherPrefixService.class);
+            if (null != service && null != dispatcherPrefixService) {
+                service.unregister(dispatcherPrefixService.getPrefix() + SERVLET_PATH_APPENDIX);
+            }
             /*
              * Close service trackers
              */
