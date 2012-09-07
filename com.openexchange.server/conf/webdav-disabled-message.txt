@@ -1,0 +1,4 @@
+You are using a discontinued product (OXtender 1 for Microsoft Outlook).
+Please note that this product is no longer officially supported. There is an
+upgrade path available, please contact your service provider for further
+details.
