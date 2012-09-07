@@ -1,3 +1,7 @@
+* 2012-09-07 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22943: Limit max. size of parseable HTML content; configurable through 'com.openexchange.html.maxLength'
+
 * 2012-09-07 - jan.bauerdick@open-xchange.com
 
  - New bundle c.o.aws.autoscaling: Monitoring of instances and loadbalancers, add/remove instances if neccessary
