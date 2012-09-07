@@ -49,62 +49,44 @@
 
 package com.openexchange.admin.autocontextid.osgi;
 
-import java.sql.SQLException;
-import java.util.Hashtable;
-import org.apache.commons.logging.Log;
-import com.openexchange.admin.autocontextid.daemons.ClientAdminThreadExtended;
-import com.openexchange.admin.autocontextid.rmi.impl.OXAutoCIDContextImpl;
-import com.openexchange.admin.autocontextid.tools.AdminCacheExtended;
-import com.openexchange.admin.exceptions.OXGenericException;
-import com.openexchange.admin.plugins.OXContextPluginInterface;
-import com.openexchange.admin.tools.AdminCache;
-import com.openexchange.config.ConfigurationService;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterface;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.log.LogFactory;
-import com.openexchange.osgi.HousekeepingActivator;
 
-public class Activator extends HousekeepingActivator {
+/**
+ * {@link DatabaseServiceCustomizer}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
+public final class DatabaseServiceCustomizer implements ServiceTrackerCustomizer<DatabaseService, DatabaseService> {
 
-    private static final Log LOG = LogFactory.getLog(Activator.class);
+    private final BundleContext context;
+    private final OXAdminPoolInterface pool;
 
-    @Override
-    public void startBundle() throws Exception {
-        try {
-            ConfigurationService service = getService(ConfigurationService.class);
-            AdminCache.compareAndSet(null, service);
-            initCache(service);
-            track(DatabaseService.class, new DatabaseServiceCustomizer(context, ClientAdminThreadExtended.cache.getPool()));
-
-            final Hashtable<String, String> props = new Hashtable<String, String>();
-            props.put("name", "OXContext");
-            LOG.info(OXContextPluginInterface.class.getName());
-            registerService(OXContextPluginInterface.class, new OXAutoCIDContextImpl(), props);
-
-        } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
-            throw e;
-        } catch (final OXGenericException e) {
-            LOG.fatal(e.getMessage(), e);
-            throw e;
-        }
+    public DatabaseServiceCustomizer(BundleContext context, OXAdminPoolInterface pool) {
+        super();
+        this.context = context;
+        this.pool = pool;
     }
 
     @Override
-    public void stopBundle() throws Exception {
-        unregisterServices();
-    }
-
-    private void initCache(final ConfigurationService service) throws SQLException, OXGenericException {
-        final AdminCacheExtended cache = new AdminCacheExtended();
-        cache.initCache(service);
-        cache.initCacheExtended();
-        cache.initIDGenerator();
-        ClientAdminThreadExtended.cache = cache;
-        LOG.info("AutocontextID Bundle: Cache and Pools initialized!");
+    public DatabaseService addingService(ServiceReference<DatabaseService> reference) {
+        DatabaseService service = context.getService(reference);
+        pool.setService(service);
+        return service;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+    public void modifiedService(ServiceReference<DatabaseService> reference, DatabaseService service) {
+        // Nothing to do.
     }
+
+    @Override
+    public void removedService(ServiceReference<DatabaseService> reference, DatabaseService service) {
+        pool.removeService();
+        context.ungetService(reference);
+    }
+
 }

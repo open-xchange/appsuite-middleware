@@ -1,3 +1,7 @@
+* 2012-09-07 - marcus.klein@open-xchange.com
+
+ - Fix for bug 22933: Pushing the DatabaseService into AdminCache instances of administration autocontextid bundle.
+
 * 2012-06-15 - jan.bauerdick@open-xchange.com
 
  - Moved package c.o.admin.autocontextid.console to dedicated bundle
