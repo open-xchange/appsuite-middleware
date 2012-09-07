@@ -164,6 +164,12 @@ public final class ZmalMessageStorage extends MailMessageStorage implements IMai
     }
 
     @Override
+    public MailMessage getMessage(String folder, String mailId, boolean markSeen) throws OXException {
+        // TODO Auto-generated method stub
+        return super.getMessage(folder, mailId, markSeen);
+    }
+
+    @Override
     public MailMessage[] getMessages(String fullName, String[] mailIds, MailField[] fields, String[] headerNames) throws OXException {
         // TODO Auto-generated method stub
         return null;
@@ -187,51 +193,34 @@ public final class ZmalMessageStorage extends MailMessageStorage implements IMai
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.api.MailMessageStorage#deleteMessages(java.lang.String, java.lang.String[], boolean)
-     */
     @Override
     public void deleteMessages(String folder, String[] mailIds, boolean hardDelete) throws OXException {
         // TODO Auto-generated method stub
         
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.api.MailMessageStorage#getMessages(java.lang.String, java.lang.String[], com.openexchange.mail.MailField[])
-     */
     @Override
     public MailMessage[] getMessages(String folder, String[] mailIds, MailField[] fields) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.api.MailMessageStorage#releaseResources()
-     */
     @Override
     public void releaseResources() throws OXException {
         // TODO Auto-generated method stub
         
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.api.MailMessageStorage#searchMessages(java.lang.String, com.openexchange.mail.IndexRange, com.openexchange.mail.MailSortField, com.openexchange.mail.OrderDirection, com.openexchange.mail.search.SearchTerm, com.openexchange.mail.MailField[])
-     */
     @Override
     public MailMessage[] searchMessages(String folder, IndexRange indexRange, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailField[] fields) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.api.MailMessageStorage#updateMessageFlags(java.lang.String, java.lang.String[], int, boolean)
-     */
     @Override
     public void updateMessageFlags(String folder, String[] mailIds, int flags, boolean set) throws OXException {
         // TODO Auto-generated method stub
         
     }
-
-    
 
 }
