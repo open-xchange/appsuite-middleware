@@ -97,8 +97,6 @@ public class AWSEC2Activator extends HousekeepingActivator {
         AmazonEC2 ec2 = getService(AmazonEC2.class);
         service = new AWSEC2ServiceImpl(ec2, config);
         registerService(AWSEC2Service.class, service);
-        String instanceId = service.startInstance();
-        service.stopInstance(instanceId);
     }
 
     @Override

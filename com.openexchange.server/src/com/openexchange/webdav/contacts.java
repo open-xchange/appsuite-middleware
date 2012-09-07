@@ -104,6 +104,11 @@ public final class contacts extends XmlServlet<ContactService> {
     protected Interface getInterface() {
         return Interface.WEBDAV_XML;
     }
+    
+    @Override
+    protected boolean isServletDisabled() {
+        return true;
+    }
 
     @Override
     protected void parsePropChilds(final HttpServletRequest req, final HttpServletResponse resp,

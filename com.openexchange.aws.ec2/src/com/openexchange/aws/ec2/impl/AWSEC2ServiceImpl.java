@@ -53,16 +53,12 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import com.amazonaws.services.ec2.AmazonEC2;
-import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
-import com.amazonaws.services.ec2.model.DescribeInstancesResult;
-import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.InstanceStateChange;
 import com.amazonaws.services.ec2.model.Placement;
 import com.amazonaws.services.ec2.model.RunInstancesRequest;
 import com.amazonaws.services.ec2.model.RunInstancesResult;
 import com.amazonaws.services.ec2.model.StopInstancesRequest;
 import com.amazonaws.services.ec2.model.StopInstancesResult;
-import com.amazonaws.services.elasticloadbalancing.model.HealthCheck;
 import com.openexchange.aws.ec2.AWSEC2Configuration;
 import com.openexchange.aws.ec2.AWSEC2Service;
 import com.openexchange.aws.ec2.osgi.AWSEC2ServiceRegistry;
@@ -145,24 +141,6 @@ public class AWSEC2ServiceImpl implements AWSEC2Service {
         sb.append("stopped.");
         LOG.info(sb.toString());
         return result.getStoppingInstances();
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.aws.ec2.AWSEC2Service#checkHealth(java.lang.String)
-     */
-    @Override
-    public HealthCheck checkHealth(String instanceId) {
-        List<String> instancesToCheck = new ArrayList<String>();
-        instancesToCheck.add(instanceId);
-        DescribeInstancesRequest instanceReq = new DescribeInstancesRequest();
-        instanceReq.setInstanceIds(instancesToCheck);
-        DescribeInstancesResult result = ec2client.describeInstances(instanceReq);
-        Instance instance = result.getReservations().get(0).getInstances().get(0);
-        String dnsName = instance.getPublicDnsName();
-        HealthCheck hc = new HealthCheck();
-        hc.setTarget(dnsName);
-        return null;
     }
 
     @Override
