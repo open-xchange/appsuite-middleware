@@ -70,7 +70,7 @@ public class HazelcastIndexingService {
     
     public void scheduleJob(JobDetail jobDetail, Trigger trigger) throws OXException {
         QuartzService quartzService = Services.getService(QuartzService.class);
-        Scheduler scheduler = quartzService.getScheduler();
+        Scheduler scheduler = quartzService.getClusteredScheduler();
         try {
             scheduler.scheduleJob(jobDetail, trigger);
         } catch (SchedulerException e) {

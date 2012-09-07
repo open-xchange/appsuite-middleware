@@ -47,38 +47,33 @@
  *
  */
 
-package com.openexchange.solr.internal;
+package com.openexchange.service.indexing.hazelcast;
 
-import java.io.Serializable;
-import java.util.concurrent.Callable;
-import com.openexchange.solr.SolrAccessService;
-import com.openexchange.solr.SolrCoreIdentifier;
+import java.util.Collection;
+import org.quartz.JobPersistenceException;
+import org.quartz.service.internal.HazelcastJobStore;
+import com.hazelcast.core.Hazelcast;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.Instance;
 
-
-/**
- * {@link StartCoreCallable}
- *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- */
-public class StartCoreCallable implements Callable<String>, Serializable {
+public class TestableHazelcastJobStore extends HazelcastJobStore {
     
-    private static final long serialVersionUID = 6374396689822777915L;
+    private HazelcastInstance hazelcast = null;
     
-    private final SolrCoreIdentifier identifier;
-    
-    
-    public StartCoreCallable(SolrCoreIdentifier identifier, String ownerAddress) {
-        super();
-        this.identifier = identifier;
-    }
-
     @Override
-    public String call() throws Exception {
-        DelegationSolrAccessImpl accessService = (DelegationSolrAccessImpl) Services.getService(SolrAccessService.class);
-        EmbeddedSolrAccessImpl embeddedAccess = accessService.getEmbeddedServerAccess();                
-        embeddedAccess.startCore(identifier);
-        
-        return null;
+    public void shutdown() {
+        Collection<Instance> instances = hazelcast.getInstances();
+        for (Instance instance : instances) {
+            instance.destroy();
+        }
     }
-
+    
+    @Override
+    protected HazelcastInstance getHazelcast() throws JobPersistenceException {
+        if (hazelcast == null) {
+            hazelcast = Hazelcast.getDefaultInstance();
+        }
+        
+        return hazelcast;
+    }
 }

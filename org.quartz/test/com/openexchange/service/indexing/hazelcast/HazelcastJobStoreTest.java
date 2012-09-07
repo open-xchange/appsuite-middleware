@@ -53,11 +53,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -69,7 +66,6 @@ import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
-import org.quartz.JobPersistenceException;
 import org.quartz.ObjectAlreadyExistsException;
 import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
@@ -85,9 +81,6 @@ import org.quartz.spi.ClassLoadHelper;
 import org.quartz.spi.JobStore;
 import org.quartz.spi.OperableTrigger;
 
-import com.hazelcast.core.Hazelcast;
-import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.Instance;
 
 
 /**
@@ -111,6 +104,7 @@ public class HazelcastJobStoreTest {
         signaler = new SampleSignaler();
         ClassLoadHelper loadHelper = new CascadingClassLoadHelper();
         loadHelper.initialize();
+//        jobStore = new RAMJobStore();
         jobStore = new TestableHazelcastJobStore();
         jobStore.initialize(loadHelper, signaler);
         jobStore.schedulerStarted();
@@ -158,34 +152,57 @@ public class HazelcastJobStoreTest {
 //        }
 //    }
     
-    @Test
-    public void testConcurrentExecution() throws Exception {
-        MutableJobDetail jobDetail = (MutableJobDetail) this.jobDetail.clone();
-        jobDetail.setConcurrentExecution(false);
-        jobStore.storeJob(jobDetail, true);
-        
-        SimpleTriggerImpl trigger1 = (SimpleTriggerImpl) SimpleScheduleBuilder.repeatSecondlyForever(5).build();
-        trigger1.setKey(new TriggerKey("testTrigger1", "testTriggerGroup1"));
-        trigger1.setJobKey(jobDetail.getKey());
-        trigger1.setStartTime(startDate);
-        trigger1.computeFirstFireTime(null);
-        jobStore.storeTrigger(trigger1, false);
-        
-        SimpleTriggerImpl trigger2 = (SimpleTriggerImpl) SimpleScheduleBuilder.repeatSecondlyForever(5).build();
-        trigger2.setKey(new TriggerKey("testTrigger2", "testTriggerGroup1"));
-        trigger2.setJobKey(jobDetail.getKey());
-        trigger2.setStartTime(startDate);
-        trigger2.computeFirstFireTime(null);
-        jobStore.storeTrigger(trigger2, false);
-        
-        long firstFireTime = new Date(trigger1.getNextFireTime().getTime()).getTime();
-        List<OperableTrigger> nextTriggers = jobStore.acquireNextTriggers(firstFireTime, 2, 0L);        
-        Assert.assertTrue(nextTriggers.size() == 1);
-        
-        nextTriggers = jobStore.acquireNextTriggers(firstFireTime, 2, 0L);        
-        Assert.assertTrue(nextTriggers.size() == 0);
-        
-    }
+//    @Test
+//    public void testConcurrentExecution() throws Exception {
+//        MutableJobDetail jobDetail = (MutableJobDetail) this.jobDetail.clone();
+//        jobDetail.setConcurrentExecution(false);
+//        jobStore.storeJob(jobDetail, true);
+//        
+//        OperableTrigger trigger1 = (SimpleTriggerImpl) SimpleScheduleBuilder.repeatSecondlyForever(15).build();
+//        trigger1.setKey(new TriggerKey("testTrigger1", "testTriggerGroup1"));
+//        trigger1.setJobKey(jobDetail.getKey());
+//        trigger1.setStartTime(startDate);
+//        trigger1.computeFirstFireTime(null);
+//        jobStore.storeTrigger(trigger1, false);
+//        
+//        OperableTrigger trigger2 = (SimpleTriggerImpl) SimpleScheduleBuilder.repeatSecondlyForever(15).build();
+//        trigger2.setKey(new TriggerKey("testTrigger2", "testTriggerGroup1"));
+//        trigger2.setJobKey(jobDetail.getKey());
+//        trigger2.setStartTime(new Date(startDate.getTime() + 10000));
+//        trigger2.computeFirstFireTime(null);
+//        jobStore.storeTrigger(trigger2, false);
+//        
+//        long firstFireTime = new Date(trigger1.getNextFireTime().getTime()).getTime();
+//        List<OperableTrigger> nextTriggers = jobStore.acquireNextTriggers(firstFireTime + 10000, 2, 0L);        
+//        Assert.assertTrue(nextTriggers.size() == 1);
+//        Assert.assertEquals(trigger1.getKey(), nextTriggers.get(0).getKey());
+//        
+//        nextTriggers = jobStore.acquireNextTriggers(firstFireTime + 10000, 2, 0L);        
+//        Assert.assertTrue(nextTriggers.size() == 1);
+//        Assert.assertEquals(trigger2.getKey(), nextTriggers.get(0).getKey());
+//        
+//        List<TriggerFiredResult> fired = jobStore.triggersFired(Collections.singletonList(trigger1));
+//        Assert.assertTrue(fired.size() == 1);
+//        Assert.assertEquals(trigger1.getKey(), fired.get(0).getTriggerFiredBundle().getTrigger().getKey());
+//        
+//        fired = jobStore.triggersFired(Collections.singletonList(trigger2));
+//        Assert.assertTrue(fired.size() == 0);
+////        
+////        nextTriggers = jobStore.acquireNextTriggers(firstFireTime + 10000, 2, 0L);        
+////        Assert.assertTrue(nextTriggers.size() == 0);
+////        jobStore.releaseAcquiredTrigger(trigger1);
+////
+////        nextTriggers = jobStore.acquireNextTriggers(firstFireTime, 2, 0L);        
+////        Assert.assertTrue(nextTriggers.size() == 1);
+////        jobStore.triggersFired(nextTriggers);
+////        jobStore.triggeredJobComplete(nextTriggers.get(0), jobDetail, Trigger.CompletedExecutionInstruction.RE_EXECUTE_JOB);
+////        
+////        nextTriggers = jobStore.acquireNextTriggers(firstFireTime + 10000, 2, 0L);        
+////        Assert.assertTrue(nextTriggers.size() == 1);
+////        Assert.assertEquals(trigger2.getKey(), nextTriggers.get(0).getKey());
+//        
+//        
+//    }
     
     /*
      * Tests from quartz sources
@@ -583,28 +600,6 @@ public class HazelcastJobStoreTest {
         @Override
         public Object clone() {
             return new MutableJobDetail(this);
-        }
-    }
-    
-    private static final class TestableHazelcastJobStore extends HazelcastJobStore {
-        
-        private HazelcastInstance hazelcast = null;
-        
-        @Override
-        public void shutdown() {
-            Collection<Instance> instances = hazelcast.getInstances();
-            for (Instance instance : instances) {
-                instance.destroy();
-            }
-        }
-        
-        @Override
-        protected HazelcastInstance getHazelcast() throws JobPersistenceException {
-            if (hazelcast == null) {
-                hazelcast = Hazelcast.getDefaultInstance();
-            }
-            
-            return hazelcast;
         }
     }
 

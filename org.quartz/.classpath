@@ -9,5 +9,7 @@
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="examples"/>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="test"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.test"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

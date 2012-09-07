@@ -17,19 +17,9 @@ package org.quartz;
 
 import java.util.Date;
 import java.util.List;
-
 import junit.framework.Assert;
 import junit.framework.TestCase;
-
-import org.quartz.JobBuilder;
-import org.quartz.JobDetail;
-import org.quartz.JobKey;
-import org.quartz.ObjectAlreadyExistsException;
-import org.quartz.SimpleScheduleBuilder;
-import org.quartz.Trigger;
 import org.quartz.Trigger.TriggerState;
-import org.quartz.TriggerBuilder;
-import org.quartz.TriggerKey;
 import org.quartz.impl.JobDetailImpl;
 import org.quartz.impl.jdbcjobstore.JobStoreSupport;
 import org.quartz.impl.matchers.GroupMatcher;

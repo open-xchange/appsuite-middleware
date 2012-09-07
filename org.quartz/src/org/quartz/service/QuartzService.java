@@ -128,10 +128,16 @@ public interface QuartzService {
     public static final String PROPERTY_JOB_KEY = "quartz.jobKey";
 
     /**
-     * Gets the main scheduler started on bundle start-up.
+     * Gets the nodes local scheduler started on bundle start-up.
      * 
-     * @return The main scheduler
+     * @return The local scheduler
      */
-    Scheduler getScheduler();
-
+    Scheduler getLocalScheduler();
+    
+    /**
+     * Gets the local instance of the clustered scheduler started on bundle start-up.
+     * 
+     * @return The clustered scheduler
+     */
+    Scheduler getClusteredScheduler();
 }

@@ -6,7 +6,7 @@ Bundle-Version: 6.23.0
 Bundle-Activator: com.openexchange.hazelcast.osgi.HazelcastActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Eclipse-BuddyPolicy: registered
+Eclipse-BuddyPolicy: dependent
 Import-Package: com.openexchange.cluster.discovery,
  com.openexchange.config,
  com.openexchange.log,

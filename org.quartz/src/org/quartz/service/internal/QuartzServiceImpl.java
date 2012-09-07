@@ -59,19 +59,28 @@ import org.quartz.service.QuartzService;
  */
 public final class QuartzServiceImpl implements QuartzService {
 
-    private final Scheduler scheduler;
+    private final Scheduler localScheduler;
+    
+    private final Scheduler clusteredScheduler;
+    
 
     /**
      * Initializes a new {@link QuartzServiceImpl}.
      */
-    public QuartzServiceImpl(final Scheduler scheduler) {
+    public QuartzServiceImpl(Scheduler localScheduler, Scheduler clusteredScheduler) {
         super();
-        this.scheduler = scheduler;
+        this.localScheduler = localScheduler;
+        this.clusteredScheduler = clusteredScheduler;
     }
 
     @Override
-    public Scheduler getScheduler() {
-        return scheduler;
+    public Scheduler getLocalScheduler() {
+        return localScheduler;
+    }
+
+    @Override
+    public Scheduler getClusteredScheduler() {
+        return clusteredScheduler;
     }
 
 }

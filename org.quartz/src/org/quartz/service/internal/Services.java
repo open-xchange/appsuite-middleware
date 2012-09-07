@@ -47,38 +47,72 @@
  *
  */
 
-package com.openexchange.solr.internal;
+package org.quartz.service.internal;
 
-import java.io.Serializable;
-import java.util.concurrent.Callable;
-import com.openexchange.solr.SolrAccessService;
-import com.openexchange.solr.SolrCoreIdentifier;
-
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link StartCoreCallable}
- *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * {@link Services} - The static service lookup.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class StartCoreCallable implements Callable<String>, Serializable {
-    
-    private static final long serialVersionUID = 6374396689822777915L;
-    
-    private final SolrCoreIdentifier identifier;
-    
-    
-    public StartCoreCallable(SolrCoreIdentifier identifier, String ownerAddress) {
+public final class Services {    
+
+    /**
+     * Initializes a new {@link Services}.
+     */
+    private Services() {
         super();
-        this.identifier = identifier;
     }
 
-    @Override
-    public String call() throws Exception {
-        DelegationSolrAccessImpl accessService = (DelegationSolrAccessImpl) Services.getService(SolrAccessService.class);
-        EmbeddedSolrAccessImpl embeddedAccess = accessService.getEmbeddedServerAccess();                
-        embeddedAccess.startCore(identifier);
-        
-        return null;
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
+
+    /**
+     * Sets the service lookup.
+     * 
+     * @param serviceLookup The service lookup or <code>null</code>
+     */
+    public static void setServiceLookup(final ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
+    }
+
+    /**
+     * Gets the service lookup.
+     * 
+     * @return The service lookup or <code>null</code>
+     */
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
+    }
+
+    /**
+     * Gets the service of specified type
+     * 
+     * @param clazz The service's class
+     * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"org.quartz\" not started?");
+        }
+        return serviceLookup.getService(clazz);
+    }
+
+    /**
+     * (Optionally) Gets the service of specified type
+     * 
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        try {
+            return getService(clazz);
+        } catch (final IllegalStateException e) {
+            return null;
+        }
     }
 
 }

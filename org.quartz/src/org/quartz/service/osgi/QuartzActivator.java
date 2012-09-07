@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,101 +49,107 @@
 
 package org.quartz.service.osgi;
 
-import java.io.StringReader;
-import java.lang.management.ManagementFactory;
 import java.util.Properties;
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerFactory;
-import org.quartz.core.QuartzScheduler;
-import org.quartz.core.QuartzSchedulerMBeanImpl;
-import org.quartz.core.QuartzSchedulerResources;
 import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.service.QuartzService;
 import org.quartz.service.internal.QuartzServiceImpl;
+import org.quartz.service.internal.Services;
+import com.hazelcast.core.HazelcastInstance;
+import com.openexchange.osgi.HousekeepingActivator;
 
 
 /**
  * {@link QuartzActivator}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public final class QuartzActivator implements BundleActivator {
-
-    private volatile Scheduler scheduler;
+public class QuartzActivator extends HousekeepingActivator {
 
     private volatile ServiceRegistration<QuartzService> quartzServiceRegistration;
 
-    /**
-     * Initializes a new {@link QuartzActivator}.
-     */
-    public QuartzActivator() {
-        super();
+    private volatile Scheduler localScheduler;
+
+    private volatile Scheduler clusteredScheduler;
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { HazelcastInstance.class };
     }
 
     @Override
-    public void start(final BundleContext context) throws Exception {
+    protected void startBundle() throws Exception {
+        Services.setServiceLookup(this);
         final Log log = LogFactory.getLog(QuartzActivator.class);
         log.info("Starting bundle: org.quartz");
         try {
             System.setProperty("org.terracotta.quartz.skipUpdateCheck", "true");
+            
             // Specify properties
-            final Properties properties;
-            {
-                final String sProps = "" +
-                		"# Default Properties file for use by StdSchedulerFactory\n" + 
-                		"# to create a Quartz Scheduler Instance, if a different\n" + 
-                		"# properties file is not explicitly specified.\n" + 
-                		"\n" + 
-                		"org.quartz.scheduler.instanceName=OpenXchangeQuartzScheduler\n" + 
-                		"org.quartz.scheduler.rmi.export=false\n" + 
-                		"org.quartz.scheduler.rmi.proxy=false\n" + 
-                		"org.quartz.scheduler.wrapJobExecutionInUserTransaction=false\n" + 
-                		"\n" + 
-                		"org.quartz.threadPool.class=org.quartz.simpl.SimpleThreadPool\n" + 
-                		"org.quartz.threadPool.threadCount=10\n" + 
-                		"org.quartz.threadPool.threadPriority=5\n" + 
-                		"org.quartz.threadPool.threadsInheritContextClassLoaderOfInitializingThread=true\n" + 
-                		"\n" + 
-                		"org.quartz.jobStore.misfireThreshold=60000\n" + 
-                		"\n" + 
-                		"org.quartz.jobStore.class=org.quartz.simpl.RAMJobStore\n" +
-                		"\n" +
-                		"org.quartz.scheduler.jmx.export=true";
-                properties = new Properties();
-                properties.load(new StringReader(sProps));
-            }
+            Properties localProperties = new Properties();
+            localProperties.put("org.quartz.scheduler.instanceName", "OX-Local-Scheduler");
+            localProperties.put("org.quartz.scheduler.rmi.export", false);
+            localProperties.put("org.quartz.scheduler.rmi.proxy", false);
+            localProperties.put("org.quartz.scheduler.wrapJobExecutionInUserTransaction", false);
+            localProperties.put("org.quartz.threadPool.class", "org.quartz.simpl.SimpleThreadPool");
+            localProperties.put("org.quartz.threadPool.threadCount", "10");
+            localProperties.put("org.quartz.threadPool.threadPriority", "5");
+            localProperties.put("org.quartz.threadPool.threadsInheritContextClassLoaderOfInitializingThread", true);
+            localProperties.put("org.quartz.jobStore.misfireThreshold", "60000");
+            localProperties.put("org.quartz.jobStore.class", "org.quartz.simpl.RAMJobStore");
+            localProperties.put("org.quartz.scheduler.jmx.export", true);
+            
+            Properties clusteredProperties = new Properties();
+            clusteredProperties.put("org.quartz.scheduler.instanceName", "OX-Clustered-Scheduler");
+            clusteredProperties.put("org.quartz.scheduler.instanceId", getService(HazelcastInstance.class).getCluster().getLocalMember().getUuid());
+            clusteredProperties.put("org.quartz.scheduler.rmi.export", false);
+            clusteredProperties.put("org.quartz.scheduler.rmi.proxy", false);
+            clusteredProperties.put("org.quartz.scheduler.wrapJobExecutionInUserTransaction", false);
+            clusteredProperties.put("org.quartz.threadPool.class", "org.quartz.simpl.SimpleThreadPool");
+            clusteredProperties.put("org.quartz.threadPool.threadCount", "10");
+            clusteredProperties.put("org.quartz.threadPool.threadPriority", "5");
+            clusteredProperties.put("org.quartz.threadPool.threadsInheritContextClassLoaderOfInitializingThread", true);
+            clusteredProperties.put("org.quartz.jobStore.misfireThreshold", "60000");
+            clusteredProperties.put("org.quartz.jobStore.class", "org.quartz.service.internal.HazelcastJobStore");
+            clusteredProperties.put("org.quartz.scheduler.jmx.export", true);
+
             // Create scheduler
-            final SchedulerFactory sf = new StdSchedulerFactory(properties);
-            final Scheduler scheduler = sf.getScheduler();
-            // Start scheduler
-            scheduler.start();
-            this.scheduler = scheduler;
-            // Initialize appropriate service
-            quartzServiceRegistration = context.registerService(QuartzService.class, new QuartzServiceImpl(scheduler), null);
+            SchedulerFactory lsf = new StdSchedulerFactory(localProperties);
+            SchedulerFactory csf = new StdSchedulerFactory(clusteredProperties);
+            localScheduler = lsf.getScheduler();
+            clusteredScheduler = csf.getScheduler();
+            localScheduler.start();
+            clusteredScheduler.start();
+
+            quartzServiceRegistration = context.registerService(QuartzService.class, new QuartzServiceImpl(localScheduler, clusteredScheduler), null);
             log.info("Bundle successfully started: org.quartz");
         } catch (final Exception e) {
             log.error("Failed starting bundle: org.quartz", e);
             throw e;
-        }
+        }        
     }
-
+    
     @Override
-    public void stop(final BundleContext context) throws Exception {
+    protected void stopBundle() throws Exception {
         final Log log = LogFactory.getLog(QuartzActivator.class);
         log.info("Stopping bundle: org.quartz");
         try {
-            final Scheduler scheduler = this.scheduler;
+            Scheduler scheduler = localScheduler;
             if (null != scheduler) {
                 scheduler.shutdown();
-                this.scheduler = null;
+                localScheduler = null;
             }
+            
+            scheduler = clusteredScheduler;
+            if (null != scheduler) {
+                scheduler.shutdown();
+                clusteredScheduler = null;
+            }
+            
             final ServiceRegistration<QuartzService> quartzServiceRegistration = this.quartzServiceRegistration;
             if (null != quartzServiceRegistration) {
                 quartzServiceRegistration.unregister();

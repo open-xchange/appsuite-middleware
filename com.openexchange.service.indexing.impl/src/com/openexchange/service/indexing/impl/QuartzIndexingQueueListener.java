@@ -149,7 +149,7 @@ public final class QuartzIndexingQueueListener implements MQQueueListener {
         final TriggerBuilder<Trigger> triggerBuilder = newTrigger().withIdentity("rescheduler", GROUP).withDescription("The rescheduling trigger.").forJob(job.getKey());
         triggerBuilder.startNow().withSchedule(simpleSchedule().repeatForever().withIntervalInSeconds(15));
         // Schedule
-        quartzService.getScheduler().scheduleJob(job, triggerBuilder.build());
+        quartzService.getLocalScheduler().scheduleJob(job, triggerBuilder.build());
     }
 
     @Override
@@ -184,7 +184,7 @@ public final class QuartzIndexingQueueListener implements MQQueueListener {
             /*
              * Tell quartz to schedule the job using our trigger
              */
-            quartzService.getScheduler().scheduleJob(job, trigger);
+            quartzService.getLocalScheduler().scheduleJob(job, trigger);
         } catch (final JMSException e) {
             LOG.warn("A JMS error occurred: " + e.getMessage(), e);
         } catch (final SchedulerException e) {
@@ -216,7 +216,7 @@ public final class QuartzIndexingQueueListener implements MQQueueListener {
             /*
              * Tell quartz to schedule the job using our trigger
              */
-            quartzService.getScheduler().scheduleJob(job, trigger);
+            quartzService.getLocalScheduler().scheduleJob(job, trigger);
         } catch (final ClassNotFoundException e) {
             LOG.warn("Invalid Java object in indexing message: " + e.getMessage(), e);
         } catch (final IOException e) {
