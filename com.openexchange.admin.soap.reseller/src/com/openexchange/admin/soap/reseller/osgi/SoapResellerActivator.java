@@ -54,8 +54,20 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.admin.reseller.rmi.OXResellerInterface;
+import com.openexchange.admin.rmi.OXContextInterface;
+import com.openexchange.admin.rmi.OXGroupInterface;
+import com.openexchange.admin.rmi.OXResourceInterface;
+import com.openexchange.admin.rmi.OXUserInterface;
+import com.openexchange.admin.soap.reseller.context.reseller.soap.OXResellerContextServicePortType;
+import com.openexchange.admin.soap.reseller.context.reseller.soap.OXResellerContextServicePortTypeImpl;
+import com.openexchange.admin.soap.reseller.group.reseller.soap.OXResellerGroupServicePortType;
+import com.openexchange.admin.soap.reseller.group.reseller.soap.OXResellerGroupServicePortTypeImpl;
+import com.openexchange.admin.soap.reseller.resource.reseller.soap.OXResellerResourceServicePortType;
+import com.openexchange.admin.soap.reseller.resource.reseller.soap.OXResellerResourceServicePortTypeImpl;
 import com.openexchange.admin.soap.reseller.service.reseller.soap.OXResellerServicePortType;
 import com.openexchange.admin.soap.reseller.service.reseller.soap.OXResellerServicePortTypeImpl;
+import com.openexchange.admin.soap.reseller.user.reseller.soap.OXResellerUserServicePortType;
+import com.openexchange.admin.soap.reseller.user.reseller.soap.OXResellerUserServicePortTypeImpl;
 import com.openexchange.osgi.HousekeepingActivator;
 
 
@@ -85,8 +97,24 @@ public final class SoapResellerActivator extends HousekeepingActivator {
             
             @Override
             public void removedService(final ServiceReference<Remote> reference, final Remote service) {
-                if (null != service) {
+                if (service instanceof OXResellerInterface) {
                     OXResellerServicePortTypeImpl.RMI_REFERENCE.set(null);
+                    context.ungetService(reference);
+                }
+                if (service instanceof OXUserInterface) {
+                    OXResellerUserServicePortTypeImpl.RMI_REFERENCE.set(null);
+                    context.ungetService(reference);
+                }
+                if (service instanceof OXContextInterface) {
+                    OXResellerContextServicePortTypeImpl.RMI_REFERENCE.set(null);
+                    context.ungetService(reference);
+                }
+                if (service instanceof OXGroupInterface) {
+                    OXResellerGroupServicePortTypeImpl.RMI_REFERENCE.set(null);
+                    context.ungetService(reference);
+                }
+                if (service instanceof OXResourceInterface) {
+                    OXResellerResourceServicePortTypeImpl.RMI_REFERENCE.set(null);
                     context.ungetService(reference);
                 }
             }
@@ -103,6 +131,22 @@ public final class SoapResellerActivator extends HousekeepingActivator {
                     OXResellerServicePortTypeImpl.RMI_REFERENCE.set((OXResellerInterface) service);
                     return service;
                 }
+                if (service instanceof OXUserInterface) {
+                    OXResellerUserServicePortTypeImpl.RMI_REFERENCE.set((OXUserInterface) service);
+                    return service;
+                }
+                if (service instanceof OXContextInterface) {
+                    OXResellerContextServicePortTypeImpl.RMI_REFERENCE.set((OXContextInterface) service);
+                    return service;
+                }
+                if (service instanceof OXGroupInterface) {
+                    OXResellerGroupServicePortTypeImpl.RMI_REFERENCE.set((OXGroupInterface) service);
+                    return service;
+                }
+                if (service instanceof OXResourceInterface) {
+                    OXResellerResourceServicePortTypeImpl.RMI_REFERENCE.set((OXResourceInterface) service);
+                    return service;
+                }
                 context.ungetService(reference);
                 return null;
             }
@@ -110,8 +154,26 @@ public final class SoapResellerActivator extends HousekeepingActivator {
         track(Remote.class, trackerCustomizer);
         openTrackers();
 
-        final OXResellerServicePortTypeImpl soapService = new OXResellerServicePortTypeImpl();
-        registerService(OXResellerServicePortType.class, soapService);
+        {
+            final OXResellerServicePortTypeImpl soapService = new OXResellerServicePortTypeImpl();
+            registerService(OXResellerServicePortType.class, soapService);
+        }
+        {
+            final OXResellerUserServicePortTypeImpl soapService = new OXResellerUserServicePortTypeImpl();
+            registerService(OXResellerUserServicePortType.class, soapService);
+        }
+        {
+            final OXResellerResourceServicePortTypeImpl soapService = new OXResellerResourceServicePortTypeImpl();
+            registerService(OXResellerResourceServicePortType.class, soapService);
+        }
+        {
+            final OXResellerGroupServicePortTypeImpl soapService = new OXResellerGroupServicePortTypeImpl();
+            registerService(OXResellerGroupServicePortType.class, soapService);
+        }
+        {
+            final OXResellerContextServicePortTypeImpl soapService = new OXResellerContextServicePortTypeImpl();
+            registerService(OXResellerContextServicePortType.class, soapService);
+        }
     }
 
 }

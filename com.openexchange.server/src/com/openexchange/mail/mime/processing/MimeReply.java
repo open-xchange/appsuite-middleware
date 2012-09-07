@@ -194,6 +194,23 @@ public final class MimeReply {
             usm);
     }
 
+    private static final Pattern PAT_META_CT = Pattern.compile("<meta[^>]*?http-equiv=\"?content-type\"?[^>]*?>", Pattern.CASE_INSENSITIVE);
+
+    private static String replaceMetaEquiv(final String html, final ContentType contentType) {
+        final Matcher m = PAT_META_CT.matcher(html);
+        final MatcherReplacer mr = new MatcherReplacer(m, html);
+        final StringBuilder replaceBuffer = new StringBuilder(html.length());
+        if (m.find()) {
+            replaceBuffer.append("<meta content=\"").append(contentType.getBaseType().toLowerCase(Locale.ENGLISH));
+            replaceBuffer.append("; charset=").append(contentType.getCharsetParameter()).append("\" http-equiv=\"Content-Type\" />");
+            final String replacement = replaceBuffer.toString();
+            replaceBuffer.setLength(0);
+            mr.appendLiteralReplacement(replaceBuffer, replacement);
+        }
+        mr.appendTail(replaceBuffer);
+        return replaceBuffer.toString();
+    }
+
     /**
      * Composes a reply message from specified original message based on MIME objects from <code>JavaMail</code> API.
      * 
@@ -412,7 +429,7 @@ public final class MimeReply {
              * Add reply text
              */
             final ContentType retvalContentType = new ContentType();
-            final String replyText;
+            String replyText;
             {
                 final List<String> list = new ArrayList<String>();
                 {
@@ -471,6 +488,10 @@ public final class MimeReply {
             /*
              * Set message's content directly to reply text
              */
+            if (retvalContentType.startsWith("text/htm")) {
+                retvalContentType.setCharsetParameter("UTF-8");
+                replyText = replaceMetaEquiv(replyText, retvalContentType);
+            }
             replyMsg.setText(replyText, retvalContentType.getCharsetParameter(), retvalContentType.getSubType());
             replyMsg.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
             replyMsg.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(retvalContentType.toString()));

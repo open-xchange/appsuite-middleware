@@ -63,6 +63,7 @@ import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.AddSessionParameter;
+import com.openexchange.sessiond.Parameterized;
 import com.openexchange.sessiond.SessionMatcher;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.SessiondServiceExtended;
@@ -91,7 +92,14 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
 
     @Override
     public String addSession(final AddSessionParameter param) throws OXException {
-        return SessionHandler.addSession(param.getUserId(), param.getUserLoginInfo(), param.getPassword(), param.getContext().getContextId(), param.getClientIP(), param.getFullLogin(), param.getAuthId(), param.getHash(), param.getClient());
+        final SessionImpl session = SessionHandler.addSession(param.getUserId(), param.getUserLoginInfo(), param.getPassword(), param.getContext().getContextId(), param.getClientIP(), param.getFullLogin(), param.getAuthId(), param.getHash(), param.getClient());
+        if (null == session) {
+            return null;
+        }
+        if (param instanceof Parameterized) {
+            ((Parameterized) param).setParameter(Parameterized.PARAM_SESSION, session);
+        }
+        return session.getSessionID();
     }
 
     @Override

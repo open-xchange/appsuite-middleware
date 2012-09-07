@@ -293,6 +293,23 @@ public final class MimeForward {
 
     private static final String TEXT_HTM = "text/htm";
 
+    private static final Pattern PAT_META_CT = Pattern.compile("<meta[^>]*?http-equiv=\"?content-type\"?[^>]*?>", Pattern.CASE_INSENSITIVE);
+
+    private static String replaceMetaEquiv(final String html, final ContentType contentType) {
+        final Matcher m = PAT_META_CT.matcher(html);
+        final MatcherReplacer mr = new MatcherReplacer(m, html);
+        final StringBuilder replaceBuffer = new StringBuilder(html.length());
+        if (m.find()) {
+            replaceBuffer.append("<meta content=\"").append(contentType.getBaseType().toLowerCase(Locale.ENGLISH));
+            replaceBuffer.append("; charset=").append(contentType.getCharsetParameter()).append("\" http-equiv=\"Content-Type\" />");
+            final String replacement = replaceBuffer.toString();
+            replaceBuffer.setLength(0);
+            mr.appendLiteralReplacement(replaceBuffer, replacement);
+        }
+        mr.appendTail(replaceBuffer);
+        return replaceBuffer.toString();
+    }
+
     private static MailMessage asInlineForward(final MailMessage originalMsg, final Session session, final Context ctx, final UserSettingMail usm, final MimeMessage forwardMsg) throws OXException, MessagingException, IOException {
         /*
          * Check for message reference
@@ -320,6 +337,8 @@ public final class MimeForward {
                     firstSeenText = "";
                 } else if (isHtml) {
                     contentIds = MimeMessageUtility.getContentIDs(firstSeenText);
+                    contentType.setCharsetParameter("UTF-8");
+                    firstSeenText = replaceMetaEquiv(firstSeenText, contentType);
                 }
                 /*
                  * Add appropriate text part prefixed with forward text
@@ -365,7 +384,11 @@ public final class MimeForward {
                     originalContentType.setCharsetParameter(MessageUtility.checkCharset(originalMsg, originalContentType));
                 }
             }
-            final String content = MimeProcessingUtility.readContent(originalMsg, originalContentType.getCharsetParameter());
+            String content = MimeProcessingUtility.readContent(originalMsg, originalContentType.getCharsetParameter());
+            if (originalContentType.startsWith(TEXT_HTM)) {
+                originalContentType.setCharsetParameter("UTF-8");
+                content = replaceMetaEquiv(content, originalContentType);
+            }
             forwardMsg.setText(
                 usm.isDropReplyForwardPrefix() ? (content == null ? "" : content) : generateForwardText(
                     content == null ? "" : content,

@@ -50,10 +50,7 @@
 package com.openexchange.admin.contextrestore.osgi;
 
 import java.rmi.Remote;
-import java.rmi.RemoteException;
-import java.rmi.server.UnicastRemoteObject;
 import org.apache.commons.logging.Log;
-import com.openexchange.admin.contextrestore.rmi.OXContextRestoreInterface;
 import com.openexchange.admin.contextrestore.rmi.impl.OXContextRestore;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.exceptions.StorageException;
@@ -61,7 +58,6 @@ import com.openexchange.admin.rmi.impl.OXContext;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.log.LogFactory;
-import com.openexchange.log.LogProperties;
 import com.openexchange.osgi.HousekeepingActivator;
 
 public class Activator extends HousekeepingActivator {
@@ -79,14 +75,10 @@ public class Activator extends HousekeepingActivator {
             AdminCache.compareAndSet(null, service);
             ox_ctx = new OXContext(context);
             contextRestore = new OXContextRestore();
-            final OXContextRestoreInterface oxctxrest_stub = (OXContextRestoreInterface) UnicastRemoteObject.exportObject(contextRestore, 0);
 
             // bind all NEW Objects to registry
-            registerService(Remote.class, oxctxrest_stub, null);
+            registerService(Remote.class, contextRestore, null);
             log.info("RMI Interface for context restore bound to RMI registry");
-        } catch (final RemoteException e) {
-            log.error(e.getMessage(), e);
-            throw e;
         } catch (final StorageException e) {
             log.fatal("Error while creating one instance for RMI interface", e);
             throw e;
@@ -94,7 +86,7 @@ public class Activator extends HousekeepingActivator {
     }
 
     @Override
-    public void stopBundle() throws Exception {
+    public void stopBundle() {
         unregisterServices();
     }
 

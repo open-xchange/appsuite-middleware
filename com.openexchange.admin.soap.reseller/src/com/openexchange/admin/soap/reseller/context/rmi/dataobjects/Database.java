@@ -10,6 +10,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlElementRefs;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.namespace.QName;
 
 
 /**
@@ -188,4 +189,409 @@ public class Database
         return this.rest;
     }
 
+    private <V extends Serializable> V getByName(final String name, final V defaultValue) {
+        for (final JAXBElement<? extends Serializable> jaxbElement : getRest()) {
+            if (name.equals(jaxbElement.getName().getLocalPart())) {
+                return (V) (jaxbElement.isNil() ? defaultValue : jaxbElement.getValue());
+            }
+        }
+        return null;
+    }
+
+    private <V extends Serializable> void setByName(final String name, final Class<V> clazz, final V value) {
+        final List<JAXBElement<? extends Serializable>> rests = getRest();
+        for (final JAXBElement<? extends Serializable> jaxbElement : rests) {
+            if (name.equals(jaxbElement.getName().getLocalPart())) {
+                final JAXBElement<V> cur = (JAXBElement<V>) jaxbElement;
+                cur.setValue(value);
+                return;
+            }
+        }
+        final QName qname = new QName("http://dataobjects.rmi.admin.openexchange.com/xsd", name);
+        rests.add(new JAXBElement<V>(qname, clazz, value));
+    }
+    
+    /**
+     * Ruft den Wert der clusterWeight-Eigenschaft ab.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Integer }
+     *     
+     */
+    public Integer getClusterWeight() {
+        return getByName("clusterWeight", null);
+    }
+    
+    /**
+     * Legt den Wert der clusterWeight-Eigenschaft fest.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Integer }
+     *     
+     */
+    public void setClusterWeight(final Integer value) {
+        setByName("clusterWeight", Integer.class, value);
+    }
+    
+    /**
+     * Ruft den Wert der currentUnits-Eigenschaft ab.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Integer }
+     *     
+     */
+    public Integer getCurrentUnits() {
+        return getByName("currentUnits", null);
+    }
+    
+    /**
+     * Legt den Wert der currentUnits-Eigenschaft fest.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Integer }
+     *     
+     */
+    public void setCurrentUnits(final Integer value) {
+        setByName("currentUnits", Integer.class, value);
+    }
+    
+    /**
+     * Ruft den Wert der driver-Eigenschaft ab.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getDriver() {
+        return getByName("driver", null);
+    }
+    
+    /**
+     * Legt den Wert der driver-Eigenschaft fest.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setDriver(final String value) {
+        setByName("drive", String.class, value);
+    }
+    
+    /**
+     * Ruft den Wert der id-Eigenschaft ab.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Integer }
+     *     
+     */
+    public Integer getId() {
+        return getByName("id", null);
+    }
+    
+    /**
+     * Legt den Wert der id-Eigenschaft fest.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Integer }
+     *     
+     */
+    public void setId(final Integer value) {
+        setByName("id", Integer.class, value);
+    }
+    
+    /**
+     * Ruft den Wert der login-Eigenschaft ab.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getLogin() {
+        return getByName("login", null);
+    }
+    
+    /**
+     * Legt den Wert der login-Eigenschaft fest.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setLogin(final String value) {
+        setByName("login", String.class, value);
+    }
+    
+    /**
+     * Ruft den Wert der master-Eigenschaft ab.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Boolean }
+     *     
+     */
+    public Boolean isMaster() {
+        return getByName("master", null);
+    }
+    
+    /**
+     * Legt den Wert der master-Eigenschaft fest.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Boolean }
+     *     
+     */
+    public void setMaster(final Boolean value) {
+        setByName("master", Boolean.class, value);
+    }
+    
+    /**
+     * Ruft den Wert der masterId-Eigenschaft ab.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Integer }
+     *     
+     */
+    public Integer getMasterId() {
+        return getByName("masterId", null);
+    }
+    
+    /**
+     * Legt den Wert der masterId-Eigenschaft fest.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Integer }
+     *     
+     */
+    public void setMasterId(final Integer value) {
+        setByName("masterId", Integer.class, value);
+    }
+    
+    /**
+     * Ruft den Wert der maxUnits-Eigenschaft ab.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Integer }
+     *     
+     */
+    public Integer getMaxUnits() {
+        return getByName("maxUnits", null);
+    }
+    
+    /**
+     * Legt den Wert der maxUnits-Eigenschaft fest.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Integer }
+     *     
+     */
+    public void setMaxUnits(final Integer value) {
+        setByName("maxUnits", Integer.class, value);
+    }
+    
+    /**
+     * Ruft den Wert der name-Eigenschaft ab.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getName() {
+        return getByName("name", null);
+    }
+    
+    /**
+     * Legt den Wert der name-Eigenschaft fest.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setName(final String value) {
+        setByName("name", String.class, value);
+    }
+    
+    /**
+     * Ruft den Wert der password-Eigenschaft ab.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getPassword() {
+        return getByName("password", null);
+    }
+    
+    /**
+     * Legt den Wert der password-Eigenschaft fest.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setPassword(final String value) {
+        setByName("password", String.class, value);
+    }
+    
+    /**
+     * Ruft den Wert der poolHardLimit-Eigenschaft ab.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Integer }
+     *     
+     */
+    public Integer getPoolHardLimit() {
+        return getByName("poolHardLimit", null);
+    }
+    
+    /**
+     * Legt den Wert der poolHardLimit-Eigenschaft fest.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Integer }
+     *     
+     */
+    public void setPoolHardLimit(final Integer value) {
+        setByName("poolHardLimit", Integer.class, value);
+    }
+    
+    /**
+     * Ruft den Wert der poolInitial-Eigenschaft ab.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Integer }
+     *     
+     */
+    public Integer getPoolInitial() {
+        return getByName("poolInitial", null);
+    }
+    
+    /**
+     * Legt den Wert der poolInitial-Eigenschaft fest.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Integer }
+     *     
+     */
+    public void setPoolInitial(final Integer value) {
+        setByName("poolInitial", Integer.class, value);
+    }
+    
+    /**
+     * Ruft den Wert der poolMax-Eigenschaft ab.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Integer }
+     *     
+     */
+    public Integer getPoolMax() {
+        return getByName("poolMax", null);
+    }
+    
+    /**
+     * Legt den Wert der poolMax-Eigenschaft fest.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Integer }
+     *     
+     */
+    public void setPoolMax(final Integer value) {
+        setByName("poolMax", Integer.class, value);
+    }
+    
+    /**
+     * Ruft den Wert der readId-Eigenschaft ab.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Integer }
+     *     
+     */
+    public Integer getReadId() {
+        return getByName("readId", null);
+    }
+    
+    /**
+     * Legt den Wert der readId-Eigenschaft fest.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Integer }
+     *     
+     */
+    public void setReadId(final Integer value) {
+        setByName("readId", Integer.class, value);
+    }
+    
+    /**
+     * Ruft den Wert der scheme-Eigenschaft ab.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getScheme() {
+        return getByName("scheme", null);
+    }
+    
+    /**
+     * Legt den Wert der scheme-Eigenschaft fest.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setScheme(final String value) {
+        setByName("scheme", String.class, value);
+    }
+    
+    /**
+     * Ruft den Wert der url-Eigenschaft ab.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getUrl() {
+        return getByName("url", null);
+    }
+    
+    /**
+     * Legt den Wert der url-Eigenschaft fest.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setUrl(final String value) {
+        setByName("url", String.class, value);
+    }
 }

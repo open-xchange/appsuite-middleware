@@ -142,7 +142,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     /**
      * Request object.
      */
-    private final HttpServletRequestImpl request;
+    protected final HttpServletRequestImpl request;
 
     /**
      * Response object.
@@ -2289,7 +2289,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     }
 
-    private static final class KeepAliveRunnable implements Runnable {
+    private final class KeepAliveRunnable implements Runnable {
 
         private final AjpProcessor ajpProcessor;
 
@@ -2311,6 +2311,10 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         public void run() {
             try {
                 if (ajpProcessor.isProcessing() && ((System.currentTimeMillis() - ajpProcessor.getLastWriteAccess()) > max)) {
+                    if (first && request.getContentLengthLong() > 0) {
+                        // Very first request data chunk not yet received
+                        return;
+                    }
                     /*
                      * Send "keep-alive" package
                      */

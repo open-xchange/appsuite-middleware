@@ -128,7 +128,9 @@ public final class GetForwardAction extends AbstractMailAction {
              */
             final MailServletInterface mailInterface = getMailInterface(req);
             final MailMessage mailMessage = mailInterface.getForwardMessageForDisplay(new String[] { folderPath }, new String[] { uid }, usmNoSave);
-            mailMessage.setAccountId(mailInterface.getAccountID());
+            if (!mailMessage.containsAccountId()) {
+                mailMessage.setAccountId(mailInterface.getAccountID());
+            }
             return new AJAXRequestResult(mailMessage, "mail");
         } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -173,7 +175,9 @@ public final class GetForwardAction extends AbstractMailAction {
             }
             final MailServletInterface mailInterface = getMailInterface(req);
             final MailMessage mail = mailInterface.getForwardMessageForDisplay(folders, ids, usmNoSave);
-            mail.setAccountId(mailInterface.getAccountID());
+            if (!mail.containsAccountId()) {
+                mail.setAccountId(mailInterface.getAccountID());
+            }
             return new AJAXRequestResult(mail, "mail");
         } catch (final OXException e) {
             final Object[] args = e.getDisplayArgs();

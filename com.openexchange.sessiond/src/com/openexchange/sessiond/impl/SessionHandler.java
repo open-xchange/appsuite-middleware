@@ -51,9 +51,7 @@ package com.openexchange.sessiond.impl;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -300,7 +298,7 @@ public final class SessionHandler {
      * @return The session ID associated with newly created session
      * @throws OXException If creating a new session fails
      */
-    protected static String addSession(final int userId, final String loginName, final String password, final int contextId, final String clientHost, final String login, final String authId, final String hash, final String client) throws OXException {
+    protected static SessionImpl addSession(final int userId, final String loginName, final String password, final int contextId, final String clientHost, final String login, final String authId, final String hash, final String client) throws OXException {
         checkMaxSessPerUser(userId, contextId);
         checkMaxSessPerClient(client, userId, contextId);
         checkAuthId(login, authId);
@@ -317,7 +315,7 @@ public final class SessionHandler {
         // Post event for created session
         postSessionCreation(session);
         // Return session ID
-        return sessionId;
+        return session;
     }
 
     private static void checkMaxSessPerUser(final int userId, final int contextId) throws OXException {
@@ -479,7 +477,21 @@ public final class SessionHandler {
             if (storageService != null) {
                 try {
                     Session s = storageService.lookupSession(sessionId);
-                    sessionData.addSession(new SessionImpl(s.getUserId(), s.getLoginName(), s.getPassword(), s.getContextId(), s.getSessionID(), s.getSecret(), s.getRandomToken(), s.getLocalIp(), s.getLogin(), s.getAuthId(), s.getHash(), s.getClient()), noLimit);
+                    sessionData.addSession(
+                        new SessionImpl(
+                            s.getUserId(),
+                            s.getLoginName(),
+                            s.getPassword(),
+                            s.getContextId(),
+                            s.getSessionID(),
+                            s.getSecret(),
+                            s.getRandomToken(),
+                            s.getLocalIp(),
+                            s.getLogin(),
+                            s.getAuthId(),
+                            s.getHash(),
+                            s.getClient()),
+                        noLimit);
                     return sessionToSessionControl(s);
                 } catch (OXException e) {
                     LOG.error(e.getMessage(), e);
@@ -805,11 +817,26 @@ public final class SessionHandler {
         return null;
     }
 
-    private static <T> T[] merge(T[]... arrays) {
-        List<T> list = new ArrayList<T>();
-        for (T[] array : arrays) {
-            list.addAll(Arrays.asList(array));
+    private static Session[] merge(Session[] array1, Session[] array2) {
+        int lenghtArray1 = 0, lengthArray2 = 0;
+        if (array1 != null) {
+            lenghtArray1 = array1.length;
         }
-        return (T[]) Array.newInstance(arrays[0][0].getClass(), list.size());
+        if (array2 != null) {
+            lengthArray2 = array2.length;
+        }
+        Session[] retval = new Session[lenghtArray1 + lengthArray2];
+        int i = 0;
+        if (array1 != null) {
+            for (Session s : array1) {
+                retval[i++] = s;
+            }
+        }
+        if (array2 != null) {
+            for (Session s : array2) {
+                retval[i++] = s;
+            }
+        }
+        return retval;
     }
 }

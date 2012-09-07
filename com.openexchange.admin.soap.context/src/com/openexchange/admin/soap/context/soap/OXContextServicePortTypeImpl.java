@@ -436,7 +436,7 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
     public java.util.List<Context> list(final java.lang.String searchPattern,final Credentials auth) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , RemoteException_Exception    { 
         final OXContextInterface contextInterface = getContextInterface();
         try {
-            final com.openexchange.admin.rmi.dataobjects.Context[] contexts = contextInterface.list(searchPattern, soap2Credentials(auth));
+            final com.openexchange.admin.rmi.dataobjects.Context[] contexts = contextInterface.list(isEmpty(searchPattern) ? "*" : searchPattern, soap2Credentials(auth));
             if (null == contexts) {
                 return Collections.emptyList();
             }
@@ -1571,6 +1571,10 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
         soapContext.setEnabled(context.getEnabled());
         soapContext.setFilestoreId(context.getFilestoreId());
         soapContext.setFilestoreName(context.getFilestore_name());
+        final HashSet<String> lmappings = context.getLoginMappings();
+        if (null != lmappings && !lmappings.isEmpty()) {
+            soapContext.setLoginMappings(new ArrayList<String>(lmappings));
+        }
         soapContext.setId(context.getId());
         soapContext.setMaxQuota(context.getMaxQuota());
         soapContext.setName(context.getName());
@@ -1635,6 +1639,18 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
         }
         soapMap.setEntries(entries);
         return soapMap;
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
 }

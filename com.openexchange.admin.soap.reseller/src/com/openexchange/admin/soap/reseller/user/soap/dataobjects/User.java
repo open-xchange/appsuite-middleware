@@ -1,7 +1,6 @@
 
 package com.openexchange.admin.soap.reseller.user.soap.dataobjects;
 
-import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -558,6 +557,15 @@ public class User {
      */
     public List<String> getAliases() {
         return this.aliases;
+    }
+    
+    /**
+     * Sets the aliases
+     *
+     * @param aliases The aliases to set
+     */
+    public void setAliases(List<String> aliases) {
+        this.aliases = aliases;
     }
 
     /**

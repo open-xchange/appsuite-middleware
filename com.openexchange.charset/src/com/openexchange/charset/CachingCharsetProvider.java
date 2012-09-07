@@ -50,35 +50,52 @@
 package com.openexchange.charset;
 
 import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CharsetEncoder;
 import java.nio.charset.UnsupportedCharsetException;
 import java.nio.charset.spi.CharsetProvider;
 import java.util.Iterator;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
- * {@link JapaneseReplacementCharsetProvider} - A charset provider which returns the "CP50220" charset when "ISO-2022-JP" is requested.
+ * {@link CachingCharsetProvider} - A charset provider which returns the "CP50220" charset when "ISO-2022-JP" is requested.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class JapaneseReplacementCharsetProvider extends CharsetProvider {
+public final class CachingCharsetProvider extends CharsetProvider {
+
+    private static final Charset NULL = new Charset("x-null", new String[0]) {
+        
+        @Override
+        public CharsetEncoder newEncoder() {
+            return null;
+        }
+        
+        @Override
+        public CharsetDecoder newDecoder() {
+            return null;
+        }
+        
+        @Override
+        public boolean contains(Charset cs) {
+            return false;
+        }
+    };
 
     private final CharsetProvider standardProvider;
 
-    private final Charset cp50220;
+    private final ConcurrentMap<String, Charset> cache;
 
     /**
-     * Initializes a new {@link JapaneseReplacementCharsetProvider}.
+     * Initializes a new {@link CachingCharsetProvider}.
      *
      * @throws UnsupportedCharsetException If "CP50220" charset cannot be found
      */
-    public JapaneseReplacementCharsetProvider(final CharsetProvider standardProvider) {
+    public CachingCharsetProvider(final CharsetProvider standardProvider) {
         super();
         this.standardProvider = standardProvider;
-        cp50220 = Charset.forName("CP50220");
-        /*-
-         * Retry with: "x-windows-50220", "MS50220"
-         *
-         * http://www.docjar.com/html/api/sun/nio/cs/ext/MS50220.java.html
-         */
+        cache = new ConcurrentHashMap<String, Charset>(32);
     }
 
     @Override
@@ -93,13 +110,18 @@ public final class JapaneseReplacementCharsetProvider extends CharsetProvider {
 
     @Override
     public Charset charsetForName(final String charsetName) {
-        if ("ISO-2022-JP".equalsIgnoreCase(charsetName)) {
-            return cp50220;
+        Charset charset = cache.get(charsetName);
+        if (null == charset) {
+            Charset ncharset = standardProvider.charsetForName(charsetName);
+            if (null == ncharset) {
+                ncharset = NULL;
+            }
+            charset = cache.putIfAbsent(charsetName, ncharset);
+            if (null == charset) {
+                charset = ncharset;
+            }
         }
-        /*
-         * Delegate to standard provider
-         */
-        return standardProvider.charsetForName(charsetName);
+        return NULL == charset ? null : charset;
     }
 
     @Override

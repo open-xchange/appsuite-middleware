@@ -78,9 +78,12 @@ public class TransformGenericElementsInterceptor extends AbstractInDatabindingIn
         reader = TransformUtils.createNewReaderIfNeeded(reader, message.getContent(InputStream.class));
         Exchange exchange = message.getExchange();
         BindingOperationInfo bop = getBindingOperationInfo(exchange, reader.getName(), isRequestor(message));
-        // Create transforming reader
-        reader = new ReplacingXMLStreamReader(bop, reader);
-        message.setContent(XMLStreamReader.class, reader);
-        message.removeContent(InputStream.class);
+        if (null != bop) {
+            // Create transforming reader
+            reader = new ReplacingXMLStreamReader(bop, reader);
+            message.setContent(XMLStreamReader.class, reader);
+            message.removeContent(InputStream.class);
+        }
+        // SOAP method is not found, so normal exception from CXF framework is sent.
     }
 }

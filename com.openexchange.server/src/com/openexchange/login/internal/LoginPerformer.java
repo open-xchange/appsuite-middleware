@@ -89,6 +89,7 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.Parameterized;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
@@ -170,6 +171,8 @@ public final class LoginPerformer {
 
     private static final Pattern SPLIT = Pattern.compile(" *, *");
 
+    private static final String PARAM_SESSION = Parameterized.PARAM_SESSION;
+
     private static final int MAX_RETRY = 3;
 
     /**
@@ -226,8 +229,13 @@ public final class LoginPerformer {
             {
                 int cnt = 0;
                 while (null == session && cnt++ < MAX_RETRY) {
-                    final String sessionId = sessiondService.addSession(new AddSessionParameterImpl(username, request, user, ctx));
-                    session = sessiondService.getSession(sessionId);
+                    final AddSessionParameterImpl parameterObject = new AddSessionParameterImpl(username, request, user, ctx);
+                    final String sessionId = sessiondService.addSession(parameterObject);
+                    // Look-up generated session instance
+                    session = parameterObject.getParameter(PARAM_SESSION);
+                    if (null == session) {
+                        session = sessiondService.getSession(sessionId);
+                    }
                 }
                 if (null == session) {
                     // Session could not be created
@@ -243,7 +251,7 @@ public final class LoginPerformer {
                 final String capabilities = (String) properties.get("client.capabilities");
                 if (null == capabilities) {
                     session.setParameter(Session.PARAM_CAPABILITIES, Collections.<String> emptyList());
-                    retval.addWarning(LoginExceptionCodes.MISSING_CAPABILITIES.create());
+                    // retval.addWarning(LoginExceptionCodes.MISSING_CAPABILITIES.create());
                 } else {
                     final String[] sa = SPLIT.split(capabilities, 0);
                     final int length = sa.length;

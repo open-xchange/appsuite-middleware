@@ -2033,7 +2033,11 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         if (null == draftMessage) {
             return null;
         }
-        final String retval = draftMessage.getMailPath().toString();
+        final MailPath mailPath = draftMessage.getMailPath();
+        if (null == mailPath) {
+            return null;
+        }
+        final String retval = mailPath.toString();
         postEvent(accountId, draftFullname, true);
         return retval;
     }
