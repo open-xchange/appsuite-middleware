@@ -62,14 +62,22 @@ class GroupTests extends PHPUnit_Framework_TestCase {
 				var_dump($users_id_array);
 			}
 		}
-		
+
 		// now init a new group
 		$group = getFullGroupObject("soap-test-creategroup", $ctx->id);
-
-		// FIXME PHP still sends <members><item>3</item></members> but it must be <members>3</members> but PHP understands that server response strangely...
+		// PHP still sends <members><item>3</item></members> but it must be <members>3</members> but PHP understands that server response strangely...
 		$group->members = $users_id_array;
 
-		try { 	
+		// different approach like described in bug 22776
+		//$group = array('name' => "soap-test-creategroup"."_".$ctx->id."_soap_test_group");
+		//$group['displayname'] = strtoupper($group['name']);
+		//$key = 'members';
+		//for ($i = 0; $i < count($users_id_array); $i++) {
+		//	$group[$key] = $users_id_array[$i];
+		//	$key .= ' ';
+		//}
+
+		try {
 			// create this group in OX System
 			getGroupClient($SOAPHOST)->create($ctx, $group, getCredentialsObject($admin_user->name, $admin_user->password));
 		
