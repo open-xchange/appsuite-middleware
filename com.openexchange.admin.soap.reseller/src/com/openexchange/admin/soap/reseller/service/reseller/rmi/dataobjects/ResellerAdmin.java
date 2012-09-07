@@ -82,6 +82,9 @@ public class ResellerAdmin
 
     public List<Restriction> getRestrictions() {
         final List<JAXBElement<?>> list = get("restrictions");
+        if (null == list) {
+            return null;
+        }
         final List<Restriction> ret = new ArrayList<Restriction>(list.size());
         for (final JAXBElement<?> jaxbElement : list) {
             final List<JAXBElement<? extends Serializable>> rest = (List<JAXBElement<? extends Serializable>>) jaxbElement.getValue();
@@ -102,6 +105,9 @@ public class ResellerAdmin
     }
 
     public void setRestrictions(final List<Restriction> restrictions) {
+        if (null == restrictions) {
+            return;
+        }
         final List<List<JAXBElement<? extends Serializable>>> jaxbRestrictions = new ArrayList<List<JAXBElement<? extends Serializable>>>(restrictions.size());
         for (final Restriction restriction : restrictions) {
             final List<JAXBElement<? extends Serializable>> jaxbRestriction = new ArrayList<JAXBElement<? extends Serializable>>(3);

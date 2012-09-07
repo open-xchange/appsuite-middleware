@@ -1,3 +1,7 @@
+* 2012-09-07 - marcus.klein@open-xchange.com
+
+ - Fix for bug 22937: Preventing NullPointerExceptions in SOAP administrator reseller service if optional restrictions are not sent.
+
 * 2012-09-06 - marcus.klein@open-xchange.com
 
  - Fix for bug 22872: Publishing directly the object of a RMI Remote interface instead of its stub makes the objects not disappear anymore.
