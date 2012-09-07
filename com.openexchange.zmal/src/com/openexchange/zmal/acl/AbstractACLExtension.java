@@ -47,54 +47,70 @@
  *
  */
 
-package com.openexchange.zmal.osgi;
+package com.openexchange.zmal.acl;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.context.ContextService;
-import com.openexchange.mail.api.MailProvider;
-import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.user.UserService;
-import com.openexchange.zmal.Services;
-import com.openexchange.zmal.ZmalProvider;
+import com.sun.mail.imap.Rights;
 
 /**
- * {@link ZmalActivator} - The Zimbra MAL activator.
+ * {@link AbstractACLExtension} - The abstract ACL extension for common rights in <small><b><a
+ * href="http://www.rfc-archive.org/getrfc.php?rfc=2086">RFC 2086</a></b></small> and <small><b><a
+ * href="http://www.rfc-archive.org/getrfc.php?rfc=4314">RFC 4314</a></b></small>
+ * <p>
+ * <ul>
+ * <li><b><code>l</code></b> - lookup (mailbox is visible to LIST/LSUB commands, SUBSCRIBE mailbox)</li>
+ * <li><b><code>r</code></b> - read (SELECT the mailbox, perform STATUS)</li>
+ * <li><b><code>s</code></b> - keep seen/unseen information across sessions (set or clear \SEEN flag via STORE, also set \SEEN during
+ * APPEND/COPY/ FETCH BODY[...])</li>
+ * <li><b><code>w</code></b> - write (set or clear flags other than \SEEN and \DELETED via STORE, also set them during APPEND/COPY)</li>
+ * <li><b><code>i</code></b> - insert (perform APPEND, COPY into mailbox)</li>
+ * <li><b><code>p</code></b> - post (send mail to submission address for mailbox, not enforced by IMAP4 itself)</li>
+ * <ul>
+ * <br>
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ZmalActivator extends HousekeepingActivator {
-	
-	
+abstract class AbstractACLExtension implements ACLExtension {
+
     /**
-     * Initializes a new {@link ZmalActivator}.
+     * Initializes a new {@link AbstractACLExtension}.
      */
-    public ZmalActivator() {
+    protected AbstractACLExtension() {
         super();
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, MailAccountStorageService.class, UserService.class, ContextService.class };
+    public boolean aclSupport() {
+        return true;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-        /*
-         * Register Zimbra MAL mail provider
-         */
-        final Dictionary<String, String> dictionary = new Hashtable<String, String>(1);
-        dictionary.put("protocol", ZmalProvider.PROTOCOL_ZMAL.toString());
-        registerService(MailProvider.class, ZmalProvider.getInstance(), dictionary);
+    public boolean canRead(final Rights rights) {
+        return rights.contains(Rights.Right.READ);
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        Services.setServiceLookup(null);
-        super.stopBundle();
+    public boolean canLookUp(final Rights rights) {
+        return rights.contains(Rights.Right.LOOKUP);
+    }
+
+    @Override
+    public boolean canKeepSeen(final Rights rights) {
+        return rights.contains(Rights.Right.KEEP_SEEN);
+    }
+
+    @Override
+    public boolean canWrite(final Rights rights) {
+        return rights.contains(Rights.Right.WRITE);
+    }
+
+    @Override
+    public boolean canInsert(final Rights rights) {
+        return rights.contains(Rights.Right.INSERT);
+    }
+
+    @Override
+    public boolean canPost(final Rights rights) {
+        return rights.contains(Rights.Right.POST);
     }
 
 }
