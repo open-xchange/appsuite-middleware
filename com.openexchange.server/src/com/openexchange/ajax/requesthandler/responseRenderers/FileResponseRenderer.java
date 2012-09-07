@@ -128,7 +128,10 @@ public class FileResponseRenderer implements ResponseRenderer {
     public void write(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest req, final HttpServletResponse resp) {
         IFileHolder file = (IFileHolder) result.getResultObject();
 
-        final String contentType = req.getParameter(PARAMETER_CONTENT_TYPE);
+        String contentType = req.getParameter(PARAMETER_CONTENT_TYPE);
+        if (null == contentType) {
+            contentType = file.getContentType();
+        }
         String delivery = req.getParameter(DELIVERY);
         if (delivery == null) {
             delivery = file.getDelivery();

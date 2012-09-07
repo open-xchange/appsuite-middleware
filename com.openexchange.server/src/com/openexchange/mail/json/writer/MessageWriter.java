@@ -203,13 +203,23 @@ public final class MessageWriter {
                 warnings.addAll(list);
             }
         }
+        final JSONObject jsonObject = handler.getJSONObject();
+        if (mail instanceof Delegatized) {
+            final int undelegatedAccountId = ((Delegatized) mail).getUndelegatedAccountId();
+            if (undelegatedAccountId >= 0) {
+                try {
+                    jsonObject.put(FolderChildFields.FOLDER_ID, prepareFullname(undelegatedAccountId, mail.getFolder()));
+                } catch (JSONException e) {
+                    throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
+                }
+            }
+        }
         if (!mail.isDraft()) {
-            return handler.getJSONObject();
+            return jsonObject;
         }
         /*
          * Ensure "msgref" is present in draft mail
          */
-        final JSONObject jsonObject = handler.getJSONObject();
         final String key = MailJSONField.MSGREF.getKey();
         if (!jsonObject.has(key) && null != mailPath) {
             try {
@@ -315,7 +325,10 @@ public final class MessageWriter {
                 try {
                     int accId = accountId;
                     if (mail instanceof Delegatized) {
-                        accId = ((Delegatized) mail).getUndelegatedAccountId();
+                        final int undelegatedAccountId = ((Delegatized) mail).getUndelegatedAccountId();
+                        if (undelegatedAccountId >= 0) {
+                            accId = undelegatedAccountId;
+                        }
                     }
                     if (withKey) {
                         ((JSONObject) jsonContainer).put(FolderChildFields.FOLDER_ID, prepareFullname(accId, mail.getFolder()));
