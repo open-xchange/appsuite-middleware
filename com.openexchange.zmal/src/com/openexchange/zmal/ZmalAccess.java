@@ -264,6 +264,7 @@ public final class ZmalAccess extends MailAccess<ZmalFolderStorage, ZmalMessageS
             if (resultString == null) {
                 resultString = "";
             }
+            config.initializeCapabilities();
             System.out.println(resultString);
             
             

@@ -61,12 +61,10 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailCapabilities;
 import com.openexchange.mail.api.MailConfig;
-import com.openexchange.session.Session;
 import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URIParser;
 import com.openexchange.zmal.ZmalCapabilities;
 import com.openexchange.zmal.ZmalException;
-import com.sun.mail.imap.IMAPStore;
 
 /**
  * {@link ZmalConfig} - The Zimbra mail configuration.
@@ -95,8 +93,6 @@ public final class ZmalConfig extends MailConfig {
 
     private InetSocketAddress imapServerSocketAddress;
 
-    private IMAPStore imapStore;
-
     private final Map<String, Object> params;
 
     /**
@@ -108,22 +104,6 @@ public final class ZmalConfig extends MailConfig {
         super();
         this.accountId = accountId;
         params = new NonBlockingHashMap<String, Object>(4);
-    }
-
-    /**
-     * Gets the optional Zimbra mail store.
-     *
-     * @return The Zimbra mail store
-     */
-    public IMAPStore optImapStore() {
-        return imapStore;
-    }
-
-    /**
-     * Drops the Zimbra mail store reference.
-     */
-    public void dropImapStore() {
-        imapStore = null;
     }
 
     /**
@@ -207,19 +187,21 @@ public final class ZmalConfig extends MailConfig {
 
     /**
      * Initializes Zimbra mail server's capabilities if not done, yet
-     *
-     * @param imapStore The Zimbra mail store from which to fetch the capabilities
-     * @param session The session possibly caching capabilities information
-     * @throws OXException If Zimbra mail capabilities cannot be initialized
      */
-    public void initializeCapabilities(final IMAPStore imapStore, final Session session) throws OXException {
+    public void initializeCapabilities() {
+        ZmalCapabilities zmalCapabilities = this.zmalCapabilities;
         if (zmalCapabilities == null) {
             synchronized (this) {
-                this.imapStore = imapStore;
-                if (zmalCapabilities != null) {
+                zmalCapabilities = this.zmalCapabilities;
+                if (zmalCapabilities == null) {
+                    zmalCapabilities = new ZmalCapabilities();
+                    zmalCapabilities.setACL(true);
+                    zmalCapabilities.setHasSubscription(true);
+                    zmalCapabilities.setSort(true);
+                    zmalCapabilities.setThreadReferences(true);
+                    this.zmalCapabilities = zmalCapabilities;
                     return;
                 }
-                // TODO: Initialize capabilities
             }
         }
     }
@@ -229,7 +211,7 @@ public final class ZmalConfig extends MailConfig {
      *
      * @return <code>true</code> if Zimbra mail sort is configured and corresponding capability is available; otherwise <code>false</code>
      */
-    public boolean isImapSort() {
+    public boolean isZmalSort() {
         final ZmalCapabilities capabilities = zmalCapabilities;
         return (capabilities != null) ? (capabilities.hasSort()) : false;
     }
