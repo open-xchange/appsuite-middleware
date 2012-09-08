@@ -105,6 +105,8 @@ public final class ZmalFolderStorage extends MailFolderStorage implements IMailF
 
     private final ZmalFolderParser parser;
 
+    private final String authToken;
+
 
     /**
      * Initializes a new {@link ZmalFolderStorage}
@@ -114,8 +116,9 @@ public final class ZmalFolderStorage extends MailFolderStorage implements IMailF
      * @param session The session providing needed user data
      * @throws OXException If context loading fails
      */
-    public ZmalFolderStorage(final ZmalSoapPerformer performer, final ZmalAccess zmalAccess, final Session session) throws OXException {
+    public ZmalFolderStorage(final String authToken, final ZmalSoapPerformer performer, final ZmalAccess zmalAccess, final Session session) throws OXException {
         super();
+        this.authToken = authToken;
         this.performer = performer;
         this.zmalAccess = zmalAccess;
         accountId = zmalAccess.getAccountId();

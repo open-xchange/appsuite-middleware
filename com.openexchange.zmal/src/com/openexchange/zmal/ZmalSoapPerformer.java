@@ -112,6 +112,15 @@ public class ZmalSoapPerformer {
         mUseJson = false;
         this.config = config;
     }
+    
+    /**
+     * Gets the auth token
+     * 
+     * @return The auth token
+     */
+    public String getAuthToken() {
+        return mAuthToken;
+    }
 
     /**
      * Sets the userId
@@ -205,6 +214,15 @@ public class ZmalSoapPerformer {
             sb.append("/service/soap");
             mUrl = sb.toString();
         }
+    }
+    
+    /**
+     * Gets the URL.
+     * 
+     * @return The URL
+     */
+    public String getUrl() {
+        return mUrl;
     }
 
     /**

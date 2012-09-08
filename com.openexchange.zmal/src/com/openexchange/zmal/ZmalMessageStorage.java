@@ -52,6 +52,7 @@ package com.openexchange.zmal;
 import java.util.List;
 import java.util.Locale;
 import org.apache.commons.logging.Log;
+import org.dom4j.QName;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -71,6 +72,17 @@ import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 import com.openexchange.zmal.config.IZmalProperties;
 import com.openexchange.zmal.config.ZmalConfig;
+import com.openexchange.zmal.converters.ZMessageConverter;
+import com.zimbra.common.service.ServiceException;
+import com.zimbra.common.soap.Element;
+import com.zimbra.common.soap.MailConstants;
+import com.zimbra.common.soap.SoapProtocol;
+import com.zimbra.common.soap.Element.JSONElement;
+import com.zimbra.common.soap.Element.XMLElement;
+import com.zimbra.cs.zclient.ZGetMessageParams;
+import com.zimbra.cs.zclient.ZMailbox;
+import com.zimbra.cs.zclient.ZMessage;
+import com.zimbra.cs.zclient.ZMailbox.Options;
 
 /**
  * {@link ZmalMessageStorage} - The Zimbra mail implementation of message storage.
@@ -86,22 +98,17 @@ public final class ZmalMessageStorage extends MailMessageStorage implements IMai
      */
 
     private final ZmalAccess zmalAccess;
-
     private final ZmalSoapPerformer performer;
-
     private final int accountId;
-
     private final Session session;
-
     private final Context ctx;
-
     private final ZmalConfig zmalConfig;
-
     private Locale locale;
-
     private final ZmalFolderStorage zmalFolderStorage;
-
     private IZmalProperties zmalProperties;
+    private final String authToken;
+    private final String url;
+    private ZMessageConverter parser;
 
     /**
      * Initializes a new {@link ZmalMessageStorage}.
@@ -111,8 +118,10 @@ public final class ZmalMessageStorage extends MailMessageStorage implements IMai
      * @param session The session providing needed user data
      * @throws OXException If initialization fails
      */
-    public ZmalMessageStorage(final ZmalSoapPerformer performer, final ZmalAccess zmalAccess, final Session session) throws OXException {
+    public ZmalMessageStorage(final String authToken, final ZmalSoapPerformer performer, final ZmalAccess zmalAccess, final Session session) throws OXException {
         super();
+        this.authToken = authToken;
+        this.url = performer.getUrl();
         this.performer = performer;
         this.zmalAccess = zmalAccess;
         zmalFolderStorage = zmalAccess.getFolderStorage();
@@ -120,6 +129,15 @@ public final class ZmalMessageStorage extends MailMessageStorage implements IMai
         this.session = session;
         ctx = ContextStorage.getStorageContext(session.getContextId());
         zmalConfig = zmalAccess.getZmalConfig();
+    }
+
+    private ZMessageConverter getParser() {
+        ZMessageConverter p = parser;
+        if (null == p) {
+            p = new ZMessageConverter(url, performer.getConfig());
+            parser = p;
+        }
+        return p;
     }
 
     private Locale getLocale() throws OXException {
@@ -145,6 +163,26 @@ public final class ZmalMessageStorage extends MailMessageStorage implements IMai
         return zmalProperties;
     }
 
+    private Element newRequestElement(QName name) {
+        return performer.mUseJson ? new JSONElement(name) : new XMLElement(name);
+    }
+
+    private Element messageAction(String op, String id) {
+        Element req = newRequestElement(MailConstants.MSG_ACTION_REQUEST);
+        Element actionEl = req.addUniqueElement(MailConstants.E_ACTION);
+        actionEl.addAttribute(MailConstants.A_ID, id);
+        actionEl.addAttribute(MailConstants.A_OPERATION, op);
+        return actionEl;
+    }
+
+    private Options newOptions() {
+        final Options options = new Options(authToken, url);
+        options.setRequestProtocol(performer.mUseJson ? SoapProtocol.SoapJS : SoapProtocol.Soap11);
+        options.setResponseProtocol(performer.mUseJson ? SoapProtocol.SoapJS : SoapProtocol.Soap11);
+        options.setUserAgent("Open-Xchange Http Client", "v6.22");
+        return options;
+    }
+
     @Override
     public List<List<MailMessage>> getThreadSortedMessages(String folder, boolean includeSent, boolean cache, IndexRange indexRange, long max, MailSortField sortField, OrderDirection order, MailField[] fields) throws OXException {
         // TODO Auto-generated method stub
@@ -165,14 +203,32 @@ public final class ZmalMessageStorage extends MailMessageStorage implements IMai
 
     @Override
     public MailMessage getMessage(String folder, String mailId, boolean markSeen) throws OXException {
-        // TODO Auto-generated method stub
-        return super.getMessage(folder, mailId, markSeen);
+        try {
+            final ZMailbox mailbox = new ZMailbox(newOptions());
+            final ZGetMessageParams params = new ZGetMessageParams();
+            params.setId(mailId);
+            params.setMarkRead(markSeen);
+            //params.setRawContent(true);
+            ZMessage message = mailbox.getMessage(params);
+            return getParser().convert(message);
+        } catch (final ServiceException e) {
+            throw ZmalException.create(ZmalException.Code.SERVICE_ERROR, e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
     @Override
     public MailMessage[] getMessages(String fullName, String[] mailIds, MailField[] fields, String[] headerNames) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        final int length = mailIds.length;
+        final MailMessage[] ret = new MailMessage[length];
+        for (int i = 0; i < length; i++) {
+            final String mailId = mailIds[i];
+            if (null != mailId) {
+                ret[i] = getMessage(fullName, mailId, false);
+            }
+        }
+        return ret;
     }
 
     @Override
