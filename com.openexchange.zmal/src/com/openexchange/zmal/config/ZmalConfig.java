@@ -81,17 +81,17 @@ public final class ZmalConfig extends MailConfig {
 
     private volatile Map<String, String> capabilities;
 
-    private int imapPort;
+    private int port;
 
-    private String imapServer;
+    private String server;
 
     private boolean secure;
 
     private IZmalProperties mailProperties;
 
-    private InetAddress imapServerAddress;
+    private InetAddress zmalServerAddress;
 
-    private InetSocketAddress imapServerSocketAddress;
+    private InetSocketAddress zmalServerSocketAddress;
 
     private final Map<String, Object> params;
 
@@ -162,12 +162,12 @@ public final class ZmalConfig extends MailConfig {
      */
     @Override
     public int getPort() {
-        return imapPort;
+        return port;
     }
 
     @Override
     public void setPort(final int imapPort) {
-        this.imapPort = imapPort;
+        this.port = imapPort;
     }
 
     /**
@@ -177,12 +177,12 @@ public final class ZmalConfig extends MailConfig {
      */
     @Override
     public String getServer() {
-        return imapServer;
+        return server;
     }
 
     @Override
     public void setServer(final String imapServer) {
-        this.imapServer = null == imapServer ? null : IDNA.toUnicode(imapServer);
+        this.server = null == imapServer ? null : IDNA.toUnicode(imapServer);
     }
 
     /**
@@ -235,8 +235,8 @@ public final class ZmalConfig extends MailConfig {
             throw ZmalException.Code.URI_PARSE_FAILED.create(e, serverURL);
         }
         secure = PROTOCOL_ZMAL_SECURE.equals(uri.getScheme());
-        imapServer = uri.getHost();
-        imapPort = uri.getPort();
+        server = uri.getHost();
+        port = uri.getPort();
     }
 
     /**
@@ -245,17 +245,17 @@ public final class ZmalConfig extends MailConfig {
      * @return The internet address of the Zimbra mail server.
      * @throws OXException If Zimbra mail server cannot be resolved
      */
-    public InetAddress getImapServerAddress() throws OXException {
-        if (null == imapServerAddress) {
+    public InetAddress getZmalServerAddress() throws OXException {
+        if (null == zmalServerAddress) {
             try {
-                imapServerAddress = InetAddress.getByName(imapServer);
+                zmalServerAddress = InetAddress.getByName(server);
                 // TODO: Touch address for proper equality check?
                 // imapServerAddress.toString();
             } catch (final UnknownHostException e) {
                 throw ZmalException.Code.IO_ERROR.create(e, e.getMessage());
             }
         }
-        return imapServerAddress;
+        return zmalServerAddress;
     }
 
     /**
@@ -264,11 +264,11 @@ public final class ZmalConfig extends MailConfig {
      * @return The socket address (internet address + port) of the Zimbra mail server.
      * @throws OXException If Zimbra mail server cannot be resolved
      */
-    public InetSocketAddress getImapServerSocketAddress() throws OXException {
-        if (null == imapServerSocketAddress) {
-            imapServerSocketAddress = new InetSocketAddress(getImapServerAddress(), imapPort);
+    public InetSocketAddress getZmalServerSocketAddress() throws OXException {
+        if (null == zmalServerSocketAddress) {
+            zmalServerSocketAddress = new InetSocketAddress(getZmalServerAddress(), port);
         }
-        return imapServerSocketAddress;
+        return zmalServerSocketAddress;
     }
 
     @Override
