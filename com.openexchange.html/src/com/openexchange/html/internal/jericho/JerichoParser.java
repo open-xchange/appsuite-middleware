@@ -133,7 +133,8 @@ public final class JerichoParser {
                 if (null == maxLength) {
                     // Default is 512KB
                     final ConfigurationService service = ServiceRegistry.getInstance().getService(ConfigurationService.class);
-                    i = Integer.valueOf(null == service ? (1048576 >> 1) : service.getIntProperty("com.openexchange.html.maxLength", (1048576 >> 1)));
+                    final int defaultMaxLength = 1048576 >> 1;
+                    i = Integer.valueOf(null == service ? defaultMaxLength : service.getIntProperty("com.openexchange.html.maxLength", defaultMaxLength));
                     maxLength = i;
                 }
             }
