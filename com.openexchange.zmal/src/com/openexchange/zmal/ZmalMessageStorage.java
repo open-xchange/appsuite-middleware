@@ -367,7 +367,7 @@ public final class ZmalMessageStorage extends MailMessageStorage implements IMai
     public MailMessage[] searchMessages(String folder, IndexRange indexRange, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailField[] fields) throws OXException {
         try {
             final ZMailbox mailbox = new ZMailbox(newOptions());
-            // TODO: 
+            // TODO: http://wiki.zimbra.com/index.php?title=Search_Tips
             
             return null;
         } catch (final ServiceException e) {
