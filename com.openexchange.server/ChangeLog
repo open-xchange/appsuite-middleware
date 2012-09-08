@@ -1,3 +1,7 @@
+* 2012-09-07 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22943: Limit max. size of parseable HTML content; configurable through 'com.openexchange.html.maxLength'
+
 * 2012-09-07 - marcus.klein@open-xchange.com
 
  - Fix for bug 22937: Preventing NullPointerExceptions in SOAP administrator reseller service if optional restrictions are not sent.
