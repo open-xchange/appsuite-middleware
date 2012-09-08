@@ -181,8 +181,9 @@ public final class JerichoParser {
      */
     public static void parse(final String html, final JerichoHandler handler) {
         final long st = DEBUG ? System.currentTimeMillis() : 0L;
-        final StreamedSource streamedSource = checkBody(html);
+        StreamedSource streamedSource = null;
         try {
+            streamedSource = checkBody(html);
             streamedSource.setLogger(null);
             int lastSegmentEnd = 0;
             for (final Segment segment : streamedSource) {
@@ -203,6 +204,8 @@ public final class JerichoParser {
                 final long dur = System.currentTimeMillis() - st;
                 LOG.debug("\tJerichoParser.parse() took " + dur + "msec.");
             }
+        } catch (final StackOverflowError parserOverflow) {
+            throw new ParsingDeniedException("Parser overflow detected.", parserOverflow);
         } finally {
             Streams.close(streamedSource);
         }
