@@ -49,6 +49,8 @@
 
 package com.openexchange.zmal;
 
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import org.apache.commons.logging.Log;
@@ -75,14 +77,18 @@ import com.openexchange.zmal.config.ZmalConfig;
 import com.openexchange.zmal.converters.ZMessageConverter;
 import com.zimbra.common.service.ServiceException;
 import com.zimbra.common.soap.Element;
-import com.zimbra.common.soap.MailConstants;
-import com.zimbra.common.soap.SoapProtocol;
 import com.zimbra.common.soap.Element.JSONElement;
 import com.zimbra.common.soap.Element.XMLElement;
+import com.zimbra.common.soap.MailConstants;
+import com.zimbra.common.soap.SoapProtocol;
 import com.zimbra.cs.zclient.ZGetMessageParams;
 import com.zimbra.cs.zclient.ZMailbox;
-import com.zimbra.cs.zclient.ZMessage;
 import com.zimbra.cs.zclient.ZMailbox.Options;
+import com.zimbra.cs.zclient.ZMessage;
+import com.zimbra.cs.zclient.ZSearchHit;
+import com.zimbra.cs.zclient.ZSearchPagerResult;
+import com.zimbra.cs.zclient.ZSearchParams;
+import com.zimbra.cs.zclient.ZSearchResult;
 
 /**
  * {@link ZmalMessageStorage} - The Zimbra mail implementation of message storage.
@@ -183,6 +189,16 @@ public final class ZmalMessageStorage extends MailMessageStorage implements IMai
         return options;
     }
 
+    private ZMessage getZMessage(String mailId, boolean markSeen) throws ServiceException {
+        final ZMailbox mailbox = new ZMailbox(newOptions());
+        final ZGetMessageParams params = new ZGetMessageParams();
+        params.setId(mailId);
+        params.setMarkRead(markSeen);
+        //params.setRawContent(true);
+        ZMessage message = mailbox.getMessage(params);
+        return message;
+    }
+
     @Override
     public List<List<MailMessage>> getThreadSortedMessages(String folder, boolean includeSent, boolean cache, IndexRange indexRange, long max, MailSortField sortField, OrderDirection order, MailField[] fields) throws OXException {
         // TODO Auto-generated method stub
@@ -197,19 +213,36 @@ public final class ZmalMessageStorage extends MailMessageStorage implements IMai
 
     @Override
     public void updateMessageFlags(String fullName, int flags, boolean set) throws OXException {
-        // TODO Auto-generated method stub
-        
+        try {
+            final ZMailbox mailbox = new ZMailbox(newOptions());
+            // List for identifiers
+            final List<String> ids = new LinkedList<String>();
+            // Search for all
+            final ZSearchParams mSearchParams = new ZSearchParams("in:"+fullName);
+            mSearchParams.setTypes(ZSearchParams.TYPE_MESSAGE);
+            int mSearchPage = 0;
+            boolean keegoing = true;
+            while (keegoing) {
+                ZSearchPagerResult pager = mailbox.search(mSearchParams, mSearchPage++, false, false);
+                ZSearchResult result = pager.getResult();
+                keegoing = result.hasMore();
+                for (final Iterator<ZSearchHit> iterator = result.getHits().iterator(); iterator.hasNext();) {
+                    final ZSearchHit hit = iterator.next();
+                    ids.add(hit.getId());
+                }
+            }
+            updateMessageFlags(fullName, ids.toArray(new String[ids.size()]), flags, set);
+        } catch (final ServiceException e) {
+            throw ZmalException.create(ZmalException.Code.SERVICE_ERROR, e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
     @Override
     public MailMessage getMessage(String folder, String mailId, boolean markSeen) throws OXException {
         try {
-            final ZMailbox mailbox = new ZMailbox(newOptions());
-            final ZGetMessageParams params = new ZGetMessageParams();
-            params.setId(mailId);
-            params.setMarkRead(markSeen);
-            //params.setRawContent(true);
-            ZMessage message = mailbox.getMessage(params);
+            ZMessage message = getZMessage(mailId, markSeen);
             return getParser().convert(message);
         } catch (final ServiceException e) {
             throw ZmalException.create(ZmalException.Code.SERVICE_ERROR, e, e.getMessage());
@@ -233,50 +266,208 @@ public final class ZmalMessageStorage extends MailMessageStorage implements IMai
 
     @Override
     public MailMessage[] getMessagesByMessageID(String... messageIDs) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        try {
+            final ZMailbox mailbox = new ZMailbox(newOptions());
+            // TODO: 
+            
+            return null;
+        } catch (final ServiceException e) {
+            throw ZmalException.create(ZmalException.Code.SERVICE_ERROR, e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
     @Override
     public String[] appendMessages(String destFolder, MailMessage[] msgs) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException("ZmalMessageStorage.appendMessages()");
     }
 
     @Override
     public String[] copyMessages(String sourceFolder, String destFolder, String[] mailIds, boolean fast) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        try {
+            final ZMailbox mailbox = new ZMailbox(newOptions());
+            // TODO: 
+            
+            return null;
+        } catch (final ServiceException e) {
+            throw ZmalException.create(ZmalException.Code.SERVICE_ERROR, e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
     @Override
     public void deleteMessages(String folder, String[] mailIds, boolean hardDelete) throws OXException {
-        // TODO Auto-generated method stub
+        try {
+            final ZMailbox mailbox = new ZMailbox(newOptions());
+            if (hardDelete) {
+                for (String mailId : mailIds) {
+                    mailbox.deleteMessage(mailId);
+                }
+            } else {
+                for (String mailId : mailIds) {
+                    mailbox.trashMessage(mailId);
+                }
+            }
+        } catch (final ServiceException e) {
+            throw ZmalException.create(ZmalException.Code.SERVICE_ERROR, e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
         
     }
 
     @Override
     public MailMessage[] getMessages(String folder, String[] mailIds, MailField[] fields) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        return getMessages(folder, mailIds, fields, null);
     }
 
     @Override
     public void releaseResources() throws OXException {
-        // TODO Auto-generated method stub
-        
+        // Release resources
     }
 
     @Override
     public MailMessage[] searchMessages(String folder, IndexRange indexRange, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailField[] fields) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        try {
+            final ZMailbox mailbox = new ZMailbox(newOptions());
+            // TODO: 
+            
+            return null;
+        } catch (final ServiceException e) {
+            throw ZmalException.create(ZmalException.Code.SERVICE_ERROR, e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
     @Override
-    public void updateMessageFlags(String folder, String[] mailIds, int flags, boolean set) throws OXException {
-        // TODO Auto-generated method stub
-        
+    public void updateMessageFlags(String folder, String[] mailIds, int flagsArg, boolean set) throws OXException {
+        try {
+            final ZMailbox mailbox = new ZMailbox(newOptions());
+            final StringBuilder sFlags = new StringBuilder(8);
+            for (final String mailId : mailIds) {
+                sFlags.setLength(0);
+                sFlags.append(getZMessage(mailId, false).getFlags());
+                boolean applyFlags = false;
+                int flags = flagsArg;
+                flags &= ~MailMessage.FLAG_RECENT;
+                flags &= ~MailMessage.FLAG_USER;
+                if (((flags & MailMessage.FLAG_ANSWERED) > 0)) {
+                    if (set) {
+                        if (sFlags.indexOf("r") < 0) {
+                            sFlags.append('r');
+                            applyFlags = true;
+                        }
+                    } else {
+                        final int pos = sFlags.indexOf("r");
+                        if (pos >= 0) {
+                            sFlags.deleteCharAt(pos);
+                            applyFlags = true;
+                        }
+                    }
+                }
+                if (((flags & MailMessage.FLAG_DELETED) > 0) && sFlags.indexOf("x") < 0) {
+                    if (set) {
+                        if (sFlags.indexOf("x") < 0) {
+                            sFlags.append('x');
+                            applyFlags = true;
+                        }
+                    } else {
+                        final int pos = sFlags.indexOf("x");
+                        if (pos >= 0) {
+                            sFlags.deleteCharAt(pos);
+                            applyFlags = true;
+                        }
+                    }
+                }
+                if (((flags & MailMessage.FLAG_DRAFT) > 0) && sFlags.indexOf("d") < 0) {
+                    if (set) {
+                        if (sFlags.indexOf("d") < 0) {
+                            sFlags.append('d');
+                            applyFlags = true;
+                        }
+                    } else {
+                        final int pos = sFlags.indexOf("d");
+                        if (pos >= 0) {
+                            sFlags.deleteCharAt(pos);
+                            applyFlags = true;
+                        }
+                    }
+                }
+                if (((flags & MailMessage.FLAG_FLAGGED) > 0) && sFlags.indexOf("f") < 0) {
+                    if (set) {
+                        if (sFlags.indexOf("f") < 0) {
+                            sFlags.append('f');
+                            applyFlags = true;
+                        }
+                    } else {
+                        final int pos = sFlags.indexOf("f");
+                        if (pos >= 0) {
+                            sFlags.deleteCharAt(pos);
+                            applyFlags = true;
+                        }
+                    }
+                }
+                if (((flags & MailMessage.FLAG_SEEN) <= 0)) { //  NOT CONTAINED
+                    if (set) {
+                        if (sFlags.indexOf("u") < 0) {
+                            sFlags.append('u');
+                            applyFlags = true;
+                        }
+                    } else {
+                        final int pos = sFlags.indexOf("u");
+                        if (pos >= 0) {
+                            sFlags.deleteCharAt(pos);
+                            applyFlags = true;
+                        }
+                    }
+                }
+                /*
+                 * Check for forwarded flag
+                 */
+                if (((flags & MailMessage.FLAG_FORWARDED) > 0)) {
+                    if (set) {
+                        if (sFlags.indexOf("w") < 0) {
+                            sFlags.append('w');
+                            applyFlags = true;
+                        }
+                    } else {
+                        final int pos = sFlags.indexOf("w");
+                        if (pos >= 0) {
+                            sFlags.deleteCharAt(pos);
+                            applyFlags = true;
+                        }
+                    }
+                }
+                /*
+                 * Check for read acknowledgment flag
+                 */
+                if (((flags & MailMessage.FLAG_READ_ACK) > 0)) {
+                    if (set) {
+                        if (sFlags.indexOf("n") < 0) {
+                            sFlags.append('n');
+                            applyFlags = true;
+                        }
+                    } else {
+                        final int pos = sFlags.indexOf("n");
+                        if (pos >= 0) {
+                            sFlags.deleteCharAt(pos);
+                            applyFlags = true;
+                        }
+                    }
+                }
+                if (applyFlags) {
+                    final String theFlags = sFlags.toString();
+                    mailbox.updateMessage(mailId, null, null, theFlags);
+                }
+            }
+        } catch (final ServiceException e) {
+            throw ZmalException.create(ZmalException.Code.SERVICE_ERROR, e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
 }
