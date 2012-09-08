@@ -201,14 +201,49 @@ public final class ZmalMessageStorage extends MailMessageStorage implements IMai
 
     @Override
     public List<List<MailMessage>> getThreadSortedMessages(String folder, boolean includeSent, boolean cache, IndexRange indexRange, long max, MailSortField sortField, OrderDirection order, MailField[] fields) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        try {
+            final ZMailbox mailbox = new ZMailbox(newOptions());
+            // TODO: 
+            
+            return null;
+        } catch (final ServiceException e) {
+            throw ZmalException.create(ZmalException.Code.SERVICE_ERROR, e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
     @Override
     public void updateMessageColorLabel(String fullName, int colorLabel) throws OXException {
-        // TODO Auto-generated method stub
-        
+        try {
+            final ZMailbox mailbox = new ZMailbox(newOptions());
+            // List for identifiers
+            final List<String> ids = new LinkedList<String>();
+            // Search for all
+            final ZSearchParams mSearchParams = new ZSearchParams("in:"+fullName);
+            mSearchParams.setTypes(ZSearchParams.TYPE_MESSAGE);
+            int mSearchPage = 0;
+            boolean keegoing = true;
+            while (keegoing) {
+                ZSearchPagerResult pager = mailbox.search(mSearchParams, mSearchPage++, false, false);
+                ZSearchResult result = pager.getResult();
+                keegoing = result.hasMore();
+                for (final Iterator<ZSearchHit> iterator = result.getHits().iterator(); iterator.hasNext();) {
+                    final ZSearchHit hit = iterator.next();
+                    ids.add(hit.getId());
+                }
+            }
+            updateMessageColorLabel(fullName, ids.toArray(new String[ids.size()]), colorLabel);
+        } catch (final ServiceException e) {
+            throw ZmalException.create(ZmalException.Code.SERVICE_ERROR, e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    @Override
+    public void updateMessageColorLabel(String folder, String[] mailIds, int colorLabel) throws OXException {
+        // TODO:
     }
 
     @Override
