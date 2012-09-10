@@ -51,8 +51,8 @@ package com.openexchange.http.probe.osgi;
 import org.osgi.service.http.HttpService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.http.probe.HealthProbeServlet;
-import com.openexchange.http.probe.ProbeExceptionCode;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.server.ServiceExceptionCode;
 
 /**
  * 
@@ -75,14 +75,14 @@ public class HealthProbeActivator extends HousekeepingActivator {
         
         ConfigurationService configService = getService(ConfigurationService.class);
         if (configService == null) {
-            throw ProbeExceptionCode.NEEDED_SERVICE_MISSING.create(ConfigurationService.class.getName());
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigurationService.class.getName());
         }
 
         final String alias = configService.getProperty("com.openexchange.http.probe.alias", "/healthProbe");
         
         HttpService service = getService(HttpService.class);
         if(service == null) {
-            throw ProbeExceptionCode.NEEDED_SERVICE_MISSING.create(HttpService.class.getName());
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(HttpService.class.getName());
         }
         service.registerServlet(alias, new HealthProbeServlet(), null, null);
     }

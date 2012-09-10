@@ -1,14 +1,16 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Open-Xchange Http Health Probe Bundle
-Bundle-SymbolicName: com.openexchange.http.probe
-Bundle-Version: 6.23.0.0
-Bundle-Activator: com.openexchange.http.probe.osgi.HealthProbeActivator
+Bundle-Name: Open-Xchange Testservlet Bundle
+Bundle-SymbolicName: com.openexchange.http.testservlet
+Bundle-Version: 6.23.0
+Bundle-Activator: osgi.TestServletActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.config,
+ com.openexchange.configuration,
  com.openexchange.exception,
  com.openexchange.i18n,
+ com.openexchange.java,
  com.openexchange.osgi,
  com.openexchange.server,
  javax.servlet,
