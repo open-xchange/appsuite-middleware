@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ajp13;
+package com.openexchange.http.testservlet;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -60,11 +60,14 @@ import javax.servlet.http.HttpServletResponse;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 
+
+/**
+ * {@link TestServlet} - Default TestServlet for basic server tests.
+ *
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ */
 public class TestServlet extends HttpServlet {
 
-    /**
-     * For serialization.
-     */
     private static final long serialVersionUID = -4037317824217605551L;
 
     /**

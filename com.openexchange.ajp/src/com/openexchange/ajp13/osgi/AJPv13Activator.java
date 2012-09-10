@@ -183,17 +183,6 @@ public final class AJPv13Activator extends HousekeepingActivator {
              */
             final HttpServiceImpl http = new HttpServiceImpl();
             registerService(HttpService.class, http);
-            http.registerServlet("/servlet/TestServlet", new com.openexchange.ajp13.TestServlet(), null, null);
-
-            /*-
-             * Alternative approach for HttpService:
-             *
-             * http://www.eclipse.org/equinox/server/
-             * http://www.eclipse.org/equinox/server/http_in_equinox.php
-             *
-             * http://docs.codehaus.org/display/JETTY/OSGi+Tips
-             */
-
         } catch (final Exception e) {
             com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AJPv13Activator.class)).error(e.getMessage(), e);
             throw e;
