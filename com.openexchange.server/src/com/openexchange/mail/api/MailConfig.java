@@ -786,8 +786,9 @@ public abstract class MailConfig {
      * @param account The associated mail account
      * @param session The user's session
      * @return <code>true</code> if custom parsing has been performed; otherwise <code>false</code>
+     * @throws OXException If custom parsing fails
      */
-    public boolean doCustomParsing(MailAccount account, Session session) {
+    protected boolean doCustomParsing(MailAccount account, Session session) throws OXException {
         return false;
     }
 

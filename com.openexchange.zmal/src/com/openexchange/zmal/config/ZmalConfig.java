@@ -54,17 +54,22 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
+import java.util.HashMap;
 import java.util.Map;
 import javax.mail.internet.IDNA;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailCapabilities;
 import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.session.Session;
 import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URIParser;
 import com.openexchange.zmal.ZmalCapabilities;
 import com.openexchange.zmal.ZmalException;
+import com.openexchange.zmal.utils.Preauth;
 
 /**
  * {@link ZmalConfig} - The Zimbra mail configuration.
@@ -74,6 +79,29 @@ import com.openexchange.zmal.ZmalException;
 public final class ZmalConfig extends MailConfig {
 
     private static final String PROTOCOL_ZMAL_SECURE = "zmals";
+
+    /**
+     * The preauth information object.
+     */
+    public static final class PreauthInfo {
+        public final long expires;
+        public final long timestamp;
+        public final String preauth;
+
+        /**
+         * Initializes a new {@link PreauthInfo}.
+         * 
+         * @param preauth The computed computed
+         * @param timestamp The time stamp
+         * @param expires The expires
+         */
+        public PreauthInfo(String preauth, long timestamp, long expires) {
+            super();
+            this.preauth = preauth;
+            this.timestamp = timestamp;
+            this.expires = expires;
+        }
+    }
 
     // private final int accountId;
 
@@ -95,6 +123,8 @@ public final class ZmalConfig extends MailConfig {
 
     private final Map<String, Object> params;
 
+    private PreauthInfo preauth;
+
     /**
      * Default constructor
      *
@@ -104,6 +134,15 @@ public final class ZmalConfig extends MailConfig {
         super();
         this.accountId = accountId;
         params = new NonBlockingHashMap<String, Object>(4);
+    }
+    
+    /**
+     * Gets the preauth
+     *
+     * @return The preauth
+     */
+    public PreauthInfo getPreauth() {
+        return preauth;
     }
 
     /**
@@ -237,6 +276,26 @@ public final class ZmalConfig extends MailConfig {
         secure = PROTOCOL_ZMAL_SECURE.equals(uri.getScheme());
         server = uri.getHost();
         port = uri.getPort();
+    }
+
+    @Override
+    protected boolean doCustomParsing(MailAccount account, Session session) throws OXException {
+        if (MailAccount.DEFAULT_ID != account.getId()) {
+            throw MailExceptionCode.CONFIG_ERROR.create("Zimbra mail account must be the primary one.");
+        }
+        // Gather needed data
+        final long timestamp = ((Long) session.getParameter("")).longValue();
+        final long expires = ((Long) session.getParameter("")).longValue();
+        final String key = (String) session.getParameter("");
+        // Preauth information
+        final Map<String, String> preauthParams = new HashMap<String, String>(4);
+        preauthParams.put("account", login);
+        preauthParams.put("by", "name"); // needs to be part of hmac
+        preauthParams.put("timestamp", Long.toString(timestamp));
+        preauthParams.put("expires", Long.toString(expires));
+        String preauth = Preauth.computePreAuth(preauthParams, key);
+        this.preauth = new PreauthInfo(preauth, timestamp, expires);
+        return true;
     }
 
     /**

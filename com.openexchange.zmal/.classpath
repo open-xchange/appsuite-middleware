@@ -5,7 +5,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/tinder-1.2.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/whack.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/xpp3.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/activation.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/ant-1.7.0-ziputil-patched.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/ant-contrib-1.0b1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/ant-tar-patched.jar"/>

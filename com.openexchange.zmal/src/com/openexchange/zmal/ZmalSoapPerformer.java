@@ -58,6 +58,7 @@ import org.dom4j.Namespace;
 import org.dom4j.QName;
 import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.zmal.config.ZmalConfig;
+import com.openexchange.zmal.config.ZmalConfig.PreauthInfo;
 import com.zimbra.common.service.ServiceException;
 import com.zimbra.common.soap.AccountConstants;
 import com.zimbra.common.soap.AdminConstants;
@@ -94,7 +95,7 @@ public class ZmalSoapPerformer {
     private String mUrl;
     private String mAdminUrl;
     private String mServer;
-    private String mPreAuthKey;
+    private PreauthInfo mPreAuth;
     private String mMailboxName;
     private String mAdminAccountName;
     private String mTargetAccountName;
@@ -117,12 +118,12 @@ public class ZmalSoapPerformer {
     }
     
     /**
-     * Sets the preauth key
+     * Sets the preauth
      *
-     * @param mPreAuthKey The preauth key to set
+     * @param mPreAuth The preauth to set
      */
-    public void setPreAuthKey(String preAuthKey) {
-        this.mPreAuthKey = preAuthKey;
+    public void setPreAuthKey(PreauthInfo preAuth) {
+        this.mPreAuth = preAuth;
     }
     
     /**
@@ -242,6 +243,7 @@ public class ZmalSoapPerformer {
         mAuthToken = null;
         mMailboxName = config.getLogin();
         mPassword = config.getPassword();
+        mPreAuth = config.getPreauth();
         // Compose URL
         /*-
          * SOAP service URL, usually http[s]://host:port/service/soap or https://host:port/service/admin/soap.
@@ -294,6 +296,7 @@ public class ZmalSoapPerformer {
         mAdminAccountName = null;
         mTargetAccountName = null;
         mPassword = null;
+        mPreAuth = null;
         mAuthToken = null;
         mFactory = null;
         mUseSession = false;
@@ -326,10 +329,16 @@ public class ZmalSoapPerformer {
         final Element auth = mFactory.createElement(AccountConstants.AUTH_REQUEST);
         final Element account = auth.addElement(AccountConstants.E_ACCOUNT).setText(mMailboxName);
         account.addAttribute(AdminConstants.A_BY, AdminConstants.BY_NAME);
-        if (null == mPreAuthKey) {
-            auth.addElement(AccountConstants.E_PREAUTH).setText(mPassword);
-        } else {
+        if (null == mPreAuth) {
             auth.addElement(AccountConstants.E_PASSWORD).setText(mPassword);
+        } else {
+            /*-
+             * <AuthRequest xmlns="urn:zimbraAccount">
+                <account>john.doe@domain.com</account>
+                <preauth timestamp="1135280708088" expires="0">b248f6cfd027edd45c5369f8490125204772f844</preauth>
+               </AuthRequest>
+             */
+            auth.addElement(AccountConstants.E_PREAUTH).setText(mPreAuth.preauth).addAttribute("timestamp", mPreAuth.timestamp).addAttribute("expires", mPreAuth.expires);
         }
 
         // Authenticate and get auth token
@@ -413,8 +422,8 @@ public class ZmalSoapPerformer {
     }
 
     private ZmalSoapResponse perform0(final ZmalType type, Element request) throws ServiceException, IOException {
-        // Authenticate (and remember auth-token)
         final int timeout = config.getZmalProperties().getZmalTimeout();
+        // Authenticate (and remember auth-token)
         mailboxAuth(timeout);
         // Send request and return response
         final SoapHttpTransport transport = new SoapHttpTransport(mUrl);
