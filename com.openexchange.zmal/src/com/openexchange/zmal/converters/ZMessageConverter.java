@@ -49,35 +49,25 @@
 
 package com.openexchange.zmal.converters;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.net.URLEncoder;
-import java.nio.charset.UnsupportedCharsetException;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import javax.activation.DataHandler;
 import javax.mail.Flags;
+import javax.mail.Flags.Flag;
 import javax.mail.Header;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
-import javax.mail.Flags.Flag;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeMessage.RecipientType;
+import javax.mail.internet.MimeMultipart;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Charsets;
-import com.openexchange.java.Streams;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -89,9 +79,10 @@ import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
-import com.openexchange.zmal.ZmalException;
 import com.openexchange.zmal.config.ZmalConfig;
+import com.openexchange.zmal.utils.UrlSink;
 import com.zimbra.cs.zclient.ZEmailAddress;
+import com.zimbra.cs.zclient.ZMailbox;
 import com.zimbra.cs.zclient.ZMessage;
 import com.zimbra.cs.zclient.ZMessage.ZMimePart;
 
@@ -104,12 +95,14 @@ public final class ZMessageConverter {
 
     private final String url;
     private final ZmalConfig config;
+    private final ZMailbox mailbox;
 
     /**
      * Initializes a new {@link ZMessageConverter}.
      */
-    public ZMessageConverter(final String url, final ZmalConfig config) {
+    public ZMessageConverter(final String url, final ZmalConfig config, final ZMailbox mailbox) {
         super();
+        this.mailbox = mailbox;
         this.url = url;
         this.config = config;
     }
@@ -310,7 +303,6 @@ public final class ZMessageConverter {
     }
 
     private void setDataHandler(final ZMimePart part, final ContentType contentType, final MimeBodyPart bodyPart, final String messageId) throws OXException, MessagingException {
-        HttpURLConnection conn = null;
         try {
             // /service/content/get?id={message-id}[&fmt={fmt-type}][&part={part-name}][&subId={subId}]
             final StringBuilder sb = new StringBuilder(url);
@@ -323,87 +315,10 @@ public final class ZMessageConverter {
             if (!isEmpty(subId)) {
                 sb.append("&subId=").append(urlEncode(subId));
             }
-            // Establish URL connection
-            conn = (HttpURLConnection) (new URL(sb.toString())).openConnection();
-            conn.setRequestMethod("GET");
-            conn.setDoInput(true);
-            conn.setDoOutput(true);
-            conn.setAllowUserInteraction(false);
-            conn.setUseCaches(false);
-            conn.setRequestProperty("User-Agent", "Open-Xchange-Http-Client");
-            // timeouts
-            final int connectTimeout = config.getZmalProperties().getZmalConnectionTimeout();
-            if (connectTimeout >= 0) {
-                conn.setConnectTimeout(connectTimeout);
-            }
-
-            final int readTimeout = config.getZmalProperties().getZmalTimeout();
-            if (readTimeout >= 0) {
-                conn.setReadTimeout(readTimeout);
-            }
-
-            // Authenticate
-            {
-                final Map<String, List<String>> httpHeaders = new HashMap<String, List<String>>(4);
-                // Get user and password
-                final String user = config.getLogin();
-                final String password = config.getPassword();
-                // If no user is set, don't set basic auth header
-                if (user != null) {
-                    httpHeaders.put("Authorization", createBasicAuthHeaderValue(user, password));
-                }
-                // Add them
-                for (final Map.Entry<String, List<String>> header : httpHeaders.entrySet()) {
-                    if (header.getValue() != null) {
-                        for (final String value : header.getValue()) {
-                            conn.addRequestProperty(header.getKey(), value);
-                        }
-                    }
-                }
-            }
-
-            // connect
-            conn.connect();
-
-            // get stream, if present
-            final int respCode = conn.getResponseCode();
-            if ((respCode != 200) && (respCode != 201) && (respCode != 203) && (respCode != 206)) {
-                throw ZmalException.create(ZmalException.Code.SERVICE_ERROR, respCode + " - " + conn.getResponseMessage());
-            }
-            final InputStream inputStream = conn.getInputStream();
-            try {
-                final ByteArrayOutputStream out = Streams.newByteArrayOutputStream(8192);
-                final byte[] buf = new byte[2048];
-                for (int read = inputStream.read(buf, 0, buf.length); read > 0; read = inputStream.read(buf, 0, buf.length)) {
-                    out.write(buf, 0, read);
-                }
-                out.flush();
-                bodyPart.setDataHandler(new DataHandler(new MessageDataSource(out.toByteArray(), contentType.toString())));
-            } finally {
-                Streams.close(inputStream);
-            }
-        } catch (final IOException e) {
-            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-        } finally {
-            if (null != conn) {
-                conn.disconnect();
-            }
-        }
-    }
-
-    /**
-     * Creates a basic authentication header value from a username and a password.
-     */
-    private static List<String> createBasicAuthHeaderValue(final String username, final String password) {
-        String pw = password;
-        if (pw == null) {
-            pw = "";
-        }
-        try {
-            return Collections.singletonList("Basic " + org.apache.commons.codec.binary.Base64.encodeBase64((username + ":" + pw).getBytes(Charsets.ISO_8859_1)));
-        } catch (final UnsupportedCharsetException e) {
-            // shouldn't happen...
-            return Collections.emptyList();
+            final byte[] content = UrlSink.getContent(sb.toString(), config, mailbox);
+            bodyPart.setDataHandler(new DataHandler(new MessageDataSource(content, contentType.toString())));
+        } catch (final RuntimeException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 

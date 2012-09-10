@@ -89,19 +89,22 @@ public class ZmalSoapPerformer {
     private static final Log LOG = com.openexchange.log.Log.loggerFor(ZmalSoapPerformer.class);
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
-    public int contextId;
-    public int userId;
-    public String mUrl;
-    public String mMailboxName;
-    public String mAdminAccountName;
-    public String mTargetAccountName;
-    public String mPassword;
-    public String mAuthToken;
-    public ElementFactory mFactory;
-    public boolean mUseSession;
-    public boolean mUseJson;
-    public String mSelect;
-    public final ZmalConfig config;
+    private int contextId;
+    private int userId;
+    private String mUrl;
+    private String mAdminUrl;
+    private String mServer;
+    private String mPreAuthKey;
+    private String mMailboxName;
+    private String mAdminAccountName;
+    private String mTargetAccountName;
+    private String mPassword;
+    private String mAuthToken;
+    private ElementFactory mFactory;
+    private boolean mUseSession;
+    private boolean mUseJson;
+    private String mSelect;
+    private final ZmalConfig config;
 
     /**
      * Initializes a new {@link ZmalSoapPerformer}.
@@ -111,6 +114,24 @@ public class ZmalSoapPerformer {
         mUseSession = false;
         mUseJson = false;
         this.config = config;
+    }
+    
+    /**
+     * Sets the preauth key
+     *
+     * @param mPreAuthKey The preauth key to set
+     */
+    public void setPreAuthKey(String preAuthKey) {
+        this.mPreAuthKey = preAuthKey;
+    }
+    
+    /**
+     * Gets the URL for administration interface.
+     *
+     * @return The URL for administration interface
+     */
+    public String getAdminUrl() {
+        return mAdminUrl;
     }
     
     /**
@@ -178,6 +199,24 @@ public class ZmalSoapPerformer {
         this.mSelect = select;
         return this;
     }
+    
+    /**
+     * Gets the select string
+     *
+     * @return The select string
+     */
+    public String getSelect() {
+        return mSelect;
+    }
+    
+    /**
+     * Gets the use-json flag.
+     *
+     * @return The use-json flag
+     */
+    public boolean isUseJson() {
+        return mUseJson;
+    }
 
     /**
      * Sets whether to use JSON format.
@@ -204,16 +243,35 @@ public class ZmalSoapPerformer {
         mMailboxName = config.getLogin();
         mPassword = config.getPassword();
         // Compose URL
+        /*-
+         * SOAP service URL, usually http[s]://host:port/service/soap or https://host:port/service/admin/soap.
+         */
         {
-            final StringBuilder sb = new StringBuilder(64).append(config.isSecure() ? "https" : "http");
-            sb.append("://").append(config.getServer());
+            final StringBuilder sb = new StringBuilder(64);
+            sb.append(config.getServer());
             final int port = config.getPort();
             if (port > 0 && port != URIDefaults.IMAP.getPort()) {
                 sb.append(port);
             }
+            mServer = sb.toString();
+            // Prepend protocol
+            sb.insert(0, config.isSecure() ? "https://" : "http://");
+            final int l = sb.length();
             sb.append("/service/soap");
             mUrl = sb.toString();
+            sb.setLength(l);
+            sb.append("/service/admin/soap");
+            mAdminUrl = sb.toString();
         }
+    }
+    
+    /**
+     * Gets the server; host[:port] of server to connect to
+     *
+     * @return The server
+     */
+    public String getServer() {
+        return mServer;
     }
     
     /**
@@ -230,6 +288,8 @@ public class ZmalSoapPerformer {
      */
     public void reset() {
         mUrl = null;
+        mAdminUrl = null;
+        mServer = null;
         mMailboxName = null;
         mAdminAccountName = null;
         mTargetAccountName = null;
@@ -266,7 +326,11 @@ public class ZmalSoapPerformer {
         final Element auth = mFactory.createElement(AccountConstants.AUTH_REQUEST);
         final Element account = auth.addElement(AccountConstants.E_ACCOUNT).setText(mMailboxName);
         account.addAttribute(AdminConstants.A_BY, AdminConstants.BY_NAME);
-        auth.addElement(AccountConstants.E_PASSWORD).setText(mPassword);
+        if (null == mPreAuthKey) {
+            auth.addElement(AccountConstants.E_PREAUTH).setText(mPassword);
+        } else {
+            auth.addElement(AccountConstants.E_PASSWORD).setText(mPassword);
+        }
 
         // Authenticate and get auth token
         final Element response = transport.invoke(auth, false, !mUseSession, null);

@@ -242,7 +242,7 @@ public final class ZmalAccess extends MailAccess<ZmalFolderStorage, ZmalMessageS
             checkFieldsBeforeConnect(config);
             final ZmalSoapPerformer performer = new ZmalSoapPerformer(config).setUseJson(useJson);
             performer.setContextId(session.getContextId()).setUserId(session.getUserId());
-            performer.mSelect = "GetInfoResponse";
+            performer.setSelect("GetInfoResponse");
             final ZmalSoapResponse soapResponse = performer.perform(ZmalType.ACCOUNT, "GetInfoRequest");
             
             
