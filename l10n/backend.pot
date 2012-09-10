@@ -2554,7 +2554,6 @@ msgstr ""
 
 #. * The following needed service is missing: \"%1$s\"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.grizzly/src/com/openexchange/http/grizzly/GrizzlyExceptionMessage.java:64
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.probe/src/com/openexchange/http/probe/ProbeExceptionMessage.java:62
 msgid "The following needed service is missing: \"%1$s\""
 msgstr ""
 
