@@ -47,40 +47,42 @@
  *
  */
 
-package com.openexchange.service.indexing;
+package com.openexchange.service.indexing.osgi;
 
-import java.util.Date;
 import org.apache.commons.logging.Log;
-import com.openexchange.exception.OXException;
+import org.quartz.service.QuartzService;
+import com.hazelcast.core.HazelcastInstance;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.index.IndexFacadeService;
 import com.openexchange.log.LogFactory;
+import com.openexchange.mail.service.MailService;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.service.indexing.IndexingService;
+import com.openexchange.service.indexing.internal.IndexingServiceImpl;
+import com.openexchange.service.indexing.internal.Services;
+
 
 /**
- * {@link EchoIndexJob} - A simple job for echo'ing a given message.
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link IndexingActivator}
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public final class EchoIndexJob extends StandardIndexingJob {
-
-    private static final long serialVersionUID = 8422334197440807865L;
-
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(EchoIndexJob.class));
-
-    private final String message;
-
-    private final Date stamp;
-
-    /**
-     * Initializes a new {@link EchoIndexJob}.
-     */
-    public EchoIndexJob(final String message) {
-        super();
-        this.message = null == message ? "Hello world!" : message;
-        stamp = new Date();
-    }
-
+public class IndexingActivator extends HousekeepingActivator {
+    
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(IndexingActivator.class));
+    
     @Override
-    public void performJob() throws OXException {
-        LOG.error("\n\n\tEchoIndexJob (created at " + stamp.toString() + "): \"" + message + "\"\n\n");
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { ConfigurationService.class, IndexFacadeService.class, HazelcastInstance.class, QuartzService.class, MailService.class };
     }
+    
+    @Override
+    protected void startBundle() throws Exception {
+        LOG.info("Starting bundle: com.openexchange.service.indexing");
+        Services.setServiceLookup(this);
+        registerService(IndexingService.class, new IndexingServiceImpl());
+    }
+
+    
 
 }

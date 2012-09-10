@@ -47,27 +47,18 @@
  *
  */
 
-package com.openexchange.service.indexing;
-
-import java.util.Date;
-import com.openexchange.exception.OXException;
+package com.openexchange.service.indexing.internal;
 
 
 /**
- * {@link IndexingService}
+ * {@link JobConstants}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public interface IndexingService {
+public class JobConstants {
     
-    /**
-     * Schedules an indexing job. 
-     * 
-     * @param info The information needed to run this job.
-     * @param startDate The start date of the job. My be <code>null</code> to run immediately.
-     * @param repeatInterval The repeat interval in milliseconds. May be negative if the job shall only run once.
-     * @throws OXException 
-     */
-    void scheduleJob(JobInfo info, Date startDate, long repeatInterval) throws OXException;
+    public static final String JOB_INFO = "jobInfo";
+    
+    public static final String JOB_CLASS = "jobClass";
 
 }

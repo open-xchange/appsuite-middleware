@@ -47,127 +47,73 @@
  *
  */
 
-package com.openexchange.service.indexing;
+package com.openexchange.service.indexing.internal;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link StandardIndexingJob} - The standard <code style="color: red;">abstract</code> {@link IndexingJob} to extend from.
+ * {@link Services} - The static service lookup for Message Queue bundle.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class StandardIndexingJob implements IndexingJob {
-
-    private static final long serialVersionUID = -603520334844563670L;
+public final class Services {
 
     /**
-     * The job's priority; initially <code>4</code> (default).
+     * Initializes a new {@link Services}.
      */
-    protected volatile int priority;
-
-    /**
-     * The job's behavior; initially {@link Behavior#CONSUMER_RUNS}.
-     * 
-     * @see #setBehavior(com.openexchange.service.indexing.IndexingJob.Behavior)
-     */
-    protected volatile Behavior behavior;
-
-    /**
-     * The job' origin.
-     */
-    protected volatile Origin origin;
-
-    /**
-     * The time stamp.
-     */
-    protected final long timeStamp;
-
-    /**
-     * The properties.
-     */
-    protected final ConcurrentMap<String, ?> properties;
-
-    /**
-     * Initializes a new {@link StandardIndexingJob}.
-     */
-    protected StandardIndexingJob() {
+    private Services() {
         super();
-        properties = new ConcurrentHashMap<String, Object>();
-        timeStamp = System.currentTimeMillis();
-        priority = DEFAULT_PRIORITY;
-        behavior = DEFAULT_BEHAVIOR;
-        origin = DEFAULT_ORIGIN;
     }
 
-    @Override
-    public Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
-    }
-
-    @Override
-    public Map<String, ?> getProperties() {
-        return properties;
-    }
-
-    @Override
-    public long getTimeStamp() {
-        return timeStamp;
-    }
-
-    @Override
-    public Origin getOrigin() {
-        return origin;
-    }
-
-    @Override
-    public boolean isDurable() {
-        return true;
-    }
-
-    @Override
-    public int getPriority() {
-        return priority;
-    }
-
-    @Override
-    public void setPriority(final int priority) {
-        this.priority = priority;
-    }
-
-    @Override
-    public Behavior getBehavior() {
-        return behavior;
-    }
-
-    
-    /**
-     * Sets the origin
-     *
-     * @param origin The origin to set
-     */
-    public void setOrigin(final Origin origin) {
-        this.origin = origin;
-    }
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
 
     /**
-     * Sets the behavior
+     * Sets the service lookup.
      * 
-     * @param behavior The behavior to set
+     * @param serviceLookup The service lookup or <code>null</code>
      */
-    public void setBehavior(final Behavior behavior) {
-        this.behavior = behavior;
+    public static void setServiceLookup(final ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
     }
 
-    @Override
-    public void beforeExecute() {
-        // Nothing to do
+    /**
+     * Gets the service lookup.
+     * 
+     * @return The service lookup or <code>null</code>
+     */
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
     }
 
-    @Override
-    public void afterExecute(final Throwable t) {
-        // Nothing to do
+    /**
+     * Gets the service of specified type
+     * 
+     * @param clazz The service's class
+     * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException(
+                "Missing ServiceLookup instance. Bundle com.openexchange.service.indexing not staretd?");
+        }
+        return serviceLookup.getService(clazz);
+    }
+
+    /**
+     * (Optionally) Gets the service of specified type
+     * 
+     * @param clazz The service's class
+     * @return The service or <code>null</code> is absent
+     */
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        try {
+            return getService(clazz);
+        } catch (final IllegalStateException e) {
+            return null;
+        }
     }
 
 }

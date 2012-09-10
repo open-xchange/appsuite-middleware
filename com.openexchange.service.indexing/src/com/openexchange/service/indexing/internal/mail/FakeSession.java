@@ -47,12 +47,11 @@
  *
  */
 
-package com.openexchange.service.indexing.mail;
+package com.openexchange.service.indexing.internal.mail;
 
 import java.io.Serializable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import com.openexchange.service.indexing.internal.mail.FakeSession;
 import com.openexchange.session.Session;
 
 /**

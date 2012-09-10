@@ -49,8 +49,6 @@
 
 package com.openexchange.mail.smal.impl;
 
-import static java.util.Arrays.asList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -77,16 +75,18 @@ import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailMessageStorageBatch;
 import com.openexchange.mail.api.IMailMessageStorageExt;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.smal.impl.index.IndexAccessAdapter;
 import com.openexchange.mail.smal.impl.index.IndexDocumentHelper;
-import com.openexchange.service.indexing.mail.job.AddByIDsJob;
-import com.openexchange.service.indexing.mail.job.ChangeByIDsJob;
-import com.openexchange.service.indexing.mail.job.FolderJob;
-import com.openexchange.service.indexing.mail.job.RemoveByIDsJob;
+import com.openexchange.service.indexing.IndexingService;
+import com.openexchange.service.indexing.JobInfo;
+import com.openexchange.service.indexing.mail.MailFolderJob;
+import com.openexchange.service.indexing.mail.MailJobInfo;
+import com.openexchange.service.indexing.mail.MailJobInfo.Builder;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPools;
 
@@ -118,10 +118,10 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
         /*
          * Enqueue adder job
          */
-        final AddByIDsJob adderJob = new AddByIDsJob(destFolder, createJobInfo());
-        adderJob.setMails(Arrays.asList(msgs));
-        adderJob.setPriority(9);
-        submitJob(adderJob);
+//        final AddByIDsJob adderJob = new AddByIDsJob(destFolder, createJobInfo());
+//        adderJob.setMails(Arrays.asList(msgs));
+//        adderJob.setPriority(9);
+//        submitJob(adderJob);
         return newIds;
     }
 
@@ -131,10 +131,10 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
         /*
          * Enqueue adder job
          */
-        final AddByIDsJob adderJob = new AddByIDsJob(destFolder, createJobInfo());
-        adderJob.setMailIds(Arrays.asList(mailIds));
-        adderJob.setPriority(9);
-        submitJob(adderJob);
+//        final AddByIDsJob adderJob = new AddByIDsJob(destFolder, createJobInfo());
+//        adderJob.setMailIds(Arrays.asList(mailIds));
+//        adderJob.setPriority(9);
+//        submitJob(adderJob);
         return fast ? new String[0] : newIds;
     }
 
@@ -144,10 +144,10 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
         /*
          * Enqueue remover job
          */
-        final RemoveByIDsJob removerJob = new RemoveByIDsJob(folder, createJobInfo());
-        removerJob.setMailIds(Arrays.asList(mailIds));
-        removerJob.setPriority(9);
-        submitJob(removerJob);
+//        final RemoveByIDsJob removerJob = new RemoveByIDsJob(folder, createJobInfo());
+//        removerJob.setMailIds(Arrays.asList(mailIds));
+//        removerJob.setPriority(9);
+//        submitJob(removerJob);
     }
     
     @Override
@@ -167,8 +167,12 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
             indexAccess = IndexAccessAdapter.getInstance().getIndexAccess(session);
             boolean isIndexed = indexAccess.isIndexed(String.valueOf(accountId), folder);
             if (!isIndexed) {
-                FolderJob folderJob = new FolderJob(folder, createJobInfo());
-                submitJob(folderJob);
+                try {
+                    submitFolderJob();
+                } catch (OXException e) {
+                    LOG.error("Could not schedule folder job.", e);
+                }
+                
                 return messageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
             } else if (searchTerm == null || !MailUtility.getIndexableFields(indexAccess).containsAll(mfs)) {
                 return messageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
@@ -238,6 +242,22 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
             IndexAccessAdapter.getInstance().releaseIndexAccess(indexAccess);
         }
     }
+    
+    private void submitFolderJob() throws OXException {
+        MailConfig config = delegateMailAccess.getMailConfig();                
+        Builder builder = MailJobInfo.newBuilder(MailFolderJob.class)
+            .login(config.getLogin())
+            .accountId(accountId)
+            .contextId(contextId)
+            .userId(userId)
+            .primaryPassword(session.getPassword())
+            .password(config.getPassword());
+
+        JobInfo jobInfo = builder.build();
+        IndexingService indexingService = SmalServiceLookup.getServiceStatic(IndexingService.class);
+        // FIXME: interval
+        indexingService.scheduleJob(jobInfo, null, 60000L * 10);
+    }
 
     @Override
     public void updateMessageFlags(final String folder, final String[] mailIds, final int flags, final boolean set) throws OXException {
@@ -245,10 +265,10 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
         /*
          * Enqueue change job
          */
-        final ChangeByIDsJob job = new ChangeByIDsJob(folder, createJobInfo());
-        job.setMailIds(Arrays.asList(mailIds));
-        job.setPriority(9);
-        submitJob(job);
+//        final ChangeByIDsJob job = new ChangeByIDsJob(folder, createJobInfo());
+//        job.setMailIds(Arrays.asList(mailIds));
+//        job.setPriority(9);
+//        submitJob(job);
     }
 
     @Override
@@ -306,15 +326,15 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
             /*
              * Remover job
              */
-            final RemoveByIDsJob removerJob = new RemoveByIDsJob(sourceFolder, createJobInfo());
-            removerJob.setMailIds(asList(mailIds));
-            removerJob.setPriority(9);
-            submitJob(removerJob);
+//            final RemoveByIDsJob removerJob = new RemoveByIDsJob(sourceFolder, createJobInfo());
+//            removerJob.setMailIds(asList(mailIds));
+//            removerJob.setPriority(9);
+//            submitJob(removerJob);
             /*
              * Schedule folder job
              */
-            final FolderJob folderJob = new FolderJob(destFolder, createJobInfo());
-            submitJob(folderJob);
+//            final FolderJob folderJob = new FolderJob(destFolder, createJobInfo());
+//            submitJob(folderJob);
             /*
              * Return depending on "fast" parameter
              */
@@ -324,17 +344,17 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
         /*
          * Adder job
          */
-        final AddByIDsJob adderJob = new AddByIDsJob(destFolder, createJobInfo());
-        adderJob.setMailIds(asList(newIds));
-        adderJob.setPriority(9);
-        submitJob(adderJob);
+//        final AddByIDsJob adderJob = new AddByIDsJob(destFolder, createJobInfo());
+//        adderJob.setMailIds(asList(newIds));
+//        adderJob.setPriority(9);
+//        submitJob(adderJob);
         /*
          * Remover job
          */
-        final RemoveByIDsJob removerJob = new RemoveByIDsJob(sourceFolder, createJobInfo());
-        removerJob.setMailIds(asList(mailIds));
-        removerJob.setPriority(9);
-        submitJob(removerJob);
+//        final RemoveByIDsJob removerJob = new RemoveByIDsJob(sourceFolder, createJobInfo());
+//        removerJob.setMailIds(asList(mailIds));
+//        removerJob.setPriority(9);
+//        submitJob(removerJob);
         /*
          * Return depending on "fast" parameter
          */
@@ -352,10 +372,10 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
         /*
          * Enqueue change job.
          */
-        final ChangeByIDsJob job = new ChangeByIDsJob(folder, createJobInfo());
-        job.setMailIds(asList(mailIds));
-        job.setPriority(9);
-        submitJob(job);
+//        final ChangeByIDsJob job = new ChangeByIDsJob(folder, createJobInfo());
+//        job.setMailIds(asList(mailIds));
+//        job.setPriority(9);
+//        submitJob(job);
     }
 
     @Override

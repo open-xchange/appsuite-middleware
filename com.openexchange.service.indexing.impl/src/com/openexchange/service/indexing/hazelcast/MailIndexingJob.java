@@ -23,7 +23,7 @@ import com.openexchange.index.SearchHandler;
 import com.openexchange.index.mail.MailIndexField;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.service.indexing.impl.Services;
-import com.openexchange.service.indexing.mail.MailJobInfo;
+import com.openexchange.service.indexing.internal.mail.MailJobInfo;
 import com.openexchange.solr.SolrCoreIdentifier;
 
 public class MailIndexingJob implements Job {
@@ -51,7 +51,7 @@ public class MailIndexingJob implements Job {
             IndexAccess<MailMessage> indexAccess = indexFacade.acquireIndexAccess(Types.EMAIL, jobInfo.userId, jobInfo.contextId);
             QueryParameters queryParameters = new QueryParameters.Builder("Something").setLength(0).setHandler(SearchHandler.SIMPLE).build();
             indexAccess.query(queryParameters, Collections.singleton(MailIndexField.ID));
-            indexFacade.releaseIndexAccess(indexAccess);           
+            indexFacade.releaseIndexAccess(indexAccess);
             
             SolrCoreIdentifier identifier = new SolrCoreIdentifier(jobInfo.contextId, jobInfo.userId, Types.EMAIL);
             HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);

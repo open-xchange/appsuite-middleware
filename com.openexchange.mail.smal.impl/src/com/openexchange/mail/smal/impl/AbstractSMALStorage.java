@@ -286,18 +286,18 @@ public abstract class AbstractSMALStorage {
      * @param job The job
      * @return <code>true</code> if successfully submitted; otherwise <code>false</code>
      */
-    protected boolean submitJob(final IndexingJob job) {
-        try {
-            final IndexingService service = SmalServiceLookup.getServiceStatic(IndexingService.class);
-            if (null == service) {
-                return false;
-            }
-            service.addJob(job);
-            return true;
-        } catch (final OXException e) {
-            return false;
-        }
-    }
+//    protected boolean submitJob(final IndexingJob job) {
+//        try {
+//            final IndexingService service = SmalServiceLookup.getServiceStatic(IndexingService.class);
+//            if (null == service) {
+//                return false;
+//            }
+//            service.addJob(job);
+//            return true;
+//        } catch (final OXException e) {
+//            return false;
+//        }
+//    }
 
     /**
      * Creates the appropriate job info for this storage access.
@@ -305,23 +305,23 @@ public abstract class AbstractSMALStorage {
      * @return The job info
      * @throws OXException If creation fails
      */
-    protected MailJobInfo createJobInfo() throws OXException {
-        MailJobInfo jobInfo = this.jobInfo;
-        if (null == jobInfo) {
-            synchronized (this) {
-                jobInfo = this.jobInfo;
-                if (null == jobInfo) {
-                    final MailConfig config = delegateMailAccess.getMailConfig();
-                    jobInfo =
-                        new MailJobInfo.Builder(userId, contextId).accountId(accountId).login(config.getLogin()).password(
-                            config.getPassword()).port(config.getPort()).server(config.getServer()).secure(config.isSecure()).primaryPassword(
-                            session.getPassword()).build();
-                    this.jobInfo = jobInfo;
-                }
-            }
-        }
-        return jobInfo;
-    }
+//    protected MailJobInfo createJobInfo() throws OXException {
+//        MailJobInfo jobInfo = this.jobInfo;
+//        if (null == jobInfo) {
+//            synchronized (this) {
+//                jobInfo = this.jobInfo;
+//                if (null == jobInfo) {
+//                    final MailConfig config = delegateMailAccess.getMailConfig();
+//                    jobInfo =
+//                        new MailJobInfo.Builder(userId, contextId).accountId(accountId).login(config.getLogin()).password(
+//                            config.getPassword()).port(config.getPort()).server(config.getServer()).secure(config.isSecure()).primaryPassword(
+//                            session.getPassword()).build();
+//                    this.jobInfo = jobInfo;
+//                }
+//            }
+//        }
+//        return jobInfo;
+//    }
 
     /**
      * Handles specified {@link RuntimeException} instance.

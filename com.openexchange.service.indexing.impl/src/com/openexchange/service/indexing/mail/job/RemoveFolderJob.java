@@ -61,7 +61,7 @@ import com.openexchange.index.SearchHandler;
 import com.openexchange.index.solr.IndexFolderManager;
 import com.openexchange.log.LogFactory;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.service.indexing.mail.MailJobInfo;
+import com.openexchange.service.indexing.internal.mail.MailJobInfo;
 
 /**
  * {@link RemoveFolderJob}

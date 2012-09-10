@@ -47,8 +47,8 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.smal.SmalAccessService;
 import com.openexchange.service.indexing.impl.Services;
-import com.openexchange.service.indexing.mail.FakeSession;
-import com.openexchange.service.indexing.mail.MailJobInfo;
+import com.openexchange.service.indexing.internal.mail.FakeSession;
+import com.openexchange.service.indexing.internal.mail.MailJobInfo;
 import com.openexchange.session.Session;
 
 public class MailFolderCallable implements Callable<Object>, Serializable {

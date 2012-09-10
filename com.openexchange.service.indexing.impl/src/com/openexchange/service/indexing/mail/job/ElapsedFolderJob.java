@@ -57,8 +57,8 @@ import com.openexchange.index.solr.IndexFolderManager;
 import com.openexchange.log.LogFactory;
 import com.openexchange.service.indexing.IndexingService;
 import com.openexchange.service.indexing.impl.Services;
+import com.openexchange.service.indexing.internal.mail.MailJobInfo;
 import com.openexchange.service.indexing.mail.Constants;
-import com.openexchange.service.indexing.mail.MailJobInfo;
 
 /**
  * {@link ElapsedFolderJob}

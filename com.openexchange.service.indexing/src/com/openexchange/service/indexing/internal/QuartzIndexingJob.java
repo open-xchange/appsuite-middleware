@@ -47,79 +47,57 @@
  *
  */
 
-package com.openexchange.service.indexing.mail.job;
+package com.openexchange.service.indexing.internal;
 
-import java.util.List;
-import org.apache.commons.logging.Log;
+import org.quartz.Job;
+import org.quartz.JobDataMap;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
 import com.openexchange.exception.OXException;
-import com.openexchange.index.IndexAccess;
-import com.openexchange.index.mail.MailUUID;
-import com.openexchange.log.LogFactory;
-import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.service.indexing.internal.mail.MailJobInfo;
+import com.openexchange.service.indexing.IndexingJob;
+import com.openexchange.service.indexing.JobInfo;
+
 
 /**
- * {@link RemoveByIDsJob} - Removes mails from index by specified identifiers.
+ * {@link QuartzIndexingJob}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public final class RemoveByIDsJob extends AbstractMailJob {
-
-    private static final long serialVersionUID = 6978164673531858003L;
-
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(RemoveByIDsJob.class));
-
-    private static final String SIMPLE_NAME = RemoveByIDsJob.class.getSimpleName();
-
-    private static final boolean DEBUG = LOG.isDebugEnabled();
-
-    private final String fullName;
-
-    private volatile List<String> mailIds;
-
-    /**
-     * Initializes a new {@link RemoveByIDsJob}.
-     *
-     * @param fullName The folder full name
-     * @param info The job information
-     */
-    public RemoveByIDsJob(final String fullName, final MailJobInfo info) {
-        super(info);
-        this.fullName = fullName;
+public class QuartzIndexingJob implements Job {
+    
+    public QuartzIndexingJob() {
+        super();
     }
-
-    /**
-     * Sets the mails identifiers
-     *
-     * @param mailIds The identifiers to set
-     * @return This folder job
-     */
-    public RemoveByIDsJob setMailIds(final List<String> mailIds) {
-        this.mailIds = mailIds;
-        return this;
-    }
+    
 
     @Override
-    protected void performMailJob() throws OXException, InterruptedException {
-        final List<String> mailIds = this.mailIds;
-        if (null == mailIds) {
-            return;
+    public void execute(JobExecutionContext context) throws JobExecutionException {
+        JobDataMap jobData = context.getMergedJobDataMap();
+        Object infoObject = jobData.get(JobConstants.JOB_INFO);
+        if (infoObject == null || !(infoObject instanceof JobInfo)) {
+            throw new JobExecutionException("JobDataMap did not contain valid JobInfo instance.", false);
         }
+        
+        Object classObject = jobData.get(JobConstants.JOB_CLASS);
+        if (classObject == null || !(classObject instanceof Class<?>)) {
+            throw new JobExecutionException("JobDataMap did not contain valid job class.", false);
+        }
+        
+        JobInfo jobInfo = (JobInfo) infoObject;       
+        IndexingJob indexingJob;
         try {
-            /*
-             * Check flags of contained mails
-             */
-            final IndexAccess<MailMessage> indexAccess = storageAccess.getIndexAccess();
-            // Iterate identifiers
-            for (final String id : mailIds) {
-                final MailUUID indexId = new MailUUID(contextId, userId, accountId, fullName, id);
-                indexAccess.deleteById(indexId.getUUID());
-            }
-            if (DEBUG) {
-                LOG.debug(mailIds.size() + " mails deleted from index; folder job: " + info);
-            }
-        } catch (final RuntimeException e) {
-            LOG.error(SIMPLE_NAME + " \"" + info + "\" failed.", e);
+            Class<? extends IndexingJob> jobClass = (Class<? extends IndexingJob>) classObject;
+            indexingJob = jobClass.newInstance();
+        } catch (Throwable e) {
+            throw new JobExecutionException("Could not instantiate IndexingJob from class object.", e, false);
+        }
+        
+        try {
+            indexingJob.execute(jobInfo);
+        } catch (OXException e) {
+            throw new JobExecutionException("Error during IndexingJob execution.", e, false);
+        } catch (Throwable t) {
+            throw new JobExecutionException("Runtime error during IndexingJob execution.", t, false);
         }
     }
 

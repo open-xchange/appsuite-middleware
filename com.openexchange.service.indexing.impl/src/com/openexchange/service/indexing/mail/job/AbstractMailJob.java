@@ -64,7 +64,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mail.smal.SmalAccessService;
 import com.openexchange.service.indexing.StandardIndexingJob;
-import com.openexchange.service.indexing.mail.MailJobInfo;
+import com.openexchange.service.indexing.internal.mail.MailJobInfo;
 import com.openexchange.service.indexing.mail.StorageAccess;
 
 /**

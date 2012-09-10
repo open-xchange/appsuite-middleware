@@ -47,27 +47,28 @@
  *
  */
 
-package com.openexchange.service.indexing;
+package com.openexchange.service.indexing.hazelcast;
 
-import java.util.Date;
-import com.openexchange.exception.OXException;
+import org.quartz.Job;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
 
 
 /**
- * {@link IndexingService}
+ * {@link IndexingJob}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public interface IndexingService {
+public class IndexingJob implements Job {
     
-    /**
-     * Schedules an indexing job. 
-     * 
-     * @param info The information needed to run this job.
-     * @param startDate The start date of the job. My be <code>null</code> to run immediately.
-     * @param repeatInterval The repeat interval in milliseconds. May be negative if the job shall only run once.
-     * @throws OXException 
-     */
-    void scheduleJob(JobInfo info, Date startDate, long repeatInterval) throws OXException;
+    public IndexingJob() {
+        super();
+    }
+
+    @Override
+    public void execute(JobExecutionContext context) throws JobExecutionException {
+        // TODO Auto-generated method stub
+
+    }
 
 }

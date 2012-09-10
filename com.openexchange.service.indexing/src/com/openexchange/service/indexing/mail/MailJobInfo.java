@@ -49,27 +49,17 @@
 
 package com.openexchange.service.indexing.mail;
 
-import java.io.Serializable;
-import com.openexchange.service.indexing.internal.mail.MailJobInfo;
+import com.openexchange.service.indexing.IndexingJob;
+import com.openexchange.service.indexing.JobInfo;
 
 /**
  * {@link MailJobInfo} - Provides necessary information for performing a mail job.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailJobInfo implements Serializable {
+public final class MailJobInfo extends JobInfo {
 
     private static final long serialVersionUID = -541314174402111431L;
-
-    /**
-     * The context identifier
-     */
-    public final int contextId;
-
-    /**
-     * The user identifier.
-     */
-    public final int userId;
 
     /**
      * The account identifier.
@@ -90,36 +80,64 @@ public final class MailJobInfo implements Serializable {
      * The password.
      */
     public final String password;
-
+//
+//    /**
+//     * The server's host name or IP address.
+//     */
+//    public final String server;
+//
+//    /**
+//     * The port.
+//     */
+//    public final int port;
+//
+//    /**
+//     * Whether a secure connection shall be established.
+//     */
+//    public final boolean secure;
+    
     /**
-     * The server's host name or IP address.
+     * The optional mail folder affected within this job.
      */
-    public final String server;
-
-    /**
-     * The port.
-     */
-    public final int port;
-
-    /**
-     * Whether a secure connection shall be established.
-     */
-    public final boolean secure;
+    public final String folder;
+    
+    private String uniqueId = null;
+    
 
     /**
      * Initializes a new {@link MailJobInfo}.
      */
-    protected MailJobInfo(final Builder builder) {
-        super();
+    private MailJobInfo(final Builder builder) {
+        super(builder.jobClass, builder.contextId, builder.userId, builder.properties);
         accountId = builder.accountId;
-        contextId = builder.contextId;
-        userId = builder.userId;
         primaryPassword = builder.primaryPassword;
         login = builder.login;
         password = builder.password;
-        server = builder.server;
-        port = builder.port;
-        secure = builder.secure;
+//        server = builder.server;
+//        port = builder.port;
+//        secure = builder.secure;
+        folder = builder.folder;
+    }
+    
+    @Override
+    public String toUniqueId() {
+        if (uniqueId == null) {
+            StringBuilder sb = new StringBuilder(getClass().getName());
+            sb.append('/');
+            sb.append(contextId);
+            sb.append('/');
+            sb.append(userId);
+            sb.append('/');
+            sb.append(accountId);
+            if (folder != null) {
+                sb.append('/');
+                sb.append(folder);
+            }
+            
+            uniqueId = sb.toString();
+        }
+        
+        return uniqueId;
     }
 
     @Override
@@ -130,34 +148,29 @@ public final class MailJobInfo implements Serializable {
         if (login != null) {
             sb.append("login=").append(login).append(", ");
         }
-        if (server != null) {
-            sb.append("server=").append(server).append(", ");
-        }
-        sb.append("port=").append(port).append(", secure=").append(secure).append('}');
+//        if (server != null) {
+//            sb.append("server=").append(server).append(", ");
+//        }
+//        sb.append("port=").append(port).append(", secure=").append(secure).append('}');
         return sb.toString();
     }
 
     /**
      * Initializes a new {@link Builder}.
      * <p>
-     * Convenience method for <code>new MailJobInfo.Builder(userId, contextId)</code>.
+     * Convenience method for <code>new MailJobInfo.Builder(Class<? extends IndexingJob> jobClass)</code>.
      * 
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return The new builder
+     * @param jobClass The job class.
+     * @return The new builder.
      */
-    public static Builder newBuilder(final int userId, final int contextId) {
-        return new Builder(userId, contextId);
+    public static Builder newBuilder(Class<? extends IndexingJob> jobClass) {
+        return new Builder(jobClass);
     }
 
     /**
      * Builds a {@link MailJobInfo} instance.
      */
-    public static final class Builder {
-
-        protected final int contextId;
-
-        protected final int userId;
+    public static final class Builder extends JobInfoBuilder<Builder> {
 
         protected int accountId;
 
@@ -167,11 +180,13 @@ public final class MailJobInfo implements Serializable {
 
         protected String password;
 
-        protected String server;
-
-        protected int port;
-
-        protected boolean secure;
+//        protected String server;
+//
+//        protected int port;
+//
+//        protected boolean secure;
+        
+        protected String folder;
 
         /**
          * Initializes a new {@link Builder}.
@@ -179,10 +194,8 @@ public final class MailJobInfo implements Serializable {
          * @param userId The user identifier
          * @param contextId The context identifier
          */
-        public Builder(final int userId, final int contextId) {
-            super();
-            this.userId = userId;
-            this.contextId = contextId;
+        public Builder(Class<? extends IndexingJob> jobClass) {
+            super(jobClass);
         }
 
         /**
@@ -190,7 +203,8 @@ public final class MailJobInfo implements Serializable {
          * 
          * @return The {@link MailJobInfo} instance
          */
-        public MailJobInfo build() {
+        @Override
+        public JobInfo build() {
             return new MailJobInfo(this);
         }
 
@@ -214,18 +228,23 @@ public final class MailJobInfo implements Serializable {
             return this;
         }
 
-        public Builder server(final String server) {
-            this.server = server;
-            return this;
-        }
-
-        public Builder port(final int port) {
-            this.port = port;
-            return this;
-        }
-
-        public Builder secure(final boolean secure) {
-            this.secure = secure;
+//        public Builder server(final String server) {
+//            this.server = server;
+//            return this;
+//        }
+//
+//        public Builder port(final int port) {
+//            this.port = port;
+//            return this;
+//        }
+//
+//        public Builder secure(final boolean secure) {
+//            this.secure = secure;
+//            return this;
+//        }
+        
+        public Builder folder(final String folder) {
+            this.folder = folder;
             return this;
         }
 

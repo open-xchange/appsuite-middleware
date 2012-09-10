@@ -65,8 +65,8 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.service.indexing.IndexingService;
 import com.openexchange.service.indexing.impl.Services;
+import com.openexchange.service.indexing.internal.mail.MailJobInfo;
 import com.openexchange.service.indexing.mail.Constants;
-import com.openexchange.service.indexing.mail.MailJobInfo;
 
 /**
  * {@link MailAccountJob}

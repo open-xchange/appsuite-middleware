@@ -47,80 +47,54 @@
  *
  */
 
-package com.openexchange.service.indexing.mail.job;
+package com.openexchange.service.indexing.old;
 
-import java.util.List;
-import org.apache.commons.logging.Log;
-import com.openexchange.exception.OXException;
-import com.openexchange.index.IndexAccess;
-import com.openexchange.index.mail.MailUUID;
-import com.openexchange.log.LogFactory;
-import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.service.indexing.internal.mail.MailJobInfo;
+import javax.management.MBeanException;
 
 /**
- * {@link RemoveByIDsJob} - Removes mails from index by specified identifiers.
- *
+ * {@link IndexingServiceMBean} - The MBean for indexing service.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class RemoveByIDsJob extends AbstractMailJob {
-
-    private static final long serialVersionUID = 6978164673531858003L;
-
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(RemoveByIDsJob.class));
-
-    private static final String SIMPLE_NAME = RemoveByIDsJob.class.getSimpleName();
-
-    private static final boolean DEBUG = LOG.isDebugEnabled();
-
-    private final String fullName;
-
-    private volatile List<String> mailIds;
+public interface IndexingServiceMBean {
 
     /**
-     * Initializes a new {@link RemoveByIDsJob}.
-     *
-     * @param fullName The folder full name
-     * @param info The job information
+     * The domain of the indexing service's MBean.
      */
-    public RemoveByIDsJob(final String fullName, final MailJobInfo info) {
-        super(info);
-        this.fullName = fullName;
-    }
+    public static final String DOMAIN = "com.openexchange.service.indexing";
 
     /**
-     * Sets the mails identifiers
-     *
-     * @param mailIds The identifiers to set
-     * @return This folder job
+     * Sends a simple echo.
+     * <p>
+     * Message is logged as <code>ERROR</code>, don't be surprised!
+     * 
+     * @param message The echo message
+     * @throws MBeanException If a MBean error occurs
      */
-    public RemoveByIDsJob setMailIds(final List<String> mailIds) {
-        this.mailIds = mailIds;
-        return this;
-    }
+    public void echoMessage(String message) throws MBeanException;
 
-    @Override
-    protected void performMailJob() throws OXException, InterruptedException {
-        final List<String> mailIds = this.mailIds;
-        if (null == mailIds) {
-            return;
-        }
-        try {
-            /*
-             * Check flags of contained mails
-             */
-            final IndexAccess<MailMessage> indexAccess = storageAccess.getIndexAccess();
-            // Iterate identifiers
-            for (final String id : mailIds) {
-                final MailUUID indexId = new MailUUID(contextId, userId, accountId, fullName, id);
-                indexAccess.deleteById(indexId.getUUID());
-            }
-            if (DEBUG) {
-                LOG.debug(mailIds.size() + " mails deleted from index; folder job: " + info);
-            }
-        } catch (final RuntimeException e) {
-            LOG.error(SIMPLE_NAME + " \"" + info + "\" failed.", e);
-        }
-    }
+    /**
+     * (Re-)Starts the receiver on this node.
+     * 
+     * @throws MBeanException If starting receiver fails
+     */
+    public void startReceiving() throws MBeanException;
+
+    /**
+     * Stops the receiver on this node.
+     * 
+     * @throws MBeanException If receiver cannot be stopped
+     */
+    public void stopReceiving() throws MBeanException;
+    
+    /**
+     * Queues an indexing job. The user needs to have an active session on this machine.
+     * 
+     * @param contextId The context id.
+     * @param userId The user id.
+     * @param fullName The mail folder's full name.
+     * @throws MBeanException If enqueue operation fails
+     */
+    public void queueIndexingJob(int contextId, int userId, String fullName) throws MBeanException;
 
 }

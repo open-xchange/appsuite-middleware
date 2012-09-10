@@ -59,7 +59,7 @@ import com.openexchange.index.mail.MailUtility;
 import com.openexchange.log.LogFactory;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.service.indexing.mail.MailJobInfo;
+import com.openexchange.service.indexing.internal.mail.MailJobInfo;
 
 /**
  * {@link AddByIDsJob} - Adds mails to index by specified identifiers.

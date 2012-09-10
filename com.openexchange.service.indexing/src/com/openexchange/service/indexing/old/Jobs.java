@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.service.indexing;
+package com.openexchange.service.indexing.old;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

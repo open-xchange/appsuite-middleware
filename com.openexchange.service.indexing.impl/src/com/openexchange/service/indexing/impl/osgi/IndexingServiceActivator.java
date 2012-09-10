@@ -78,8 +78,8 @@ import com.openexchange.service.indexing.hazelcast.MailIndexingJob;
 import com.openexchange.service.indexing.impl.CompositeServiceLookup;
 import com.openexchange.service.indexing.impl.IndexingServiceInit;
 import com.openexchange.service.indexing.impl.Services;
-import com.openexchange.service.indexing.mail.MailJobInfo;
-import com.openexchange.service.indexing.mail.MailJobInfo.Builder;
+import com.openexchange.service.indexing.internal.mail.MailJobInfo;
+import com.openexchange.service.indexing.internal.mail.MailJobInfo.Builder;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -263,7 +263,7 @@ public final class IndexingServiceActivator extends HousekeepingActivator {
                                 jobData.put("folder", "INBOX");
                                 JobDetail jobDetail = JobBuilder.newJob(MailIndexingJob.class)
                                     .withIdentity(session.getContextId() + '/' + session.getUserId() + "INBOX", "indexingJobs")
-                                    .usingJobData(jobData)                                    
+                                    .usingJobData(jobData)
                                     .build();
                                 
                                 Trigger trigger = TriggerBuilder.newTrigger()

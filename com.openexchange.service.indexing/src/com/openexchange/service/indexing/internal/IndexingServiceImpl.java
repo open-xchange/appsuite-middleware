@@ -47,80 +47,75 @@
  *
  */
 
-package com.openexchange.service.indexing.mail.job;
+package com.openexchange.service.indexing.internal;
 
-import java.util.List;
+import java.util.Date;
 import org.apache.commons.logging.Log;
+import org.quartz.JobBuilder;
+import org.quartz.JobDataMap;
+import org.quartz.JobDetail;
+import org.quartz.ObjectAlreadyExistsException;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.SimpleScheduleBuilder;
+import org.quartz.Trigger;
+import org.quartz.TriggerBuilder;
+import org.quartz.service.QuartzService;
 import com.openexchange.exception.OXException;
-import com.openexchange.index.IndexAccess;
-import com.openexchange.index.mail.MailUUID;
-import com.openexchange.log.LogFactory;
-import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.service.indexing.internal.mail.MailJobInfo;
+import com.openexchange.service.indexing.IndexingService;
+import com.openexchange.service.indexing.JobInfo;
+
 
 /**
- * {@link RemoveByIDsJob} - Removes mails from index by specified identifiers.
+ * {@link IndexingServiceImpl}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public final class RemoveByIDsJob extends AbstractMailJob {
-
-    private static final long serialVersionUID = 6978164673531858003L;
-
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(RemoveByIDsJob.class));
-
-    private static final String SIMPLE_NAME = RemoveByIDsJob.class.getSimpleName();
-
-    private static final boolean DEBUG = LOG.isDebugEnabled();
-
-    private final String fullName;
-
-    private volatile List<String> mailIds;
-
-    /**
-     * Initializes a new {@link RemoveByIDsJob}.
-     *
-     * @param fullName The folder full name
-     * @param info The job information
-     */
-    public RemoveByIDsJob(final String fullName, final MailJobInfo info) {
-        super(info);
-        this.fullName = fullName;
-    }
-
-    /**
-     * Sets the mails identifiers
-     *
-     * @param mailIds The identifiers to set
-     * @return This folder job
-     */
-    public RemoveByIDsJob setMailIds(final List<String> mailIds) {
-        this.mailIds = mailIds;
-        return this;
-    }
+public class IndexingServiceImpl implements IndexingService {
+    
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(IndexingServiceImpl.class);
+    
 
     @Override
-    protected void performMailJob() throws OXException, InterruptedException {
-        final List<String> mailIds = this.mailIds;
-        if (null == mailIds) {
-            return;
+    public void scheduleJob(JobInfo info, Date startDate, long repeatInterval) throws OXException {
+        JobDataMap jobData = new JobDataMap();
+        jobData.put(JobConstants.JOB_INFO, info);
+
+        JobDetail jobDetail = JobBuilder.newJob(QuartzIndexingJob.class)
+            .withIdentity(info.toUniqueId(), "indexingJobs")
+            .usingJobData(jobData)
+            .build();
+        
+        TriggerBuilder<Trigger> triggerBuilder = TriggerBuilder.newTrigger()
+            .forJob(jobDetail)
+            .withIdentity(info.toUniqueId(), "indexingTriggers");
+        
+        if (startDate == null) {
+            triggerBuilder.startNow();
+        } else {
+            triggerBuilder.startAt(startDate);
         }
+        
+        if (repeatInterval > 0) {
+            triggerBuilder.withSchedule(SimpleScheduleBuilder.simpleSchedule().withIntervalInMilliseconds(repeatInterval));
+        }
+
+        Trigger trigger = triggerBuilder.build();        
         try {
-            /*
-             * Check flags of contained mails
-             */
-            final IndexAccess<MailMessage> indexAccess = storageAccess.getIndexAccess();
-            // Iterate identifiers
-            for (final String id : mailIds) {
-                final MailUUID indexId = new MailUUID(contextId, userId, accountId, fullName, id);
-                indexAccess.deleteById(indexId.getUUID());
-            }
-            if (DEBUG) {
-                LOG.debug(mailIds.size() + " mails deleted from index; folder job: " + info);
-            }
-        } catch (final RuntimeException e) {
-            LOG.error(SIMPLE_NAME + " \"" + info + "\" failed.", e);
+            scheduleJob(jobDetail, trigger);
+        } catch (SchedulerException e) {
+            if (e.getUnderlyingException() instanceof ObjectAlreadyExistsException) {
+                LOG.info("Job already exists within JobStore.");
+            } else {
+                throw new OXException(e);
+            }                
         }
+    }
+    
+    private void scheduleJob(JobDetail jobDetail, Trigger trigger) throws SchedulerException {
+        QuartzService quartzService = Services.getService(QuartzService.class);
+        Scheduler scheduler = quartzService.getClusteredScheduler();
+        scheduler.scheduleJob(jobDetail, trigger);
     }
 
 }

@@ -1,54 +1,6 @@
-/*
- *
- *    OPEN-XCHANGE legal information
- *
- *    All intellectual property rights in the Software are protected by
- *    international copyright laws.
- *
- *
- *    In some countries OX, OX Open-Xchange, open xchange and OXtender
- *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
- *    The use of the Logos is not covered by the GNU General Public License.
- *    Instead, you are allowed to use these Logos according to the terms and
- *    conditions of the Creative Commons License, Version 2.5, Attribution,
- *    Non-commercial, ShareAlike, and the interpretation of the term
- *    Non-commercial applicable to the aforementioned license is published
- *    on the web site http://www.open-xchange.com/EN/legal/index.html.
- *
- *    Please make sure that third-party modules and libraries are used
- *    according to their respective licenses.
- *
- *    Any modifications to this package must retain all copyright notices
- *    of the original copyright holder(s) for the original code used.
- *
- *    After any such modifications, the original and derivative code shall remain
- *    under the copyright of the copyright holder(s) and/or original author(s)per
- *    the Attribution and Assignment Agreement that can be located at
- *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
- *    given Attribution for the derivative code and a license granting use.
- *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
- *     Mail: info@open-xchange.com
- *
- *
- *     This program is free software; you can redistribute it and/or modify it
- *     under the terms of the GNU General Public License, Version 2 as published
- *     by the Free Software Foundation.
- *
- *     This program is distributed in the hope that it will be useful, but
- *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
- *     for more details.
- *
- *     You should have received a copy of the GNU General Public License along
- *     with this program; if not, write to the Free Software Foundation, Inc., 59
- *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- */
+package com.openexchange.service.indexing.internal.mail;
 
-package com.openexchange.service.indexing.hazelcast;
-
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -57,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
@@ -86,28 +39,18 @@ import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.ContentAwareMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.parser.MailMessageParser;
-import com.openexchange.mail.smal.SmalAccessService;
-import com.openexchange.service.indexing.IndexingJob;
-import com.openexchange.service.indexing.impl.Services;
-import com.openexchange.service.indexing.internal.mail.FakeSession;
-import com.openexchange.service.indexing.internal.mail.MailJobInfo;
-import com.openexchange.session.Session;
+import com.openexchange.mail.service.MailService;
+import com.openexchange.service.indexing.internal.Services;
+import com.openexchange.service.indexing.mail.MailJobInfo;
 
+public class MailFolderCallable implements Callable<Object>, Serializable {
 
-/**
- * {@link MailFolderJob}
- *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- */
-public class MailFolderJob implements IndexingJob {
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(MailFolderCallable.class);
     
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(MailFolderJob.class);
-    
-    private static final MailField[] CHANGEABLE_FIELDS = new MailField[] { 
+    private static transient MailField[] CHANGEABLE_FIELDS = new MailField[] { 
         MailField.ID,
         MailField.FLAGS,
         MailField.COLOR_LABEL };
@@ -117,24 +60,22 @@ public class MailFolderJob implements IndexingJob {
     private static final int CHUNK_SIZE = 100;
     
     private final MailJobInfo info;
-
-    private String folder;
     
     
-    public MailFolderJob(String folder, MailJobInfo info) {
+    public MailFolderCallable(MailJobInfo info) {
         super();
         this.info = info;
-        this.folder = folder;
     }
 
-    @Override
-    public Class<?>[] getNeededServices() {
-        // TODO Auto-generated method stub
-        return null;
-    }
 
-    @Override
     public void performJob() throws OXException, InterruptedException {
+        if (CHANGEABLE_FIELDS == null) {
+            CHANGEABLE_FIELDS = new MailField[] { 
+                    MailField.ID,
+                    MailField.FLAGS,
+                    MailField.COLOR_LABEL };
+        }
+        
         long start = System.currentTimeMillis();
         if (LOG.isDebugEnabled()) {
             LOG.debug(this.getClass().getSimpleName() + " started performing. " + info.toString());
@@ -144,22 +85,24 @@ public class MailFolderJob implements IndexingJob {
         IndexFacadeService indexFacade = Services.getService(IndexFacadeService.class);
         IndexAccess<MailMessage> mailIndex = indexFacade.acquireIndexAccess(Types.EMAIL, info.userId, info.contextId);
         IndexAccess<Attachment> attachmentIndex = indexFacade.acquireIndexAccess(Types.ATTACHMENT, info.userId, info.contextId);
-        MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage> mailAccess = getMailAccess();
+        MailService mailService = Services.getService(MailService.class);
+        MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage> mailAccess = mailService.getMailAccess(info.userId, info.contextId, info.accountId);
+        mailAccess.connect(false);
         try {            
             Map<String, Object> params = new HashMap<String, Object>();
             params.put(IndexConstants.ACCOUNT, Integer.valueOf(info.accountId));
             Builder queryBuilder = new Builder(params);
             QueryParameters mailAllQuery = queryBuilder.setHandler(SearchHandler.ALL_REQUEST)
-                .setFolders(Collections.singleton(folder))
+                .setFolders(Collections.singleton(info.folder))
                 .setSortField(MailIndexField.RECEIVED_DATE)
                 .setOrder(Order.DESC)
                 .build();
             
             IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
-            if (folderStorage.exists(folder)) {
+            if (folderStorage.exists(info.folder)) {
                 IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
                 MailMessage[] storageResult = messageStorage.searchMessages(
-                    folder,
+                    info.folder,
                     IndexRange.NULL,
                     MailSortField.RECEIVED_DATE,
                     OrderDirection.DESC,
@@ -170,7 +113,7 @@ public class MailFolderJob implements IndexingJob {
                     storageMails.put(msg.getMailId(), msg);
                 }
                 
-                if (IndexFolderManager.isIndexed(info.contextId, info.userId, Types.EMAIL, String.valueOf(info.accountId), folder)) {         
+                if (IndexFolderManager.isIndexed(info.contextId, info.userId, Types.EMAIL, String.valueOf(info.accountId), info.folder)) {         
                     IndexResult<MailMessage> indexResult = mailIndex.query(mailAllQuery, MailIndexField.getFor(CHANGEABLE_FIELDS));                    
                     Map<String, MailMessage> indexMails = new HashMap<String, MailMessage>();
                     for (IndexDocument<MailMessage> document : indexResult.getResults()) {
@@ -182,22 +125,22 @@ public class MailFolderJob implements IndexingJob {
                     addMails(indexMails.keySet(), storageMails.keySet(), mailIndex, attachmentIndex, messageStorage);
                     changeMails(indexMails, storageMails, mailIndex, attachmentIndex, messageStorage);              
                 } else {
-                    addMails(Collections.EMPTY_SET, storageMails.keySet(), mailIndex, attachmentIndex, messageStorage);
-                    IndexFolderManager.setIndexed(info.contextId, info.userId, Types.EMAIL, String.valueOf(info.accountId), folder);
+                    addMails(Collections.<String> emptySet(), storageMails.keySet(), mailIndex, attachmentIndex, messageStorage);
+                    IndexFolderManager.setIndexed(info.contextId, info.userId, Types.EMAIL, String.valueOf(info.accountId), info.folder);
                 }                
             } else {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Deleting folder from index: " + info.toString());
+                    LOG.debug("Deleting info.folder from index: " + info.toString());
                 }
                 
-                IndexFolderManager.deleteFolderEntry(info.contextId, info.userId, Types.EMAIL, String.valueOf(info.accountId), folder);
+                IndexFolderManager.deleteFolderEntry(info.contextId, info.userId, Types.EMAIL, String.valueOf(info.accountId), info.folder);
                 mailIndex.deleteByQuery(mailAllQuery);
                 Map<String, Object> attachmentAllParams = new HashMap<String, Object>();
                 params.put(IndexConstants.MODULE, new Integer(Types.EMAIL));
                 params.put(IndexConstants.ACCOUNT, Integer.toString(info.accountId));                
                 QueryParameters attachmentAllQuery = new Builder(attachmentAllParams)
                     .setHandler(SearchHandler.ALL_REQUEST)
-                    .setFolders(Collections.singleton(folder))
+                    .setFolders(Collections.singleton(info.folder))
                     .build();
                 attachmentIndex.deleteByQuery(attachmentAllQuery);                
             }
@@ -236,12 +179,12 @@ public class MailFolderJob implements IndexingJob {
             @Override
             public int perform(int off, int len) throws OXException {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Adding a chunk of mails of folder " + folder + ": " + info.toString());
+                    LOG.debug("Adding a chunk of mails of info.folder " + info.folder + ": " + info.toString());
                 }
                 
                 List<String> subList = changedMails.subList(off, len);                
                 MailMessage[] messages = messageStorage.getMessages(
-                    folder, 
+                    info.folder, 
                     subList.toArray(new String[subList.size()]), 
                     MailField.values());
                 
@@ -254,7 +197,7 @@ public class MailFolderJob implements IndexingJob {
                 }
                 
                 List<IndexDocument<MailMessage>> documents = new ArrayList<IndexDocument<MailMessage>>(messages.length);
-                String[] primaryContents = messageStorage.getPrimaryContents(folder, mailIds);                
+                String[] primaryContents = messageStorage.getPrimaryContents(info.folder, mailIds);                
                 for (int i = 0; i < messages.length; i++) {
                     MailMessage message = messages[i];
                     if (message != null) {
@@ -299,12 +242,12 @@ public class MailFolderJob implements IndexingJob {
             @Override
             public int perform(int off, int len) throws OXException {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Adding a chunk of mails of folder " + folder + ": " + info.toString());
+                    LOG.debug("Adding a chunk of mails of info.folder " + info.folder + ": " + info.toString());
                 }
                 
                 List<String> subList = toAdd.subList(off, len);
                 MailMessage[] messages = messageStorage.getMessages(
-                    folder, 
+                    info.folder, 
                     subList.toArray(new String[subList.size()]), 
                     MailField.values());
                 
@@ -318,13 +261,13 @@ public class MailFolderJob implements IndexingJob {
                 
                 List<IndexDocument<MailMessage>> documents = new ArrayList<IndexDocument<MailMessage>>(messages.length);
                 List<IndexDocument<Attachment>> attachments = new ArrayList<IndexDocument<Attachment>>();
-                String[] primaryContents = messageStorage.getPrimaryContents(folder, mailIds);                
+                String[] primaryContents = messageStorage.getPrimaryContents(info.folder, mailIds);                
                 for (int i = 0; i < messages.length; i++) {
                     MailMessage message = messages[i];
                     if (message != null) {
                         ContentAwareMailMessage contentAwareMessage = new ContentAwareMailMessage(primaryContents[i], message);
                         documents.add(new StandardIndexDocument<MailMessage>(contentAwareMessage));
-                        IndexMailHandler handler = new IndexMailHandler(String.valueOf(info.accountId), folder, message.getMailId());
+                        IndexMailHandler handler = new IndexMailHandler(String.valueOf(info.accountId), info.folder, message.getMailId());
                         parser.parseMailMessage(message, handler);
                         attachments.addAll(handler.getAttachments());                        
                     }
@@ -369,7 +312,7 @@ public class MailFolderJob implements IndexingJob {
             @Override
             public int perform(int off, int len) throws OXException {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Deleting a chunk of mails in folder " + folder + ": " + info.toString());
+                    LOG.debug("Deleting a chunk of mails in info.folder " + info.folder + ": " + info.toString());
                 }
                 
                 List<String> subList = toDelete.subList(off, len);
@@ -377,7 +320,7 @@ public class MailFolderJob implements IndexingJob {
                 String[] mailUuids = new String[subList.size()];
                 int i = 0;        
                 for (String id : subList) {
-                    mailUuids[i] = new MailUUID(info.contextId, info.userId, info.accountId, folder, id).getUUID();
+                    mailUuids[i] = new MailUUID(info.contextId, info.userId, info.accountId, info.folder, id).getUUID();
                     idTerms[i] = new ObjectIdTerm(id);
                     ++i;
                 }                    
@@ -396,7 +339,7 @@ public class MailFolderJob implements IndexingJob {
                 QueryParameters deleteAttachmentsQuery = new QueryParameters.Builder(deleteAttachmentsParams)
                     .setHandler(SearchHandler.CUSTOM)
                     .setSearchTerm(orTerm)
-                    .setFolders(Collections.singleton(folder))
+                    .setFolders(Collections.singleton(info.folder))
                     .build();
                 attachmentIndex.deleteByQuery(deleteAttachmentsQuery);
                 
@@ -452,34 +395,33 @@ public class MailFolderJob implements IndexingJob {
         return (!storageUserFlags.equals(indexUserFlags));
     }
     
-    private MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getMailAccess() throws OXException {
-        Session session = new FakeSession(info.primaryPassword, info.userId, info.contextId);
-        session.setParameter("com.openexchange.mail.lookupMailAccessCache", Boolean.FALSE);
-        SmalAccessService smalService = Services.getService(SmalAccessService.class);
-        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> tmp = smalService.getUnwrappedInstance(session, info.accountId);
-        /*
-         * Safety close & not cacheable
-         */
-        tmp.close(true);
-        tmp.setCacheable(false);
-        /*
-         * Parameterize configuration
-         */
-        MailConfig mailConfig = tmp.getMailConfig();
-        mailConfig.setLogin(info.login);
-        mailConfig.setPassword(info.password);
-        mailConfig.setServer(info.server);
-        mailConfig.setPort(info.port);
-        mailConfig.setSecure(info.secure);
-        tmp.connect(true);
-        
-        return tmp;
-    }
-    
+//    private MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getMailAccess() throws OXException {
+//        Session session = new FakeSession(info.primaryPassword, info.userId, info.contextId);
+//        session.setParameter("com.openexchange.mail.lookupMailAccessCache", Boolean.FALSE);
+//        MailService mailService = Services.getService(MailService.class);
+//        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> tmp = mailService.getMailAccess(info.userId, info.contextId, info.accountId);
+//        /*
+//         * Safety close & not cacheable
+//         */
+//        tmp.close(true);
+//        tmp.setCacheable(false);
+//        /*
+//         * Parameterize configuration
+//         */
+//        MailConfig mailConfig = tmp.getMailConfig();
+//        mailConfig.setLogin(info.login);
+//        mailConfig.setPassword(info.password);
+//        mailConfig.setServer(info.server);
+//        mailConfig.setPort(info.port);
+//        mailConfig.setSecure(info.secure);
+//        tmp.connect(true);
+//        
+//        return tmp;
+//    }
+//    
     private void closeMailAccess(MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage> mailAccess) {
-        if (mailAccess != null) {
-            SmalAccessService smalService = Services.getService(SmalAccessService.class);
-            smalService.closeUnwrappedInstance(mailAccess);
+        if (mailAccess != null) {            
+            mailAccess.close(false);
         }        
     }
     
@@ -495,57 +437,8 @@ public class MailFolderJob implements IndexingJob {
     }
 
     @Override
-    public boolean isDurable() {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public int getPriority() {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    @Override
-    public void setPriority(int priority) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public long getTimeStamp() {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    @Override
-    public Origin getOrigin() {
-        // TODO Auto-generated method stub
+    public Object call() throws Exception {
+        performJob();
         return null;
     }
-
-    @Override
-    public Behavior getBehavior() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public void beforeExecute() {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void afterExecute(Throwable t) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public Map<String, ?> getProperties() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
 }

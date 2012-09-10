@@ -49,52 +49,87 @@
 
 package com.openexchange.service.indexing;
 
-import javax.management.MBeanException;
+import java.io.Serializable;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * {@link IndexingServiceMBean} - The MBean for indexing service.
+ * {@link JobInfo}
  * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public interface IndexingServiceMBean {
+public abstract class JobInfo implements Serializable {
 
-    /**
-     * The domain of the indexing service's MBean.
-     */
-    public static final String DOMAIN = "com.openexchange.service.indexing";
+    private static final long serialVersionUID = 3704945446543513829L;
 
-    /**
-     * Sends a simple echo.
-     * <p>
-     * Message is logged as <code>ERROR</code>, don't be surprised!
-     * 
-     * @param message The echo message
-     * @throws MBeanException If a MBean error occurs
-     */
-    public void echoMessage(String message) throws MBeanException;
+    public final int contextId;
 
-    /**
-     * (Re-)Starts the receiver on this node.
-     * 
-     * @throws MBeanException If starting receiver fails
-     */
-    public void startReceiving() throws MBeanException;
+    public final int userId;
 
-    /**
-     * Stops the receiver on this node.
-     * 
-     * @throws MBeanException If receiver cannot be stopped
-     */
-    public void stopReceiving() throws MBeanException;
+    public final Class<? extends IndexingJob> jobClass;
+
+    private Map<String, Object> properties;
     
-    /**
-     * Queues an indexing job. The user needs to have an active session on this machine.
-     * 
-     * @param contextId The context id.
-     * @param userId The user id.
-     * @param fullName The mail folder's full name.
-     * @throws MBeanException If enqueue operation fails
-     */
-    public void queueIndexingJob(int contextId, int userId, String fullName) throws MBeanException;
 
+    protected JobInfo(Class<? extends IndexingJob> jobClass, int contextId, int userId) {
+        this(jobClass, contextId, userId, new HashMap<String, Object>());
+    }
+
+    protected JobInfo(Class<? extends IndexingJob> jobClass, int contextId, int userId, Map<String, Object> properties) {
+        super();
+        this.jobClass = jobClass;
+        this.contextId = contextId;
+        this.userId = userId;
+        this.properties = properties;
+    }
+
+    public Map<String, Object> getProperties() {
+        return Collections.unmodifiableMap(properties);
+    }
+
+    public Object getProperty(String key) {
+        return properties.get(key);
+    }
+
+    public abstract String toUniqueId();
+    
+
+    public static abstract class JobInfoBuilder<T extends JobInfoBuilder<T>> {
+
+        public int contextId;
+
+        public int userId;
+
+        public Map<String, Object> properties = new HashMap<String, Object>();
+        
+        public Class<? extends IndexingJob> jobClass;
+        
+
+        /**
+         * Initializes a new {@link JobInfoBuilder}.
+         * @param jobClass The class that implements the Job.
+         */
+        public JobInfoBuilder(Class<? extends IndexingJob> jobClass) {
+            super();
+            this.jobClass = jobClass;
+        }
+
+        public T contextId(int contextId) {
+            this.contextId = contextId;
+            return (T) this;
+        }
+
+        public T userId(int userId) {
+            this.userId = userId;
+            return (T) this;
+        }
+        
+        public T addProperty(String key, Object value) {
+            properties.put(key, value);
+            return (T) this;
+        }
+
+        public abstract JobInfo build();
+    }
 }

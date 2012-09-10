@@ -47,143 +47,126 @@
  *
  */
 
-package com.openexchange.service.indexing.mail;
+package com.openexchange.service.indexing.old;
 
-import java.io.Serializable;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import com.openexchange.service.indexing.internal.mail.FakeSession;
-import com.openexchange.session.Session;
 
 /**
- * {@link FakeSession} - A fake session.
+ * {@link StandardIndexingJob} - The standard <code style="color: red;">abstract</code> {@link IndexingJob} to extend from.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class FakeSession implements Session, Serializable {
+public abstract class StandardIndexingJob implements IndexingJob {
 
-    private static final long serialVersionUID = -6627564586034661789L;
-
-    private final String password;
-
-    private final int userId;
-
-    private final int contextId;
-
-    private final ConcurrentMap<String, Object> parameters;
+    private static final long serialVersionUID = -603520334844563670L;
 
     /**
-     * Initializes a new {@link FakeSession}.
+     * The job's priority; initially <code>4</code> (default).
      */
-    public FakeSession(final String password, final int userId, final int contextId) {
+    protected volatile int priority;
+
+    /**
+     * The job's behavior; initially {@link Behavior#CONSUMER_RUNS}.
+     * 
+     * @see #setBehavior(com.openexchange.service.indexing.IndexingJob.Behavior)
+     */
+    protected volatile Behavior behavior;
+
+    /**
+     * The job' origin.
+     */
+    protected volatile Origin origin;
+
+    /**
+     * The time stamp.
+     */
+    protected final long timeStamp;
+
+    /**
+     * The properties.
+     */
+    protected final ConcurrentMap<String, ?> properties;
+
+    /**
+     * Initializes a new {@link StandardIndexingJob}.
+     */
+    protected StandardIndexingJob() {
         super();
-        this.password = password;
-        this.userId = userId;
-        this.contextId = contextId;
-        parameters = new ConcurrentHashMap<String, Object>(8);
+        properties = new ConcurrentHashMap<String, Object>();
+        timeStamp = System.currentTimeMillis();
+        priority = DEFAULT_PRIORITY;
+        behavior = DEFAULT_BEHAVIOR;
+        origin = DEFAULT_ORIGIN;
     }
 
     @Override
-    public int getContextId() {
-        return contextId;
+    public Class<?>[] getNeededServices() {
+        return EMPTY_CLASSES;
     }
 
     @Override
-    public String getLocalIp() {
-        return null;
+    public Map<String, ?> getProperties() {
+        return properties;
     }
 
     @Override
-    public void setLocalIp(final String ip) {
+    public long getTimeStamp() {
+        return timeStamp;
+    }
+
+    @Override
+    public Origin getOrigin() {
+        return origin;
+    }
+
+    @Override
+    public boolean isDurable() {
+        return true;
+    }
+
+    @Override
+    public int getPriority() {
+        return priority;
+    }
+
+    @Override
+    public void setPriority(final int priority) {
+        this.priority = priority;
+    }
+
+    @Override
+    public Behavior getBehavior() {
+        return behavior;
+    }
+
+    
+    /**
+     * Sets the origin
+     *
+     * @param origin The origin to set
+     */
+    public void setOrigin(final Origin origin) {
+        this.origin = origin;
+    }
+
+    /**
+     * Sets the behavior
+     * 
+     * @param behavior The behavior to set
+     */
+    public void setBehavior(final Behavior behavior) {
+        this.behavior = behavior;
+    }
+
+    @Override
+    public void beforeExecute() {
         // Nothing to do
     }
 
     @Override
-    public String getLoginName() {
-        return null;
-    }
-
-    @Override
-    public boolean containsParameter(final String name) {
-        return parameters.containsKey(name);
-    }
-
-    @Override
-    public Object getParameter(final String name) {
-        return parameters.get(name);
-    }
-
-    @Override
-    public String getPassword() {
-        return password;
-    }
-
-    @Override
-    public String getRandomToken() {
-        return null;
-    }
-
-    @Override
-    public String getSecret() {
-        return null;
-    }
-
-    @Override
-    public String getSessionID() {
-        return null;
-    }
-
-    @Override
-    public int getUserId() {
-        return userId;
-    }
-
-    @Override
-    public String getUserlogin() {
-        return null;
-    }
-
-    @Override
-    public String getLogin() {
-        return null;
-    }
-
-    @Override
-    public void setParameter(final String name, final Object value) {
-        if (null == value) {
-            parameters.remove(name);
-        } else {
-            parameters.put(name, value);
-        }
-    }
-
-    @Override
-    public void removeRandomToken() {
-        // Nope
-    }
-
-    @Override
-    public String getAuthId() {
-        return null;
-    }
-
-    @Override
-    public String getHash() {
-        return null;
-    }
-
-    @Override
-    public void setHash(final String hash) {
-        // Nope
-    }
-
-    @Override
-    public String getClient() {
-        return null;
-    }
-
-    @Override
-    public void setClient(final String client) {
+    public void afterExecute(final Throwable t) {
         // Nothing to do
     }
 
