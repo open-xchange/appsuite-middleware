@@ -1,7 +1,3 @@
-* 2012-09-07 - marcus.klein@open-xchange.com
-
- - Fix for bug 22669: Not using any reflection mechanisms anymore to instantiate OXToolStorageInterface to prevent NullPointerException.
-
 * 2012-07-18 - choeger@open-xchange.com
 
  - Fix for bug 22581: oxinstaller memory parsing should be more fault-tolerant

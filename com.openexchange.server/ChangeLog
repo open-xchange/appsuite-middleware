@@ -1,6 +1,8 @@
 * 2012-09-10 - marcus.klein@open-xchange.com
 
  - Fix for bug 22949: Missed to start OSGi service trackers for DatabaseService.
+ - Fix for bug 22961: Added conflict to old open-xchange-commons-logging-log4j package.
+ - Fix for bug 22869: Iterating now all bundles in system excluding bundle fragments and checking if bundles are in active state.
 
 * 2012-09-07 - thorben.betten@open-xchange.com
 
@@ -10,6 +12,7 @@
 
  - Fix for bug 22937: Preventing NullPointerExceptions in SOAP administrator reseller service if optional restrictions are not sent.
  - Fix for bug 22933: Pushing the DatabaseService into AdminCache instances of administration autocontextid bundle.
+ - Fix for bug 22669: Not using any reflection mechanisms anymore to instantiate OXToolStorageInterface to prevent NullPointerException.
 
 * 2012-09-06 - marcus.klein@open-xchange.com
 
