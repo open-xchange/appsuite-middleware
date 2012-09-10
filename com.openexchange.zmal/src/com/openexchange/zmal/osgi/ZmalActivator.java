@@ -52,9 +52,11 @@ package com.openexchange.zmal.osgi;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.context.ContextService;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.user.UserService;
 import com.openexchange.zmal.Services;
 import com.openexchange.zmal.ZmalProvider;
 
@@ -75,7 +77,7 @@ public class ZmalActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, MailAccountStorageService.class };
+        return new Class<?>[] { ConfigurationService.class, MailAccountStorageService.class, UserService.class, ContextService.class };
     }
 
     @Override

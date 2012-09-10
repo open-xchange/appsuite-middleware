@@ -61,12 +61,10 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailCapabilities;
 import com.openexchange.mail.api.MailConfig;
-import com.openexchange.session.Session;
 import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URIParser;
 import com.openexchange.zmal.ZmalCapabilities;
 import com.openexchange.zmal.ZmalException;
-import com.sun.mail.imap.IMAPStore;
 
 /**
  * {@link ZmalConfig} - The Zimbra mail configuration.
@@ -83,19 +81,17 @@ public final class ZmalConfig extends MailConfig {
 
     private volatile Map<String, String> capabilities;
 
-    private int imapPort;
+    private int port;
 
-    private String imapServer;
+    private String server;
 
     private boolean secure;
 
     private IZmalProperties mailProperties;
 
-    private InetAddress imapServerAddress;
+    private InetAddress zmalServerAddress;
 
-    private InetSocketAddress imapServerSocketAddress;
-
-    private IMAPStore imapStore;
+    private InetSocketAddress zmalServerSocketAddress;
 
     private final Map<String, Object> params;
 
@@ -108,22 +104,6 @@ public final class ZmalConfig extends MailConfig {
         super();
         this.accountId = accountId;
         params = new NonBlockingHashMap<String, Object>(4);
-    }
-
-    /**
-     * Gets the optional Zimbra mail store.
-     *
-     * @return The Zimbra mail store
-     */
-    public IMAPStore optImapStore() {
-        return imapStore;
-    }
-
-    /**
-     * Drops the Zimbra mail store reference.
-     */
-    public void dropImapStore() {
-        imapStore = null;
     }
 
     /**
@@ -182,12 +162,12 @@ public final class ZmalConfig extends MailConfig {
      */
     @Override
     public int getPort() {
-        return imapPort;
+        return port;
     }
 
     @Override
     public void setPort(final int imapPort) {
-        this.imapPort = imapPort;
+        this.port = imapPort;
     }
 
     /**
@@ -197,29 +177,31 @@ public final class ZmalConfig extends MailConfig {
      */
     @Override
     public String getServer() {
-        return imapServer;
+        return server;
     }
 
     @Override
     public void setServer(final String imapServer) {
-        this.imapServer = null == imapServer ? null : IDNA.toUnicode(imapServer);
+        this.server = null == imapServer ? null : IDNA.toUnicode(imapServer);
     }
 
     /**
      * Initializes Zimbra mail server's capabilities if not done, yet
-     *
-     * @param imapStore The Zimbra mail store from which to fetch the capabilities
-     * @param session The session possibly caching capabilities information
-     * @throws OXException If Zimbra mail capabilities cannot be initialized
      */
-    public void initializeCapabilities(final IMAPStore imapStore, final Session session) throws OXException {
+    public void initializeCapabilities() {
+        ZmalCapabilities zmalCapabilities = this.zmalCapabilities;
         if (zmalCapabilities == null) {
             synchronized (this) {
-                this.imapStore = imapStore;
-                if (zmalCapabilities != null) {
+                zmalCapabilities = this.zmalCapabilities;
+                if (zmalCapabilities == null) {
+                    zmalCapabilities = new ZmalCapabilities();
+                    zmalCapabilities.setACL(true);
+                    zmalCapabilities.setHasSubscription(true);
+                    zmalCapabilities.setSort(true);
+                    zmalCapabilities.setThreadReferences(true);
+                    this.zmalCapabilities = zmalCapabilities;
                     return;
                 }
-                // TODO: Initialize capabilities
             }
         }
     }
@@ -229,7 +211,7 @@ public final class ZmalConfig extends MailConfig {
      *
      * @return <code>true</code> if Zimbra mail sort is configured and corresponding capability is available; otherwise <code>false</code>
      */
-    public boolean isImapSort() {
+    public boolean isZmalSort() {
         final ZmalCapabilities capabilities = zmalCapabilities;
         return (capabilities != null) ? (capabilities.hasSort()) : false;
     }
@@ -253,8 +235,8 @@ public final class ZmalConfig extends MailConfig {
             throw ZmalException.Code.URI_PARSE_FAILED.create(e, serverURL);
         }
         secure = PROTOCOL_ZMAL_SECURE.equals(uri.getScheme());
-        imapServer = uri.getHost();
-        imapPort = uri.getPort();
+        server = uri.getHost();
+        port = uri.getPort();
     }
 
     /**
@@ -263,17 +245,17 @@ public final class ZmalConfig extends MailConfig {
      * @return The internet address of the Zimbra mail server.
      * @throws OXException If Zimbra mail server cannot be resolved
      */
-    public InetAddress getImapServerAddress() throws OXException {
-        if (null == imapServerAddress) {
+    public InetAddress getZmalServerAddress() throws OXException {
+        if (null == zmalServerAddress) {
             try {
-                imapServerAddress = InetAddress.getByName(imapServer);
+                zmalServerAddress = InetAddress.getByName(server);
                 // TODO: Touch address for proper equality check?
                 // imapServerAddress.toString();
             } catch (final UnknownHostException e) {
                 throw ZmalException.Code.IO_ERROR.create(e, e.getMessage());
             }
         }
-        return imapServerAddress;
+        return zmalServerAddress;
     }
 
     /**
@@ -282,11 +264,11 @@ public final class ZmalConfig extends MailConfig {
      * @return The socket address (internet address + port) of the Zimbra mail server.
      * @throws OXException If Zimbra mail server cannot be resolved
      */
-    public InetSocketAddress getImapServerSocketAddress() throws OXException {
-        if (null == imapServerSocketAddress) {
-            imapServerSocketAddress = new InetSocketAddress(getImapServerAddress(), imapPort);
+    public InetSocketAddress getZmalServerSocketAddress() throws OXException {
+        if (null == zmalServerSocketAddress) {
+            zmalServerSocketAddress = new InetSocketAddress(getZmalServerAddress(), port);
         }
-        return imapServerSocketAddress;
+        return zmalServerSocketAddress;
     }
 
     @Override

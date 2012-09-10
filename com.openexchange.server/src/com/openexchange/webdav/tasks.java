@@ -97,6 +97,11 @@ public final class tasks extends XmlServlet<TasksSQLInterface> {
     protected Interface getInterface() {
         return Interface.WEBDAV_ICAL;
     }
+    
+    @Override
+    protected boolean isServletDisabled() {
+        return true;
+    }
 
     @Override
     protected void parsePropChilds(final HttpServletRequest req, final HttpServletResponse resp, final XmlPullParser parser, final PendingInvocations<TasksSQLInterface> pendingInvocations) throws OXException, XmlPullParserException, IOException {

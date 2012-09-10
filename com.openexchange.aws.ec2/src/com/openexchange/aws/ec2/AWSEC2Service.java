@@ -51,7 +51,6 @@ package com.openexchange.aws.ec2;
 
 import java.util.List;
 import com.amazonaws.services.ec2.model.InstanceStateChange;
-import com.amazonaws.services.elasticloadbalancing.model.HealthCheck;
 import com.openexchange.exception.OXException;
 
 /**
@@ -86,14 +85,6 @@ public interface AWSEC2Service {
      * @throws OXException When instance can not stop
      */
     public List<InstanceStateChange> stopInstance(String instanceId) throws OXException;
-
-    /**
-     * Check health of an instance
-     * 
-     * @param instanceId The id of the instance to check
-     * @return The health of the checked instance
-     */
-    public HealthCheck checkHealth(String instanceId);
 
     /**
      * Stops all instances started by service

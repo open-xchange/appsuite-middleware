@@ -241,6 +241,7 @@ public final class ZmalAccess extends MailAccess<ZmalFolderStorage, ZmalMessageS
             final ZmalConfig config = getZmalConfig();
             checkFieldsBeforeConnect(config);
             final ZmalSoapPerformer performer = new ZmalSoapPerformer(config).setUseJson(useJson);
+            performer.setContextId(session.getContextId()).setUserId(session.getUserId());
             performer.mSelect = "GetInfoResponse";
             final ZmalSoapResponse soapResponse = performer.perform(ZmalType.ACCOUNT, "GetInfoRequest");
             
@@ -263,6 +264,7 @@ public final class ZmalAccess extends MailAccess<ZmalFolderStorage, ZmalMessageS
             if (resultString == null) {
                 resultString = "";
             }
+            config.initializeCapabilities();
             System.out.println(resultString);
             
             
@@ -284,7 +286,7 @@ public final class ZmalAccess extends MailAccess<ZmalFolderStorage, ZmalMessageS
             throw ZmalException.create(ZmalException.Code.NOT_CONNECTED, getMailConfig(), session, new Object[0]);
         }
         if (null == folderStorage) {
-            folderStorage = new ZmalFolderStorage(performer, this, session);
+            folderStorage = new ZmalFolderStorage(performer.getAuthToken(), performer, this, session);
         }
         return folderStorage;
     }
@@ -296,7 +298,7 @@ public final class ZmalAccess extends MailAccess<ZmalFolderStorage, ZmalMessageS
             throw ZmalException.create(ZmalException.Code.NOT_CONNECTED, getMailConfig(), session, new Object[0]);
         }
         if (null == messageStorage) {
-            messageStorage = new ZmalMessageStorage(performer, this, session);
+            messageStorage = new ZmalMessageStorage(performer.getAuthToken(), performer, this, session);
         }
         return messageStorage;
     }

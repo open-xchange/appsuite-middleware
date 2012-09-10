@@ -68,7 +68,19 @@ import com.zimbra.common.soap.Element.XMLElement;
 import com.zimbra.common.soap.SoapHttpTransport;
 
 /**
- * {@link ZmalSoapPerformer}
+ * {@link ZmalSoapPerformer} - Performs SOAP requests with an XPath-inspired syntax, takes care of authenticating, generating the envelope,
+ * sending the request, and parsing the response.
+ * <p>
+ * 
+ * <pre>
+ * GetAccountInfoRequest/account=user1 -v @by=name
+ * 
+ * Sending admin auth request to https://localhost:7071/service/admin/soap
+ * 
+ * &lt;GetAccountInfoRequest xmlns="urn:zimbraAdmin"&gt;
+ *   &lt;account by="name"&gt;user1&lt;/account&gt;
+ * &lt;/GetAccountInfoRequest&gt;
+ * </pre>
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -77,6 +89,8 @@ public class ZmalSoapPerformer {
     private static final Log LOG = com.openexchange.log.Log.loggerFor(ZmalSoapPerformer.class);
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
+    public int contextId;
+    public int userId;
     public String mUrl;
     public String mMailboxName;
     public String mAdminAccountName;
@@ -100,17 +114,64 @@ public class ZmalSoapPerformer {
     }
     
     /**
+     * Gets the auth token
+     * 
+     * @return The auth token
+     */
+    public String getAuthToken() {
+        return mAuthToken;
+    }
+
+    /**
+     * Sets the userId
+     * 
+     * @param userId The userId to set
+     */
+    public ZmalSoapPerformer setUserId(int userId) {
+        this.userId = userId;
+        return this;
+    }
+
+    /**
+     * Gets the userId
+     * 
+     * @return The userId
+     */
+    public int getUserId() {
+        return userId;
+    }
+
+    /**
+     * Sets the contextId
+     * 
+     * @param contextId The contextId to set
+     */
+    public ZmalSoapPerformer setContextId(int contextId) {
+        this.contextId = contextId;
+        return this;
+    }
+
+    /**
+     * Gets the contextId
+     * 
+     * @return The contextId
+     */
+    public int getContextId() {
+        return contextId;
+    }
+
+    /**
      * Gets the configuration
-     *
+     * 
      * @return The configuration
      */
     public ZmalConfig getConfig() {
         return config;
     }
-    
+
     /**
      * Sets the select string
-     *
+     * 
      * @param select The select string
      */
     public ZmalSoapPerformer setSelect(final String select) {
@@ -153,6 +214,15 @@ public class ZmalSoapPerformer {
             sb.append("/service/soap");
             mUrl = sb.toString();
         }
+    }
+    
+    /**
+     * Gets the URL.
+     * 
+     * @return The URL
+     */
+    public String getUrl() {
+        return mUrl;
     }
 
     /**
@@ -209,6 +279,35 @@ public class ZmalSoapPerformer {
     }
 
     /**
+     * Parses specified XPath-inspired syntax
+     * 
+     * @param type The SOAP API type
+     * @param paths The XPath-inspired syntax; e.g. <tt>"DumpSessionsRequest @groupByAccount=1 @listSessions=1"</tt>
+     * @return The parsed element
+     */
+    public Element parse(final ZmalType type, final String... paths) {
+        // Determine namespace by type
+        final Namespace mNamespace = type.getNamespace();
+        Element element = null;
+        if (paths.length > 0) {
+            // Build request from command line.
+            for (final String path : paths) {
+                element = processPath(element, path, mNamespace);
+            }
+        }
+        // Find the root.
+        if (null == element) {
+            return null;
+        }
+        Element request = element;
+        Element p;
+        while (null != (p = request.getParent())) {
+            request = p;
+        }
+        return request;
+    }
+
+    /**
      * Performs a SOAP request.
      * 
      * @param type The SOAP API type
@@ -223,23 +322,33 @@ public class ZmalSoapPerformer {
         if (null == mMailboxName) {
             parse(false);
         }
-        // Determine namespace by type
-        final Namespace mNamespace = type.getNamespace();
-        Element element = null;
-        if (paths.length > 0) {
-            // Build request from command line.
-            for (final String path : paths) {
-                element = processPath(element, path, mNamespace);
-            }
-        }
-        // Find the root.
-        Element request = element;
+        // Parse XPath syntax
+        Element request = parse(type, paths);
         if (request == null) {
             return null;
         }
-        while (request.getParent() != null) {
-            request = request.getParent();
+        return perform0(type, request);
+    }
+
+    /**
+     * Performs specified SOAP request as represented by given element.
+     * 
+     * @param type The SOAP API type
+     * @param request The element representing the SOAP request
+     * @return The SOAP response
+     * @throws ServiceException If a service error occurs
+     * @throws IOException If an I/O error occurs
+     */
+    public ZmalSoapResponse perform(final ZmalType type, Element request) throws ServiceException, IOException {
+        // Assemble SOAP request.
+        final String mMailboxName = this.mMailboxName;
+        if (null == mMailboxName) {
+            parse(false);
         }
+        return perform0(type, request);
+    }
+
+    private ZmalSoapResponse perform0(final ZmalType type, Element request) throws ServiceException, IOException {
         // Authenticate (and remember auth-token)
         final int timeout = config.getZmalProperties().getZmalTimeout();
         mailboxAuth(timeout);
