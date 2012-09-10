@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange RequireJS servlet bundle
-Bundle-SymbolicName: com.openexchange.ui7.backend
+Bundle-SymbolicName: com.openexchange.ui7
 Bundle-Version: 6.21.0.0
 Bundle-Vendor: Open-Xchange, Inc.
 Import-Package: com.openexchange.ajax,
@@ -33,4 +33,4 @@ Import-Package: com.openexchange.ajax,
  org.osgi.service.http,
  org.osgi.util.tracker
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Bundle-Activator: com.openexchange.apps.Activator
+Bundle-Activator: com.openexchange.ui7.Activator

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.apps;
+package com.openexchange.ui7;
 
 import org.osgi.service.http.HttpService;
 import com.openexchange.ajax.requesthandler.Dispatcher;
@@ -67,7 +67,8 @@ public class Activator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         String prefix = Dispatcher.PREFIX.get();
         String path = getService(ConfigurationService.class).getProperty("com.openexchange.apps.path");
-        getService(HttpService.class).registerServlet(prefix + "apps", new AppsServlet(path), null, null);
+        HttpService service = getService(HttpService.class);
+        service.registerServlet(prefix + "apps", new AppsServlet(path), null, null);
     }
 
 }

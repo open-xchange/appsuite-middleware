@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.apps;
+package com.openexchange.ui7;
 
 import java.io.File;
 import java.io.IOException;
@@ -80,6 +80,7 @@ public class AppsServlet extends HttpServlet {
     public AppsServlet(String path) {
         if (!path.endsWith("/"))
             path += "/";
+        path += "apps/";
         prefix = new File(path);
     }
 
