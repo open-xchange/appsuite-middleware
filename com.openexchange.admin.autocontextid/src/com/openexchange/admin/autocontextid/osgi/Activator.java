@@ -74,6 +74,7 @@ public class Activator extends HousekeepingActivator {
             AdminCache.compareAndSet(null, service);
             initCache(service);
             track(DatabaseService.class, new DatabaseServiceCustomizer(context, ClientAdminThreadExtended.cache.getPool()));
+            openTrackers();
 
             final Hashtable<String, String> props = new Hashtable<String, String>();
             props.put("name", "OXContext");
@@ -90,8 +91,9 @@ public class Activator extends HousekeepingActivator {
     }
 
     @Override
-    public void stopBundle() throws Exception {
+    public void stopBundle() {
         unregisterServices();
+        closeTrackers();
     }
 
     private void initCache(final ConfigurationService service) throws SQLException, OXGenericException {
