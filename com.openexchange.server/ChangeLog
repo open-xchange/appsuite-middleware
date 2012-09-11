@@ -1,6 +1,7 @@
 * 2012-09-11 - marcus.klein@open-xchange.com
 
  - Fix for bug 22939: Checking for missing credentials and throwing an InvalidCredentialsException with message "Credentials are missing".
+ - Fix for bug 22909: Removed second configuration directory from report client CLT.
 
 * 2012-09-10 - marcus.klein@open-xchange.com
 
