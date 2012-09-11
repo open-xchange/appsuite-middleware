@@ -90,7 +90,7 @@ public interface Category {
 
         @Override
         public LogLevel getLogLevel() { // The higher chosen log level is, the more likely will it be logged
-            return LogLevel.DEBUG;
+            return LogLevel.ERROR;
         }
 
         @Override
@@ -144,7 +144,7 @@ public interface Category {
 
         @Override
         public LogLevel getLogLevel() { // The higher chosen log level is, the more likely will it be logged
-            return LogLevel.DEBUG;
+            return LogLevel.ERROR;
         }
 
         @Override
@@ -171,7 +171,7 @@ public interface Category {
 
         @Override
         public LogLevel getLogLevel() { // The higher chosen log level is, the more likely will it be logged
-            return LogLevel.DEBUG;
+            return LogLevel.ERROR;
         }
 
         @Override
@@ -252,7 +252,7 @@ public interface Category {
 
         @Override
         public LogLevel getLogLevel() { // The higher chosen log level is, the more likely will it be logged
-            return LogLevel.DEBUG;
+            return LogLevel.ERROR;
         }
 
         @Override
@@ -279,7 +279,7 @@ public interface Category {
 
         @Override
         public LogLevel getLogLevel() { // The higher chosen log level is, the more likely will it be logged
-            return LogLevel.DEBUG;
+            return LogLevel.ERROR;
         }
 
         @Override
@@ -306,7 +306,7 @@ public interface Category {
 
         @Override
         public LogLevel getLogLevel() { // The higher chosen log level is, the more likely will it be logged
-            return LogLevel.DEBUG;
+            return LogLevel.ERROR;
         }
 
         @Override
