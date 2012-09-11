@@ -106,50 +106,44 @@ public class ReportConfiguration {
 
     public String getUseProxy() {
         if (null != properties.getProperty("com.openexchange.report.client.proxy.useproxy")) {
-            return(properties.getProperty("com.openexchange.report.client.proxy.useproxy"));
-        } else {
-            return "";
+            return properties.getProperty("com.openexchange.report.client.proxy.useproxy");
         }
+        return "";
     }
 
     public String getProxyAddress() {
         if (null != properties.getProperty("com.openexchange.report.client.proxy.address")) {
-            return(properties.getProperty("com.openexchange.report.client.proxy.address"));
-        } else {
-            return "";
+            return properties.getProperty("com.openexchange.report.client.proxy.address");
         }
+        return "";
     }
 
     public String getProxyPort() {
         if (null != properties.getProperty("com.openexchange.report.client.proxy.port")) {
-            return(properties.getProperty("com.openexchange.report.client.proxy.port"));
-        } else {
-            return "";
+            return properties.getProperty("com.openexchange.report.client.proxy.port");
         }
+        return "";
     }
 
     public String getProxyAuthRequired() {
         if (null != properties.getProperty("com.openexchange.report.client.proxy.authrequired")) {
-            return(properties.getProperty("com.openexchange.report.client.proxy.authrequired"));
-        } else {
-            return "";
+            return properties.getProperty("com.openexchange.report.client.proxy.authrequired");
         }
+        return "";
     }
 
     public String getProxyUsername() {
         if (null != properties.getProperty("com.openexchange.report.client.proxy.username")) {
-            return(properties.getProperty("com.openexchange.report.client.proxy.username"));
-        } else {
-            return "";
+            return properties.getProperty("com.openexchange.report.client.proxy.username");
         }
+        return "";
     }
 
     public String getProxyPassword() {
         if (null != properties.getProperty("com.openexchange.report.client.proxy.password")) {
-            return(properties.getProperty("com.openexchange.report.client.proxy.password"));
-        } else {
-            return "";
+            return properties.getProperty("com.openexchange.report.client.proxy.password");
         }
+        return "";
     }
 
 }
