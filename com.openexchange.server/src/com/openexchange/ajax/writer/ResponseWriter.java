@@ -49,17 +49,7 @@
 
 package com.openexchange.ajax.writer;
 
-import static com.openexchange.ajax.fields.ResponseFields.DATA;
-import static com.openexchange.ajax.fields.ResponseFields.ERROR;
-import static com.openexchange.ajax.fields.ResponseFields.ERROR_CATEGORIES;
-import static com.openexchange.ajax.fields.ResponseFields.ERROR_CODE;
-import static com.openexchange.ajax.fields.ResponseFields.ERROR_ID;
-import static com.openexchange.ajax.fields.ResponseFields.ERROR_PARAMS;
-import static com.openexchange.ajax.fields.ResponseFields.ERROR_STACK;
-import static com.openexchange.ajax.fields.ResponseFields.PROBLEMATIC;
-import static com.openexchange.ajax.fields.ResponseFields.TIMESTAMP;
-import static com.openexchange.ajax.fields.ResponseFields.TRUNCATED;
-import static com.openexchange.ajax.fields.ResponseFields.WARNINGS;
+import static com.openexchange.ajax.fields.ResponseFields.*;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Iterator;
@@ -534,7 +524,9 @@ public final class ResponseWriter {
         {
             final List<Category> categories = exc.getCategories();
             if (1 == categories.size()) {
-                writer.key(ERROR_CATEGORIES).value(categories.get(0).toString());
+                final String sCategory = categories.get(0).toString();
+                writer.key(ERROR_CATEGORIES).value(sCategory);
+                writer.key(ERROR_CATEGORY).value(sCategory);
             } else {
                 writer.key(ERROR_CATEGORIES);
                 writer.array();
@@ -546,7 +538,6 @@ public final class ResponseWriter {
                     writer.endArray();
                 }
             }
-
         }
         writer.key(ERROR_CODE).value(exc.getErrorCode());
         writer.key(ERROR_ID).value(exc.getExceptionId());
