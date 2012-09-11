@@ -1,0 +1,21 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Testing Bundle for JUnit Tests
+Bundle-SymbolicName: com.openexchange.test.osgi
+Bundle-Version: 6.21.0
+Bundle-Activator: com.openexchange.test.osgi.osgi.TestingActivator
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.log,
+ com.openexchange.osgi,
+ org.apache.commons.logging,
+ junit.extensions,
+ junit.framework,
+ junit.runner,
+ junit.textui
+Bundle-ClassPath: Bundle-ClassPath: lib/json.jar,
+ .,
+ lib/jchronic-0.2.3.jar,
+ lib/junit-4.6.jar
+Export-Package: com.openexchange.test.osgi
+Require-Bundle: org.eclipse.osgi
