@@ -61,6 +61,8 @@ import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.elasticloadbalancing.AmazonElasticLoadBalancing;
 import com.amazonaws.services.elasticloadbalancing.AmazonElasticLoadBalancingClient;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3Client;
 import com.openexchange.aws.exceptions.OXAWSExceptionCodes;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -88,6 +90,8 @@ public class AWSActivator extends HousekeepingActivator {
 
     private String cloudwatchRegion;
 
+    private String amazonS3Region;
+
     /**
      * Initializes a new {@link AWSActivator}.
      */
@@ -110,6 +114,7 @@ public class AWSActivator extends HousekeepingActivator {
         lbRegion = configService.getProperty("com.openexchange.aws.lbregion");
         autoscalingRegion = configService.getProperty("com.openexchange.aws.autoscalingregion");
         cloudwatchRegion = configService.getProperty("com.openexchange.aws.cloudwatchregion");
+        amazonS3Region = configService.getProperty("com.openexchange.aws.s3region");
         if (accessKey == null) {
             throw OXAWSExceptionCodes.AWS_NO_ACCESSKEY.create();
         }
@@ -131,10 +136,13 @@ public class AWSActivator extends HousekeepingActivator {
         amazonAutoScaling.setEndpoint(autoscalingRegion);
         AmazonCloudWatch amazonCloudWatch = new AmazonCloudWatchClient(credentials);
         amazonCloudWatch.setEndpoint(cloudwatchRegion);
+        AmazonS3 amazonS3 = new AmazonS3Client(credentials);
+        amazonS3.setEndpoint(amazonS3Region);
         registerService(AmazonEC2.class, amazonEC2);
         registerService(AmazonElasticLoadBalancing.class, amazonLoadBalancing);
         registerService(AmazonAutoScaling.class, amazonAutoScaling);
         registerService(AmazonCloudWatch.class, amazonCloudWatch);
+        registerService(AmazonS3.class, amazonS3);
     }
 
     @Override
