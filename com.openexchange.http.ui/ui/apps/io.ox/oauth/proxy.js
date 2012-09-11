@@ -1,1 +1,0 @@
-define("io.ox/oauth/proxy",["io.ox/core/http"],function(a){var b={request:function(b){var c={};return b.api&&(c.api=b.api,delete b.api),b.account&&(c.account=b.account,delete b.account),a.PUT({module:"oauth/proxy",params:c,data:b})}};return"use strict",b})

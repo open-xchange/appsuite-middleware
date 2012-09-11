@@ -1,2 +1,0 @@
-define("io.ox/applications/view-installed",["io.ox/core/api/apps","io.ox/applications/view-common"],function(a,b){return"use strict",{draw:function(c){var d=$("<div>").append($("<div>").addClass("clear-title").text("Installed applications")).append($("<p>").text("Your favorite applications, designated by "+"★"+", are always shown in the top left navigation bar. "+"This allows a faster start of your favorites.")),e=$("<div>").addClass("apps");return _(a.getInstalled("installed")).each(function(a){
-e.append(b.drawApp(a,c))}),d.children().eq(1).after(e),d}}})

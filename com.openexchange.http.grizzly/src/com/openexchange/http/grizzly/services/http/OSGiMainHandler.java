@@ -71,7 +71,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.http.grizzly.GrizzlyExceptionMessage;
 import com.openexchange.http.grizzly.osgi.GrizzlyServiceRegistry;
 import com.openexchange.http.grizzly.servletfilters.RequestReportingFilter;
-import com.openexchange.log.LogFactory;
 
 /**
  * OSGi Main HttpHandler.

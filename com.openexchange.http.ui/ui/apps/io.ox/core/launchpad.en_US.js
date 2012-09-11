@@ -1,1 +1,0 @@
-define("io.ox/core/launchpad.en_US",["io.ox/core/gettext"],function(g){return g("io.ox/core/launchpad",{"nplurals":2,"plural":"(n!=1)","dictionary":{}});});
