@@ -1,2 +1,0 @@
-define("io.ox/calendar/edit/view-conflicts",["dot!io.ox/calendar/edit/common.html"],function(a){var b=Backbone.View.extend({events:{"click a.btn-danger[data-action=ignore]":"onIgnore","click a.btn[data-action=cancel]":"onCancel"},initialize:function(){},render:function(){return this.$el.empty().append(a.render("io.ox/calendar/edit/conflicts",{})),this},onIgnore:function(){console.log("ignore me"),this.trigger("ignore")},onCancel:function(){console.log("cancel me"),this.trigger("cancel")}});return"use strict"
-,b})

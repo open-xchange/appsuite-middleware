@@ -1,1 +1,0 @@
-define("io.ox/calendar/edit/model-conflict",["io.ox/calendar/api"],function(){var a=Backbone.Model.extend({initialize:function(){}});return"use strict",a})

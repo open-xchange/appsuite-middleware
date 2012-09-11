@@ -1,1 +1,0 @@
-define("io.ox/preview/preview.de_DE",["io.ox/core/gettext"],function(g){return g("io.ox/preview/preview",{"nplurals":2,"plural":"(n != 1)","dictionary":{}});});

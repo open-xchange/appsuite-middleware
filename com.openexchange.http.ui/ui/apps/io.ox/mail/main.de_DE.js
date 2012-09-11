@@ -1,1 +1,0 @@
-define("io.ox/mail/main.de_DE",["io.ox/core/gettext"],function(g){return g("io.ox/mail/main",{"nplurals":2,"plural":"(n != 1)","dictionary":{}});});
