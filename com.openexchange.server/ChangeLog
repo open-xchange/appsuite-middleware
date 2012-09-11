@@ -1,3 +1,7 @@
+* 2012-09-11 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22917: Added previous naming for downward comptability
+
 * 2012-09-11 - marcus.klein@open-xchange.com
 
  - Fix for bug 22939: Checking for missing credentials and throwing an InvalidCredentialsException with message "Credentials are missing".
