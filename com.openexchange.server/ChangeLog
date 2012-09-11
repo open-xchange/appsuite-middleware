@@ -1,3 +1,7 @@
+* 2012-09-11 - marcus.klein@open-xchange.com
+
+ - Fix for bug 22939: Checking for missing credentials and throwing an InvalidCredentialsException with message "Credentials are missing".
+
 * 2012-09-10 - marcus.klein@open-xchange.com
 
  - Fix for bug 22949: Missed to start OSGi service trackers for DatabaseService.
@@ -346,6 +350,7 @@
 * 2012-06-15 - jan.bauerdick@open-xchange.com
 
  - Moved package c.o.admin.autocontextid.console to dedicated bundle
+ - Moved packages c.o.admin.reseller.rmi & c.o.admin.reseller.console to dedicated bundles
 
 * 2012-06-15 - thorben.betten@open-xchange.com
 

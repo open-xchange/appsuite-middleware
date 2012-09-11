@@ -1,12 +1,3 @@
-* 2012-06-15 - jan.bauerdick@open-xchange.com
-
- - Moved packages c.o.admin.reseller.rmi & c.o.admin.reseller.console to dedicated bundles
-
-* 2012-06-11 - jan.bauerdick@open-xchange.com
-
- - Refactored to run in groupware VM
- - Register RMI as OSGi-service
-
 * 2011-10-19 - choeger@open-xchange.com
 
  - Use the new stabilized SOAP API from SoftwareChange_Request-860
