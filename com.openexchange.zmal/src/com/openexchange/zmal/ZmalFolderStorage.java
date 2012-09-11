@@ -136,6 +136,10 @@ public final class ZmalFolderStorage extends MailFolderStorage implements IMailF
         final ZMailbox.Options options = new ZMailbox.Options(authToken, url);
         options.setRequestProtocol(performer.isUseJson() ? SoapProtocol.SoapJS : SoapProtocol.Soap11);
         options.setResponseProtocol(performer.isUseJson() ? SoapProtocol.SoapJS : SoapProtocol.Soap11);
+        final int timeout = zmalConfig.getZmalProperties().getZmalTimeout();
+        if (timeout > 0) {
+            options.setTimeout(timeout);
+        }
         options.setUserAgent("Open-Xchange Http Client", "v6.22");
         return options;
     }
