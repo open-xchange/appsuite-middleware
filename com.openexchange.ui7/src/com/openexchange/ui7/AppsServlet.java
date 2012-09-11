@@ -53,6 +53,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
+import java.io.UnsupportedEncodingException;
+import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
@@ -75,13 +77,13 @@ public class AppsServlet extends HttpServlet {
 
     private String version;
 
-    private File prefix;
+    private File root, zoneinfo;
 
-    public AppsServlet(String path) {
-        if (!path.endsWith("/"))
-            path += "/";
-        path += "apps/";
-        prefix = new File(path);
+    private String ZONEINFO = "io.ox/core/date/tz/zoneinfo/";
+
+    public AppsServlet(File root, File zoneinfo) {
+        this.root = root;
+        this.zoneinfo = zoneinfo;
     }
 
     private static Pattern moduleRE = Pattern.compile("(?:/(text|raw);)?([\\w/-]+(?:\\.[\\w/-]+)*)");
@@ -118,63 +120,86 @@ public class AppsServlet extends HttpServlet {
         e.appendTail(sb);
     }
 
+    private String escapeName(String name) {
+        if (name.length() > 256) {
+            name = name.substring(0, 256);
+        }
+        StringBuffer sb = new StringBuffer();
+        escape(name, sb);
+        return sb.toString();
+    }
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String[] modules = req.getPathInfo().split(",");
-        if (modules.length < 2)
-            return;
+        if (modules.length < 2) {
+            return; // no actual files requested
+        }
         if (version == null || modules[0].compareTo(version) > 0) {
             version = modules[0];
             cache.clear();
-            LOG.info("Started serving version " + version);
+            LOG.debug("Started serving version " + version);
         }
         resp.setContentType("text/javascript;charset=UTF-8");
+        resp.setDateHeader("Expires", (new Date()).getTime() + (long) 3e10); // + almost a year
         OutputStream out = resp.getOutputStream();
         for (int i = 1; i < modules.length; i++) {
             String module = modules[i];
+
+            // Module names may only contain letters, digits, '_', '-', '/' and
+            // '.', but not "..".
             Matcher m = moduleRE.matcher(module);
             if (!m.matches()) {
-                LOG.info("Invalid module name: " + module);
-                StringBuffer sb = new StringBuffer();
-                sb.append("console.error('Invalid module name: \"");
-                escape(module, sb);
-                sb.append("\"');\n");
-                out.write(sb.toString().getBytes("UTF-8"));
+                String escapedName = escapeName(module);
+                LOG.debug("Invalid module name: '" + escapedName + "'");
+                out.write(("console.error('Invalid module name: \\'" + escapedName + "\\'');\n").getBytes("UTF-8"));
                 continue;
             }
+
             byte[] data = cache.get(module);
             if (data == null) {
-                String name = m.group(2);
-                File filename = new File(prefix, name);
-                LOG.info("Reading " + filename);
-                try {
-                    RandomAccessFile f = new RandomAccessFile(filename, "r");
-                    data = new byte[(int) f.length()];
-                    f.readFully(data);
-                    f.close();
-                    if (m.group(1) != null) {
-                        StringBuffer sb = new StringBuffer();
-                        sb.append("define('").append(module).append("','");
-                        String payload;
-                        if ("raw".equals(m.group(1))) {
-                            StringBuffer raw = new StringBuffer();
-                            for (byte b : data)
-                                raw.append((char) (b & 255));
-                            payload = raw.toString();
-                        } else {
-                            payload = new String(data, "UTF-8");
-                        }
-                        escape(payload, sb);
-                        sb.append("');\n");
-                        data = sb.toString().getBytes("UTF-8");
-                    }
-                } catch (IOException e) {
-                    LOG.info("Could not read " + filename);
-                    data = ("console.error('Could not read " + module + "');\n").getBytes("UTF-8");
-                }
+                data = readFile(module, m.group(1), m.group(2));
                 cache.put(module, data);
             }
             out.write(data);
         }
+    }
+
+    private byte[] readFile(String module, String format, String name) throws UnsupportedEncodingException {
+        File filename;
+        byte[] data;
+        if (name.startsWith(ZONEINFO)) {
+            filename = new File(zoneinfo, name.substring(ZONEINFO.length()));
+        } else {
+            filename = new File(root, name);
+        }
+        LOG.debug("Reading " + filename);
+        try {
+            RandomAccessFile f = new RandomAccessFile(filename, "r");
+            data = new byte[(int) f.length()];
+            f.readFully(data);
+            f.close();
+        } catch (IOException e) {
+            LOG.debug("Could not read '" + escapeName(filename.getPath()) + "'");
+            return ("console.error('Could not read \\'" + escapeName(module) + "\\'');\n").getBytes("UTF-8");
+        }
+        if (format != null) {
+            StringBuffer sb = new StringBuffer();
+            sb.append("define('").append(module).append("','");
+            String payload;
+            if ("raw".equals(format)) {
+                char[] raw = new char[data.length];
+                for (int i = 0; i < data.length; i++) {
+                    raw[i] = (char) (data[i] & 255);
+                }
+                payload = new String(raw);
+            } else {
+                payload = new String(data, "UTF-8");
+            }
+            escape(payload, sb);
+            sb.append("');\n");
+            return sb.toString().getBytes("UTF-8");
+        }
+        return data;
     }
 }

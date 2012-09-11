@@ -49,6 +49,7 @@
 
 package com.openexchange.ui7;
 
+import java.io.File;
 import org.osgi.service.http.HttpService;
 import com.openexchange.ajax.requesthandler.Dispatcher;
 import com.openexchange.config.ConfigurationService;
@@ -66,9 +67,10 @@ public class Activator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         String prefix = Dispatcher.PREFIX.get();
-        String path = getService(ConfigurationService.class).getProperty("com.openexchange.apps.path");
+        ConfigurationService config = getService(ConfigurationService.class);
+        File path = new File(config.getProperty("com.openexchange.ui7.path", "/opt/open-xchange/ui7/"), "apps");
+        File zoneinfo = new File(config.getProperty("com.openexchange.ui7.zoneinfo", "/usr/share/zoneinfo/"));
         HttpService service = getService(HttpService.class);
-        service.registerServlet(prefix + "apps", new AppsServlet(path), null, null);
+        service.registerServlet(prefix + "apps", new AppsServlet(path, zoneinfo), null, null);
     }
-
 }
