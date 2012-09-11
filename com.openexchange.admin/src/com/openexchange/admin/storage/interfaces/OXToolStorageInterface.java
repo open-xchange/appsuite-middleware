@@ -60,6 +60,10 @@ import com.openexchange.admin.rmi.dataobjects.Server;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.NoSuchGroupException;
+import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
+import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
+import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
@@ -314,9 +318,9 @@ public abstract class OXToolStorageInterface {
 
     public abstract int getAdminForContext(final Context ctx) throws StorageException;
 
-    public abstract int getContextIDByContextname(final String ctxname) throws StorageException;
+    public abstract int getContextIDByContextname(String ctxName) throws StorageException, NoSuchObjectException;
 
-    public abstract int getDatabaseIDByDatabasename(final String dbname) throws StorageException;
+    public abstract int getDatabaseIDByDatabasename(String dbName) throws StorageException, NoSuchObjectException;
 
     /**
      * load Database with the given ID
@@ -343,17 +347,17 @@ public abstract class OXToolStorageInterface {
      */
     public abstract int getGidNumberOfGroup(final Context ctx, final int group_id, final Connection con) throws StorageException;
 
-    public abstract int getGroupIDByGroupname(final Context ctx, final String groupname) throws StorageException;
+    public abstract int getGroupIDByGroupname(Context ctx, String groupName) throws StorageException, NoSuchGroupException;
 
     public abstract String getGroupnameByGroupID(final Context ctx,final int group_id) throws StorageException;
 
-    public abstract int getResourceIDByResourcename(final Context ctx,final String resourcename) throws StorageException;
+    public abstract int getResourceIDByResourcename(Context ctx, String resourceName) throws StorageException, NoSuchResourceException;
 
     public abstract String getResourcenameByResourceID(final Context ctx,final int resource_id) throws StorageException;
 
-    public abstract int getServerIDByServername(final String servername) throws StorageException;
+    public abstract int getServerIDByServername(String serverName) throws StorageException, NoSuchObjectException;
 
-    public abstract int getUserIDByUsername(final Context ctx,final String username) throws StorageException;
+    public abstract int getUserIDByUsername(Context ctx, String userName) throws StorageException, NoSuchUserException;
 
     public abstract String getUsernameByUserID(final Context ctx,final int user_id) throws StorageException;
 

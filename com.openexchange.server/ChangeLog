@@ -8,6 +8,7 @@
  - Fix for bug 22939: Checking for missing credentials and throwing an InvalidCredentialsException with message "Credentials are missing".
  - Fix for bug 22909: Removed second configuration directory from report client CLT.
  - Fix for bug 22969: Made generic elements transformation for SOAP CXF more robust against wrong client requests.
+ - Fix for bug 10007: Corrected return codes of CLTs if object is not found through its name.
 
 * 2012-09-10 - marcus.klein@open-xchange.com
 

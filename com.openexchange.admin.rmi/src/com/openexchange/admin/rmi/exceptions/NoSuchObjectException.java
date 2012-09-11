@@ -47,35 +47,30 @@
  *
  */
 
-package com.openexchange.admin.console.context;
+package com.openexchange.admin.rmi.exceptions;
 
-import java.net.MalformedURLException;
-import java.rmi.Naming;
-import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
-import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.rmi.OXContextInterface;
-import com.openexchange.admin.rmi.dataobjects.Context;
-import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
-import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
+/**
+ * Super class for all exceptions thrown if some object is not found.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
+public class NoSuchObjectException extends Exception {
 
-public class Delete extends DeleteCore {
+    private static final long serialVersionUID = -1177306986891794358L;
 
-    private Delete() {
+    public NoSuchObjectException() {
         super();
     }
 
-    public static void main(final String args[]) {
-        new Delete().commonfunctions(new AdminParser("deletecontext"), args);
+    public NoSuchObjectException(String message) {
+        super(message);
     }
 
-    @Override
-    protected void maincall(final Context ctx, final Credentials auth) throws NotBoundException, MalformedURLException, RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, DatabaseUpdateException, InvalidDataException {
-        final OXContextInterface oxres = (OXContextInterface) Naming.lookup(RMI_HOSTNAME + OXContextInterface.RMI_NAME);
-        oxres.delete(ctx, auth);
+    public NoSuchObjectException(Throwable cause) {
+        super(cause);
+    }
+
+    public NoSuchObjectException(String message, Throwable cause) {
+        super(message, cause);
     }
 }
