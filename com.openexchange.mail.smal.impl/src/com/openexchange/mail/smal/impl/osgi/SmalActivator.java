@@ -51,7 +51,6 @@ package com.openexchange.mail.smal.impl.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-import org.osgi.service.event.EventConstants;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
@@ -70,7 +69,6 @@ import com.openexchange.mail.smal.impl.internal.tasks.SMALCheckTableTask;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.service.indexing.IndexingService;
-import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;

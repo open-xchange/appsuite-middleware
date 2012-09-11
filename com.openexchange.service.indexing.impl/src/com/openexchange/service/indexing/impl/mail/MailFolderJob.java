@@ -47,93 +47,40 @@
  *
  */
 
-package com.openexchange.service.indexing;
+package com.openexchange.service.indexing.impl.mail;
 
-import java.io.Serializable;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.Callable;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.Types;
+import com.openexchange.service.indexing.JobInfo;
+import com.openexchange.service.indexing.impl.AbstractIndexingJob;
+import com.openexchange.service.indexing.impl.internal.mail.MailFolderCallable;
+
 
 /**
- * {@link JobInfo}
- * 
+ * {@link MailFolderJob}
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public abstract class JobInfo implements Serializable {
-
-    private static final long serialVersionUID = 3704945446543513829L;
-
-    public final int contextId;
-
-    public final int userId;
-
-    public final Class<? extends IndexingJob> jobClass;
-
-    private Map<String, Object> properties;
+public class MailFolderJob extends AbstractIndexingJob {
     
-    
-    protected JobInfo(JobInfoBuilder<?> builder) {
-        this(builder.jobClass, builder.contextId, builder.userId);
-    }
-
-    protected JobInfo(Class<? extends IndexingJob> jobClass, int contextId, int userId) {
-        this(jobClass, contextId, userId, new HashMap<String, Object>());
-    }
-
-    protected JobInfo(Class<? extends IndexingJob> jobClass, int contextId, int userId, Map<String, Object> properties) {
+    public MailFolderJob() {
         super();
-        this.jobClass = jobClass;
-        this.contextId = contextId;
-        this.userId = userId;
-        this.properties = properties;
     }
 
-    public Map<String, Object> getProperties() {
-        return Collections.unmodifiableMap(properties);
-    }
+    @Override
+    public void execute(JobInfo jobInfo) throws OXException {
+        try {
+            if (!(jobInfo instanceof MailJobInfo)) {
+                throw new IllegalArgumentException("Job info must be an instance of MailJobInfo.");
+            }
 
-    public Object getProperty(String key) {
-        return properties.get(key);
+            MailJobInfo mailJobInfo = (MailJobInfo) jobInfo;
+            Callable<Object> mailFolderCallable = new MailFolderCallable(mailJobInfo);
+            submitCallable(Types.EMAIL, mailJobInfo, mailFolderCallable);
+        } catch (Exception e) {
+            throw new OXException(e);
+        }
     }
-
-    public abstract String toUniqueId();
     
-
-    public static abstract class JobInfoBuilder<T extends JobInfoBuilder<T>> {
-
-        public int contextId;
-
-        public int userId;
-
-        public Map<String, Object> properties = new HashMap<String, Object>();
-        
-        public Class<? extends IndexingJob> jobClass;
-        
-
-        /**
-         * Initializes a new {@link JobInfoBuilder}.
-         * @param jobClass The class that implements the Job.
-         */
-        public JobInfoBuilder(Class<? extends IndexingJob> jobClass) {
-            super();
-            this.jobClass = jobClass;
-        }
-
-        public T contextId(int contextId) {
-            this.contextId = contextId;
-            return (T) this;
-        }
-
-        public T userId(int userId) {
-            this.userId = userId;
-            return (T) this;
-        }
-        
-        public T addProperty(String key, Object value) {
-            properties.put(key, value);
-            return (T) this;
-        }
-
-        public abstract JobInfo build();
-    }
 }

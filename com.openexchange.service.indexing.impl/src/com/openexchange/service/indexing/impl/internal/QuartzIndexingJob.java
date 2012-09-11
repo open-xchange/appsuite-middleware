@@ -47,93 +47,65 @@
  *
  */
 
-package com.openexchange.service.indexing;
+package com.openexchange.service.indexing.impl.internal;
 
-import java.io.Serializable;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import org.apache.commons.logging.Log;
+import org.quartz.Job;
+import org.quartz.JobDataMap;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
+import com.openexchange.service.indexing.IndexingJob;
+import com.openexchange.service.indexing.JobInfo;
+
 
 /**
- * {@link JobInfo}
- * 
+ * {@link QuartzIndexingJob}
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public abstract class JobInfo implements Serializable {
-
-    private static final long serialVersionUID = 3704945446543513829L;
-
-    public final int contextId;
-
-    public final int userId;
-
-    public final Class<? extends IndexingJob> jobClass;
-
-    private Map<String, Object> properties;
+public class QuartzIndexingJob implements Job {
+    
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(QuartzIndexingJob.class);
     
     
-    protected JobInfo(JobInfoBuilder<?> builder) {
-        this(builder.jobClass, builder.contextId, builder.userId);
-    }
-
-    protected JobInfo(Class<? extends IndexingJob> jobClass, int contextId, int userId) {
-        this(jobClass, contextId, userId, new HashMap<String, Object>());
-    }
-
-    protected JobInfo(Class<? extends IndexingJob> jobClass, int contextId, int userId, Map<String, Object> properties) {
+    public QuartzIndexingJob() {
         super();
-        this.jobClass = jobClass;
-        this.contextId = contextId;
-        this.userId = userId;
-        this.properties = properties;
-    }
+    }    
 
-    public Map<String, Object> getProperties() {
-        return Collections.unmodifiableMap(properties);
-    }
-
-    public Object getProperty(String key) {
-        return properties.get(key);
-    }
-
-    public abstract String toUniqueId();
-    
-
-    public static abstract class JobInfoBuilder<T extends JobInfoBuilder<T>> {
-
-        public int contextId;
-
-        public int userId;
-
-        public Map<String, Object> properties = new HashMap<String, Object>();
-        
-        public Class<? extends IndexingJob> jobClass;
-        
-
-        /**
-         * Initializes a new {@link JobInfoBuilder}.
-         * @param jobClass The class that implements the Job.
-         */
-        public JobInfoBuilder(Class<? extends IndexingJob> jobClass) {
-            super();
-            this.jobClass = jobClass;
-        }
-
-        public T contextId(int contextId) {
-            this.contextId = contextId;
-            return (T) this;
-        }
-
-        public T userId(int userId) {
-            this.userId = userId;
-            return (T) this;
+    @Override
+    public void execute(JobExecutionContext context) throws JobExecutionException {
+        JobDataMap jobData = context.getMergedJobDataMap();
+        Object infoObject = jobData.get(JobConstants.JOB_INFO);
+        if (infoObject == null || !(infoObject instanceof JobInfo)) {
+            String msg = "JobDataMap did not contain valid JobInfo instance.";
+            LOG.error(msg);
+            throw new JobExecutionException(msg, false);
         }
         
-        public T addProperty(String key, Object value) {
-            properties.put(key, value);
-            return (T) this;
+        JobInfo jobInfo = (JobInfo) infoObject;   
+        Class<? extends IndexingJob> jobClass = jobInfo.jobClass;
+        if (jobClass == null) {
+            String msg = "JobInfo did not contain valid job class. " + jobInfo.toString();
+            LOG.error(msg);
+            throw new JobExecutionException(msg, false);
         }
-
-        public abstract JobInfo build();
+            
+        IndexingJob indexingJob;
+        try {
+            indexingJob = jobClass.newInstance();
+        } catch (Throwable t) {
+            String msg = "Could not instantiate IndexingJob from class object. " + jobInfo.toString();
+            LOG.error(msg, t);
+            throw new JobExecutionException(msg, t, false);
+        }
+        
+        try {
+            indexingJob.execute(jobInfo);
+        } catch (Throwable t) {
+            String msg = "Error during IndexingJob execution. " + jobInfo.toString();
+            LOG.error(msg, t);
+            throw new JobExecutionException(msg, t, false);
+        }
     }
+
 }

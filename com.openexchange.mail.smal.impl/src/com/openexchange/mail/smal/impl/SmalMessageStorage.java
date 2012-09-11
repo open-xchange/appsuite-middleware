@@ -84,11 +84,10 @@ import com.openexchange.mail.smal.impl.index.IndexAccessAdapter;
 import com.openexchange.mail.smal.impl.index.IndexDocumentHelper;
 import com.openexchange.service.indexing.IndexingService;
 import com.openexchange.service.indexing.JobInfo;
-import com.openexchange.service.indexing.mail.MailFolderJob;
-import com.openexchange.service.indexing.mail.MailJobInfo;
-import com.openexchange.service.indexing.mail.MailJobInfo.Builder;
+import com.openexchange.service.indexing.impl.mail.MailFolderJob;
+import com.openexchange.service.indexing.impl.mail.MailJobInfo;
+import com.openexchange.service.indexing.impl.mail.MailJobInfo.Builder;
 import com.openexchange.session.Session;
-import com.openexchange.threadpool.ThreadPools;
 
 /**
  * {@link SmalMessageStorage} - The message storage for SMAL which either delegates calls to delegating message storage or serves them from
@@ -168,7 +167,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
             boolean isIndexed = indexAccess.isIndexed(String.valueOf(accountId), folder);
             if (!isIndexed) {
                 try {
-                    submitFolderJob();
+                    submitFolderJob(folder);
                 } catch (OXException e) {
                     LOG.error("Could not schedule folder job.", e);
                 }
@@ -243,7 +242,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
         }
     }
     
-    private void submitFolderJob() throws OXException {
+    private void submitFolderJob(String folder) throws OXException {
         MailConfig config = delegateMailAccess.getMailConfig();                
         Builder builder = MailJobInfo.newBuilder(MailFolderJob.class)
             .login(config.getLogin())
@@ -251,7 +250,8 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
             .contextId(contextId)
             .userId(userId)
             .primaryPassword(session.getPassword())
-            .password(config.getPassword());
+            .password(config.getPassword())
+            .folder(folder);
 
         JobInfo jobInfo = builder.build();
         IndexingService indexingService = SmalServiceLookup.getServiceStatic(IndexingService.class);
@@ -294,17 +294,18 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
         }
         
         mail.setAccountId(accountId);        
-        ThreadPools.getThreadPool().submit(ThreadPools.task(new Runnable() {            
-            @Override
-            public void run() {
-                try {
-                    IndexAccessAdapter.getInstance().addContent(mail, session);
-                } catch (final Exception e) {
-                    // Ignore failed adding to index
-                    LOG.warn("Adding message's content to index failed.", e);
-                }                
-            }
-        }));
+        // FIXME: reactivate
+//        ThreadPools.getThreadPool().submit(ThreadPools.task(new Runnable() {            
+//            @Override
+//            public void run() {
+//                try {
+//                    IndexAccessAdapter.getInstance().addContent(mail, session);
+//                } catch (final Exception e) {
+//                    // Ignore failed adding to index
+//                    LOG.warn("Adding message's content to index failed.", e);
+//                }                
+//            }
+//        }));
         
         return mail;
     }

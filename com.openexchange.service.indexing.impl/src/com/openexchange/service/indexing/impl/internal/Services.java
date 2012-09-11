@@ -47,93 +47,73 @@
  *
  */
 
-package com.openexchange.service.indexing;
+package com.openexchange.service.indexing.impl.internal;
 
-import java.io.Serializable;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link JobInfo}
+ * {@link Services} - The static service lookup for Message Queue bundle.
  * 
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class JobInfo implements Serializable {
+public final class Services {
 
-    private static final long serialVersionUID = 3704945446543513829L;
-
-    public final int contextId;
-
-    public final int userId;
-
-    public final Class<? extends IndexingJob> jobClass;
-
-    private Map<String, Object> properties;
-    
-    
-    protected JobInfo(JobInfoBuilder<?> builder) {
-        this(builder.jobClass, builder.contextId, builder.userId);
-    }
-
-    protected JobInfo(Class<? extends IndexingJob> jobClass, int contextId, int userId) {
-        this(jobClass, contextId, userId, new HashMap<String, Object>());
-    }
-
-    protected JobInfo(Class<? extends IndexingJob> jobClass, int contextId, int userId, Map<String, Object> properties) {
+    /**
+     * Initializes a new {@link Services}.
+     */
+    private Services() {
         super();
-        this.jobClass = jobClass;
-        this.contextId = contextId;
-        this.userId = userId;
-        this.properties = properties;
     }
 
-    public Map<String, Object> getProperties() {
-        return Collections.unmodifiableMap(properties);
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
+
+    /**
+     * Sets the service lookup.
+     * 
+     * @param serviceLookup The service lookup or <code>null</code>
+     */
+    public static void setServiceLookup(final ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
     }
 
-    public Object getProperty(String key) {
-        return properties.get(key);
+    /**
+     * Gets the service lookup.
+     * 
+     * @return The service lookup or <code>null</code>
+     */
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
     }
 
-    public abstract String toUniqueId();
-    
-
-    public static abstract class JobInfoBuilder<T extends JobInfoBuilder<T>> {
-
-        public int contextId;
-
-        public int userId;
-
-        public Map<String, Object> properties = new HashMap<String, Object>();
-        
-        public Class<? extends IndexingJob> jobClass;
-        
-
-        /**
-         * Initializes a new {@link JobInfoBuilder}.
-         * @param jobClass The class that implements the Job.
-         */
-        public JobInfoBuilder(Class<? extends IndexingJob> jobClass) {
-            super();
-            this.jobClass = jobClass;
+    /**
+     * Gets the service of specified type
+     * 
+     * @param clazz The service's class
+     * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException(
+                "Missing ServiceLookup instance. Bundle com.openexchange.service.indexing not staretd?");
         }
-
-        public T contextId(int contextId) {
-            this.contextId = contextId;
-            return (T) this;
-        }
-
-        public T userId(int userId) {
-            this.userId = userId;
-            return (T) this;
-        }
-        
-        public T addProperty(String key, Object value) {
-            properties.put(key, value);
-            return (T) this;
-        }
-
-        public abstract JobInfo build();
+        return serviceLookup.getService(clazz);
     }
+
+    /**
+     * (Optionally) Gets the service of specified type
+     * 
+     * @param clazz The service's class
+     * @return The service or <code>null</code> is absent
+     */
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        try {
+            return getService(clazz);
+        } catch (final IllegalStateException e) {
+            return null;
+        }
+    }
+
 }

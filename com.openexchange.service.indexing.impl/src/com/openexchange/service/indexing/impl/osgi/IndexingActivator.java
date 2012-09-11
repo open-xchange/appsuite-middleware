@@ -47,93 +47,60 @@
  *
  */
 
-package com.openexchange.service.indexing;
+package com.openexchange.service.indexing.impl.osgi;
 
-import java.io.Serializable;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import org.apache.commons.logging.Log;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
+import org.quartz.service.QuartzService;
+import com.hazelcast.core.HazelcastInstance;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
+import com.openexchange.folderstorage.FolderService;
+import com.openexchange.index.IndexFacadeService;
+import com.openexchange.log.LogFactory;
+import com.openexchange.mail.service.MailService;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.service.indexing.IndexingService;
+import com.openexchange.service.indexing.impl.internal.IndexingServiceImpl;
+import com.openexchange.service.indexing.impl.internal.Services;
+import com.openexchange.service.indexing.impl.internal.groupware.SessionEventHandler;
+import com.openexchange.sessiond.SessiondEventConstants;
+
 
 /**
- * {@link JobInfo}
- * 
+ * {@link IndexingActivator}
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public abstract class JobInfo implements Serializable {
-
-    private static final long serialVersionUID = 3704945446543513829L;
-
-    public final int contextId;
-
-    public final int userId;
-
-    public final Class<? extends IndexingJob> jobClass;
-
-    private Map<String, Object> properties;
+public class IndexingActivator extends HousekeepingActivator {
     
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(IndexingActivator.class));
     
-    protected JobInfo(JobInfoBuilder<?> builder) {
-        this(builder.jobClass, builder.contextId, builder.userId);
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { ConfigurationService.class, 
+            IndexFacadeService.class, 
+            HazelcastInstance.class, 
+            QuartzService.class, 
+            MailService.class,
+            FolderService.class,
+            IDBasedFileAccessFactory.class };
     }
-
-    protected JobInfo(Class<? extends IndexingJob> jobClass, int contextId, int userId) {
-        this(jobClass, contextId, userId, new HashMap<String, Object>());
-    }
-
-    protected JobInfo(Class<? extends IndexingJob> jobClass, int contextId, int userId, Map<String, Object> properties) {
-        super();
-        this.jobClass = jobClass;
-        this.contextId = contextId;
-        this.userId = userId;
-        this.properties = properties;
-    }
-
-    public Map<String, Object> getProperties() {
-        return Collections.unmodifiableMap(properties);
-    }
-
-    public Object getProperty(String key) {
-        return properties.get(key);
-    }
-
-    public abstract String toUniqueId();
     
-
-    public static abstract class JobInfoBuilder<T extends JobInfoBuilder<T>> {
-
-        public int contextId;
-
-        public int userId;
-
-        public Map<String, Object> properties = new HashMap<String, Object>();
+    @Override
+    protected void startBundle() throws Exception {
+        LOG.info("Starting bundle: com.openexchange.service.indexing");
+        Services.setServiceLookup(this);
+        IndexingService serviceImpl = new IndexingServiceImpl();
+        addService(IndexingService.class, serviceImpl);
+        registerService(IndexingService.class, serviceImpl);
         
-        public Class<? extends IndexingJob> jobClass;
-        
-
-        /**
-         * Initializes a new {@link JobInfoBuilder}.
-         * @param jobClass The class that implements the Job.
-         */
-        public JobInfoBuilder(Class<? extends IndexingJob> jobClass) {
-            super();
-            this.jobClass = jobClass;
-        }
-
-        public T contextId(int contextId) {
-            this.contextId = contextId;
-            return (T) this;
-        }
-
-        public T userId(int userId) {
-            this.userId = userId;
-            return (T) this;
-        }
-        
-        public T addProperty(String key, Object value) {
-            properties.put(key, value);
-            return (T) this;
-        }
-
-        public abstract JobInfo build();
+        Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+        serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
+        registerService(EventHandler.class, new SessionEventHandler(), serviceProperties);
     }
+    
 }
