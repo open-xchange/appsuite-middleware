@@ -50,6 +50,7 @@
 package com.openexchange.soap.cxf;
 
 import java.io.InputStream;
+import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamReader;
 import org.apache.cxf.interceptor.AbstractInDatabindingInterceptor;
 import org.apache.cxf.interceptor.DocLiteralInInterceptor;
@@ -75,15 +76,18 @@ public class TransformGenericElementsInterceptor extends AbstractInDatabindingIn
     @Override
     public void handleMessage(Message message) throws Fault {
         XMLStreamReader reader = message.getContent(XMLStreamReader.class);
-        reader = TransformUtils.createNewReaderIfNeeded(reader, message.getContent(InputStream.class));
-        Exchange exchange = message.getExchange();
-        BindingOperationInfo bop = getBindingOperationInfo(exchange, reader.getName(), isRequestor(message));
-        if (null != bop) {
-            // Create transforming reader
-            reader = new ReplacingXMLStreamReader(bop, reader);
-            message.setContent(XMLStreamReader.class, reader);
-            message.removeContent(InputStream.class);
+        if (reader.hasName()) {
+            QName name = reader.getName();
+            reader = TransformUtils.createNewReaderIfNeeded(reader, message.getContent(InputStream.class));
+            Exchange exchange = message.getExchange();
+            BindingOperationInfo bop = getBindingOperationInfo(exchange, name, isRequestor(message));
+            if (null != bop) {
+                // Create transforming reader
+                reader = new ReplacingXMLStreamReader(bop, reader);
+                message.setContent(XMLStreamReader.class, reader);
+                message.removeContent(InputStream.class);
+            }
+            // SOAP method is not found, so normal exception from CXF framework is sent.
         }
-        // SOAP method is not found, so normal exception from CXF framework is sent.
     }
 }
