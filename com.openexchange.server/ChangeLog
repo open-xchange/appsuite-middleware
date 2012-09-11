@@ -1,6 +1,7 @@
 * 2012-09-11 - thorben.betten@open-xchange.com
 
- - Fix for bug 22917: Added previous naming for downward comptability
+ - Fix for bug 22917: Added previous naming for downward compatibility
+ - Fix for bug 22975: Select high log level for all error categories to let them be logged
 
 * 2012-09-07 - thorben.betten@open-xchange.com
 
