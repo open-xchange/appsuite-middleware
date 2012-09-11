@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange RequireJS servlet bundle
 Bundle-SymbolicName: com.openexchange.ui7
-Bundle-Version: 6.21.0.0
+Bundle-Version: 6.23.0
 Bundle-Vendor: Open-Xchange, Inc.
 Import-Package: com.openexchange.ajax,
  com.openexchange.ajax.requesthandler,
