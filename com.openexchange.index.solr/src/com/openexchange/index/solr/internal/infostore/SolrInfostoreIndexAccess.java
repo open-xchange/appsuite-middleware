@@ -47,26 +47,20 @@
  *
  */
 
-package com.openexchange.index.solr.internal.filestore;
+package com.openexchange.index.solr.internal.infostore;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.common.SolrInputDocument;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.File.Field;
-import com.openexchange.file.storage.FileFieldSwitcher;
-import com.openexchange.file.storage.meta.FileFieldGet;
-import com.openexchange.file.storage.meta.FileFieldSet;
 import com.openexchange.groupware.Types;
+import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.index.FacetParameters;
 import com.openexchange.index.IndexConstants;
 import com.openexchange.index.IndexDocument;
@@ -75,9 +69,8 @@ import com.openexchange.index.IndexResult;
 import com.openexchange.index.Indexes;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.SearchHandler;
-import com.openexchange.index.StandardIndexDocument;
-import com.openexchange.index.filestore.FileUUID;
-import com.openexchange.index.filestore.FilestoreIndexField;
+import com.openexchange.index.infostore.InfostoreIndexField;
+import com.openexchange.index.infostore.InfostoreUUID;
 import com.openexchange.index.solr.internal.AbstractSolrIndexAccess;
 import com.openexchange.index.solr.internal.Services;
 import com.openexchange.index.solr.internal.SolrIndexResult;
@@ -86,18 +79,18 @@ import com.openexchange.solr.SolrCoreIdentifier;
 import com.openexchange.solr.SolrProperties;
 
 /**
- * {@link SolrFilestoreIndexAccess}
+ * {@link SolrInfostoreIndexAccess}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class SolrFilestoreIndexAccess extends AbstractSolrIndexAccess<File> {
+public class SolrInfostoreIndexAccess extends AbstractSolrIndexAccess<DocumentMetadata> {
 
     /**
-     * Initializes a new {@link SolrFilestoreIndexAccess}.
+     * Initializes a new {@link SolrInfostoreIndexAccess}.
      * 
      * @param identifier
      */
-    public SolrFilestoreIndexAccess(SolrCoreIdentifier identifier) {
+    public SolrInfostoreIndexAccess(SolrCoreIdentifier identifier) {
         super(identifier);
     }
 
@@ -107,19 +100,19 @@ public class SolrFilestoreIndexAccess extends AbstractSolrIndexAccess<File> {
     }
 
     @Override
-    public Set<FilestoreIndexField> getIndexedFields() {
-        return SolrFilestoreField.getIndexedFields();
+    public Set<InfostoreIndexField> getIndexedFields() {
+        return SolrInfostoreField.getIndexedFields();
     }
 
     @Override
-    public void addEnvelopeData(IndexDocument<File> document) throws OXException {
+    public void addEnvelopeData(IndexDocument<DocumentMetadata> document) throws OXException {
         addDocument(convertToDocument(document));        
     }
 
     @Override
-    public void addEnvelopeData(Collection<IndexDocument<File>> documents) throws OXException {
+    public void addEnvelopeData(Collection<IndexDocument<DocumentMetadata>> documents) throws OXException {
         List<SolrInputDocument> inputDocuments = new ArrayList<SolrInputDocument>();
-        for (IndexDocument<File> document : documents) {
+        for (IndexDocument<DocumentMetadata> document : documents) {
             inputDocuments.add(convertToDocument(document));
         }
         
@@ -127,14 +120,14 @@ public class SolrFilestoreIndexAccess extends AbstractSolrIndexAccess<File> {
     }
 
     @Override
-    public void addContent(IndexDocument<File> document, boolean full) throws OXException {
+    public void addContent(IndexDocument<DocumentMetadata> document, boolean full) throws OXException {
         addDocument(convertToDocument(document));  
     }
 
     @Override
-    public void addContent(Collection<IndexDocument<File>> documents, boolean full) throws OXException {
+    public void addContent(Collection<IndexDocument<DocumentMetadata>> documents, boolean full) throws OXException {
         List<SolrInputDocument> inputDocuments = new ArrayList<SolrInputDocument>();
-        for (IndexDocument<File> document : documents) {
+        for (IndexDocument<DocumentMetadata> document : documents) {
             inputDocuments.add(convertToDocument(document));
         }
         
@@ -142,64 +135,23 @@ public class SolrFilestoreIndexAccess extends AbstractSolrIndexAccess<File> {
     }
 
     @Override
-    public void addAttachments(IndexDocument<File> document, boolean full) throws OXException {
+    public void addAttachments(IndexDocument<DocumentMetadata> document, boolean full) throws OXException {
         addDocument(convertToDocument(document));  
     }
 
     @Override
-    public void addAttachments(Collection<IndexDocument<File>> documents, boolean full) throws OXException {
+    public void addAttachments(Collection<IndexDocument<DocumentMetadata>> documents, boolean full) throws OXException {
         List<SolrInputDocument> inputDocuments = new ArrayList<SolrInputDocument>();
-        for (IndexDocument<File> document : documents) {
+        for (IndexDocument<DocumentMetadata> document : documents) {
             inputDocuments.add(convertToDocument(document));
         }
         
         addDocuments(inputDocuments);
     }
     
-    private SolrInputDocument convertToDocument(IndexDocument<File> document) throws OXException {
-        return SolrFilestoreDocumentConverter.convertStatic(contextId, userId, document);
+    private SolrInputDocument convertToDocument(IndexDocument<DocumentMetadata> document) throws OXException {
+        return SolrInfostoreDocumentConverter.convertStatic(contextId, userId, document);
     }
-
-    @Override
-    public void change(IndexDocument<File> document, Set<? extends IndexField> fields) throws OXException {
-        Set<FilestoreIndexField> indexFields;
-        if (fields == null) {
-            indexFields = EnumSet.allOf(FilestoreIndexField.class);
-        } else {
-            indexFields = EnumSet.noneOf(FilestoreIndexField.class);
-            for (IndexField field : fields) {
-                if (field instanceof FilestoreIndexField) {
-                    indexFields.add((FilestoreIndexField) field);
-                }
-            }
-        }
-        
-        File reloaded = loadFromIndex(FileUUID.newUUID(document).toString());
-        if (reloaded == null) {
-            addAttachments(document, true);
-        } else {
-            FileFieldSwitcher setter = new FileFieldSet(); 
-            FileFieldSwitcher getter = new FileFieldGet();
-            for (FilestoreIndexField field : indexFields) {
-                Field fileField = field.getFileField();
-                if (fileField != null) {
-                    Object value = fileField.doSwitch(getter, document.getObject());
-                    fileField.doSwitch(setter, reloaded, value);
-                }
-            }
-            
-            StandardIndexDocument<File> changed = new StandardIndexDocument<File>(reloaded);
-            changed.setProperties(document.getProperties());
-            addAttachments(changed, true);
-        }
-    }
-
-    @Override
-    public void change(Collection<IndexDocument<File>> documents, Set<? extends IndexField> fields) throws OXException {
-        for (IndexDocument<File> document : documents) {
-            change(document, fields);
-        }        
-    }    
 
     @Override
     public void deleteById(String id) throws OXException {
@@ -208,11 +160,11 @@ public class SolrFilestoreIndexAccess extends AbstractSolrIndexAccess<File> {
 
     @Override
     public void deleteByQuery(QueryParameters parameters) throws OXException {
-        IndexResult<File> indexResult = query(parameters, null);
-        List<IndexDocument<File>> documents = indexResult.getResults();
+        IndexResult<DocumentMetadata> indexResult = query(parameters, null);
+        List<IndexDocument<DocumentMetadata>> documents = indexResult.getResults();
         Set<String> uuids = new HashSet<String>(documents.size());
-        for (IndexDocument<File> document : documents) {
-            uuids.add(FileUUID.newUUID(document).toString());
+        for (IndexDocument<DocumentMetadata> document : documents) {
+            uuids.add(InfostoreUUID.newUUID(contextId, userId, document).toString());
         }
         
         String deleteQuery = buildQueryStringWithOr(SolrAttachmentField.UUID.solrName(), uuids);
@@ -220,35 +172,23 @@ public class SolrFilestoreIndexAccess extends AbstractSolrIndexAccess<File> {
     }
     
     @Override
-    public IndexResult<File> query(QueryParameters parameters, FacetParameters facetParameters, Set<? extends IndexField> fields) throws OXException {
+    public IndexResult<DocumentMetadata> query(QueryParameters parameters, FacetParameters facetParameters, Set<? extends IndexField> fields) throws OXException {
         // TODO: implement me
         return null;
     }
 
     @Override
-    public IndexResult<File> query(QueryParameters parameters, Set<? extends IndexField> fields) throws OXException {        
+    public IndexResult<DocumentMetadata> query(QueryParameters parameters, Set<? extends IndexField> fields) throws OXException {        
         SolrQuery solrQuery = buildSolrQuery(parameters);
         setSortAndOrder(parameters, solrQuery);
-        Set<SolrFilestoreField> solrFields = convertAndCheckFields(parameters, fields);
+        Set<SolrInfostoreField> solrFields = convertAndCheckFields(parameters, fields);
         setFieldList(solrQuery, solrFields);        
-        List<IndexDocument<File>> results = queryChunkWise(new SolrFilestoreDocumentConverter(), solrQuery, parameters.getOff(), parameters.getLen(), 100);
+        List<IndexDocument<DocumentMetadata>> results = queryChunkWise(new SolrInfostoreDocumentConverter(), solrQuery, parameters.getOff(), parameters.getLen(), 100);
         if (results.isEmpty()) {
             return Indexes.emptyResult();
         }
         
-        return new SolrIndexResult<File>(results.size(), results, null);
-    }
-    
-    private File loadFromIndex(String id) throws OXException {
-        Map<String, Object> params = new HashMap<String, Object>(1);
-        params.put(IndexConstants.IDS, new String[] { id });
-        QueryParameters query = new QueryParameters.Builder(params).setHandler(SearchHandler.GET_REQUEST).build();
-        IndexResult<File> result = query(query, null);
-        if (result.getNumFound() == 1) {
-            return result.getResults().get(0).getObject();
-        }
-        
-        return null;
+        return new SolrIndexResult<DocumentMetadata>(results.size(), results, null);
     }
     
     private SolrQuery buildSolrQuery(QueryParameters parameters) throws OXException {
@@ -314,18 +254,18 @@ public class SolrFilestoreIndexAccess extends AbstractSolrIndexAccess<File> {
     }
     
     private void setSortAndOrder(QueryParameters parameters, SolrQuery solrQuery) {
-        setSortAndOrder(parameters, solrQuery, SolrFilestoreField.class);
+        setSortAndOrder(parameters, solrQuery, SolrInfostoreField.class);
     }
     
-    private Set<SolrFilestoreField> convertAndCheckFields(QueryParameters parameters, Set<? extends IndexField> fields) {
-        Set<SolrFilestoreField> set;
+    private Set<SolrInfostoreField> convertAndCheckFields(QueryParameters parameters, Set<? extends IndexField> fields) {
+        Set<SolrInfostoreField> set;
         if (fields == null) {
-            set = EnumSet.allOf(SolrFilestoreField.class);
+            set = EnumSet.allOf(SolrInfostoreField.class);
         } else {        
-            set = EnumSet.noneOf(SolrFilestoreField.class);
+            set = EnumSet.noneOf(SolrInfostoreField.class);
             for (IndexField field : fields) {
-                if (field instanceof FilestoreIndexField) {
-                    set.add(SolrFilestoreField.getByIndexField((FilestoreIndexField) field));
+                if (field instanceof InfostoreIndexField) {
+                    set.add(SolrInfostoreField.getByIndexField((InfostoreIndexField) field));
                 }
             }
         }

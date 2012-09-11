@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.index.solr.internal.filestore;
+package com.openexchange.index.solr.internal.infostore;
 
 import java.util.Collections;
 import java.util.EnumMap;
@@ -55,49 +55,49 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import com.openexchange.index.filestore.FilestoreIndexField;
+import com.openexchange.index.infostore.InfostoreIndexField;
 import com.openexchange.index.solr.internal.SolrField;
 
 /**
- * {@link SolrFilestoreField}
+ * {@link SolrInfostoreField}
  * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public enum SolrFilestoreField implements SolrField {
+public enum SolrInfostoreField implements SolrField {
 
-    UUID("uuid", FilestoreIndexField.UUID, "param1"),
-    ACCOUNT("account", FilestoreIndexField.ACCOUNT, "param2"),
-    SERVICE("service", FilestoreIndexField.SERVICE, "param3"),
-    FOLDER("folder_id", FilestoreIndexField.FOLDER, "param4"),
-    ID("id", FilestoreIndexField.ID, "param5"),
-    CREATED_BY("created_by", FilestoreIndexField.CREATED_BY, "param6"),
-    MODIFIED_BY("modified_by", FilestoreIndexField.MODIFIED_BY, "param7"),
-    CREATED("creation_date", FilestoreIndexField.CREATED, "param8"),
-    LAST_MODIFIED("last_modified", FilestoreIndexField.LAST_MODIFIED, "param9"),
-    TITLE("title", FilestoreIndexField.TITLE, "param10"),
-    VERSION("version", FilestoreIndexField.VERSION, "param11"),
-    DESCRIPTION("description", FilestoreIndexField.DESCRIPTION, "param15"),
-    URL("url", FilestoreIndexField.URL, "param16"),
-    SEQUENCE_NUMBER("sequence_number", FilestoreIndexField.SEQUENCE_NUMBER, "param17"),
-    CATEGORIES("categories", FilestoreIndexField.CATEGORIES, "param18"),
-    COLOR_LABEL("color_label", FilestoreIndexField.COLOR_LABEL, "param19"),
-    VERSION_COMMENT("version_comment", FilestoreIndexField.VERSION_COMMENT, "param20");
+    UUID("uuid", InfostoreIndexField.UUID, "param1"),
+    FILESTORE_LOCATION("filestore_location", InfostoreIndexField.FILESTORE_LOCATION, "param2"),
+    NUMBER_OF_VERSIONS("number_of_versions", InfostoreIndexField.NUMBER_OF_VERSIONS, "param3"),
+    FOLDER("folder_id", InfostoreIndexField.FOLDER, "param4"),
+    ID("id", InfostoreIndexField.ID, "param5"),
+    CREATED_BY("created_by", InfostoreIndexField.CREATED_BY, "param6"),
+    MODIFIED_BY("modified_by", InfostoreIndexField.MODIFIED_BY, "param7"),
+    CREATED("creation_date", InfostoreIndexField.CREATED, "param8"),
+    LAST_MODIFIED("last_modified", InfostoreIndexField.LAST_MODIFIED, "param9"),
+    TITLE("title", InfostoreIndexField.TITLE, "param10"),
+    VERSION("version", InfostoreIndexField.VERSION, "param11"),
+    DESCRIPTION("description", InfostoreIndexField.DESCRIPTION, "param15"),
+    URL("url", InfostoreIndexField.URL, "param16"),
+    SEQUENCE_NUMBER("sequence_number", InfostoreIndexField.SEQUENCE_NUMBER, "param17"),
+    CATEGORIES("categories", InfostoreIndexField.CATEGORIES, "param18"),
+    COLOR_LABEL("color_label", InfostoreIndexField.COLOR_LABEL, "param19"),
+    VERSION_COMMENT("version_comment", InfostoreIndexField.VERSION_COMMENT, "param20");
     
 
     private String solrName;
 
-    private FilestoreIndexField indexField;
+    private InfostoreIndexField indexField;
 
     private String parameterName;
     
-    private static final Map<String, SolrFilestoreField> solrNameMapping = new HashMap<String, SolrFilestoreField>();
+    private static final Map<String, SolrInfostoreField> solrNameMapping = new HashMap<String, SolrInfostoreField>();
     
-    private static final Map<FilestoreIndexField, SolrFilestoreField> fieldMapping = new EnumMap<FilestoreIndexField, SolrFilestoreField>(FilestoreIndexField.class);
+    private static final Map<InfostoreIndexField, SolrInfostoreField> fieldMapping = new EnumMap<InfostoreIndexField, SolrInfostoreField>(InfostoreIndexField.class);
     
-    private static final Set<FilestoreIndexField> indexedFields = EnumSet.noneOf(FilestoreIndexField.class);
+    private static final Set<InfostoreIndexField> indexedFields = EnumSet.noneOf(InfostoreIndexField.class);
     
     static {
-        for (SolrFilestoreField field : values()) {
+        for (SolrInfostoreField field : values()) {
             String name = field.solrName();
             if (name != null) {
                 solrNameMapping.put(name, field);
@@ -107,29 +107,29 @@ public enum SolrFilestoreField implements SolrField {
         }
     }
     
-    public static SolrFilestoreField getBySolrName(String solrName) {
+    public static SolrInfostoreField getBySolrName(String solrName) {
         return solrNameMapping.get(solrName);
     }
     
-    public static SolrFilestoreField getByIndexField(FilestoreIndexField indexField) {
+    public static SolrInfostoreField getByIndexField(InfostoreIndexField indexField) {
         return fieldMapping.get(indexField);
     }
     
-    public static Set<FilestoreIndexField> getIndexedFields() {        
+    public static Set<InfostoreIndexField> getIndexedFields() {        
         return Collections.unmodifiableSet(indexedFields);
     }
     
-    public static String[] solrNamesFor(Set<SolrFilestoreField> solrFields) {
+    public static String[] solrNamesFor(Set<SolrInfostoreField> solrFields) {
         String[] names = new String[solrFields.size()];
         int i = 0;
-        for (SolrFilestoreField field : solrFields) {
+        for (SolrInfostoreField field : solrFields) {
             names[i++] = field.solrName();
         }
         
         return names;
     }
 
-    private SolrFilestoreField(String solrName, FilestoreIndexField indexField, String parameterName) {
+    private SolrInfostoreField(String solrName, InfostoreIndexField indexField, String parameterName) {
         this.solrName = solrName;
         this.indexField = indexField;
         this.parameterName = parameterName;
@@ -141,7 +141,7 @@ public enum SolrFilestoreField implements SolrField {
     }
 
     @Override
-    public FilestoreIndexField indexField() {
+    public InfostoreIndexField indexField() {
         return indexField;
     }
 

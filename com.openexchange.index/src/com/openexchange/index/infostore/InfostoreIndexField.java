@@ -47,70 +47,64 @@
  *
  */
 
-package com.openexchange.file.storage.json.actions.files;
+package com.openexchange.index.infostore;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.File;
-import com.openexchange.index.IndexDocument;
-import com.openexchange.tools.iterator.SearchIterator;
+import java.util.HashMap;
+import java.util.Map;
+import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.index.IndexField;
 
 
 /**
- * {@link FilestorageIndexSearchIterator}
+ * {@link InfostoreIndexField}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class FilestorageIndexSearchIterator implements SearchIterator<File> {
+public enum InfostoreIndexField implements IndexField {
     
-    private final List<OXException> warnings = new ArrayList<OXException>();
+    UUID(null),
+    FOLDER(Metadata.FOLDER_ID_LITERAL),
+    ID(Metadata.ID_LITERAL),
+    CREATED_BY(Metadata.CREATED_BY_LITERAL),
+    MODIFIED_BY(Metadata.MODIFIED_BY_LITERAL),
+    CREATED(Metadata.CREATION_DATE_LITERAL),
+    LAST_MODIFIED(Metadata.LAST_MODIFIED_LITERAL),
+    TITLE(Metadata.TITLE_LITERAL),
+    VERSION(Metadata.VERSION_LITERAL),
+    DESCRIPTION(Metadata.DESCRIPTION_LITERAL),
+    URL(Metadata.URL_LITERAL),
+    SEQUENCE_NUMBER(Metadata.SEQUENCE_NUMBER_LITERAL),
+    CATEGORIES(Metadata.CATEGORIES_LITERAL),
+    COLOR_LABEL(Metadata.COLOR_LABEL_LITERAL),
+    VERSION_COMMENT(Metadata.VERSION_COMMENT_LITERAL),
+    NUMBER_OF_VERSIONS(Metadata.NUMBER_OF_VERSIONS_LITERAL),
+    FILESTORE_LOCATION(Metadata.FILESTORE_LOCATION_LITERAL);
+
     
-    private final List<IndexDocument<File>> documents;
     
-    private final Iterator<IndexDocument<File>> iterator;    
+    private static final Map<Metadata, InfostoreIndexField> mapping = new HashMap<Metadata, InfostoreIndexField>();
     
-
-    public FilestorageIndexSearchIterator(List<IndexDocument<File>> documents) {
-        super();
-        this.documents = documents;
-        iterator = documents.iterator();
+    static {
+        for (InfostoreIndexField field : values()) {
+            Metadata metadataField = field.getMetadataField();
+            if (metadataField != null) {
+                mapping.put(metadataField, field);
+            }            
+        }
     }
-
-    @Override
-    public boolean hasNext() throws OXException {
-        return iterator.hasNext();
+    
+    private final Metadata metadataField;
+    
+    private InfostoreIndexField(Metadata metadataField) {
+        this.metadataField = metadataField;
     }
-
-    @Override
-    public File next() throws OXException {
-        IndexDocument<File> next = iterator.next();
-        return next.getObject();
+    
+    public Metadata getMetadataField() {
+        return metadataField;
     }
-
-    @Override
-    public void close() throws OXException {
-    }
-
-    @Override
-    public int size() {
-        return documents.size();
-    }
-
-    @Override
-    public boolean hasWarnings() {
-        return !warnings.isEmpty();
-    }
-
-    @Override
-    public void addWarning(OXException warning) {
-        warnings.add(warning);        
-    }
-
-    @Override
-    public OXException[] getWarnings() {
-        return warnings.toArray(new OXException[warnings.size()]);
+    
+    public static InfostoreIndexField getByMetadateField(int metadataField) {
+        return mapping.get(metadataField);
     }
 
 }

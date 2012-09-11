@@ -47,137 +47,41 @@
  *
  */
 
-package com.openexchange.groupware.infostore.database.impl;
+package com.openexchange.index.infostore;
 
 import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.infostore.utils.MetadataSwitcher;
+import com.openexchange.index.IndexDocument;
 
-public class GetSwitch implements MetadataSwitcher {
-
-	private final DocumentMetadata metadata;
-
-	public GetSwitch(final DocumentMetadata metadata){
-		this.metadata = metadata;
-	}
-
-	@Override
-    public Object lastModified() {
-		return metadata.getLastModified();
-	}
-
-	@Override
-    public Object creationDate() {
-		return metadata.getCreationDate();
-	}
-
-	@Override
-    public Object modifiedBy() {
-		return metadata.getModifiedBy();
-	}
-
-	@Override
-    public Object folderId() {
-		return metadata.getFolderId();
-	}
-
-	@Override
-    public Object title() {
-		return metadata.getTitle();
-	}
-
-	@Override
-    public Object version() {
-		return metadata.getVersion();
-	}
-
-	@Override
-    public Object content() {
-		return metadata.getContent();
-	}
-
-	@Override
-    public Object id() {
-		return metadata.getId();
-	}
-
-	@Override
-    public Object fileSize() {
-		return metadata.getFileSize();
-	}
-
-	@Override
-    public Object description() {
-		return metadata.getDescription();
-	}
-
-	@Override
-    public Object url() {
-		return metadata.getURL();
-	}
-
-	@Override
-    public Object createdBy() {
-		return metadata.getCreatedBy();
-	}
-
-	@Override
-    public Object fileName() {
-		return metadata.getFileName();
-	}
-
-	@Override
-    public Object fileMIMEType() {
-		return metadata.getFileMIMEType();
-	}
-
-	@Override
-    public Object sequenceNumber() {
-		return metadata.getSequenceNumber();
-	}
-
-	@Override
-    public Object categories() {
-		return metadata.getCategories();
-	}
-
-	@Override
-    public Object lockedUntil() {
-		return metadata.getLockedUntil();
-	}
-
-	@Override
-    public Object fileMD5Sum() {
-		return metadata.getFileMD5Sum();
-	}
-
-	@Override
-    public Object versionComment() {
-		return metadata.getVersionComment();
-	}
-
-	@Override
-    public Object currentVersion() {
-		return metadata.isCurrentVersion();
-	}
-
-	@Override
-    public Object colorLabel() {
-		return metadata.getColorLabel();
-	}
-
-	@Override
-    public Object filestoreLocation() {
-		return metadata.getFilestoreLocation();
-	}
-
-    @Override
-    public Object lastModifiedUTC() {
-        return metadata.getLastModified();
+/**
+ * {@link InfostoreUUID}
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ */
+public class InfostoreUUID {
+    
+    private final String fileUUID;
+    
+    
+    private InfostoreUUID(int contextId, int userId, long folderId, int fileId) {
+        super();
+        StringBuilder tmp = new StringBuilder(64);
+        tmp.append("infostore/").append(contextId).append('/').append(userId).append('/').append(folderId).append('/').append(fileId);
+        fileUUID = tmp.toString();
     }
-
+    
     @Override
-    public Object numberOfVersions() {
-        return metadata.getNumberOfVersions();
+    public String toString() {
+        return fileUUID;
+    }
+    
+    public static InfostoreUUID newUUID(int contextId, int userId, IndexDocument<DocumentMetadata> document) {
+        DocumentMetadata file = document.getObject();
+        
+        return newUUID(contextId, userId, file.getFolderId(), file.getId());
+    }
+    
+    public static InfostoreUUID newUUID(int contextId, int userId, long folderId, int fileId) {
+        return new InfostoreUUID(contextId, userId, folderId, fileId);
     }
 
 }

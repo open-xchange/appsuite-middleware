@@ -150,21 +150,6 @@ public class SolrAttachmentIndexAccess extends AbstractSolrIndexAccess<Attachmen
     }
 
     @Override
-    public void change(IndexDocument<Attachment> document, Set<? extends IndexField> fields) throws OXException {
-        addDocument(convertToDocument(document));
-    }
-
-    @Override
-    public void change(Collection<IndexDocument<Attachment>> documents, Set<? extends IndexField> fields) throws OXException {
-        List<SolrInputDocument> inputDocuments = new ArrayList<SolrInputDocument>();
-        for (IndexDocument<Attachment> document : documents) {
-            inputDocuments.add(convertToDocument(document));
-        }
-
-        addDocuments(inputDocuments);
-    }
-
-    @Override
     public void deleteById(String id) throws OXException {
         deleteDocumentById(id);
     }

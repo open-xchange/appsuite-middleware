@@ -136,26 +136,6 @@ public interface IndexAccess<V> {
     void addAttachments(Collection<IndexDocument<V>> documents, boolean full) throws OXException;
 
     /**
-     * Changes the denoted fields of already existing document according to specified input document.
-     * 
-     * @param document The document providing changes
-     * @param fields The fields denoting the changes or <code>null</code> to indicate usage of all possible fields.
-     * @throws OXException If change operation fails
-     * @throws InterruptedException If operation has been interrupted
-     */
-    void change(IndexDocument<V> document, Set<? extends IndexField> fields) throws OXException;
-
-    /**
-     * Changes the denoted fields of already existing documents according to specified input documents.
-     * 
-     * @param documents The documents providing changes
-     * @param fields The fields denoting the changes or <code>null</code> to indicate usage of all possible fields.
-     * @throws OXException If change operation fails
-     * @throws InterruptedException If operation has been interrupted
-     */
-    void change(Collection<IndexDocument<V>> documents, Set<? extends IndexField> fields) throws OXException;
-
-    /**
      * Deletes a document by identifier.
      * 
      * @param id The document identifier

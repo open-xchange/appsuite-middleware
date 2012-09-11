@@ -49,27 +49,10 @@
 
 package com.openexchange.index.solr.groupware;
 
-import java.io.InputStream;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
-import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.FileStorageEventHelper;
-import com.openexchange.file.storage.FileStorageFileAccess;
-import com.openexchange.file.storage.composition.IDBasedFileAccess;
-import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
-import com.openexchange.groupware.Types;
-import com.openexchange.index.IndexAccess;
-import com.openexchange.index.IndexConstants;
-import com.openexchange.index.IndexFacadeService;
-import com.openexchange.index.StandardIndexDocument;
-import com.openexchange.index.attachments.Attachment;
-import com.openexchange.index.attachments.AttachmentUUID;
-import com.openexchange.index.filestore.FileUUID;
-import com.openexchange.index.solr.internal.Services;
-import com.openexchange.session.Session;
 
 
 /**
@@ -80,73 +63,80 @@ import com.openexchange.session.Session;
 public class SolrFilestoreEventHandler implements EventHandler {
     
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SolrFilestoreEventHandler.class));
-    
 
+    // FIXME: remove class
     @Override
     public void handleEvent(Event event) {
-        if (FileStorageEventHelper.isInfostoreEvent(event)) {
-            try {
-                Session session = FileStorageEventHelper.extractSession(event);
-                IDBasedFileAccessFactory accessFactory = Services.getService(IDBasedFileAccessFactory.class);
-                IndexFacadeService indexService = Services.getService(IndexFacadeService.class);                    
-                IDBasedFileAccess access = accessFactory.createAccess(session);
-                IndexAccess<File> filestoreIndexAccess = indexService.acquireIndexAccess(Types.INFOSTORE, session);
-                IndexAccess<Attachment> attachmentIndexAccess = indexService.acquireIndexAccess(Types.ATTACHMENT, session);
-                String service = FileStorageEventHelper.extractService(event);
-                String accountId = FileStorageEventHelper.extractAccountId(event);                    
-                String id = FileStorageEventHelper.extractObjectId(event);
-                if (FileStorageEventHelper.isCreateEvent(event)) {
-                    indexFile(access, filestoreIndexAccess, attachmentIndexAccess, session, id, service, accountId);
-                } else if (FileStorageEventHelper.isUpdateEvent(event)) {
-                    // Just reindex
-                    indexFile(access, filestoreIndexAccess, attachmentIndexAccess, session, id, service, accountId);
-                } else if (FileStorageEventHelper.isDeleteEvent(event)) {
-                    String folderId = FileStorageEventHelper.extractFolderId(event);
-                    FileUUID uuid = FileUUID.newUUID(service, accountId, folderId, id);
-                    filestoreIndexAccess.deleteById(uuid.toString()); 
-                    attachmentIndexAccess.deleteById(AttachmentUUID.newUUID(Types.INFOSTORE, service, accountId, folderId, id, IndexConstants.DEFAULT_ATTACHMENT).toString());
-                    if (access.exists(id, FileStorageFileAccess.CURRENT_VERSION)) {
-                        // One or more versions have been deleted. 
-                        // We have to reindex the current one.                                           
-                        indexFile(access, filestoreIndexAccess, attachmentIndexAccess, session, id, service, accountId);
-                    }
-                }
-            } catch (OXException e) {
-                LOG.error(e.getMessage(), e);
-            } catch (Throwable e) {
-                LOG.error(e.getMessage(), e);
-            }
-        }        
-    }
-    
-    private void indexFile(IDBasedFileAccess access, IndexAccess<File> filestoreIndexAccess, IndexAccess<Attachment> attachmentIndexAccess, Session session, String id, String service, String accountId) throws OXException {        
-        File fileMetadata = access.getFileMetadata(id, FileStorageFileAccess.CURRENT_VERSION);
-        StandardIndexDocument<File> document = new StandardIndexDocument<File>(fileMetadata);
-        document.addProperty(IndexConstants.SERVICE, service);
-        document.addProperty(IndexConstants.ACCOUNT, accountId);    
-        filestoreIndexAccess.addContent(document, true);
+        // TODO Auto-generated method stub
         
-        if (hasAttachment(fileMetadata)) {
-            InputStream is = access.getDocument(id, FileStorageFileAccess.CURRENT_VERSION);
-            Attachment attachment = new Attachment();
-            attachment.setModule(Types.INFOSTORE);
-            attachment.setService(service);
-            attachment.setAccount(accountId);
-            attachment.setFolder(fileMetadata.getFolderId());
-            attachment.setObjectId(id);
-            attachment.setAttachmentId(IndexConstants.DEFAULT_ATTACHMENT);
-            attachment.setFileName(fileMetadata.getFileName());
-            attachment.setFileSize(fileMetadata.getFileSize());
-            attachment.setMimeType(fileMetadata.getFileMIMEType());
-            attachment.setMd5Sum(fileMetadata.getFileMD5Sum());
-            attachment.setContent(is);
-                  
-            attachmentIndexAccess.addContent(new StandardIndexDocument<Attachment>(attachment), true);
-        }
     }
     
-    private boolean hasAttachment(File file) {
-        return file.getFileName() != null && !file.getFileName().isEmpty() && file.getFileSize() > 0;
-    }
+
+//    @Override
+//    public void handleEvent(Event event) {
+//        if (FileStorageEventHelper.isInfostoreEvent(event)) {
+//            try {
+//                Session session = FileStorageEventHelper.extractSession(event);
+//                IDBasedFileAccessFactory accessFactory = Services.getService(IDBasedFileAccessFactory.class);
+//                IndexFacadeService indexService = Services.getService(IndexFacadeService.class);                    
+//                IDBasedFileAccess access = accessFactory.createAccess(session);
+//                IndexAccess<File> filestoreIndexAccess = indexService.acquireIndexAccess(Types.INFOSTORE, session);
+//                IndexAccess<Attachment> attachmentIndexAccess = indexService.acquireIndexAccess(Types.ATTACHMENT, session);
+//                String service = FileStorageEventHelper.extractService(event);
+//                String accountId = FileStorageEventHelper.extractAccountId(event);                    
+//                String id = FileStorageEventHelper.extractObjectId(event);
+//                if (FileStorageEventHelper.isCreateEvent(event)) {
+//                    indexFile(access, filestoreIndexAccess, attachmentIndexAccess, session, id, service, accountId);
+//                } else if (FileStorageEventHelper.isUpdateEvent(event)) {
+//                    // Just reindex
+//                    indexFile(access, filestoreIndexAccess, attachmentIndexAccess, session, id, service, accountId);
+//                } else if (FileStorageEventHelper.isDeleteEvent(event)) {
+//                    String folderId = FileStorageEventHelper.extractFolderId(event);
+//                    InfostoreUUID uuid = InfostoreUUID.newUUID(service, accountId, folderId, id);
+//                    filestoreIndexAccess.deleteById(uuid.toString()); 
+//                    attachmentIndexAccess.deleteById(AttachmentUUID.newUUID(Types.INFOSTORE, service, accountId, folderId, id, IndexConstants.DEFAULT_ATTACHMENT).toString());
+//                    if (access.exists(id, FileStorageFileAccess.CURRENT_VERSION)) {
+//                        // One or more versions have been deleted. 
+//                        // We have to reindex the current one.                                           
+//                        indexFile(access, filestoreIndexAccess, attachmentIndexAccess, session, id, service, accountId);
+//                    }
+//                }
+//            } catch (OXException e) {
+//                LOG.error(e.getMessage(), e);
+//            } catch (Throwable e) {
+//                LOG.error(e.getMessage(), e);
+//            }
+//        }        
+//    }
+//    
+//    private void indexFile(IDBasedFileAccess access, IndexAccess<File> filestoreIndexAccess, IndexAccess<Attachment> attachmentIndexAccess, Session session, String id, String service, String accountId) throws OXException {        
+//        File fileMetadata = access.getFileMetadata(id, FileStorageFileAccess.CURRENT_VERSION);
+//        StandardIndexDocument<File> document = new StandardIndexDocument<File>(fileMetadata);
+//        document.addProperty(IndexConstants.SERVICE, service);
+//        document.addProperty(IndexConstants.ACCOUNT, accountId);    
+//        filestoreIndexAccess.addContent(document, true);
+//        
+//        if (hasAttachment(fileMetadata)) {
+//            InputStream is = access.getDocument(id, FileStorageFileAccess.CURRENT_VERSION);
+//            Attachment attachment = new Attachment();
+//            attachment.setModule(Types.INFOSTORE);
+//            attachment.setService(service);
+//            attachment.setAccount(accountId);
+//            attachment.setFolder(fileMetadata.getFolderId());
+//            attachment.setObjectId(id);
+//            attachment.setAttachmentId(IndexConstants.DEFAULT_ATTACHMENT);
+//            attachment.setFileName(fileMetadata.getFileName());
+//            attachment.setFileSize(fileMetadata.getFileSize());
+//            attachment.setMimeType(fileMetadata.getFileMIMEType());
+//            attachment.setMd5Sum(fileMetadata.getFileMD5Sum());
+//            attachment.setContent(is);
+//                  
+//            attachmentIndexAccess.addContent(new StandardIndexDocument<Attachment>(attachment), true);
+//        }
+//    }
+//    
+//    private boolean hasAttachment(File file) {
+//        return file.getFileName() != null && !file.getFileName().isEmpty() && file.getFileSize() > 0;
+//    }
 
 }

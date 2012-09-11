@@ -61,7 +61,7 @@ import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.solr.SolrIndexExceptionCodes;
 import com.openexchange.index.solr.internal.attachments.SolrAttachmentIndexAccess;
-import com.openexchange.index.solr.internal.filestore.SolrFilestoreIndexAccess;
+import com.openexchange.index.solr.internal.infostore.SolrInfostoreIndexAccess;
 import com.openexchange.index.solr.internal.mail.SolrMailIndexAccess;
 import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
@@ -208,7 +208,7 @@ public class SolrIndexFacadeService implements IndexFacadeService {
                 return new SolrMailIndexAccess(identifier);
                 
             case Types.INFOSTORE:
-                return new SolrFilestoreIndexAccess(identifier);
+                return new SolrInfostoreIndexAccess(identifier);
                 
             case Types.ATTACHMENT:
                 return new SolrAttachmentIndexAccess(identifier);

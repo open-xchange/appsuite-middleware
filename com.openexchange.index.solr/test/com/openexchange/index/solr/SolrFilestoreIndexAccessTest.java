@@ -53,17 +53,15 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import junit.framework.TestCase;
-import com.openexchange.file.storage.DefaultFile;
-import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.File.Field;
+import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.index.IndexConstants;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.SearchHandler;
 import com.openexchange.index.StandardIndexDocument;
-import com.openexchange.index.solr.internal.filestore.SolrFilestoreIndexAccess;
+import com.openexchange.index.solr.internal.infostore.SolrDocumentMetadata;
+import com.openexchange.index.solr.internal.infostore.SolrInfostoreIndexAccess;
 
 
 /**
@@ -73,7 +71,7 @@ import com.openexchange.index.solr.internal.filestore.SolrFilestoreIndexAccess;
  */
 public class SolrFilestoreIndexAccessTest extends TestCase {
     
-    private SolrFilestoreIndexAccess indexAccess;
+    private SolrInfostoreIndexAccess indexAccess;
     
     
     @Override
@@ -83,18 +81,18 @@ public class SolrFilestoreIndexAccessTest extends TestCase {
     }
 
     public void testAddDocument() throws Exception {
-        File file = new DefaultFile();
+        DocumentMetadata file = new SolrDocumentMetadata();
         file.setCategories("Ene mene muh");
         file.setColorLabel(3);
-        file.setCreated(new GregorianCalendar(2005, 3, 12, 17, 24, 43).getTime());
+        file.setCreationDate(new GregorianCalendar(2005, 3, 12, 17, 24, 43).getTime());
         file.setCreatedBy(5);
         file.setDescription("This is the description");
         file.setFileMD5Sum("234345645mlml4k5");
         file.setFileMIMEType("text/html");
         file.setFileName("A_file_name.html");
         file.setFileSize(33456L);
-        file.setFolderId("A38");
-        file.setId("4352");
+        file.setFolderId(1234L);
+        file.setId(4352);
         file.setLastModified(new Date());
         file.setModifiedBy(16);
         file.setTitle("I am the title, man...");
@@ -105,16 +103,18 @@ public class SolrFilestoreIndexAccessTest extends TestCase {
         Map<String, Object> parameters = new HashMap<String, Object>();
         parameters.put(IndexConstants.SERVICE, "http://infostoreservice.ox");
         parameters.put(IndexConstants.ACCOUNT, "sada689");
-        StandardIndexDocument<File> document = new StandardIndexDocument<File>(file);
+        StandardIndexDocument<DocumentMetadata> document = new StandardIndexDocument<DocumentMetadata>(file);
         document.setProperties(parameters);
         indexAccess.addEnvelopeData(document);
         
         QueryParameters query = new QueryParameters.Builder(parameters).setHandler(SearchHandler.ALL_REQUEST).build();
-        IndexResult<File> result = indexAccess.query(query, null);
+        IndexResult<DocumentMetadata> result = indexAccess.query(query, null);
         assertTrue("Wrong result size", result.getNumFound() == 1);
-        File reloaded = result.getResults().get(0).getObject();
-        Set<Field> differences = file.differences(reloaded);
-        assertTrue("There were differences.", differences.size() == 0);
+        DocumentMetadata reloaded = result.getResults().get(0).getObject();
+        // FIXME: calc differences
+//        Set<DocumentMetadata> differences = file.differences(reloaded);        
+//        assertTrue("There were differences.", differences.size() == 0);
+        fail("FIXME!");
     }
     
 }

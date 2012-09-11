@@ -47,46 +47,136 @@
  *
  */
 
-package com.openexchange.index.filestore;
+package com.openexchange.groupware.infostore.utils;
 
-import java.util.Map;
-import com.openexchange.file.storage.File;
-import com.openexchange.index.IndexConstants;
-import com.openexchange.index.IndexDocument;
+import com.openexchange.groupware.infostore.DocumentMetadata;
 
-/**
- * {@link FileUUID}
- *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- */
-public class FileUUID {
-    
-    private final String fileUUID;
-    
-    
-    private FileUUID(String service, String accountId, String folderId, String fileId) {
-        super();
-        StringBuilder tmp = new StringBuilder(64);
-        tmp.append(service).append('/').append(accountId).append('/').append(folderId).append('/').append(fileId);
-        fileUUID = tmp.toString();
-    }
-    
+public class GetSwitch implements MetadataSwitcher {
+
+	private final DocumentMetadata metadata;
+
+	public GetSwitch(final DocumentMetadata metadata){
+		this.metadata = metadata;
+	}
+
+	@Override
+    public Object lastModified() {
+		return metadata.getLastModified();
+	}
+
+	@Override
+    public Object creationDate() {
+		return metadata.getCreationDate();
+	}
+
+	@Override
+    public Object modifiedBy() {
+		return metadata.getModifiedBy();
+	}
+
+	@Override
+    public Object folderId() {
+		return metadata.getFolderId();
+	}
+
+	@Override
+    public Object title() {
+		return metadata.getTitle();
+	}
+
+	@Override
+    public Object version() {
+		return metadata.getVersion();
+	}
+
+	@Override
+    public Object content() {
+		return metadata.getContent();
+	}
+
+	@Override
+    public Object id() {
+		return metadata.getId();
+	}
+
+	@Override
+    public Object fileSize() {
+		return metadata.getFileSize();
+	}
+
+	@Override
+    public Object description() {
+		return metadata.getDescription();
+	}
+
+	@Override
+    public Object url() {
+		return metadata.getURL();
+	}
+
+	@Override
+    public Object createdBy() {
+		return metadata.getCreatedBy();
+	}
+
+	@Override
+    public Object fileName() {
+		return metadata.getFileName();
+	}
+
+	@Override
+    public Object fileMIMEType() {
+		return metadata.getFileMIMEType();
+	}
+
+	@Override
+    public Object sequenceNumber() {
+		return metadata.getSequenceNumber();
+	}
+
+	@Override
+    public Object categories() {
+		return metadata.getCategories();
+	}
+
+	@Override
+    public Object lockedUntil() {
+		return metadata.getLockedUntil();
+	}
+
+	@Override
+    public Object fileMD5Sum() {
+		return metadata.getFileMD5Sum();
+	}
+
+	@Override
+    public Object versionComment() {
+		return metadata.getVersionComment();
+	}
+
+	@Override
+    public Object currentVersion() {
+		return metadata.isCurrentVersion();
+	}
+
+	@Override
+    public Object colorLabel() {
+		return metadata.getColorLabel();
+	}
+
+	@Override
+    public Object filestoreLocation() {
+		return metadata.getFilestoreLocation();
+	}
+
     @Override
-    public String toString() {
-        return fileUUID;
+    public Object lastModifiedUTC() {
+        return metadata.getLastModified();
     }
-    
-    public static FileUUID newUUID(IndexDocument<File> document) {
-        File file = document.getObject();
-        Map<String, Object> properties = document.getProperties();
-        String service = (String) properties.get(IndexConstants.SERVICE);
-        String accountId = (String) properties.get(IndexConstants.ACCOUNT);
-        
-        return newUUID(service, accountId, file.getFolderId(), file.getId());
-    }
-    
-    public static FileUUID newUUID(String service, String accountId, String folderId, String fileId) {
-        return new FileUUID(service, accountId, folderId, fileId);
+
+    @Override
+    public Object numberOfVersions() {
+        return metadata.getNumberOfVersions();
     }
 
 }

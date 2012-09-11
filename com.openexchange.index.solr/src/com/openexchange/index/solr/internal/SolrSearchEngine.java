@@ -56,8 +56,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.File;
 import com.openexchange.groupware.Types;
+import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.IndexResult;
@@ -83,12 +83,12 @@ public class SolrSearchEngine implements IndexSearchEngine {
         ThreadPoolService threadPoolService = Services.getService(ThreadPoolService.class);
         IndexFacadeService indexService = Services.getService(IndexFacadeService.class);
         IndexAccess<MailMessage> mailIndex = indexService.acquireIndexAccess(Types.EMAIL, session);
-        IndexAccess<File> infostoreIndex = indexService.acquireIndexAccess(Types.INFOSTORE, session);
+        IndexAccess<DocumentMetadata> infostoreIndex = indexService.acquireIndexAccess(Types.INFOSTORE, session);
         IndexAccess<Attachment> attachmentIndex = indexService.acquireIndexAccess(Types.ATTACHMENT, session);
         
         CountDownLatch latch = new CountDownLatch(3);
         Future<IndexResult<MailMessage>> mailFuture = threadPoolService.submit(ThreadPools.task(new SearchCallable<MailMessage>(mailIndex, searchTerm, latch)));
-        Future<IndexResult<File>> infostoreFuture = threadPoolService.submit(ThreadPools.task(new SearchCallable<File>(infostoreIndex, searchTerm, latch)));
+        Future<IndexResult<DocumentMetadata>> infostoreFuture = threadPoolService.submit(ThreadPools.task(new SearchCallable<DocumentMetadata>(infostoreIndex, searchTerm, latch)));
         Future<IndexResult<Attachment>> attachmentFuture = threadPoolService.submit(ThreadPools.task(new SearchCallable<Attachment>(attachmentIndex, searchTerm, latch)));
         
         Map<Integer, IndexResult<?>> result = new HashMap<Integer, IndexResult<?>>(3);

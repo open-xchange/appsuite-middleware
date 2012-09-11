@@ -153,16 +153,6 @@ public class SolrMailIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
     }
 
     @Override
-    public void change(final IndexDocument<MailMessage> document, final Set<? extends IndexField> fields) throws OXException {
-        throw new UnsupportedOperationException("change is not implemented.");
-    }
-
-    @Override
-    public void change(final Collection<IndexDocument<MailMessage>> documents, final Set<? extends IndexField> fields) throws OXException {     
-        throw new UnsupportedOperationException("change is not implemented.");
-    }
-
-    @Override
     public void deleteById(String id) throws OXException {
         deleteDocumentById(id);
     }

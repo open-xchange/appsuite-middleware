@@ -181,5 +181,5 @@
 
     <uniqueKey>uuid</uniqueKey>
     <solrQueryParser defaultOperator="OR" />
-    <defaultSearchField>from</defaultSearchField>
+    <defaultSearchField>uuid</defaultSearchField>
 </schema>

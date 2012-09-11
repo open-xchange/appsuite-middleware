@@ -101,8 +101,8 @@
 
     <searchComponent name="queryModifier" class="de.kippdata.cria.solrext.searchcomponents.FormalFieldQueryModifier">
         <str name="param1">uuid</str>
-        <str name="param2">account</str>
-        <str name="param3">service</str>
+        <str name="param2">filestore_location</str>
+        <str name="param3">number_of_versions</str>
         <str name="param4">folder_id</str>
         <str name="param5">id</str>
         <str name="param6">created_by</str>

@@ -49,23 +49,17 @@
 
 package com.openexchange.index.solr.osgi;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
 import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleActivator;
-import org.osgi.service.event.EventConstants;
-import org.osgi.service.event.EventHandler;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.file.storage.FileStorageEventConstants;
-import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.solr.groupware.IndexedFoldersCreateTableService;
 import com.openexchange.index.solr.groupware.IndexedFoldersCreateTableTask;
-import com.openexchange.index.solr.groupware.SolrFilestoreEventHandler;
 import com.openexchange.index.solr.internal.Services;
 import com.openexchange.index.solr.internal.SolrIndexFacadeService;
 import com.openexchange.log.LogFactory;
@@ -95,7 +89,7 @@ public class SolrIndexActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class[] {
             DatabaseService.class, UserService.class, ConfigurationService.class, TimerService.class, ThreadPoolService.class,
-            SolrAccessService.class, IDBasedFileAccessFactory.class, TextXtractService.class };
+            SolrAccessService.class, TextXtractService.class, InfostoreFacade.class };
     }
 
     @Override
@@ -110,9 +104,6 @@ public class SolrIndexActivator extends HousekeepingActivator {
         IndexedFoldersCreateTableService createTableService = new IndexedFoldersCreateTableService();
         registerService(CreateTableService.class, createTableService);
         registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new IndexedFoldersCreateTableTask(createTableService)));
-        Dictionary<String, Object> ht = new Hashtable<String, Object>();
-        ht.put(EventConstants.EVENT_TOPIC, FileStorageEventConstants.ALL_TOPICS);
-        registerService(EventHandler.class, new SolrFilestoreEventHandler(), ht);
         try {
             Class<? extends BundleActivator> clazz = 
                 (Class<? extends BundleActivator>) Class.forName("com.openexchange.index.solr.test.FragmentActivator");

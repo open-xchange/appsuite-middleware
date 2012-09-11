@@ -333,24 +333,24 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
         addContent(documents, full);
     }
     
-    @Override
-    public void change(final IndexDocument<MailMessage> document, final Set<? extends IndexField> fields) throws OXException {
-        final Set<SolrMailField> solrFields = convertAndCheckFields(null, fields);        
-        final SolrInputDocument inputDocument = calculateAndSetChanges(document, solrFields);        
-        addDocument(inputDocument, true);
-    }
-
-    @Override
-    public void change(final Collection<IndexDocument<MailMessage>> documents, final Set<? extends IndexField> fields) throws OXException {     
-        final Set<SolrMailField> solrFields = convertAndCheckFields(null, fields);        
-        final List<SolrInputDocument> inputDocuments = new ArrayList<SolrInputDocument>();
-        for (final IndexDocument<MailMessage> document : documents) {
-            final SolrInputDocument inputDocument = calculateAndSetChanges(document, solrFields); 
-            inputDocuments.add(inputDocument);
-        }
-        
-        addDocuments(inputDocuments);
-    }
+//    @Override
+//    public void change(final IndexDocument<MailMessage> document, final Set<? extends IndexField> fields) throws OXException {
+//        final Set<SolrMailField> solrFields = convertAndCheckFields(null, fields);        
+//        final SolrInputDocument inputDocument = calculateAndSetChanges(document, solrFields);        
+//        addDocument(inputDocument, true);
+//    }
+//
+//    @Override
+//    public void change(final Collection<IndexDocument<MailMessage>> documents, final Set<? extends IndexField> fields) throws OXException {     
+//        final Set<SolrMailField> solrFields = convertAndCheckFields(null, fields);        
+//        final List<SolrInputDocument> inputDocuments = new ArrayList<SolrInputDocument>();
+//        for (final IndexDocument<MailMessage> document : documents) {
+//            final SolrInputDocument inputDocument = calculateAndSetChanges(document, solrFields); 
+//            inputDocuments.add(inputDocument);
+//        }
+//        
+//        addDocuments(inputDocuments);
+//    }
     
     private SolrInputDocument calculateAndSetChanges(final IndexDocument<MailMessage> document, final Set<SolrMailField> fields) throws OXException {
         final SolrDocument solrDocument = getIndexedDocument(document);

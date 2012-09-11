@@ -50,12 +50,10 @@
 /**
  *
  */
-package com.openexchange.groupware.infostore.database.impl;
+package com.openexchange.groupware.infostore.utils;
 
 import java.util.Date;
 import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.infostore.utils.Metadata;
-import com.openexchange.groupware.infostore.utils.MetadataSwitcher;
 
 public class SetSwitch implements MetadataSwitcher{
 

@@ -139,5 +139,5 @@
 
     <uniqueKey>uuid</uniqueKey>
     <solrQueryParser defaultOperator="OR" />
-    <defaultSearchField>file_name</defaultSearchField>
+    <defaultSearchField>uuid</defaultSearchField>
 </schema>

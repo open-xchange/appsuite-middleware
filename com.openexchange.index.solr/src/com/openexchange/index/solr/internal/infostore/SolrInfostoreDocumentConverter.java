@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.index.solr.internal.filestore;
+package com.openexchange.index.solr.internal.infostore;
 
 import java.util.Date;
 import java.util.List;
@@ -56,41 +56,38 @@ import java.util.Map.Entry;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.DefaultFile;
-import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.File.Field;
-import com.openexchange.file.storage.FileFieldSwitcher;
-import com.openexchange.file.storage.meta.FileFieldGet;
-import com.openexchange.file.storage.meta.FileFieldSet;
-import com.openexchange.index.IndexConstants;
+import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.infostore.utils.GetSwitch;
+import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.groupware.infostore.utils.SetSwitch;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexField;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.StandardIndexDocument;
-import com.openexchange.index.filestore.FileUUID;
-import com.openexchange.index.filestore.FilestoreIndexField;
+import com.openexchange.index.infostore.InfostoreIndexField;
+import com.openexchange.index.infostore.InfostoreUUID;
 import com.openexchange.index.solr.internal.SolrIndexResult;
 import com.openexchange.index.solr.internal.SolrResultConverter;
 
 
 /**
- * {@link SolrFilestoreDocumentConverter}
+ * {@link SolrInfostoreDocumentConverter}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class SolrFilestoreDocumentConverter implements SolrResultConverter<File> {
+public class SolrInfostoreDocumentConverter implements SolrResultConverter<DocumentMetadata> {
     
-    public static SolrInputDocument convertStatic(int contextId, int userId, IndexDocument<File> indexDocument) throws OXException {
-        File file = indexDocument.getObject();
+    public static SolrInputDocument convertStatic(int contextId, int userId, IndexDocument<DocumentMetadata> indexDocument) throws OXException {
+        DocumentMetadata file = indexDocument.getObject();
         SolrInputDocument document = new SolrInputDocument();
-        FileFieldSwitcher getter = new FileFieldGet();
-        for (SolrFilestoreField field : SolrFilestoreField.values()) {
-            FilestoreIndexField indexField = field.indexField();
-            Field fileField = indexField.getFileField();
-            if (fileField != null && fileField != Field.CONTENT) {
-                Object value = fileField.doSwitch(getter, file);
+        GetSwitch getter = new GetSwitch(file);
+        for (SolrInfostoreField field : SolrInfostoreField.values()) {
+            InfostoreIndexField indexField = field.indexField();
+            Metadata metadataField = indexField.getMetadataField();
+            if (metadataField != null) {
+                Object value = metadataField.doSwitch(getter);
                 if (value != null) {
-                    if (fileField == Field.CREATED || fileField == Field.LAST_MODIFIED) {
+                    if (metadataField.equals(Metadata.CREATION_DATE_LITERAL) || metadataField.equals(Metadata.LAST_MODIFIED_LITERAL)) {
                         document.setField(field.solrName(), ((Date) value).getTime());
                     } else {
                         document.setField(field.solrName(), value);
@@ -98,38 +95,33 @@ public class SolrFilestoreDocumentConverter implements SolrResultConverter<File>
                 }
             }
         }
-        
-        // Special fields: uuid, account, content
-        Map<String, Object> properties = indexDocument.getProperties();
-        String service = (String) properties.get(IndexConstants.SERVICE);
-        String accountId = (String) properties.get(IndexConstants.ACCOUNT);        
-        document.setField(SolrFilestoreField.UUID.solrName(), FileUUID.newUUID(indexDocument));
-        document.setField(SolrFilestoreField.SERVICE.solrName(), service);
-        document.setField(SolrFilestoreField.ACCOUNT.solrName(), accountId);
-        
+
+        document.setField(SolrInfostoreField.UUID.solrName(), InfostoreUUID.newUUID(contextId, userId, indexDocument));        
         return document;
     }
 
     @Override
-    public IndexDocument<File> convert(SolrDocument document) throws OXException {
-        File converted = convertStatic(document);
-        IndexDocument<File> indexDocument = new StandardIndexDocument<File>(converted);
+    public IndexDocument<DocumentMetadata> convert(SolrDocument document) throws OXException {
+        DocumentMetadata converted = convertStatic(document);
+        IndexDocument<DocumentMetadata> indexDocument = new StandardIndexDocument<DocumentMetadata>(converted);
         
         return indexDocument;
     }
     
-    public static File convertStatic(SolrDocument document) {
-        File file = new DefaultFile();
-        FileFieldSwitcher setter = new FileFieldSet();
+    public static DocumentMetadata convertStatic(SolrDocument document) {
+        DocumentMetadata file = new SolrDocumentMetadata();
+        SetSwitch setter = new SetSwitch(file);
         for (Entry<String, Object> field : document) {
             String name = field.getKey();
             Object value = field.getValue();
-            SolrFilestoreField solrField = SolrFilestoreField.getBySolrName(name);
+            SolrInfostoreField solrField = SolrInfostoreField.getBySolrName(name);
             if (solrField != null && value != null) {
-                FilestoreIndexField indexField = solrField.indexField();
-                Field fileField = indexField.getFileField();
-                if (fileField != null) {
-                    fileField.doSwitch(setter, file, value);
+                InfostoreIndexField indexField = solrField.indexField();
+                Metadata metadataField = indexField.getMetadataField();
+                if (metadataField != null) {
+                    setter.setValue(value);
+                    metadataField.doSwitch(setter);
+                    setter.setValue(null);
                 }
             }
         }
@@ -138,8 +130,8 @@ public class SolrFilestoreDocumentConverter implements SolrResultConverter<File>
     }
 
     @Override
-    public IndexResult<File> createIndexResult(List<IndexDocument<File>> documents, Map<IndexField, Map<String, Long>> facetCounts) throws OXException {
-        return new SolrIndexResult<File>(documents.size(), documents, facetCounts);
+    public IndexResult<DocumentMetadata> createIndexResult(List<IndexDocument<DocumentMetadata>> documents, Map<IndexField, Map<String, Long>> facetCounts) throws OXException {
+        return new SolrIndexResult<DocumentMetadata>(documents.size(), documents, facetCounts);
     }
 
 }

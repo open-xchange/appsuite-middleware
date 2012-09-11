@@ -130,31 +130,19 @@
 
     <fields>
         <field name="uuid" type="string" stored="true" indexed="true" />
-        <field name="service" type="string" stored="true" indexed="true" />
-        <field name="account" type="string" stored="true" indexed="true" />
-        <!-- infostore.folder_id -->
-        <field name="folder_id" type="string" stored="true" indexed="true" />
-        <!-- infostore.id -->
-        <field name="id" type="string" stored="true" indexed="true" />
-        <!-- infostore.created_by -->
+        <field name="folder_id" type="long" stored="true" indexed="true" />
+        <field name="id" type="int" stored="true" indexed="true" />
         <field name="created_by" type="int" stored="true" indexed="true" />
-        <!-- infostore.changed_by -->
         <field name="modified_by" type="int" stored="true" indexed="true" />
-        <!-- infostore.creating_date -->
         <field name="creation_date" type="long" stored="true" indexed="true" />
-        <!-- infostore.last_modified -->
         <field name="last_modified" type="long" stored="true" indexed="true" />
-        <!-- infostore_document.title -->
-        
-        <!-- infostore.version -->
         <field name="version" type="int" stored="true" indexed="true" />
-        <!-- infostore_document.url -->
         <field name="url" type="url" stored="true" indexed="true" />     
         <field name="sequence_number" type="long" stored="true" indexed="true" />
-        <!-- infostore_document.categories -->
         <field name="categories" type="categories" stored="true" indexed="true" />
-        <!-- infostore.color_label -->
         <field name="color_label" type="int" stored="true" indexed="true" />
+        <field name="filestore_location" type="string" stored="true" indexed="true" />
+        <field name="number_of_versions" type="int" stored="true" indexed="true" />
         
         <field name="title" type="text" stored="false" indexed="false" />   
         <field name="title_gen" type="text" stored="true" indexed="true" />   
@@ -182,5 +170,5 @@
 
     <uniqueKey>uuid</uniqueKey>
     <solrQueryParser defaultOperator="OR" />
-    <defaultSearchField>title</defaultSearchField>
+    <defaultSearchField>uuid</defaultSearchField>
 </schema>
