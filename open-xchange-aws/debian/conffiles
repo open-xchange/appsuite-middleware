@@ -1,0 +1,4 @@
+opt/open-xchange/etc/aws.properties
+opt/open-xchange/etc/autoscaling.properties
+opt/open-xchange/etc/awsec2.properties
+opt/open-xchange/etc/awsloadbalancing.properties
