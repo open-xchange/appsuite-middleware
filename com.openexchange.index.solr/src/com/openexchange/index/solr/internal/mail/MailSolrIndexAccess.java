@@ -81,12 +81,12 @@ import com.openexchange.index.Indexes;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.QueryParameters.Order;
 import com.openexchange.index.SearchHandler;
-import com.openexchange.index.mail.MailIndexField;
-import com.openexchange.index.mail.MailUUID;
 import com.openexchange.index.solr.internal.AbstractSolrIndexAccess;
 import com.openexchange.index.solr.internal.Services;
 import com.openexchange.mail.dataobjects.ContentAwareMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.index.MailIndexField;
+import com.openexchange.mail.index.MailUUID;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.text.TextFinder;
 import com.openexchange.solr.SolrCoreIdentifier;
@@ -176,7 +176,7 @@ public class MailSolrIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
         final String uuidField = SolrMailField.UUID.solrName();
         if (uuidField != null) {
             final StringBuilder queryBuilder = new StringBuilder(128);
-            queryBuilder.append('(').append(uuidField).append(":\"").append(uuid.getUUID()).append("\")");
+            queryBuilder.append('(').append(uuidField).append(":\"").append(uuid.toString()).append("\")");
             final SolrQuery solrQuery = new SolrQuery().setQuery(queryBuilder.toString());
             solrQuery.setStart(Integer.valueOf(0));
             solrQuery.setRows(Integer.valueOf(1));            

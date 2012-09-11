@@ -47,67 +47,31 @@
  *
  */
 
-package com.openexchange.service.indexing.impl.internal;
-
-import org.apache.commons.logging.Log;
-import org.quartz.DisallowConcurrentExecution;
-import org.quartz.Job;
-import org.quartz.JobDataMap;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
-import com.openexchange.service.indexing.IndexingJob;
-import com.openexchange.service.indexing.JobInfo;
+package com.openexchange.groupware.attach.index;
 
 
 /**
- * {@link QuartzIndexingJob}
+ * {@link ObjectIdTerm}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-@DisallowConcurrentExecution
-public class QuartzIndexingJob implements Job {
+public class ObjectIdTerm extends SearchTerm<String> {
     
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(QuartzIndexingJob.class);
+    private final String pattern;
     
     
-    public QuartzIndexingJob() {
+    public ObjectIdTerm(String pattern) {
         super();
-    }    
-
-    @Override
-    public void execute(JobExecutionContext context) throws JobExecutionException {
-        JobDataMap jobData = context.getMergedJobDataMap();
-        Object infoObject = jobData.get(JobConstants.JOB_INFO);
-        if (infoObject == null || !(infoObject instanceof JobInfo)) {
-            String msg = "JobDataMap did not contain valid JobInfo instance.";
-            LOG.error(msg);
-            throw new JobExecutionException(msg, false);
-        }
-        
-        JobInfo jobInfo = (JobInfo) infoObject;   
-        Class<? extends IndexingJob> jobClass = jobInfo.jobClass;
-        if (jobClass == null) {
-            String msg = "JobInfo did not contain valid job class. " + jobInfo.toString();
-            LOG.error(msg);
-            throw new JobExecutionException(msg, false);
-        }
-            
-        IndexingJob indexingJob;
-        try {
-            indexingJob = jobClass.newInstance();
-        } catch (Throwable t) {
-            String msg = "Could not instantiate IndexingJob from class object. " + jobInfo.toString();
-            LOG.error(msg, t);
-            throw new JobExecutionException(msg, t, false);
-        }
-        
-        try {
-            indexingJob.execute(jobInfo);
-        } catch (Throwable t) {
-            String msg = "Error during IndexingJob execution. " + jobInfo.toString();
-            LOG.error(msg, t);
-            throw new JobExecutionException(msg, t, false);
-        }
+        this.pattern = pattern;
     }
 
+    @Override
+    public String getPattern() {
+        return pattern;
+    }
+
+    @Override
+    public void accept(SearchTermVisitor visitor) {
+        visitor.visit(this);
+    }
 }

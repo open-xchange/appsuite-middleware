@@ -47,56 +47,49 @@
  *
  */
 
-package com.openexchange.index.attachments;
+package com.openexchange.mail.index;
 
+import com.openexchange.mail.MailPath;
+import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
- * {@link AttachmentUUID}
- * 
+ * {@link MailUUID} - Represents a mail's UUID in index storage.
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class AttachmentUUID {
+public class MailUUID {
 
-    private final String uuid;
-    
+    private final String mailUUID;
 
-    private AttachmentUUID(int module, String service, String account, String folder, String objectId, String attachmentId) {
+    /**
+     * Initializes a new {@link MailUUID}.
+     *
+     * @param contextId The context identifier
+     * @param userId The user identifier
+     * @param accountId The account identifier
+     * @param fullName The folder full name
+     * @param mailId The mail identifier
+     */
+    public MailUUID(final int contextId, final int userId, final int accountId, final String fullName, final String mailId) {
         super();
-        StringBuilder tmp = new StringBuilder(64);
-        tmp.append(module).append('/');
-        if (service != null) {
-            tmp.append(service).append('/');
-        }
-        if (account != null) {
-            tmp.append(account).append('/');
-        }
-        tmp.append(folder).append('/').append(objectId).append('/').append(attachmentId);
-        uuid = tmp.toString();
+        final StringBuilder tmp = new StringBuilder(64);
+        tmp.append("mail/").append(contextId).append(MailPath.SEPERATOR).append(userId).append(MailPath.SEPERATOR);
+        tmp.append(MailPath.getMailPath(accountId, fullName, mailId));
+        mailUUID = tmp.toString();
     }
 
-    public static AttachmentUUID newUUID(int module, String service, String account, String folder, String objectId, String attachmentId) {
-        return new AttachmentUUID(module, service, account, folder, objectId, attachmentId);
-    }
-
-    public static AttachmentUUID newUUID(int module, String account, String folder, String objectId, String attachmentId) {
-        return new AttachmentUUID(module, null, account, folder, objectId, attachmentId);
-    }
-
-    public static AttachmentUUID newUUID(int module, String folder, String objectId, String attachmentId) {
-        return new AttachmentUUID(module, null, null, folder, objectId, attachmentId);
-    }
-    
-    public static AttachmentUUID newUUID(Attachment attachment) {
-        return new AttachmentUUID(attachment.getModule(), 
-            attachment.getService(), 
-            attachment.getAccount(),
-            attachment.getFolder(),
-            attachment.getObjectId(),
-            attachment.getAttachmentId());
-    }
-    
     @Override
-    public String toString() {        
-        return uuid;
+    public String toString() {
+        return mailUUID;
     }
+    
+    public static MailUUID newUUID(int contextId, int userId, int accountId, String fullName, String mailId) {
+        return new MailUUID(contextId, userId, accountId, fullName, mailId);
+    }
+    
+    public static MailUUID newUUID(int contextId, int userId, MailMessage message) {
+        return new MailUUID(contextId, userId, message.getAccountId(), message.getFolder(), message.getMailId());
+    }
+
 }

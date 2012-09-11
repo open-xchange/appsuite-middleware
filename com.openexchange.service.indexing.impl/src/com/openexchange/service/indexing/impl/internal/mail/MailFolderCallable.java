@@ -13,6 +13,10 @@ import java.util.concurrent.Callable;
 import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
+import com.openexchange.groupware.attach.index.Attachment;
+import com.openexchange.groupware.attach.index.ORTerm;
+import com.openexchange.groupware.attach.index.ObjectIdTerm;
+import com.openexchange.groupware.attach.index.SearchTerm;
 import com.openexchange.groupware.tools.chunk.ChunkPerformer;
 import com.openexchange.groupware.tools.chunk.Performable;
 import com.openexchange.index.IndexAccess;
@@ -25,12 +29,6 @@ import com.openexchange.index.QueryParameters.Builder;
 import com.openexchange.index.QueryParameters.Order;
 import com.openexchange.index.SearchHandler;
 import com.openexchange.index.StandardIndexDocument;
-import com.openexchange.index.attachments.Attachment;
-import com.openexchange.index.attachments.ORTerm;
-import com.openexchange.index.attachments.ObjectIdTerm;
-import com.openexchange.index.attachments.SearchTerm;
-import com.openexchange.index.mail.MailIndexField;
-import com.openexchange.index.mail.MailUUID;
 import com.openexchange.index.solr.IndexFolderManager;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailField;
@@ -41,6 +39,8 @@ import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.ContentAwareMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.index.MailIndexField;
+import com.openexchange.mail.index.MailUUID;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.service.indexing.impl.internal.Services;
@@ -113,7 +113,7 @@ public class MailFolderCallable implements Callable<Object>, Serializable {
                     storageMails.put(msg.getMailId(), msg);
                 }
                 
-                if (IndexFolderManager.isIndexed(info.contextId, info.userId, Types.EMAIL, String.valueOf(info.accountId), info.folder)) {         
+                if (!info.force && IndexFolderManager.isIndexed(info.contextId, info.userId, Types.EMAIL, String.valueOf(info.accountId), info.folder)) {         
                     IndexResult<MailMessage> indexResult = mailIndex.query(mailAllQuery, MailIndexField.getFor(CHANGEABLE_FIELDS));                    
                     Map<String, MailMessage> indexMails = new HashMap<String, MailMessage>();
                     for (IndexDocument<MailMessage> document : indexResult.getResults()) {
@@ -320,7 +320,7 @@ public class MailFolderCallable implements Callable<Object>, Serializable {
                 String[] mailUuids = new String[subList.size()];
                 int i = 0;        
                 for (String id : subList) {
-                    mailUuids[i] = new MailUUID(info.contextId, info.userId, info.accountId, info.folder, id).getUUID();
+                    mailUuids[i] = new MailUUID(info.contextId, info.userId, info.accountId, info.folder, id).toString();
                     idTerms[i] = new ObjectIdTerm(id);
                     ++i;
                 }                    

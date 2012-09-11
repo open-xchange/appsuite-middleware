@@ -59,10 +59,10 @@ import org.apache.solr.common.SolrInputDocument;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.StandardIndexDocument;
-import com.openexchange.index.mail.MailUUID;
 import com.openexchange.index.solr.internal.mail.MailFillers.MailFiller;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.index.MailUUID;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 
 /**
@@ -143,7 +143,7 @@ public final class SolrInputDocumentHelper {
     public SolrInputDocument inputDocumentFor(final MailMessage mail, final int userId, final int contextId) {
         final int accountId = mail.getAccountId();
         final MailUUID uuid = new MailUUID(contextId, userId, accountId, mail.getFolder(), mail.getMailId());
-        return createDocument(uuid.getUUID(), mail, accountId, userId, contextId, System.currentTimeMillis());
+        return createDocument(uuid.toString(), mail, accountId, userId, contextId, System.currentTimeMillis());
     }
 
     public List<SolrInputDocument> inputDocumentsFor(final List<IndexDocument<MailMessage>> messages, final int userId, final int contextId) {

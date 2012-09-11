@@ -47,14 +47,14 @@
  *
  */
 
-package com.openexchange.index.mail;
+package com.openexchange.mail.index;
 
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.index.IndexField;
-import com.openexchange.mail.MailField;
+import com.openexchange.mail.*;
 
 
 /**

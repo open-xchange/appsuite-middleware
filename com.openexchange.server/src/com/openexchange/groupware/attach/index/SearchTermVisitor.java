@@ -47,31 +47,20 @@
  *
  */
 
-package com.openexchange.index.attachments;
+package com.openexchange.groupware.attach.index;
 
 
 /**
- * {@link ANDTerm}
+ * {@link SearchTermVisitor}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class ANDTerm extends SearchTerm<SearchTerm<?>[]> {
+public interface SearchTermVisitor {
     
-    private final SearchTerm<?>[] terms;
+    void visit(ORTerm term);
     
+    void visit(ANDTerm term);
 
-    public ANDTerm(SearchTerm<?>[] terms) {
-        super();
-        this.terms = terms;
-    }
+    void visit(ObjectIdTerm objectIdTerm);
 
-    @Override
-    public SearchTerm<?>[] getPattern() {        
-        return terms;
-    }
-
-    @Override
-    public void accept(SearchTermVisitor visitor) {
-        visitor.visit(this);
-    }
 }

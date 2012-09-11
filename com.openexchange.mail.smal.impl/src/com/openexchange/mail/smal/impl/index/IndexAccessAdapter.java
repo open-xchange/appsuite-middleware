@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.smal.impl.index;
 
-import static com.openexchange.index.mail.MailUtility.releaseAccess;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -66,16 +65,17 @@ import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.SearchHandler;
 import com.openexchange.index.StandardIndexDocument;
-import com.openexchange.index.mail.MailIndexField;
-import com.openexchange.index.mail.MailUUID;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.index.MailIndexField;
+import com.openexchange.mail.index.MailUUID;
 import com.openexchange.mail.smal.impl.SmalServiceLookup;
 import com.openexchange.service.indexing.IndexingService;
 import com.openexchange.session.Session;
+import static com.openexchange.mail.index.MailUtility.releaseAccess;;
 
 /**
  * {@link IndexAccessAdapter}
@@ -159,7 +159,7 @@ public final class IndexAccessAdapter {
              */
             for (final String id : optMailIds) {
                 final MailUUID indexId = new MailUUID(contextId, userId, accountId, fullName, id);
-                indexAccess.deleteById(indexId.getUUID());
+                indexAccess.deleteById(indexId.toString());
             }
         } finally {
             releaseAccess(facade, indexAccess);

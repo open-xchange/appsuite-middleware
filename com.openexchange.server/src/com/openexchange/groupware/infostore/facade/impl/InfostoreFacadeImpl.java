@@ -67,6 +67,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
@@ -75,6 +76,8 @@ import com.openexchange.database.provider.ReuseReadConProvider;
 import com.openexchange.database.tx.DBService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
+import com.openexchange.groupware.attach.index.Attachment;
+import com.openexchange.groupware.attach.index.AttachmentUUID;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.impl.IDGenerator;
@@ -100,6 +103,7 @@ import com.openexchange.groupware.infostore.database.impl.InsertDocumentIntoDelT
 import com.openexchange.groupware.infostore.database.impl.SelectForUpdateFilenameReserver;
 import com.openexchange.groupware.infostore.database.impl.UpdateDocumentAction;
 import com.openexchange.groupware.infostore.database.impl.UpdateVersionAction;
+import com.openexchange.groupware.infostore.index.InfostoreUUID;
 import com.openexchange.groupware.infostore.utils.GetSwitch;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.infostore.utils.SetSwitch;
@@ -120,9 +124,16 @@ import com.openexchange.groupware.results.DeltaImpl;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.index.IndexAccess;
+import com.openexchange.index.IndexConstants;
+import com.openexchange.index.IndexDocument;
+import com.openexchange.index.IndexFacadeService;
+import com.openexchange.index.StandardIndexDocument;
 import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.collections.Injector;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
@@ -475,7 +486,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
     public void saveDocument(final DocumentMetadata document, final InputStream data, final long sequenceNumber, final ServerSession sessionObj) throws OXException {
         security.checkFolderId(document.getFolderId(), sessionObj.getContext());
 
+        boolean wasCreation = false;
         if (document.getId() == InfostoreFacade.NEW) {
+            wasCreation = true;
             final EffectivePermission isperm = security.getFolderPermission(
                 document.getFolderId(),
                 sessionObj.getContext(),
@@ -583,6 +596,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
                 }
 
+                indexDocument(sessionObj.getContext(), sessionObj.getUserId(), document.getId(), -1L, wasCreation);
             } finally {
                 if (reservation != null) {
                     reservation.destroySilently();
@@ -726,6 +740,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
     public void saveDocument(final DocumentMetadata document, final InputStream data, final long sequenceNumber, Metadata[] modifiedColumns, final ServerSession sessionObj) throws OXException {
         if (document.getId() == NEW) {
             saveDocument(document, data, sequenceNumber, sessionObj);
+            indexDocument(sessionObj.getContext(), sessionObj.getContextId(), document.getId(), -1L, true);
             return;
         }
         try {
@@ -879,6 +894,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                     updateAction.setTimestamp(Long.MAX_VALUE);
                     perform(updateAction, true);
                 }
+                
+                long indexFolderId = document.getFolderId() == oldDocument.getFolderId() ? -1L : oldDocument.getFolderId();
+                indexDocument(sessionObj.getContext(), sessionObj.getUserId(), oldDocument.getId(), indexFolderId, false);
             } finally {
                 for (final InfostoreFilenameReservation infostoreFilenameReservation : reservations) {
                     infostoreFilenameReservation.destroySilently();
@@ -969,6 +987,10 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         {
             perform(deleteDocument, true);
         }
+        
+        removeFromIndex(sessionObj.getContext(), sessionObj.getUserId(), delDocs);
+        // TODO: This triggers a full re-indexing and can be improved. We only have to re-index if the latest version is affected.
+        removeFromIndex(sessionObj.getContext(), sessionObj.getUserId(), delVers);
     }
 
     private void removeFile(final Context context, final String filestoreLocation) throws OXException {
@@ -1219,6 +1241,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         int i = 0;
         for (final Integer integer : versionSet) {
             retval[i++] = integer.intValue();
+        }
+        
+        if (removeCurrent) {
+            removeFromIndex(sessionObj.getContext(), sessionObj.getUserId(), Collections.singletonList(metadata));
+            indexDocument(sessionObj.getContext(), sessionObj.getUserId(), id, -1L, true);
         }
 
         return retval;
@@ -1783,5 +1810,157 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
     @Override
     public void setSessionHolder(final SessionHolder sessionHolder) {
         expiredLocksListener.setSessionHolder(sessionHolder);
+    }
+    
+    private void removeFromIndex(final Context context, final int userId, final List<DocumentMetadata> documents) {
+        if (documents == null || documents.isEmpty()) {
+            return;
+        }
+        
+        ThreadPoolService threadPoolService = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
+        ExecutorService executorService = threadPoolService.getExecutor();
+        executorService.submit(new Runnable() {
+            @Override
+            public void run() {
+                IndexFacadeService indexFacade = ServerServiceRegistry.getInstance().getService(IndexFacadeService.class);
+                if (indexFacade != null) {  
+                    IndexAccess<DocumentMetadata> infostoreIndex = null;
+                    IndexAccess<Attachment> attachmentIndex = null;
+                    try {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Deleting infostore document");
+                        }
+                        
+                        infostoreIndex = indexFacade.acquireIndexAccess(Types.INFOSTORE, userId, context.getContextId());
+                        attachmentIndex = indexFacade.acquireIndexAccess(Types.ATTACHMENT, userId, context.getContextId());
+                        for (DocumentMetadata document : documents) {
+                            infostoreIndex.deleteById(InfostoreUUID.newUUID(
+                                context.getContextId(),
+                                userId,
+                                document.getFolderId(),
+                                document.getId()).toString());
+                            attachmentIndex.deleteById(AttachmentUUID.newUUID(
+                                context.getContextId(),
+                                userId,
+                                Types.INFOSTORE,
+                                IndexConstants.DEFAULT_ACCOUNT,
+                                String.valueOf(document.getFolderId()),
+                                String.valueOf(document.getId()),
+                                IndexConstants.DEFAULT_ATTACHMENT).toString());
+                        }
+                    } catch (Exception e) {
+                        LOG.error("Error while deleting documents from index.", e);
+                    } finally {
+                        if (infostoreIndex != null) {
+                            try {
+                                indexFacade.releaseIndexAccess(infostoreIndex);
+                            } catch (OXException e) {
+                            }
+                        }
+                        
+                        if (attachmentIndex != null) {
+                            try {
+                                indexFacade.releaseIndexAccess(attachmentIndex);
+                            } catch (OXException e) {
+                            }
+                        }
+                    }
+                }
+            }            
+        });
+    }
+    
+    private void indexDocument(final Context context, final int userId, final int id, final long origFolderId, final boolean isCreation) {
+        ThreadPoolService threadPoolService = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
+        ExecutorService executorService = threadPoolService.getExecutor();
+        executorService.submit(new Runnable() {            
+            @Override
+            public void run() {
+                IndexFacadeService indexFacade = ServerServiceRegistry.getInstance().getService(IndexFacadeService.class);
+                if (indexFacade != null) {  
+                    IndexAccess<DocumentMetadata> infostoreIndex = null;
+                    IndexAccess<Attachment> attachmentIndex = null;
+                    try {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Indexing infostore document");
+                        }
+                        
+                        infostoreIndex = indexFacade.acquireIndexAccess(Types.INFOSTORE, userId, context.getContextId());
+                        attachmentIndex = indexFacade.acquireIndexAccess(Types.ATTACHMENT, userId, context.getContextId());
+                        DocumentMetadata document = load(id, CURRENT_VERSION, context);
+                        if (isCreation) {                            
+                            addToIndex(document, infostoreIndex, attachmentIndex);
+                        } else {
+                            if (origFolderId > 0) {
+                                // folder move
+                                infostoreIndex.deleteById(InfostoreUUID.newUUID(context.getContextId(), userId, origFolderId, id).toString());
+                                attachmentIndex.deleteById(AttachmentUUID.newUUID(
+                                    context.getContextId(),
+                                    userId,
+                                    Types.INFOSTORE,
+                                    IndexConstants.DEFAULT_ACCOUNT,
+                                    String.valueOf(origFolderId),
+                                    String.valueOf(id),
+                                    IndexConstants.DEFAULT_ATTACHMENT).toString());
+                                
+                                addToIndex(document, infostoreIndex, attachmentIndex);
+                            } else {
+                                infostoreIndex.deleteById(InfostoreUUID.newUUID(context.getContextId(), userId, document.getFolderId(), id).toString());
+                                attachmentIndex.deleteById(AttachmentUUID.newUUID(
+                                    context.getContextId(),
+                                    userId,
+                                    Types.INFOSTORE,
+                                    IndexConstants.DEFAULT_ACCOUNT,
+                                    String.valueOf(document.getFolderId()),
+                                    String.valueOf(id),
+                                    IndexConstants.DEFAULT_ATTACHMENT).toString());
+                                
+                                addToIndex(document, infostoreIndex, attachmentIndex);
+                            }
+                        }
+                    } catch (Exception e) {
+                        LOG.error("Error while indexing document.", e);
+                    } finally {
+                        if (infostoreIndex != null) {
+                            try {
+                                indexFacade.releaseIndexAccess(infostoreIndex);
+                            } catch (OXException e) {
+                            }
+                        }
+                        
+                        if (attachmentIndex != null) {
+                            try {
+                                indexFacade.releaseIndexAccess(attachmentIndex);
+                            } catch (OXException e) {
+                            }
+                        }
+                    }
+                }
+            }
+                
+            private void addToIndex(DocumentMetadata document, IndexAccess<DocumentMetadata> infostoreIndex, IndexAccess<Attachment> attachmentIndex) throws OXException {
+                IndexDocument<DocumentMetadata> indexDocument = new StandardIndexDocument<DocumentMetadata>(document);
+                infostoreIndex.addContent(indexDocument, true);
+                
+                String filestoreLocation = document.getFilestoreLocation();
+                if (filestoreLocation != null) {                    
+                    FileStorage fileStorage = getFileStorage(context);
+                    InputStream file = fileStorage.getFile(filestoreLocation);
+                    Attachment attachment = new Attachment();
+                    attachment.setModule(Types.INFOSTORE);
+                    attachment.setAccount(IndexConstants.DEFAULT_ACCOUNT);
+                    attachment.setFolder(String.valueOf(document.getFolderId()));
+                    attachment.setObjectId(String.valueOf(id));
+                    attachment.setAttachmentId(IndexConstants.DEFAULT_ATTACHMENT);
+                    attachment.setFileName(document.getFileName());
+                    attachment.setFileSize(document.getFileSize());
+                    attachment.setMimeType(document.getFileMIMEType());
+                    attachment.setMd5Sum(document.getFileMD5Sum());
+                    attachment.setContent(file);
+                    
+                    attachmentIndex.addContent(new StandardIndexDocument<Attachment>(attachment), true);
+               }
+            }
+        });             
     }
 }

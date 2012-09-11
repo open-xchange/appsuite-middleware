@@ -57,8 +57,9 @@ import org.osgi.service.event.EventHandler;
 import org.quartz.service.QuartzService;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
+import com.openexchange.context.ContextService;
 import com.openexchange.folderstorage.FolderService;
+import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.log.LogFactory;
 import com.openexchange.mail.service.MailService;
@@ -68,6 +69,8 @@ import com.openexchange.service.indexing.impl.internal.IndexingServiceImpl;
 import com.openexchange.service.indexing.impl.internal.Services;
 import com.openexchange.service.indexing.impl.internal.groupware.SessionEventHandler;
 import com.openexchange.sessiond.SessiondEventConstants;
+import com.openexchange.user.UserService;
+import com.openexchange.userconf.UserConfigurationService;
 
 
 /**
@@ -87,7 +90,10 @@ public class IndexingActivator extends HousekeepingActivator {
             QuartzService.class, 
             MailService.class,
             FolderService.class,
-            IDBasedFileAccessFactory.class };
+            InfostoreFacade.class,
+            ContextService.class,
+            UserService.class,
+            UserConfigurationService.class };
     }
     
     @Override

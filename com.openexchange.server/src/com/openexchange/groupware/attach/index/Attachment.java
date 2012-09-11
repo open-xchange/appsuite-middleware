@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.index.attachments;
+package com.openexchange.groupware.attach.index;
 
 import java.io.InputStream;
 import java.util.HashSet;
@@ -67,8 +67,6 @@ public class Attachment {
     }
 
     private int module;
-
-    private String service;
 
     private String account;
 
@@ -108,24 +106,6 @@ public class Attachment {
      */
     public void setModule(int module) {
         this.module = module;
-    }
-
-    /**
-     * Gets the service
-     * 
-     * @return The service
-     */
-    public String getService() {
-        return service;
-    }
-
-    /**
-     * Sets the service
-     * 
-     * @param service The service to set
-     */
-    public void setService(String service) {
-        this.service = service;
     }
 
     /**

@@ -47,41 +47,46 @@
  *
  */
 
-package com.openexchange.index.infostore;
+package com.openexchange.server.osgi;
 
-import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.index.IndexDocument;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.index.IndexFacadeService;
+import com.openexchange.server.services.ServerServiceRegistry;
+
 
 /**
- * {@link InfostoreUUID}
+ * {@link IndexFacadeCustomizer}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class InfostoreUUID {
+public class IndexFacadeCustomizer implements ServiceTrackerCustomizer<IndexFacadeService, IndexFacadeService> {
     
-    private final String fileUUID;
+    private final BundleContext context;
     
-    
-    private InfostoreUUID(int contextId, int userId, long folderId, int fileId) {
+
+    public IndexFacadeCustomizer(BundleContext context) {
         super();
-        StringBuilder tmp = new StringBuilder(64);
-        tmp.append("infostore/").append(contextId).append('/').append(userId).append('/').append(folderId).append('/').append(fileId);
-        fileUUID = tmp.toString();
+        this.context = context;
     }
-    
+
     @Override
-    public String toString() {
-        return fileUUID;
+    public IndexFacadeService addingService(ServiceReference<IndexFacadeService> reference) {      
+        IndexFacadeService service = context.getService(reference);
+        ServerServiceRegistry.getInstance().addService(IndexFacadeService.class, service);
+        return service;
     }
-    
-    public static InfostoreUUID newUUID(int contextId, int userId, IndexDocument<DocumentMetadata> document) {
-        DocumentMetadata file = document.getObject();
-        
-        return newUUID(contextId, userId, file.getFolderId(), file.getId());
+
+    @Override
+    public void modifiedService(ServiceReference<IndexFacadeService> reference, IndexFacadeService service) {
+        // nothing to do        
     }
-    
-    public static InfostoreUUID newUUID(int contextId, int userId, long folderId, int fileId) {
-        return new InfostoreUUID(contextId, userId, folderId, fileId);
+
+    @Override
+    public void removedService(ServiceReference<IndexFacadeService> reference, IndexFacadeService service) {
+        ServerServiceRegistry.getInstance().removeService(IndexFacadeService.class);
+        context.ungetService(reference);        
     }
 
 }

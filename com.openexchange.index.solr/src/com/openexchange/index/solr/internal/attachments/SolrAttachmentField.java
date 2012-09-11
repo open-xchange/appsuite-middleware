@@ -54,7 +54,7 @@ import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
-import com.openexchange.index.attachments.AttachmentIndexField;
+import com.openexchange.groupware.attach.index.AttachmentIndexField;
 import com.openexchange.index.solr.internal.SolrField;
 
 

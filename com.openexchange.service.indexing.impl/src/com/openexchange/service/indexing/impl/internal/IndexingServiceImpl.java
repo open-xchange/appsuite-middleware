@@ -104,8 +104,8 @@ public class IndexingServiceImpl implements IndexingService {
         try {
             scheduleJob(jobDetail, trigger);
         } catch (SchedulerException e) {
-            if (e.getUnderlyingException() instanceof ObjectAlreadyExistsException) {
-                LOG.info("Job already exists within JobStore.");
+            if (e instanceof ObjectAlreadyExistsException) {
+                LOG.debug("Job already exists within JobStore: " + info.toString());
             } else {
                 throw new OXException(e);
             }                

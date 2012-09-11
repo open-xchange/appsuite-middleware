@@ -61,6 +61,8 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.infostore.index.InfostoreIndexField;
+import com.openexchange.groupware.infostore.index.InfostoreUUID;
 import com.openexchange.index.FacetParameters;
 import com.openexchange.index.IndexConstants;
 import com.openexchange.index.IndexDocument;
@@ -69,8 +71,6 @@ import com.openexchange.index.IndexResult;
 import com.openexchange.index.Indexes;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.SearchHandler;
-import com.openexchange.index.infostore.InfostoreIndexField;
-import com.openexchange.index.infostore.InfostoreUUID;
 import com.openexchange.index.solr.internal.AbstractSolrIndexAccess;
 import com.openexchange.index.solr.internal.Services;
 import com.openexchange.index.solr.internal.SolrIndexResult;
@@ -111,6 +111,10 @@ public class SolrInfostoreIndexAccess extends AbstractSolrIndexAccess<DocumentMe
 
     @Override
     public void addEnvelopeData(Collection<IndexDocument<DocumentMetadata>> documents) throws OXException {
+        if (documents.isEmpty()) {
+            return;
+        }
+        
         List<SolrInputDocument> inputDocuments = new ArrayList<SolrInputDocument>();
         for (IndexDocument<DocumentMetadata> document : documents) {
             inputDocuments.add(convertToDocument(document));
@@ -126,6 +130,10 @@ public class SolrInfostoreIndexAccess extends AbstractSolrIndexAccess<DocumentMe
 
     @Override
     public void addContent(Collection<IndexDocument<DocumentMetadata>> documents, boolean full) throws OXException {
+        if (documents.isEmpty()) {
+            return;
+        }
+        
         List<SolrInputDocument> inputDocuments = new ArrayList<SolrInputDocument>();
         for (IndexDocument<DocumentMetadata> document : documents) {
             inputDocuments.add(convertToDocument(document));
@@ -141,6 +149,10 @@ public class SolrInfostoreIndexAccess extends AbstractSolrIndexAccess<DocumentMe
 
     @Override
     public void addAttachments(Collection<IndexDocument<DocumentMetadata>> documents, boolean full) throws OXException {
+        if (documents.isEmpty()) {
+            return;
+        }
+        
         List<SolrInputDocument> inputDocuments = new ArrayList<SolrInputDocument>();
         for (IndexDocument<DocumentMetadata> document : documents) {
             inputDocuments.add(convertToDocument(document));

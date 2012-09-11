@@ -52,15 +52,16 @@ package com.openexchange.index.solr.internal.attachments;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.logging.Log;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.attach.index.Attachment;
+import com.openexchange.groupware.attach.index.AttachmentUUID;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexField;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.StandardIndexDocument;
-import com.openexchange.index.attachments.Attachment;
-import com.openexchange.index.attachments.AttachmentUUID;
 import com.openexchange.index.solr.internal.Services;
 import com.openexchange.index.solr.internal.SolrIndexResult;
 import com.openexchange.index.solr.internal.SolrResultConverter;
@@ -72,7 +73,9 @@ import com.openexchange.textxtraction.TextXtractService;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class SolrAttachmentDocumentConverter implements SolrResultConverter<Attachment> {        
+public class SolrAttachmentDocumentConverter implements SolrResultConverter<Attachment> {    
+    
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(SolrAttachmentDocumentConverter.class);
 
     @Override
     public IndexDocument<Attachment> convert(SolrDocument document) throws OXException {
@@ -88,9 +91,6 @@ public class SolrAttachmentDocumentConverter implements SolrResultConverter<Atta
         Attachment attachment = new Attachment();
         if (document.containsKey(SolrAttachmentField.MODULE.solrName())) {
             attachment.setModule(((Integer) document.get(SolrAttachmentField.MODULE.solrName())).intValue());
-        }
-        if (document.containsKey(SolrAttachmentField.SERVICE.solrName())) {
-            attachment.setService((String) document.get(SolrAttachmentField.SERVICE.solrName()));
         }
         if (document.containsKey(SolrAttachmentField.ACCOUNT.solrName())) {
             attachment.setAccount((String) document.get(SolrAttachmentField.ACCOUNT.solrName()));
@@ -120,11 +120,10 @@ public class SolrAttachmentDocumentConverter implements SolrResultConverter<Atta
         return new StandardIndexDocument<Attachment>(attachment);
     }
     
-    public static SolrInputDocument convertStatic(IndexDocument<Attachment> document) throws OXException {
+    public static SolrInputDocument convertStatic(int contextId, int userId, IndexDocument<Attachment> document) throws OXException {
         Attachment attachment = document.getObject();
         SolrInputDocument inputDocument = new SolrInputDocument();        
         int module = attachment.getModule();
-        String service = attachment.getService();
         String account = attachment.getAccount();
         String folder = attachment.getFolder();
         String objectId = attachment.getObjectId();
@@ -134,7 +133,7 @@ public class SolrAttachmentDocumentConverter implements SolrResultConverter<Atta
         String mimeType = attachment.getMimeType();
         String md5Sum = attachment.getMd5Sum();
         InputStream file = attachment.getContent();
-        String uuid = AttachmentUUID.newUUID(attachment).toString();   
+        String uuid = AttachmentUUID.newUUID(contextId, userId, attachment).toString();   
         if (folder == null) {
             throw new IllegalArgumentException("Folder id must not be null!");
         }
@@ -152,14 +151,17 @@ public class SolrAttachmentDocumentConverter implements SolrResultConverter<Atta
         inputDocument.setField(SolrAttachmentField.FILE_SIZE.solrName(), new Long(fileSize));    
         inputDocument.setField(SolrAttachmentField.ATTACHMENT_ID.solrName(), attachmentId);    
         
-        setFieldIfNotNull(inputDocument, SolrAttachmentField.SERVICE.solrName(), service);
         setFieldIfNotNull(inputDocument, SolrAttachmentField.ACCOUNT.solrName(), account);
         setFieldIfNotNull(inputDocument, SolrAttachmentField.FILE_NAME.solrName(), fileName);
         setFieldIfNotNull(inputDocument, SolrAttachmentField.MIME_TYPE.solrName(), mimeType);
         setFieldIfNotNull(inputDocument, SolrAttachmentField.MD5_SUM.solrName(), md5Sum);
         TextXtractService xtractService = Services.getService(TextXtractService.class);
-        String extractedText = xtractService.extractFrom(file, mimeType);
-        inputDocument.setField(SolrAttachmentField.CONTENT.solrName(), extractedText);
+        try {
+            String extractedText = xtractService.extractFrom(file, mimeType);
+            inputDocument.setField(SolrAttachmentField.CONTENT.solrName(), extractedText);
+        } catch (Exception e) {
+            LOG.warn("Exception during text extraction. Skipping attachments content...", e);
+        }
         
         return inputDocument;        
     }

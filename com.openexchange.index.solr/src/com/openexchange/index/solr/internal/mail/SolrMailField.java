@@ -58,9 +58,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.lang.StringUtils;
-import com.openexchange.index.mail.MailIndexField;
 import com.openexchange.index.solr.internal.SolrField;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.index.MailIndexField;
 
 /**
  * {@link SolrMailField}

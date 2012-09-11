@@ -47,31 +47,41 @@
  *
  */
 
-package com.openexchange.index.attachments;
+package com.openexchange.groupware.infostore.index;
 
+import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.index.IndexDocument;
 
 /**
- * {@link ObjectIdTerm}
+ * {@link InfostoreUUID}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class ObjectIdTerm extends SearchTerm<String> {
+public class InfostoreUUID {
     
-    private final String pattern;
+    private final String fileUUID;
     
     
-    public ObjectIdTerm(String pattern) {
+    private InfostoreUUID(int contextId, int userId, long folderId, int fileId) {
         super();
-        this.pattern = pattern;
+        StringBuilder tmp = new StringBuilder(64);
+        tmp.append("infostore/").append(contextId).append('/').append(userId).append('/').append(folderId).append('/').append(fileId);
+        fileUUID = tmp.toString();
+    }
+    
+    @Override
+    public String toString() {
+        return fileUUID;
+    }
+    
+    public static InfostoreUUID newUUID(int contextId, int userId, IndexDocument<DocumentMetadata> document) {
+        DocumentMetadata file = document.getObject();
+        
+        return newUUID(contextId, userId, file.getFolderId(), file.getId());
+    }
+    
+    public static InfostoreUUID newUUID(int contextId, int userId, long folderId, int fileId) {
+        return new InfostoreUUID(contextId, userId, folderId, fileId);
     }
 
-    @Override
-    public String getPattern() {
-        return pattern;
-    }
-
-    @Override
-    public void accept(SearchTermVisitor visitor) {
-        visitor.visit(this);
-    }
 }

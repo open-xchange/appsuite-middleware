@@ -47,64 +47,45 @@
  *
  */
 
-package com.openexchange.index.infostore;
-
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.groupware.infostore.utils.Metadata;
-import com.openexchange.index.IndexField;
+package com.openexchange.groupware.attach.index;
 
 
 /**
- * {@link InfostoreIndexField}
- *
+ * {@link AttachmentUUID}
+ * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public enum InfostoreIndexField implements IndexField {
-    
-    UUID(null),
-    FOLDER(Metadata.FOLDER_ID_LITERAL),
-    ID(Metadata.ID_LITERAL),
-    CREATED_BY(Metadata.CREATED_BY_LITERAL),
-    MODIFIED_BY(Metadata.MODIFIED_BY_LITERAL),
-    CREATED(Metadata.CREATION_DATE_LITERAL),
-    LAST_MODIFIED(Metadata.LAST_MODIFIED_LITERAL),
-    TITLE(Metadata.TITLE_LITERAL),
-    VERSION(Metadata.VERSION_LITERAL),
-    DESCRIPTION(Metadata.DESCRIPTION_LITERAL),
-    URL(Metadata.URL_LITERAL),
-    SEQUENCE_NUMBER(Metadata.SEQUENCE_NUMBER_LITERAL),
-    CATEGORIES(Metadata.CATEGORIES_LITERAL),
-    COLOR_LABEL(Metadata.COLOR_LABEL_LITERAL),
-    VERSION_COMMENT(Metadata.VERSION_COMMENT_LITERAL),
-    NUMBER_OF_VERSIONS(Metadata.NUMBER_OF_VERSIONS_LITERAL),
-    FILESTORE_LOCATION(Metadata.FILESTORE_LOCATION_LITERAL);
+public class AttachmentUUID {
 
+    private final String uuid;
     
-    
-    private static final Map<Metadata, InfostoreIndexField> mapping = new HashMap<Metadata, InfostoreIndexField>();
-    
-    static {
-        for (InfostoreIndexField field : values()) {
-            Metadata metadataField = field.getMetadataField();
-            if (metadataField != null) {
-                mapping.put(metadataField, field);
-            }            
-        }
-    }
-    
-    private final Metadata metadataField;
-    
-    private InfostoreIndexField(Metadata metadataField) {
-        this.metadataField = metadataField;
-    }
-    
-    public Metadata getMetadataField() {
-        return metadataField;
-    }
-    
-    public static InfostoreIndexField getByMetadateField(int metadataField) {
-        return mapping.get(metadataField);
+
+    private AttachmentUUID(int contextId, int userId, int module, String account, String folder, String objectId, String attachmentId) {
+        super();
+        StringBuilder tmp = new StringBuilder(64);
+        tmp.append("attachments/");
+        tmp.append(contextId).append('/');
+        tmp.append(userId).append('/');
+        tmp.append(module).append('/');
+        tmp.append(account).append('/');
+        tmp.append(folder).append('/').append(objectId).append('/').append(attachmentId);
+        uuid = tmp.toString();
     }
 
+    public static AttachmentUUID newUUID(int contextId, int userId, int module, String account, String folder, String objectId, String attachmentId) {
+        return new AttachmentUUID(contextId, userId, module, account, folder, objectId, attachmentId);
+    }
+    
+    public static AttachmentUUID newUUID(int contextId, int userId, Attachment attachment) {
+        return new AttachmentUUID(contextId, userId, attachment.getModule(), 
+            attachment.getAccount(),
+            attachment.getFolder(),
+            attachment.getObjectId(),
+            attachment.getAttachmentId());
+    }
+    
+    @Override
+    public String toString() {        
+        return uuid;
+    }
 }

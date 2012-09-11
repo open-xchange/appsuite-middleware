@@ -60,6 +60,10 @@ import org.apache.solr.common.SolrInputDocument;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
+import com.openexchange.groupware.attach.index.Attachment;
+import com.openexchange.groupware.attach.index.AttachmentIndexField;
+import com.openexchange.groupware.attach.index.AttachmentUUID;
+import com.openexchange.groupware.attach.index.SearchTerm;
 import com.openexchange.index.FacetParameters;
 import com.openexchange.index.IndexConstants;
 import com.openexchange.index.IndexDocument;
@@ -68,10 +72,6 @@ import com.openexchange.index.IndexResult;
 import com.openexchange.index.Indexes;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.SearchHandler;
-import com.openexchange.index.attachments.Attachment;
-import com.openexchange.index.attachments.AttachmentIndexField;
-import com.openexchange.index.attachments.AttachmentUUID;
-import com.openexchange.index.attachments.SearchTerm;
 import com.openexchange.index.solr.internal.AbstractSolrIndexAccess;
 import com.openexchange.index.solr.internal.Services;
 import com.openexchange.index.solr.internal.SolrIndexResult;
@@ -111,6 +111,10 @@ public class SolrAttachmentIndexAccess extends AbstractSolrIndexAccess<Attachmen
 
     @Override
     public void addEnvelopeData(Collection<IndexDocument<Attachment>> documents) throws OXException {
+        if (documents.isEmpty()) {
+            return;
+        }
+        
         List<SolrInputDocument> inputDocuments = new ArrayList<SolrInputDocument>();
         for (IndexDocument<Attachment> document : documents) {
             inputDocuments.add(convertToDocument(document));
@@ -126,6 +130,10 @@ public class SolrAttachmentIndexAccess extends AbstractSolrIndexAccess<Attachmen
 
     @Override
     public void addContent(Collection<IndexDocument<Attachment>> documents, boolean full) throws OXException {
+        if (documents.isEmpty()) {
+            return;
+        }
+        
         List<SolrInputDocument> inputDocuments = new ArrayList<SolrInputDocument>();
         for (IndexDocument<Attachment> document : documents) {
             inputDocuments.add(convertToDocument(document));
@@ -141,6 +149,10 @@ public class SolrAttachmentIndexAccess extends AbstractSolrIndexAccess<Attachmen
 
     @Override
     public void addAttachments(Collection<IndexDocument<Attachment>> documents, boolean full) throws OXException {
+        if (documents.isEmpty()) {
+            return;
+        }
+        
         List<SolrInputDocument> inputDocuments = new ArrayList<SolrInputDocument>();
         for (IndexDocument<Attachment> document : documents) {
             inputDocuments.add(convertToDocument(document));
@@ -168,7 +180,7 @@ public class SolrAttachmentIndexAccess extends AbstractSolrIndexAccess<Attachmen
         List<IndexDocument<Attachment>> documents = indexResult.getResults();
         Set<String> uuids = new HashSet<String>(documents.size());
         for (IndexDocument<Attachment> document : documents) {
-            uuids.add(AttachmentUUID.newUUID(document.getObject()).toString());
+            uuids.add(AttachmentUUID.newUUID(contextId, userId, document.getObject()).toString());
         }
         
         String deleteQuery = buildQueryStringWithOr(SolrAttachmentField.UUID.solrName(), uuids);
@@ -290,7 +302,7 @@ public class SolrAttachmentIndexAccess extends AbstractSolrIndexAccess<Attachmen
     }  
 
     private SolrInputDocument convertToDocument(IndexDocument<Attachment> document) throws OXException {
-        return SolrAttachmentDocumentConverter.convertStatic(document);
+        return SolrAttachmentDocumentConverter.convertStatic(contextId, userId, document);
     }
 
 }

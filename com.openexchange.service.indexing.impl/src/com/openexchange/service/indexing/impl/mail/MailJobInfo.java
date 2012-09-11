@@ -86,6 +86,11 @@ public final class MailJobInfo extends JobInfo {
      */
     public final String folder;
     
+    /**
+     * Shall this job be executed with forced behavior.
+     */
+    public boolean force;
+    
     private String uniqueId = null;
     
 
@@ -99,6 +104,7 @@ public final class MailJobInfo extends JobInfo {
         login = builder.login;
         password = builder.password;
         folder = builder.folder;
+        force = builder.force;
     }
     
     @Override
@@ -129,7 +135,10 @@ public final class MailJobInfo extends JobInfo {
         sb.append(", accountId=").append(accountId);
         if (login != null) {
             sb.append(", ").append("login=").append(login);
-        }        
+        }
+        if (folder != null) {
+            sb.append(", ").append("folder=").append(folder);
+        }
         sb.append('}');
         
         return sb.toString();
@@ -161,6 +170,8 @@ public final class MailJobInfo extends JobInfo {
         protected String password;
         
         protected String folder;
+        
+        protected boolean force = false;
 
         /**
          * Initializes a new {@link Builder}.
@@ -204,6 +215,11 @@ public final class MailJobInfo extends JobInfo {
         
         public Builder folder(final String folder) {
             this.folder = folder;
+            return this;
+        }
+        
+        public Builder force() {
+            force = true;
             return this;
         }
 

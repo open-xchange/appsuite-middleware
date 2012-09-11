@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.smal.impl.processor;
 
-import static com.openexchange.index.mail.MailUtility.releaseAccess;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -73,6 +72,7 @@ import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.index.MailUtility;
 import com.openexchange.mail.smal.impl.DebugInfo;
 import com.openexchange.mail.smal.impl.SmalMailAccess;
 import com.openexchange.mail.smal.impl.SmalServiceLookup;
@@ -213,7 +213,7 @@ public class Processor {
                 LOG.error(e.getMessage(), e);
             } finally {
                 SmalMailAccess.closeUnwrappedInstance(mailAccess);
-                releaseAccess(facade, indexAccess);
+                MailUtility.releaseAccess(facade, indexAccess);
             }
         }
         

@@ -47,22 +47,32 @@
  *
  */
 
-package com.openexchange.index.attachments;
+package com.openexchange.groupware.attach.index;
+
 
 
 /**
- * {@link SearchTerm}
+ * {@link ORTerm}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public abstract class SearchTerm<T> {
+public class ORTerm extends SearchTerm<SearchTerm<?>[]> {
     
-    public SearchTerm() {
-        super();
-    }
+    private final SearchTerm<?>[] terms;
     
-    public abstract T getPattern();
-    
-    public abstract void accept(SearchTermVisitor visitor);
 
+    public ORTerm(SearchTerm<?>[] terms) {
+        super();
+        this.terms = terms;
+    }
+
+    @Override
+    public SearchTerm<?>[] getPattern() {        
+        return terms;
+    }
+
+    @Override
+    public void accept(SearchTermVisitor visitor) {
+        visitor.visit(this);
+    }
 }

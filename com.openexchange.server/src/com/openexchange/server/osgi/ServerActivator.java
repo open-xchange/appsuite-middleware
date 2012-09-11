@@ -139,6 +139,7 @@ import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.id.IDGeneratorService;
+import com.openexchange.index.IndexFacadeService;
 import com.openexchange.log.LogFactory;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.mail.MailCounterImpl;
@@ -457,6 +458,8 @@ public final class ServerActivator extends HousekeepingActivator {
          * getNeededServices(), because publishing bundle needs the HttpService which is in turn provided by server
          */
         track(FileMetadataParserService.class, new ServiceAdderTrackerCustomizer(context));
+        
+        track(IndexFacadeService.class, new IndexFacadeCustomizer(context));
 
         // Start up server the usual way
         starter.start();

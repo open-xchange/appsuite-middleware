@@ -47,54 +47,31 @@
  *
  */
 
-package com.openexchange.index.mail;
+package com.openexchange.groupware.attach.index;
 
-import com.openexchange.mail.MailPath;
-import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
- * {@link MailUUID} - Represents a mail's UUID in index storage.
+ * {@link ANDTerm}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MailUUID {
+public class ANDTerm extends SearchTerm<SearchTerm<?>[]> {
+    
+    private final SearchTerm<?>[] terms;
+    
 
-    // FIXME: Modify like AttachmentUUID
-    private final String mailUUID;
-
-    /**
-     * Initializes a new {@link MailUUID}.
-     *
-     * @param contextId The context identifier
-     * @param userId The user identifier
-     * @param accountId The account identifier
-     * @param fullName The folder full name
-     * @param mailId The mail identifier
-     */
-    public MailUUID(final int contextId, final int userId, final int accountId, final String fullName, final String mailId) {
+    public ANDTerm(SearchTerm<?>[] terms) {
         super();
-        final StringBuilder tmp = new StringBuilder(64);
-        tmp.append(contextId).append(MailPath.SEPERATOR).append(userId).append(MailPath.SEPERATOR);
-        tmp.append(MailPath.getMailPath(accountId, fullName, mailId));
-        mailUUID = tmp.toString();
-    }
-
-    public String getUUID() {
-        return mailUUID;
+        this.terms = terms;
     }
 
     @Override
-    public String toString() {
-        return mailUUID;
-    }
-    
-    public static MailUUID newUUID(int contextId, int userId, int accountId, String fullName, String mailId) {
-        return new MailUUID(contextId, userId, accountId, fullName, mailId);
-    }
-    
-    public static MailUUID newUUID(int contextId, int userId, MailMessage message) {
-        return new MailUUID(contextId, userId, message.getAccountId(), message.getFolder(), message.getMailId());
+    public SearchTerm<?>[] getPattern() {        
+        return terms;
     }
 
+    @Override
+    public void accept(SearchTermVisitor visitor) {
+        visitor.visit(this);
+    }
 }

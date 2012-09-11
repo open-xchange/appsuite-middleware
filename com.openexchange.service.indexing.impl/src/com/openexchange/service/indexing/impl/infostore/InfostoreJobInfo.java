@@ -62,11 +62,11 @@ public class InfostoreJobInfo extends JobInfo {
     
     private static final long serialVersionUID = 2186833384874500056L;
     
-    public final String service;
-    
     public final String account;
     
-    public final String folder;
+    public final long folder;
+    
+    public boolean force;
     
     private String uniqueId = null;
 
@@ -78,9 +78,9 @@ public class InfostoreJobInfo extends JobInfo {
      */
     private InfostoreJobInfo(Builder builder) {
         super(builder);
-        service = builder.service;
         account = builder.account;
         folder = builder.folder;
+        force = builder.force;
     }
 
     @Override
@@ -92,20 +92,13 @@ public class InfostoreJobInfo extends JobInfo {
             sb.append('/');
             sb.append(userId);
             
-            if (service != null) {
-                sb.append('/');
-                sb.append(service);
-            }
-            
             if (account != null) {
                 sb.append('/');
                 sb.append(account);
             }
             
-            if (folder != null) {
-                sb.append('/');
-                sb.append(folder);
-            }
+            sb.append('/');
+            sb.append(folder);
             
             uniqueId = sb.toString();
         }
@@ -123,12 +116,12 @@ public class InfostoreJobInfo extends JobInfo {
     }
     
     public static final class Builder extends JobInfoBuilder<Builder> {
-        
-        protected String service;
-        
+
         protected String account;
         
-        protected String folder;
+        protected long folder;
+        
+        protected boolean force = false;
 
         /**
          * Initializes a new {@link Builder}.
@@ -138,18 +131,18 @@ public class InfostoreJobInfo extends JobInfo {
             super(jobClass);
         }
         
-        public Builder service(String service) {
-            this.service = service;
-            return this;
-        }
-        
         public Builder account(String account) {
             this.account = account;
             return this;
         }
         
-        public Builder folder(String folder) {
+        public Builder folder(long folder) {
             this.folder = folder;
+            return this;
+        }
+        
+        public Builder force() {
+            force = true;
             return this;
         }
 

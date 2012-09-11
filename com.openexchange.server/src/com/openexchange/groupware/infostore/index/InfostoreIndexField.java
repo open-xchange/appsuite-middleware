@@ -47,20 +47,64 @@
  *
  */
 
-package com.openexchange.index.attachments;
+package com.openexchange.groupware.infostore.index;
+
+import java.util.HashMap;
+import java.util.Map;
+import com.openexchange.index.IndexField;
+import com.openexchange.groupware.infostore.utils.Metadata;
 
 
 /**
- * {@link SearchTermVisitor}
+ * {@link InfostoreIndexField}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public interface SearchTermVisitor {
+public enum InfostoreIndexField implements IndexField {
     
-    void visit(ORTerm term);
-    
-    void visit(ANDTerm term);
+    UUID(null),
+    FOLDER(Metadata.FOLDER_ID_LITERAL),
+    ID(Metadata.ID_LITERAL),
+    CREATED_BY(Metadata.CREATED_BY_LITERAL),
+    MODIFIED_BY(Metadata.MODIFIED_BY_LITERAL),
+    CREATED(Metadata.CREATION_DATE_LITERAL),
+    LAST_MODIFIED(Metadata.LAST_MODIFIED_LITERAL),
+    TITLE(Metadata.TITLE_LITERAL),
+    VERSION(Metadata.VERSION_LITERAL),
+    DESCRIPTION(Metadata.DESCRIPTION_LITERAL),
+    URL(Metadata.URL_LITERAL),
+    SEQUENCE_NUMBER(Metadata.SEQUENCE_NUMBER_LITERAL),
+    CATEGORIES(Metadata.CATEGORIES_LITERAL),
+    COLOR_LABEL(Metadata.COLOR_LABEL_LITERAL),
+    VERSION_COMMENT(Metadata.VERSION_COMMENT_LITERAL),
+    NUMBER_OF_VERSIONS(Metadata.NUMBER_OF_VERSIONS_LITERAL),
+    FILESTORE_LOCATION(Metadata.FILESTORE_LOCATION_LITERAL);
 
-    void visit(ObjectIdTerm objectIdTerm);
+    
+    
+    private static final Map<Metadata, InfostoreIndexField> mapping = new HashMap<Metadata, InfostoreIndexField>();
+    
+    static {
+        for (InfostoreIndexField field : values()) {
+            Metadata metadataField = field.getMetadataField();
+            if (metadataField != null) {
+                mapping.put(metadataField, field);
+            }            
+        }
+    }
+    
+    private final Metadata metadataField;
+    
+    private InfostoreIndexField(Metadata metadataField) {
+        this.metadataField = metadataField;
+    }
+    
+    public Metadata getMetadataField() {
+        return metadataField;
+    }
+    
+    public static InfostoreIndexField getByMetadateField(int metadataField) {
+        return mapping.get(metadataField);
+    }
 
 }

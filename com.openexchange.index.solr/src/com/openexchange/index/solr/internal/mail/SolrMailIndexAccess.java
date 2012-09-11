@@ -71,12 +71,12 @@ import com.openexchange.index.Indexes;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.QueryParameters.Order;
 import com.openexchange.index.SearchHandler;
-import com.openexchange.index.mail.MailIndexField;
-import com.openexchange.index.mail.MailUUID;
 import com.openexchange.index.solr.internal.AbstractSolrIndexAccess;
 import com.openexchange.index.solr.internal.Services;
 import com.openexchange.index.solr.internal.SolrIndexResult;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.index.MailIndexField;
+import com.openexchange.mail.index.MailUUID;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.solr.SolrCoreIdentifier;
 import com.openexchange.solr.SolrProperties;
@@ -114,6 +114,10 @@ public class SolrMailIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
 
     @Override
     public void addEnvelopeData(Collection<IndexDocument<MailMessage>> documents) throws OXException {
+        if (documents.isEmpty()) {
+            return;
+        }
+        
         List<SolrInputDocument> inputDocuments = new ArrayList<SolrInputDocument>();
         for (IndexDocument<MailMessage> document : documents) {
             inputDocuments.add(convertToDocument(document));
@@ -129,6 +133,10 @@ public class SolrMailIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
 
     @Override
     public void addContent(Collection<IndexDocument<MailMessage>> documents, boolean full) throws OXException {
+        if (documents.isEmpty()) {
+            return;
+        }
+        
         List<SolrInputDocument> inputDocuments = new ArrayList<SolrInputDocument>();
         for (IndexDocument<MailMessage> document : documents) {
             inputDocuments.add(convertToDocument(document));
@@ -144,6 +152,10 @@ public class SolrMailIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
 
     @Override
     public void addAttachments(Collection<IndexDocument<MailMessage>> documents, boolean full) throws OXException {
+        if (documents.isEmpty()) {
+            return;
+        }
+        
         List<SolrInputDocument> inputDocuments = new ArrayList<SolrInputDocument>();
         for (IndexDocument<MailMessage> document : documents) {
             inputDocuments.add(convertToDocument(document));

@@ -51,10 +51,10 @@ package com.openexchange.index.solr;
 
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
-import com.openexchange.index.attachments.ANDTerm;
-import com.openexchange.index.attachments.ORTerm;
-import com.openexchange.index.attachments.ObjectIdTerm;
-import com.openexchange.index.attachments.SearchTerm;
+import com.openexchange.groupware.attach.index.ANDTerm;
+import com.openexchange.groupware.attach.index.ORTerm;
+import com.openexchange.groupware.attach.index.ObjectIdTerm;
+import com.openexchange.groupware.attach.index.SearchTerm;
 import com.openexchange.index.solr.internal.attachments.SolrAttachmentField;
 import com.openexchange.index.solr.internal.attachments.SolrAttachmentSearchTermVisitor;
 

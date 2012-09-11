@@ -49,11 +49,10 @@
 
 package com.openexchange.service.indexing.impl.internal.groupware;
 
+import java.io.File;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
@@ -61,6 +60,7 @@ import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.index.IndexAccess;
+import com.openexchange.index.IndexConstants;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.service.indexing.IndexingService;
 import com.openexchange.service.indexing.JobInfo;
@@ -102,15 +102,14 @@ public class SessionEventHandler implements EventHandler {
                 IndexingService indexingService = Services.getService(IndexingService.class);
                 for (UserizedFolder folder : folders.getResponse()) {
                     String id = folder.getID();
-                    FolderID folderID = new FolderID(id);
-                    // FIXME: infostore service missing in db table
-                    if (!infostoreAccess.isIndexed(folderID.getAccountId(), folderID.getFolderId())) {
+                    long folderId = Long.parseLong(folder.getID());
+                    
+                    if (!infostoreAccess.isIndexed(IndexConstants.DEFAULT_ACCOUNT, id)) {
                         JobInfo jobInfo = InfostoreJobInfo.newBuilder(InfostoreFolderJob.class)
                             .contextId(session.getContextId())
                             .userId(session.getUserId())
-                            .service(folderID.getService())
-                            .account(folderID.getAccountId())
-                            .folder(folderID.getFolderId())
+                            .account(IndexConstants.DEFAULT_ACCOUNT)
+                            .folder(folderId)
                             .build();
                         
                         indexingService.scheduleJob(jobInfo, null, -1L);
