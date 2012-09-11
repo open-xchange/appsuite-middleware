@@ -137,6 +137,8 @@ Provides:      open-xchange-xml = %{version}
 Obsoletes:     open-xchange-xml <= %{version}
 Provides:      open-xchange-passwordchange-servlet = %{version}
 Obsoletes:     open-xchange-passwordchange-servlet <= %{version}
+Provides:      open-xchange-file-storage-webdav = %{version}
+Obsoletes:     open-xchange-file-storage-webdav <= %{version}
 
 
 %description
