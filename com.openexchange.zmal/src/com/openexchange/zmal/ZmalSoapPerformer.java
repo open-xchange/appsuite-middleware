@@ -59,6 +59,7 @@ import org.dom4j.QName;
 import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.zmal.config.ZmalConfig;
 import com.openexchange.zmal.config.ZmalConfig.PreauthInfo;
+import com.zimbra.common.auth.ZAuthToken;
 import com.zimbra.common.service.ServiceException;
 import com.zimbra.common.soap.AccountConstants;
 import com.zimbra.common.soap.AdminConstants;
@@ -101,6 +102,7 @@ public class ZmalSoapPerformer {
     private String mTargetAccountName;
     private String mPassword;
     private String mAuthToken;
+    private ZAuthToken zAuthToken;
     private ElementFactory mFactory;
     private boolean mUseSession;
     private boolean mUseJson;
@@ -142,6 +144,15 @@ public class ZmalSoapPerformer {
      */
     public String getAuthToken() {
         return mAuthToken;
+    }
+    
+    /**
+     * Gets the Zimbra auth token
+     *
+     * @return The Zimbra auth token
+     */
+    public ZAuthToken getZAuthToken() {
+        return zAuthToken;
     }
 
     /**
@@ -241,6 +252,7 @@ public class ZmalSoapPerformer {
         }
         mFactory = (mUseJson ? JSONElement.mFactory : XMLElement.mFactory);
         mAuthToken = null;
+        zAuthToken = null;
         mMailboxName = config.getLogin();
         mPassword = config.getPassword();
         mPreAuth = config.getPreauth();
@@ -298,6 +310,7 @@ public class ZmalSoapPerformer {
         mPassword = null;
         mPreAuth = null;
         mAuthToken = null;
+        zAuthToken = null;
         mFactory = null;
         mUseSession = false;
         mUseJson = false;
@@ -338,7 +351,8 @@ public class ZmalSoapPerformer {
                 <preauth timestamp="1135280708088" expires="0">b248f6cfd027edd45c5369f8490125204772f844</preauth>
                </AuthRequest>
              */
-            auth.addElement(AccountConstants.E_PREAUTH).setText(mPreAuth.preauth).addAttribute("timestamp", mPreAuth.timestamp).addAttribute("expires", mPreAuth.expires);
+            final Element preauth = auth.addElement(AccountConstants.E_PREAUTH).setText(mPreAuth.preauth);
+            preauth.addAttribute("timestamp", mPreAuth.timestamp).addAttribute("expires", mPreAuth.expires);
         }
 
         // Authenticate and get auth token
@@ -348,6 +362,8 @@ public class ZmalSoapPerformer {
         }
         authToken = response.getAttribute(AccountConstants.E_AUTH_TOKEN);
         mAuthToken = authToken;
+        Element eAuthToken = response.getElement(AccountConstants.E_AUTH_TOKEN);
+        zAuthToken = new ZAuthToken(eAuthToken, false);
         return authToken;
     }
 
