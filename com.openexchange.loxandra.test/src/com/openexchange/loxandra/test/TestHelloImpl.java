@@ -60,6 +60,6 @@ public class TestHelloImpl implements TestHelloService {
 
 	@Override
 	public String sayHello() {
-		return "Hey bitch!";
+		return "Hey snitch!";
 	}
 }
