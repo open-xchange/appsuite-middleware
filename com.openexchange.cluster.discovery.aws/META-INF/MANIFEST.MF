@@ -7,8 +7,6 @@ Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.amazonaws.services.ec2,
  com.amazonaws.services.ec2.model,
- com.amazonaws.services.elasticloadbalancing,
- com.amazonaws.services.elasticloadbalancing.model,
  com.openexchange.cluster.discovery,
  com.openexchange.exception,
  com.openexchange.log,
