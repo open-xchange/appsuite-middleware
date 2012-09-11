@@ -118,7 +118,7 @@ Authors:
 %package -n	open-xchange-meta-mobility
 Group:          Applications/Productivity
 Summary:	The Open-Xchange Meta package for Business Mobility
-Requires:	open-xchange-eas, open-xchange-usm, open-xchange-help-usm-eas, open-xchange-eas-provisioning-mail, open-xchange-eas-provisioning-ui
+Requires:	open-xchange-eas, open-xchange-usm, open-xchange-help-usm-eas, open-xchange-eas-provisioning-mail, open-xchange-eas-provisioning-gui
 
 
 %description -n open-xchange-meta-mobility
