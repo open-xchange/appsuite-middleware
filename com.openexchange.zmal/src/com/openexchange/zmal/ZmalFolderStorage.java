@@ -55,18 +55,19 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.TimeZone;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.mail.Quota;
-import com.openexchange.mail.Quota.Type;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced2;
 import com.openexchange.mail.api.MailFolderStorage;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.UserService;
 import com.openexchange.zmal.config.ZmalConfig;
 import com.openexchange.zmal.converters.ZFolderConverter;
 import com.zimbra.common.service.ServiceException;
@@ -75,8 +76,6 @@ import com.zimbra.common.soap.Element.JSONElement;
 import com.zimbra.common.soap.Element.XMLElement;
 import com.zimbra.common.soap.MailConstants;
 import com.zimbra.common.soap.SoapProtocol;
-import com.zimbra.cs.account.soap.SoapProvisioning;
-import com.zimbra.cs.account.soap.SoapProvisioning.QuotaUsage;
 import com.zimbra.cs.zclient.ZFolder;
 import com.zimbra.cs.zclient.ZFolder.View;
 import com.zimbra.cs.zclient.ZGrant;
@@ -110,6 +109,7 @@ public final class ZmalFolderStorage extends MailFolderStorage implements IMailF
     private Character separator;
     private final String authToken;
     private final String url;
+    private TimeZone tz;
 
 
     /**
@@ -132,6 +132,26 @@ public final class ZmalFolderStorage extends MailFolderStorage implements IMailF
         zmalConfig = zmalAccess.getZmalConfig();
     }
 
+    private TimeZone getTimeZone() throws OXException {
+        TimeZone t = this.tz;
+        if (null == t) {
+            try {
+                String st;
+                if (session instanceof ServerSession) {
+                    st = ((ServerSession) session).getUser().getTimeZone();
+                } else {
+                    final UserService userService = Services.getService(UserService.class);
+                    st = userService.getUser(session.getUserId(), ctx).getTimeZone();
+                }
+                t = TimeZone.getTimeZone(st);
+                tz = t;
+            } catch (final RuntimeException e) {
+                throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+            }
+        }
+        return t;
+    }
+
     private ZMailbox.Options newOptions() {
         final ZMailbox.Options options = new ZMailbox.Options(authToken, url);
         options.setRequestProtocol(performer.isUseJson() ? SoapProtocol.SoapJS : SoapProtocol.Soap11);
@@ -149,6 +169,26 @@ public final class ZmalFolderStorage extends MailFolderStorage implements IMailF
     }
 
     private ZFolder checkFolder(final String fullName, final ZMailbox mailbox) throws ServiceException, OXException {
+        if (MailFolder.DEFAULT_FOLDER_ID.equals(fullName)) {
+            return mailbox.getUserRoot(); 
+        }
+        if ("INBOX".equals(fullName)) {
+            return mailbox.getInbox();
+        }
+        final ZFolder folder = mailbox.getFolderByPath(fullName);
+        if (null == folder) {
+            throw MailExceptionCode.FOLDER_NOT_FOUND.create(fullName);
+        }
+        return folder;
+    }
+
+    private ZFolder checkFolderById(final String fullName, final ZMailbox mailbox) throws ServiceException, OXException {
+        if (MailFolder.DEFAULT_FOLDER_ID.equals(fullName)) {
+            return mailbox.getUserRoot(); 
+        }
+        if ("INBOX".equals(fullName)) {
+            return mailbox.getInbox();
+        }
         final ZFolder folder = mailbox.getFolderById(fullName);
         if (null == folder) {
             throw MailExceptionCode.FOLDER_NOT_FOUND.create(fullName);
@@ -156,10 +196,11 @@ public final class ZmalFolderStorage extends MailFolderStorage implements IMailF
         return folder;
     }
 
-    private List<String> getAllIds(final String folderId, final ZMailbox mailbox) throws ServiceException {
+    private List<String> getAllIds(final String folderPath, final ZMailbox mailbox) throws ServiceException, OXException {
         // Search for all
-        final ZSearchParams mSearchParams = new ZSearchParams("in:"+folderId);
+        final ZSearchParams mSearchParams = new ZSearchParams("in:"+folderPath);
         mSearchParams.setTypes(ZSearchParams.TYPE_MESSAGE);
+        mSearchParams.setTimeZone(getTimeZone());
         int mSearchPage = 0;
         final List<String> ids = new LinkedList<String>();
         boolean keegoing = true;
@@ -361,7 +402,8 @@ public final class ZmalFolderStorage extends MailFolderStorage implements IMailF
         }
         try {
             final ZMailbox mailbox = new ZMailbox(newOptions());
-            final ZFolder createdFolder = mailbox.createFolder(toCreate.getParentFullname(), toCreate.getName(), View.message, null, toCreate.isSubscribed() ? "*" : "", null);
+            final ZFolder parent = checkFolder(toCreate.getParentFullname(), mailbox);
+            final ZFolder createdFolder = mailbox.createFolder(parent.getId(), toCreate.getName(), View.message, null, toCreate.isSubscribed() ? "*" : "", null);
             return createdFolder.getId();
         } catch (final ServiceException e) {
             throw ZmalException.create(ZmalException.Code.SERVICE_ERROR, e, e.getMessage());
@@ -380,7 +422,8 @@ public final class ZmalFolderStorage extends MailFolderStorage implements IMailF
         }
         try {
             final ZMailbox mailbox = new ZMailbox(newOptions());
-            final ZActionResult result = mailbox.renameFolder(fullName, newName);
+            final ZFolder folder = checkFolder(fullName, mailbox);
+            final ZActionResult result = mailbox.renameFolder(folder.getId(), newName);
             final String id = result.getIds();
             return null == id ? fullName : id;
         } catch (final ServiceException e) {
@@ -397,7 +440,9 @@ public final class ZmalFolderStorage extends MailFolderStorage implements IMailF
         }
         try {
             final ZMailbox mailbox = new ZMailbox(newOptions());
-            final ZActionResult result = mailbox.moveFolder(fullName, newFullname);
+            final ZFolder folder = checkFolder(fullName, mailbox);
+            final ZFolder nParent = checkFolder(newFullname.substring(0, newFullname.lastIndexOf('/')), mailbox);
+            final ZActionResult result = mailbox.moveFolder(folder.getId(), nParent.getId());
             final String id = result.getIds();
             return null == id ? fullName : id;
         } catch (final ServiceException e) {
@@ -414,6 +459,7 @@ public final class ZmalFolderStorage extends MailFolderStorage implements IMailF
         }
         try {
             final ZMailbox mailbox = new ZMailbox(newOptions());
+            final ZFolder folder = checkFolder(fullName, mailbox);
             List<ZGrant> acl = null;
             if (toUpdate.containsPermissions()) {
                 final MailPermission[] permissions = toUpdate.getPermissions();
@@ -427,9 +473,9 @@ public final class ZmalFolderStorage extends MailFolderStorage implements IMailF
                     }
                 }
             }
-            final ZActionResult result = mailbox.updateFolder(fullName, null, null, null, toUpdate.isSubscribed() ? "*" : "", acl);
+            final ZActionResult result = mailbox.updateFolder(folder.getId(), null, null, null, toUpdate.isSubscribed() ? "*" : "", acl);
             final String id = result.getIds();
-            return null == id ? fullName : id;
+            return checkFolderById(null == id ? fullName : id, mailbox).getPath();
         } catch (final ServiceException e) {
             throw ZmalException.create(ZmalException.Code.SERVICE_ERROR, e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -444,11 +490,12 @@ public final class ZmalFolderStorage extends MailFolderStorage implements IMailF
         }
         try {
             final ZMailbox mailbox = new ZMailbox(newOptions());
+            final ZFolder folder = checkFolder(fullName, mailbox);
             if (hardDelete || isTrash(fullName, mailbox)) {
-                mailbox.deleteFolder(fullName);
+                mailbox.deleteFolder(folder.getId());
                 return fullName;
             }
-            final ZActionResult result = mailbox.trashFolder(fullName);
+            final ZActionResult result = mailbox.trashFolder(folder.getId());
             final String id = result.getIds();
             return null == id ? fullName : id;
         } catch (final ServiceException e) {
@@ -465,10 +512,12 @@ public final class ZmalFolderStorage extends MailFolderStorage implements IMailF
         }
         try {
             final ZMailbox mailbox = new ZMailbox(newOptions());
+            final ZFolder folder = checkFolder(fullName, mailbox);
             if (hardDelete || isTrash(fullName, mailbox)) {
-                mailbox.emptyFolder(toCSV(getAllIds(fullName, mailbox)), true);
+                mailbox.emptyFolder(toCSV(getAllIds(folder.getPath(), mailbox)), true);
+            } else {
+                mailbox.trashMessage(toCSV(getAllIds(folder.getPath(), mailbox)));
             }
-            mailbox.moveMessage(toCSV(getAllIds(fullName, mailbox)), mailbox.getTrash().getId());
         } catch (final ServiceException e) {
             throw ZmalException.create(ZmalException.Code.SERVICE_ERROR, e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -516,7 +565,7 @@ public final class ZmalFolderStorage extends MailFolderStorage implements IMailF
     @Override
     public String getDraftsFolder() throws OXException {
         try {
-            return new ZMailbox(newOptions()).getDrafts().getId();
+            return new ZMailbox(newOptions()).getDrafts().getPath();
         } catch (final ServiceException e) {
             throw ZmalException.create(ZmalException.Code.SERVICE_ERROR, e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -527,7 +576,7 @@ public final class ZmalFolderStorage extends MailFolderStorage implements IMailF
     @Override
     public String getSentFolder() throws OXException {
         try {
-            return new ZMailbox(newOptions()).getSent().getId();
+            return new ZMailbox(newOptions()).getSent().getPath();
         } catch (final ServiceException e) {
             throw ZmalException.create(ZmalException.Code.SERVICE_ERROR, e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -538,7 +587,7 @@ public final class ZmalFolderStorage extends MailFolderStorage implements IMailF
     @Override
     public String getSpamFolder() throws OXException {
         try {
-            return new ZMailbox(newOptions()).getSpam().getId();
+            return new ZMailbox(newOptions()).getSpam().getPath();
         } catch (final ServiceException e) {
             throw ZmalException.create(ZmalException.Code.SERVICE_ERROR, e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -549,7 +598,7 @@ public final class ZmalFolderStorage extends MailFolderStorage implements IMailF
     @Override
     public String getTrashFolder() throws OXException {
         try {
-            return new ZMailbox(newOptions()).getTrash().getId();
+            return new ZMailbox(newOptions()).getTrash().getPath();
         } catch (final ServiceException e) {
             throw ZmalException.create(ZmalException.Code.SERVICE_ERROR, e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -564,20 +613,7 @@ public final class ZmalFolderStorage extends MailFolderStorage implements IMailF
 
     @Override
     public com.openexchange.mail.Quota[] getQuotas(final String fullName, final com.openexchange.mail.Quota.Type[] types) throws OXException {
-        try {
-            final SoapProvisioning.Options options = new SoapProvisioning.Options(authToken, performer.getAdminUrl());
-            final SoapProvisioning provisioning = new SoapProvisioning(options);
-            final List<QuotaUsage> quotaUsages = provisioning.getQuotaUsage(performer.getServer());
-            final List<com.openexchange.mail.Quota> ret = new ArrayList<Quota>(quotaUsages.size());
-            for (final QuotaUsage quotaUsage : quotaUsages) {
-                ret.add(new Quota(quotaUsage.getLimit(), quotaUsage.getUsed(), Type.valueOf(quotaUsage.getName())));
-            }
-            return ret.toArray(new com.openexchange.mail.Quota[0]);
-        } catch (final ServiceException e) {
-            throw ZmalException.create(ZmalException.Code.SERVICE_ERROR, e, e.getMessage());
-        } catch (final RuntimeException e) {
-            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
+        return com.openexchange.mail.Quota.getUnlimitedQuotas(types);
     }
 
     /*

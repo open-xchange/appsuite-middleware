@@ -52,6 +52,8 @@ package com.openexchange.zmal;
 import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import gnu.trove.procedure.TObjectIntProcedure;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -59,7 +61,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicReference;
+import javax.mail.internet.InternetAddress;
 import org.apache.commons.logging.Log;
 import org.dom4j.QName;
 import com.openexchange.exception.OXException;
@@ -69,18 +73,26 @@ import com.openexchange.java.Charsets;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.IMailMessageStorageBatch;
 import com.openexchange.mail.api.IMailMessageStorageExt;
 import com.openexchange.mail.api.MailMessageStorage;
+import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.utils.MailMessageComparator;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.session.Session;
+import com.openexchange.spamhandler.SpamHandler;
+import com.openexchange.spamhandler.SpamHandlerRegistry;
+import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 import com.openexchange.zmal.config.IZmalProperties;
@@ -95,11 +107,15 @@ import com.zimbra.common.soap.Element.XMLElement;
 import com.zimbra.common.soap.SoapProtocol;
 import com.zimbra.cs.zclient.ZConversation;
 import com.zimbra.cs.zclient.ZConversation.ZMessageSummary;
+import com.zimbra.cs.zclient.ZEmailAddress;
+import com.zimbra.cs.zclient.ZFolder;
 import com.zimbra.cs.zclient.ZGetMessageParams;
 import com.zimbra.cs.zclient.ZMailbox;
 import com.zimbra.cs.zclient.ZMailbox.Fetch;
 import com.zimbra.cs.zclient.ZMailbox.SearchSortBy;
+import com.zimbra.cs.zclient.ZMailbox.ZOutgoingMessage;
 import com.zimbra.cs.zclient.ZMessage;
+import com.zimbra.cs.zclient.ZMessage.ZMimePart;
 import com.zimbra.cs.zclient.ZSearchHit;
 import com.zimbra.cs.zclient.ZSearchPagerResult;
 import com.zimbra.cs.zclient.ZSearchParams;
@@ -124,6 +140,7 @@ public final class ZmalMessageStorage extends MailMessageStorage implements IMai
     private final Context ctx;
     private final ZmalConfig zmalConfig;
     private Locale locale;
+    private TimeZone tz;
     private final ZmalFolderStorage zmalFolderStorage;
     private IZmalProperties zmalProperties;
     private final String authToken;
@@ -152,6 +169,40 @@ public final class ZmalMessageStorage extends MailMessageStorage implements IMai
         zmalConfig = zmalAccess.getZmalConfig();
     }
 
+    private ZFolder checkFolder(final String fullName, final ZMailbox mailbox) throws ServiceException, OXException {
+        if (MailFolder.DEFAULT_FOLDER_ID.equals(fullName)) {
+            return mailbox.getUserRoot(); 
+        }
+        if ("INBOX".equals(fullName)) {
+            return mailbox.getInbox();
+        }
+        final ZFolder folder = mailbox.getFolderByPath(fullName);
+        if (null == folder) {
+            throw MailExceptionCode.FOLDER_NOT_FOUND.create(fullName);
+        }
+        return folder;
+    }
+
+    private TimeZone getTimeZone() throws OXException {
+        TimeZone t = this.tz;
+        if (null == t) {
+            try {
+                String st;
+                if (session instanceof ServerSession) {
+                    st = ((ServerSession) session).getUser().getTimeZone();
+                } else {
+                    final UserService userService = Services.getService(UserService.class);
+                    st = userService.getUser(session.getUserId(), ctx).getTimeZone();
+                }
+                t = TimeZone.getTimeZone(st);
+                tz = t;
+            } catch (final RuntimeException e) {
+                throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+            }
+        }
+        return t;
+    }
+
     private MailAccount getMailAccount() throws OXException {
         if (mailAccount == null) {
             try {
@@ -168,10 +219,11 @@ public final class ZmalMessageStorage extends MailMessageStorage implements IMai
         return mailbox.getTrash().getId().equals(id);
     }
 
-    private List<String> getAllIds(final String folderId, final MailSortField sortField, final OrderDirection order, final ZMailbox mailbox) throws ServiceException {
+    private List<String> getAllIds(final String folderPath, final MailSortField sortField, final OrderDirection order, final ZMailbox mailbox) throws ServiceException, OXException {
         // Search for all
-        final ZSearchParams mSearchParams = new ZSearchParams("in:"+folderId);
+        final ZSearchParams mSearchParams = new ZSearchParams("in:"+folderPath);
         mSearchParams.setTypes(ZSearchParams.TYPE_MESSAGE);
+        mSearchParams.setTimeZone(getTimeZone());
         if (null != sortField) {
             final SearchSortBy searchSortBy;
             if (MailSortField.SENT_DATE.equals(sortField) || MailSortField.RECEIVED_DATE.equals(sortField)) {
@@ -268,12 +320,14 @@ public final class ZmalMessageStorage extends MailMessageStorage implements IMai
 
     protected ZMessage getZMessage(final String mailId, final boolean markSeen) throws ServiceException {
         final ZMailbox mailbox = getMailbox();
+        if (markSeen) {
+            mailbox.markMessageRead(mailId, true);
+        }
         final ZGetMessageParams params = new ZGetMessageParams();
         params.setId(mailId);
         params.setMarkRead(markSeen);
         //params.setRawContent(true);
-        final ZMessage message = mailbox.getMessage(params);
-        return message;
+        return mailbox.getMessage(params);
     }
 
     private byte[] getRawZMessage(final String mailId, final boolean markSeen, final ZMailbox optMmailbox) throws ServiceException, OXException {
@@ -283,13 +337,17 @@ public final class ZmalMessageStorage extends MailMessageStorage implements IMai
         params.setMarkRead(markSeen);
         params.setRawContent(true);
         final ZMessage message = mailbox.getMessage(params);
+        if (markSeen) {
+            mailbox.markMessageRead(mailId, true);
+        }
         final String content = message.getContent();
         if (null == content || content.startsWith("http")) {
-            String contentURL = null == content ? message.getContentURL() : content;
+            final String contentURL = null == content ? message.getContentURL() : content;
             return UrlSink.getContent(contentURL, zmalConfig, mailbox);
         }
         // Content available as String
-        final ContentType ct = new ContentType(message.getMimeStructure().getContentType());
+        final ZMimePart structure = message.getMimeStructure();
+        final ContentType ct = null == structure ? ContentType.DEFAULT_CONTENT_TYPE : new ContentType(structure.getContentType());
         if (!ct.startsWith("text/")) {
             return content.getBytes(Charsets.US_ASCII);
         }
@@ -298,10 +356,12 @@ public final class ZmalMessageStorage extends MailMessageStorage implements IMai
     }
 
     @Override
-    public MailMessage[] getThreadSortedMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws OXException {
+    public MailMessage[] getThreadSortedMessages(final String fullName, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws OXException {
         try {
             final ZMailbox mailbox = getMailbox();
-            final ZSearchParams mSearchParams = new ZSearchParams("in:"+folder);
+            final ZFolder folder = checkFolder(fullName, mailbox);
+            final ZSearchParams mSearchParams = new ZSearchParams("inid:"+folder.getId());
+            mSearchParams.setTimeZone(getTimeZone());
             mSearchParams.setTypes(ZSearchParams.TYPE_CONVERSATION);
             if (null != sortField) {
                 final SearchSortBy searchSortBy;
@@ -339,6 +399,8 @@ public final class ZmalMessageStorage extends MailMessageStorage implements IMai
             }
             // Get associated messages
             final ZMessageConverter converter = getConverter();
+            final MailFields fs = new MailFields(fields);
+            final boolean loadContent = fs.contains(MailField.FULL) || fs.contains(MailField.BODY);
             final List<MailMessage> msgs = new ArrayList<MailMessage>(map.size());
             final AtomicReference<OXException> err1 = new AtomicReference<OXException>();
             final AtomicReference<ServiceException> err2 = new AtomicReference<ServiceException>();
@@ -346,15 +408,15 @@ public final class ZmalMessageStorage extends MailMessageStorage implements IMai
             map.forEachEntry(new TObjectIntProcedure<String>() {
 
                 @Override
-                public boolean execute(String mailId, int threadLevel) {
+                public boolean execute(final String mailId, final int threadLevel) {
                     try {
-                        final MailMessage msg = converter.convert(getZMessage(mailId, false));
+                        final MailMessage msg = converter.convert(getZMessage(mailId, false), loadContent, null);
                         msg.setThreadLevel(threadLevel);
                         msgs.add(msg);
                         return true;
-                    } catch (OXException e) {
+                    } catch (final OXException e) {
                         err1.set(e);
-                    } catch (ServiceException e) {
+                    } catch (final ServiceException e) {
                         err2.set(e);
                     } catch (final RuntimeException e) {
                         err3.set(e);
@@ -362,15 +424,15 @@ public final class ZmalMessageStorage extends MailMessageStorage implements IMai
                     return false;
                 }
             });
-            OXException oe = err1.get();
+            final OXException oe = err1.get();
             if (null != oe) {
                 throw oe;
             }
-            ServiceException se = err2.get();
+            final ServiceException se = err2.get();
             if (null != se) {
                 throw se;
             }
-            RuntimeException rte = err3.get();
+            final RuntimeException rte = err3.get();
             if (null != rte) {
                 throw rte;
             }
@@ -423,7 +485,9 @@ public final class ZmalMessageStorage extends MailMessageStorage implements IMai
             // List for identifiers
             final List<String> ids = new LinkedList<String>();
             // Search for all
-            final ZSearchParams mSearchParams = new ZSearchParams("in:"+fullName);
+            final ZFolder folder = checkFolder(fullName, mailbox);
+            final ZSearchParams mSearchParams = new ZSearchParams("in:"+folder.getPath());
+            mSearchParams.setTimeZone(getTimeZone());
             mSearchParams.setTypes(ZSearchParams.TYPE_MESSAGE);
             int mSearchPage = 0;
             boolean keegoing = true;
@@ -445,10 +509,42 @@ public final class ZmalMessageStorage extends MailMessageStorage implements IMai
     }
 
     @Override
+    public MailPart getAttachment(final String folder, final String mailId, final String sequenceId) throws OXException {
+        try {
+            // /service/content/get?id={message-id}[&fmt={fmt-type}][&part={part-name}][&subId={subId}]
+            final StringBuilder sb = new StringBuilder(64);
+            sb.append(zmalConfig.getServer());
+            final int port = zmalConfig.getPort();
+            if (port > 0 && port != URIDefaults.IMAP.getPort()) {
+                sb.append(':').append(port);
+            }
+            // Prepend protocol
+            sb.insert(0, zmalConfig.isSecure() ? "https://" : "http://");
+            sb.append("/service/content/get?id=").append(urlEncode(mailId));
+            if (!isEmpty(sequenceId)) {
+                sb.append("&part=").append(urlEncode(sequenceId));
+            }
+            final byte[] content = UrlSink.getContent(sb.toString(), zmalConfig, getMailbox());
+            
+            
+            // TODO:
+            return null;
+        } catch (final ServiceException e) {
+            throw ZmalException.create(ZmalException.Code.SERVICE_ERROR, e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    @Override
     public MailMessage getMessage(final String folder, final String mailId, final boolean markSeen) throws OXException {
+        return getMessage(mailId, markSeen, true);
+    }
+
+    private MailMessage getMessage(final String mailId, final boolean markSeen, final boolean loadContent) throws OXException {
         try {
             final ZMessage message = getZMessage(mailId, markSeen);
-            return setAccountInfo(getConverter().convert(message)); 
+            return setAccountInfo(getConverter().convert(message, loadContent, Boolean.valueOf(markSeen))); 
         } catch (final ServiceException e) {
             throw ZmalException.create(ZmalException.Code.SERVICE_ERROR, e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -460,10 +556,12 @@ public final class ZmalMessageStorage extends MailMessageStorage implements IMai
     public MailMessage[] getMessages(final String fullName, final String[] mailIds, final MailField[] fields, final String[] headerNames) throws OXException {
         final int length = mailIds.length;
         final MailMessage[] ret = new MailMessage[length];
+        final MailFields fs = new MailFields(fields);
+        final boolean loadContent = fs.contains(MailField.FULL) || fs.contains(MailField.BODY);
         for (int i = 0; i < length; i++) {
             final String mailId = mailIds[i];
             if (null != mailId) {
-                ret[i] = getMessage(fullName, mailId, false);
+                ret[i] = getMessage(mailId, loadContent, loadContent);
             }
         }
         return ret;
@@ -482,9 +580,10 @@ public final class ZmalMessageStorage extends MailMessageStorage implements IMai
                 query.append(" OR msgid:").append(messageIDs[0]);
             }
             final ZSearchParams mSearchParams = new ZSearchParams(query.toString());
+            mSearchParams.setTimeZone(getTimeZone());
             mSearchParams.setTypes(ZSearchParams.TYPE_MESSAGE);
             int mSearchPage = 0;
-            List<String> ids = new LinkedList<String>();
+            final List<String> ids = new LinkedList<String>();
             boolean keegoing = true;
             while (keegoing) {
                 final ZSearchPagerResult pager = mailbox.search(mSearchParams, mSearchPage++, false, false);
@@ -499,7 +598,7 @@ public final class ZmalMessageStorage extends MailMessageStorage implements IMai
             final ZMessageConverter converter = getConverter();
             final List<MailMessage> msgs = new ArrayList<MailMessage>(ids.size());
             for (final String mailId : ids) {
-                msgs.add(converter.convert(getZMessage(mailId, false)));
+                msgs.add(converter.convert(getZMessage(mailId, false), false, null));
             }
             return msgs.toArray(new MailMessage[0]);
         } catch (final ServiceException e) {
@@ -517,6 +616,28 @@ public final class ZmalMessageStorage extends MailMessageStorage implements IMai
             for (final MailMessage msg : msgs) {
                 ids.add(mailbox.addMessage(destFolder, null, null, 0, msg.getSourceBytes(), false));
             }
+            return ids.toArray(new String[0]);
+        } catch (final ServiceException e) {
+            throw ZmalException.create(ZmalException.Code.SERVICE_ERROR, e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    @Override
+    public String[] moveMessages(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast) throws OXException {
+        try {
+            final ZMailbox mailbox = getMailbox();
+            mailbox.moveMessage(toCSV(Arrays.asList(mailIds)), destFolder);
+            
+            
+            
+            
+            final List<String> ids = new ArrayList<String>(mailIds.length);
+            for (final String mailId : mailIds) {
+                ids.add(mailbox.addMessage(destFolder, null, null, 0, getRawZMessage(mailId, false, mailbox), true));
+            }
+            mailbox.deleteMessage(toCSV(Arrays.asList(mailIds)));
             return ids.toArray(new String[0]);
         } catch (final ServiceException e) {
             throw ZmalException.create(ZmalException.Code.SERVICE_ERROR, e, e.getMessage());
@@ -570,18 +691,70 @@ public final class ZmalMessageStorage extends MailMessageStorage implements IMai
     }
 
     @Override
-    public MailMessage[] searchMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws OXException {
+    public MailMessage[] getAllMessages(String fullName, IndexRange indexRange, MailSortField sortField, OrderDirection order, MailField[] fields) throws OXException {
+        if (MailFolder.DEFAULT_FOLDER_ID.equals(fullName)) {
+            return EMPTY_RETVAL;
+        }
         try {
             final ZMailbox mailbox = getMailbox();
+            final ZFolder folder = checkFolder(fullName, mailbox);
+            // Check: http://wiki.zimbra.com/index.php?title=Search_Tips
+            final List<String> ids = getAllIds(folder.getPath(), sortField, order, mailbox);
+            // Get them
+            final MailFields fs = new MailFields(fields);
+            final boolean loadContent = fs.contains(MailField.FULL) || fs.contains(MailField.BODY);
+            final ZMessageConverter converter = getConverter();
+            final List<MailMessage> msgs = new ArrayList<MailMessage>(ids.size());
+            for (final String mailId : ids) {
+                msgs.add(converter.convert(getZMessage(mailId, loadContent), loadContent, Boolean.valueOf(loadContent)));
+            }
+            MailMessage[] mails = msgs.toArray(new MailMessage[0]);
+            if (indexRange != null) {
+                final int fromIndex = indexRange.start;
+                int toIndex = indexRange.end;
+                if ((fromIndex) > mails.length) {
+                    /*
+                     * Return empty iterator if start is out of range
+                     */
+                    return EMPTY_RETVAL;
+                }
+                /*
+                 * Reset end index if out of range
+                 */
+                if (toIndex >= mails.length) {
+                    toIndex = mails.length;
+                }
+                final MailMessage[] tmp = mails;
+                final int retvalLength = toIndex - fromIndex;
+                mails = new MailMessage[retvalLength];
+                System.arraycopy(tmp, fromIndex, mails, 0, retvalLength);
+            }
+            return setAccountInfo(mails);
+        } catch (final ServiceException e) {
+            throw ZmalException.create(ZmalException.Code.SERVICE_ERROR, e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    @Override
+    public MailMessage[] searchMessages(final String fullName, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws OXException {
+        if (MailFolder.DEFAULT_FOLDER_ID.equals(fullName)) {
+            return EMPTY_RETVAL;
+        }
+        try {
+            final ZMailbox mailbox = getMailbox();
+            final ZFolder folder = checkFolder(fullName, mailbox);
             // Check: http://wiki.zimbra.com/index.php?title=Search_Tips
             final List<String> ids;
             if (null == searchTerm) {
-                ids = getAllIds(folder, sortField, order, mailbox);
+                ids = getAllIds(folder.getPath(), sortField, order, mailbox);
             } else {
                 // Search
                 final ZmalSearchTermVisitor visitor = new ZmalSearchTermVisitor();
                 searchTerm.accept(visitor);
-                final ZSearchParams mSearchParams = new ZSearchParams("in:"+folder + " " + visitor.getQuery());
+                final ZSearchParams mSearchParams = new ZSearchParams("in:"+folder.getPath() + " " + visitor.getQuery());
+                mSearchParams.setTimeZone(getTimeZone());
                 mSearchParams.setTypes(ZSearchParams.TYPE_MESSAGE);
                 if (null != sortField) {
                     final SearchSortBy searchSortBy;
@@ -610,10 +783,12 @@ public final class ZmalMessageStorage extends MailMessageStorage implements IMai
                 }
             }
             // Get them
+            final MailFields fs = new MailFields(fields);
+            final boolean loadContent = fs.contains(MailField.FULL) || fs.contains(MailField.BODY);
             final ZMessageConverter converter = getConverter();
             final List<MailMessage> msgs = new ArrayList<MailMessage>(ids.size());
             for (final String mailId : ids) {
-                msgs.add(converter.convert(getZMessage(mailId, false)));
+                msgs.add(converter.convert(getZMessage(mailId, loadContent), loadContent, Boolean.valueOf(loadContent)));
             }
             MailMessage[] mails = msgs.toArray(new MailMessage[0]);
             if (indexRange != null) {
@@ -764,12 +939,82 @@ public final class ZmalMessageStorage extends MailMessageStorage implements IMai
                     final String theFlags = sFlags.toString();
                     mailbox.updateMessage(mailId, null, null, theFlags);
                 }
+                /*
+                 * Check for special spam flag
+                 */
+                if (((flags & MailMessage.FLAG_SPAM) > 0)) {
+                    final SpamHandler spamHandler = SpamHandlerRegistry.getSpamHandlerBySession(session, accountId, ZmalProvider.getInstance());
+                    if (set) {
+                        spamHandler.handleSpam(accountId, folder, mailIds, false, session);
+                        mailbox.markMessageSpam(mailId, true, mailbox.getSpam().getId());
+                    } else {
+                        spamHandler.handleHam(accountId, mailbox.getSpam().getId(), mailIds, false, session);
+                        mailbox.markMessageSpam(mailId, false, mailbox.getInbox().getId());
+                    }
+                }
             }
         } catch (final ServiceException e) {
             throw ZmalException.create(ZmalException.Code.SERVICE_ERROR, e, e.getMessage());
         } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+    }
+
+    @Override
+    public MailMessage saveDraft(final String draftFullname, final ComposedMailMessage draftMail) throws OXException {
+        try {
+            final MailMessage filledMail = MimeMessageConverter.fillComposedMailMessage(draftMail);
+            filledMail.setFlag(MailMessage.FLAG_DRAFT, true);
+            /*
+             * Append message to draft folder
+             */
+            final ZMailbox mailbox = getMailbox();
+            final ZOutgoingMessage msg = new ZOutgoingMessage();
+            // Addresses
+            final List<ZEmailAddress> addresses = new ArrayList<ZEmailAddress>();
+            for (final InternetAddress addr : filledMail.getFrom()) {
+                addresses.add(new ZEmailAddress(addr.getAddress(), null, addr.getPersonal(), ZEmailAddress.EMAIL_TYPE_FROM));
+            }
+            for (final InternetAddress addr : filledMail.getTo()) {
+                addresses.add(new ZEmailAddress(addr.getAddress(), null, addr.getPersonal(), ZEmailAddress.EMAIL_TYPE_TO));
+            }
+            for (final InternetAddress addr : filledMail.getCc()) {
+                addresses.add(new ZEmailAddress(addr.getAddress(), null, addr.getPersonal(), ZEmailAddress.EMAIL_TYPE_CC));
+            }
+            for (final InternetAddress addr : filledMail.getBcc()) {
+                addresses.add(new ZEmailAddress(addr.getAddress(), null, addr.getPersonal(), ZEmailAddress.EMAIL_TYPE_BCC));
+            }
+            msg.setAddresses(addresses);
+            // Subject
+            msg.setSubject(filledMail.getSubject());
+            // Assemble body
+            msg.setMessagePart(toMessagePart(filledMail));
+            // Save draft
+            final ZMessage saveDraft = mailbox.saveDraft(msg, null, mailbox.getDrafts().getId());
+            return getConverter().convert(saveDraft, false, null);
+        } catch (final ServiceException e) {
+            throw ZmalException.create(ZmalException.Code.SERVICE_ERROR, e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            draftMail.cleanUp();
+        }
+    }
+
+    private ZOutgoingMessage.MessagePart toMessagePart(final MailPart part) throws OXException {
+        if (null == part) {
+            return null;
+        }
+        final int count = part.getEnclosedCount();
+        if (count > 0) {
+            final ZOutgoingMessage.MessagePart[] subparts = new ZOutgoingMessage.MessagePart[count];
+            for (int i = 0; i < count; i++) {
+                subparts[i] = toMessagePart(part.getEnclosedMailPart(i));
+            }
+            final String subType = part.getContentType().getSubType();
+            return new ZOutgoingMessage.MessagePart("multipart/" + (isEmpty(subType) ? "mixed" : subType), subparts);
+        }
+        return new ZOutgoingMessage.MessagePart(part.getContentType().toString(), part.getSource());
     }
 
     /**
@@ -810,6 +1055,35 @@ public final class ZmalMessageStorage extends MailMessageStorage implements IMai
             }
         }
         return mailMessages;
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
+
+    private static final String ISO_8859_1 = "ISO-8859-1";
+
+    /**
+     * Generates URL-encoding of specified text.
+     * 
+     * @param text The text
+     * @return The URL-encoded text
+     */
+    private static String urlEncode(final String text) {
+        try {
+            return URLEncoder.encode(text, ISO_8859_1);
+        } catch (final UnsupportedEncodingException e) {
+            // cannot occur
+            return text;
+        }
     }
 
 }

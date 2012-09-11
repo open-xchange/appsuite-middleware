@@ -50,7 +50,6 @@
 package com.openexchange.zmal;
 
 import org.apache.commons.logging.Log;
-import com.zimbra.common.soap.DomUtil;
 import com.zimbra.common.soap.Element;
 import com.zimbra.common.soap.SoapTransport.DebugListener;
 
@@ -73,12 +72,12 @@ public final class ZmalDebugListener implements DebugListener {
 
     @Override
     public void sendSoapMessage(Element envelope) {
-        LOG.info(DomUtil.toString(envelope.toXML(), true));
+        //LOG.info(DomUtil.toString(envelope.toXML(), true));
     }
 
     @Override
     public void receiveSoapMessage(Element envelope) {
-        LOG.info(DomUtil.toString(envelope.toXML(), true));
+        //LOG.info(DomUtil.toString(envelope.toXML(), true));
     }
 
 }

@@ -95,6 +95,20 @@ public class ZFolderConverter {
         session = config.getSession();
     }
 
+    private ZFolder checkFolderById(final String fullName, final ZMailbox mailbox) throws ServiceException, OXException {
+        if (MailFolder.DEFAULT_FOLDER_ID.equals(fullName)) {
+            return mailbox.getUserRoot(); 
+        }
+        if ("INBOX".equals(fullName)) {
+            return mailbox.getInbox();
+        }
+        final ZFolder folder = mailbox.getFolderById(fullName);
+        if (null == folder) {
+            throw MailExceptionCode.FOLDER_NOT_FOUND.create(fullName);
+        }
+        return folder;
+    }
+
     public MailFolder convert(final ZFolder folder, final ZMailbox mailbox) throws OXException {
         if (null == folder) {
             return null;
@@ -102,8 +116,10 @@ public class ZFolderConverter {
         try {
             final MailFolder mailFolder = new MailFolder();
             mailFolder.setSupportsUserFlags(false);
+            mailFolder.setExists(true);
+            mailFolder.setShared(false);
             final String parentId = folder.getParentId();
-            if (null == parentId) {
+            if (mailbox.getUserRoot().getId().equals(folder.getId())) {
                 // Root
                 mailFolder.setRootFolder(true);
                 mailFolder.setName(MailFolder.DEFAULT_FOLDER_NAME);
@@ -111,15 +127,35 @@ public class ZFolderConverter {
                 mailFolder.setParentFullname(null);
                 mailFolder.setDefaultFolder(false);
                 mailFolder.setDefaultFolderType(DefaultFolderType.NONE);
+                mailFolder.setSubfolders(true);
+                mailFolder.setSubscribed(true);
+                mailFolder.setSubscribedSubfolders(true);
+                mailFolder.setHoldsMessages(false);
+                mailFolder.setUnreadMessageCount(-1);
+                mailFolder.setMessageCount(-1);
+                mailFolder.setDeletedMessageCount(-1);
+                mailFolder.setNewMessageCount(-1);
             } else {
                 mailFolder.setRootFolder(false);
                 mailFolder.setName(folder.getName());
-                mailFolder.setParentFullname(parentId);
+                final String inboxId = mailbox.getInbox().getId();
+                if (mailbox.getUserRoot().getId().equals(parentId)) {
+                    mailFolder.setParentFullname(MailFolder.DEFAULT_FOLDER_ID);
+                } else if (inboxId.equals(parentId)) {
+                    mailFolder.setParentFullname("INBOX");
+                } else {
+                    ZFolder parent = folder.getParent();
+                    if (null == parent) {
+                        parent = checkFolderById(parentId, mailbox);
+                    }
+                    mailFolder.setParentFullname(parent.getPath());
+                }
                 final String id = folder.getId();
-                mailFolder.setFullname(id);
-                if (mailbox.getInbox().getId().equals(id)) {
+                mailFolder.setFullname(folder.getPath());
+                if (inboxId.equals(id)) {
                     mailFolder.setDefaultFolder(true);
                     mailFolder.setDefaultFolderType(DefaultFolderType.INBOX);
+                    mailFolder.setFullname("INBOX");
                 } else if (mailbox.getDrafts().getId().equals(id)) {
                     mailFolder.setDefaultFolder(true);
                     mailFolder.setDefaultFolderType(DefaultFolderType.DRAFTS);
@@ -133,45 +169,46 @@ public class ZFolderConverter {
                     mailFolder.setDefaultFolder(false);
                     mailFolder.setDefaultFolderType(DefaultFolderType.NONE);
                 }
-            }
-            mailFolder.setSubscribed(folder.isIMAPSubscribed());
-            mailFolder.setHoldsMessages(true);
-            if (folder.isNoInferiors()) {
-                mailFolder.setHoldsFolders(false);
-                mailFolder.setSubscribedSubfolders(false);
-                mailFolder.setSubfolders(false);
-            } else {
-                mailFolder.setHoldsFolders(true);
-                final List<ZFolder> subFolders = folder.getSubFolders();
-                if (null != subFolders && !subFolders.isEmpty()) {
-                    boolean subscribedSubfolders = false;
-                    for (final ZFolder zFolder : subFolders) {
-                        if (zFolder.isIMAPSubscribed()) {
-                            subscribedSubfolders = true;
-                            break;
-                        }
-                    }
-                    mailFolder.setSubscribedSubfolders(subscribedSubfolders);
-                    mailFolder.setSubfolders(true);
-                } else {
+                mailFolder.setSubscribed(folder.isIMAPSubscribed());
+                mailFolder.setHoldsMessages(true);
+                if (folder.isNoInferiors()) {
+                    mailFolder.setHoldsFolders(false);
                     mailFolder.setSubscribedSubfolders(false);
                     mailFolder.setSubfolders(false);
+                } else {
+                    mailFolder.setHoldsFolders(true);
+                    final List<ZFolder> subFolders = folder.getSubFolders();
+                    if (null != subFolders && !subFolders.isEmpty()) {
+                        boolean subscribedSubfolders = false;
+                        for (final ZFolder zFolder : subFolders) {
+                            if (zFolder.isIMAPSubscribed()) {
+                                subscribedSubfolders = true;
+                                break;
+                            }
+                        }
+                        mailFolder.setSubscribedSubfolders(subscribedSubfolders);
+                        mailFolder.setSubfolders(true);
+                    } else {
+                        mailFolder.setSubscribedSubfolders(false);
+                        mailFolder.setSubfolders(false);
+                    }
                 }
+                final int unreadCount = folder.getUnreadCount();
+                if (unreadCount >= 0) {
+                    mailFolder.setUnreadMessageCount(unreadCount);
+                } else {
+                    mailFolder.setUnreadMessageCount(-1);
+                }
+                final int messageCount = folder.getMessageCount();
+                if (messageCount >= 0) {
+                    mailFolder.setMessageCount(messageCount);
+                } else {
+                    mailFolder.setMessageCount(-1);
+                }
+                mailFolder.setDeletedMessageCount(-1);
+                mailFolder.setNewMessageCount(-1);
             }
-            final int unreadCount = folder.getUnreadCount();
-            if (unreadCount >= 0) {
-                mailFolder.setUnreadMessageCount(unreadCount);
-            } else {
-                mailFolder.setUnreadMessageCount(-1);
-            }
-            final int messageCount = folder.getMessageCount();
-            if (messageCount >= 0) {
-                mailFolder.setMessageCount(messageCount);
-            } else {
-                mailFolder.setMessageCount(-1);
-            }
-            mailFolder.setDeletedMessageCount(-1);
-            mailFolder.setNewMessageCount(-1);
+            // Check ACL
             if (useACLs()) {
                 // Own permission
                 {
@@ -248,11 +285,11 @@ public class ZFolderConverter {
                 }
             } else {
                 final DefaultMailPermission p = new DefaultMailPermission();
+                p.setAllPermission(MailPermission.CREATE_SUB_FOLDERS, MailPermission.READ_ALL_OBJECTS, MailPermission.WRITE_ALL_OBJECTS, MailPermission.DELETE_ALL_OBJECTS);
                 p.setEntity(session.getUserId());
                 p.setGroupPermission(false);
                 mailFolder.setOwnPermission(p);
                 mailFolder.addPermission(p);
-                
             }
             return mailFolder;
         } catch (final ServiceException e) {

@@ -56,8 +56,13 @@ import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import javax.mail.internet.IDNA;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
+import org.mortbay.log.Log;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.IMailProperties;
@@ -67,6 +72,7 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.session.Session;
 import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URIParser;
+import com.openexchange.zmal.Services;
 import com.openexchange.zmal.ZmalCapabilities;
 import com.openexchange.zmal.ZmalException;
 import com.openexchange.zmal.utils.Preauth;
@@ -77,6 +83,8 @@ import com.openexchange.zmal.utils.Preauth;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ZmalConfig extends MailConfig {
+
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(ZmalConfig.class);
 
     private static final String PROTOCOL_ZMAL_SECURE = "zmals";
 
@@ -181,7 +189,7 @@ public final class ZmalConfig extends MailConfig {
      *
      * @return The Zimbra MAL capabilities
      */
-    public ZmalCapabilities getImapCapabilities() {
+    public ZmalCapabilities getZmalCapabilities() {
         return zmalCapabilities;
     }
 
@@ -284,18 +292,53 @@ public final class ZmalConfig extends MailConfig {
             throw MailExceptionCode.CONFIG_ERROR.create("Zimbra mail account must be the primary one.");
         }
         // Gather needed data
-        final long timestamp = ((Long) session.getParameter("")).longValue();
-        final long expires = ((Long) session.getParameter("")).longValue();
-        final String key = (String) session.getParameter("");
-        // Preauth information
-        final Map<String, String> preauthParams = new HashMap<String, String>(4);
-        preauthParams.put("account", login);
-        preauthParams.put("by", "name"); // needs to be part of hmac
-        preauthParams.put("timestamp", Long.toString(timestamp));
-        preauthParams.put("expires", Long.toString(expires));
-        String preauth = Preauth.computePreAuth(preauthParams, key);
-        this.preauth = new PreauthInfo(preauth, timestamp, expires);
+        try {
+            /*-
+             * COMCAST_USERNAME
+             * COMCAST_TIMESTAMP
+             * COMCAST_EXPIRES
+             */
+            final long timestamp = ((Long) session.getParameter("COMCAST_USERNAME")).longValue();
+            final long expires = ((Long) session.getParameter("COMCAST_EXPIRES")).longValue();
+            final String userName = (String) session.getParameter("COMCAST_USERNAME");
+            final ConfigurationService service = Services.getService(ConfigurationService.class);
+            final String key = service.getProperty("com.openexchange.zmal.preauth.key");
+            // Preauth information
+            final Map<String, String> preauthParams = new HashMap<String, String>(4);
+            preauthParams.put("account", login);
+            preauthParams.put("by", "name"); // needs to be part of hmac
+            preauthParams.put("timestamp", Long.toString(timestamp));
+            preauthParams.put("expires", Long.toString(expires));
+            String preauth = Preauth.computePreAuth(preauthParams, key);
+            this.preauth = new PreauthInfo(preauth, timestamp, expires);
+        } catch (final Exception e) {
+            Log.warn("Unable to generate Zimbra preauth.", e);
+            this.preauth = null;
+        }
+        
+        // TODO: Delete
+        // this.password = "password";
+        
         return true;
+    }
+
+    private String computePreAuth(final String username, final String by, final long expires, final long ts, final String key, Properties properties) {
+        StringBuilder ret = new StringBuilder();
+        String input = username + "|" + by + "|" + expires + "|" + ts;
+        try {
+            String hmacSha = (String) properties.get("hmacSha");
+            Mac mac = Mac.getInstance(hmacSha);
+            SecretKeySpec secret = new SecretKeySpec(key.getBytes(), hmacSha);
+            mac.init(secret);
+            byte[] digest = mac.doFinal(input.getBytes());
+            for (byte b : digest) {
+                String tokenByte = String.format("%02x", b);
+                ret.append(tokenByte);
+            }
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
+        return ret.toString();
     }
 
     /**

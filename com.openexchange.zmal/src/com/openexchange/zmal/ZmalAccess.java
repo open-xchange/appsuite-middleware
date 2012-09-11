@@ -50,7 +50,6 @@
 package com.openexchange.zmal;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Properties;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
@@ -63,7 +62,6 @@ import com.openexchange.session.Session;
 import com.openexchange.zmal.config.MailAccountZmalProperties;
 import com.openexchange.zmal.config.ZmalConfig;
 import com.zimbra.common.service.ServiceException;
-import com.zimbra.common.soap.Element;
 
 /**
  * {@link ZmalAccess} - Establishes an Zimbra mail access and provides access to storages.
@@ -157,8 +155,6 @@ public final class ZmalAccess extends MailAccess<ZmalFolderStorage, ZmalMessageS
         // Release resources
     }
 
-    
-
     @Override
     protected void closeInternal() {
         try {
@@ -242,32 +238,8 @@ public final class ZmalAccess extends MailAccess<ZmalFolderStorage, ZmalMessageS
             checkFieldsBeforeConnect(config);
             final ZmalSoapPerformer performer = new ZmalSoapPerformer(config).setUseJson(useJson);
             performer.setContextId(session.getContextId()).setUserId(session.getUserId());
-            performer.setSelect("GetInfoResponse");
-            final ZmalSoapResponse soapResponse = performer.perform(ZmalType.ACCOUNT, "GetInfoRequest");
-            
-            
-            String resultString = soapResponse.getResultString();
-            final List<Element> results = soapResponse.getResults();
-            if (resultString == null && results != null) {
-                StringBuilder buf = new StringBuilder();
-                boolean first = true;
-                for (Element e : results) {
-                    if (first) {
-                        first = false; 
-                    } else {
-                        buf.append('\n');
-                    }
-                    buf.append(e.prettyPrint());
-                }
-                resultString = buf.toString();
-            }
-            if (resultString == null) {
-                resultString = "";
-            }
+            performer.perform(ZmalType.ACCOUNT, "GetInfoRequest");
             config.initializeCapabilities();
-            System.out.println(resultString);
-            
-            
             this.performer = performer;
             connected = true;
         } catch (ServiceException e) {

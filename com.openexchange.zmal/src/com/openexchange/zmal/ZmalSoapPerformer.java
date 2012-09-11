@@ -265,7 +265,7 @@ public class ZmalSoapPerformer {
             sb.append(config.getServer());
             final int port = config.getPort();
             if (port > 0 && port != URIDefaults.IMAP.getPort()) {
-                sb.append(port);
+                sb.append(':').append(port);
             }
             mServer = sb.toString();
             // Prepend protocol

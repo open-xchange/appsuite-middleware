@@ -70,6 +70,7 @@ import javax.mail.internet.MimeMultipart;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailPath;
+import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
@@ -79,9 +80,13 @@ import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
+import com.openexchange.tools.net.URIDefaults;
+import com.openexchange.zmal.ZmalException;
 import com.openexchange.zmal.config.ZmalConfig;
 import com.openexchange.zmal.utils.UrlSink;
+import com.zimbra.common.service.ServiceException;
 import com.zimbra.cs.zclient.ZEmailAddress;
+import com.zimbra.cs.zclient.ZFolder;
 import com.zimbra.cs.zclient.ZMailbox;
 import com.zimbra.cs.zclient.ZMessage;
 import com.zimbra.cs.zclient.ZMessage.ZMimePart;
@@ -107,14 +112,23 @@ public final class ZMessageConverter {
         this.config = config;
     }
 
-    public MailMessage convert(ZMessage message) throws OXException {
+    /**
+     * Converts a {@code ZMessage} to a {@code MailMessage} instance.
+     * 
+     * @param message The {@code ZMessage} instance
+     * @param loadContent <code>true</code> to load content(s); else <code>false</code>
+     * @param markRead 
+     * @return The resulting {@code MailMessage} instance
+     * @throws OXException If conversion fails
+     */
+    public MailMessage convert(final ZMessage message, final boolean loadContent, final Boolean markRead) throws OXException {
         if (null == message) {
             return null;
         }
         try {
             boolean hasAttachments = false;
             final MimeMessage mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession());
-            for (ZEmailAddress zEmailAddress : message.getEmailAddresses()) {
+            for (final ZEmailAddress zEmailAddress : message.getEmailAddresses()) {
                 final QuotedInternetAddress addr = new QuotedInternetAddress(zEmailAddress.getFullAddress());
                 if (zEmailAddress.isBcc()) {
                     mimeMessage.addRecipient(RecipientType.BCC, addr);
@@ -134,7 +148,7 @@ public final class ZMessageConverter {
                 final String sFlags = message.getFlags();
                 if (!isEmpty(sFlags)) {
                     final Flags flags = new Flags();
-                    if (sFlags.indexOf('u') < 0) {
+                    if (sFlags.indexOf('u') < 0 || (markRead != null && markRead.booleanValue())) {
                         flags.add(Flag.SEEN);
                     }
                     if (sFlags.indexOf('a') >= 0) {
@@ -158,12 +172,15 @@ public final class ZMessageConverter {
                     if (sFlags.indexOf('n') >= 0) {
                         flags.add(MailMessage.USER_READ_ACK);
                     }
+                    mimeMessage.setFlags(flags, true);
                     if (sFlags.indexOf('!') >= 0) {
                         mimeMessage.setHeader(MessageHeaders.HDR_IMPORTANCE, "High");
                     }
                     if (sFlags.indexOf('?') >= 0) {
                         mimeMessage.setHeader(MessageHeaders.HDR_IMPORTANCE, "Low");
                     }
+                } else if (markRead != null && markRead.booleanValue()) {
+                    mimeMessage.setFlag(Flags.Flag.SEEN, true);
                 }
             }
             {
@@ -193,7 +210,7 @@ public final class ZMessageConverter {
             final String id = message.getId();
             final ZMimePart mimeStructure = message.getMimeStructure();
             if (null != mimeStructure) {
-                final MimeBodyPart part = parsePart(mimeStructure, id);
+                final MimeBodyPart part = parsePart(mimeStructure, id, loadContent);
                 final String sct = part.getHeader("Content-Type", null);
                 if (null != sct && sct.toLowerCase(Locale.US).startsWith("multipart/")) {
                     mimeMessage.setContent((Multipart) part.getContent());
@@ -212,7 +229,20 @@ public final class ZMessageConverter {
             {
                 final String sFolder = message.getFolderId();
                 if (!isEmpty(sFolder)) {
-                    mailMessage.setFolder(sFolder);
+                    try {
+                        if (mailbox.getUserRoot().getId().equals(sFolder)) {
+                            mailMessage.setFolder(MailFolder.DEFAULT_FOLDER_ID);
+                        } else if (mailbox.getInbox().getId().equals(sFolder)) {
+                            mailMessage.setFolder("INBOX");
+                        } else {
+                            final ZFolder folder = mailbox.getFolderById(sFolder);
+                            if (null != folder) {
+                                mailMessage.setFolder(folder.getPath());
+                            }
+                        }
+                    } catch (final ServiceException e) {
+                        throw ZmalException.create(ZmalException.Code.SERVICE_ERROR, e, e.getMessage());
+                    }
                 }
             }
             // Check folder
@@ -236,7 +266,7 @@ public final class ZMessageConverter {
         }
     }
 
-    public MimeBodyPart parsePart(final ZMimePart part, final String mailId) throws OXException {
+    public MimeBodyPart parsePart(final ZMimePart part, final String mailId, final boolean loadContent) throws OXException {
         try {
             final ContentType contentType;
             {
@@ -245,14 +275,14 @@ public final class ZMessageConverter {
             }
             ContentDisposition contentDisposition = null;
             {
-                String s = part.getContentDispostion();
+                final String s = part.getContentDispostion();
                 if (!isEmpty(s)) {
                     contentDisposition = new ContentDisposition(s);
                 }
             }
             final MimeBodyPart bodyPart = new MimeBodyPart();
             {
-                String s = part.getContentId();
+                final String s = part.getContentId();
                 if (!isEmpty(s)) {
                     bodyPart.setHeader(MessageHeaders.HDR_CONTENT_ID, s);
                 }
@@ -264,14 +294,14 @@ public final class ZMessageConverter {
                 }
             }
             // Check for sub-parts
-            List<ZMimePart> children = part.getChildren();
+            final List<ZMimePart> children = part.getChildren();
             if (null != children && !children.isEmpty()) {
                 if (!contentType.startsWith("multipart/")) {
                     contentType.setBaseType("multipart/mixed");
                 }
                 final MimeMultipart multipart = new MimeMultipart();
                 for (final ZMimePart subpart : children) {
-                    final MimeBodyPart part2 = parsePart(subpart, mailId);
+                    final MimeBodyPart part2 = parsePart(subpart, mailId, loadContent);
                     if (null != part2) {
                         multipart.addBodyPart(part2);
                     }
@@ -282,8 +312,28 @@ public final class ZMessageConverter {
             /*-
              * ----------------- Not a multipart - read its content -----------------
              */
-            if (!isEmpty(mailId)) {
-                setDataHandler(part, contentType, bodyPart, mailId);
+            final String content = part.getContent();
+            if (isEmpty(content)) {
+                // Content NOT initially available
+                if (loadContent) {
+                    // ... but requested to load it
+                    if (isEmpty(mailId)) {
+                        bodyPart.setText("", contentType.getCharsetParameter(), contentType.getSubType());
+                    } else {
+                        setDataHandler(part, contentType, bodyPart, mailId);
+                    }
+                } else {
+                    // Just some dummy content
+                    if (contentType.startsWith("text/")) {
+                        bodyPart.setText("<no-content>", contentType.getCharsetParameter(), contentType.getSubType());
+                    } else {
+                        final byte[] bs = new byte[1];
+                        bs[0] = 1;
+                        bodyPart.setDataHandler(new DataHandler(new MessageDataSource(bs, contentType.toString())));
+                    }
+                }
+            } else {
+                bodyPart.setDataHandler(new DataHandler(new MessageDataSource(content, contentType.toString())));
             }
             // Set headers
             bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentType.toString());
@@ -295,6 +345,8 @@ public final class ZMessageConverter {
                 }
             }
             return bodyPart;
+        } catch (final UnsupportedEncodingException e) {
+            throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         } catch (final RuntimeException e) {
@@ -305,7 +357,14 @@ public final class ZMessageConverter {
     private void setDataHandler(final ZMimePart part, final ContentType contentType, final MimeBodyPart bodyPart, final String messageId) throws OXException, MessagingException {
         try {
             // /service/content/get?id={message-id}[&fmt={fmt-type}][&part={part-name}][&subId={subId}]
-            final StringBuilder sb = new StringBuilder(url);
+            final StringBuilder sb = new StringBuilder(64);
+            sb.append(config.getServer());
+            final int port = config.getPort();
+            if (port > 0 && port != URIDefaults.IMAP.getPort()) {
+                sb.append(':').append(port);
+            }
+            // Prepend protocol
+            sb.insert(0, config.isSecure() ? "https://" : "http://");
             sb.append("/service/content/get?id=").append(urlEncode(messageId));
             final String partName = part.getPartName();
             if (!isEmpty(partName)) {

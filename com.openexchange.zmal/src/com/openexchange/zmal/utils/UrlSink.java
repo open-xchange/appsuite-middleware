@@ -54,6 +54,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Map;
+import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
 import com.openexchange.exception.OXException;
@@ -89,6 +91,20 @@ public class UrlSink {
      * @throws OXException If operation fails
      */
     public static byte[] getContent(final String url, final ZmalConfig config, final ZMailbox mailbox) throws OXException {
+        return getContent(url, config, mailbox, null);
+    }
+
+    /**
+     * Grabs the content from specified URI.
+     * 
+     * @param url The URI to content
+     * @param config The configuration
+     * @param mailbox The mailbox instance
+     * @param responseHeaders An optional empty map to put response headers to
+     * @return The grabbed content
+     * @throws OXException If operation fails
+     */
+    public static byte[] getContent(final String url, final ZmalConfig config, final ZMailbox mailbox, final Map<String, String> responseHeaders) throws OXException {
         HttpClient httpClient = null;
         GetMethod get = null;
         try {
@@ -108,6 +124,11 @@ public class UrlSink {
             InputStream in = null;
             try {
                 in = new GetMethodInputStream(get);
+                if (null != responseHeaders) {
+                    for (final Header header : get.getResponseHeaders()) {
+                        responseHeaders.put(header.getName(), header.getValue());
+                    }
+                }
                 final ByteArrayOutputStream out = Streams.newByteArrayOutputStream(8192);
                 final byte[] buf = new byte[2048];
                 for (int read = in.read(buf, 0, buf.length); read > 0; read = in.read(buf, 0, buf.length)) {
