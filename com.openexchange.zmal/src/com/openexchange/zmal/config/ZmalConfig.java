@@ -277,7 +277,7 @@ public final class ZmalConfig extends MailConfig {
     protected void parseServerURL(final String serverURL) throws OXException {
         final URI uri;
         try {
-            uri = URIParser.parse(serverURL, URIDefaults.IMAP);
+            uri = URIParser.parse(serverURL, URIDefaults.HTTP);
         } catch (final URISyntaxException e) {
             throw ZmalException.Code.URI_PARSE_FAILED.create(e, serverURL);
         }

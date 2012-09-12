@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.smtp;
+package com.openexchange.zmal.transport;
 
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.mime.converters.MimeMessageConverter.saveChanges;
@@ -113,13 +113,8 @@ import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.session.Session;
-import com.openexchange.smtp.config.ISMTPProperties;
-import com.openexchange.smtp.config.MailAccountSMTPProperties;
-import com.openexchange.smtp.config.SMTPConfig;
-import com.openexchange.smtp.config.SMTPSessionProperties;
-import com.openexchange.smtp.filler.SMTPMessageFiller;
-import com.openexchange.smtp.services.SMTPServiceRegistry;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
+import com.openexchange.zmal.config.ZmalConfig;
 import com.sun.mail.smtp.SMTPMessage;
 
 /**
@@ -187,7 +182,7 @@ public final class SMTPTransport extends MailTransport {
 
     private final UserSettingMail usm;
 
-    private volatile SMTPConfig cachedSmtpConfig;
+    private volatile ZmalConfig cachedZmalConfig;
 
     protected SMTPTransport() {
         super();
@@ -544,7 +539,7 @@ public final class SMTPTransport extends MailTransport {
              * Transport message
              */
             final long start = System.currentTimeMillis();
-            final Transport transport = getSMTPSession().getTransport(SMTPProvider.PROTOCOL_SMTP.getName());
+            final Transport transport = getSMTPSession().getTransport(ZTransProvider.PROTOCOL_SMTP.getName());
             try {
                 final String server = IDNA.toASCII(smtpConfig.getServer());
                 final int port = smtpConfig.getPort();
@@ -592,7 +587,7 @@ public final class SMTPTransport extends MailTransport {
             checkRecipients(recipients);
             try {
                 final long start = System.currentTimeMillis();
-                final Transport transport = getSMTPSession().getTransport(SMTPProvider.PROTOCOL_SMTP.getName());
+                final Transport transport = getSMTPSession().getTransport(ZTransProvider.PROTOCOL_SMTP.getName());
                 try {
                     final String server = IDNA.toASCII(smtpConfig.getServer());
                     final int port = smtpConfig.getPort();
@@ -669,7 +664,7 @@ public final class SMTPTransport extends MailTransport {
                         System.currentTimeMillis() - startPrep).append("msec").toString());
                 }
                 final long start = System.currentTimeMillis();
-                final Transport transport = getSMTPSession().getTransport(SMTPProvider.PROTOCOL_SMTP.getName());
+                final Transport transport = getSMTPSession().getTransport(ZTransProvider.PROTOCOL_SMTP.getName());
                 try {
                     final String server = IDNA.toASCII(smtpConfig.getServer());
                     final int port = smtpConfig.getPort();
@@ -779,7 +774,7 @@ public final class SMTPTransport extends MailTransport {
         // Connect to SMTP server
         final Transport transport;
         try {
-            transport = getSMTPSession().getTransport(SMTPProvider.PROTOCOL_SMTP.getName());
+            transport = getSMTPSession().getTransport(ZTransProvider.PROTOCOL_SMTP.getName());
         } catch (final NoSuchProviderException e) {
             throw MimeMailException.handleMessagingException(e);
         }

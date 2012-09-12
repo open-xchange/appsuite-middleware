@@ -106,6 +106,7 @@ public class AppsServlet extends HttpServlet {
                 break;
             case 0x5c:
                 replacement = "\\\\\\\\";
+                break;
             case 0x2028:
                 replacement = "\\\\u2028";
                 break;

@@ -143,4 +143,27 @@ public interface URIDefaults {
             return 995;
         }
     };
+
+    static URIDefaults HTTP = new URIDefaults() {
+
+        @Override
+        public String getProtocol() {
+            return "http";
+        }
+
+        @Override
+        public String getSSLProtocol() {
+            return "https";
+        }
+
+        @Override
+        public int getPort() {
+            return 80;
+        }
+
+        @Override
+        public int getSSLPort() {
+            return 443;
+        }
+    };
 }
