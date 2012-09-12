@@ -103,6 +103,7 @@ Import-Package: com.openexchange.api2,
  org.cliffc.high_scale_lib,
  org.osgi.framework,
  org.osgi.service.event,
+ org.osgi.util.tracker,
  sun.security,
  sun.security.util
 Bundle-ClassPath: lib/activation.jar,

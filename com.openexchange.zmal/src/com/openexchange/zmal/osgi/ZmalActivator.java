@@ -51,6 +51,9 @@ package com.openexchange.zmal.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.notify.hostname.HostnameService;
@@ -80,12 +83,45 @@ public class ZmalActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, MailAccountStorageService.class, UserService.class, ContextService.class, HostnameService.class };
+        return new Class<?>[] { ConfigurationService.class, MailAccountStorageService.class, UserService.class, ContextService.class };
+    }
+
+    @Override
+    public <S> boolean removeService(Class<? extends S> clazz) {
+        return super.removeService(clazz);
+    }
+
+    @Override
+    public <S> boolean addService(Class<S> clazz, S service) {
+        return super.addService(clazz, service);
     }
 
     @Override
     protected void startBundle() throws Exception {
         Services.setServiceLookup(this);
+        final BundleContext context = this.context;
+        final ServiceTrackerCustomizer<HostnameService, HostnameService> hostnameTracker = new ServiceTrackerCustomizer<HostnameService, HostnameService>() {
+            
+            @Override
+            public void removedService(ServiceReference<HostnameService> reference, HostnameService service) {
+                removeService(HostnameService.class);
+                context.ungetService(reference);
+            }
+            
+            @Override
+            public void modifiedService(ServiceReference<HostnameService> reference, HostnameService service) {
+                // Nope
+            }
+            
+            @Override
+            public HostnameService addingService(ServiceReference<HostnameService> reference) {
+                final HostnameService service = context.getService(reference);
+                addService(HostnameService.class, service);
+                return service;
+            }
+        };
+        track(HostnameService.class, hostnameTracker);
+        openTrackers();
         /*
          * Register Zimbra mail provider
          */

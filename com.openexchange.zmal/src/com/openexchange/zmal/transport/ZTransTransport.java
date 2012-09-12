@@ -57,6 +57,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -82,6 +83,7 @@ import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.java.Charsets;
 import com.openexchange.java.Java7ConcurrentLinkedQueue;
 import com.openexchange.java.Streams;
 import com.openexchange.log.LogProperties;
@@ -621,28 +623,40 @@ public final class ZTransTransport extends MailTransport {
             final ZOutgoingMessage msg = new ZOutgoingMessage();
             // Addresses
             final List<ZEmailAddress> addresses = new ArrayList<ZEmailAddress>();
-            for (final Address address : message.getFrom()) {
-                final InternetAddress addr = (InternetAddress) address;
-                addresses.add(new ZEmailAddress(addr.getAddress(), null, addr.getPersonal(), ZEmailAddress.EMAIL_TYPE_FROM));
+            Address[] addrs = message.getFrom();
+            if (null != addrs) {
+                for (final Address address : addrs) {
+                    final InternetAddress addr = (InternetAddress) address;
+                    addresses.add(new ZEmailAddress(addr.getAddress(), null, addr.getPersonal(), ZEmailAddress.EMAIL_TYPE_FROM));
+                }
             }
-            for (final Address address : message.getRecipients(RecipientType.TO)) {
-                final InternetAddress addr = (InternetAddress) address;
-                addresses.add(new ZEmailAddress(addr.getAddress(), null, addr.getPersonal(), ZEmailAddress.EMAIL_TYPE_TO));
+            addrs = message.getRecipients(RecipientType.TO);
+            if (null != addrs) {
+                for (final Address address : addrs) {
+                    final InternetAddress addr = (InternetAddress) address;
+                    addresses.add(new ZEmailAddress(addr.getAddress(), null, addr.getPersonal(), ZEmailAddress.EMAIL_TYPE_TO));
+                }
             }
-            for (final Address address : message.getRecipients(RecipientType.CC)) {
-                final InternetAddress addr = (InternetAddress) address;
-                addresses.add(new ZEmailAddress(addr.getAddress(), null, addr.getPersonal(), ZEmailAddress.EMAIL_TYPE_CC));
+            addrs = message.getRecipients(RecipientType.CC);
+            if (null != addrs) {
+                for (final Address address : addrs) {
+                    final InternetAddress addr = (InternetAddress) address;
+                    addresses.add(new ZEmailAddress(addr.getAddress(), null, addr.getPersonal(), ZEmailAddress.EMAIL_TYPE_CC));
+                }
             }
-            for (final Address address : message.getRecipients(RecipientType.BCC)) {
-                final InternetAddress addr = (InternetAddress) address;
-                addresses.add(new ZEmailAddress(addr.getAddress(), null, addr.getPersonal(), ZEmailAddress.EMAIL_TYPE_BCC));
+            addrs = message.getRecipients(RecipientType.BCC);
+            if (null != addrs) {
+                for (final Address address : addrs) {
+                    final InternetAddress addr = (InternetAddress) address;
+                    addresses.add(new ZEmailAddress(addr.getAddress(), null, addr.getPersonal(), ZEmailAddress.EMAIL_TYPE_BCC));
+                }
             }
             msg.setAddresses(addresses);
             // Subject
             msg.setSubject(message.getSubject());
             // In-Reply-To
             {
-                final String s = message.getHeader("Content-Type", null);
+                final String s = message.getHeader("In-Reply-To", null);
                 if (!isEmpty(s)) {
                     msg.setInReplyTo(s);
                 }
@@ -691,7 +705,13 @@ public final class ZTransTransport extends MailTransport {
                 // Plain part
                 final ByteArrayOutputStream out = Streams.newByteArrayOutputStream(4096);
                 part.writeTo(out);
-                retval = new ZOutgoingMessage.MessagePart(part.getContentType().toString(), new String(out.toByteArray()));
+                if (contentType.startsWith("text/")) {
+                    final String cs = contentType.getCharsetParameter();
+                    final Charset charset = isEmpty(cs) ? Charsets.ISO_8859_1 : Charsets.forName(cs);
+                    retval = new ZOutgoingMessage.MessagePart(contentType.toString(), new String(out.toByteArray(), charset));
+                } else {
+                    retval = new ZOutgoingMessage.MessagePart(contentType.toString(), new String(out.toByteArray(), Charsets.ISO_8859_1));
+                }
             }
             return retval;
         } catch (final MessagingException e) {
