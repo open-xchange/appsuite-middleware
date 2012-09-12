@@ -421,7 +421,7 @@ public final class SMTPTransport extends MailTransport {
         if (cachedSmtpConfig == null) {
             synchronized (this) {
                 if (cachedSmtpConfig == null) {
-                    cachedSmtpConfig = TransportConfig.getTransportConfig(SMTPConfig.class, new SMTPConfig(), session, accountId);
+                    cachedSmtpConfig = TransportConfig.getTransportConfig(new SMTPConfig(), session, accountId);
                     cachedSmtpConfig.setTransportProperties(createNewMailProperties());
                 }
             }

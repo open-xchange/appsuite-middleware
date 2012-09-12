@@ -2469,6 +2469,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                  */
                 return null;
             }
+            if (null != sentMail.getMailId() && null != sentMail.getFolder()) {
+                return new MailPath(accountId, sentMail.getFolder(), sentMail.getMailId()).toString();
+            }
             return append2SentFolder(sentMail).toString();
         } finally {
             transport.close();
