@@ -52,11 +52,15 @@ public class RssJsonConverter implements ResultConverter {
 	private JSONObject conv(RssResult result) throws OXException{
 		try {
 			return new JSONObject()
-				.append("author", result.getAuthor())
-				.append("body", result.getBody())
-				.append("format", result.getFormat())
-				.append("source", result.getSource())
-				.append("subject", result.getSubject());
+				.put("author", result.getAuthor())
+				.put("body", result.getBody())
+				.put("format", result.getFormat())
+				.put("url", result.getUrl())
+				.put("feedUrl", result.getFeedUrl())
+				.put("feedTitle", result.getFeedTitle())
+				.put("subject", result.getSubject())
+				.put("image", result.getImageUrl())
+				.put("date", result.getDate().getTime());
 		} catch (JSONException e) {
 			throw AjaxExceptionCodes.JSON_ERROR.create(e);
 		}

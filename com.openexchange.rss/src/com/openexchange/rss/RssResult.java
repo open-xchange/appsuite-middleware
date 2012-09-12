@@ -1,10 +1,13 @@
 package com.openexchange.rss;
 
-public class RssResult {
-	private String source, author, format, body, subject;
+import java.util.Date;
 
-	public String getSource() {
-		return source;
+public class RssResult {
+	private String url, author, format, body, subject, feedUrl, feedTitle, imageUrl;
+	private Date publishedDate;
+
+	public String getUrl() {
+		return url;
 	}
 
 	public String getAuthor() {
@@ -23,8 +26,24 @@ public class RssResult {
 		return subject;
 	}
 
-	public RssResult setSource(String source) {
-		this.source = source;
+	public String getFeedUrl() {
+		return feedUrl;
+	}
+
+	public String getFeedTitle() {
+		return feedTitle;
+	}
+
+	public String getImageUrl() {
+		return this.imageUrl;
+	}
+	
+	public Date getDate() {
+		return this.publishedDate;
+	}
+
+	public RssResult setUrl(String url) {
+		this.url = url;
 		return this;
 	}
 
@@ -45,6 +64,26 @@ public class RssResult {
 
 	public RssResult setSubject(String subject) {
 		this.subject = subject;
+		return this;
+	}
+	
+	public RssResult setFeedUrl(String feedUrl) {
+		this.feedUrl = feedUrl;
+		return this;
+	}
+	
+	public RssResult setFeedTitle(String feedTitle) {
+		this.feedTitle = feedTitle;
+		return this;
+	}
+	
+	public RssResult setImageUrl(String imageUrl) {
+		this.imageUrl = imageUrl;
+		return this;
+	}
+
+	public RssResult setDate(Date publishedDate) {
+		this.publishedDate = publishedDate;
 		return this;
 	}
 }
