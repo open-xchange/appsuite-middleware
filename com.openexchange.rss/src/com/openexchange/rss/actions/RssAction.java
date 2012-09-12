@@ -70,6 +70,7 @@ import com.openexchange.rss.RssResult;
 import com.openexchange.rss.preprocessors.ImagePreprocessor;
 import com.openexchange.rss.preprocessors.RssPreprocessor;
 import com.openexchange.rss.preprocessors.WhitelistPreprocessor;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.sun.syndication.feed.synd.SyndContent;
 import com.sun.syndication.feed.synd.SyndEntry;
@@ -80,12 +81,13 @@ import com.sun.syndication.fetcher.impl.HttpURLFeedFetcher;
 import com.sun.syndication.io.FeedException;
 
 public class RssAction implements AJAXActionService {
+	private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(RssAction.class));
 	private HttpURLFeedFetcher fetcher;
 	private HashMapFeedInfoCache feedCache;
 	
 	public RssAction () {
 		feedCache = new HashMapFeedInfoCache();
-		fetcher = new HttpURLFeedFetcher(); //feedCache); TODO use cache when done testing
+		fetcher = new HttpURLFeedFetcher(feedCache);
 	}
 
 	@Override
@@ -99,44 +101,40 @@ public class RssAction implements AJAXActionService {
 		
 		List<URL> urls = new LinkedList<URL>();
 		List<SyndFeed> feeds = new LinkedList<SyndFeed>();
-		
+		String urlString = "";
 		try {
 			JSONObject data = (JSONObject) request.getData();
 			JSONArray test = data.optJSONArray("feedUrl");
 			if(test != null)  {
-				for(int i = 0; i < test.length(); i++)
-					urls.add(new URL(test.getString(i)));
+				for(int i = 0; i < test.length(); i++) {
+					urlString = test.getString(i);
+					urls.add(new URL(urlString));
+				}
 			} else {
-				String uriString = request.checkParameter("feedUrl");
-				uriString = URLDecoder.decode(uriString, "UTF-8");
-				urls.add(new URL(uriString));
+				urlString = request.checkParameter("feedUrl");
+				urlString = URLDecoder.decode(urlString, "UTF-8");
+				urls.add(new URL(urlString));
 			}
 			for(URL url: urls) {
 				try {
 					feeds.add(fetcher.retrieveFeed(url));
 				} catch (FeedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					LOG.info("Could not load RSS feed from " + url, e);
 				} catch (FetcherException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					LOG.info("Could not load RSS feed from " + url, e);
 				}
 			}
 			
 		} catch (UnsupportedEncodingException e) { 
 			/* yeah, right... not happening for UTF-8 */ 
 		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw AjaxExceptionCodes.IMVALID_PARAMETER.create(urlString);
 		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw AjaxExceptionCodes.IMVALID_PARAMETER.create(e);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw AjaxExceptionCodes.IO_ERROR.create(e);
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw AjaxExceptionCodes.JSON_ERROR.create(e);
 		}
 
 		RssPreprocessor preprocessor = new ImagePreprocessor().chain(new WhitelistPreprocessor());
