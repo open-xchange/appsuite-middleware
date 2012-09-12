@@ -60,7 +60,6 @@ import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.mime.filler.MimeMessageFiller;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.session.Session;
-import com.openexchange.zmal.config.IZmalProperties;
 import com.openexchange.zmal.transport.dataobjects.ZTransMailMessage;
 import com.sun.mail.smtp.SMTPMessage;
 
@@ -72,17 +71,14 @@ import com.sun.mail.smtp.SMTPMessage;
  */
 public final class ZTransMessageFiller extends MimeMessageFiller {
 
-    private final IZmalProperties zmalProperties;
-
     /**
      * Constructor
      * 
      * @param session The session
      * @param ctx The context
      */
-    public ZTransMessageFiller(final IZmalProperties zmalProperties, final Session session, final Context ctx) {
+    public ZTransMessageFiller(final Session session, final Context ctx) {
         super(session, ctx);
-        this.zmalProperties = zmalProperties;
     }
 
     /**
@@ -92,9 +88,8 @@ public final class ZTransMessageFiller extends MimeMessageFiller {
      * @param ctx The context
      * @param usm The user's mail settings
      */
-    public ZTransMessageFiller(final IZmalProperties zmalProperties, final Session session, final Context ctx, final UserSettingMail usm) {
+    public ZTransMessageFiller(final Session session, final Context ctx, final UserSettingMail usm) {
         super(session, ctx, usm);
-        this.zmalProperties = zmalProperties;
     }
 
     /**

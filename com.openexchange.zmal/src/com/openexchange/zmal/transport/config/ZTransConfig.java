@@ -47,63 +47,102 @@
  *
  */
 
-package com.openexchange.zmal.osgi;
+package com.openexchange.zmal.transport.config;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.context.ContextService;
-import com.openexchange.groupware.notify.hostname.HostnameService;
-import com.openexchange.mail.api.MailProvider;
-import com.openexchange.mail.transport.TransportProvider;
-import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.user.UserService;
-import com.openexchange.zmal.Services;
-import com.openexchange.zmal.ZmalProvider;
-import com.openexchange.zmal.transport.ZTransProvider;
+import javax.mail.internet.IDNA;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.api.MailCapabilities;
+import com.openexchange.mail.transport.config.ITransportProperties;
+import com.openexchange.mail.transport.config.TransportConfig;
+import com.openexchange.zmal.config.ZmalConfig;
 
 /**
- * {@link ZmalActivator} - The Zimbra MAL activator.
+ * {@link ZTransConfig} - The Zimbra mail transport configuration.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ZmalActivator extends HousekeepingActivator {
-	
-	
+public final class ZTransConfig extends TransportConfig {
+
+    private final ZmalConfig zmalConfig;
+
+    private ITransportProperties transportProperties;
+
     /**
-     * Initializes a new {@link ZmalActivator}.
+     * Default constructor
+     * 
+     * @param zmalConfig The applicable Zimbra mail configuration
      */
-    public ZmalActivator() {
+    public ZTransConfig(ZmalConfig zmalConfig) {
         super();
+        this.zmalConfig = zmalConfig;
+    }
+    
+    /**
+     * Gets the Zimbra configuration
+     *
+     * @return The Zimbra configuration
+     */
+    public ZmalConfig getZmalConfig() {
+        return zmalConfig;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, MailAccountStorageService.class, UserService.class, ContextService.class, HostnameService.class };
+    public MailCapabilities getCapabilities() {
+        return MailCapabilities.EMPTY_CAPS;
+    }
+
+    /**
+     * Gets the smtpPort
+     *
+     * @return the smtpPort
+     */
+    @Override
+    public int getPort() {
+        return zmalConfig.getPort();
+    }
+
+    /**
+     * Gets the smtpServer
+     *
+     * @return the smtpServer
+     */
+    @Override
+    public String getServer() {
+        return zmalConfig.getServer();
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-        /*
-         * Register Zimbra mail provider
-         */
-        Dictionary<String, String> dictionary = new Hashtable<String, String>(1);
-        dictionary.put("protocol", ZmalProvider.PROTOCOL_ZMAL.toString());
-        registerService(MailProvider.class, ZmalProvider.getInstance(), dictionary);
-        /*
-         * Register Zimbra mail transport provider
-         */
-        dictionary = new Hashtable<String, String>(1);
-        dictionary.put("protocol", ZTransProvider.PROTOCOL_ZTRAN.toString());
-        registerService(TransportProvider.class, ZTransProvider.getInstance(), dictionary);
+    public boolean isSecure() {
+        return zmalConfig.isSecure();
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        Services.setServiceLookup(null);
-        super.stopBundle();
+    protected void parseServerURL(final String serverURL) throws OXException {
+        // Nope
     }
 
+    @Override
+    public void setPort(final int smtpPort) {
+        zmalConfig.setPort(smtpPort);
+    }
+
+    @Override
+    public void setSecure(final boolean secure) {
+        zmalConfig.setSecure(secure);
+    }
+
+    @Override
+    public void setServer(final String smtpServer) {
+        zmalConfig.setServer(null == smtpServer ? null : IDNA.toUnicode(smtpServer));
+    }
+
+    @Override
+    public ITransportProperties getTransportProperties() {
+        return transportProperties;
+    }
+
+    @Override
+    public void setTransportProperties(final ITransportProperties transportProperties) {
+        this.transportProperties = transportProperties;
+    }
 }

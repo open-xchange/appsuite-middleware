@@ -47,63 +47,68 @@
  *
  */
 
-package com.openexchange.zmal.osgi;
+package com.openexchange.zmal.transport;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.context.ContextService;
-import com.openexchange.groupware.notify.hostname.HostnameService;
-import com.openexchange.mail.api.MailProvider;
-import com.openexchange.mail.transport.TransportProvider;
-import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.user.UserService;
-import com.openexchange.zmal.Services;
-import com.openexchange.zmal.ZmalProvider;
-import com.openexchange.zmal.transport.ZTransProvider;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link ZmalActivator} - The Zimbra MAL activator.
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link ZTransExceptionMessage}
+ * 
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class ZmalActivator extends HousekeepingActivator {
-	
-	
+public class ZTransExceptionMessage implements LocalizableStrings {
+
     /**
-     * Initializes a new {@link ZmalActivator}.
+     * Initializes a new {@link ZTransExceptionMessage}.
      */
-    public ZmalActivator() {
+    private ZTransExceptionMessage() {
         super();
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, MailAccountStorageService.class, UserService.class, ContextService.class, HostnameService.class };
-    }
+    /**
+     * The message part with sequence ID %1$s could not be found in message %2$s in folder %3$s
+     */
+    public final static String PART_NOT_FOUND_MSG = "The message part with sequence ID %1$s could not be found in message %2$s in folder %3$s";
 
-    @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-        /*
-         * Register Zimbra mail provider
-         */
-        Dictionary<String, String> dictionary = new Hashtable<String, String>(1);
-        dictionary.put("protocol", ZmalProvider.PROTOCOL_ZMAL.toString());
-        registerService(MailProvider.class, ZmalProvider.getInstance(), dictionary);
-        /*
-         * Register Zimbra mail transport provider
-         */
-        dictionary = new Hashtable<String, String>(1);
-        dictionary.put("protocol", ZTransProvider.PROTOCOL_ZTRAN.toString());
-        registerService(TransportProvider.class, ZTransProvider.getInstance(), dictionary);
-    }
+    /**
+     * Html-2-Text conversion failed: %1$s
+     */
+    public final static String HTML2TEXT_CONVERTER_ERROR_MSG = "Html-2-Text conversion failed: %1$s";
 
-    @Override
-    protected void stopBundle() throws Exception {
-        Services.setServiceLookup(null);
-        super.stopBundle();
-    }
+    /**
+     * An internal error occurred: %1$s
+     */
+    public final static String INTERNAL_ERROR_MSG = "An internal error occurred: %1$s";
+
+    /**
+     * No recipient(s) has been defined for new message
+     */
+    public final static String MISSING_RECIPIENTS_MSG = "There are no recipient(s) for the new message.";
+
+    /**
+     * Receipt acknowledgment cannot be sent: missing header %1$s in message %2$s
+     */
+    public final static String MISSING_NOTIFICATION_HEADER_MSG = "Receipt acknowledgment cannot be sent: missing header %1$s in message %2$s";
+
+    /**
+     * No send address could be found in user configuration
+     */
+    public final static String NO_SEND_ADDRESS_FOUND_MSG = "No send address could be found in user configuration";
+
+    /**
+     * No content available in mail part
+     */
+    public final static String NO_CONTENT_MSG = "No content available in mail part";
+
+    /**
+     * No storage access because mail connection is not connected
+     */
+    public final static String NOT_CONNECTED_MSG = "No storage access because mail connection is not connected";
+
+    // Unable to parse SMTP server URI "%1$s".
+    public final static String URI_PARSE_FAILED_MSG = "Unable to parse SMTP server URI \"%1$s\".";
+
+    // The following recipient is not allowed: %1$s. Please remove associated address and try again.
+    public static final String RECIPIENT_NOT_ALLOWED = "The following recipient is not allowed: %1$s. Please remove associated address and try again.";
 
 }

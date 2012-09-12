@@ -115,7 +115,7 @@ public final class ZmalAccess extends MailAccess<ZmalFolderStorage, ZmalMessageS
      * 
      * @param session The session providing needed user data
      */
-    protected ZmalAccess(final Session session) {
+    public ZmalAccess(final Session session) {
         super(session);
         setMailProperties((Properties) System.getProperties().clone());
     }
@@ -126,9 +126,18 @@ public final class ZmalAccess extends MailAccess<ZmalFolderStorage, ZmalMessageS
      * @param session The session providing needed user data
      * @param accountId The account ID
      */
-    protected ZmalAccess(final Session session, final int accountId) {
+    public ZmalAccess(final Session session, final int accountId) {
         super(session, accountId);
         setMailProperties((Properties) System.getProperties().clone());
+    }
+    
+    /**
+     * Gets the SOAP performer
+     *
+     * @return The SOAP performer
+     */
+    public ZmalSoapPerformer getPerformer() {
+        return performer;
     }
 
     /**

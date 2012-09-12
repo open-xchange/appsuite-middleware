@@ -106,12 +106,12 @@ public final class ZTransProvider extends TransportProvider {
 
     @Override
     public MailTransport createNewMailTransport(final Session session) throws OXException {
-        return new SMTPTransport(session);
+        return new ZTransTransport(session);
     }
 
     @Override
     public MailTransport createNewMailTransport(final Session session, final int accountId) throws OXException {
-        return new SMTPTransport(session, accountId);
+        return new ZTransTransport(session, accountId);
     }
 
     @Override
