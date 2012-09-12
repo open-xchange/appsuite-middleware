@@ -62,6 +62,7 @@ import javax.mail.Flags.Flag;
 import javax.mail.Header;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
+import javax.mail.internet.IDNA;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
@@ -358,9 +359,9 @@ public final class ZMessageConverter {
         try {
             // /service/content/get?id={message-id}[&fmt={fmt-type}][&part={part-name}][&subId={subId}]
             final StringBuilder sb = new StringBuilder(64);
-            sb.append(config.getServer());
+            sb.append(IDNA.toASCII(config.getServer()));
             final int port = config.getPort();
-            if (port > 0 && port != URIDefaults.IMAP.getPort()) {
+            if (port > 0 && port != (config.isSecure() ? URIDefaults.HTTP.getSSLPort() : URIDefaults.HTTP.getPort())) {
                 sb.append(':').append(port);
             }
             // Prepend protocol

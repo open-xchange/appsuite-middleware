@@ -47,15 +47,12 @@
  *
  */
 
-package com.openexchange.zmal.transport;
+package com.openexchange.zmal.transport.filler;
 
 import java.io.IOException;
 import javax.mail.MessagingException;
-import javax.mail.internet.IDNA;
-import javax.mail.internet.MimeMessage;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
@@ -64,56 +61,58 @@ import com.openexchange.mail.mime.filler.MimeMessageFiller;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.session.Session;
 import com.openexchange.zmal.config.IZmalProperties;
+import com.openexchange.zmal.transport.dataobjects.ZTransMailMessage;
+import com.sun.mail.smtp.SMTPMessage;
 
 /**
- * {@link SMTPMessageFiller} - Fills an instance of {@link SMTPMessage} with headers/contents given through an instance of
- * {@link SMTPMailMessage}
- *
+ * {@link ZTransMessageFiller} - Fills an instance of {@code SMTPMessage} with headers/contents given through an instance of
+ * {@code ZTransMailMessage}
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SMTPMessageFiller extends MimeMessageFiller {
+public final class ZTransMessageFiller extends MimeMessageFiller {
 
     private final IZmalProperties zmalProperties;
 
     /**
      * Constructor
-     *
+     * 
      * @param session The session
      * @param ctx The context
      */
-    public SMTPMessageFiller(final IZmalProperties zmalProperties, final Session session, final Context ctx) {
+    public ZTransMessageFiller(final IZmalProperties zmalProperties, final Session session, final Context ctx) {
         super(session, ctx);
         this.zmalProperties = zmalProperties;
     }
 
     /**
      * Constructor
-     *
+     * 
      * @param session The session
      * @param ctx The context
      * @param usm The user's mail settings
      */
-    public SMTPMessageFiller(final IZmalProperties zmalProperties, final Session session, final Context ctx, final UserSettingMail usm) {
+    public ZTransMessageFiller(final IZmalProperties zmalProperties, final Session session, final Context ctx, final UserSettingMail usm) {
         super(session, ctx, usm);
         this.zmalProperties = zmalProperties;
     }
 
     /**
      * Fills given instance of {@link SMTPMessage}
-     *
+     * 
      * @param mail The source mail
      * @param smtpMessage The SMTP message to fill
      * @throws MessagingException If a messaging error occurs
      * @throws OXException If a mail error occurs
      * @throws IOException If an I/O error occurs
      */
-    public void fillMail(final SMTPMailMessage mail, final SMTPMessage smtpMessage) throws MessagingException, OXException, IOException {
+    public void fillMail(final ZTransMailMessage mail, final SMTPMessage smtpMessage) throws MessagingException, OXException, IOException {
         fillMail(mail, smtpMessage, ComposeType.NEW);
     }
 
     /**
      * Fills given instance of {@link SMTPMessage}
-     *
+     * 
      * @param mail The source mail
      * @param smtpMessage The SMTP message to fill
      * @param type The compose type
@@ -155,20 +154,6 @@ public final class SMTPMessageFiller extends MimeMessageFiller {
          * Fill body
          */
         fillMailBody(mail, smtpMessage, type);
-    }
-
-    @Override
-    public void setCommonHeaders(final MimeMessage mimeMessage) throws MessagingException {
-        super.setCommonHeaders(mimeMessage);
-        /*
-         * ENVELOPE-FROM
-         */
-        if (smtpProperties.isSmtpEnvelopeFrom() && (mimeMessage instanceof SMTPMessage)) {
-            /*
-             * Set ENVELOPE-FROM in SMTP message to user's primary email address
-             */
-            ((SMTPMessage) mimeMessage).setEnvelopeFrom(IDNA.toACE(UserStorage.getStorageUser(session.getUserId(), ctx).getMail()));
-        }
     }
 
 }

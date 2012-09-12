@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
+import javax.mail.internet.IDNA;
 import org.apache.commons.logging.Log;
 import org.dom4j.Namespace;
 import org.dom4j.QName;
@@ -262,9 +263,9 @@ public class ZmalSoapPerformer {
          */
         {
             final StringBuilder sb = new StringBuilder(64);
-            sb.append(config.getServer());
+            sb.append(IDNA.toASCII(config.getServer()));
             final int port = config.getPort();
-            if (port > 0 && port != URIDefaults.IMAP.getPort()) {
+            if (port > 0 && port != (config.isSecure() ? URIDefaults.HTTP.getSSLPort() : URIDefaults.HTTP.getPort())) {
                 sb.append(':').append(port);
             }
             mServer = sb.toString();
