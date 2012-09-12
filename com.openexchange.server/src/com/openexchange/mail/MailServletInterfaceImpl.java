@@ -2469,6 +2469,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                  */
                 return null;
             }
+            /*
+             * If mail identifier and folder identifier is already available, assume is has already been stored in Sent folder
+             */
             if (null != sentMail.getMailId() && null != sentMail.getFolder()) {
                 return new MailPath(accountId, sentMail.getFolder(), sentMail.getMailId()).toString();
             }
