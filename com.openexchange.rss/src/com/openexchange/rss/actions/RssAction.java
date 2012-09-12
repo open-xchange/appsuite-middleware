@@ -119,7 +119,6 @@ public class RssAction implements AJAXActionService {
 						result
 							.setBody(htmlContent)
 							.setFormat("text/html");
-						System.out.println(htmlContent);
 						break;
 					}
 					if(!foundHtml) {
