@@ -148,6 +148,12 @@ public final class Tools {
      * @throws OXException If check for full names fails
      */
     public static MailAccount checkFullNames(final MailAccount account, final MailAccountStorageService storageService, final Session session) throws OXException {
+        if (MailAccount.DEFAULT_ID == account.getId()) {
+            /*
+             * No check for primary account
+             */
+            return account;
+        }
         final int contextId = session.getContextId();
         final Connection rcon = Database.get(contextId, false);
         try {
