@@ -175,9 +175,6 @@ public final class Tools {
      * @throws OXException If check for full names fails
      */
     public static MailAccount checkFullNames(final MailAccount account, final MailAccountStorageService storageService, final Session session, final Connection con) throws OXException {
-        if (null == con) {
-            return checkFullNames(account, storageService, session);
-        }
         final int accountId = account.getId();
         if (MailAccount.DEFAULT_ID == accountId) {
             /*
