@@ -70,7 +70,18 @@ public abstract class DateMapping<O> extends DefaultDbMapping<Date, O> {
 	
 	@Override
 	public Date get(final ResultSet resultSet) throws SQLException {
-        return resultSet.getTimestamp(this.getColumnLabel());
+	    try {
+	        return resultSet.getTimestamp(this.getColumnLabel());
+	    } catch (SQLException e) {
+	        if ("S1009".equals(e.getSQLState())) {
+	            /*
+	             * http://dev.mysql.com/doc/refman/5.0/en/connector-j-reference-configuration-properties.html
+	             * DATETIME values that are composed entirely of zeros result in an exception with state S1009
+	             */
+	            return null;
+	        }
+	        throw e;
+	    }
 	}
 	
 	@Override

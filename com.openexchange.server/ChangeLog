@@ -1,3 +1,7 @@
+* 2012-09-13 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 22942: Be prepared for DATETIME values that are composed entirely of zeros 
+
 * 2012-09-11 - thorben.betten@open-xchange.com
 
  - Fix for bug 22917: Added previous naming for downward compatibility
