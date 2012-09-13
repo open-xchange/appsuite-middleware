@@ -81,6 +81,11 @@ public final class ResponseFields {
     public static final String ERROR_CATEGORIES = "categories";
 
     /**
+     * <b>Deprecated</b>: Name of the JSON attribute containing the error category.
+     */
+    public static final String ERROR_CATEGORY = "category";
+
+    /**
      * Name of the JSON attribute containing the error code.
      */
     public static final String ERROR_CODE = "code";

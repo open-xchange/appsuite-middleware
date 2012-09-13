@@ -53,10 +53,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.services.autoscaling.AmazonAutoScaling;
+import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
+import com.amazonaws.services.cloudwatch.AmazonCloudWatch;
+import com.amazonaws.services.cloudwatch.AmazonCloudWatchClient;
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.elasticloadbalancing.AmazonElasticLoadBalancing;
 import com.amazonaws.services.elasticloadbalancing.AmazonElasticLoadBalancingClient;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3Client;
 import com.openexchange.aws.exceptions.OXAWSExceptionCodes;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -80,6 +86,12 @@ public class AWSActivator extends HousekeepingActivator {
 
     private String lbRegion;
 
+    private String autoscalingRegion;
+
+    private String cloudwatchRegion;
+
+    private String amazonS3Region;
+
     /**
      * Initializes a new {@link AWSActivator}.
      */
@@ -100,6 +112,9 @@ public class AWSActivator extends HousekeepingActivator {
         secretKey = configService.getProperty("com.openexchange.aws.secretKey");
         ec2Region = configService.getProperty("com.openexchange.aws.ec2region");
         lbRegion = configService.getProperty("com.openexchange.aws.lbregion");
+        autoscalingRegion = configService.getProperty("com.openexchange.aws.autoscalingregion");
+        cloudwatchRegion = configService.getProperty("com.openexchange.aws.cloudwatchregion");
+        amazonS3Region = configService.getProperty("com.openexchange.aws.s3region");
         if (accessKey == null) {
             throw OXAWSExceptionCodes.AWS_NO_ACCESSKEY.create();
         }
@@ -117,8 +132,17 @@ public class AWSActivator extends HousekeepingActivator {
         amazonEC2.setEndpoint(ec2Region);
         AmazonElasticLoadBalancing amazonLoadBalancing = new AmazonElasticLoadBalancingClient(credentials);
         amazonLoadBalancing.setEndpoint(lbRegion);
+        AmazonAutoScaling amazonAutoScaling = new AmazonAutoScalingClient(credentials);
+        amazonAutoScaling.setEndpoint(autoscalingRegion);
+        AmazonCloudWatch amazonCloudWatch = new AmazonCloudWatchClient(credentials);
+        amazonCloudWatch.setEndpoint(cloudwatchRegion);
+        AmazonS3 amazonS3 = new AmazonS3Client(credentials);
+        amazonS3.setEndpoint(amazonS3Region);
         registerService(AmazonEC2.class, amazonEC2);
         registerService(AmazonElasticLoadBalancing.class, amazonLoadBalancing);
+        registerService(AmazonAutoScaling.class, amazonAutoScaling);
+        registerService(AmazonCloudWatch.class, amazonCloudWatch);
+        registerService(AmazonS3.class, amazonS3);
     }
 
     @Override

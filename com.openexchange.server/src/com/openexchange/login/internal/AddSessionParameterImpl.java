@@ -49,25 +49,28 @@
 
 package com.openexchange.login.internal;
 
+import java.util.HashMap;
+import java.util.Map;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.sessiond.AddSessionParameter;
+import com.openexchange.sessiond.Parameterized;
 
 /**
  * Implements {@link AddSessionParameter}.
  */
-final class AddSessionParameterImpl implements AddSessionParameter {
+final class AddSessionParameterImpl implements AddSessionParameter, Parameterized {
 
     private final String username;
-
     private final LoginRequest request;
-
     private final User user;
-
     private final Context ctx;
+    private final Map<String, Object> parameters;
 
     AddSessionParameterImpl(final String username, final LoginRequest request, final User user, final Context ctx) {
+        super();
+        parameters = new HashMap<String, Object>(4);
         this.username = username;
         this.request = request;
         this.user = user;
@@ -117,5 +120,29 @@ final class AddSessionParameterImpl implements AddSessionParameter {
     @Override
     public String getClient() {
         return request.getClient();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <V> V getParameter(String name) {
+        try {
+            return (V) parameters.get(name);
+        } catch (final Exception e) {
+            return null;
+        }
+    }
+
+    @Override
+    public void setParameter(String name, Object value) {
+        if (null == name) {
+            parameters.remove(name);
+        } else {
+            parameters.put(name, value);
+        }
+    }
+
+    @Override
+    public Object removeParameter(String name) {
+        return parameters.remove(name);
     }
 }

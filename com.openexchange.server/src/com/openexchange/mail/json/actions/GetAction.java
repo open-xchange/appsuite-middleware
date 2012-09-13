@@ -70,7 +70,6 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.log.Log;
 import com.openexchange.mail.MailExceptionCode;
@@ -283,10 +282,21 @@ public final class GetAction extends AbstractMailAction {
                 }
                 final ContentType ct = mail.getContentType();
                 if (ct.containsCharsetParameter() && CharsetDetector.isValid(ct.getCharsetParameter())) {
-                    data = new AJAXRequestResult(new String(baos.toByteArray(), Charsets.forName(ct.getCharsetParameter())), "string");
+                    data = new AJAXRequestResult(new String(baos.toByteArray(), ct.getCharsetParameter()), "string");
                 } else {
-                    data = new AJAXRequestResult(new String(baos.toByteArray(), com.openexchange.java.Charsets.UTF_8), "string");
+                    data = new AJAXRequestResult(new String(baos.toByteArray(), "UTF-8"), "string");
                 }
+                // final ContentType rct = new ContentType("text/plain");
+                // if (ct.containsCharsetParameter() && CharsetDetector.isValid(ct.getCharsetParameter())) {
+                // rct.setCharsetParameter(ct.getCharsetParameter());
+                // } else {
+                // rct.setCharsetParameter("UTF-8");
+                // }
+                // req.getRequest().setFormat("file");
+                // final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(baos.toByteArray());
+                // fileHolder.setContentType(rct.toString());
+                // fileHolder.setName("msgsrc.txt");
+                // data = new AJAXRequestResult(fileHolder, "file");
             } else if (showMessageHeaders) {
                 /*
                  * Get message
@@ -302,6 +312,18 @@ public final class GetAction extends AbstractMailAction {
                     final int unreadMsgs = mail.getUnreadMessages();
                     mail.setUnreadMessages(unreadMsgs < 0 ? 0 : unreadMsgs + 1);
                 }
+                final ContentType rct = new ContentType("text/plain");
+                final ContentType ct = mail.getContentType();
+                if (ct.containsCharsetParameter() && CharsetDetector.isValid(ct.getCharsetParameter())) {
+                    rct.setCharsetParameter(ct.getCharsetParameter());
+                } else {
+                    rct.setCharsetParameter("UTF-8");
+                }
+                // req.getRequest().setFormat("file");
+                // final String sHeaders = formatMessageHeaders(mail.getHeadersIterator());
+                // final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(sHeaders.getBytes(rct.getCharsetParameter()));
+                // fileHolder.setContentType(rct.toString());
+                // data = new AJAXRequestResult(fileHolder, "file");
                 data = new AJAXRequestResult(formatMessageHeaders(mail.getHeadersIterator()), "string");
                 if (doUnseen) {
                     /*
@@ -344,7 +366,9 @@ public final class GetAction extends AbstractMailAction {
                 if (mail == null) {
                     throw MailExceptionCode.MAIL_NOT_FOUND.create(uid, folderPath);
                 }
-                mail.setAccountId(mailInterface.getAccountID());
+                if (!mail.containsAccountId()) {
+                    mail.setAccountId(mailInterface.getAccountID());
+                }
                 data = new AJAXRequestResult(mail, "mail");
             }
             data.addWarnings(warnings);

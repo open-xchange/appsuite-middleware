@@ -134,12 +134,12 @@ public class DiscoveryActivator extends HousekeepingActivator {
         genconfStorage = new WhiteboardGenericConfigurationStorageService(context);
         final SubscriptionSQLStorage storage = new SubscriptionSQLStorage(provider, genconfStorage, discoveryCollector);
 
-        AbstractSubscribeService.STORAGE = storage;
+        AbstractSubscribeService.STORAGE.set(storage);
 
-        AbstractSubscribeService.ENCRYPTION_FACTORY = getService(SecretEncryptionFactoryService.class);
-        AbstractSubscribeService.CRYPTO_SERVICE = getService(CryptoService.class);
-        AbstractSubscribeService.FOLDERS = folders;
-        AbstractSubscribeService.USER_CONFIGS = userConfigs;
+        AbstractSubscribeService.ENCRYPTION_FACTORY.set(getService(SecretEncryptionFactoryService.class));
+        AbstractSubscribeService.CRYPTO_SERVICE.set(getService(CryptoService.class));
+        AbstractSubscribeService.FOLDERS.set(folders);
+        AbstractSubscribeService.USER_CONFIGS.set(userConfigs);
 
         final SubscriptionUserDeleteListener listener = new SubscriptionUserDeleteListener();
         listener.setStorageService(genconfStorage);
@@ -161,6 +161,11 @@ public class DiscoveryActivator extends HousekeepingActivator {
         contextService.close();
         contextService = null;
         unregisterServices();
+        AbstractSubscribeService.STORAGE.set(null);
+        AbstractSubscribeService.ENCRYPTION_FACTORY.set(null);
+        AbstractSubscribeService.CRYPTO_SERVICE.set(null);
+        AbstractSubscribeService.FOLDERS.set(null);
+        AbstractSubscribeService.USER_CONFIGS.set(null);
     }
 
     @Override

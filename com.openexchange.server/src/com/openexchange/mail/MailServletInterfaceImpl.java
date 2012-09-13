@@ -2033,7 +2033,11 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         if (null == draftMessage) {
             return null;
         }
-        final String retval = draftMessage.getMailPath().toString();
+        final MailPath mailPath = draftMessage.getMailPath();
+        if (null == mailPath) {
+            return null;
+        }
+        final String retval = mailPath.toString();
         postEvent(accountId, draftFullname, true);
         return retval;
     }
@@ -2464,6 +2468,12 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                  * No copy in sent folder
                  */
                 return null;
+            }
+            /*
+             * If mail identifier and folder identifier is already available, assume is has already been stored in Sent folder
+             */
+            if (null != sentMail.getMailId() && null != sentMail.getFolder()) {
+                return new MailPath(accountId, sentMail.getFolder(), sentMail.getMailId()).toString();
             }
             return append2SentFolder(sentMail).toString();
         } finally {

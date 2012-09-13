@@ -53,13 +53,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
-import org.osgi.service.http.HttpContext;
-
-import javax.servlet.Servlet;
 import java.util.concurrent.locks.ReentrantLock;
+import javax.servlet.Servlet;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.glassfish.grizzly.http.server.HttpHandler;
+import org.osgi.service.http.HttpContext;
 
 /**
  * Context mapper.

@@ -589,6 +589,7 @@ public abstract class MailConfig {
                 mailConfig.password = MailPasswordUtil.decrypt(mailAccountPassword, session, mailAccount.getId(), mailAccount.getLogin(), mailAccount.getMailServer());
             }
         }
+        mailConfig.doCustomParsing(mailAccount, session);
     }
 
     /*-
@@ -775,6 +776,20 @@ public abstract class MailConfig {
      */
     public void setPassword(final String password) {
         this.password = password;
+    }
+
+    /**
+     * Performs optional custom parsing.
+     * <p>
+     * Returns <code>false</code> by default.
+     * 
+     * @param account The associated mail account
+     * @param session The user's session
+     * @return <code>true</code> if custom parsing has been performed; otherwise <code>false</code>
+     * @throws OXException If custom parsing fails
+     */
+    protected boolean doCustomParsing(MailAccount account, Session session) throws OXException {
+        return false;
     }
 
     /**

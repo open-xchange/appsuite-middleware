@@ -176,6 +176,15 @@ public class Context {
     public void setFilestoreName(String value) {
         this.filestoreName = value;
     }
+    
+    /**
+     * Sets the loginMappings
+     *
+     * @param loginMappings The loginMappings to set
+     */
+    public void setLoginMappings(List<String> loginMappings) {
+        this.loginMappings = loginMappings;
+    }
 
     /**
      * Ruft den Wert der id-Eigenschaft ab.

@@ -10,6 +10,7 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
@@ -127,7 +128,7 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
     public java.util.List<com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext> list(java.lang.String searchPattern,com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Credentials auth) throws InvalidCredentialsException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    { 
         final OXContextInterface contextInterface = getContextInterface();
         try {
-            final com.openexchange.admin.rmi.dataobjects.Context[] contexts = contextInterface.list(searchPattern, soap2Credentials(auth));
+            final com.openexchange.admin.rmi.dataobjects.Context[] contexts = contextInterface.list(isEmpty(searchPattern) ? "*" : searchPattern, soap2Credentials(auth));
             if (null == contexts) {
                 return Collections.emptyList();
             }
@@ -1509,6 +1510,10 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
         soapContext.setEnabled(context.getEnabled());
         soapContext.setFilestoreId(context.getFilestoreId());
         soapContext.setFilestoreName(context.getFilestore_name());
+        final HashSet<String> lmappings = context.getLoginMappings();
+        if (null != lmappings && !lmappings.isEmpty()) {
+            soapContext.setLoginMappings(new ArrayList<String>(lmappings));
+        }
         soapContext.setId(context.getId());
         soapContext.setMaxQuota(context.getMaxQuota());
         soapContext.setName(context.getName());
@@ -1662,4 +1667,17 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
         }
         return ret;
     }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
+
 }

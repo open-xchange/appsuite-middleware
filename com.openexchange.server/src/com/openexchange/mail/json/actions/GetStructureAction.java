@@ -130,6 +130,9 @@ public final class GetStructureAction extends AbstractMailAction {
                     uid = tmp2;
                 }
             }
+            if (isEmpty(uid)) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_ID);
+            }
             /*
              * Get message
              */

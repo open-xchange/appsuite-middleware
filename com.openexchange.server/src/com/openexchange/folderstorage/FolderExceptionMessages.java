@@ -163,6 +163,9 @@ public class FolderExceptionMessages implements LocalizableStrings {
     // Found two folders named "%1$s" located below the parent folder "%2$s". Please rename one of the folders. There should be no two folders with the same name.
     public static final String DUPLICATE_NAME_MSG = "Found two folders named \"%1$s\" located below the parent folder \"%2$s\". Please rename one of the folders. There should be no two folders with the same name.";
 
+    // An unexpected error occurred: %1$s. Please try again.
+    public static final String TRY_AGAIN_MSG = "An unexpected error occurred: %1$s. Please try again.";
+
     /**
      * Initializes a new {@link FolderExceptionMessages}
      */

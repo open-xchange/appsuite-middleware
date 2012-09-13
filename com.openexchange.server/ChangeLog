@@ -1,3 +1,43 @@
+* 2012-09-11 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22917: Added previous naming for downward compatibility
+ - Fix for bug 22975: Select high log level for all error categories to let them be logged
+
+* 2012-09-07 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22943: Limit max. size of parseable HTML content; configurable through 'com.openexchange.html.maxLength'
+
+* 2012-09-07 - jan.bauerdick@open-xchange.com
+
+ - New bundle c.o.aws.autoscaling: Monitoring of instances and loadbalancers, add/remove instances if neccessary
+
+* 2012-09-06 - jan.bauerdick@open-xchange.com
+
+ - New bundle c.o.aws.ec2: Start and stop EC2 instances and register them with the loadbalancer
+
+* 2012-09-05 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22897: Make generated session instance available, rather than only providing its identifier
+ - Fix for bug 22918: Deal with possible absent ThreadState instance
+ - Fix for bug 22921: Added null guard to prevent NPE
+ - Fix for bug 22920: Added null guard to prevent NPE
+ - Fix for bug 22891: Added null guard
+ - Fix for bug 22890: Added null guard
+ - Fix for bug 22883: Added missing reseller interfaces
+ - Fix for bug 22928: Fixed activator of bundle 'com.openexchange.user.copy'
+ - Fix for bug 22870: Checking for possibly empty mail identifier on action=get_structure request
+ - Fix for bug 22927: Fixed CleanUpActivator of bundle 'com.openexchange.subscribe'
+ - Fix for bug 22926: Fixed activator of bundle 'com.openexchange.mobile.configuration.json'
+ - Fix for bug 22929: Prefer user name when generating NoSuchUserException's message
+
+* 2012-09-04 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22886: Read and write support for ISO-2022-CN charset
+ - Fix for bug 22884: Set appropriate content type
+ - Fix for bug 22777: Fixed possible NPE when saving a draft
+ - Fix for bug 22882: Prevent possible NPE
+ - Fix for bug 22880: Prevent possible NPE
+
 * 2012-09-04 - jan.bauerdick@open-xchange.com
 
  - New bundle c.o.aws.loadbalancing: Register and deregister ec2 instances with the elastic loadbalancer

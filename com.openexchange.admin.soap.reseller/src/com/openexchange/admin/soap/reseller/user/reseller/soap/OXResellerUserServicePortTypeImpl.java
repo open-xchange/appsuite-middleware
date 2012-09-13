@@ -9,6 +9,7 @@ package com.openexchange.admin.soap.reseller.user.reseller.soap;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
@@ -121,7 +122,7 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
     public java.util.List<com.openexchange.admin.soap.reseller.user.soap.dataobjects.User> list(final com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext ctx,final java.lang.String searchPattern,final com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth) throws DatabaseUpdateException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    { 
         final OXUserInterface iface = getUserInterface();
         try {
-            final com.openexchange.admin.rmi.dataobjects.User[] list = iface.list(soap2Context(ctx), searchPattern, soap2Credentials(auth));
+            final com.openexchange.admin.rmi.dataobjects.User[] list = iface.list(soap2Context(ctx), isEmpty(searchPattern) ? "*" : searchPattern, soap2Credentials(auth));
             if (null == list) {
                 return null;
             }
@@ -368,7 +369,7 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
     public java.util.List<com.openexchange.admin.soap.reseller.user.soap.dataobjects.User> listCaseInsensitive(final com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext ctx,final java.lang.String searchPattern,final com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth) throws DatabaseUpdateException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    { 
         final OXUserInterface iface = getUserInterface();
         try {
-            final User[] listCaseInsensitive = iface.listCaseInsensitive(soap2Context(ctx), searchPattern, soap2Credentials(auth));
+            final User[] listCaseInsensitive = iface.listCaseInsensitive(soap2Context(ctx), isEmpty(searchPattern) ? "*" : searchPattern, soap2Credentials(auth));
             final java.util.List<com.openexchange.admin.soap.reseller.user.soap.dataobjects.User> l = new ArrayList<com.openexchange.admin.soap.reseller.user.soap.dataobjects.User>(listCaseInsensitive.length);
             for (final User user : listCaseInsensitive) {
                 l.add(user2Soap(user));
@@ -1234,23 +1235,29 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
         final com.openexchange.admin.soap.reseller.user.soap.dataobjects.User soapUser = new com.openexchange.admin.soap.reseller.user.soap.dataobjects.User();
         soapUser.setGuiSpamFilterEnabled(user.getGui_spam_filter_enabled());
         soapUser.setAliases(user.getAliasesForSOAP());
-        if (null != user.getAnniversary()) {
+        Date d = user.getAnniversary();
+        if (null == d) {
+            soapUser.setAnniversary(null);
+        } else {
             try {
                 final GregorianCalendar c = new GregorianCalendar();
-                c.setTime(user.getAnniversary());
+                c.setTime(d);
                 soapUser.setAnniversary(DatatypeFactory.newInstance().newXMLGregorianCalendar(c));
             } catch (final DatatypeConfigurationException e) {
                 soapUser.setAnniversary(null);
             }
         }
         soapUser.setAssistantName(user.getAssistant_name());
-        if (null != user.getBirthday()) {
+        d = user.getBirthday();
+        if (null == d) {
+            soapUser.setBirthday(null);
+        } else {
             try {
                 final GregorianCalendar c = new GregorianCalendar();
-                c.setTime(user.getBirthday());
+                c.setTime(d);
                 soapUser.setBirthday(DatatypeFactory.newInstance().newXMLGregorianCalendar(c));
             } catch (final DatatypeConfigurationException e) {
-                soapUser.setAnniversary(null);
+                soapUser.setBirthday(null);
             }
         }
         soapUser.setBranches(user.getBranches());
@@ -1383,7 +1390,10 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
         final com.openexchange.admin.soap.reseller.user.soap.dataobjects.Group soapGroup = new com.openexchange.admin.soap.reseller.user.soap.dataobjects.Group();
         soapGroup.setDisplayname(group.getDisplayname());
         soapGroup.setId(group.getId());
-        soapGroup.setMembers(Arrays.asList(group.getMembers()));
+        {
+            final Integer[] members = group.getMembers();
+            soapGroup.setMembers(null == members ? null : Arrays.asList(members));
+        }
         soapGroup.setName(group.getName());
         return soapGroup;
     }
@@ -1625,4 +1635,17 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
         soapModuleAccess.setWebmail(Boolean.valueOf(moduleAccess.getWebmail()));
         return soapModuleAccess;
     }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
+
 }

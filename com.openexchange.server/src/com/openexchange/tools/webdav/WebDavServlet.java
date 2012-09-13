@@ -156,21 +156,26 @@ public abstract class WebDavServlet extends HttpServlet {
         resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Method \"REPORT\" is not supported by this servlet");
     }
 
-    private static volatile Boolean disabled;
-
-    private static boolean disabled() {
-        Boolean tmp = disabled;
-        if (null == tmp) {
-            synchronized (WebDavServlet.class) {
-                tmp = disabled;
-                if (null == tmp) {
-                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                    tmp = Boolean.valueOf(service != null && !service.getBoolProperty("com.openexchange.webdav.enabled", true));
-                    disabled = tmp;
-                }
-            }
-        }
-        return tmp.booleanValue();
+    protected boolean isDisabledByProperty() {
+        ConfigurationService config = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+        return config.getBoolProperty("com.openexchange.webdav.disabled", true);
+    }
+    
+    protected String getDisabledMessage() {
+        ConfigurationService config = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+        String text = config.getText("webdav-disabled-message.txt");
+        return text;
+    }
+    
+    /**
+     * Override this and return true to disable the servlet. In this case an error message will be sent to the client.
+     * Whether WebDav servlets can be disabled at all has to be specified with "com.openexchange.webdav.disabled=true"
+     * in server.properties. The error message may be customized within the property "com.openexchange.webdav.errorMessage".
+     * 
+     * @return
+     */
+    protected boolean isServletDisabled() {
+        return false;
     }
 
     /**
@@ -178,9 +183,9 @@ public abstract class WebDavServlet extends HttpServlet {
      */
     @Override
     protected void service(final HttpServletRequest request, final HttpServletResponse resp) throws ServletException, IOException {
-        if (disabled()) {
+        if (isServletDisabled() && isDisabledByProperty()) {
             resp.setContentType("text/html; charset=UTF-8");
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND, "The WebDAV interface is disabled.");
+            resp.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, getDisabledMessage());
             return;
         }
         incrementRequests();

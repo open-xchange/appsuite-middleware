@@ -70,15 +70,11 @@ public final class DefaultSpamHandlerActivator extends HousekeepingActivator {
     private static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(DefaultSpamHandlerActivator.class));
 
-    private final Dictionary<String, String> dictionary;
-
     /**
      * Initializes a new {@link DefaultSpamHandlerActivator}
      */
     public DefaultSpamHandlerActivator() {
         super();
-        dictionary = new Hashtable<String, String>();
-        dictionary.put("name", DefaultSpamHandler.getInstance().getSpamHandlerName());
     }
 
     @Override
@@ -105,6 +101,8 @@ public final class DefaultSpamHandlerActivator extends HousekeepingActivator {
         try {
             MailServiceSupplier.getInstance().setMailService(getService(MailService.class));
             ConfigurationServiceSupplier.getInstance().setConfigurationService(getService(ConfigurationService.class));
+            final Dictionary<String, String> dictionary = new Hashtable<String, String>(1);
+            dictionary.put("name", DefaultSpamHandler.getInstance().getSpamHandlerName());
             registerService(SpamHandler.class, DefaultSpamHandler.getInstance(), dictionary);
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);

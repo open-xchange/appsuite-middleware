@@ -121,7 +121,7 @@ public final class SMTPActivator extends HousekeepingActivator {
             }
             track(HostnameService.class, new RegistryCustomizer<HostnameService>(context, HostnameService.class, getServiceRegistry()));
             openTrackers();
-            final Dictionary<String, String> dictionary = new Hashtable<String, String>();
+            final Dictionary<String, String> dictionary = new Hashtable<String, String>(1);
             dictionary.put("protocol", SMTPProvider.PROTOCOL_SMTP.toString());
             registerService(TransportProvider.class, SMTPProvider.getInstance(), dictionary);
         } catch (final Throwable t) {

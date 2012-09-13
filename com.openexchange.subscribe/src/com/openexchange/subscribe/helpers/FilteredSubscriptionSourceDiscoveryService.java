@@ -51,13 +51,14 @@ package com.openexchange.subscribe.helpers;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.log.LogFactory;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 
@@ -71,13 +72,13 @@ public class FilteredSubscriptionSourceDiscoveryService implements SubscriptionS
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FilteredSubscriptionSourceDiscoveryService.class));
 
-    public static ConfigViewFactory CONFIG_VIEW_FACTORY;
+    public static final AtomicReference<ConfigViewFactory> CONFIG_VIEW_FACTORY = new AtomicReference<ConfigViewFactory>();
 
     public SubscriptionSourceDiscoveryService delegate = null;
     private final ConfigView config;
 
     public FilteredSubscriptionSourceDiscoveryService(final int user, final int context, final SubscriptionSourceDiscoveryService delegate) throws OXException {
-        this.config = CONFIG_VIEW_FACTORY.getView(user, context);
+        this.config = CONFIG_VIEW_FACTORY.get().getView(user, context);
         this.delegate = delegate;
     }
 

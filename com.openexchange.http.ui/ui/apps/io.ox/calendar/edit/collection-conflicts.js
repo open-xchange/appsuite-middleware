@@ -1,1 +1,0 @@
-define("io.ox/calendar/edit/collection-conflicts",["io.ox/calendar/edit/model-conflict"],function(a){var b=Backbone.Collection.extend({model:a});return"use strict",b})

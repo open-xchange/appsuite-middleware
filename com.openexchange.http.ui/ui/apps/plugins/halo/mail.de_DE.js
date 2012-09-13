@@ -1,1 +1,0 @@
-define("plugins/halo/mail.de_DE",["io.ox/core/gettext"],function(g){return g("plugins/halo/mail",{"nplurals":2,"plural":"(n != 1)","dictionary":{}});});

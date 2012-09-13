@@ -4750,6 +4750,11 @@ msgid ""
 "same name."
 msgstr ""
 
+#. An unexpected error occurred: %1$s. Please try again.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:167
+msgid "An unexpected error occurred: %1$s. Please try again."
+msgstr ""
+
 #. SQL Problem: "%1$s".
 #. * SQL Problem: %1$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:72

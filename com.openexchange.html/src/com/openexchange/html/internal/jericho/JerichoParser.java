@@ -64,7 +64,10 @@ import net.htmlparser.jericho.StreamedSource;
 import net.htmlparser.jericho.Tag;
 import net.htmlparser.jericho.TagType;
 import org.apache.commons.logging.Log;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.internal.parser.HtmlHandler;
+import com.openexchange.html.services.ServiceRegistry;
+import com.openexchange.java.Streams;
 import com.openexchange.log.LogFactory;
 
 /**
@@ -78,6 +81,40 @@ public final class JerichoParser {
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
+    public static final class ParsingDeniedException extends RuntimeException {
+
+        private static final long serialVersionUID = 150733382242549446L;
+
+        /**
+         * Initializes a new {@link ParsingDeniedException}.
+         */
+        ParsingDeniedException() {
+            super();
+        }
+
+        /**
+         * Initializes a new {@link ParsingDeniedException}.
+         */
+        ParsingDeniedException(String message, Throwable cause) {
+            super(message, cause);
+        }
+
+        /**
+         * Initializes a new {@link ParsingDeniedException}.
+         */
+        ParsingDeniedException(String message) {
+            super(message);
+        }
+
+        /**
+         * Initializes a new {@link ParsingDeniedException}.
+         */
+        ParsingDeniedException(Throwable cause) {
+            super(cause);
+        }
+
+    } // End of ParsingDeniedException
+
     /**
      * Initializes a new {@link JerichoParser}.
      */
@@ -87,25 +124,49 @@ public final class JerichoParser {
 
     private static final Pattern BODY_START = Pattern.compile("<body.*?>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 
+    private static volatile Integer maxLength;
+    private static int maxLength() {
+        Integer i = maxLength;
+        if (null == maxLength) {
+            synchronized (JerichoParser.class) {
+                i = maxLength;
+                if (null == maxLength) {
+                    // Default is 512KB
+                    final ConfigurationService service = ServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    final int defaultMaxLength = 1048576 >> 1;
+                    i = Integer.valueOf(null == service ? defaultMaxLength : service.getIntProperty("com.openexchange.html.maxLength", defaultMaxLength));
+                    maxLength = i;
+                }
+            }
+        }
+        return i.intValue();
+    }
+
     /**
      * Ensure given HTML content has a <code>&lt;body&gt;</code> tag.
      * 
      * @param html The HTML content to check
      * @return The checked HTML content possibly with surrounded with a <code>&lt;body&gt;</code> tag
+     * @throws ParsingDeniedException If specified HTML content cannot be parsed without wasting too many JVM resources
      */
-    private static String checkBody(final String html) {
+    private static StreamedSource checkBody(final String html) {
         if (null == html) {
-            return html;
+            return null;
+        }
+        final int maxLength = maxLength();
+        final boolean big = html.length() > maxLength;
+        if (big) {
+            throw new ParsingDeniedException("HTML content is too big: max. " + maxLength + ", but is " + html.length());
         }
         if (BODY_START.matcher(html).find()) {
-            return html;
+            return new StreamedSource(html);
         }
         // <body> tag missing
         String sep = System.getProperty("line.separator");
         if (null == sep) {
             sep = "\n";
         }
-        return new StringBuilder(html.length() + 16).append("<body>").append(sep).append(html).append(sep).append("</body>").toString();
+        return new StreamedSource(new StringBuilder(html.length() + 16).append("<body>").append(sep).append(html).append(sep).append("</body>"));
     }
 
     private static final Pattern NESTED_TAG = Pattern.compile("^(?:\r?\n *)?(<[^>]+>)");
@@ -117,24 +178,37 @@ public final class JerichoParser {
      * 
      * @param html The real-life HTML document
      * @param handler The HTML handler
+     * @throws ParsingDeniedException If specified HTML content cannot be parsed without wasting too many JVM resources
      */
     public static void parse(final String html, final JerichoHandler handler) {
-        final StreamedSource streamedSource = new StreamedSource(checkBody(html));
-        streamedSource.setLogger(null);
-        int lastSegmentEnd = 0;
-        for (final Segment segment : streamedSource) {
-            if (segment.getEnd() <= lastSegmentEnd) {
+        final long st = DEBUG ? System.currentTimeMillis() : 0L;
+        StreamedSource streamedSource = null;
+        try {
+            streamedSource = checkBody(html);
+            streamedSource.setLogger(null);
+            int lastSegmentEnd = 0;
+            for (final Segment segment : streamedSource) {
+                if (segment.getEnd() <= lastSegmentEnd) {
+                    /*
+                     * If this tag is inside the previous tag (e.g. a server tag) then ignore it as it was already output along with the
+                     * previous tag.
+                     */
+                    continue;
+                }
+                lastSegmentEnd = segment.getEnd();
                 /*
-                 * If this tag is inside the previous tag (e.g. a server tag) then ignore it as it was already output along with the
-                 * previous tag.
+                 * Handle current segment
                  */
-                continue;
+                handleSegment(handler, segment, false);
             }
-            lastSegmentEnd = segment.getEnd();
-            /*
-             * Handle current segment
-             */
-            handleSegment(handler, segment, false);
+            if (DEBUG) {
+                final long dur = System.currentTimeMillis() - st;
+                LOG.debug("\tJerichoParser.parse() took " + dur + "msec.");
+            }
+        } catch (final StackOverflowError parserOverflow) {
+            throw new ParsingDeniedException("Parser overflow detected.", parserOverflow);
+        } finally {
+            Streams.close(streamedSource);
         }
     }
 

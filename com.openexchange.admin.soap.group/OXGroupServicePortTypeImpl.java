@@ -10,6 +10,7 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -565,20 +566,30 @@ public class OXGroupServicePortTypeImpl implements OXGroupServicePortType {
         final User soapUser = new User();
         soapUser.setGuiSpamFilterEnabled(user.getGui_spam_filter_enabled());
         soapUser.setAliases(user.getAliasesForSOAP());
-        try {
-            final GregorianCalendar c = new GregorianCalendar();
-            c.setTime(user.getAnniversary());
-            soapUser.setAnniversary(DatatypeFactory.newInstance().newXMLGregorianCalendar(c));
-        } catch (final DatatypeConfigurationException e) {
+        Date d = user.getAnniversary();
+        if (null == d) {
             soapUser.setAnniversary(null);
+        } else {
+            try {
+                final GregorianCalendar c = new GregorianCalendar();
+                c.setTime(d);
+                soapUser.setAnniversary(DatatypeFactory.newInstance().newXMLGregorianCalendar(c));
+            } catch (final DatatypeConfigurationException e) {
+                soapUser.setAnniversary(null);
+            }
         }
         soapUser.setAssistantName(user.getAssistant_name());
-        try {
-            final GregorianCalendar c = new GregorianCalendar();
-            c.setTime(user.getBirthday());
-            soapUser.setBirthday(DatatypeFactory.newInstance().newXMLGregorianCalendar(c));
-        } catch (final DatatypeConfigurationException e) {
-            soapUser.setAnniversary(null);
+        d = user.getBirthday();
+        if (null == d) {
+            soapUser.setBirthday(null);
+        } else {
+            try {
+                final GregorianCalendar c = new GregorianCalendar();
+                c.setTime(d);
+                soapUser.setBirthday(DatatypeFactory.newInstance().newXMLGregorianCalendar(c));
+            } catch (final DatatypeConfigurationException e) {
+                soapUser.setBirthday(null);
+            }
         }
         soapUser.setBranches(user.getBranches());
         soapUser.setBusinessCategory(user.getBusiness_category());
@@ -722,7 +733,10 @@ public class OXGroupServicePortTypeImpl implements OXGroupServicePortType {
         final Group soapGroup = new Group();
         soapGroup.setDisplayname(group.getDisplayname());
         soapGroup.setId(group.getId());
-        soapGroup.setMembers(Arrays.asList(group.getMembers()));
+        {
+            final Integer[] members = group.getMembers();
+            soapGroup.setMembers(null == members ? null : Arrays.asList(members));
+        }
         soapGroup.setName(group.getName());
         return soapGroup;
     }

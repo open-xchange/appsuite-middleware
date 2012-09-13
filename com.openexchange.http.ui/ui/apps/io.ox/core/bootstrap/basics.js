@@ -1,1 +1,0 @@
-(function(){var a="io.ox/core/bootstrap/";"use strict",define(a+"basics",[ox.base+"/bootstrap.js","less!"+a+"less/bootstrap.less"],$.noop)})()

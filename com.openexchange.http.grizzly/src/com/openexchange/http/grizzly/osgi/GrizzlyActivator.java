@@ -49,13 +49,10 @@
 
 package com.openexchange.http.grizzly.osgi;
 
-import java.io.IOException;
-import javax.servlet.ServletException;
 import org.glassfish.grizzly.comet.CometAddOn;
 import org.glassfish.grizzly.http.HttpRequestPacket;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.grizzly.http.server.NetworkListener;
-import org.glassfish.grizzly.http.server.StaticHttpHandler;
 import org.glassfish.grizzly.websockets.WebSocket;
 import org.glassfish.grizzly.websockets.WebSocketAddOn;
 import org.glassfish.grizzly.websockets.WebSocketApplication;
@@ -63,7 +60,6 @@ import org.glassfish.grizzly.websockets.WebSocketEngine;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
 import org.osgi.service.http.HttpService;
-import org.osgi.service.http.NamespaceException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.grizzly.GrizzlyExceptionCode;
@@ -75,7 +71,6 @@ import com.openexchange.http.requestwatcher.osgi.services.RequestWatcherService;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.server.ServiceExceptionCode;
 
 /**
  * {@link GrizzlyActivator}
@@ -152,7 +147,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
             // create addons based on given configuration
             final ConfigurationService configService = grizzlyServiceRegistry.getService(ConfigurationService.class);
             if (configService == null) {
-                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigurationService.class.getName());
+                throw GrizzlyExceptionCode.NEEDED_SERVICE_MISSING.create(ConfigurationService.class.getName());
             }
 
             /*
@@ -170,6 +165,8 @@ public class GrizzlyActivator extends HousekeepingActivator {
             grizzly = new HttpServer();
             
             final NetworkListener networkListener = new NetworkListener("http-listener", httpHost, 8080);
+            networkListener.setChunkingEnabled(false);
+            
             
             if (hasJMXEnabled) {
                 if (LOG.isInfoEnabled()) {
@@ -236,9 +233,6 @@ public class GrizzlyActivator extends HousekeepingActivator {
             }
             serviceFactory = new HttpServiceFactory(grizzly, context.getBundle());
             registerService(HttpService.class.getName(), serviceFactory);
-            
-//            grizzly.getServerConfiguration().addHttpHandler(new StaticHttpHandler("/var/www/ox7"), "/");
-//            grizzly.getServerConfiguration().addHttpHandler(new StaticHttpHandler("/var/www/ox7"), "/v=7.0.0-1.20120614.152235");
             
         } catch (final Exception e) {
             throw GrizzlyExceptionCode.GRIZZLY_SERVER_NOT_STARTED.create(e, new Object[] {});

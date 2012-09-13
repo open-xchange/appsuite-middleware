@@ -117,6 +117,7 @@ public class AWSLoadbalancingServiceImpl implements AWSLoadbalancingService {
                 instances);
             RegisterInstancesWithLoadBalancerResult result = lbClient.registerInstancesWithLoadBalancer(registerReq);
             registeredInstances = result.getInstances();
+            LOG.info("Instance " + instanceId + " registered with the loadbalancer.");
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
             throw OXAWSLoadBalancingExceptionCodes.AWS_LB_REGISTER_FAILED.create(instanceId);
@@ -134,6 +135,7 @@ public class AWSLoadbalancingServiceImpl implements AWSLoadbalancingService {
                 instances);
             DeregisterInstancesFromLoadBalancerResult result = lbClient.deregisterInstancesFromLoadBalancer(deregisterReq);
             registeredInstances = result.getInstances();
+            LOG.info("Instance " + instanceId + " deregistered from the loadbalancer.");
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
             throw OXAWSLoadBalancingExceptionCodes.AWS_LB_DEREGISTER_FAILED.create(instanceId);

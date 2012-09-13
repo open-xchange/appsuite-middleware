@@ -1,1 +1,0 @@
-define("io.ox/files/files.de_DE",["io.ox/core/gettext"],function(g){return g("io.ox/files/files",{"nplurals":2,"plural":"(n != 1)","dictionary":{"Title":""}});});
