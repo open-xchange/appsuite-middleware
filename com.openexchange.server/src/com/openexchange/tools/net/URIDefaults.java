@@ -148,7 +148,7 @@ public interface URIDefaults {
 
         @Override
         public String getProtocol() {
-            return "http";
+            return "http"; // comment
         }
 
         @Override
