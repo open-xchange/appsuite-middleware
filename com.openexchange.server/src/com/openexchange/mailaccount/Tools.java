@@ -396,13 +396,15 @@ public final class Tools {
 
     private static String getPrefix(final int accountId, final ServerSession session) throws OXException {
         try {
-            final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> access =
-                MailAccess.getInstance(session, accountId);
-            access.connect(false);
+            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> access = null;
             try {
+                access = MailAccess.getInstance(session, accountId);
+                access.connect(false);
                 return access.getFolderStorage().getDefaultFolderPrefix();
             } finally {
-                access.close(true);
+                if (null != access) {
+                    access.close(true);
+                }
             }
         } catch (final OXException e) {
             throw new OXException(e);
