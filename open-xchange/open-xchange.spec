@@ -14,7 +14,7 @@ BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Source1:       open-xchange.init
-Summary:       Open-Xchange Backend
+Summary:       The Open-Xchange backend
 Requires:      open-xchange-core >= @OXVERSION@
 Requires:      open-xchange-authentication
 Requires:      open-xchange-authorization
@@ -24,7 +24,8 @@ Requires:      open-xchange-theme-default
 Requires:      open-xchange-smtp >= @OXVERSION@
 
 %description
-This package only contains the dependencies to install a working Open-Xchange 7 backend system.
+This package provides the dependencies to install a working Open-Xchange backend system. By installing this package a minimal backend is
+installed. Additionally this package provides the init script for starting the backend on system boot.
 
 Authors:
 --------
