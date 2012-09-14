@@ -4,6 +4,7 @@
    support for SOAP data class inheritance to ReplacingXMLStreamReader for subclasses for reseller interface.
  - Fix for bug 22981: Corrected permissions on ox-scriptconf.sh so showruntimestats can be executed by munin user.
  - Fix for bug 22853: Commented everywhere the lateral TCP servers entry.
+ - Fix for bug 23008: Wrote better description for the open-xchange package.
 
 * 2012-09-14 - tobias.friedrich@open-xchange.com
 
