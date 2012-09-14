@@ -2,6 +2,7 @@
 
  - Fix for bug 22978: Defined the ResellerAdmin SOAP object completely new by hand. Looks much more clean now and works as expected. Added
    support for SOAP data class inheritance to ReplacingXMLStreamReader for subclasses for reseller interface.
+ - Fix for bug 22981: Corrected permissions on ox-scriptconf.sh so showruntimestats can be executed by munin user.
 
 * 2012-09-14 - tobias.friedrich@open-xchange.com
 
