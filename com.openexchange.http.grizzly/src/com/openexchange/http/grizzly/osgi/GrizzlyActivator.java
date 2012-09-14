@@ -90,27 +90,19 @@ public class GrizzlyActivator extends HousekeepingActivator {
         return new Class[] { ConfigurationService.class, RequestWatcherService.class };
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.osgi.HousekeepingActivator#handleAvailability(java.lang.Class)
-     */
     @Override
     protected void handleAvailability(Class<?> clazz) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Service " + clazz.getName() + " is available again.");
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Service " + clazz.getName() + " is available again.");
         }
         Object service = getService(clazz);
         GrizzlyServiceRegistry.getInstance().addService(clazz, service);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.osgi.HousekeepingActivator#handleUnavailability(java.lang.Class)
-     */
     @Override
     protected void handleUnavailability(Class<?> clazz) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Service " + clazz.getName() + " is no longer available.");
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Service " + clazz.getName() + " is no longer available.");
         }
         GrizzlyServiceRegistry.getInstance().removeService(clazz);
     }
