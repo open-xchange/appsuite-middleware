@@ -57,11 +57,11 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.caching.objects.CachedSession;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 import com.openexchange.session.PutIfAbsent;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.services.SessiondServiceRegistry;
@@ -176,6 +176,9 @@ public final class SessionImpl implements PutIfAbsent {
     }
 
     private String obfuscate(final String string) {
+        if (isEmpty(string)) {
+            return string;
+        }
         try {
             final String key = getObfuscationKey();
             return isEmpty(key) ? string : SessiondServiceRegistry.getServiceRegistry().getService(CryptoService.class).encrypt(string, key);
