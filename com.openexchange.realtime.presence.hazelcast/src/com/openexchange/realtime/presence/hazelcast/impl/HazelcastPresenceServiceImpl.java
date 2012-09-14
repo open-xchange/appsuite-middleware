@@ -47,24 +47,32 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere;
+package com.openexchange.realtime.presence.hazelcast.impl;
 
-import com.openexchange.i18n.LocalizableStrings;
+import com.openexchange.exception.OXException;
+import com.openexchange.realtime.example.presence.PresenceService;
+import com.openexchange.realtime.example.presence.PresenceStatus;
+import com.openexchange.realtime.packet.ID;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link AtmosphereExceptionMessage}
+ * {@link HazelcastPresenceServiceImpl}
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class AtmosphereExceptionMessage implements LocalizableStrings {
-    /** The mandatory session information is missing. */
-    public static final String SESSIONINFO_DIDNT_MATCH_SERVERSESSION_MSG = "The session information didn't match any ServerSession";
-    /** The received message is missing the \"kind\" key. */
-    public static final String MISSING_KIND_MSG = "The received message is missing the \"kind\" key.";
-    /** Could not find a parser for a message of kind: . \"%1$s\" */
-    public static final String MISSING_PARSER_FOR_KIND_MSG = "Could not find a parser for a message of kind: . \"%1$s\"";
-    /** Error while building Stanza: \"%1$s\" */
-    public static final String ERROR_WHILE_BUILDING_MSG = "Error while building Stanza: \"%1$s\"";
-    
+public class HazelcastPresenceServiceImpl implements PresenceService {
+
+    @Override
+    public void changeState(ID id, PresenceState state, String statusMessage, ServerSession session) throws OXException {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public PresenceStatus getPresence(ID id) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

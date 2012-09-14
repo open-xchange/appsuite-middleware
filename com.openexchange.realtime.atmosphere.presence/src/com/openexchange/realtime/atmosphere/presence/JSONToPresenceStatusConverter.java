@@ -60,17 +60,17 @@ import com.openexchange.realtime.example.presence.PresenceStatus;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link JSONToPresenceStatusConverter} - Convert incoming PresenceStatus from JSON to PresenceStatus POJO  
-   {
-     kind: 'presence'
-     ns: 'presence',
-     to: 'myuser@mycontext',
-     data: {
-       state: 'online'
-       message: 'i am here',
-       priority: 0
-     }
-  };
+ * {@link JSONToPresenceStatusConverter} - Convert incoming PresenceStatus from JSON to PresenceStatus POJO
+ * A presence element in form of a JSONObject looks like:
+ * <pre>
+ * data: {
+ *   state: 'online',
+ *   message: 'i am here',
+ *   [priority: 0],
+ *   [type: none]
+ * }
+ * </pre>
+ * where priority and type are optional elements.
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
@@ -93,7 +93,6 @@ public class JSONToPresenceStatusConverter implements SimplePayloadConverter {
 
     /**
      * Convert a JSON Object into a StatusPresence Object.
-     * The JSON has to be formed like {state: 'theState', message: 'theMessage'} where state is obligatory and message is optional.
      */
     @Override
     public Object convert(Object data, ServerSession session, SimpleConverter converter) throws OXException {
@@ -109,7 +108,7 @@ public class JSONToPresenceStatusConverter implements SimplePayloadConverter {
                     break;
                 }
             }
-            if(state == null) {
+            if (state == null) {
                 throw OBLIGATORY_ELEMENT_MISSING.create("state");
             }
         } catch (JSONException e) {

@@ -47,24 +47,46 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere;
+package com.openexchange.realtime.atmosphere.impl.stanza;
 
-import com.openexchange.i18n.LocalizableStrings;
+import org.json.JSONObject;
+import com.openexchange.exception.OXException;
+import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.IQ;
+import com.openexchange.realtime.packet.Message;
 
 
 /**
- * {@link AtmosphereExceptionMessage}
+ * {@link MessageBuilder}
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class AtmosphereExceptionMessage implements LocalizableStrings {
-    /** The mandatory session information is missing. */
-    public static final String SESSIONINFO_DIDNT_MATCH_SERVERSESSION_MSG = "The session information didn't match any ServerSession";
-    /** The received message is missing the \"kind\" key. */
-    public static final String MISSING_KIND_MSG = "The received message is missing the \"kind\" key.";
-    /** Could not find a parser for a message of kind: . \"%1$s\" */
-    public static final String MISSING_PARSER_FOR_KIND_MSG = "Could not find a parser for a message of kind: . \"%1$s\"";
-    /** Error while building Stanza: \"%1$s\" */
-    public static final String ERROR_WHILE_BUILDING_MSG = "Error while building Stanza: \"%1$s\"";
+public class MessageBuilder extends StanzaBuilder<Message> {
+    /**
+     * Create a new MessageBuilder
+     * Initializes a new {@link MessageBuilder}.
+     * @param from the sender's ID, must not be null
+     * @param json the sender's message, must not be null
+     * @throws IllegalArgumentException if from or json are null
+     */
+    public MessageBuilder(ID from, JSONObject json) {
+        if(from == null || json == null) {
+            throw new IllegalArgumentException();
+        }
+        this.from = from;
+        this.json = json;
+        this.stanza = new Message();
+    }
     
+    @Override
+    protected void validate() throws OXException {
+        throw new UnsupportedOperationException("Not implemented yet!");
+        
+    }
+
+    @Override
+    protected Message build() throws OXException {
+        throw new UnsupportedOperationException("Not implemented yet!");
+    }
+
 }

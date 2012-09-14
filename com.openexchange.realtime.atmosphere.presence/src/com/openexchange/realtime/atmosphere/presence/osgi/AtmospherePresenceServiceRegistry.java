@@ -47,24 +47,53 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere;
+package com.openexchange.realtime.atmosphere.presence.osgi;
 
-import com.openexchange.i18n.LocalizableStrings;
-
+import com.openexchange.osgi.ServiceRegistry;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link AtmosphereExceptionMessage}
+ * {@link AtmospherePresenceServiceRegistry}
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class AtmosphereExceptionMessage implements LocalizableStrings {
-    /** The mandatory session information is missing. */
-    public static final String SESSIONINFO_DIDNT_MATCH_SERVERSESSION_MSG = "The session information didn't match any ServerSession";
-    /** The received message is missing the \"kind\" key. */
-    public static final String MISSING_KIND_MSG = "The received message is missing the \"kind\" key.";
-    /** Could not find a parser for a message of kind: . \"%1$s\" */
-    public static final String MISSING_PARSER_FOR_KIND_MSG = "Could not find a parser for a message of kind: . \"%1$s\"";
-    /** Error while building Stanza: \"%1$s\" */
-    public static final String ERROR_WHILE_BUILDING_MSG = "Error while building Stanza: \"%1$s\"";
+/**
+ * {@link AtmospherePresenceServiceRegistry} Singleton that extends the existing {@link ServiceRegistry} to gain functionality and acts as
+ * central accesspoint for classes of the AtmospherePresence bundle.
+ * 
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ */
+public class AtmospherePresenceServiceRegistry extends ServiceRegistry {
+    private static final AtmospherePresenceServiceRegistry INSTANCE = new AtmospherePresenceServiceRegistry();
     
+    /**
+     * Encapsulated constructor.
+     */
+    private AtmospherePresenceServiceRegistry() {}
+    
+    /**
+     * Get the GrizzlyService Registry singleton.
+     * @return the GrizzlyService Registry singleton
+     */
+    public static AtmospherePresenceServiceRegistry getInstance() {
+        return INSTANCE;
+    }
+    
+    /**
+     * Initialize the service registry with the services that are declared as needed.
+     * @param activator the DeferredActivator to get services from
+     * @param neededServices the services declared as needed
+     */
+    public void initialize(ServiceLookup serviceLookup, Class[] neededServices) {
+        INSTANCE.clearRegistry();
+        for (Class<?> serviceClass : neededServices) {
+            Object service = serviceLookup.getService(serviceClass);
+            if (service != null) {
+                INSTANCE.addService(serviceClass, service);
+            }
+        }
+    }
 }
+
+
+

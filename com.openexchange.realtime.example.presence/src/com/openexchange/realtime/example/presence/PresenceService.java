@@ -55,16 +55,28 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link PresenceService}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public interface PresenceService {
-	
-	public static enum PresenceState {
-		ONLINE, OFFLINE, DO_NOT_DISTURB, CHAT_ME_UP, AWAY
-	}
-	
-	public void changeState(ID id, PresenceState state, String statusMessage, ServerSession session) throws OXException;
-	
-	public PresenceStatus getPresence(ID id);
+
+    public static enum PresenceState {
+        ONLINE, OFFLINE, DO_NOT_DISTURB, CHAT_ME_UP, AWAY
+    }
+
+    /**
+     * @param id
+     * @param state
+     * @param statusMessage
+     * @param session
+     * @throws OXException
+     */
+    public void changeState(ID id, PresenceState state, String statusMessage, ServerSession session) throws OXException;
+
+    /**
+     * @param id
+     * @return
+     */
+    public PresenceStatus getPresence(ID id);
 }

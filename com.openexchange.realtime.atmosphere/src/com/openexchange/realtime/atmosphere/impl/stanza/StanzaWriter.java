@@ -47,24 +47,68 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere;
+package com.openexchange.realtime.atmosphere.impl.stanza;
 
-import com.openexchange.i18n.LocalizableStrings;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import com.openexchange.exception.OXException;
+import com.openexchange.realtime.packet.IQ;
+import com.openexchange.realtime.packet.Message;
+import com.openexchange.realtime.packet.Presence;
+import com.openexchange.realtime.packet.Stanza;
 
 /**
- * {@link AtmosphereExceptionMessage}
+ * {@link StanzaWriter} - Transforms Stanza objects into their JSON representation.
  *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class AtmosphereExceptionMessage implements LocalizableStrings {
-    /** The mandatory session information is missing. */
-    public static final String SESSIONINFO_DIDNT_MATCH_SERVERSESSION_MSG = "The session information didn't match any ServerSession";
-    /** The received message is missing the \"kind\" key. */
-    public static final String MISSING_KIND_MSG = "The received message is missing the \"kind\" key.";
-    /** Could not find a parser for a message of kind: . \"%1$s\" */
-    public static final String MISSING_PARSER_FOR_KIND_MSG = "Could not find a parser for a message of kind: . \"%1$s\"";
-    /** Error while building Stanza: \"%1$s\" */
-    public static final String ERROR_WHILE_BUILDING_MSG = "Error while building Stanza: \"%1$s\"";
-    
+public class StanzaWriter {
+
+	/**
+	 * Writes specified stanza into its JSON representation.
+	 * 
+	 * @param stanza The stanza to write
+	 * @return The appropriate JSON representation
+	 * @throws OXException If a JSON write error occurs
+	 */
+	public static JSONObject write(Stanza stanza) throws OXException {
+		try {
+			JSONObject object = new JSONObject();
+			writeBasics(stanza, object);
+			if (stanza instanceof Message) {
+				writeMessage((Message) stanza, object);
+			} else if (stanza instanceof Presence) {
+				writePresence((Presence) stanza, object);
+			} else if (stanza instanceof IQ) {
+				writeQuery((IQ) stanza, object);
+			}
+			return object;
+		} catch (JSONException x) {
+			throw OXException.general("JSONException "+x.toString());
+		}
+	}
+
+	private static void writeQuery(IQ stanza, JSONObject object) throws JSONException {
+		object.put("kind", "iq");
+		object.put("type", stanza.getType().name().toLowerCase());
+	}
+
+	private static void writePresence(Presence stanza, JSONObject object) throws JSONException {
+		object.put("kind", "presence");
+	}
+
+	private static void writeMessage(Message stanza, JSONObject object) throws JSONException {
+		object.put("type", stanza.getType().name().toLowerCase());
+	}
+
+	private static void writeBasics(Stanza stanza, JSONObject object) throws JSONException {
+		object.put("ns", stanza.getNamespace());
+		object.put("from", stanza.getFrom().toString());
+		object.put("to", stanza.getTo().toString());
+		object.put("data", stanza.getPayload().getData());
+	}
+
 }

@@ -51,24 +51,59 @@ package com.openexchange.realtime.packet;
 
 /**
  * {@link Presence} - Exchanges presence information.
+ * A Presence Stanza is a broadcast from a single entity X to a set of entities subscribed to this specific entity X.
+ * Being a broadcast this stanza normally doesn't specify a recipient via the <code>to</code> field.
+ * Nevertheless clients are able to send directed Presence Stanzas to single recipients by specifying a <code>to</code>.
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
+
 public class Presence extends Stanza {
 
+    /**
+     * {@link Type} - Specifies the Presence Type
+     * <ol>
+     * <li>unavailable: entity is no longer available for communication</li>
+     * <li>subscribe: sender wants to subscribe to recipient's presence</li>
+     * <li>subscribed: sender allowed recipient to subscribe to their presence</li>
+     * <li>unsubscribe: sender wants to unsubscribe from recipient's presence</li>
+     * <li>unsubscribed: <code>subscribe</code> request has been denied or an existing subscription has been cancelled</li>
+     * <li>error: if an error occurred during processing or delivery of the last stanza</li>
+     * <li>none: is used for the initial presence message of a client to signal its availability for communications.</li>
+     * <li>pending:</li>
+     * </ol>
+     * 
+     * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+     */
     public enum Type {
-        subscribe, subscribed, unsubscribed, pending, none;
+        UNAVAILABLE, SUBSCRIBE, SUBSCRIBED, UNSUBSCRIBE, UNSUBSCRIBED, ERROR, NONE, PENDING;
     }
 
-    private Type state;
+    /**
+     * Optional attribute. The default of none means the client is available.
+     */
+    private Type state = Type.NONE;
 
+    /**
+     * Gets the state
+     * 
+     * @return The state
+     */
     public Type getState() {
         return state;
     }
 
+    /**
+     * Sets the state
+     * 
+     * @param state The state to set
+     */
     public void setState(Type state) {
         this.state = state;
     }
+
+
 
 }

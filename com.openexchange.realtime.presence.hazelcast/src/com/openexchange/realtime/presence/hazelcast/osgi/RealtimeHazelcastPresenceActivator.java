@@ -1,4 +1,4 @@
-package com.openexchange.realtime.presence.osgi;
+package com.openexchange.realtime.presence.hazelcast.osgi;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;

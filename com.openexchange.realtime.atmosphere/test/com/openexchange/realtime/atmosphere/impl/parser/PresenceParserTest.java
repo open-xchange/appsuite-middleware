@@ -47,24 +47,41 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere;
+package com.openexchange.realtime.atmosphere.impl.parser;
 
-import com.openexchange.i18n.LocalizableStrings;
+import static org.junit.Assert.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 
 /**
- * {@link AtmosphereExceptionMessage}
+ * {@link PresenceParserTest}
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class AtmosphereExceptionMessage implements LocalizableStrings {
-    /** The mandatory session information is missing. */
-    public static final String SESSIONINFO_DIDNT_MATCH_SERVERSESSION_MSG = "The session information didn't match any ServerSession";
-    /** The received message is missing the \"kind\" key. */
-    public static final String MISSING_KIND_MSG = "The received message is missing the \"kind\" key.";
-    /** Could not find a parser for a message of kind: . \"%1$s\" */
-    public static final String MISSING_PARSER_FOR_KIND_MSG = "Could not find a parser for a message of kind: . \"%1$s\"";
-    /** Error while building Stanza: \"%1$s\" */
-    public static final String ERROR_WHILE_BUILDING_MSG = "Error while building Stanza: \"%1$s\"";
-    
+public class PresenceParserTest {
+
+    /**
+     * @throws java.lang.Exception
+     */
+    @Before
+    public void setUp() throws Exception {
+    }
+
+    /**
+     * @throws java.lang.Exception
+     */
+    @After
+    public void tearDown() throws Exception {
+    }
+
+    /**
+     * Test method for {@link com.openexchange.realtime.atmosphere.impl.parser.PresenceParser#parseStanza(org.json.JSONObject)}.
+     */
+    @Test
+    public void testParseStanza() {
+        fail("Not yet implemented");
+    }
+
 }

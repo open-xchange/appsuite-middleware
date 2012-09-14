@@ -47,24 +47,53 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere;
+package com.openexchange.realtime.atmosphere.impl.stanza;
 
-import com.openexchange.i18n.LocalizableStrings;
-
+import org.json.JSONObject;
+import com.openexchange.exception.OXException;
+import com.openexchange.realtime.atmosphere.AtmosphereExceptionCode;
+import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.Stanza;
 
 /**
- * {@link AtmosphereExceptionMessage}
- *
+ * {@link BuilderSelector} - Select and instantiate a new StanzaBuilder matching the client's message.
+ * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class AtmosphereExceptionMessage implements LocalizableStrings {
-    /** The mandatory session information is missing. */
-    public static final String SESSIONINFO_DIDNT_MATCH_SERVERSESSION_MSG = "The session information didn't match any ServerSession";
-    /** The received message is missing the \"kind\" key. */
-    public static final String MISSING_KIND_MSG = "The received message is missing the \"kind\" key.";
-    /** Could not find a parser for a message of kind: . \"%1$s\" */
-    public static final String MISSING_PARSER_FOR_KIND_MSG = "Could not find a parser for a message of kind: . \"%1$s\"";
-    /** Error while building Stanza: \"%1$s\" */
-    public static final String ERROR_WHILE_BUILDING_MSG = "Error while building Stanza: \"%1$s\"";
-    
+public class BuilderSelector {
+
+    /**
+     * Get a parser that is adequate for he JSONObject that has to be parsed.
+     * Incoming JSONObjects must contain a kind key that let's us determine the needed StanzaBuilder.
+     * <pre>
+     *  {
+     *      kind: 'presence'
+     *      ...
+     *   };
+     * </pre>
+     * 
+     * @param json the JSONObject that has to be parsed.
+     * @return a Builder adequate for the JSONObject that has to be transformed
+     * @throws IllegalArgumentException if the JSONObject is null
+     * @throws OXException if the JSONObject doesn't contain a <code>kind</code> key specifying the kind of Stanza or no adequate
+     *             Stanzaparser can be found
+     */
+    public static StanzaBuilder<? extends Stanza> getBuilder(ID from, JSONObject json) throws OXException {
+        if (json == null) {
+            throw new IllegalArgumentException();
+        }
+        String kind = json.optString("kind");
+        if (kind == null) {
+            throw AtmosphereExceptionCode.MISSING_KIND.create();
+        }
+        if (kind.equalsIgnoreCase("iq")) {
+            return new IQBuilder(from, json);
+        } else if (kind.equalsIgnoreCase("message")) {
+            return new MessageBuilder(from, json);
+        } else if (kind.equalsIgnoreCase("presence")) {
+            return new PresenceBuilder(from, json);
+        } else {
+            throw AtmosphereExceptionCode.MISSING_BUILDER_FOR_KIND.create(kind);
+        }
+    }
 }

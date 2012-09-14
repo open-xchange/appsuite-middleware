@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.impl;
+package com.openexchange.realtime.atmosphere.impl.stanza;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -60,13 +60,13 @@ import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.packet.Stanza;
 
 /**
- * {@link StanzaParser} -
+ * {@link OLDStanzaParser} -
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class StanzaParser {
-
+public class OLDStanzaParser {
+    
     /**
      * Parse a JSON based Stanza String into one of the differend kind of Stanza implementations we understand.
      * 

@@ -47,68 +47,69 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.impl;
+package com.openexchange.realtime.atmosphere.impl.stanza;
 
-import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.packet.IQ;
-import com.openexchange.realtime.packet.Message;
-import com.openexchange.realtime.packet.Presence;
+import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.Payload;
 import com.openexchange.realtime.packet.Stanza;
 
 /**
- * {@link StanzaWriter} - Transforms Stanza objects into their JSON representation.
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
+ * {@link StanzaBuilder} - Abstract Stanza parser class, gathering common fields and methods.
+ * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @param <T>
  */
-public class StanzaWriter {
+public abstract class StanzaBuilder<T extends Stanza> {
 
-	/**
-	 * Writes specified stanza into its JSON representation.
-	 * 
-	 * @param stanza The stanza to write
-	 * @return The appropriate JSON representation
-	 * @throws OXException If a JSON write error occurs
-	 */
-	public static JSONObject write(Stanza stanza) throws OXException {
-		try {
-			JSONObject object = new JSONObject();
-			writeBasics(stanza, object);
-			if (stanza instanceof Message) {
-				writeMessage((Message) stanza, object);
-			} else if (stanza instanceof Presence) {
-				writePresence((Presence) stanza, object);
-			} else if (stanza instanceof IQ) {
-				writeQuery((IQ) stanza, object);
-			}
-			return object;
-		} catch (JSONException x) {
-			throw OXException.general("JSONException "+x.toString());
-		}
-	}
+    protected ID from;
+    protected JSONObject json;
+    protected T stanza;
 
-	private static void writeQuery(IQ stanza, JSONObject object) throws JSONException {
-		object.put("kind", "iq");
-		object.put("type", stanza.getType().name().toLowerCase());
-	}
+    /**
+     * Set the obligatory {@link Stanza} elements.
+     */
+    protected void basics() {
+        from();
+        to();
+        namespace();
+        payload();
+    }
 
-	private static void writePresence(Presence stanza, JSONObject object) throws JSONException {
-		object.put("kind", "presence");
-	}
+    private void from() {
+        stanza.setFrom(from);
+    }
+    
+    private void to() {
+        if (json.has("to")) {
+            stanza.setTo(new ID(json.optString("to")));
+        }
+    }
 
-	private static void writeMessage(Message stanza, JSONObject object) throws JSONException {
-		object.put("type", stanza.getType().name().toLowerCase());
-	}
+    private void namespace() {
+        if (json.has("namespace")) {
+            stanza.setNamespace(json.optString("namespace"));
+        }
+    }
+    
+    private void payload() {
+        if (json.has("data")) {
+            stanza.setPayload(new Payload(json.optJSONObject("data"), "json"));
+        }
+    }
 
-	private static void writeBasics(Stanza stanza, JSONObject object) throws JSONException {
-		object.put("ns", stanza.getNamespace());
-		object.put("from", stanza.getFrom().toString());
-		object.put("to", stanza.getTo().toString());
-		object.put("data", stanza.getPayload().getData());
-	}
+    /**
+     * Check if the obligatory elements are present and all elements of the stanza are valid. 
+     * @throws OXException if elements are missing or invalid
+     */
+    protected abstract void validate() throws OXException;
+    
+    /**
+     * Build a validated Stanza of type T
+     * @return a validated Stanza of type T
+     * @throws OXException if the Stanza couldn't be build due to validation or other errors 
+     */
+    protected abstract T build() throws OXException; 
 
 }

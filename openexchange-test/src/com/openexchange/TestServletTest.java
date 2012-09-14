@@ -47,24 +47,46 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere;
+package com.openexchange;
 
-import com.openexchange.i18n.LocalizableStrings;
-
+import static org.junit.Assert.assertEquals;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import org.junit.Test;
+import org.xml.sax.SAXException;
+import com.meterware.httpunit.GetMethodWebRequest;
+import com.meterware.httpunit.HTMLElement;
+import com.meterware.httpunit.PutMethodWebRequest;
+import com.meterware.httpunit.WebConversation;
+import com.meterware.httpunit.WebRequest;
+import com.meterware.httpunit.WebResponse;
 
 /**
- * {@link AtmosphereExceptionMessage}
- *
+ * {@link TestServletTest}
+ * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class AtmosphereExceptionMessage implements LocalizableStrings {
-    /** The mandatory session information is missing. */
-    public static final String SESSIONINFO_DIDNT_MATCH_SERVERSESSION_MSG = "The session information didn't match any ServerSession";
-    /** The received message is missing the \"kind\" key. */
-    public static final String MISSING_KIND_MSG = "The received message is missing the \"kind\" key.";
-    /** Could not find a parser for a message of kind: . \"%1$s\" */
-    public static final String MISSING_PARSER_FOR_KIND_MSG = "Could not find a parser for a message of kind: . \"%1$s\"";
-    /** Error while building Stanza: \"%1$s\" */
-    public static final String ERROR_WHILE_BUILDING_MSG = "Error while building Stanza: \"%1$s\"";
+public class TestServletTest {
     
+    private final String URL = "http://localhost/servlet/TestServlet";
+    private final String PUT_STRING = "A PUT String with Umlaut";
+    
+    @Test
+    public void testGetMethod() throws Exception {
+        WebConversation conversation = new WebConversation();
+        WebRequest request = new GetMethodWebRequest(URL);
+        WebResponse response = conversation.getResponse(request);
+        HTMLElement[] paragraphs = response.getElementsByTagName("p");
+    }
+
+    @Test
+    public void testPutMethod() throws IOException, SAXException {
+        WebConversation conversation = new WebConversation();
+        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(PUT_STRING.getBytes("UTF-8"));
+        WebRequest request = new PutMethodWebRequest("http://localhost/servlet/TestServlet", byteArrayInputStream, "text/xml");
+        WebResponse response = conversation.getResponse(request);
+        HTMLElement[] paragraphs = response.getElementsByTagName("p");
+        assertEquals("The transfered content differs", "The content: " + PUT_STRING, paragraphs[4].getText());
+    }
+
 }
