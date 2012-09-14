@@ -4,6 +4,7 @@
  - Fix for bug 22992: Prevent NPE in crypto service
  - Fix for bug 23024: Added missing import
  - Fix for bug 23013: Use default template name if JSONObject.NULL is provided
+ - Fix for bug 22611: Checking for JSONObject.NULL representation
 
 * 2012-09-14 - marcus.klein@open-xchange.com
 
