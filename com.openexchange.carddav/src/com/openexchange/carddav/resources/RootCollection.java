@@ -54,16 +54,13 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-
+import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
-
 import com.openexchange.carddav.GroupwareCarddavFactory;
 import com.openexchange.carddav.mixins.DummySyncToken;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.log.LogFactory;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.WebdavFactory;
@@ -81,7 +78,8 @@ import com.openexchange.webdav.protocol.helpers.AbstractCollection;
  */
 public class RootCollection extends AbstractCollection {
 
-	private static final String EXPOSED_COLLECTIONS_PROPERTY = "com.openexchange.carddav.exposedCollections";
+    private static final String EXPOSED_COLLECTIONS_PROPERTY = "com.openexchange.carddav.exposedCollections";
+    private static final String USER_AGENT_FOR_AGGREGATED_COLLECTION_PROPERTY = "com.openexchange.carddav.userAgentForAggregatedCollection";
     private static final Log LOG = com.openexchange.log.Log.loggerFor(RootCollection.class);
     private static final String DISPLAY_NAME = "Addressbooks";
     private static final String AGGREGATED_FOLDER_ID = "Contacts"; // folder ID needs to be exactly "Contacts" for backwards compatibility
@@ -90,6 +88,7 @@ public class RootCollection extends AbstractCollection {
     private final GroupwareCarddavFactory factory;
     private final WebdavPath url;
     private String exposedCollections = null;
+    private Pattern userAgentForAggregatedCollection = null;
 
     /**
      * Initializes a new {@link RootCollection}.
@@ -226,17 +225,30 @@ public class RootCollection extends AbstractCollection {
 		throw protocolException(new Throwable("child resource '" + name + "' not found"), HttpServletResponse.SC_NOT_FOUND);
 	}
 	
-	private String getExposedCollections() {
-		if (null == this.exposedCollections) {
-			exposedCollections = "0";
-			try {
-				exposedCollections = factory.getConfigValue(EXPOSED_COLLECTIONS_PROPERTY, "0");
-			} catch (OXException e) {
-				LOG.error("error getting exposed collections from config, falling back to '0'", e);
-			}
-		}
-		return this.exposedCollections;
-	}
+    private String getExposedCollections() {
+        if (null == this.exposedCollections) {
+            exposedCollections = "0";
+            try {
+                exposedCollections = factory.getConfigValue(EXPOSED_COLLECTIONS_PROPERTY, "0");
+            } catch (OXException e) {
+                LOG.error("error getting exposed collections from config, falling back to '0'", e);
+            }
+        }
+        return this.exposedCollections;
+    }
+
+    private Pattern getUserAgentForAggregatedCollection() {
+        if (null == this.userAgentForAggregatedCollection) {
+            String regex = ".*CFNetwork.*Darwin.*|.*AddressBook.*CardDAVPlugin.*Mac_OS_X.*|.*Mac OS X.*AddressBook.*";
+            try {
+                regex = factory.getConfigValue(USER_AGENT_FOR_AGGREGATED_COLLECTION_PROPERTY, regex);
+            } catch (OXException e) {
+                LOG.error("error getting exposed collections from config, falling back to '" + regex + "'", e);
+            }
+            userAgentForAggregatedCollection = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+        }
+        return userAgentForAggregatedCollection;
+    }
 
 	private boolean isUseAggregatedCollection() {
 		return "2".equals(getExposedCollections()) || "0".equals(getExposedCollections()) && isAddressbookClient(); 
@@ -248,11 +260,10 @@ public class RootCollection extends AbstractCollection {
 	
 	private boolean isAddressbookClient() {
 		String userAgent = (String)factory.getSession().getParameter("user-agent");
-		return null != userAgent && ( 
-				(userAgent.contains("CFNetwork") && userAgent.contains("Darwin")) || 
-				(userAgent.contains("AddressBook") && userAgent.contains("CardDAVPlugin") && userAgent.contains("Mac_OS_X")) && 
-				(false == (userAgent.contains("iOS") && (userAgent.contains("dataaccessd") || userAgent.contains("Preferences")))) 
-			);
+		if (null != userAgent && 0 < userAgent.length() && null != getUserAgentForAggregatedCollection()) {
+		    return getUserAgentForAggregatedCollection().matcher(userAgent).find();
+		}
+		return false;
 	}
 
 	@Override

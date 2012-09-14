@@ -1,0 +1,29 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange Rss Bundle
+Bundle-SymbolicName: com.openexchange.rss
+Bundle-Version: 6.23.0
+Bundle-Activator: com.openexchange.rss.osgi.RssActivator
+Bundle-Vendor: OPEN-XCHANGE Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.ajax.requesthandler,
+ com.openexchange.ajax.requesthandler.osgiservice,
+ com.openexchange.documentation,
+ com.openexchange.exception,
+ com.openexchange.html,
+ com.openexchange.log,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.tools.encoding,
+ com.openexchange.tools.servlet,
+ com.openexchange.tools.session,
+ com.sun.syndication.feed.synd,
+ com.sun.syndication.fetcher,
+ com.sun.syndication.fetcher.impl,
+ com.sun.syndication.io,
+ org.apache.commons.logging,
+ org.json,
+ org.osgi.framework;version="1.3.0",
+ org.osgi.service.log;version="1.3",
+ org.osgi.util.tracker;version="1.3.1"
+Bundle-ActivationPolicy: lazy

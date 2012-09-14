@@ -1,3 +1,17 @@
+* 2012-09-14 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22983: Add former "category" field providing previously used category number for downward compatibility
+ - Fix for bug 22992: Prevent NPE in crypto service
+
+* 2012-09-14 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 22967: More flexible user-agent matching for Mac OS Addressbook client
+ - Fix for bug 22993: Enabled CalDAV/CardDAV by default 
+
+* 2012-09-13 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 22942: Be prepared for DATETIME values that are composed entirely of zeros 
+
 * 2012-09-11 - thorben.betten@open-xchange.com
 
  - Fix for bug 22917: Added previous naming for downward compatibility
@@ -9,11 +23,11 @@
 
 * 2012-09-07 - jan.bauerdick@open-xchange.com
 
- - New bundle c.o.aws.autoscaling: Monitoring of instances and loadbalancers, add/remove instances if neccessary
+ - New bundle c.o.aws.autoscaling: Monitoring of instances and load-balancers, add/remove instances if necessary
 
 * 2012-09-06 - jan.bauerdick@open-xchange.com
 
- - New bundle c.o.aws.ec2: Start and stop EC2 instances and register them with the loadbalancer
+ - New bundle c.o.aws.ec2: Start and stop EC2 instances and register them with the load-balancer
 
 * 2012-09-05 - thorben.betten@open-xchange.com
 

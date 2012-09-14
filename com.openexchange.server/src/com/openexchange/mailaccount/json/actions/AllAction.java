@@ -51,6 +51,7 @@ package com.openexchange.mailaccount.json.actions;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.json.JSONArray;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -108,7 +109,8 @@ public final class AllAction extends AbstractMailAccountAction {
         }
         userMailAccounts = tmp.toArray(new MailAccount[tmp.size()]);
 
-        return new AJAXRequestResult(MailAccountWriter.writeArray(userMailAccounts, attributes));
+        final JSONArray jsonArray = MailAccountWriter.writeArray(userMailAccounts, attributes);
+        return new AJAXRequestResult(jsonArray);
     }
 
 }

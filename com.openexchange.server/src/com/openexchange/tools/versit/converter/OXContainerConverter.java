@@ -1847,10 +1847,16 @@ public class OXContainerConverter {
             }
         }
         // CATEGORIES
-        final String s = contact.getCategories();
-        if (s != null) {
-            addProperty(object, P_CATEGORIES, getList(s, ','));
-        }
+        if (null != contact.getCategories() && 0 < contact.getCategories().length()) {
+            ArrayList<String> categories = new ArrayList<String>();
+            StringTokenizer tokenizer = new StringTokenizer(contact.getCategories(), ",");
+            while (tokenizer.hasMoreTokens()) {
+                categories.add(tokenizer.nextToken());
+            }
+            if (0 < categories.size()) {
+                addProperty(object, P_CATEGORIES, categories);
+            }
+        }       
         // NOTE
         addProperty(object, "NOTE", contact.getNote());
         // REV

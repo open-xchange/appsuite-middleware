@@ -119,4 +119,51 @@ public final class Categories implements OXExceptionConstants {
         return fallback;
     }
 
+    /**
+     * Gets the former category number.
+     * 
+     * @param category The category
+     * @return The associated number or <tt>-1</tt>
+     */
+    public static int getFormerCategroyNumber(final Category category) {
+        if (null == category) {
+            return -1;
+        }
+        final String name = category.toString();
+        if (CATEGORY_ERROR.toString().equalsIgnoreCase(name)) {
+            return 8;
+        }
+        if (CATEGORY_CAPACITY.toString().equalsIgnoreCase(name)) {
+            return 11;
+        }
+        if (CATEGORY_CONFIGURATION.toString().equalsIgnoreCase(name)) {
+            return 2;
+        }
+        if (CATEGORY_CONFLICT.toString().equalsIgnoreCase(name)) {
+            return 9;
+        }
+        if (CATEGORY_CONNECTIVITY.toString().equalsIgnoreCase(name)) {
+            return 6;
+        }
+        if (CATEGORY_PERMISSION_DENIED.toString().equalsIgnoreCase(name)) {
+            return 3;
+        }
+        if (CATEGORY_SERVICE_DOWN.toString().equalsIgnoreCase(name)) {
+            return 5;
+        }
+        if (CATEGORY_TRUNCATED.toString().equalsIgnoreCase(name)) {
+            return 12;
+        }
+        if (CATEGORY_TRY_AGAIN.toString().equalsIgnoreCase(name)) {
+            return 4;
+        }
+        if (CATEGORY_USER_INPUT.toString().equalsIgnoreCase(name)) {
+            return 1;
+        }
+        if (CATEGORY_WARNING.toString().equalsIgnoreCase(name)) {
+            return 13;
+        }
+        return -1;
+    }
+
 }

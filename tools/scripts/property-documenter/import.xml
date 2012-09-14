@@ -1,0 +1,10693 @@
+<mediawiki xmlns="http://www.mediawiki.org/xml/export-0.5/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mediawiki.org/xml/export-0.5/ http://www.mediawiki.org/xml/export-0.5.xsd" version="0.5" xml:lang="en">
+  <siteinfo>
+    <sitename>Open-Xchange</sitename>
+    <base>http://oxpedia.org/wiki/index.php?title=Main_Page</base>
+    <generator>MediaWiki 1.18.1</generator>
+    <case>first-letter</case>
+    <namespaces>
+      <namespace key="-2" case="first-letter">Media</namespace>
+      <namespace key="-1" case="first-letter">Special</namespace>
+      <namespace key="0" case="first-letter" />
+      <namespace key="1" case="first-letter">Talk</namespace>
+      <namespace key="2" case="first-letter">User</namespace>
+      <namespace key="3" case="first-letter">User talk</namespace>
+      <namespace key="4" case="first-letter">Open-Xchange</namespace>
+      <namespace key="5" case="first-letter">Open-Xchange talk</namespace>
+      <namespace key="6" case="first-letter">File</namespace>
+      <namespace key="7" case="first-letter">File talk</namespace>
+      <namespace key="8" case="first-letter">MediaWiki</namespace>
+      <namespace key="9" case="first-letter">MediaWiki talk</namespace>
+      <namespace key="10" case="first-letter">Template</namespace>
+      <namespace key="11" case="first-letter">Template talk</namespace>
+      <namespace key="12" case="first-letter">Help</namespace>
+      <namespace key="13" case="first-letter">Help talk</namespace>
+      <namespace key="14" case="first-letter">Category</namespace>
+      <namespace key="15" case="first-letter">Category talk</namespace>
+      <namespace key="200" case="first-letter">Development</namespace>
+    </namespaces>
+  </siteinfo>
+  <page>
+    <title>sessiond.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.sessiond.maxSession
+|5000
+|
+|-
+|com.openexchange.sessiond.maxSessionPerUser
+|100
+|
+|-
+|com.openexchange.sessiond.maxSessionPerClient
+|0
+|
+|-
+|com.openexchange.sessiond.sessionDefaultLifeTime
+|3600000
+|
+|-
+|com.openexchange.sessiond.sessionLongLifeTime
+|1W
+|
+|-
+|com.openexchange.sessiond.randomTokenTimeout
+|1M
+|
+|-
+|com.openexchange.sessiond.sessionCacheConfig
+|sessioncache.ccf
+|
+|-
+|com.openexchange.sessiond.autologin
+|false
+|
+|-
+|com.openexchange.sessiond.encryptionKey
+|auw948cz,spdfgibcsp9e8ri+<#qawcghgifzign7c6gnrns9oysoeivn
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>management.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|JMXPort
+|9999
+|
+|-
+|JMXServerPort
+|-1
+|
+|-
+|JMXBindAddress
+|localhost
+|
+|-
+|JMXLogin
+|
+|
+|-
+|JMXPassword
+|
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>probe.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.http.probe.alias
+|/healthProbe
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>rmi.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.rmi.host 
+| localhost
+|
+|-
+|com.openexchange.rmi.port 
+| 1099
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>msnsubscribe.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.subscribe.socialplugin.msn
+|true
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>solr.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.solr.isSolrNode 
+| true
+|
+|-
+|com.openexchange.solr.solrHome 
+| /opt/open-xchange/solr
+|
+|-
+|com.openexchange.solr.libDir 
+| /opt/open-xchange/solr/lib
+|
+|-
+|com.openexchange.solr.configDir 
+| /opt/open-xchange/solr/conf
+|
+|-
+|com.openexchange.solr.schemaMail 
+| /opt/open-xchange/solr/conf/schema-mail.xml
+|
+|-
+|com.openexchange.solr.configMail 
+| /opt/open-xchange/solr/conf/solrconfig-mail.xml
+|
+|-
+|com.openexchange.solr.schemaInfostore 
+| /opt/open-xchange/solr/conf/schema-infostore.xml
+|
+|-
+|com.openexchange.solr.configInfostore 
+| /opt/open-xchange/solr/conf/solrconfig-infostore.xml
+|
+|-
+|com.openexchange.solr.schemaAttachments 
+| /opt/open-xchange/solr/conf/schema-attachments.xml
+|
+|-
+|com.openexchange.solr.configAttachments 
+| /opt/open-xchange/solr/conf/solrconfig-attachments.xml
+|
+|-
+|com.openexchange.solr.simpleHandler
+|simpleSearch
+|
+|-
+|com.openexchange.solr.customHandler
+|customSearch
+|
+|-
+|com.openexchange.solr.allHandler
+|allSearch
+|
+|-
+|com.openexchange.solr.getHandler
+|getSearch
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>imapauth.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|IMAP_SERVER
+|localhost
+|
+|-
+|IMAP_PORT
+|143
+|
+|-
+|IMAP_USE_SECURE
+|false
+|
+|-
+|IMAP_TIMEOUT
+|5000
+|
+|-
+|IMAP_CONNECTIONTIMEOUT
+|5000
+|
+|-
+|USE_FULL_LOGIN_INFO
+|true
+|
+|-
+|USE_MULTIPLE
+|false
+|
+|-
+|com.openexchange.authentication.imap.imapAuthEnc
+|UTF-8
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>eas-provisioning-mail.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.mobile.configuration.url
+|https://%h/servlet/mobileconfig?l=%p
+|
+|-
+|com.openexchange.mobile.configuration.urlencoding
+|UTF-8
+|
+|-
+|com.openexchange.mobile.configuration.mail.from
+|user
+|
+|-
+|com.openexchange.mobile.configuration.mail.message.en_US.subject
+|Open-Xchange Mobility Provisioning
+|
+|-
+|com.openexchange.mobile.configuration.mail.message.en_US.text
+|Please click on the following link to open the Open-Xchange Mobility Provisioning application: %u
+|
+|-
+|com.openexchange.mobile.configuration.mail.message.en_GB.subject
+|Open-Xchange Mobility Provisioning
+|
+|-
+|com.openexchange.mobile.configuration.mail.message.en_GB.text
+|Please click on the following link to open the Open-Xchange Mobility Provisioning application: %u
+|
+|-
+|com.openexchange.mobile.configuration.mail.message.de_DE.subject
+|Open-Xchange Mobility-Provisionierung
+|
+|-
+|com.openexchange.mobile.configuration.mail.message.de_DE.text
+|Bitte auf den folgenden Link klicken, um die Open-Xchange Mobility Provisionierungs-Applikation zu \u00F6ffnen: %u
+|
+|-
+|com.openexchange.mobile.configuration.mail.message.fr_FR.subject
+|Pr\u00E9paration de la mobilit\u00E9 Open-Xchange
+|
+|-
+|com.openexchange.mobile.configuration.mail.message.fr_FR.text
+|Veuillez cliquer sur le lien suivant pour ouvrir l'application de pr\u00E9paration de la mobilit\u00E9 Open-Xchange: %u
+|
+|-
+|com.openexchange.mobile.configuration.mail.message.nl_NL.subject
+|Open-Xchange-mobility-initialisatie
+|
+|-
+|com.openexchange.mobile.configuration.mail.message.nl_NL.text
+|Klik op de volgende link om de initialisatietoepasssing voor Open-Xchange-mobility te starten: %u
+|
+|-
+|com.openexchange.mobile.configuration.mail.message.es_ES.subject
+|Configuraci\u00F3n m\u00F3vil de Open-Xchange
+|
+|-
+|com.openexchange.mobile.configuration.mail.message.es_ES.text
+|Por favor, haga clic en el siguiente enlace para ejecutar la aplicaci\u00F3n de configuraci\u00F3n m\u00F3vil de Open-Xchange: %u
+|
+|-
+|com.openexchange.mobile.configuration.mail.message.it_IT.subject
+|Fornitura in mobilit\u00E0 Open-Xchange
+|
+|-
+|com.openexchange.mobile.configuration.mail.message.it_IT.text
+|Fai clic sul seguente collegamento per aprire l'applicazione di fornitura in mobilit\u00E0 Open-Xchange: %u
+|
+|-
+|com.openexchange.mobile.configuration.sms.message.en_US.text
+|Please click on the following link to open the Open-Xchange Mobility Provisioning application: %u
+|
+|-
+|com.openexchange.mobile.configuration.sms.message.en_GB.text
+|Please click on the following link to open the Open-Xchange Mobility Provisioning application: %u
+|
+|-
+|com.openexchange.mobile.configuration.sms.message.de_DE.text
+|Bitte auf den folgenden Link klicken, um die Open-Xchange Mobility Provisionierungs-Applikation zu \u00F6ffnen: %u
+|
+|-
+|com.openexchange.mobile.configuration.sms.message.fr_FR.text
+|Veuillez cliquer sur le lien suivant pour ouvrir l'application de pr\u00E9paration de la mobilit\u00E9 Open-Xchange: %u
+|
+|-
+|com.openexchange.mobile.configuration.sms.message.nl_NL.text
+|Klik op de volgende link om de initialisatietoepasssing voor Open-Xchange-mobility te starten: %u
+|
+|-
+|com.openexchange.mobile.configuration.sms.message.es_ES.text
+|Por favor, haga clic en el siguiente enlace para ejecutar la aplicaci\u00F3n de configuraci\u00F3n m\u00F3vil de Open-Xchange: %u
+|
+|-
+|com.openexchange.mobile.configuration.sms.message.it_IT.text
+|Fai clic sul seguente collegamento per aprire l'applicazione di fornitura in mobilit\u00E0 Open-Xchange: %u
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>rssmessaging.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.messaging.rss
+|true
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>notification.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|notify_participants_on_delete 
+| true
+|
+|-
+|object_link
+|http://[hostname]/[uiwebpath]#m=[module]&i=[object]&f=[folder]
+|
+|-
+|imipForInternalUsers 
+| false
+|
+|-
+|com.openexchange.notification.fromSource
+|defaultSenderAddress
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>filestorage.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>attachment.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|MAX_UPLOAD_SIZE
+|10485760
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>participant.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.participant.ShowWithoutEmail
+|true
+|
+|-
+|com.openexchange.participant.autoSearch
+|true
+|
+|-
+|com.openexchange.participant.MaximumNumberParticipants
+|0
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>spamassassin.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.spamhandler.spamassassin.spamd
+|false
+|
+|-
+|com.openexchange.spamhandler.spamassassin.hostname
+|localhost
+|
+|-
+|com.openexchange.spamhandler.spamassassin.port
+|783
+|
+|-
+|com.openexchange.spamhandler.spamassassin.timeout
+|10
+|
+|-
+|com.openexchange.spamhandler.spamassassin.retries
+|1
+|
+|-
+|com.openexchange.spamhandler.spamassassin.retrysleep
+|1
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>msnoauth.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.oauth.msn.apiKey
+|REPLACE_THIS_WITH_VALUE_OBTAINED_FROM_MSN
+|
+|-
+|com.openexchange.oauth.msn.apiSecret
+|REPLACE_THIS_WITH_VALUE_OBTAINED_FROM_MSN
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>HTMLEntities.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|weierp
+|8472
+|
+|-
+|supe
+|8839
+|
+|-
+|image
+|8465
+|
+|-
+|ecirc
+|234
+|
+|-
+|Otilde
+|213
+|
+|-
+|uacute
+|250
+|
+|-
+|diams
+|9830
+|
+|-
+|ntilde
+|241
+|
+|-
+|dArr
+|8659
+|
+|-
+|Ecirc
+|202
+|
+|-
+|ograve
+|242
+|
+|-
+|yacute
+|253
+|
+|-
+|times
+|215
+|
+|-
+|iuml
+|239
+|
+|-
+|rArr
+|8658
+|
+|-
+|micro
+|181
+|
+|-
+|rceil
+|8969
+|
+|-
+|plusmn
+|177
+|
+|-
+|there4
+|8756
+|
+|-
+|nabla
+|8711
+|
+|-
+|lsaquo
+|8249
+|
+|-
+|rang
+|9002
+|
+|-
+|Iuml
+|207
+|
+|-
+|real
+|8476
+|
+|-
+|sup3
+|179
+|
+|-
+|sube
+|8838
+|
+|-
+|acirc
+|226
+|
+|-
+|sup2
+|178
+|
+|-
+|sup1
+|185
+|
+|-
+|lsquo
+|8216
+|
+|-
+|Acirc
+|194
+|
+|-
+|sect
+|167
+|
+|-
+|notin
+|8713
+|
+|-
+|radic
+|8730
+|
+|-
+|ocirc
+|244
+|
+|-
+|oplus
+|8853
+|
+|-
+|euml
+|235
+|
+|-
+|Oacute
+|211
+|
+|-
+|rfloor
+|8971
+|
+|-
+|rdquo
+|8221
+|
+|-
+|Ocirc
+|212
+|
+|-
+|Igrave
+|204
+|
+|-
+|minus
+|8722
+|
+|-
+|trade
+|8482
+|
+|-
+|szlig
+|223
+|
+|-
+|Agrave
+|192
+|
+|-
+|forall
+|8704
+|
+|-
+|laquo
+|171
+|
+|-
+|cedil
+|184
+|
+|-
+|Euml
+|203
+|
+|-
+|ensp
+|8194
+|
+|-
+|Egrave
+|200
+|
+|-
+|otilde
+|245
+|
+|-
+|lowast
+|8727
+|
+|-
+|uml
+|168
+|
+|-
+|perp
+|8869
+|
+|-
+|int
+|8747
+|
+|-
+|nbsp
+|160
+|
+|-
+|Oslash
+|216
+|
+|-
+|Ugrave
+|217
+|
+|-
+|auml
+|228
+|
+|-
+|part
+|8706
+|
+|-
+|gt
+|62
+|
+|-
+|ouml
+|246
+|
+|-
+|ge
+|8805
+|
+|-
+|para
+|182
+|
+|-
+|empty
+|8709
+|
+|-
+|Auml
+|196
+|
+|-
+|isin
+|8712
+|
+|-
+|ang
+|8736
+|
+|-
+|uarr
+|8593
+|
+|-
+|agrave
+|224
+|
+|-
+|Ouml
+|214
+|
+|-
+|and
+|8743
+|
+|-
+|cap
+|8745
+|
+|-
+|exist
+|8707
+|
+|-
+|oline
+|8254
+|
+|-
+|egrave
+|232
+|
+|-
+|rsquo
+|8217
+|
+|-
+|oacute
+|243
+|
+|-
+|frac34
+|190
+|
+|-
+|larr
+|8592
+|
+|-
+|amp
+|38
+|
+|-
+|lrm
+|8206
+|
+|-
+|Atilde
+|195
+|
+|-
+|iquest
+|191
+|
+|-
+|infin
+|8734
+|
+|-
+|reg
+|174
+|
+|-
+|igrave
+|236
+|
+|-
+|sbquo
+|8218
+|
+|-
+|ucirc
+|251
+|
+|-
+|Ucirc
+|219
+|
+|-
+|yuml
+|255
+|
+|-
+|copy
+|169
+|
+|-
+|nsub
+|8836
+|
+|-
+|prime
+|8242
+|
+|-
+|raquo
+|187
+|
+|-
+|Ccedil
+|199
+|
+|-
+|Prime
+|8243
+|
+|-
+|hearts
+|9829
+|
+|-
+|oslash
+|248
+|
+|-
+|ugrave
+|249
+|
+|-
+|harr
+|8596
+|
+|-
+|brvbar
+|166
+|
+|-
+|Dagger
+|8225
+|
+|-
+|equiv
+|8801
+|
+|-
+|quot
+|34
+|
+|-
+|ordm
+|186
+|
+|-
+|deg
+|176
+|
+|-
+|bull
+|8226
+|
+|-
+|alefsym
+|8501
+|
+|-
+|frac14
+|188
+|
+|-
+|frac12
+|189
+|
+|-
+|ordf
+|170
+|
+|-
+|Iacute
+|205
+|
+|-
+|sim
+|8764
+|
+|-
+|zwnj
+|8204
+|
+|-
+|lfloor
+|8970
+|
+|-
+|otimes
+|8855
+|
+|-
+|rsaquo
+|8250
+|
+|-
+|Aacute
+|193
+|
+|-
+|uuml
+|252
+|
+|-
+|ndash
+|8211
+|
+|-
+|clubs
+|9827
+|
+|-
+|sup
+|8835
+|
+|-
+|atilde
+|227
+|
+|-
+|spades
+|9824
+|
+|-
+|sum
+|8721
+|
+|-
+|not
+|172
+|
+|-
+|loz
+|9674
+|
+|-
+|curren
+|164
+|
+|-
+|shy
+|173
+|
+|-
+|Eacute
+|201
+|
+|-
+|or
+|8744
+|
+|-
+|thinsp
+|8201
+|
+|-
+|sdot
+|8901
+|
+|-
+|aring
+|229
+|
+|-
+|sub
+|8834
+|
+|-
+|uArr
+|8657
+|
+|-
+|pound
+|163
+|
+|-
+|bdquo
+|8222
+|
+|-
+|Aring
+|197
+|
+|-
+|Uuml
+|220
+|
+|-
+|darr
+|8595
+|
+|-
+|Uacute
+|218
+|
+|-
+|cong
+|8773
+|
+|-
+|Ntilde
+|209
+|
+|-
+|ccedil
+|231
+|
+|-
+|aelig
+|230
+|
+|-
+|lArr
+|8656
+|
+|-
+|emsp
+|8195
+|
+|-
+|rarr
+|8594
+|
+|-
+|Ograve
+|210
+|
+|-
+|lceil
+|8968
+|
+|-
+|thorn
+|254
+|
+|-
+|Yacute
+|221
+|
+|-
+|euro
+|8364
+|
+|-
+|permil
+|8240
+|
+|-
+|dagger
+|8224
+|
+|-
+|ni
+|8715
+|
+|-
+|cent
+|162
+|
+|-
+|ne
+|8800
+|
+|-
+|cup
+|8746
+|
+|-
+|lang
+|9001
+|
+|-
+|asymp
+|8776
+|
+|-
+|THORN
+|222
+|
+|-
+|aacute
+|225
+|
+|-
+|AElig
+|198
+|
+|-
+|crarr
+|8629
+|
+|-
+|acute
+|180
+|
+|-
+|ETH
+|208
+|
+|-
+|iexcl
+|161
+|
+|-
+|icirc
+|238
+|
+|-
+|eacute
+|233
+|
+|-
+|divide
+|247
+|
+|-
+|eth
+|240
+|
+|-
+|hArr
+|8660
+|
+|-
+|ldquo
+|8220
+|
+|-
+|Icirc
+|206
+|
+|-
+|macr
+|175
+|
+|-
+|rlm
+|8207
+|
+|-
+|yen
+|165
+|
+|-
+|iacute
+|237
+|
+|-
+|hellip
+|8230
+|
+|-
+|middot
+|183
+|
+|-
+|prop
+|8733
+|
+|-
+|lt
+|60
+|
+|-
+|frasl
+|8260
+|
+|-
+|mdash
+|8212
+|
+|-
+|zwj
+|8205
+|
+|-
+|prod
+|8719
+|
+|-
+|le
+|8804
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>passwordchange.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.passwordchange.showStrength
+|false
+|
+|-
+|com.openexchange.passwordchange.minLength
+|4
+|
+|-
+|com.openexchange.passwordchange.maxLength
+|0
+|
+|-
+|com.openexchange.passwordchange.regexp
+|[^a-z0-9]
+|
+|-
+|com.openexchange.passwordchange.special
+|$, _, or %
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>ldap.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|inetOrgPersonAttributebusinessCategoryName
+|businessCategory
+|
+|-
+|inetOrgPersonAttributecnName
+|cn
+|
+|-
+|inetOrgPersonAttributeemployeeNumberName
+|employeeNumber
+|
+|-
+|inetOrgPersonAttributeemployeeTypeName
+|employeeType
+|
+|-
+|OXUserObjectAttributecoName
+|co
+|
+|-
+|inetOrgPersonAttributehomePhoneName
+|homePhone
+|
+|-
+|inetOrgPersonAttributehomePostalAddressName
+|homePostalAddress
+|
+|-
+|OXUserObjectAttributeInfoName
+|info
+|
+|-
+|inetOrgPersonAttributeinitialsName
+|initials
+|
+|-
+|inetOrgPersonAttributeinternationaliSDNNumberName
+|internationaliSDNNumber
+|
+|-
+|OXUserObjectAttributeIPPhoneName
+|IPPhone
+|
+|-
+|OXUserObjectAttributeotherfacsimiletelephonenumberName
+|otherfacsimiletelephonenumber
+|
+|-
+|inetOrgPersonAttributeroomNumberName
+|roomNumber
+|
+|-
+|inetOrgPersonAttributetelexNumberName
+|telexNumber
+|
+|-
+|inetOrgPersonClassName
+|inetOrgPerson
+|
+|-
+|OXUserObjectAttributebirthDayName
+|birthDay
+|
+|-
+|OXUserObjectAttributeDistributionListName
+|OXUserDistributionList
+|
+|-
+|OXUserObjectAttributeAnniversaryName
+|OXUserAnniversary
+|
+|-
+|OXUserObjectAttributeBranchesName
+|OXUserBranches
+|
+|-
+|OXUserObjectAttributeCategoriesName
+|OXUserCategories
+|
+|-
+|OXUserObjectAttributeChildrenName
+|OXUserChildren
+|
+|-
+|OXUserObjectAttributeCityName
+|OXUserCity
+|
+|-
+|OXUserObjectAttributeCommentName
+|OXUserComment
+|
+|-
+|OXUserObjectAttributeComRegName
+|OXUserComReg
+|
+|-
+|OXUserObjectAttributeEmail2Name
+|OXUserEmail2
+|
+|-
+|OXUserObjectAttributeEmail3Name
+|OXUserEmail3
+|
+|-
+|OXUserObjectAttributeInstantMessenger2Name
+|OXUserInstantMessenger2
+|
+|-
+|OXUserObjectAttributeInstantMessengerName
+|OXUserInstantMessenger
+|
+|-
+|OXUserObjectAttributeMaritalStatusName
+|OXUserMaritalStatus
+|
+|-
+|OXUserObjectAttributeNickNameName
+|OXUserNickName
+|
+|-
+|OXUserObjectAttributeOtherCityName
+|OXUserOtherCity
+|
+|-
+|OXUserObjectAttributeOtherCountryName
+|OXUserOtherCountry
+|
+|-
+|OXUserObjectAttributeOtherPostalCodeName
+|OXUserOtherPostalCode
+|
+|-
+|OXUserObjectAttributeOtherStateName
+|OXUserOtherState
+|
+|-
+|OXUserObjectAttributeOtherStreetName
+|OXUserOtherStreet
+|
+|-
+|OXUserObjectAttributePositionName
+|OXUserPosition
+|
+|-
+|OXUserObjectAttributePostalCodeName
+|OXUserPostalCode
+|
+|-
+|OXUserObjectAttributeProfessionName
+|OXUserProfession
+|
+|-
+|OXUserObjectAttributeSalesVolumeName
+|OXUserSalesVolume
+|
+|-
+|OXUserObjectAttributeSpouseNameName
+|OXUserSpouseName
+|
+|-
+|OXUserObjectAttributeStateName
+|OXUserState
+|
+|-
+|OXUserObjectAttributesuffixName
+|OXUserSuffix
+|
+|-
+|OXUserObjectAttributeTaxIDName
+|OXUserTaxID
+|
+|-
+|OXUserObjectAttributeTeleAssistantName
+|OXUserTeleAssistant
+|
+|-
+|OXUserObjectAttributeTeleBusiness2Name
+|OXUserTeleBusiness2
+|
+|-
+|OXUserObjectAttributeTeleCallbackName
+|OXUserTeleCallback
+|
+|-
+|OXUserObjectAttributeTeleCarName
+|OXUserTeleCar
+|
+|-
+|OXUserObjectAttributeTeleCompanyName
+|OXUserTeleCompany
+|
+|-
+|OXUserObjectAttributeTeleFax2Name
+|OXUserTeleFax2
+|
+|-
+|OXUserObjectAttributeTeleHome2Name
+|OXUserTeleHome2
+|
+|-
+|OXUserObjectAttributeTeleMobile2Name
+|OXUserTeleMobile2
+|
+|-
+|OXUserObjectAttributeTeleOtherName
+|OXUserTeleOther
+|
+|-
+|OXUserObjectAttributeTelePrimaryName
+|OXUserTelePrimary
+|
+|-
+|OXUserObjectAttributeTeleRadioName
+|OXUserTeleRadio
+|
+|-
+|OXUserObjectAttributeTeleTTYName
+|OXUserTeleTTY
+|
+|-
+|OXUserObjectAttributeurlName
+|url
+|
+|-
+|OXUserObjectAttributeUserUndef01Name
+|OXUserUserUndef01
+|
+|-
+|OXUserObjectAttributeUserUndef02Name
+|OXUserUserUndef02
+|
+|-
+|OXUserObjectAttributeUserUndef03Name
+|OXUserUserUndef03
+|
+|-
+|OXUserObjectAttributeUserUndef04Name
+|OXUserUserUndef04
+|
+|-
+|OXUserObjectAttributeUserUndef05Name
+|OXUserUserUndef05
+|
+|-
+|OXUserObjectAttributeUserUndef06Name
+|OXUserUserUndef06
+|
+|-
+|OXUserObjectAttributeUserUndef07Name
+|OXUserUserUndef07
+|
+|-
+|OXUserObjectAttributeUserUndef08Name
+|OXUserUserUndef08
+|
+|-
+|OXUserObjectAttributeUserUndef09Name
+|OXUserUserUndef09
+|
+|-
+|OXUserObjectAttributeUserUndef10Name
+|OXUserUserUndef10
+|
+|-
+|OXUserObjectAttributeUserUndef11Name
+|OXUserUserUndef11
+|
+|-
+|OXUserObjectAttributeUserUndef12Name
+|OXUserUserUndef12
+|
+|-
+|OXUserObjectAttributeUserUndef13Name
+|OXUserUserUndef13
+|
+|-
+|OXUserObjectAttributeUserUndef14Name
+|OXUserUserUndef14
+|
+|-
+|OXUserObjectAttributeUserUndef15Name
+|OXUserUserUndef15
+|
+|-
+|OXUserObjectAttributeUserUndef16Name
+|OXUserUserUndef16
+|
+|-
+|OXUserObjectAttributeUserUndef17Name
+|OXUserUserUndef17
+|
+|-
+|OXUserObjectAttributeUserUndef18Name
+|OXUserUserUndef18
+|
+|-
+|OXUserObjectAttributeUserUndef19Name
+|OXUserUserUndef19
+|
+|-
+|OXUserObjectAttributeUserUndef20Name
+|OXUserUserUndef20
+|
+|-
+|OXUserObjectClassName
+|OXUserObject
+|
+|-
+|AllContactUIDSearch
+|(&(objectClass=inetOrgPerson)(objectClass=OXUserObject))
+|
+|-
+|AddressAdminsDN
+|cn=AddressAdmins,[globalAddressBookBaseDN]
+|
+|-
+|globalAddressBookBaseDN
+|o=AddressBook,ou=OxObjects
+|
+|-
+|GlobalAddressBookEntryDN
+|uid=[contactid],[globalAddressBookBaseDN]
+|
+|-
+|InternalUsersForeSureNameUIDPatternSearchFilter
+|(&(objectClass=inetOrgPerson)(objectClass=OXUserObject)(|(sn=[pattern])(givenname=[pattern])(uid=[pattern]))(mailEnabled=ok))
+|
+|-
+|InternalUsersForDlistSearchFilter
+|(&(objectClass=inetOrgPerson)(objectClass=OXUserObject)(cn=[pattern1])(|(mail=[pattern2])(OXUserEmail2=[pattern2])(OXUserEmail3=[pattern2]))(mailEnabled=ok))
+|
+|-
+|InternalUsersStartingLetterSearchFilter
+|(&(objectClass=inetOrgPerson)(objectClass=OXUserObject)(sn=[letter]*)(mailEnabled=ok))
+|
+|-
+|UserAddressBookEntryDN
+|uid=[contactid],[UserAddressBookDN]
+|
+|-
+|OXResourceGroupAttributeresourceGroupAvailableName
+|resourceGroupAvailable
+|
+|-
+|OXResourceGroupAttributeresourceGroupMemberName
+|resourceGroupMember
+|
+|-
+|OXResourceGroupAttributeresourceGroupNameName
+|resourceGroupName
+|
+|-
+|ResourceGroupDN
+|resourceGroupName=[group],[resourceGroupBaseDN]
+|
+|-
+|ResourceGroupPatternSearchFilter
+|(&(objectclass=OXResourceGroupObject)(resourceGroupName=[pattern]))
+|
+|-
+|ResourceGroupSearchFilter
+|(objectclass=OXResourceGroupObject)
+|
+|-
+|OXResourceAttributeresourceNameName
+|resourceName
+|
+|-
+|resourceBaseDN
+|ou=Resources,ou=ResourceObjects,ou=OxObjects
+|
+|-
+|ResourceDN
+|resourceName=[resource],[resourceBaseDN]
+|
+|-
+|resourceGroupBaseDN
+|ou=ResourceGroups,ou=ResourceObjects,ou=OxObjects
+|
+|-
+|ResourcePatternSearchFilter
+|(&(objectclass=OXResourceObject)(resourceName=[pattern]))
+|
+|-
+|groupBaseDN
+|ou=Groups,ou=OxObjects
+|
+|-
+|GroupDN
+|cn=[gid],[groupBaseDN]
+|
+|-
+|GroupSearchFilter
+|(objectclass=posixGroup)
+|
+|-
+|posixAccountAttributecnName
+|cn
+|
+|-
+|UserAddressBookDN
+|ou=addr,uid=[uid],[userBaseDN]
+|
+|-
+|userBaseDN
+|ou=Users,ou=OxObjects
+|
+|-
+|UserDN
+|uid=[uid],[userBaseDN]
+|
+|-
+|UserSearchFilter
+|(&(uid=[uid])(objectClass=OXUserObject))
+|
+|-
+|UsersPatternSearchFilter
+|(&(objectclass=posixAccount)(uid=[pattern]))
+|
+|-
+|UsersPatternSearchObjectClasses
+|posixAccount,inetOrgPerson,OXUserObject
+|
+|-
+|GlobalAddressBookSearchScope
+|1
+|
+|-
+|inetOrgPersonAttributejpegPhotoName
+|jpegPhoto
+|
+|-
+|OXUserObjectAttributeDayViewEndTimeName
+|OXDayViewEndTime
+|
+|-
+|OXUserObjectAttributeDayViewStartTimeName
+|OXDayViewStartTime
+|
+|-
+|OXUserObjectAttributeDayViewIntervalName
+|OXDayViewInterval
+|
+|-
+|Factory.GeneralSupport
+|DefaultGeneralSupport
+|
+|-
+|UserAttributeAlias
+|alias
+|
+|-
+|UserAttributeAppointmentDays
+|appointmentDays
+|
+|-
+|UserAttributeCountry
+|field27
+|
+|-
+|UserAttributeCountry2
+|field41
+|
+|-
+|UserAttributeDisplayName
+|field01
+|
+|-
+|UserAttributeDescription
+|field34
+|
+|-
+|UserAttributeFacsimile
+|field45
+|
+|-
+|UserAttributeGivenName
+|field03
+|
+|-
+|UserAttributeIdentifier
+|id
+|
+|-
+|UserAttributeImapServer
+|imapServer
+|
+|-
+|UserAttributeJDBCDatabaseURL
+|oxJDBCDatabaseURL
+|
+|-
+|UserAttributeJDBCDriverClassName
+|oxJDBCDriverClassName
+|
+|-
+|UserAttributeJDBCLogin
+|oxJDBCLogin
+|
+|-
+|UserAttributeJDBCPassword
+|oxJDBCPassword
+|
+|-
+|UserAttributeLabeledURI
+|field68
+|
+|-
+|UserAttributeLocality
+|field25
+|
+|-
+|UserAttributeMail
+|mail
+|
+|-
+|UserAttributeMailDomain
+|mailDomain
+|
+|-
+|UserAttributeEnabled
+|mailEnabled
+|
+|-
+|UserAttributeMobile
+|field53
+|
+|-
+|UserAttributeModifyTimestamp
+|changing_date
+|
+|-
+|UserAttributeOrganization
+|field18
+|
+|-
+|UserAttributeOrganizationalUnit
+|field19
+|
+|-
+|UserAttributePager
+|field57
+|
+|-
+|UserAttributePassword
+|userPassword
+|
+|-
+|UserAttributePostalCode
+|field24
+|
+|-
+|UserAttributePreferredLanguage
+|preferredLanguage
+|
+|-
+|UserAttributeShadowLastChange
+|shadowLastChange
+|
+|-
+|UserAttributeSmtpServer
+|smtpServer
+|
+|-
+|UserAttributeState
+|field26
+|
+|-
+|UserAttributeStreet
+|field23
+|
+|-
+|UserAttributeSureName
+|field02
+|
+|-
+|UserAttributeTaskDays
+|taskDays
+|
+|-
+|UserAttributeTelephoneNumber
+|field43
+|
+|-
+|UserAttributeTimeZone
+|timeZone
+|
+|-
+|UserAttributeTitle
+|field06
+|
+|-
+|UserAttributeUid
+|uid
+|
+|-
+|DNForDefaultMail
+|mailadmin
+|
+|-
+|GroupsPatternSearchFilter
+|identifier
+|
+|-
+|UsersDisplayNamePatternSearchFilter
+|field01,uid
+|
+|-
+|UsersForeSureNameUIDPatternSearchFilter
+|field03,field02,uid
+|
+|-
+|ContactsDisabled
+|false
+|
+|-
+|MailEnabledOK
+|OK
+|
+|-
+|Caching
+|true
+|
+|-
+|ResourceStorageImpl
+|com.openexchange.groupware.ldap.RdbResourceStorage
+|
+|-
+|UserStorageImpl
+|com.openexchange.groupware.ldap.RdbUserStorage
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>spamexperts.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.custom.spamexperts.panel_servlet
+|/ajax/spamexperts/panel
+|
+|-
+|com.openexchange.custom.spamexperts.panel.api_interface_url
+|http://demo1.spambrand.com/api/authticket/create/username/
+|
+|-
+|com.openexchange.custom.spamexperts.panel.admin_user
+|admin
+|
+|-
+|com.openexchange.custom.spamexperts.panel.admin_password
+|demo
+|
+|-
+|com.openexchange.custom.spamexperts.panel.api_auth_attribute
+|mail
+|
+|-
+|com.openexchange.custom.spamexperts.panel.web_ui_url
+|http://demo1.spambrand.com/?authticket=
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>server.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|PrefetchEnabled
+|true
+|
+|-
+|UPLOAD_DIRECTORY
+|/var/spool/open-xchange/uploads
+|
+|-
+|MAX_UPLOAD_SIZE
+|0
+|
+|-
+|MAX_UPLOAD_IDLE_TIME_MILLIS
+|300000
+|
+|-
+|MAX_BODY_SIZE
+|0
+|
+|-
+|com.openexchange.defaultMaxConcurrentAJAXRequests
+|0
+|
+|-
+|DefaultEncoding
+|UTF-8
+|
+|-
+|com.openexchange.MinimumSearchCharacters
+|0
+|
+|-
+|PUBLISH_REVOKE
+|
+|
+|-
+|com.openexchange.IPCheck
+|true
+|
+|-
+|com.openexchange.IPMaskV4
+|
+|
+|-
+|com.openexchange.IPMaskV6
+|
+|
+|-
+|com.openexchange.IPCheckWhitelist
+|
+|
+|-
+|com.openexchange.UIWebPath
+|/ox6/index.html
+|
+|-
+|com.openexchange.dispatcher.prefix
+|/ajax/
+|
+|-
+|com.openexchange.cookie.ttl
+|1W
+|
+|-
+|com.openexchange.cookie.httpOnly
+|true
+|
+|-
+|com.openexchange.cookie.hash
+|calculate
+|
+|-
+|com.openexchange.forceHTTPS
+|false
+|
+|-
+|com.openexchange.servlet.maxActiveSessions
+|-1
+|
+|-
+|com.openexchange.servlet.maxInactiveInterval
+|1800
+|
+|-
+|com.openexchange.servlet.maxBodySize
+|104857600
+|
+|-
+|com.openexchange.servlet.echoHeaderName
+|X-Echo-Header
+|
+|-
+|com.openexchange.log.propertyNames
+|com.openexchange.ajp13.remoteAddress(ERROR),com.openexchange.ajp13.remotePort(ERROR),com.openexchange.session.userId(DEBUG),com.openexchange.session.contextId(DEBUG),com.openexchange.session.clientId(DEBUG)
+|
+|-
+|com.openexchange.json.maxSize
+|2500
+|
+|-
+|com.openexchange.webdav.disabled
+|false
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>solr_mailfields.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|UUID 
+| uuid
+|
+|-
+|TIMESTAMP 
+| timestamp
+|
+|-
+|ACCOUNT 
+| account
+|
+|-
+|FULL_NAME 
+| full_name
+|
+|-
+|ID 
+| id
+|
+|-
+|COLOR_LABEL 
+| color_label
+|
+|-
+|ATTACHMENT 
+| attachment
+|
+|-
+|RECEIVED_DATE 
+| received_date
+|
+|-
+|SENT_DATE 
+| sent_date
+|
+|-
+|SIZE 
+| size
+|
+|-
+|FLAG_ANSWERED 
+| flag_answered
+|
+|-
+|FLAG_DELETED 
+| flag_deleted
+|
+|-
+|FLAG_DRAFT 
+| flag_draft
+|
+|-
+|FLAG_FLAGGED 
+| flag_flagged
+|
+|-
+|FLAG_RECENT 
+| flag_recent
+|
+|-
+|FLAG_SEEN 
+| flag_seen
+|
+|-
+|FLAG_USER 
+| flag_user
+|
+|-
+|FLAG_SPAM 
+| flag_spam
+|
+|-
+|FLAG_FORWARDED 
+| flag_forwarded
+|
+|-
+|FLAG_READ_ACK 
+| flag_read_ack
+|
+|-
+|USER_FLAGS 
+| user_flags
+|
+|-
+|FROM 
+| from
+|
+|-
+|SENDER 
+| sender
+|
+|-
+|TO 
+| to
+|
+|-
+|CC 
+| cc
+|
+|-
+|BCC 
+| bcc
+|
+|-
+|SUBJECT 
+| subject
+|
+|-
+|CONTENT_FLAG 
+| content_flag
+|
+|-
+|CONTENT 
+| content
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>light-breeze-theme.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|modules/themes/light_breeze
+|Light Breeze
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>awsautoscaling.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.aws.autoscaling.launchconfiguration 
+| ox-aws-autoscaling-configuration
+|
+|-
+|com.openexchange.aws.autoscaling.autoscaling 
+| ox-aws-autoscaling-group
+|
+|-
+|com.openexchange.aws.autoscaling.ami 
+| ami-a1e7e1d5
+|
+|-
+|com.openexchange.aws.autoscaling.type 
+| t1.micro
+|
+|-
+|com.openexchange.aws.autoscaling.securitygroup 
+| sg-0d94a179
+|
+|-
+|com.openexchange.aws.autoscaling.keyPair 
+| jbauerdick
+|
+|-
+|com.openexchange.aws.autoscaling.zone 
+| eu-west-1a
+|
+|-
+|com.openexchange.aws.autoscaling.loadbalancer 
+| ox-aws-loadbalancer
+|
+|-
+|com.openexchange.aws.autoscaling.min 
+| 2
+|
+|-
+|com.openexchange.aws.autoscaling.max 
+| 10
+|
+|-
+|com.openexchange.aws.autoscaling.grace 
+| 300
+|
+|-
+|com.openexchange.aws.autoscaling.scaleup 
+| 2
+|
+|-
+|com.openexchange.aws.autoscaling.scaledown 
+| -1
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>flickroauth.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.oauth.flickr
+|false
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>CatalogManager.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|verbosity
+|1
+|
+|-
+|catalogs
+|../resources/schema/catalog.xcat
+|
+|-
+|relative-catalogs
+|no
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>mailfilter.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|SIEVE_LOGIN_TYPE
+|user
+|
+|-
+|SIEVE_CREDSRC
+|session
+|
+|-
+|SIEVE_SERVER
+|localhost
+|
+|-
+|SIEVE_PORT
+|2000
+|
+|-
+|SCRIPT_NAME
+|Open-Xchange
+|
+|-
+|SIEVE_AUTH_ENC
+|UTF-8
+|
+|-
+|NON_RFC_COMPLIANT_TLS_REGEX
+|^Cyrus.*v([0-1]\\.[0-9].*|2\\.[0-2].*|2\\.3\\.[0-9]|2\\.3\\.[0-9][^0-9].*)$
+|
+|-
+|TLS
+|true
+|
+|-
+|VACATION_DOMAINS
+|
+|
+|-
+|com.openexchange.mail.filter.connectionTimeout
+|30000
+|
+|-
+|com.openexchange.mail.filter.passwordSource
+|session
+|
+|-
+|com.openexchange.mail.filter.masterPassword
+|
+|
+|-
+|com.openexchange.mail.filter.useUTF7FolderEncoding
+|false
+|
+|-
+|com.openexchange.mail.filter.punycode
+|false
+|
+|-
+|com.openexchange.mail.filter.punycode
+|false
+|
+|-
+|com.openexchange.mail.filter.useSIEVEResponseCodes
+|false
+|
+|-
+|com.openexchange.mail.filter.redirectWhitelist
+|
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>publications.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.publish.microformats.usesWhitelisting
+|true
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>crawler.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.subscribe.crawler.path
+|crawlers
+|
+|-
+|com.openexchange.subscribe.crawler.updatepath
+|http://software.open-xchange.com/OX6/6.18/crawler-updates/files/
+|
+|-
+|com.openexchange.subscribe.crawler.updatedfile
+|http://software.open-xchange.com/OX6/6.18/crawler-updates/updates.html
+|
+|-
+|com.openexchange.subscribe.crawler.updateinterval
+|86400000
+|
+|-
+|com.openexchange.subscribe.crawler.enableautoupdate
+|true
+|
+|-
+|com.openexchange.subscribe.crawler.onlyupdatealreadyinstalled
+|false
+|
+|-
+|com.openexchange.subscribe.crawler.yahoocom
+|true
+|
+|-
+|com.openexchange.subscribe.xing
+|true
+|
+|-
+|com.openexchange.subscribe.crawler.googlemail
+|true
+|
+|-
+|com.openexchange.subscribe.crawler.webde
+|true
+|
+|-
+|com.openexchange.subscribe.crawler.google.calendar
+|true
+|
+|-
+|com.openexchange.subscribe.crawler.gmx
+|true
+|
+|-
+|com.openexchange.subscribe.crawler.t-online.de
+|true
+|
+|-
+|com.openexchange.subscribe.crawler.gmx.com
+|true
+|
+|-
+|com.openexchange.subscribe.crawler.msn.de
+|false
+|
+|-
+|com.openexchange.subscribe.crawler.suncontacts
+|false
+|
+|-
+|com.openexchange.subscribe.crawler.suncalendar
+|false
+|
+|-
+|com.openexchange.subscribe.crawler.suntasks
+|false
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>forrest.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|project.skin
+|lucene
+|
+|-
+|project.required.plugins
+|org.apache.forrest.plugin.output.pdf
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>eas-provisioning-ui.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|modules/com.openexchange.eas.provisioning.ui/module
+|true
+|
+|-
+|modules/com.openexchange.mobile.configuration.gui/other/0/de_DE/name
+|Nokia S60
+|
+|-
+|modules/com.openexchange.mobile.configuration.gui/other/0/de_DE/url
+|plugins/com.openexchange.usm.eas/html/ox6-nokias60-German.html
+|
+|-
+|modules/com.openexchange.mobile.configuration.gui/other/0/fr_FR/name
+|Nokia S60
+|
+|-
+|modules/com.openexchange.mobile.configuration.gui/other/0/fr_FR/url
+|plugins/com.openexchange.usm.eas/html/ox6-nokias60-French.html
+|
+|-
+|modules/com.openexchange.mobile.configuration.gui/other/0/en_US/name
+|Nokia S60
+|
+|-
+|modules/com.openexchange.mobile.configuration.gui/other/0/en_US/url
+|plugins/com.openexchange.usm.eas/html/ox6-nokias60-English.html
+|
+|-
+|modules/com.openexchange.mobile.configuration.gui/other/0/en_GB/name
+|Nokia S60
+|
+|-
+|modules/com.openexchange.mobile.configuration.gui/other/0/en_GB/url
+|plugins/com.openexchange.usm.eas/html/ox6-nokias60-English.html
+|
+|-
+|modules/com.openexchange.mobile.configuration.gui/other/0/nl_NL/name
+|Nokia S60
+|
+|-
+|modules/com.openexchange.mobile.configuration.gui/other/0/nl_NL/url
+|plugins/com.openexchange.usm.eas/html/ox6-nokias60-Dutch.html
+|
+|-
+|modules/com.openexchange.mobile.configuration.gui/other/0/es_ES/name
+|Nokia S60
+|
+|-
+|modules/com.openexchange.mobile.configuration.gui/other/0/es_ES/url
+|plugins/com.openexchange.usm.eas/html/ox6-nokias60-Spanish.html
+|
+|-
+|modules/com.openexchange.mobile.configuration.gui/other/1/de_DE/name
+|Blackberry
+|
+|-
+|modules/com.openexchange.mobile.configuration.gui/other/1/de_DE/url
+|plugins/com.openexchange.usm.eas/html/ox6-blackberry-German.html
+|
+|-
+|modules/com.openexchange.mobile.configuration.gui/other/1/fr_FR/name
+|Blackberry
+|
+|-
+|modules/com.openexchange.mobile.configuration.gui/other/1/fr_FR/url
+|plugins/com.openexchange.usm.eas/html/ox6-blackberry-French.html
+|
+|-
+|modules/com.openexchange.mobile.configuration.gui/other/1/en_US/name
+|Blackberry
+|
+|-
+|modules/com.openexchange.mobile.configuration.gui/other/1/en_US/url
+|plugins/com.openexchange.usm.eas/html/ox6-blackberry-English.html
+|
+|-
+|modules/com.openexchange.mobile.configuration.gui/other/1/en_GB/name
+|Blackberry
+|
+|-
+|modules/com.openexchange.mobile.configuration.gui/other/1/en_GB/url
+|plugins/com.openexchange.usm.eas/html/ox6-blackberry-English.html
+|
+|-
+|modules/com.openexchange.mobile.configuration.gui/other/1/nl_NL/name
+|Blackberry
+|
+|-
+|modules/com.openexchange.mobile.configuration.gui/other/1/nl_NL/url
+|plugins/com.openexchange.usm.eas/html/ox6-blackberry-Dutch.html
+|
+|-
+|modules/com.openexchange.mobile.configuration.gui/other/1/es_ES/name
+|Blackberry
+|
+|-
+|modules/com.openexchange.mobile.configuration.gui/other/1/es_ES/url
+|plugins/com.openexchange.usm.eas/html/ox6-blackberry-Spanish.html
+|
+|-
+|modules/com.openexchange.mobile.configuration.gui/other/2/de_DE/name
+|Android
+|
+|-
+|modules/com.openexchange.mobile.configuration.gui/other/2/de_DE/url
+|plugins/com.openexchange.usm.eas/html/ox6-android2-German.html
+|
+|-
+|modules/com.openexchange.mobile.configuration.gui/other/2/fr_FR/name
+|Android
+|
+|-
+|modules/com.openexchange.mobile.configuration.gui/other/2/fr_FR/url
+|plugins/com.openexchange.usm.eas/html/ox6-android2-French.html
+|
+|-
+|modules/com.openexchange.mobile.configuration.gui/other/2/en_US/name
+|Android
+|
+|-
+|modules/com.openexchange.mobile.configuration.gui/other/2/en_US/url
+|plugins/com.openexchange.usm.eas/html/ox6-android2-English.html
+|
+|-
+|modules/com.openexchange.mobile.configuration.gui/other/2/en_GB/name
+|Android
+|
+|-
+|modules/com.openexchange.mobile.configuration.gui/other/2/en_GB/url
+|plugins/com.openexchange.usm.eas/html/ox6-android2-English.html
+|
+|-
+|modules/com.openexchange.mobile.configuration.gui/other/2/nl_NL/name
+|Android
+|
+|-
+|modules/com.openexchange.mobile.configuration.gui/other/2/nl_NL/url
+|plugins/com.openexchange.usm.eas/html/ox6-android2-Dutch.html
+|
+|-
+|modules/com.openexchange.mobile.configuration.gui/other/2/es_ES/name
+|Android
+|
+|-
+|modules/com.openexchange.mobile.configuration.gui/other/2/es_ES/url
+|plugins/com.openexchange.usm.eas/html/ox6-android2-Spanish.html
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>system.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.caching.configfile
+|cache.ccf
+|
+|-
+|serviceUsageInspection
+|false
+|
+|-
+|serviceUsageTimeout
+|10000
+|
+|-
+|MimeTypeFileName
+|mime.types
+|
+|-
+|UserConfigurationStorage
+|Caching
+|
+|-
+|Cache
+|true
+|
+|-
+|CalendarSQL
+|com.openexchange.groupware.calendar.CalendarMySQL
+|
+|-
+|SERVER_NAME
+|local
+|
+|-
+|com.openexchange.config.cascade.scopes
+|user, context, contextSets, server
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>blackwhitelist_gui.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|modules/com.openexchange.blackwhitelist/module
+|true
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>outlook2003.nl_NL.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|cellular_telephone1
+|Mobiel nummer
+|
+|-
+|city_business
+|Werkplaats
+|
+|-
+|city_home
+|Woonplaats
+|
+|-
+|company
+|Organisatie
+|
+|-
+|country_business
+|Werkland
+|
+|-
+|country_home
+|Land
+|
+|-
+|department
+|Afdeling
+|
+|-
+|display_name
+|Weergavenaam
+|
+|-
+|email1
+|Eerste e-mail
+|
+|-
+|email2
+|Tweede e-mail
+|
+|-
+|fax_home
+|Faxnummer
+|
+|-
+|first_name
+|Voornaam
+|
+|-
+|last_name
+|Achternaam
+|
+|-
+|note
+|Aantekeningen
+|
+|-
+|postal_code_business
+|Werkpostcode
+|
+|-
+|postal_code_home
+|Postcode
+|
+|-
+|profession
+|Werktitel
+|
+|-
+|second_name
+|Middle Name
+|
+|-
+|state_business
+|Werkprovincie
+|
+|-
+|state_home
+|Provincie
+|
+|-
+|street_business
+|Werkadres
+|
+|-
+|street_home
+|Adres
+|
+|-
+|telephone_business1
+|Telefoon werk
+|
+|-
+|telephone_home1
+|Telefoon thuis
+|
+|-
+|telephone_pager
+|Pieper nummer
+|
+|-
+|title
+|Title
+|
+|-
+|url
+|Webpagina 1
+|
+|-
+|birthday_year
+|Geboortejaar
+|
+|-
+|birthday_month
+|Geboortemaand
+|
+|-
+|birthday_day
+|Geboortedag
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>eas-provisioning-sms.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.mobile.configuration.json.action.sms.sipgat.api.url
+|https://samurai.sipgate.net/RPC2
+|
+|-
+|com.openexchange.mobile.configuration.json.action.sms.sipgat.api.username
+|openexchange
+|
+|-
+|com.openexchange.mobile.configuration.json.action.sms.sipgat.api.password
+|test
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>open-xchange-gui-help-plugin.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|modules/com.openexchange.help/module
+|true
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>autoconfig.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.mail.autoconfig.path
+|/opt/open-xchange/ispdb
+|
+|-
+|com.openexchange.mail.autoconfig.ispdb
+|https://live.mozillamessaging.com/autoconfig/v1.1/
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>recaptcha.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|publicKey
+|
+|
+|-
+|privateKey
+|
+|
+|-
+|errorMessage
+|Error!!!
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>threadpool.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.threadpool.corePoolSize
+|3
+|
+|-
+|com.openexchange.threadpool.prestartAllCoreThreads
+|true
+|
+|-
+|com.openexchange.threadpool.maximumPoolSize
+|2147483647
+|
+|-
+|com.openexchange.threadpool.keepAliveTime
+|60000
+|
+|-
+|com.openexchange.threadpool.workQueue
+|synchronous
+|
+|-
+|com.openexchange.threadpool.workQueueSize
+|0
+|
+|-
+|com.openexchange.threadpool.blocking
+|false
+|
+|-
+|com.openexchange.threadpool.refusedExecutionBehavior
+|abort
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>microformatSubscription.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.subscribe.microformats.contacts.http
+|true
+|
+|-
+|com.openexchange.subscribe.microformats.infostore.http
+|true
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>caldav.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.caldav.enabled
+|false
+|
+|-
+|com.openexchange.caldav.tree
+|0
+|
+|-
+|com.openexchange.caldav.interval.start
+|one_month
+|
+|-
+|com.openexchange.caldav.interval.end
+|one_year
+|
+|-
+|com.openexchange.caldav.url
+|https://[hostname]/caldav/[folderId]
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>textxtraction.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.textxtraction.tikaConfig
+|tika-config.xml
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>linkedinsubscribe.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.subscribe.socialplugin.linkedin
+|true
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>push-udp.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.push.udp.pushEnabled
+|true
+|
+|-
+|com.openexchange.push.udp.remoteHost
+|
+|
+|-
+|com.openexchange.push.udp.registerTimeout
+|3600000
+|
+|-
+|com.openexchange.push.udp.registerPort
+|44335
+|
+|-
+|com.openexchange.push.udp.registerDistributionEnabled
+|false
+|
+|-
+|com.openexchange.push.udp.eventDistributionEnabled
+|false
+|
+|-
+|com.openexchange.push.udp.outputQueueDelay
+|120000
+|
+|-
+|com.openexchange.push.udp.hostname
+|
+|
+|-
+|com.openexchange.push.udp.senderAddress
+|
+|
+|-
+|com.openexchange.push.udp.multicastEnabled
+|false
+|
+|-
+|com.openexchange.push.udp.multicastAddress
+|224.0.0.1
+|
+|-
+|com.openexchange.push.udp.multicastPort
+|9982
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>secret.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.secret.secretSource
+|"<password>"
+|
+|-
+|com.openexchange.secret.secretRandom
+|eb495148-a9f8-441e-8a28-dcb9eecd60f9
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>recaptcha_options.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>grizzly.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.http.grizzly.httpNetworkListenerHost
+|0.0.0.0
+|
+|-
+|com.openexchange.http.grizzly.httpNetworkListenerPort
+|8080
+|
+|-
+|com.openexchange.http.grizzly.hasCometEnabled
+|true
+|
+|-
+|com.openexchange.http.grizzly.hasWebSocketsEnabled
+|true
+|
+|-
+|com.openexchange.http.grizzly.hasJMXEnabled
+|true
+|
+|-
+|com.openexchange.http.grizzly.backendRoute
+|OX0
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>infostore.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|MAX_UPLOAD_SIZE
+|10485760
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>sql.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|driver 
+| com.mysql.jdbc.Driver
+|
+|-
+|login 
+| openexchange
+|
+|-
+|password 
+| secret
+|
+|-
+|url 
+| jdbc:mysql://devel-master.netline.de/openexchangeHEAD_14
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>snappy.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.nosql.cassandra.snappyjava.nativelibs 
+| /opt/open-xchange/snappy
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>requestwatcher.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.http.requestwatcher.isEnabled
+| true
+|
+|-
+|com.openexchange.http.requestwatcher.frequency
+| 30000
+|
+|-
+|com.openexchange.http.requestwatcher.maxRequestAge
+| 60000
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>hazelcast.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>logging.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|.level
+|INFO
+|
+|-
+|handlers
+|java.util.logging.ConsoleHandler
+|
+|-
+|java.util.logging.ConsoleHandler.level
+|ALL
+|
+|-
+|com.openexchange.login.internal.LoginPerformer.level
+|INFO
+|
+|-
+|com.openexchange.sessiond.impl.SessionHandler.level
+|INFO
+|
+|-
+|sun.rmi.level
+|INFO
+|
+|-
+|org.apache.level
+|WARNING
+|
+|-
+|com.sun.level
+|INFO
+|
+|-
+|javax.management.level
+|INFO
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>oauth.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.oauth.callback
+|false
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>aws.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.aws.accessKey 
+| 
+|
+|-
+|com.openexchange.aws.secretKey 
+| 
+|
+|-
+|com.openexchange.aws.ec2region 
+| ec2.eu-west-1.amazonaws.com
+|
+|-
+|com.openexchange.aws.lbregion 
+| eu-west-1.elasticloadbalancing.amazonaws.com
+|
+|-
+|com.openexchange.aws.autoscalingregion 
+| autoscaling.eu-west-1.amazonaws.com
+|
+|-
+|com.openexchange.aws.cloudwatchregion 
+| monitoring.eu-west-1.amazonaws.com
+|
+|-
+|com.openexchange.aws.s3region 
+| s3-eu-west-1.amazonaws.com
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>contextrestore.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|CONTEXT_RESTORE_STORAGE
+|com.openexchange.admin.contextrestore.storage.mysqlStorage.OXContextRestoreMySQLStorage
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>facebookoauth.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.facebook.apiKey
+|INSERT_YOUR_API_KEY_HERE
+|
+|-
+|com.openexchange.facebook.secretKey
+|INSERT_YOUR_API_SECRET_HERE
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>import.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.import.mapper.path
+|importCSV
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>ui7.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>spamexperts-ui.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|modules/com.openexchange.custom.spamexperts/module
+|true
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>outlook2003.de_DE.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|anniversary
+|Jahrestag
+|
+|-
+|assistant_name
+|Name Assistent
+|
+|-
+|birthday
+|Geburtstag
+|
+|-
+|categories
+|Kategorien
+|
+|-
+|cellular_telephone1
+|Mobiltelefon
+|
+|-
+|city_business
+|Ort gesch\u00e4ftlich
+|
+|-
+|city_home
+|Ort privat
+|
+|-
+|city_other
+|Weiterer Ort
+|
+|-
+|commercial_register
+|Organisations-Nr.
+|
+|-
+|company
+|Firma
+|
+|-
+|country_business
+|Land gesch\u00e4ftlich
+|
+|-
+|country_home
+|Land privat
+|
+|-
+|country_other
+|Weiteres Land
+|
+|-
+|department
+|Abteilung
+|
+|-
+|email1
+|E-Mail-Adresse
+|
+|-
+|email2
+|E-Mail 2: Adresse
+|
+|-
+|email3
+|E-Mail 3: Adresse
+|
+|-
+|fax_business
+|Fax gesch\u00e4ftlich
+|
+|-
+|fax_home
+|Fax privat
+|
+|-
+|fax_other
+|Weiteres Fax
+|
+|-
+|first_name
+|Vorname
+|
+|-
+|last_name
+|Nachname
+|
+|-
+|manager_name
+|Name des/der Vorgesetzten
+|
+|-
+|note
+|Notizen
+|
+|-
+|number_of_children
+|Kinder
+|
+|-
+|position
+|Position
+|
+|-
+|postal_code_business
+|Postleitzahl gesch\u00e4ftlich
+|
+|-
+|postal_code_home
+|Postleitzahl privat
+|
+|-
+|postal_code_other
+|Weitere Postleitzahl
+|
+|-
+|private_flag
+|Vertraulichkeit
+|
+|-
+|profession
+|Beruf
+|
+|-
+|room_number
+|Raumnummer
+|
+|-
+|second_name
+|Weitere Vornamen
+|
+|-
+|spouse_name
+|Partner
+|
+|-
+|state_business
+|Region gesch\u00e4ftlich
+|
+|-
+|state_home
+|Region privat
+|
+|-
+|state_other
+|Weitere Region
+|
+|-
+|street_business
+|Stra\u00dfe gesch\u00e4ftlich
+|
+|-
+|street_home
+|Stra\u00dfe privat
+|
+|-
+|street_other
+|Weitere Stra\u00dfe
+|
+|-
+|suffix
+|Suffix
+|
+|-
+|telephone_assistant
+|Telefon Assistent
+|
+|-
+|telephone_business1
+|Telefon gesch\u00e4ftlich
+|
+|-
+|telephone_business2
+|Telefon gesch\u00e4ftlich 2
+|
+|-
+|telephone_callback
+|R\u00fcckmeldung
+|
+|-
+|telephone_car
+|Autotelefon
+|
+|-
+|telephone_company
+|Telefon Firma
+|
+|-
+|telephone_home1
+|Telefon privat
+|
+|-
+|telephone_home2
+|Telefon privat 2
+|
+|-
+|telephone_isdn
+|ISDN
+|
+|-
+|telephone_other
+|Weiteres Telefon
+|
+|-
+|telephone_pager
+|Pager
+|
+|-
+|telephone_primary
+|Haupttelefon
+|
+|-
+|telephone_radio
+|Mobiltelefon 2
+|
+|-
+|telephone_telex
+|Telex
+|
+|-
+|telephone_ttytdd
+|Telefon f\u00fcr H\u00f6rbehinderte
+|
+|-
+|title
+|Anrede
+|
+|-
+|url
+|Webseite
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>yahoooauth.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.oauth.yahoo.apiKey
+|REPLACE_THIS_WITH_VALUE_OBTAINED_FROM_YAHOO
+|
+|-
+|com.openexchange.oauth.yahoo.apiSecret
+|REPLACE_THIS_WITH_VALUE_OBTAINED_FROM_YAHOO
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>push_mailnotify.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.push.mail.notify.udp_listen_multicast
+|false
+|
+|-
+|com.openexchange.push.mail.notify.udp_listen_host
+|localhost
+|
+|-
+|com.openexchange.push.mail.notify.udp_listen_port
+|23420
+|
+|-
+|com.openexchange.push.mail.notify.use_ox_login
+|false
+|
+|-
+|com.openexchange.push.mail.notify.use_full_email_address
+|false
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>tumblroauth.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.oauth.tumblr
+|false
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>upsell-multiple-gui.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|modules/com.openexchange.upsell.multiple.gui/module
+|true
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>sessionstorage_hazelcast.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.sessionstorage.hazelcast.enabled 
+| true
+|
+|-
+|com.openexchange.sessionstorage.hazelcast.defaultLifetime 
+| 604800
+|
+|-
+|com.openexchange.sessionstorage.hazelcast.encryptionKey
+|yb#QdT~M~<i]V-VT{"h(J8o=5}1Hwtx(c6fy'*!`kR[Xa=4"=yyBB{h>sw
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>Sql.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|INITIAL_OX_SQL_ORDER
+|sequences.sql,ldap2sql.sql,oxfolder.sql,virtualfolder.sql,settings.sql,calendar.sql,contacts.sql,tasks.sql,infostore.sql,attachment.sql,misc.sql,ical_vcard.sql
+|
+|-
+|LOG_PARSED_QUERIES
+|false
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>loxandra.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|node 
+| 192.168.33.37:9160
+|
+|-
+|keyspace 
+| OX
+|
+|-
+|replication_factor 
+| 3
+|
+|-
+|strategy 
+| SimpleStrategy
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>contactcollector.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.contactcollector.enabled
+|true 
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>sessionstorage.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|sessionstorage.enabled 
+| false
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>outlook2003.en_EN.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|anniversary
+|Anniversary
+|
+|-
+|assistant_name
+|Assistant's Name
+|
+|-
+|birthday
+|Birthday
+|
+|-
+|categories
+|Categories
+|
+|-
+|cellular_telephone1
+|Mobile Phone
+|
+|-
+|city_business
+|Business City
+|
+|-
+|city_home
+|Home City
+|
+|-
+|city_other
+|Other City
+|
+|-
+|commercial_register
+|Organizational ID Number 
+|
+|-
+|company
+|Company
+|
+|-
+|country_business
+|Business Country
+|
+|-
+|country_home
+|Home Country
+|
+|-
+|country_other
+|Other Country
+|
+|-
+|department
+|Department
+|
+|-
+|email1
+|E-mail Address
+|
+|-
+|email2
+|E-mail 2 Address
+|
+|-
+|email3
+|E-mail 3 Address
+|
+|-
+|fax_business
+|Business Fax
+|
+|-
+|fax_home
+|Home Fax
+|
+|-
+|fax_other
+|Other Fax
+|
+|-
+|first_name
+|First Name
+|
+|-
+|last_name
+|Last Name
+|
+|-
+|manager_name
+|Manager's Name
+|
+|-
+|note
+|Notes
+|
+|-
+|number_of_children
+|Children
+|
+|-
+|postal_code_business
+|Business Postal Code
+|
+|-
+|postal_code_home
+|Home Postal Code
+|
+|-
+|postal_code_other
+|Other Postal Code
+|
+|-
+|private_flag
+|Sensitivity
+|
+|-
+|profession
+|Profession
+|
+|-
+|second_name
+|Middle Name
+|
+|-
+|spouse_name
+|Spouse
+|
+|-
+|state_business
+|Business State
+|
+|-
+|state_home
+|Home State
+|
+|-
+|state_other
+|Other State
+|
+|-
+|street_business
+|Business Street
+|
+|-
+|street_home
+|Home Street
+|
+|-
+|street_other
+|Other Street
+|
+|-
+|suffix
+|Suffix
+|
+|-
+|telephone_assistant
+|Assistant's Phone
+|
+|-
+|telephone_business1
+|Business Phone
+|
+|-
+|telephone_business2
+|Business Phone 2
+|
+|-
+|telephone_callback
+|Callback
+|
+|-
+|telephone_car
+|Car Phone
+|
+|-
+|telephone_company
+|Company Main Phone
+|
+|-
+|telephone_home1
+|Home Phone
+|
+|-
+|telephone_home2
+|Home Phone 2
+|
+|-
+|telephone_isdn
+|ISDN
+|
+|-
+|telephone_other
+|Other Phone
+|
+|-
+|telephone_pager
+|Pager
+|
+|-
+|telephone_primary
+|Primary Phone
+|
+|-
+|telephone_radio
+|Radio Phone
+|
+|-
+|telephone_telex
+|Telex
+|
+|-
+|telephone_ttytdd
+|TTY/TDD Phone
+|
+|-
+|title
+|Title
+|
+|-
+|url
+|Web Page
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>smtp.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.smtp.smtpLocalhost
+|null
+|
+|-
+|com.openexchange.smtp.smtpAuthEnc
+|UTF-8
+|
+|-
+|com.openexchange.smtp.smtpAuthentication
+|true
+|
+|-
+|com.openexchange.smtp.setSMTPEnvelopeFrom
+|false
+|
+|-
+|com.openexchange.smtp.smtpTimeout
+|50000
+|
+|-
+|com.openexchange.smtp.smtpConnectionTimeout
+|10000
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>deferrer.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>calendar.printing.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|cp_dayview_table.tmpl 
+| calendar, printing
+|
+|-
+|cp_monthview_list.tmpl 
+| calendar, printing
+|
+|-
+|cp_monthview_table.tmpl 
+| calendar, printing
+|
+|-
+|cp_weekview_table.tmpl 
+| calendar, printing
+|
+|-
+|cp_workweekview_table.tmpl 
+| calendar, printing
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>open-xchange-admin-soap.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|MAX_RMI_CONNECT_ATTEMPTS
+|2
+|
+|-
+|CONNECT_ATTEMPTS_DELAY_TIME
+|1
+|
+|-
+|RMI_HOSTNAME
+|rmi://localhost:1099/
+|
+|-
+|LOCK_WAIT_TIME
+|10
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>cool-water-theme.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|modules/themes/default
+|Cool Water (Default)
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>parallels.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.custom.parallels.sso_info_servlet
+|/ajax/parallels/info
+|
+|-
+|com.openexchange.custom.parallels.branding.suffix
+|BRANDING||
+|
+|-
+|com.openexchange.custom.parallels.branding.fallbackurl
+|fallbackurlnotset.com/webmail/
+|
+|-
+|com.openexchange.custom.parallels.antispam.xmlrpc.port
+|3100
+|
+|-
+|com.openexchange.custom.parallels.openapi.interface_url
+|http://<coreserver>:<port>/
+|
+|-
+|com.openexchange.custom.parallels.openapi.auth_enabled
+|false
+|
+|-
+|com.openexchange.custom.parallels.openapi.auth_id
+|openapi_user_id
+|
+|-
+|com.openexchange.custom.parallels.openapi.auth_password
+|openapi_password
+|
+|-
+|com.openexchange.custom.parallels.openapi_servlet
+|/ajax/parallels/openapi
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>AdminUser.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|DEFAULT_PASSWORD_MECHANISM
+|SHA
+|
+|-
+|UID_NUMBER_START
+|-1
+|
+|-
+|CHECK_USER_UID_FOR_NOT_ALLOWED_CHARS
+|true
+|
+|-
+|CHECK_USER_UID_REGEXP
+|[$@%\\.+a-zA-Z0-9_-]
+|
+|-
+|AUTO_TO_LOWERCASE_UID
+|false
+|
+|-
+|USERNAME_CHANGEABLE
+|false
+|
+|-
+|PRIMARY_MAIL_UNCHANGEABLE
+|true
+|
+|-
+|SENT_MAILFOLDER_DE_DE
+|Gesendete Objekte
+|
+|-
+|TRASH_MAILFOLDER_DE_DE
+|Papierkorb
+|
+|-
+|DRAFTS_MAILFOLDER_DE_DE
+|Entw\u00fcrfe
+|
+|-
+|SPAM_MAILFOLDER_DE_DE
+|Spam
+|
+|-
+|CONFIRMED_SPAM_MAILFOLDER_DE_DE
+|confirmed-spam
+|
+|-
+|CONFIRMED_HAM_MAILFOLDER_DE_DE
+|confirmed-ham
+|
+|-
+|SENT_MAILFOLDER_EN_US
+|Sent Items
+|
+|-
+|TRASH_MAILFOLDER_EN_US
+|Trash
+|
+|-
+|DRAFTS_MAILFOLDER_EN_US
+|Drafts
+|
+|-
+|SPAM_MAILFOLDER_EN_US
+|Spam
+|
+|-
+|CONFIRMED_SPAM_MAILFOLDER_EN_US
+|confirmed-spam
+|
+|-
+|CONFIRMED_HAM_MAILFOLDER_EN_US
+|confirmed-ham
+|
+|-
+|SENT_MAILFOLDER_FR_FR
+|Objets envoy\u00e9s
+|
+|-
+|TRASH_MAILFOLDER_FR_FR
+|Corbeille
+|
+|-
+|DRAFTS_MAILFOLDER_FR_FR
+|Brouillons
+|
+|-
+|SPAM_MAILFOLDER_FR_FR
+|Pourriel
+|
+|-
+|CONFIRMED_SPAM_MAILFOLDER_FR_FR
+|pourriel-confirme
+|
+|-
+|CONFIRMED_HAM_MAILFOLDER_FR_FR
+|non-pourriel-confirme
+|
+|-
+|SENT_MAILFOLDER_NL_NL
+|Verzonden items
+|
+|-
+|TRASH_MAILFOLDER_NL_NL
+|Prullenbak
+|
+|-
+|DRAFTS_MAILFOLDER_NL_NL
+|Concepten
+|
+|-
+|SPAM_MAILFOLDER_NL_NL
+|Spam
+|
+|-
+|CONFIRMED_SPAM_MAILFOLDER_NL_NL
+|bevestigde spam
+|
+|-
+|CONFIRMED_HAM_MAILFOLDER_NL_NL
+|bevestigde ham
+|
+|-
+|SENT_MAILFOLDER_SV_SV
+|Skickat
+|
+|-
+|TRASH_MAILFOLDER_SV_SV
+|Papperskorgen
+|
+|-
+|DRAFTS_MAILFOLDER_SV_SV
+|Utkast
+|
+|-
+|SPAM_MAILFOLDER_SV_SV
+|Skr\u00E4ppost
+|
+|-
+|CONFIRMED_SPAM_MAILFOLDER_SV_SV
+|bekr\u00E4ftad-skr\u00E4ppost
+|
+|-
+|CONFIRMED_HAM_MAILFOLDER_SV_SV
+|felaktigt-bekr\u00E4ftad-spam
+|
+|-
+|SENT_MAILFOLDER_ES_ES
+|Elementos enviados
+|
+|-
+|TRASH_MAILFOLDER_ES_ES
+|Papelera
+|
+|-
+|DRAFTS_MAILFOLDER_ES_ES
+|Borradores
+|
+|-
+|SPAM_MAILFOLDER_ES_ES
+|Correo no deseado
+|
+|-
+|CONFIRMED_SPAM_MAILFOLDER_ES_ES
+|correo basura confirmado
+|
+|-
+|CONFIRMED_HAM_MAILFOLDER_ES_ES
+|correo leg\u00EDtimo confirmado
+|
+|-
+|SENT_MAILFOLDER_JA_JP
+|\u9001\u4FE1\u6E08\u30A2\u30A4\u30C6\u30E0
+|
+|-
+|TRASH_MAILFOLDER_JA_JP
+|\u524A\u9664\u6E08\u307F\u30A2\u30A4\u30C6\u30E0
+|
+|-
+|DRAFTS_MAILFOLDER_JA_JP
+|\u4E0B\u66F8\u304D
+|
+|-
+|SPAM_MAILFOLDER_JA_JP
+|\u8FF7\u60D1\u30E1\u30FC\u30EB
+|
+|-
+|CONFIRMED_SPAM_MAILFOLDER_JA_JP
+|\u8FF7\u60D1\u30E1\u30FC\u30EB\uFF08\u78BA\u8A8D\u6E08\uFF09
+|
+|-
+|CONFIRMED_HAM_MAILFOLDER_JA_JP
+|\u4E00\u822C\u30E1\u30FC\u30EB\uFF08\u78BA\u8A8D\u6E08\uFF09
+|
+|-
+|SENT_MAILFOLDER_PL_PL
+|Elementy wys\u0142ane
+|
+|-
+|TRASH_MAILFOLDER_PL_PL
+|Kosz
+|
+|-
+|DRAFTS_MAILFOLDER_PL_PL
+|Szkice
+|
+|-
+|SPAM_MAILFOLDER_PL_PL
+|Spam
+|
+|-
+|CONFIRMED_SPAM_MAILFOLDER_PL_PL
+|Potwierdzony spam
+|
+|-
+|CONFIRMED_HAM_MAILFOLDER_PL_PL
+|Potwierdzony nie-spam
+|
+|-
+|SENT_MAILFOLDER_IT_IT
+|Posta inviata
+|
+|-
+|TRASH_MAILFOLDER_IT_IT
+|Cestino
+|
+|-
+|DRAFTS_MAILFOLDER_IT_IT
+|Bozze
+|
+|-
+|SPAM_MAILFOLDER_IT_IT
+|Posta Indesiderata
+|
+|-
+|CONFIRMED_SPAM_MAILFOLDER_IT_IT
+|Posta indesiderata accertata
+|
+|-
+|CONFIRMED_HAM_MAILFOLDER_IT_IT
+|Posta attendibile accertata
+|
+|-
+|SENT_MAILFOLDER_ZH_CN
+|\u5df2\u53d1\u9001\u90ae\u4ef6
+|
+|-
+|TRASH_MAILFOLDER_ZH_CN
+|\u5783\u573e\u7b52
+|
+|-
+|DRAFTS_MAILFOLDER_ZH_CN
+|\u8349\u7a3f
+|
+|-
+|SPAM_MAILFOLDER_ZH_CN
+|\u5783\u573e\u90ae\u4ef6
+|
+|-
+|CONFIRMED_SPAM_MAILFOLDER_ZH_CN
+|\u5df2\u786e\u8ba4\u7684\u5783\u573e\u90ae\u4ef6
+|
+|-
+|CONFIRMED_HAM_MAILFOLDER_ZH_CN
+|\u5df2\u786e\u8ba4\u7684\u6b63\u5e38\u90ae\u4ef6
+|
+|-
+|SENT_MAILFOLDER_CS_CZ
+|Odeslan\u00e9 polo\u017eky
+|
+|-
+|TRASH_MAILFOLDER_CS_CZ
+|Ko\u0161
+|
+|-
+|DRAFTS_MAILFOLDER_CS_CZ
+|Koncepty
+|
+|-
+|SPAM_MAILFOLDER_CS_CZ
+|Spam
+|
+|-
+|CONFIRMED_SPAM_MAILFOLDER_CS_CZ
+|Potvrzen\u00fd spam
+|
+|-
+|CONFIRMED_HAM_MAILFOLDER_CS_CZ
+|Potvrzen\u00e1 norm\u00e1ln\u00ed po\u0161ta
+|
+|-
+|SENT_MAILFOLDER_HU_HU
+|Elk\u00fcld\u00f6tt elemek
+|
+|-
+|TRASH_MAILFOLDER_HU_HU
+|T\u00f6r\u00f6lt elemek
+|
+|-
+|DRAFTS_MAILFOLDER_HU_HU
+|Piszkozatok
+|
+|-
+|SPAM_MAILFOLDER_HU_HU
+|Lev\u00e9lszem\u00e9t
+|
+|-
+|CONFIRMED_SPAM_MAILFOLDER_HU_HU
+|Elfogadott k\u00e9retlen
+|
+|-
+|CONFIRMED_HAM_MAILFOLDER_HU_HU
+|Elfogadott \u00e1l-k\u00e9retlen
+|
+|-
+|SENT_MAILFOLDER_SK_SK
+|Odoslan\u00e9 polo\u017eky
+|
+|-
+|TRASH_MAILFOLDER_SK_SK
+|K\u00f4\u0161
+|
+|-
+|DRAFTS_MAILFOLDER_SK_SK
+|Rozp\u00edsan\u00e9
+|
+|-
+|SPAM_MAILFOLDER_SK_SK
+|Spam
+|
+|-
+|CONFIRMED_SPAM_MAILFOLDER_SK_SK
+|Potvrden\u00fd spam
+|
+|-
+|CONFIRMED_HAM_MAILFOLDER_SK_SK
+|Potvrden\u00e9 ako nie spam
+|
+|-
+|SENT_MAILFOLDER_LV_LV
+|Nos\u016Bt\u012Bt\u0101s vien\u012Bbas
+|
+|-
+|TRASH_MAILFOLDER_LV_LV
+|Atkritumi
+|
+|-
+|DRAFTS_MAILFOLDER_LV_LV
+|Melnraksti
+|
+|-
+|SPAM_MAILFOLDER_LV_LV
+|M\u0113stules
+|
+|-
+|CONFIRMED_SPAM_MAILFOLDER_LV_LV
+|Apstiprin\u0101ta "m\u0113stule"
+|
+|-
+|CONFIRMED_HAM_MAILFOLDER_LV_LV
+|Apstiprin\u0101ts "ham"
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>push_imapidle.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.push.imapidle.folder
+|INBOX
+|
+|-
+|com.openexchange.push.imapidle.errordelay
+|2000
+|
+|-
+|com.openexchange.push.imapidle.pushmode
+|always
+|
+|-
+|com.openexchange.push.imapidle.debug
+|true
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>folderjson.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.folder.json.module
+|folders
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>Group.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|GID_NUMBER_START
+|-1
+|
+|-
+|CHECK_GROUP_UID_FOR_NOT_ALLOWED_CHARS
+|true
+|
+|-
+|CHECK_GROUP_UID_REGEXP
+|[ $@%\\.+a-zA-Z0-9_-]
+|
+|-
+|AUTO_TO_LOWERCASE_UID
+|false
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>authplugin.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|LDAP_HOST
+|localhost
+|
+|-
+|LDAP_BASE
+|dc=example,dc=org
+|
+|-
+|LDAP_PORT
+|389
+|
+|-
+|LDAP_SEARCH
+|(&(objectClass=oxdbObject)(uid=@USER@))
+|
+|-
+|LDAP_ATTRIBUTE
+|mailPrimaryAddress
+|
+|-
+|USE_POOL
+|false
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>licensekeys.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.licensekey.1
+|OX-AS-MK-123456-789
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>excludedupdatetasks.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>passcrypt.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.passcrypt.key
+|5ce1bcd8175f43ecaf5c809f66bd2dfb
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>awsloadbalancing.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.aws.loadbalancing.name 
+| ox-aws-loadbalancer
+|
+|-
+|com.openexchange.aws.loadbalancing.https 
+| false
+|
+|-
+|com.openexchange.aws.loadbalancing.zone 
+| eu-west-1a
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>event.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.event.isEventQueueEnabled
+|true
+|
+|-
+|com.openexchange.event.eventQueueDelay
+|60000
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>ajp.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|AJP_PORT
+|8009
+|
+|-
+|AJP_BACKLOG
+|0
+|
+|-
+|SERVLET_POOL_SIZE
+| 1
+|
+|-
+|AJP_SERVER_THREAD_SIZE
+| 1
+|
+|-
+|AJP_LISTENER_POOL_SIZE
+| 1
+|
+|-
+|AJP_LISTENER_READ_TIMEOUT
+| 60000
+|
+|-
+|AJP_KEEP_ALIVE_TIME
+| 20000
+|
+|-
+|AJP_MAX_REQUEST_PARAMETER_COUNT
+| 30
+|
+|-
+|AJP_WATCHER_ENABLED
+| TRUE
+|
+|-
+|AJP_WATCHER_PERMISSION
+| FALSE
+|
+|-
+|AJP_WATCHER_MAX_RUNNING_TIME
+| 60000
+|
+|-
+|AJP_WATCHER_FREQUENCY
+| 30000
+|
+|-
+|AJP_JVM_ROUTE
+| OX1
+|
+|-
+|AJP_SERVLET_CONFIG_DIR
+| null
+|
+|-
+|AJP_BIND_ADDR
+|localhost
+|
+|-
+|AJP_LOG_FORWARD_REQUEST
+| FALSE
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>oxmobile.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|mox/config/mailCount
+| 50
+|
+|-
+|mox/config/appointmentDays
+| 10
+|
+|-
+|mox/config/maxAppointmentBreak
+| 50
+|
+|-
+|mox/config/animations 
+| true
+|
+|-
+|mox/subscribedFolders/contacts
+| []
+|
+|-
+|mox/subscribedFolders/mail
+| []
+|
+|-
+|mox/subscribedFolders/calendar
+| []
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>voipnow.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.4psa.voipnow.enabled
+|true
+|
+|-
+|com.4psa.voipnow.version
+|2.0.4
+|
+|-
+|com.4psa.voipnow.faxaddress
+|fax@voip.open-xchange.com
+|
+|-
+|com.4psa.voipnow.host
+|my.voipnowserver.net
+|
+|-
+|com.4psa.voipnow.port
+|443
+|
+|-
+|com.4psa.voipnow.secure
+|true
+|
+|-
+|com.4psa.voipnow.adminLogin
+|admin
+|
+|-
+|com.4psa.voipnow.adminPassword
+|secret
+|
+|-
+|com.4psa.voipnow.adminPasswordHTTP
+|secret
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>upsell.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.upsell.multiple.method
+|static
+|
+|-
+|com.openexchange.upsell.multiple.method.static.shop_redir_url
+|http://shop.host.tld/?shop=true&src=ox&user=_USER_&userid=_USERID_&mail=_MAIL_&login=_LOGIN_&imaplogin=_IMAPLOGIN_&clicked_feat=_CLICKED_FEATURE_&lang=_LANG_&cid=_CID_
+|
+|-
+|com.openexchange.upsell.multiple.method.email.address
+|upsell@shop.host.tld
+|
+|-
+|com.openexchange.upsell.multiple.method.email.template
+|/opt/open-xchange/etc/groupware/upsell_mail_body.tmpl
+|
+|-
+|com.openexchange.upsell.multiple.method.email.subject
+|OX upsell in context _CID_ for user _USERID_ (_USER_) with email _MAIL_ was requested by clicking _CLICKED_FEATURE_
+|
+|-
+|com.openexchange.upsell.multiple.method.email.oxuser.enabled
+|true
+|
+|-
+|com.openexchange.upsell.multiple.method.email.oxuser.template
+|/opt/open-xchange/etc/groupware/upsell_mail_body_ox_enduser.tmpl
+|
+|-
+|com.openexchange.upsell.multiple.method.email.oxuser.template_subject
+|/opt/open-xchange/etc/groupware/upsell_mail_subject_ox_enduser.tmpl
+|
+|-
+|com.openexchange.upsell.multiple.servlet
+|/ajax/upsell/multiple
+|
+|-
+|com.openexchange.upsell.multiple.rmi.host
+|127.0.0.1
+|
+|-
+|com.openexchange.upsell.multiple.rmi.masteradmin
+|oxadminmaster
+|
+|-
+|com.openexchange.upsell.multiple.rmi.masteradmin.pass
+|secret
+|
+|-
+|com.openexchange.upsell.multiple.rmi.downgrade.accessname
+|pim
+|
+|-
+|com.openexchange.upsell.multiple.method.external.shop_api_url
+|http://shop.host.com/api/generateshopurl
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>dataretention.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.dataretention.dir
+|/var/log/open-xchange
+|
+|-
+|com.openexchange.dataretention.versionNumber
+|1
+|
+|-
+|com.openexchange.dataretention.clientID
+|Open-Xchange
+|
+|-
+|com.openexchange.dataretention.sourceID
+|OX_mail_01
+|
+|-
+|com.openexchange.dataretention.location
+|DE/Olpe
+|
+|-
+|com.openexchange.dataretention.timeZone
+|GMT
+|
+|-
+|com.openexchange.dataretention.rotateLength
+|0
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>parallels-ui.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|modules/com.openexchange.custom.parallels/module
+|true
+|
+|-
+|ui/parallels/sender_address_hiding_activated
+|true
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>fetcher.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>change_pwd_script.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.passwordchange.script.shellscript
+|/bin/changepwd.sh
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>publish.microformats.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|contacts_hcard_censored.tmpl 
+| contacts, publish, default
+|
+|-
+|contacts_hcard_uncensored.tmpl 
+| contacts, publish
+|
+|-
+|contacts_oxmf_censored.tmpl 
+| contacts, publish
+|
+|-
+|contacts_oxmf_uncensored.tmpl 
+| contacts, publish
+|
+|-
+|contacts.tmpl 
+| contacts, publish
+|
+|-
+|infostore.tmpl 
+| infostore, publish, default
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>foldercache.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|ENABLE_DB_GROUPING
+| TRUE
+|
+|-
+|ENABLE_FOLDER_CACHE
+| TRUE
+|
+|-
+|IGNORE_SHARED_ADDRESSBOOK
+|TRUE
+|
+|-
+|ENABLE_INTERNAL_USER_EDIT
+|TRUE
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>pop3.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.pop3.pop3Timeout
+|50000
+|
+|-
+|com.openexchange.pop3.pop3ConnectionTimeout
+|20000
+|
+|-
+|com.openexchange.pop3.pop3TemporaryDown
+|10000
+|
+|-
+|com.openexchange.pop3.pop3AuthEnc
+|UTF-8
+|
+|-
+|com.openexchange.pop3.spamHandler
+|DefaultSpamHandler
+|
+|-
+|com.openexchange.pop3.pop3ConnectionIdleTime
+|300000
+|
+|-
+|com.openexchange.pop3.pop3BlockSize
+|100
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>sessionstorage_nosql.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.sessionstorage.nosql.enabled 
+| true
+|
+|-
+|com.openexchange.sessionstorage.nosql.host 
+| 192.168.32.75
+|
+|-
+|com.openexchange.sessionstorage.nosql.port 
+| 9160
+|
+|-
+|com.openexchange.sessionstorage.nosql.keyspace 
+| ox
+|
+|-
+|com.openexchange.sessionstorage.nosql.cfname 
+| sessionstorage
+|
+|-
+|com.openexchange.sessionstorage.nosql.sessionLifetime 
+| 604800
+|
+|-
+|com.openexchange.sessionstorage.nosql.encryptionKey
+|Cv!IAB2+gfgmbxbatQ7)iaK(?@lgg[d;W,VYV/-u%ies/)w{_nfDZx/>gH
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>indexing-service.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.service.indexing.startReceiver 
+| true
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>appstore.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.app.descriptions.path
+|/var/www/webdesktop/AppForge
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>carddav.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.carddav.enabled
+|false
+|
+|-
+|com.openexchange.carddav.ignoreFolders
+|
+|
+|-
+|com.openexchange.carddav.tree
+|0
+|
+|-
+|com.openexchange.carddav.combinedRequestTimeout
+|20000
+|
+|-
+|com.openexchange.carddav.exposedCollections
+|0
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>facebooksubscribe.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.subscribe.socialplugin.facebook
+|true
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>defaultspamhandler.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.spamhandler.defaultspamhandler.createConfirmedSpam
+|true
+|
+|-
+|com.openexchange.spamhandler.defaultspamhandler.createConfirmedHam
+|true
+|
+|-
+|com.openexchange.spamhandler.defaultspamhandler.unsubscribeSpamFolders
+|true
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>ui.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|ui/global/windows/mode/value
+|embedded
+|
+|-
+|ui/global/windows/mode/configurable
+|true
+|
+|-
+|ui/global/toolbar/mode/value
+|tabbased
+|
+|-
+|ui/global/toolbar/mode/configurable
+|true
+|
+|-
+|ui/mail/showContactImage/value 
+| true
+|
+|-
+|ui/mail/showContactImage/configurable 
+| true
+|
+|-
+|ui/mail/replyTo/configurable 
+| false
+|
+|-
+|ui/portal/autoRefresh 
+| false
+|
+|-
+|ui/portal/customUWA 
+| true
+|
+|-
+|ui/global/expert/mode/configurable 
+| true
+|
+|-
+|ui/global/expert/mode/value 
+| false
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>ModuleAccessDefinitions.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|webmail_plus
+|contacts,webmail
+|
+|-
+|pim_plus
+|contacts,webmail,calendar,tasks
+|
+|-
+|groupware_plus
+|contacts,webmail,calendar,delegatetask,tasks,editpublicfolders,infostore,publicfoldereditable,readcreatesharedfolders
+|
+|-
+|premium
+|contacts,webmail,calendar,delegatetask,tasks,editpublicfolders,infostore,publicfoldereditable,readcreatesharedfolders,ical,vcard,webdav,webdavxml
+|
+|-
+|groupware
+|calendar,contacts,delegatetask,editpublicfolders,forum,ical,infostore,publicfoldereditable,pinboardwrite,projects,readcreatesharedfolders,rssbookmarks,rssportal,tasks,vcard,webdav,webdavxml,webmail,editresource,editgroup,editpassword,collectemailaddresses,multiplemailaccounts,subscription,publication
+|
+|-
+|webmail
+|webmail,contacts,globaladdressbookdisabled,collectemailaddresses,editpassword
+|
+|-
+|pim
+|webmail,calendar,contacts,tasks,globaladdressbookdisabled,collectemailaddresses,multiplemailaccounts,subscription,publication,editpassword
+|
+|-
+|pim_infostore
+|webmail,calendar,contacts,tasks,infostore,webdav,globaladdressbookdisabled,collectemailaddresses,multiplemailaccounts,subscription,publication,editpassword
+|
+|-
+|pim_mobility
+|webmail,calendar,contacts,tasks,syncml,usm,activesync,globaladdressbookdisabled,collectemailaddresses,multiplemailaccounts,subscription,publication,editpassword
+|
+|-
+|groupware_standard
+|webmail,calendar,contacts,infostore,tasks,webdav,ical,vcard,readcreatesharedfolders,delegatetask,editpublicfolders,editgroup,editresource,editpassword,collectemailaddresses,multiplemailaccounts,subscription,publication
+|
+|-
+|groupware_premium
+|webmail,calendar,contacts,infostore,tasks,webdav,webdavxml,ical,vcard,syncml,usm,olox20,activesync,readcreatesharedfolders,delegatetask,editpublicfolders,editgroup,editresource,editpassword,collectemailaddresses,multiplemailaccounts,subscription,publication
+|
+|-
+|all
+|webmail,calendar,contacts,infostore,tasks,webdav,webdavxml,ical,vcard,syncml,usm,olox20,activesync,readcreatesharedfolders,delegatetask,editpublicfolders,editgroup,editresource,editpassword,publicfoldereditable,collectemailaddresses,multiplemailaccounts,subscription,publication
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>transport.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.mail.transport.referencedPartLimit
+|1048576
+|
+|-
+|com.openexchange.mail.defaultTransportProvider
+|smtp
+|
+|-
+|com.openexchange.mail.transport.enablePublishOnExceededQuota
+|false
+|
+|-
+|com.openexchange.mail.transport.publishingPublicInfostoreFolder
+|i18n-defined
+|
+|-
+|com.openexchange.mail.transport.publishPrimaryAccountOnly
+|true
+|
+|-
+|com.openexchange.mail.transport.sendAttachmentToExternalRecipients
+|false
+|
+|-
+|com.openexchange.mail.transport.provideLinksInAttachment
+|false
+|
+|-
+|com.openexchange.mail.transport.publishedDocumentTimeToLive
+|604800000
+|
+|-
+|com.openexchange.mail.transport.externalRecipientsLocale
+|user-defined
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>hosting.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|CONTEXT_STORAGE
+|com.openexchange.admin.storage.mysqlStorage.OXContextMySQLStorage
+|
+|-
+|UTIL_STORAGE
+|com.openexchange.admin.storage.mysqlStorage.OXUtilMySQLStorage
+|
+|-
+|AVERAGE_CONTEXT_SIZE
+|200
+|
+|-
+|CONTEXTS_PER_SCHEMA
+|1000
+|
+|-
+|CREATE_CONTEXT_USE_UNIT
+|context
+|
+|-
+|CHECK_CONTEXT_LOGIN_MAPPING_REGEXP
+|[$%\\.+a-zA-Z0-9_-]
+|
+|-
+|NEW_CONTEXT_DEFAULT_ACCESS_COMBINATION_NAME
+|webmail_plus
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>language-codes.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|afar
+|aa
+|
+|-
+|abkhazian
+|ab
+|
+|-
+|afrikaans
+|af
+|
+|-
+|amharic
+|am
+|
+|-
+|arabic
+|ar
+|
+|-
+|assamese
+|as
+|
+|-
+|aymara
+|ay
+|
+|-
+|azerbaijani
+|az
+|
+|-
+|bashkir
+|ba
+|
+|-
+|byelorussian
+|be
+|
+|-
+|belarus
+|be
+|
+|-
+|bulgarian
+|bg
+|
+|-
+|bihari
+|bh
+|
+|-
+|bislama
+|bi
+|
+|-
+|bengali
+|bn
+|
+|-
+|tibetan
+|bo
+|
+|-
+|breton
+|br
+|
+|-
+|bosnian
+|bs
+|
+|-
+|catalan
+|ca
+|
+|-
+|corsican
+|co
+|
+|-
+|czech
+|cs
+|
+|-
+|welsh
+|cy
+|
+|-
+|danish
+|da
+|
+|-
+|german
+|de
+|
+|-
+|bhutani
+|dz
+|
+|-
+|greek
+|el
+|
+|-
+|english
+|en
+|
+|-
+|esperanto
+|eo
+|
+|-
+|spanish
+|es
+|
+|-
+|estonian
+|et
+|
+|-
+|basque
+|eu
+|
+|-
+|persian
+|fa
+|
+|-
+|finnish
+|fi
+|
+|-
+|fiji
+|fj
+|
+|-
+|faeroese
+|fo
+|
+|-
+|french
+|fr
+|
+|-
+|frisian
+|fy
+|
+|-
+|irish
+|ga
+|
+|-
+|gaelic
+|gd
+|
+|-
+|galician
+|gl
+|
+|-
+|guarani
+|gn
+|
+|-
+|gujarati
+|gu
+|
+|-
+|hausa
+|ha
+|
+|-
+|hindi
+|hi
+|
+|-
+|croatian
+|hr
+|
+|-
+|hungarian
+|hu
+|
+|-
+|armenian
+|hy
+|
+|-
+|interlingua
+|ia
+|
+|-
+|interlingue
+|ie
+|
+|-
+|inupiak
+|ik
+|
+|-
+|indonesian
+|in
+|
+|-
+|icelandic
+|is
+|
+|-
+|italian
+|it
+|
+|-
+|hebrew
+|iw
+|
+|-
+|japanese
+|ja
+|
+|-
+|yiddish
+|ji
+|
+|-
+|javanese
+|jw
+|
+|-
+|georgian
+|ka
+|
+|-
+|kazakh
+|kk
+|
+|-
+|greenlandic
+|kl
+|
+|-
+|cambodian
+|km
+|
+|-
+|kannada
+|kn
+|
+|-
+|korean
+|ko
+|
+|-
+|kashmiri
+|ks
+|
+|-
+|kurdish
+|ku
+|
+|-
+|kirghiz
+|ky
+|
+|-
+|latin
+|la
+|
+|-
+|limburgish
+|li
+|
+|-
+|lingala
+|ln
+|
+|-
+|laothian
+|lo
+|
+|-
+|lithuanian
+|lt
+|
+|-
+|latvian
+|lv
+|
+|-
+|malagasy
+|mg
+|
+|-
+|maori
+|mi
+|
+|-
+|macedonian
+|mk
+|
+|-
+|malayalam
+|ml
+|
+|-
+|mongolian
+|mn
+|
+|-
+|moldavian
+|mo
+|
+|-
+|marathi
+|mr
+|
+|-
+|malay
+|ms
+|
+|-
+|maltese
+|mt
+|
+|-
+|burmese
+|my
+|
+|-
+|nauru
+|na
+|
+|-
+|nepali
+|ne
+|
+|-
+|dutch
+|nl
+|
+|-
+|norwegian
+|no
+|
+|-
+|occitan
+|oc
+|
+|-
+|oromo
+|om
+|
+|-
+|oriya
+|or
+|
+|-
+|punjabi
+|pa
+|
+|-
+|polish
+|pl
+|
+|-
+|pashto
+|ps
+|
+|-
+|portuguese
+|pt
+|
+|-
+|quechua
+|qu
+|
+|-
+|rhaeto-romance
+|rm
+|
+|-
+|kirundi
+|rn
+|
+|-
+|romanian
+|ro
+|
+|-
+|russian
+|ru
+|
+|-
+|kinyarwanda
+|rw
+|
+|-
+|sanskrit
+|sa
+|
+|-
+|scots
+|sco
+|
+|-
+|sindhi
+|sd
+|
+|-
+|sangro
+|sg
+|
+|-
+|serbo-croatian
+|sh
+|
+|-
+|singhalese
+|si
+|
+|-
+|slovak
+|sk
+|
+|-
+|slovenian
+|sl
+|
+|-
+|samoan
+|sm
+|
+|-
+|shona
+|sn
+|
+|-
+|somali
+|so
+|
+|-
+|albanian
+|sq
+|
+|-
+|serbian
+|sr
+|
+|-
+|siswati
+|ss
+|
+|-
+|sesotho
+|st
+|
+|-
+|sudanese
+|su
+|
+|-
+|swedish
+|sv
+|
+|-
+|swahili
+|sw
+|
+|-
+|tamil
+|ta
+|
+|-
+|tegulu
+|te
+|
+|-
+|tajik
+|tg
+|
+|-
+|thai
+|th
+|
+|-
+|tigrinya
+|ti
+|
+|-
+|turkmen
+|tk
+|
+|-
+|tagalog
+|tl
+|
+|-
+|setswana
+|tn
+|
+|-
+|tonga
+|to
+|
+|-
+|turkish
+|tr
+|
+|-
+|tsonga
+|ts
+|
+|-
+|tatar
+|tt
+|
+|-
+|twi
+|tw
+|
+|-
+|ukrainian
+|uk
+|
+|-
+|urdu
+|ur
+|
+|-
+|uzbek
+|uz
+|
+|-
+|vietnamese
+|vi
+|
+|-
+|volapuk
+|vo
+|
+|-
+|wolof
+|wo
+|
+|-
+|xhosa
+|xh
+|
+|-
+|yoruba
+|yo
+|
+|-
+|chinese
+|zh
+|
+|-
+|zulu
+|zu
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>mobile.configuration.generator.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|iPhoneTemplate.tmpl 
+| mobile_configuration
+|
+|-
+|winMobileTemplate.tmpl 
+| mobile_configuration
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>mail.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.mail.loginSource
+|login
+|
+|-
+|com.openexchange.mail.passwordSource
+|session
+|
+|-
+|com.openexchange.mail.mailServerSource
+|user
+|
+|-
+|com.openexchange.mail.transportServerSource
+|user
+|
+|-
+|com.openexchange.mail.masterPassword
+|secret
+|
+|-
+|com.openexchange.mail.mailServer
+|127.0.0.1
+|
+|-
+|com.openexchange.mail.transportServer
+|127.0.0.1
+|
+|-
+|com.openexchange.mail.defaultMailProvider
+|imap
+|
+|-
+|mail.mime.charset
+|UTF-8
+|
+|-
+|com.openexchange.mail.mailFetchLimit
+|1000
+|
+|-
+|com.openexchange.mail.attachmentDisplaySizeLimit
+|8192
+|
+|-
+|com.openexchange.mail.mailAccessCacheShrinkerSeconds
+|3
+|
+|-
+|com.openexchange.mail.mailAccessCacheIdleSeconds
+|7
+|
+|-
+|com.openexchange.mail.quoteLineColors
+|#a14044,#917722,#599351,#516193,#666666
+|
+|-
+|com.openexchange.mail.userFlagsEnabled
+|true
+|
+|-
+|com.openexchange.mail.partModifierImpl
+|com.openexchange.mail.partmodifier.DummyPartModifier
+|
+|-
+|com.openexchange.mail.allowNestedDefaultFolderOnAltNamespace
+|false
+|
+|-
+|com.openexchange.mail.ignoreSubscription
+|false
+|
+|-
+|com.openexchange.mail.supportSubscription
+|true
+|
+|-
+|com.openexchange.mail.defaultSeparator
+|/
+|
+|-
+|com.openexchange.mail.watcherEnabled
+|true
+|
+|-
+|com.openexchange.mail.watcherFrequency
+|10000
+|
+|-
+|com.openexchange.mail.watcherTime
+|60000
+|
+|-
+|com.openexchange.mail.watcherShallClose
+|false
+|
+|-
+|com.openexchange.mail.JavaMailProperties
+|javamail.properties
+|
+|-
+|com.openexchange.mail.phishingHeader
+|
+|
+|-
+|com.openexchange.mail.adminMailLoginEnabled
+|false
+|
+|-
+|com.openexchange.mail.addClientIPAddress
+|false
+|
+|-
+|com.openexchange.mail.rateLimitPrimaryOnly
+|true
+|
+|-
+|com.openexchange.mail.rateLimit
+|0
+|
+|-
+|com.openexchange.mail.maxToCcBcc
+|0
+|
+|-
+|com.openexchange.mail.hidePOP3StorageFolders
+|false
+|
+|-
+|com.openexchange.mail.deleteDraftOnTransport
+|false
+|
+|-
+|com.openexchange.mail.translateDefaultFolders
+|true
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>Resource.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|CHECK_RES_UID_FOR_NOT_ALLOWED_CHARS
+|true
+|
+|-
+|CHECK_RES_UID_REGEXP
+|[ $@%\\.+a-zA-Z0-9_-]
+|
+|-
+|AUTO_TO_LOWERCASE_UID
+|false
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>messaging.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.messaging.enabled
+|true
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>themes.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>lang-detect.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.langdetect.languageModelsDir
+|languageModels
+|
+|-
+|com.openexchange.langdetect.languageCodesFile
+|language-codes.properties
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>twitter.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.twitter.clientVersion
+|2.2.3
+|
+|-
+|com.openexchange.twitter.http.useSSL
+|false
+|
+|-
+|com.openexchange.twitter.http.proxyHost
+|
+|
+|-
+|com.openexchange.twitter.http.proxyPort
+|
+|
+|-
+|com.openexchange.twitter.http.connectionTimeout
+|20000
+|
+|-
+|com.openexchange.twitter.http.readTimeout
+|120000
+|
+|-
+|com.openexchange.twitter.http.retryCount
+|3
+|
+|-
+|com.openexchange.twitter.http.retryIntervalSecs
+|10
+|
+|-
+|com.openexchange.twitter.consumerKey
+|kZX3V4AmAWwC53yA5RjHbQ
+|
+|-
+|com.openexchange.twitter.consumerSecret
+|HvY7pVFFQSGPVu9LCoBMUhvMpS00qdtqBob99jucc
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>microformatWhitelist.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|html.tag.a
+|"class,id,style,title,dir,lang,href,name,tabindex,target,type"
+|
+|-
+|html.tag.area
+|"class,id,style,title,dir,lang,alt,coords,href,nohref[nohref],shape[:rect:circle:poly:default:],tabindex,target"
+|
+|-
+|html.tag.b
+|"class,id,title,dir,lang"
+|
+|-
+|html.tag.base
+|"class,id,style,title,dir,lang,href"
+|
+|-
+|html.tag.basefont
+|"class,id,style,title,dir,lang,color,face,size"
+|
+|-
+|html.tag.bdo
+|"class,id,style,title,dir,lang"
+|
+|-
+|html.tag.blockquote
+|"class,id,style,title,dir,lang,type"
+|
+|-
+|html.tag.body
+|"class,id,style,title,dir,lang,alink,background,bgcolor,link,text,vlink"
+|
+|-
+|html.tag.br
+|"class,id,style,title,dir,lang,clear[:left:right:all:none:]"
+|
+|-
+|html.tag.button
+|"class,id,style,title,dir,lang,disabled[disabled],name,tabindex,type[:button:submit:reset:],value"
+|
+|-
+|html.tag.caption
+|"class,id,style,title,dir,lang,align[:top:bottom:left:right:]"
+|
+|-
+|html.tag.col
+|"class,id,style,title,dir,lang,align[:left:center:right:justify:char:],char,charoff,span[],valign[:top:middle:bottom:baseline:],width"
+|
+|-
+|html.tag.colgroup
+|"class,id,style,title,dir,lang,align[:left:center:right:justify:char:],char,charoff,span[],valign[:top:middle:bottom:baseline:],width"
+|
+|-
+|html.tag.del
+|"class,id,style,title,dir,lang,datetime"
+|
+|-
+|html.tag.dir
+|"class,id,style,title,dir,lang,compact[compact]"
+|
+|-
+|html.tag.div
+|"class,id,style,title,dir,lang,align[:left:center:right:justify:]"
+|
+|-
+|html.tag.dl
+|"class,id,style,title,dir,lang,compact[compact]"
+|
+|-
+|html.tag.em
+|"class,id,title,dir,lang"
+|
+|-
+|html.tag.font
+|"class,id,style,title,dir,lang,color,face,size"
+|
+|-
+|html.tag.form
+|"class,id,style,title,dir,lang,action,accept,accept-charset,enctype,method[:get:post:],name,target"
+|
+|-
+|html.tag.h1
+|"class,id,style,title,dir,lang,align[:left:center:right:justify:]"
+|
+|-
+|html.tag.h2
+|"class,id,style,title,dir,lang,align[:left:center:right:justify:]"
+|
+|-
+|html.tag.h3
+|"class,id,style,title,dir,lang,align[:left:center:right:justify:]"
+|
+|-
+|html.tag.h4
+|"class,id,style,title,dir,lang,align[:left:center:right:justify:]"
+|
+|-
+|html.tag.h5
+|"class,id,style,title,dir,lang,align[:left:center:right:justify:]"
+|
+|-
+|html.tag.h6
+|"class,id,style,title,dir,lang,align[:left:center:right:justify:]"
+|
+|-
+|html.tag.hr
+|"class,id,style,title,dir,lang,align[:left:center:right:],noshade[noshade],size,width"
+|
+|-
+|html.tag.html
+|"class,id,style,title,dir,lang,version,xmlns"
+|
+|-
+|html.tag.img
+|"class,id,style,title,dir,lang,align[:top:middle:bottom:left:right:],alt,border,height,hspace,ismap[ismap],name,src,usemap,vspace,width"
+|
+|-
+|html.tag.input
+|"class,id,style,title,dir,lang,accept,align[:top:middle:bottom:left:right:center:],alt,checked[checked],disabled[disabled],maxlength[],name,readonly[readonly],size,src,tabindex,type[:text:checkbox:radio:submit:reset:hidden:image:button:password:],value"
+|
+|-
+|html.tag.ins
+|"class,id,style,title,dir,lang,datetime"
+|
+|-
+|html.tag.label
+|"class,id,style,title,dir,lang,for"
+|
+|-
+|html.tag.legend
+|"class,id,style,title,dir,lang,align[:left:top:right:bottom:]"
+|
+|-
+|html.tag.li
+|"class,id,style,title,dir,lang,type[:disc:square:circle:1:a:A:i:I:],value[]"
+|
+|-
+|html.tag.link
+|"class,id,style,title,dir,lang,rel,href,type,title,media,target,hreflang,charset"
+|
+|-
+|html.tag.map
+|"class,id,style,title,dir,lang,name"
+|
+|-
+|html.tag.meta
+|"class,id,style,title,dir,lang,http-equiv[:content-type:]"
+|
+|-
+|html.tag.ol
+|"class,id,style,title,dir,lang,compact[compact],start[],type[:1:a:A:i:I:]"
+|
+|-
+|html.tag.optgroup
+|"class,id,style,title,dir,lang,disabled[disabled],label"
+|
+|-
+|html.tag.option
+|"class,id,style,title,dir,lang,disabled[disabled],label,selected[selected],value"
+|
+|-
+|html.tag.p
+|"class,id,style,title,dir,lang,align[:left:center:right:justify:]"
+|
+|-
+|html.tag.pre
+|"class,id,style,title,dir,lang,width[]"
+|
+|-
+|html.tag.select
+|"class,id,style,title,dir,lang,disabled[disabled],multiple[multiple],name,size,tabindex[]"
+|
+|-
+|html.tag.span
+|"class,id,title,dir,lang"
+|
+|-
+|html.tag.strong
+|"class,id,title,dir,lang"
+|
+|-
+|html.tag.style
+|"class,id,style,title,dir,lang,media,type,src"
+|
+|-
+|html.tag.table
+|"class,id,style,title,dir,lang,align[:left:center:right:],background,border,bgcolor,cellpadding,cellspacing,frame[:void:above:below:hsides:ihs:rhs:vsides:box:border:],rules[:none:groups:rows:cols:all:],summary,width"
+|
+|-
+|html.tag.tbody
+|"class,id,style,title,dir,lang,align[:left:center:right:justify:char:],char,charoff,valign[:top:middle:bottom:baseline:]"
+|
+|-
+|html.tag.td
+|"class,id,style,title,dir,lang,abbr,align[:left:center:right:justify:char:],axis,background,bgcolor,char,charoff,colspan[],headers,height,nowrap[nowrap],rowspan[],scope[:row:col:rowgroup:colgroup:],valign[:top:middle:bottom:baseline:],width"
+|
+|-
+|html.tag.textarea
+|"class,id,style,title,dir,lang,cols[],disabled[disabled],name,readonly[readonly],rows[],tabindex[]"
+|
+|-
+|html.tag.tfoot
+|"class,id,style,title,dir,lang,align[:left:center:right:justify:char:],char,charoff,valign[:top:middle:bottom:baseline:]"
+|
+|-
+|html.tag.th
+|"class,id,style,title,dir,lang,abbr,align[:left:center:right:justify:char:],axis,bgcolor,char,charoff,colspan[],headers,height,nowrap[nowrap],rowspan[],scope[:row:col:rowgroup:colgroup:],valign[:top:middle:bottom:baseline:],width"
+|
+|-
+|html.tag.thead
+|"class,id,style,title,dir,lang,align[:left:center:right:justify:char:],char,charoff,valign[:top:middle:bottom:baseline:]"
+|
+|-
+|html.tag.tr
+|"class,id,style,title,dir,lang,align[:left:center:right:justify:char:],bgcolor,char,charoff,valign[:top:middle:bottom:baseline:],height"
+|
+|-
+|html.tag.u
+|"class,id,title,dir,lang"
+|
+|-
+|html.tag.ul
+|"class,id,style,title,dir,lang,compact[compact],type[:disc:square:circle:]"
+|
+|-
+|html.style.azimuth
+|"left-side,left-side behind,far-left,far-left behind,left,left behind,center-left,center-left behind,center,center behind,center-right,center-right behind,right,right behind,far-right,far-right behind,right-side,right behind"
+|
+|-
+|html.style.background
+|""
+|
+|-
+|html.style.background-attachment
+|"scroll,fixed"
+|
+|-
+|html.style.background-color
+|"c,transparent"
+|
+|-
+|html.style.background-image
+|"u"
+|
+|-
+|html.style.background-position
+|"top,bottom,center,left,right"
+|
+|-
+|html.style.background-repeat
+|"repeat,repeat-x,repeat-y,no-repeat"
+|
+|-
+|html.style.border
+|""
+|
+|-
+|html.style.border-bottom
+|""
+|
+|-
+|html.style.border-bottom-color
+|"c,transparent"
+|
+|-
+|html.style.border-bottom-style
+|"none,hidden,dotted,dashed,solid,double,groove,ridge,inset,outset"
+|
+|-
+|html.style.border-bottom-width
+|"n"
+|
+|-
+|html.style.border-collapse
+|"separate,collapse"
+|
+|-
+|html.style.border-color
+|"c,transparent"
+|
+|-
+|html.style.border-left
+|""
+|
+|-
+|html.style.border-left-color
+|"c,transparent"
+|
+|-
+|html.style.border-left-style
+|"none,hidden,dotted,dashed,solid,double,groove,ridge,inset,outset"
+|
+|-
+|html.style.border-left-width
+|"n"
+|
+|-
+|html.style.border-right
+|""
+|
+|-
+|html.style.border-right-color
+|"c,transparent"
+|
+|-
+|html.style.border-right-style
+|"none,hidden,dotted,dashed,solid,double,groove,ridge,inset,outset"
+|
+|-
+|html.style.border-right-width
+|"n"
+|
+|-
+|html.style.border-spacing
+|"N"
+|
+|-
+|html.style.border-style
+|""
+|
+|-
+|html.style.border-top
+|""
+|
+|-
+|html.style.border-top-color
+|"c,transparent"
+|
+|-
+|html.style.border-top-style
+|"none,hidden,dotted,dashed,solid,double,groove,ridge,inset,outset"
+|
+|-
+|html.style.border-top-width
+|"n"
+|
+|-
+|html.style.border-width
+|""
+|
+|-
+|html.style.bottom
+|"N,auto"
+|
+|-
+|html.style.caption-side
+|"top,bottom,left,right"
+|
+|-
+|html.style.centerline
+|"d"
+|
+|-
+|html.style.clear
+|"left,right,both,none"
+|
+|-
+|html.style.clip
+|"d"
+|
+|-
+|html.style.color
+|"c,transparent"
+|
+|-
+|html.style.content
+|"d"
+|
+|-
+|html.style.counter-increment
+|"d"
+|
+|-
+|html.style.counter-reset
+|"d"
+|
+|-
+|html.style.counter
+|"d"
+|
+|-
+|html.style.cue
+|"u"
+|
+|-
+|html.style.cue-after
+|"u"
+|
+|-
+|html.style.cue-before
+|"u"
+|
+|-
+|html.style.cursor
+|"auto,default,crosshair,pointer,move,n-resize,ne-resize,e-resize,se-resize,s-resize,sw-resize,w-resize,nw-resize,text,wait,help"
+|
+|-
+|html.style.definition-src
+|"d"
+|
+|-
+|html.style.direction
+|"ltr,rtl"
+|
+|-
+|html.style.display
+|"block,inline,list-item,marker,run-in,compact,none,table,inline-table,table-row,table-cell,table-row-group,table-header-group,table-footer-group,table-column,table-column-group,table-caption"
+|
+|-
+|html.style.empty-cells
+|"show,hide"
+|
+|-
+|html.style.elevation
+|"below,level,above,higher,lower"
+|
+|-
+|html.style.filter
+|"d" 
+|
+|-
+|html.style.float
+|"left,right,none"
+|
+|-
+|html.style.font
+|""
+|
+|-
+|html.style.font-family
+|"*"
+|
+|-
+|html.style.font-color
+|"c,transparent"
+|
+|-
+|html.style.font-size
+|"N,xx-small,x-small,small,medium,large,x-large,xx-large,smaller,larger"
+|
+|-
+|html.style.font-stretch
+|"wider,narrower,condensed,semi-condensed,extra-condensed,ultra-condensed,expanded,semi-expanded,extra-expanded,ultra-expanded,normal"
+|
+|-
+|html.style.font-style
+|"italic,oblique,normal"
+|
+|-
+|html.style.font-variant
+|"small-caps,normal"
+|
+|-
+|html.style.font-weight
+|"bold,bolder,lighter,100,200,300,400,500,600,700,800,900,normal"
+|
+|-
+|html.style.height
+|"N,auto"
+|
+|-
+|html.style.left
+|"N,auto"
+|
+|-
+|html.style.letter-spacing
+|"n"
+|
+|-
+|html.style.line-height
+|"N"
+|
+|-
+|html.style.list-style
+|""	
+|
+|-
+|html.style.list-style-image
+|"u,none"
+|
+|-
+|html.style.list-style-position
+|"inside,outside"
+|
+|-
+|html.style.list-style-type
+|"decimal,lower-roman,upper-roman,lower-alpha,lower-latin,upper-alpha,upper-latin,disc,circle,square,none,lower-greek,hebrew,decimal-leading-zero,cjk-ideographic,hiragana,katakana,hiragana-iroha,katakana-iroha"
+|
+|-
+|html.style.margin
+|""
+|
+|-
+|html.style.margin-bottom
+|"N,auto,inherit"
+|
+|-
+|html.style.margin-left
+|"N,auto,inherit"
+|
+|-
+|html.style.margin-right
+|"N,auto,inherit"
+|
+|-
+|html.style.margin-top
+|"N,auto,inherit"
+|
+|-
+|html.style.max-height
+|"N"
+|
+|-
+|html.style.max-width
+|"N"
+|
+|-
+|html.style.min-height
+|"N"
+|
+|-
+|html.style.min-width
+|"N"
+|
+|-
+|html.style.orphans
+|"0"
+|
+|-
+|html.style.overflow
+|"visible,hidden,scroll,auto"
+|
+|-
+|html.style.padding
+|""
+|
+|-
+|html.style.padding-bottom
+|"N"
+|
+|-
+|html.style.padding-left
+|"N"
+|
+|-
+|html.style.padding-right
+|"N"
+|
+|-
+|html.style.padding-top
+|"N"
+|
+|-
+|html.style.page-break-after
+|"always,avoid,left,right,inherit,auto"
+|
+|-
+|html.style.page-break-before
+|"always,avoid,left,right,inherit,auto"
+|
+|-
+|html.style.page-break-inside
+|"avoid,auto"
+|
+|-
+|html.style.pause
+|"t"
+|
+|-
+|html.style.pause-after
+|"t"
+|
+|-
+|html.style.pause-before
+|"t"
+|
+|-
+|html.style.pitch
+|"x-low,low,medium,high,x-high"
+|
+|-
+|html.style.pitch-range
+|"0"
+|
+|-
+|html.style.play-during
+|"u,mix,repeat,auto"
+|
+|-
+|html.style.position
+|"absolute,fixed,relative,static"
+|
+|-
+|html.style.quotes
+|"d"
+|
+|-
+|html.style.richness
+|"0"
+|
+|-
+|html.style.right
+|"N,auto"
+|
+|-
+|html.style.scrollbar-3dlight-color
+|"c"
+|
+|-
+|html.style.scrollbar-arrow-color
+|"c"
+|
+|-
+|html.style.scrollbar-base-color
+|"c"
+|
+|-
+|html.style.scrollbar-darkshadow-color
+|"c"
+|
+|-
+|html.style.scrollbar-face-color
+|"c"
+|
+|-
+|html.style.scrollbar-highlight-color
+|"c"
+|
+|-
+|html.style.scrollbar-shadow-color
+|"c"
+|
+|-
+|html.style.scrollbar-track-color
+|"c"
+|
+|-
+|html.style.speak
+|"none,normal,spell-out"
+|
+|-
+|html.style.speak-header
+|"always,once"
+|
+|-
+|html.style.speak-numeral
+|"digits,continuous"
+|
+|-
+|html.style.speak-punctuation
+|"code,none"
+|
+|-
+|html.style.speech-rate
+|"0,x-slow,slow,slower,medium,faster,fast,x-fase"
+|
+|-
+|html.style.stress
+|"0"
+|
+|-
+|html.style.table-layout
+|"auto,fixed"
+|
+|-
+|html.style.text-align
+|"left,center,right,justify"
+|
+|-
+|html.style.text-decoration
+|"underline,overline,line-through,blink,none"
+|
+|-
+|html.style.text-indent
+|"N"
+|
+|-
+|html.style.text-shadow
+|"nc,none" or color
+|
+|-
+|html.style.text-transform
+|"capitalize,uppercase,lowercase,none"
+|
+|-
+|html.style.top
+|"N,auto"
+|
+|-
+|html.style.vertical-align
+|"top,middle,bottom,baseline,sub,super,text-top,text-bottom"
+|
+|-
+|html.style.visibility
+|"hidden,visible"
+|
+|-
+|html.style.voice-family
+|"male,female,old,young,child"
+|
+|-
+|html.style.volume
+|"0,silent,x-soft,soft,medium,loud,x-loud"
+|
+|-
+|html.style.white-space
+|"normal,pre,nowrap"
+|
+|-
+|html.style.widows
+|"0"
+|
+|-
+|html.style.width
+|"N,auto"
+|
+|-
+|html.style.word-spacing
+|"n"
+|
+|-
+|html.style.z-index
+|"0"
+|
+|-
+|html.style.combimap.background
+|"uNc,scroll,fixed,transparent,top,bottom,center,left,right,repeat,repeat-x,repeat-y,no-repeat"
+|
+|-
+|html.style.combimap.border
+|"Nc,transparent,none,hidden,dotted,dashed,solid,double,groove,ridge,inset,outset,separate,collapse"
+|
+|-
+|html.style.combimap.border-bottom
+|"nc,transparent,none,hidden,dotted,dashed,solid,double,groove,ridge,inset,outset"
+|
+|-
+|html.style.combimap.border-left
+|"nc,transparent,none,hidden,dotted,dashed,solid,double,groove,ridge,inset,outset"
+|
+|-
+|html.style.combimap.border-right
+|"nc,transparent,none,hidden,dotted,dashed,solid,double,groove,ridge,inset,outset"
+|
+|-
+|html.style.combimap.border-style
+|"none,hidden,dotted,dashed,solid,double,groove,ridge,inset,outset"
+|
+|-
+|html.style.combimap.border-top
+|"nc,transparent,none,hidden,dotted,dashed,solid,double,groove,ridge,inset,outset"
+|
+|-
+|html.style.combimap.border-width
+|"n"
+|
+|-
+|html.style.combimap.font
+|"N*,xx-small,x-small,small,medium,large,x-large,xx-large,smaller,larger,wider,narrower,condensed,semi-condensed,extra-condensed,ultra-condensed,expanded,semi-expanded,extra-expanded,ultra-expanded,normal,italic,oblique,small-caps,bold,bolder,lighter,100,200,300,400,500,600,700,800,900"
+|
+|-
+|html.style.combimap.list-style
+|"u,none,inside,outside,decimal,lower-roman,upper-roman,lower-alpha,lower-latin,upper-alpha,upper-latin,disc,circle,square,lower-greek,hebrew,decimal-leading-zero,cjk-ideographic,hiragana,katakana,hiragana-iroha,katakana-iroha"
+|
+|-
+|html.style.combimap.margin
+|"N,auto,inherit"
+|
+|-
+|html.style.combimap.padding
+|"N"
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>configdb.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|readDriverClass
+|com.mysql.jdbc.Driver
+|
+|-
+|readUrl
+|jdbc:mysql://localhost/configdb
+|
+|-
+|readProperty.1
+|user=openexchange
+|
+|-
+|readProperty.2
+|password=secret
+|
+|-
+|readProperty.3
+|useUnicode=true
+|
+|-
+|readProperty.4
+|characterEncoding=UTF-8
+|
+|-
+|readProperty.5
+|autoReconnect=true
+|
+|-
+|readProperty.6
+|useServerPrepStmts=false
+|
+|-
+|readProperty.7
+|useTimezone=true
+|
+|-
+|readProperty.8
+|serverTimezone=UTC
+|
+|-
+|readProperty.9
+|connectTimeout=15000
+|
+|-
+|readProperty.10
+|socketTimeout=15000
+|
+|-
+|writeDriverClass
+|com.mysql.jdbc.Driver
+|
+|-
+|writeUrl
+|jdbc:mysql://localhost/configdb
+|
+|-
+|writeProperty.1
+|user=openexchange
+|
+|-
+|writeProperty.2
+|password=secret
+|
+|-
+|writeProperty.3
+|useUnicode=true
+|
+|-
+|writeProperty.4
+|characterEncoding=UTF-8
+|
+|-
+|writeProperty.5
+|autoReconnect=true
+|
+|-
+|writeProperty.6
+|useServerPrepStmts=false
+|
+|-
+|writeProperty.7
+|useTimezone=true
+|
+|-
+|writeProperty.8
+|serverTimezone=UTC
+|
+|-
+|writeProperty.9
+|connectTimeout=15000
+|
+|-
+|writeProperty.10
+|socketTimeout=15000
+|
+|-
+|cleanerInterval
+|10000
+|
+|-
+|minIdle
+|0
+|
+|-
+|maxIdle
+|-1
+|
+|-
+|maxIdleTime
+|60000
+|
+|-
+|maxActive
+|100
+|
+|-
+|maxWait
+|10000
+|
+|-
+|maxLifeTime
+|600000
+|
+|-
+|exhaustedAction
+|BLOCK
+|
+|-
+|testOnActivate
+|false
+|
+|-
+|testOnDeactivate
+|true
+|
+|-
+|testOnIdle
+|false
+|
+|-
+|testThreads
+|false
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>reportclient.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.report.client.proxy.useproxy
+|false
+|
+|-
+|com.openexchange.report.client.proxy.address
+|proxy.example.com
+|
+|-
+|com.openexchange.report.client.proxy.port
+|8080
+|
+|-
+|com.openexchange.report.client.proxy.authrequired
+|false
+|
+|-
+|com.openexchange.report.client.proxy.username
+|USER
+|
+|-
+|com.openexchange.report.client.proxy.password
+|PASSWORD
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>AdminDaemon.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|MASTER_AUTHENTICATION_DISABLED
+|false
+|
+|-
+|CONTEXT_AUTHENTICATION_DISABLED
+|false
+|
+|-
+|USER_STORAGE
+|com.openexchange.admin.storage.mysqlStorage.OXUserMySQLStorage
+|
+|-
+|GROUP_STORAGE
+|com.openexchange.admin.storage.mysqlStorage.OXGroupMySQLStorage
+|
+|-
+|TOOL_STORAGE
+|com.openexchange.admin.storage.mysqlStorage.OXToolMySQLStorage
+|
+|-
+|RESOURCE_STORAGE
+|com.openexchange.admin.storage.mysqlStorage.OXResourceMySQLStorage
+|
+|-
+|CONCURRENT_JOBS
+|2
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>ldapauth.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|java.naming.provider.url
+|ldap://localhost:389/dc=example,dc=com
+|
+|-
+|java.naming.security.authentication
+|simple
+|
+|-
+|com.sun.jndi.ldap.connect.timeout
+|10000
+|
+|-
+|com.sun.jndi.ldap.read.timeout
+|10000
+|
+|-
+|uidAttribute
+|uid
+|
+|-
+|baseDN
+|ou=Users,ou=OxObjects,dc=open-xchange,dc=com
+|
+|-
+|ldapReturnField
+|
+|
+|-
+|adsBind
+|false
+|
+|-
+|subtreeSearch
+|false
+|
+|-
+|searchFilter
+|(objectclass=posixAccount)
+|
+|-
+|bindDN
+|
+|
+|-
+|bindDNPassword
+|
+|
+|-
+|referral
+|follow
+|
+|-
+|adsBind
+|false
+|
+|-
+|referral
+|follow
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>linkedinoauth.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.socialplugin.linkedin.apikey
+|REPLACE_THIS_WITH_THE_KEY_FROM_YOUR_LINKEDIN_APP
+|
+|-
+|com.openexchange.socialplugin.linkedin.apisecret
+|REPLACE_THIS_WITH_THE_SECRET_FROM_YOUR_LINKEDIN_APP
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>messaging-service.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.service.message.bindAddress
+|*
+|
+|-
+|com.openexchange.service.message.mdnsEnabled
+|true
+|
+|-
+|com.openexchange.service.message.listenerPort
+|9311
+|
+|-
+|com.openexchange.service.message.numOfServerThreads
+|1
+|
+|-
+|com.openexchange.service.message.servers
+|
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>autocid.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|AUTOCID_STORAGE
+|com.openexchange.admin.autocontextid.storage.mysqlStorage.OXAutoCIDMySQLStorage
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>cache.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|jcs.region.[REGIONNAME]
+|LTCP
+|
+|-
+|jcs.region.[REGIONNAME].cacheattributes
+|org.apache.jcs.engine.CompositeCacheAttributes
+|
+|-
+|jcs.region.[REGIONNAME].cacheattributes.MaxObjects
+|-1
+|
+|-
+|jcs.region.[REGIONNAME].cacheattributes.MemoryCacheName
+|org.apache.jcs.engine.memory.lru.LRUMemoryCache
+|
+|-
+|jcs.region.[REGIONNAME].cacheattributes.UseMemoryShrinker
+|true
+|
+|-
+|jcs.region.[REGIONNAME].cacheattributes.MaxMemoryIdleTimeSeconds
+|-1
+|
+|-
+|jcs.region.[REGIONNAME].cacheattributes.ShrinkerIntervalSeconds
+|60
+|
+|-
+|jcs.region.[REGIONNAME].cacheattributes.MaxSpoolPerRun
+|500
+|
+|-
+|jcs.region.[REGIONNAME].elementattributes
+|org.apache.jcs.engine.ElementAttributes
+|
+|-
+|jcs.region.[REGIONNAME].elementattributes.IsEternal
+|false
+|
+|-
+|jcs.region.[REGIONNAME].elementattributes.MaxLifeSeconds
+|-1
+|
+|-
+|jcs.region.[REGIONNAME].elementattributes.IdleTime
+|-1
+|
+|-
+|jcs.region.[REGIONNAME].elementattributes.IsSpool
+|false
+|
+|-
+|jcs.region.[REGIONNAME].elementattributes.IsRemote
+|false
+|
+|-
+|jcs.region.[REGIONNAME].elementattributes.IsLateral
+|false
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>configjump.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|URL
+|http://localhost/oxadmin/umin
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>outlook2003.fr_FR.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|anniversary
+|Anniversaire de mariage ou f\u00eate
+|
+|-
+|assistant_name
+|Nom de l'assistant(e)
+|
+|-
+|birthday
+|Anniversaire
+|
+|-
+|categories
+|Cat\u00e9gories
+|
+|-
+|cellular_telephone1
+|T\u00e9l. mobile
+|
+|-
+|city_business
+|Ville (bureau)
+|
+|-
+|city_home
+|Ville (domicile)
+|
+|-
+|city_other
+|Ville (autre)
+|
+|-
+|commercial_register
+|Num\u00e9ro d'identification de l'organisation
+|
+|-
+|company
+|Soci\u00e9t\u00e9 
+|
+|-
+|country_business
+|Pays (bureau)
+|
+|-
+|country_home
+|Pays (domicile)
+|
+|-
+|country_other
+|Pays (autre)
+|
+|-
+|department
+|Service 
+|
+|-
+|email1
+|Adresse de messagerie
+|
+|-
+|email2
+|Adresse de messagerie 2
+|
+|-
+|email3
+|Adresse de messagerie 3
+|
+|-
+|fax_business
+|T\u00e9l\u00e9copie (bureau)
+|
+|-
+|fax_home
+|T\u00e9l\u00e9copie (domicile)
+|
+|-
+|fax_other
+|T\u00e9l\u00e9copie (autre)
+|
+|-
+|first_name
+|Pr\u00e9nom
+|
+|-
+|last_name
+|Nom
+|
+|-
+|manager_name
+|Responsable
+|
+|-
+|note
+|Notes
+|
+|-
+|number_of_children
+|Enfants
+|
+|-
+|postal_code_business
+|Code postal (bureau)
+|
+|-
+|postal_code_home
+|Code postal (domicile)
+|
+|-
+|postal_code_other
+|Code postal (autre)
+|
+|-
+|private_flag
+|Crit\u00e8re de diffusion
+|
+|-
+|profession
+|Profession
+|
+|-
+|second_name
+|Deuxi\u00e8me pr\u00e9nom
+|
+|-
+|spouse_name
+|Conjoint(e)
+|
+|-
+|state_business
+|D\u00e9p/R\u00e9gion (bureau)
+|
+|-
+|state_home
+|D\u00e9p/R\u00e9gion (domicile)
+|
+|-
+|state_other
+|D\u00e9p/R\u00e9gion (autre)
+|
+|-
+|street_business
+|Rue (bureau)
+|
+|-
+|street_home
+|Rue (domicile)
+|
+|-
+|street_other
+|Rue (autre)
+|
+|-
+|suffix
+|Suffixe
+|
+|-
+|telephone_assistant
+|T\u00e9l\u00e9phone de l'assistant(e)
+|
+|-
+|telephone_business1
+|T\u00e9l\u00e9phone (bureau)
+|
+|-
+|telephone_business2
+|T\u00e9l\u00e9phone 2 (bureau)
+|
+|-
+|telephone_callback
+|Rappel
+|
+|-
+|telephone_car
+|T\u00e9l\u00e9phone (voiture)
+|
+|-
+|telephone_company
+|T\u00e9l\u00e9phone soci\u00e9t\u00e9
+|
+|-
+|telephone_home1
+|T\u00e9l\u00e9phone (domicile)
+|
+|-
+|telephone_home2
+|T\u00e9l\u00e9phone 2 (domicile)
+|
+|-
+|telephone_isdn
+|RNIS
+|
+|-
+|telephone_other
+|T\u00e9l\u00e9phone (autre)
+|
+|-
+|telephone_pager
+|R\u00e9cepteur de radiomessagerie
+|
+|-
+|telephone_primary
+|T\u00e9l\u00e9phone principal
+|
+|-
+|telephone_radio
+|Radio t\u00e9l\u00e9phone
+|
+|-
+|telephone_telex
+|T\u00e9lex
+|
+|-
+|telephone_ttytdd
+|T\u00e9l\u00e9phone TDD/TTY
+|
+|-
+|title
+|Titre
+|
+|-
+|url
+|Page Web
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>user.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.user.beta
+|true
+|
+|-
+|com.openexchange.folder.tree
+|1
+|
+|-
+|com.openexchange.user.contactCollectOnMailAccess
+|false
+|
+|-
+|com.openexchange.user.contactCollectOnMailTransport
+|false
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>calendar.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>malpoll.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.push.malpoll.period
+|300000
+|
+|-
+|com.openexchange.push.malpoll.global
+|true
+|
+|-
+|com.openexchange.push.malpoll.concurrentglobal
+|true
+|
+|-
+|com.openexchange.push.malpoll.folder
+|INBOX
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>dataRetrieval.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.groupware.dataRetrieval.lifetime
+|60000
+|
+|-
+|com.openexchange.groupware.dataRetrieval.onetime
+|true
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>twitteroauth.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.oauth.twitter
+|true
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>reseller.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|RESELLER_STORAGE
+|com.openexchange.admin.reseller.storage.mysqlStorage.OXResellerMySQLStorage
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>contact.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|contact_first_letter_field
+|field02
+|
+|-
+|validate_contact_email
+|true
+|
+|-
+|scale_images
+|true
+|
+|-
+|scale_image_width
+|90
+|
+|-
+|scale_image_height
+|90
+|
+|-
+|max_image_size
+|33750
+|
+|-
+|com.openexchange.contact.mailAddressAutoSearch
+|true
+|
+|-
+|com.openexchange.contact.singleFolderSearch
+|false
+|
+|-
+|com.openexchange.contacts.characterSearch
+|true
+|
+|-
+|com.openexchange.contacts.allFoldersForAutoComplete
+|true
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>facebookmessaging.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.messaging.facebook
+|true
+|
+|-
+|com.openexchange.messaging.facebook.renewalFrequence
+|300000
+|
+|-
+|com.openexchange.messaging.facebook.loginPageBaseURL
+|http://www.facebook.com/login.php
+|
+|-
+|com.openexchange.messaging.facebook.actionOfLoginForm
+|https://login.facebook.com/login.php?login_attempt=1
+|
+|-
+|com.openexchange.messaging.facebook.linkAfterLogin
+|"\\Qhttp://www.facebook.com/profile.php?ref=profile&id=\\E([0-9]+)"
+|
+|-
+|com.openexchange.messaging.facebook.apiVersion
+|1.0
+|
+|-
+|com.openexchange.messaging.facebook.nameOfUserField
+|email
+|
+|-
+|com.openexchange.messaging.facebook.nameOfPasswordField
+|pass
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>awsec2.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.aws.ec2.imageId 
+| ami-a1e7e1d5
+|
+|-
+|com.openexchange.aws.ec2.instanceType 
+| t1.micro
+|
+|-
+|com.openexchange.aws.ec2.keyPair 
+| jbauerdick
+|
+|-
+|com.openexchange.aws.ec2.placement 
+| eu-west-1a
+|
+|-
+|com.openexchange.aws.ec2.securitygroup 
+| sg-0d94a179
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>oauth-provider.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.oauth.provider.secret
+|f58c636e089745d4a79679d726aca8b5
+|
+|-
+|com.openexchange.oauth.provider.validator.maxTimestampAgeMsec
+|300000
+|
+|-
+|com.openexchange.oauth.provider.validator.maxVersion
+|1.0
+|
+|-
+|com.openexchange.oauth.provider.validator.v2.maxTimestampAgeMsec
+|300000
+|
+|-
+|com.openexchange.oauth.provider.validator.v2.maxVersion
+|2.0
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>login.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.ajax.login.http-auth.autologin
+|false
+|
+|-
+|com.openexchange.ajax.login.http-auth.client
+|com.openexchange.ox.gui.dhtml
+|
+|-
+|com.openexchange.ajax.login.http-auth.version
+|HTTP Auth
+|
+|-
+|com.openexchange.ajax.login.insecure
+|false
+|
+|-
+|com.openexchange.ajax.login.redirect.changeIPAllowed
+|true
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>smal.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.mail.smal.blacklist
+|
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>yahoosubscribe.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.subscribe.socialplugin.yahoo
+|true
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>whitelist.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|html.tag.a
+|",href,name,tabindex,target,type,"
+|
+|-
+|html.tag.area
+|",alt,coords,href,nohref[nohref],shape[:rect:circle:poly:default:],tabindex,target,"
+|
+|-
+|html.tag.b
+|""
+|
+|-
+|html.tag.base
+|",href"
+|
+|-
+|html.tag.basefont
+|",color,face,size,"
+|
+|-
+|html.tag.bdo
+|",dir[:ltr:rtl:]"
+|
+|-
+|html.tag.blockquote
+|",type,"
+|
+|-
+|html.tag.body
+|",alink,background,bgcolor,link,text,vlink,"
+|
+|-
+|html.tag.br
+|",clear[:left:right:all:none:]"
+|
+|-
+|html.tag.button
+|",disabled[disabled],name,tabindex,type[:button:submit:reset:],value,"
+|
+|-
+|html.tag.caption
+|",align[:top:bottom:left:right:]"
+|
+|-
+|html.tag.col
+|",align[:left:center:right:justify:char:],char,charoff,span[],valign[:top:middle:bottom:baseline:],width,"
+|
+|-
+|html.tag.colgroup
+|",align[:left:center:right:justify:char:],char,charoff,span[],valign[:top:middle:bottom:baseline:],width,"
+|
+|-
+|html.tag.del
+|",datetime,"
+|
+|-
+|html.tag.dir
+|",compact[compact]"
+|
+|-
+|html.tag.div
+|",align[:left:center:right:justify:],dir[:ltr:rtl:auto:],"
+|
+|-
+|html.tag.dd
+|""
+|
+|-
+|html.tag.dl
+|",compact[compact]"
+|
+|-
+|html.tag.dt
+|""
+|
+|-
+|html.tag.em
+|""
+|
+|-
+|html.tag.font
+|",color,face,size,"
+|
+|-
+|html.tag.form
+|",action,accept,accept-charset,enctype,method[:get:post:],name,target,"
+|
+|-
+|html.tag.h1
+|",align[:left:center:right:justify:]"
+|
+|-
+|html.tag.h2
+|",align[:left:center:right:justify:]"
+|
+|-
+|html.tag.h3
+|",align[:left:center:right:justify:]"
+|
+|-
+|html.tag.h4
+|",align[:left:center:right:justify:]"
+|
+|-
+|html.tag.h5
+|",align[:left:center:right:justify:]"
+|
+|-
+|html.tag.h6
+|",align[:left:center:right:justify:]"
+|
+|-
+|html.tag.hr
+|",align[:left:center:right:],noshade[noshade],size,width,"
+|
+|-
+|html.tag.html
+|",version,xmlns,"
+|
+|-
+|html.tag.i
+|""
+|
+|-
+|html.tag.img
+|",align[:top:middle:bottom:left:right:],alt,border,height,hspace,ismap[ismap],name,src,usemap,vspace,width,"
+|
+|-
+|html.tag.input
+|",accept,align[:top:middle:bottom:left:right:center:],alt,checked[checked],disabled[disabled],maxlength[],name,readonly[readonly],size,src,tabindex,type[:text:checkbox:radio:submit:reset:hidden:image:button:password:],value,"
+|
+|-
+|html.tag.ins
+|",datetime,"
+|
+|-
+|html.tag.label
+|",for,"
+|
+|-
+|html.tag.legend
+|",align[:left:top:right:bottom:]"
+|
+|-
+|html.tag.li
+|",type[:disc:square:circle:1:a:A:i:I:],value[],"
+|
+|-
+|html.tag.map
+|",name,"
+|
+|-
+|html.tag.meta
+|",http-equiv[:content-type:],"
+|
+|-
+|html.tag.ol
+|",compact[compact],start[],type[:1:a:A:i:I:],"
+|
+|-
+|html.tag.optgroup
+|",disabled[disabled],label,"
+|
+|-
+|html.tag.option
+|",disabled[disabled],label,selected[selected],value,"
+|
+|-
+|html.tag.p
+|",align[:left:center:right:justify:]"
+|
+|-
+|html.tag.pre
+|",width[],"
+|
+|-
+|html.tag.select
+|",disabled[disabled],multiple[multiple],name,size,tabindex[],"
+|
+|-
+|html.tag.span
+|""
+|
+|-
+|html.tag.strong
+|""
+|
+|-
+|html.tag.style
+|",media,type,"
+|
+|-
+|html.tag.sub
+|""
+|
+|-
+|html.tag.sup
+|""
+|
+|-
+|html.tag.table
+|",align[:left:center:right:],background,border,bgcolor,cellpadding,cellspacing,frame[:void:above:below:hsides:ihs:rhs:vsides:box:border:],rules[:none:groups:rows:cols:all:],summary,width,"
+|
+|-
+|html.tag.tbody
+|",align[:left:center:right:justify:char:],char,charoff,valign[:top:middle:bottom:baseline:],"
+|
+|-
+|html.tag.td
+|",abbr,align[:left:center:right:justify:char:],axis,background,bgcolor,char,charoff,colspan[],headers,height,nowrap[nowrap],rowspan[],scope[:row:col:rowgroup:colgroup:],valign[:top:middle:bottom:baseline:],width,"
+|
+|-
+|html.tag.textarea
+|",cols[],disabled[disabled],name,readonly[readonly],rows[],tabindex[],"
+|
+|-
+|html.tag.tfoot
+|",align[:left:center:right:justify:char:],char,charoff,valign[:top:middle:bottom:baseline:],"
+|
+|-
+|html.tag.th
+|",abbr,align[:left:center:right:justify:char:],axis,bgcolor,char,charoff,colspan[],headers,height,nowrap[nowrap],rowspan[],scope[:row:col:rowgroup:colgroup:],valign[:top:middle:bottom:baseline:],width,"
+|
+|-
+|html.tag.thead
+|",align[:left:center:right:justify:char:],char,charoff,valign[:top:middle:bottom:baseline:],"
+|
+|-
+|html.tag.tr
+|",align[:left:center:right:justify:char:],bgcolor,char,charoff,valign[:top:middle:bottom:baseline:],height,"
+|
+|-
+|html.tag.tt
+|",align[:left:center:right:justify:char:],bgcolor,char,charoff,valign[:top:middle:bottom:baseline:],height,"
+|
+|-
+|html.tag.u
+|""
+|
+|-
+|html.tag.ul
+|",compact[compact],type[:disc:square:circle:],"
+|
+|-
+|html.style.azimuth
+|",left-side,left-side behind,far-left,far-left behind,left,left behind,center-left,center-left behind,center,center behind,center-right,center-right behind,right,right behind,far-right,far-right behind,right-side,right behind,"
+|
+|-
+|html.style.background
+|""
+|
+|-
+|html.style.background-attachment
+|",scroll,fixed,"
+|
+|-
+|html.style.background-color
+|"c,transparent,"
+|
+|-
+|html.style.background-image
+|"u"
+|
+|-
+|html.style.background-position
+|",top,bottom,center,left,right,"
+|
+|-
+|html.style.background-repeat
+|",repeat,repeat-x,repeat-y,no-repeat,"
+|
+|-
+|html.style.border
+|""
+|
+|-
+|html.style.border-bottom
+|""
+|
+|-
+|html.style.border-bottom-color
+|"c,transparent,"
+|
+|-
+|html.style.border-bottom-style
+|",none,hidden,dotted,dashed,solid,double,groove,ridge,inset,outset,"
+|
+|-
+|html.style.border-bottom-width
+|"n"
+|
+|-
+|html.style.border-collapse
+|",separate,collapse,"
+|
+|-
+|html.style.border-color
+|"c,transparent,"
+|
+|-
+|html.style.border-left
+|""
+|
+|-
+|html.style.border-left-color
+|"c,transparent,"
+|
+|-
+|html.style.border-left-style
+|",none,hidden,dotted,dashed,solid,double,groove,ridge,inset,outset,"
+|
+|-
+|html.style.border-left-width
+|"n"
+|
+|-
+|html.style.border-right
+|""
+|
+|-
+|html.style.border-right-color
+|"c,transparent,"
+|
+|-
+|html.style.border-right-style
+|",none,hidden,dotted,dashed,solid,double,groove,ridge,inset,outset,"
+|
+|-
+|html.style.border-right-width
+|"n"
+|
+|-
+|html.style.border-spacing
+|"N"
+|
+|-
+|html.style.border-style
+|""
+|
+|-
+|html.style.border-top
+|""
+|
+|-
+|html.style.border-top-color
+|"c,transparent,"
+|
+|-
+|html.style.border-top-style
+|",none,hidden,dotted,dashed,solid,double,groove,ridge,inset,outset,"
+|
+|-
+|html.style.border-top-width
+|"n"
+|
+|-
+|html.style.border-width
+|""
+|
+|-
+|html.style.bottom
+|"N,auto,"
+|
+|-
+|html.style.caption-side
+|",top,bottom,left,right,"
+|
+|-
+|html.style.centerline
+|"d"
+|
+|-
+|html.style.clear
+|",left,right,both,none,"
+|
+|-
+|html.style.clip
+|"d"
+|
+|-
+|html.style.color
+|"c,transparent,"
+|
+|-
+|html.style.content
+|"d"
+|
+|-
+|html.style.counter-increment
+|"d"
+|
+|-
+|html.style.counter-reset
+|"d"
+|
+|-
+|html.style.counter
+|"d"
+|
+|-
+|html.style.cue
+|"u"
+|
+|-
+|html.style.cue-after
+|"u"
+|
+|-
+|html.style.cue-before
+|"u"
+|
+|-
+|html.style.cursor
+|",auto,default,crosshair,pointer,move,n-resize,ne-resize,e-resize,se-resize,s-resize,sw-resize,w-resize,nw-resize,text,wait,help,"
+|
+|-
+|html.style.definition-src
+|"d"
+|
+|-
+|html.style.direction
+|",ltr,rtl,"
+|
+|-
+|html.style.display
+|",block,inline,list-item,marker,run-in,compact,none,table,inline-table,table-row,table-cell,table-row-group,table-header-group,table-footer-group,table-column,table-column-group,table-caption,"
+|
+|-
+|html.style.empty-cells
+|",show,hide,"
+|
+|-
+|html.style.elevation
+|",below,level,above,higher,lower,"
+|
+|-
+|html.style.filter
+|"d" 
+|
+|-
+|html.style.float
+|",left,right,none,"
+|
+|-
+|html.style.font
+|""
+|
+|-
+|html.style.font-family
+|"*"
+|
+|-
+|html.style.font-color
+|"c,transparent,"
+|
+|-
+|html.style.font-size
+|"N,xx-small,x-small,small,medium,large,x-large,xx-large,smaller,larger,"
+|
+|-
+|html.style.font-stretch
+|",wider,narrower,condensed,semi-condensed,extra-condensed,ultra-condensed,expanded,semi-expanded,extra-expanded,ultra-expanded,normal,"
+|
+|-
+|html.style.font-style
+|",italic,oblique,normal,"
+|
+|-
+|html.style.font-variant
+|",small-caps,normal,"
+|
+|-
+|html.style.font-weight
+|",bold,bolder,lighter,100,200,300,400,500,600,700,800,900,normal,"
+|
+|-
+|html.style.height
+|"N,auto,"
+|
+|-
+|html.style.left
+|"N,auto,"
+|
+|-
+|html.style.letter-spacing
+|"n"
+|
+|-
+|html.style.line-height
+|"N"
+|
+|-
+|html.style.list-style
+|""	
+|
+|-
+|html.style.list-style-image
+|"u,none,"
+|
+|-
+|html.style.list-style-position
+|",inside,outside,"
+|
+|-
+|html.style.list-style-type
+|",decimal,lower-roman,upper-roman,lower-alpha,lower-latin,upper-alpha,upper-latin,disc,circle,square,none,lower-greek,hebrew,decimal-leading-zero,cjk-ideographic,hiragana,katakana,hiragana-iroha,katakana-iroha,"
+|
+|-
+|html.style.margin
+|""
+|
+|-
+|html.style.margin-bottom
+|"N,auto,inherit,"
+|
+|-
+|html.style.margin-left
+|"N,auto,inherit,"
+|
+|-
+|html.style.margin-right
+|"N,auto,inherit,"
+|
+|-
+|html.style.margin-top
+|"N,auto,inherit,"
+|
+|-
+|html.style.max-height
+|"N"
+|
+|-
+|html.style.max-width
+|"N"
+|
+|-
+|html.style.min-height
+|"N"
+|
+|-
+|html.style.min-width
+|"N"
+|
+|-
+|html.style.orphans
+|"0"
+|
+|-
+|html.style.overflow
+|",visible,hidden,scroll,auto,"
+|
+|-
+|html.style.padding
+|""
+|
+|-
+|html.style.padding-bottom
+|"N"
+|
+|-
+|html.style.padding-left
+|"N"
+|
+|-
+|html.style.padding-right
+|"N"
+|
+|-
+|html.style.padding-top
+|"N"
+|
+|-
+|html.style.page-break-after
+|",always,avoid,left,right,inherit,auto,"
+|
+|-
+|html.style.page-break-before
+|",always,avoid,left,right,inherit,auto,"
+|
+|-
+|html.style.page-break-inside
+|",avoid,auto,"
+|
+|-
+|html.style.pause
+|"t"
+|
+|-
+|html.style.pause-after
+|"t"
+|
+|-
+|html.style.pause-before
+|"t"
+|
+|-
+|html.style.pitch
+|",x-low,low,medium,high,x-high,"
+|
+|-
+|html.style.pitch-range
+|"0"
+|
+|-
+|html.style.play-during
+|"u,mix,repeat,auto,"
+|
+|-
+|html.style.position
+|",absolute,fixed,relative,static,"
+|
+|-
+|html.style.quotes
+|"d"
+|
+|-
+|html.style.richness
+|"0"
+|
+|-
+|html.style.right
+|"N,auto,"
+|
+|-
+|html.style.scrollbar-3dlight-color
+|"c"
+|
+|-
+|html.style.scrollbar-arrow-color
+|"c"
+|
+|-
+|html.style.scrollbar-base-color
+|"c"
+|
+|-
+|html.style.scrollbar-darkshadow-color
+|"c"
+|
+|-
+|html.style.scrollbar-face-color
+|"c"
+|
+|-
+|html.style.scrollbar-highlight-color
+|"c"
+|
+|-
+|html.style.scrollbar-shadow-color
+|"c"
+|
+|-
+|html.style.scrollbar-track-color
+|"c"
+|
+|-
+|html.style.speak
+|",none,normal,spell-out,"
+|
+|-
+|html.style.speak-header
+|",always,once,"
+|
+|-
+|html.style.speak-numeral
+|",digits,continuous,"
+|
+|-
+|html.style.speak-punctuation
+|",code,none,"
+|
+|-
+|html.style.speech-rate
+|"0,x-slow,slow,slower,medium,faster,fast,x-fase,"
+|
+|-
+|html.style.stress
+|"0"
+|
+|-
+|html.style.table-layout
+|",auto,fixed,"
+|
+|-
+|html.style.text-align
+|",left,center,right,justify,"
+|
+|-
+|html.style.text-decoration
+|",underline,overline,line-through,blink,none,"
+|
+|-
+|html.style.text-indent
+|"N"
+|
+|-
+|html.style.text-shadow
+|"nc,none," or color
+|
+|-
+|html.style.text-transform
+|",capitalize,uppercase,lowercase,none,"
+|
+|-
+|html.style.top
+|"N,auto,"
+|
+|-
+|html.style.vertical-align
+|",top,middle,bottom,baseline,sub,super,text-top,text-bottom,"
+|
+|-
+|html.style.visibility
+|",hidden,visible,"
+|
+|-
+|html.style.voice-family
+|",male,female,old,young,child,"
+|
+|-
+|html.style.volume
+|"0,silent,x-soft,soft,medium,loud,x-loud,"
+|
+|-
+|html.style.white-space
+|",normal,pre,nowrap,"
+|
+|-
+|html.style.widows
+|"0"
+|
+|-
+|html.style.width
+|"N,auto,"
+|
+|-
+|html.style.word-spacing
+|"n"
+|
+|-
+|html.style.z-index
+|"0"
+|
+|-
+|html.style.combimap.background
+|"uNc,scroll,fixed,transparent,top,bottom,center,left,right,repeat,repeat-x,repeat-y,no-repeat,"
+|
+|-
+|html.style.combimap.border
+|"Nc,transparent,none,hidden,dotted,dashed,solid,double,groove,ridge,inset,outset,separate,collapse,"
+|
+|-
+|html.style.combimap.border-bottom
+|"nc,transparent,none,hidden,dotted,dashed,solid,double,groove,ridge,inset,outset,"
+|
+|-
+|html.style.combimap.border-left
+|"nc,transparent,none,hidden,dotted,dashed,solid,double,groove,ridge,inset,outset,"
+|
+|-
+|html.style.combimap.border-right
+|"nc,transparent,none,hidden,dotted,dashed,solid,double,groove,ridge,inset,outset,"
+|
+|-
+|html.style.combimap.border-style
+|",none,hidden,dotted,dashed,solid,double,groove,ridge,inset,outset,"
+|
+|-
+|html.style.combimap.border-top
+|"nc,transparent,none,hidden,dotted,dashed,solid,double,groove,ridge,inset,outset,"
+|
+|-
+|html.style.combimap.border-width
+|"n"
+|
+|-
+|html.style.combimap.font
+|"N*,xx-small,x-small,small,medium,large,x-large,xx-large,smaller,larger,wider,narrower,condensed,semi-condensed,extra-condensed,ultra-condensed,expanded,semi-expanded,extra-expanded,ultra-expanded,normal,italic,oblique,small-caps,bold,bolder,lighter,100,200,300,400,500,600,700,800,900,"
+|
+|-
+|html.style.combimap.list-style
+|"u,none,inside,outside,decimal,lower-roman,upper-roman,lower-alpha,lower-latin,upper-alpha,upper-latin,disc,circle,square,lower-greek,hebrew,decimal-leading-zero,cjk-ideographic,hiragana,katakana,hiragana-iroha,katakana-iroha,"
+|
+|-
+|html.style.combimap.margin
+|"N,auto,inherit,"
+|
+|-
+|html.style.combimap.padding
+|"N"
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>javamail.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>imap.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.imap.imapSort
+|imap
+|
+|-
+|com.openexchange.imap.imapSearch
+|imap
+|
+|-
+|com.openexchange.imap.imapFastFetch
+|true
+|
+|-
+|com.openexchange.imap.imapSupportsACL
+|auto
+|
+|-
+|com.openexchange.imap.imapTimeout
+|50000
+|
+|-
+|com.openexchange.imap.imapConnectionTimeout
+|20000
+|
+|-
+|com.openexchange.imap.imapTemporaryDown
+|10000
+|
+|-
+|com.openexchange.imap.failedAuthTimeout
+|10000
+|
+|-
+|com.openexchange.imap.imapAuthEnc
+|UTF-8
+|
+|-
+|com.openexchange.imap.maxIMAPConnectionIdleTime
+|60000
+|
+|-
+|com.openexchange.imap.User2ACLImpl
+|auto
+|
+|-
+|com.openexchange.imap.blockSize
+|1000
+|
+|-
+|com.openexchange.imap.spamHandler
+|DefaultSpamHandler
+|
+|-
+|com.openexchange.imap.propagateClientIPAddress
+|false
+|
+|-
+|com.openexchange.imap.propagateHostNames
+|
+|
+|-
+|com.openexchange.imap.maxNumConnections
+|0
+|
+|-
+|com.openexchange.imap.maxNumExternalConnections
+|imap.gmail.com:2,imap.googlemail.com:2
+|
+|-
+|com.openexchange.imap.enableTls
+|true
+|
+|-
+|com.openexchange.imap.notifyRecent
+|false
+|
+|-
+|com.openexchange.imap.notifyFrequencySeconds
+|300
+|
+|-
+|com.openexchange.imap.notifyFullNames
+|INBOX
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>eas-provisioning.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.mobile.configuration.generator.iPhoneRegex
+|^.*(iPhone|iPad).*$
+|
+|-
+|com.openexchange.mobile.configuration.generator.WinMobRegex
+|^.*Windows Phone.*$
+|
+|-
+|com.openexchange.mobile.configuration.generator.OnlySecureConnect
+|true
+|
+|-
+|com.openexchange.mobile.configuration.generator.SignConfig
+|false
+|
+|-
+|com.openexchange.mobile.configuration.generator.OpensslBinary
+|
+|
+|-
+|com.openexchange.mobile.configuration.generator.OpensslTimeout
+|3000
+|
+|-
+|com.openexchange.mobile.configuration.generator.CertFile
+|
+|
+|-
+|com.openexchange.mobile.configuration.generator.KeyFile
+|
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>spamhandler_cloudmark.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.spamhandler.cloudmark.targetSpamEmailAddress
+|
+|
+|-
+|com.openexchange.spamhandler.cloudmark.targetSpamFolder
+|2
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>log4j.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|log4j.appender.console
+|org.apache.log4j.ConsoleAppender
+|
+|-
+|log4j.appender.console.layout
+|org.apache.log4j.PatternLayout
+|
+|-
+|log4j.appender.console.layout.ConversionPattern
+| %d{dd.MM.yyyy HH:mm:ss} [%t] %-5p %c{1} - %m%n
+|
+|-
+|log4j.logger.de.kippdata
+|INFO,console
+|
+|-
+|log4j.logger.org.apache.solr
+|WARN,console
+|
+|-
+|log4j.logger.org.apache.solr.analysis
+|ERROR,console
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>mail-push.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.push.allowedClients
+|"USM-EAS*", "USM-JSON*"
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>twittermessaging.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.messaging.twitter
+|true
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+  <page>
+    <title>kerberos.properties</title>
+    <revision>
+      <timestamp>2012-09-14T17:14:05Z</timestamp>
+      <contributor>
+        <username>Tierlieb</username>
+        <id>5</id>
+      </contributor>
+      <comment>Automatic update</comment>
+      <text xml:space="preserve">{{Generated}}{{Properties}}
+      
+{|
+!Key
+!Default value
+!Comment
+|-
+|com.openexchange.kerberos.moduleName
+|Open-Xchange
+|
+|-
+|java.security.auth.login.config
+|/opt/open-xchange/etc/groupware/kerberosLogin.conf
+|
+|-
+|sun.security.krb5.debug
+|true
+|
+|-
+|java.security.krb5.conf
+|/opt/open-xchange/etc/groupware/krb5.conf
+|
+|}
+
+      [[Category:Config]] [[Category:Generated]]</text>
+    </revision>
+  </page>  
+</mediawiki>
