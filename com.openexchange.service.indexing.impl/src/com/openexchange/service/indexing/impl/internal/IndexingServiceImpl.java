@@ -77,7 +77,7 @@ public class IndexingServiceImpl implements IndexingService {
     
 
     @Override
-    public void scheduleJob(JobInfo info, Date startDate, long repeatInterval) throws OXException {
+    public void scheduleJob(JobInfo info, Date startDate, long repeatInterval, int priority) throws OXException {
         JobDataMap jobData = new JobDataMap();
         jobData.put(JobConstants.JOB_INFO, info);
 
@@ -100,6 +100,7 @@ public class IndexingServiceImpl implements IndexingService {
             triggerBuilder.withSchedule(SimpleScheduleBuilder.simpleSchedule().withIntervalInMilliseconds(repeatInterval));
         }
 
+        triggerBuilder.withPriority(priority);
         Trigger trigger = triggerBuilder.build();        
         try {
             scheduleJob(jobDetail, trigger);

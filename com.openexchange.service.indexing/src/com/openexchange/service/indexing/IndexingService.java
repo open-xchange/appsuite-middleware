@@ -61,13 +61,20 @@ import com.openexchange.exception.OXException;
 public interface IndexingService {
     
     /**
+     * Default priority for jobs.
+     */
+    public static final int DEFAULT_PRIORITY = 5;
+    
+    
+    /**
      * Schedules an indexing job. 
      * 
      * @param info The information needed to run this job.
      * @param startDate The start date of the job. My be <code>null</code> to run immediately.
      * @param repeatInterval The repeat interval in milliseconds. May be negative if the job shall only run once.
+     * @param priority The priority. If two jobs shall be started at the same time, the one with the higher priority wins. See {{@link #DEFAULT_PRIORITY}.
      * @throws OXException 
      */
-    void scheduleJob(JobInfo info, Date startDate, long repeatInterval) throws OXException;
+    void scheduleJob(JobInfo info, Date startDate, long repeatInterval, int priority) throws OXException;
 
 }

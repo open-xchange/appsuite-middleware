@@ -90,7 +90,7 @@ public class MailFolderCallable implements Callable<Object>, Serializable {
         mailAccess.connect(false);
         try {            
             Map<String, Object> params = new HashMap<String, Object>();
-            params.put(IndexConstants.ACCOUNT, Integer.valueOf(info.accountId));
+            params.put(IndexConstants.ACCOUNT, String.valueOf(info.accountId));
             Builder queryBuilder = new Builder(params);
             QueryParameters mailAllQuery = queryBuilder.setHandler(SearchHandler.ALL_REQUEST)
                 .setFolders(Collections.singleton(info.folder))
@@ -130,7 +130,7 @@ public class MailFolderCallable implements Callable<Object>, Serializable {
                 }                
             } else {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Deleting info.folder from index: " + info.toString());
+                    LOG.debug("Deleting folder from index: " + info.toString());
                 }
                 
                 IndexFolderManager.deleteFolderEntry(info.contextId, info.userId, Types.EMAIL, String.valueOf(info.accountId), info.folder);
@@ -179,7 +179,7 @@ public class MailFolderCallable implements Callable<Object>, Serializable {
             @Override
             public int perform(int off, int len) throws OXException {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Adding a chunk of mails of info.folder " + info.folder + ": " + info.toString());
+                    LOG.debug("Adding a chunk of mails of folder " + info.folder + ": " + info.toString());
                 }
                 
                 List<String> subList = changedMails.subList(off, len);                
@@ -242,7 +242,7 @@ public class MailFolderCallable implements Callable<Object>, Serializable {
             @Override
             public int perform(int off, int len) throws OXException {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Adding a chunk of mails of info.folder " + info.folder + ": " + info.toString());
+                    LOG.debug("Adding a chunk of mails of folder " + info.folder + ": " + info.toString());
                 }
                 
                 List<String> subList = toAdd.subList(off, len);
@@ -312,7 +312,7 @@ public class MailFolderCallable implements Callable<Object>, Serializable {
             @Override
             public int perform(int off, int len) throws OXException {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Deleting a chunk of mails in info.folder " + info.folder + ": " + info.toString());
+                    LOG.debug("Deleting a chunk of mails in folder " + info.folder + ": " + info.toString());
                 }
                 
                 List<String> subList = toDelete.subList(off, len);
@@ -335,7 +335,7 @@ public class MailFolderCallable implements Callable<Object>, Serializable {
                 SearchTerm<?> orTerm = new ORTerm(idTerms);
                 Map<String, Object> deleteAttachmentsParams = new HashMap<String, Object>();
                 deleteAttachmentsParams.put(IndexConstants.MODULE, new Integer(Types.EMAIL));
-                deleteAttachmentsParams.put(IndexConstants.ACCOUNT, Integer.valueOf(info.accountId));
+                deleteAttachmentsParams.put(IndexConstants.ACCOUNT, String.valueOf(info.accountId));
                 QueryParameters deleteAttachmentsQuery = new QueryParameters.Builder(deleteAttachmentsParams)
                     .setHandler(SearchHandler.CUSTOM)
                     .setSearchTerm(orTerm)
@@ -394,31 +394,7 @@ public class MailFolderCallable implements Callable<Object>, Serializable {
         }
         return (!storageUserFlags.equals(indexUserFlags));
     }
-    
-//    private MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getMailAccess() throws OXException {
-//        Session session = new FakeSession(info.primaryPassword, info.userId, info.contextId);
-//        session.setParameter("com.openexchange.mail.lookupMailAccessCache", Boolean.FALSE);
-//        MailService mailService = Services.getService(MailService.class);
-//        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> tmp = mailService.getMailAccess(info.userId, info.contextId, info.accountId);
-//        /*
-//         * Safety close & not cacheable
-//         */
-//        tmp.close(true);
-//        tmp.setCacheable(false);
-//        /*
-//         * Parameterize configuration
-//         */
-//        MailConfig mailConfig = tmp.getMailConfig();
-//        mailConfig.setLogin(info.login);
-//        mailConfig.setPassword(info.password);
-//        mailConfig.setServer(info.server);
-//        mailConfig.setPort(info.port);
-//        mailConfig.setSecure(info.secure);
-//        tmp.connect(true);
-//        
-//        return tmp;
-//    }
-//    
+
     private void closeMailAccess(MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage> mailAccess) {
         if (mailAccess != null) {            
             mailAccess.close(false);

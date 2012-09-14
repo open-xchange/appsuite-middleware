@@ -180,7 +180,9 @@ public class SolrInfostoreIndexAccess extends AbstractSolrIndexAccess<DocumentMe
         }
         
         String deleteQuery = buildQueryStringWithOr(SolrAttachmentField.UUID.solrName(), uuids);
-        deleteDocumentsByQuery(deleteQuery);   
+        if (deleteQuery != null) {
+            deleteDocumentsByQuery(deleteQuery);
+        }
     }
     
     @Override

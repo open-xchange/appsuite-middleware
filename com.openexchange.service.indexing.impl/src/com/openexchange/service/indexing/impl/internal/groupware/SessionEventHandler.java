@@ -78,10 +78,11 @@ import com.openexchange.sessiond.SessiondEventConstants;
  */
 public class SessionEventHandler implements EventHandler {
 
+    // TODO: move to infostore/server bundle and check if indexing is allowed
     @Override
     public void handleEvent(Event event) {
         String topic = event.getTopic();
-        if (SessiondEventConstants.TOPIC_ADD_SESSION.equals(topic)) {            
+        if (SessiondEventConstants.TOPIC_ADD_SESSION.equals(topic) || SessiondEventConstants.TOPIC_REACTIVATE_SESSION.equals(topic)) {            
             IndexFacadeService indexFacade = Services.getService(IndexFacadeService.class);
             IndexAccess<File> infostoreAccess = null;
             try {
@@ -112,7 +113,7 @@ public class SessionEventHandler implements EventHandler {
                             .folder(folderId)
                             .build();
                         
-                        indexingService.scheduleJob(jobInfo, null, -1L);
+                        indexingService.scheduleJob(jobInfo, null, -1L, IndexingService.DEFAULT_PRIORITY);
                     }
                 }                
             } catch (Exception e) {

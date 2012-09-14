@@ -256,7 +256,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
         JobInfo jobInfo = builder.build();
         IndexingService indexingService = SmalServiceLookup.getServiceStatic(IndexingService.class);
         // FIXME: interval
-        indexingService.scheduleJob(jobInfo, null, 60000L * 10);
+        indexingService.scheduleJob(jobInfo, null, 60000L * 10, IndexingService.DEFAULT_PRIORITY);
     }
 
     @Override

@@ -184,7 +184,9 @@ public class SolrMailIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
         }
         
         String deleteQuery = buildQueryStringWithOr(SolrMailField.UUID.solrName(), uuids);
-        deleteDocumentsByQuery(deleteQuery);
+        if (deleteQuery != null) {
+            deleteDocumentsByQuery(deleteQuery);
+        }        
     }
 
     @Override

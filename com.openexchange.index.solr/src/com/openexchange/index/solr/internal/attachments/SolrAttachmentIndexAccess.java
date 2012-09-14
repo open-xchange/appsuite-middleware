@@ -184,7 +184,9 @@ public class SolrAttachmentIndexAccess extends AbstractSolrIndexAccess<Attachmen
         }
         
         String deleteQuery = buildQueryStringWithOr(SolrAttachmentField.UUID.solrName(), uuids);
-        deleteDocumentsByQuery(deleteQuery);
+        if (deleteQuery != null) {
+            deleteDocumentsByQuery(deleteQuery);
+        }
     }
 
     @Override
