@@ -1,3 +1,7 @@
+* 2012-09-14 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 22967: More flexible user-agent matching for Mac OS Addressbook client 
+
 * 2012-09-13 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 22942: Be prepared for DATETIME values that are composed entirely of zeros 
