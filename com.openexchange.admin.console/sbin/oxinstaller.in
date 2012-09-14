@@ -546,14 +546,14 @@ setup()
     v_cache_hosting ${CONFDIR}/sessioncache.ccf SessionLTCP $UDP_SESS_DISC_PORT
     v_setprop jcs.auxiliary.SessionLTCP.attributes.TcpListenerPort $GWSCACHEPORT ${CONFDIR}/sessioncache.ccf
 
-    v_setprop com.openexchange.push.udp.senderAddress "$OXCLUSTERIP" ${CONFDIR}/push.properties
-    v_setprop com.openexchange.push.udp.multicastAddress "$UDPDISCOVERYADDR" ${CONFDIR}/push.properties
-    v_setprop com.openexchange.push.udp.multicastPort "$PUSHMCPORT" ${CONFDIR}/push.properties
-    v_setprop com.openexchange.push.udp.multicastEnabled true ${CONFDIR}/push.properties
-    v_setprop com.openexchange.push.udp.pushEnabled true ${CONFDIR}/push.properties
-    v_setprop com.openexchange.push.udp.registerPort $OLPORT ${CONFDIR}/push.properties
-    v_setprop com.openexchange.push.udp.registerDistributionEnabled false  ${CONFDIR}/push.properties
-    v_setprop com.openexchange.push.udp.eventDistributionEnabled true ${CONFDIR}/push.properties
+    v_setprop com.openexchange.push.udp.senderAddress "$OXCLUSTERIP" ${CONFDIR}/push-udp.properties
+    v_setprop com.openexchange.push.udp.multicastAddress "$UDPDISCOVERYADDR" ${CONFDIR}/push-udp.properties
+    v_setprop com.openexchange.push.udp.multicastPort "$PUSHMCPORT" ${CONFDIR}/push-udp.properties
+    v_setprop com.openexchange.push.udp.multicastEnabled true ${CONFDIR}/push-udp.properties
+    v_setprop com.openexchange.push.udp.pushEnabled true ${CONFDIR}/push-udp.properties
+    v_setprop com.openexchange.push.udp.registerPort $OLPORT ${CONFDIR}/push-udp.properties
+    v_setprop com.openexchange.push.udp.registerDistributionEnabled false  ${CONFDIR}/push-udp.properties
+    v_setprop com.openexchange.push.udp.eventDistributionEnabled true ${CONFDIR}/push-udp.properties
 
     #
     # administration configuration files
