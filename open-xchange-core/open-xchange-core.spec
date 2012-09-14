@@ -181,10 +181,9 @@ if [ ${1:-0} -eq 2 ]; then
 
     ox_update_permissions "/var/log/open-xchange" open-xchange:root 750
     ox_update_permissions "/opt/open-xchange/osgi" open-xchange:root 750
-    ox_update_permissions "/opt/open-xchange/etc/mail.properties" root:open-xchange 640
     ox_update_permissions "/opt/open-xchange/etc/configdb.properties" root:open-xchange 640
-    ox_update_permissions "/opt/open-xchange/etc/server.properties" root:open-xchange 640
-    ox_update_permissions "/opt/open-xchange/etc/filestorage.properties" root:open-xchange 640
+    ox_update_permissions "/opt/open-xchange/etc/mail.properties" root:open-xchange 640
+    ox_update_permissions "/opt/open-xchange/etc/ox-scriptconf.sh" root:root 644
 fi
 
 
