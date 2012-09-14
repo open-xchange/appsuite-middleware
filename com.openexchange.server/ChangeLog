@@ -1,11 +1,12 @@
+* 2012-09-14 - marcus.klein@open-xchange.com
+
+ - Fix for bug 22978: Defined the ResellerAdmin SOAP object completely new by hand. Looks much more clean now and works as expected. Added
+   support for SOAP data class inheritance to ReplacingXMLStreamReader for subclasses for reseller interface.
+
 * 2012-09-14 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 22967: More flexible user-agent matching for Mac OS Addressbook client
  - Fix for bug 22993: Enabled CalDAV/CardDAV by default 
-
-* 2012-09-12 - marcus.klein@open-xchange.com
-
- - Fix for bug 22978: Defined the ResellerAdmin SOAP object completely new by hand. Looks much more clean now and works as expected.
 
 * 2012-09-13 - tobias.friedrich@open-xchange.com
 

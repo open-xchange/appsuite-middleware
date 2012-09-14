@@ -26,16 +26,14 @@ sub doRequest {
     my $admin = "reselleradmin";
     my $adminpass = $ENV{"MASTERPW"} || "secret";
     my $displayname = "Reseller Admin";
+    my $resellerAdmin = SOAP::Data->type("ResellerAdmin")->value(\SOAP::Data->value(
+        SOAP::Data->name("name" => $admin),
+        SOAP::Data->name("displayname" => $displayname),
+        SOAP::Data->name("password" => $adminpass)
+    ));
 
     my $som_entry =
-        $soap->create(
-            SOAP::Data->type("ResellerAdmin")->value(\SOAP::Data->value(
-                SOAP::Data->name("name" => $admin),
-                SOAP::Data->name("displayname" => $displayname),
-                SOAP::Data->name("password" => $adminpass)
-            )),
-            $inSelf->{'mastercreds'}
-        );
+        $soap->create($resellerAdmin, $inSelf->{'mastercreds'});
 
     if ($som_entry->fault()) {
         $inSelf->fault_output($som_entry);

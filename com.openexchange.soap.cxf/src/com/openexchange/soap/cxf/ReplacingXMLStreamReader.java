@@ -60,10 +60,13 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.util.StreamReaderDelegate;
 import org.apache.cxf.service.model.BindingOperationInfo;
+import org.apache.ws.commons.schema.XmlSchemaComplexContentExtension;
 import org.apache.ws.commons.schema.XmlSchemaComplexType;
+import org.apache.ws.commons.schema.XmlSchemaContentModel;
 import org.apache.ws.commons.schema.XmlSchemaElement;
 import org.apache.ws.commons.schema.XmlSchemaSequence;
 import org.apache.ws.commons.schema.XmlSchemaSequenceMember;
+import org.apache.ws.commons.schema.XmlSchemaType;
 
 /**
  * {@link ReplacingXMLStreamReader}
@@ -72,11 +75,13 @@ import org.apache.ws.commons.schema.XmlSchemaSequenceMember;
  */
 public class ReplacingXMLStreamReader extends StreamReaderDelegate {
 
+    private final BindingOperationInfo bop;
     private final Stack<ReplacingElement> stack = new Stack<ReplacingElement>();
     private ReplacingElement current;
 
     public ReplacingXMLStreamReader(BindingOperationInfo bop, XMLStreamReader reader) {
         super(reader);
+        this.bop = bop;
         QName name = super.getName();
         ReplacingElement method = new ReplacingElement(name, name);
         stack.push(method);
@@ -133,20 +138,46 @@ public class ReplacingXMLStreamReader extends StreamReaderDelegate {
         if (schema.getSchemaType() instanceof XmlSchemaComplexType) {
             XmlSchemaComplexType cplxType = (XmlSchemaComplexType) schema.getSchemaType();
             XmlSchemaSequence seq = (XmlSchemaSequence) cplxType.getParticle();
-            int rememberPosition = parent.nextChildPosition();
-            XmlSchemaElement retval = null;
-            // First try to use the given type name. But with PHP this type name is "Struct".
-            if (null != name) {
-                retval = byName(parent, seq.getItems(), name);
+            if (null == seq) {
+                // SOAP Class inheritance.
+                XmlSchemaContentModel contentModel = cplxType.getContentModel();
+                XmlSchemaComplexContentExtension extension = (XmlSchemaComplexContentExtension) contentModel.getContent();
+                seq = (XmlSchemaSequence) extension.getParticle();
+                XmlSchemaElement retval = findReplacer(parent, name, seq, true);
+                if (null == retval) {
+                    // Check for the attribute in the super type.
+                    QName baseTypeName = extension.getBaseTypeName();
+                    XmlSchemaType superType = cplxType.getParent().getParent().getTypeByQName(baseTypeName);
+                    if (superType instanceof XmlSchemaComplexType) {
+                        seq = (XmlSchemaSequence) ((XmlSchemaComplexType) superType).getParticle();
+                        retval = findReplacer(parent, name, seq, true);
+                    }
+                    if (null != retval) {
+                        return retval;
+                    }
+                } else {
+                    return retval;
+                }
+            } else {
+                return findReplacer(parent, name, seq, false);
             }
-            if (null != retval) {
-                return retval;
-            }
-            // If no child is found using the type name, fall back to child position because of PHP using "Struct" as type name.
-            parent.setChildPosition(rememberPosition);
-            return byPosition(parent, seq.getItems());
         }
         return null;
+    }
+
+    private static XmlSchemaElement findReplacer(ReplacingElement parent, String name, XmlSchemaSequence seq, boolean strict) {
+        int rememberPosition = parent.nextChildPosition();
+        XmlSchemaElement retval = null;
+        // First try to use the given type name. But with PHP this type name is "Struct".
+        if (null != name) {
+            retval = byName(parent, seq.getItems(), name);
+        }
+        if (null != retval || (null != name && strict)) {
+            return retval;
+        }
+        // If no child is found using the type name, fall back to child position because of PHP using "Struct" as type name.
+        parent.setChildPosition(rememberPosition);
+        return byPosition(parent, seq.getItems());
     }
 
     private static XmlSchemaElement byPosition(ReplacingElement parent, List<XmlSchemaSequenceMember> childs) {
