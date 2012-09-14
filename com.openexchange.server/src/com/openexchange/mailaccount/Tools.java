@@ -148,6 +148,12 @@ public final class Tools {
      * @throws OXException If check for full names fails
      */
     public static MailAccount checkFullNames(final MailAccount account, final MailAccountStorageService storageService, final Session session) throws OXException {
+        if (MailAccount.DEFAULT_ID == account.getId()) {
+            /*
+             * No check for primary account
+             */
+            return account;
+        }
         final int contextId = session.getContextId();
         final Connection rcon = Database.get(contextId, false);
         try {
@@ -396,13 +402,15 @@ public final class Tools {
 
     private static String getPrefix(final int accountId, final ServerSession session) throws OXException {
         try {
-            final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> access =
-                MailAccess.getInstance(session, accountId);
-            access.connect(false);
+            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> access = null;
             try {
+                access = MailAccess.getInstance(session, accountId);
+                access.connect(false);
                 return access.getFolderStorage().getDefaultFolderPrefix();
             } finally {
-                access.close(true);
+                if (null != access) {
+                    access.close(true);
+                }
             }
         } catch (final OXException e) {
             throw new OXException(e);

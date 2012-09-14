@@ -1,0 +1,30 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Service for persistent Presence Subscriptions
+Bundle-SymbolicName: com.openexchange.realtime.presence.subscribe
+Bundle-Version: 6.22.0.0
+Bundle-Activator: com.openexchange.realtime.presence.subscribe.osgi.Activator
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.context,
+ com.openexchange.database,
+ com.openexchange.exception,
+ com.openexchange.groupware.contexts,
+ com.openexchange.groupware.ldap,
+ com.openexchange.groupware.update,
+ com.openexchange.osgi,
+ com.openexchange.realtime,
+ com.openexchange.realtime.packet,
+ com.openexchange.server,
+ com.openexchange.session,
+ com.openexchange.sql.builder,
+ com.openexchange.sql.grammar,
+ com.openexchange.sql.schema,
+ com.openexchange.sql.tools,
+ com.openexchange.tools.session,
+ com.openexchange.user,
+ org.osgi.framework
+Bundle-ActivationPolicy: lazy
+Bundle-ClassPath: .,
+ lib/org.apache.felix.ipojo.junit4osgi-1.0.0.jar
+Export-Package: com.openexchange.realtime.presence.subscribe

@@ -60,6 +60,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import org.apache.commons.codec.binary.Base64;
+import com.openexchange.crypto.CryptoErrorMessage;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.crypto.EncryptedData;
 import com.openexchange.exception.OXException;
@@ -143,22 +144,19 @@ public class CryptoServiceImpl implements CryptoService {
         if (useSalt && data.getSalt() == null) {
             throw NoSalt.create();
         }
-
-        if (useSalt) {
-            return decrypt(data.getData(), generateSecretKey(password, data.getSalt()));
-        } else {
-            return decrypt(data.getData(), generateSecretKey(password, SALT));
-        }
+        return useSalt ? decrypt(data.getData(), generateSecretKey(password, data.getSalt())) : decrypt(data.getData(), generateSecretKey(password, SALT));
     }
 
     @Override
     public EncryptedData encrypt(final String data, final String password, final boolean useSalt) throws OXException {
+        if (data == null) {
+            return null;
+        }
         if (useSalt) {
             final byte[] salt = generateSalt();
             return new EncryptedData(encrypt(data, generateSecretKey(password, salt)), salt);
-        } else {
-            return new EncryptedData(encrypt(data, generateSecretKey(password, SALT)), null);
         }
+        return new EncryptedData(encrypt(data, generateSecretKey(password, SALT)), null);
     }
 
     /**
@@ -258,11 +256,15 @@ public class CryptoServiceImpl implements CryptoService {
      * @throws OXException
      */
     private SecretKey generateSecretKey(final String password, final byte[] salt) throws OXException {
-        final PBKDF2Parameters params = new PBKDF2Parameters(KEY_ALGORITHM, CHARSET, salt, 1000);
-        final PBKDF2Engine engine = new PBKDF2Engine(params);
-        final byte[] key = engine.deriveKey(password, KEY_LENGTH);
-        final SecretKey secretKey = new SecretKeySpec(key, ALGORITHM);
-        return secretKey;
+        try {
+            final PBKDF2Parameters params = new PBKDF2Parameters(KEY_ALGORITHM, CHARSET, salt, 1000);
+            final PBKDF2Engine engine = new PBKDF2Engine(params);
+            final byte[] key = engine.deriveKey(password, KEY_LENGTH);
+            final SecretKey secretKey = new SecretKeySpec(key, ALGORITHM);
+            return secretKey;
+        } catch (final RuntimeException e) {
+            throw CryptoErrorMessage.SecurityException.create(e, e.getMessage());
+        }
     }
 
     private byte[] generateSalt() throws OXException {

@@ -169,12 +169,16 @@ public class AppsServlet extends HttpServlet {
     private byte[] readFile(String module, String format, String name) throws UnsupportedEncodingException {
         File filename;
         byte[] data;
+
+        // Map module name to file name
         if (name.startsWith(ZONEINFO)) {
             filename = new File(zoneinfo, name.substring(ZONEINFO.length()));
         } else {
             filename = new File(root, name);
         }
         LOG.debug("Reading " + filename);
+
+        // Read the entire file into a byte array
         try {
             RandomAccessFile f = new RandomAccessFile(filename, "r");
             data = new byte[(int) f.length()];
@@ -184,6 +188,10 @@ public class AppsServlet extends HttpServlet {
             LOG.debug("Could not read '" + escapeName(filename.getPath()) + "'");
             return ("console.error('Could not read \\'" + escapeName(module) + "\\'');\n").getBytes("UTF-8");
         }
+
+        // Special cases for JavaScript-friendly reading of raw files:
+        // /text;* returns the file as a UTF-8 string
+        // /raw;* maps every byte to [u+0000..u+00ff]
         if (format != null) {
             StringBuffer sb = new StringBuffer();
             sb.append("define('").append(module).append("','");
@@ -201,6 +209,7 @@ public class AppsServlet extends HttpServlet {
             sb.append("');\n");
             return sb.toString().getBytes("UTF-8");
         }
+
         return data;
     }
 }

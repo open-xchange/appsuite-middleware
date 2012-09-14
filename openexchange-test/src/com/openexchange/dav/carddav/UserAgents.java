@@ -67,7 +67,11 @@ public final class UserAgents {
 
 	public static final String MACOS_10_7_2 = "AddressBook/6.1 (1062) CardDAVPlugin/196 CFNetwork/520.2.5 Mac_OS_X/10.7.2 (11C74)";
 
-	public static final String MACOS_10_7_3 = "AddressBook/6.1 (1083) CardDAVPlugin/200 CFNetwork/520.3.2 Mac_OS_X/10.7.3 (11D50d)";
+    public static final String MACOS_10_7_3 = "AddressBook/6.1 (1083) CardDAVPlugin/200 CFNetwork/520.3.2 Mac_OS_X/10.7.3 (11D50d)";
+
+    public static final String MACOS_10_8_1 = "Mac OS X/10.8.1 (12B19) AddressBook/1143";
+    
+    public static final String MACOS_10_8_2 = "Mac OS X/10.8.2 (12C31a) AddressBook/1164";
 
 	public static final String IOS_5_0_1 = "iOS/5.0.1 (9A405) dataaccessd/1.0";
 	
@@ -81,7 +85,7 @@ public final class UserAgents {
 	
 		
 	public static final String[] MACOS_ALL = {
-		MACOS_10_6_7, MACOS_10_6_8, MACOS_10_6_8_DE, MACOS_10_6_8_NL, MACOS_10_7_2, MACOS_10_7_3
+		MACOS_10_6_7, MACOS_10_6_8, MACOS_10_6_8_DE, MACOS_10_6_8_NL, MACOS_10_7_2, MACOS_10_7_3, MACOS_10_8_1, MACOS_10_8_2
 	};
 	
 	public static final String[] IOS_ALL = {
