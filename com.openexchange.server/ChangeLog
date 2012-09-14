@@ -23,11 +23,11 @@
 
 * 2012-09-07 - jan.bauerdick@open-xchange.com
 
- - New bundle c.o.aws.autoscaling: Monitoring of instances and loadbalancers, add/remove instances if neccessary
+ - New bundle c.o.aws.autoscaling: Monitoring of instances and load-balancers, add/remove instances if necessary
 
 * 2012-09-06 - jan.bauerdick@open-xchange.com
 
- - New bundle c.o.aws.ec2: Start and stop EC2 instances and register them with the loadbalancer
+ - New bundle c.o.aws.ec2: Start and stop EC2 instances and register them with the load-balancer
 
 * 2012-09-05 - thorben.betten@open-xchange.com
 
