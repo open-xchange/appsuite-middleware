@@ -66,6 +66,7 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.fields.ResponseFields.ParsingFields;
 import com.openexchange.ajax.fields.ResponseFields.TruncatedFields;
+import com.openexchange.exception.Categories;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Parsing;
@@ -524,9 +525,12 @@ public final class ResponseWriter {
         {
             final List<Category> categories = exc.getCategories();
             if (1 == categories.size()) {
-                final String sCategory = categories.get(0).toString();
-                writer.key(ERROR_CATEGORIES).value(sCategory);
-                writer.key(ERROR_CATEGORY).value(sCategory);
+                final Category category = categories.get(0);
+                writer.key(ERROR_CATEGORIES).value(category.toString());
+                final int number = Categories.getFormerCategroyNumber(category);
+                if (number > 0) {
+                    writer.key(ERROR_CATEGORY).value(number);
+                }
             } else {
                 writer.key(ERROR_CATEGORIES);
                 writer.array();
