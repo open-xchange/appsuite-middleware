@@ -13,7 +13,7 @@ License:       GPL-2.0
 BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
-Summary:       OSGi bundles commonly used by all Open-Xchange packages
+Summary:       3rd party OSGi bundles used by the Open-Xchange backend
 PreReq:        /usr/sbin/useradd
 Provides:      open-xchange-common = %{version}
 Obsoletes:     open-xchange-common <= %{version}
@@ -31,9 +31,9 @@ Requires:      java >= 1.6.0
 Conflicts:     java-ibm
 %endif
 
-
 %description
-OSGi bundles commonly used by all Open-Xchange packages
+This package installes 3rd party OSGi bundles for the Open-Xchange backend. This includes the Equinox OSGi framework and the servlet API.
+Furthermore libraries from the Apache Commons project are installed: CLI, Lang, Logging and some Apache service mix bundles.
 
 Authors:
 --------
