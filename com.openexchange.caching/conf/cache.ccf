@@ -229,7 +229,7 @@ jcs.region.GlobalFolderCache.elementattributes.IsLateral=false
 # TCP Lateral Cache to broadcast PUTS and REMOVALS (and possibly GETS) to other local caches
 jcs.auxiliary.LTCP=org.apache.jcs.auxiliary.lateral.socket.tcp.LateralTCPCacheFactory
 jcs.auxiliary.LTCP.attributes=org.apache.jcs.auxiliary.lateral.socket.tcp.TCPLateralCacheAttributes
-# jcs.auxiliary.LTCP.attributes.TcpServers=oxhost2:57462
+# jcs.auxiliary.LTCP.attributes.TcpServers=oxhost2:57461
 jcs.auxiliary.LTCP.attributes.TcpListenerPort=57462
 # Define UDP discovery here, but ensure you do not specify static TCP server via jcs.auxiliary.LTCP.attributes.TcpServers
 # jcs.auxiliary.LTCP.attributes.UdpDiscoveryAddr=224.0.0.1
