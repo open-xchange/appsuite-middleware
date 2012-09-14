@@ -547,6 +547,13 @@ public final class ResponseWriter {
         writer.key(ERROR_ID).value(exc.getExceptionId());
         writeProblematic(exc, writer);
         writeTruncated(exc, writer);
+        if (exc.getLogArgs() != null) {
+            final JSONArray array = new JSONArray();
+            for (final Object tmp : exc.getLogArgs()) {
+                array.put(tmp);
+            }
+            writer.key(ResponseFields.ERROR_PARAMS).value(array);
+        }
         // Write stack trace
         writer.key(ERROR_STACK);
         writer.array();
