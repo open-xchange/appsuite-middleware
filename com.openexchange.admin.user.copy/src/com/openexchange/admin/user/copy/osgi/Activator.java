@@ -71,7 +71,7 @@ public class Activator extends HousekeepingActivator {
         final Log log = com.openexchange.log.Log.loggerFor(Activator.class);
         try {
             ConfigurationService configurationService = getService(ConfigurationService.class);
-            AdminCache.compareAndSet(null, configurationService);
+            AdminCache.compareAndSetConfigurationService(null, configurationService);
             track(UserCopyService.class, new RMIUserCopyRegisterer(context));
             openTrackers();
             log.info("Started bundle: com.openexchange.admin.user.copy");

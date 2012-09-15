@@ -103,7 +103,7 @@ public class AdminCache {
      * 
      * @return The <tt>ConfigurationService</tt> or <code>null</code>
      */
-    public static ConfigurationService get() {
+    public static ConfigurationService getConfigurationService() {
         return CONF_SERVICE.get();
     }
 
@@ -114,7 +114,7 @@ public class AdminCache {
      * @param update the new <tt>ConfigurationService</tt>
      * @return <code>true</code> if successful. <code>false</code> return indicates that the actual <tt>ConfigurationService</tt> was not equal to the expected <tt>ConfigurationService</tt>.
      */
-    public static boolean compareAndSet(final ConfigurationService expect, final ConfigurationService update) {
+    public static boolean compareAndSetConfigurationService(final ConfigurationService expect, final ConfigurationService update) {
         return CONF_SERVICE.compareAndSet(expect, update);
     }
 
@@ -123,7 +123,7 @@ public class AdminCache {
      * 
      * @param service The <tt>ConfigurationService</tt> to set
      */
-    public static void set(final ConfigurationService service) {
+    public static void setConfigurationService(final ConfigurationService service) {
         CONF_SERVICE.set(service);
     }
 
