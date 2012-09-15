@@ -53,7 +53,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.SynchronizedBasedReentrantLock;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingAccountManager;
 import com.openexchange.messaging.twitter.services.TwitterMessagingServiceRegistry;
@@ -127,7 +126,7 @@ public abstract class AbstractTwitterMessagingAccess {
                     if (null == oAuthAccountId) {
                         Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
                         if (null == lock) {
-                            lock = new SynchronizedBasedReentrantLock(session);
+                            lock = Session.EMPTY_LOCK;
                         }
                         lock.lock();
                         try {
