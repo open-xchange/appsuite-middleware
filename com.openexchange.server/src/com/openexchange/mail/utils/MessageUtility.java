@@ -669,4 +669,37 @@ public final class MessageUtility {
         return isAscci;
     }
 
+    /**
+     * Detects possible duplicate &lt;html&gt; tags and removes all but last.
+     * 
+     * @param html The HTML content
+     * @return The HTML content with duplicate &lt;html&gt; tags removed
+     */
+    public static String simpleHtmlDuplicateRemoval(final String html) {
+        if (isEmpty(html)) {
+            return html;
+        }
+        final String lc = html.toLowerCase();
+        int pos = lc.lastIndexOf("<html>");
+        if (pos > 0) {
+            pos = lc.lastIndexOf("<html>", pos-1);
+            if (pos >= 0) {
+                return html.substring(pos+6);
+            }
+        }
+        return html;
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
+
 }

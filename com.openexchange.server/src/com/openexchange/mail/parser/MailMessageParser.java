@@ -1023,6 +1023,10 @@ public final class MailMessageParser {
          */
         final String charset = getCharset(mailPart, contentType);
         try {
+            if (contentType.startsWith("text/htm")) {
+                final String html = MessageUtility.readMailPart(mailPart, charset);
+                return MessageUtility.simpleHtmlDuplicateRemoval(html);
+            }
             return MessageUtility.readMailPart(mailPart, charset);
         } catch (final java.io.CharConversionException e) {
             // Obviously charset was wrong or bogus implementation of character conversion

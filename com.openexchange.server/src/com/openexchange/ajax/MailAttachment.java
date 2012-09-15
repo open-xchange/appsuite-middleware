@@ -161,7 +161,8 @@ public class MailAttachment extends AJAXServlet {
                     final ContentType contentType = mailPart.getContentType();
                     final String cs =
                         contentType.containsCharsetParameter() ? contentType.getCharsetParameter() : MailProperties.getInstance().getDefaultMimeCharset();
-                    final String htmlContent = MessageUtility.readMailPart(mailPart, cs);
+                    String htmlContent = MessageUtility.readMailPart(mailPart, cs);
+                    htmlContent = MessageUtility.simpleHtmlDuplicateRemoval(htmlContent);
                     final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
                     attachmentInputStream =
                         new UnsynchronizedByteArrayInputStream(htmlService.filterWhitelist(
