@@ -130,7 +130,7 @@ public class ReplacingXMLStreamReader extends StreamReaderDelegate {
 
     private static XmlSchemaElement getChildSchema(ReplacingElement parent, String name) {
         XmlSchemaElement schema = parent.getXmlSchema();
-        if (schema.getSchemaType() instanceof XmlSchemaComplexType) {
+        if ((null != schema) && (schema.getSchemaType() instanceof XmlSchemaComplexType)) {
             XmlSchemaComplexType cplxType = (XmlSchemaComplexType) schema.getSchemaType();
             XmlSchemaSequence seq = (XmlSchemaSequence) cplxType.getParticle();
             int rememberPosition = parent.nextChildPosition();
