@@ -641,16 +641,19 @@ public class AdminCache {
     private void readMasterCredentials(final ConfigurationService service) throws OXGenericException {
         BufferedReader bf = null;
         try {
-            bf = new BufferedReader(new FileReader(service.getFileByName("mpasswd")), 2048);
-            String line = null;
-            while ((line = bf.readLine()) != null) {
-                if (!line.startsWith("#")) {
-                    if (line.indexOf(':') >= 0) {
-                        // ok seems to be a line with user:pass entry
-                        final String[] user_pass_combination = line.split(":");
-                        if (user_pass_combination.length > 0) {
-                            this.masterCredentials = new Credentials(user_pass_combination[0], user_pass_combination[1]);
-                            this.log.debug("Master credentials successfully set!");
+            final File file = service.getFileByName("mpasswd");
+            if (null != file) {
+                bf = new BufferedReader(new FileReader(file), 2048);
+                String line = null;
+                while ((line = bf.readLine()) != null) {
+                    if (!line.startsWith("#")) {
+                        if (line.indexOf(':') >= 0) {
+                            // ok seems to be a line with user:pass entry
+                            final String[] user_pass_combination = line.split(":");
+                            if (user_pass_combination.length > 0) {
+                                this.masterCredentials = new Credentials(user_pass_combination[0], user_pass_combination[1]);
+                                this.log.debug("Master credentials successfully set!");
+                            }
                         }
                     }
                 }
