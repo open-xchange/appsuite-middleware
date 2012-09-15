@@ -100,7 +100,6 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
-import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.helper.BrowserDetector;
 import com.openexchange.ajax.helper.DownloadUtility;
@@ -2165,7 +2164,8 @@ public class Mail extends PermissionServlet implements UploadListener {
                         final ContentType contentType = mailPart.getContentType();
                         final String cs =
                             contentType.containsCharsetParameter() ? contentType.getCharsetParameter() : MailProperties.getInstance().getDefaultMimeCharset();
-                        final String htmlContent = MessageUtility.readMailPart(mailPart, cs);
+                        String htmlContent = MessageUtility.readMailPart(mailPart, cs);
+                        htmlContent = MessageUtility.simpleHtmlDuplicateRemoval(htmlContent);
                         final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
                         attachmentInputStream =
                             new UnsynchronizedByteArrayInputStream(htmlService.filterWhitelist(
