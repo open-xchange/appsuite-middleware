@@ -4,6 +4,7 @@
  - Fix for bug 22946: Added Xerces imports
  - Fix for bug 22657: Alternative look-up for configuration service
  - Fix for bug 22580: Deal with possibly absent mpasswd file
+ - Fix for bug 22947: Added null guard
 
 * 2012-09-14 - thorben.betten@open-xchange.com
 
