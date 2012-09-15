@@ -87,7 +87,6 @@ import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
-import com.openexchange.java.SynchronizedBasedReentrantLock;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
@@ -185,7 +184,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     private static <V> V performSynchronized(final Callable<V> task, final Session session) throws Exception {
         Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
         if (null == lock) {
-            lock = new SynchronizedBasedReentrantLock(session);
+            lock = Session.EMPTY_LOCK;
         }
         lock.lock();
         try {

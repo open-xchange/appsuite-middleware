@@ -54,7 +54,7 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Lock;
-import com.openexchange.java.SynchronizedBasedReentrantLock;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.session.Session;
 
 /**
@@ -85,7 +85,7 @@ public final class MailSessionCache {
         if (null == mailCache) {
             Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
             if (null == lock) {
-                lock = new SynchronizedBasedReentrantLock(session);
+                lock = Session.EMPTY_LOCK;
             }
             lock.lock();
             try {
@@ -122,7 +122,7 @@ public final class MailSessionCache {
         if (null != mailCache) {
             Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
             if (null == lock) {
-                lock = new SynchronizedBasedReentrantLock(session);
+                lock = Session.EMPTY_LOCK;
             }
             lock.lock();
             try {

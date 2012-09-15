@@ -60,7 +60,6 @@ import com.openexchange.imap.cache.util.FolderMap;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.converters.IMAPFolderConverter;
 import com.openexchange.imap.services.IMAPServiceRegistry;
-import com.openexchange.java.SynchronizedBasedReentrantLock;
 import com.openexchange.mail.cache.SessionMailCache;
 import com.openexchange.mail.cache.SessionMailCacheEntry;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -199,7 +198,7 @@ public final class FolderCache {
         if (null == folderMap) {
             Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
             if (null == lock) {
-                lock = new SynchronizedBasedReentrantLock(session);
+                lock = Session.EMPTY_LOCK;
             }
             lock.lock();
             try {
