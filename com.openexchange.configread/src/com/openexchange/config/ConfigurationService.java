@@ -145,7 +145,7 @@ public interface ConfigurationService {
      * Gets the file denoted by given file name.
      * 
      * @param fileName The file name
-     * @return The directory or <code>null</code>
+     * @return The file or <code>null</code>
      */
     File getFileByName(String fileName);
 
