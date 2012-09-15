@@ -1,3 +1,7 @@
+* 2012-09-15 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22948: Resolved deadlock on locked session instance
+
 * 2012-09-14 - thorben.betten@open-xchange.com
 
  - Fix for bug 22983: Add former "category" field providing previously used category number for downward compatibility
