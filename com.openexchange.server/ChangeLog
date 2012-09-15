@@ -3,6 +3,7 @@
  - Fix for bug 22948: Resolved deadlock on locked session instance
  - Fix for bug 22946: Added Xerces imports
  - Fix for bug 22657: Alternative look-up for configuration service
+ - Fix for bug 22580: Deal with possibly absent mpasswd file
 
 * 2012-09-14 - thorben.betten@open-xchange.com
 
