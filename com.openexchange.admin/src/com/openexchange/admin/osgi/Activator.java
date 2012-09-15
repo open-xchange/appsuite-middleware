@@ -86,7 +86,7 @@ public class Activator extends HousekeepingActivator {
         track(ContextService.class, new RegistryServiceTrackerCustomizer<ContextService>(context, AdminServiceRegistry.getInstance(), ContextService.class));
         track(MailAccountStorageService.class, new RegistryServiceTrackerCustomizer<MailAccountStorageService>(context, AdminServiceRegistry.getInstance(), MailAccountStorageService.class));
         final ConfigurationService configurationService = getService(ConfigurationService.class);
-        AdminCache.compareAndSet(null, configurationService);
+        AdminCache.compareAndSetConfigurationService(null, configurationService);
         AdminServiceRegistry.getInstance().addService(ConfigurationService.class, configurationService);
         track(CreateTableService.class, new CreateTableCustomizer(context));
         openTrackers();

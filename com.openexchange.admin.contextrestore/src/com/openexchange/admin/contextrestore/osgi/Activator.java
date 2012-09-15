@@ -72,7 +72,7 @@ public class Activator extends HousekeepingActivator {
     public void startBundle() throws Exception {
         try {
             ConfigurationService service = getService(ConfigurationService.class);
-            AdminCache.compareAndSet(null, service);
+            AdminCache.compareAndSetConfigurationService(null, service);
             ox_ctx = new OXContext(context);
             contextRestore = new OXContextRestore();
 

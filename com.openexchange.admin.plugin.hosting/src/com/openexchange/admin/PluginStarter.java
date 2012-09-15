@@ -85,7 +85,7 @@ public class PluginStarter {
 
     public void start(final BundleContext context, final ConfigurationService service) throws RemoteException, StorageException, OXGenericException {
         try {
-            AdminCache.compareAndSet(null, service);
+            AdminCache.compareAndSetConfigurationService(null, service);
             this.context = context;
             initCache(service);
 
