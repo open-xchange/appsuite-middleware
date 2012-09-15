@@ -1,6 +1,7 @@
 * 2012-09-15 - thorben.betten@open-xchange.com
 
  - Fix for bug 22948: Resolved deadlock on locked session instance
+ - Fix for bug 22946: Added Xerces imports
 
 * 2012-09-14 - thorben.betten@open-xchange.com
 
