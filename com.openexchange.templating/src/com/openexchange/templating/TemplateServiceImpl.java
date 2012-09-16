@@ -251,8 +251,8 @@ public class TemplateServiceImpl implements TemplateService {
         }
         BufferedReader reader = null;
         try {
-            final StringBuilder builder = new StringBuilder();
             reader = new BufferedReader(new FileReader(templateFile));
+            final StringBuilder builder = new StringBuilder();
             String line = null;
             while ((line = reader.readLine()) != null) {
                 builder.append(line).append('\n');
