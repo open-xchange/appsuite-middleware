@@ -1,6 +1,7 @@
 * 2012-09-16 - thorben.betten@open-xchange.com
 
  - Fix for bug 22951: Added missing "autosave" action to mail module
+ - Fix for bug 23006: Fixed logging of exceptions
 
 * 2012-09-15 - thorben.betten@open-xchange.com
 
