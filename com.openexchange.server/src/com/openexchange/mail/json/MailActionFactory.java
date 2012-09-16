@@ -61,6 +61,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.json.actions.AbstractMailAction;
 import com.openexchange.mail.json.actions.AllAction;
+import com.openexchange.mail.json.actions.AutosaveAction;
 import com.openexchange.mail.json.actions.ClearAction;
 import com.openexchange.mail.json.actions.CopyAction;
 import com.openexchange.mail.json.actions.DeleteAction;
@@ -103,7 +104,7 @@ public class MailActionFactory implements AJAXActionServiceFactory, AJAXStateHan
      */
     public MailActionFactory(final ServiceLookup services) {
         super();
-        actions = new ConcurrentHashMap<String, AbstractMailAction>(25);
+        actions = new ConcurrentHashMap<String, AbstractMailAction>(32);
         actions.put("all", new AllAction(services));
         actions.put("threadedAll", new SimpleThreadStructureAction(services));
         actions.put("get", new GetAction(services));
@@ -129,6 +130,7 @@ public class MailActionFactory implements AJAXActionServiceFactory, AJAXStateHan
         actions.put("new", new NewAction(services));
         actions.put("import", new ImportAction(services));
         actions.put("edit", new EditAction(services));
+        actions.put("autosave", new AutosaveAction(services));
     }
 
     @Override
