@@ -86,9 +86,14 @@ public abstract class DateMapping<O> extends DefaultJsonMapping<Date, O> {
             final Object object = from.get(ajaxName);
             if (object instanceof Number) {
                 set(to, new Date(((Number) object).longValue()));
+            } else if (null != object) {
+                try {
+                    set(to, new Date(Long.parseLong(object.toString())));
+                } catch (final NumberFormatException e) {
+                    throw new JSONException("JSONObject[\""+ajaxName+"\"] is not a number: " + object);
+                }
             } else {
-                LOG.warn("JSONObject[\""+ajaxName+"\"] is not a number: " + object);
-                set(to, null);
+                throw new JSONException("JSONObject[\""+ajaxName+"\"] is not a number: " + object);
             }
         }
 	}
