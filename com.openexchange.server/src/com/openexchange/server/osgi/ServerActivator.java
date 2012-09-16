@@ -54,7 +54,6 @@ import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import javax.servlet.ServletException;
 import net.htmlparser.jericho.Config;
 import net.htmlparser.jericho.LoggerProvider;
@@ -271,8 +270,6 @@ public final class ServerActivator extends HousekeepingActivator {
 
     private final Starter starter;
 
-    private final AtomicBoolean started;
-
     private WhiteboardSecretService secretService;
 
     /**
@@ -280,7 +277,6 @@ public final class ServerActivator extends HousekeepingActivator {
      */
     public ServerActivator() {
         super();
-        this.started = new AtomicBoolean();
         this.starter = new Starter();
         serviceTrackerList = new ArrayList<ServiceTracker<?,?>>();
         eventHandlerList = new ArrayList<EventHandlerRegistration>();
@@ -336,15 +332,6 @@ public final class ServerActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        if (!started.compareAndSet(false, true)) {
-            /*
-             * Don't start the server again. A duplicate call to startBundle() is probably caused by temporary absent service(s) whose
-             * re-availability causes to trigger this method again.
-             */
-            LOG.info("A temporary absent service is available again");
-            return;
-        }
-        
         CONTEXT = context;
         JSONObject.setMaxSize(getService(ConfigurationService.class).getIntProperty("com.openexchange.json.maxSize", 2500));
         Config.LoggerProvider = LoggerProvider.DISABLED;
