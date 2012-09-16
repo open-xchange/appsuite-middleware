@@ -114,7 +114,7 @@ public class DatabaseAuthentication implements AuthenticationService {
                 throw INVALID_CREDENTIALS.create();
             }
         } catch (final OXException e) {
-            throw new OXException(e);
+            throw e;
         }
         return new Authenticated() {
             @Override
