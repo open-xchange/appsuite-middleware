@@ -49,6 +49,9 @@
 
 package com.openexchange.exception;
 
+import java.util.EnumSet;
+import java.util.Set;
+
 /**
  * {@link OXExceptionFactory} - A factory for {@link OXException} instances.
  *
@@ -118,9 +121,20 @@ public class OXExceptionFactory {
         return create(code, (Throwable) null, args);
     }
 
+    private static final Set<Category.EnumType> DISPLAYABLE = EnumSet.of(
+        Category.EnumType.CAPACITY,
+        Category.EnumType.CONFLICT,
+        Category.EnumType.CONNECTIVITY,
+        Category.EnumType.PERMISSION_DENIED,
+        Category.EnumType.SERVICE_DOWN,
+        Category.EnumType.TRUNCATED,
+        Category.EnumType.TRY_AGAIN,
+        Category.EnumType.USER_INPUT,
+        Category.EnumType.WARNING);
+
     /**
      * Creates a new {@link OXException} instance pre-filled with specified code's attributes.
-     *
+     * 
      * @param code The exception code
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
@@ -132,12 +146,15 @@ public class OXExceptionFactory {
         if (category.getLogLevel().implies(LogLevel.DEBUG)) {
             ret = new OXException(code.getNumber(), code.getMessage(), cause, args);
         } else {
-            ret =
-                new OXException(
+            if (DISPLAYABLE.contains(category.getType())) {
+                ret = new OXException(code.getNumber(), code.getMessage(), cause, args).setLogMessage(code.getMessage(), args);
+            } else {
+                ret = new OXException(
                     code.getNumber(),
                     Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE,
                     cause,
                     new Object[0]).setLogMessage(code.getMessage(), args);
+            }
         }
         return ret.addCategory(category).setPrefix(code.getPrefix());
     }
