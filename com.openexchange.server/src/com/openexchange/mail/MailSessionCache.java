@@ -54,7 +54,6 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Lock;
-import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.session.Session;
 
 /**
