@@ -324,16 +324,18 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
              */
             {
                 final Session session = SessiondService.SERVICE_REFERENCE.get().getAnyActiveSessionForUser(user, cid);
-                final String parameterName = MailSessionParameterNames.getParamDefaultFolderArray();
-                final String[] fullNames = MailSessionCache.getInstance(session).getParameter(id, parameterName);
-                String s = getOptionalString(result.getString(15));
-                mailAccount.setTrashFullname(s == null ? (null == fullNames ? null : fullNames[StorageUtility.INDEX_TRASH]) : s);
-                s = getOptionalString(result.getString(16));
-                mailAccount.setSentFullname(s == null ? (null == fullNames ? null : fullNames[StorageUtility.INDEX_SENT]) : s);
-                s = getOptionalString(result.getString(17));
-                mailAccount.setDraftsFullname(s == null ? (null == fullNames ? null : fullNames[StorageUtility.INDEX_DRAFTS]) : s);
-                s = getOptionalString(result.getString(18));
-                mailAccount.setSpamFullname(s == null ? (null == fullNames ? null : fullNames[StorageUtility.INDEX_SPAM]) : s);
+                if (null != session) {
+                    final String parameterName = MailSessionParameterNames.getParamDefaultFolderArray();
+                    final String[] fullNames = MailSessionCache.getInstance(session).getParameter(id, parameterName);
+                    String s = getOptionalString(result.getString(15));
+                    mailAccount.setTrashFullname(s == null ? (null == fullNames ? null : fullNames[StorageUtility.INDEX_TRASH]) : s);
+                    s = getOptionalString(result.getString(16));
+                    mailAccount.setSentFullname(s == null ? (null == fullNames ? null : fullNames[StorageUtility.INDEX_SENT]) : s);
+                    s = getOptionalString(result.getString(17));
+                    mailAccount.setDraftsFullname(s == null ? (null == fullNames ? null : fullNames[StorageUtility.INDEX_DRAFTS]) : s);
+                    s = getOptionalString(result.getString(18));
+                    mailAccount.setSpamFullname(s == null ? (null == fullNames ? null : fullNames[StorageUtility.INDEX_SPAM]) : s);
+                }
             }
             /*
              * Full names for confirmed-spam and confirmed-ham
