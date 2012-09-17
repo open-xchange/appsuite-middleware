@@ -1,9 +1,9 @@
-package com.openexchange.realtime.example.presence.osgi;
+package com.openexchange.realtime.presence.osgi;
 
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.realtime.MessageDispatcher;
-import com.openexchange.realtime.example.presence.DummyPresenceService;
-import com.openexchange.realtime.example.presence.PresenceService;
+import com.openexchange.realtime.presence.DummyPresenceService;
+import com.openexchange.realtime.presence.PresenceService;
 
 public class PresenceActivator extends HousekeepingActivator {
 

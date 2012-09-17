@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.realtime.example.presence;
+package com.openexchange.realtime.presence;
 
 import java.util.Arrays;
 import java.util.List;

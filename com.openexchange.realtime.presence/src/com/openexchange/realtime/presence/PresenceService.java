@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.realtime.example.presence;
+package com.openexchange.realtime.presence;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.packet.ID;

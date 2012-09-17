@@ -49,10 +49,10 @@
 
 package com.openexchange.realtime.example.websocket.presence;
 
-import com.openexchange.realtime.example.presence.PresenceService;
-import com.openexchange.realtime.example.presence.PresenceStatus;
 import com.openexchange.realtime.example.websocket.ConversionWSHandler;
 import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.presence.PresenceService;
+import com.openexchange.realtime.presence.PresenceStatus;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 

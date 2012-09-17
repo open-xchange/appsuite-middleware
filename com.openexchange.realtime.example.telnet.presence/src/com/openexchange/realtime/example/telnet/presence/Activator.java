@@ -1,8 +1,8 @@
 package com.openexchange.realtime.example.telnet.presence;
 
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.realtime.example.presence.PresenceService;
 import com.openexchange.realtime.example.telnet.TelnetChatPlugin;
+import com.openexchange.realtime.presence.PresenceService;
 
 public class Activator extends HousekeepingActivator {
 

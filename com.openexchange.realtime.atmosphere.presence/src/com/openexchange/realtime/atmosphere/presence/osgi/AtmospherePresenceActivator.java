@@ -56,7 +56,7 @@ import com.openexchange.realtime.atmosphere.OXRTConversionHandler;
 import com.openexchange.realtime.atmosphere.OXRTHandler;
 import com.openexchange.realtime.atmosphere.presence.JSONToPresenceStatusConverter;
 import com.openexchange.realtime.atmosphere.presence.PresenceStatusToJSONConverter;
-import com.openexchange.realtime.example.presence.PresenceService;
+import com.openexchange.realtime.presence.PresenceService;
 
 /**
  * {@link AtmospherePresenceActivator} - Register the presence specific payload converters as SimplePayloadConverters and add a new

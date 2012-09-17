@@ -47,9 +47,9 @@
  *
  */
 
-package com.openexchange.realtime.example.presence;
+package com.openexchange.realtime.presence;
 
-import com.openexchange.realtime.example.presence.PresenceService.PresenceState;
+import com.openexchange.realtime.presence.PresenceService.PresenceState;
 
 /**
  * {@link PresenceStatus} - A Presence status to be used to signalize your status.

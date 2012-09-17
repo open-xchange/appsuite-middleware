@@ -50,9 +50,9 @@
 package com.openexchange.realtime.presence.hazelcast.impl;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.example.presence.PresenceService;
-import com.openexchange.realtime.example.presence.PresenceStatus;
 import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.presence.PresenceService;
+import com.openexchange.realtime.presence.PresenceStatus;
 import com.openexchange.tools.session.ServerSession;
 
 

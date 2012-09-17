@@ -52,11 +52,9 @@ package com.openexchange.realtime.atmosphere.presence;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.atmosphere.OXRTHandler;
 import com.openexchange.realtime.atmosphere.StanzaSender;
-import com.openexchange.realtime.example.presence.PresenceService;
-import com.openexchange.realtime.example.presence.PresenceStatus;
 import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.Payload;
 import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.presence.PresenceStatus;
 import com.openexchange.realtime.util.IDMap;
 import com.openexchange.tools.session.ServerSession;
 
