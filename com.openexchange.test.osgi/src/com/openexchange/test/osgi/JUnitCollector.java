@@ -47,19 +47,17 @@
  *
  */
 
-package com.openexchange.test.osgi.osgi;
+package com.openexchange.test.osgi;
 
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import junit.framework.TestSuite;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
-import com.openexchange.test.osgi.JUnitTestExecutor;
 
 /**
  * {@link JUnitCollector}
@@ -67,8 +65,6 @@ import com.openexchange.test.osgi.JUnitTestExecutor;
  * @author <a href="mailto:felix.marx@open-xchange.com">Felix Marx</a>
  */
 public class JUnitCollector implements ServiceListener {
-
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(JUnitCollector.class);
 
     private final ConcurrentMap<String, TestSuite> jUnitServices;
 
@@ -104,8 +100,10 @@ public class JUnitCollector implements ServiceListener {
      * Opens this collector.
      */
     public void open() {
+//        System.out.println("Starting opening progress");
         try {
-            final ServiceReference<?>[] allServiceReferences = context.getAllServiceReferences(null, null);
+            final ServiceReference<?>[] allServiceReferences = context.getServiceReferences(TestSuite.class.getName(), null);
+//            System.out.println("im still there");
             if (allServiceReferences != null && allServiceReferences.length > 0) {
                 for (final ServiceReference<?> serviceReference : allServiceReferences) {
                     add(serviceReference);
@@ -113,10 +111,13 @@ public class JUnitCollector implements ServiceListener {
             }
             
 
-        } catch (final InvalidSyntaxException e) {
-            // Impossible, no filter specified.
+//        } catch (final InvalidSyntaxException e) {
+//            // Impossible, no filter specified.
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
+//        System.out.println("finished opening");
+        
         open = true;
     }
 
@@ -147,8 +148,9 @@ public class JUnitCollector implements ServiceListener {
             jUnitServices.put(name,(TestSuite) service);
             
             //vorlaeufig
-            LOG.info("added " + name + " as OSGI Test" );
+            System.out.println("added " + name + " as OSGI Test" );
             runAllTests();
+            System.out.println("ran all tests");
         }
     }
 

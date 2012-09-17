@@ -50,48 +50,30 @@
 package com.openexchange.test.osgi.osgi;
 
 //import javax.servlet.ServletException;
-import java.util.Map;
-import org.apache.commons.logging.Log;
-import junit.framework.TestSuite;
+//import org.apache.commons.logging.Log;
+import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-//import org.osgi.service.http.HttpService;
-//import org.osgi.service.http.NamespaceException;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.test.osgi.JUnitCollector;
 
 /**
  * {@link TestingActivator} - The activator for Junit testing bundle.
  *
  * @author <a href="mailto:felix.marx@open-xchange.com">Felix Marx</a>
  */
-public class TestingActivator extends HousekeepingActivator {
-
-    /**
-     * The logger.
-     */
-    static final Log LOG = com.openexchange.log.Log.loggerFor(TestingActivator.class);
-
-    /**
-     * The JUnit testing Servlet's alias.
-     */
-    static final String ALIAS = "/testing";
-
+public class TestingActivator implements BundleActivator {
+    
     
     private volatile JUnitCollector jCollector;
     private volatile boolean collectorOpened = false;
     
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] {/* HttpService.class */};
-    }
+ 
 
     @Override
-    protected void startBundle() throws Exception {
+    public void start(final BundleContext context) throws Exception {
         
         try {
-            LOG.info("Starting Bundle: com.openexchange.test.osgi");
+            System.out.println("Starting Bundle: com.openexchange.test.osgi");
             
             final JUnitCollector jcollector = new JUnitCollector(context);
             context.addServiceListener(jcollector);
@@ -101,7 +83,7 @@ public class TestingActivator extends HousekeepingActivator {
             
             this.jCollector = jcollector;
             
-            LOG.info("Collector opened and created");
+            System.out.println("Collector opened and created");
             
         } catch (final Exception e) {
             if (collectorOpened) {
@@ -115,14 +97,15 @@ public class TestingActivator extends HousekeepingActivator {
                     this.jCollector = null;
                 }
             }
-            
-            LOG.error(e.getMessage(), e);
+            System.out.println(e.getMessage());
             throw e;
         }
+        
+
     }
     
     @Override
-    protected void stopBundle() throws Exception {
+    public void stop(BundleContext context) throws Exception {
         if (collectorOpened) {
             if (null != jCollector) {
                 try {
