@@ -65,6 +65,11 @@ public final class SessiondEventConstants {
     }
 
     /**
+     * The topic on last session gone.
+     */
+    public static final String TOPIC_LAST_SESSION = "com/openexchange/sessiond/remove/last";
+
+    /**
      * The topic on single session removal.
      */
     public static final String TOPIC_REMOVE_SESSION = "com/openexchange/sessiond/remove/session";
@@ -97,7 +102,7 @@ public final class SessiondEventConstants {
      * <p>
      * Needed on event handler registration to a bundle context.
      */
-    private static final String[] TOPICS = { TOPIC_REMOVE_SESSION, TOPIC_REMOVE_CONTAINER, TOPIC_REMOVE_DATA, TOPIC_ADD_SESSION, TOPIC_REACTIVATE_SESSION };
+    private static final String[] TOPICS = { TOPIC_LAST_SESSION, TOPIC_REMOVE_SESSION, TOPIC_REMOVE_CONTAINER, TOPIC_REMOVE_DATA, TOPIC_ADD_SESSION, TOPIC_REACTIVATE_SESSION };
 
     /**
      * Gets an array of {@link String string} including all known topics.
@@ -111,6 +116,20 @@ public final class SessiondEventConstants {
         System.arraycopy(TOPICS, 0, retval, 0, TOPICS.length);
         return retval;
     }
+
+    /**
+     * The property for a user identifier kept in event's properties.
+     * <p>
+     * Target object is an instance of <tt>java.lang.Integer</tt>.
+     */
+    public static final String PROP_USER_ID = "com.openexchange.sessiond.userId";
+
+    /**
+     * The property for a context identifier kept in event's properties.
+     * <p>
+     * Target object is an instance of <tt>java.lang.Integer</tt>.
+     */
+    public static final String PROP_CONTEXT_ID = "com.openexchange.sessiond.contextId";
 
     /**
      * The property for a single session kept in event's properties.

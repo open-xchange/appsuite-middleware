@@ -79,16 +79,21 @@ public abstract class DateMapping<O> extends DefaultJsonMapping<Date, O> {
 
 	@Override
 	public void deserialize(JSONObject from, O to) throws JSONException, OXException {
-		final String ajaxName = getAjaxName();
-		if (from.isNull(ajaxName)) {
+	    final String ajaxName = getAjaxName();
+        if (from.isNull(ajaxName)) {
             set(to, null);
         } else {
             final Object object = from.get(ajaxName);
             if (object instanceof Number) {
                 set(to, new Date(((Number) object).longValue()));
+            } else if (null != object) {
+                try {
+                    set(to, new Date(Long.parseLong(object.toString())));
+                } catch (final NumberFormatException e) {
+                    throw new JSONException("JSONObject[\""+ajaxName+"\"] is not a number: " + object);
+                }
             } else {
-                LOG.warn("JSONObject[\""+ajaxName+"\"] is not a number: " + object);
-                set(to, null);
+                throw new JSONException("JSONObject[\""+ajaxName+"\"] is not a number: " + object);
             }
         }
 	}

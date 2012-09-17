@@ -54,9 +54,11 @@ import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServ
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
@@ -705,6 +707,22 @@ public final class SessionHandler {
             if (DEBUG) {
                 LOG.debug("Posted event for removed session");
             }
+            if (sessionData.isUserActive(session.getUserId(), session.getContextId())) {
+                postLastSessionGone(session.getUserId(), session.getContextId(), eventAdmin);
+            }
+        }
+    }
+
+    private static void postLastSessionGone(final int userId, final int contextId, final EventAdmin eventAdmin) {
+        if (eventAdmin != null) {
+            final Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
+            dic.put(SessiondEventConstants.PROP_USER_ID, Integer.valueOf(userId));
+            dic.put(SessiondEventConstants.PROP_CONTEXT_ID, Integer.valueOf(contextId));
+            final Event event = new Event(SessiondEventConstants.TOPIC_LAST_SESSION, dic);
+            eventAdmin.postEvent(event);
+            if (DEBUG) {
+                LOG.debug("Posted event for last removed session");
+            }
         }
     }
 
@@ -713,9 +731,11 @@ public final class SessionHandler {
         if (eventAdmin != null) {
             final Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
             final Map<String, Session> eventMap = new HashMap<String, Session>();
+            final Set<UserKey> users = new HashSet<UserKey>(sessionControls.size());
             for (final SessionControl sessionControl : sessionControls) {
                 final Session session = sessionControl.getSession();
                 eventMap.put(session.getSessionID(), session);
+                users.add(new UserKey(session.getUserId(), session.getContextId()));
             }
             dic.put(SessiondEventConstants.PROP_CONTAINER, eventMap);
             dic.put(SessiondEventConstants.PROP_COUNTER, SESSION_COUNTER);
@@ -723,6 +743,11 @@ public final class SessionHandler {
             eventAdmin.postEvent(event);
             if (DEBUG) {
                 LOG.debug("Posted event for removed session container");
+            }
+            for (final UserKey userKey : users) {
+                if (sessionData.isUserActive(userKey.userId, userKey.contextId)) {
+                    postLastSessionGone(userKey.userId, userKey.contextId, eventAdmin);
+                }
             }
         }
     }
@@ -732,9 +757,11 @@ public final class SessionHandler {
         if (eventAdmin != null) {
             final Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
             final Map<String, Session> eventMap = new HashMap<String, Session>();
+            final Set<UserKey> users = new HashSet<UserKey>(controls.size());
             for (final SessionControl sessionControl : controls) {
                 final Session session = sessionControl.getSession();
                 eventMap.put(session.getSessionID(), session);
+                users.add(new UserKey(session.getUserId(), session.getContextId()));
             }
             dic.put(SessiondEventConstants.PROP_CONTAINER, eventMap);
             dic.put(SessiondEventConstants.PROP_COUNTER, SESSION_COUNTER);
@@ -742,6 +769,11 @@ public final class SessionHandler {
             eventAdmin.postEvent(event);
             if (DEBUG) {
                 LOG.debug("Posted event for removing temporary session data.");
+            }
+            for (final UserKey userKey : users) {
+                if (sessionData.isUserActive(userKey.userId, userKey.contextId)) {
+                    postLastSessionGone(userKey.userId, userKey.contextId, eventAdmin);
+                }
             }
         }
     }
@@ -838,5 +870,45 @@ public final class SessionHandler {
             }
         }
         return retval;
+    }
+
+    private static final class UserKey {
+        protected final int contextId;
+        protected final int userId;
+        private final int hash;
+
+        protected UserKey(int userId, int contextId) {
+            super();
+            this.userId = userId;
+            this.contextId = contextId;
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + contextId;
+            result = prime * result + userId;
+            hash = result;
+        }
+
+        @Override
+        public int hashCode() {
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof UserKey)) {
+                return false;
+            }
+            UserKey other = (UserKey) obj;
+            if (contextId != other.contextId) {
+                return false;
+            }
+            if (userId != other.userId) {
+                return false;
+            }
+            return true;
+        }
     }
 }

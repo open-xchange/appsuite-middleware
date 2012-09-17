@@ -196,11 +196,22 @@ final class SessionData {
      * @return <code>true</code> if given user in specified context has an active session; otherwise <code>false</code>
      */
     boolean isUserActive(final int userId, final Context context) {
+        return isUserActive(userId, context.getContextId());
+    }
+
+    /**
+     * Checks if given user in specified context has an active session kept in session container(s)
+     *
+     * @param userId The user ID
+     * @param contextId The user's context ID
+     * @return <code>true</code> if given user in specified context has an active session; otherwise <code>false</code>
+     */
+    boolean isUserActive(final int userId, final int contextId) {
         // A read-only access to session list
         rlock.lock();
         try {
             for (final SessionContainer container : sessionList) {
-                if (container.containsUser(userId, context.getContextId())) {
+                if (container.containsUser(userId, contextId)) {
                     return true;
                 }
             }
@@ -209,7 +220,7 @@ final class SessionData {
         }
         rlongTermLock.lock();
         try {
-            return hasLongTermSession(userId, context.getContextId());
+            return hasLongTermSession(userId, contextId);
         } finally {
             rlongTermLock.unlock();
         }
