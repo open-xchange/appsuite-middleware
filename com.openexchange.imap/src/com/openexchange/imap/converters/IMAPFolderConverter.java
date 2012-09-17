@@ -521,13 +521,13 @@ public final class IMAPFolderConverter {
         }
     }
 
-    private static boolean startsWithOneOf(String imapFullName, char sep, String[] personalNamespaces, String[] userNamespaces) {
-        for (String string : userNamespaces) {
+    private static boolean startsWithOneOf(final String imapFullName, final char sep, final String[] personalNamespaces, final String[] userNamespaces) {
+        for (final String string : userNamespaces) {
             if (imapFullName.equals(string) || imapFullName.startsWith(string+sep)) {
                 return true;
             }
         }
-        for (String string : personalNamespaces) {
+        for (final String string : personalNamespaces) {
             if (imapFullName.equals(string) || imapFullName.startsWith(string+sep)) {
                 return true;
             }
