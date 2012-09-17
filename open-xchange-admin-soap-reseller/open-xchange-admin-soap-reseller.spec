@@ -15,14 +15,16 @@ License:        GPL-2.0
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 URL:            http://www.open-xchange.com/
 Source:         %{name}_%{version}.orig.tar.bz2
-Summary:        Open Xchange Admin Reseller Plugin SOAP server
+Summary:        SOAP interfaces for the reseller administration level
 Requires:       open-xchange-soap-cxf >= @OXVERSION@
 Requires:	open-xchange-admin-reseller >= @OXVERSION@
 Provides:	open-xchange-admin-plugin-reseller-soap = %{version}
 Obsoletes:	open-xchange-admin-plugin-reseller-soap <= %{version}
 
 %description
-Open Xchange Admin Reseller Plugin SOAP server
+This package installs the SOAP interfaces for the reseller level administration RMI interfaces. See the open-xchange-admin-reseller package
+for a description of the reseller administration level. The SOAP interfaces allow a lot of programming languages for the reseller
+administration clients while RMI only allows Java clients.
 
 Authors:
 --------

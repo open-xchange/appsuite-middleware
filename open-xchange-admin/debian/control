@@ -13,4 +13,6 @@ Depends: ${misc:Depends}
 Replaces: open-xchange-admin-plugin-hosting, open-xchange-admin-lib, open-xchange-admin-plugin-hosting-client, open-xchange-admin-plugin-hosting-doc, open-xchange-admin-client, open-xchange-admin-plugin-hosting-lib, open-xchange-admin-doc
 Conflicts: open-xchange-admin-plugin-hosting, open-xchange-admin-lib, open-xchange-admin-plugin-hosting-client, open-xchange-admin-plugin-hosting-doc, open-xchange-admin-client, open-xchange-admin-plugin-hosting-lib, open-xchange-admin-doc
 Description: The Open-Xchange backend administration extension
- This package installs the OSGi bundles to the backend that provide the RMI interface to administer the installation.
+ This package installs the OSGi bundles to the backend that provide the RMI interface to administer the installation. This package contains
+ the RMI interfaces for the overall administrative tasks like registering, changing and deleting servers, databases and filestores. It also
+ contains the interfaces for creating, changing and deleting contexts, users, groups and resources.

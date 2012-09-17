@@ -11,7 +11,11 @@ Architecture: all
 Depends: ${misc:Depends}, open-xchange-admin (>= @OXVERSION@), open-xchange-admin-autocontextid (>= @OXVERSION@)
 Replaces: open-xchange-admin-plugin-reseller (<< 6.21.0-0)
 Conflicts: open-xchange-admin-plugin-reseller (<< 6.21.0-0)
-Description: Open Xchange Admin Reseller Plugin
+Description: Extends the administration of the backend with the reseller level
+ This extension adds the reseller administration level to the administrative RMI interface. The master administrator can now create reseller
+ administators which are the allowed to manage contexts on their own. All reseller administrators are completely isolated in the cluster
+ installation. For every reseller it looks like he is working with his own cluster installation and he is not able to see contexts of other
+ resellers.
 
 ###### http://wiki.debian.org/Renaming_a_Package #####
 Package: open-xchange-admin-plugin-reseller

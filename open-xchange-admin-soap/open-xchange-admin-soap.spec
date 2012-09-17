@@ -14,12 +14,15 @@ License:        GPL-2.0
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 URL:            http://www.open-xchange.com/
 Source:         %{name}_%{version}.orig.tar.bz2
-Summary:        Open Xchange Admin SOAP API
+Summary:        The Open-Xchange administrative SOAP interface
 Requires:       open-xchange-soap-cxf >= @OXVERSION@
 Requires:	open-xchange-admin >= @OXVERSION@
 
 %description
-Open Xchange Admin SOAP API
+This package installs the OSGi bundles that provide a SOAP interface to administer the backend installation. This is an extension to the
+administrative RMI interfaces. RMI can only be used with Java while SOAP enables a lot of programming languages for administrative clients.
+This package contains the SOAP interfaces for registering, changing and deleting servers, databases and filestores. It also add the
+interfaces for creating, changing and deleting contexts, users, groups and resources.
 
 Authors:
 --------

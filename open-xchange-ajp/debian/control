@@ -12,5 +12,9 @@ Pre-Depends: open-xchange-core (>= @OXVERSION@)
 Depends: ${misc:Depends}
 Conflicts: open-xchange-grizzly
 Provides: open-xchange-httpservice
-Description: The Open-Xchange AJP Connector
- This package implements an AJP Connector and provides the OSGi http service.
+Description: AJPv13 protocol based connector between backend and web server
+ This package installs the OSGi bundle that implements an AJPv13 protocol based web server connector. The web server and the Open-Xchange
+ backend are connected through this connector to provide the backend data to the web frontend or any other client through the HTTP or HTTPS
+ protocol. Normally Apache is used as web server and it is possible to use mod_jk or mod_proxy_ajp to establish the connection.
+ AJPv13 is optimized to use as few as possible connections to the backend by reusing AJPv13 connections for subsequent HTTP/HTTPS requests.
+ This package and its bundle provide the OSGi http service internally for registering HTTP servlets and resources.

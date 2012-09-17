@@ -14,14 +14,19 @@ License:       GPL-2.0
 BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
-Summary:       The Open-Xchange database authentication
+Summary:       Module for authenticating users using the password stored in MySQL
 Requires:      open-xchange-core >= @OXVERSION@
 Provides:      open-xchange-authentication
 Conflicts:     open-xchange-authentication-ldap
 Conflicts:     open-xchange-authentication-imap
 
 %description
-This package implements an authentication mechanism using the Open-Xchange database.
+This package installs the OSGi bundle implementing the OSGi AuthenticationService for the backend. The implementation uses the user object
+stored in the MySQL database to authenticate login requests. Therefore the login is separated at the @ character into context specific
+login and user specific login information. Both informations are used to resolve context and user. Afterwards the password of the login
+request is verified with the stored password of the user.
+This authentication module is mutually exclusive with any other authentication module. Only one authentication module can be installed on
+the backend.
 
 Authors:
 --------

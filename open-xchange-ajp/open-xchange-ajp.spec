@@ -14,14 +14,17 @@ License:       GPL-2.0
 BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
-Summary:       The Open-Xchange AJP Connector
+Summary:       AJPv13 protocol based connector between backend and web server
 Requires:      open-xchange-core >= @OXVERSION@
 Provides:      open-xchange-httpservice
 Conflicts:     open-xchange-grizzly
 
 %description
-This package implements an AJP Connector and provides the OSGi HTTP service.
-
+This package installs the OSGi bundle that implements an AJPv13 protocol based web server connector. The web server and the Open-Xchange
+backend are connected through this connector to provide the backend data to the web frontend or any other client through the HTTP or HTTPS
+protocol. Normally Apache is used as web server and it is possible to use mod_jk or mod_proxy_ajp to establish the connection.
+AJPv13 is optimized to use as few as possible connections to the backend by reusing AJPv13 connections for subsequent HTTP/HTTPS requests.
+This package and its bundle provide the OSGi http service internally for registering HTTP servlets and resources.
 
 Authors:
 --------

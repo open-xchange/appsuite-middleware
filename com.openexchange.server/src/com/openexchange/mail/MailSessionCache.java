@@ -70,6 +70,9 @@ public final class MailSessionCache {
      * @return The session-bound mail cache.
      */
     public static MailSessionCache getInstance(final Session session) {
+        if (null == session) {
+            return null;
+        }
         final String key = MailSessionParameterNames.getParamMainCache();
         MailSessionCache mailCache = null;
         try {

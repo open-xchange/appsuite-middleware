@@ -15,14 +15,16 @@ License:        GPL-2.0
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 URL:            http://www.open-xchange.com/
 Source:         %{name}_%{version}.orig.tar.bz2
-Summary:        Open Xchange Admin User Copy Bundle SOAP server
+Summary:        SOAP interface for extension to copy user into other contexts
 Requires:       open-xchange-soap-cxf >= @OXVERSION@
-Requires:	open-xchange-admin-user-copy >= @OXVERSION@
+Requires:       open-xchange-admin-user-copy >= @OXVERSION@
 Provides:       open-xchange-admin-plugin-user-copy-soap = %{version}
 Obsoletes:      open-xchange-admin-plugin-user-copy-soap <= %{version}
 
 %description
-Open Xchange Admin User Copy Bundle SOAP server
+This package installs the OSGi bundle that provides the administrative SOAP interface to copy users into other contexts. SOAP allows
+administrative clients written in any programming language while RMI requires clients written in Java. For a description of copying users
+into other contexts see the package description of package open-xchange-admin-user-copy.
 
 Authors:
 --------
