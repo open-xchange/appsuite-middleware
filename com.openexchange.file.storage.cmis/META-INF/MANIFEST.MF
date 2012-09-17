@@ -95,7 +95,6 @@ Import-Package: com.openexchange.context,
  org.xml.sax,
  org.xml.sax.ext,
  org.xml.sax.helpers
->>>>>>> 1d93005... Added missing imports
 Bundle-ClassPath: lib/chemistry-opencmis-client-api-0.7.0.jar,
  lib/chemistry-opencmis-client-bindings-0.7.0.jar,
  lib/chemistry-opencmis-client-impl-0.7.0.jar,
