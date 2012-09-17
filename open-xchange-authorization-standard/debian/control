@@ -11,4 +11,7 @@ Architecture: all
 Pre-Depends: open-xchange-core (>= @OXVERSION@)
 Depends: ${misc:Depends}
 Provides: open-xchange-authorization
-Description: Default Open-Xchange Authorization implementation
+Description: Module implementing the default authorization
+ This package installs the OSGi bundle publishing the OSGi AuthorizationService. This bundle implements the default authorization method
+ for the backend. When a user got authenticated a second step is to verify that he is authorized to use Open-Xchange currently. The default
+ implementation checks wether the context of the user is enabled.
