@@ -1,3 +1,7 @@
+* 2012-09-17 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23005: Proper response code if auto-login is disabled
+
 * 2012-09-16 - thorben.betten@open-xchange.com
 
  - Fix for bug 23006: Fixed logging of exceptions

@@ -164,7 +164,14 @@ public final class LoginPerformer {
         return doLogin(request, properties, new LoginPerformerClosure() {
             @Override
             public Authenticated doAuthentication(final LoginResultImpl retval) throws OXException {
-                return Authentication.autologin(request.getLogin(), request.getPassword(), properties);
+                try {
+                    return Authentication.autologin(request.getLogin(), request.getPassword(), properties);
+                } catch (OXException e) {
+                    if (LoginExceptionCodes.NOT_SUPPORTED.equals(e)) {
+                        return null;
+                    }
+                    throw e;
+                }
             }
         });
     }
