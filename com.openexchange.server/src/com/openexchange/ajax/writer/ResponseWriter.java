@@ -66,6 +66,7 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.fields.ResponseFields.ParsingFields;
 import com.openexchange.ajax.fields.ResponseFields.TruncatedFields;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.Categories;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
@@ -73,6 +74,7 @@ import com.openexchange.exception.OXException.Parsing;
 import com.openexchange.exception.OXException.ProblematicAttribute;
 import com.openexchange.exception.OXException.Truncated;
 import com.openexchange.log.Log;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * JSON writer for the response container objekt.
@@ -93,6 +95,23 @@ public final class ResponseWriter {
 
     private ResponseWriter() {
         super();
+    }
+
+    private static volatile Boolean includeStackTraceOnError;
+
+    private static boolean includeStackTraceOnError() {
+        Boolean b = includeStackTraceOnError;
+        if (null == b) {
+            synchronized (ResponseWriter.class) {
+                b = includeStackTraceOnError;
+                if (null == b) {
+                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    b = Boolean.valueOf(null != service && service.getBoolProperty("com.openexchange.ajax.response.includeStackTraceOnError", false));
+                    includeStackTraceOnError = b;
+                }
+            }
+        }
+        return b.booleanValue();
     }
 
     /**
@@ -313,28 +332,30 @@ public final class ResponseWriter {
         if (Category.CATEGORY_TRUNCATED.equals(exception.getCategory())) {
             addTruncated(json, exception.getProblematics());
         }
-        // Write exception
-        final JSONArray jsonStack = new JSONArray();
-        jsonStack.put(exception.getSoleMessage());
-        StackTraceElement[] traceElements = exception.getStackTrace();
-        Throwable cause = exception;
-        final StringBuilder tmp = new StringBuilder(64);
-        while (null != traceElements && traceElements.length > 0) {            
-            for (final StackTraceElement stackTraceElement : traceElements) {
-                tmp.setLength(0);
-                writeElementTo(stackTraceElement, tmp);
-                jsonStack.put(tmp.toString());
+        if (includeStackTraceOnError()) {
+            // Write exception
+            final JSONArray jsonStack = new JSONArray();
+            jsonStack.put(exception.getSoleMessage());
+            StackTraceElement[] traceElements = exception.getStackTrace();
+            Throwable cause = exception;
+            final StringBuilder tmp = new StringBuilder(64);
+            while (null != traceElements && traceElements.length > 0) {
+                for (final StackTraceElement stackTraceElement : traceElements) {
+                    tmp.setLength(0);
+                    writeElementTo(stackTraceElement, tmp);
+                    jsonStack.put(tmp.toString());
+                }
+                cause = cause.getCause();
+                if (null == cause) {
+                    traceElements = null;
+                } else {
+                    tmp.setLength(0);
+                    jsonStack.put(tmp.append("Caused by: ").append(cause.getClass().getName()).append(": ").append(cause.getMessage()).toString());
+                    traceElements = cause.getStackTrace();
+                }
             }
-            cause = cause.getCause();
-            if (null == cause) {
-                traceElements = null;
-            } else {
-                tmp.setLength(0);
-                jsonStack.put(tmp.append("Caused by: ").append(cause.getClass().getName()).append(": ").append(cause.getMessage()).toString());
-                traceElements = cause.getStackTrace();
-            }
+            json.put(ERROR_STACK, jsonStack);
         }
-        json.put(ERROR_STACK, jsonStack);
     }
 
     private static void writeElementTo(final StackTraceElement element, final StringBuilder sb) {
@@ -555,21 +576,23 @@ public final class ResponseWriter {
             writer.key(ResponseFields.ERROR_PARAMS).value(array);
         }
         // Write stack trace
-        writer.key(ERROR_STACK);
-        writer.array();
-        try {
-            writer.value(exc.getSoleMessage());
-            final StackTraceElement[] traceElements = exc.getStackTrace();
-            if (null != traceElements && traceElements.length > 0) {
-                final StringBuilder tmp = new StringBuilder(64);
-                for (final StackTraceElement stackTraceElement : traceElements) {
-                    tmp.setLength(0);
-                    writeElementTo(stackTraceElement, tmp);
-                    writer.value(tmp.toString());
+        if (includeStackTraceOnError()) {
+            writer.key(ERROR_STACK);
+            writer.array();
+            try {
+                writer.value(exc.getSoleMessage());
+                final StackTraceElement[] traceElements = exc.getStackTrace();
+                if (null != traceElements && traceElements.length > 0) {
+                    final StringBuilder tmp = new StringBuilder(64);
+                    for (final StackTraceElement stackTraceElement : traceElements) {
+                        tmp.setLength(0);
+                        writeElementTo(stackTraceElement, tmp);
+                        writer.value(tmp.toString());
+                    }
                 }
+            } finally {
+                writer.endArray();
             }
-        } finally {
-            writer.endArray();
         }
     }
 
