@@ -52,7 +52,7 @@ package com.openexchange.realtime.presence;
 import com.openexchange.realtime.presence.PresenceService.PresenceState;
 
 /**
- * {@link PresenceStatus} - A Presence status to be used to signalize your status.
+ * {@link PresenceStatus} - A PresenceStatus to signalize your availability for communication.
  * The server should deliver messages to the highest-priority available resource or decide on other metrics.
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>

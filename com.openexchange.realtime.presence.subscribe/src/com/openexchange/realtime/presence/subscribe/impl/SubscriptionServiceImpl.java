@@ -146,7 +146,7 @@ public class SubscriptionServiceImpl implements PresenceSubscriptionService {
             Presence presence = new Presence();
             presence.setFrom(createID(pending.getFrom()));
             presence.setTo(createID(pending.getTo()));
-            presence.setState(Presence.Type.SUBSCRIBE);
+            presence.setType(Presence.Type.SUBSCRIBE);
             presences.add(presence);
         }
         return presences;

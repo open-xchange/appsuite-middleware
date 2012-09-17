@@ -92,7 +92,7 @@ public class JSONToPresenceStatusConverter implements SimplePayloadConverter {
     }
 
     /**
-     * Convert a JSON Object into a StatusPresence Object.
+     * Convert a JSON Object into a StatusPresence Object. Check for state, message and priority
      */
     @Override
     public Object convert(Object data, ServerSession session, SimpleConverter converter) throws OXException {

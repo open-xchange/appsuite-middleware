@@ -60,7 +60,7 @@ package com.openexchange.realtime.packet;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 
-public class Presence extends Stanza {
+public class Presence extends Stanza<Presence> {
 
     /**
      * {@link Type} - Specifies the Presence Type
@@ -84,26 +84,24 @@ public class Presence extends Stanza {
     /**
      * Optional attribute. The default of none means the client is available.
      */
-    private Type state = Type.NONE;
+    private Type type = Type.NONE;
 
     /**
-     * Gets the state
+     * Gets the type of Presence Stanza
      * 
      * @return The state
      */
-    public Type getState() {
-        return state;
+    public Type getType() {
+        return type;
     }
 
     /**
-     * Sets the state
+     * Sets the type of the Presence Stanza
      * 
-     * @param state The state to set
+     * @param type The state to set
      */
-    public void setState(Type state) {
-        this.state = state;
+    public void setType(Type type) {
+        this.type = type;
     }
-
-
 
 }

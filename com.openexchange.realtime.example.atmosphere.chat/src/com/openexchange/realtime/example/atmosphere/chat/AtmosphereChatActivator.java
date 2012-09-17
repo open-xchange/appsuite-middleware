@@ -47,7 +47,7 @@ public class AtmosphereChatActivator extends HousekeepingActivator {
          * for ChatMessages. All this COnversionHandler does is to tell the
          * Payload to convert itself into the desired format.
          */
-        registerService(OXRTHandler.class,  new OXRTConversionHandler("chat", "chatMessage"));
+        registerService(OXRTHandler.class,  new OXRTConversionHandler("ox/chat", "chatMessage"));
         
         //Add the atmosphere chat handler
         AtmosphereService service = getService(AtmosphereService.class);

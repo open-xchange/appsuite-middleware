@@ -79,11 +79,6 @@ public class IQBuilder extends StanzaBuilder<IQ> {
     }
 
     @Override
-    protected void validate() throws OXException {
-        throw new UnsupportedOperationException("Not implemented yet!");
-    }
-
-    @Override
     protected IQ build() throws OXException {
         throw new UnsupportedOperationException("Not implemented yet!");
     }

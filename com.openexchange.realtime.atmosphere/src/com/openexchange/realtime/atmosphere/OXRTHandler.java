@@ -65,7 +65,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public interface OXRTHandler {
+public interface OXRTHandler<T extends Stanza<?>> {
     
     /**
      * Get the namespace of this OXRTHandler.
@@ -78,14 +78,14 @@ public interface OXRTHandler {
 	 * <p>
 	 * Channel handlers can decide to delegate the processing of stanzas to the
 	 * proper {@OXRTHandler} when they can't be handled internally. The
-	 * OXRTHandler's concern is to process it so that the stanza can be handled
+	 * OXRTHandler's concern is to process and validate it so that the stanza can be handled
 	 * by the MessageDispatcher.
 	 * </p>
 	 * @param stanza the incoming stanza to process
 	 * @param session the currently active session
 	 * @throws OXException
 	 */
-	public void incoming(Stanza stanza, ServerSession session) throws OXException;
+	public void incoming(T stanza, ServerSession session) throws OXException;
 	
 	/**
 	 * Handle an outgoing {@link Stanza}.
@@ -98,5 +98,6 @@ public interface OXRTHandler {
 	 * @param sender the StanzaSender to use for finally sending the processed Stanza
 	 * @throws OXException
 	 */
-	public void outgoing(Stanza stanza, ServerSession session, StanzaSender sender) throws OXException;
+	public void outgoing(T stanza, ServerSession session, StanzaSender sender) throws OXException;
+	
 }

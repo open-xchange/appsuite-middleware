@@ -50,29 +50,19 @@
 package com.openexchange.realtime.atmosphere.presence;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.atmosphere.AtmosphereExceptionCode;
 import com.openexchange.realtime.atmosphere.OXRTHandler;
 import com.openexchange.realtime.atmosphere.StanzaSender;
+import com.openexchange.realtime.atmosphere.presence.osgi.AtmospherePresenceServiceRegistry;
 import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.Payload;
+import com.openexchange.realtime.packet.Presence;
+import com.openexchange.realtime.packet.Presence.Type;
 import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.presence.PresenceService;
 import com.openexchange.realtime.presence.PresenceStatus;
 import com.openexchange.realtime.util.IDMap;
 import com.openexchange.tools.session.ServerSession;
-
-/*
- * Build OXRTHandler(s) and SimpleConverters to handle
-* Ask someone else for permission to see his status. Done by triggering a method on the PresenceSubscriptionService
-* Give someone permission to see my status
--> PresenceSubscriptionService
-* Get a list of OXIDs whose status I can see and their status
--> PresenceSubscriptionService and PresenceStatusService
-* Change my status
--> PresenceStatusService
-
-* Transport status changes
-This is an outgoing message
-* Transport subscribe requests
-This, too, is an outgoing message
-*/
 
 /**
  * {@link OXRTPresenceHandler} - Handles Stanzas related to Presence and PresenceSubscription.
@@ -80,18 +70,59 @@ This, too, is an outgoing message
  * <ul>
  * <li>Ask others to see their Status, iow. subscribe to their Presence</li>
  * <li>Give others permission to view my Status, iow. subscribe to my Presence</li>
- * <li>Get a list of pairs containing my subscribed users and their status</li>
- * <li></li>
+ * <li>Get a list of IDs you are subscribed to and their status</li>
+ * <li>Change my status</li>
  * </ul>
+ * <h3>Initial Presence</h3> The initial presence message only has to consist of an object specifying its
+ * element type and optionally the default namespace. This is enough to send a presence broadcast to
+ * all subscribed users and signal that the user is now available.
+ * 
+ * <pre>
+ * {
+ *  [namespace: 'default',]
+ *  elment: 'presence'
+ *  [type: none]
+ * };
+ * </pre>
+ * 
+ * <h3>Update Presence(Broadcast)</h3> After the initial presence message the user can decide to set his presence to a specific value. Again
+ * specifying the kind of message he is sending and a data object attached specifying the presence status he wants to set. The optional
+ * priority in the data object let's the user specify to which resource messages should be routed if he is connected via several clients.
+ * The maximum value is 127.
+ * 
+ * <pre>
+ * {
+ *  [namespace: 'default',]
+ *  element: 'presence',
+ *  [type: none]
+ *  data: {
+ *      state: 'online',
+ *      message: 'i am here',
+ *      [priority: 0,]
+ *  }
+ * };
+ * </pre>
+ * 
+ * <h3>Final unavailable presence</h3>
+ * 
+ * <pre>
+ * {
+ *  [namespace: 'default',]
+ *  kind: 'presence',
+ *  type: unavailable
+ *  [data: {
+ *      message: 'Bye'
+ *  }]
+ * };
+ * </pre>
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class OXRTPresenceHandler implements OXRTHandler {
+public class OXRTPresenceHandler implements OXRTHandler<Presence> {
 
     @Override
     public String getNamespace() {
-        // TODO Auto-generated method stub
-        return null;
+        return "ox/presence";
     }
 
     /*
@@ -100,17 +131,23 @@ public class OXRTPresenceHandler implements OXRTHandler {
      * presenceService.changeState (causes many outgoing stanzas to inform himself and subscribed users)
      */
     @Override
-    public void incoming(Stanza stanza, ServerSession session) throws OXException {
-        if(stanza == null || session == null) {
+    public void incoming(Presence stanza, ServerSession session) throws OXException {
+        if (stanza == null || session == null) {
             throw new IllegalArgumentException();
         }
-        
-//        //transform stanza to Presence Status
-//        PresenceStatus status = (PresenceStatus) stanza.getPayload().to("presenceStatus", session).getData();
-//
-//        PresenceService presenceService = services.getService(PresenceService.class);
-//
-//        presenceService.changeState(stanza.getFrom(), status.getState(), status.getMessage(), session);
+        PresenceService presenceService = AtmospherePresenceServiceRegistry.getInstance().getService(PresenceService.class);
+
+        // transform stanza payload to Presence Status
+        PresenceStatus presenceStatus = null;
+        Payload payload = stanza.getPayload();
+        if (payload == null) { // empty initial presence
+            presenceStatus = new PresenceStatus();
+        } else {
+            Type type = stanza.getType();
+            presenceStatus = (PresenceStatus) stanza.getPayload().to("presenceStatus", session).getData();
+
+        }
+        presenceService.changeState(stanza.getFrom(), presenceStatus.getState(), presenceStatus.getMessage(), session);
 
     }
 
@@ -118,7 +155,7 @@ public class OXRTPresenceHandler implements OXRTHandler {
      * Transport status changes and subscribe requests
      */
     @Override
-    public void outgoing(Stanza stanza, ServerSession session, StanzaSender sender) throws OXException {
+    public void outgoing(Presence stanza, ServerSession session, StanzaSender sender) throws OXException {
         // TODO Auto-generated method stub
 
     }

@@ -49,126 +49,54 @@
 
 package com.openexchange.realtime.atmosphere.impl.stanza;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.AtmosphereExceptionCode;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.packet.Presence.Type;
-import com.openexchange.realtime.packet.Presence.Type.*;
-
 
 /**
- * {@link PresenceParser} - Parese an atmosphere client's presence message and build a Presence Stanza from it by adding the recipients ID.
- * 
- * Modeled after http://tools.ietf.org/html/rfc3921#page-16
- * 
- * A valid Presence message contains at least 
- * <pre>
- * {
-     kind: 'presence'
-     to:   'myuser@mycontext',
-     data: {
-       state:    'online',
-       message:  'i am here',
-       [priority: 0],
-       [type: none]
-     }
-  };
- * </pre>
- * and is transformed into a Presence stanza in the end
- * <pre>
- * {
-     from: 'usera@context',
-     to:   'myuser@mycontext',
-     namespace. 'default',
-     payload : {
-       format: 'presence'
-       data: {
-           state:    'online',
-           message:  'i am here',
-           [priority: 0]
-           [type: none]
-       }
-     }
-  };
- * </pre>
- * 
- * Presence Stanza with data object of type JSONObject ( later transformed into PresenceStatus)
+ * {@link PresenceBuilder} - Parse an atmosphere client's presence message and build a Presence Stanza from it by adding the recipients ID.
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class PresenceBuilder extends StanzaBuilder<Presence> {
-    
+
     /**
      * Create a new PresenceBuilder
      * Initializes a new {@link PresenceBuilder}.
+     * 
      * @param from the sender's ID, must not be null
      * @param json the sender's message, must not be null
      * @throws IllegalArgumentException if from or json are null
      */
     public PresenceBuilder(ID from, JSONObject json) {
-        if(from == null || json == null) {
+        if (from == null || json == null) {
             throw new IllegalArgumentException();
         }
         this.from = from;
         this.json = json;
         this.stanza = new Presence();
     }
-    
+
     @Override
     protected Presence build() throws OXException {
         basics();
         type();
         return stanza;
     }
-    
-    
-    private void type() throws OXException {
-        if(json.has("type")) {
+
+    private void type() {
+        if (json.has("type")) {
             String type = json.optString("type");
-            if (type.equalsIgnoreCase("UNAVAILABLE")) {
-                this.stanza.setState(Type.UNAVAILABLE);
-            } else if (type.equalsIgnoreCase("SUBSCRIBE")) {
-                this.stanza.setState(Type.SUBSCRIBE);
-            } else if (type.equalsIgnoreCase("SUBSCRIBED")) {
-                this.stanza.setState(Type.SUBSCRIBED);
-            } else if (type.equalsIgnoreCase("UNSUBSCRIBE")) {
-                this.stanza.setState(Type.UNSUBSCRIBE);
-            } else if (type.equalsIgnoreCase("UNSUBSCRIBED")) {
-                this.stanza.setState(Type.UNSUBSCRIBED);
-            } else if (type.equalsIgnoreCase("ERROR")) {
-                this.stanza.setState(Type.ERROR);
-            } else if (type.equalsIgnoreCase("NONE")) {
-                this.stanza.setState(Type.NONE);
-            } else if (type.equalsIgnoreCase("PENDING")) {
-                this.stanza.setState(Type.PENDING);
-            } else {
-                throw AtmosphereExceptionCode.ERROR_WHILE_BUILDING.create("Malformed Presence type");
+            for (Presence.Type t : Presence.Type.values()) {
+                if (t.name().equalsIgnoreCase(type)) {
+                    stanza.setType(t);
+                    break;
+                }
             }
-        }
-    }
-    
-    @Override
-    protected void validate() throws OXException {
-        switch(this.stanza.getState()) {
-        case UNAVAILABLE: ;
-            break;
-        case SUBSCRIBE: ;
-            break;
-        case SUBSCRIBED: ;
-            break;
-        case UNSUBSCRIBE:;
-            break;
-        case UNSUBSCRIBED:;
-            break;
-        case ERROR:;
-            break;
-        case NONE:;
-            break;
-        case PENDING:;
-            break;
+        } else {
+            stanza.setType(Type.NONE);
         }
     }
 

@@ -98,12 +98,6 @@ public abstract class StanzaBuilder<T extends Stanza> {
             stanza.setPayload(new Payload(json.optJSONObject("data"), "json"));
         }
     }
-
-    /**
-     * Check if the obligatory elements are present and all elements of the stanza are valid. 
-     * @throws OXException if elements are missing or invalid
-     */
-    protected abstract void validate() throws OXException;
     
     /**
      * Build a validated Stanza of type T

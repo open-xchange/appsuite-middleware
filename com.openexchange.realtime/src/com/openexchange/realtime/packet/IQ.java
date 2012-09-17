@@ -75,7 +75,7 @@ package com.openexchange.realtime.packet;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
-public class IQ extends Stanza {
+public class IQ extends Stanza<IQ> {
 
     /**
      * Describes a command's type.

@@ -105,7 +105,7 @@ public class AtmospherePresenceActivator extends HousekeepingActivator {
          */
         registerService(SimplePayloadConverter.class, new PresenceStatusToJSONConverter());
         registerService(SimplePayloadConverter.class, new JSONToPresenceStatusConverter());
-        registerService(OXRTHandler.class, new OXRTConversionHandler("presence", "presenceStatus"));
+        registerService(OXRTHandler.class, new OXRTConversionHandler("ox/presence", "presenceStatus"));
 
         // TODO: register PresenceSubscriptionHandler
     }

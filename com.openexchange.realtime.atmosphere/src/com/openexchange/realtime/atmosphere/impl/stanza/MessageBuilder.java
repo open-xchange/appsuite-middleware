@@ -79,12 +79,6 @@ public class MessageBuilder extends StanzaBuilder<Message> {
     }
     
     @Override
-    protected void validate() throws OXException {
-        throw new UnsupportedOperationException("Not implemented yet!");
-        
-    }
-
-    @Override
     protected Message build() throws OXException {
         throw new UnsupportedOperationException("Not implemented yet!");
     }
