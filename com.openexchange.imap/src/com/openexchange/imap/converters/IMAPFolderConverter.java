@@ -291,6 +291,34 @@ public final class IMAPFolderConverter {
                             }
                         }
                     }
+                    if (!shared) {
+                        final String[] sharedNamespaces = NamespaceFoldersCache.getSharedNamespaces(
+                            (IMAPStore) imapFolder.getStore(),
+                            true,
+                            session,
+                            accountId);
+                        final String[] personalNamespaces = NamespaceFoldersCache.getPersonalNamespaces(
+                            (IMAPStore) imapFolder.getStore(),
+                            true,
+                            session,
+                            accountId);
+                        for (int i = 0; !shared && i < sharedNamespaces.length; i++) {
+                            final String sharedNamespace = sharedNamespaces[i];
+                            if (!isEmpty(sharedNamespace)) {
+                                if (imapFullName.equals(sharedNamespace)) {
+                                    shared = true;
+                                } else {
+                                    tmp.setLength(0);
+                                    final String prefix = tmp.append(sharedNamespace).append(sep).toString();
+                                    if (imapFullName.startsWith(prefix)) {
+                                        shared = true;
+                                    }
+                                }
+                            } else if (!startsWithOneOf(imapFullName, sep, personalNamespaces, userNamespaces)) {
+                                shared = true;
+                            }
+                        }
+                    }
                     mailFolder.setShared(shared);
                     if (null != owner) {
                         mailFolder.setOwner(owner);
@@ -491,6 +519,20 @@ public final class IMAPFolderConverter {
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
+    }
+
+    private static boolean startsWithOneOf(String imapFullName, char sep, String[] personalNamespaces, String[] userNamespaces) {
+        for (String string : userNamespaces) {
+            if (imapFullName.startsWith(string+sep)) {
+                return true;
+            }
+        }
+        for (String string : personalNamespaces) {
+            if (imapFullName.startsWith(string+sep)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static Rights ownRightsFromProblematic(final Session session, final IMAPAccess imapAccess, final String imapFullName, final IMAPConfig imapConfig, final IMAPMailFolder mailFolder, final int accountId, final ACLPermission ownPermission) throws MessagingException, OXException, IMAPException {
