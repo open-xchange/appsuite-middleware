@@ -3,7 +3,6 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry exported="true" kind="lib" path="lib/ical4j-1.0.1.jar" sourcepath="lib/ical4j-1.0.1-src.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/backport-util-concurrent-3.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/commons-lang-2.3.jar"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="lib" path="lib/ical4j-zoneinfo-outlook-1.0.2.jar"/>

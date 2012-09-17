@@ -6,8 +6,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/twitter4j-examples-2.2.3.jar" sourcepath="lib/twitter4j-examples-2.2.3-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/twitter4j-media-support-2.2.3.jar" sourcepath="lib/twitter4j-media-support-2.2.3-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/twitter4j-stream-2.2.3.jar" sourcepath="lib/twitter4j-stream-2.2.3-sources.jar"/>
-	<classpathentry kind="lib" path="lib/commons-collections-3.2.1.jar"/>
-	<classpathentry kind="lib" path="lib/commons-lang-2.4.jar"/>
 	<classpathentry kind="lib" path="lib/htmlunit-2.5.jar"/>
 	<classpathentry kind="lib" path="lib/htmlunit-core-js-2.5.jar"/>
 	<classpathentry kind="lib" path="lib/jaxb-api-2.1.jar"/>
