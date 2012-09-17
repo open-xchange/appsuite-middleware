@@ -11,4 +11,7 @@ Architecture: all
 Depends: ${misc:Depends}, open-xchange-admin (>= @OXVERSION@)
 Replaces: open-xchange-admin-plugin-contextrestore
 Conflicts: open-xchange-admin-plugin-contextrestore
-Description: Open Xchange Admin Context Restore Plugin
+Description: Extension to restore context data from a database dump
+ This package adds the OSGi bundle that allows to restore a complete context from a MySQL database dump file. Only the table rows for the
+ given context are extracted from the database dump file and inserted into the currently registered database servers. This can be used to
+ restore accidentially deleted contexts.

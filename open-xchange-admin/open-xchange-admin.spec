@@ -32,7 +32,9 @@ Provides:      open-xchange-admin-doc = %{version}
 Obsoletes:     open-xchange-admin-doc <= %{version}
 
 %description
-This package installs the OSGi bundles to the backend that provide the RMI interface to administer the installation.
+This package installs the OSGi bundles to the backend that provide the RMI interface to administer the installation. This package contains
+the RMI interfaces for the overall administrative tasks like registering, changing and deleting servers, databases and filestores. It also
+contains the interfaces for creating, changing and deleting contexts, users, groups and resources.
 
 Authors:
 --------

@@ -15,7 +15,7 @@ License:       GPL-2.0
 BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
-Summary:       Open Xchange Admin AutocontextId Plugin
+Summary:       Administrative extension to automatically create context identifiers
 Requires:      open-xchange-core >= @OXVERSION@
 Requires:      open-xchange-admin >= @OXVERSION@
 Provides:      open-xchange-admin-plugin-autocontextid = %{version}
@@ -24,7 +24,8 @@ Provides:      open-xchange-admin-plugin-autocontextid-client = %{version}
 Obsoletes:     open-xchange-admin-plugin-autocontextid-client <= %{version}
 
 %description
-Open Xchange Admin AutocontextId Plugin
+This package adds the administrative OSGi bundle that creates for every newly created context a straight rising context identifier. Without
+this extension an identifier must be given when creating a context.
 
 Authors:
 --------
