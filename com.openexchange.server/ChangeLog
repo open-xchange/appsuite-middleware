@@ -1,6 +1,7 @@
 * 2012-09-17 - thorben.betten@open-xchange.com
 
  - Fix for bug 23034: Added property to specify whether stack trace should be included in returned JSON response
+ - Fix for bug 23030: Check possible null dereference when acquiring mail session cache
 
 * 2012-09-16 - thorben.betten@open-xchange.com
 
