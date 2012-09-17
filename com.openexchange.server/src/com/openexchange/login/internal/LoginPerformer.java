@@ -60,7 +60,6 @@ import java.util.regex.Pattern;
 import javax.security.auth.login.LoginException;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.Cookie;
 import com.openexchange.authentication.LoginExceptionCodes;
@@ -82,6 +81,7 @@ import com.openexchange.groupware.notify.hostname.internal.HostDataImpl;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.java.Strings;
+import com.openexchange.log.LogFactory;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
@@ -164,7 +164,14 @@ public final class LoginPerformer {
         return doLogin(request, properties, new LoginPerformerClosure() {
             @Override
             public Authenticated doAuthentication(final LoginResultImpl retval) throws OXException {
-                return Authentication.autologin(request.getLogin(), request.getPassword(), properties);
+                try {
+                    return Authentication.autologin(request.getLogin(), request.getPassword(), properties);
+                } catch (OXException e) {
+                    if (LoginExceptionCodes.NOT_SUPPORTED.equals(e)) {
+                        return null;
+                    }
+                    throw e;
+                }
             }
         });
     }
