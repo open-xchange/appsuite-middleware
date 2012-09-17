@@ -3,6 +3,7 @@
  - Fix for bug 23034: Added property to specify whether stack trace should be included in returned JSON response
  - Fix for bug 23030: Check possible null dereference when acquiring mail session cache
  - Fix for bug 23005: Proper response code if auto-login is disabled
+ - Fix for bug 21996: ForceHttps setting only applies to non-local endpoints
 
 * 2012-09-16 - thorben.betten@open-xchange.com
 
