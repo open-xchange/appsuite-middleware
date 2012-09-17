@@ -90,7 +90,7 @@ public class IntegrationTest extends TestCase {
         subscription.setFrom(from);
         ID to = new ID(null, "martin.herfurth", "1337", null);
         subscription.setTo(to);
-        subscription.setState(Presence.Type.unsubscribed);
+        subscription.setState(Presence.Type.UNSUBSCRIBED);
         try {
             subscriptionService.subscribe(subscription, getSessionOne());
             List<Presence> pendingRequests = subscriptionService.getPendingRequests(getSessionOne());
