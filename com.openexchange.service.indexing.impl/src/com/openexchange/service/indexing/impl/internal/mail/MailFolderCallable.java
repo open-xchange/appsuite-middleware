@@ -1,6 +1,5 @@
 package com.openexchange.service.indexing.impl.internal.mail;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -9,16 +8,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.index.Attachment;
-import com.openexchange.groupware.attach.index.ORTerm;
-import com.openexchange.groupware.attach.index.ObjectIdTerm;
-import com.openexchange.groupware.attach.index.SearchTerm;
-import com.openexchange.groupware.tools.chunk.ChunkPerformer;
-import com.openexchange.groupware.tools.chunk.Performable;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexConstants;
 import com.openexchange.index.IndexDocument;
@@ -28,7 +21,6 @@ import com.openexchange.index.QueryParameters;
 import com.openexchange.index.QueryParameters.Builder;
 import com.openexchange.index.QueryParameters.Order;
 import com.openexchange.index.SearchHandler;
-import com.openexchange.index.StandardIndexDocument;
 import com.openexchange.index.solr.IndexFolderManager;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailField;
@@ -37,16 +29,14 @@ import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.dataobjects.ContentAwareMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.index.MailIndexField;
-import com.openexchange.mail.index.MailUUID;
-import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.service.indexing.impl.internal.Services;
+import com.openexchange.service.indexing.impl.mail.AbstractMailCallable;
 import com.openexchange.service.indexing.impl.mail.MailJobInfo;
 
-public class MailFolderCallable implements Callable<Object>, Serializable {
+public class MailFolderCallable extends AbstractMailCallable {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(MailFolderCallable.class);
     
@@ -57,18 +47,13 @@ public class MailFolderCallable implements Callable<Object>, Serializable {
 
     private static final long serialVersionUID = -900105721652425254L;
     
-    private static final int CHUNK_SIZE = 100;
-    
-    private final MailJobInfo info;
-    
     
     public MailFolderCallable(MailJobInfo info) {
-        super();
-        this.info = info;
+        super(info);
     }
 
-
-    public void performJob() throws OXException, InterruptedException {
+    @Override
+    public Object call() throws OXException, InterruptedException {
         if (CHANGEABLE_FIELDS == null) {
             CHANGEABLE_FIELDS = new MailField[] { 
                     MailField.ID,
@@ -87,7 +72,6 @@ public class MailFolderCallable implements Callable<Object>, Serializable {
         IndexAccess<Attachment> attachmentIndex = indexFacade.acquireIndexAccess(Types.ATTACHMENT, info.userId, info.contextId);
         MailService mailService = Services.getService(MailService.class);
         MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage> mailAccess = mailService.getMailAccess(info.userId, info.contextId, info.accountId);
-        mailAccess.connect(false);
         try {            
             Map<String, Object> params = new HashMap<String, Object>();
             params.put(IndexConstants.ACCOUNT, String.valueOf(info.accountId));
@@ -122,10 +106,10 @@ public class MailFolderCallable implements Callable<Object>, Serializable {
                     }                
                     
                     deleteMails(indexMails.keySet(), storageMails.keySet(), mailIndex, attachmentIndex);
-                    addMails(indexMails.keySet(), storageMails.keySet(), mailIndex, attachmentIndex, messageStorage);
-                    changeMails(indexMails, storageMails, mailIndex, attachmentIndex, messageStorage);              
+                    addMails(indexMails.keySet(), storageMails.keySet(), mailIndex, attachmentIndex, mailAccess);
+                    changeMails(indexMails, storageMails, mailIndex, attachmentIndex, mailAccess);              
                 } else {
-                    addMails(Collections.<String> emptySet(), storageMails.keySet(), mailIndex, attachmentIndex, messageStorage);
+                    addMails(Collections.<String> emptySet(), storageMails.keySet(), mailIndex, attachmentIndex, mailAccess);
                     IndexFolderManager.setIndexed(info.contextId, info.userId, Types.EMAIL, String.valueOf(info.accountId), info.folder);
                 }                
             } else {
@@ -145,7 +129,6 @@ public class MailFolderCallable implements Callable<Object>, Serializable {
                 attachmentIndex.deleteByQuery(attachmentAllQuery);                
             }
         } finally {
-            closeMailAccess(mailAccess);
             closeIndexAccess(mailIndex);
             closeIndexAccess(attachmentIndex);
             
@@ -153,10 +136,28 @@ public class MailFolderCallable implements Callable<Object>, Serializable {
                 long diff = System.currentTimeMillis() - start;
                 LOG.debug(this.getClass().getSimpleName() + " lasted " + diff + "ms. " + info.toString());
             }
-        }        
+        }
+        
+        return null;        
     }
     
-    private void changeMails(Map<String, MailMessage> indexMails, Map<String, MailMessage> storageMails, final IndexAccess<MailMessage> mailIndex, final IndexAccess<Attachment> attachmentIndex, final IMailMessageStorage messageStorage) throws OXException {
+    private void checkJobInfo() throws OXException {
+        // TODO: implement
+    }
+
+    private void addMails(Set<String> indexIds, Set<String> storageIds, final IndexAccess<MailMessage> mailIndex, final IndexAccess<Attachment> attachmentIndex, final MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage> mailAccess) throws OXException {
+        final List<String> toAdd = new ArrayList<String>(storageIds);
+        toAdd.removeAll(indexIds);        
+        addMails(toAdd, mailAccess, mailIndex, attachmentIndex);
+    }
+
+    private void deleteMails(Set<String> indexIds, Set<String> storageIds, final IndexAccess<MailMessage> mailIndex, final IndexAccess<Attachment> attachmentIndex) throws OXException {
+        final List<String> toDelete = new ArrayList<String>(indexIds);
+        toDelete.removeAll(storageIds);
+        deleteMails(toDelete, mailIndex, attachmentIndex);        
+    }
+    
+    private void changeMails(Map<String, MailMessage> indexMails, Map<String, MailMessage> storageMails, final IndexAccess<MailMessage> mailIndex, final IndexAccess<Attachment> attachmentIndex, final MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage> mailAccess) throws OXException {
         Set<String> toRemove = new HashSet<String>(indexMails.keySet());
         toRemove.removeAll(storageMails.keySet());
         
@@ -172,195 +173,7 @@ public class MailFolderCallable implements Callable<Object>, Serializable {
             }
         }
         
-        if (changedMails.isEmpty()) {
-            return;
-        }
-        ChunkPerformer.perform(new Performable() {            
-            @Override
-            public int perform(int off, int len) throws OXException {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Adding a chunk of mails of folder " + info.folder + ": " + info.toString());
-                }
-                
-                List<String> subList = changedMails.subList(off, len);                
-                MailMessage[] messages = messageStorage.getMessages(
-                    info.folder, 
-                    subList.toArray(new String[subList.size()]), 
-                    MailField.values());
-                
-                String[] mailIds = new String[messages.length];
-                for (int i = 0; i < messages.length; i++) {
-                    MailMessage mailMessage = messages[i];
-                    if (mailMessage != null) {
-                        mailIds[i] = (mailMessage.getMailId());
-                    }
-                }
-                
-                List<IndexDocument<MailMessage>> documents = new ArrayList<IndexDocument<MailMessage>>(messages.length);
-                String[] primaryContents = messageStorage.getPrimaryContents(info.folder, mailIds);                
-                for (int i = 0; i < messages.length; i++) {
-                    MailMessage message = messages[i];
-                    if (message != null) {
-                        ContentAwareMailMessage contentAwareMessage = new ContentAwareMailMessage(primaryContents[i], message);
-                        documents.add(new StandardIndexDocument<MailMessage>(contentAwareMessage));           
-                    }
-                }
-
-                if (!documents.isEmpty()) {
-                    mailIndex.addContent(documents, true);
-                }
-                
-                return subList.size();
-            }
-
-            @Override
-            public int getChunkSize() {
-                return CHUNK_SIZE;
-            }
-
-            @Override
-            public int getLength() {
-                return changedMails.size();
-            }
-
-            @Override
-            public int getInitialOffset() {
-                return 0;
-            }         
-        });
-    }
-
-    private void addMails(Set<String> indexIds, Set<String> storageIds, final IndexAccess<MailMessage> mailIndex, final IndexAccess<Attachment> attachmentIndex, final IMailMessageStorage messageStorage) throws OXException {
-        final List<String> toAdd = new ArrayList<String>(storageIds);
-        toAdd.removeAll(indexIds);
-        if (toAdd.isEmpty()) {
-            return;
-        }
-        
-        final MailMessageParser parser = new MailMessageParser();
-        ChunkPerformer.perform(new Performable() {
-            @Override
-            public int perform(int off, int len) throws OXException {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Adding a chunk of mails of folder " + info.folder + ": " + info.toString());
-                }
-                
-                List<String> subList = toAdd.subList(off, len);
-                MailMessage[] messages = messageStorage.getMessages(
-                    info.folder, 
-                    subList.toArray(new String[subList.size()]), 
-                    MailField.values());
-                
-                String[] mailIds = new String[messages.length];
-                for (int i = 0; i < messages.length; i++) {
-                    MailMessage mailMessage = messages[i];
-                    if (mailMessage != null) {
-                        mailIds[i] = (mailMessage.getMailId());
-                    }
-                }
-                
-                List<IndexDocument<MailMessage>> documents = new ArrayList<IndexDocument<MailMessage>>(messages.length);
-                List<IndexDocument<Attachment>> attachments = new ArrayList<IndexDocument<Attachment>>();
-                String[] primaryContents = messageStorage.getPrimaryContents(info.folder, mailIds);                
-                for (int i = 0; i < messages.length; i++) {
-                    MailMessage message = messages[i];
-                    if (message != null) {
-                        ContentAwareMailMessage contentAwareMessage = new ContentAwareMailMessage(primaryContents[i], message);
-                        documents.add(new StandardIndexDocument<MailMessage>(contentAwareMessage));
-                        IndexMailHandler handler = new IndexMailHandler(String.valueOf(info.accountId), info.folder, message.getMailId());
-                        parser.parseMailMessage(message, handler);
-                        attachments.addAll(handler.getAttachments());                        
-                    }
-                }
-
-                if (!documents.isEmpty()) {
-                    mailIndex.addContent(documents, true);
-                }
-                
-                if (!attachments.isEmpty()) {
-                    attachmentIndex.addContent(attachments, true);
-                }
-                
-                return subList.size();
-            }
-
-            @Override
-            public int getChunkSize() {
-                return CHUNK_SIZE;
-            }
-
-            @Override
-            public int getLength() {
-                return toAdd.size();
-            }
-
-            @Override
-            public int getInitialOffset() {
-                return 0;
-            }         
-        });
-    }
-
-    private void deleteMails(Set<String> indexIds, Set<String> storageIds, final IndexAccess<MailMessage> mailIndex, final IndexAccess<Attachment> attachmentIndex) throws OXException {
-        final List<String> toDelete = new ArrayList<String>(indexIds);
-        toDelete.removeAll(storageIds);
-        if (toDelete.isEmpty()) {
-            return;
-        }
-        
-        ChunkPerformer.perform(new Performable() {
-            @Override
-            public int perform(int off, int len) throws OXException {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Deleting a chunk of mails in folder " + info.folder + ": " + info.toString());
-                }
-                
-                List<String> subList = toDelete.subList(off, len);
-                SearchTerm<?>[] idTerms = new SearchTerm<?>[subList.size()];
-                String[] mailUuids = new String[subList.size()];
-                int i = 0;        
-                for (String id : subList) {
-                    mailUuids[i] = new MailUUID(info.contextId, info.userId, info.accountId, info.folder, id).toString();
-                    idTerms[i] = new ObjectIdTerm(id);
-                    ++i;
-                }                    
-                
-                Map<String, Object> deleteMailsParams = new HashMap<String, Object>();
-                deleteMailsParams.put(IndexConstants.IDS, mailUuids);
-                QueryParameters deleteMailsQuery = new QueryParameters.Builder(deleteMailsParams)
-                    .setHandler(SearchHandler.GET_REQUEST)
-                    .build();
-                mailIndex.deleteByQuery(deleteMailsQuery);
-                
-                SearchTerm<?> orTerm = new ORTerm(idTerms);
-                Map<String, Object> deleteAttachmentsParams = new HashMap<String, Object>();
-                deleteAttachmentsParams.put(IndexConstants.MODULE, new Integer(Types.EMAIL));
-                deleteAttachmentsParams.put(IndexConstants.ACCOUNT, String.valueOf(info.accountId));
-                QueryParameters deleteAttachmentsQuery = new QueryParameters.Builder(deleteAttachmentsParams)
-                    .setHandler(SearchHandler.CUSTOM)
-                    .setSearchTerm(orTerm)
-                    .setFolders(Collections.singleton(info.folder))
-                    .build();
-                attachmentIndex.deleteByQuery(deleteAttachmentsQuery);
-                
-                return subList.size();
-            }
-
-            @Override
-            public int getChunkSize() {
-                return CHUNK_SIZE;
-            }
-
-            @Override
-            public int getLength() {
-                return toDelete.size();
-            }
-
-            @Override
-            public int getInitialOffset() {
-                return 0;
-            }
-        });
+        changeMails(changedMails, mailAccess, mailIndex, attachmentIndex);
     }
     
     private boolean isDifferent(final MailMessage storageMail, final MailMessage indexMail) {
@@ -393,28 +206,5 @@ public class MailFolderCallable implements Callable<Object>, Serializable {
             indexUserFlags = null == idxUserFlags ? Collections.<String> emptySet() : new HashSet<String>(Arrays.asList(idxUserFlags));
         }
         return (!storageUserFlags.equals(indexUserFlags));
-    }
-
-    private void closeMailAccess(MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage> mailAccess) {
-        if (mailAccess != null) {            
-            mailAccess.close(false);
-        }        
-    }
-    
-    private void closeIndexAccess(IndexAccess<?> indexAccess) throws OXException {
-        if (indexAccess != null) {
-            IndexFacadeService indexFacade = Services.getService(IndexFacadeService.class);
-            indexFacade.releaseIndexAccess(indexAccess);
-        }        
-    }
-    
-    private void checkJobInfo() throws OXException {
-        // TODO: implement
-    }
-
-    @Override
-    public Object call() throws Exception {
-        performJob();
-        return null;
     }
 }

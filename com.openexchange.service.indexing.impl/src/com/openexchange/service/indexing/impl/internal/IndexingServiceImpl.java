@@ -49,17 +49,22 @@
 
 package com.openexchange.service.indexing.impl.internal;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
+import org.quartz.JobKey;
 import org.quartz.ObjectAlreadyExistsException;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
+import org.quartz.TriggerKey;
+import org.quartz.impl.matchers.GroupMatcher;
 import org.quartz.service.QuartzService;
 import com.openexchange.exception.OXException;
 import com.openexchange.service.indexing.IndexingService;
@@ -82,13 +87,13 @@ public class IndexingServiceImpl implements IndexingService {
         jobData.put(JobConstants.JOB_INFO, info);
 
         JobDetail jobDetail = JobBuilder.newJob(QuartzIndexingJob.class)
-            .withIdentity(info.toUniqueId(), "indexingJobs/" + info.contextId + '/' + info.userId)
+            .withIdentity(generateJobKey(info))
             .usingJobData(jobData)
             .build();
         
         TriggerBuilder<Trigger> triggerBuilder = TriggerBuilder.newTrigger()
             .forJob(jobDetail)
-            .withIdentity(info.toUniqueId(), "indexingTriggers/" + info.contextId + '/' + info.userId);
+            .withIdentity(generateTriggerKey(info));
         
         if (startDate == null) {
             triggerBuilder.startNow();
@@ -97,10 +102,14 @@ public class IndexingServiceImpl implements IndexingService {
         }
         
         if (repeatInterval > 0) {
-            triggerBuilder.withSchedule(SimpleScheduleBuilder.simpleSchedule().withIntervalInMilliseconds(repeatInterval));
+            triggerBuilder.withSchedule(SimpleScheduleBuilder.simpleSchedule()
+                .withIntervalInMilliseconds(repeatInterval)
+                .repeatForever()
+                .withMisfireHandlingInstructionFireNow());            
         }
 
         triggerBuilder.withPriority(priority);
+        
         Trigger trigger = triggerBuilder.build();        
         try {
             scheduleJob(jobDetail, trigger);
@@ -113,10 +122,52 @@ public class IndexingServiceImpl implements IndexingService {
         }
     }
     
+    @Override
+    public void unscheduleJob(JobInfo info) throws OXException {
+        QuartzService quartzService = Services.getService(QuartzService.class);
+        Scheduler scheduler = quartzService.getClusteredScheduler();
+        try {
+            scheduler.deleteJob(generateJobKey(info));
+        } catch (SchedulerException e) {
+            throw new OXException(e);
+        }
+    }
+    
+    @Override
+    public void unscheduleAllForUser(int contextId, int userId) throws OXException {
+        QuartzService quartzService = Services.getService(QuartzService.class);
+        Scheduler scheduler = quartzService.getClusteredScheduler();
+        String jobGroup = generateJobGroup(contextId, userId);        
+        try {
+            Set<JobKey> jobKeys = scheduler.getJobKeys(GroupMatcher.jobGroupEquals(jobGroup));
+            scheduler.deleteJobs(new ArrayList<JobKey>(jobKeys));
+        } catch (SchedulerException e) {
+            throw new OXException(e);
+        }
+    }
+    
     private void scheduleJob(JobDetail jobDetail, Trigger trigger) throws SchedulerException {
         QuartzService quartzService = Services.getService(QuartzService.class);
         Scheduler scheduler = quartzService.getClusteredScheduler();
         scheduler.scheduleJob(jobDetail, trigger);
+    }    
+    
+    private JobKey generateJobKey(JobInfo info) {
+        JobKey key = new JobKey(info.toUniqueId(), generateJobGroup(info.contextId, info.userId));
+        return key;
     }
-
+    
+    private TriggerKey generateTriggerKey(JobInfo info) {
+        TriggerKey key = new TriggerKey(info.toUniqueId(), generateTriggerGroup(info.contextId, info.userId));
+        return key;
+    }
+    
+    private String generateJobGroup(int contextId, int userId) {
+        return "indexingJobs/" + contextId + '/' + userId;
+    }
+    
+    private String generateTriggerGroup(int contextId, int userId) {
+        return "indexingTriggers/" + contextId + '/' + userId;
+    }
+    
 }

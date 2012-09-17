@@ -50,18 +50,23 @@
 package com.openexchange.service.indexing.impl.internal.groupware;
 
 import java.io.File;
+import java.util.List;
+import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.FolderResponse;
-import com.openexchange.folderstorage.FolderService;
-import com.openexchange.folderstorage.FolderStorage;
-import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexConstants;
 import com.openexchange.index.IndexFacadeService;
+import com.openexchange.server.impl.EffectivePermission;
+import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.service.indexing.IndexingService;
 import com.openexchange.service.indexing.JobInfo;
 import com.openexchange.service.indexing.impl.infostore.InfostoreFolderJob;
@@ -69,6 +74,9 @@ import com.openexchange.service.indexing.impl.infostore.InfostoreJobInfo;
 import com.openexchange.service.indexing.impl.internal.Services;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
+import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
+import com.openexchange.user.UserService;
+import com.openexchange.userconf.UserConfigurationService;
 
 
 /**
@@ -77,47 +85,69 @@ import com.openexchange.sessiond.SessiondEventConstants;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SessionEventHandler implements EventHandler {
+    
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(SessionEventHandler.class);
+    
 
     // TODO: move to infostore/server bundle and check if indexing is allowed
     @Override
     public void handleEvent(Event event) {
         String topic = event.getTopic();
-        if (SessiondEventConstants.TOPIC_ADD_SESSION.equals(topic) || SessiondEventConstants.TOPIC_REACTIVATE_SESSION.equals(topic)) {            
+        if (SessiondEventConstants.TOPIC_ADD_SESSION.equals(topic)) {            
+            ContextService contextService = Services.getService(ContextService.class);
+            UserService userService = Services.getService(UserService.class);
+            UserConfigurationService configurationService = Services.getService(UserConfigurationService.class);
             IndexFacadeService indexFacade = Services.getService(IndexFacadeService.class);
             IndexAccess<File> infostoreAccess = null;
             try {
                 Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
                 infostoreAccess = indexFacade.acquireIndexAccess(Types.INFOSTORE, session);
-                FolderService folderService = Services.getService(FolderService.class);                
-                FolderResponse<UserizedFolder[]> folders = folderService.getSubfolders(
-                    FolderStorage.REAL_TREE_ID,
-                    String.valueOf(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID),
-                    true,
-                    session,
-                    null);
+                Context context = contextService.getContext(session.getContextId());
+                User user = userService.getUser(session.getUserId(), context);
+                UserConfiguration userConfiguration = configurationService.getUserConfiguration(session.getUserId(), context);
+
+                // layer separation FTW!
+                List<FolderObject> folders =
+                    ((FolderObjectIterator) OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfType(
+                        session.getUserId(),
+                        user.getGroups(),
+                        userConfiguration.getAccessibleModules(),
+                        FolderObject.PUBLIC,
+                        new int[] { FolderObject.INFOSTORE },
+                        context)).asList();
                 
-                if (folders == null || folders.getResponse().length == 0) {
+                if (folders.isEmpty()) {
                     return;
                 }
                 
                 IndexingService indexingService = Services.getService(IndexingService.class);
-                for (UserizedFolder folder : folders.getResponse()) {
-                    String id = folder.getID();
-                    long folderId = Long.parseLong(folder.getID());
+                for (FolderObject folder : folders) {
+                    OCLPermission[] oclPermissions = folder.getNonSystemPermissionsAsArray();
+                    if (oclPermissions.length > 1) {
+                        /*
+                         * This folder is shared in any way
+                         */
+                        return;
+                    }
                     
-                    if (!infostoreAccess.isIndexed(IndexConstants.DEFAULT_ACCOUNT, id)) {
-                        JobInfo jobInfo = InfostoreJobInfo.newBuilder(InfostoreFolderJob.class)
-                            .contextId(session.getContextId())
-                            .userId(session.getUserId())
-                            .account(IndexConstants.DEFAULT_ACCOUNT)
-                            .folder(folderId)
-                            .build();
-                        
-                        indexingService.scheduleJob(jobInfo, null, -1L, IndexingService.DEFAULT_PRIORITY);
+                    EffectivePermission userPermission = folder.getEffectiveUserPermission(user.getId(), userConfiguration);
+                    if (userPermission.getEntity() == user.getId() && userPermission.canReadAllObjects()) {
+                        // The folder is a private folder of this user
+                        long folderId = (long) folder.getObjectID();                    
+                        if (!infostoreAccess.isIndexed(IndexConstants.DEFAULT_ACCOUNT, String.valueOf(folderId))) {
+                            JobInfo jobInfo = InfostoreJobInfo.newBuilder(InfostoreFolderJob.class)
+                                .contextId(session.getContextId())
+                                .userId(session.getUserId())
+                                .account(IndexConstants.DEFAULT_ACCOUNT)
+                                .folder(folderId)
+                                .build();
+                            
+                            indexingService.scheduleJob(jobInfo, null, -1L, IndexingService.DEFAULT_PRIORITY);
+                        }
                     }
                 }                
             } catch (Exception e) {
-                // TODO: handle exception
+                LOG.warn("Error while triggering infostore indexing jobs.", e);
             } finally {
                 if (infostoreAccess != null) {
                     try {

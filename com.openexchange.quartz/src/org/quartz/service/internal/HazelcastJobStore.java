@@ -109,7 +109,7 @@ public class HazelcastJobStore implements JobStore {
     
     private IMap<JobKey, ISet<TriggerKey>> triggersByJobKey;
     
-    private IMap<String, Map<JobKey, JobDetail>> jobsByGroup;
+    private IMap<String, IMap<JobKey, JobDetail>> jobsByGroup;
     
     private IMap<String, Calendar> calendarsByName;
     
@@ -205,7 +205,7 @@ public class HazelcastJobStore implements JobStore {
         try {
             JobKey key = newJob.getKey();
             String group = key.getGroup();
-            Map<JobKey, JobDetail> jobsByKey = jobsByGroup.get(group);
+            IMap<JobKey, JobDetail> jobsByKey = jobsByGroup.get(group);
             if (jobsByKey == null) {
                 jobsByKey = hazelcast.getMap("quartzJobsByKey/" + group);
                 jobsByKey.put(key, newJob);
@@ -331,7 +331,7 @@ public class HazelcastJobStore implements JobStore {
                 return false;
             }
             
-            Map<JobKey, JobDetail> jobsByKey = jobsByGroup.get(group);
+            IMap<JobKey, JobDetail> jobsByKey = jobsByGroup.get(group);
             if (jobsByKey == null) {
                 return false;
             }
@@ -339,6 +339,7 @@ public class HazelcastJobStore implements JobStore {
             jobsByKey.remove(jobKey);
             if (jobsByKey.isEmpty()) {
                 jobsByGroup.remove(group);
+                jobsByKey.destroy();
             }
             
             ISet<TriggerKey> triggers = triggersByJobKey.get(jobKey);
@@ -405,6 +406,7 @@ public class HazelcastJobStore implements JobStore {
             triggerKeysForJob.remove(triggerKey);
             boolean removeJob = false;
             if (triggerKeysForJob.isEmpty()) {
+                triggersByJobKey.remove(jobKey);
                 Map<JobKey, JobDetail> jobsByKey = jobsByGroup.get(jobKey.getGroup());
                 if (jobsByKey != null) {
                     JobDetail jobDetail = jobsByKey.get(jobKey);

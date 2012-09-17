@@ -70,11 +70,28 @@ public interface IndexingService {
      * Schedules an indexing job. 
      * 
      * @param info The information needed to run this job.
-     * @param startDate The start date of the job. My be <code>null</code> to run immediately.
+     * @param startDate The start date of the job. May be <code>null</code> to run immediately.
      * @param repeatInterval The repeat interval in milliseconds. May be negative if the job shall only run once.
      * @param priority The priority. If two jobs shall be started at the same time, the one with the higher priority wins. See {{@link #DEFAULT_PRIORITY}.
      * @throws OXException 
      */
     void scheduleJob(JobInfo info, Date startDate, long repeatInterval, int priority) throws OXException;
+    
+    /**
+     * Deletes an indexing job from the scheduler.
+     * 
+     * @param info The information needed to delete this job.
+     * @throws OXException
+     */
+    void unscheduleJob(JobInfo info) throws OXException;
+    
+    /**
+     * Deletes all jobs for a given user from the scheduler.
+     * 
+     * @param contextId The context id.
+     * @param userId The user id.
+     * @throws OXException
+     */
+    void unscheduleAllForUser(int contextId, int userId) throws OXException;
 
 }
