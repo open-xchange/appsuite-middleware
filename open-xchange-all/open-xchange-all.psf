@@ -8,6 +8,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-core"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-soap-cxf"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-ajp"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-grizzly"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-authentication-database"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-authentication-ldap"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-authentication-ucs"/>
@@ -65,5 +66,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-gui-help-plugin"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-meta"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-contact-storage-ldap"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-ui7-backend"/>
 </provider>
 </psf>

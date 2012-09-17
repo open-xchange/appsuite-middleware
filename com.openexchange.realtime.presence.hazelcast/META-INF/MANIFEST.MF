@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Realtime Presence Service
 Bundle-SymbolicName: com.openexchange.realtime.presence.hazelcast
 Bundle-Version: 6.22.0.0
-Bundle-Activator: com.openexchange.realtime.presence.osgi.RealtimeHazelcastPresenceActivator
+Bundle-Activator: com.openexchange.realtime.presence.hazelcast.osgi.RealtimeHazelcastPresenceActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.conversion,
@@ -13,7 +13,7 @@ Import-Package: com.openexchange.conversion,
  com.openexchange.log,
  com.openexchange.osgi,
  com.openexchange.realtime,
- com.openexchange.realtime.example.presence,
+ com.openexchange.realtime.presence,
  com.openexchange.realtime.packet,
  com.openexchange.tools.session,
  org.apache.commons.logging,

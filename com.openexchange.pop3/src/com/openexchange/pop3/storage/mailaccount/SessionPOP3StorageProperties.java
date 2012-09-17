@@ -55,7 +55,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.SynchronizedBasedReentrantLock;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.pop3.POP3Access;
 import com.openexchange.pop3.services.POP3ServiceRegistry;
@@ -83,7 +82,7 @@ public final class SessionPOP3StorageProperties implements POP3StorageProperties
         SessionPOP3StorageProperties cached;
         Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
         if (null == lock) {
-            lock = new SynchronizedBasedReentrantLock(session);
+            lock = Session.EMPTY_LOCK;
         }
         lock.lock();
         try {

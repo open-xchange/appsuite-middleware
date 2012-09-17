@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange Presence Definition Bundle
+Bundle-SymbolicName: com.openexchange.realtime.presence
+Bundle-Version: 6.22.0.0
+Bundle-Activator: com.openexchange.realtime.presence.osgi.PresenceActivator
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.exception,
+ com.openexchange.osgi,
+ com.openexchange.realtime,
+ com.openexchange.realtime.packet,
+ com.openexchange.realtime.util,
+ com.openexchange.server,
+ com.openexchange.session,
+ com.openexchange.tools.session,
+ org.osgi.framework;version="1.3.0",
+ org.osgi.util.tracker;version="1.5.0"
+Export-Package: com.openexchange.realtime.presence

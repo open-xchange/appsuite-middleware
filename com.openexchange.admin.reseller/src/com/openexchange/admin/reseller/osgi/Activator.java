@@ -86,7 +86,7 @@ public class Activator extends HousekeepingActivator {
     public void startBundle() throws Exception {
         try {
             ConfigurationService configurationService = getService(ConfigurationService.class);
-            AdminCache.compareAndSet(null, configurationService);
+            AdminCache.compareAndSetConfigurationService(null, configurationService);
             initCache(configurationService);
 
             final OXReseller reseller = new OXReseller();

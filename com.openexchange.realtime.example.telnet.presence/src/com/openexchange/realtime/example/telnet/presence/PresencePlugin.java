@@ -50,14 +50,14 @@
 package com.openexchange.realtime.example.telnet.presence;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.example.presence.PresenceService;
-import com.openexchange.realtime.example.presence.PresenceService.PresenceState;
-import com.openexchange.realtime.example.presence.PresenceStatus;
 import com.openexchange.realtime.example.telnet.TelnetChatMessage;
 import com.openexchange.realtime.example.telnet.TelnetChatPlugin;
 import com.openexchange.realtime.example.telnet.TelnetMessageDelivery;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.presence.PresenceService;
+import com.openexchange.realtime.presence.PresenceStatus;
+import com.openexchange.realtime.presence.PresenceService.PresenceState;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 

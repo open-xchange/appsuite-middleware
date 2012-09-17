@@ -49,17 +49,7 @@
 
 package com.openexchange.ajax.writer;
 
-import static com.openexchange.ajax.fields.ResponseFields.DATA;
-import static com.openexchange.ajax.fields.ResponseFields.ERROR;
-import static com.openexchange.ajax.fields.ResponseFields.ERROR_CATEGORIES;
-import static com.openexchange.ajax.fields.ResponseFields.ERROR_CODE;
-import static com.openexchange.ajax.fields.ResponseFields.ERROR_ID;
-import static com.openexchange.ajax.fields.ResponseFields.ERROR_PARAMS;
-import static com.openexchange.ajax.fields.ResponseFields.ERROR_STACK;
-import static com.openexchange.ajax.fields.ResponseFields.PROBLEMATIC;
-import static com.openexchange.ajax.fields.ResponseFields.TIMESTAMP;
-import static com.openexchange.ajax.fields.ResponseFields.TRUNCATED;
-import static com.openexchange.ajax.fields.ResponseFields.WARNINGS;
+import static com.openexchange.ajax.fields.ResponseFields.*;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Iterator;
@@ -76,6 +66,7 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.fields.ResponseFields.ParsingFields;
 import com.openexchange.ajax.fields.ResponseFields.TruncatedFields;
+import com.openexchange.exception.Categories;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Parsing;
@@ -534,7 +525,12 @@ public final class ResponseWriter {
         {
             final List<Category> categories = exc.getCategories();
             if (1 == categories.size()) {
-                writer.key(ERROR_CATEGORIES).value(categories.get(0).toString());
+                final Category category = categories.get(0);
+                writer.key(ERROR_CATEGORIES).value(category.toString());
+                final int number = Categories.getFormerCategroyNumber(category);
+                if (number > 0) {
+                    writer.key(ERROR_CATEGORY).value(number);
+                }
             } else {
                 writer.key(ERROR_CATEGORIES);
                 writer.array();
@@ -546,12 +542,18 @@ public final class ResponseWriter {
                     writer.endArray();
                 }
             }
-
         }
         writer.key(ERROR_CODE).value(exc.getErrorCode());
         writer.key(ERROR_ID).value(exc.getExceptionId());
         writeProblematic(exc, writer);
         writeTruncated(exc, writer);
+        if (exc.getLogArgs() != null) {
+            final JSONArray array = new JSONArray();
+            for (final Object tmp : exc.getLogArgs()) {
+                array.put(tmp);
+            }
+            writer.key(ResponseFields.ERROR_PARAMS).value(array);
+        }
         // Write stack trace
         writer.key(ERROR_STACK);
         writer.array();

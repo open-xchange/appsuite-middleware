@@ -1,1 +1,0 @@
-define("io.ox/core/test",["io.ox/core/test/cacheStorage","io.ox/core/test/cacheSimpleCache","io.ox/core/test/cacheObjectCache","io.ox/core/test/date","io.ox/core/test/model"],function(){"use strict"})

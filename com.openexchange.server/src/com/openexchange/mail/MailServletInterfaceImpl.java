@@ -105,7 +105,6 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.upload.quotachecker.MailUploadQuotaChecker;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.java.SynchronizedBasedReentrantLock;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced;
 import com.openexchange.mail.api.IMailMessageStorage;
@@ -2469,6 +2468,12 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                  */
                 return null;
             }
+            /*
+             * If mail identifier and folder identifier is already available, assume is has already been stored in Sent folder
+             */
+            if (null != sentMail.getMailId() && null != sentMail.getFolder()) {
+                return new MailPath(accountId, sentMail.getFolder(), sentMail.getMailId()).toString();
+            }
             return append2SentFolder(sentMail).toString();
         } finally {
             transport.close();
@@ -2800,7 +2805,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     private <V> V performSynchronized(final Callable<V> task, final Session session) throws Exception {
         Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
         if (null == lock) {
-            lock = new SynchronizedBasedReentrantLock(session);
+            lock = Session.EMPTY_LOCK;
         }
         lock.lock();
         try {

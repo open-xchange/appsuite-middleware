@@ -61,6 +61,7 @@ import org.apache.commons.logging.Log;
 import org.glassfish.grizzly.http.server.HttpHandler;
 import org.glassfish.grizzly.http.server.Request;
 import org.glassfish.grizzly.http.server.Response;
+import org.glassfish.grizzly.http.server.util.MappingData;
 import org.glassfish.grizzly.http.util.HttpStatus;
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
@@ -71,7 +72,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.http.grizzly.GrizzlyExceptionMessage;
 import com.openexchange.http.grizzly.osgi.GrizzlyServiceRegistry;
 import com.openexchange.http.grizzly.servletfilters.RequestReportingFilter;
-import com.openexchange.log.LogFactory;
 
 /**
  * OSGi Main HttpHandler.
@@ -96,7 +96,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
     private final Bundle bundle;
 
     private final OSGiCleanMapper mapper;
-    
+
     private final boolean isRequestWatcherEnabled;
 
     /**
@@ -108,7 +108,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
     public OSGiMainHandler(Bundle bundle) {
         this.bundle = bundle;
         this.mapper = new OSGiCleanMapper();
-        
+
         /*
          * Get configparams from configService and add Filters to ServletHandler.
          */
@@ -152,6 +152,8 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
 
                 ((OSGiHandler) httpHandler).getProcessingLock().lock();
                 try {
+                    updateMappingInfo(request, alias, originalAlias);
+
                     httpHandler.service(request, response);
                 } finally {
                     ((OSGiHandler) httpHandler).getProcessingLock().unlock();
@@ -219,7 +221,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
             OSGiServletHandler servletHandler = findOrCreateOSGiServletHandler(servlet, context, initparams);
             servletHandler.setServletPath(alias);
 
-            //Do we have to watch long running requests?
+            // Do we have to watch long running requests?
             if (isRequestWatcherEnabled) {
                 servletHandler.addFilter(
                     new RequestReportingFilter(GrizzlyServiceRegistry.getInstance()),
@@ -445,5 +447,23 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
         }
         osgiServletHandler.addFilter(new OSGiAuthFilter(httpContext), "AuthorisationFilter", Collections.<String, String> emptyMap());
         return osgiServletHandler;
+    }
+
+    private void updateMappingInfo(final Request request, final String alias, final String originalAlias) {
+
+        final MappingData mappingData = request.obtainMappingData();
+        mappingData.contextPath.setString("/");
+        mappingData.wrapperPath.setString(alias);
+
+        if (alias.length() != originalAlias.length()) {
+            String pathInfo = originalAlias.substring(alias.length());
+            if (pathInfo.charAt(0) != '/') {
+                pathInfo = "/" + pathInfo;
+            }
+
+            mappingData.pathInfo.setString(pathInfo);
+        }
+
+        updatePaths(request, mappingData);
     }
 }

@@ -1,1 +1,0 @@
-define("plugins/halo/linkedIn/view-halo",["io.ox/linkedIn/view-detail","less!io.ox/linkedIn/style.css"],function(a){return"use strict",{draw:function(b){var c=$("<div>").addClass("linkedIn");return c.append($("<div>").addClass("widget-title clear-title").text("LinkedIn")),b.status&&b.status===404?c.append($("<div>").text("Not found")):c.append(a.draw(b)),c}}})

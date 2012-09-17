@@ -60,4 +60,11 @@ import com.openexchange.i18n.LocalizableStrings;
 public class AtmosphereExceptionMessage implements LocalizableStrings {
     /** The mandatory session information is missing. */
     public static final String SESSIONINFO_DIDNT_MATCH_SERVERSESSION_MSG = "The session information didn't match any ServerSession";
+    /** The received message is missing the \"kind\" key. */
+    public static final String MISSING_KIND_MSG = "The received message is missing the \"kind\" key.";
+    /** Could not find a parser for a message of kind: . \"%1$s\" */
+    public static final String MISSING_PARSER_FOR_KIND_MSG = "Could not find a parser for a message of kind: . \"%1$s\"";
+    /** Error while building Stanza: \"%1$s\" */
+    public static final String ERROR_WHILE_BUILDING_MSG = "Error while building Stanza: \"%1$s\"";
+    
 }

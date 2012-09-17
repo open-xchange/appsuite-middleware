@@ -421,7 +421,7 @@ public final class SMTPTransport extends MailTransport {
         if (cachedSmtpConfig == null) {
             synchronized (this) {
                 if (cachedSmtpConfig == null) {
-                    cachedSmtpConfig = TransportConfig.getTransportConfig(SMTPConfig.class, new SMTPConfig(), session, accountId);
+                    cachedSmtpConfig = TransportConfig.getTransportConfig(new SMTPConfig(), session, accountId);
                     cachedSmtpConfig.setTransportProperties(createNewMailProperties());
                 }
             }
@@ -566,13 +566,11 @@ public final class SMTPTransport extends MailTransport {
                 } else {
                     transport.connect(server, port, null, null);
                 }
-            } catch (final javax.mail.AuthenticationFailedException e) {
-                throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
-            }
-            try {
                 saveChangesSafe(smtpMessage);
                 transport.sendMessage(smtpMessage, smtpMessage.getAllRecipients());
                 mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+            } catch (final javax.mail.AuthenticationFailedException e) {
+                throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
             } finally {
                 transport.close();
             }
@@ -616,13 +614,11 @@ public final class SMTPTransport extends MailTransport {
                     } else {
                         transport.connect(server, port, null, null);
                     }
-                } catch (final javax.mail.AuthenticationFailedException e) {
-                    throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
-                }
-                try {
                     saveChangesSafe(smtpMessage);
                     transport.sendMessage(smtpMessage, recipients);
                     mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                } catch (final javax.mail.AuthenticationFailedException e) {
+                    throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
                 } finally {
                     transport.close();
                 }
@@ -695,17 +691,18 @@ public final class SMTPTransport extends MailTransport {
                     } else {
                         transport.connect(server, port, null, null);
                     }
-                } catch (final javax.mail.AuthenticationFailedException e) {
-                    throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
-                }
-                try {
+                    /*
+                     * Save changes
+                     */
                     saveChangesSafe(smtpMessage);
                     /*
                      * TODO: Do encryption here
                      */
                     transport.sendMessage(smtpMessage, recipients);
                     mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-                } finally {
+                } catch (final javax.mail.AuthenticationFailedException e) {
+                    throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
+                }  finally {
                     transport.close();
                 }
             } finally {

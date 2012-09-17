@@ -89,6 +89,8 @@ public class Protocol implements Component, Serializable {
 
     private static final Pattern PAT_PROT = Pattern.compile("([a-z0-9]+)(?:((?:_[a-z0-9]+)*))?");
 
+    private static final Pattern SPLIT = Pattern.compile("_");
+
     /**
      * Parses specified protocol string whose syntax match pattern:<br>
      * <i>([a-z]+)(?:((?:_[a-z]+)*))?</i><br>
@@ -109,12 +111,12 @@ public class Protocol implements Component, Serializable {
         final String[] aliases;
         {
             final String s = m.group(2);
-            if (null != s) {
-                final String[] sa = s.split("_");
+            if (null == s) {
+                aliases = null;
+            } else {
+                final String[] sa = SPLIT.split(s, 0);
                 aliases = new String[sa.length - 1];
                 System.arraycopy(sa, 1, aliases, 0, aliases.length);
-            } else {
-                aliases = null;
             }
         }
         return new Protocol(m.group(1), aliases);
@@ -157,11 +159,7 @@ public class Protocol implements Component, Serializable {
             throw new IllegalArgumentException("name is null");
         }
         this.name = name.toLowerCase(Locale.ENGLISH);
-        if (secureName == null) {
-            aliases = null;
-        } else {
-            aliases = new String[] { secureName.toLowerCase(Locale.ENGLISH) };
-        }
+        aliases = secureName == null ? null : new String[] { secureName.toLowerCase(Locale.ENGLISH) };
         hashCode = 31 * 1 + (name.hashCode());
     }
 
@@ -172,7 +170,7 @@ public class Protocol implements Component, Serializable {
      * @param aliases The protocol's aliases in lower case
      * @throws IllegalArgumentException If name is <code>null</code>
      */
-    public Protocol(final String name, final String[] aliases) {
+    public Protocol(final String name, final String... aliases) {
         super();
         if (null == name) {
             throw new IllegalArgumentException("name is null");

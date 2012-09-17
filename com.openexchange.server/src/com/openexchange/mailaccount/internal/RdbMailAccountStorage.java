@@ -87,8 +87,9 @@ import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
-import com.openexchange.java.SynchronizedBasedReentrantLock;
 import com.openexchange.mail.MailProviderRegistry;
+import com.openexchange.mail.MailSessionCache;
+import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
@@ -185,7 +186,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     private static <V> V performSynchronized(final Callable<V> task, final Session session) throws Exception {
         Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
         if (null == lock) {
-            lock = new SynchronizedBasedReentrantLock(session);
+            lock = Session.EMPTY_LOCK;
         }
         lock.lock();
         try {
@@ -316,13 +317,29 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
              * Unified mail enabled
              */
             mailAccount.setUnifiedINBOXEnabled(result.getInt(14) > 0);
-            /*
+            /*-
              * Default folder full names
+             * 
+             * Full names for: Trash, Sent, Drafts, and Spam
              */
-            mailAccount.setTrashFullname(getOptionalString(result.getString(15)));
-            mailAccount.setSentFullname(getOptionalString(result.getString(16)));
-            mailAccount.setDraftsFullname(getOptionalString(result.getString(17)));
-            mailAccount.setSpamFullname(getOptionalString(result.getString(18)));
+            {
+                final Session session = SessiondService.SERVICE_REFERENCE.get().getAnyActiveSessionForUser(user, cid);
+                if (null != session) {
+                    final String parameterName = MailSessionParameterNames.getParamDefaultFolderArray();
+                    final String[] fullNames = MailSessionCache.getInstance(session).getParameter(id, parameterName);
+                    String s = getOptionalString(result.getString(15));
+                    mailAccount.setTrashFullname(s == null ? (null == fullNames ? null : fullNames[StorageUtility.INDEX_TRASH]) : s);
+                    s = getOptionalString(result.getString(16));
+                    mailAccount.setSentFullname(s == null ? (null == fullNames ? null : fullNames[StorageUtility.INDEX_SENT]) : s);
+                    s = getOptionalString(result.getString(17));
+                    mailAccount.setDraftsFullname(s == null ? (null == fullNames ? null : fullNames[StorageUtility.INDEX_DRAFTS]) : s);
+                    s = getOptionalString(result.getString(18));
+                    mailAccount.setSpamFullname(s == null ? (null == fullNames ? null : fullNames[StorageUtility.INDEX_SPAM]) : s);
+                }
+            }
+            /*
+             * Full names for confirmed-spam and confirmed-ham
+             */
             mailAccount.setConfirmedSpamFullname(getOptionalString(result.getString(19)));
             mailAccount.setConfirmedHamFullname(getOptionalString(result.getString(20)));
             final String pers = result.getString(21);
@@ -2219,7 +2236,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     }
 
     private static String getOptionalString(final String string) {
-        return (null == string || string.length() == 0) ? null : string;
+        return (null == string || 0 == string.length()) ? null : string;
     }
 
     private static boolean isEmpty(final String string) {

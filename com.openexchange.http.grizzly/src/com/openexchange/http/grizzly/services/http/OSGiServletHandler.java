@@ -44,17 +44,12 @@
 
 package com.openexchange.http.grizzly.services.http;
 
-import org.apache.commons.logging.Log;
-import org.glassfish.grizzly.Grizzly;
-import org.glassfish.grizzly.http.server.Request;
-import org.glassfish.grizzly.localization.LogMessages;
-import org.glassfish.grizzly.servlet.FilterChainInvoker;
-import org.glassfish.grizzly.servlet.FilterConfigImpl;
-import org.glassfish.grizzly.servlet.HttpServletRequestImpl;
-import org.glassfish.grizzly.servlet.ServletConfigImpl;
-import org.glassfish.grizzly.servlet.WebappContext;
-import org.osgi.service.http.HttpContext;
-
+import java.io.IOException;
+import java.util.EventListener;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.logging.Level;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -64,16 +59,17 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletRequestEvent;
 import javax.servlet.ServletRequestListener;
 import javax.servlet.ServletResponse;
-import java.io.IOException;
-import java.lang.String;
-import java.util.EventListener;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.logging.Level;
-
+import org.apache.commons.logging.Log;
+import org.glassfish.grizzly.Grizzly;
+import org.glassfish.grizzly.http.server.Request;
+import org.glassfish.grizzly.localization.LogMessages;
+import org.glassfish.grizzly.servlet.FilterChainInvoker;
+import org.glassfish.grizzly.servlet.FilterConfigImpl;
+import org.glassfish.grizzly.servlet.HttpServletRequestImpl;
+import org.glassfish.grizzly.servlet.ServletConfigImpl;
 import org.glassfish.grizzly.servlet.ServletHandler;
-import com.openexchange.log.LogFactory;
+import org.glassfish.grizzly.servlet.WebappContext;
+import org.osgi.service.http.HttpContext;
 
 /**
  * OSGi customized {@link ServletHandler}.
@@ -180,10 +176,10 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
 
     }
 
-    @Override
-    protected void setPathData(Request from, HttpServletRequestImpl to) {
-        to.setServletPath(getServletPath());
-    }
+//    @Override
+//    protected void setPathData(Request from, HttpServletRequestImpl to) {
+//        to.setServletPath(getServletPath());
+//    }
 
     // --------------------------------------------------------- Private Methods
 

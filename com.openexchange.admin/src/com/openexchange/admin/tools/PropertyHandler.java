@@ -150,7 +150,10 @@ public class PropertyHandler {
         
         synchronized (this) {
             if ( this.groupPropValues == null ) {
-                final ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
+                ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
+                if (null == service) {
+                    service = AdminCache.getConfigurationService();
+                }
                 if (null == service) {
                     if (log.isDebugEnabled()) {
                         log.debug("Service '" + ConfigurationService.class.getName() + "' is missing.");
@@ -187,7 +190,10 @@ public class PropertyHandler {
         
         synchronized (this) {
             if ( this.groupPropValues == null ) {
-                final ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
+                ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
+                if (null == service) {
+                    service = AdminCache.getConfigurationService();
+                }
                 if (null == service) {
                     if (log.isDebugEnabled()) {
                         log.debug("Service '" + ConfigurationService.class.getName() + "' is missing.");
@@ -224,7 +230,10 @@ public class PropertyHandler {
         
         synchronized (this) {
             if ( this.userPropValues == null ) {
-                final ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
+                ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
+                if (null == service) {
+                    service = AdminCache.getConfigurationService();
+                }
                 if (null == service) {
                     if (log.isDebugEnabled()) {
                         log.debug("Service '" + ConfigurationService.class.getName() + "' is missing.");
@@ -262,7 +271,10 @@ public class PropertyHandler {
         
         synchronized (this) {
             if ( this.userPropValues == null ) {
-                final ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
+                ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
+                if (null == service) {
+                    service = AdminCache.getConfigurationService();
+                }
                 if (null == service) {
                     if (log.isDebugEnabled()) {
                         log.debug("Service '" + ConfigurationService.class.getName() + "' is missing.");
@@ -301,7 +313,10 @@ public class PropertyHandler {
         
         synchronized (this) {
             if ( this.resPropValues == null ) {
-                final ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
+                ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
+                if (null == service) {
+                    service = AdminCache.getConfigurationService();
+                }
                 if (null == service) {
                     if (log.isDebugEnabled()) {
                         log.debug("Service '" + ConfigurationService.class.getName() + "' is missing.");
@@ -339,7 +354,10 @@ public class PropertyHandler {
         
         synchronized (this) {
             if ( this.rmiPropValues == null ) {
-                final ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
+                ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
+                if (null == service) {
+                    service = AdminCache.getConfigurationService();
+                }
                 if (null == service) {
                     if (log.isDebugEnabled()) {
                         log.debug("Service '" + ConfigurationService.class.getName() + "' is missing.");
@@ -453,7 +471,10 @@ public class PropertyHandler {
         String retval = fallback;
         synchronized (this) {
             if ( this.resPropValues == null ) {
-                final ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
+                ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
+                if (null == service) {
+                    service = AdminCache.getConfigurationService();
+                }
                 if (null == service) {
                     if (log.isDebugEnabled()) {
                         log.debug("Service '" + ConfigurationService.class.getName() + "' is missing.");
@@ -489,7 +510,10 @@ public class PropertyHandler {
 
         synchronized (this) {
             if ( this.sqlPropValues == null ) {
-                final ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
+                ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
+                if (null == service) {
+                    service = AdminCache.getConfigurationService();
+                }
                 if (null == service) {
                     if (log.isDebugEnabled()) {
                         log.debug("Service '" + ConfigurationService.class.getName() + "' is missing.");

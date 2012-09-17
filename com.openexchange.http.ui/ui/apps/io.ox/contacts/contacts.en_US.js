@@ -1,1 +1,0 @@
-define("io.ox/contacts/contacts.en_US",["io.ox/core/gettext"],function(g){return g("io.ox/contacts/contacts",{"nplurals":2,"plural":"(n!=1)","dictionary":{}});});

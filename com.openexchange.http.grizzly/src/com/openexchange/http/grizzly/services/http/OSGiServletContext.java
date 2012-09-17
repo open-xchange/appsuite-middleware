@@ -44,19 +44,16 @@
 
 package com.openexchange.http.grizzly.services.http;
 
+import static java.text.MessageFormat.format;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.EventListener;
 import org.apache.commons.logging.Log;
 import org.glassfish.grizzly.http.server.util.MimeType;
 import org.glassfish.grizzly.servlet.WebappContext;
 import org.osgi.service.http.HttpContext;
-import com.openexchange.log.LogFactory;
-
-import java.net.URL;
-import java.net.MalformedURLException;
-import java.io.InputStream;
-import java.io.IOException;
-import java.util.EventListener;
-
-import static java.text.MessageFormat.format;
 
 /**
  * OSGi {@link WebappContext} integration.

@@ -1,1 +1,0 @@
-define("io.ox/core/date.de_DE",["io.ox/core/gettext"],function(g){return g("io.ox/core/date",{"nplurals":2,"plural":"(n != 1)","dictionary":{}});});

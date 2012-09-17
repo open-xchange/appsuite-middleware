@@ -75,6 +75,8 @@ import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;
 import com.openexchange.realtime.atmosphere.OXRTHandler;
 import com.openexchange.realtime.atmosphere.StanzaSender;
+import com.openexchange.realtime.atmosphere.impl.stanza.OLDStanzaParser;
+import com.openexchange.realtime.atmosphere.impl.stanza.StanzaWriter;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Payload;
 import com.openexchange.realtime.packet.Stanza;
@@ -201,7 +203,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                         LOG.info("tracked session:" + sessionIdToState.keys());
                         throw ex;
                     }
-                    handleIncoming(StanzaParser.parse(postData), atmosphereState);
+                    handleIncoming(OLDStanzaParser.parse(postData), atmosphereState);
                     printBroadcasters("Broadcasters after POST Request");
                     printSessions("Sessions after POST Request");
                 } catch (IllegalArgumentException illEx) {

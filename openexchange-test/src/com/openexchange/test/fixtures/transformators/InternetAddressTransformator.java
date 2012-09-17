@@ -73,7 +73,7 @@ public class InternetAddressTransformator implements Transformator {
 
 	private final FixtureLoader fixtureLoader;
 
-	public InternetAddressTransformator(FixtureLoader fixtureLoader) {
+	public InternetAddressTransformator(final FixtureLoader fixtureLoader) {
 		super();
 		this.fixtureLoader = fixtureLoader;
 	}
@@ -94,7 +94,7 @@ public class InternetAddressTransformator implements Transformator {
 		final boolean[] plainFLags = new boolean[splitted.length];
 
 		for (int i = 0; i < splitted.length; i++) {
-	        Matcher mFlag = patFlags.matcher(splitted[i]);
+	        final Matcher mFlag = patFlags.matcher(splitted[i]);
 	        if(mFlag.find() && mFlag.group().contains(plainMarker)) {
 	        	plainFLags[i] = true;
 	        	splitted[i] = splitted[i].replace(plainMarker, "").replace(" ", "");
@@ -118,7 +118,7 @@ public class InternetAddressTransformator implements Transformator {
 	private InternetAddress getAddress(final String address) throws OXException {
 		try {
 			return InternetAddress.parse(address)[0];
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw OXException.general("Unable to parse e-mail address from " + address);
 		}
 	}
@@ -142,10 +142,16 @@ public class InternetAddressTransformator implements Transformator {
 				for (final DistributionListEntryObject entry : entries) {
 					if (null != entry && entry.containsEmailaddress()) {
 						try {
-							addresses.add(new InternetAddress(entry.getEmailaddress()));
-						} catch (AddressException e) {
+						    if(entry.containsDisplayname() && null != entry.getDisplayname()) {
+						        addresses.add(new InternetAddress(entry.getEmailaddress(), entry.getDisplayname()));
+						    } else {
+						        addresses.add(new InternetAddress(entry.getEmailaddress()));
+							}
+						} catch (final AddressException e) {
 							throw new OXException(e);
-						}
+						} catch (final UnsupportedEncodingException e) {
+						    throw new OXException(e);
+                        }
 					}
 				}
 			}
@@ -171,9 +177,9 @@ public class InternetAddressTransformator implements Transformator {
 						addresses.add(new InternetAddress(contact.getEmail3()));
 					}
 				}
-			} catch (UnsupportedEncodingException e) {
+			} catch (final UnsupportedEncodingException e) {
 				throw new OXException(e);
-			} catch (AddressException e) {
+			} catch (final AddressException e) {
 				e.printStackTrace();
 			}
 		}

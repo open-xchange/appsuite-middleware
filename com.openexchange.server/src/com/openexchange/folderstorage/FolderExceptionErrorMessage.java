@@ -206,6 +206,10 @@ public enum FolderExceptionErrorMessage implements OXExceptionCode {
      * Found two folders named "%1$s" located below the parent folder "%2$s". Please rename one of the folders. There should be no two folders with the same name.
      */
     DUPLICATE_NAME(FolderExceptionMessages.DUPLICATE_NAME_MSG, Category.CATEGORY_PERMISSION_DENIED, 1034),
+    /**
+     * An unexpected error occurred: %1$s. Please try again.
+     */
+    TRY_AGAIN(FolderExceptionMessages.TRY_AGAIN_MSG, Category.CATEGORY_TRY_AGAIN, 1035)
 
     ;
 

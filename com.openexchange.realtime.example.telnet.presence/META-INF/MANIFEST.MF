@@ -8,9 +8,9 @@ Bundle-Vendor: OPENEXCHANGE
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.exception,
  com.openexchange.osgi,
- com.openexchange.realtime.example.presence,
  com.openexchange.realtime.example.telnet,
  com.openexchange.realtime.packet,
+ com.openexchange.realtime.presence,
  com.openexchange.server,
  com.openexchange.session,
  com.openexchange.tools.session,

@@ -1,1 +1,0 @@
-define("io.ox/calendar/edit/collection-participants",["io.ox/calendar/edit/model-participant"],function(a){var b=Backbone.Collection.extend({model:a});return"use strict",b})

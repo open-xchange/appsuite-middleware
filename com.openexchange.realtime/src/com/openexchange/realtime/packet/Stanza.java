@@ -60,7 +60,7 @@ public abstract class Stanza {
 
 	private ID to, from;
 
-	private String namespace;
+	private String namespace = "default";
 
 	private Payload payload;
 
@@ -73,7 +73,7 @@ public abstract class Stanza {
 
 	/**
 	 * Get the {@link ID} describing the stanza's recipient.
-	 * @return the ID of the stanza's recipient
+	 * @return null or the ID of the stanza's recipient
 	 */
 	public ID getTo() {
 		return to;
@@ -113,7 +113,7 @@ public abstract class Stanza {
 
 	/**
 	 * Get the structured information of this Stanza.
-	 * @return the structured information of this Stanza.
+	 * @return null or the structured information of this Stanza.
 	 */
 	public Payload getPayload() {
 		return payload;
@@ -122,6 +122,7 @@ public abstract class Stanza {
 	/**
 	 * Get the namespace of this Stanza.
 	 * Namespaces are used to separate data ownership and vocabularies.
+	 * A namespace must not be specified for elements of the default namespace e.g. IQ, Presence, Message.
 	 * @return the namespace of this Stanza
 	 */
 	public String getNamespace() {

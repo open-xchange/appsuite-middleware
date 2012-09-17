@@ -78,6 +78,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.internal.jericho.JerichoParser;
+import com.openexchange.html.internal.jericho.JerichoParser.ParsingDeniedException;
 import com.openexchange.html.internal.jericho.handler.FilterJerichoHandler;
 import com.openexchange.html.internal.parser.HtmlParser;
 import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
@@ -458,34 +459,39 @@ public final class HtmlServiceImpl implements HtmlService {
 
     @Override
     public String sanitize(final String htmlContent, final String optConfigName, final boolean dropExternalImages, final boolean[] modified, final String cssPrefix) {
-        final long st = DEBUG ? System.currentTimeMillis() : 0L;
-        String confName = optConfigName;
-        if (null != confName && !confName.endsWith(".properties")) {
-            confName += ".properties";
-        }
-        String html = replaceHexEntities(htmlContent);
-        html = processDownlevelRevealedConditionalComments(html);
-        html = dropDoubleAccents(html);
-        // html = replaceHexNbsp(html);
-        final FilterJerichoHandler handler;
-        {
-            final String definition = null == confName ? null : getConfiguration().getText(confName);
-            if (null == definition) {
-                handler = new FilterJerichoHandler(html.length());
-            } else {
-                handler = new FilterJerichoHandler(html.length(), definition);
+        try {
+            final long st = DEBUG ? System.currentTimeMillis() : 0L;
+            String confName = optConfigName;
+            if (null != confName && !confName.endsWith(".properties")) {
+                confName += ".properties";
             }
+            String html = replaceHexEntities(htmlContent);
+            html = processDownlevelRevealedConditionalComments(html);
+            html = dropDoubleAccents(html);
+            // html = replaceHexNbsp(html);
+            final FilterJerichoHandler handler;
+            {
+                final String definition = null == confName ? null : getConfiguration().getText(confName);
+                if (null == definition) {
+                    handler = new FilterJerichoHandler(html.length());
+                } else {
+                    handler = new FilterJerichoHandler(html.length(), definition);
+                }
+            }
+            JerichoParser.parse(html, handler.setDropExternalImages(dropExternalImages).setCssPrefix(cssPrefix));
+            if (dropExternalImages && null != modified) {
+                modified[0] |= handler.isImageURLFound();
+            }
+            final String retval = handler.getHTML();
+            if (DEBUG) {
+                final long dur = System.currentTimeMillis() - st;
+                LOG.debug("\tHTMLServiceImpl.sanitize() took " + dur + "msec.");
+            }
+            return retval;
+        } catch (final ParsingDeniedException e) {
+            LOG.warn("HTML content will be returned un-sanitized. Reason: "+e.getMessage(), e);
+            return htmlContent;
         }
-        JerichoParser.parse(html, handler.setDropExternalImages(dropExternalImages).setCssPrefix(cssPrefix));
-        if (dropExternalImages && null != modified) {
-            modified[0] |= handler.isImageURLFound();
-        }
-        final String retval = handler.getHTML();
-        if (DEBUG) {
-            final long dur = System.currentTimeMillis() - st;
-            LOG.debug("\tHTMLServiceImpl.sanitize() took " + dur + "msec.");
-        }
-        return retval;
     }
 
     private static final Pattern PATTERN_TAG = Pattern.compile("<\\w+?[^>]*>");

@@ -53,7 +53,6 @@ import org.glassfish.grizzly.comet.CometAddOn;
 import org.glassfish.grizzly.http.HttpRequestPacket;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.grizzly.http.server.NetworkListener;
-import org.glassfish.grizzly.http.server.StaticHttpHandler;
 import org.glassfish.grizzly.websockets.WebSocket;
 import org.glassfish.grizzly.websockets.WebSocketAddOn;
 import org.glassfish.grizzly.websockets.WebSocketApplication;
@@ -91,27 +90,19 @@ public class GrizzlyActivator extends HousekeepingActivator {
         return new Class[] { ConfigurationService.class, RequestWatcherService.class };
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.osgi.HousekeepingActivator#handleAvailability(java.lang.Class)
-     */
     @Override
     protected void handleAvailability(Class<?> clazz) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Service " + clazz.getName() + " is available again.");
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Service " + clazz.getName() + " is available again.");
         }
         Object service = getService(clazz);
         GrizzlyServiceRegistry.getInstance().addService(clazz, service);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.osgi.HousekeepingActivator#handleUnavailability(java.lang.Class)
-     */
     @Override
     protected void handleUnavailability(Class<?> clazz) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Service " + clazz.getName() + " is no longer available.");
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Service " + clazz.getName() + " is no longer available.");
         }
         GrizzlyServiceRegistry.getInstance().removeService(clazz);
     }
@@ -159,8 +150,6 @@ public class GrizzlyActivator extends HousekeepingActivator {
             final boolean hasJMXEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasJMXEnabled", false);
             final boolean hasWebsocketsEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasWebSocketsEnabled", false);
             final boolean hasCometEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasCometEnabled", false);
-            final boolean hasDeliverUiEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasDeliverUiEnabled", false);
-            
 
             /*
              *  create, configure and start server
@@ -201,15 +190,6 @@ public class GrizzlyActivator extends HousekeepingActivator {
                     LOG.info("Enabling Comet for Grizzly server.");
                 }
                 networkListener.registerAddOn(new CometAddOn());
-            }
-            
-            if (hasDeliverUiEnabled) {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Enabling UI delivery via Grizzly server.");
-                }
-                final String uiRootPath = configService.getProperty("com.openexchange.ui.rootPath", "/var/www/ox7/");
-                final String uiAlias = configService.getProperty("com.openexchange.http.grizzly.uiAlias", "/ox7");
-                grizzly.getServerConfiguration().addHttpHandler(new StaticHttpHandler(uiRootPath), uiAlias);
             }
 
             if (LOG.isInfoEnabled()) {

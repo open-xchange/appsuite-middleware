@@ -2554,7 +2554,6 @@ msgstr ""
 
 #. * The following needed service is missing: \"%1$s\"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.grizzly/src/com/openexchange/http/grizzly/GrizzlyExceptionMessage.java:64
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.probe/src/com/openexchange/http/probe/ProbeExceptionMessage.java:62
 msgid "The following needed service is missing: \"%1$s\""
 msgstr ""
 
@@ -4375,6 +4374,21 @@ msgstr ""
 msgid "The session information didn't match any ServerSession"
 msgstr ""
 
+#. * The received message is missing the \"kind\" key.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:64
+msgid "The received message is missing the \"kind\" key."
+msgstr ""
+
+#. * Could not find a parser for a message of kind: . \"%1$s\"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:66
+msgid "Could not find a parser for a message of kind: . \"%1$s\""
+msgstr ""
+
+#. * Error while building Stanza: \"%1$s\"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:68
+msgid "Error while building Stanza: \"%1$s\""
+msgstr ""
+
 #. Unknown channel %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeExceptionMessages.java:63
 msgid "Unknown channel %1$s"
@@ -4749,6 +4763,11 @@ msgid ""
 "Found two folders named \"%1$s\" located below the parent folder \"%2$s\". "
 "Please rename one of the folders. There should be no two folders with the "
 "same name."
+msgstr ""
+
+#. An unexpected error occurred: %1$s. Please try again.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:167
+msgid "An unexpected error occurred: %1$s. Please try again."
 msgstr ""
 
 #. SQL Problem: "%1$s".

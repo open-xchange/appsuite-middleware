@@ -52,20 +52,40 @@ package com.openexchange.realtime.atmosphere.presence;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.atmosphere.OXRTHandler;
 import com.openexchange.realtime.atmosphere.StanzaSender;
-import com.openexchange.realtime.example.presence.PresenceStatus;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.presence.PresenceStatus;
 import com.openexchange.realtime.util.IDMap;
 import com.openexchange.tools.session.ServerSession;
 
 /*
- * Build OXRTHandler(s) and SimpleConverters to handle 
+ * Build OXRTHandler(s) and SimpleConverters to handle
+* Ask someone else for permission to see his status. Done by triggering a method on the PresenceSubscriptionService
+* Give someone permission to see my status
+-> PresenceSubscriptionService
+* Get a list of OXIDs whose status I can see and their status
+-> PresenceSubscriptionService and PresenceStatusService
+* Change my status
+-> PresenceStatusService
 
+* Transport status changes
+This is an outgoing message
+* Transport subscribe requests
+This, too, is an outgoing message
+*/
 
-
-
+/**
+ * {@link OXRTPresenceHandler} - Handles Stanzas related to Presence and PresenceSubscription.
+ * Features:
+ * <ul>
+ * <li>Ask others to see their Status, iow. subscribe to their Presence</li>
+ * <li>Give others permission to view my Status, iow. subscribe to my Presence</li>
+ * <li>Get a list of pairs containing my subscribed users and their status</li>
+ * <li></li>
+ * </ul>
+ * 
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-
 public class OXRTPresenceHandler implements OXRTHandler {
 
     @Override
@@ -74,9 +94,23 @@ public class OXRTPresenceHandler implements OXRTHandler {
         return null;
     }
 
+    /*
+     * transform stanza to presence status
+     * get presence service
+     * presenceService.changeState (causes many outgoing stanzas to inform himself and subscribed users)
+     */
     @Override
     public void incoming(Stanza stanza, ServerSession session) throws OXException {
-        // TODO Auto-generated method stub
+        if(stanza == null || session == null) {
+            throw new IllegalArgumentException();
+        }
+        
+//        //transform stanza to Presence Status
+//        PresenceStatus status = (PresenceStatus) stanza.getPayload().to("presenceStatus", session).getData();
+//
+//        PresenceService presenceService = services.getService(PresenceService.class);
+//
+//        presenceService.changeState(stanza.getFrom(), status.getState(), status.getMessage(), session);
 
     }
 

@@ -59,7 +59,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.SynchronizedBasedReentrantLock;
 import com.openexchange.pop3.POP3Access;
 import com.openexchange.pop3.services.POP3ServiceRegistry;
 import com.openexchange.pop3.storage.FullnameUIDPair;
@@ -88,7 +87,7 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
         SessionPOP3StorageUIDLMap cached;
         Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
         if (null == lock) {
-            lock = new SynchronizedBasedReentrantLock(session);
+            lock = Session.EMPTY_LOCK;
         }
         lock.lock();
         try {
