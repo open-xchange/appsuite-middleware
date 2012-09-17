@@ -132,6 +132,11 @@ public final class Authentication {
         });
     }
 
+    /**
+     * Gets the registered {@code AuthenticationService}.
+     * 
+     * @return The registered {@code AuthenticationService} or <code>null</code>
+     */
     public static AuthenticationService getService() {
         return SERVICE_REF.get();
     }
