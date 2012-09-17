@@ -14,11 +14,12 @@ License:        GPL-2.0
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 URL:            http://www.open-xchange.com/
 Source:         %{name}_%{version}.orig.tar.bz2
-Summary:        Blackwhitelist
+Summary:        JSON interface for some black/white list implementation
 Requires:       open-xchange-core >= @OXVERSION@
 
 %description
-Blackwhitelist
+This package installs an OSGi bundle that adds the JSON interface for some black/white list implementation. The concrete implementation
+needs to be installed additionally and is not required by this package.
 
 Authors:
 --------

@@ -14,15 +14,17 @@ License:       GPL-2.0
 BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
-Summary:       The Open-Xchange IMAP authentication
+Summary:       Module for authenticating users using the IMAP server
 Requires:      open-xchange-core >= @OXVERSION@
 Provides:      open-xchange-authentication
 Conflicts:     open-xchange-authentication-ldap
 Conflicts:     open-xchange-authentication-database
 
 %description
-This package implements an authentication mechanism using an IMAP server.
-
+ This package installs the OSGi bundle implementing the OSGi AuthenticationService for the backend. The implementation uses some IMAP server
+ to authenticate login requests.
+ This authentication module is mutually exclusive with any other authentication module. Only one authentication module can be installed on
+ the backend.
 
 Authors:
 --------

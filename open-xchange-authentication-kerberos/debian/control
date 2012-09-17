@@ -12,4 +12,9 @@ Pre-Depends: open-xchange-core (>= @OXVERSION@)
 Depends: ${misc:Depends}
 Conflicts: open-xchange-authentication-database, open-xchange-authentication-ldap, open-xchange-authentication-imap
 Provides: open-xchange-authentication
-Description: The Open-Xchange Kerberos Authentication
+Description: Module for authenticating users in a Kerberos domain
+ This package installs the OSGi bundle implementing the OSGi AuthenticationService for the backend. The implementation uses the Kerberos
+ domain controller (KDC) of the domain to authenticate login requests. Additionally this implementation is able to verify the service ticket
+ sent by the browser from the desktop login.
+ This authentication module is mutually exclusive with any other authentication module. Only one authentication module can be installed on
+ the backend.
