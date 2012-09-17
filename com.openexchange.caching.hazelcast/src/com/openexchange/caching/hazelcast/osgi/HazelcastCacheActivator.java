@@ -102,17 +102,25 @@ public final class HazelcastCacheActivator extends HousekeepingActivator impleme
 
     private void startUp() throws OXException {
         synchronized (this) {
-            Services.setServiceLookup(this);
-            HazelcastCacheService hazelcastCacheService = this.hazelcastCacheService;
-            if (null != hazelcastCacheService) {
-                return;
+            final ConfigurationService service = getService(ConfigurationService.class);
+            /*
+             * Register service
+             */
+            if (null == service || service.getBoolProperty("com.openexchange.caching.jcs.enabled", true)) {
+                LOG.info("Denied registration of '"+HazelcastCacheService.class.getSimpleName() + "', because higher-ranked cache service is available.");
+            } else {
+                Services.setServiceLookup(this);
+                HazelcastCacheService hazelcastCacheService = this.hazelcastCacheService;
+                if (null != hazelcastCacheService) {
+                    return;
+                }
+                hazelcastCacheService = new HazelcastCacheService(getService(HazelcastInstance.class));
+                hazelcastCacheService.loadDefaultConfiguration();
+                final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
+                props.put(Constants.SERVICE_RANKING, Integer.valueOf(MY_RANKING));
+                cacheServiceRegistration = context.registerService(CacheService.class, hazelcastCacheService, props);
+                this.hazelcastCacheService = hazelcastCacheService;
             }
-            hazelcastCacheService = new HazelcastCacheService(getService(HazelcastInstance.class));
-            hazelcastCacheService.loadDefaultConfiguration();
-            final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
-            props.put(Constants.SERVICE_RANKING, Integer.valueOf(MY_RANKING));
-            cacheServiceRegistration = context.registerService(CacheService.class, hazelcastCacheService, props);
-            this.hazelcastCacheService = hazelcastCacheService;
         }
     }
 
