@@ -78,104 +78,85 @@ public class MailFolder implements Serializable, Cloneable {
     }
 
     private DefaultFolderType defaulFolderType;
-
     private boolean b_defaulFolderType;
 
     private String name;
-
     private boolean b_name;
 
     private String fullname;
-
     private boolean b_fullname;
 
     private String parentFullname;
-
     private boolean b_parentFullname;
 
     private boolean subscribed;
-
     private boolean b_subscribed;
 
     /**
      * Flag to indicate whether this mail folder contains subfolders.
      */
     private boolean hasSubfolders;
-
     private boolean b_hasSubfolders;
 
     /**
      * Flag to indicate whether this mail folder contains _subscribed_ subfolders.
      */
     private boolean hasSubscribedSubfolders;
-
     private boolean b_hasSubscribedSubfolders;
 
     private boolean exists;
-
     private boolean b_exists;
 
     /**
      * Flag to indicate whether this mail folder is able to hold messages.
      */
     private boolean holdsMessages;
-
     private boolean b_holdsMessages;
 
     /**
      * Flag to indicate whether this mail folder is able to hold (sub)folders.
      */
     private boolean holdsFolders;
-
     private boolean b_holdsFolders;
 
     private int messageCount;
-
     private boolean b_messageCount;
 
     private int newMessageCount;
-
     private boolean b_newMessageCount;
 
     private int unreadMessageCount;
-
     private boolean b_unreadMessageCount;
 
     private int deletedMessageCount;
-
     private boolean b_deletedMessageCount;
 
     private char separator;
-
     private boolean b_separator;
 
     private MailPermission ownPermission;
-
     private boolean b_ownPermission;
 
     private boolean supportsUserFlags;
-
     private boolean b_supportsUserFlags;
 
     private boolean rootFolder;
-
     private boolean b_rootFolder;
 
     private boolean defaultFolder;
-
     private boolean b_defaultFolder;
 
     private List<MailPermission> permissions;
-
     private boolean b_permissions;
 
     private boolean shared;
-
     private boolean b_shared;
 
     private String owner;
-
     private boolean b_owner;
+
+    private boolean isPublic;
+    private boolean b_public;
 
     /**
      * Virtual name of mailbox's root folder
@@ -1100,7 +1081,7 @@ public class MailFolder implements Serializable, Cloneable {
     }
 
     /**
-     * Removes the supports-user-flags flag.
+     * Removes the shared flag.
      */
     public void removeShared() {
         shared = false;
@@ -1115,6 +1096,42 @@ public class MailFolder implements Serializable, Cloneable {
     public void setShared(final boolean shared) {
         this.shared = shared;
         b_shared = true;
+    }
+
+    /**
+     * Checks if this folder is public.
+     *
+     * @return <code>true</code> if this folder is public; otherwise <code>false</code>
+     */
+    public boolean isPublic() {
+        return isPublic;
+    }
+
+    /**
+     * Checks if the public flag was set.
+     *
+     * @return <code>true</code> if public flag is set; otherwise <code>false</code>
+     */
+    public boolean containsPublic() {
+        return b_public;
+    }
+
+    /**
+     * Removes the public flag.
+     */
+    public void removePublic() {
+        isPublic = false;
+        b_public = false;
+    }
+
+    /**
+     * Sets the public flag.
+     *
+     * @param isPublic The public flag to set
+     */
+    public void setPublic(final boolean isPublic) {
+        this.isPublic = isPublic;
+        b_public = true;
     }
 
     /**

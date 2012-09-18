@@ -288,6 +288,11 @@ public final class IMAPFolderConverter {
                             }
                         }
                     }
+                    mailFolder.setShared(shared);
+                    if (null != owner) {
+                        mailFolder.setOwner(owner);
+                    }
+                    boolean isPublic = false;
                     if (!shared) {
                         final String[] shares = NamespaceFoldersCache.getSharedNamespaces(imapStore, true, session, accountId);
                         final String[] personals = NamespaceFoldersCache.getPersonalNamespaces(imapStore, true, session, accountId);
@@ -295,23 +300,20 @@ public final class IMAPFolderConverter {
                             final String sharedNamespace = shares[i];
                             if (!isEmpty(sharedNamespace)) {
                                 if (imapFullName.equals(sharedNamespace)) {
-                                    shared = true;
+                                    isPublic = true;
                                 } else {
                                     tmp.setLength(0);
                                     final String prefix = tmp.append(sharedNamespace).append(sep).toString();
                                     if (imapFullName.startsWith(prefix)) {
-                                        shared = true;
+                                        isPublic = true;
                                     }
                                 }
                             } else if (!startsWithOneOf(imapFullName, sep, personals, users, tmp)) {
-                                shared = true;
+                                isPublic = true;
                             }
                         }
                     }
-                    mailFolder.setShared(shared);
-                    if (null != owner) {
-                        mailFolder.setOwner(owner);
-                    }
+                    mailFolder.setPublic(isPublic);
                 }
                 /*-
                  * -------------------------------------------------------------------
@@ -584,6 +586,7 @@ public final class IMAPFolderConverter {
             mailFolder.setRootFolder(true);
             mailFolder.setExists(true);
             mailFolder.setShared(false);
+            mailFolder.setPublic(true);
             mailFolder.setSeparator(ListLsubCache.getSeparator(imapConfig.getAccountId(), rootFolder, session));
             final String imapFullname = "";
             final ListLsubEntry listEntry = ListLsubCache.getCachedLISTEntry(imapFullname, imapConfig.getAccountId(), rootFolder, session);
