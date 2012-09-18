@@ -49,13 +49,18 @@
 
 package com.openexchange.realtime.presence.subscribe.test.osgi;
 
+import java.util.ArrayList;
+import java.util.List;
+import junit.framework.TestSuite;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
-import org.junit.runner.JUnitCore;
-import org.junit.runner.Result;
-import org.junit.runner.notification.Failure;
+//import org.junit.runner.JUnitCore;
+//import org.junit.runner.Result;
+//import org.junit.runner.notification.Failure;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.realtime.presence.subscribe.PresenceSubscriptionService;
 import com.openexchange.realtime.presence.subscribe.test.IntegrationTest;
 
@@ -64,51 +69,86 @@ import com.openexchange.realtime.presence.subscribe.test.IntegrationTest;
  * 
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class Activator implements BundleActivator {
+public class Activator extends HousekeepingActivator {
+
+    private static Activator instance;
+//    private BundleContext context;
+
+    private List<ServiceRegistration> regs;
+
+    public Activator()  {
+        instance = this;
+    }
+    
+    public static synchronized Activator getDefault() {
+        return instance;
+    }
+
+    public BundleContext getContext() {
+        return context;
+    }
+    
+    @Override
+    public void startBundle() throws Exception {
+//        this.context = context;
+
+        regs = new ArrayList<ServiceRegistration>();
+        regs.add(context.registerService(TestSuite.class.getName(), new TestSuite(IntegrationTest.class), null));
+
+        System.out.println(this.getClass().getName() + " added " + regs.size() + " suites for OSGi testing.");
+
+    }
+    
+//    @Override
+//    public void start(BundleContext context) throws Exception {
+//        context.registerService(CommandProvider.class.getName(), new TestCommandProvider(), null);
+//        PresenceSubscriptionService subscriptionService = (PresenceSubscriptionService) context.getService(context.getServiceReference(PresenceSubscriptionService.class.getName()));
+//        IntegrationTest.subscriptionService = subscriptionService;
+//    }
 
     @Override
-    public void start(BundleContext context) throws Exception {
-        context.registerService(CommandProvider.class.getName(), new TestCommandProvider(), null);
-        PresenceSubscriptionService subscriptionService = (PresenceSubscriptionService) context.getService(context.getServiceReference(PresenceSubscriptionService.class.getName()));
-        IntegrationTest.subscriptionService = subscriptionService;
+    public void stopBundle() throws Exception {
+        for (ServiceRegistration sr: regs)
+            sr.unregister();
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { PresenceSubscriptionService.class };
     }
 
-    /**
-     * {@link TestCommandProvider}
-     * 
-     * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
-     */
-    public class TestCommandProvider implements CommandProvider {
-
-        @Override
-        public String getHelp() {
-            return "";
-        }
-
-        public void _test(final CommandInterpreter commandInterpreter) {
-            String testCase = commandInterpreter.nextArgument();
-            if (testCase == null) {
-                testCase = "IntegrationTest";
-            }
-
-            String clazz = "com.openexchange.realtime.presence.subscribe.test." + testCase;
-            try {
-                Class<?> loaded = Class.forName(clazz);
-                JUnitCore jUnit = new JUnitCore();
-                Result run = jUnit.run(loaded);
-                if (!run.wasSuccessful()) {
-                    for (Failure failure : run.getFailures()) {
-                        commandInterpreter.print(failure.toString());
-                    }
-                }
-            } catch (ClassNotFoundException e) {
-                commandInterpreter.print("Could not load class " + clazz);
-            }
-        }
-
-    }
+//    /**
+//     * {@link TestCommandProvider}
+//     * 
+//     * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+//     */
+//    public class TestCommandProvider implements CommandProvider {
+//
+//        @Override
+//        public String getHelp() {
+//            return "";
+//        }
+//
+//        public void _test(final CommandInterpreter commandInterpreter) {
+//            String testCase = commandInterpreter.nextArgument();
+//            if (testCase == null) {
+//                testCase = "IntegrationTest";
+//            }
+//
+//            String clazz = "com.openexchange.realtime.presence.subscribe.test." + testCase;
+//            try {
+//                Class<?> loaded = Class.forName(clazz);
+//                JUnitCore jUnit = new JUnitCore();
+//                Result run = jUnit.run(loaded);
+//                if (!run.wasSuccessful()) {
+//                    for (Failure failure : run.getFailures()) {
+//                        commandInterpreter.print(failure.toString());
+//                    }
+//                }
+//            } catch (ClassNotFoundException e) {
+//                commandInterpreter.print("Could not load class " + clazz);
+//            }
+//        }
+//
+//    }
 }

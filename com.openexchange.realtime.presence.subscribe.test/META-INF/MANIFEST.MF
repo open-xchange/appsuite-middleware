@@ -2,18 +2,20 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Test
 Bundle-SymbolicName: com.openexchange.realtime.presence.subscribe.test
+Bundle-Activator: com.openexchange.realtime.presence.subscribe.test.osgi.Activator
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: OPENEXCHANGE
-Fragment-Host: com.openexchange.realtime.presence.subscribe;bundle-version="6.22.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.authentication,
  com.openexchange.java.util,
  com.openexchange.login,
  com.openexchange.login.internal,
+ com.openexchange.osgi,
+ com.openexchange.realtime.packet,
  com.openexchange.realtime.presence.subscribe,
  com.openexchange.server,
+ com.openexchange.tools.session,
  junit.framework,
+ junit.textui,
  org.eclipse.osgi.framework.console,
- org.junit.runner,
- org.junit.runner.notification,
  org.osgi.framework

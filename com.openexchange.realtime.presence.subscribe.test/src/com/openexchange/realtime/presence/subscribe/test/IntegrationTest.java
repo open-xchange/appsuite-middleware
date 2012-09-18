@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import org.osgi.framework.BundleContext;
 import junit.framework.TestCase;
 import com.openexchange.authentication.Cookie;
 import com.openexchange.java.util.UUIDs;
@@ -15,6 +16,7 @@ import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.presence.subscribe.PresenceSubscriptionService;
+import com.openexchange.realtime.presence.subscribe.test.osgi.Activator;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
@@ -83,6 +85,20 @@ public class IntegrationTest extends TestCase {
     private static final String password2 = "netline";
 
     public static PresenceSubscriptionService subscriptionService;
+    
+    
+    @Override
+    protected void setUp() throws Exception {
+        BundleContext context = Activator.getDefault().getContext();
+
+        assertNotNull(context);
+        
+        PresenceSubscriptionService subscriptionService = (PresenceSubscriptionService) context.getService(context.getServiceReference(PresenceSubscriptionService.class.getName()));
+        
+        assertNotNull(subscriptionService);
+        
+        super.setUp();
+    }
 
     public void testWas() throws Exception {
         Presence subscription = new Presence();
@@ -92,6 +108,7 @@ public class IntegrationTest extends TestCase {
         subscription.setTo(to);
         subscription.setType(Presence.Type.UNSUBSCRIBED);
         try {
+            
             subscriptionService.subscribe(subscription, getSessionOne());
             List<Presence> pendingRequests = subscriptionService.getPendingRequests(getSessionOne());
             assertEquals("Wrong amount of pending requests.", 1, pendingRequests.size());
