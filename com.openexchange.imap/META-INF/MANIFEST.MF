@@ -80,7 +80,16 @@ Import-Package: com.openexchange.api2,
  javax.net,
  javax.net.ssl,
  javax.security.auth,
+ net.htmlparser.jericho,
+ net.htmlparser.jericho.nodoc,
  org.apache.commons.logging,
+ org.jsoup,
+ org.jsoup.examples,
+ org.jsoup.helper,
+ org.jsoup.nodes,
+ org.jsoup.parser,
+ org.jsoup.safety,
+ org.jsoup.select,
  org.osgi.framework,
  org.osgi.service.event
 Export-Package: com.openexchange.imap,
@@ -88,6 +97,4 @@ Export-Package: com.openexchange.imap,
  com.openexchange.imap.notify
 Bundle-Activator: com.openexchange.imap.osgi.IMAPActivator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Bundle-ClassPath: .,
- lib/jericho-3.2.jar,
- lib/jsoup-1.6.1.jar
+Bundle-ClassPath: .

@@ -13,9 +13,11 @@ Import-Package: com.openexchange.config.cascade,
  com.openexchange.server,
  com.openexchange.tools.strings,
  org.apache.commons.logging,
- org.apache.commons.logging.impl,
- org.osgi.framework
+ org.ho.yaml,
+ org.ho.yaml.exception,
+ org.ho.yaml.wrapper,
+ org.osgi.framework,
+ yaml.parser
 Export-Package: com.openexchange.config
 Bundle-Activator: com.openexchange.config.osgi.ConfigActivator
-Bundle-ClassPath: .,
- lib/jyaml-1.3.jar
+Bundle-ClassPath: .
