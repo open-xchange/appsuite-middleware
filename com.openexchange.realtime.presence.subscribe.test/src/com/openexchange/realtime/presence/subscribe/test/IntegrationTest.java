@@ -93,7 +93,7 @@ public class IntegrationTest extends TestCase {
 
         assertNotNull(context);
         
-        PresenceSubscriptionService subscriptionService = (PresenceSubscriptionService) context.getService(context.getServiceReference(PresenceSubscriptionService.class.getName()));
+        subscriptionService = (PresenceSubscriptionService) context.getService(context.getServiceReference(PresenceSubscriptionService.class.getName()));
         
         assertNotNull(subscriptionService);
         
