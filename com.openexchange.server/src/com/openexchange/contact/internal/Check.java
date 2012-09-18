@@ -217,7 +217,7 @@ public final class Check {
 				try {
 					searchIterator = storage.search(session, andTerm, new ContactField[] { ContactField.OBJECT_ID });
 					if (searchIterator.hasNext()) {
-						throw ContactExceptionCodes.DISPLAY_NAME_IN_USE.create(session, update.getObjectID());
+						throw ContactExceptionCodes.DISPLAY_NAME_IN_USE.create(session.getContextId(), update.getObjectID());
 					}
 				} finally {
 					if (null != searchIterator) {
