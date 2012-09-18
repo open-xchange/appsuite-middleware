@@ -131,19 +131,26 @@ public final class ListAction extends AbstractUserAction {
         /*
          * Get users/contacts
          */
-        final ContactService contactService = ServiceRegistry.getInstance().getService(ContactService.class, true);
-        final List<Contact> contacts = new ArrayList<Contact>();
-        SearchIterator<Contact> searchIterator = null;
-        try {
-        	searchIterator = contactService.getUsers(session, userIDs, 
-            		ContactMapper.getInstance().getFields(columnIDs, ContactField.LAST_MODIFIED, ContactField.INTERNAL_USERID));
-            while (searchIterator.hasNext()) {
-                contacts.add(searchIterator.next());
+        final List<Contact> contacts;
+        {
+            final ContactService contactService = ServiceRegistry.getInstance().getService(ContactService.class, true);
+            SearchIterator<Contact> searchIterator = null;
+            try {
+                searchIterator = contactService.getUsers(session, userIDs, ContactMapper.getInstance().getFields(columnIDs, ContactField.LAST_MODIFIED, ContactField.INTERNAL_USERID));
+                final int iterSize = searchIterator.size();
+                if (iterSize >= 0) {
+                    contacts = new ArrayList<Contact>(iterSize);
+                } else {
+                    contacts = new LinkedList<Contact>();
+                }
+                while (searchIterator.hasNext()) {
+                    contacts.add(searchIterator.next());
+                }
+            } finally {
+                if (null != searchIterator) {
+                    searchIterator.close();
+                }
             }
-        } finally {
-        	if (null != searchIterator) {
-        		searchIterator.close();
-        	}
         }
         /*
          * Map user to contact information
