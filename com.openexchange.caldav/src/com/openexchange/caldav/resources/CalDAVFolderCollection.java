@@ -230,11 +230,11 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
     public List<WebdavResource> filter(Filter filter) throws WebdavProtocolException {
         List<Object> arguments = new ArrayList<Object>(2);
         if (VEVENT_RANGE_QUERY_ANALYZER.match(filter, arguments) || VTODO_RANGE_QUERY_ANALYZER.match(filter, arguments)) {
-            Date from = toDate(arguments.get(0));
+            Date from = arguments.isEmpty() ? null : toDate(arguments.get(0));
             if (null == from || from.before(getIntervalStart())) {
                 from = getIntervalStart();
             }
-            Date until = toDate(arguments.get(1));
+            Date until = arguments.isEmpty() ? null : toDate(arguments.get(1));
             if (null == until || until.after(getIntervalEnd())) {
                 until = getIntervalEnd();
             }
