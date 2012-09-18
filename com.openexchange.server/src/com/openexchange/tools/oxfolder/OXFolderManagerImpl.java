@@ -70,6 +70,7 @@ import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.database.provider.StaticDBPoolProvider;
 import com.openexchange.event.impl.EventClient;
@@ -1711,19 +1712,32 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         }
     }
 
+    private static final int SPECIAL_CONTACT_COLLECT_FOLDER = 0;
+
     /**
      * Gathers all folders which are allowed to be deleted
      */
     private TIntObjectMap<TIntObjectMap<?>> gatherDeleteableFolders(final int folderID, final int userId, final UserConfiguration userConfig, final String permissionIDs) throws OXException, OXException, SQLException {
         final TIntObjectMap<TIntObjectMap<?>> deleteableIDs = new TIntObjectHashMap<TIntObjectMap<?>>();
-        gatherDeleteableSubfoldersRecursively(folderID, userId, userConfig, permissionIDs, deleteableIDs, folderID);
+        final Integer[] specials = new Integer[1];
+        // Initialize special folders that must not be deleted
+        {
+            Integer i = null;
+            final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+            if (null != service && service.getBoolProperty("com.openexchange.contactcollector.folder.deleteDenied", false)) {
+                i = ServerUserSetting.getInstance(writeCon).getContactCollectionFolder(ctx.getContextId(), userId);
+            }
+            specials[SPECIAL_CONTACT_COLLECT_FOLDER] = i;
+        }
+        gatherDeleteableSubfoldersRecursively(folderID, userId, userConfig, permissionIDs, deleteableIDs, folderID, specials);
         return deleteableIDs;
     }
 
     /**
      * Gathers all folders which are allowed to be deleted in a recursive manner
+     * @param specials 
      */
-    private void gatherDeleteableSubfoldersRecursively(final int folderID, final int userId, final UserConfiguration userConfig, final String permissionIDs, final TIntObjectMap<TIntObjectMap<?>> deleteableIDs, final int initParent) throws OXException, OXException, SQLException {
+    private void gatherDeleteableSubfoldersRecursively(final int folderID, final int userId, final UserConfiguration userConfig, final String permissionIDs, final TIntObjectMap<TIntObjectMap<?>> deleteableIDs, final int initParent, final Integer[] specials) throws OXException, OXException, SQLException {
         final FolderObject delFolder = getOXFolderAccess().getFolderObject(folderID);
         /*
          * Check if shared
@@ -1786,6 +1800,14 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 Integer.valueOf(ctx.getContextId()));
         }
         /*
+         * Check for special folder
+         */
+        for (final Integer special : specials) {
+            if (null != special && special.intValue() == folderID) {
+                throw OXFolderExceptionCode.DELETE_DENIED.create(OXFolderUtility.getFolderName(folderID, ctx), Integer.valueOf(ctx.getContextId()));
+            }
+        }
+        /*
          * Check, if folder has subfolders
          */
         final TIntList subfolders = OXFolderSQL.getSubfolderIDs(delFolder.getObjectID(), readCon, ctx);
@@ -1796,7 +1818,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         final TIntObjectMap<TIntObjectMap<?>> subMap = new TIntObjectHashMap<TIntObjectMap<?>>();
         final int size = subfolders.size();
         for (int i = 0; i < size; i++) {
-            gatherDeleteableSubfoldersRecursively(subfolders.get(i), userId, userConfig, permissionIDs, subMap, initParent);
+            gatherDeleteableSubfoldersRecursively(subfolders.get(i), userId, userConfig, permissionIDs, subMap, initParent, specials);
         }
         deleteableIDs.put(folderID, subMap);
     }
