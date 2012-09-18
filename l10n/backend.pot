@@ -4374,14 +4374,14 @@ msgstr ""
 msgid "The session information didn't match any ServerSession"
 msgstr ""
 
-#. * The received message is missing the \"kind\" key.
+#. * Missing key \"%1$s\" in: \"%2$s\"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:64
-msgid "The received message is missing the \"kind\" key."
+msgid "Missing key \"%1$s\" in: \"%2$s\""
 msgstr ""
 
-#. * Could not find a parser for a message of kind: . \"%1$s\"
+#. * Could not find a builder for the specified element: . \"%1$s\"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:66
-msgid "Could not find a parser for a message of kind: . \"%1$s\""
+msgid "Could not find a stanza builder for the specified element: . \"%1$s\""
 msgstr ""
 
 #. * Error while building Stanza: \"%1$s\"
