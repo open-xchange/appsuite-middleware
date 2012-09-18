@@ -2,6 +2,10 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="test"/>
+	<classpathentry exported="true" kind="lib" path="lib/cssparser-0.9.7.jar" sourcepath="source/cssparser-0.9.7-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/backport-util-concurrent-3.1.jar" sourcepath="lib/backport-util-concurrent-3.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/ical4j-1.0.1.jar" sourcepath="source/ical4j-1.0.1-src.zip"/>
+	<classpathentry exported="true" kind="lib" path="lib/ical4j-zoneinfo-outlook-1.0.2.jar" sourcepath="source/ical4j-zoneinfo-outlook-1.0.2-src.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/guava-13.0.jar" sourcepath="source/guava-13.0-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/org.apache.httpcomponents.httpclient_4.1.2.v201203221030.jar" sourcepath="source/org.apache.httpcomponents.httpclient.source_4.1.2.v201203221030.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/org.apache.httpcomponents.httpcore_4.1.4.v201203221030.jar" sourcepath="source/org.apache.httpcomponents.httpcore.source_4.1.4.v201203221030.jar"/>
