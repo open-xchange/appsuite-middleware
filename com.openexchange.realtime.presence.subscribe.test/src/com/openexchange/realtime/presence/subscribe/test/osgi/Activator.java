@@ -60,6 +60,7 @@ import org.eclipse.osgi.framework.console.CommandProvider;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.realtime.presence.subscribe.PresenceSubscriptionService;
 import com.openexchange.realtime.presence.subscribe.test.IntegrationTest;
 
@@ -68,12 +69,29 @@ import com.openexchange.realtime.presence.subscribe.test.IntegrationTest;
  * 
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class Activator implements BundleActivator {
+public class Activator extends HousekeepingActivator {
+
+    private static Activator instance;
+//    private BundleContext context;
 
     private List<ServiceRegistration> regs;
+
+    public Activator()  {
+        instance = this;
+    }
+    
+    public static synchronized Activator getDefault() {
+        return instance;
+    }
+
+    public BundleContext getContext() {
+        return context;
+    }
     
     @Override
-    public void start(BundleContext context) throws Exception {
+    public void startBundle() throws Exception {
+//        this.context = context;
+
         regs = new ArrayList<ServiceRegistration>();
         regs.add(context.registerService(TestSuite.class.getName(), new TestSuite(IntegrationTest.class), null));
 
@@ -89,9 +107,14 @@ public class Activator implements BundleActivator {
 //    }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
+    public void stopBundle() throws Exception {
         for (ServiceRegistration sr: regs)
             sr.unregister();
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { PresenceSubscriptionService.class };
     }
 
 //    /**
