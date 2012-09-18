@@ -56,6 +56,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.subscribe.Subscription;
+import com.openexchange.subscribe.json.SubscriptionJSONErrorMessages;
 import com.openexchange.subscribe.json.SubscriptionJSONWriter;
 import com.openexchange.secret.SecretService;
 
@@ -89,6 +90,9 @@ public class GetSubscriptionAction extends AbstractSubscribeAction {
 					source,
 					services.getService(SecretService.class).getSecret(
 							subscribeRequest.getServerSession()));
+			if (subscription == null) {
+				throw SubscriptionJSONErrorMessages.UNKNOWN_SUBSCRIPTION.create();
+			}
 			String urlPrefix = "";
 			if (subscribeRequest.getRequestData().getParameter("__serverURL") != null) {
 				urlPrefix = subscribeRequest.getRequestData().getParameter(
