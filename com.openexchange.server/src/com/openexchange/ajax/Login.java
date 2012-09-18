@@ -126,6 +126,7 @@ import com.openexchange.tools.io.IOTools;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.servlet.http.Authorization;
+import com.openexchange.tools.servlet.http.Cookies;
 import com.openexchange.tools.servlet.http.Authorization.Credentials;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -1026,7 +1027,7 @@ public class Login extends AJAXServlet {
     private void configureCookie(final Cookie cookie, final boolean secure, final String serverName) {
         cookie.setPath("/");
         final LoginConfiguration conf = confReference.get();
-        if (conf.cookieForceHTTPS || secure) {
+        if (secure || (conf.cookieForceHTTPS && !Cookies.isLocalLan(serverName))) {
             cookie.setSecure(true);
         }
         if (conf.sessiondAutoLogin || conf.cookieExpiry < 0) {

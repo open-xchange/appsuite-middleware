@@ -53,7 +53,6 @@ import java.util.Date;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.DataFields;
-import com.openexchange.ajax.fields.TaskFields;
 import com.openexchange.ajax.parser.TaskParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.TasksSQLInterface;
@@ -65,6 +64,7 @@ import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.log.Log;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tasks.json.TaskRequest;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link NewAction}
@@ -87,28 +87,19 @@ public class NewAction extends TaskAction {
         super(services);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.tasks.json.actions.TaskAction#perform(com.openexchange.tasks.json.TaskRequest)
-     */
     @Override
     protected AJAXRequestResult perform(final TaskRequest req) throws OXException, JSONException {
         final Task task = new Task();
-
         final JSONObject jsonobject = (JSONObject) req.getRequest().getData();
-
+        ServerSession session = req.getSession();
         final TaskParser taskParser = new TaskParser(req.getTimeZone());
-        taskParser.parse(task, jsonobject);
-
-        final TasksSQLInterface sqlinterface = new TasksSQLImpl(req.getSession());
-
+        taskParser.parse(task, jsonobject, session.getUser().getLocale());
+        final TasksSQLInterface sqlinterface = new TasksSQLImpl(session);
         convertExternalToInternalUsersIfPossible(task, req.getSession().getContext(), LOG);
         sqlinterface.insertTaskObject(task);
         final Date timestamp = task.getLastModified();
-
         final JSONObject jsonResponseObject = new JSONObject();
         jsonResponseObject.put(DataFields.ID, task.getObjectID());
-
         return new AJAXRequestResult(jsonResponseObject, timestamp, "json");
     }
 

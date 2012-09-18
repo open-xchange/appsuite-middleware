@@ -14,12 +14,14 @@ License:       GPL-2.0
 BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
-Summary:       Default Open-Xchange Authorization implementation
+Summary:       Module implementing the default authorization
 Provides:      open-xchange-authorization
 Requires:      open-xchange-core >= @OXVERSION@
 
 %description
-Default Open-Xchange Authorization implementation.
+This package installs the OSGi bundle publishing the OSGi AuthorizationService. This bundle implements the default authorization method
+for the backend. When a user got authenticated a second step is to verify that he is authorized to use Open-Xchange currently. The default
+implementation checks wether the context of the user is enabled.
 
 Authors:
 --------

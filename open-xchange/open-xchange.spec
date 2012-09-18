@@ -86,6 +86,12 @@ if [ ${1:-0} -eq 2 ]; then
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
 
+    # SoftwareChange_Request-1124
+    pfile=/opt/open-xchange/etc/server.properties
+    if ! ox_exists_property com.openexchange.ajax.response.includeStackTraceOnError $pfile; then
+        ox_set_property com.openexchange.ajax.response.includeStackTraceOnError false $pfile
+    fi
+
     # SoftwareChange_Request-1117
     pfile=/opt/open-xchange/etc/server.properties
     if ! ox_exists_property com.openexchange.webdav.disabled $pfile; then

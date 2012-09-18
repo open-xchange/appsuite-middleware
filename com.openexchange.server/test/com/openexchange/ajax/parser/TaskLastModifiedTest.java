@@ -50,6 +50,7 @@
 package com.openexchange.ajax.parser;
 
 import java.util.Date;
+import java.util.Locale;
 import java.util.TimeZone;
 import junit.framework.TestCase;
 import org.json.JSONObject;
@@ -74,7 +75,7 @@ public class TaskLastModifiedTest extends TestCase {
         JSONObject json = new JSONObject();
         new TaskWriter(UTC).writeTask(task, json);
         Task parsed = new Task();
-        new TaskParser(UTC).parse(parsed, json);
+        new TaskParser(UTC).parse(parsed, json, Locale.ENGLISH);
         assertFalse("lastModified has been set but should not.", parsed.containsLastModified());
         assertNull("lastModified is not null but should.", parsed.getLastModified());
     }
@@ -86,7 +87,7 @@ public class TaskLastModifiedTest extends TestCase {
         JSONObject json = new JSONObject();
         new TaskWriter(UTC).writeTask(task, json);
         Task parsed = new Task();
-        new TaskParser(true, UTC).parse(parsed, json);
+        new TaskParser(true, UTC).parse(parsed, json, Locale.ENGLISH);
         assertTrue("lastModified has not been set but should.", parsed.containsLastModified());
         assertNotNull("lastModified is null but should not.", parsed.getLastModified());
     }

@@ -14,14 +14,17 @@ License:       GPL-2.0
 BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
-Summary:       The Open-Xchange LDAP authentication
+Summary:       Module for authenticating users using a LDAP server
 Requires:      open-xchange-core >= @OXVERSION@
 Provides:      open-xchange-authentication
 Conflicts:     open-xchange-authentication-database
 Conflicts:     open-xchange-authentication-imap
 
 %description
-This package implements an authentication mechanism using an LDAP server.
+This package installs the OSGi bundle implementing the OSGi AuthenticationService for the backend. The implementation uses a LDAP server to
+authenticate login requests.
+This authentication module is mutually exclusive with any other authentication module. Only one authentication module can be installed on
+the backend.
 
 Authors:
 --------

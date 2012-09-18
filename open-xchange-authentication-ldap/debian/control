@@ -12,5 +12,8 @@ Pre-Depends: open-xchange-core (>= @OXVERSION@)
 Depends: ${misc:Depends}
 Conflicts: open-xchange-authentication-database, open-xchange-authentication-imap
 Provides: open-xchange-authentication
-Description: The Open-Xchange LDAP authentication
- This package implements an authentication mechanism using a LDAP server.
+Description: Module for authenticating users using a LDAP server
+ This package installs the OSGi bundle implementing the OSGi AuthenticationService for the backend. The implementation uses a LDAP server to
+ authenticate login requests.
+ This authentication module is mutually exclusive with any other authentication module. Only one authentication module can be installed on
+ the backend.

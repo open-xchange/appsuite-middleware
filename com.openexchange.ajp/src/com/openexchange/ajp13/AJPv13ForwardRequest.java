@@ -74,6 +74,7 @@ import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.log.LogProperties;
 import com.openexchange.tools.codec.QuotedPrintable;
 import com.openexchange.tools.regex.RFC2616Regex;
+import com.openexchange.tools.servlet.http.Cookies;
 
 /**
  * AJPv13ForwardRequest - this class' purpose is mainly to fill the http servlet request from AJP's forward request, to identify servlet
@@ -678,7 +679,7 @@ public final class AJPv13ForwardRequest extends AbstractAJPv13Request {
                             }
                             current.setPath("/");
                             current.setMaxAge(0); // delete
-                            current.setSecure(forceHttps || servletRequest.isSecure());
+                            current.setSecure((forceHttps && !Cookies.isLocalLan(servletRequest)) || servletRequest.isSecure());
                             resp.addCookie(current);
                             continue nextCookie;
                         }
@@ -694,13 +695,13 @@ public final class AJPv13ForwardRequest extends AbstractAJPv13Request {
                             }
                             current.setPath("/");
                             current.setMaxAge(0); // delete
-                            current.setSecure(forceHttps || servletRequest.isSecure());
+                            current.setSecure((forceHttps && !Cookies.isLocalLan(servletRequest)) || servletRequest.isSecure());
                             resp.addCookie(current);
                             continue nextCookie;
                         }
                         jsessionIDCookie = current;
                         LogProperties.putLogProperty("com.openexchange.ajp13.httpSession", id);
-                        jsessionIDCookie.setSecure(forceHttps || servletRequest.isSecure());
+                        jsessionIDCookie.setSecure((forceHttps && !Cookies.isLocalLan(servletRequest)) || servletRequest.isSecure());
                         ajpRequestHandler.setHttpSessionCookie(jsessionIDCookie, true);
                     } else {
                         /*
@@ -715,7 +716,7 @@ public final class AJPv13ForwardRequest extends AbstractAJPv13Request {
                             }
                             current.setPath("/");
                             current.setMaxAge(0); // delete
-                            current.setSecure(forceHttps || servletRequest.isSecure());
+                            current.setSecure((forceHttps && !Cookies.isLocalLan(servletRequest)) || servletRequest.isSecure());
                             resp.addCookie(current);
                             continue nextCookie;
                         }
@@ -731,13 +732,13 @@ public final class AJPv13ForwardRequest extends AbstractAJPv13Request {
                             }
                             current.setPath("/");
                             current.setMaxAge(0); // delete
-                            current.setSecure(forceHttps || servletRequest.isSecure());
+                            current.setSecure((forceHttps && !Cookies.isLocalLan(servletRequest)) || servletRequest.isSecure());
                             resp.addCookie(current);
                             continue nextCookie;
                         }
                         jsessionIDCookie = current;
                         LogProperties.putLogProperty("com.openexchange.ajp13.httpSession", id);
-                        jsessionIDCookie.setSecure(forceHttps || servletRequest.isSecure());
+                        jsessionIDCookie.setSecure((forceHttps && !Cookies.isLocalLan(servletRequest)) || servletRequest.isSecure());
                         ajpRequestHandler.setHttpSessionCookie(jsessionIDCookie, true);
                     }
                 }
@@ -787,7 +788,7 @@ public final class AJPv13ForwardRequest extends AbstractAJPv13Request {
         }
         final Cookie jsessionIDCookie = new Cookie(AJPv13RequestHandler.JSESSIONID_COOKIE, jsessionIdVal);
         LogProperties.putLogProperty("com.openexchange.ajp13.httpSession", jsessionIdVal);
-        jsessionIDCookie.setSecure(forceHttps || servletRequest.isSecure());
+        jsessionIDCookie.setSecure((forceHttps && !Cookies.isLocalLan(servletRequest)) || servletRequest.isSecure());
         ajpRequestHandler.setHttpSessionCookie(jsessionIDCookie, join);
         /*
          * HttpServletRequestWrapper.getSession() adds the JSESSIONID cookie

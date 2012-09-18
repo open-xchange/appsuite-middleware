@@ -52,7 +52,6 @@ package com.openexchange.http.grizzly.filters.backendroute;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import org.glassfish.grizzly.http.Cookie;
@@ -144,9 +143,13 @@ public class ServerCookieInspector extends AbstractCookieInspector {
      * @return true if either the request is over a secure connection or the server enforces https.
      */
     private boolean isSecure() {
-        ConfigurationService configService = GrizzlyServiceRegistry.getInstance().getService(ConfigurationService.class);
-        boolean forceHttps = configService.getBoolProperty("com.openexchange.forceHTTPS", true);
-        return httpResponsePacket.getRequest().isSecure() || forceHttps;
+        final ConfigurationService configService = GrizzlyServiceRegistry.getInstance().getService(ConfigurationService.class);
+        final boolean forceHttps = configService.getBoolProperty("com.openexchange.forceHTTPS", true);
+        if (forceHttps && !com.openexchange.tools.servlet.http.Cookies.isLocalLan(httpResponsePacket.getRequest().getRemoteHost())) {
+            // Speak HTTPS with all non-local LAN endpoints
+            return true;
+        }
+        return httpResponsePacket.getRequest().isSecure();
     }
     
     /**
