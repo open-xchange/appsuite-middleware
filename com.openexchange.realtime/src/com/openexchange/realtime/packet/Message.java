@@ -56,7 +56,7 @@ package com.openexchange.realtime.packet;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class Message extends Stanza<Message> {
+public class Message extends Stanza {
 
     /**
      * An enumeration of message types describing a message's purpose.

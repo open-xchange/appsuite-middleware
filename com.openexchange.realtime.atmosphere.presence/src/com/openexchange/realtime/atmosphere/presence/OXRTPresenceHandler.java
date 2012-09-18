@@ -74,13 +74,13 @@ import com.openexchange.tools.session.ServerSession;
  * <li>Change my status</li>
  * </ul>
  * <h3>Initial Presence</h3> The initial presence message only has to consist of an object specifying its
- * element type and optionally the default namespace. This is enough to send a presence broadcast to
+ * element class and optionally the default namespace. This is enough to send a presence broadcast to
  * all subscribed users and signal that the user is now available.
  * 
  * <pre>
  * {
  *  [namespace: 'default',]
- *  elment: 'presence'
+ *  element: 'presence'
  *  [type: none]
  * };
  * </pre>
@@ -93,7 +93,7 @@ import com.openexchange.tools.session.ServerSession;
  * <pre>
  * {
  *  [namespace: 'default',]
- *  element: 'presence',
+ *  element: 'presence'
  *  [type: none]
  *  data: {
  *      state: 'online',
@@ -108,7 +108,7 @@ import com.openexchange.tools.session.ServerSession;
  * <pre>
  * {
  *  [namespace: 'default',]
- *  kind: 'presence',
+ *  element: 'presence',
  *  type: unavailable
  *  [data: {
  *      message: 'Bye'
@@ -125,32 +125,97 @@ public class OXRTPresenceHandler implements OXRTHandler<Presence> {
         return "ox/presence";
     }
 
-    /*
-     * transform stanza to presence status
-     * get presence service
-     * presenceService.changeState (causes many outgoing stanzas to inform himself and subscribed users)
-     */
     @Override
     public void incoming(Presence stanza, ServerSession session) throws OXException {
         if (stanza == null || session == null) {
             throw new IllegalArgumentException();
         }
-        PresenceService presenceService = AtmospherePresenceServiceRegistry.getInstance().getService(PresenceService.class);
-
-        // transform stanza payload to Presence Status
-        PresenceStatus presenceStatus = null;
-        Payload payload = stanza.getPayload();
-        if (payload == null) { // empty initial presence
-            presenceStatus = new PresenceStatus();
+        Type type = stanza.getType();
+        if (Type.SUBSCRIBE == type) {
+            handleSubscribe(stanza);
+        } else if (Type.SUBSCRIBED == type) {
+            handleSubscribed(stanza);
+        } else if (Type.UNSUBSCRIBE == type) {
+            handleUnSubscribe(stanza);
+        } else if (Type.UNSUBSCRIBED == type) {
+            handleUnSubscribed(stanza);
+        } else if (Type.NONE == type || Type.UNAVAILABLE == type) {
+            handlePresence(stanza);
         } else {
-            Type type = stanza.getType();
-            presenceStatus = (PresenceStatus) stanza.getPayload().to("presenceStatus", session).getData();
-
+            throw new UnsupportedOperationException("Not implemented yet!");
         }
-        presenceService.changeState(stanza.getFrom(), presenceStatus.getState(), presenceStatus.getMessage(), session);
+    }
+
+    /**
+     * Handle the incoming request of userA to subscribe to the presence of userB.
+     * 
+     * @param stanza the incoming Stanza representing the subscribe request
+     */
+    private void handleSubscribe(Presence stanza) {
+        throw new UnsupportedOperationException("Not implemented yet!");
+    }
+
+    /**
+     * Handle userB's incoming approval to prior subscription request of userA.
+     * 
+     * @param stanza the incoming Stanza representing the approval
+     */
+    private void handleSubscribed(Presence stanza) {
+        throw new UnsupportedOperationException("Not implemented yet!");
 
     }
 
+    /**
+     * Handle userA's request to unsubscribe from the Presence of userB.
+     * @param stanza
+     */
+    private void handleUnSubscribe(Presence stanza) {
+        throw new UnsupportedOperationException("Not implemented yet!");
+
+    }
+
+    /**
+     * Used:
+     * <ul>
+     * <li>by userB to deny a prior subscription request made by userA</li>
+     * <li>by userB to cancel the previously granted subscription to userA</li>
+     * </ul>
+     * 
+     * @param stanza the Stanza representing the unsubscribed request.
+     */
+    private void handleUnSubscribed(Presence stanza) {
+        throw new UnsupportedOperationException("Not implemented yet!");
+    }
+
+    /**
+     * Used:
+     * 
+     * @param stanza
+     */
+    private void handlePresence(Presence stanza) {
+        // initial presence
+        // presence broadcast
+        // directed presence
+        // presence braodcast unavailable
+        // directed presence unavailable
+        // transform stanza payload to Presence Status
+        // PresenceStatus presenceStatus = null;
+        // Payload payload = stanza.getPayload();
+        // if (payload == null) { // empty initial presence
+        // presenceStatus = new PresenceStatus();
+        // presenceStatus = (PresenceStatus) stanza.getPayload().to("presenceStatus", session).getData();
+        // presenceService.changeState(stanza.getFrom(), presenceStatus.getState(), presenceStatus.getMessage(), session);
+        PresenceService presenceService = AtmospherePresenceServiceRegistry.getInstance().getService(PresenceService.class);
+        throw new UnsupportedOperationException("Not implemented yet!");
+    }
+
+    
+    
+    
+    
+    
+    
+    
     /*
      * Transport status changes and subscribe requests
      */

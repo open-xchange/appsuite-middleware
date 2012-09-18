@@ -60,7 +60,7 @@ package com.openexchange.realtime.packet;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 
-public class Presence extends Stanza<Presence> {
+public class Presence extends Stanza {
 
     /**
      * {@link Type} - Specifies the Presence Type

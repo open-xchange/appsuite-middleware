@@ -65,7 +65,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public interface OXRTHandler<T extends Stanza<?>> {
+public interface OXRTHandler<T extends Stanza> {
     
     /**
      * Get the namespace of this OXRTHandler.

@@ -64,27 +64,29 @@ public class BuilderSelector {
 
     /**
      * Get a parser that is adequate for he JSONObject that has to be parsed.
-     * Incoming JSONObjects must contain a kind key that let's us determine the needed StanzaBuilder.
+     * Incoming JSONObjects must contain an <code>element</code> key that let's us determine the needed StanzaBuilder.
+     * 
      * <pre>
-     *  {
-     *      kind: 'presence'
-     *      ...
-     *   };
+     * {
+     *  [namespace: 'default',]
+     *  element: 'presence'
+     *  ...
+     * };
      * </pre>
      * 
      * @param json the JSONObject that has to be parsed.
      * @return a Builder adequate for the JSONObject that has to be transformed
      * @throws IllegalArgumentException if the JSONObject is null
-     * @throws OXException if the JSONObject doesn't contain a <code>kind</code> key specifying the kind of Stanza or no adequate
-     *             Stanzaparser can be found
+     * @throws OXException if the JSONObject doesn't contain a <code>element</code> key specifying the Stanza or no adequate
+     *             StanzaBuilder can be found
      */
     public static StanzaBuilder<? extends Stanza> getBuilder(ID from, JSONObject json) throws OXException {
         if (json == null) {
             throw new IllegalArgumentException();
         }
-        String kind = json.optString("kind");
+        String kind = json.optString("element");
         if (kind == null) {
-            throw AtmosphereExceptionCode.MISSING_KIND.create();
+            throw AtmosphereExceptionCode.MISSING_KEY.create("element");
         }
         if (kind.equalsIgnoreCase("iq")) {
             return new IQBuilder(from, json);

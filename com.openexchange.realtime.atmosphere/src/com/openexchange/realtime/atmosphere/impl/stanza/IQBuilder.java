@@ -51,11 +51,13 @@ package com.openexchange.realtime.atmosphere.impl.stanza;
 
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.atmosphere.AtmosphereExceptionCode;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.IQ;
+import com.openexchange.realtime.packet.Stanza;
 
 /**
- * {@link IQBuilder}
+ * {@link IQBuilder} - Parse an atmosphere client's IQ message and build a IQ Stanza from it by adding the recipients ID.
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
@@ -79,8 +81,28 @@ public class IQBuilder extends StanzaBuilder<IQ> {
     }
 
     @Override
-    protected IQ build() throws OXException {
-        throw new UnsupportedOperationException("Not implemented yet!");
+    public IQ build() throws OXException {
+        basics();
+        type();
+        return stanza;
     }
 
+    /**
+     * Check for the obligatory type key of IQ Stanzas in the received json and set the value in the Stanza 
+     * @throws OXException if the type key is missing
+     */
+    private void type() throws OXException {
+        throw new UnsupportedOperationException("Not implemented yet!");
+//        String type = json.optString("type");
+//        if (type == null) {
+//            throw AtmosphereExceptionCode.MISSING_KEY.create("type", json);
+//        }
+//        for (IQ.Type t : IQ.Type.values()) {
+//            if (t.name().equalsIgnoreCase(type)) {
+//                stanza.setType(t);
+//                break;
+//            }
+//        }
+    }
+    
 }

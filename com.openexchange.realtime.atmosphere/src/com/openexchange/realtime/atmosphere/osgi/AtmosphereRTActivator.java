@@ -13,6 +13,7 @@ import com.openexchange.realtime.atmosphere.OXRTHandler;
 import com.openexchange.realtime.atmosphere.impl.HandlerLibrary;
 import com.openexchange.realtime.atmosphere.impl.RTAtmosphereChannel;
 import com.openexchange.realtime.atmosphere.impl.RTAtmosphereHandler;
+import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.sessiond.SessiondService;
 
 public class AtmosphereRTActivator extends HousekeepingActivator {
@@ -29,7 +30,8 @@ public class AtmosphereRTActivator extends HousekeepingActivator {
 	 * AtmosphereChannel so that it can decide if it is able to process incoming
 	 * Stanzas into POJOs and back again via the RTAtmosphereHandler.
 	 */
-	@Override
+	@SuppressWarnings("rawtypes")
+    @Override
 	protected void startBundle() throws Exception {
 		
 	    //Set the ServiceLookup reference directly as class variable
@@ -39,18 +41,18 @@ public class AtmosphereRTActivator extends HousekeepingActivator {
 		
 		track(OXRTHandler.class, new SimpleRegistryListener<OXRTHandler>() {
 
-			@Override
+		    @Override
             public void added(ServiceReference<OXRTHandler> ref,
-					OXRTHandler service) {
-				handlerLibrary.add(service);
-			}
+                    OXRTHandler service) {
+                handlerLibrary.add(service);
+            }
 
-			@Override
+            @Override
             public void removed(ServiceReference<OXRTHandler> ref,
-					OXRTHandler service) {
-				handlerLibrary.remove(service);
-			}
-			
+                    OXRTHandler service) {
+                handlerLibrary.remove(service);
+            }
+
 		});
 		
 		AtmosphereService atmosphereService = getService(AtmosphereService.class);

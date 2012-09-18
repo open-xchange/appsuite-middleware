@@ -104,6 +104,6 @@ public abstract class StanzaBuilder<T extends Stanza> {
      * @return a validated Stanza of type T
      * @throws OXException if the Stanza couldn't be build due to validation or other errors 
      */
-    protected abstract T build() throws OXException; 
+    public abstract T build() throws OXException; 
 
 }

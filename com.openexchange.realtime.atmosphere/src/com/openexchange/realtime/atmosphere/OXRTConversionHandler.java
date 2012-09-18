@@ -61,7 +61,7 @@ import com.openexchange.tools.session.ServerSession;
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class OXRTConversionHandler implements OXRTHandler {
+public class OXRTConversionHandler<T extends Stanza> implements OXRTHandler<T> {
 
     public static ServiceLookup services;
 

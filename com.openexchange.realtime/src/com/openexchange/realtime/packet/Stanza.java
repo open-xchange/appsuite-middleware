@@ -56,7 +56,7 @@ package com.openexchange.realtime.packet;
  *  @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *  @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public abstract class Stanza<T extends Object> {
+public abstract class Stanza {
 
 	private ID to, from;
 

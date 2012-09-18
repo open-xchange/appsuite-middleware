@@ -75,7 +75,8 @@ import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;
 import com.openexchange.realtime.atmosphere.OXRTHandler;
 import com.openexchange.realtime.atmosphere.StanzaSender;
-import com.openexchange.realtime.atmosphere.impl.stanza.OLDStanzaParser;
+import com.openexchange.realtime.atmosphere.impl.stanza.BuilderSelector;
+import com.openexchange.realtime.atmosphere.impl.stanza.StanzaBuilder;
 import com.openexchange.realtime.atmosphere.impl.stanza.StanzaWriter;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Payload;
@@ -100,8 +101,6 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 
     // TODO: Figure Out JSONP and Long-Polling State management. Hot-Swap the
     // AtmosphereResource.
-    // TODO: Close connections and get rid of em, apache doesn't tell us about client disconnects,
-    // 502 Proxy error, resources are destroyed properly though.
 
     private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(RTAtmosphereHandler.class));
 
@@ -203,9 +202,14 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                         LOG.info("tracked session:" + sessionIdToState.keys());
                         throw ex;
                     }
-                    handleIncoming(OLDStanzaParser.parse(postData), atmosphereState);
+                    JSONObject json = new JSONObject(postData);
+                    StanzaBuilder<? extends Stanza> stanzaBuilder = BuilderSelector.getBuilder(atmosphereState.id, json);
+                    handleIncoming(stanzaBuilder.build(), atmosphereState);
                     printBroadcasters("Broadcasters after POST Request");
                     printSessions("Sessions after POST Request");
+                } catch (JSONException illEx) {
+                    LOG.error(illEx);
+                    writeExceptionToResource(illEx, resource);
                 } catch (IllegalArgumentException illEx) {
                     LOG.error(illEx);
                     writeExceptionToResource(illEx, resource);

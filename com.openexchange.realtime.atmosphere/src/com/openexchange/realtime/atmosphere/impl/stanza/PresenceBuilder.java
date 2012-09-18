@@ -80,7 +80,7 @@ public class PresenceBuilder extends StanzaBuilder<Presence> {
     }
 
     @Override
-    protected Presence build() throws OXException {
+    public Presence build() throws OXException {
         basics();
         type();
         return stanza;

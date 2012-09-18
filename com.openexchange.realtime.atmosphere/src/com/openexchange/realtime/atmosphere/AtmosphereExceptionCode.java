@@ -63,10 +63,10 @@ public enum AtmosphereExceptionCode implements OXExceptionCode {
     
     /** The session information didn't match any ServerSession. */
     SESSIONINFO_DIDNT_MATCH_SERVERSESSION(AtmosphereExceptionMessage.SESSIONINFO_DIDNT_MATCH_SERVERSESSION_MSG, CATEGORY_ERROR, 1),
-    /** The received message is missing the \"kind\" key. */
-    MISSING_KIND(AtmosphereExceptionMessage.MISSING_KIND_MSG, CATEGORY_ERROR, 2),
-    /** Could not find a parser for a message of kind: . \"%1$s\" */
-    MISSING_BUILDER_FOR_KIND(AtmosphereExceptionMessage.MISSING_PARSER_FOR_KIND_MSG, CATEGORY_ERROR, 3),
+    /** Missing key \"%1$s\" in: \"%2$s\" */
+    MISSING_KEY(AtmosphereExceptionMessage.MISSING_KEY_MSG, CATEGORY_ERROR, 2),
+    /** Could not find a builder for the specified element: . \"%1$s\" */
+    MISSING_BUILDER_FOR_KIND(AtmosphereExceptionMessage.MISSING_BUILDER_FOR_ELEMENT_MSG, CATEGORY_ERROR, 3),
     /** Error while building Stanza: \"%1$s\" */
     ERROR_WHILE_BUILDING(AtmosphereExceptionMessage.ERROR_WHILE_BUILDING_MSG, CATEGORY_ERROR, 4)
     ;
