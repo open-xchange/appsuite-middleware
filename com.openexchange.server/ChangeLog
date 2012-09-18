@@ -5,6 +5,7 @@
 * 2012-09-18 - francisco.laguna@open-xchange.com
 
  - Fix for bug 22989: Respond with proper error message if a subscription can not be loaded.
+ - Fix for bug 22990: Fixed NPE.
 
 * 2012-09-18 - marcus.klein@open-xchange.com
 
