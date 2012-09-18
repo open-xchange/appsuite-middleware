@@ -122,13 +122,15 @@ public class ChangeByIdsJob extends AbstractIndexingJob {
             MailService mailService = Services.getService(MailService.class);
             MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage> mailAccess = mailService.getMailAccess(info.userId, info.contextId, info.accountId);
             try {
+                mailAccess.connect();
                 IMailFolderStorage folderStorage = mailAccess.getFolderStorage();                
                 if (folderStorage.exists(info.folder)) {
                     String[] ids = (String[]) info.getProperty(IDS);
                     final List<String> toChange = Arrays.asList(ids);
-                    changeMails(toChange, mailAccess, mailIndex, attachmentIndex);
+                    changeMails(toChange, mailAccess.getMessageStorage(), mailIndex, attachmentIndex);
                 }
             } finally {
+                closeMailAccess(mailAccess);
                 closeIndexAccess(mailIndex);
                 closeIndexAccess(attachmentIndex);
                 

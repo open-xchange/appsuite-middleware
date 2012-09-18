@@ -50,6 +50,7 @@
 package com.openexchange.mail.smal.impl.index;
 
 import java.io.Serializable;
+import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
@@ -89,8 +90,7 @@ public class SmalSessionEventHandler implements EventHandler {
 
     @Override
     public void handleEvent(Event event) {
-        try {
-            Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
+        try {            
             IndexingService indexingService = SmalServiceLookup.getServiceStatic(IndexingService.class);
             if (indexingService == null) {
                 OXException e = ServiceExceptionCode.SERVICE_UNAVAILABLE.create(IndexingService.class.getName());
@@ -98,9 +98,10 @@ public class SmalSessionEventHandler implements EventHandler {
                 return;
             }  
             
-            String topic = event.getTopic();
-            UserContextKey userContextKey = new UserContextKey(session.getContextId(), session.getUserId());
+            String topic = event.getTopic();            
             if (SessiondEventConstants.TOPIC_ADD_SESSION.equals(topic) || SessiondEventConstants.TOPIC_REACTIVATE_SESSION.equals(topic)) {
+                Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
+                UserContextKey userContextKey = new UserContextKey(session.getContextId(), session.getUserId());
                 MailAccountStorageService storageService = SmalServiceLookup.getServiceStatic(MailAccountStorageService.class);
                 if (storageService == null) {
                     OXException e = ServiceExceptionCode.SERVICE_UNAVAILABLE.create(MailAccountStorageService.class.getName());
@@ -128,34 +129,45 @@ public class SmalSessionEventHandler implements EventHandler {
                 if (goOn) {
                     scheduleFolderJobs(session, indexingService, storageService);
                 }
-            } else if (SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic) || SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
-                IMap<UserContextKey,Integer> sessionMap = getSessionMap();
-                sessionMap.lock(userContextKey);
-                boolean goOn = false;
-                try {
-                    Integer sessionCount = sessionMap.get(userContextKey);
-                    if (sessionCount == null) {
-                        return;
-                    }
-                    
-                    if (sessionCount.intValue() == 1) {
-                        sessionMap.remove(userContextKey);
-                        goOn = true;
-                    } else {
-                        sessionMap.put(userContextKey, new Integer(sessionCount.intValue() - 1));
-                    }
-                } finally {
-                    sessionMap.unlock(userContextKey);
-                }
-                
-                if (goOn) {
-                    int userId = session.getUserId();
-                    int contextId = session.getContextId();
-                    indexingService.unscheduleAllForUser(contextId, userId);
+            } else if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
+                Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
+                unschedule(session, indexingService);
+            } else if (SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic)) {
+                Map<String, Session> sessions = (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
+                for (Session session : sessions.values()) {
+                    unschedule(session, indexingService);
                 }
             }
         } catch (Exception e) {
             LOG.warn("Error while triggering mail indexing jobs.", e);
+        }
+    }
+    
+    private void unschedule(Session session, IndexingService indexingService) throws OXException {
+        UserContextKey userContextKey = new UserContextKey(session.getContextId(), session.getUserId());
+        IMap<UserContextKey,Integer> sessionMap = getSessionMap();
+        sessionMap.lock(userContextKey);
+        boolean goOn = false;
+        try {
+            Integer sessionCount = sessionMap.get(userContextKey);
+            if (sessionCount == null) {
+                return;
+            }
+            
+            if (sessionCount.intValue() == 1) {
+                sessionMap.remove(userContextKey);
+                goOn = true;
+            } else {
+                sessionMap.put(userContextKey, new Integer(sessionCount.intValue() - 1));
+            }
+        } finally {
+            sessionMap.unlock(userContextKey);
+        }
+        
+        if (goOn) {
+            int userId = session.getUserId();
+            int contextId = session.getContextId();
+            indexingService.unscheduleAllForUser(contextId, userId);
         }
     }
     

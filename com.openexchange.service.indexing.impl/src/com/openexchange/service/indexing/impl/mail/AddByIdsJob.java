@@ -118,13 +118,15 @@ public class AddByIdsJob extends AbstractIndexingJob {
             MailService mailService = Services.getService(MailService.class);
             MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage> mailAccess = mailService.getMailAccess(info.userId, info.contextId, info.accountId);
             try {
+                mailAccess.connect();
                 IMailFolderStorage folderStorage = mailAccess.getFolderStorage();                
                 if (folderStorage.exists(info.folder)) {
                     String[] ids = (String[]) info.getProperty(IDS);
-                    final List<String> toAdd = Arrays.asList(ids);
-                    addMails(toAdd, mailAccess, mailIndex, attachmentIndex);
+                    final List<String> toAdd = Arrays.asList(ids);                    
+                    addMails(toAdd, mailAccess.getMessageStorage(), mailIndex, attachmentIndex);
                 }
             } finally {
+                closeMailAccess(mailAccess);
                 closeIndexAccess(mailIndex);
                 closeIndexAccess(attachmentIndex);
                 

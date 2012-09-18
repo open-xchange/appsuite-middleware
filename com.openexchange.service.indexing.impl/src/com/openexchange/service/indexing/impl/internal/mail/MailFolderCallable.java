@@ -12,6 +12,7 @@ import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.index.Attachment;
+import com.openexchange.imap.IMAPException;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexConstants;
 import com.openexchange.index.IndexDocument;
@@ -32,6 +33,7 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.index.MailIndexField;
 import com.openexchange.mail.service.MailService;
+import com.openexchange.service.indexing.IndexingService;
 import com.openexchange.service.indexing.impl.internal.Services;
 import com.openexchange.service.indexing.impl.mail.AbstractMailCallable;
 import com.openexchange.service.indexing.impl.mail.MailJobInfo;
@@ -71,8 +73,9 @@ public class MailFolderCallable extends AbstractMailCallable {
         IndexAccess<MailMessage> mailIndex = indexFacade.acquireIndexAccess(Types.EMAIL, info.userId, info.contextId);
         IndexAccess<Attachment> attachmentIndex = indexFacade.acquireIndexAccess(Types.ATTACHMENT, info.userId, info.contextId);
         MailService mailService = Services.getService(MailService.class);
-        MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage> mailAccess = mailService.getMailAccess(info.userId, info.contextId, info.accountId);
-        try {            
+        MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage> mailAccess = mailService.getMailAccess(info.userId, info.contextId, info.accountId);        
+        try {
+            mailAccess.connect();
             Map<String, Object> params = new HashMap<String, Object>();
             params.put(IndexConstants.ACCOUNT, String.valueOf(info.accountId));
             Builder queryBuilder = new Builder(params);
@@ -81,7 +84,7 @@ public class MailFolderCallable extends AbstractMailCallable {
                 .setSortField(MailIndexField.RECEIVED_DATE)
                 .setOrder(Order.DESC)
                 .build();
-            
+                    
             IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
             if (folderStorage.exists(info.folder)) {
                 IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
@@ -91,7 +94,8 @@ public class MailFolderCallable extends AbstractMailCallable {
                     MailSortField.RECEIVED_DATE,
                     OrderDirection.DESC,
                     null,
-                    CHANGEABLE_FIELDS);                
+                    CHANGEABLE_FIELDS);  
+                
                 Map<String, MailMessage> storageMails = new HashMap<String, MailMessage>();
                 for (MailMessage msg : storageResult) {
                     storageMails.put(msg.getMailId(), msg);
@@ -106,10 +110,10 @@ public class MailFolderCallable extends AbstractMailCallable {
                     }                
                     
                     deleteMails(indexMails.keySet(), storageMails.keySet(), mailIndex, attachmentIndex);
-                    addMails(indexMails.keySet(), storageMails.keySet(), mailIndex, attachmentIndex, mailAccess);
-                    changeMails(indexMails, storageMails, mailIndex, attachmentIndex, mailAccess);              
+                    addMails(indexMails.keySet(), storageMails.keySet(), mailIndex, attachmentIndex, messageStorage);
+                    changeMails(indexMails, storageMails, mailIndex, attachmentIndex, messageStorage);              
                 } else {
-                    addMails(Collections.<String> emptySet(), storageMails.keySet(), mailIndex, attachmentIndex, mailAccess);
+                    addMails(Collections.<String> emptySet(), storageMails.keySet(), mailIndex, attachmentIndex, messageStorage);
                     IndexFolderManager.setIndexed(info.contextId, info.userId, Types.EMAIL, String.valueOf(info.accountId), info.folder);
                 }                
             } else {
@@ -128,7 +132,16 @@ public class MailFolderCallable extends AbstractMailCallable {
                     .build();
                 attachmentIndex.deleteByQuery(attachmentAllQuery);                
             }
+        } catch (OXException e) {
+            // If connect to mail access failed, reschedule this job
+            if (e.getCategory().equals(IMAPException.IMAPCode.CONNECTION_UNAVAILABLE.getCategory())
+                && e.getCode() == IMAPException.IMAPCode.CONNECTION_UNAVAILABLE.getNumber()) {
+                IndexingService indexingService = Services.getService(IndexingService.class);
+                indexingService.scheduleJob(info, null, -1L, IndexingService.DEFAULT_PRIORITY);
+            }
+            throw e;
         } finally {
+            closeMailAccess(mailAccess);
             closeIndexAccess(mailIndex);
             closeIndexAccess(attachmentIndex);
             
@@ -145,10 +158,10 @@ public class MailFolderCallable extends AbstractMailCallable {
         // TODO: implement
     }
 
-    private void addMails(Set<String> indexIds, Set<String> storageIds, final IndexAccess<MailMessage> mailIndex, final IndexAccess<Attachment> attachmentIndex, final MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage> mailAccess) throws OXException {
+    private void addMails(Set<String> indexIds, Set<String> storageIds, final IndexAccess<MailMessage> mailIndex, final IndexAccess<Attachment> attachmentIndex, final IMailMessageStorage messageStorage) throws OXException {
         final List<String> toAdd = new ArrayList<String>(storageIds);
         toAdd.removeAll(indexIds);        
-        addMails(toAdd, mailAccess, mailIndex, attachmentIndex);
+        addMails(toAdd, messageStorage, mailIndex, attachmentIndex);
     }
 
     private void deleteMails(Set<String> indexIds, Set<String> storageIds, final IndexAccess<MailMessage> mailIndex, final IndexAccess<Attachment> attachmentIndex) throws OXException {
@@ -157,7 +170,7 @@ public class MailFolderCallable extends AbstractMailCallable {
         deleteMails(toDelete, mailIndex, attachmentIndex);        
     }
     
-    private void changeMails(Map<String, MailMessage> indexMails, Map<String, MailMessage> storageMails, final IndexAccess<MailMessage> mailIndex, final IndexAccess<Attachment> attachmentIndex, final MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage> mailAccess) throws OXException {
+    private void changeMails(Map<String, MailMessage> indexMails, Map<String, MailMessage> storageMails, final IndexAccess<MailMessage> mailIndex, final IndexAccess<Attachment> attachmentIndex, final IMailMessageStorage messageStorage) throws OXException {
         Set<String> toRemove = new HashSet<String>(indexMails.keySet());
         toRemove.removeAll(storageMails.keySet());
         
@@ -173,7 +186,7 @@ public class MailFolderCallable extends AbstractMailCallable {
             }
         }
         
-        changeMails(changedMails, mailAccess, mailIndex, attachmentIndex);
+        changeMails(changedMails, messageStorage, mailIndex, attachmentIndex);
     }
     
     private boolean isDifferent(final MailMessage storageMail, final MailMessage indexMail) {

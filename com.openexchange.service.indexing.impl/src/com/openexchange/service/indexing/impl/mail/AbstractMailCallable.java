@@ -105,7 +105,7 @@ public abstract class AbstractMailCallable implements Callable<Object>, Serializ
         this.info = info;
     }    
     
-    protected void addMails(final List<String> idsToAdd, final MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage> mailAccess, final IndexAccess<MailMessage> mailIndex, final IndexAccess<Attachment> attachmentIndex) throws OXException {
+    protected void addMails(final List<String> idsToAdd, final IMailMessageStorage messageStorage, final IndexAccess<MailMessage> mailIndex, final IndexAccess<Attachment> attachmentIndex) throws OXException {
         if (idsToAdd.isEmpty()) {
             return;
         }
@@ -121,30 +121,21 @@ public abstract class AbstractMailCallable implements Callable<Object>, Serializ
                 List<String> subList = idsToAdd.subList(off, len);  
                 List<IndexDocument<MailMessage>> documents = new ArrayList<IndexDocument<MailMessage>>();
                 List<IndexDocument<Attachment>> attachments = new ArrayList<IndexDocument<Attachment>>();
-                MailMessage[] messages = null;
-                String[] primaryContents = null;
-                try {
-                    mailAccess.connect();
-                    IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
-                    messages = messageStorage.getMessages(
-                        info.folder, 
-                        subList.toArray(new String[subList.size()]), 
-                        MailField.values());
+                MailMessage[] messages = messageStorage.getMessages(
+                    info.folder, 
+                    subList.toArray(new String[subList.size()]), 
+                    MailField.values());
                     
-                    String[] mailIds = new String[messages.length];
-                    for (int i = 0; i < messages.length; i++) {
-                        MailMessage mailMessage = messages[i];
-                        if (mailMessage != null) {
-                            mailIds[i] = (mailMessage.getMailId());
-                        }
+                String[] mailIds = new String[messages.length];
+                for (int i = 0; i < messages.length; i++) {
+                    MailMessage mailMessage = messages[i];
+                    if (mailMessage != null) {
+                        mailIds[i] = (mailMessage.getMailId());
                     }
-                    
-                    
-                    primaryContents = messageStorage.getPrimaryContents(info.folder, mailIds);     
-                } finally {
-                    closeMailAccess(mailAccess);
                 }
-                
+                    
+                    
+                String[] primaryContents = messageStorage.getPrimaryContents(info.folder, mailIds);                
                 for (int i = 0; i < messages.length; i++) {
                     MailMessage message = messages[i];
                     if (message != null) {
@@ -244,7 +235,7 @@ public abstract class AbstractMailCallable implements Callable<Object>, Serializ
         });
     }
     
-    protected void changeMails(final List<String> changedMails, final MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage> mailAccess, final IndexAccess<MailMessage> mailIndex, final IndexAccess<Attachment> attachmentIndex) throws OXException {
+    protected void changeMails(final List<String> changedMails, final IMailMessageStorage messageStorage, final IndexAccess<MailMessage> mailIndex, final IndexAccess<Attachment> attachmentIndex) throws OXException {
         if (changedMails.isEmpty()) {
             return;
         }
@@ -257,30 +248,21 @@ public abstract class AbstractMailCallable implements Callable<Object>, Serializ
                 }
                 
                 List<String> subList = changedMails.subList(off, len);
-                List<IndexDocument<MailMessage>> documents = new ArrayList<IndexDocument<MailMessage>>();
-                MailMessage[] messages = null;
-                String[] primaryContents = null;
-                try {
-                    mailAccess.connect();
-                    IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
-                    messages = messageStorage.getMessages(
-                        info.folder, 
-                        subList.toArray(new String[subList.size()]), 
-                        MailField.values());
+                List<IndexDocument<MailMessage>> documents = new ArrayList<IndexDocument<MailMessage>>();               
+                MailMessage[]  messages = messageStorage.getMessages(
+                    info.folder, 
+                    subList.toArray(new String[subList.size()]), 
+                    MailField.values());
                     
-                    String[] mailIds = new String[messages.length];
-                    for (int i = 0; i < messages.length; i++) {
-                        MailMessage mailMessage = messages[i];
-                        if (mailMessage != null) {
-                            mailIds[i] = (mailMessage.getMailId());
-                        }
+                String[] mailIds = new String[messages.length];
+                for (int i = 0; i < messages.length; i++) {
+                    MailMessage mailMessage = messages[i];
+                    if (mailMessage != null) {
+                        mailIds[i] = (mailMessage.getMailId());
                     }
-                    
-                    primaryContents = messageStorage.getPrimaryContents(info.folder, mailIds); 
-                } finally {
-                    closeMailAccess(mailAccess);
                 }
-                               
+                
+                String[] primaryContents = messageStorage.getPrimaryContents(info.folder, mailIds);                               
                 for (int i = 0; i < messages.length; i++) {
                     MailMessage message = messages[i];
                     if (message != null) {
