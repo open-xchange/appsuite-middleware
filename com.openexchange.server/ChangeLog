@@ -2,6 +2,10 @@
 
  - Fix for bug 22881: Fixed update operation for personal data
 
+* 2012-09-18 - francisco.laguna@open-xchange.com
+
+ - Fix for bug 22989: Respond with proper error message if a subscription can not be loaded.
+
 * 2012-09-18 - marcus.klein@open-xchange.com
 
  - Fix for bug 22064: If parsing of the JSON value fails a understandable exception message is now generated for the user.
