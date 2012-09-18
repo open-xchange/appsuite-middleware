@@ -548,7 +548,7 @@ public final class ResponseWriter {
             if (1 == categories.size()) {
                 final Category category = categories.get(0);
                 writer.key(ERROR_CATEGORIES).value(category.toString());
-                final int number = Categories.getFormerCategroyNumber(category);
+                final int number = Categories.getFormerCategoryNumber(category);
                 if (number > 0) {
                     writer.key(ERROR_CATEGORY).value(number);
                 }

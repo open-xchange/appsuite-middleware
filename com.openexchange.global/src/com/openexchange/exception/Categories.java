@@ -125,7 +125,7 @@ public final class Categories implements OXExceptionConstants {
      * @param category The category
      * @return The associated number or <tt>-1</tt>
      */
-    public static int getFormerCategroyNumber(final Category category) {
+    public static int getFormerCategoryNumber(final Category category) {
         if (null == category) {
             return -1;
         }
