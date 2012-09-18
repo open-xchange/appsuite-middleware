@@ -260,17 +260,14 @@ public final class IMAPFolderConverter {
                 mailFolder.setSeparator(listEntry.getSeparator());
                 // Shared?
                 {
-                    final String[] userNamespaces = NamespaceFoldersCache.getUserNamespaces(
-                        (IMAPStore) imapFolder.getStore(),
-                        true,
-                        session,
-                        accountId);
+                    final IMAPStore imapStore = (IMAPStore) imapFolder.getStore();
+                    final String[] users = NamespaceFoldersCache.getUserNamespaces(imapStore, true, session, accountId);
                     final char sep = mailFolder.getSeparator();
                     final StringBuilder tmp = new StringBuilder(32);
                     boolean shared = false;
                     String owner = null;
-                    for (int i = 0; !shared && i < userNamespaces.length; i++) {
-                        final String userNamespace = userNamespaces[i];
+                    for (int i = 0; !shared && i < users.length; i++) {
+                        final String userNamespace = users[i];
                         if (!isEmpty(userNamespace)) {
                             if (imapFullName.equals(userNamespace)) {
                                 shared = true;
@@ -292,18 +289,10 @@ public final class IMAPFolderConverter {
                         }
                     }
                     if (!shared) {
-                        final String[] sharedNamespaces = NamespaceFoldersCache.getSharedNamespaces(
-                            (IMAPStore) imapFolder.getStore(),
-                            true,
-                            session,
-                            accountId);
-                        final String[] personalNamespaces = NamespaceFoldersCache.getPersonalNamespaces(
-                            (IMAPStore) imapFolder.getStore(),
-                            true,
-                            session,
-                            accountId);
-                        for (int i = 0; !shared && i < sharedNamespaces.length; i++) {
-                            final String sharedNamespace = sharedNamespaces[i];
+                        final String[] shares = NamespaceFoldersCache.getSharedNamespaces(imapStore, true, session, accountId);
+                        final String[] personals = NamespaceFoldersCache.getPersonalNamespaces(imapStore, true, session, accountId);
+                        for (int i = 0; !shared && i < shares.length; i++) {
+                            final String sharedNamespace = shares[i];
                             if (!isEmpty(sharedNamespace)) {
                                 if (imapFullName.equals(sharedNamespace)) {
                                     shared = true;
@@ -314,7 +303,7 @@ public final class IMAPFolderConverter {
                                         shared = true;
                                     }
                                 }
-                            } else if (!startsWithOneOf(imapFullName, sep, personalNamespaces, userNamespaces)) {
+                            } else if (!startsWithOneOf(imapFullName, sep, personals, users, tmp)) {
                                 shared = true;
                             }
                         }
@@ -521,14 +510,22 @@ public final class IMAPFolderConverter {
         }
     }
 
-    private static boolean startsWithOneOf(final String imapFullName, final char sep, final String[] personalNamespaces, final String[] userNamespaces) {
+    private static boolean startsWithOneOf(final String imapFullName, final char sep, final String[] personalNamespaces, final String[] userNamespaces, final StringBuilder tmp) {
         for (final String string : userNamespaces) {
-            if (imapFullName.equals(string) || imapFullName.startsWith(string+sep)) {
+            if (imapFullName.equals(string)) {
+                return true;
+            }
+            tmp.setLength(0);
+            if (imapFullName.startsWith(tmp.append(string).append(sep).toString())) {
                 return true;
             }
         }
         for (final String string : personalNamespaces) {
-            if (imapFullName.equals(string) || imapFullName.startsWith(string+sep)) {
+            if (imapFullName.equals(string)) {
+                return true;
+            }
+            tmp.setLength(0);
+            if (imapFullName.startsWith(tmp.append(string).append(sep).toString())) {
                 return true;
             }
         }
@@ -586,6 +583,7 @@ public final class IMAPFolderConverter {
             final IMAPMailFolder mailFolder = new IMAPMailFolder();
             mailFolder.setRootFolder(true);
             mailFolder.setExists(true);
+            mailFolder.setShared(false);
             mailFolder.setSeparator(ListLsubCache.getSeparator(imapConfig.getAccountId(), rootFolder, session));
             final String imapFullname = "";
             final ListLsubEntry listEntry = ListLsubCache.getCachedLISTEntry(imapFullname, imapConfig.getAccountId(), rootFolder, session);
