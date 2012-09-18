@@ -155,7 +155,7 @@ public final class ListAction extends AbstractUserAction {
         /*
          * Map user to contact information
          */
-        Date lastModified = new Date(0);
+        Date lastModified = null;
         final List<OXException> warnings = new LinkedList<OXException>();
         final User[] users = getUsers(session, userIDs, warnings);
         final List<UserContact> userContacts = new ArrayList<UserContact>(users.length);
@@ -163,8 +163,13 @@ public final class ListAction extends AbstractUserAction {
         	for (final Contact contact : contacts) {
         		if (user.getId() == contact.getInternalUserId()) {
         			userContacts.add(new UserContact(contact, user));
-                	if (contact.getLastModified().after(lastModified)) {
+                	if (null == lastModified) {
                 		lastModified = contact.getLastModified();
+                	} else {
+                	    final Date contactLastModified = contact.getLastModified();
+                        if (contactLastModified.after(lastModified)) {
+                	        lastModified = contactLastModified;
+                	    }
                 	}
         			break;
         		}
