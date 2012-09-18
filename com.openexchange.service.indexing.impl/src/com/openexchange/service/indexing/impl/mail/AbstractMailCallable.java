@@ -192,7 +192,7 @@ public abstract class AbstractMailCallable implements Callable<Object>, Serializ
                 String[] mailUuids = new String[subList.size()];
                 int i = 0;        
                 for (String id : subList) {
-                    mailUuids[i] = new MailUUID(info.contextId, info.userId, info.accountId, info.folder, id).toString();
+                    mailUuids[i] = MailUUID.newUUID(info.contextId, info.userId, info.accountId, info.folder, id).toString();
                     idTerms[i] = new ObjectIdTerm(id);
                     ++i;
                 }                    

@@ -83,7 +83,7 @@ public class SolrMailDocumentConverter implements SolrResultConverter<MailMessag
     
     public static SolrInputDocument convertStatic(int contextId, int userId, IndexDocument<MailMessage> document) throws OXException {
         MailMessage message = document.getObject();
-        SolrInputDocument inputDocument = SolrInputDocumentHelper.getInstance().inputDocumentFor(message, userId, contextId);
+        SolrInputDocument inputDocument = SolrMailHelper.getInstance().inputDocumentFor(message, userId, contextId);
         String text;
         // TODO: Can this be anything else?
         if (message instanceof ContentAwareMailMessage) {
@@ -114,7 +114,7 @@ public class SolrMailDocumentConverter implements SolrResultConverter<MailMessag
     }
     
     public static IndexDocument<MailMessage> convertStatic(SolrDocument document) throws OXException {
-        return SolrInputDocumentHelper.getInstance().readDocument(document, MailFillers.allFillers());
+        return SolrMailHelper.getInstance().readDocument(document, MailFillers.allFillers());
     }
 
 }

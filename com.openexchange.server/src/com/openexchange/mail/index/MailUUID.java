@@ -61,6 +61,17 @@ import com.openexchange.mail.dataobjects.MailMessage;
 public class MailUUID {
 
     private final String mailUUID;
+    
+    private final int contextId;
+    
+    private final int userId;
+    
+    private final int accountId;
+    
+    private final String fullName;
+    
+    private final String mailId;
+    
 
     /**
      * Initializes a new {@link MailUUID}.
@@ -71,17 +82,17 @@ public class MailUUID {
      * @param fullName The folder full name
      * @param mailId The mail identifier
      */
-    public MailUUID(final int contextId, final int userId, final int accountId, final String fullName, final String mailId) {
+    private MailUUID(final int contextId, final int userId, final int accountId, final String fullName, final String mailId) {
         super();
-        final StringBuilder tmp = new StringBuilder(64);
+        this.contextId = contextId;
+        this.userId = userId;
+        this.accountId = accountId;
+        this.fullName = fullName;
+        this.mailId = mailId;
+        StringBuilder tmp = new StringBuilder(64);
         tmp.append("mail/").append(contextId).append(MailPath.SEPERATOR).append(userId).append(MailPath.SEPERATOR);
         tmp.append(MailPath.getMailPath(accountId, fullName, mailId));
         mailUUID = tmp.toString();
-    }
-
-    @Override
-    public String toString() {
-        return mailUUID;
     }
     
     public static MailUUID newUUID(int contextId, int userId, int accountId, String fullName, String mailId) {
@@ -90,6 +101,56 @@ public class MailUUID {
     
     public static MailUUID newUUID(int contextId, int userId, MailMessage message) {
         return new MailUUID(contextId, userId, message.getAccountId(), message.getFolder(), message.getMailId());
+    }    
+    
+    public final int getContextId() {
+        return contextId;
+    }
+    
+    public final int getUserId() {
+        return userId;
+    }
+    
+    public final int getAccountId() {
+        return accountId;
+    }
+    
+    public final String getFullName() {
+        return fullName;
+    }
+    
+    public final String getMailId() {
+        return mailId;
+    }
+
+    @Override
+    public String toString() {
+        return mailUUID;
+    }
+    
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((mailUUID == null) ? 0 : mailUUID.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        MailUUID other = (MailUUID) obj;
+        if (mailUUID == null) {
+            if (other.mailUUID != null)
+                return false;
+        } else if (!mailUUID.equals(other.mailUUID))
+            return false;
+        return true;
     }
 
 }

@@ -83,39 +83,42 @@ public class IndexingServiceImpl implements IndexingService {
 
     @Override
     public void scheduleJob(JobInfo info, Date startDate, long repeatInterval, int priority) throws OXException {
+        if (startDate == null) {
+            startDate = new Date();
+        }
+        
         JobDataMap jobData = new JobDataMap();
         jobData.put(JobConstants.JOB_INFO, info);
-
         JobDetail jobDetail = JobBuilder.newJob(QuartzIndexingJob.class)
             .withIdentity(generateJobKey(info))
             .usingJobData(jobData)
-            .build();
+            .build();        
         
         TriggerBuilder<Trigger> triggerBuilder = TriggerBuilder.newTrigger()
             .forJob(jobDetail)
-            .withIdentity(generateTriggerKey(info));
+            .withIdentity(generateTriggerKey(info, startDate, repeatInterval))
+            .startAt(startDate)
+            .withPriority(priority);
         
-        if (startDate == null) {
-            triggerBuilder.startNow();
-        } else {
-            triggerBuilder.startAt(startDate);
-        }
-        
-        if (repeatInterval > 0) {
+        if (repeatInterval > 0L) {
             triggerBuilder.withSchedule(SimpleScheduleBuilder.simpleSchedule()
                 .withIntervalInMilliseconds(repeatInterval)
                 .repeatForever()
                 .withMisfireHandlingInstructionFireNow());            
-        }
-
-        triggerBuilder.withPriority(priority);
-        
-        Trigger trigger = triggerBuilder.build();        
+        }        
+          
+        Trigger trigger = triggerBuilder.build(); 
+        Scheduler scheduler = getScheduler();
         try {
-            scheduleJob(jobDetail, trigger);
+            scheduler.scheduleJob(jobDetail, trigger);
         } catch (SchedulerException e) {
             if (e instanceof ObjectAlreadyExistsException) {
-                LOG.debug("Job already exists within JobStore: " + info.toString());
+                LOG.debug("Job already exists within JobStore: " + info.toString() + ". Trying to store trigger only.");
+                try {
+                    scheduler.scheduleJob(trigger);
+                } catch (SchedulerException f) {
+                    LOG.warn("Could not schedule trigger.", f);
+                }
             } else {
                 throw new OXException(e);
             }                
@@ -124,8 +127,7 @@ public class IndexingServiceImpl implements IndexingService {
     
     @Override
     public void unscheduleJob(JobInfo info) throws OXException {
-        QuartzService quartzService = Services.getService(QuartzService.class);
-        Scheduler scheduler = quartzService.getClusteredScheduler();
+        Scheduler scheduler = getScheduler();
         try {
             scheduler.deleteJob(generateJobKey(info));
         } catch (SchedulerException e) {
@@ -135,8 +137,7 @@ public class IndexingServiceImpl implements IndexingService {
     
     @Override
     public void unscheduleAllForUser(int contextId, int userId) throws OXException {
-        QuartzService quartzService = Services.getService(QuartzService.class);
-        Scheduler scheduler = quartzService.getClusteredScheduler();
+        Scheduler scheduler = getScheduler();
         String jobGroup = generateJobGroup(contextId, userId);        
         try {
             Set<JobKey> jobKeys = scheduler.getJobKeys(GroupMatcher.jobGroupEquals(jobGroup));
@@ -146,28 +147,42 @@ public class IndexingServiceImpl implements IndexingService {
         }
     }
     
-    private void scheduleJob(JobDetail jobDetail, Trigger trigger) throws SchedulerException {
-        QuartzService quartzService = Services.getService(QuartzService.class);
-        Scheduler scheduler = quartzService.getClusteredScheduler();
-        scheduler.scheduleJob(jobDetail, trigger);
-    }    
-    
-    private JobKey generateJobKey(JobInfo info) {
+    JobKey generateJobKey(JobInfo info) {
         JobKey key = new JobKey(info.toUniqueId(), generateJobGroup(info.contextId, info.userId));
         return key;
     }
     
-    private TriggerKey generateTriggerKey(JobInfo info) {
-        TriggerKey key = new TriggerKey(info.toUniqueId(), generateTriggerGroup(info.contextId, info.userId));
+    TriggerKey generateTriggerKey(JobInfo info, Date startDate, long repeatInterval) {
+        TriggerKey key = new TriggerKey(generateTriggerName(info, startDate, repeatInterval), generateTriggerGroup(info.contextId, info.userId));
         return key;
     }
     
-    private String generateJobGroup(int contextId, int userId) {
+    String generateJobGroup(int contextId, int userId) {
         return "indexingJobs/" + contextId + '/' + userId;
     }
     
-    private String generateTriggerGroup(int contextId, int userId) {
+    String generateTriggerGroup(int contextId, int userId) {
         return "indexingTriggers/" + contextId + '/' + userId;
+    }
+    
+    String generateTriggerName(JobInfo info, Date startDate, long repeatInterval) {
+        StringBuilder sb = new StringBuilder(info.toUniqueId());
+        sb.append('/');
+        if (repeatInterval > 0L) {
+            sb.append("withInterval/");
+            sb.append(repeatInterval);
+        } else {
+            sb.append("oneShot/");
+            sb.append(startDate.getTime());
+        }
+        
+        return sb.toString();
+    }
+
+    Scheduler getScheduler() {
+        QuartzService quartzService = Services.getService(QuartzService.class);
+        Scheduler scheduler = quartzService.getClusteredScheduler();
+        return scheduler;
     }
     
 }

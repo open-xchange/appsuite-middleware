@@ -52,7 +52,10 @@ package com.openexchange.service.indexing.impl.internal.infostore;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import org.apache.commons.logging.Log;
 import com.openexchange.context.ContextService;
@@ -68,8 +71,12 @@ import com.openexchange.groupware.tools.chunk.ChunkPerformer;
 import com.openexchange.groupware.tools.chunk.Performable;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.index.IndexAccess;
+import com.openexchange.index.IndexConstants;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexFacadeService;
+import com.openexchange.index.QueryParameters;
+import com.openexchange.index.QueryParameters.Builder;
+import com.openexchange.index.SearchHandler;
 import com.openexchange.index.StandardIndexDocument;
 import com.openexchange.index.solr.IndexFolderManager;
 import com.openexchange.service.indexing.impl.infostore.InfostoreJobInfo;
@@ -78,10 +85,9 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
 
-
 /**
  * {@link InfostoreFolderCallable}
- *
+ * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class InfostoreFolderCallable implements Callable<Object>, Serializable {
@@ -89,12 +95,11 @@ public class InfostoreFolderCallable implements Callable<Object>, Serializable {
     private static final int CHUNK_SIZE = 100;
 
     private static final long serialVersionUID = -8114344313753991788L;
-    
+
     private static final Log LOG = com.openexchange.log.Log.loggerFor(InfostoreFolderCallable.class);
-    
+
     private final InfostoreJobInfo info;
-    
-    
+
     public InfostoreFolderCallable(InfostoreJobInfo info) {
         super();
         this.info = info;
@@ -105,143 +110,181 @@ public class InfostoreFolderCallable implements Callable<Object>, Serializable {
         long start = System.currentTimeMillis();
         if (LOG.isDebugEnabled()) {
             LOG.debug(this.getClass().getSimpleName() + " started performing. " + info.toString());
-        }        
-        
+        }
+
         checkJobInfo();
-        if (info.force || !IndexFolderManager.isIndexed(info.contextId, info.userId, Types.INFOSTORE, info.account, String.valueOf(info.folder))) {  
+        if (info.force || !IndexFolderManager.isIndexed(
+            info.contextId,
+            info.userId,
+            Types.INFOSTORE,
+            info.account,
+            String.valueOf(info.folder))) {            
+
+            ContextService contextService = Services.getService(ContextService.class);
+            UserService userService = Services.getService(UserService.class);
+            UserConfigurationService userConfigurationService = Services.getService(UserConfigurationService.class);
+            Context context = contextService.getContext(info.contextId);
+            User user = userService.getUser(info.userId, context);
+            UserConfiguration userConfig = userConfigurationService.getUserConfiguration(info.userId, context);            
             IndexFacadeService indexFacade = Services.getService(IndexFacadeService.class);
-            final IndexAccess<DocumentMetadata> infostoreIndex = indexFacade.acquireIndexAccess(Types.INFOSTORE, info.userId, info.contextId);
+            final IndexAccess<DocumentMetadata> infostoreIndex = indexFacade.acquireIndexAccess(
+                Types.INFOSTORE,
+                info.userId,
+                info.contextId);
             final IndexAccess<Attachment> attachmentIndex = indexFacade.acquireIndexAccess(Types.ATTACHMENT, info.userId, info.contextId);
-            try {            
-                ContextService contextService = Services.getService(ContextService.class);
-                UserService userService = Services.getService(UserService.class);
-                UserConfigurationService userConfigurationService = Services.getService(UserConfigurationService.class);            
-                InfostoreFacade infostoreFacade = Services.getService(InfostoreFacade.class);            
-                Context context = contextService.getContext(info.contextId);
-                User user = userService.getUser(info.userId, context);
-                UserConfiguration userConfig = userConfigurationService.getUserConfiguration(info.userId, context);
-                
-                TimedResult<DocumentMetadata> documents = infostoreFacade.getDocuments(info.folder, context, user, userConfig);
-                final List<IndexDocument<DocumentMetadata>> indexDocuments = new ArrayList<IndexDocument<DocumentMetadata>>();
-                final List<IndexDocument<Attachment>> attachments = new ArrayList<IndexDocument<Attachment>>();
-                SearchIterator<DocumentMetadata> it = documents.results();
-                while (it.hasNext()) {
-                    DocumentMetadata file = it.next();
-                    StandardIndexDocument<DocumentMetadata> indexDocument = new StandardIndexDocument<DocumentMetadata>(file);
-                    indexDocuments.add(indexDocument);                
-                    if (file.getFilestoreLocation() != null) {
-                        try {                        
-                            InputStream document = infostoreFacade.getDocument(
-                                file.getId(),
-                                InfostoreFacade.CURRENT_VERSION,
-                                context,
-                                user,
-                                userConfig);
-                            
-                            if (document != null) {
-                                Attachment attachment = new Attachment();
-                                attachment.setModule(Types.INFOSTORE);
-                                attachment.setAccount(info.account);
-                                attachment.setAttachmentId(String.valueOf(file.getVersion()));
-                                attachment.setObjectId(String.valueOf(file.getId()));
-                                attachment.setFolder(String.valueOf(file.getFolderId()));
-                                attachment.setFileName(file.getFileName());
-                                attachment.setFileSize(file.getFileSize());
-                                attachment.setMimeType(file.getFileMIMEType());
-                                attachment.setMd5Sum(file.getFileMD5Sum());
-                                attachment.setContent(document);
-                                
-                                attachments.add(new StandardIndexDocument<Attachment>(attachment));
-                            }
-                        } catch (OXException e) {
-                            LOG.warn("Could not get attachment input stream for infostore document.", e);
-                        }
-                    }
+            try {
+                if (info.deleteFolder) {
+                    deleteFromIndex(infostoreIndex, attachmentIndex);                    
+                } else {
+                    indexFolder(context, user, userConfig, infostoreIndex, attachmentIndex);
                 }
-                
-                ChunkPerformer.perform(new Performable() {
-                    @Override
-                    public int perform(int off, int len) throws OXException {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("Adding a chunk of files to the index.");
-                        }
-                        
-                        List<IndexDocument<DocumentMetadata>> subList = indexDocuments.subList(off, len);
-                        infostoreIndex.addContent(subList, true);
-                        
-                        return subList.size();
-                    }
-
-                    @Override
-                    public int getChunkSize() {
-                        return CHUNK_SIZE;
-                    }
-
-                    @Override
-                    public int getLength() {
-                        return indexDocuments.size();
-                    }
-
-                    @Override
-                    public int getInitialOffset() {
-                        return 0;
-                    }
-                });
-                
-                ChunkPerformer.perform(new Performable() {
-                    @Override
-                    public int perform(int off, int len) throws OXException {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("Adding a chunk of attachments to the index.");
-                        }
-                        
-                        List<IndexDocument<Attachment>> subList = attachments.subList(off, len);
-                        attachmentIndex.addContent(subList, true);
-                        
-                        return subList.size();
-                    }
-
-                    @Override
-                    public int getChunkSize() {
-                        return CHUNK_SIZE;
-                    }
-
-                    @Override
-                    public int getLength() {
-                        return attachments.size();
-                    }
-
-                    @Override
-                    public int getInitialOffset() {
-                        return 0;
-                    }
-                });
-                
-                IndexFolderManager.setIndexed(info.contextId, info.userId, Types.INFOSTORE, info.account, String.valueOf(info.folder));
             } finally {
                 closeIndexAccess(infostoreIndex);
                 closeIndexAccess(attachmentIndex);
-                
+
                 if (LOG.isDebugEnabled()) {
                     long diff = System.currentTimeMillis() - start;
                     LOG.debug(this.getClass().getSimpleName() + " lasted " + diff + "ms. " + info.toString());
                 }
             }
         }
-        
+
         return null;
     }
     
+    private void deleteFromIndex(IndexAccess<DocumentMetadata> infostoreIndex, IndexAccess<Attachment> attachmentIndex) throws OXException {
+        IndexFolderManager.deleteFolderEntry(info.contextId, info.userId, Types.INFOSTORE, info.account, String.valueOf(info.folder));
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put(IndexConstants.ACCOUNT, IndexConstants.DEFAULT_ACCOUNT);
+        Builder queryBuilder = new Builder(params);
+        QueryParameters infostoreAllQuery = queryBuilder.setHandler(SearchHandler.ALL_REQUEST)
+            .setFolders(Collections.singleton(String.valueOf(info.folder)))
+            .build();
+        
+        infostoreIndex.deleteByQuery(infostoreAllQuery);
+        Map<String, Object> attachmentAllParams = new HashMap<String, Object>();
+        params.put(IndexConstants.MODULE, new Integer(Types.INFOSTORE));
+        params.put(IndexConstants.ACCOUNT, info.account);                
+        QueryParameters attachmentAllQuery = new Builder(attachmentAllParams)
+            .setHandler(SearchHandler.ALL_REQUEST)
+            .setFolders(Collections.singleton(String.valueOf(info.folder)))
+            .build();
+        attachmentIndex.deleteByQuery(attachmentAllQuery);
+    }
+
+    private void indexFolder(Context context, User user, UserConfiguration userConfig, final IndexAccess<DocumentMetadata> infostoreIndex, final IndexAccess<Attachment> attachmentIndex) throws OXException {
+        InfostoreFacade infostoreFacade = Services.getService(InfostoreFacade.class);
+        TimedResult<DocumentMetadata> documents = infostoreFacade.getDocuments(info.folder, context, user, userConfig);
+        final List<IndexDocument<DocumentMetadata>> indexDocuments = new ArrayList<IndexDocument<DocumentMetadata>>();
+        final List<IndexDocument<Attachment>> attachments = new ArrayList<IndexDocument<Attachment>>();
+        SearchIterator<DocumentMetadata> it = documents.results();
+        while (it.hasNext()) {
+            DocumentMetadata file = it.next();
+            StandardIndexDocument<DocumentMetadata> indexDocument = new StandardIndexDocument<DocumentMetadata>(file);
+            indexDocuments.add(indexDocument);
+            if (file.getFilestoreLocation() != null) {
+                try {
+                    InputStream document = infostoreFacade.getDocument(
+                        file.getId(),
+                        InfostoreFacade.CURRENT_VERSION,
+                        context,
+                        user,
+                        userConfig);
+
+                    if (document != null) {
+                        Attachment attachment = new Attachment();
+                        attachment.setModule(Types.INFOSTORE);
+                        attachment.setAccount(info.account);
+                        attachment.setAttachmentId(String.valueOf(file.getVersion()));
+                        attachment.setObjectId(String.valueOf(file.getId()));
+                        attachment.setFolder(String.valueOf(file.getFolderId()));
+                        attachment.setFileName(file.getFileName());
+                        attachment.setFileSize(file.getFileSize());
+                        attachment.setMimeType(file.getFileMIMEType());
+                        attachment.setMd5Sum(file.getFileMD5Sum());
+                        attachment.setContent(document);
+
+                        attachments.add(new StandardIndexDocument<Attachment>(attachment));
+                    }
+                } catch (OXException e) {
+                    LOG.warn("Could not get attachment input stream for infostore document.", e);
+                }
+            }
+        }
+
+        ChunkPerformer.perform(new Performable() {
+
+            @Override
+            public int perform(int off, int len) throws OXException {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Adding a chunk of files to the index.");
+                }
+
+                List<IndexDocument<DocumentMetadata>> subList = indexDocuments.subList(off, len);
+                infostoreIndex.addContent(subList, true);
+
+                return subList.size();
+            }
+
+            @Override
+            public int getChunkSize() {
+                return CHUNK_SIZE;
+            }
+
+            @Override
+            public int getLength() {
+                return indexDocuments.size();
+            }
+
+            @Override
+            public int getInitialOffset() {
+                return 0;
+            }
+        });
+
+        ChunkPerformer.perform(new Performable() {
+
+            @Override
+            public int perform(int off, int len) throws OXException {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Adding a chunk of attachments to the index.");
+                }
+
+                List<IndexDocument<Attachment>> subList = attachments.subList(off, len);
+                attachmentIndex.addContent(subList, true);
+
+                return subList.size();
+            }
+
+            @Override
+            public int getChunkSize() {
+                return CHUNK_SIZE;
+            }
+
+            @Override
+            public int getLength() {
+                return attachments.size();
+            }
+
+            @Override
+            public int getInitialOffset() {
+                return 0;
+            }
+        });
+
+        IndexFolderManager.setIndexed(info.contextId, info.userId, Types.INFOSTORE, info.account, String.valueOf(info.folder));
+    }
+
     private void closeIndexAccess(IndexAccess<?> indexAccess) throws OXException {
         if (indexAccess != null) {
             IndexFacadeService indexFacade = Services.getService(IndexFacadeService.class);
             indexFacade.releaseIndexAccess(indexAccess);
-        }    
+        }
     }
 
     private void checkJobInfo() {
         // TODO Auto-generated method stub
-        
+
     }
 
 }

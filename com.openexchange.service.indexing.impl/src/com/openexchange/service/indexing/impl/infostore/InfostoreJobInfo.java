@@ -68,6 +68,8 @@ public class InfostoreJobInfo extends JobInfo {
     
     public boolean force;
     
+    public boolean deleteFolder;
+    
     private String uniqueId = null;
 
     /**
@@ -81,6 +83,7 @@ public class InfostoreJobInfo extends JobInfo {
         account = builder.account;
         folder = builder.folder;
         force = builder.force;
+        deleteFolder = builder.deleteFolder;
     }
 
     @Override
@@ -122,6 +125,8 @@ public class InfostoreJobInfo extends JobInfo {
         protected long folder;
         
         protected boolean force = false;
+        
+        protected boolean deleteFolder = false;
 
         /**
          * Initializes a new {@link Builder}.
@@ -143,6 +148,11 @@ public class InfostoreJobInfo extends JobInfo {
         
         public Builder force() {
             force = true;
+            return this;
+        }
+        
+        public Builder delete() {
+            this.deleteFolder = true;
             return this;
         }
 

@@ -58,7 +58,7 @@ import com.openexchange.index.IndexDocument;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class InfostoreUUID {
-    
+
     private final String fileUUID;
     
     
@@ -69,19 +69,43 @@ public class InfostoreUUID {
         fileUUID = tmp.toString();
     }
     
-    @Override
-    public String toString() {
-        return fileUUID;
-    }
-    
     public static InfostoreUUID newUUID(int contextId, int userId, IndexDocument<DocumentMetadata> document) {
-        DocumentMetadata file = document.getObject();
-        
+        DocumentMetadata file = document.getObject();        
         return newUUID(contextId, userId, file.getFolderId(), file.getId());
     }
     
     public static InfostoreUUID newUUID(int contextId, int userId, long folderId, int fileId) {
         return new InfostoreUUID(contextId, userId, folderId, fileId);
+    }
+    
+    @Override
+    public String toString() {
+        return fileUUID;
+    }
+    
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((fileUUID == null) ? 0 : fileUUID.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        InfostoreUUID other = (InfostoreUUID) obj;
+        if (fileUUID == null) {
+            if (other.fileUUID != null)
+                return false;
+        } else if (!fileUUID.equals(other.fileUUID))
+            return false;
+        return true;
     }
 
 }

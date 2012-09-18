@@ -158,7 +158,7 @@ public final class IndexAccessAdapter {
              * Delete by identifier
              */
             for (final String id : optMailIds) {
-                final MailUUID indexId = new MailUUID(contextId, userId, accountId, fullName, id);
+                final MailUUID indexId = MailUUID.newUUID(contextId, userId, accountId, fullName, id);
                 indexAccess.deleteById(indexId.toString());
             }
         } finally {

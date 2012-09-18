@@ -65,6 +65,16 @@ public interface IndexingService {
      */
     public static final int DEFAULT_PRIORITY = 5;
     
+    /**
+     * Use this to schedule one-shot jobs.
+     */
+    public static final long NO_INTERVAL = -1L;
+    
+    /**
+     * Use this if the job should start immediately.
+     */
+    public static final Date NOW = null;
+    
     
     /**
      * Schedules an indexing job. 

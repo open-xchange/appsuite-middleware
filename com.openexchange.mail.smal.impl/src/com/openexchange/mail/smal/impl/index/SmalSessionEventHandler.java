@@ -50,7 +50,10 @@
 package com.openexchange.mail.smal.impl.index;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
@@ -70,6 +73,7 @@ import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.service.indexing.IndexingService;
 import com.openexchange.service.indexing.JobInfo;
+import com.openexchange.service.indexing.impl.mail.CheckForDeletedFoldersJob;
 import com.openexchange.service.indexing.impl.mail.MailFolderJob;
 import com.openexchange.service.indexing.impl.mail.MailJobInfo;
 import com.openexchange.session.Session;
@@ -86,6 +90,8 @@ public class SmalSessionEventHandler implements EventHandler {
     private static final Log LOG = com.openexchange.log.Log.loggerFor(SmalSessionEventHandler.class);
     
     private static final long FOLDER_INTERVAL = 60000L * 60;
+
+    private static final boolean ONLY_PRIMARY = true;
     
 
     @Override
@@ -99,9 +105,11 @@ public class SmalSessionEventHandler implements EventHandler {
             }  
             
             String topic = event.getTopic();            
-            if (SessiondEventConstants.TOPIC_ADD_SESSION.equals(topic) || SessiondEventConstants.TOPIC_REACTIVATE_SESSION.equals(topic)) {
+            if (SessiondEventConstants.TOPIC_ADD_SESSION.equals(topic) || SessiondEventConstants.TOPIC_REACTIVATE_SESSION.equals(topic)) {                
                 Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
-                UserContextKey userContextKey = new UserContextKey(session.getContextId(), session.getUserId());
+                int contextId = session.getContextId();
+                int userId = session.getUserId();                
+                UserContextKey userContextKey = new UserContextKey(contextId, userId);
                 MailAccountStorageService storageService = SmalServiceLookup.getServiceStatic(MailAccountStorageService.class);
                 if (storageService == null) {
                     OXException e = ServiceExceptionCode.SERVICE_UNAVAILABLE.create(MailAccountStorageService.class.getName());
@@ -127,7 +135,8 @@ public class SmalSessionEventHandler implements EventHandler {
                 }
                 
                 if (goOn) {
-                    scheduleFolderJobs(session, indexingService, storageService);
+                    Map<Integer, Set<MailFolder>> allFolders = calculateMailFolders(session, storageService);
+                    scheduleFolderJobs(session, allFolders, storageService, indexingService);
                 }
             } else if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
                 Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
@@ -171,119 +180,22 @@ public class SmalSessionEventHandler implements EventHandler {
         }
     }
     
-//    private void scheduleFolderJobs(Session session, Map<Integer, Set<MailFolder>> mailFolders, MailAccountStorageService storageService) throws OXException {
-//        for (Integer accountId : mailFolders.keySet()) {
-//            MailAccount account = storageService.getMailAccount(accountId.intValue(), session.getUserId(), session.getContextId());
-//            String decryptedPW = account.getPassword() == null ? session.getPassword() : MailPasswordUtil.decrypt(
-//                account.getPassword(),
-//                session,
-//                accountId,
-//                account.getLogin(),
-//                account.getMailServer());
-//            
-//            
-//        }
-//    }
-//    
-    private void scheduleFolderJobs(Session session, IndexingService indexingService, MailAccountStorageService storageService) throws OXException {
-        // TODO: Check if accounts are allowed to be indexed
-        int userId = session.getUserId();
+    private void scheduleFolderJobs(Session session, Map<Integer, Set<MailFolder>> allFolders, MailAccountStorageService storageService, IndexingService indexingService) throws OXException {
         int contextId = session.getContextId();
-        for (MailAccount account : storageService.getUserMailAccounts(userId, contextId)) {
-            int accountId = account.getId();
+        int userId = session.getUserId();        
+        for (Integer accountId : allFolders.keySet()) {
+            MailAccount account = storageService.getMailAccount(accountId.intValue(), userId, contextId);
+            Set<MailFolder> folders = allFolders.get(accountId);
             String decryptedPW = account.getPassword() == null ? session.getPassword() : MailPasswordUtil.decrypt(
                 account.getPassword(),
                 session,
-                accountId,
+                accountId.intValue(),
                 account.getLogin(),
                 account.getMailServer());
-
-            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = SmalMailAccess.getUnwrappedInstance(
-                session,
-                accountId);
-            try {
-                mailAccess.connect();
-                IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
-
-                // TODO: This is an ugly workaround to not index shared imap folders. Maybe the folder storage has to be extended here.
-//                MailFolder rootFolder = folderStorage.getFolder("INBOX");
-//                MailFolder draftsFolder = folderStorage.getFolder(folderStorage.getDraftsFolder());
-//                MailFolder sentFolder = folderStorage.getFolder(folderStorage.getSentFolder());
-//                MailFolder trashFolder = folderStorage.getFolder(folderStorage.getTrashFolder());
-                scheduleFolderJobsRecursive(
-                    indexingService,
-                    account,
-                    folderStorage,
-                    contextId,
-                    userId,
-                    session.getPassword(),
-                    decryptedPW,
-//                    new MailFolder[] { rootFolder, draftsFolder, sentFolder, trashFolder });
-                    new MailFolder[] { folderStorage.getRootFolder() });
-            } finally {
-                SmalMailAccess.closeUnwrappedInstance(mailAccess);
-            }
-        }
-    }
-    
-//    private Map<Integer, Set<MailFolder>> calculateMailFolders(Session session, MailAccountStorageService storageService) throws OXException {
-//        int userId = session.getUserId();
-//        int contextId = session.getContextId();
-//        Map<Integer, Set<MailFolder>> folderMap = new HashMap<Integer, Set<MailFolder>>();
-//        for (MailAccount account : storageService.getUserMailAccounts(userId, contextId)) {
-//            Set<MailFolder> allFolders = new HashSet<MailFolder>();
-//            int accountId = account.getId();
-//            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = SmalMailAccess.getUnwrappedInstance(
-//                session,
-//                accountId);
-//            try {
-//                mailAccess.connect();
-//                IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
-//                MailFolder rootFolder = folderStorage.getFolder("INBOX");
-//                MailFolder draftsFolder = folderStorage.getFolder(folderStorage.getDraftsFolder());
-//                MailFolder sentFolder = folderStorage.getFolder(folderStorage.getSentFolder());
-//                MailFolder trashFolder = folderStorage.getFolder(folderStorage.getTrashFolder());
-//
-//                addFoldersRecursive(new MailFolder[] { rootFolder, draftsFolder, sentFolder, trashFolder }, allFolders, folderStorage);
-//                folderMap.put(new Integer(accountId), allFolders);
-//            } finally {
-//                SmalMailAccess.closeUnwrappedInstance(mailAccess);
-//            }   
-//        }
-//        
-//        return folderMap;
-//    }
-//    
-//    private void addFoldersRecursive(MailFolder[] subfolders, Set<MailFolder> allFolders, IMailFolderStorage folderStorage) throws OXException {
-//        for (MailFolder folder : subfolders) {
-//            if (!folder.exists() || (folder.containsShared() && folder.isShared()) || folder.isSpam() || folder.isConfirmedSpam()) {
-//                continue;
-//            }
-//            
-//            MailPermission ownPermission = folder.getOwnPermission();            
-//            String fullName = folder.getFullname();
-//            if (ownPermission.isFolderVisible() && ownPermission.canReadAllObjects() && folder.isHoldsMessages()) {
-//                allFolders.add(folder);
-//            }
-//            
-//            if (folder.isHoldsFolders()) {
-//                MailFolder[] subsubfolders = folderStorage.getSubfolders(fullName, true);
-//                if (subsubfolders != null && subsubfolders.length > 0 && subsubfolders != IMailFolderStorage.EMPTY_PATH) {
-//                    addFoldersRecursive(subsubfolders, allFolders, folderStorage);
-//                }
-//            }
-//        }
-//    }
-    
-    private void scheduleFolderJobsRecursive(IndexingService indexingService, MailAccount account, IMailFolderStorage folderStorage, int contextId, int userId, String primaryPassword, String password, MailFolder[] subfolders) throws OXException {        
-        for (MailFolder folder : subfolders) {
-            if (!folder.exists() || (folder.containsShared() && folder.isShared()) || folder.isSpam() || folder.isConfirmedSpam()) {
-                continue;
-            }
             
-            MailPermission ownPermission = folder.getOwnPermission();            
-            String fullName = folder.getFullname();
-            if (ownPermission.isFolderVisible() && ownPermission.canReadAllObjects() && folder.isHoldsMessages()) {
+            Set<String> fullNames = new HashSet<String>();
+            for (MailFolder folder : folders) {         
+                fullNames.add(folder.getFullname());
                 int priority;
                 if (account.isDefaultAccount() && folder.isInbox()) {
                     priority = 15;
@@ -300,28 +212,167 @@ public class SmalSessionEventHandler implements EventHandler {
                     .accountId(account.getId())
                     .contextId(contextId)
                     .userId(userId)
-                    .primaryPassword(primaryPassword)
-                    .password(password)
-                    .folder(fullName)
+                    .primaryPassword(session.getPassword())
+                    .password(decryptedPW)
+                    .folder(folder.getFullname())
                     .build();                                
-                indexingService.scheduleJob(jobInfo, null, FOLDER_INTERVAL, priority);
+                indexingService.scheduleJob(jobInfo, IndexingService.NOW, FOLDER_INTERVAL, priority);
+            }
+            
+            JobInfo checkDeletedJobInfo = MailJobInfo.newBuilder(CheckForDeletedFoldersJob.class)
+                .accountId(account.getId())
+                .contextId(contextId)
+                .userId(userId)
+                .addProperty(CheckForDeletedFoldersJob.ALL_FOLDERS, fullNames)
+                .build();                                
+            indexingService.scheduleJob(checkDeletedJobInfo, IndexingService.NOW, FOLDER_INTERVAL, IndexingService.DEFAULT_PRIORITY); 
+        }
+    }
+
+//    private void scheduleFolderJobs(Session session, IndexingService indexingService, MailAccountStorageService storageService) throws OXException {
+//        // TODO: Check if accounts are allowed to be indexed
+//        int userId = session.getUserId();
+//        int contextId = session.getContextId();
+//        for (MailAccount account : storageService.getUserMailAccounts(userId, contextId)) {
+//            int accountId = account.getId();
+//            String decryptedPW = account.getPassword() == null ? session.getPassword() : MailPasswordUtil.decrypt(
+//                account.getPassword(),
+//                session,
+//                accountId,
+//                account.getLogin(),
+//                account.getMailServer());
+//
+//            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = SmalMailAccess.getUnwrappedInstance(
+//                session,
+//                accountId);
+//            try {
+//                mailAccess.connect();
+//                IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
+//                MailFolder rootFolder = folderStorage.getRootFolder();
+//                MailFolder[] subfolders = folderStorage.getSubfolders(rootFolder.getFullname(), true);
+//                scheduleFolderJobsRecursive(
+//                    indexingService,
+//                    account,
+//                    folderStorage,
+//                    contextId,
+//                    userId,
+//                    session.getPassword(),
+//                    decryptedPW,
+//                    subfolders);
+//            } finally {
+//                SmalMailAccess.closeUnwrappedInstance(mailAccess);
+//            }
+//        }
+//    }
+    
+    private Map<Integer, Set<MailFolder>> calculateMailFolders(Session session, MailAccountStorageService storageService) throws OXException {
+        int userId = session.getUserId();
+        int contextId = session.getContextId();
+        MailAccount[] mailAccounts;
+        if (ONLY_PRIMARY) {
+            mailAccounts = new MailAccount[] { storageService.getDefaultMailAccount(userId, contextId) };
+        } else {
+            mailAccounts = storageService.getUserMailAccounts(userId, contextId);
+        }
+        
+        Map<Integer, Set<MailFolder>> folderMap = new HashMap<Integer, Set<MailFolder>>();
+        for (MailAccount account : mailAccounts) {
+            Set<MailFolder> allFolders = new HashSet<MailFolder>();
+            int accountId = account.getId();
+            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = SmalMailAccess.getUnwrappedInstance(
+                session,
+                accountId);
+            try {
+                mailAccess.connect();
+                IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
+                MailFolder rootFolder = folderStorage.getRootFolder();
+                MailFolder[] subfolders = folderStorage.getSubfolders(rootFolder.getFullname(), true);
+                addFoldersRecursive(subfolders, allFolders, folderStorage);
+                folderMap.put(new Integer(accountId), allFolders);
+            } finally {
+                SmalMailAccess.closeUnwrappedInstance(mailAccess);
+            }   
+        }
+        
+        return folderMap;
+    }
+    
+    private void addFoldersRecursive(MailFolder[] subfolders, Set<MailFolder> allFolders, IMailFolderStorage folderStorage) throws OXException {
+        for (MailFolder folder : subfolders) {
+            if (!folder.exists() || folder.isSpam() || folder.isConfirmedSpam()) {                
+                continue;
+            }
+            
+            boolean index = true;
+            if ((folder.containsShared() && folder.isShared()) || (folder.containsPublic() && folder.isPublic())) {
+                index = false;
+            }
+            
+            MailPermission ownPermission = folder.getOwnPermission();            
+            if (index && ownPermission.isFolderVisible() && ownPermission.canReadAllObjects() && folder.isHoldsMessages()) {
+                allFolders.add(folder);
             }
             
             if (folder.isHoldsFolders()) {
-                MailFolder[] subsubfolders = folderStorage.getSubfolders(fullName, true);
+                MailFolder[] subsubfolders = folderStorage.getSubfolders(folder.getFullname(), true);
                 if (subsubfolders != null && subsubfolders.length > 0 && subsubfolders != IMailFolderStorage.EMPTY_PATH) {
-                    scheduleFolderJobsRecursive(indexingService, 
-                        account, 
-                        folderStorage, 
-                        contextId, 
-                        userId, 
-                        primaryPassword,
-                        password,
-                        subsubfolders);
-                } 
-            }                           
+                    addFoldersRecursive(subsubfolders, allFolders, folderStorage);
+                }
+            }
         }
     }
+    
+//    private void scheduleFolderJobsRecursive(IndexingService indexingService, MailAccount account, IMailFolderStorage folderStorage, int contextId, int userId, String primaryPassword, String password, MailFolder[] subfolders) throws OXException {        
+//        for (MailFolder folder : subfolders) {
+//            if (!folder.exists() || folder.isSpam() || folder.isConfirmedSpam()) {                
+//                continue;
+//            }
+//            
+//            boolean index = true;
+//            if ((folder.containsShared() && folder.isShared()) || (folder.containsPublic() && folder.isPublic())) {
+//                index = false;
+//            }
+//            
+//            MailPermission ownPermission = folder.getOwnPermission();            
+//            if (index && ownPermission.isFolderVisible() && ownPermission.canReadAllObjects() && folder.isHoldsMessages()) {
+//                int priority;
+//                if (account.isDefaultAccount() && folder.isInbox()) {
+//                    priority = 15;
+//                } else if (folder.isInbox()) {
+//                    priority = 10;
+//                } else if (folder.isTrash()) {
+//                    priority = 1;
+//                } else {
+//                    priority = 5;
+//                }
+//
+//                JobInfo jobInfo = MailJobInfo.newBuilder(MailFolderJob.class)
+//                    .login(account.getLogin())
+//                    .accountId(account.getId())
+//                    .contextId(contextId)
+//                    .userId(userId)
+//                    .primaryPassword(primaryPassword)
+//                    .password(password)
+//                    .folder(folder.getFullname())
+//                    .build();                                
+//                indexingService.scheduleJob(jobInfo, null, FOLDER_INTERVAL, priority);
+//            }
+//            
+//            if (folder.isHoldsFolders()) {
+//                MailFolder[] subsubfolders = folderStorage.getSubfolders(folder.getFullname(), true);
+//                if (subsubfolders != null && subsubfolders.length > 0 && subsubfolders != IMailFolderStorage.EMPTY_PATH) {
+//                    scheduleFolderJobsRecursive(indexingService, 
+//                        account, 
+//                        folderStorage, 
+//                        contextId, 
+//                        userId, 
+//                        primaryPassword,
+//                        password,
+//                        subsubfolders);
+//                } 
+//            }                           
+//        }
+//    }
     
     private IMap<UserContextKey, Integer> getSessionMap() throws OXException {
         HazelcastInstance hazelcast = SmalServiceLookup.getServiceStatic(HazelcastInstance.class);

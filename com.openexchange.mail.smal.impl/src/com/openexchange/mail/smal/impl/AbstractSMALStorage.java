@@ -62,6 +62,7 @@ import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.smal.impl.processor.DefaultProcessorStrategy;
 import com.openexchange.mail.smal.impl.processor.DoNothingProcessor;
@@ -69,7 +70,11 @@ import com.openexchange.mail.smal.impl.processor.MailFolderInfo;
 import com.openexchange.mail.smal.impl.processor.Processor;
 import com.openexchange.mail.smal.impl.processor.ProcessorStrategy;
 import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.service.indexing.IndexingService;
+import com.openexchange.service.indexing.JobInfo;
+import com.openexchange.service.indexing.impl.mail.MailFolderJob;
 import com.openexchange.service.indexing.impl.mail.MailJobInfo;
+import com.openexchange.service.indexing.impl.mail.MailJobInfo.Builder;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.CancelableCompletionService;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
@@ -278,47 +283,26 @@ public abstract class AbstractSMALStorage {
     }
 
     /**
-     * Submits specified job.
+     * Submits a folder job for the given full name.
      * 
-     * @param job The job
-     * @return <code>true</code> if successfully submitted; otherwise <code>false</code>
+     * @param folder The folders full name.
+     * @throws OXException
      */
-//    protected boolean submitJob(final IndexingJob job) {
-//        try {
-//            final IndexingService service = SmalServiceLookup.getServiceStatic(IndexingService.class);
-//            if (null == service) {
-//                return false;
-//            }
-//            service.addJob(job);
-//            return true;
-//        } catch (final OXException e) {
-//            return false;
-//        }
-//    }
+    protected void submitFolderJob(String folder) throws OXException {
+        MailConfig config = delegateMailAccess.getMailConfig();                
+        Builder builder = MailJobInfo.newBuilder(MailFolderJob.class)
+            .login(config.getLogin())
+            .accountId(accountId)
+            .contextId(contextId)
+            .userId(userId)
+            .primaryPassword(session.getPassword())
+            .password(config.getPassword())
+            .folder(folder);
 
-    /**
-     * Creates the appropriate job info for this storage access.
-     * 
-     * @return The job info
-     * @throws OXException If creation fails
-     */
-//    protected MailJobInfo createJobInfo() throws OXException {
-//        MailJobInfo jobInfo = this.jobInfo;
-//        if (null == jobInfo) {
-//            synchronized (this) {
-//                jobInfo = this.jobInfo;
-//                if (null == jobInfo) {
-//                    final MailConfig config = delegateMailAccess.getMailConfig();
-//                    jobInfo =
-//                        new MailJobInfo.Builder(userId, contextId).accountId(accountId).login(config.getLogin()).password(
-//                            config.getPassword()).port(config.getPort()).server(config.getServer()).secure(config.isSecure()).primaryPassword(
-//                            session.getPassword()).build();
-//                    this.jobInfo = jobInfo;
-//                }
-//            }
-//        }
-//        return jobInfo;
-//    }
+        JobInfo jobInfo = builder.build();
+        IndexingService indexingService = SmalServiceLookup.getServiceStatic(IndexingService.class);
+        indexingService.scheduleJob(jobInfo, null, -1L, IndexingService.DEFAULT_PRIORITY);
+    }
 
     /**
      * Handles specified {@link RuntimeException} instance.

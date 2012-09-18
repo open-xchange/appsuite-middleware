@@ -51,22 +51,32 @@ package com.openexchange.service.indexing.impl.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+import javax.management.MalformedObjectNameException;
+import javax.management.NotCompliantMBeanException;
+import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.quartz.service.QuartzService;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.log.LogFactory;
 import com.openexchange.mail.service.MailService;
+import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.service.indexing.IndexingService;
+import com.openexchange.service.indexing.IndexingServiceMBean;
 import com.openexchange.service.indexing.impl.internal.IndexingServiceImpl;
+import com.openexchange.service.indexing.impl.internal.IndexingServiceMBeanImpl;
 import com.openexchange.service.indexing.impl.internal.Services;
+import com.openexchange.service.indexing.impl.internal.groupware.FolderEventHandler;
 import com.openexchange.service.indexing.impl.internal.groupware.SessionEventHandler;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.user.UserService;
@@ -81,6 +91,10 @@ import com.openexchange.userconf.UserConfigurationService;
 public class IndexingActivator extends HousekeepingActivator {
     
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(IndexingActivator.class));
+    
+    private ObjectName indexingMBeanName;
+
+    private IndexingServiceMBeanImpl indexingMBean;
     
     @Override
     protected Class<?>[] getNeededServices() {
@@ -104,9 +118,61 @@ public class IndexingActivator extends HousekeepingActivator {
         addService(IndexingService.class, serviceImpl);
         registerService(IndexingService.class, serviceImpl);
         
-        Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
-        serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
-        registerService(EventHandler.class, new SessionEventHandler(), serviceProperties);
+        Dictionary<String, Object> sessionProperties = new Hashtable<String, Object>(1);
+        sessionProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
+        registerService(EventHandler.class, new SessionEventHandler(), sessionProperties);
+        
+        Dictionary<String, Object> folderProperties = new Hashtable<String, Object>(1);
+        folderProperties.put(EventConstants.EVENT_TOPIC, new String[] { 
+            "com/openexchange/groupware/folder/delete", 
+            "com/openexchange/groupware/folder/update" 
+            });
+        registerService(EventHandler.class, new FolderEventHandler(), folderProperties);
+        
+        registerMBean((IndexingServiceImpl) serviceImpl);
+        openTrackers();
+    }
+    
+    @Override
+    protected void stopBundle() throws Exception {
+        super.stopBundle();
+        
+        ManagementService managementService = Services.optService(ManagementService.class);
+        if (managementService != null && indexingMBeanName != null) {
+            managementService.unregisterMBean(indexingMBeanName);
+            indexingMBean = null;
+        }        
+    }
+    
+    private void registerMBean(IndexingServiceImpl indexingService) {
+        try {
+            indexingMBeanName = new ObjectName(IndexingServiceMBean.DOMAIN, "name", "Indexing Service");
+            indexingMBean = new IndexingServiceMBeanImpl(indexingService);
+            track(ManagementService.class, new SimpleRegistryListener<ManagementService>() {
+
+                @Override
+                public void added(ServiceReference<ManagementService> ref, ManagementService service) {
+                    try {
+                        service.registerMBean(indexingMBeanName, indexingMBean);
+                    } catch (OXException e) {
+                        LOG.error(e.getMessage(), e);
+                    }
+                }
+
+                @Override
+                public void removed(ServiceReference<ManagementService> ref, ManagementService service) {
+                    try {
+                        service.unregisterMBean(indexingMBeanName);
+                    } catch (OXException e) {
+                        LOG.warn(e.getMessage(), e);
+                    }
+                }
+            });
+        } catch (MalformedObjectNameException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (NotCompliantMBeanException e) {
+            LOG.error(e.getMessage(), e);
+        }
     }
     
 }

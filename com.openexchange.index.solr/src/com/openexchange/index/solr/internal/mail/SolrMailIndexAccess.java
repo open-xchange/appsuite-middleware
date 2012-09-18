@@ -273,11 +273,7 @@ public class SolrMailIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
             }
             
             case ALL_REQUEST:
-            {
-                if (parameters.getFolders() == null) {
-                    throw new IllegalArgumentException("Parameter `folders` must not be null!");
-                }
-                
+            {                
                 solrQuery = new SolrQuery("*:*");
                 solrQuery.setQueryType(config.getProperty(SolrProperties.ALL_HANLDER));                
                 addFilterQueries(parameters, solrQuery);             
@@ -320,6 +316,10 @@ public class SolrMailIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
     
     private void addFilterQueries(QueryParameters parameters, SolrQuery solrQuery) {
         String account = getStringParameter(parameters, IndexConstants.ACCOUNT);
+        if (account == null) {
+            Integer intAccount = getIntParameter(parameters, IndexConstants.ACCOUNT);
+            account = intAccount == null ? null : String.valueOf(intAccount);
+        }
         addFilterQueryIfNotNull(solrQuery, buildQueryString(SolrMailField.ACCOUNT.solrName(), account));
         addFilterQueryIfNotNull(solrQuery, buildQueryStringWithOr(SolrMailField.FULL_NAME.solrName(), parameters.getFolders()));        
     }

@@ -66,27 +66,27 @@ import com.openexchange.mail.index.MailUUID;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 
 /**
- * {@link SolrInputDocumentHelper} - Helper for <code>SolrInputDocument</code> to <code>MailMessage</code> conversion and vice versa.
+ * {@link SolrMailHelper} - Helper for <code>SolrInputDocument</code> to <code>MailMessage</code> conversion and vice versa.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SolrInputDocumentHelper {
+public final class SolrMailHelper {
 
-    private static final SolrInputDocumentHelper INSTANCE = new SolrInputDocumentHelper();
+    private static final SolrMailHelper INSTANCE = new SolrMailHelper();
 
     /**
      * Gets the instance
      * 
      * @return The instance
      */
-    public static SolrInputDocumentHelper getInstance() {
+    public static SolrMailHelper getInstance() {
         return INSTANCE;
     }
 
     /**
-     * Initializes a new {@link SolrInputDocumentHelper}.
+     * Initializes a new {@link SolrMailHelper}.
      */
-    private SolrInputDocumentHelper() {
+    private SolrMailHelper() {
         super();
     }
 
@@ -142,7 +142,7 @@ public final class SolrInputDocumentHelper {
      */
     public SolrInputDocument inputDocumentFor(final MailMessage mail, final int userId, final int contextId) {
         final int accountId = mail.getAccountId();
-        final MailUUID uuid = new MailUUID(contextId, userId, accountId, mail.getFolder(), mail.getMailId());
+        final MailUUID uuid = MailUUID.newUUID(contextId, userId, accountId, mail.getFolder(), mail.getMailId());
         return createDocument(uuid.toString(), mail, accountId, userId, contextId, System.currentTimeMillis());
     }
 

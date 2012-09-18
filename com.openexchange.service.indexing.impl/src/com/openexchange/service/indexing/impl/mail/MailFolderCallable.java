@@ -1,8 +1,9 @@
-package com.openexchange.service.indexing.impl.internal.mail;
+package com.openexchange.service.indexing.impl.mail;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -35,8 +36,6 @@ import com.openexchange.mail.index.MailIndexField;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.service.indexing.IndexingService;
 import com.openexchange.service.indexing.impl.internal.Services;
-import com.openexchange.service.indexing.impl.mail.AbstractMailCallable;
-import com.openexchange.service.indexing.impl.mail.MailJobInfo;
 
 public class MailFolderCallable extends AbstractMailCallable {
 
@@ -133,12 +132,22 @@ public class MailFolderCallable extends AbstractMailCallable {
                 attachmentIndex.deleteByQuery(attachmentAllQuery);                
             }
         } catch (OXException e) {
-            // If connect to mail access failed, reschedule this job
+            /*
+             * If connect to mail access failed, reschedule this job
+             * FIXME: This is just a workaround! We need to fix the mail implementation for this. 
+             * The priority for acquiring a mail connection must be lower than for interactive connections.
+             * Jobs should not fail because of missing connections and jobs must not block connections
+             * for interactive uses (user activities).
+             */
             if (e.getCategory().equals(IMAPException.IMAPCode.CONNECTION_UNAVAILABLE.getCategory())
                 && e.getCode() == IMAPException.IMAPCode.CONNECTION_UNAVAILABLE.getNumber()) {
+                LOG.warn("Could not connect mail access for job " + info + ". Rescheduling job to run again in 60 seconds.");
                 IndexingService indexingService = Services.getService(IndexingService.class);
-                indexingService.scheduleJob(info, null, -1L, IndexingService.DEFAULT_PRIORITY);
+                indexingService.scheduleJob(info, new Date(System.currentTimeMillis() + 60000), -1L, IndexingService.DEFAULT_PRIORITY);
+                
+                return null;
             }
+            
             throw e;
         } finally {
             closeMailAccess(mailAccess);

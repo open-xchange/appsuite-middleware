@@ -57,6 +57,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexAccess;
+import com.openexchange.index.IndexConstants;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
@@ -203,7 +204,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
             }
             
             final Map<String, Object> params = new HashMap<String, Object>(1);
-            params.put("accountId", accountId);
+            params.put(IndexConstants.ACCOUNT, accountId);
             final QueryParameters.Builder builder = new QueryParameters.Builder(params)
                                                     .setOffset(0)
                                                     .setLength(Integer.MAX_VALUE)
@@ -265,22 +266,6 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
         } finally {
             IndexAccessAdapter.getInstance().releaseIndexAccess(indexAccess);
         }
-    }
-    
-    private void submitFolderJob(String folder) throws OXException {
-        MailConfig config = delegateMailAccess.getMailConfig();                
-        Builder builder = MailJobInfo.newBuilder(MailFolderJob.class)
-            .login(config.getLogin())
-            .accountId(accountId)
-            .contextId(contextId)
-            .userId(userId)
-            .primaryPassword(session.getPassword())
-            .password(config.getPassword())
-            .folder(folder);
-
-        JobInfo jobInfo = builder.build();
-        IndexingService indexingService = SmalServiceLookup.getServiceStatic(IndexingService.class);
-        indexingService.scheduleJob(jobInfo, null, -1L, IndexingService.DEFAULT_PRIORITY);
     }
 
     @Override
