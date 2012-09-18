@@ -49,6 +49,8 @@
 
 package com.openexchange.user.json.actions;
 
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -131,20 +133,16 @@ public final class ListAction extends AbstractUserAction {
         /*
          * Get users/contacts
          */
-        final List<Contact> contacts;
+        final TIntObjectMap<Contact> contacts;
         {
             final ContactService contactService = ServiceRegistry.getInstance().getService(ContactService.class, true);
             SearchIterator<Contact> searchIterator = null;
             try {
                 searchIterator = contactService.getUsers(session, userIDs, ContactMapper.getInstance().getFields(columnIDs, ContactField.LAST_MODIFIED, ContactField.INTERNAL_USERID));
-                final int iterSize = searchIterator.size();
-                if (iterSize >= 0) {
-                    contacts = new ArrayList<Contact>(iterSize);
-                } else {
-                    contacts = new LinkedList<Contact>();
-                }
+                contacts = new TIntObjectHashMap<Contact>();
                 while (searchIterator.hasNext()) {
-                    contacts.add(searchIterator.next());
+                    final Contact contact = searchIterator.next();
+                    contacts.put(contact.getInternalUserId(), contact);
                 }
             } finally {
                 if (null != searchIterator) {
@@ -160,20 +158,18 @@ public final class ListAction extends AbstractUserAction {
         final User[] users = getUsers(session, userIDs, warnings);
         final List<UserContact> userContacts = new ArrayList<UserContact>(users.length);
         for (final User user : users) {
-        	for (final Contact contact : contacts) {
-        		if (user.getId() == contact.getInternalUserId()) {
-        			userContacts.add(new UserContact(contact, user));
-                	if (null == lastModified) {
-                		lastModified = contact.getLastModified();
-                	} else {
-                	    final Date contactLastModified = contact.getLastModified();
-                        if (contactLastModified.after(lastModified)) {
-                	        lastModified = contactLastModified;
-                	    }
-                	}
-        			break;
-        		}
-			}
+            final Contact contact = contacts.get(user.getId());
+            if (null != contact) {
+                userContacts.add(new UserContact(contact, user));
+                if (null == lastModified) {
+                    lastModified = contact.getLastModified();
+                } else {
+                    final Date contactLastModified = contact.getLastModified();
+                    if (contactLastModified.after(lastModified)) {
+                        lastModified = contactLastModified;
+                    }
+                }
+            }
 		}
         /*
          * Return appropriate result
