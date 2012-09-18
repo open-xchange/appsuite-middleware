@@ -24,7 +24,7 @@ import com.openexchange.user.UserService;
  */
 public class Activator extends HousekeepingActivator {
 
-    private BundleActivator testFragment;
+//    private BundleActivator testFragment;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -33,6 +33,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
+       System.out.println("Here i am");
         final DatabaseService dbService = getService(DatabaseService.class);
         SubscriptionsSQL.db = dbService;
         registerService(PresenceSubscriptionService.class, new SubscriptionServiceImpl(this));
@@ -44,13 +45,13 @@ public class Activator extends HousekeepingActivator {
             }
         });
 
-        try {
-            Class<? extends BundleActivator> clazz = (Class<? extends BundleActivator>) Class.forName("com.openexchange.realtime.presence.subscribe.test.osgi.Activator");
-            testFragment = clazz.newInstance();
-            testFragment.start(context);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        try {
+//            Class<? extends BundleActivator> clazz = (Class<? extends BundleActivator>) Class.forName("com.openexchange.realtime.presence.subscribe.test.osgi.Activator");
+//            testFragment = clazz.newInstance();
+//            testFragment.start(context);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
     }
 
     /*
@@ -59,13 +60,13 @@ public class Activator extends HousekeepingActivator {
      */
     @Override
     public void stop(BundleContext context) throws Exception {
-        try {
-            if (testFragment != null) {
-                testFragment.stop(context);
-            }
-        } catch (Exception e) {
-
-        }
+//        try {
+//            if (testFragment != null) {
+//                testFragment.stop(context);
+//            }
+//        } catch (Exception e) {
+//
+//        }
         super.stop(context);
     }
 

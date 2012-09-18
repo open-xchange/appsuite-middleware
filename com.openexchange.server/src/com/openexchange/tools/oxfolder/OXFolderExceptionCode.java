@@ -477,6 +477,10 @@ public enum OXFolderExceptionCode implements OXExceptionCode {
      * Operation may only be performed for context administrator.
      */
     ADMIN_OP_ONLY(OXFolderExceptionMessage.ADMIN_OP_ONLY_MSG, Category.CATEGORY_PERMISSION_DENIED, 89),
+    /**
+     * Folder %1$s must not be deleted in context %2$s.
+     */
+    DELETE_DENIED(OXFolderExceptionMessage.DELETE_DENIED_MSG, Category.CATEGORY_PERMISSION_DENIED, 90),
 
     ;
 

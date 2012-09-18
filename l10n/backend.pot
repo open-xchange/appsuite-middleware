@@ -9773,6 +9773,11 @@ msgstr ""
 msgid "Operation may only be performed for context administrator."
 msgstr ""
 
+#. Folder %1$s must not be deleted in context %2$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:537
+msgid "Folder %1$s must not be deleted in context %2$s."
+msgstr ""
+
 #. Unknown AJAX action: %s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:70
 msgid "Unknown AJAX action: %s."

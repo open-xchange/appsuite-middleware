@@ -56,7 +56,7 @@ import java.util.Date;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public interface ExecutedTask {
+public interface ExecutedTask extends Comparable<ExecutedTask> {
 
     String getTaskName();
 
