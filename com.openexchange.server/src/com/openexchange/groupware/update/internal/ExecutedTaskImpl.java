@@ -90,4 +90,24 @@ public class ExecutedTaskImpl implements ExecutedTask {
     public boolean isSuccessful() {
         return successful;
     }
+
+    @Override
+    public int compareTo(final ExecutedTask o) {
+        if (null == o) {
+            return 1;
+        }
+        final Date thisLastModified = lastModified;
+        final Date otherLastModified = o.getLastModified();
+        if (null == thisLastModified) {
+            if (null == otherLastModified) {
+                return 0; // Both null
+            }
+            return -1; // Other is not null
+        }
+        if (null == otherLastModified) {
+            return 1; // Other is null
+        }
+        return thisLastModified.compareTo(otherLastModified);
+    }
+
 }
