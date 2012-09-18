@@ -70,6 +70,11 @@ public interface Mapper<T extends Object> {
     String getDBColumnName();
 
     /**
+     * @return the name of the attribute that is shown in the UI.
+     */
+    String getDisplayName();
+
+    /**
      * Checks if the attribute is defined in the task.
      * @param task Task object.
      * @return <code>true</code> if the attribute is defined.

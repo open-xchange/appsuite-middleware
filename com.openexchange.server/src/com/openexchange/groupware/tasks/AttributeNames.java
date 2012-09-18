@@ -47,68 +47,30 @@
  *
  */
 
-package com.openexchange.groupware.tasks.mapping;
+package com.openexchange.groupware.tasks;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.Date;
-import com.openexchange.groupware.container.CalendarObject;
-import com.openexchange.groupware.tasks.Mapper;
-import com.openexchange.groupware.tasks.Mapping;
-import com.openexchange.groupware.tasks.Task;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * Mapper implementation for the alarm.
+ * {@link AttributeNames}
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Alarm implements Mapper<Date>{
+public final class AttributeNames implements LocalizableStrings {
 
-    public Alarm() {
+    private AttributeNames() {
         super();
     }
 
-    @Override
-    public boolean equals(final Task task1, final Task task2) {
-        return Mapping.equals(task1.getAlarm(), task2.getAlarm());
-    }
+    // Task attribute name
+    public static final String ACTUAL_COSTS = "Current costs";
 
-    @Override
-    public void fromDB(final ResultSet result, final int pos, final Task task) {
-        throw new UnsupportedOperationException();
-    }
+    // Task attribute name
+    public static final String ACTUAL_DURATION = "Current duration";
 
-    @Override
-    public Date get(final Task task) {
-        return task.getAlarm();
-    }
+    // Task attribute name
+    public static final String TARGET_COSTS = "Estimated costs";
 
-    @Override
-    public String getDBColumnName() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public String getDisplayName() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public int getId() {
-        return CalendarObject.ALARM;
-    }
-
-    @Override
-    public boolean isSet(final Task task) {
-        return task.containsAlarm();
-    }
-
-    @Override
-    public void set(final Task task, final Date value) {
-        task.setAlarm(value);
-    }
-
-    @Override
-    public void toDB(final PreparedStatement stmt, final int pos, final Task task) {
-        throw new UnsupportedOperationException();
-    }
+    // Task attribute name
+    public static final String TARGET_DURATION = "Estimated duration";
 }

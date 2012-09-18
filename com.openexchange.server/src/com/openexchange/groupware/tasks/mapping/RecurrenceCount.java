@@ -99,6 +99,11 @@ public class RecurrenceCount implements Mapper<Integer> {
         return "recurrence_count"; // TODO rename this
     }
 
+    @Override
+    public String getDisplayName() {
+        throw new UnsupportedOperationException();
+    }
+
     /**
      * {@inheritDoc}
      */

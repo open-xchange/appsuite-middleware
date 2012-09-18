@@ -1,3 +1,7 @@
+* 2012-09-18 - marcus.klein@open-xchange.com
+
+ - Fix for bug 22064: If parsing of the JSON value fails a understandable exception message is now generated for the user.
+
 * 2012-09-17 - thorben.betten@open-xchange.com
 
  - Fix for bug 23034: Added property to specify whether stack trace should be included in returned JSON response
