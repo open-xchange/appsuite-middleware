@@ -17,4 +17,3 @@ Description: Module for authenticating users using a LDAP server
  authenticate login requests.
  This authentication module is mutually exclusive with any other authentication module. Only one authentication module can be installed on
  the backend.
- 
