@@ -12,6 +12,8 @@ Import-Package: com.hazelcast.cluster,
  com.openexchange.log,
  com.openexchange.mdns,
  com.openexchange.osgi,
+ com.openexchange.threadpool,
+ com.openexchange.threadpool.behavior,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.util.tracker
