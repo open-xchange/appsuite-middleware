@@ -240,6 +240,10 @@ final class SessionData {
      * @return <code>true</code> if given user in specified context has an active session; otherwise <code>false</code>
      */
     boolean isUserActive(final int userId, final Context context) {
+        final Queue<String> queue = volatileUserSessions.get(new UserKey(userId, context.getContextId()));
+        if (null != queue && !queue.isEmpty()) {
+            return true;
+        }
         // A read-only access to session list
         rlock.lock();
         try {
