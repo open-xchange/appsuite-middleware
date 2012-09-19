@@ -272,6 +272,14 @@ final class SessionData {
     }
 
     SessionControl[] removeUserSessions(final int userId, final int contextId) {
+        final UserKey key = new UserKey(userId, contextId);
+        final Queue<String> queue = volatileUserSessions.get(key);
+        if (null != queue) {
+            for (final String sessionId : queue) {
+                volatileSessions.remove(sessionId);
+            }
+            volatileUserSessions.remove(key);
+        }
         // Removing sessions is a write operation.
         final List<SessionControl> retval = new ArrayList<SessionControl>();
         wlock.lock();
@@ -309,6 +317,21 @@ final class SessionData {
     }
 
     List<SessionControl> removeContextSessions(final int contextId) {
+        final List<UserKey> keys = new LinkedList<UserKey>();
+        for (final UserKey key : volatileUserSessions.keySet()) {
+            if (key.getCid() == contextId) {
+                keys.add(key);
+            }
+        }
+        for (final UserKey key : keys) {
+            final Queue<String> queue = volatileUserSessions.get(key);
+            if (null != queue) {
+                for (final String sessionId : queue) {
+                    volatileSessions.remove(sessionId);
+                }
+                volatileUserSessions.remove(key);
+            }
+        }
         // Removing sessions is a write operation.
         final List<SessionControl> list = new ArrayList<SessionControl>();
         wlock.lock();
@@ -346,6 +369,12 @@ final class SessionData {
     }
 
     boolean hasForContext(final int contextId) {
+        final List<UserKey> keys = new LinkedList<UserKey>();
+        for (final UserKey key : volatileUserSessions.keySet()) {
+            if (key.getCid() == contextId) {
+                return true;
+            }
+        }
         wlock.lock();
         try {
             for (final SessionContainer container : sessionList) {
@@ -360,6 +389,14 @@ final class SessionData {
     }
 
     public SessionControl getAnyActiveSessionForUser(final int userId, final int contextId, final boolean includeLongTerm) {
+        final Queue<String> queue = volatileUserSessions.get(new UserKey(userId, contextId));
+        if (null != queue && !queue.isEmpty()) {
+            final String sessionId = queue.peek();
+            final SessionControl sessionControl = volatileSessions.get(sessionId);
+            if (null != sessionControl) {
+                return sessionControl;
+            }
+        }
         rlock.lock();
         try {
             for (final SessionContainer container : sessionList) {
@@ -393,6 +430,14 @@ final class SessionData {
     }
 
     public Session findFirstSessionForUser(final int userId, final int contextId, final SessionMatcher matcher) {
+        final Queue<String> queue = volatileUserSessions.get(new UserKey(userId, contextId));
+        if (null != queue && !queue.isEmpty()) {
+            final String sessionId = queue.peek();
+            final SessionControl control = volatileSessions.get(sessionId);
+            if (null != control && matcher.accepts(control.getSession())) {
+                return control.getSession();
+            }
+        }
         rlock.lock();
         try {
             for (final SessionContainer container : sessionList) {
@@ -428,6 +473,16 @@ final class SessionData {
     SessionControl[] getUserSessions(final int userId, final int contextId) {
         // A read-only access to session list
         final List<SessionControl> retval = new ArrayList<SessionControl>();
+        final Queue<String> queue = volatileUserSessions.get(new UserKey(userId, contextId));
+        if (null != queue && !queue.isEmpty()) {
+            for (final String sessionId : queue) {
+                final SessionControl control = volatileSessions.get(sessionId);
+                if (null != control) {
+                    retval.add(control);
+                }
+            }
+        }
+        // Short term ones
         rlock.lock();
         try {
             for (final SessionContainer container : sessionList) {
@@ -458,6 +513,10 @@ final class SessionData {
     int getNumOfUserSessions(final int userId, final int contextId) {
         // A read-only access to session list
         int count = 0;
+        final Queue<String> queue = volatileUserSessions.get(new UserKey(userId, contextId));
+        if (null != queue && !queue.isEmpty()) {
+            count += queue.size();
+        }
         rlock.lock();
         try {
             for (final SessionContainer container : sessionList) {
@@ -487,6 +546,11 @@ final class SessionData {
 
     void checkAuthId(final String login, final String authId) throws OXException {
         if (null != authId) {
+            for (final SessionControl sc : volatileSessions.values()) {
+                if (authId.equals(sc.getSession().getAuthId())) {
+                    throw SessionExceptionCodes.DUPLICATE_AUTHID.create(sc.getSession().getLogin(), login);
+                }
+            }
             rlock.lock();
             try {
                 for (final SessionContainer container : sessionList) {
@@ -556,6 +620,7 @@ final class SessionData {
     int countSessions() {
         // A read-only access to session list
         int count = 0;
+        count += volatileSessions.size();
         rlock.lock();
         try {
             for (final SessionContainer container : sessionList) {
@@ -646,7 +711,11 @@ final class SessionData {
     }
 
     SessionControl getSession(final String sessionId) {
-        SessionControl control = null;
+        // Look-up volatile ones
+        SessionControl control = volatileSessions.get(sessionId);
+        if (null != control) {
+            return control;
+        }
         int i = 0;
         // Read-only access
         rlock.lock();

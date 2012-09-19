@@ -68,6 +68,24 @@ final class UserKey {
         result = prime * result + userId;
         hash = result;
     }
+    
+    /**
+     * Gets the user identifier
+     *
+     * @return The user identifier
+     */
+    public int getUserId() {
+        return userId;
+    }
+    
+    /**
+     * Gets the context identifier
+     *
+     * @return The context identifier
+     */
+    public int getCid() {
+        return cid;
+    }
 
     @Override
     public int hashCode() {
