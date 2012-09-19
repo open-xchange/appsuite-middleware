@@ -16,7 +16,6 @@
 	<classpathentry kind="lib" path="lib/jaxb-impl-2.1.jar"/>
 	<classpathentry kind="lib" path="lib/json-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/jsr173-api-1.0.jar"/>
-	<classpathentry kind="lib" path="lib/jyaml-1.3.jar" sourcepath="source/jyaml_1.3_sources.jar"/>
 	<classpathentry kind="lib" path="lib/sac-1.3.jar" sourcepath="source/sac_1.3_sources.jar"/>
 	<classpathentry kind="lib" path="lib/serializer-2.7.1.jar"/>
 	<classpathentry kind="lib" path="lib/xalan-2.7.1.jar" sourcepath="source/xalan_2.7.1_sources.jar"/>
