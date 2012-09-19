@@ -122,9 +122,13 @@ public final class AllAction extends AppointmentAction {
         final Date start = req.applyTimeZone2Date(startUTC.getTime());
         final Date end = req.applyTimeZone2Date(endUTC.getTime());
         final int folderId = req.getFolderId();
-        final int orderBy = req.optInt(AJAXServlet.PARAMETER_SORT);
+        int orderBy = req.optInt(AJAXServlet.PARAMETER_SORT);
         final boolean showPrivateAppointments = Boolean.parseBoolean(req.getParameter(AJAXServlet.PARAMETER_SHOW_PRIVATE_APPOINTMENTS));
         final boolean listOrder;
+        
+        if (orderBy == AppointmentAJAXRequest.NOT_FOUND) {
+            orderBy = CalendarObject.START_DATE;
+        }
         if (orderBy == CalendarObject.START_DATE || orderBy == CalendarObject.END_DATE) {
             listOrder = true;
         } else {
@@ -299,14 +303,6 @@ public final class AllAction extends AppointmentAction {
                 }
             }
 
-            Collections.sort(appointmentList, new Comparator<Appointment>() {
-
-                @Override
-                public int compare(Appointment o1, Appointment o2) {
-                    return o1.getStartDate().compareTo(o2.getStartDate());
-                }
-            });
-            
             return new AJAXRequestResult(appointmentList, timestamp, "appointment");
         } catch (final SQLException e) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e, new Object[0]);
