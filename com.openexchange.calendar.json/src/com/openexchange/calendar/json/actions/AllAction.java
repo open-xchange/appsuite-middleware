@@ -53,6 +53,7 @@ import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
@@ -298,6 +299,14 @@ public final class AllAction extends AppointmentAction {
                 }
             }
 
+            Collections.sort(appointmentList, new Comparator<Appointment>() {
+
+                @Override
+                public int compare(Appointment o1, Appointment o2) {
+                    return o1.getStartDate().compareTo(o2.getStartDate());
+                }
+            });
+            
             return new AJAXRequestResult(appointmentList, timestamp, "appointment");
         } catch (final SQLException e) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e, new Object[0]);
