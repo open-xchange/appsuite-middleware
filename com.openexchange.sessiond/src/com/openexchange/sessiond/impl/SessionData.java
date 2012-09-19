@@ -60,6 +60,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -103,12 +104,23 @@ final class SessionData {
     private final Lock wlongTermLock;
     private final Lock rlongTermLock;
 
+    /**
+     * Map to remember if there is already a task that should move the session to the first container.
+     */
+    private final ConcurrentMap<String, Move2FirstContainerTask> tasks = new ConcurrentHashMap<String, Move2FirstContainerTask>();
+    private final AtomicReference<ThreadPoolService> threadPoolService;
+
+    private final AtomicReference<TimerService> timerService;
+    protected Map<String, ScheduledTimerTask> removers = new ConcurrentHashMap<String, ScheduledTimerTask>();
+
     private final ConcurrentMap<String, SessionControl> volatileSessions;
     private final ConcurrentMap<UserKey, Queue<String>> volatileUserSessions;
     private volatile ScheduledTimerTask volatileSessionsTimerTask;
 
     SessionData(final long containerCount, final int maxSessions, final long randomTokenTimeout, final long longTermContainerCount, final boolean autoLogin) {
         super();
+        threadPoolService = new AtomicReference<ThreadPoolService>();
+        timerService = new AtomicReference<TimerService>();
         this.maxSessions = maxSessions;
         this.randomTokenTimeout = randomTokenTimeout;
         this.autoLogin = autoLogin;
@@ -130,43 +142,8 @@ final class SessionData {
             longTermList.add(0, new SessionMap(256));
         }
 
-        final ConcurrentMap<String, SessionControl> volatileSessions = new ConcurrentHashMap<String, SessionControl>(128);
-        final ConcurrentMap<UserKey, Queue<String>> volatileUserSessions = new ConcurrentHashMap<UserKey, Queue<String>>(128);
-        this.volatileSessions = volatileSessions;
-        this.volatileUserSessions = volatileUserSessions;
-        final Runnable task = new Runnable() {
-            
-            @Override
-            public void run() {
-                try {
-                    final long maxStamp = System.currentTimeMillis() - 360000;
-                    for (final Iterator<SessionControl> it = volatileSessions.values().iterator(); it.hasNext();) {
-                        final SessionControl sessionControl = it.next();
-                        if (sessionControl.getLastAccessed() < maxStamp) {
-                            it.remove();
-                            final SessionImpl session = sessionControl.getSession();
-                            SessionHandler.postSessionRemoval(session);
-                            final UserKey key = new UserKey(session.getUserId(), session.getContextId());
-                            final Queue<String> queue = volatileUserSessions.remove(key);
-                            if (null != queue) {
-                                queue.remove(session.getSessionID());
-                                if (!queue.isEmpty()) {
-                                    final Queue<String> prev = volatileUserSessions.put(key, queue);
-                                    if (null != prev) {
-                                        queue.addAll(prev);
-                                    }
-                                }
-                            }
-                            LOG.info("Removed volatile session due to timeout: " + session.getSessionID());
-                        }
-                    }
-                    LOG.info("Volatile session cleaner run finished.");
-                } catch (final Exception e) {
-                    LOG.warn(e.getMessage(), e);
-                }
-            }
-        };
-        volatileSessionsTimerTask = ThreadPools.getTimerService().scheduleWithFixedDelay(task, 60000L, 60000L);
+        this.volatileSessions = new ConcurrentHashMap<String, SessionControl>(128);
+        this.volatileUserSessions = new ConcurrentHashMap<UserKey, Queue<String>>(128);
     }
 
     void clear() {
@@ -379,7 +356,6 @@ final class SessionData {
     }
 
     boolean hasForContext(final int contextId) {
-        final List<UserKey> keys = new LinkedList<UserKey>();
         for (final UserKey key : volatileUserSessions.keySet()) {
             if (key.getCid() == contextId) {
                 return true;
@@ -923,19 +899,12 @@ final class SessionData {
         }
     }
 
-    /**
-     * Map to remember if there is already a task that should move the session to the first container.
-     */
-    private final ConcurrentMap<String, Move2FirstContainerTask> tasks = new ConcurrentHashMap<String, Move2FirstContainerTask>();
-
-    private ThreadPoolService threadPoolService;
-
     public void addThreadPoolService(final ThreadPoolService service) {
-        threadPoolService = service;
+        threadPoolService.set(service);
     }
 
     public void removeThreadPoolService() {
-        threadPoolService = null;
+        threadPoolService.set(null);
     }
 
     private void scheduleTask2MoveSession2FirstContainer(final String sessionId, final boolean longTerm) {
@@ -953,6 +922,7 @@ final class SessionData {
             }
             task = ntask;
         }
+        final ThreadPoolService threadPoolService = this.threadPoolService.get();
         if (null == threadPoolService) {
             final Move2FirstContainerTask tmp = task;
             new Thread(new Runnable() {
@@ -1007,22 +977,55 @@ final class SessionData {
         }
     }
 
-    private TimerService timerService;
-    Map<String, ScheduledTimerTask> removers = new ConcurrentHashMap<String, ScheduledTimerTask>();
-
     public void addTimerService(final TimerService service) {
-        timerService = service;
+        timerService.set(service);
+        final ConcurrentMap<String, SessionControl> volatileSessions = this.volatileSessions;
+        final ConcurrentMap<UserKey, Queue<String>> volatileUserSessions = this.volatileUserSessions;
+        final Runnable task = new Runnable() {
+            
+            @Override
+            public void run() {
+                try {
+                    final long maxStamp = System.currentTimeMillis() - 360000;
+                    for (final Iterator<SessionControl> it = volatileSessions.values().iterator(); it.hasNext();) {
+                        final SessionControl sessionControl = it.next();
+                        if (sessionControl.getLastAccessed() < maxStamp) {
+                            it.remove();
+                            final SessionImpl session = sessionControl.getSession();
+                            SessionHandler.postSessionRemoval(session);
+                            final UserKey key = new UserKey(session.getUserId(), session.getContextId());
+                            final Queue<String> queue = volatileUserSessions.remove(key);
+                            if (null != queue) {
+                                queue.remove(session.getSessionID());
+                                if (!queue.isEmpty()) {
+                                    final Queue<String> prev = volatileUserSessions.put(key, queue);
+                                    if (null != prev) {
+                                        queue.addAll(prev);
+                                    }
+                                }
+                            }
+                            LOG.info("Removed volatile session due to timeout: " + session.getSessionID());
+                        }
+                    }
+                    LOG.info("Volatile session cleaner run finished.");
+                } catch (final Exception e) {
+                    LOG.warn(e.getMessage(), e);
+                }
+            }
+        };
+        volatileSessionsTimerTask = service.scheduleWithFixedDelay(task, 60000L, 60000L);
     }
 
     public void removeTimerService() {
         for (final ScheduledTimerTask timerTask : removers.values()) {
             timerTask.cancel();
         }
-        timerService = null;
+        timerService.set(null);
     }
 
     private void scheduleRandomTokenRemover(final String randomToken) {
         final RandomTokenRemover remover = new RandomTokenRemover(randomToken);
+        final TimerService timerService = this.timerService.get();
         if (null == timerService) {
             remover.run();
         } else {
