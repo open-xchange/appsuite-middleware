@@ -14,16 +14,8 @@ set -e
 # the debian-policy package
 
 
-CONFFILES="outlook2003.de_DE.properties outlook2003.en_EN.properties outlook2003.fr_FR.properties outlook2003.nl_NL.properties"
-
 case "$1" in
     install|upgrade)
-        if dpkg --compare-versions "$2" lt "6.21.0-0"; then
-            for FILE in ${CONFFILES}; do
-                dpkg-divert --package open-xchange-core --add --rename --divert /opt/open-xchange/importCSV/${FILE}.dpkg-bak \
-                    /opt/open-xchange/importCSV/${FILE}
-            done
-        fi
     ;;
 
     abort-upgrade)

@@ -13,9 +13,18 @@ set -e
 # for details, see http://www.debian.org/doc/debian-policy/ or
 # the debian-policy package
 
+CONFFILES="outlook2003.de_DE.properties outlook2003.en_EN.properties outlook2003.fr_FR.properties outlook2003.nl_NL.properties"
 
 case "$1" in
-    install|upgrade)
+    upgrade)
+        if dpkg --compare-versions "$2" lt "6.21.0-0"; then
+            for FILE in ${CONFFILES}; do
+                dpkg-divert --package open-xchange --add --rename --divert /opt/open-xchange/importCSV/${FILE}.old \
+                    /opt/open-xchange/importCSV/${FILE}
+            done
+        fi
+    ;;
+    install)
     ;;
 
     abort-upgrade)
