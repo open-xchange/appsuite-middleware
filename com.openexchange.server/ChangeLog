@@ -1,3 +1,7 @@
+* 2012-09-19 - francisco.laguna@open-xchange.com
+
+ - Fix for bug 22525: Remove I18nService from needed services array in subscription json activator, since they are discovered dynamically.
+
 * 2012-09-19 - marcus.klein@open-xchange.com
 
  - Fix for bug 22776: Made the new administration SOAP interface based on Apache CXF as conform as possible to previous Axis2 framework.
