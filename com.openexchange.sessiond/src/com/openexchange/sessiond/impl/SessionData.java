@@ -55,7 +55,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
@@ -102,6 +104,7 @@ final class SessionData {
     private final Lock rlongTermLock;
 
     private final ConcurrentMap<String, SessionControl> volatileSessions;
+    private final ConcurrentMap<UserKey, Queue<String>> volatileUserSessions;
     private volatile ScheduledTimerTask volatileSessionsTimerTask;
 
     SessionData(final long containerCount, final int maxSessions, final long randomTokenTimeout, final long longTermContainerCount, final boolean autoLogin) {
@@ -128,7 +131,9 @@ final class SessionData {
         }
 
         final ConcurrentMap<String, SessionControl> volatileSessions = new ConcurrentHashMap<String, SessionControl>(128);
+        final ConcurrentMap<UserKey, Queue<String>> volatileUserSessions = new ConcurrentHashMap<UserKey, Queue<String>>(128);
         this.volatileSessions = volatileSessions;
+        this.volatileUserSessions = volatileUserSessions;
         final Runnable task = new Runnable() {
             
             @Override
@@ -141,6 +146,10 @@ final class SessionData {
                             it.remove();
                             final SessionImpl session = sessionControl.getSession();
                             SessionHandler.postSessionRemoval(session);
+                            final Queue<String> queue = volatileUserSessions.get(new UserKey(session.getUserId(), session.getContextId()));
+                            if (null != queue) {
+                                queue.remove(session.getSessionID());
+                            }
                             LOG.info("Removed volatile session due to timeout: " + session.getSessionID());
                         }
                     }
@@ -513,6 +522,17 @@ final class SessionData {
                 final SessionImpl prevSession = prev.getSession();
                 clearSession(prevSession.getSessionID());
                 SessionHandler.postSessionRemoval(prevSession);
+            } else {
+                final UserKey key = new UserKey(session.getUserId(), session.getContextId());
+                Queue<String> queue = volatileUserSessions.get(key);
+                if (null == queue) {
+                    final Queue<String> nq = new ConcurrentLinkedQueue<String>();
+                    queue = volatileUserSessions.putIfAbsent(key, nq);
+                    if (null == queue) {
+                        queue = nq;
+                    }
+                }
+                queue.offer(session.getSessionID());
             }
             return control;
         }
@@ -690,6 +710,11 @@ final class SessionData {
     SessionControl clearSession(final String sessionId) {
         final SessionControl volatileSession = volatileSessions.remove(sessionId);
         if (null != volatileSession) {
+            final SessionImpl session = volatileSession.getSession();
+            final Queue<String> queue = volatileUserSessions.get(new UserKey(session.getUserId(), session.getContextId()));
+            if (null != queue) {
+                queue.remove(session.getSessionID());
+            }
             return volatileSession;
         }
         // A write access
