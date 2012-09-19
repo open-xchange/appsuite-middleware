@@ -139,9 +139,12 @@ final class SessionData {
                         final SessionControl sessionControl = it.next();
                         if (sessionControl.getLastAccessed() < maxStamp) {
                             it.remove();
-                            SessionHandler.postSessionRemoval(sessionControl.getSession());
+                            final SessionImpl session = sessionControl.getSession();
+                            SessionHandler.postSessionRemoval(session);
+                            LOG.info("Removed volatile session due to timeout: " + session.getSessionID());
                         }
                     }
+                    LOG.info("Volatile session cleaner run finished.");
                 } catch (final Exception e) {
                     LOG.warn(e.getMessage(), e);
                 }
@@ -685,6 +688,10 @@ final class SessionData {
     }
 
     SessionControl clearSession(final String sessionId) {
+        final SessionControl volatileSession = volatileSessions.remove(sessionId);
+        if (null != volatileSession) {
+            return volatileSession;
+        }
         // A write access
         wlock.lock();
         try {
