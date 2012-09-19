@@ -151,6 +151,7 @@ public final class ListAction extends AbstractUserAction {
                         final User user = getUserByContact(session, userService, contact);
                         if (null != user) {
                             internalUserId = user.getId();
+                            contact.setInternalUserId(internalUserId);
                         }
                     }
                     contacts.put(internalUserId, contact);
