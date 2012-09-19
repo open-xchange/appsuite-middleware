@@ -138,11 +138,22 @@ public final class ListAction extends AbstractUserAction {
             final ContactService contactService = ServiceRegistry.getInstance().getService(ContactService.class, true);
             SearchIterator<Contact> searchIterator = null;
             try {
-                searchIterator = contactService.getUsers(session, userIDs, ContactMapper.getInstance().getFields(columnIDs, ContactField.LAST_MODIFIED, ContactField.INTERNAL_USERID));
+                searchIterator = contactService.getUsers(session, userIDs, ContactMapper.getInstance().getFields(columnIDs, ContactField.LAST_MODIFIED, ContactField.INTERNAL_USERID, ContactField.EMAIL1, ContactField.DISPLAY_NAME));
+                UserService userService = null;
                 contacts = new TIntObjectHashMap<Contact>();
                 while (searchIterator.hasNext()) {
                     final Contact contact = searchIterator.next();
-                    contacts.put(contact.getInternalUserId(), contact);
+                    int internalUserId = contact.getInternalUserId();
+                    if (internalUserId <= 0) {
+                        if (null == userService) {
+                            userService = ServiceRegistry.getInstance().getService(UserService.class, true);
+                        }
+                        final User user = getUserByContact(session, userService, contact);
+                        if (null != user) {
+                            internalUserId = user.getId();
+                        }
+                    }
+                    contacts.put(internalUserId, contact);
                 }
             } finally {
                 if (null != searchIterator) {
@@ -161,13 +172,9 @@ public final class ListAction extends AbstractUserAction {
             final Contact contact = contacts.get(user.getId());
             if (null != contact) {
                 userContacts.add(new UserContact(contact, user));
-                if (null == lastModified) {
-                    lastModified = contact.getLastModified();
-                } else {
-                    final Date contactLastModified = contact.getLastModified();
-                    if (contactLastModified.after(lastModified)) {
-                        lastModified = contactLastModified;
-                    }
+                final Date contactLastModified = contact.getLastModified();
+                if (null != contactLastModified && ((null == lastModified) || (contactLastModified.after(lastModified)))) {
+                    lastModified = contactLastModified;
                 }
             }
 		}
@@ -175,6 +182,18 @@ public final class ListAction extends AbstractUserAction {
          * Return appropriate result
          */
         return new AJAXRequestResult(userContacts, lastModified, "usercontact").addWarnings(warnings);
+    }
+
+    private User getUserByContact(final ServerSession session, UserService userService, final Contact contact) throws OXException {
+        final String email1 = contact.getEmail1();
+        User user = isEmpty(email1) ? null : userService.searchUser(email1, session.getContext());
+        if (null == user) {
+            final User[] usrs = userService.searchUserByName(contact.getDisplayName(), session.getContext(), UserService.SEARCH_DISPLAY_NAME);
+            if (null != usrs && usrs.length > 0) {
+                user = usrs[0];
+            }
+        }
+        return user;
     }
 
     private int[] parseUserIDs(final AJAXRequestData request, final int fallbackUserID) throws OXException {
