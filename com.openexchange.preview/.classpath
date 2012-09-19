@@ -2,6 +2,7 @@
 <classpath>
 	<classpathentry exported="true" kind="lib" path="lib/jodreports-2.4.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jodconverter-core-3.0-beta-4.jar" sourcepath="source/jodconverter-core-3.0-beta-4-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/json-20090211.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/juh-3.2.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jurt-3.2.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/ridl-3.2.1.jar"/>
