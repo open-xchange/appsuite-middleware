@@ -109,8 +109,8 @@ public abstract class OXServlet extends WebDavServlet {
 
         public LoginRequestImpl(final String login, final String pass, final Interface interfaze, final HttpServletRequest req) {
             super();
-            this.client = req.getParameter("client");
-            version = req.getParameter("version");
+            this.client = req.getParameter(LoginFields.CLIENT_PARAM);
+            version = req.getParameter(LoginFields.VERSION_PARAM);
             String parameter = req.getParameter(LoginFields.VOLATILE);
             this.isVolatile = null != parameter && Boolean.parseBoolean(parameter.trim());
             this.login = login;
