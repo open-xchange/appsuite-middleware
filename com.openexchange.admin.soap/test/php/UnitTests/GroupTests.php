@@ -59,23 +59,18 @@ class GroupTests extends PHPUnit_Framework_TestCase {
 				// verfiy user data				
 				$this->verifyUser($new_user,$user_get_response);
 				$users_id_array[] = $user_get_response->id;
-				var_dump($users_id_array);
 			}
 		}
 
 		// now init a new group
 		$group = getFullGroupObject("soap-test-creategroup", $ctx->id);
-		// PHP still sends <members><item>3</item></members> but it must be <members>3</members> but PHP understands that server response strangely...
-		$group->members = $users_id_array;
-
-		// different approach like described in bug 22776
-		//$group = array('name' => "soap-test-creategroup"."_".$ctx->id."_soap_test_group");
-		//$group['displayname'] = strtoupper($group['name']);
-		//$key = 'members';
-		//for ($i = 0; $i < count($users_id_array); $i++) {
-		//	$group[$key] = $users_id_array[$i];
-		//	$key .= ' ';
-		//}
+		// Hack to get PHP send <members>3</members> instead of <members><item>3</item></members> which is the normal behavior of PHP.
+		// This approach is described in bug 22776 and used for Parallels integration.
+		$key = 'members';
+		for ($i = 0; $i < count($users_id_array); $i++) {
+			$group->$key = $users_id_array[$i];
+			$key .= ' ';
+		}
 
 		try {
 			// create this group in OX System
@@ -92,18 +87,19 @@ class GroupTests extends PHPUnit_Framework_TestCase {
 				$query_group->id = $ret_group->id;
 				$group_get_response = getGroupClient($SOAPHOST)->getData($ctx, $query_group, getCredentialsObject($admin_user->name, $admin_user->password));
 				if($group_get_response->name == $group->name){
-					// verfiy user data				
+					// verify user data
 					$this->verifyGroup($group,$group_get_response);
 					$group_found = true;
+					$group->id = $group_get_response->id;
 					//############# members bug #############
-					// verify if "new user" was added to the new group				
+					// verify if "new user" was added to the new group
 					//foreach ( $group_get_response->members as $member_id ) {
-       					//	if($new_users_id==$member_id){
-       						//	$member_found = true;
-       						//}       					
+       				//		if($new_users_id==$member_id){
+       				//			$member_found = true;
+       				//		}
 					//}
 					// ######################################
-				}			 
+				}
 			}
 			$this->assertTrue($group_found);
 			//$this->assertTrue($member_found);
@@ -115,7 +111,6 @@ class GroupTests extends PHPUnit_Framework_TestCase {
         		handleExcepion($e);
 			$this->fail();
 		}
-		
 		return $group;
 	} 
 	
@@ -214,7 +209,7 @@ class GroupTests extends PHPUnit_Framework_TestCase {
 			}
 		} catch (SoapFault $fault) {
                         handleSoapFault($fault);
-                        // FAILS 
+                        // FAILS
                         $this->fail();
                 } catch (Exception $e) {
                         handleExcepion($e);
@@ -278,14 +273,14 @@ class GroupTests extends PHPUnit_Framework_TestCase {
 		$this->deleteAndVerify($ctx,$admin_user,$new_group);
 		
 	}
-	
+
 	/**
 	 * Create a new Group in the OX System via SOAP
-	 * and then changes the group and after that it 
+	 * and then changes the group and after that it
 	 * checks if it was changed correctly!
 	 * The check is done via "list" and then via "get" in
 	 * the OXGroupService.
-	 *	 
+	 *
 	 */
 	public function testChangeGroup(){
 		$random_id = generateContextId();
@@ -302,11 +297,8 @@ class GroupTests extends PHPUnit_Framework_TestCase {
 		$new_group->name = $new_group->name."_changed";
 		$new_group->displayname = $new_group->displayname."_changed";
 		$this->changeAndVerifyGroup($ctx,$admin_user,$new_group);	
-		
 	}
-		
-	
-	
+
 	public function verifyCreatedContexts($expected, $server_response) {
 		$this->assertEquals($expected->maxQuota, $server_response->maxQuota);
 		$this->assertEquals($expected->name, $server_response->name);

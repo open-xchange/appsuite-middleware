@@ -14,9 +14,8 @@ class AllTests
         $suite->addTestSuite('UserTests');
         $suite->addTestSuite('GroupTests');
         $suite->addTestSuite('ResourceTests');
-        $suite->addTestSuite('UtilTests');
-	
-	#$suite->addTestSuite('CleanUpContexts'); 
+        // $suite->addTestSuite('UtilTests');
+        // $suite->addTestSuite('CleanUpContexts');
         return $suite;
     }
 }

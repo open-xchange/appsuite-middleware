@@ -77,7 +77,6 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.ServiceException;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -104,6 +103,7 @@ import com.openexchange.groupware.settings.impl.SettingStorage;
 import com.openexchange.groupware.userconfiguration.RdbUserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mailaccount.Attribute;
@@ -553,7 +553,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     } else if (returntype.equalsIgnoreCase("java.util.Date")) {
                         final Date result = (java.util.Date) method.invoke(usrdata, (Object[]) null);
                         if (null != result) {
-                            stmt.setDate(db, new java.sql.Date(result.getTime()));
+                            stmt.setTimestamp(db, new java.sql.Timestamp(result.getTime()));
                         } else {
                             final Method methodbool = getMethodforbooleanparameter(method);
                             final boolean test = (Boolean) methodbool.invoke(usrdata, (Object[]) null);
