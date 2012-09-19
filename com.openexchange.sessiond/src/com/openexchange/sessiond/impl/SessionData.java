@@ -65,12 +65,14 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.apache.commons.logging.Log;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessionMatcher;
+import com.openexchange.sessiond.services.SessiondServiceRegistry;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
@@ -977,16 +979,49 @@ final class SessionData {
         }
     }
 
+    private static volatile Integer volatileMaxIdleTime;
+    private static int volatileMaxIdleTime() {
+        Integer i = volatileMaxIdleTime;
+        if (null == i) {
+            synchronized (SessionData.class) {
+                i = volatileMaxIdleTime;
+                if (null == i) {
+                    final ConfigurationService service = SessiondServiceRegistry.getServiceRegistry().getOptionalService(ConfigurationService.class);
+                    i = service == null ? Integer.valueOf(360000) : Integer.valueOf(service.getIntProperty("com.openexchange.sessiond.volatile.maxIdleTime", 360000));
+                    volatileMaxIdleTime = i;
+                }
+            }
+        }
+        return i.intValue();
+    }
+
+    private static volatile Integer volatileFrequencyTime;
+    private static int volatileFrequencyTime() {
+        Integer i = volatileFrequencyTime;
+        if (null == i) {
+            synchronized (SessionData.class) {
+                i = volatileFrequencyTime;
+                if (null == i) {
+                    final ConfigurationService service = SessiondServiceRegistry.getServiceRegistry().getOptionalService(ConfigurationService.class);
+                    i = service == null ? Integer.valueOf(60000) : Integer.valueOf(service.getIntProperty("com.openexchange.sessiond.volatile.frequencyTime", 60000));
+                    volatileFrequencyTime = i;
+                }
+            }
+        }
+        return i.intValue();
+    }
+
     public void addTimerService(final TimerService service) {
         timerService.set(service);
         final ConcurrentMap<String, SessionControl> volatileSessions = this.volatileSessions;
         final ConcurrentMap<UserKey, Queue<String>> volatileUserSessions = this.volatileUserSessions;
+        final int maxIdleTime = volatileMaxIdleTime();
         final Runnable task = new Runnable() {
             
             @Override
             public void run() {
                 try {
-                    final long maxStamp = System.currentTimeMillis() - 360000;
+                    final long maxStamp = System.currentTimeMillis() - maxIdleTime;
                     for (final Iterator<SessionControl> it = volatileSessions.values().iterator(); it.hasNext();) {
                         final SessionControl sessionControl = it.next();
                         if (sessionControl.getLastAccessed() < maxStamp) {
@@ -1013,7 +1048,8 @@ final class SessionData {
                 }
             }
         };
-        volatileSessionsTimerTask = service.scheduleWithFixedDelay(task, 60000L, 60000L);
+        final int frequencyTime = volatileFrequencyTime();
+        volatileSessionsTimerTask = service.scheduleWithFixedDelay(task, frequencyTime, frequencyTime);
     }
 
     public void removeTimerService() {
