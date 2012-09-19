@@ -146,9 +146,16 @@ final class SessionData {
                             it.remove();
                             final SessionImpl session = sessionControl.getSession();
                             SessionHandler.postSessionRemoval(session);
-                            final Queue<String> queue = volatileUserSessions.get(new UserKey(session.getUserId(), session.getContextId()));
+                            final UserKey key = new UserKey(session.getUserId(), session.getContextId());
+                            final Queue<String> queue = volatileUserSessions.remove(key);
                             if (null != queue) {
                                 queue.remove(session.getSessionID());
+                                if (!queue.isEmpty()) {
+                                    final Queue<String> prev = volatileUserSessions.put(key, queue);
+                                    if (null != prev) {
+                                        queue.addAll(prev);
+                                    }
+                                }
                             }
                             LOG.info("Removed volatile session due to timeout: " + session.getSessionID());
                         }
@@ -169,6 +176,8 @@ final class SessionData {
             ThreadPools.getTimerService().purge();
             this.volatileSessionsTimerTask = null;
         }
+        volatileSessions.clear();
+        volatileUserSessions.clear();
         wlock.lock();
         try {
             sessionList.clear();
@@ -240,7 +249,8 @@ final class SessionData {
      * @return <code>true</code> if given user in specified context has an active session; otherwise <code>false</code>
      */
     boolean isUserActive(final int userId, final Context context) {
-        final Queue<String> queue = volatileUserSessions.get(new UserKey(userId, context.getContextId()));
+        final int contextId = context.getContextId();
+        final Queue<String> queue = volatileUserSessions.get(new UserKey(userId, contextId));
         if (null != queue && !queue.isEmpty()) {
             return true;
         }
@@ -248,7 +258,7 @@ final class SessionData {
         rlock.lock();
         try {
             for (final SessionContainer container : sessionList) {
-                if (container.containsUser(userId, context.getContextId())) {
+                if (container.containsUser(userId, contextId)) {
                     return true;
                 }
             }
@@ -257,7 +267,7 @@ final class SessionData {
         }
         rlongTermLock.lock();
         try {
-            return hasLongTermSession(userId, context.getContextId());
+            return hasLongTermSession(userId, contextId);
         } finally {
             rlongTermLock.unlock();
         }
