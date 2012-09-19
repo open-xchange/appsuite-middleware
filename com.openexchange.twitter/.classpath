@@ -10,7 +10,6 @@
 	<classpathentry kind="lib" path="lib/htmlunit-core-js-2.5.jar"/>
 	<classpathentry kind="lib" path="lib/jaxb-api-2.1.jar"/>
 	<classpathentry kind="lib" path="lib/jaxb-impl-2.1.jar"/>
-	<classpathentry kind="lib" path="lib/json-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/jsr173-api-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/jsr305.jar"/>
 	<classpathentry kind="lib" path="lib/sac-1.3.jar"/>
