@@ -57,6 +57,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mdns.MDNSService;
 import com.openexchange.mdns.MDNSServiceInfo;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
 
 
 /**
@@ -66,11 +68,11 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public final class HazelcastRegistrationActivator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(HazelcastRegistrationActivator.class);
+    static final Log LOG = com.openexchange.log.Log.loggerFor(HazelcastRegistrationActivator.class);
 
     private final AtomicReference<MDNSService> mdnsServiceRef;
 
-    private volatile MDNSServiceInfo serviceInfo;
+    volatile MDNSServiceInfo serviceInfo;
 
     /**
      * Initializes a new {@link HazelcastRegistrationActivator}.
@@ -82,20 +84,27 @@ public final class HazelcastRegistrationActivator extends HousekeepingActivator 
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { MDNSService.class };
+        return new Class<?>[] { MDNSService.class, ThreadPoolService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        MDNSService service = getService(MDNSService.class);
+        final MDNSService service = getService(MDNSService.class);
         if (mdnsServiceRef.compareAndSet(null, service)) {
-            try {
-                serviceInfo =
-                    service.registerService("openexchange.service.hazelcast", 57462, new StringBuilder(
-                        "open-xchange hazelcast service @").append(getHostName()).toString());
-            } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
-            }
+            final Runnable task = new Runnable() {
+
+                @Override
+                public void run() {
+                    try {
+                        serviceInfo =
+                            service.registerService("openexchange.service.hazelcast", 57462, new StringBuilder(
+                                "open-xchange hazelcast service @").append(getHostName()).toString());
+                    } catch (final OXException e) {
+                        LOG.error(e.getMessage(), e);
+                    }
+                }
+            };
+            ThreadPools.getThreadPool().submit(ThreadPools.task(task));
         }
     }
 
@@ -103,17 +112,20 @@ public final class HazelcastRegistrationActivator extends HousekeepingActivator 
     protected void stopBundle() throws Exception {
         final MDNSService mdnsService = getService(MDNSService.class);
         if (mdnsServiceRef.compareAndSet(mdnsService, null)) {
-            try {
-                mdnsService.unregisterService(serviceInfo);
-            } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+            final MDNSServiceInfo serviceInfo = this.serviceInfo;
+            if (null != serviceInfo) {
+                try {
+                    mdnsService.unregisterService(serviceInfo);
+                } catch (final Exception e) {
+                    LOG.error(e.getMessage(), e);
+                }
+                this.serviceInfo = null;
             }
-            serviceInfo = null;
         }
         super.stopBundle();
     }
 
-    private static String getHostName() {
+    static String getHostName() {
         try {
             return InetAddress.getLocalHost().getCanonicalHostName();
         } catch (final UnknownHostException e) {
