@@ -67,7 +67,7 @@ import com.openexchange.subscribe.json.actions.SubscriptionSourcesActionFactory;
  */
 public class SubscribeActivator extends AJAXModuleActivator {
 
-	private static final Class<?>[] NEEDED = { HttpService.class, SubscriptionExecutionService.class, I18nService.class, PreferencesItemService.class, SubscriptionSourceDiscoveryService.class };
+	private static final Class<?>[] NEEDED = { HttpService.class, SubscriptionExecutionService.class, PreferencesItemService.class, SubscriptionSourceDiscoveryService.class };
 
 	@Override
 	protected Class<?>[] getNeededServices() {
