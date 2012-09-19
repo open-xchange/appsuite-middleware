@@ -9,6 +9,7 @@
 * 2012-09-19 - thorben.betten@open-xchange.com
 
  - Fix for bug 23025: Return proper JSON response if GAB is disabled for requested user(s)
+ - Fix for bug 23045: More lenient scanner behavior for VCard parsing
 
 * 2012-09-18 - thorben.betten@open-xchange.com
 
