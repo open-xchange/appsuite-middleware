@@ -79,8 +79,25 @@ public class MessageBuilder extends StanzaBuilder<Message> {
     }
     
     @Override
-    protected Message build() throws OXException {
+    public Message build() throws OXException {
         throw new UnsupportedOperationException("Not implemented yet!");
+//        Message message = new Message();
+//        basics(message, object);
+//
+//        String type = object.optString("type");
+//
+//        if (type == null || type.equals("")) {
+//            message.setType(Message.Type.normal);
+//        } else {
+//            for (Message.Type t : Message.Type.values()) {
+//                if (t.name().equalsIgnoreCase(type)) {
+//                    message.setType(t);
+//                    break;
+//                }
+//            }
+//        }
+//
+//        return message;
     }
 
 }

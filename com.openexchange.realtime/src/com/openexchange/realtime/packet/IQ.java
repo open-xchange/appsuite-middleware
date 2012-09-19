@@ -74,16 +74,20 @@ package com.openexchange.realtime.packet;
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class IQ extends Stanza<IQ> {
+public class IQ extends Stanza {
 
     /**
      * Describes a command's type.
      */
     public static enum Type {
-        get, set, result, error
+        GET, SET, RESULT, ERROR
     }
 
+    /**
+     * Obligatory type specifier for IQ Stanzas
+     */
     private Type type;
 
     /**
