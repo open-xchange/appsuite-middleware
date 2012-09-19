@@ -8,8 +8,6 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: .,
  lib/htmlunit-2.5.jar,
  lib/htmlunit-core-js-2.5.jar,
- lib/jaxb-api-2.1.jar,
- lib/jaxb-impl-2.1.jar,
  lib/json-1.0.jar,
  lib/jsr173-api-1.0.jar,
  lib/jsr305.jar,

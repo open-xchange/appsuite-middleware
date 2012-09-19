@@ -127,8 +127,6 @@ Import-Package: com.openexchange.config,
  org.xml.sax.helpers
 Bundle-ClassPath: lib/htmlunit-2.5.jar,
  lib/htmlunit-core-js-2.5.jar,
- lib/jaxb-api-2.1.jar,
- lib/jaxb-impl-2.1.7.jar,
  lib/runtime-0.4.1.5.jar,
  lib/sac-1.3.jar,
  lib/serializer-2.7.1.jar,

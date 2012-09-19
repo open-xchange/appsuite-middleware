@@ -8,8 +8,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/twitter4j-stream-2.2.3.jar" sourcepath="lib/twitter4j-stream-2.2.3-sources.jar"/>
 	<classpathentry kind="lib" path="lib/htmlunit-2.5.jar"/>
 	<classpathentry kind="lib" path="lib/htmlunit-core-js-2.5.jar"/>
-	<classpathentry kind="lib" path="lib/jaxb-api-2.1.jar"/>
-	<classpathentry kind="lib" path="lib/jaxb-impl-2.1.jar"/>
 	<classpathentry kind="lib" path="lib/json-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/jsr173-api-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/jsr305.jar"/>
