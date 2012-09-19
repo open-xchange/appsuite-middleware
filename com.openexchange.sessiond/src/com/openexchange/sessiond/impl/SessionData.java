@@ -70,6 +70,7 @@ import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessionMatcher;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
@@ -100,6 +101,9 @@ final class SessionData {
     private final Lock wlongTermLock;
     private final Lock rlongTermLock;
 
+    private final ConcurrentMap<String, SessionControl> volatileSessions;
+    private volatile ScheduledTimerTask volatileSessionsTimerTask;
+
     SessionData(final long containerCount, final int maxSessions, final long randomTokenTimeout, final long longTermContainerCount, final boolean autoLogin) {
         super();
         this.maxSessions = maxSessions;
@@ -122,9 +126,37 @@ final class SessionData {
         for (int i = 0; i < longTermContainerCount; i++) {
             longTermList.add(0, new SessionMap(256));
         }
+
+        final ConcurrentMap<String, SessionControl> volatileSessions = new ConcurrentHashMap<String, SessionControl>(128);
+        this.volatileSessions = volatileSessions;
+        final Runnable task = new Runnable() {
+            
+            @Override
+            public void run() {
+                try {
+                    final long maxStamp = System.currentTimeMillis() - 360000;
+                    for (final Iterator<SessionControl> it = volatileSessions.values().iterator(); it.hasNext();) {
+                        final SessionControl sessionControl = it.next();
+                        if (sessionControl.getLastAccessed() < maxStamp) {
+                            it.remove();
+                            SessionHandler.postSessionRemoval(sessionControl.getSession());
+                        }
+                    }
+                } catch (final Exception e) {
+                    LOG.warn(e.getMessage(), e);
+                }
+            }
+        };
+        volatileSessionsTimerTask = ThreadPools.getTimerService().scheduleWithFixedDelay(task, 60000L, 60000L);
     }
 
     void clear() {
+        final ScheduledTimerTask volatileSessionsTimerTask = this.volatileSessionsTimerTask;
+        if (null != volatileSessionsTimerTask) {
+            volatileSessionsTimerTask.cancel();
+            ThreadPools.getTimerService().purge();
+            this.volatileSessionsTimerTask = null;
+        }
         wlock.lock();
         try {
             sessionList.clear();
@@ -469,6 +501,17 @@ final class SessionData {
     SessionControl addSession(final SessionImpl session, final boolean noLimit) throws OXException {
         if (!noLimit && countSessions() > maxSessions) {
             throw SessionExceptionCodes.MAX_SESSION_EXCEPTION.create();
+        }
+        // Check for volatile flag
+        if (session.isVolatile()) {
+            final SessionControl control = new SessionControl(session);
+            final SessionControl prev = volatileSessions.put(session.getSessionID(), control);
+            if (null != prev) {
+                final SessionImpl prevSession = prev.getSession();
+                clearSession(prevSession.getSessionID());
+                SessionHandler.postSessionRemoval(prevSession);
+            }
+            return control;
         }
         // Adding a session is a writing operation. Other threads requesting a session should be blocked.
         final SessionControl control;

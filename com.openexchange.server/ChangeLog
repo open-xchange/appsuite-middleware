@@ -1,3 +1,7 @@
+* 2012-09-19 - marcus.klein@open-xchange.com
+
+ - Fix for bug 22776: Made the new administration SOAP interface based on Apache CXF as conform as possible to previous Axis2 framework.
+
 * 2012-09-19 - thorben.betten@open-xchange.com
 
  - Fix for bug 23025: Return proper JSON response if GAB is disabled for requested user(s)
@@ -141,7 +145,6 @@
 
 * 2012-08-19 - thorben.betten@open-xchange.com
 
- - Fix for bug 22776: Set property "set-jaxb-validation-event-handler" to "false" to turn off the validation event handler.
  - Fix for bug 22735: Enable parsing of TNEF parts
 
 * 2012-08-18 - thorben.betten@open-xchange.com

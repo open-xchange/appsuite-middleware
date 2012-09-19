@@ -54,12 +54,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelStateEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
-
 import com.openexchange.authentication.Cookie;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
@@ -171,6 +169,11 @@ public class TelnetChatDecoder extends SimpleChannelUpstreamHandler implements T
 
 		LoginResult result = LoginPerformer.getInstance().doLogin(
 				new LoginRequest() {
+
+				    @Override
+				    public boolean isVolatile() {
+				        return false;
+				    }
 
 					@Override
                     public String getLogin() {

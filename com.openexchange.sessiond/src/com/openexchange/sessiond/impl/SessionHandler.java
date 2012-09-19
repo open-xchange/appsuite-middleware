@@ -111,8 +111,6 @@ public final class SessionHandler {
 
     private static ScheduledTimerTask longSessionContainerRotator;
 
-    private static SessionStorageService sessionStorageService;
-
     /**
      * Initializes a new {@link SessionHandler session handler}
      */
@@ -298,7 +296,7 @@ public final class SessionHandler {
      * @return The session ID associated with newly created session
      * @throws OXException If creating a new session fails
      */
-    protected static SessionImpl addSession(final int userId, final String loginName, final String password, final int contextId, final String clientHost, final String login, final String authId, final String hash, final String client) throws OXException {
+    protected static SessionImpl addSession(final int userId, final String loginName, final String password, final int contextId, final String clientHost, final String login, final String authId, final String hash, final String client, final boolean isVolatile) throws OXException {
         checkMaxSessPerUser(userId, contextId);
         checkMaxSessPerClient(client, userId, contextId);
         checkAuthId(login, authId);
@@ -306,9 +304,10 @@ public final class SessionHandler {
         final SessionImpl session = new SessionImpl(userId, loginName, password, contextId, sessionId, sessionIdGenerator.createSecretId(
             loginName,
             Long.toString(System.currentTimeMillis())), sessionIdGenerator.createRandomId(), clientHost, login, authId, hash, client);
+        session.setVolatile(isVolatile);
         // Add session
         sessionData.addSession(session, noLimit);
-        sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
+        final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
         if (sessionStorageService != null) {
             sessionStorageService.addSession(session);
         }
@@ -326,7 +325,7 @@ public final class SessionHandler {
                 throw SessionExceptionCodes.MAX_SESSION_PER_USER_EXCEPTION.create(I(userId), I(contextId));
             }
         }
-        SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
+        final SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
         if (storageService != null) {
             try {
                 int count = storageService.getUserSessions(userId, contextId).length;
@@ -397,7 +396,7 @@ public final class SessionHandler {
             return false;
         }
         try {
-            sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
+            final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
             if (sessionStorageService != null) {
                 sessionStorageService.removeSession(sessionControl.getSession().getSessionID());
             }
@@ -425,7 +424,7 @@ public final class SessionHandler {
         }
         // TODO: Check permission via security service
         sessionControl.getSession().setPassword(newPassword);
-        sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
+        final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
         if (sessionStorageService != null) {
             sessionStorageService.changePassword(sessionid, newPassword);
         }
@@ -628,7 +627,7 @@ public final class SessionHandler {
                 LOG.info("Session timed out. ID: " + sessionControl.getSession().getSessionID());
             }
             try {
-                sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
+                final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
                 if (sessionStorageService != null) {
                     sessionStorageService.removeSession(sessionControl.getSession().getSessionID());
                 }
@@ -646,7 +645,7 @@ public final class SessionHandler {
                 LOG.info("Session timed out. ID: " + control.getSession().getSessionID());
             }
             try {
-                sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
+                final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
                 if (sessionStorageService != null) {
                     sessionStorageService.removeSession(control.getSession().getSessionID());
                 }
@@ -694,7 +693,7 @@ public final class SessionHandler {
         }
     }
 
-    private static void postSessionRemoval(final Session session) {
+    static void postSessionRemoval(final Session session) {
         final EventAdmin eventAdmin = getServiceRegistry().getService(EventAdmin.class);
         if (eventAdmin != null) {
             final Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
