@@ -51,8 +51,8 @@ package com.openexchange.realtime.example.websocket.presence;
 
 import com.openexchange.realtime.example.websocket.ConversionWSHandler;
 import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.presence.PresenceData;
 import com.openexchange.realtime.presence.PresenceService;
-import com.openexchange.realtime.presence.PresenceStatus;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
@@ -72,7 +72,7 @@ public class WSPresenceHandler extends ConversionWSHandler {
 	@Override
     public void incoming(Stanza stanza, ServerSession session) throws com.openexchange.exception.OXException {
 		
-		PresenceStatus status = (PresenceStatus) stanza.getPayload().to("presenceStatus", session).getData();
+		PresenceData status = (PresenceData) stanza.getPayload().to("presenceStatus", session).getData();
 		
 		PresenceService presenceService = services.getService(PresenceService.class);
 		

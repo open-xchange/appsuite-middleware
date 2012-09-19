@@ -55,7 +55,7 @@ import org.json.JSONObject;
 import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.conversion.simple.SimplePayloadConverter;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.presence.PresenceStatus;
+import com.openexchange.realtime.presence.PresenceData;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -84,7 +84,7 @@ public class PresenceStatusToJSON implements SimplePayloadConverter {
 	public Object convert(Object data, ServerSession session,
 			SimpleConverter converter) throws OXException {
 		try {
-			PresenceStatus status = (PresenceStatus) data;
+			PresenceData status = (PresenceData) data;
 			
 			JSONObject object = new JSONObject();
 			object.put("state", status.getState().name().toLowerCase());

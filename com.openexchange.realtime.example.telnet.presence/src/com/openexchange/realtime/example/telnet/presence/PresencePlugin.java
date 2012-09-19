@@ -55,8 +55,8 @@ import com.openexchange.realtime.example.telnet.TelnetChatPlugin;
 import com.openexchange.realtime.example.telnet.TelnetMessageDelivery;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.presence.PresenceData;
 import com.openexchange.realtime.presence.PresenceService;
-import com.openexchange.realtime.presence.PresenceStatus;
 import com.openexchange.realtime.presence.PresenceService.PresenceState;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -123,7 +123,7 @@ public class PresencePlugin implements TelnetChatPlugin {
 	@Override
 	public void handleOutgoing(Stanza stanza, ID to, ServerSession session,
 			TelnetMessageDelivery delivery) throws OXException {
-		PresenceStatus status = (PresenceStatus) stanza.getPayload().getData();
+		PresenceData status = (PresenceData) stanza.getPayload().getData();
 		
 		TelnetChatMessage msg = new TelnetChatMessage(status.getMessage(), stanza.getFrom(), session);
 		msg.setHeader("to", to.toString());

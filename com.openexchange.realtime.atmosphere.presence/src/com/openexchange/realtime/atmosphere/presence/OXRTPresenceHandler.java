@@ -50,17 +50,15 @@
 package com.openexchange.realtime.atmosphere.presence;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.AtmosphereExceptionCode;
 import com.openexchange.realtime.atmosphere.OXRTHandler;
 import com.openexchange.realtime.atmosphere.StanzaSender;
 import com.openexchange.realtime.atmosphere.presence.osgi.AtmospherePresenceServiceRegistry;
 import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.Payload;
 import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.packet.Presence.Type;
-import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.presence.PresenceData;
 import com.openexchange.realtime.presence.PresenceService;
-import com.openexchange.realtime.presence.PresenceStatus;
+import com.openexchange.realtime.presence.subscribe.PresenceSubscriptionService;
 import com.openexchange.realtime.util.IDMap;
 import com.openexchange.tools.session.ServerSession;
 
@@ -132,15 +130,15 @@ public class OXRTPresenceHandler implements OXRTHandler<Presence> {
         }
         Type type = stanza.getType();
         if (Type.SUBSCRIBE == type) {
-            handleSubscribe(stanza);
+            handleSubscribe(stanza, session);
         } else if (Type.SUBSCRIBED == type) {
-            handleSubscribed(stanza);
+            handleSubscribed(stanza, session);
         } else if (Type.UNSUBSCRIBE == type) {
-            handleUnSubscribe(stanza);
+            handleUnSubscribe(stanza, session);
         } else if (Type.UNSUBSCRIBED == type) {
-            handleUnSubscribed(stanza);
+            handleUnSubscribed(stanza, session);
         } else if (Type.NONE == type || Type.UNAVAILABLE == type) {
-            handlePresence(stanza);
+            handlePresence(stanza, session);
         } else {
             throw new UnsupportedOperationException("Not implemented yet!");
         }
@@ -148,28 +146,73 @@ public class OXRTPresenceHandler implements OXRTHandler<Presence> {
 
     /**
      * Handle the incoming request of userA to subscribe to the presence of userB.
+     * This transforms the payload of the incoming stanza and passes it to the MessageDispatcher for routing to the proper contact.
+     * 
+     * <pre>
+     * {
+     *  from: userA@realtime
+     *  to: userB@realtime
+     *  [namespace: 'default',]
+     *  element: 'presence'
+     *  type: subscribe
+     *  [data: {
+     *      message: 'Hello B, please let me subscribe to your presence. WBR, A.',
+     *  }]
+     * };
+     * </pre>
      * 
      * @param stanza the incoming Stanza representing the subscribe request
+     * @throws OXException if the subscription fails, e.g. Stanza can't be read
      */
-    private void handleSubscribe(Presence stanza) {
-        throw new UnsupportedOperationException("Not implemented yet!");
+    private void handleSubscribe(Presence stanza, ServerSession session) throws OXException {
+        PresenceData data = (PresenceData) stanza.getPayload().to("presenceData", session).getData();
+        PresenceSubscriptionService subscriptionService = AtmospherePresenceServiceRegistry.getInstance().getService(
+            PresenceSubscriptionService.class);
+        subscriptionService.subscribe(stanza, session);
     }
 
     /**
      * Handle userB's incoming approval to prior subscription request of userA.
      * 
+     * <pre>
+     * {
+     *  from: userB@realtime
+     *  to: userA@realtime
+     *  [namespace: 'default',]
+     *  element: 'presence'
+     *  type: subscribed
+     *  [data: {
+     *      message: 'Hello A, just don't spam me with kitten pics!'
+     *  }]
+     * };
+     * </pre>
+     * 
      * @param stanza the incoming Stanza representing the approval
      */
-    private void handleSubscribed(Presence stanza) {
+    private void handleSubscribed(Presence stanza, ServerSession session) {
         throw new UnsupportedOperationException("Not implemented yet!");
 
     }
 
     /**
      * Handle userA's request to unsubscribe from the Presence of userB.
+     * 
+     * <pre>
+     * {
+     *  from: userA@realtime
+     *  to: userB@realtime
+     *  [namespace: 'default',]
+     *  element: 'presence'
+     *  type: unsubscribe
+     *  [data: {
+     *      message: 'If you don't want my kitten pics, there is no reason to subscribe to you!',
+     *  }]
+     * };
+     * </pre>
+     * 
      * @param stanza
      */
-    private void handleUnSubscribe(Presence stanza) {
+    private void handleUnSubscribe(Presence stanza, ServerSession session) {
         throw new UnsupportedOperationException("Not implemented yet!");
 
     }
@@ -181,9 +224,23 @@ public class OXRTPresenceHandler implements OXRTHandler<Presence> {
      * <li>by userB to cancel the previously granted subscription to userA</li>
      * </ul>
      * 
+     * <pre>
+     * {
+     *  from: userB@realtime
+     *  [namespace: 'default',]
+     *  element: 'presence'
+     *  [type: none]
+     *  data: {
+     *      state: 'online',
+     *      message: 'i am here',
+     *      [priority: 0,]
+     *  }
+     * };
+     * </pre>
+     * 
      * @param stanza the Stanza representing the unsubscribed request.
      */
-    private void handleUnSubscribed(Presence stanza) {
+    private void handleUnSubscribed(Presence stanza, ServerSession session) {
         throw new UnsupportedOperationException("Not implemented yet!");
     }
 
@@ -192,7 +249,7 @@ public class OXRTPresenceHandler implements OXRTHandler<Presence> {
      * 
      * @param stanza
      */
-    private void handlePresence(Presence stanza) {
+    private void handlePresence(Presence stanza, ServerSession session) {
         // initial presence
         // presence broadcast
         // directed presence
@@ -209,13 +266,6 @@ public class OXRTPresenceHandler implements OXRTHandler<Presence> {
         throw new UnsupportedOperationException("Not implemented yet!");
     }
 
-    
-    
-    
-    
-    
-    
-    
     /*
      * Transport status changes and subscribe requests
      */
@@ -238,7 +288,7 @@ public class OXRTPresenceHandler implements OXRTHandler<Presence> {
      * @param status The new PresenceStatus of the client that has to be set
      * @param session The server session associated with the update request
      */
-    public void updatePresenceStatus(ID client, PresenceStatus status, ServerSession session) {
+    public void updatePresenceStatus(ID client, PresenceData status, ServerSession session) {
         throw new UnsupportedOperationException("Not implemented.");
     }
 
@@ -250,7 +300,7 @@ public class OXRTPresenceHandler implements OXRTHandler<Presence> {
      * @param session The associated session
      * @return a map of clients and associated status that a given client is subscribed to
      */
-    public IDMap<PresenceStatus> getSubscriptionStatus(ID requester, ServerSession session) {
+    public IDMap<PresenceData> getSubscriptionStatus(ID requester, ServerSession session) {
         throw new UnsupportedOperationException("Not implemented.");
     }
 

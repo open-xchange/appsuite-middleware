@@ -49,24 +49,22 @@
 
 package com.openexchange.realtime.atmosphere.presence;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.conversion.simple.SimplePayloadConverter;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.presence.PresenceStatus;
 import com.openexchange.tools.session.ServerSession;
 
+
 /**
- * {@link PresenceStatusToJSONConverter}
- * 
+ * {@link PresenceDataToJSONConverter}
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class PresenceStatusToJSONConverter implements SimplePayloadConverter {
+public class PresenceDataToJSONConverter implements SimplePayloadConverter {
 
     @Override
     public String getInputFormat() {
-        return "presenceStatus";
+        return "presenceData";
     }
 
     @Override
@@ -81,17 +79,7 @@ public class PresenceStatusToJSONConverter implements SimplePayloadConverter {
 
     @Override
     public Object convert(Object data, ServerSession session, SimpleConverter converter) throws OXException {
-        try {
-            PresenceStatus status = (PresenceStatus) data;
-
-            JSONObject object = new JSONObject();
-            object.put("state", status.getState().name().toLowerCase());
-            object.put("message", status.getMessage());
-
-            return object;
-        } catch (JSONException x) {
-            throw OXException.general(x.getMessage());
-        }
+        throw new UnsupportedOperationException("Not implemented yet!");
     }
 
 }

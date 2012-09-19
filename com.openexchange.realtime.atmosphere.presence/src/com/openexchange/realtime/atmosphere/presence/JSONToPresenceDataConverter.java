@@ -49,32 +49,18 @@
 
 package com.openexchange.realtime.atmosphere.presence;
 
-import static com.openexchange.realtime.atmosphere.presence.AtmospherePresenceExceptionCode.OBLIGATORY_ELEMENT_MISSING;
-import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.conversion.simple.SimplePayloadConverter;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.presence.PresenceService.PresenceState;
-import com.openexchange.realtime.presence.PresenceStatus;
 import com.openexchange.tools.session.ServerSession;
 
+
 /**
- * {@link JSONToPresenceStatusConverter} - Convert incoming PresenceStatus from JSON to PresenceStatus POJO
- * A presence element in form of a JSONObject looks like:
- * <pre>
- * data: {
- *   state: 'online',
- *   message: 'i am here',
- *   [priority: 0],
- *   [type: none]
- * }
- * </pre>
- * where priority and type are optional elements.
- * 
+ * {@link JSONToPresenceDataConverter}
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class JSONToPresenceStatusConverter implements SimplePayloadConverter {
+public class JSONToPresenceDataConverter implements SimplePayloadConverter {
 
     @Override
     public String getInputFormat() {
@@ -83,7 +69,7 @@ public class JSONToPresenceStatusConverter implements SimplePayloadConverter {
 
     @Override
     public String getOutputFormat() {
-        return "presenceStatus";
+        return "presenceData";
     }
 
     @Override
@@ -91,31 +77,9 @@ public class JSONToPresenceStatusConverter implements SimplePayloadConverter {
         return Quality.GOOD;
     }
 
-    /**
-     * Convert a JSON Object into a StatusPresence Object. Check for state, message and priority
-     */
     @Override
     public Object convert(Object data, ServerSession session, SimpleConverter converter) throws OXException {
-        JSONObject object = (JSONObject) data;
-
-        PresenceState state = null;
-
-        try {
-            String status = object.getString("state");
-            for (PresenceState s : PresenceState.values()) {
-                if (s.name().equalsIgnoreCase(status)) {
-                    state = s;
-                    break;
-                }
-            }
-            if (state == null) {
-                throw OBLIGATORY_ELEMENT_MISSING.create("state");
-            }
-        } catch (JSONException e) {
-            throw OXException.general(e.getMessage());
-        }
-
-        return new PresenceStatus(state, object.optString("message"));
+        throw new UnsupportedOperationException("Not implemented yet!");
     }
 
 }

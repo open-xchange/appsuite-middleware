@@ -69,7 +69,7 @@ import com.openexchange.tools.session.ServerSession;
 public class DummyPresenceService implements PresenceService {
 	
 	private final ServiceLookup services;
-	private final IDMap<PresenceStatus> statusMap = new IDMap<PresenceStatus>();
+	private final IDMap<PresenceData> statusMap = new IDMap<PresenceData>();
 	
 	
 	private final IDMap<List<ID>> subscriptions = new IDMap<List<ID>>();
@@ -93,7 +93,7 @@ public class DummyPresenceService implements PresenceService {
 	
 	@Override
 	public void changeState(ID id, PresenceState state, String statusMessage, ServerSession session) throws OXException {
-		PresenceStatus presenceStatus = new PresenceStatus(state, statusMessage);
+		PresenceData presenceStatus = new PresenceData(state, statusMessage);
 		
 		statusMap.put(id.toGeneralForm(), presenceStatus);
 		
@@ -113,7 +113,7 @@ public class DummyPresenceService implements PresenceService {
 	}
 
 	@Override
-	public PresenceStatus getPresence(ID id) {
+	public PresenceData getPresence(ID id) {
 		return statusMap.get(id.toGeneralForm());
 	}
 

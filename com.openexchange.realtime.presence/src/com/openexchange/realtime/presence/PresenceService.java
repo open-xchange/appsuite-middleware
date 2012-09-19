@@ -78,5 +78,5 @@ public interface PresenceService {
      * @param id
      * @return
      */
-    public PresenceStatus getPresence(ID id);
+    public PresenceData getPresence(ID id);
 }

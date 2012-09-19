@@ -55,7 +55,7 @@ import org.json.JSONObject;
 import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.conversion.simple.SimplePayloadConverter;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.presence.PresenceStatus;
+import com.openexchange.realtime.presence.PresenceData;
 import com.openexchange.realtime.presence.PresenceService.PresenceState;
 import com.openexchange.tools.session.ServerSession;
 
@@ -100,7 +100,7 @@ public class JSON2PresenceStatus implements SimplePayloadConverter {
 			throw OXException.general(e.getMessage());
 		}
 		
-		return new PresenceStatus(state, object.optString("message"));
+		return new PresenceData(state, object.optString("message"));
 	}
 
 }

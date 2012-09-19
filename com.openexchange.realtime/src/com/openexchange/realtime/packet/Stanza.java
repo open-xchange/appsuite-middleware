@@ -63,7 +63,7 @@ public abstract class Stanza {
 	private String namespace = "default";
 
 	private Payload payload;
-
+	
 	/**
 	 * Initializes a new {@link Stanza}.
 	 */

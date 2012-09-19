@@ -54,9 +54,10 @@ import com.openexchange.conversion.simple.SimplePayloadConverter;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.realtime.atmosphere.OXRTConversionHandler;
 import com.openexchange.realtime.atmosphere.OXRTHandler;
-import com.openexchange.realtime.atmosphere.presence.JSONToPresenceStatusConverter;
-import com.openexchange.realtime.atmosphere.presence.PresenceStatusToJSONConverter;
+import com.openexchange.realtime.atmosphere.presence.JSONToPresenceDataConverter;
+import com.openexchange.realtime.atmosphere.presence.PresenceDataToJSONConverter;
 import com.openexchange.realtime.presence.PresenceService;
+import com.openexchange.realtime.presence.subscribe.PresenceSubscriptionService;
 
 /**
  * {@link AtmospherePresenceActivator} - Register the presence specific payload converters as SimplePayloadConverters and add a new
@@ -78,8 +79,7 @@ public class AtmospherePresenceActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        // return new Class[] { PresenceSubscriptionService.class, PresenceStatusService.class };
-        return new Class[] { PresenceService.class };
+         return new Class[] { PresenceSubscriptionService.class, PresenceService.class };
     }
 
     @Override
@@ -103,11 +103,9 @@ public class AtmospherePresenceActivator extends HousekeepingActivator {
          * OXRTConversionHandler for the PresenceStatus. All this ConversionHandler does is to tell the payload to convert itself into the
          * desired format.
          */
-        registerService(SimplePayloadConverter.class, new PresenceStatusToJSONConverter());
-        registerService(SimplePayloadConverter.class, new JSONToPresenceStatusConverter());
-        registerService(OXRTHandler.class, new OXRTConversionHandler("ox/presence", "presenceStatus"));
-
-        // TODO: register PresenceSubscriptionHandler
+        registerService(SimplePayloadConverter.class, new PresenceDataToJSONConverter());
+        registerService(SimplePayloadConverter.class, new JSONToPresenceDataConverter());
+        registerService(OXRTHandler.class, new OXRTConversionHandler("ox/presence", "presenceData"));
     }
 
     @Override
