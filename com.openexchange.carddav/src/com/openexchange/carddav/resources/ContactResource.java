@@ -412,22 +412,22 @@ public class ContactResource extends CardDAVResource {
         StringBuilder stringBuilder = new StringBuilder();
         String name = this.getDisplayName();
         stringBuilder
-        	.append("BEGIN:VCARD\n")
-        	.append("VERSION:3.0\n")
-        	.append("X-ADDRESSBOOKSERVER-KIND:group\n")
-        	.append("N:").append(name).append('\n')
-        	.append("FN:").append(name).append('\n')
-        	.append("UID:").append(this.getUID()).append('\n')
+        	.append("BEGIN:VCARD\r\n")
+        	.append("VERSION:3.0\r\n")
+        	.append("X-ADDRESSBOOKSERVER-KIND:group\r\n")
+        	.append("N:").append(name).append("\r\n")
+        	.append("FN:").append(name).append("\r\n")
+        	.append("UID:").append(this.getUID()).append("\r\n")
         ;
         try {
             List<String> uids = this.resolveMembers(contact.getDistributionList());
             for (String uid : uids) {
-                stringBuilder.append("X-ADDRESSBOOKSERVER-MEMBER:urn:uuid:").append(uid).append('\n');
+                stringBuilder.append("X-ADDRESSBOOKSERVER-MEMBER:urn:uuid:").append(uid).append("\r\n");
             }
         } catch (final OXException e) {
         	throw protocolException(e);
         }
-        stringBuilder.append("END:VCARD");
+        stringBuilder.append("END:VCARD\r\n");
         return stringBuilder.toString();
 	}
 
