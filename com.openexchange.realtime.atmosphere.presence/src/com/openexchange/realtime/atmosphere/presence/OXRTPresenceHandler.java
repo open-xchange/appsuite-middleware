@@ -168,6 +168,8 @@ public class OXRTPresenceHandler implements OXRTHandler<Presence> {
         PresenceData data = (PresenceData) stanza.getPayload().to("presenceData", session).getData();
         PresenceSubscriptionService subscriptionService = AtmospherePresenceServiceRegistry.getInstance().getService(
             PresenceSubscriptionService.class);
+        //TODO:
+//        subscriptionService.subscribe(stanza, data.getMessage(), session);
         subscriptionService.subscribe(stanza, session);
     }
 
@@ -188,10 +190,15 @@ public class OXRTPresenceHandler implements OXRTHandler<Presence> {
      * </pre>
      * 
      * @param stanza the incoming Stanza representing the approval
+     * @throws OXException If stanza conversion fails or the subscription can't be approved
      */
-    private void handleSubscribed(Presence stanza, ServerSession session) {
-        throw new UnsupportedOperationException("Not implemented yet!");
-
+    private void handleSubscribed(Presence stanza, ServerSession session) throws OXException {
+        PresenceData data = (PresenceData) stanza.getPayload().to("presenceData", session).getData();
+        PresenceSubscriptionService subscriptionService = AtmospherePresenceServiceRegistry.getInstance().getService(
+            PresenceSubscriptionService.class);
+        //TODO:
+//        subscriptionService.subscribe(stanza, data.getMessage(), session);
+        subscriptionService.approve(stanza.getTo(), true, session);
     }
 
     /**
@@ -211,10 +218,15 @@ public class OXRTPresenceHandler implements OXRTHandler<Presence> {
      * </pre>
      * 
      * @param stanza
+     * @throws OXException 
      */
-    private void handleUnSubscribe(Presence stanza, ServerSession session) {
-        throw new UnsupportedOperationException("Not implemented yet!");
-
+    private void handleUnSubscribe(Presence stanza, ServerSession session) throws OXException {
+        PresenceData data = (PresenceData) stanza.getPayload().to("presenceData", session).getData();
+        PresenceSubscriptionService subscriptionService = AtmospherePresenceServiceRegistry.getInstance().getService(
+            PresenceSubscriptionService.class);
+        //TODO:
+//        subscriptionService.subscribe(stanza, data.getMessage(), session);
+        subscriptionService.approve(stanza.getTo(), false, session);
     }
 
     /**
@@ -239,31 +251,26 @@ public class OXRTPresenceHandler implements OXRTHandler<Presence> {
      * </pre>
      * 
      * @param stanza the Stanza representing the unsubscribed request.
+     * @throws OXException If stanza conversion fails or the subscription can't be denied/canceled
      */
-    private void handleUnSubscribed(Presence stanza, ServerSession session) {
-        throw new UnsupportedOperationException("Not implemented yet!");
+    private void handleUnSubscribed(Presence stanza, ServerSession session) throws OXException {
+        PresenceData data = (PresenceData) stanza.getPayload().to("presenceData", session).getData();
+        PresenceSubscriptionService subscriptionService = AtmospherePresenceServiceRegistry.getInstance().getService(
+            PresenceSubscriptionService.class);
+        //TODO:
+//        subscriptionService.subscribe(stanza, data.getMessage(), session);
+        subscriptionService.approve(stanza.getTo(), false, session);
     }
 
     /**
-     * Used:
-     * 
-     * @param stanza
+     * Change the curren Presence status.
+     * @param stanza Stanza containing the new Presence Status
+     * @throws OXException If stanza conversion fails or the status can't be changed 
      */
-    private void handlePresence(Presence stanza, ServerSession session) {
-        // initial presence
-        // presence broadcast
-        // directed presence
-        // presence braodcast unavailable
-        // directed presence unavailable
-        // transform stanza payload to Presence Status
-        // PresenceStatus presenceStatus = null;
-        // Payload payload = stanza.getPayload();
-        // if (payload == null) { // empty initial presence
-        // presenceStatus = new PresenceStatus();
-        // presenceStatus = (PresenceStatus) stanza.getPayload().to("presenceStatus", session).getData();
-        // presenceService.changeState(stanza.getFrom(), presenceStatus.getState(), presenceStatus.getMessage(), session);
+    private void handlePresence(Presence stanza, ServerSession session) throws OXException {
+        PresenceData data = (PresenceData) stanza.getPayload().to("presenceData", session).getData();
         PresenceService presenceService = AtmospherePresenceServiceRegistry.getInstance().getService(PresenceService.class);
-        throw new UnsupportedOperationException("Not implemented yet!");
+        presenceService.changeState(stanza.getFrom(), data.getState(), data.getMessage(), session);
     }
 
     /*
