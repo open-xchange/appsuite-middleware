@@ -6,6 +6,7 @@
 
  - Fix for bug 22980: No "hidden" mailbox expunge anymore
  - Fix for bug 22897: Delete only matching session if marked for removal
+ - Fix for bug 23037: Properly mapping parsed TNEF read receipt to a multipart
 
  * 2012-09-20 - tobias.friedrich@open-xchange.com
 
