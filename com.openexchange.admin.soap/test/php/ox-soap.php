@@ -529,9 +529,18 @@ function modifyUserData($user,$changed_suffix){
 	$user->given_name = $user->given_name.$changed_suffix;
 	$user->sur_name = $user->sur_name.$changed_suffix;
 	$user->password = $user->password.$changed_suffix;
+	if (!is_array($user->aliases)) {
+	    $user->aliases = array();
+	}
+	array_push($user->aliases, $user->primaryEmail);
+	$key = 'aliases';
+    for ($i = 0; $i < count($user->aliases); $i++) {
+        $user->$key = $changed_suffix.$user->aliases[$i];
+        $key .= ' ';
+    }
 	$user->email1 = $changed_suffix.$user->email1;
-	$user->primaryEmail = $changed_suffix.$user->primaryEmail;	
-	$user->anniversary = "1981-02-02T00:00:00.00Z";	
+	$user->primaryEmail = $changed_suffix.$user->primaryEmail;
+	$user->anniversary = "1981-02-02T00:00:00.00Z";
 	$user->birthday = "1981-02-02T00:00:00.00Z";
 	$user->assistant_name = $changed_suffix.$user->assistant_name;
 	$user->branches = $changed_suffix.$user->branches;
@@ -557,10 +566,10 @@ function modifyUserData($user,$changed_suffix){
 	$user->fax_home = $user->fax_home.$changed_suffix;
 	$user->fax_other = $user->fax_other.$changed_suffix;
 	$user->gui_spam_filter_enabled = "true";
-	
+
 	$user->imapLogin = $user->imapLogin.$changed_suffix;
-	$user->imapServer = $user->imapServer.$changed_suffix;
-	
+	$user->imapServer = "imaps://".$user->imapServer.$changed_suffix.":993";
+
 	$user->info = $user->info.$changed_suffix;
 	$user->instant_messenger1 = $user->instant_messenger1.$changed_suffix;
 	$user->instant_messenger2 = $user->instant_messenger2.$changed_suffix;
@@ -586,9 +595,9 @@ function modifyUserData($user,$changed_suffix){
 	$user->profession = $user->profession.$changed_suffix;
 	$user->room_number = $user->room_number.$changed_suffix;
 	$user->sales_volume = $user->sales_volume.$changed_suffix;	
-	
-	$user->smtpServer = $user->smtpServer.$changed_suffix;
-	
+
+	$user->smtpServer = "smtps://".$user->smtpServer.$changed_suffix.":583";
+
 	$user->spouse_name = $user->spouse_name.$changed_suffix;
 	$user->state_business = $user->state_business.$changed_suffix;
 	$user->state_home = $user->state_home.$changed_suffix;

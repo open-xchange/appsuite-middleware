@@ -3530,7 +3530,7 @@ msgstr ""
 #. *
 #. * A database connection cannot be obtained.
 #.
-#. * A database connection cannot be obtained.
+#. A database connection cannot be obtained.
 #. *
 #. * A database connection Cannot be obtained.
 #.
@@ -3538,7 +3538,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:69
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:91
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:91
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:75
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:72
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/internal/SchemaExceptionMessages.java:76
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/resource/ResourceExceptionMessage.java:71
 msgid "Cannot get database connection."
@@ -5319,14 +5319,14 @@ msgstr ""
 #. *
 #. * In order to accomplish the search, %1$d or more characters are required.
 #.
-#. * In order to accomplish the search, %1$d or more characters are required.
+#. In order to accomplish the search, %1$d or more characters are required.
 #. *
 #. * In order to accomplish the search, %1$d or more characters are required.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:341
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:147
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:111
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:218
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:211
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:428
 msgid ""
 "In order to accomplish the search, %1$d or more characters are required."
@@ -5371,8 +5371,9 @@ msgid ""
 msgstr ""
 
 #. * SQL Problem.
+#. SQL Problem.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:365
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:81
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:78
 msgid "SQL Problem."
 msgstr ""
 
@@ -7165,258 +7166,279 @@ msgstr ""
 msgid "Reached maximum retries for writing the setting %s."
 msgstr ""
 
-#. * Error while inserting task: %s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:69
+#. Task attribute name
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/AttributeNames.java:66
+msgid "Current costs"
+msgstr ""
+
+#. Task attribute name
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/AttributeNames.java:69
+msgid "Current duration"
+msgstr ""
+
+#. Task attribute name
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/AttributeNames.java:72
+msgid "Estimated costs"
+msgstr ""
+
+#. Task attribute name
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/AttributeNames.java:75
+msgid "Estimated duration"
+msgstr ""
+
+#. Error while inserting task: %s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:66
 msgid "Error while inserting task: %s."
 msgstr ""
 
-#. * Setting autoCommit to true failed.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:72
+#. Setting autoCommit to true failed.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:69
 msgid "Problem setting auto commit to true."
 msgstr ""
 
-#. * Unimplemented feature.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:78
+#. Unimplemented feature.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:75
 msgid "This method is not implemented."
 msgstr ""
 
-#. * Folder %1$s (%2$d) is not a task folder.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:84
+#. Folder %1$s (%2$d) is not a task folder.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:81
 msgid "Folder %1$s (%2$d) is not a task folder."
 msgstr ""
 
-#. *
-#. * Edit conflict. Your change cannot be completed because somebody else has made a conflicting change to the same item. Please refresh or synchronize and try again.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:89
+#. Edit conflict. Your change cannot be completed because somebody else has made a conflicting change to the same item. Please refresh or synchronize and try again.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:84
 msgid ""
 "Edit conflict. Your change cannot be completed because somebody else has "
 "made a conflicting change to the same item. Please refresh or synchronize "
 "and try again."
 msgstr ""
 
-#. * Cannot create private task in public/shared folder %1$d.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:92
+#. Cannot create private task in public/shared folder %1$d.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:87
 msgid "Cannot create private task in public/shared folder %1$d."
 msgstr ""
 
-#. * SQL problem while updating task: %s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:95
+#. SQL problem while updating task: %s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:90
 msgid "SQL problem while updating task: %s."
 msgstr ""
 
-#. * Counting tasks did not return a result.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:98
+#. Counting tasks did not return a result.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:93
 msgid "Counting tasks did not return a result."
 msgstr ""
 
-#. * SQL problem while deleting task: %s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:101
+#. SQL problem while deleting task: %s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:96
 msgid "SQL problem while deleting task: %s."
 msgstr ""
 
-#. * Cannot find folder for task %2$d and participant %1$d in context %3$d.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:104
+#. Cannot find folder for task %2$d and participant %1$d in context %3$d.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:99
 msgid "Cannot find folder for task %2$d and participant %1$d in context %3$d."
 msgstr ""
 
-#. * SQL problem while listing tasks: %s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:107
+#. SQL problem while listing tasks: %s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:102
 msgid "SQL problem while listing tasks: %s."
 msgstr ""
 
-#. * You are not allowed to delete the task %d.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:110
+#. You are not allowed to delete the task %d.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:105
 msgid "You are not allowed to delete the task."
 msgstr ""
 
-#. * Tried to delete %1$d folders but only %2$d were deleted.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:113
+#. Tried to delete %1$d folders but only %2$d were deleted.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:108
 msgid "Tried to delete %1$d folders but only %2$d were deleted."
 msgstr ""
 
-#. * Tried to delete %1$d participants but only %2$d were deleted.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:116
+#. Tried to delete %1$d participants but only %2$d were deleted.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:111
 msgid "Tried to delete %1$d participants but only %2$d were deleted."
 msgstr ""
 
-#. * Participant %d for task %d is not found.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:119
+#. Participant %d for task %d is not found.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:114
 msgid "Participant %d for task %d is not found."
 msgstr ""
 
-#. * Cannot find task %d in context %d.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:122
+#. Cannot find task %d in context %d.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:117
 msgid "Cannot find task %d in context %d."
 msgstr ""
 
-#. * Unknown task attribute %d.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:125
+#. Unknown task attribute %d.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:120
 msgid "Unknown task attribute %d."
 msgstr ""
 
-#. * Date range in search must contain 2 and not %d values.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:128
+#. Date range in search must contain 2 and not %d values.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:123
 msgid "Date range in search must contain 2 and not %d values."
 msgstr ""
 
-#. * Cannot decrease number of attachments below zero.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:131
+#. Cannot decrease number of attachments below zero.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:126
 msgid "Cannot decrease number of attachments below zero."
 msgstr ""
 
-#. * You are not allowed to read the contents of folder %1$s (%2$d).
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:134
+#. You are not allowed to read the contents of folder %1$s (%2$d).
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:129
 msgid "You are not allowed to read the contents of folder %1$s (%2$d)."
 msgstr ""
 
-#. * Tasks are disable for you (%d).
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:137
+#. Tasks are disable for you (%d).
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:132
 msgid "Tasks are disabled for you (%d)."
 msgstr ""
 
-#. * You are not allowed to create tasks in folder %1$s (%2$d).
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:140
+#. You are not allowed to create tasks in folder %1$s (%2$d).
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:135
 msgid "You are not allowed to create tasks in folder %1$s (%2$d)."
 msgstr ""
 
-#. * You are not allowed to delegate tasks.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:143
+#. You are not allowed to delegate tasks.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:138
 msgid "You are not allowed to delegate tasks."
 msgstr ""
 
-#. * Missing folder id for creating task.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:146
+#. Missing folder id for creating task.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:141
 msgid "Missing folder id for creating task."
 msgstr ""
 
-#. * Private flagged tasks cannot be delegated.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:149
+#. Private flagged tasks cannot be delegated.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:144
 msgid "Tasks with private flag cannot be delegated."
 msgstr ""
 
-#. * Percent is %d but must be between 0 and 100.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:152
+#. Percent is %d but must be between 0 and 100.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:147
 msgid "Percent is %d but must be between 0 and 100."
 msgstr ""
 
-#. * For tasks which are not started the percentage done must be 0 and not %d.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:155
+#. For tasks which are not started the percentage done must be 0 and not %d.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:150
 msgid ""
 "Tasks that have not been started yet need to have a 'Done' percentage of 0 "
 "and not %d."
 msgstr ""
 
-#. * cannot send event to event system.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:158
+#. cannot send event to event system.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:153
 msgid "Cannot send event to event system."
 msgstr ""
 
-#. * You are not allowed to edit tasks in folder %1$s (%2$d).
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:161
+#. You are not allowed to edit tasks in folder %1$s (%2$d).
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:156
 msgid "You are not allowed to edit tasks in folder %1$s (%2$d)."
 msgstr ""
 
-#. * Moving items from or into shared folder %1$s (%2$d) is not allowed.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:164
+#. Moving items from or into shared folder %1$s (%2$d) is not allowed.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:159
 msgid "Moving items from or into shared folder %1$s (%2$d) is not allowed."
 msgstr ""
 
-#. * Missing folder mapping for task %1$d.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:167
+#. Missing folder mapping for task %1$d.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:162
 msgid "Missing folder mapping for task %1$d."
 msgstr ""
 
-#. * Unknown recurrence type %d.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:170
+#. Unknown recurrence type %d.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:165
 msgid "Unknown recurrence type %d."
 msgstr ""
 
-#. * Value for the recurrence is missing: %d.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:173
+#. Value for the recurrence is missing: %d.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:168
 msgid "Value for the recurrence is missing: %d."
 msgstr ""
 
-#. * For finished tasks the percentage must be 100 and not %d.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:176
+#. For finished tasks the percentage must be 100 and not %d.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:171
 msgid "Finished tasks need to have a percentage of 100 and not %d."
 msgstr ""
 
-#. * Invalid task state %d.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:179
+#. Invalid task state %d.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:174
 msgid "Invalid task state %d."
 msgstr ""
 
-#. * Start date %1$s must be before end date %2$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:182
+#. Start date %1$s must be before end date %2$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:177
 msgid "Start date %1$s must be before end date %2$s."
 msgstr ""
 
-#. *
-#. * The task could not be saved. Please shorten the %1$s and try again. Current length %3$d is more than allowed length of %2$d
-#. * characters.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:188
+#. The task could not be saved. Please shorten the %1$s and try again. Current length %3$d is more than allowed length of %2$d
+#. characters.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:181
 msgid ""
 "The task could not be saved. Please shorten the %1$s and try again. Current "
 "length %3$d is more than allowed length of %2$d characters."
 msgstr ""
 
-#. * Task with private flag cannot be moved to public folder %1$s (%2$d).
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:191
+#. Task with private flag cannot be moved to public folder %1$s (%2$d).
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:184
 msgid "Tasks with private flag cannot be moved to a public folder %1$s (%2$d)."
 msgstr ""
 
-#. * Only the task creator is allowed to set private flag.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:194
+#. Only the task creator is allowed to set private flag.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:187
 msgid "Only the task creator is allowed to set the private flag."
 msgstr ""
 
-#. * Cannot add external participant without email address.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:197
+#. Cannot add external participant without email address.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:190
 msgid "External participants without E-Mail address can not be added."
 msgstr ""
 
-#. * Problem with a thread.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:200
+#. Problem with a thread.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:193
 msgid "Unexpected error."
 msgstr ""
 
-#. * You are not allowed to see the task %1$d in folder %2$s (%3$d).
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:203
+#. You are not allowed to see the task %1$d in folder %2$s (%3$d).
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:196
 msgid "You are not allowed to see the task %1$d in folder %2$s (%3$d)."
 msgstr ""
 
-#. * Task contains invalid data: "%1$s"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:206
+#. Task contains invalid data: "%1$s"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:199
 msgid "Task contains invalid data: \"%1$s\""
 msgstr ""
 
-#. * The task %1$d is not stored in folder %2$s (%3$d).
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:209
+#. The task %1$d is not stored in folder %2$s (%3$d).
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:202
 msgid "The task %1$d is not stored in folder %2$s (%3$d)."
 msgstr ""
 
-#. * Unknown participant type %1$d.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:212
+#. Unknown participant type %1$d.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:205
 msgid "Unknown participant type %1$d."
 msgstr ""
 
-#. * The entered value for costs is not within the allowed range. Please use a value from -130000.00 to 130000.00.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:215
+#. The entered value for costs is not within the allowed range. Please use a value from -130000.00 to 130000.00.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:208
 msgid ""
 "The value entered for costs is not within the allowed range. Please use a "
 "value from -130000.00 to 130000.00."
 msgstr ""
 
-#. * Group %1$d is empty. You can't add an empty group to a task.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:221
+#. Group %1$d is empty. You can't add an empty group to a task.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:214
 msgid "Group %1$d is empty. You can not add an empty group to a task."
 msgstr ""
 
-#. * UID of tasks can not be changed.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:224
+#. UID of tasks can not be changed.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:217
 msgid "Tasks uids can not be changed."
+msgstr ""
+
+#. Into a numeric attribute something non numeric has been entered. %2$s will name the attribute that contains non digit characters.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:220
+msgid "Value \"%1$s\" of attribute \"%2$s\" contains non digit characters."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:62
@@ -10326,6 +10348,10 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:94
 msgid "Please ask only for columns the server knows"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:96
+msgid "Unknown Subscription"
 msgstr ""
 
 #. Provide well-formed HTML.

@@ -180,6 +180,8 @@ public final class LoginPerformer {
 
     private static final String PARAM_SESSION = Parameterized.PARAM_SESSION;
 
+    private static final String PARAM_VOLATILE = Parameterized.PARAM_VOLATILE;
+
     private static final int MAX_RETRY = 3;
 
     /**
@@ -237,6 +239,7 @@ public final class LoginPerformer {
                 int cnt = 0;
                 while (null == session && cnt++ < MAX_RETRY) {
                     final AddSessionParameterImpl parameterObject = new AddSessionParameterImpl(username, request, user, ctx);
+                    parameterObject.setParameter(PARAM_VOLATILE, Boolean.valueOf(request.isVolatile()));
                     final String sessionId = sessiondService.addSession(parameterObject);
                     // Look-up generated session instance
                     session = parameterObject.getParameter(PARAM_SESSION);

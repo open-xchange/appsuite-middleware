@@ -28,8 +28,15 @@ Import-Package: com.openexchange.config,
  org.json,
  org.osgi.framework,
  org.osgi.util.tracker,
+ org.scribe.builder,
+ org.scribe.builder.api,
+ org.scribe.exceptions,
+ org.scribe.extractors,
+ org.scribe.model,
+ org.scribe.oauth,
+ org.scribe.services,
+ org.scribe.utils,
  org.w3c.dom,
  org.xml.sax
-Bundle-ClassPath: .,
- lib/scribe_head.jar
+Bundle-ClassPath: .
 Export-Package: com.openexchange.oauth.linkedin

@@ -55,21 +55,27 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.apache.commons.logging.Log;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessionMatcher;
+import com.openexchange.sessiond.services.SessiondServiceRegistry;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
@@ -100,8 +106,23 @@ final class SessionData {
     private final Lock wlongTermLock;
     private final Lock rlongTermLock;
 
+    /**
+     * Map to remember if there is already a task that should move the session to the first container.
+     */
+    private final ConcurrentMap<String, Move2FirstContainerTask> tasks = new ConcurrentHashMap<String, Move2FirstContainerTask>();
+    private final AtomicReference<ThreadPoolService> threadPoolService;
+
+    private final AtomicReference<TimerService> timerService;
+    protected Map<String, ScheduledTimerTask> removers = new ConcurrentHashMap<String, ScheduledTimerTask>();
+
+    private final ConcurrentMap<String, SessionControl> volatileSessions;
+    private final ConcurrentMap<UserKey, Queue<String>> volatileUserSessions;
+    private volatile ScheduledTimerTask volatileSessionsTimerTask;
+
     SessionData(final long containerCount, final int maxSessions, final long randomTokenTimeout, final long longTermContainerCount, final boolean autoLogin) {
         super();
+        threadPoolService = new AtomicReference<ThreadPoolService>();
+        timerService = new AtomicReference<TimerService>();
         this.maxSessions = maxSessions;
         this.randomTokenTimeout = randomTokenTimeout;
         this.autoLogin = autoLogin;
@@ -122,9 +143,20 @@ final class SessionData {
         for (int i = 0; i < longTermContainerCount; i++) {
             longTermList.add(0, new SessionMap(256));
         }
+
+        this.volatileSessions = new ConcurrentHashMap<String, SessionControl>(128);
+        this.volatileUserSessions = new ConcurrentHashMap<UserKey, Queue<String>>(128);
     }
 
     void clear() {
+        final ScheduledTimerTask volatileSessionsTimerTask = this.volatileSessionsTimerTask;
+        if (null != volatileSessionsTimerTask) {
+            volatileSessionsTimerTask.cancel();
+            ThreadPools.getTimerService().purge();
+            this.volatileSessionsTimerTask = null;
+        }
+        volatileSessions.clear();
+        volatileUserSessions.clear();
         wlock.lock();
         try {
             sessionList.clear();
@@ -196,11 +228,16 @@ final class SessionData {
      * @return <code>true</code> if given user in specified context has an active session; otherwise <code>false</code>
      */
     boolean isUserActive(final int userId, final Context context) {
+        final int contextId = context.getContextId();
+        final Queue<String> queue = volatileUserSessions.get(new UserKey(userId, contextId));
+        if (null != queue && !queue.isEmpty()) {
+            return true;
+        }
         // A read-only access to session list
         rlock.lock();
         try {
             for (final SessionContainer container : sessionList) {
-                if (container.containsUser(userId, context.getContextId())) {
+                if (container.containsUser(userId, contextId)) {
                     return true;
                 }
             }
@@ -209,7 +246,7 @@ final class SessionData {
         }
         rlongTermLock.lock();
         try {
-            return hasLongTermSession(userId, context.getContextId());
+            return hasLongTermSession(userId, contextId);
         } finally {
             rlongTermLock.unlock();
         }
@@ -224,6 +261,14 @@ final class SessionData {
     }
 
     SessionControl[] removeUserSessions(final int userId, final int contextId) {
+        final UserKey key = new UserKey(userId, contextId);
+        final Queue<String> queue = volatileUserSessions.get(key);
+        if (null != queue) {
+            for (final String sessionId : queue) {
+                volatileSessions.remove(sessionId);
+            }
+            volatileUserSessions.remove(key);
+        }
         // Removing sessions is a write operation.
         final List<SessionControl> retval = new ArrayList<SessionControl>();
         wlock.lock();
@@ -261,6 +306,21 @@ final class SessionData {
     }
 
     List<SessionControl> removeContextSessions(final int contextId) {
+        final List<UserKey> keys = new LinkedList<UserKey>();
+        for (final UserKey key : volatileUserSessions.keySet()) {
+            if (key.getCid() == contextId) {
+                keys.add(key);
+            }
+        }
+        for (final UserKey key : keys) {
+            final Queue<String> queue = volatileUserSessions.get(key);
+            if (null != queue) {
+                for (final String sessionId : queue) {
+                    volatileSessions.remove(sessionId);
+                }
+                volatileUserSessions.remove(key);
+            }
+        }
         // Removing sessions is a write operation.
         final List<SessionControl> list = new ArrayList<SessionControl>();
         wlock.lock();
@@ -298,6 +358,11 @@ final class SessionData {
     }
 
     boolean hasForContext(final int contextId) {
+        for (final UserKey key : volatileUserSessions.keySet()) {
+            if (key.getCid() == contextId) {
+                return true;
+            }
+        }
         wlock.lock();
         try {
             for (final SessionContainer container : sessionList) {
@@ -312,6 +377,14 @@ final class SessionData {
     }
 
     public SessionControl getAnyActiveSessionForUser(final int userId, final int contextId, final boolean includeLongTerm) {
+        final Queue<String> queue = volatileUserSessions.get(new UserKey(userId, contextId));
+        if (null != queue && !queue.isEmpty()) {
+            final String sessionId = queue.peek();
+            final SessionControl sessionControl = volatileSessions.get(sessionId);
+            if (null != sessionControl) {
+                return sessionControl;
+            }
+        }
         rlock.lock();
         try {
             for (final SessionContainer container : sessionList) {
@@ -345,6 +418,14 @@ final class SessionData {
     }
 
     public Session findFirstSessionForUser(final int userId, final int contextId, final SessionMatcher matcher) {
+        final Queue<String> queue = volatileUserSessions.get(new UserKey(userId, contextId));
+        if (null != queue && !queue.isEmpty()) {
+            final String sessionId = queue.peek();
+            final SessionControl control = volatileSessions.get(sessionId);
+            if (null != control && matcher.accepts(control.getSession())) {
+                return control.getSession();
+            }
+        }
         rlock.lock();
         try {
             for (final SessionContainer container : sessionList) {
@@ -380,6 +461,16 @@ final class SessionData {
     SessionControl[] getUserSessions(final int userId, final int contextId) {
         // A read-only access to session list
         final List<SessionControl> retval = new ArrayList<SessionControl>();
+        final Queue<String> queue = volatileUserSessions.get(new UserKey(userId, contextId));
+        if (null != queue && !queue.isEmpty()) {
+            for (final String sessionId : queue) {
+                final SessionControl control = volatileSessions.get(sessionId);
+                if (null != control) {
+                    retval.add(control);
+                }
+            }
+        }
+        // Short term ones
         rlock.lock();
         try {
             for (final SessionContainer container : sessionList) {
@@ -410,6 +501,10 @@ final class SessionData {
     int getNumOfUserSessions(final int userId, final int contextId) {
         // A read-only access to session list
         int count = 0;
+        final Queue<String> queue = volatileUserSessions.get(new UserKey(userId, contextId));
+        if (null != queue && !queue.isEmpty()) {
+            count += queue.size();
+        }
         rlock.lock();
         try {
             for (final SessionContainer container : sessionList) {
@@ -439,6 +534,11 @@ final class SessionData {
 
     void checkAuthId(final String login, final String authId) throws OXException {
         if (null != authId) {
+            for (final SessionControl sc : volatileSessions.values()) {
+                if (authId.equals(sc.getSession().getAuthId())) {
+                    throw SessionExceptionCodes.DUPLICATE_AUTHID.create(sc.getSession().getLogin(), login);
+                }
+            }
             rlock.lock();
             try {
                 for (final SessionContainer container : sessionList) {
@@ -470,6 +570,28 @@ final class SessionData {
         if (!noLimit && countSessions() > maxSessions) {
             throw SessionExceptionCodes.MAX_SESSION_EXCEPTION.create();
         }
+        // Check for volatile flag
+        if (session.isVolatile()) {
+            final SessionControl control = new SessionControl(session);
+            final SessionControl prev = volatileSessions.put(session.getSessionID(), control);
+            if (null != prev) {
+                final SessionImpl prevSession = prev.getSession();
+                clearSession(prevSession.getSessionID());
+                SessionHandler.postSessionRemoval(prevSession);
+            } else {
+                final UserKey key = new UserKey(session.getUserId(), session.getContextId());
+                Queue<String> queue = volatileUserSessions.get(key);
+                if (null == queue) {
+                    final Queue<String> nq = new ConcurrentLinkedQueue<String>();
+                    queue = volatileUserSessions.putIfAbsent(key, nq);
+                    if (null == queue) {
+                        queue = nq;
+                    }
+                }
+                queue.offer(session.getSessionID());
+            }
+            return control;
+        }
         // Adding a session is a writing operation. Other threads requesting a session should be blocked.
         final SessionControl control;
         wlock.lock();
@@ -486,6 +608,7 @@ final class SessionData {
     int countSessions() {
         // A read-only access to session list
         int count = 0;
+        count += volatileSessions.size();
         rlock.lock();
         try {
             for (final SessionContainer container : sessionList) {
@@ -576,7 +699,11 @@ final class SessionData {
     }
 
     SessionControl getSession(final String sessionId) {
-        SessionControl control = null;
+        // Look-up volatile ones
+        SessionControl control = volatileSessions.get(sessionId);
+        if (null != control) {
+            return control;
+        }
         int i = 0;
         // Read-only access
         rlock.lock();
@@ -642,6 +769,15 @@ final class SessionData {
     }
 
     SessionControl clearSession(final String sessionId) {
+        final SessionControl volatileSession = volatileSessions.remove(sessionId);
+        if (null != volatileSession) {
+            final SessionImpl session = volatileSession.getSession();
+            final Queue<String> queue = volatileUserSessions.get(new UserKey(session.getUserId(), session.getContextId()));
+            if (null != queue) {
+                queue.remove(session.getSessionID());
+            }
+            return volatileSession;
+        }
         // A write access
         wlock.lock();
         try {
@@ -765,19 +901,12 @@ final class SessionData {
         }
     }
 
-    /**
-     * Map to remember if there is already a task that should move the session to the first container.
-     */
-    private final ConcurrentMap<String, Move2FirstContainerTask> tasks = new ConcurrentHashMap<String, Move2FirstContainerTask>();
-
-    private ThreadPoolService threadPoolService;
-
     public void addThreadPoolService(final ThreadPoolService service) {
-        threadPoolService = service;
+        threadPoolService.set(service);
     }
 
     public void removeThreadPoolService() {
-        threadPoolService = null;
+        threadPoolService.set(null);
     }
 
     private void scheduleTask2MoveSession2FirstContainer(final String sessionId, final boolean longTerm) {
@@ -795,6 +924,7 @@ final class SessionData {
             }
             task = ntask;
         }
+        final ThreadPoolService threadPoolService = this.threadPoolService.get();
         if (null == threadPoolService) {
             final Move2FirstContainerTask tmp = task;
             new Thread(new Runnable() {
@@ -849,22 +979,89 @@ final class SessionData {
         }
     }
 
-    private TimerService timerService;
-    Map<String, ScheduledTimerTask> removers = new ConcurrentHashMap<String, ScheduledTimerTask>();
+    private static volatile Integer volatileMaxIdleTime;
+    private static int volatileMaxIdleTime() {
+        Integer i = volatileMaxIdleTime;
+        if (null == i) {
+            synchronized (SessionData.class) {
+                i = volatileMaxIdleTime;
+                if (null == i) {
+                    final ConfigurationService service = SessiondServiceRegistry.getServiceRegistry().getOptionalService(ConfigurationService.class);
+                    i = service == null ? Integer.valueOf(360000) : Integer.valueOf(service.getIntProperty("com.openexchange.sessiond.volatile.maxIdleTime", 360000));
+                    volatileMaxIdleTime = i;
+                }
+            }
+        }
+        return i.intValue();
+    }
+
+    private static volatile Integer volatileFrequencyTime;
+    private static int volatileFrequencyTime() {
+        Integer i = volatileFrequencyTime;
+        if (null == i) {
+            synchronized (SessionData.class) {
+                i = volatileFrequencyTime;
+                if (null == i) {
+                    final ConfigurationService service = SessiondServiceRegistry.getServiceRegistry().getOptionalService(ConfigurationService.class);
+                    i = service == null ? Integer.valueOf(60000) : Integer.valueOf(service.getIntProperty("com.openexchange.sessiond.volatile.frequencyTime", 60000));
+                    volatileFrequencyTime = i;
+                }
+            }
+        }
+        return i.intValue();
+    }
 
     public void addTimerService(final TimerService service) {
-        timerService = service;
+        timerService.set(service);
+        final ConcurrentMap<String, SessionControl> volatileSessions = this.volatileSessions;
+        final ConcurrentMap<UserKey, Queue<String>> volatileUserSessions = this.volatileUserSessions;
+        final int maxIdleTime = volatileMaxIdleTime();
+        final Runnable task = new Runnable() {
+            
+            @Override
+            public void run() {
+                try {
+                    final long maxStamp = System.currentTimeMillis() - maxIdleTime;
+                    for (final Iterator<SessionControl> it = volatileSessions.values().iterator(); it.hasNext();) {
+                        final SessionControl sessionControl = it.next();
+                        if (sessionControl.getLastAccessed() < maxStamp) {
+                            it.remove();
+                            final SessionImpl session = sessionControl.getSession();
+                            SessionHandler.postSessionRemoval(session);
+                            final UserKey key = new UserKey(session.getUserId(), session.getContextId());
+                            final Queue<String> queue = volatileUserSessions.remove(key);
+                            if (null != queue) {
+                                queue.remove(session.getSessionID());
+                                if (!queue.isEmpty()) {
+                                    final Queue<String> prev = volatileUserSessions.put(key, queue);
+                                    if (null != prev) {
+                                        queue.addAll(prev);
+                                    }
+                                }
+                            }
+                            LOG.info("Removed volatile session due to timeout: " + session.getSessionID());
+                        }
+                    }
+                    LOG.info("Volatile session cleaner run finished.");
+                } catch (final Exception e) {
+                    LOG.warn(e.getMessage(), e);
+                }
+            }
+        };
+        final int frequencyTime = volatileFrequencyTime();
+        volatileSessionsTimerTask = service.scheduleWithFixedDelay(task, frequencyTime, frequencyTime);
     }
 
     public void removeTimerService() {
         for (final ScheduledTimerTask timerTask : removers.values()) {
             timerTask.cancel();
         }
-        timerService = null;
+        timerService.set(null);
     }
 
     private void scheduleRandomTokenRemover(final String randomToken) {
         final RandomTokenRemover remover = new RandomTokenRemover(randomToken);
+        final TimerService timerService = this.timerService.get();
         if (null == timerService) {
             remover.run();
         } else {

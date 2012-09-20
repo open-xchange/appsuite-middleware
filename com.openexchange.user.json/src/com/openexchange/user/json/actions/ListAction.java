@@ -49,11 +49,14 @@
 
 package com.openexchange.user.json.actions;
 
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -68,6 +71,7 @@ import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -129,41 +133,68 @@ public final class ListAction extends AbstractUserAction {
         /*
          * Get users/contacts
          */
-        final ContactService contactService = ServiceRegistry.getInstance().getService(ContactService.class, true);
-        final List<Contact> contacts = new ArrayList<Contact>();
-        SearchIterator<Contact> searchIterator = null;
-        try {
-        	searchIterator = contactService.getUsers(session, userIDs, 
-            		ContactMapper.getInstance().getFields(columnIDs, ContactField.LAST_MODIFIED, ContactField.INTERNAL_USERID));
-            while (searchIterator.hasNext()) {
-                contacts.add(searchIterator.next());
+        final TIntObjectMap<Contact> contacts;
+        {
+            final ContactService contactService = ServiceRegistry.getInstance().getService(ContactService.class, true);
+            SearchIterator<Contact> searchIterator = null;
+            try {
+                searchIterator = contactService.getUsers(session, userIDs, ContactMapper.getInstance().getFields(columnIDs, ContactField.LAST_MODIFIED, ContactField.INTERNAL_USERID, ContactField.EMAIL1, ContactField.DISPLAY_NAME));
+                UserService userService = null;
+                contacts = new TIntObjectHashMap<Contact>();
+                while (searchIterator.hasNext()) {
+                    final Contact contact = searchIterator.next();
+                    int internalUserId = contact.getInternalUserId();
+                    if (internalUserId <= 0) {
+                        if (null == userService) {
+                            userService = ServiceRegistry.getInstance().getService(UserService.class, true);
+                        }
+                        final User user = getUserByContact(session, userService, contact);
+                        if (null != user) {
+                            internalUserId = user.getId();
+                            contact.setInternalUserId(internalUserId);
+                        }
+                    }
+                    contacts.put(internalUserId, contact);
+                }
+            } finally {
+                if (null != searchIterator) {
+                    searchIterator.close();
+                }
             }
-        } finally {
-        	if (null != searchIterator) {
-        		searchIterator.close();
-        	}
         }
         /*
          * Map user to contact information
          */
-        Date lastModified = new Date(0);
-        final User[] users = getUsers(session, userIDs);
+        Date lastModified = null;
+        final List<OXException> warnings = new LinkedList<OXException>();
+        final User[] users = getUsers(session, userIDs, warnings);
         final List<UserContact> userContacts = new ArrayList<UserContact>(users.length);
         for (final User user : users) {
-        	for (final Contact contact : contacts) {
-        		if (user.getId() == contact.getInternalUserId()) {
-        			userContacts.add(new UserContact(contact, user));
-                	if (contact.getLastModified().after(lastModified)) {
-                		lastModified = contact.getLastModified();
-                	}
-        			break;
-        		}
-			}
+            final Contact contact = contacts.get(user.getId());
+            if (null != contact) {
+                userContacts.add(new UserContact(contact, user));
+                final Date contactLastModified = contact.getLastModified();
+                if (null != contactLastModified && ((null == lastModified) || (contactLastModified.after(lastModified)))) {
+                    lastModified = contactLastModified;
+                }
+            }
 		}
         /*
          * Return appropriate result
          */
-        return new AJAXRequestResult(userContacts, lastModified, "usercontact");
+        return new AJAXRequestResult(userContacts, lastModified, "usercontact").addWarnings(warnings);
+    }
+
+    private User getUserByContact(final ServerSession session, UserService userService, final Contact contact) throws OXException {
+        final String email1 = contact.getEmail1();
+        User user = isEmpty(email1) ? null : userService.searchUser(email1, session.getContext());
+        if (null == user) {
+            final User[] usrs = userService.searchUserByName(contact.getDisplayName(), session.getContext(), UserService.SEARCH_DISPLAY_NAME);
+            if (null != usrs && usrs.length > 0) {
+                user = usrs[0];
+            }
+        }
+        return user;
     }
 
     private int[] parseUserIDs(final AJAXRequestData request, final int fallbackUserID) throws OXException {
@@ -183,7 +214,7 @@ public final class ListAction extends AbstractUserAction {
         return userIDs;
     }
 
-	private User[] getUsers(final ServerSession session, final int[] userIDs) throws OXException {
+	private User[] getUsers(final ServerSession session, final int[] userIDs, final List<OXException> warnings) throws OXException {
         final UserService userService = ServiceRegistry.getInstance().getService(UserService.class, true);
 		try {
 		    return userService.getUser(session.getContext(), userIDs);
@@ -220,8 +251,13 @@ public final class ListAction extends AbstractUserAction {
 		            if (!UserExceptionCode.USER_NOT_FOUND.equals(ue)) {
 		                throw ue;
 		            }
+		            warnings.add(ue.setCategory(Category.CATEGORY_WARNING));
 		        }
 		    }
+		    if (list.isEmpty()) {
+                // None loaded
+		        throw e;
+            }
 		    return list.toArray(new User[list.size()]);
 		}
 	}

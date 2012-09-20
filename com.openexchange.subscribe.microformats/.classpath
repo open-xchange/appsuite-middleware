@@ -6,7 +6,6 @@
 	<classpathentry kind="lib" path="lib/htmllexer.jar"/>
 	<classpathentry kind="lib" path="lib/htmlparser.jar"/>
 	<classpathentry kind="lib" path="lib/jodatime.jar"/>
-	<classpathentry kind="lib" path="lib/nekohtml-1.9.13.jar" sourcepath="lib/nekohtml.src-1.9.13.jar"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.test"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>

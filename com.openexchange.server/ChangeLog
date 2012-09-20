@@ -1,6 +1,33 @@
+* 2012-09-20 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22980: No "hidden" mailbox expunge anymore
+ 
+ * 2012-09-20 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 23046: Skip validation of URL property in vCards
+
+* 2012-09-19 - francisco.laguna@open-xchange.com
+
+ - Fix for bug 22525: Remove I18nService from needed services array in subscription json activator, since they are discovered dynamically.
+
+* 2012-09-19 - marcus.klein@open-xchange.com
+
+ - Fix for bug 22776: Made the new administration SOAP interface based on Apache CXF as conform as possible to previous Axis2 framework.
+
+* 2012-09-19 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23025: Return proper JSON response if GAB is disabled for requested user(s)
+ - Fix for bug 23045: More lenient scanner behavior for VCard parsing
+
 * 2012-09-18 - thorben.betten@open-xchange.com
 
  - Fix for bug 22881: Fixed update operation for personal data
+ - Fix for bug 23036: Fixed possible IndexOutOfBoundsException when accessing arguments
+
+* 2012-09-18 - francisco.laguna@open-xchange.com
+
+ - Fix for bug 22989: Respond with proper error message if a subscription can not be loaded.
+ - Fix for bug 22990: Fixed NPE.
 
 * 2012-09-18 - marcus.klein@open-xchange.com
 
@@ -125,13 +152,16 @@
 
  - Fix for bug 22838: New implementation of com.openexchange.sessiond.impl.SessionHandler.merge
 
+* 2012-08-20 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 22809: Send proper linebreaks in group vCards to clients
+
 * 2012-08-20 - marcus.klein@open-xchange.com
 
  - Fix for bug 22803: Parse escaped characters properly from PO file without entering an endless loop.
 
 * 2012-08-19 - thorben.betten@open-xchange.com
 
- - Fix for bug 22776: Set property "set-jaxb-validation-event-handler" to "false" to turn off the validation event handler.
  - Fix for bug 22735: Enable parsing of TNEF parts
 
 * 2012-08-18 - thorben.betten@open-xchange.com

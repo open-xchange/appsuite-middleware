@@ -64,6 +64,11 @@ public interface Parameterized {
     public static final String PARAM_SESSION = "__session";
 
     /**
+     * The parameter name for a volatile flag.
+     */
+    public static final String PARAM_VOLATILE = "__volatile";
+
+    /**
      * Gets the denoted parameter.
      * 
      * @param name The name

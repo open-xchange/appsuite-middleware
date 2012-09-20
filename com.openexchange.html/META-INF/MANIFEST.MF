@@ -6,11 +6,7 @@ Bundle-Version: 6.22.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: .,
- lib/htmlcleaner-2.2.jar,
- lib/jericho-3.2.jar,
- lib/jsoup-1.6.1.jar,
  lib/jTidy.jar,
- lib/kxml2-2.3.0.jar,
  lib/org.apache.log4j_1.2.13.v200806030600.jar
 Import-Package: com.openexchange.config,
  com.openexchange.dispatcher,
@@ -22,12 +18,29 @@ Import-Package: com.openexchange.config,
  com.openexchange.session,
  com.openexchange.tools.stream,
  gnu.inet.encoding,
+ net.htmlparser.jericho,
+ net.htmlparser.jericho.nodoc,
  org.apache.commons.httpclient;version="3.1.0",
  org.apache.commons.httpclient.methods;version="3.1.0",
  org.apache.commons.logging,
+ org.htmlcleaner,
+ org.jsoup,
+ org.jsoup.examples,
+ org.jsoup.helper,
+ org.jsoup.nodes,
+ org.jsoup.parser,
+ org.jsoup.safety,
+ org.jsoup.select,
+ org.kxml2.io,
+ org.kxml2.kdom,
+ org.kxml2.wap,
+ org.kxml2.wap.syncml,
+ org.kxml2.wap.wml,
+ org.kxml2.wap.wv,
  org.osgi.framework,
  org.osgi.util.tracker,
- org.w3c.dom
+ org.w3c.dom,
+ org.xmlpull.v1
 Export-Package: com.openexchange.html,
  com.openexchange.html.tools
 Bundle-Activator: com.openexchange.html.osgi.HTMLServiceActivator

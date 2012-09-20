@@ -64,6 +64,7 @@ import org.apache.commons.logging.Log;
 import org.jdom2.Document;
 import org.jdom2.JDOMException;
 import com.openexchange.ajax.fields.Header;
+import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
@@ -99,25 +100,28 @@ public abstract class OXServlet extends WebDavServlet {
     private static final class LoginRequestImpl implements LoginRequest {
 
         private final String login;
-
         private final HttpServletRequest req;
-
         private final String pass;
-
         private final String client;
-
         private final Interface interfaze;
-
         private final String version;
+        private final boolean isVolatile;
 
         public LoginRequestImpl(final String login, final String pass, final Interface interfaze, final HttpServletRequest req) {
             super();
-            this.client = req.getParameter("client");
-            version = req.getParameter("version");
+            this.client = req.getParameter(LoginFields.CLIENT_PARAM);
+            version = req.getParameter(LoginFields.VERSION_PARAM);
+            String parameter = req.getParameter(LoginFields.VOLATILE);
+            this.isVolatile = null != parameter && Boolean.parseBoolean(parameter.trim());
             this.login = login;
             this.req = req;
             this.pass = pass;
             this.interfaze = interfaze;
+        }
+
+        @Override
+        public boolean isVolatile() {
+            return isVolatile;
         }
 
         @Override
