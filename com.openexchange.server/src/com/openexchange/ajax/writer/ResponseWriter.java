@@ -270,12 +270,26 @@ public final class ResponseWriter {
      * Writes specified exception to given JSON object using passed locale.
      *
      * @param json The JSON object
+     * @param errorKey The key value for the error value inside the JSON object
      * @param exception The exception to write
      * @param locale The locale
      * @throws JSONException If writing JSON fails
      */
     public static void addException(final JSONObject json, final OXException exception, final Locale locale) throws JSONException {
-        json.put(ERROR, exception.getDisplayMessage(locale));
+        addException(json, ERROR, exception, locale);
+    }
+
+    /**
+     * Writes specified exception to given JSON object using passed locale.
+     *
+     * @param json The JSON object
+     * @param errorKey The key value for the error value inside the JSON object
+     * @param exception The exception to write
+     * @param locale The locale
+     * @throws JSONException If writing JSON fails
+     */
+    public static void addException(final JSONObject json, String errorKey, final OXException exception, final Locale locale) throws JSONException {
+        json.put(errorKey, exception.getDisplayMessage(locale));
         /*
          * Put argument JSON array for compatibility reasons
          */
