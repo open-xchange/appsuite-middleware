@@ -53,6 +53,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.presence.PresenceData;
 import com.openexchange.realtime.presence.PresenceService;
+import com.openexchange.realtime.presence.PresenceState;
 import com.openexchange.tools.session.ServerSession;
 
 

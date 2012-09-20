@@ -1,3 +1,6 @@
+
+package com.openexchange.realtime.presence;
+
 /*
  *
  *    OPEN-XCHANGE legal information
@@ -47,21 +50,38 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.presence;
-
-import com.openexchange.i18n.LocalizableStrings;
-
-
 /**
- * {@link AtmospherePresenceExceptionMessage}
- *
+ * {@link PresenceState} - The different Presence states that can be used to display your availability.
+ * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class AtmospherePresenceExceptionMessage implements LocalizableStrings{
-    /** The following obligatory element is missing: \"%1$s\" */
-    public static final String OBLIGATORY_ELEMENT_MISSING_MSG = "The following obligatory element is missing: \"%1$s\"";
-    /** Malformed Presence Data */
-    public static final String PRESENCE_DATA_MALFORMED_MSG = "Malformed Presence Data";
-    /** Malformed Presence Element: \"%1$s\" */
-    public static final String PRESENCE_DATA_ELEMENT_MALFORMED_MSG = "Malformed Presence Element: \"%1$s\"";
+public enum PresenceState {
+    ONLINE, OFFLINE, DO_NOT_DISTURB, CHAT_ME_UP, AWAY;
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * The programmer-friendly form in this case is the name to lower case.
+     * </p>
+     */
+    @Override
+    public String toString() {
+        return this.name().toLowerCase();
+    }
+
+    /**
+     * Get the possible PresenceStates as comma separated String
+     * @return the values of this enum as comma separated String
+     */
+    public static String getPossibleStates() {
+        StringBuilder sb = new StringBuilder();
+        PresenceState[] states = values();
+        for(int i = 0; i < states.length; i++) {
+            sb.append(states[i]);
+            if(i < states.length - 1) {
+                sb.append(", ");
+            }
+        }
+        return sb.toString();
+    }
 }

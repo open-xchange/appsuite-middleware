@@ -64,7 +64,11 @@ import static com.openexchange.realtime.atmosphere.presence.AtmospherePresenceEx
 public enum AtmospherePresenceExceptionCode implements OXExceptionCode {
     
     /** The following obligatory element is missing: \"%1$s\" */
-    OBLIGATORY_ELEMENT_MISSING(OBLIGATORY_ELEMENT_MISSING_MSG, CATEGORY_ERROR, 1)
+    OBLIGATORY_ELEMENT_MISSING(OBLIGATORY_ELEMENT_MISSING_MSG, CATEGORY_ERROR, 1),
+    /** Malformed Presence Data \"%1$s\" */
+    PRESENCE_DATA_MALFORMED(PRESENCE_DATA_MALFORMED_MSG, CATEGORY_ERROR, 2),
+    /** Malformed Presence Element: \"%1$s\" */
+    PRESENCE_DATA_ELEMENT_MALFORMED(PRESENCE_DATA_ELEMENT_MALFORMED_MSG, CATEGORY_ERROR, 2)
     ;
 
     private final String message;

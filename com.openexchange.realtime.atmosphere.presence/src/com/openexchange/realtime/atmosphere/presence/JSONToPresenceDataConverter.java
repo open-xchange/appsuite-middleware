@@ -49,15 +49,21 @@
 
 package com.openexchange.realtime.atmosphere.presence;
 
+import static com.openexchange.realtime.presence.PresenceData.MESSAGE;
+import static com.openexchange.realtime.presence.PresenceData.PRIORITY;
+import static com.openexchange.realtime.presence.PresenceData.STATE;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.conversion.simple.SimplePayloadConverter;
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.presence.PresenceData;
+import com.openexchange.realtime.presence.PresenceState;
 import com.openexchange.tools.session.ServerSession;
-
 
 /**
  * {@link JSONToPresenceDataConverter}
- *
+ * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class JSONToPresenceDataConverter implements SimplePayloadConverter {
@@ -77,9 +83,63 @@ public class JSONToPresenceDataConverter implements SimplePayloadConverter {
         return Quality.GOOD;
     }
 
+    /* 
+     * Convert FROM
+     * {
+     * from: userB@realtime
+     * [namespace: 'default',]
+     * element: 'presence'
+     * [type: none]
+     * <--- interesting part to convert
+     * data: {
+     * state: 'online',
+     * message: 'i am here',
+     * [priority: 0,]
+     * [error: "error"]
+     * }
+     * --->
+     * };
+     */
     @Override
     public Object convert(Object data, ServerSession session, SimpleConverter converter) throws OXException {
-        throw new UnsupportedOperationException("Not implemented yet!");
+        if (!(data instanceof JSONObject)) {
+            throw new IllegalArgumentException("Input must be valid JSONObject");
+        }
+
+        JSONObject json = (JSONObject) data;
+        PresenceData presenceData = new PresenceData();
+
+        try {
+
+            if (json.has(MESSAGE)) {
+                presenceData.setMessage(json.getString(MESSAGE));
+            }
+
+            if (json.has(PRIORITY)) {
+                byte priority = Byte.parseByte(json.getString(PRIORITY));
+                presenceData.setPriority(priority);
+            }
+
+            if (json.has(PresenceData.STATE)) {
+                String state = json.getString(STATE);
+                PresenceState presenceState = null;
+                for (PresenceState ps : PresenceState.values()) {
+                    if (ps.name().equalsIgnoreCase(state)) {
+                        presenceState = ps;
+                        break;
+                    }
+                }
+                if (presenceState == null) {
+                    throw AtmospherePresenceExceptionCode.PRESENCE_DATA_ELEMENT_MALFORMED.create(STATE);
+                } else {
+                    presenceData.setState(presenceState);
+                }
+            }
+
+        } catch (JSONException ex) {
+            throw AtmospherePresenceExceptionCode.PRESENCE_DATA_MALFORMED.create(ex, new Object[0]);
+        }
+        return presenceData;
     }
 
 }

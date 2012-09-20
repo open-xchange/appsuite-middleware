@@ -49,15 +49,24 @@
 
 package com.openexchange.realtime.atmosphere.presence;
 
+import static com.openexchange.realtime.presence.PresenceData.ERROR;
+import static com.openexchange.realtime.presence.PresenceData.MESSAGE;
+import static com.openexchange.realtime.presence.PresenceData.PRIORITY;
+import static com.openexchange.realtime.presence.PresenceData.STATE;
+import java.io.StringWriter;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONWriter;
+import com.openexchange.ajax.writer.*;
 import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.conversion.simple.SimplePayloadConverter;
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.presence.PresenceData;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
- * {@link PresenceDataToJSONConverter}
- *
+ * {@link PresenceDataToJSONConverter} - Convert PresenceData into JSON.
+ * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class PresenceDataToJSONConverter implements SimplePayloadConverter {
@@ -77,9 +86,41 @@ public class PresenceDataToJSONConverter implements SimplePayloadConverter {
         return Quality.GOOD;
     }
 
+    /*
+     * Convert PresenceData to JSON like shown below
+     * {
+     * from: userB@realtime
+     * [namespace: 'default',]
+     * element: 'presence'
+     * [type: none]
+     * <--- interesting part to convert
+     * data: {
+     * state: 'online',
+     * message: 'i am here',
+     * [priority: 0,]
+     * [error: "error"]
+     * }
+     * --->
+     * };
+     */
     @Override
     public Object convert(Object data, ServerSession session, SimpleConverter converter) throws OXException {
-        throw new UnsupportedOperationException("Not implemented yet!");
-    }
+        if (!(data instanceof PresenceData)) {
+            throw new IllegalArgumentException("Input must be valid PresenceData");
+        }
 
+        JSONObject json = new JSONObject();
+        PresenceData presenceData = (PresenceData) data;
+        try {
+        if (presenceData.getError() != null) {
+            ResponseWriter.addException(json, ERROR, presenceData.getError(), session.getUser().getLocale());
+        }
+            json.put(MESSAGE, presenceData.getMessage());
+            json.put(PRIORITY, presenceData.getPriority());
+            json.put(STATE, presenceData.getState().toString());
+        } catch (JSONException ex) {
+            AtmospherePresenceExceptionCode.PRESENCE_DATA_MALFORMED.create(ex, new Object[0]);
+        }
+        return json;
+    }
 }

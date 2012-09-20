@@ -50,7 +50,6 @@
 package com.openexchange.realtime.presence;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.presence.PresenceService.PresenceState;
 
 /**
  * {@link PresenceData} - Presence specific data that combined with the general Stanza fields forms a Presence Stanza.
@@ -59,6 +58,12 @@ import com.openexchange.realtime.presence.PresenceService.PresenceState;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class PresenceData {
+
+    //names of the corresponding keys in the JSONObject
+    public static final String ERROR="error";
+    public static final String MESSAGE="message";
+    public static final String PRIORITY="priority";
+    public static final String STATE="state";
 
     /**
      * The server should deliver messages to the highest-priority available resource or decide on metrics like most recent connect,
@@ -117,7 +122,7 @@ public class PresenceData {
     /**
      * Get the error element describing the error-type Stanza in more detail. 
      *
-     * @return The error
+     * @return The OXException representing the error
      */
     public OXException getError() {
         return error;
@@ -126,7 +131,7 @@ public class PresenceData {
     /**
      * Set the error element describing the error-type Stanza in more detail.
      *
-     * @param error The error to set
+     * @param error The OXException representing the error
      */
     public void setError(OXException error) {
         this.error = error;
@@ -173,7 +178,7 @@ public class PresenceData {
      * 
      * @return The state
      */
-    public PresenceService.PresenceState getState() {
+    public PresenceState getState() {
         return state;
     }
 
@@ -181,7 +186,7 @@ public class PresenceData {
      * Sets the state e.g. online or away
      * @param state The state
      */
-    public void setState(PresenceService.PresenceState state) {
+    public void setState(PresenceState state) {
         this.state = state;
     }
 

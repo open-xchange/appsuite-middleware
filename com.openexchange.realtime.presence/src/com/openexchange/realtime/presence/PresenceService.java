@@ -61,10 +61,6 @@ import com.openexchange.tools.session.ServerSession;
  */
 public interface PresenceService {
 
-    public static enum PresenceState {
-        ONLINE, OFFLINE, DO_NOT_DISTURB, CHAT_ME_UP, AWAY
-    }
-
     /**
      * @param id
      * @param state
