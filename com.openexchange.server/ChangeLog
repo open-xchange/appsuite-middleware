@@ -1,6 +1,10 @@
+* 2012-09-20 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 23055: External participant detected as "Party Crasher".
+
 * 2012-09-19 - martin.herfurth@open-xchange.com
 
- - Fix for bug 21054: Wrong sorting of Recurring Appointments in Week view..
+ - Fix for bug 21054: Wrong sorting of Recurring Appointments in Week view.
 
 * 2012-09-17 - thorben.betten@open-xchange.com
 

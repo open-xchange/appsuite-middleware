@@ -136,7 +136,7 @@ public class ResourceParticipant implements Participant, Comparable<Participant>
      */
     @Override
     public String getEmailAddress() {
-        return emailaddress;
+        return emailaddress == null ? null : emailaddress.toLowerCase();
     }
 
     /**
