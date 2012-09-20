@@ -1022,10 +1022,12 @@ final class SessionData {
             public void run() {
                 try {
                     final long maxStamp = System.currentTimeMillis() - maxIdleTime;
+                    int count = 0;
                     for (final Iterator<SessionControl> it = volatileSessions.values().iterator(); it.hasNext();) {
                         final SessionControl sessionControl = it.next();
                         if (sessionControl.getLastAccessed() < maxStamp) {
                             it.remove();
+                            count++;
                             final SessionImpl session = sessionControl.getSession();
                             SessionHandler.postSessionRemoval(session);
                             final UserKey key = new UserKey(session.getUserId(), session.getContextId());
@@ -1042,7 +1044,7 @@ final class SessionData {
                             LOG.info("Removed volatile session due to timeout: " + session.getSessionID());
                         }
                     }
-                    LOG.info("Volatile session cleaner run finished.");
+                    LOG.info("Volatile session cleaner run finished: " + count + " volatile session(s) removed.");
                 } catch (final Exception e) {
                     LOG.warn(e.getMessage(), e);
                 }
