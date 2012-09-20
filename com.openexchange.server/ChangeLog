@@ -5,6 +5,7 @@
 * 2012-09-20 - thorben.betten@open-xchange.com
 
  - Fix for bug 22980: No "hidden" mailbox expunge anymore
+ - Fix for bug 22897: Delete only matching session if marked for removal
 
  * 2012-09-20 - tobias.friedrich@open-xchange.com
 
