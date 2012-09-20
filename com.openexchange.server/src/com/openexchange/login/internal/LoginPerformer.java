@@ -173,10 +173,9 @@ public final class LoginPerformer {
     private static final Pattern SPLIT = Pattern.compile(" *, *");
 
     private static final String PARAM_SESSION = Parameterized.PARAM_SESSION;
-
     private static final String PARAM_VOLATILE = Parameterized.PARAM_VOLATILE;
 
-    private static final int MAX_RETRY = 3;
+    private static final int MAX_RETRY = 1;
 
     /**
      * Performs the login for specified login request.
@@ -237,10 +236,7 @@ public final class LoginPerformer {
                     parameterObject.setParameter(PARAM_VOLATILE, Boolean.valueOf(request.isVolatile()));
                     final String sessionId = sessiondService.addSession(parameterObject);
                     // Look-up generated session instance
-                    session = parameterObject.getParameter(PARAM_SESSION);
-                    if (null == session) {
-                        session = sessiondService.getSession(sessionId);
-                    }
+                    session = sessiondService.getSession(sessionId);
                 }
                 if (null == session) {
                     // Session could not be created
