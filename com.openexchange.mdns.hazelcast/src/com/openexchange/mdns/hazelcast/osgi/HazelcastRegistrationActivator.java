@@ -57,8 +57,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mdns.MDNSService;
 import com.openexchange.mdns.MDNSServiceInfo;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.threadpool.ThreadPools;
 
 
 /**
@@ -84,7 +82,7 @@ public final class HazelcastRegistrationActivator extends HousekeepingActivator 
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { MDNSService.class, ThreadPoolService.class };
+        return new Class<?>[] { MDNSService.class };
     }
 
     @Override
@@ -104,7 +102,7 @@ public final class HazelcastRegistrationActivator extends HousekeepingActivator 
                     }
                 }
             };
-            ThreadPools.getThreadPool().submit(ThreadPools.task(task));
+            new Thread(task).run();
         }
     }
 

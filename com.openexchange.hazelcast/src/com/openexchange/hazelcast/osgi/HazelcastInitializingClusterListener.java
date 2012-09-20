@@ -82,7 +82,7 @@ final class HazelcastInitializingClusterListener implements ClusterListener {
     public void added(final InetAddress address) {
         if (activator.init(Collections.<InetAddress> singletonList(address))) {
             if (LOG.isInfoEnabled()) {
-                LOG.info("Initialized Hazelcast instance via cluster listener notification about an appeared Open-Xchange node: " + address);
+                LOG.info("\n\n\tInitialized Hazelcast instance via cluster listener notification about an appeared Open-Xchange node: " + address);
             }
         }
     }
