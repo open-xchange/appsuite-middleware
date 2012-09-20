@@ -145,7 +145,7 @@ public class VCard {
         BinaryProperty, new PropertyDefinition(VCardValueDefinition.Default, AgentValueNames, AgentValues, NoNames, NoParameters),
         new PropertyDefinition(SemicolonList), CommaListProperty, DefaultProperty, DefaultProperty,
         new PropertyDefinition(DateTimeValueDefinition.Default, DateValueNames, DateValues, NoNames, NoParameters), DefaultProperty,
-        BinaryProperty, DefaultProperty, new PropertyDefinition(URIValueDefinition.Default), DefaultProperty, DefaultProperty,
+        BinaryProperty, DefaultProperty, DefaultProperty, DefaultProperty, DefaultProperty,
         new PropertyDefinition(BinaryValue, KeyValueNames, KeyValues, NoNames, NoParameters), DefaultProperty, DefaultProperty };
 
     // Arrays of object definitions

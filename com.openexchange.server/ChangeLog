@@ -1,3 +1,7 @@
+* 2012-09-20 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 23046: Skip validation of URL property in vCards
+
 * 2012-09-19 - francisco.laguna@open-xchange.com
 
  - Fix for bug 22525: Remove I18nService from needed services array in subscription json activator, since they are discovered dynamically.
