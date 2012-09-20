@@ -33,7 +33,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2006-11-13 15:15+0100\n"
-"PO-Revision-Date: 2012-09-18 14:52+0200\n"
+"PO-Revision-Date: 2012-09-20 13:14+0200\n"
 "Last-Translator: Antje Faber\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "MIME-Version: 1.0\n"
@@ -109,10 +109,9 @@ msgid "Could not create loadbalancer."
 msgstr "Loadbalancer konnte nicht erstellt werden."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.loadbalancing/src/com/openexchange/aws/loadbalancing/exceptions/OXAWSLoadBalancingExceptionMessages.java:67
-#, fuzzy
 msgid "Could not register instance with id %1$s with the loadbalancer."
 msgstr ""
-"Die Instanz mit der ID %1$s konnte nicht mit dem Load balancer registriert "
+"Die Instanz mit der ID %1$s konnte nicht am Load Balancer registriert "
 "werden"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.loadbalancing/src/com/openexchange/aws/loadbalancing/exceptions/OXAWSLoadBalancingExceptionMessages.java:69
@@ -131,11 +130,11 @@ msgstr "Fehlender Secret Key"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws/src/com/openexchange/aws/exceptions/OXAWSExceptionMessages.java:65
 msgid "EC2 region not set."
-msgstr ""
+msgstr "EC2-Region nicht gesetzt"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws/src/com/openexchange/aws/exceptions/OXAWSExceptionMessages.java:67
 msgid "Loadbalancing region not set."
-msgstr ""
+msgstr "Keine Region für Load Balancing festgelegt"
 
 #. A cache error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caching/src/com/openexchange/caching/CacheExceptionMessage.java:69
@@ -1178,12 +1177,14 @@ msgid "An internal LDAP error occurred: %s"
 msgstr "Es trat ein interner LDAP-Fehler auf: %s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.ldap/src/com/openexchange/contact/storage/ldap/LdapExceptionMessages.java:66
+#, fuzzy
 msgid "This storage can't handle context %d"
-msgstr ""
+msgstr "Dieser Speicher kann den Kontext %d nicht verarbeiten"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.ldap/src/com/openexchange/contact/storage/ldap/LdapExceptionMessages.java:67
+#, fuzzy
 msgid "This storage can't handle folder %s"
-msgstr ""
+msgstr "Der Speicher kann den Ordner %s nicht verarbeiten"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.ldap/src/com/openexchange/contact/storage/ldap/LdapExceptionMessages.java:68
 msgid "No mapping for object %s, folder %s, context %d found"
@@ -3057,6 +3058,8 @@ msgstr "Ungültiger Pfad: %1$s."
 msgid ""
 "Referenced JSlob %1$s must not be set for service %2$s. Nothing will be done."
 msgstr ""
+"Referenzierter JSlob %1$s darf für den Dienst %2$s nicht gesetzt werden. Es "
+"wird keine Aktion ausgeführt."
 
 #. A configuration error: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.loxandra/src/com/openexchange/loxandra/LoxandraExceptionMessages.java:70
@@ -3184,8 +3187,9 @@ msgstr "Fehler auf entferntem System: %1$s"
 #. * A JMX connector is already bound to URL %1$s.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.management/src/com/openexchange/management/ManagementExceptionMessage.java:121
+#, fuzzy
 msgid "A JMX connector is already bound to URL %1$s."
-msgstr ""
+msgstr "Die URL %1$s ist bereits an einen JMX-Konnektor gebunden."
 
 #. Communication error with facebook service: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.facebook/src/com/openexchange/messaging/facebook/FacebookMessagingExceptionMessages.java:76
@@ -3732,8 +3736,9 @@ msgstr ""
 "Einstellungen -> Accounts. Versuchen Sie es dann erneut."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:137
+#, fuzzy
 msgid "The address %1$s is not white-listed as for the %2$s OAuth API"
-msgstr ""
+msgstr "Die Adresse %1$s ist nicht in der Positivliste der %2$s OAuth API"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:139
 msgid "The request sent was missing its body"
@@ -10248,7 +10253,8 @@ msgstr ""
 msgid ""
 "Only one admin CATEGORY_PERMISSION_DENIED is allowed on a private folder"
 msgstr ""
-"Für einen privaten Ordner kann das Adminrecht nur einmal vergeben werden"
+"Für einen privaten Ordner kann das Adminrecht CATEGORY_PERMISSION_DENIED nur "
+"einmal vergeben werden"
 
 #. *
 #. * A group must not hold admin CATEGORY_PERMISSION_DENIED on a private folder
@@ -10275,8 +10281,9 @@ msgid ""
 "Only folder owner may hold admin CATEGORY_PERMISSION_DENIED on a private "
 "folder"
 msgstr ""
-"Nur der Eigentümer des Ordners kann Adminrechte auf einen privaten Ordner "
-"haben"
+"Nur der Eigentümer des Ordners kann das Adminrecht "
+"CATEGORY_PERMISSION_DENIED für "
+"einen privaten Ordner haben."
 
 #. *
 #. * Administration rights required. In the Rights tab add at least one user with administration rights.
@@ -10510,8 +10517,8 @@ msgid ""
 "Effective CATEGORY_PERMISSION_DENIED of folder %1$s could not be determined "
 "for user %2$s in context %3$s"
 msgstr ""
-"Rechte für Ordner %1$s für Benutzer %2$s im Kontext %3$s konnten nicht "
-"bestimmt werden"
+"Das Recht CATEGORY_PERMISSION_DENIED für Ordner %1$s für Benutzer %2$s im "
+"Kontext %3$s konnte nicht bestimmt werden."
 
 #. *
 #. * A DBPool error occurred in context %1$s
@@ -11039,9 +11046,8 @@ msgstr "Ungültige Anfrage. Der Server kann die Anfrage nicht bearbeiten."
 
 #. Missing request body.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:134
-#, fuzzy
 msgid "Missing request body."
-msgstr "Fehlende Sitzung."
+msgstr "Fehlender Anfrage-Body"
 
 #. *
 #. * Exception while writing JSON.
@@ -11292,10 +11298,11 @@ msgid "Saving session with sessionId %1$s failed."
 msgstr "Das Speichern der Sitzung mit der ID %1$s ist fehlgeschlagen."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.hazelcast/src/com/openexchange/sessionstorage/hazelcast/exceptions/OXHazelcastSessionStorageExceptionMessages.java:67
+#, fuzzy
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.impl/src/com/openexchange/sessionstorage/impl/exceptions/OXSessionStorageExceptionMessages.java:71
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.nosql/src/com/openexchange/sessionstorage/nosql/exceptions/OXNoSQLSessionStorageExceptionMessages.java:67
 msgid "Lookup for session with sessionId %1$s failed."
-msgstr ""
+msgstr "Referenz für die Sitzung mit der ID %1$s ist fehlgeschlagen"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.hazelcast/src/com/openexchange/sessionstorage/hazelcast/exceptions/OXHazelcastSessionStorageExceptionMessages.java:69
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.impl/src/com/openexchange/sessionstorage/impl/exceptions/OXSessionStorageExceptionMessages.java:72
@@ -11315,10 +11322,10 @@ msgid "Operation %1$s not supported."
 msgstr "Vorgang %1$s ist nicht unterstützt."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.hazelcast/src/com/openexchange/sessionstorage/hazelcast/exceptions/OXHazelcastSessionStorageExceptionMessages.java:77
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.nosql/src/com/openexchange/sessionstorage/nosql/exceptions/OXNoSQLSessionStorageExceptionMessages.java:77
 #, fuzzy
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.nosql/src/com/openexchange/sessionstorage/nosql/exceptions/OXNoSQLSessionStorageExceptionMessages.java:77
 msgid "Lookup for session with altId %1$s failed"
-msgstr "Der Benutzername \"%1$s\" konnte nicht aufgelöst werden."
+msgstr "Referenz für die Sitzung mit altId %1$s ist fehlgeschlagen"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.hazelcast/src/com/openexchange/sessionstorage/hazelcast/exceptions/OXHazelcastSessionStorageExceptionMessages.java:79
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.nosql/src/com/openexchange/sessionstorage/nosql/exceptions/OXNoSQLSessionStorageExceptionMessages.java:79
@@ -11405,13 +11412,13 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetExceptionMessages.java:69
 #, fuzzy
 msgid "No such snippet found for identifier: %1$s"
-msgstr "Es wurde kein OAuth-Provider für die ID %1$s gefunden."
+msgstr "Kein solches Snippet für ID %1$s gefunden"
 
 #. No such snippet attachment found for identifier %1$s in snippet %2$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetExceptionMessages.java:81
 #, fuzzy
 msgid "No such snippet attachment found for identifier %1$s in snippet %2$s"
-msgstr "Kein Anhang mit Section ID %1$s in Datei %2$s im Ordner %3$d gefunden."
+msgstr "Kein solcher Snippet- Anhang für die ID %1$s im Snippet %2$s gefunden"
 
 #. Could not find Apache Solr Core entry for user %1$s and module %2$s in context %3$s.
 #. Apache Solr Core" is a proper name, no translation applicable
@@ -11433,9 +11440,8 @@ msgstr ""
 
 #. All core stores seem to be full.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.solr/src/com/openexchange/solr/SolrExceptionMessages.java:78
-#, fuzzy
 msgid "All core stores seem to be full."
-msgstr "Dateispeicher ist voll."
+msgstr "Alle Kernspeicher scheinen belegt zu sein."
 
 #. This Apache Solr Core's instance directory (%1$s) already exists and its structure is inconsistent.
 #. Apache Solr Core" is a proper name, no translation applicable
@@ -11444,6 +11450,8 @@ msgid ""
 "This Apache Solr Core's instance directory (%1$s) already exists and its "
 "structure is inconsistent."
 msgstr ""
+"Dieses Instanzen-Verzeichnis (%1$s) von Apache Solr Core ist bereits "
+"vorhanden und seine Struktur ist inkonsistent."
 
 #. Could neither delegate Apache Solr request to a local nor to a remote server instance.
 #. "Apache Solr" is a proper name, no translation applicable
@@ -11483,6 +11491,8 @@ msgid ""
 "Can not reach Apache Solr Core Store. URI %1$s does not lead to an existing "
 "directory."
 msgstr ""
+"Der Zugriff auf den Apache Solr Core Store ist fehlgeschlagen. Der URI %1$s "
+"verweist nicht auf ein vorhandenes Verzeichnis."
 
 #. The affected Apache Solr Core %1$s is not started up yet. Please try again later.
 #. "Apache Solr Core" is a proper name, no translation applicable
@@ -11784,7 +11794,7 @@ msgstr "Bitte korrigieren Sie die Vorlage"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:74
 msgid "The underlying templating system threw an exception: %s"
-msgstr ""
+msgstr "Fehlermeldung des zugrundeliegenden Vorlagesystems: %s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:76
 msgid "Please use an existing template"
@@ -11795,8 +11805,9 @@ msgid "The template %2 does not exist."
 msgstr "Die Vorlage %2 ist nicht vorhanden."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:80
+#, fuzzy
 msgid "An underlying system threw an SQL exception"
-msgstr ""
+msgstr "Ein zugrundeliegendes System gab eine SQL-Ausnahme zurück"
 
 #. The consumer key/consumer secret pair is missing in configuration.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.twitter/src/com/openexchange/twitter/TwitterExceptionMessages.java:71
