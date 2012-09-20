@@ -90,6 +90,7 @@ import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.TNEFBodyPart;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.dataobjects.MIMEMultipartMailPart;
+import com.openexchange.mail.mime.dataobjects.MimeMailPart;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.parser.MailMessageHandler;
@@ -518,14 +519,7 @@ public final class StructureMailMessageParser {
                         LOG.error("Invalid TNEF contact", e);
                         return;
                     }
-                    final int mpsize = mp.getCount();
-                    for (int i = 0; i < mpsize; i++) {
-                        /*
-                         * Since TNEF library is based on JavaMail API we use an instance of IMAPMailContent regardless of the mail
-                         * implementation
-                         */
-                        parseMailContent(MimeMessageConverter.convertPart(mp.getBodyPart(i), false), handler, prefix, partCount++);
-                    }
+                    parseMailContent(new MimeMailPart(mp), handler, prefix, partCount);
                     /*
                      * Stop to further process TNEF attachment
                      */
@@ -544,14 +538,7 @@ public final class StructureMailMessageParser {
                         }
                         return;
                     }
-                    final int mpsize = mp.getCount();
-                    for (int i = 0; i < mpsize; i++) {
-                        /*
-                         * Since TNEF library is based on JavaMail API we use an instance of IMAPMailContent regardless of the mail
-                         * implementation
-                         */
-                        parseMailContent(MimeMessageConverter.convertPart(mp.getBodyPart(i)), handler, prefix, partCount++);
-                    }
+                    parseMailContent(new MimeMailPart(mp), handler, prefix, partCount);
                     /*
                      * Stop to further process TNEF attachment
                      */
