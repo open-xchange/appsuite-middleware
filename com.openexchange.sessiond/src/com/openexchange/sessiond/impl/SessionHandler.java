@@ -394,7 +394,7 @@ public final class SessionHandler {
     protected static boolean clearSession(final String sessionid) {
         final SessionControl sessionControl = sessionDataRef.get().clearSession(sessionid);
         if (null == sessionControl) {
-            LOG.debug("Cannot find session id to remove session <" + sessionid + '>');
+            LOG.debug("Cannot find session for given identifier to remove session <" + sessionid + '>');
             return false;
         }
         try {
