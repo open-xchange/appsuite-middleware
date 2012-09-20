@@ -1022,32 +1022,46 @@ final class SessionData {
             public void run() {
                 try {
                     final long maxStamp = System.currentTimeMillis() - maxIdleTime;
-                    int count = 0;
-                    for (final Iterator<SessionControl> it = volatileSessions.values().iterator(); it.hasNext();) {
-                        final SessionControl sessionControl = it.next();
-                        if (sessionControl.getLastAccessed() < maxStamp) {
-                            it.remove();
-                            count++;
-                            final SessionImpl session = sessionControl.getSession();
-                            SessionHandler.postSessionRemoval(session);
-                            final UserKey key = new UserKey(session.getUserId(), session.getContextId());
-                            final Queue<String> queue = volatileUserSessions.remove(key);
-                            if (null != queue) {
-                                queue.remove(session.getSessionID());
-                                if (!queue.isEmpty()) {
-                                    final Queue<String> prev = volatileUserSessions.put(key, queue);
-                                    if (null != prev) {
-                                        queue.addAll(prev);
-                                    }
-                                }
+                    if (LOG.isDebugEnabled()) {
+                        int count = 0;
+                        for (final Iterator<SessionControl> it = volatileSessions.values().iterator(); it.hasNext();) {
+                            final SessionControl sessionControl = it.next();
+                            if (sessionControl.getLastAccessed() < maxStamp) {
+                                it.remove();
+                                dropSession(sessionControl, volatileUserSessions);
+                                count++;
                             }
-                            LOG.info("Removed volatile session due to timeout: " + session.getSessionID());
+                        }
+                        LOG.debug("Volatile session cleaner run finished: " + count + " volatile session(s) removed.");
+                    } else {
+                        for (final Iterator<SessionControl> it = volatileSessions.values().iterator(); it.hasNext();) {
+                            final SessionControl sessionControl = it.next();
+                            if (sessionControl.getLastAccessed() < maxStamp) {
+                                it.remove();
+                                dropSession(sessionControl, volatileUserSessions);
+                            }
                         }
                     }
-                    LOG.info("Volatile session cleaner run finished: " + count + " volatile session(s) removed.");
                 } catch (final Exception e) {
                     LOG.warn(e.getMessage(), e);
                 }
+            }
+
+            private void dropSession(final SessionControl sessionControl, final ConcurrentMap<UserKey, Queue<String>> volatileUserSessions) {
+                final SessionImpl session = sessionControl.getSession();
+                SessionHandler.postSessionRemoval(session);
+                final UserKey key = new UserKey(session.getUserId(), session.getContextId());
+                final Queue<String> queue = volatileUserSessions.remove(key);
+                if (null != queue) {
+                    queue.remove(session.getSessionID());
+                    if (!queue.isEmpty()) {
+                        final Queue<String> prev = volatileUserSessions.put(key, queue);
+                        if (null != prev) {
+                            queue.addAll(prev);
+                        }
+                    }
+                }
+                LOG.info("Removed volatile session due to timeout: " + session.getSessionID());
             }
         };
         final int frequencyTime = volatileFrequencyTime();
