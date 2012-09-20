@@ -90,6 +90,7 @@ import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRendere
 import com.openexchange.ajax.writer.LoginWriter;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.authentication.LoginExceptionCodes;
+import com.openexchange.authentication.ResultCode;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ClientWhitelist;
@@ -1128,14 +1129,17 @@ public class Login extends AJAXServlet {
                 return true;
             }
             addHeadersAndCookies(result, resp);
-            if (null != result.getCode()) {
-                switch (result.getCode()) {
-                case FAILED:
-                    return true;
-                case REDIRECT:
-                    throw LoginExceptionCodes.REDIRECT.create(result.getRedirect());
-                default:
-                    break;
+            {
+                final ResultCode code = result.getCode();
+                if (null != code) {
+                    switch (code) {
+                    case FAILED:
+                        return true;
+                    case REDIRECT:
+                        throw LoginExceptionCodes.REDIRECT.create(result.getRedirect());
+                    default:
+                        break;
+                    }
                 }
             }
             final Session session = result.getSession();

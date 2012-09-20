@@ -134,13 +134,7 @@ public final class LoginPerformer {
      * @throws LoginException If login fails
      */
     public LoginResult doLogin(final LoginRequest request) throws OXException {
-        final HashMap<String, Object> properties = new HashMap<String, Object>();
-        return doLogin(request, properties, new LoginPerformerClosure() {
-            @Override
-            public Authenticated doAuthentication(final LoginResultImpl retval) throws OXException {
-                return Authentication.login(request.getLogin(), request.getPassword(), properties);
-            }
-        });
+        return doLogin(request, new HashMap<String, Object>());
     }
 
     public LoginResult doLogin(final LoginRequest request, final Map<String, Object> properties) throws OXException {
