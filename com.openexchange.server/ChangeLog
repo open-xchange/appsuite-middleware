@@ -1,4 +1,8 @@
-* 2012-09-20 - tobias.friedrich@open-xchange.com
+* 2012-09-20 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22980: No "hidden" mailbox expunge anymore
+ 
+ * 2012-09-20 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 23046: Skip validation of URL property in vCards
 
