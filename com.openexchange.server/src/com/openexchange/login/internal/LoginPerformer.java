@@ -206,8 +206,9 @@ public final class LoginPerformer {
                 retval.setHeaders(responseEnhancement.getHeaders());
                 retval.setCookies(responseEnhancement.getCookies());
                 retval.setRedirect(responseEnhancement.getRedirect());
-                retval.setCode(responseEnhancement.getCode());
-                if (ResultCode.REDIRECT.equals(responseEnhancement.getCode()) || ResultCode.FAILED.equals(responseEnhancement.getCode())) {
+                final ResultCode code = responseEnhancement.getCode();
+                retval.setCode(code);
+                if (ResultCode.REDIRECT.equals(code) || ResultCode.FAILED.equals(code)) {
                     return retval;
                 }
             }
