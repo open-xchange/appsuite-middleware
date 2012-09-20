@@ -192,7 +192,7 @@ public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
         CalendarDataObject appointment = appointment("123-123-123-123");
 
         // With a user that has accepted
-        ExternalUserParticipant externalParticipant = new ExternalUserParticipant("partyCrasher@somewhere.invalid");
+        ExternalUserParticipant externalParticipant = new ExternalUserParticipant("partycrasher@somewhere.invalid");
         externalParticipant.setStatus(ConfirmStatus.ACCEPT);
         appointment.setParticipants(new Participant[] { externalParticipant });
 
@@ -249,7 +249,7 @@ public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
                 break;
             case Participant.EXTERNAL_USER:
                 ExternalUserParticipant externalInMergedAppointment = (ExternalUserParticipant) participant;
-                if (externalInMergedAppointment.getEmailAddress().contains("partyCrasher")) {
+                if (externalInMergedAppointment.getEmailAddress().contains("partycrasher")) {
                     // Our Party Crasher
                     foundPartyCrasher = true;
                 } else {
@@ -470,7 +470,7 @@ public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
                 break;
             case Participant.EXTERNAL_USER:
                 ExternalUserParticipant externalInMergedAppointment = (ExternalUserParticipant) participant;
-                if (externalInMergedAppointment.getEmailAddress().contains("partyCrasher")) {
+                if (externalInMergedAppointment.getEmailAddress().contains("partycrasher")) {
                     // Our Party Crasher
                     foundPartyCrasher = true;
                 } else {
