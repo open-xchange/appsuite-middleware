@@ -155,7 +155,6 @@ public class InfostoreFolderCallable implements Callable<Object>, Serializable {
     private void deleteFromIndex(IndexAccess<DocumentMetadata> infostoreIndex, IndexAccess<Attachment> attachmentIndex) throws OXException {
         IndexFolderManager.deleteFolderEntry(info.contextId, info.userId, Types.INFOSTORE, info.account, String.valueOf(info.folder));
         Map<String, Object> params = new HashMap<String, Object>();
-        params.put(IndexConstants.ACCOUNT, IndexConstants.DEFAULT_ACCOUNT);
         Builder queryBuilder = new Builder(params);
         QueryParameters infostoreAllQuery = queryBuilder.setHandler(SearchHandler.ALL_REQUEST)
             .setFolders(Collections.singleton(String.valueOf(info.folder)))
@@ -163,8 +162,7 @@ public class InfostoreFolderCallable implements Callable<Object>, Serializable {
         
         infostoreIndex.deleteByQuery(infostoreAllQuery);
         Map<String, Object> attachmentAllParams = new HashMap<String, Object>();
-        params.put(IndexConstants.MODULE, new Integer(Types.INFOSTORE));
-        params.put(IndexConstants.ACCOUNT, info.account);                
+        params.put(IndexConstants.MODULE, new Integer(Types.INFOSTORE));            
         QueryParameters attachmentAllQuery = new Builder(attachmentAllParams)
             .setHandler(SearchHandler.ALL_REQUEST)
             .setFolders(Collections.singleton(String.valueOf(info.folder)))

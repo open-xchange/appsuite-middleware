@@ -76,7 +76,6 @@ import com.openexchange.service.indexing.IndexingServiceMBean;
 import com.openexchange.service.indexing.impl.internal.IndexingServiceImpl;
 import com.openexchange.service.indexing.impl.internal.IndexingServiceMBeanImpl;
 import com.openexchange.service.indexing.impl.internal.Services;
-import com.openexchange.service.indexing.impl.internal.groupware.FolderEventHandler;
 import com.openexchange.service.indexing.impl.internal.groupware.SessionEventHandler;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.user.UserService;
@@ -121,13 +120,6 @@ public class IndexingActivator extends HousekeepingActivator {
         Dictionary<String, Object> sessionProperties = new Hashtable<String, Object>(1);
         sessionProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
         registerService(EventHandler.class, new SessionEventHandler(), sessionProperties);
-        
-        Dictionary<String, Object> folderProperties = new Hashtable<String, Object>(1);
-        folderProperties.put(EventConstants.EVENT_TOPIC, new String[] { 
-            "com/openexchange/groupware/folder/delete", 
-            "com/openexchange/groupware/folder/update" 
-            });
-        registerService(EventHandler.class, new FolderEventHandler(), folderProperties);
         
         registerMBean((IndexingServiceImpl) serviceImpl);
         openTrackers();

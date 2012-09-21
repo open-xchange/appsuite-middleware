@@ -260,10 +260,6 @@ public class SolrInfostoreIndexAccess extends AbstractSolrIndexAccess<DocumentMe
     }
     
     private void addFilterQueries(QueryParameters parameters, SolrQuery solrQuery) {
-        String service = getStringParameter(parameters, IndexConstants.SERVICE);
-        String accountId = getStringParameter(parameters, IndexConstants.ACCOUNT);
-        addFilterQueryIfNotNull(solrQuery, buildQueryString(SolrAttachmentField.SERVICE.solrName(), service));
-        addFilterQueryIfNotNull(solrQuery, buildQueryString(SolrAttachmentField.ACCOUNT.solrName(), accountId));
         addFilterQueryIfNotNull(solrQuery, buildQueryStringWithOr(SolrAttachmentField.FOLDER.solrName(), parameters.getFolders()));
     }
     
