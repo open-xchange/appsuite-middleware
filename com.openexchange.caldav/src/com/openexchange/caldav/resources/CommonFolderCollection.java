@@ -298,7 +298,7 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends Com
 		    Collection<T> deletedObjects = this.getDeletedObjects(since);
     		for (T object : deletedObjects) {
     			// only include objects that are not also modified (due to move operations)
-    			if (false == contains(modifiedObjects, object.getUid())) {
+    			if (null != object.getUid() && false == contains(modifiedObjects, object.getUid())) {
     				// add resource to multistatus
     				WebdavResource resource = createResource(object, constructPathForChildResource(object));
     				multistatus.addStatus(new WebdavStatusImpl<WebdavResource>(
