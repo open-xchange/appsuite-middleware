@@ -49,6 +49,7 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc push_m
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/etc/
 %config(noreplace) /opt/open-xchange/etc/*
+%doc com.openexchange.push.mail.notify/ChangeLog
 
 %changelog
 * Tue Aug 21 2012 Carsten Hoeger <choeger@open-xchange.com>

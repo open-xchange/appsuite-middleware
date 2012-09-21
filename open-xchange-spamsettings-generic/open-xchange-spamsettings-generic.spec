@@ -68,6 +68,7 @@ ant -lib build/lib -Dbasedir=build -Dhtdoc=%{docroot} -DdestDir=%{buildroot} -Dp
 %defattr(-,root,root)
 %dir %{docroot}/ox6/plugins/com.openexchange.spamsettings.generic
 %{docroot}/ox6/plugins/com.openexchange.spamsettings.generic/*
+%doc com.openexchange.spamsettings.generic/ChangeLog
 
 %changelog
 * Tue Aug 21 2012 Carsten Hoeger <choeger@open-xchange.com>

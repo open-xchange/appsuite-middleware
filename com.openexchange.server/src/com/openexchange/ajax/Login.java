@@ -625,9 +625,9 @@ public class Login extends AJAXServlet {
                         return;
                     }
 
-                    final Cookie[] cookies = req.getCookies();
+                    Cookie[] cookies = req.getCookies();
                     if (cookies == null) {
-                        throw OXJSONExceptionCodes.INVALID_COOKIE.create();
+                        cookies = new Cookie[0];
                     }
 
                     final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);

@@ -59,6 +59,7 @@ ox_move_config_file /opt/open-xchange/etc/admindaemon /opt/open-xchange/etc plug
 /opt/open-xchange/lib/*
 %dir /opt/open-xchange/etc/plugin
 %config(noreplace) /opt/open-xchange/etc/plugin/*
+%doc com.openexchange.admin.contextrestore/ChangeLog
 
 %changelog
 * Tue Aug 21 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>

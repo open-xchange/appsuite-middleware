@@ -51,7 +51,7 @@ ant -lib build/lib -Dbasedir=build -Dhtdoc=%{docroot} -DdestDir=%{buildroot} -Dp
 /opt/open-xchange/osgi/bundle.d/*
 /opt/open-xchange/bundles/*
 %config(noreplace) /opt/open-xchange/etc/settings/*
-
+%doc com.openexchange.blackwhitelist/ChangeLog
 
 %changelog
 * Tue Aug 21 2012 Carsten Hoeger <choeger@open-xchange.com>

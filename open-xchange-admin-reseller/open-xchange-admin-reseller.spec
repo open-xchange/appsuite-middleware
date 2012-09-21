@@ -67,6 +67,7 @@ done
 %dir /opt/open-xchange/etc/mysql
 %config(noreplace) /opt/open-xchange/etc/mysql/*
 %doc com.openexchange.admin.reseller.rmi/javadoc
+%doc ./com.openexchange.admin.reseller/ChangeLog
 
 %changelog
 * Tue Aug 21 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>

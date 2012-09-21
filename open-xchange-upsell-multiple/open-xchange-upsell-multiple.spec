@@ -48,6 +48,7 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %dir /opt/open-xchange/etc/settings
 %config(noreplace) /opt/open-xchange/etc/*
 %config(noreplace) /opt/open-xchange/etc/settings/*
+%doc com.openexchange.upsell.multiple/ChangeLog
 
 %changelog
 * Tue Aug 21 2012 Carsten Hoeger <choeger@open-xchange.com>
