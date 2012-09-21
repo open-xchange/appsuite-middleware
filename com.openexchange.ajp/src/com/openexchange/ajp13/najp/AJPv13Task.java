@@ -339,6 +339,11 @@ public final class AJPv13Task implements Task<Object>, com.openexchange.ajp13.wa
         return thread.getStackTrace();
     }
 
+    @Override
+    public Thread getThread() {
+        return thread;
+    }
+
     /**
      * Gets currently executing thread's name.
      *

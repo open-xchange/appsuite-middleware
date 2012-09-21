@@ -126,6 +126,24 @@ public final class LogProperties {
     }
 
     /**
+     * Gets the thread-local log properties for specified thread.
+     *
+     * @param thread The thread
+     * @return The log properties or <code>null</code>
+     * @see #isEnabled()
+     */
+    public static Props optLogProperties(final Thread thread) {
+        if (null == thread) {
+            return null;
+        }
+        Props props = THREAD_LOCAL.get(thread);
+        if (props == null) {
+            return null;
+        }
+        return props.copy();
+    }
+
+    /**
      * Removes the log properties for calling thread.
      */
     public static void removeLogProperties() {
