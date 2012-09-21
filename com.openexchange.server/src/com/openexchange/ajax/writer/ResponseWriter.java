@@ -296,7 +296,7 @@ public final class ResponseWriter {
         {
             final Object[] args = exception.getDisplayArgs();
             // Enforce first condition; review later on
-            if (true || (null == args || 0 == args.length)) {
+            if ((null == args || 0 == args.length)) {
                 json.put(ERROR_PARAMS, new JSONArray());
             } else {
                 final JSONArray jArray = new JSONArray();
