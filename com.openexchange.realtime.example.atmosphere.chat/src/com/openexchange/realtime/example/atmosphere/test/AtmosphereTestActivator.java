@@ -1,4 +1,4 @@
-package com.openexchange.realtime.example.atmosphere.chat;
+package com.openexchange.realtime.example.atmosphere.test;
 
 import org.osgi.service.http.HttpService;
 import com.openexchange.conversion.simple.SimplePayloadConverter;
@@ -11,9 +11,9 @@ import com.openexchange.realtime.atmosphere.OXRTHandler;
 import converters.ChatMessageToJSONConverter;
 import converters.JSONToChatMessageConverter;
 
-public class AtmosphereChatActivator extends HousekeepingActivator {
+public class AtmosphereTestActivator extends HousekeepingActivator {
 
-    private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(AtmosphereChatActivator.class));
+    private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(AtmosphereTestActivator.class));
     
     @Override
     protected Class<?>[] getNeededServices() {
@@ -47,7 +47,7 @@ public class AtmosphereChatActivator extends HousekeepingActivator {
          * for ChatMessages. All this COnversionHandler does is to tell the
          * Payload to convert itself into the desired format.
          */
-        registerService(OXRTHandler.class,  new OXRTConversionHandler("ox/chat", "chatMessage"));
+        registerService(OXRTHandler.class,  new OXRTConversionHandler("chat", "chatMessage"));
         
         //Add the atmosphere chat handler
         AtmosphereService service = getService(AtmosphereService.class);
@@ -56,7 +56,8 @@ public class AtmosphereChatActivator extends HousekeepingActivator {
         
         HttpService httpService = getService(HttpService.class);
         httpService.registerResources("/originalAtmosphereChat", "/originalAtmosphereChat", null);
-        httpService.registerResources("/atmosphereChat", "/atmosphereChat", null);
+        httpService.registerResources("/atmosphere/chat", "/chat", null);
+        httpService.registerResources("/atmosphere/presence","/presence", null);
     }
 
 }

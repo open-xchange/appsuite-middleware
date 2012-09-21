@@ -54,6 +54,7 @@ import com.openexchange.realtime.atmosphere.OXRTHandler;
 import com.openexchange.realtime.atmosphere.StanzaSender;
 import com.openexchange.realtime.atmosphere.presence.osgi.AtmospherePresenceServiceRegistry;
 import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.Payload;
 import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.packet.Presence.Type;
 import com.openexchange.realtime.presence.PresenceData;
@@ -120,7 +121,7 @@ public class OXRTPresenceHandler implements OXRTHandler<Presence> {
 
     @Override
     public String getNamespace() {
-        return "ox/presence";
+        return "presence";
     }
 
     @Override
@@ -165,7 +166,10 @@ public class OXRTPresenceHandler implements OXRTHandler<Presence> {
      * @throws OXException if the subscription fails, e.g. Stanza can't be read
      */
     private void handleSubscribe(Presence stanza, ServerSession session) throws OXException {
-        PresenceData data = (PresenceData) stanza.getPayload().to("presenceData", session).getData();
+        Payload payload = stanza.getPayload();
+        if(payload != null) {
+            PresenceData data = (PresenceData) stanza.getPayload().to("presenceData", session).getData();
+        }
         PresenceSubscriptionService subscriptionService = AtmospherePresenceServiceRegistry.getInstance().getService(
             PresenceSubscriptionService.class);
         //TODO:

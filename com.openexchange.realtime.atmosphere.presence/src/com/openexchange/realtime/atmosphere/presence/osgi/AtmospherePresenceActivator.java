@@ -55,6 +55,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.realtime.atmosphere.OXRTConversionHandler;
 import com.openexchange.realtime.atmosphere.OXRTHandler;
 import com.openexchange.realtime.atmosphere.presence.JSONToPresenceDataConverter;
+import com.openexchange.realtime.atmosphere.presence.OXRTPresenceHandler;
 import com.openexchange.realtime.atmosphere.presence.PresenceDataToJSONConverter;
 import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.presence.PresenceService;
@@ -106,7 +107,7 @@ public class AtmospherePresenceActivator extends HousekeepingActivator {
          */
         registerService(SimplePayloadConverter.class, new PresenceDataToJSONConverter());
         registerService(SimplePayloadConverter.class, new JSONToPresenceDataConverter());
-        registerService(OXRTHandler.class, new OXRTConversionHandler<Presence>("presence", "presenceData"));
+        registerService(OXRTHandler.class, new OXRTPresenceHandler());
     }
 
     @Override

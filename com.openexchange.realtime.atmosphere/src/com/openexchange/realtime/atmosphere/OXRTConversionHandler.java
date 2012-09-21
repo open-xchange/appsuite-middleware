@@ -51,6 +51,7 @@ package com.openexchange.realtime.atmosphere;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.MessageDispatcher;
+import com.openexchange.realtime.packet.Payload;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -85,7 +86,10 @@ public class OXRTConversionHandler<T extends Stanza> implements OXRTHandler<T> {
 
     @Override
     public void incoming(Stanza stanza, ServerSession session) throws OXException {
-        stanza.setPayload(stanza.getPayload().to(format, session));
+        Payload payload = stanza.getPayload();
+        if(payload != null) {
+            stanza.setPayload(payload.to(format, session));
+        }
         send(stanza, session);
     }
 

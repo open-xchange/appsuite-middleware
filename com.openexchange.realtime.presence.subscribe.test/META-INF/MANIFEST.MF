@@ -15,7 +15,5 @@ Import-Package: com.openexchange.authentication,
  com.openexchange.realtime.presence.subscribe,
  com.openexchange.server,
  com.openexchange.tools.session,
- junit.framework,
- junit.textui,
  org.eclipse.osgi.framework.console,
  org.osgi.framework

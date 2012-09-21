@@ -1,9 +1,9 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Chat
-Bundle-SymbolicName: com.openexchange.realtime.example.atmosphere.chat
+Bundle-SymbolicName: com.openexchange.realtime.atmosphere.test
 Bundle-Version: 6.21.0
-Bundle-Activator: com.openexchange.realtime.example.atmosphere.chat.AtmosphereChatActivator
+Bundle-Activator: com.openexchange.realtime.example.atmosphere.test.AtmosphereTestActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.conversion,
