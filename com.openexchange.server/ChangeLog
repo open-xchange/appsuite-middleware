@@ -1,6 +1,7 @@
- * 2012-09-21 - tobias.friedrich@open-xchange.com
+* 2012-09-21 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 22974: Exclude distribution lists from synchronization
+ - Fix for bug 23058: Assume a status of 'COMPLETED' for tasks that are 100% completed implicitly
 
 * 2012-09-21 - martin.herfurth@open-xchange.com
 
