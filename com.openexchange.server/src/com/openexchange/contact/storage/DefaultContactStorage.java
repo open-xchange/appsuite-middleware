@@ -83,23 +83,23 @@ public abstract class DefaultContactStorage implements ContactStorage {
     
     @Override
     public SearchIterator<Contact> all(Session session, final String folderId, final ContactField[] fields) throws OXException {
-		return this.all(session, folderId, fields, SortOptions.EMPTY);
+        return this.all(session, folderId, fields, SortOptions.EMPTY);
     }
 
     @Override
     public SearchIterator<Contact> list(Session session, final String folderId, final String[] ids, final ContactField[] fields) throws OXException {
-    	return this.list(session, folderId, ids, fields, SortOptions.EMPTY);    	
+        return this.list(session, folderId, ids, fields, SortOptions.EMPTY);        
     }
     
-	@Override
-	public <O> SearchIterator<Contact> search(Session session, SearchTerm<O> term, ContactField[] fields) throws OXException {
+    @Override
+    public <O> SearchIterator<Contact> search(Session session, SearchTerm<O> term, ContactField[] fields) throws OXException {
         return this.search(session, term, fields, SortOptions.EMPTY);
-	}
+    }
 
-	@Override
-	public SearchIterator<Contact> search(Session session, ContactSearchObject contactSearch, ContactField[] fields) throws OXException {
+    @Override
+    public SearchIterator<Contact> search(Session session, ContactSearchObject contactSearch, ContactField[] fields) throws OXException {
         return this.search(session, contactSearch, fields, SortOptions.EMPTY);
-	}
+    }
 
     @Override
     public SearchIterator<Contact> deleted(Session session, String folderId, Date since, ContactField[] fields) throws OXException {
@@ -117,7 +117,7 @@ public abstract class DefaultContactStorage implements ContactStorage {
      */
     @Override
     public SearchIterator<Contact> search(Session session, ContactSearchObject contactSearch, ContactField[] fields, SortOptions sortOptions) throws OXException {
-        return search(session, new SearchAdapter(contactSearch).getSearchTerm(), fields, sortOptions);
+        return search(session, getSearchTerm(contactSearch), fields, sortOptions);
     }
 
     /**
@@ -178,6 +178,17 @@ public abstract class DefaultContactStorage implements ContactStorage {
         } catch (NumberFormatException e) {
             throw ContactExceptionCodes.ID_PARSING_FAILED.create(e, null != ids ? ids.toString() : null); 
         }
+    }
+    
+    /**
+     * Converts the supplied contact search object into a search term.
+     * 
+     * @param contactSearch the contact search
+     * @return the search term
+     * @throws OXException
+     */
+    protected static SearchTerm<?> getSearchTerm(ContactSearchObject contactSearch) throws OXException {
+        return new SearchAdapter(contactSearch).getSearchTerm();
     }
     
 }

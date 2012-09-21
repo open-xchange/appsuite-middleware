@@ -491,7 +491,7 @@ Authors:
 
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
-for LANG in ca_ES cs_CZ da_DK de_DE el_GR es_ES eu_ES fr_CA fr_FR he_HE hu_HU it_IT ja_JP ko_KO lv_LV nl_NL pl_PL pt_BR pt_PT ro_RO sk_SK sv_SV tr_TR zh_CN zh_TW; do \
+for LANG in ca_ES cs_CZ da_DK de_DE el_GR es_ES eu_ES fr_CA fr_FR he_HE hu_HU it_IT ja_JP ko_KO lv_LV nl_NL pl_PL pt_BR pt_PT ro_RO sk_SK sv_SV tr_TR zh_CN zh_TW ru_RU; do \
     PACKAGE_EXTENSION=$(echo ${LANG} | tr '[:upper:]_' '[:lower:]-'); \
     ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -Dlanguage=${LANG} -f build/build.xml clean build; \
 done
@@ -623,6 +623,11 @@ done
 %defattr(-,root,root)
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*zh_TW*
+
+%files ru-ru
+%defattr(-,root,root)
+%dir /opt/open-xchange/i18n/
+/opt/open-xchange/i18n/*ru_RU*
 
 %changelog
 * Tue Aug 21 2012 Marcus Klein <marcus.klein@open-xchange.com>

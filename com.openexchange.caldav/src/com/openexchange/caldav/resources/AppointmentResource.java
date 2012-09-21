@@ -359,6 +359,9 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
     }
 
     private List<CalendarDataObject> parse(final String iCal) throws ConversionError {
+        if (LOG.isTraceEnabled()) {
+            LOG.trace(iCal);
+        }
         /*
          * apply patches
          */

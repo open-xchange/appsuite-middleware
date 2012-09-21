@@ -21,6 +21,7 @@ import com.openexchange.cluster.discovery.ClusterListener;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.hazelcast.ClassLoaderAwareHazelcastInstance;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.strings.TimeSpanParser;
 
@@ -54,7 +55,7 @@ public class HazelcastActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { ConfigurationService.class, TimerService.class };
+        return new Class[] { ConfigurationService.class, TimerService.class, ThreadPoolService.class };
     }
 
     @Override
@@ -80,40 +81,55 @@ public class HazelcastActivator extends HousekeepingActivator {
             public ClusterDiscoveryService addingService(final ServiceReference<ClusterDiscoveryService> reference) {
                 final ClusterDiscoveryService discovery = context.getService(reference);
                 final List<InetAddress> nodes = discovery.getNodes();
+                final Runnable task;
                 if (nodes.isEmpty()) {
                     /*-
                      * Wait for at least one via ClusterListener
                      * 
                      * Add cluster listener to manage appearing/disappearing nodes
                      */
-                    final HazelcastActivator activator = HazelcastActivator.this;
-                    final ClusterListener clusterListener = new HazelcastInitializingClusterListener(activator);
-                    discovery.addListener(clusterListener);
-                    activator.clusterListener = clusterListener;
-                    /*
-                     * Timeout before we assume we are either the first or alone in the cluster
-                     */
-                    final long delay = getDelay();
-                    if (delay >= 0) {
-                        final Runnable task = new Runnable() {
+                    task = new Runnable() {
 
-                            @Override
-                            public void run() {
-                                if (init(Collections.<InetAddress> emptyList())) {
-                                    logger.info("Initialized Hazelcast instance via delayed one-shot task after " + delay + "msec.");
-                                }
+                        @Override
+                        public void run() {
+                            final HazelcastActivator activator = HazelcastActivator.this;
+                            final ClusterListener clusterListener = new HazelcastInitializingClusterListener(activator);
+                            discovery.addListener(clusterListener);
+                            activator.clusterListener = clusterListener;
+                            /*
+                             * Timeout before we assume we are either the first or alone in the cluster
+                             */
+                            final long delay = getDelay();
+                            if (delay >= 0) {
+                                final Runnable task = new Runnable() {
+
+                                    @Override
+                                    public void run() {
+                                        if (init(Collections.<InetAddress> emptyList())) {
+                                            logger.info("\n\n\tInitialized Hazelcast instance via delayed one-shot task after " + delay + "msec.");
+                                        }
+                                    }
+                                };
+                                getService(TimerService.class).schedule(task, delay);
                             }
-                        };
-                        getService(TimerService.class).schedule(task, delay);
-                    }
+                        }
+                    };
                 } else {
-                    /*
-                     * We already have at least one node at start-up time
-                     */
-                    if (init(nodes)) {
-                        logger.info("Initialized Hazelcast instance via initially available Open-Xchange nodes.");
-                    }
+                    task = new Runnable() {
+
+                        @Override
+                        public void run() {
+                            /*
+                             * We already have at least one node at start-up time
+                             */
+                            if (init(nodes)) {
+                                logger.info("\n\n\tInitialized Hazelcast instance via initially available Open-Xchange nodes.");
+                            }
+                        }
+                    };
                 }
+                //getService(ThreadPoolService.class).submit(ThreadPools.task(task));
+                new Thread(task).run();
                 return discovery;
             }
 

@@ -49,5 +49,4 @@ Bundle-ClassPath: lib/htmlcleaner-2.2.jar,
  lib/rome-1.0.jar,
  lib/rome-fetcher-1.0.jar,
  lib/jdom-1.1.1.jar,
- extraClassPath/,
  .
