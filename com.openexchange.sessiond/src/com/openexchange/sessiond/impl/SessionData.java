@@ -570,9 +570,10 @@ final class SessionData {
         if (!noLimit && countSessions() > maxSessions) {
             throw SessionExceptionCodes.MAX_SESSION_EXCEPTION.create();
         }
+        final SessionControl control;
         // Check for volatile flag
         if (session.isVolatile()) {
-            final SessionControl control = new SessionControl(session);
+            control = new SessionControl(session);
             final SessionControl prev = volatileSessions.put(session.getSessionID(), control);
             if (null != prev) {
                 final SessionImpl prevSession = prev.getSession();
@@ -590,18 +591,17 @@ final class SessionData {
                 }
                 queue.offer(session.getSessionID());
             }
-            return control;
+        } else {
+            // Adding a session is a writing operation. Other threads requesting a session should be blocked.
+            wlock.lock();
+            try {
+                control = sessionList.getFirst().put(session);
+                randoms.put(session.getRandomToken(), session.getSessionID());
+            } finally {
+                wlock.unlock();
+            }
+            scheduleRandomTokenRemover(session.getRandomToken());
         }
-        // Adding a session is a writing operation. Other threads requesting a session should be blocked.
-        final SessionControl control;
-        wlock.lock();
-        try {
-            control = sessionList.getFirst().put(session);
-            randoms.put(session.getRandomToken(), session.getSessionID());
-        } finally {
-            wlock.unlock();
-        }
-        scheduleRandomTokenRemover(session.getRandomToken());
         return control;
     }
 
