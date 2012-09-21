@@ -1,3 +1,7 @@
+* 2012-09-21 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 23055: External Participant with different upper/lower case spelling are detected as party crasher.
+
 * 2012-09-20 - marcus.klein@open-xchange.com
 
  - Fix for bug 22405: Extended build system to support arbitrary resources in bundles. Added fetcher.properties to bundle resources.

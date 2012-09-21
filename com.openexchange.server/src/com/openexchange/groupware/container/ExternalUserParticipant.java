@@ -102,7 +102,7 @@ public class ExternalUserParticipant extends AbstractConfirmableParticipant impl
 
     @Override
     public String getEmailAddress() {
-        return emailaddress;
+        return emailaddress == null ? null : emailaddress.toLowerCase();
     }
 
     @Override
