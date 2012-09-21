@@ -142,7 +142,11 @@ public abstract class CalDAVResource<T extends CalendarObject> extends CommonRes
 
     @Override
     public InputStream getBody() throws WebdavProtocolException {
-        return null != getICalFile() ? new ByteArrayInputStream(getICalFile().getBytes()) : null; 
+        String body = this.getICalFile();
+        if (LOG.isTraceEnabled()) {
+            LOG.trace(body);
+        }
+        return null != body ? new ByteArrayInputStream(body.getBytes()) : null;
     }
 
     @Override
