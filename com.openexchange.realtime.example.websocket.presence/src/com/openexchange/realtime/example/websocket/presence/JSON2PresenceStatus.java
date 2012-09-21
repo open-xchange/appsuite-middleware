@@ -56,7 +56,7 @@ import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.conversion.simple.SimplePayloadConverter;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.presence.PresenceData;
-import com.openexchange.realtime.presence.PresenceService.PresenceState;
+import com.openexchange.realtime.presence.PresenceState;
 import com.openexchange.tools.session.ServerSession;
 
 /**
