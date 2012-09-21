@@ -96,8 +96,8 @@ public class SolrActivator extends HousekeepingActivator {
         boolean isSolrNode = config.getBoolProperty(SolrProperties.IS_NODE, false);
         if (isSolrNode) {
             IMap<String, Integer> solrNodes = hazelcast.getMap(SOLR_NODE_MAP);
-            String memberUuid = hazelcast.getCluster().getLocalMember().getUuid();
-            solrNodes.put(memberUuid, new Integer(0));
+            String memberAddress = hazelcast.getCluster().getLocalMember().getInetSocketAddress().getAddress().getHostAddress();
+            solrNodes.put(memberAddress, new Integer(0));
         }
 		openTrackers();
 	}
