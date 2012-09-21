@@ -58,11 +58,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
-
 import com.openexchange.carddav.resources.RootCollection;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
@@ -82,12 +79,9 @@ import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.Order;
-import com.openexchange.log.LogFactory;
-import com.openexchange.search.SearchTerm;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.SessionHolder;
@@ -109,7 +103,6 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 	private static final String OVERRIDE_NEXT_SYNC_TOKEN_PROPERTY = "com.openexchange.carddav.overridenextsynctoken";
 	private static final String FOLDER_BLACKLIST_PROPERTY = "com.openexchange.carddav.ignoreFolders";
 	private static final String FOLDER_TRRE_ID_PROPERTY = "com.openexchange.carddav.tree";
-	private static final String COMBINED_REQUEST_TIMEOUT_PROPERTY = "com.openexchange.carddav.combinedRequestTimeout";
 	private static final CarddavProtocol PROTOCOL = new CarddavProtocol();
 	private static final Log LOG = com.openexchange.log.Log.loggerFor(GroupwareCarddavFactory.class);
 
@@ -264,12 +257,12 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 		private final GroupwareCarddavFactory factory;
 		private Map<String, Contact> uidCache = null;
 		private Map<String, Contact> filenameCache = null;
-		private List<UserizedFolder> allFolders = null;		
+        private List<UserizedFolder> allFolders = null;     
+        private List<UserizedFolder> reducedFolders = null;     
 		private HashSet<String> folderBlacklist = null;		
 		private UserizedFolder defaultFolder = null;
 		private String treeID = null;
 		private Date overallLastModified = null;
-		private long combinedRequestTimeout = Long.MIN_VALUE; 
 		
 		/**
 		 * Initializes a new {@link State}.
@@ -279,39 +272,6 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 		public State(final GroupwareCarddavFactory factory) {
 			super();
 			this.factory = factory;
-		}
-		
-		public Contact waitFor(String uid, ContactField[] fields) throws OXException, InterruptedException {
-			/*
-			 * try caches first
-			 */
-			if (null != uidCache && uidCache.containsKey(uid)) {
-				return load(uidCache.get(uid), fields);
-			} else if (null != filenameCache && filenameCache.containsKey(uid)) {
-				return load(filenameCache.get(uid), fields);
-			}
-			/*
-			 * perform repeated search 
-			 */
-			SearchTerm<?> searchTerm = Tools.getSearchTerm(uid, getFolderIDs());
-			SortOptions sortOptions = new SortOptions(0, 1);
-			long timeoutTime = getCombinedRequestTimeout() + System.currentTimeMillis();
-			long waitInterval = getCombinedRequestTimeout() / 20;
-			do {
-				SearchIterator<Contact> iter = null;
-				try {
-					iter = factory.getContactService().searchContacts(factory.getSession(), searchTerm, fields, sortOptions);
-					if (null != iter && iter.hasNext()) {
-						return prepare(iter.next());
-					}
-				} finally {
-					close(iter);
-				}
-				LOG.debug("Waiting for contact '" + uid + "'...");
-				Thread.sleep(waitInterval);
-			} while (System.currentTimeMillis() < timeoutTime);
-			LOG.warn("Contact '" + uid + "' not found after " + getCombinedRequestTimeout() + "ms.");
-			return null; // not found
 		}
 		
 		/**
@@ -419,6 +379,22 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 			return this.allFolders;
 		}
 		
+	    public List<UserizedFolder> getReducedFolders() throws OXException {
+	        if (null == this.reducedFolders) {
+    	        reducedFolders = new ArrayList<UserizedFolder>();
+    	        UserizedFolder defaultContactsFolder = this.getDefaultFolder(); 
+    	        if (false == this.isBlacklisted(defaultContactsFolder)) {
+    	            reducedFolders.add(defaultContactsFolder);
+    	        }
+    	        UserizedFolder globalAddressBookFolder = factory.getFolderService().getFolder(
+    	            FolderStorage.REAL_TREE_ID, FolderStorage.GLOBAL_ADDRESS_BOOK_ID, this.factory.getSession(), null);
+    	        if (false == this.isBlacklisted(globalAddressBookFolder)) {
+    	            reducedFolders.add(globalAddressBookFolder);
+    	        }
+	        }
+	        return this.reducedFolders;
+	    }
+		
 		/**
 		 * Gets a list of all visible folders.
 		 * 
@@ -488,7 +464,10 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 			try {
 				iterator = factory.getContactService().getModifiedContacts(factory.getSession(), folder.getID(), lastModified, fields, sortOptions);			
 				if (iterator.hasNext()) {
-					lastModified = Tools.getLatestModified(lastModified, iterator.next());
+				    Contact contact = iterator.next();
+				    if (false == contact.getMarkAsDistribtuionlist()) {
+				        lastModified = Tools.getLatestModified(lastModified, contact);
+				    }
 				}
 			} finally {
 				close(iterator);
@@ -496,7 +475,10 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 			try {
 				iterator = factory.getContactService().getDeletedContacts(factory.getSession(), folder.getID(), lastModified, fields, sortOptions);			
 				if (iterator.hasNext()) {
-					lastModified = Tools.getLatestModified(lastModified, iterator.next());
+                    Contact contact = iterator.next();
+                    if (false == contact.getMarkAsDistribtuionlist()) {
+                        lastModified = Tools.getLatestModified(lastModified, contact);
+                    }
 				}
 			} finally {
 				close(iterator);
@@ -536,7 +518,10 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 			try {
 				iterator = factory.getContactService().getModifiedContacts(factory.getSession(), folderID, since, BASIC_FIELDS);
 				while (iterator.hasNext()) {
-					contacts.add(iterator.next());						
+                    Contact contact = iterator.next();
+                    if (false == contact.getMarkAsDistribtuionlist()) {
+                        contacts.add(contact);                      
+                    }
 				}
 			} finally {
 				close(iterator);
@@ -572,7 +557,10 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 			try {
 				iterator = factory.getContactService().getDeletedContacts(factory.getSession(), folderID, since, BASIC_FIELDS);
 				while (iterator.hasNext()) {
-					contacts.add(iterator.next());						
+                    Contact contact = iterator.next();
+                    if (false == contact.getMarkAsDistribtuionlist()) {
+                        contacts.add(contact);                      
+                    }
 				}
 			} finally {
 				close(iterator);
@@ -615,19 +603,6 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 				}
 	    	}
 	    	return this.treeID;
-	    }
-
-	    private long getCombinedRequestTimeout() {
-	    	if (Long.MIN_VALUE == this.combinedRequestTimeout) {
-		        try {
-		        	String value = factory.getConfigValue(COMBINED_REQUEST_TIMEOUT_PROPERTY, "10000");
-		        	combinedRequestTimeout = Tools.parse(value);
-				} catch (OXException e) {
-					LOG.warn("falling back to a value of 10000 for the combined request timeout.", e);
-					combinedRequestTimeout = 10000;
-				}
-	    	}
-	    	return this.combinedRequestTimeout;
 	    }
 
 		/**
@@ -693,12 +668,15 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 					iterator = factory.getContactService().getAllContacts(factory.getSession(), folder.getID(), BASIC_FIELDS);
 					while (iterator.hasNext()) {
 						Contact contact = iterator.next();
+						if (contact.getMarkAsDistribtuionlist()) {
+						    continue;
+						}
 						if (false == contact.containsUid() && false == this.tryAddUID(contact, folder)) {
 							LOG.warn("No UID found in contact '" + contact.toString() + "', skipping.");
 							continue;
 						}
 						contact.setParentFolderID(folderID);
-						cache.put(contact.getUid(), prepare(contact));
+						cache.put(contact.getUid(), contact);
 					}
 				} finally {
 					close(iterator);
@@ -715,55 +693,6 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 				}
 			}
 			return cache;
-		}
-		
-		private Contact prepare(Contact contact) throws OXException {
-			if (contact.getMarkAsDistribtuionlist()) {
-				filterMembers(contact);
-			}
-			return contact;
-		}
-		
-		/**
-		 * Filters members from distribution lists that are not meant to be 
-		 * synchronized via the CardDAV interface, i.e. one-off members that
-		 * don't reference an existing contact and also those members that 
-		 * reference distribution list members from other folders.		 * 
-		 * 
-		 * @param distributionList the distribution list
-		 * @throws OXException
-		 */
-		private void filterMembers(Contact distributionList) throws OXException {
-			if (null != distributionList && null != distributionList.getDistributionList() && 
-					0 < distributionList.getDistributionList().length) {
-				List<DistributionListEntryObject> filteredMembers = new ArrayList<DistributionListEntryObject>();
-				for (DistributionListEntryObject member : distributionList.getDistributionList()) {
-					if (DistributionListEntryObject.INDEPENDENT != member.getEmailfield() && 
-							this.hasFolderID(Integer.toString(member.getFolderID()))) {
-						filteredMembers.add(member);						
-					} else {
-						LOG.debug("Excluding distribution list member '" + member.getEmailaddress() + "' from distribution list.");
-					}
-				}
-				distributionList.setDistributionList(filteredMembers.toArray(new DistributionListEntryObject[filteredMembers.size()]));
-			}
-		}
-		
-		private boolean hasFolderID(String folderID) throws OXException {
-			for (UserizedFolder folder : this.getFolders()) {
-				if (folderID.equals(folder.getID())) {
-					return true;
-				}
-			}
-			return false;
-		}
-		
-		private List<String> getFolderIDs() throws OXException {
-			List<String> folderIDs = new ArrayList<String>();
-			for (UserizedFolder folder : this.getFolders()) {
-				folderIDs.add(folder.getID());
-			}
-			return folderIDs;
 		}
 		
 		private boolean tryAddUID(Contact contact, UserizedFolder folder) {

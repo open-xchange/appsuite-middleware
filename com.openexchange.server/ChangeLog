@@ -1,3 +1,7 @@
+ * 2012-09-21 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 22974: Exclude distribution lists from synchronization
+
 * 2012-09-21 - martin.herfurth@open-xchange.com
 
  - Fix for bug 23055: External Participant with different upper/lower case spelling are detected as party crasher.
