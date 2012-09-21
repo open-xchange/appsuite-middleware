@@ -88,7 +88,7 @@ public enum LoginExceptionCodes implements OXExceptionCode {
     /** Method "%1$s" in HTTP header authorization is not supported. */
     UNKNOWN_HTTP_AUTHORIZATION(UNKNOWN_HTTP_AUTHORIZATION_MSG, Category.CATEGORY_TRY_AGAIN, 15),
     /** Only used as workaround for a redirection, This is <b>no</b> real error. */
-    REDIRECT(REDIRECT_MSG, Category.CATEGORY_WARNING, 16),
+    REDIRECT(REDIRECT_MSG, Category.CATEGORY_USER_INPUT, 16),
     /** No session found. */
     NO_SESSION_FOUND(NO_SESSION_FOUND_MSG, Category.CATEGORY_USER_INPUT, 17),
     /** Missing client capabilities. */
