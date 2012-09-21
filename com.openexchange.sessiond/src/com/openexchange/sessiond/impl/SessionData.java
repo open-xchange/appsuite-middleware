@@ -566,6 +566,22 @@ final class SessionData {
         }
     }
 
+    private static volatile Boolean volatileOnePerClient;
+    private static boolean volatileOnePerClient() {
+        Boolean b = volatileOnePerClient;
+        if (null == b) {
+            synchronized (SessionData.class) {
+                b = volatileOnePerClient;
+                if (null == b) {
+                    final ConfigurationService service = SessiondServiceRegistry.getServiceRegistry().getOptionalService(ConfigurationService.class);
+                    b = null == service ? Boolean.FALSE : Boolean.valueOf(service.getBoolProperty("com.openexchange.sessiond.volatile.onePerClient", false));
+                    volatileOnePerClient = b;
+                }
+            }
+        }
+        return b.booleanValue();
+    }
+
     SessionControl addSession(final SessionImpl session, final boolean noLimit) throws OXException {
         if (!noLimit && countSessions() > maxSessions) {
             throw SessionExceptionCodes.MAX_SESSION_EXCEPTION.create();
@@ -579,18 +595,40 @@ final class SessionData {
                 final SessionImpl prevSession = prev.getSession();
                 clearSession(prevSession.getSessionID());
                 SessionHandler.postSessionRemoval(prevSession);
-            } else {
-                final UserKey key = new UserKey(session.getUserId(), session.getContextId());
-                Queue<String> queue = volatileUserSessions.get(key);
+            }
+            final UserKey key = new UserKey(session.getUserId(), session.getContextId());
+            Queue<String> queue = volatileUserSessions.get(key);
+            if (null == queue) {
+                final Queue<String> nq = new ConcurrentLinkedQueue<String>();
+                queue = volatileUserSessions.putIfAbsent(key, nq);
                 if (null == queue) {
-                    final Queue<String> nq = new ConcurrentLinkedQueue<String>();
-                    queue = volatileUserSessions.putIfAbsent(key, nq);
-                    if (null == queue) {
-                        queue = nq;
+                    queue = nq;
+                }
+            }
+            // Only one volatile session per client?
+            if (volatileOnePerClient()) {
+                final String client = session.getClient();
+                if (null != client) {
+                    final List<SessionImpl> removees = new LinkedList<SessionImpl>();
+                    for (final Iterator<String> it = queue.iterator(); it.hasNext();) {
+                        final String sessionId = it.next();
+                        final SessionControl sessionControl = volatileSessions.get(sessionId);
+                        if (null == sessionControl) {
+                            it.remove(); // Does no more exist
+                        } else {
+                            final SessionImpl candidate = sessionControl.getSession();
+                            if (client.equals(candidate.getClient())) {
+                                removees.add(candidate);
+                            }
+                        }
+                    }
+                    for (final SessionImpl removee : removees) {
+                        clearSession(removee.getSessionID());
+                        SessionHandler.postSessionRemoval(removee);
                     }
                 }
-                queue.offer(session.getSessionID());
             }
+            queue.offer(session.getSessionID());
         } else {
             // Adding a session is a writing operation. Other threads requesting a session should be blocked.
             wlock.lock();
