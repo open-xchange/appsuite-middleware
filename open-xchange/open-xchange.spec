@@ -114,9 +114,6 @@ if [ ${1:-0} -eq 2 ]; then
     if ! ox_exists_property com.openexchange.carddav.tree $pfile; then
         ox_set_property com.openexchange.carddav.tree "0" $pfile
     fi
-    if ! ox_exists_property com.openexchange.carddav.combinedRequestTimeout $pfile; then
-        ox_set_property com.openexchange.carddav.combinedRequestTimeout "20000" $pfile
-    fi
     if ! ox_exists_property com.openexchange.carddav.exposedCollections $pfile; then
         ox_set_property com.openexchange.carddav.exposedCollections "0" $pfile
     fi
