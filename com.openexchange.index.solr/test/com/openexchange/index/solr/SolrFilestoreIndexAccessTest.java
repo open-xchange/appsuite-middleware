@@ -101,7 +101,6 @@ public class SolrFilestoreIndexAccessTest extends TestCase {
         file.setVersionComment("Version comment...");
         
         Map<String, Object> parameters = new HashMap<String, Object>();
-        parameters.put(IndexConstants.SERVICE, "http://infostoreservice.ox");
         parameters.put(IndexConstants.ACCOUNT, "sada689");
         StandardIndexDocument<DocumentMetadata> document = new StandardIndexDocument<DocumentMetadata>(file);
         document.setProperties(parameters);

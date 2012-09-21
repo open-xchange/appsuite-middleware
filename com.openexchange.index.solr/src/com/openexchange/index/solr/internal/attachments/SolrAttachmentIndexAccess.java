@@ -295,10 +295,8 @@ public class SolrAttachmentIndexAccess extends AbstractSolrIndexAccess<Attachmen
     
     private void addFilterQueries(QueryParameters parameters, SolrQuery solrQuery) {
         Integer module = getIntParameter(parameters, IndexConstants.MODULE);
-        String service = getStringParameter(parameters, IndexConstants.SERVICE);
         String accountId = getStringParameter(parameters, IndexConstants.ACCOUNT);
         addFilterQueryIfNotNull(solrQuery, buildQueryString(SolrAttachmentField.MODULE.solrName(), module));
-        addFilterQueryIfNotNull(solrQuery, buildQueryString(SolrAttachmentField.SERVICE.solrName(), service));
         addFilterQueryIfNotNull(solrQuery, buildQueryString(SolrAttachmentField.ACCOUNT.solrName(), accountId));
         addFilterQueryIfNotNull(solrQuery, buildQueryStringWithOr(SolrAttachmentField.FOLDER.solrName(), parameters.getFolders()));
     }  
