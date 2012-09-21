@@ -7,6 +7,9 @@ Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-RegisterBuddy: javax.activation
 Import-Package: javax.activation,
+ javax.crypto,
+ javax.crypto.spec,
+ javax.crypto.interfaces,
  javax.naming,
  javax.net,
  javax.net.ssl,
@@ -25,6 +28,8 @@ Import-Package: javax.activation,
  org.apache.commons.lang.text,
  org.apache.commons.lang.time,
  org.apache.commons.logging,
+ org.apache.xerces.impl,
+ org.apache.xerces.parsers,
  org.osgi.framework
 Bundle-ClassPath: .,
  lib/automaton-1.11-8.jar,

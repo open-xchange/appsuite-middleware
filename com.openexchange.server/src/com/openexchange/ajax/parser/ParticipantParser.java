@@ -167,7 +167,7 @@ public class ParticipantParser {
 
         @Override
         public String getEmailAddress() {
-            return emailAddress;
+            return emailAddress == null ? null : emailAddress.toLowerCase();
         }
 
         @Override

@@ -123,7 +123,7 @@ public class ExternalGroupParticipant implements Participant, Comparable<Partici
      */
     @Override
     public String getEmailAddress() {
-        return emailaddress;
+        return emailaddress == null ? null : emailaddress.toLowerCase();
     }
 
     /**
