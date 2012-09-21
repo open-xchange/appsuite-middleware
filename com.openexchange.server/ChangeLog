@@ -1,6 +1,9 @@
 * 2012-09-21 - marcus.klein@open-xchange.com
 
  - Fix for bug 23061: Added buddy classloading to bundle with JYaml library to solve crawler description object loading from YML files.
+ - Fix for bug 22658: Complete path has been removed from the configuration file. Relative path are now used. Fixed a problem creating the
+   path for new crawler descriptions.
+ - Fix for bug 22198: Permissions of crawlers directory and path for crawler descriptions to write are now correct.
 
 * 2012-09-21 - tobias.friedrich@open-xchange.com
 
