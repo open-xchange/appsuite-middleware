@@ -66,7 +66,6 @@ import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 
 /**
@@ -121,7 +120,6 @@ public final class MDNSActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(MDNSActivator.class));
-        final ThreadPoolService threadPoolService = getService(ThreadPoolService.class);
         log.info("Starting bundle: com.openexchange.mdns");
         final Runnable starter = new Runnable() {
 
@@ -167,7 +165,7 @@ public final class MDNSActivator extends HousekeepingActivator {
                 }
             }
         };
-        threadPoolService.submit(ThreadPools.task(starter));
+        new Thread(starter).run();
     }
 
     protected String getHostName() {
