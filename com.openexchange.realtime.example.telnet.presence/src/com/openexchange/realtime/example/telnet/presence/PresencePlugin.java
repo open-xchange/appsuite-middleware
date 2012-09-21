@@ -57,7 +57,7 @@ import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.presence.PresenceData;
 import com.openexchange.realtime.presence.PresenceService;
-import com.openexchange.realtime.presence.PresenceService.PresenceState;
+import com.openexchange.realtime.presence.PresenceState;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
