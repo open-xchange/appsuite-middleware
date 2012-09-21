@@ -1,3 +1,7 @@
+* 2012-09-21 - marcus.klein@open-xchange.com
+
+ - Fix for bug 23061: Added buddy classloading to bundle with JYaml library to solve crawler description object loading from YML files.
+
 * 2012-09-21 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 22974: Exclude distribution lists from synchronization
